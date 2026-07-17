@@ -1,0 +1,1615 @@
+{
+  "/api/actions/connector_types": {
+    "get": "get-actions-connector-types"
+  },
+  "/api/actions/connector/_oauth_callback": {
+    "get": "get-actions-connector-oauth-callback"
+  },
+  "/api/actions/connector/_oauth_callback_script": {
+    "get": "get-actions-connector-oauth-callback-script"
+  },
+  "/api/actions/connector/{connectorId}/oauth/start": {
+    "get": "get-actions-connector-connectorid-oauth-start"
+  },
+  "/api/actions/connector/{id}": {
+    "get": "get-actions-connector-id",
+    "post": "post-actions-connector-id",
+    "put": "put-actions-connector-id",
+    "delete": "delete-actions-connector-id"
+  },
+  "/api/actions/connector/{id}/_execute": {
+    "post": "post-actions-connector-id-execute"
+  },
+  "/api/actions/connectors": {
+    "get": "get-actions-connectors"
+  },
+  "/api/agent_builder/a2a/{agentId}": {
+    "post": "post-agent-builder-a2a-agentid"
+  },
+  "/api/agent_builder/a2a/{agentId}.json": {
+    "get": "get-agent-builder-a2a-agentid.json"
+  },
+  "/api/agent_builder/agents": {
+    "get": "get-agent-builder-agents",
+    "post": "post-agent-builder-agents"
+  },
+  "/api/agent_builder/agents/{agent_id}/consumption": {
+    "post": "post-agent-builder-agents-agent-id-consumption"
+  },
+  "/api/agent_builder/agents/{id}": {
+    "get": "get-agent-builder-agents-id",
+    "put": "put-agent-builder-agents-id",
+    "delete": "delete-agent-builder-agents-id"
+  },
+  "/api/agent_builder/agents/{id}/access_control": {
+    "get": "get-agent-builder-agents-id-access-control",
+    "put": "put-agent-builder-agents-id-access-control"
+  },
+  "/api/agent_builder/conversations": {
+    "get": "get-agent-builder-conversations"
+  },
+  "/api/agent_builder/conversations/{conversation_id}": {
+    "get": "get-agent-builder-conversations-conversation-id",
+    "delete": "delete-agent-builder-conversations-conversation-id"
+  },
+  "/api/agent_builder/conversations/{conversation_id}/attachments": {
+    "get": "get-agent-builder-conversations-conversation-id-attachments",
+    "post": "post-agent-builder-conversations-conversation-id-attachments"
+  },
+  "/api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}": {
+    "put": "put-agent-builder-conversations-conversation-id-attachments-attachment-id",
+    "delete": "delete-agent-builder-conversations-conversation-id-attachments-attachment-id",
+    "patch": "patch-agent-builder-conversations-conversation-id-attachments-attachment-id"
+  },
+  "/api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}/_restore": {
+    "post": "post-agent-builder-conversations-conversation-id-attachments-attachment-id-restore"
+  },
+  "/api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}/origin": {
+    "put": "put-agent-builder-conversations-conversation-id-attachments-attachment-id-origin"
+  },
+  "/api/agent_builder/conversations/{conversation_id}/attachments/stale": {
+    "get": "get-agent-builder-conversations-conversation-id-attachments-stale"
+  },
+  "/api/agent_builder/converse": {
+    "post": "post-agent-builder-converse"
+  },
+  "/api/agent_builder/converse/async": {
+    "post": "post-agent-builder-converse-async"
+  },
+  "/api/agent_builder/mcp": {
+    "post": "post-agent-builder-mcp"
+  },
+  "/api/agent_builder/plugins": {
+    "get": "get-agent-builder-plugins"
+  },
+  "/api/agent_builder/plugins/{pluginId}": {
+    "get": "get-agent-builder-plugins-pluginid",
+    "delete": "delete-agent-builder-plugins-pluginid"
+  },
+  "/api/agent_builder/plugins/install": {
+    "post": "post-agent-builder-plugins-install"
+  },
+  "/api/agent_builder/skills": {
+    "get": "get-agent-builder-skills",
+    "post": "post-agent-builder-skills"
+  },
+  "/api/agent_builder/skills/{skillId}": {
+    "get": "get-agent-builder-skills-skillid",
+    "put": "put-agent-builder-skills-skillid",
+    "delete": "delete-agent-builder-skills-skillid"
+  },
+  "/api/agent_builder/tools": {
+    "get": "get-agent-builder-tools",
+    "post": "post-agent-builder-tools"
+  },
+  "/api/agent_builder/tools/_execute": {
+    "post": "post-agent-builder-tools-execute"
+  },
+  "/api/agent_builder/tools/{toolId}": {
+    "get": "get-agent-builder-tools-toolid",
+    "put": "put-agent-builder-tools-toolid",
+    "delete": "delete-agent-builder-tools-toolid"
+  },
+  "/api/alerting/_health": {
+    "get": "getAlertingHealth"
+  },
+  "/api/alerting/rule_types": {
+    "get": "getRuleTypes"
+  },
+  "/api/alerting/rule/{id}": {
+    "get": "get-alerting-rule-id",
+    "post": "post-alerting-rule-id",
+    "put": "put-alerting-rule-id",
+    "delete": "delete-alerting-rule-id"
+  },
+  "/api/alerting/rule/{id}/_disable": {
+    "post": "post-alerting-rule-id-disable"
+  },
+  "/api/alerting/rule/{id}/_enable": {
+    "post": "post-alerting-rule-id-enable"
+  },
+  "/api/alerting/rule/{id}/_mute_all": {
+    "post": "post-alerting-rule-id-mute-all"
+  },
+  "/api/alerting/rule/{id}/_unmute_all": {
+    "post": "post-alerting-rule-id-unmute-all"
+  },
+  "/api/alerting/rule/{id}/_update_api_key": {
+    "post": "post-alerting-rule-id-update-api-key"
+  },
+  "/api/alerting/rule/{id}/query_inspector": {
+    "get": "get-alerting-rule-id-query-inspector"
+  },
+  "/api/alerting/rule/{id}/snooze_schedule": {
+    "post": "post-alerting-rule-id-snooze-schedule"
+  },
+  "/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute": {
+    "post": "post-alerting-rule-rule-id-alert-alert-id-mute"
+  },
+  "/api/alerting/rule/{rule_id}/alert/{alert_id}/_snooze": {
+    "post": "post-alerting-rule-rule-id-alert-alert-id-snooze"
+  },
+  "/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute": {
+    "post": "post-alerting-rule-rule-id-alert-alert-id-unmute"
+  },
+  "/api/alerting/rule/{rule_id}/alert/{alert_id}/_unsnooze": {
+    "post": "post-alerting-rule-rule-id-alert-alert-id-unsnooze"
+  },
+  "/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}": {
+    "delete": "delete-alerting-rule-ruleid-snooze-schedule-scheduleid"
+  },
+  "/api/alerting/rules/_find": {
+    "get": "get-alerting-rules-find"
+  },
+  "/api/alerting/rules/backfill/_find": {
+    "post": "post-alerting-rules-backfill-find"
+  },
+  "/api/alerting/rules/backfill/_schedule": {
+    "post": "post-alerting-rules-backfill-schedule"
+  },
+  "/api/alerting/rules/backfill/{id}": {
+    "get": "get-alerting-rules-backfill-id",
+    "delete": "delete-alerting-rules-backfill-id"
+  },
+  "/api/apm/agent_keys": {
+    "post": "createAgentKey"
+  },
+  "/api/apm/fleet/apm_server_schema": {
+    "post": "saveApmServerSchema"
+  },
+  "/api/apm/services/{serviceName}/annotation": {
+    "post": "createAnnotation"
+  },
+  "/api/apm/services/{serviceName}/annotation/search": {
+    "get": "getAnnotation"
+  },
+  "/api/apm/settings/agent-configuration": {
+    "get": "getAgentConfigurations",
+    "put": "createUpdateAgentConfiguration",
+    "delete": "deleteAgentConfiguration"
+  },
+  "/api/apm/settings/agent-configuration/agent_name": {
+    "get": "getAgentNameForService"
+  },
+  "/api/apm/settings/agent-configuration/environments": {
+    "get": "getEnvironmentsForService"
+  },
+  "/api/apm/settings/agent-configuration/search": {
+    "post": "searchSingleConfiguration"
+  },
+  "/api/apm/settings/agent-configuration/view": {
+    "get": "getSingleAgentConfiguration"
+  },
+  "/api/apm/sourcemaps": {
+    "get": "getSourceMaps",
+    "post": "uploadSourceMap"
+  },
+  "/api/apm/sourcemaps/{id}": {
+    "delete": "deleteSourceMap"
+  },
+  "/api/asset_criticality": {
+    "get": "GetAssetCriticalityRecord",
+    "post": "CreateAssetCriticalityRecord",
+    "delete": "DeleteAssetCriticalityRecord"
+  },
+  "/api/asset_criticality/bulk": {
+    "post": "BulkUpsertAssetCriticalityRecords"
+  },
+  "/api/asset_criticality/list": {
+    "get": "FindAssetCriticalityRecords"
+  },
+  "/api/attack_discovery/_bulk": {
+    "post": "PostAttackDiscoveryBulk"
+  },
+  "/api/attack_discovery/_find": {
+    "get": "AttackDiscoveryFind"
+  },
+  "/api/attack_discovery/_generate": {
+    "post": "PostAttackDiscoveryGenerate"
+  },
+  "/api/attack_discovery/generations": {
+    "get": "GetAttackDiscoveryGenerations"
+  },
+  "/api/attack_discovery/generations/{execution_uuid}": {
+    "get": "GetAttackDiscoveryGeneration"
+  },
+  "/api/attack_discovery/generations/{execution_uuid}/_dismiss": {
+    "post": "PostAttackDiscoveryGenerationsDismiss"
+  },
+  "/api/attack_discovery/schedules": {
+    "post": "CreateAttackDiscoverySchedules"
+  },
+  "/api/attack_discovery/schedules/_bulk_delete": {
+    "post": "BulkDeleteAttackDiscoverySchedules"
+  },
+  "/api/attack_discovery/schedules/_bulk_disable": {
+    "post": "BulkDisableAttackDiscoverySchedules"
+  },
+  "/api/attack_discovery/schedules/_bulk_enable": {
+    "post": "BulkEnableAttackDiscoverySchedules"
+  },
+  "/api/attack_discovery/schedules/_find": {
+    "get": "FindAttackDiscoverySchedules"
+  },
+  "/api/attack_discovery/schedules/{id}": {
+    "get": "GetAttackDiscoverySchedules",
+    "put": "UpdateAttackDiscoverySchedules",
+    "delete": "DeleteAttackDiscoverySchedules"
+  },
+  "/api/attack_discovery/schedules/{id}/_disable": {
+    "post": "DisableAttackDiscoverySchedules"
+  },
+  "/api/attack_discovery/schedules/{id}/_enable": {
+    "post": "EnableAttackDiscoverySchedules"
+  },
+  "/api/cases": {
+    "post": "createCaseDefaultSpace",
+    "delete": "deleteCaseDefaultSpace",
+    "patch": "updateCaseDefaultSpace"
+  },
+  "/api/cases/_find": {
+    "get": "findCasesDefaultSpace"
+  },
+  "/api/cases/{caseId}": {
+    "get": "getCaseDefaultSpace"
+  },
+  "/api/cases/{caseId}/alerts": {
+    "get": "getCaseAlertsDefaultSpace"
+  },
+  "/api/cases/{caseId}/comments": {
+    "post": "addCaseCommentDefaultSpace",
+    "delete": "deleteCaseCommentsDefaultSpace",
+    "patch": "updateCaseCommentDefaultSpace"
+  },
+  "/api/cases/{caseId}/comments/_find": {
+    "get": "findCaseCommentsDefaultSpace"
+  },
+  "/api/cases/{caseId}/comments/{commentId}": {
+    "get": "getCaseCommentDefaultSpace",
+    "delete": "deleteCaseCommentDefaultSpace"
+  },
+  "/api/cases/{caseId}/connector/{connectorId}/_push": {
+    "post": "pushCaseDefaultSpace"
+  },
+  "/api/cases/{caseId}/files": {
+    "post": "addCaseFileDefaultSpace"
+  },
+  "/api/cases/{caseId}/user_actions/_find": {
+    "get": "findCaseActivityDefaultSpace"
+  },
+  "/api/cases/alerts/{alertId}": {
+    "get": "getCasesByAlertDefaultSpace"
+  },
+  "/api/cases/configure": {
+    "get": "getCaseConfigurationDefaultSpace",
+    "post": "setCaseConfigurationDefaultSpace"
+  },
+  "/api/cases/configure/{configurationId}": {
+    "patch": "updateCaseConfigurationDefaultSpace"
+  },
+  "/api/cases/configure/connectors/_find": {
+    "get": "findCaseConnectorsDefaultSpace"
+  },
+  "/api/cases/reporters": {
+    "get": "getCaseReportersDefaultSpace"
+  },
+  "/api/cases/tags": {
+    "get": "getCaseTagsDefaultSpace"
+  },
+  "/api/cases/templates": {
+    "get": "getCaseTemplatesDefaultSpace"
+  },
+  "/api/cases/templates/{template_id}": {
+    "get": "getCaseTemplateDefaultSpace"
+  },
+  "/api/dashboards": {
+    "get": "get-dashboards-redirect",
+    "post": "create-dashboard-redirect"
+  },
+  "/api/dashboards/{id}": {
+    "get": "get-dashboard-redirect",
+    "put": "update-dashboard-redirect",
+    "delete": "delete-dashboard-redirect"
+  },
+  "/api/data_views": {
+    "get": "getAllDataViewsDefault"
+  },
+  "/api/data_views/data_view": {
+    "post": "createDataViewDefaultw"
+  },
+  "/api/data_views/data_view/{viewId}": {
+    "get": "getDataViewDefault",
+    "post": "updateDataViewDefault",
+    "delete": "deleteDataViewDefault"
+  },
+  "/api/data_views/data_view/{viewId}/fields": {
+    "post": "updateFieldsMetadataDefault"
+  },
+  "/api/data_views/data_view/{viewId}/runtime_field": {
+    "post": "createRuntimeFieldDefault",
+    "put": "createUpdateRuntimeFieldDefault"
+  },
+  "/api/data_views/data_view/{viewId}/runtime_field/{fieldName}": {
+    "get": "getRuntimeFieldDefault",
+    "post": "updateRuntimeFieldDefault",
+    "delete": "deleteRuntimeFieldDefault"
+  },
+  "/api/data_views/default": {
+    "get": "getDefaultDataViewDefault",
+    "post": "setDefaultDatailViewDefault"
+  },
+  "/api/data_views/swap_references": {
+    "post": "swapDataViewsDefault"
+  },
+  "/api/data_views/swap_references/_preview": {
+    "post": "previewSwapDataViewsDefault"
+  },
+  "/api/detection_engine/index": {
+    "get": "ReadAlertsIndex",
+    "post": "CreateAlertsIndex",
+    "delete": "DeleteAlertsIndex"
+  },
+  "/api/detection_engine/privileges": {
+    "get": "ReadPrivileges"
+  },
+  "/api/detection_engine/rules": {
+    "get": "ReadRule",
+    "post": "CreateRule",
+    "put": "UpdateRule",
+    "delete": "DeleteRule",
+    "patch": "PatchRule"
+  },
+  "/api/detection_engine/rules/_bulk_action": {
+    "post": "PerformRulesBulkAction"
+  },
+  "/api/detection_engine/rules/_export": {
+    "post": "ExportRules"
+  },
+  "/api/detection_engine/rules/_find": {
+    "get": "FindRules"
+  },
+  "/api/detection_engine/rules/_import": {
+    "post": "ImportRules"
+  },
+  "/api/detection_engine/rules/{id}/exceptions": {
+    "post": "CreateRuleExceptionListItems"
+  },
+  "/api/detection_engine/rules/prepackaged": {
+    "put": "InstallPrebuiltRulesAndTimelines"
+  },
+  "/api/detection_engine/rules/prepackaged/_status": {
+    "get": "ReadPrebuiltRulesAndTimelinesStatus"
+  },
+  "/api/detection_engine/rules/preview": {
+    "post": "RulePreview"
+  },
+  "/api/detection_engine/signals/assignees": {
+    "post": "SetAlertAssignees"
+  },
+  "/api/detection_engine/signals/finalize_migration": {
+    "post": "FinalizeAlertsMigration"
+  },
+  "/api/detection_engine/signals/migration": {
+    "post": "CreateAlertsMigration",
+    "delete": "AlertsMigrationCleanup"
+  },
+  "/api/detection_engine/signals/migration_status": {
+    "get": "ReadAlertsMigrationStatus"
+  },
+  "/api/detection_engine/signals/search": {
+    "post": "SearchAlerts"
+  },
+  "/api/detection_engine/signals/status": {
+    "post": "SetAlertsStatus"
+  },
+  "/api/detection_engine/signals/tags": {
+    "post": "SetAlertTags"
+  },
+  "/api/detection_engine/tags": {
+    "get": "ReadTags"
+  },
+  "/api/encrypted_saved_objects/_rotate_key": {
+    "post": "rotateEncryptionKey"
+  },
+  "/api/endpoint_list": {
+    "post": "CreateEndpointList"
+  },
+  "/api/endpoint_list/items": {
+    "get": "ReadEndpointListItem",
+    "post": "CreateEndpointListItem",
+    "put": "UpdateEndpointListItem",
+    "delete": "DeleteEndpointListItem"
+  },
+  "/api/endpoint_list/items/_find": {
+    "get": "FindEndpointListItems"
+  },
+  "/api/endpoint/action": {
+    "get": "EndpointGetActionsList"
+  },
+  "/api/endpoint/action_status": {
+    "get": "EndpointGetActionsStatus"
+  },
+  "/api/endpoint/action/{action_id}": {
+    "get": "EndpointGetActionsDetails"
+  },
+  "/api/endpoint/action/{action_id}/file/{file_id}": {
+    "get": "EndpointFileInfo"
+  },
+  "/api/endpoint/action/{action_id}/file/{file_id}/download": {
+    "get": "EndpointFileDownload"
+  },
+  "/api/endpoint/action/cancel": {
+    "post": "CancelAction"
+  },
+  "/api/endpoint/action/execute": {
+    "post": "EndpointExecuteAction"
+  },
+  "/api/endpoint/action/get_file": {
+    "post": "EndpointGetFileAction"
+  },
+  "/api/endpoint/action/isolate": {
+    "post": "EndpointIsolateAction"
+  },
+  "/api/endpoint/action/kill_process": {
+    "post": "EndpointKillProcessAction"
+  },
+  "/api/endpoint/action/memory_dump": {
+    "post": "EndpointGenerateMemoryDump"
+  },
+  "/api/endpoint/action/run_script": {
+    "post": "RunScriptAction"
+  },
+  "/api/endpoint/action/running_procs": {
+    "post": "EndpointGetProcessesAction"
+  },
+  "/api/endpoint/action/scan": {
+    "post": "EndpointScanAction"
+  },
+  "/api/endpoint/action/state": {
+    "get": "EndpointGetActionsState"
+  },
+  "/api/endpoint/action/suspend_process": {
+    "post": "EndpointSuspendProcessAction"
+  },
+  "/api/endpoint/action/unisolate": {
+    "post": "EndpointUnisolateAction"
+  },
+  "/api/endpoint/action/upload": {
+    "post": "EndpointUploadAction"
+  },
+  "/api/endpoint/metadata": {
+    "get": "GetEndpointMetadataList"
+  },
+  "/api/endpoint/metadata/{id}": {
+    "get": "GetEndpointMetadata"
+  },
+  "/api/endpoint/policy_response": {
+    "get": "GetPolicyResponse"
+  },
+  "/api/endpoint/protection_updates_note/{package_policy_id}": {
+    "get": "GetProtectionUpdatesNote",
+    "post": "CreateUpdateProtectionUpdatesNote"
+  },
+  "/api/endpoint/scripts_library": {
+    "get": "EndpointScriptLibraryListScripts",
+    "post": "EndpointScriptLibraryCreateScript"
+  },
+  "/api/endpoint/scripts_library/{script_id}": {
+    "get": "EndpointScriptLibraryGetOneScript",
+    "delete": "EndpointScriptLibraryDeleteScript",
+    "patch": "EndpointScriptLibraryPatchUpdateScript"
+  },
+  "/api/endpoint/scripts_library/{script_id}/download": {
+    "get": "EndpointScriptLibraryDownloadScript"
+  },
+  "/api/entity_analytics/monitoring/engine/delete": {
+    "delete": "DeleteMonitoringEngine"
+  },
+  "/api/entity_analytics/monitoring/engine/disable": {
+    "post": "DisableMonitoringEngine"
+  },
+  "/api/entity_analytics/monitoring/engine/init": {
+    "post": "InitMonitoringEngine"
+  },
+  "/api/entity_analytics/monitoring/engine/schedule_now": {
+    "post": "ScheduleMonitoringEngine"
+  },
+  "/api/entity_analytics/monitoring/privileges/health": {
+    "get": "PrivMonHealth"
+  },
+  "/api/entity_analytics/monitoring/privileges/privileges": {
+    "get": "PrivMonPrivileges"
+  },
+  "/api/entity_analytics/monitoring/users": {
+    "post": "CreatePrivMonUser"
+  },
+  "/api/entity_analytics/monitoring/users/_csv": {
+    "post": "PrivmonBulkUploadUsersCSV"
+  },
+  "/api/entity_analytics/monitoring/users/{id}": {
+    "put": "UpdatePrivMonUser",
+    "delete": "DeletePrivMonUser"
+  },
+  "/api/entity_analytics/monitoring/users/list": {
+    "get": "ListPrivMonUsers"
+  },
+  "/api/entity_analytics/privileged_user_monitoring/pad/install": {
+    "post": "InstallPrivilegedAccessDetectionPackage"
+  },
+  "/api/entity_analytics/privileged_user_monitoring/pad/status": {
+    "get": "GetPrivilegedAccessDetectionPackageStatus"
+  },
+  "/api/entity_analytics/watchlists": {
+    "post": "CreateWatchlist"
+  },
+  "/api/entity_analytics/watchlists/{id}": {
+    "get": "GetWatchlist",
+    "put": "UpdateWatchlist"
+  },
+  "/api/entity_analytics/watchlists/{watchlist_id}/csv_upload": {
+    "post": "UploadWatchlistCsv"
+  },
+  "/api/entity_analytics/watchlists/{watchlist_id}/entities/assign": {
+    "post": "AssignWatchlistEntities"
+  },
+  "/api/entity_analytics/watchlists/{watchlist_id}/entities/unassign": {
+    "post": "UnassignWatchlistEntities"
+  },
+  "/api/entity_analytics/watchlists/list": {
+    "get": "ListWatchlists"
+  },
+  "/api/exception_lists": {
+    "get": "ReadExceptionList",
+    "post": "CreateExceptionList",
+    "put": "UpdateExceptionList",
+    "delete": "DeleteExceptionList"
+  },
+  "/api/exception_lists/_duplicate": {
+    "post": "DuplicateExceptionList"
+  },
+  "/api/exception_lists/_export": {
+    "post": "ExportExceptionList"
+  },
+  "/api/exception_lists/_find": {
+    "get": "FindExceptionLists"
+  },
+  "/api/exception_lists/_import": {
+    "post": "ImportExceptionList"
+  },
+  "/api/exception_lists/items": {
+    "get": "ReadExceptionListItem",
+    "post": "CreateExceptionListItem",
+    "put": "UpdateExceptionListItem",
+    "delete": "DeleteExceptionListItem"
+  },
+  "/api/exception_lists/items/_find": {
+    "get": "FindExceptionListItems"
+  },
+  "/api/exception_lists/summary": {
+    "get": "ReadExceptionListSummary"
+  },
+  "/api/exceptions/shared": {
+    "post": "CreateSharedExceptionList"
+  },
+  "/api/features": {
+    "get": "get-features"
+  },
+  "/api/fleet/agent_download_sources": {
+    "get": "get-fleet-agent-download-sources",
+    "post": "post-fleet-agent-download-sources"
+  },
+  "/api/fleet/agent_download_sources/{sourceId}": {
+    "get": "get-fleet-agent-download-sources-sourceid",
+    "put": "put-fleet-agent-download-sources-sourceid",
+    "delete": "delete-fleet-agent-download-sources-sourceid"
+  },
+  "/api/fleet/agent_policies": {
+    "get": "get-fleet-agent-policies",
+    "post": "post-fleet-agent-policies"
+  },
+  "/api/fleet/agent_policies/_bulk_get": {
+    "post": "post-fleet-agent-policies-bulk-get"
+  },
+  "/api/fleet/agent_policies/{agentPolicyId}": {
+    "get": "get-fleet-agent-policies-agentpolicyid",
+    "put": "put-fleet-agent-policies-agentpolicyid"
+  },
+  "/api/fleet/agent_policies/{agentPolicyId}/auto_upgrade_agents_status": {
+    "get": "get-fleet-agent-policies-agentpolicyid-auto-upgrade-agents-status"
+  },
+  "/api/fleet/agent_policies/{agentPolicyId}/copy": {
+    "post": "post-fleet-agent-policies-agentpolicyid-copy"
+  },
+  "/api/fleet/agent_policies/{agentPolicyId}/download": {
+    "get": "get-fleet-agent-policies-agentpolicyid-download"
+  },
+  "/api/fleet/agent_policies/{agentPolicyId}/full": {
+    "get": "get-fleet-agent-policies-agentpolicyid-full"
+  },
+  "/api/fleet/agent_policies/{agentPolicyId}/outputs": {
+    "get": "get-fleet-agent-policies-agentpolicyid-outputs"
+  },
+  "/api/fleet/agent_policies/delete": {
+    "post": "post-fleet-agent-policies-delete"
+  },
+  "/api/fleet/agent_policies/outputs": {
+    "post": "post-fleet-agent-policies-outputs"
+  },
+  "/api/fleet/agent_status": {
+    "get": "get-fleet-agent-status"
+  },
+  "/api/fleet/agent_status/data": {
+    "get": "get-fleet-agent-status-data"
+  },
+  "/api/fleet/agentless_policies": {
+    "get": "get-fleet-agentless-policies",
+    "post": "post-fleet-agentless-policies"
+  },
+  "/api/fleet/agentless_policies/_upgrade": {
+    "post": "post-fleet-agentless-policies-upgrade"
+  },
+  "/api/fleet/agentless_policies/_upgrade/dryrun": {
+    "post": "post-fleet-agentless-policies-upgrade-dryrun"
+  },
+  "/api/fleet/agentless_policies/{policyId}": {
+    "get": "get-fleet-agentless-policies-policyid",
+    "put": "put-fleet-agentless-policies-policyid",
+    "delete": "delete-fleet-agentless-policies-policyid"
+  },
+  "/api/fleet/agents": {
+    "get": "get-fleet-agents",
+    "post": "post-fleet-agents"
+  },
+  "/api/fleet/agents/{agentId}": {
+    "get": "get-fleet-agents-agentid",
+    "put": "put-fleet-agents-agentid",
+    "delete": "delete-fleet-agents-agentid"
+  },
+  "/api/fleet/agents/{agentId}/actions": {
+    "post": "post-fleet-agents-agentid-actions"
+  },
+  "/api/fleet/agents/{agentId}/effective_config": {
+    "get": "get-fleet-agents-agentid-effective-config"
+  },
+  "/api/fleet/agents/{agentId}/migrate": {
+    "post": "post-fleet-agents-agentid-migrate"
+  },
+  "/api/fleet/agents/{agentId}/privilege_level_change": {
+    "post": "post-fleet-agents-agentid-privilege-level-change"
+  },
+  "/api/fleet/agents/{agentId}/reassign": {
+    "post": "post-fleet-agents-agentid-reassign"
+  },
+  "/api/fleet/agents/{agentId}/remove_collector": {
+    "post": "post-fleet-agents-agentid-remove-collector"
+  },
+  "/api/fleet/agents/{agentId}/request_diagnostics": {
+    "post": "post-fleet-agents-agentid-request-diagnostics"
+  },
+  "/api/fleet/agents/{agentId}/rollback": {
+    "post": "post-fleet-agents-agentid-rollback"
+  },
+  "/api/fleet/agents/{agentId}/unenroll": {
+    "post": "post-fleet-agents-agentid-unenroll"
+  },
+  "/api/fleet/agents/{agentId}/upgrade": {
+    "post": "post-fleet-agents-agentid-upgrade"
+  },
+  "/api/fleet/agents/{agentId}/uploads": {
+    "get": "get-fleet-agents-agentid-uploads"
+  },
+  "/api/fleet/agents/action_status": {
+    "get": "get-fleet-agents-action-status"
+  },
+  "/api/fleet/agents/actions/{actionId}/cancel": {
+    "post": "post-fleet-agents-actions-actionid-cancel"
+  },
+  "/api/fleet/agents/available_versions": {
+    "get": "get-fleet-agents-available-versions"
+  },
+  "/api/fleet/agents/bulk_migrate": {
+    "post": "post-fleet-agents-bulk-migrate"
+  },
+  "/api/fleet/agents/bulk_privilege_level_change": {
+    "post": "post-fleet-agents-bulk-privilege-level-change"
+  },
+  "/api/fleet/agents/bulk_reassign": {
+    "post": "post-fleet-agents-bulk-reassign"
+  },
+  "/api/fleet/agents/bulk_remove_collectors": {
+    "post": "post-fleet-agents-bulk-remove-collectors"
+  },
+  "/api/fleet/agents/bulk_request_diagnostics": {
+    "post": "post-fleet-agents-bulk-request-diagnostics"
+  },
+  "/api/fleet/agents/bulk_rollback": {
+    "post": "post-fleet-agents-bulk-rollback"
+  },
+  "/api/fleet/agents/bulk_unenroll": {
+    "post": "post-fleet-agents-bulk-unenroll"
+  },
+  "/api/fleet/agents/bulk_update_agent_tags": {
+    "post": "post-fleet-agents-bulk-update-agent-tags"
+  },
+  "/api/fleet/agents/bulk_upgrade": {
+    "post": "post-fleet-agents-bulk-upgrade"
+  },
+  "/api/fleet/agents/files/{fileId}": {
+    "delete": "delete-fleet-agents-files-fileid"
+  },
+  "/api/fleet/agents/files/{fileId}/{fileName}": {
+    "get": "get-fleet-agents-files-fileid-filename"
+  },
+  "/api/fleet/agents/setup": {
+    "get": "get-fleet-agents-setup",
+    "post": "post-fleet-agents-setup"
+  },
+  "/api/fleet/agents/tags": {
+    "get": "get-fleet-agents-tags"
+  },
+  "/api/fleet/check-permissions": {
+    "get": "get-fleet-check-permissions"
+  },
+  "/api/fleet/cloud_connectors": {
+    "get": "get-fleet-cloud-connectors",
+    "post": "post-fleet-cloud-connectors"
+  },
+  "/api/fleet/cloud_connectors/{cloudConnectorId}": {
+    "get": "get-fleet-cloud-connectors-cloudconnectorid",
+    "put": "put-fleet-cloud-connectors-cloudconnectorid",
+    "delete": "delete-fleet-cloud-connectors-cloudconnectorid"
+  },
+  "/api/fleet/cloud_connectors/{cloudConnectorId}/usage": {
+    "get": "get-fleet-cloud-connectors-cloudconnectorid-usage"
+  },
+  "/api/fleet/data_streams": {
+    "get": "get-fleet-data-streams"
+  },
+  "/api/fleet/enrollment_api_keys": {
+    "get": "get-fleet-enrollment-api-keys",
+    "post": "post-fleet-enrollment-api-keys"
+  },
+  "/api/fleet/enrollment_api_keys/_bulk_delete": {
+    "post": "post-fleet-enrollment-api-keys-bulk-delete"
+  },
+  "/api/fleet/enrollment_api_keys/{keyId}": {
+    "get": "get-fleet-enrollment-api-keys-keyid",
+    "delete": "delete-fleet-enrollment-api-keys-keyid"
+  },
+  "/api/fleet/epm/bulk_assets": {
+    "post": "post-fleet-epm-bulk-assets"
+  },
+  "/api/fleet/epm/categories": {
+    "get": "get-fleet-epm-categories"
+  },
+  "/api/fleet/epm/custom_integrations": {
+    "post": "post-fleet-epm-custom-integrations"
+  },
+  "/api/fleet/epm/custom_integrations/{pkgName}": {
+    "put": "put-fleet-epm-custom-integrations-pkgname"
+  },
+  "/api/fleet/epm/data_streams": {
+    "get": "get-fleet-epm-data-streams"
+  },
+  "/api/fleet/epm/packages": {
+    "get": "get-fleet-epm-packages",
+    "post": "post-fleet-epm-packages"
+  },
+  "/api/fleet/epm/packages/_bulk": {
+    "post": "post-fleet-epm-packages-bulk"
+  },
+  "/api/fleet/epm/packages/_bulk_namespace_customization": {
+    "post": "post-fleet-epm-packages-bulk-namespace-customization"
+  },
+  "/api/fleet/epm/packages/_bulk_rollback": {
+    "post": "post-fleet-epm-packages-bulk-rollback"
+  },
+  "/api/fleet/epm/packages/_bulk_rollback/{taskId}": {
+    "get": "get-fleet-epm-packages-bulk-rollback-taskid"
+  },
+  "/api/fleet/epm/packages/_bulk_uninstall": {
+    "post": "post-fleet-epm-packages-bulk-uninstall"
+  },
+  "/api/fleet/epm/packages/_bulk_uninstall/{taskId}": {
+    "get": "get-fleet-epm-packages-bulk-uninstall-taskid"
+  },
+  "/api/fleet/epm/packages/_bulk_upgrade": {
+    "post": "post-fleet-epm-packages-bulk-upgrade"
+  },
+  "/api/fleet/epm/packages/_bulk_upgrade/{taskId}": {
+    "get": "get-fleet-epm-packages-bulk-upgrade-taskid"
+  },
+  "/api/fleet/epm/packages/{pkgName}": {
+    "get": "get-fleet-epm-packages-pkgname",
+    "post": "post-fleet-epm-packages-pkgname",
+    "put": "put-fleet-epm-packages-pkgname",
+    "delete": "delete-fleet-epm-packages-pkgname"
+  },
+  "/api/fleet/epm/packages/{pkgName}/{pkgVersion}": {
+    "get": "get-fleet-epm-packages-pkgname-pkgversion",
+    "post": "post-fleet-epm-packages-pkgname-pkgversion",
+    "put": "put-fleet-epm-packages-pkgname-pkgversion",
+    "delete": "delete-fleet-epm-packages-pkgname-pkgversion"
+  },
+  "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
+    "get": "get-fleet-epm-packages-pkgname-pkgversion-filepath"
+  },
+  "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/datastream_assets": {
+    "delete": "delete-fleet-epm-packages-pkgname-pkgversion-datastream-assets"
+  },
+  "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/dependencies": {
+    "get": "get-fleet-epm-packages-pkgname-pkgversion-dependencies"
+  },
+  "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets": {
+    "post": "post-fleet-epm-packages-pkgname-pkgversion-kibana-assets",
+    "delete": "delete-fleet-epm-packages-pkgname-pkgversion-kibana-assets"
+  },
+  "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/rule_assets": {
+    "post": "post-fleet-epm-packages-pkgname-pkgversion-rule-assets"
+  },
+  "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize": {
+    "post": "post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize"
+  },
+  "/api/fleet/epm/packages/{pkgName}/review_upgrade": {
+    "post": "post-fleet-epm-packages-pkgname-review-upgrade"
+  },
+  "/api/fleet/epm/packages/{pkgName}/rollback": {
+    "post": "post-fleet-epm-packages-pkgname-rollback"
+  },
+  "/api/fleet/epm/packages/{pkgName}/stats": {
+    "get": "get-fleet-epm-packages-pkgname-stats"
+  },
+  "/api/fleet/epm/packages/installed": {
+    "get": "get-fleet-epm-packages-installed"
+  },
+  "/api/fleet/epm/packages/limited": {
+    "get": "get-fleet-epm-packages-limited"
+  },
+  "/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs": {
+    "get": "get-fleet-epm-templates-pkgname-pkgversion-inputs"
+  },
+  "/api/fleet/epm/verification_key_id": {
+    "get": "get-fleet-epm-verification-key-id"
+  },
+  "/api/fleet/fleet_server_hosts": {
+    "get": "get-fleet-fleet-server-hosts",
+    "post": "post-fleet-fleet-server-hosts"
+  },
+  "/api/fleet/fleet_server_hosts/{itemId}": {
+    "get": "get-fleet-fleet-server-hosts-itemid",
+    "put": "put-fleet-fleet-server-hosts-itemid",
+    "delete": "delete-fleet-fleet-server-hosts-itemid"
+  },
+  "/api/fleet/health_check": {
+    "post": "post-fleet-health-check"
+  },
+  "/api/fleet/kubernetes": {
+    "get": "get-fleet-kubernetes"
+  },
+  "/api/fleet/kubernetes/download": {
+    "get": "get-fleet-kubernetes-download"
+  },
+  "/api/fleet/logstash_api_keys": {
+    "post": "post-fleet-logstash-api-keys"
+  },
+  "/api/fleet/managed_integrations": {
+    "get": "get-fleet-managed-integrations",
+    "post": "post-fleet-managed-integrations"
+  },
+  "/api/fleet/managed_integrations/_upgrade": {
+    "post": "post-fleet-managed-integrations-upgrade"
+  },
+  "/api/fleet/managed_integrations/_upgrade/dryrun": {
+    "post": "post-fleet-managed-integrations-upgrade-dryrun"
+  },
+  "/api/fleet/managed_integrations/{policyId}": {
+    "get": "get-fleet-managed-integrations-policyid",
+    "put": "put-fleet-managed-integrations-policyid",
+    "delete": "delete-fleet-managed-integrations-policyid"
+  },
+  "/api/fleet/message_signing_service/rotate_key_pair": {
+    "post": "post-fleet-message-signing-service-rotate-key-pair"
+  },
+  "/api/fleet/outputs": {
+    "get": "get-fleet-outputs",
+    "post": "post-fleet-outputs"
+  },
+  "/api/fleet/outputs/{outputId}": {
+    "get": "get-fleet-outputs-outputid",
+    "put": "put-fleet-outputs-outputid",
+    "delete": "delete-fleet-outputs-outputid"
+  },
+  "/api/fleet/outputs/{outputId}/health": {
+    "get": "get-fleet-outputs-outputid-health"
+  },
+  "/api/fleet/package_policies": {
+    "get": "get-fleet-package-policies",
+    "post": "post-fleet-package-policies"
+  },
+  "/api/fleet/package_policies/_bulk_get": {
+    "post": "post-fleet-package-policies-bulk-get"
+  },
+  "/api/fleet/package_policies/{packagePolicyId}": {
+    "get": "get-fleet-package-policies-packagepolicyid",
+    "put": "put-fleet-package-policies-packagepolicyid",
+    "delete": "delete-fleet-package-policies-packagepolicyid"
+  },
+  "/api/fleet/package_policies/delete": {
+    "post": "post-fleet-package-policies-delete"
+  },
+  "/api/fleet/package_policies/upgrade": {
+    "post": "post-fleet-package-policies-upgrade"
+  },
+  "/api/fleet/package_policies/upgrade/dryrun": {
+    "post": "post-fleet-package-policies-upgrade-dryrun"
+  },
+  "/api/fleet/proxies": {
+    "get": "get-fleet-proxies",
+    "post": "post-fleet-proxies"
+  },
+  "/api/fleet/proxies/{itemId}": {
+    "get": "get-fleet-proxies-itemid",
+    "put": "put-fleet-proxies-itemid",
+    "delete": "delete-fleet-proxies-itemid"
+  },
+  "/api/fleet/remote_synced_integrations/{outputId}/remote_status": {
+    "get": "get-fleet-remote-synced-integrations-outputid-remote-status"
+  },
+  "/api/fleet/remote_synced_integrations/status": {
+    "get": "get-fleet-remote-synced-integrations-status"
+  },
+  "/api/fleet/service_tokens": {
+    "post": "post-fleet-service-tokens"
+  },
+  "/api/fleet/settings": {
+    "get": "get-fleet-settings",
+    "put": "put-fleet-settings"
+  },
+  "/api/fleet/setup": {
+    "post": "post-fleet-setup"
+  },
+  "/api/fleet/space_settings": {
+    "get": "get-fleet-space-settings",
+    "put": "put-fleet-space-settings"
+  },
+  "/api/fleet/uninstall_tokens": {
+    "get": "get-fleet-uninstall-tokens"
+  },
+  "/api/fleet/uninstall_tokens/{uninstallTokenId}": {
+    "get": "get-fleet-uninstall-tokens-uninstalltokenid"
+  },
+  "/api/links": {
+    "get": "get-links",
+    "post": "post-links"
+  },
+  "/api/links/{id}": {
+    "get": "get-links-id",
+    "put": "put-links-id",
+    "delete": "delete-links-id"
+  },
+  "/api/lists": {
+    "get": "ReadList",
+    "post": "CreateList",
+    "put": "UpdateList",
+    "delete": "DeleteList",
+    "patch": "PatchList"
+  },
+  "/api/lists/_find": {
+    "get": "FindLists"
+  },
+  "/api/lists/index": {
+    "get": "ReadListIndex",
+    "post": "CreateListIndex",
+    "delete": "DeleteListIndex"
+  },
+  "/api/lists/items": {
+    "get": "ReadListItem",
+    "post": "CreateListItem",
+    "put": "UpdateListItem",
+    "delete": "DeleteListItem",
+    "patch": "PatchListItem"
+  },
+  "/api/lists/items/_export": {
+    "post": "ExportListItems"
+  },
+  "/api/lists/items/_find": {
+    "get": "FindListItems"
+  },
+  "/api/lists/items/_import": {
+    "post": "ImportListItems"
+  },
+  "/api/lists/privileges": {
+    "get": "ReadListPrivileges"
+  },
+  "/api/logstash/pipeline/{id}": {
+    "get": "get-logstash-pipeline",
+    "put": "put-logstash-pipeline",
+    "delete": "delete-logstash-pipeline"
+  },
+  "/api/logstash/pipelines": {
+    "get": "get-logstash-pipelines"
+  },
+  "/api/maintenance_window": {
+    "post": "post-maintenance-window"
+  },
+  "/api/maintenance_window/_find": {
+    "get": "get-maintenance-window-find"
+  },
+  "/api/maintenance_window/{id}": {
+    "get": "get-maintenance-window-id",
+    "delete": "delete-maintenance-window-id",
+    "patch": "patch-maintenance-window-id"
+  },
+  "/api/maintenance_window/{id}/_archive": {
+    "post": "post-maintenance-window-id-archive"
+  },
+  "/api/maintenance_window/{id}/_unarchive": {
+    "post": "post-maintenance-window-id-unarchive"
+  },
+  "/api/markdowns": {
+    "get": "get-markdowns",
+    "post": "post-markdowns"
+  },
+  "/api/markdowns/{id}": {
+    "get": "get-markdowns-id",
+    "put": "put-markdowns-id",
+    "delete": "delete-markdowns-id"
+  },
+  "/api/ml/saved_objects/sync": {
+    "get": "mlSync"
+  },
+  "/api/ml/saved_objects/update_jobs_spaces": {
+    "post": "mlUpdateJobsSpaces"
+  },
+  "/api/ml/saved_objects/update_trained_models_spaces": {
+    "post": "mlUpdateTrainedModelsSpaces"
+  },
+  "/api/note": {
+    "get": "GetNotes",
+    "delete": "DeleteNote",
+    "patch": "PersistNoteRoute"
+  },
+  "/api/observability_ai_assistant/chat/complete": {
+    "post": "observability-ai-assistant-chat-complete"
+  },
+  "/api/osquery/history": {
+    "get": "OsqueryGetUnifiedHistory"
+  },
+  "/api/osquery/live_queries": {
+    "get": "OsqueryFindLiveQueries",
+    "post": "OsqueryCreateLiveQuery"
+  },
+  "/api/osquery/live_queries/{id}": {
+    "get": "OsqueryGetLiveQueryDetails"
+  },
+  "/api/osquery/live_queries/{id}/results/{actionId}": {
+    "get": "OsqueryGetLiveQueryResults"
+  },
+  "/api/osquery/live_queries/{id}/results/{actionId}/_export": {
+    "post": "OsqueryExportLiveQueryResults"
+  },
+  "/api/osquery/packs": {
+    "get": "OsqueryFindPacks",
+    "post": "OsqueryCreatePacks"
+  },
+  "/api/osquery/packs/{id}": {
+    "get": "OsqueryGetPacksDetails",
+    "put": "OsqueryUpdatePacks",
+    "delete": "OsqueryDeletePacks"
+  },
+  "/api/osquery/packs/{id}/copy": {
+    "post": "OsqueryCopyPacks"
+  },
+  "/api/osquery/saved_queries": {
+    "get": "OsqueryFindSavedQueries",
+    "post": "OsqueryCreateSavedQuery"
+  },
+  "/api/osquery/saved_queries/{id}": {
+    "get": "OsqueryGetSavedQueryDetails",
+    "put": "OsqueryUpdateSavedQuery",
+    "delete": "OsqueryDeleteSavedQuery"
+  },
+  "/api/osquery/saved_queries/{id}/copy": {
+    "post": "OsqueryCopySavedQuery"
+  },
+  "/api/osquery/scheduled_results/{scheduleId}/{executionCount}": {
+    "get": "OsqueryGetScheduledActionResults"
+  },
+  "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export": {
+    "post": "OsqueryExportScheduledQueryResults"
+  },
+  "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/results": {
+    "get": "OsqueryGetScheduledQueryResults"
+  },
+  "/api/pinned_event": {
+    "patch": "PersistPinnedEventRoute"
+  },
+  "/api/risk_score/engine/dangerously_delete_data": {
+    "delete": "CleanUpRiskEngine"
+  },
+  "/api/risk_score/engine/saved_object/configure": {
+    "patch": "ConfigureRiskEngineSavedObject"
+  },
+  "/api/risk_score/engine/schedule_now": {
+    "post": "ScheduleRiskEngineNow"
+  },
+  "/api/risk_score/history": {
+    "get": "GetRiskScoreHistory"
+  },
+  "/api/saved_objects/_bulk_create": {
+    "post": "post-saved-objects-bulk-create"
+  },
+  "/api/saved_objects/_bulk_delete": {
+    "post": "post-saved-objects-bulk-delete"
+  },
+  "/api/saved_objects/_bulk_get": {
+    "post": "post-saved-objects-bulk-get"
+  },
+  "/api/saved_objects/_bulk_resolve": {
+    "post": "post-saved-objects-bulk-resolve"
+  },
+  "/api/saved_objects/_bulk_update": {
+    "put": "put-saved-objects-bulk-update"
+  },
+  "/api/saved_objects/_export": {
+    "post": "post-saved-objects-export"
+  },
+  "/api/saved_objects/_find": {
+    "get": "get-saved-objects-find"
+  },
+  "/api/saved_objects/_import": {
+    "post": "post-saved-objects-import"
+  },
+  "/api/saved_objects/_resolve_import_errors": {
+    "post": "post-saved-objects-resolve-import-errors"
+  },
+  "/api/saved_objects/{type}": {
+    "post": "post-saved-objects-type"
+  },
+  "/api/saved_objects/{type}/{id}": {
+    "get": "get-saved-objects-type-id",
+    "post": "post-saved-objects-type-id",
+    "put": "put-saved-objects-type-id",
+    "delete": "delete-saved-objects-type-id"
+  },
+  "/api/saved_objects/resolve/{type}/{id}": {
+    "get": "get-saved-objects-resolve-type-id"
+  },
+  "/api/security_ai_assistant/anonymization_fields/_bulk_action": {
+    "post": "PerformAnonymizationFieldsBulkAction"
+  },
+  "/api/security_ai_assistant/anonymization_fields/_find": {
+    "get": "FindAnonymizationFields"
+  },
+  "/api/security_ai_assistant/chat/complete": {
+    "post": "ChatComplete"
+  },
+  "/api/security_ai_assistant/current_user/conversations": {
+    "post": "CreateConversation",
+    "delete": "DeleteAllConversations"
+  },
+  "/api/security_ai_assistant/current_user/conversations/_find": {
+    "get": "FindConversations"
+  },
+  "/api/security_ai_assistant/current_user/conversations/{id}": {
+    "get": "ReadConversation",
+    "put": "UpdateConversation",
+    "delete": "DeleteConversation"
+  },
+  "/api/security_ai_assistant/knowledge_base": {
+    "get": "GetKnowledgeBase",
+    "post": "PostKnowledgeBase"
+  },
+  "/api/security_ai_assistant/knowledge_base/{resource}": {
+    "get": "ReadKnowledgeBase",
+    "post": "CreateKnowledgeBase"
+  },
+  "/api/security_ai_assistant/knowledge_base/entries": {
+    "post": "CreateKnowledgeBaseEntry"
+  },
+  "/api/security_ai_assistant/knowledge_base/entries/_bulk_action": {
+    "post": "PerformKnowledgeBaseEntryBulkAction"
+  },
+  "/api/security_ai_assistant/knowledge_base/entries/_find": {
+    "get": "FindKnowledgeBaseEntries"
+  },
+  "/api/security_ai_assistant/knowledge_base/entries/{id}": {
+    "get": "ReadKnowledgeBaseEntry",
+    "put": "UpdateKnowledgeBaseEntry",
+    "delete": "DeleteKnowledgeBaseEntry"
+  },
+  "/api/security_ai_assistant/prompts/_bulk_action": {
+    "post": "PerformPromptsBulkAction"
+  },
+  "/api/security_ai_assistant/prompts/_find": {
+    "get": "FindPrompts"
+  },
+  "/api/security/entity_store": {
+    "put": "put-security-entity-store"
+  },
+  "/api/security/entity_store/entities": {
+    "get": "get-security-entity-store-entities"
+  },
+  "/api/security/entity_store/entities/": {
+    "delete": "delete-security-entity-store-entities"
+  },
+  "/api/security/entity_store/entities/{entityType}": {
+    "post": "post-security-entity-store-entities-entitytype",
+    "put": "put-security-entity-store-entities-entitytype"
+  },
+  "/api/security/entity_store/entities/bulk": {
+    "put": "put-security-entity-store-entities-bulk"
+  },
+  "/api/security/entity_store/install": {
+    "post": "post-security-entity-store-install"
+  },
+  "/api/security/entity_store/resolution/group": {
+    "get": "get-security-entity-store-resolution-group"
+  },
+  "/api/security/entity_store/resolution/link": {
+    "post": "post-security-entity-store-resolution-link"
+  },
+  "/api/security/entity_store/resolution/rules": {
+    "get": "get-security-entity-store-resolution-rules"
+  },
+  "/api/security/entity_store/resolution/rules/{id}/disable": {
+    "put": "put-security-entity-store-resolution-rules-id-disable"
+  },
+  "/api/security/entity_store/resolution/rules/{id}/enable": {
+    "put": "put-security-entity-store-resolution-rules-id-enable"
+  },
+  "/api/security/entity_store/resolution/unlink": {
+    "post": "post-security-entity-store-resolution-unlink"
+  },
+  "/api/security/entity_store/start": {
+    "put": "put-security-entity-store-start"
+  },
+  "/api/security/entity_store/status": {
+    "get": "get-security-entity-store-status"
+  },
+  "/api/security/entity_store/stop": {
+    "put": "put-security-entity-store-stop"
+  },
+  "/api/security/entity_store/uninstall": {
+    "post": "post-security-entity-store-uninstall"
+  },
+  "/api/security/role": {
+    "get": "get-security-role"
+  },
+  "/api/security/role/_query": {
+    "post": "post-security-role-query"
+  },
+  "/api/security/role/{name}": {
+    "get": "get-security-role-name",
+    "put": "put-security-role-name",
+    "delete": "delete-security-role-name"
+  },
+  "/api/security/roles": {
+    "post": "post-security-roles"
+  },
+  "/api/security/session/_invalidate": {
+    "post": "post-security-session-invalidate"
+  },
+  "/api/short_url": {
+    "post": "post-url"
+  },
+  "/api/short_url/_slug/{slug}": {
+    "get": "resolve-url"
+  },
+  "/api/short_url/{id}": {
+    "get": "get-url",
+    "delete": "delete-url"
+  },
+  "/api/spaces/_copy_saved_objects": {
+    "post": "post-spaces-copy-saved-objects"
+  },
+  "/api/spaces/_disable_legacy_url_aliases": {
+    "post": "post-spaces-disable-legacy-url-aliases"
+  },
+  "/api/spaces/_get_shareable_references": {
+    "post": "post-spaces-get-shareable-references"
+  },
+  "/api/spaces/_resolve_copy_saved_objects_errors": {
+    "post": "post-spaces-resolve-copy-saved-objects-errors"
+  },
+  "/api/spaces/_update_objects_spaces": {
+    "post": "post-spaces-update-objects-spaces"
+  },
+  "/api/spaces/space": {
+    "get": "get-spaces-space",
+    "post": "post-spaces-space"
+  },
+  "/api/spaces/space/{id}": {
+    "get": "get-spaces-space-id",
+    "put": "put-spaces-space-id",
+    "delete": "delete-spaces-space-id"
+  },
+  "/api/status": {
+    "get": "get-status"
+  },
+  "/api/streams": {
+    "get": "get-streams"
+  },
+  "/api/streams/_disable": {
+    "post": "post-streams-disable"
+  },
+  "/api/streams/_enable": {
+    "post": "post-streams-enable"
+  },
+  "/api/streams/_resync": {
+    "post": "post-streams-resync"
+  },
+  "/api/streams/{name}": {
+    "get": "get-streams-name",
+    "put": "put-streams-name",
+    "delete": "delete-streams-name"
+  },
+  "/api/streams/{name}/_fork": {
+    "post": "post-streams-name-fork"
+  },
+  "/api/streams/{name}/_ingest": {
+    "get": "get-streams-name-ingest",
+    "put": "put-streams-name-ingest"
+  },
+  "/api/streams/{name}/_query": {
+    "get": "get-streams-name-query",
+    "put": "put-streams-name-query"
+  },
+  "/api/streams/{name}/content/export": {
+    "post": "post-streams-name-content-export"
+  },
+  "/api/streams/{name}/content/import": {
+    "post": "post-streams-name-content-import"
+  },
+  "/api/streams/{name}/queries": {
+    "get": "get-streams-name-queries"
+  },
+  "/api/streams/{name}/queries/_bulk": {
+    "post": "post-streams-name-queries-bulk"
+  },
+  "/api/streams/{name}/queries/{queryId}": {
+    "put": "put-streams-name-queries-queryid",
+    "delete": "delete-streams-name-queries-queryid"
+  },
+  "/api/streams/{name}/significant_events": {
+    "get": "get-streams-name-significant-events"
+  },
+  "/api/streams/{streamName}/attachments": {
+    "get": "get-streams-streamname-attachments"
+  },
+  "/api/streams/{streamName}/attachments/_bulk": {
+    "post": "post-streams-streamname-attachments-bulk"
+  },
+  "/api/streams/{streamName}/attachments/{attachmentType}/{attachmentId}": {
+    "put": "put-streams-streamname-attachments-attachmenttype-attachmentid",
+    "delete": "delete-streams-streamname-attachments-attachmenttype-attachmentid"
+  },
+  "/api/synthetics/monitor/test/{monitorId}": {
+    "post": "post-synthetics-monitor-test"
+  },
+  "/api/synthetics/monitors": {
+    "get": "get-synthetic-monitors",
+    "post": "post-synthetic-monitors"
+  },
+  "/api/synthetics/monitors/_bulk_delete": {
+    "post": "delete-synthetic-monitors"
+  },
+  "/api/synthetics/monitors/{id}": {
+    "get": "get-synthetic-monitor",
+    "put": "put-synthetic-monitor",
+    "delete": "delete-synthetic-monitor"
+  },
+  "/api/synthetics/params": {
+    "get": "get-parameters",
+    "post": "post-parameters"
+  },
+  "/api/synthetics/params/_bulk_delete": {
+    "post": "delete-parameters"
+  },
+  "/api/synthetics/params/{id}": {
+    "get": "get-parameter",
+    "put": "put-parameter",
+    "delete": "delete-parameter"
+  },
+  "/api/synthetics/private_locations": {
+    "get": "get-private-locations",
+    "post": "post-private-location"
+  },
+  "/api/synthetics/private_locations/{id}": {
+    "get": "get-private-location",
+    "put": "put-private-location",
+    "delete": "delete-private-location"
+  },
+  "/api/tags": {
+    "get": "get-tags",
+    "post": "post-tags"
+  },
+  "/api/tags/{id}": {
+    "get": "get-tags-id",
+    "put": "put-tags-id",
+    "delete": "delete-tags-id"
+  },
+  "/api/task_manager/_health": {
+    "get": "task-manager-health"
+  },
+  "/api/timeline": {
+    "get": "GetTimeline",
+    "post": "CreateTimelines",
+    "delete": "DeleteTimelines",
+    "patch": "PatchTimeline"
+  },
+  "/api/timeline/_copy": {
+    "post": "CopyTimeline"
+  },
+  "/api/timeline/_draft": {
+    "get": "GetDraftTimelines",
+    "post": "CleanDraftTimelines"
+  },
+  "/api/timeline/_export": {
+    "post": "ExportTimelines"
+  },
+  "/api/timeline/_favorite": {
+    "patch": "PersistFavoriteRoute"
+  },
+  "/api/timeline/_import": {
+    "post": "ImportTimelines"
+  },
+  "/api/timeline/_prepackaged": {
+    "post": "InstallPrepackedTimelines"
+  },
+  "/api/timeline/resolve": {
+    "get": "ResolveTimeline"
+  },
+  "/api/timelines": {
+    "get": "GetTimelines"
+  },
+  "/api/upgrade_assistant/status": {
+    "get": "get-upgrade-status"
+  },
+  "/api/uptime/settings": {
+    "get": "get-uptime-settings",
+    "put": "put-uptime-settings"
+  },
+  "/api/visualizations": {
+    "get": "get-visualizations-redirect",
+    "post": "create-visualization-redirect"
+  },
+  "/api/visualizations/{id}": {
+    "get": "get-visualization-redirect",
+    "put": "update-visualization-redirect",
+    "delete": "delete-visualization-redirect"
+  },
+  "/api/workflows": {
+    "get": "get-workflows",
+    "post": "post-workflows",
+    "delete": "delete-workflows"
+  },
+  "/api/workflows/aggs": {
+    "get": "get-workflows-aggs"
+  },
+  "/api/workflows/connectors": {
+    "get": "get-workflows-connectors"
+  },
+  "/api/workflows/executions/{executionId}": {
+    "get": "get-workflows-executions-executionid"
+  },
+  "/api/workflows/executions/{executionId}/cancel": {
+    "post": "post-workflows-executions-executionid-cancel"
+  },
+  "/api/workflows/executions/{executionId}/children": {
+    "get": "get-workflows-executions-executionid-children"
+  },
+  "/api/workflows/executions/{executionId}/logs": {
+    "get": "get-workflows-executions-executionid-logs"
+  },
+  "/api/workflows/executions/{executionId}/resume": {
+    "post": "post-workflows-executions-executionid-resume"
+  },
+  "/api/workflows/executions/{executionId}/step/{stepExecutionId}": {
+    "get": "get-workflows-executions-executionid-step-stepexecutionid"
+  },
+  "/api/workflows/executions/{executionId}/steps/{stepId}/resume/external": {
+    "get": "get-workflows-executions-executionid-steps-stepid-resume-external",
+    "post": "post-workflows-executions-executionid-steps-stepid-resume-external"
+  },
+  "/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form": {
+    "get": "get-workflows-executions-executionid-steps-stepid-resume-external-form"
+  },
+  "/api/workflows/export": {
+    "post": "post-workflows-export"
+  },
+  "/api/workflows/managed/workflow/{id}": {
+    "put": "put-workflows-managed-workflow-id"
+  },
+  "/api/workflows/mget": {
+    "post": "post-workflows-mget"
+  },
+  "/api/workflows/schema": {
+    "get": "get-workflows-schema"
+  },
+  "/api/workflows/stats": {
+    "get": "get-workflows-stats"
+  },
+  "/api/workflows/step/test": {
+    "post": "post-workflows-step-test"
+  },
+  "/api/workflows/test": {
+    "post": "post-workflows-test"
+  },
+  "/api/workflows/workflow": {
+    "post": "post-workflows-workflow"
+  },
+  "/api/workflows/workflow/{id}": {
+    "get": "get-workflows-workflow-id",
+    "put": "put-workflows-workflow-id",
+    "delete": "delete-workflows-workflow-id"
+  },
+  "/api/workflows/workflow/{id}/clone": {
+    "post": "post-workflows-workflow-id-clone"
+  },
+  "/api/workflows/workflow/{id}/run": {
+    "post": "post-workflows-workflow-id-run"
+  },
+  "/api/workflows/workflow/{workflowId}/executions": {
+    "get": "get-workflows-workflow-workflowid-executions"
+  },
+  "/api/workflows/workflow/{workflowId}/executions/cancel": {
+    "post": "post-workflows-workflow-workflowid-executions-cancel"
+  },
+  "/api/workflows/workflow/{workflowId}/executions/steps": {
+    "get": "get-workflows-workflow-workflowid-executions-steps"
+  },
+  "/s/{spaceId}/api/observability/slos": {
+    "get": "findSlosOp",
+    "post": "createSloOp"
+  },
+  "/s/{spaceId}/api/observability/slos/_bulk_delete": {
+    "post": "bulkDeleteOp"
+  },
+  "/s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}": {
+    "get": "bulkDeleteStatusOp"
+  },
+  "/s/{spaceId}/api/observability/slos/_bulk_purge_rollup": {
+    "post": "deleteRollupDataOp"
+  },
+  "/s/{spaceId}/api/observability/slos/_delete_instances": {
+    "post": "deleteSloInstancesOp"
+  },
+  "/s/{spaceId}/api/observability/slos/{sloId}": {
+    "get": "getSloOp",
+    "put": "updateSloOp",
+    "delete": "deleteSloOp"
+  },
+  "/s/{spaceId}/api/observability/slos/{sloId}/_reset": {
+    "post": "resetSloOp"
+  },
+  "/s/{spaceId}/api/observability/slos/{sloId}/disable": {
+    "post": "disableSloOp"
+  },
+  "/s/{spaceId}/api/observability/slos/{sloId}/enable": {
+    "post": "enableSloOp"
+  },
+  "/s/{spaceId}/internal/observability/slos/_definitions": {
+    "get": "getDefinitionsOp"
+  }
+}

@@ -12,6 +12,7 @@ import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form
 import { useEuiTheme } from '@elastic/eui';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
+import { isDisplayOnlyField } from '../../../../common/types/domain/template/fields';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import { controlRegistry } from './field_types_registry';
 import { evaluateCondition } from '../../../../common/types/domain/template/evaluate_conditions';
@@ -39,6 +40,26 @@ interface TemplateFieldRowProps {
   isSaveDisabled: boolean;
   marginBottom: string;
 }
+
+/**
+ * Builds the initial `extended_fields` form defaults from resolved fields. Display-only fields
+ * (e.g. MARKDOWN) hold no form value and are excluded, so they never seed an `extended_fields` key.
+ */
+export const buildInitialDefaultValues = (
+  resolvedFields: InlineField[]
+): Record<string, Record<string, string>> => {
+  const defaults: Record<string, Record<string, string>> = {
+    [CASE_EXTENDED_FIELDS]: {},
+  };
+  for (const field of resolvedFields) {
+    if (!isDisplayOnlyField(field)) {
+      const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
+      const fieldKey = getFieldSnakeKey(field.name, field.type);
+      defaults[CASE_EXTENDED_FIELDS][fieldKey] = yamlDefault;
+    }
+  }
+  return defaults;
+};
 
 /** Prevents a field value change from re-rendering sibling controls. */
 const TemplateFieldRow: FC<TemplateFieldRowProps> = React.memo(
@@ -160,17 +181,10 @@ const TemplateFieldRendererInner: FC<{
   resolvedFields: InlineField[];
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
 }> = ({ resolvedFields, onFieldDefaultChange }) => {
-  const initialDefaultValues = React.useMemo(() => {
-    const defaults: Record<string, Record<string, string>> = {
-      [CASE_EXTENDED_FIELDS]: {},
-    };
-    for (const field of resolvedFields) {
-      const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
-      const fieldKey = getFieldSnakeKey(field.name, field.type);
-      defaults[CASE_EXTENDED_FIELDS][fieldKey] = yamlDefault;
-    }
-    return defaults;
-  }, [resolvedFields]);
+  const initialDefaultValues = React.useMemo(
+    () => buildInitialDefaultValues(resolvedFields),
+    [resolvedFields]
+  );
 
   const form = useForm({
     defaultValues: initialDefaultValues,
