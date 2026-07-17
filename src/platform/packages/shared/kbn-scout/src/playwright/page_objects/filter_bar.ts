@@ -31,7 +31,7 @@ interface FilterFormOptions {
 
 interface FilterStateOptions {
   field: string;
-  value: string;
+  value?: string;
   enabled?: boolean;
   pinned?: boolean;
   negated?: boolean;
