@@ -13,6 +13,7 @@ import {
 } from '@kbn/as-code-data-views-schema';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { get } from 'lodash';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import { toStoredTab } from '../../../common/embeddable/transform_utils';
 import type {
@@ -35,13 +36,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const extractEsqlFingerprint = (
   attributes: Record<string, unknown>
 ): { dataViewId: string; timeField?: string } | undefined => {
-  const state = attributes.state;
-  if (!isRecord(state)) return undefined;
-  const datasourceStates = state.datasourceStates;
-  if (!isRecord(datasourceStates)) return undefined;
-  const textBased = datasourceStates.textBased;
-  if (!isRecord(textBased)) return undefined;
-  const layers = textBased.layers;
+  const layers = get(attributes, 'state.datasourceStates.textBased.layers');
   if (!isRecord(layers)) return undefined;
 
   const layerIndexes = new Set<string>();
@@ -55,7 +50,7 @@ const extractEsqlFingerprint = (
   if (layerIndexes.size !== 1) return undefined;
 
   const [dataViewId] = layerIndexes;
-  const adHocDataViews = state.adHocDataViews;
+  const adHocDataViews = get(attributes, 'state.adHocDataViews');
 
   if (!isRecord(adHocDataViews)) return undefined;
   const dataViewSpec = adHocDataViews[dataViewId];
