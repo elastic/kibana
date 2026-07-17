@@ -187,17 +187,24 @@ export class LensApp {
     await this.closeDimensionEditorButton.waitFor({ state: 'hidden' });
   }
 
-  /** Removes the first dimension from the given dimension panel (hover to reveal, then click trash). */
-  async removeDimension(dimensionTestSubj: string) {
+  /** Removes all dimensions from the given panel, polling until none remain. */
+  async removeAllDimensions(dimensionTestSubj: string) {
     const removeLocator = this.page.testSubj.locator(
       `${dimensionTestSubj} > indexPattern-dimension-remove`
     );
-    const buttons = await removeLocator.all();
-    if (buttons.length === 0) {
-      return;
-    }
-    await buttons[0].hover();
-    await buttons[0].click();
+    await expect
+      .poll(
+        async () => {
+          const buttons = await removeLocator.all();
+          if (buttons.length > 0) {
+            await buttons[0].hover();
+            await buttons[0].click();
+          }
+          return removeLocator.count();
+        },
+        { timeout: 30_000 }
+      )
+      .toBe(0);
   }
 
   /**

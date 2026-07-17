@@ -10,11 +10,6 @@ import { expect } from '@kbn/scout/ui';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { applyLensInlineEditorAndWaitClosed, testData } from '../fixtures';
 
-// Maximum number of initial ESQL columns loaded
-// This is a temporary limit to avoid overwhelming the UI with too many columns
-// Should be syncronized with MAX_NUM_OF_COLUMNS
-const MAX_NUM_OF_INITIAL_ESQL_COLUMNS = 10;
-
 const setEsqlQueryAndRun = async (
   dashboard: PageObjects['dashboard'],
   page: ScoutPage,
@@ -61,11 +56,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.cl
       });
 
       await spaceTest.step('remove all auto-loaded columns and add bytes', async () => {
-        // Remove all columns
-        let count = MAX_NUM_OF_INITIAL_ESQL_COLUMNS;
-        while (count-- > 0) {
-          await lens.removeDimension('lnsDatatable_metrics');
-        }
+        await lens.removeAllDimensions('lnsDatatable_metrics');
 
         await page.testSubj
           .locator('lnsDatatable_metrics')
