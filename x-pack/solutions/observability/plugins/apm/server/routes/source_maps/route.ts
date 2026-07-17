@@ -77,6 +77,11 @@ const listSourceMapRoute = createApmServerRoute({
         return { artifacts, total };
       }
     } catch (e) {
+      // Preserve client-facing errors (e.g. Fleet conflicts/validation) so they
+      // are not re-wrapped as 500s and logged as unexpected errors.
+      if (Boom.isBoom(e)) {
+        throw e;
+      }
       throw Boom.internal('Something went wrong while fetching artifacts source maps', e);
     }
   },
@@ -156,6 +161,13 @@ const uploadSourceMapRoute = createApmServerRoute({
         return artifact;
       }
     } catch (e) {
+      // Duplicate uploads and other client-side failures surface as Boom errors
+      // (e.g. Fleet artifact conflicts). Re-throw them as-is so they keep their
+      // original status code instead of being reported as unexpected 500s and
+      // logged at ERROR level.
+      if (Boom.isBoom(e)) {
+        throw e;
+      }
       throw Boom.internal('Something went wrong while creating a new source map', e);
     }
   },
@@ -193,6 +205,11 @@ const deleteSourceMapRoute = createApmServerRoute({
         });
       }
     } catch (e) {
+      // Preserve client-facing errors (e.g. Fleet not-found/conflicts) so they
+      // are not re-wrapped as 500s and logged as unexpected errors.
+      if (Boom.isBoom(e)) {
+        throw e;
+      }
       throw Boom.internal(`Something went wrong while deleting source map. id: ${id}`, e);
     }
   },
