@@ -106,10 +106,7 @@ const mockRenderCellActions = jest.fn(({ children }) => <>{children}</>);
  * by type). This walks the unrendered React element tree passed to it looking for the element
  * carrying the given prop, so tests can inspect callbacks it was given without rendering it.
  */
-const findElementWithProp = (
-  node: ReactNode,
-  propName: string
-): React.ReactElement | undefined => {
+const findElementWithProp = (node: ReactNode, propName: string): React.ReactElement | undefined => {
   if (Array.isArray(node)) {
     for (const child of node) {
       const found = findElementWithProp(child, propName);
