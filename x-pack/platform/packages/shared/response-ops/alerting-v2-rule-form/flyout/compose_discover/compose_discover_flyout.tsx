@@ -1166,18 +1166,25 @@ export function ComposeDiscoverFlyout({
     return (
       <EuiPopover
         button={
-          <EuiButtonIcon
-            display="base"
-            size="s"
-            color="text"
-            iconType="gear"
-            aria-label={i18n.translate(
-              'xpack.alertingV2.composeDiscover.querySandbox.settingsAriaLabel',
-              { defaultMessage: 'Editor settings' }
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.alertingV2.composeDiscover.querySandbox.settingsTooltip',
+              { defaultMessage: 'Advanced settings' }
             )}
-            onClick={toggleSettingsPopover}
-            data-test-subj="querySandboxSettingsButton"
-          />
+          >
+            <EuiButtonIcon
+              display="base"
+              size="s"
+              color="text"
+              iconType="gear"
+              aria-label={i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.settingsAriaLabel',
+                { defaultMessage: 'Advanced settings' }
+              )}
+              onClick={toggleSettingsPopover}
+              data-test-subj="querySandboxSettingsButton"
+            />
+          </EuiToolTip>
         }
         isOpen={isSettingsPopoverOpen}
         closePopover={closeSettingsPopover}
