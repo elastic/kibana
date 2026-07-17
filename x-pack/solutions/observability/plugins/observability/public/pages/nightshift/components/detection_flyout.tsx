@@ -6,10 +6,11 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,53 +18,29 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiLink,
-  EuiPanel,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import {
-  AnnotationDomainType,
-  Axis,
-  BarSeries,
-  BubbleSeries,
-  Chart,
-  LineAnnotation,
-  PointShape,
-  Position,
-  RectAnnotation,
-  ScaleType,
-  Settings,
-  Tooltip,
-  TooltipType,
-} from '@elastic/charts';
-import moment from 'moment';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
 import type {
-  ChangePointType,
   LifecycleDetection,
   SignalEntry,
   SignificantEvent,
 } from '@kbn/significant-events-schema';
-import {
-  getChangePointIndex,
-  getChangePointLabel,
-  getChangePointTimestamp,
-  generateChangePointSeries,
-  ILLUSTRATIVE_POINT_INTERVAL_MS,
-  ILLUSTRATIVE_SERIES_POINTS,
-} from '../change_point';
 import { formatTimestamp } from '../format_timestamp';
-import { ChangePointAnnotationTooltip } from './change_point_annotation_tooltip';
+import { getChangePointLabel } from '../change_point';
+import { ChangePointTrendChart } from './change_point_visualization';
 import { EntityChip } from './entity_chip';
 import { EntityFlyout } from './entity_flyout';
-import { useChartThemes } from '../../../hooks/use_chart_themes';
+import { FlyoutSectionTitle } from './flyout_section_title';
+import { TruncatableSummary } from './truncatable_summary';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 import {
@@ -76,177 +53,8 @@ import {
 export interface DetectionFlyoutProps {
   detection: LifecycleDetection;
   event: SignificantEvent;
-  /** Signal collected by the discovery agent for this detection's rule, if any. */
   signal?: SignalEntry;
   onClose: () => void;
-}
-
-const MAX_SUMMARY_LENGTH = 300;
-
-const TREND_CHART_HEIGHT = 160;
-// Room above the tallest bar so the diamond isn't clipped at the canvas edge.
-const TREND_MARKER_MARGIN = 10;
-// Scales the generated 0-1 series into count-like values for the y-axis.
-const TREND_VALUE_SCALE = 25;
-
-function getStreamTypeLabel(streamName?: string): string {
-  if (streamName?.startsWith('metrics')) {
-    return i18n.translate('xpack.observability.nightshift.detectionFlyout.trend.metricsLabel', {
-      defaultMessage: '[Metrics]',
-    });
-  }
-  return i18n.translate('xpack.observability.nightshift.detectionFlyout.trend.logsLabel', {
-    defaultMessage: '[Logs]',
-  });
-}
-
-// TODO: replace with a Lens embeddable once detections expose a real
-// occurrence timeseries; until then this renders the illustrative series.
-function TrendChart({
-  changePointType,
-  streamName,
-  endTime,
-}: {
-  changePointType?: ChangePointType;
-  streamName?: string;
-  endTime: string;
-}) {
-  const { euiTheme } = useEuiTheme();
-  const { baseTheme } = useChartThemes();
-
-  const { data, changePointAt, changePointMarker } = useMemo(() => {
-    const end = new Date(endTime).getTime();
-    const changeIndex = getChangePointIndex(changePointType, ILLUSTRATIVE_SERIES_POINTS);
-    const series = generateChangePointSeries(changePointType, ILLUSTRATIVE_SERIES_POINTS).map(
-      ({ x, y }) => ({
-        x: end - (ILLUSTRATIVE_SERIES_POINTS - 1 - x) * ILLUSTRATIVE_POINT_INTERVAL_MS,
-        y: Math.round(y * TREND_VALUE_SCALE),
-      })
-    );
-    const changePointX = getChangePointTimestamp(end, changePointType);
-    return {
-      data: series,
-      // Series is framed so the window ends at the detection timestamp; the
-      // annotation marks the synthetic change knee within that window.
-      changePointAt: changePointX,
-      changePointMarker: [{ x: changePointX, y: series[changeIndex]?.y ?? 0 }],
-    };
-  }, [changePointType, endTime]);
-
-  return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="s"
-      css={css`
-        overflow: visible;
-      `}
-    >
-      <EuiText size="xs">
-        {`${getStreamTypeLabel(streamName)} ${getChangePointLabel(changePointType)}`}
-      </EuiText>
-      <EuiSpacer size="s" />
-      <Chart size={{ height: TREND_CHART_HEIGHT }}>
-        {/* Series tooltips stay off; the annotation uses its own customTooltip. */}
-        <Tooltip type={TooltipType.None} />
-        <Settings
-          baseTheme={baseTheme}
-          theme={{
-            background: { color: 'transparent' },
-            chartMargins: { top: TREND_MARKER_MARGIN },
-          }}
-          showLegend={false}
-          locale={i18n.getLocale()}
-        />
-        <Axis
-          id="left"
-          position={Position.Left}
-          title={i18n.translate(
-            'xpack.observability.nightshift.detectionFlyout.trend.valueAxisLabel',
-            { defaultMessage: 'value' }
-          )}
-          ticks={4}
-        />
-        <Axis
-          id="bottom"
-          position={Position.Bottom}
-          tickFormat={(value) => moment(value).format('HH:mm')}
-          ticks={4}
-        />
-        <LineAnnotation
-          id="detection-change-point"
-          domainType={AnnotationDomainType.XDomain}
-          dataValues={[{ dataValue: changePointAt }]}
-          style={{
-            line: {
-              strokeWidth: 2,
-              stroke: euiTheme.colors.danger,
-              opacity: 1,
-            },
-          }}
-        />
-        {/*
-          LineAnnotation tooltips only fire on a marker DOM node (not the line).
-          A transparent rect gives a hover target along the full annotation.
-        */}
-        <RectAnnotation
-          id="detection-change-point-tooltip"
-          zIndex={10}
-          dataValues={[
-            {
-              coordinates: {
-                x0: changePointAt - ILLUSTRATIVE_POINT_INTERVAL_MS / 2,
-                x1: changePointAt + ILLUSTRATIVE_POINT_INTERVAL_MS / 2,
-              },
-            },
-          ]}
-          style={{ fill: euiTheme.colors.danger, opacity: 0 }}
-          customTooltip={() => (
-            <ChangePointAnnotationTooltip
-              changePointLabel={getChangePointLabel(changePointType)}
-              timestamp={changePointAt}
-            />
-          )}
-        />
-        <BarSeries
-          id="detection-trend"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          data={data}
-          xAccessor="x"
-          yAccessors={['y']}
-          color={euiTheme.colors.vis.euiColorVis0}
-        />
-        {/* Point marker at the bar tip — LineAnnotation markers only pin to chart edges. */}
-        <BubbleSeries
-          id="detection-change-point-marker"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          data={changePointMarker}
-          xAccessor="x"
-          yAccessors={['y']}
-          color={euiTheme.colors.danger}
-          bubbleSeriesStyle={{
-            point: {
-              shape: PointShape.Diamond,
-              radius: 5,
-              fill: euiTheme.colors.danger,
-              strokeWidth: 0,
-              visible: 'always',
-            },
-          }}
-        />
-      </Chart>
-    </EuiPanel>
-  );
-}
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <EuiTitle size="xs">
-      <h3>{children}</h3>
-    </EuiTitle>
-  );
 }
 
 export function DetectionFlyout({
@@ -258,9 +66,13 @@ export function DetectionFlyout({
   const { euiTheme } = useEuiTheme();
   const { share, agentBuilder } = useKibana().services;
   const [selectedEntity, setSelectedEntity] = useState<DetectionEntityRef | undefined>();
-  const [summaryExpanded, setSummaryExpanded] = useState(false);
 
-  const { data: streamFeatures = [] } = useFetchStreamFeatures(detection.stream_name);
+  const {
+    data: streamFeatures = [],
+    isLoading: isLoadingStreamFeatures,
+    isError: isStreamFeaturesError,
+    refetch: refetchStreamFeatures,
+  } = useFetchStreamFeatures(detection.stream_name);
   const associatedEntities = useMemo(
     () => getDetectionEntities(event, detection, streamFeatures),
     [detection, event, streamFeatures]
@@ -272,6 +84,12 @@ export function DetectionFlyout({
     return enrichEntityFeature(selectedEntity, resolveEntityFeature(selectedEntity), signal);
   }, [selectedEntity, signal]);
 
+  useEffect(() => {
+    if (selectedEntity && !associatedEntities.some((entity) => entity.key === selectedEntity.key)) {
+      setSelectedEntity(undefined);
+    }
+  }, [associatedEntities, selectedEntity]);
+
   const closeEntityFlyout = () => {
     setSelectedEntity(undefined);
   };
@@ -279,19 +97,6 @@ export function DetectionFlyout({
   const title = detection.rule_name ?? detection.detection_id;
   const changePointLabel = getChangePointLabel(detection.change_point_type);
   const summary = signal?.description;
-
-  // Code points, not UTF-16 units, so truncation cannot split an emoji in half.
-  const summaryCharacters = useMemo(() => Array.from(summary ?? ''), [summary]);
-  const isSummaryLong = summaryCharacters.length > MAX_SUMMARY_LENGTH;
-  const displaySummary =
-    summary != null && isSummaryLong && !summaryExpanded
-      ? summaryCharacters.slice(0, MAX_SUMMARY_LENGTH).join('') + '...'
-      : summary;
-
-  const toggleSummary = useCallback(() => {
-    setSummaryExpanded((prev) => !prev);
-  }, []);
-
   const esqlQuery = signal?.evidence?.esql_query;
 
   const discoverHref = useMemo(() => {
@@ -346,9 +151,11 @@ export function DetectionFlyout({
                 })}
               </EuiBadge>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="default">{changePointLabel}</EuiBadge>
-            </EuiFlexItem>
+            {detection.change_point_type && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="default">{changePointLabel}</EuiBadge>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiText size="xs" color="subdued">
@@ -359,64 +166,88 @@ export function DetectionFlyout({
         <EuiFlyoutBody>
           {summary && (
             <>
-              <SectionTitle>
+              <FlyoutSectionTitle>
                 {i18n.translate('xpack.observability.nightshift.detectionFlyout.summaryTitle', {
                   defaultMessage: 'Summary',
                 })}
-              </SectionTitle>
+              </FlyoutSectionTitle>
               <EuiSpacer size="s" />
-              <EuiText size="s" data-test-subj="nightshiftDetectionFlyoutSummary">
-                <p>{displaySummary}</p>
-              </EuiText>
-              {isSummaryLong && (
-                // eslint-disable-next-line @elastic/eui/require-href-for-link
-                <EuiLink
-                  data-test-subj="nightshiftDetectionFlyoutSummaryToggle"
-                  onClick={toggleSummary}
-                >
-                  {summaryExpanded
-                    ? i18n.translate('xpack.observability.nightshift.flyout.showLessButtonText', {
-                        defaultMessage: 'Show less',
-                      })
-                    : i18n.translate('xpack.observability.nightshift.flyout.showMoreButtonText', {
-                        defaultMessage: 'Show more',
-                      })}
-                </EuiLink>
-              )}
+              <TruncatableSummary
+                summary={summary}
+                testSubj="nightshiftDetectionFlyoutSummary"
+                toggleTestSubj="nightshiftDetectionFlyoutSummaryToggle"
+              />
               <EuiSpacer size="l" />
             </>
           )}
 
-          {associatedEntities.length > 0 && (
+          {(isLoadingStreamFeatures || isStreamFeaturesError || associatedEntities.length > 0) && (
             <>
-              <SectionTitle>
+              <FlyoutSectionTitle>
                 {i18n.translate('xpack.observability.nightshift.detectionFlyout.entitiesTitle', {
                   defaultMessage: 'Associated entities',
                 })}
-              </SectionTitle>
+              </FlyoutSectionTitle>
               <EuiSpacer size="s" />
-              <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-                {associatedEntities.map((entity) => (
-                  <EuiFlexItem grow={false} key={entity.key}>
-                    <EntityChip
-                      label={entity.label}
-                      onClick={() => setSelectedEntity(entity)}
-                      testSubj="nightshiftDetectionFlyoutEntityChip"
-                    />
+              {isLoadingStreamFeatures && (
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="m" />
                   </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
+                </EuiFlexGroup>
+              )}
+              {isStreamFeaturesError && (
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  iconType="warning"
+                  size="s"
+                  title={i18n.translate(
+                    'xpack.observability.nightshift.detectionFlyout.entitiesErrorTitle',
+                    { defaultMessage: 'Unable to load associated entities' }
+                  )}
+                >
+                  <EuiButtonEmpty
+                    color="warning"
+                    data-test-subj="nightshiftDetectionFlyoutEntitiesRetryButton"
+                    flush="left"
+                    iconType="refresh"
+                    onClick={() => refetchStreamFeatures()}
+                    size="s"
+                  >
+                    {i18n.translate(
+                      'xpack.observability.nightshift.detectionFlyout.entitiesRetryButtonText',
+                      { defaultMessage: 'Retry' }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiCallOut>
+              )}
+              {!isLoadingStreamFeatures &&
+                !isStreamFeaturesError &&
+                associatedEntities.length > 0 && (
+                  <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+                    {associatedEntities.map((entity) => (
+                      <EuiFlexItem grow={false} key={entity.key}>
+                        <EntityChip
+                          label={entity.label}
+                          onClick={() => setSelectedEntity(entity)}
+                          testSubj="nightshiftDetectionFlyoutEntityChip"
+                        />
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                )}
               <EuiSpacer size="l" />
             </>
           )}
 
-          <SectionTitle>
+          <FlyoutSectionTitle>
             {i18n.translate('xpack.observability.nightshift.detectionFlyout.trendTitle', {
               defaultMessage: 'Trend',
             })}
-          </SectionTitle>
+          </FlyoutSectionTitle>
           <EuiSpacer size="s" />
-          <TrendChart
+          <ChangePointTrendChart
             changePointType={detection.change_point_type}
             streamName={detection.stream_name}
             endTime={detection['@timestamp']}
@@ -432,11 +263,11 @@ export function DetectionFlyout({
                 gutterSize="s"
               >
                 <EuiFlexItem grow={false}>
-                  <SectionTitle>
+                  <FlyoutSectionTitle>
                     {i18n.translate('xpack.observability.nightshift.detectionFlyout.esqlTitle', {
                       defaultMessage: 'ES|QL query',
                     })}
-                  </SectionTitle>
+                  </FlyoutSectionTitle>
                 </EuiFlexItem>
                 {discoverHref && (
                   <EuiFlexItem grow={false}>
@@ -503,6 +334,7 @@ export function DetectionFlyout({
         <EntityFlyout
           key={selectedEntityFeature.uuid}
           feature={selectedEntityFeature}
+          enableChatAttachment={Boolean(selectedEntity?.feature)}
           onClose={closeEntityFlyout}
         />
       )}

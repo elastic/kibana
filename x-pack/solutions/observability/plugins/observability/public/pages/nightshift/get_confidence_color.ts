@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const getConfidenceColor = (confidence: number): string => {
+export type ConfidenceLevel = 'success' | 'warning' | 'danger';
+
+export const getConfidenceColor = (confidence: number): ConfidenceLevel => {
   if (confidence >= 70) {
     return 'success';
   }

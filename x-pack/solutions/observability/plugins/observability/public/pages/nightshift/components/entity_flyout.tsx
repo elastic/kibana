@@ -36,6 +36,7 @@ import { useKibana } from '../../../utils/kibana_react';
 export interface EntityFlyoutProps {
   feature: Feature;
   onClose: () => void;
+  enableChatAttachment?: boolean;
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -144,7 +145,11 @@ function EvidenceList({ evidence }: { evidence: string[] }) {
   );
 }
 
-export function EntityFlyout({ feature, onClose }: EntityFlyoutProps): React.ReactElement {
+export function EntityFlyout({
+  feature,
+  onClose,
+  enableChatAttachment = true,
+}: EntityFlyoutProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder } = useKibana().services;
   const title = feature.title ?? feature.id;
@@ -267,7 +272,7 @@ export function EntityFlyout({ feature, onClose }: EntityFlyoutProps): React.Rea
         </EuiCodeBlock>
       </EuiFlyoutBody>
 
-      {agentBuilder && (
+      {agentBuilder && enableChatAttachment && (
         <EuiFlyoutFooter
           css={css`
             background: ${euiTheme.colors.backgroundBasePlain};

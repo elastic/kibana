@@ -8,6 +8,7 @@
 import { css } from '@emotion/react';
 import React from 'react';
 import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export interface EntityChipProps {
   label: string;
@@ -26,6 +27,10 @@ export function EntityChip({
     <button
       type="button"
       data-test-subj={testSubj}
+      aria-label={i18n.translate('xpack.observability.nightshift.entityChip.viewDetailsLabel', {
+        defaultMessage: 'View entity details for {label}',
+        values: { label },
+      })}
       onClick={onClick}
       css={css`
         align-items: center;

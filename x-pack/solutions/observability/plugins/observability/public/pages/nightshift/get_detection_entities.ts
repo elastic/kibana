@@ -17,7 +17,10 @@ export interface DetectionEntityRef {
   label: string;
   streamName: string;
   feature?: Feature;
+  isStreamFallback?: boolean;
 }
+
+const MAX_STREAM_ENTITY_FALLBACK = 3;
 
 const featureMatchesCausal = (feature: Feature, featureId: string): boolean =>
   feature.uuid === featureId || feature.id === featureId;
@@ -36,10 +39,6 @@ export const toStreamFallbackFeature = (
   title: label,
 });
 
-/**
- * Resolves the associated-entity pills for a detection from causal features,
- * stream knowledge indicators, or the detection stream name as a last resort.
- */
 export const getDetectionEntities = (
   event: SignificantEvent,
   detection: LifecycleDetection,
@@ -104,6 +103,9 @@ export const getDetectionEntities = (
       streamName: feature.stream_name,
       feature,
     });
+    if (entities.length >= MAX_STREAM_ENTITY_FALLBACK) {
+      break;
+    }
   }
 
   if (entities.length > 0) {
@@ -114,6 +116,7 @@ export const getDetectionEntities = (
     key: streamName,
     label: streamName,
     streamName,
+    isStreamFallback: true,
   });
 
   return entities;
@@ -122,11 +125,6 @@ export const getDetectionEntities = (
 export const resolveEntityFeature = (entity: DetectionEntityRef): Feature =>
   entity.feature ?? toStreamFallbackFeature(entity.streamName, entity.label);
 
-/**
- * Stream-only entity pills have no knowledge-indicator document yet. Until features
- * are seeded on the stream, borrow the matched detection signal so Summary and
- * Evidence are not blank in the flyout.
- */
 export const enrichEntityFeature = (
   entity: DetectionEntityRef,
   feature: Feature,

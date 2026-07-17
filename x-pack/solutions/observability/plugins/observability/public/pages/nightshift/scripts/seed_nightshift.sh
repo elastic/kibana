@@ -7,7 +7,7 @@
 #   - Landing page (Need action / Resolved, blast-radius stream chips)
 #   - Event flyout (summary, detections list, lifecycle)
 #   - Detection flyout (trend chart, ES|QL evidence, entity pills)
-#   - Entity flyout (summary, evidence, APM callout when meta is set)
+#   - Entity flyout (summary, evidence, raw document)
 #
 # Schema (post #277711 / signals model):
 #   - status: open | closed | dismissed

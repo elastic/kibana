@@ -25,7 +25,7 @@ import type {
 import { useKibana } from '../../../utils/kibana_react';
 import { formatTimestamp } from '../format_timestamp';
 
-export interface EventInvestigationsProps {
+export interface EventInvestigationProps {
   event: SignificantEvent;
 }
 
@@ -110,7 +110,7 @@ function InvestigationRow({
   );
 }
 
-export function EventInvestigation({ event }: EventInvestigationsProps): React.ReactElement {
+export function EventInvestigation({ event }: EventInvestigationProps): React.ReactElement {
   const investigations = event.investigations ?? [];
 
   return (
@@ -119,7 +119,7 @@ export function EventInvestigation({ event }: EventInvestigationsProps): React.R
         <EuiTitle size="xs">
           <h3>
             {i18n.translate('xpack.observability.nightshift.flyout.investigationsTitle', {
-              defaultMessage: 'Investigation',
+              defaultMessage: 'Investigations',
             })}
           </h3>
         </EuiTitle>

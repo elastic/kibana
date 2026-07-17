@@ -9,6 +9,8 @@ import {
   significantEventSchema,
   significantEventInvestigationSchema,
   significantEventStatusSchema,
+  CHANGE_POINT_TYPES,
+  type ChangePointType,
   type Detection,
   type SignificantEvent,
   type Discovery,
@@ -28,8 +30,16 @@ import { assertSignificantEventsAccess } from '../../utils/assert_significant_ev
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
 
-// Detections carry `change_point_type`; processed-marker docs do not.
-const isLifecycleDetection = (hit: Detection): boolean => hit.change_point_type != null;
+const hasChangePointType = (hit: Detection): boolean => hit.change_point_type != null;
+
+const parseChangePointType = (value: string | undefined): ChangePointType | undefined => {
+  if (!value) {
+    return undefined;
+  }
+  return CHANGE_POINT_TYPES.includes(value as ChangePointType)
+    ? (value as ChangePointType)
+    : undefined;
+};
 
 const collectEmbeddedDetections = (discoveries: Discovery[]) => {
   const seen = new Set<string>();
@@ -42,18 +52,35 @@ const collectEmbeddedDetections = (discoveries: Discovery[]) => {
       const streamName = signal.stream_name;
       if (!detection_id || seen.has(detection_id)) continue;
       seen.add(detection_id);
-      // The embedded discovery detection types `change_point_type` as a free-form string
-      // (agent output); narrow to the schema enum for the lifecycle response.
       result.push({
         detection_id,
         rule_name,
         stream_name: streamName,
-        change_point_type: change_point_type as LifecycleDetection['change_point_type'],
+        change_point_type: parseChangePointType(change_point_type),
       });
     }
   }
 
   return result;
+};
+
+const collectDetectionTimestamps = (discoveries: Discovery[]): Map<string, string> => {
+  const timestamps = new Map<string, string>();
+
+  for (const discovery of discoveries) {
+    for (const signal of discovery.signals ?? []) {
+      if (signal.type !== 'detection') continue;
+      const { detection_id } = signal.metadata;
+      if (detection_id && !timestamps.has(detection_id)) {
+        timestamps.set(
+          detection_id,
+          signal.collected_at ?? discovery['@timestamp'] ?? discovery.discovered_at ?? ''
+        );
+      }
+    }
+  }
+
+  return timestamps;
 };
 
 const eventsSearchRoute = createServerRoute({
@@ -199,28 +226,44 @@ const eventsLifecycleRoute = createServerRoute({
     ]);
 
     const embedded = collectEmbeddedDetections(discoveries);
+    const detectionTimestamps = collectDetectionTimestamps(discoveries);
     const { hits: allDetectionHits } = await getDetectionClient().findByIds(
       embedded.map((e) => e.detection_id).filter(Boolean)
     );
     const hitsByDetectionId = new Map(
-      allDetectionHits.filter(isLifecycleDetection).map((h) => [h.detection_id, h])
+      allDetectionHits.filter(hasChangePointType).map((h) => [h.detection_id, h])
     );
+
+    const fallbackTimestamp = events.at(-1)?.['@timestamp'];
 
     const detections: LifecycleDetection[] = embedded.flatMap(
       ({ detection_id, rule_name, stream_name, change_point_type }) => {
         const hit = hitsByDetectionId.get(detection_id);
-        if (!hit) {
+        if (hit) {
+          return [
+            {
+              detection_id,
+              rule_name: hit.rule_name ?? rule_name,
+              rule_uuid: hit.rule_uuid,
+              stream_name: hit.stream_name ?? stream_name,
+              change_point_type: parseChangePointType(hit.change_point_type) ?? change_point_type,
+              '@timestamp': hit['@timestamp'],
+            },
+          ];
+        }
+
+        const timestamp = detectionTimestamps.get(detection_id) || fallbackTimestamp;
+        if (!timestamp) {
           return [];
         }
 
         return [
           {
             detection_id,
-            rule_name: hit.rule_name ?? rule_name,
-            rule_uuid: hit.rule_uuid,
-            stream_name: hit.stream_name ?? stream_name,
-            change_point_type: change_point_type ?? hit.change_point_type,
-            '@timestamp': hit['@timestamp'],
+            rule_name,
+            stream_name,
+            change_point_type,
+            '@timestamp': timestamp,
           },
         ];
       }

@@ -6,11 +6,21 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/core/server';
 import type { GetScopedClients } from '../../routes/types';
 import { createSignificantEventAttachmentType } from './significant_event_attachment_type';
 import { createSignificantEventFeatureAttachmentType } from './feature_attachment_type';
 import { createSignificantEventDetectionAttachmentType } from './detection_attachment_type';
+
+const registerAttachmentType = (
+  agentBuilder: AgentBuilderPluginSetup,
+  definition: AttachmentTypeDefinition<string, unknown>
+): void => {
+  agentBuilder.attachments.registerType(
+    definition as Parameters<typeof agentBuilder.attachments.registerType>[0]
+  );
+};
 
 export const registerAgentBuilderAttachments = ({
   agentBuilder,
@@ -21,24 +31,27 @@ export const registerAgentBuilderAttachments = ({
   getScopedClients: GetScopedClients;
   logger: Logger;
 }): void => {
-  agentBuilder.attachments.registerType(
+  registerAttachmentType(
+    agentBuilder,
     createSignificantEventAttachmentType({
       logger: logger.get('significant_event_attachment'),
       getScopedClients,
-    }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
+    })
   );
 
-  agentBuilder.attachments.registerType(
+  registerAttachmentType(
+    agentBuilder,
     createSignificantEventFeatureAttachmentType({
       logger: logger.get('significant_event_feature_attachment'),
       getScopedClients,
-    }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
+    })
   );
 
-  agentBuilder.attachments.registerType(
+  registerAttachmentType(
+    agentBuilder,
     createSignificantEventDetectionAttachmentType({
       logger: logger.get('significant_event_detection_attachment'),
       getScopedClients,
-    }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
+    })
   );
 };

@@ -106,8 +106,27 @@ describe('getDetectionEntities', () => {
         key: 'logs.web-frontend',
         label: 'logs.web-frontend',
         streamName: 'logs.web-frontend',
+        isStreamFallback: true,
       },
     ]);
+  });
+
+  it('caps entity-type stream features when causal features are absent', () => {
+    const features = Array.from({ length: 5 }, (_, index) =>
+      mockFeature({ uuid: `feature-${index}`, id: `entity-${index}`, title: `entity-${index}` })
+    );
+    const entities = getDetectionEntities(
+      mockEvent(),
+      {
+        detection_id: 'det-1',
+        stream_name: 'logs.web-frontend',
+        change_point_type: 'spike',
+        '@timestamp': '2026-07-10T12:00:00Z',
+      },
+      features
+    );
+
+    expect(entities).toHaveLength(3);
   });
 });
 

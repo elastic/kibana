@@ -35,13 +35,16 @@ const CHANGE_POINT_LABELS: Record<ChangePointType, string> = {
   }),
 };
 
+const UNKNOWN_CHANGE_POINT_LABEL = i18n.translate(
+  'xpack.observability.nightshift.flyout.changePoint.unknownLabel',
+  { defaultMessage: 'Unknown' }
+);
+
 export function getChangePointLabel(type?: ChangePointType): string {
   if (!type) {
-    return i18n.translate('xpack.observability.nightshift.flyout.detectionFallbackLabel', {
-      defaultMessage: 'Detection',
-    });
+    return UNKNOWN_CHANGE_POINT_LABEL;
   }
-  return CHANGE_POINT_LABELS[type];
+  return CHANGE_POINT_LABELS[type] ?? UNKNOWN_CHANGE_POINT_LABEL;
 }
 
 /**
@@ -115,6 +118,15 @@ export function generateChangePointSeries(
         break;
       case 'step_change':
         y = i < changeAt ? 0.25 + rand() : 0.65 + rand();
+        break;
+      case 'distribution_change':
+        y = i < changeAt ? 0.25 + rand() * 0.35 : 0.35 + rand() * 0.55;
+        break;
+      case 'non_stationary':
+        y = 0.2 + (i / Math.max(points - 1, 1)) * 0.45 + rand() * 0.2;
+        break;
+      case 'stationary':
+        y = 0.45 + rand() * 0.08;
         break;
       default:
         y = 0.3 + rand();

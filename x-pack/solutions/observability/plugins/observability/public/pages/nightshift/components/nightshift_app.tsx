@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
@@ -63,6 +63,7 @@ export function NightshiftApp(): React.ReactElement {
     () => events.find(({ event_uuid: eventUuid }) => eventUuid === selectedEventUuid),
     [events, selectedEventUuid]
   );
+  const [eventNotFound, setEventNotFound] = useState(false);
 
   const showAllEventsHref = application.getUrlForApp('streams', {
     deepLinkId: 'significantEventsEvents',
@@ -163,6 +164,35 @@ export function NightshiftApp(): React.ReactElement {
     () => filterEventsByStream(resolvedEvents, activeStreamName),
     [resolvedEvents, activeStreamName]
   );
+
+  const selectedEventVisible = useMemo(() => {
+    if (!selectedEvent) {
+      return false;
+    }
+    return (
+      filterEventsByStream(needsActionEvents, activeStreamName).some(
+        ({ event_uuid: eventUuid }) => eventUuid === selectedEvent.event_uuid
+      ) ||
+      filterEventsByStream(resolvedEvents, activeStreamName).some(
+        ({ event_uuid: eventUuid }) => eventUuid === selectedEvent.event_uuid
+      )
+    );
+  }, [activeStreamName, needsActionEvents, resolvedEvents, selectedEvent]);
+
+  useEffect(() => {
+    if (selectedEventUuid && !selectedEvent && !isLoading) {
+      setEventNotFound(true);
+      handleFlyoutClose();
+      return;
+    }
+    setEventNotFound(false);
+  }, [handleFlyoutClose, isLoading, selectedEvent, selectedEventUuid]);
+
+  useEffect(() => {
+    if (selectedEvent && activeStreamName && !selectedEventVisible) {
+      handleFlyoutClose();
+    }
+  }, [activeStreamName, handleFlyoutClose, selectedEvent, selectedEventVisible]);
 
   const scrollToSection = (sectionRef: React.RefObject<HTMLElement>) => {
     sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -275,6 +305,31 @@ export function NightshiftApp(): React.ReactElement {
             </EuiFlexItem>
           )}
 
+          {eventNotFound && (
+            <EuiFlexItem
+              css={css`
+                margin-top: ${euiTheme.size.m};
+              `}
+            >
+              <EuiCallOut
+                announceOnMount
+                color="warning"
+                iconType="warning"
+                size="s"
+                title={i18n.translate('xpack.observability.nightshift.eventNotFoundTitle', {
+                  defaultMessage: 'Significant event not found',
+                })}
+              >
+                <EuiText size="s">
+                  {i18n.translate('xpack.observability.nightshift.eventNotFoundDescription', {
+                    defaultMessage:
+                      'The event in this link is no longer in the current results. The URL has been cleared.',
+                  })}
+                </EuiText>
+              </EuiCallOut>
+            </EuiFlexItem>
+          )}
+
           <SignificantEventStatuses
             needsActionCount={visibleNeedsActionEvents.length}
             onNeedsActionClick={() => scrollToSection(needsActionSectionRef)}
@@ -310,7 +365,7 @@ export function NightshiftApp(): React.ReactElement {
                     selectedEventUuid={selectedEventUuid}
                     statusColor="danger"
                     title={i18n.translate('xpack.observability.nightshift.list.needsActionTitle', {
-                      defaultMessage: 'Need action',
+                      defaultMessage: 'Needs action',
                     })}
                   />
                 </EuiFlexItem>
@@ -335,9 +390,8 @@ export function NightshiftApp(): React.ReactElement {
         </>
       )}
 
-      {selectedEvent && (
+      {selectedEvent && selectedEventVisible && (
         <EventFlyout
-          // Remount when switching events so per-event UI state never leaks between them.
           key={selectedEvent.event_uuid}
           event={selectedEvent}
           onClose={handleFlyoutClose}

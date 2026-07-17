@@ -20,7 +20,7 @@ export type PendingSignificantEventFeatureAttachment = AttachmentInput<
   Feature
 >;
 
-const FEATURE_ATTACHMENT_ORIGIN_SEPARATOR = '/';
+const FEATURE_ATTACHMENT_ORIGIN_SEPARATOR = '::';
 
 export const encodeFeatureAttachmentOrigin = (streamName: string, featureId: string): string =>
   `${streamName}${FEATURE_ATTACHMENT_ORIGIN_SEPARATOR}${featureId}`;
@@ -35,6 +35,6 @@ export const decodeFeatureAttachmentOrigin = (
 
   return {
     streamName: origin.slice(0, separatorIndex),
-    featureId: origin.slice(separatorIndex + 1),
+    featureId: origin.slice(separatorIndex + FEATURE_ATTACHMENT_ORIGIN_SEPARATOR.length),
   };
 };

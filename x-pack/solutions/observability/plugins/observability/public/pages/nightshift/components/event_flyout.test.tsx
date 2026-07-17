@@ -19,7 +19,12 @@ jest.mock('@kbn/investigation-output', () => ({
 }));
 
 jest.mock('../hooks/use_fetch_stream_features', () => ({
-  useFetchStreamFeatures: () => ({ data: [] }),
+  useFetchStreamFeatures: () => ({
+    data: [],
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
 }));
 
 jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
@@ -202,5 +207,16 @@ describe('EventFlyout', () => {
     expect(screen.queryByTestId('nightshiftDetectionFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('nightshiftEventFlyout')).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('toggles the detection flyout closed when the selected card is clicked again', () => {
+    renderFlyout();
+
+    const card = screen.getByTestId('nightshiftDetectionCard');
+    fireEvent.click(card);
+    expect(screen.getByTestId('nightshiftDetectionFlyout')).toBeInTheDocument();
+
+    fireEvent.click(card);
+    expect(screen.queryByTestId('nightshiftDetectionFlyout')).not.toBeInTheDocument();
   });
 });

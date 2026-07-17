@@ -21,7 +21,12 @@ const mockGetRedirectUrl = jest.fn(() => '/app/discover#redirect');
 const mockOpenChat = jest.fn();
 
 jest.mock('../hooks/use_fetch_stream_features', () => ({
-  useFetchStreamFeatures: () => ({ data: [] }),
+  useFetchStreamFeatures: () => ({
+    data: [],
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
 }));
 
 jest.mock('../../../utils/kibana_react', () => ({
