@@ -96,7 +96,7 @@ function ClassicStreamDetailManagementContent({
   const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
   const {
-    features: { canvas, queryStreams, significantEventsDiscovery },
+    features: { canvas, queryStreams, significantEvents },
     isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
@@ -250,7 +250,7 @@ function ClassicStreamDetailManagementContent({
       return null;
     }
 
-    if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
+    if (significantEvents?.available) {
       return (
         <RedirectTo
           path="/_discovery/{tab}"

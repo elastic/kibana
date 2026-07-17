@@ -8,7 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
-import { EuiComboBoxWrapper, expect } from '..';
+import { expect } from '..';
 
 const normalizeComputedColor = (color: string | undefined): string | undefined => {
   if (!color) {
@@ -34,7 +34,6 @@ export class LensApp {
   private readonly confirmSaveButton;
   private readonly closeDimensionEditorButton;
   public readonly applyChangesButton;
-  private readonly dimensionFieldComboBox;
 
   constructor(private readonly page: ScoutPage) {
     this.lensApp = this.page.testSubj.locator('lnsApp');
@@ -49,7 +48,6 @@ export class LensApp {
       'lns-indexPattern-dimensionContainerClose'
     );
     this.applyChangesButton = this.page.testSubj.locator('lnsApplyChanges__apply');
-    this.dimensionFieldComboBox = new EuiComboBoxWrapper(this.page, 'indexPattern-dimension-field');
   }
 
   async waitForLensApp() {
@@ -303,9 +301,7 @@ export class LensApp {
   }
 
   private async selectField(field: string) {
-    await this.dimensionFieldComboBox.selectSingleOption(field, {
-      optionTestSubj: `lns-fieldOption-${field}`,
-    });
+    await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
   }
 
   private async openChartSwitchPopover() {
@@ -440,13 +436,10 @@ export class LensApp {
   /** Reads the selected donut hole size from the style settings flyout. */
   async getDonutHoleSize(): Promise<string> {
     await this.openStyleSettingsFlyout();
-    const comboBox = new EuiComboBoxWrapper(this.page, 'lnsEmptySizeRatioOption');
-    const selectedOptions = await comboBox.getSelectedMultiOptions();
-    if (selectedOptions.length > 0) {
-      return selectedOptions[0];
-    }
-
-    return comboBox.getSelectedValue();
+    const selectedOptions = await this.page.components
+      .comboBox('lnsEmptySizeRatioOption')
+      .getSelectedOptions();
+    return selectedOptions[0] ?? '';
   }
 
   /**
