@@ -255,6 +255,29 @@ export { ElasticsearchAssetType } from './types';
 
 export { FleetError } from './errors';
 
+export {
+  AWS_ONBOARDING_EVENTS,
+  AWS_ONBOARDING_TELEMETRY_STORAGE_KEY,
+  AWS_ONBOARDING_PACKAGE_NAME,
+  AWS_ONBOARDING_FLOW_ENTERED_EVENT,
+  AWS_ONBOARDING_CREDENTIALS_ADDED_EVENT,
+  AWS_ONBOARDING_DEPLOY_CLICKED_EVENT,
+  AWS_ONBOARDING_AGENTLESS_ENROLLMENT_SUCCEEDED_EVENT,
+  AWS_ONBOARDING_FIRST_DATA_ARRIVED_EVENT,
+  AWS_ONBOARDING_FIRST_DATA_TIMEOUT_EVENT,
+  registerAwsOnboardingEvents,
+  reportAwsOnboardingFlowEntered,
+  reportAwsOnboardingCredentialsAdded,
+  reportAwsOnboardingDeployClicked,
+  reportAwsOnboardingEnrollmentSucceeded,
+  reportAwsOnboardingFirstDataArrived,
+  reportAwsOnboardingFirstDataTimeout,
+} from './telemetry/aws_onboarding_events';
+export type {
+  AwsOnboardingDeployPath,
+  AwsOnboardingAnalyticsClient,
+} from './telemetry/aws_onboarding_events';
+
 // Cloud connector test subjects - needed by E2E tests and unit tests
 export {
   AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,

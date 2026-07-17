@@ -125,23 +125,23 @@ export const makeUserAction = (
 
 /**
  * Build a `cases-templates` SO with the persisted shape the
- * analytics-v2 data view service reads. Only `attributes.fieldNames`
+ * analytics-v2 data view service reads. Only `attributes.fieldDefinitions`
  * is consumed, so the factory leaves everything else minimal.
  */
 export interface TemplateLike {
-  fieldNames?: Array<{ name: string; label?: string; type: string; control?: string }>;
+  fieldDefinitions?: Array<{ name: string; label?: string; type: string; control?: string }>;
 }
 
 export const makeTemplate = (
   id: string,
-  fieldNames: NonNullable<TemplateLike['fieldNames']>
+  fieldDefinitions: NonNullable<TemplateLike['fieldDefinitions']>
 ): SavedObject<TemplateLike> =>
   ({
     type: CASE_TEMPLATE_SAVED_OBJECT,
     id,
     namespaces: ['default'],
     references: [],
-    attributes: { fieldNames },
+    attributes: { fieldDefinitions },
   } as unknown as SavedObject<TemplateLike>);
 
 // ----- SO client `find` stub -----

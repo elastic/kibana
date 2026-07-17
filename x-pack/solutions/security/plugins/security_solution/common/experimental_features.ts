@@ -265,9 +265,12 @@ export const allowedExperimentalValues = Object.freeze({
   dexAiSkillRecommendPrebuiltRules: false,
 
   /**
-   * Enables the new flyout using the EUI flyout system
+   * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
+   * "Enable new flyout" advanced setting is registered and defaults to off, so users can opt in.
+   * Turning this flag on unregisters that advanced setting, forcing the
+   * legacy flyout and effectively removing the new flyout option.
    */
-  newFlyoutSystemEnabled: false,
+  newFlyoutSystemDisabled: false,
 
   /**
    * Uses entity store v2 for entity analytics skill
@@ -317,7 +320,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift
    * from the locally stored kibana mappings after a MITRE version bump.
    */
-  mitreAttackUpdatesUIEnabled: false,
+  mitreAttackUpdatesUIEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

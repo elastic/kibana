@@ -7,7 +7,6 @@
 
 import * as i18n from './translations';
 import { ALERTS, EVENTS } from '../../common/translations';
-import { KibanaServices } from '../../common/lib/kibana';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
@@ -28,8 +27,6 @@ export const useCasesColumnsConfiguration = (
   const {
     data: { customFields },
   } = useGetCaseConfiguration();
-
-  const templatesEnabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
 
   const canDisplayDefault = true;
 
@@ -105,12 +102,6 @@ export const useCasesColumnsConfiguration = (
       name: i18n.STATUS,
       canDisplay: canDisplayDefault,
       isCheckedDefault: true,
-    },
-    extendedFields: {
-      field: 'extendedFields',
-      name: i18n.EXTENDED_FIELDS,
-      canDisplay: templatesEnabled && canDisplayDefault && !isSelectorView,
-      isCheckedDefault: false,
     },
     severity: {
       field: 'severity',
