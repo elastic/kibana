@@ -23,7 +23,7 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
     );
 
     await scoutSpace.uiSettings.set({
-      'courier:ignoreFilterIfFieldNotInIndex': 'true',
+      'courier:ignoreFilterIfFieldNotInIndex': true,
       defaultIndex: testData.DATA_VIEW_ID.LONG_WINDOW_LOGSTASH,
       'dateFormat:tz': 'UTC',
       'timepicker:timeDefaults': JSON.stringify(testData.MULTIPLE_DATA_VIEWS_TIME_RANGE),
@@ -62,19 +62,29 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
         await switchDataPanelIndexPattern(page, testData.DATA_VIEW_ID.LONG_WINDOW_LOGSTASH);
         await page.testSubj.click('fieldToggle-bytes');
 
-        // Flights layer — switch data panel to flights, add new layer, click DistanceKilometers
+        // Flights layer — switch data panel first so the new layer inherits flights,
+        // then add a line layer and toggle DistanceKilometers (matches FTR order).
         await switchDataPanelIndexPattern(page, testData.DATA_VIEW_ID.FLIGHTS);
-        await addDataLayer(page);
+        await addDataLayer(page, 'line');
+        await page.testSubj.locator('lns-layerPanel-1').click();
+        await page.testSubj
+          .locator('fieldToggle-DistanceKilometers')
+          .waitFor({ state: 'visible', timeout: 30_000 });
         await page.testSubj.click('fieldToggle-DistanceKilometers');
 
         await lens.waitForVisualization('xyVisChart');
-        const data = await getChartDebugData(page, 'xyVisChart');
-        // Both layers must have data (exact values not asserted per plan §1b)
-        const nonEmptySeries = [
-          ...(data.lines?.filter((l) => l.points.length > 0) ?? []),
-          ...(data.bars?.filter((b) => b.bars.length > 0) ?? []),
-        ];
-        expect(nonEmptySeries).toHaveLength(2);
+        await expect
+          .poll(
+            async () => {
+              const data = await getChartDebugData(page, 'xyVisChart');
+              return [
+                ...(data.lines?.filter((l) => l.points.length > 0) ?? []),
+                ...(data.bars?.filter((b) => b.bars.length > 0) ?? []),
+              ].length;
+            },
+            { timeout: 30_000 }
+          )
+          .toBe(2);
       });
 
       await spaceTest.step(
@@ -102,7 +112,7 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
           // Both layers still have data; logstash was unaffected by the Carrier filter
           expect(nonEmptySeries).toHaveLength(2);
 
-          await lens.save(VIS_TITLE);
+          await lens.save(VIS_TITLE, { addToDashboard: 'none' });
         }
       );
 
@@ -112,11 +122,13 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
           // Disable the ignore-missing-field setting: the Carrier filter now applies to logstash too,
           // which has no Carrier field, so the logstash layer returns empty data.
           await scoutSpace.uiSettings.set({
-            'courier:ignoreFilterIfFieldNotInIndex': 'false',
+            'courier:ignoreFilterIfFieldNotInIndex': false,
           });
 
           await visualize.goto();
-          await visualize.openSavedVisualization(VIS_TITLE);
+          // Lens editors do not use visualizationLoader; open the listing link then wait on Lens.
+          await page.testSubj.click(`visListingTitleLink-${VIS_TITLE.split(' ').join('-')}`);
+          await lens.waitForLensApp();
           await lens.waitForVisualization('xyVisChart');
 
           const data = await getChartDebugData(page, 'xyVisChart');

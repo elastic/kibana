@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects, Locator, ScoutPage } from '@kbn/scout';
 
@@ -38,21 +39,47 @@ export async function switchDataPanelIndexPattern(page: ScoutPage, title: string
   const switcher = page.testSubj.locator('indexPattern-switcher');
   await switcher.waitFor({ state: 'visible' });
   await page.testSubj.fill('indexPattern-switcher--input', title);
-  await page
-    .locator(`[data-test-subj="indexPattern-switcher"] [data-test-subj="dataView-${title}"]`)
-    .click();
+  await switcher.locator(`[data-test-subj="dataView-${title}"]`).click();
   await page.testSubj.locator('fieldListLoading').waitFor({ state: 'hidden', timeout: 30_000 });
 }
 
 /**
- * Adds a new data (bar) layer to the current XY chart.
+ * Adds a new data layer to the current XY chart.
  * Equivalent to FTR `lens.createLayer('data')` for XY visualizations that show the layer-type picker.
  */
-export async function addDataLayer(page: ScoutPage): Promise<void> {
+export async function addDataLayer(
+  page: ScoutPage,
+  seriesType: 'bar' | 'line' = 'line'
+): Promise<void> {
   await page.testSubj.click('lnsLayerAddButton');
   await page.testSubj.click('lnsLayerAddButton-data');
-  await page.testSubj.click('lnsXY_seriesType-bar');
+  await page.testSubj.click(`lnsXY_seriesType-${seriesType}`);
   await page.testSubj.locator('lns-layerPanel-1').waitFor({ state: 'visible' });
+}
+
+/**
+ * Creates a runtime field from the field editor flyout (Lens or Discover).
+ * Caller must already open the field editor (e.g. via indexPattern-add-field).
+ */
+export async function createRuntimeFieldFromEditor(
+  page: ScoutPage,
+  fieldName: string,
+  script: string
+): Promise<void> {
+  const fieldEditor = page.getByRole('dialog', { name: /Create field/ });
+  await fieldEditor.waitFor({ state: 'visible' });
+
+  await fieldEditor.getByRole('textbox', { name: /Name/ }).fill(fieldName);
+  const valueToggle = fieldEditor.getByRole('switch', { name: 'Set value' });
+  await expect(valueToggle).toHaveAttribute('aria-checked', 'false');
+  await valueToggle.click();
+
+  await fieldEditor.getByRole('textbox', { name: /Editor content/ }).waitFor({ state: 'visible' });
+  const codeEditor = new KibanaCodeEditorWrapper(page);
+  await codeEditor.setCodeEditorValue(script);
+
+  await fieldEditor.getByRole('button', { name: 'Save' }).click();
+  await fieldEditor.waitFor({ state: 'hidden' });
 }
 
 type DashboardAndLens = Pick<PageObjects, 'dashboard' | 'lens'>;
