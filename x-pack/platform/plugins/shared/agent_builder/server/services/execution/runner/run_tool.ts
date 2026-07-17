@@ -36,7 +36,6 @@ import type {
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
-import { getCurrentTraceId } from '../../../tracing';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { ToolCallSource } from '../../../telemetry';
 import {
@@ -166,13 +165,10 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     manager,
   });
 
-  let executionTraceId: string | undefined;
-
   const toolReturn = await withExecuteToolSpan(
     tool.id,
     { tool: { input: toolParams, toolCallId, description: tool.description } },
     async (span): Promise<ToolHandlerReturn> => {
-      executionTraceId = getCurrentTraceId();
       const schema = await tool.getSchema();
       const validation = schema.safeParse(toolParams);
       if (validation.error) {
@@ -254,10 +250,6 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   };
   const afterToolHooksResult = await hooks.run(HookLifecycle.afterToolCall, postContext);
   runToolReturn = afterToolHooksResult.toolReturn;
-
-  if (executionTraceId) {
-    runToolReturn = { ...runToolReturn, traceId: executionTraceId };
-  }
 
   if (runToolReturn.results && !isExcludedFromFilestore(tool.id)) {
     resultStore.add({

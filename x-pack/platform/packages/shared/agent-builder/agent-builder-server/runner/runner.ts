@@ -28,10 +28,6 @@ export interface RunToolReturn {
    * Interruption returned by the tool
    */
   prompt?: PromptRequest;
-  /**
-   * Trace id of the trace containing this execution's spans (may differ from the request trace).
-   */
-  traceId?: string;
 }
 
 /**
