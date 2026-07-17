@@ -9,6 +9,10 @@ import { parse as parseCookie } from 'tough-cookie';
 import { Agent } from 'undici';
 
 import {
+  deriveInternalCallerAttestation,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
+import {
   createSAMLResponse,
   MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN,
   MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
@@ -192,6 +196,72 @@ apiTest.describe(
             roles: ['admin'],
           })
         );
+      }
+    );
+
+    apiTest(
+      'should be able to use internal UIAM API key on a real request WITH a valid attestation',
+      async ({ apiClient }) => {
+        // 1. Log in and grant an internal UIAM (essu_) API key.
+        const [_, { accessToken }] = await userSessionCookieFactory();
+        const internalUiamApiKeyResponse = await grantUiamApiKey(accessToken);
+        expect(internalUiamApiKeyResponse.status).toBe(200);
+
+        // 2. A real request carrying the internal key AND a valid attestation succeeds: the ES
+        // cluster client re-attaches the shared secret on the request's behalf.
+        const response = await apiClient.get('internal/security/me', {
+          headers: {
+            ...COMMON_HEADERS,
+            Authorization: `ApiKey ${(await internalUiamApiKeyResponse.json()).key}`,
+            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+              MOCK_IDP_UIAM_SHARED_SECRET
+            ),
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual(
+          expect.objectContaining({ api_key: expect.objectContaining({ internal: true }) })
+        );
+      }
+    );
+
+    apiTest(
+      'should reject an internal UIAM API key on a real request WITHOUT an attestation',
+      async ({ apiClient }) => {
+        const [_, { accessToken }] = await userSessionCookieFactory();
+        const internalUiamApiKeyResponse = await grantUiamApiKey(accessToken);
+        expect(internalUiamApiKeyResponse.status).toBe(200);
+
+        const response = await apiClient.get('internal/security/me', {
+          headers: {
+            ...COMMON_HEADERS,
+            Authorization: `ApiKey ${(await internalUiamApiKeyResponse.json()).key}`,
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(401);
+      }
+    );
+
+    apiTest(
+      'should reject an internal UIAM API key on a real request with a wrong attestation',
+      async ({ apiClient }) => {
+        const [_, { accessToken }] = await userSessionCookieFactory();
+        const internalUiamApiKeyResponse = await grantUiamApiKey(accessToken);
+        expect(internalUiamApiKeyResponse.status).toBe(200);
+
+        const response = await apiClient.get('internal/security/me', {
+          headers: {
+            ...COMMON_HEADERS,
+            Authorization: `ApiKey ${(await internalUiamApiKeyResponse.json()).key}`,
+            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+              'a-different-shared-secret'
+            ),
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(401);
       }
     );
   }

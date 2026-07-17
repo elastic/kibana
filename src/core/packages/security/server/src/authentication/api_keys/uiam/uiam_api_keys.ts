@@ -46,6 +46,17 @@ export interface UiamAPIKeysType {
    * @returns A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled.
    */
   convert(keys: string[]): Promise<ConvertUiamAPIKeysResponse | null>;
+
+  /**
+   * Returns the header(s) a trusted in-process consumer stamps on a real loopback HTTP request that
+   * carries an internal UIAM (`essu_`) API key, so that Kibana re-attaches the UIAM shared secret on
+   * that request's behalf when it calls Elasticsearch. The value proves the request is internal
+   * without ever exposing the shared secret to the consumer, and cannot be forged without it.
+   *
+   * Spread the result into the outbound headers (last, so a caller-supplied value cannot win). Read
+   * it right before the loopback call, do not persist it.
+   */
+  getInternalCallerAttestationHeaders(): Record<string, string>;
 }
 
 /**

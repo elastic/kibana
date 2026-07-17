@@ -41,7 +41,13 @@ export {
   decodeApiKeyId,
   HTTPAuthorizationHeader,
 } from './src/authentication';
-export { isUiamCredential, isMissingApiKey, isRevokedApiKey } from './src/uiam';
+export {
+  isUiamCredential,
+  isMissingApiKey,
+  isRevokedApiKey,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+  deriveInternalCallerAttestation,
+} from './src/uiam';
 export type { CoreFipsService } from './src/fips';
 export { AuthzDisabled, AuthzOptOutReason, unwindNestedSecurityPrivileges } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';

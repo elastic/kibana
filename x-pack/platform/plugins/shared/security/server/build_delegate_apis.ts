@@ -70,6 +70,8 @@ export const buildSecurityApi = ({
                 invalidateUiamApiKeyParams: InvalidateUiamAPIKeyParams
               ) => getAuthc().apiKeys.uiam!.invalidate(request, invalidateUiamApiKeyParams),
               convert: (keys: string[]) => getAuthc().apiKeys.uiam!.convert(keys),
+              getInternalCallerAttestationHeaders: () =>
+                getAuthc().apiKeys.uiam!.getInternalCallerAttestationHeaders(),
             }
           : null,
       },

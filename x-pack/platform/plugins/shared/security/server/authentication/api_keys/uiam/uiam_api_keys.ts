@@ -177,6 +177,14 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   }
 
   /**
+   * Returns the header(s) trusted loopback callers stamp on real requests carrying an internal
+   * UIAM (`essu_`) credential (see {@link UiamAPIKeysType.getInternalCallerAttestationHeaders}).
+   */
+  getInternalCallerAttestationHeaders() {
+    return this.uiam.getInternalCallerAttestationHeaders();
+  }
+
+  /**
    * Extracts and returns the authorization header from the request.
    *
    * @param request The Kibana request instance.

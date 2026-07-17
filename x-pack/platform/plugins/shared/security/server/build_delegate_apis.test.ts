@@ -205,6 +205,18 @@ describe('buildSecurityApi', () => {
         expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledTimes(1);
         expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledWith(request, invalidateParams);
       });
+
+      it('should properly delegate getInternalCallerAttestationHeaders to the service', () => {
+        const attestationHeaders = { 'x-some-attestation': 'some-attestation' };
+        jest
+          .mocked(authc.apiKeys.uiam!.getInternalCallerAttestationHeaders)
+          .mockReturnValue(attestationHeaders);
+
+        expect(api.authc.apiKeys.uiam!.getInternalCallerAttestationHeaders()).toBe(
+          attestationHeaders
+        );
+        expect(authc.apiKeys.uiam!.getInternalCallerAttestationHeaders).toHaveBeenCalledTimes(1);
+      });
     });
 
     describe('when uiam is disabled', () => {
