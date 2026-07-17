@@ -2,9 +2,9 @@
 name: exploratory-tester
 description: >
   Use when exploring a Kibana feature area for unknown bugs, testing a PR for regressions,
-  or validating user flows in a real browser — not code analysis. Triggers: "test this PR",
+  or validating user flows in a real browser — functional UI testing only. Triggers: "test this PR",
   "check for bugs", "exploratory testing", "browser testing", "manual testing".
-  Stateful and serverless environments.
+  Not for API-only testing, performance/load testing, or accessibility-only audits.
 ---
 
 # Exploratory Tester
@@ -50,6 +50,16 @@ Session-config: <path>       # optional — read all inputs from a YAML file ins
 Guided intake: if `Area`/`Flows` missing, the agent asks interactively with defaults (`phases/0-setup.md`). Environment profiles: `Environment: profile <name>` loads a saved profile; the agent offers to save a new profile after validating a user-provided environment (`phases/0-setup.md`). Session-config: `Session-config: <path>` reads all inputs from YAML; copy `templates/session.example.yaml` as a template.
 
 Each session writes its output to an isolated subfolder of `.exploratory-session/` named `<area-slug>-<YYYYMMDD-HHMMSS>`, so multiple agents can run sessions in parallel without interfering. To resume a prior session, pass its folder path as `Session-dir:`.
+
+## Common Mistakes
+
+Pre-session errors that make findings low-value before exploration even starts:
+
+- **No `expected:` on flows** — findings become vague and unactionable; the agent has no oracle to cite
+- **Running as `admin`** — permission bugs are invisible to admins; use `t2_analyst` or `platform_engineer`
+- **No `Specs:` when testing a PR** — without specs the agent falls back to UX heuristics and misses acceptance criteria
+- **Forgetting `Session-timeout:`** — long or many-flow sessions hit the 90 min default cap unexpectedly; set ≈ flows × 12 min
+- **Using this for API-only, load, or accessibility testing** — scope is functional UI testing only; browser reproduction is required for every finding
 
 ## Red Flags
 
