@@ -824,8 +824,10 @@ export const getFullAgentPolicy: FleetRequestHandler<
       });
     }
   } else {
+    const canReadSettings = fleetContext.authz.fleet.readSettings;
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
+      redactProxySecrets: !canReadSettings,
     });
     if (fullAgentPolicy) {
       const body: GetFullAgentPolicyResponse = {
@@ -908,8 +910,10 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       headers,
     });
   } else {
+    const canReadSettings = fleetContext.authz.fleet.readSettings;
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
+      redactProxySecrets: !canReadSettings,
     });
     if (!fullAgentPolicy) {
       return response.customError({

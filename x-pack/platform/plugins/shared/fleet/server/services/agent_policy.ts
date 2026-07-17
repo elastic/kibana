@@ -2248,7 +2248,12 @@ class AgentPolicyService {
   public async getFullAgentPolicy(
     soClient: SavedObjectsClientContract,
     id: string,
-    options?: { standalone?: boolean; agentPolicy?: AgentPolicy; agentVersion?: string }
+    options?: {
+      standalone?: boolean;
+      agentPolicy?: AgentPolicy;
+      agentVersion?: string;
+      redactProxySecrets?: boolean;
+    }
   ): Promise<FullAgentPolicy | null> {
     const span = apm.startSpan(
       `getFullAgentPolicy ${id} ${options?.agentVersion ?? ''}`,
