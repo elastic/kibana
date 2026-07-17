@@ -42,7 +42,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     templates: { enabled: true },
     casesRedesign: { list: false, details: false, settings: false },
     attachments: { enabled: true },
-    chat: { enabled: false },
+    chat: { enabled: true },
     ...overrides,
   };
 }
@@ -169,7 +169,7 @@ describe('Cases Plugin', () => {
               "settings": false,
             },
             "chat": Object {
-              "enabled": false,
+              "enabled": true,
             },
             "enabled": true,
             "files": Object {
