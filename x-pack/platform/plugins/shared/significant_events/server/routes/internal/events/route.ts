@@ -9,6 +9,7 @@ import {
   significantEventSchema,
   significantEventInvestigationSchema,
   significantEventStatusSchema,
+  severitySchema,
   type Detection,
   type SignificantEvent,
   type Discovery,
@@ -80,6 +81,7 @@ const eventsSearchRoute = createServerRoute({
         .optional(),
       stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
       search: z.string().max(500).optional(),
+      severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
     }),
   }),
   handler: async ({
@@ -92,12 +94,13 @@ const eventsSearchRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { status, stream, search, ...rest } = params.query;
+    const { status, stream, search, severity, ...rest } = params.query;
 
     return getEventClient().findLatestByCurrentStatePaginated({
       ...rest,
       status: toArray(status),
       stream: toArray(stream),
+      severity: toArray(severity),
       search: search || undefined,
     });
   },
