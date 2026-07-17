@@ -170,7 +170,9 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
         await expect(page.testSubj.locator('lnsFieldListPanelField-runtimefield')).toHaveCount(0);
 
         await switchDataPanelIndexPattern(page, testData.AD_HOC_DATA_VIEW_NAME);
-        await expect(page.testSubj.locator('lnsFieldListPanelField-runtimefield').first()).toBeVisible();
+        await expect(
+          page.testSubj.locator('lnsFieldListPanelField-runtimefield').first()
+        ).toBeVisible();
       });
 
       await spaceTest.step('remove the runtime field', async () => {
@@ -319,21 +321,57 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
       await lens.save(`Lens adhoc csv download ${scoutSpace.id}`, { addToDashboard: 'none' });
       await lens.waitForVisualization('mtrVis');
 
+      // Ensure the metric has data before exporting — csvEnabled requires hasData.
+      await expect
+        .poll(async () => {
+          const metricData = await lens.getMetricVisualizationData();
+          return metricData[0]?.value;
+        })
+        .toBe(AD_HOC_METRIC_AVERAGE_BYTES);
+
       await page.evaluate(() => {
         window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = true;
+        window.ELASTIC_LENS_CSV_CONTENT = undefined;
       });
 
-      await page.testSubj.click('lnsApp_exportButton');
-      await page.testSubj.click('exportMenuItem-CSV');
+      await expect(page.testSubj.locator('lnsApp_exportButton')).toBeEnabled();
 
-      const csvContent = await page
-        .waitForFunction(() => window.ELASTIC_LENS_CSV_CONTENT, { timeout: 10_000 })
-        .then(
-          (handle) =>
-            handle.jsonValue() as Promise<
-              Record<string, { content: string; type: string }> | undefined
-            >
-        );
+      // Share may skip the popover when CSV is the only export integration (auto-download),
+      // or show a popover when reporting PDF/PNG is also registered. Integrations can also
+      // register asynchronously — re-open export until CSV content is available (FTR retries
+      // the same way via exports.clickPopoverItem).
+      await expect
+        .poll(async () => {
+          const existing = await page.evaluate(() => {
+            const content = window.ELASTIC_LENS_CSV_CONTENT;
+            return content && Object.keys(content).length > 0 ? content : undefined;
+          });
+          if (existing) {
+            return existing;
+          }
+
+          const csvMenuItem = page.testSubj.locator('exportMenuItem-CSV');
+          if (await csvMenuItem.isVisible()) {
+            if (await csvMenuItem.isEnabled()) {
+              await csvMenuItem.click();
+            }
+          } else {
+            await page.testSubj.click('lnsApp_exportButton');
+          }
+
+          return page.evaluate(() => {
+            const content = window.ELASTIC_LENS_CSV_CONTENT;
+            return content && Object.keys(content).length > 0 ? content : undefined;
+          });
+        })
+        .toBeTruthy();
+
+      const csvContent = await page.evaluate(
+        () =>
+          window.ELASTIC_LENS_CSV_CONTENT as
+            | Record<string, { content: string; type: string }>
+            | undefined
+      );
 
       expect(csvContent).toBeTruthy();
       expect(Object.keys(csvContent!)).toHaveLength(1);
