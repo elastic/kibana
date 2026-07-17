@@ -60,7 +60,8 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
 
   const { data: appliedTemplateData } = useGetTemplate(
     caseData.template?.id,
-    caseData.template?.version
+    caseData.template?.version,
+    { includeDeleted: true }
   );
 
   const { data: pendingTemplateData, isFetching: isFetchingPendingTemplate } = useGetTemplate(
@@ -85,7 +86,7 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
   const oldTemplateSummary: TemplateSummary | undefined = useMemo(
     () =>
       appliedTemplateData
-        ? { name: appliedTemplateData.name, fieldNames: appliedTemplateData.fieldNames }
+        ? { name: appliedTemplateData.name, fieldDefinitions: appliedTemplateData.fieldDefinitions }
         : undefined,
     [appliedTemplateData]
   );
@@ -95,7 +96,9 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
       return undefined;
     }
     const template = templatesData?.templates.find((t) => t.templateId === pendingTemplateId);
-    return template ? { name: template.name, fieldNames: template.fieldNames } : undefined;
+    return template
+      ? { name: template.name, fieldDefinitions: template.fieldDefinitions }
+      : undefined;
   }, [pendingTemplateId, templatesData?.templates]);
 
   const isPendingNewTemplateDataReady =

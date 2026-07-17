@@ -62,8 +62,16 @@ export const ApplyTemplateModal: FC<ApplyTemplateModalProps> = ({ caseData, onCl
     [options, selectedTemplateId]
   );
 
+  // Only fetch the template definition when it's in the active options list.
+  // If the case's currently applied template has been soft-deleted it won't appear
+  // in options, and querying for it would produce a 404 spinner that never resolves.
+  const isSelectedTemplateInOptions = useMemo(
+    () => Boolean(selectedTemplateId) && options.some((o) => o.value === selectedTemplateId),
+    [selectedTemplateId, options]
+  );
+
   const { data: selectedTemplateData, isFetching: isFetchingDefinition } = useGetTemplate(
-    selectedTemplateId || undefined
+    isSelectedTemplateInOptions ? selectedTemplateId : undefined
   );
 
   const { mutate: changeAppliedTemplate, isLoading: isApplying } = useChangeAppliedTemplate();
