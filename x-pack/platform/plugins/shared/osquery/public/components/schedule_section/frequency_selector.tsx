@@ -14,10 +14,11 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiRadioGroup,
+  EuiSelect,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EuiCheckboxGroupOption, EuiRadioGroupOption } from '@elastic/eui';
+import type { EuiCheckboxGroupOption, EuiRadioGroupOption, EuiSelectOption } from '@elastic/eui';
 import type { WeekdayStr } from '@kbn/rrule';
 import {
   AT_LEAST_ONE_DAY_ERROR,
@@ -33,10 +34,14 @@ import {
   FREQUENCY_DAILY,
   FREQUENCY_LABEL,
   REPEAT_EVERY_LABEL,
+  REPEAT_UNIT_LABEL,
+  UNIT_MONTHS,
   UNIT_WEEKS,
+  UNIT_YEARS,
 } from './translations';
-import type { FrequencyMode, RecurrenceFormState } from './types';
-import { clampInt, WEEKDAY_TOKENS } from './types';
+import type { FrequencyMode, RecurrenceFormState, RepeatUnit } from './types';
+import { clampInt, maxIntervalForUnit, WEEKDAY_TOKENS } from './types';
+import { selectAppendCss } from './select_append_css';
 
 export interface FrequencySelectorProps {
   value: RecurrenceFormState;
@@ -48,17 +53,28 @@ export interface FrequencySelectorProps {
   idPrefix?: string;
 }
 
-// Daily + Custom (weekly) only for the initial release. To re-enable the other
-// frequencies, add entries here plus the matching `FrequencyMode` tokens in `./types`.
 interface FrequencyOptionTemplate {
   suffix: string;
   label: string;
   mode: FrequencyMode;
 }
+
 const FREQUENCY_OPTION_TEMPLATES: FrequencyOptionTemplate[] = [
   { suffix: 'daily', label: FREQUENCY_DAILY, mode: 'daily' },
   { suffix: 'custom', label: FREQUENCY_CUSTOM, mode: 'custom' },
 ];
+
+// `EuiSelect` values are strings on the DOM regardless of the option's
+// declared type — using string values here avoids a round-trip cast at
+// `onChange` time.
+const REPEAT_UNIT_OPTIONS: EuiSelectOption[] = [
+  { value: 'weeks', text: UNIT_WEEKS },
+  { value: 'months', text: UNIT_MONTHS },
+  { value: 'years', text: UNIT_YEARS },
+];
+
+const isRepeatUnit = (value: string): value is RepeatUnit =>
+  value === 'weeks' || value === 'months' || value === 'years';
 
 const WEEKDAY_LABEL: Record<WeekdayStr, string> = {
   MO: DAY_MO,
@@ -94,6 +110,10 @@ export const FrequencySelector = ({
   const horizontalGroupCss = useMemo(
     () => ({ flexDirection: 'row', flexWrap: 'wrap', gap: euiTheme.size.base } as const),
     [euiTheme.size.base]
+  );
+  const repeatUnitAppendCss = useMemo(
+    () => selectAppendCss(euiTheme.border.radius.medium ?? 0),
+    [euiTheme.border.radius.medium]
   );
 
   const frequencyOptions = useMemo<Array<EuiRadioGroupOption & { mode: FrequencyMode }>>(
@@ -134,13 +154,33 @@ export const FrequencySelector = ({
     [modeForOptionId, onChange, value]
   );
 
+  const repeatUnit: RepeatUnit = value.repeatUnit ?? 'weeks';
+
+  const handleRepeatUnitChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const raw = event.target.value;
+      if (!isRepeatUnit(raw) || raw === repeatUnit) return;
+
+      // Switching units changes the effective RRULE shape (WEEKLY+BYDAY vs.
+      // MONTHLY vs. YEARLY) even though `frequency` itself stays `'custom'` —
+      // clear `_unknown` for the same reason a frequency change does (D39).
+      // Re-bound the interval to the new unit's max so a large Month(s)
+      // value can't leak into Year(s).
+      const nextInterval = clampInt(value.interval, 1, maxIntervalForUnit(raw), value.interval);
+      onChange({ ...value, repeatUnit: raw, interval: nextInterval, _unknown: undefined });
+    },
+    [onChange, repeatUnit, value]
+  );
+
+  const intervalMax = maxIntervalForUnit(repeatUnit);
+
   const handleIntervalChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const raw = Number(event.target.value);
-      const next = clampInt(raw, 1, 9999, value.interval);
+      const next = clampInt(raw, 1, intervalMax, value.interval);
       onChange({ ...value, interval: next });
     },
-    [onChange, value]
+    [intervalMax, onChange, value]
   );
 
   const tokenForWeekdayId = useCallback(
@@ -192,7 +232,8 @@ export const FrequencySelector = ({
     return map;
   }, [value.byweekday, weekdayIdPrefix]);
 
-  const everyUnitLabel: string | null = value.frequency === 'custom' ? UNIT_WEEKS : null;
+  const showFrequencyPanel = value.frequency === 'custom';
+  const showWeekdays = showFrequencyPanel && repeatUnit === 'weeks';
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="osquery-frequency-selector">
@@ -212,37 +253,48 @@ export const FrequencySelector = ({
         </EuiFormRow>
       </EuiFlexItem>
 
-      {value.frequency === 'custom' ? (
+      {showFrequencyPanel ? (
         <EuiFlexItem>
           <EuiPanel color="subdued" hasShadow={false} hasBorder={false} paddingSize="m">
-            <EuiFormRow
-              label={DAYS_OF_WEEK_LABEL}
-              isInvalid={!!weekdaysError}
-              error={weekdaysError ? AT_LEAST_ONE_DAY_ERROR : undefined}
-              fullWidth
-            >
-              <EuiCheckboxGroup
-                css={horizontalGroupCss}
-                options={weekdayOptions}
-                idToSelectedMap={weekdayIdToSelectedMap}
-                onChange={handleWeekdayToggle}
-                data-test-subj="osquery-frequency-selector-weekdays"
-              />
-            </EuiFormRow>
-            {everyUnitLabel ? (
-              <EuiFormRow label={REPEAT_EVERY_LABEL} fullWidth>
-                <EuiFieldNumber
-                  fullWidth
-                  min={1}
-                  step={1}
-                  value={value.interval}
-                  onChange={handleIntervalChange}
-                  disabled={disabled}
-                  append={everyUnitLabel}
-                  data-test-subj="osquery-frequency-selector-every"
+            {showWeekdays ? (
+              <EuiFormRow
+                label={DAYS_OF_WEEK_LABEL}
+                isInvalid={!!weekdaysError}
+                error={weekdaysError ? AT_LEAST_ONE_DAY_ERROR : undefined}
+                fullWidth
+              >
+                <EuiCheckboxGroup
+                  css={horizontalGroupCss}
+                  options={weekdayOptions}
+                  idToSelectedMap={weekdayIdToSelectedMap}
+                  onChange={handleWeekdayToggle}
+                  data-test-subj="osquery-frequency-selector-weekdays"
                 />
               </EuiFormRow>
             ) : null}
+
+            <EuiFormRow label={REPEAT_EVERY_LABEL} fullWidth css={repeatUnitAppendCss}>
+              <EuiFieldNumber
+                fullWidth
+                min={1}
+                max={intervalMax}
+                step={1}
+                value={value.interval}
+                onChange={handleIntervalChange}
+                disabled={disabled}
+                append={
+                  <EuiSelect
+                    options={REPEAT_UNIT_OPTIONS}
+                    value={repeatUnit}
+                    onChange={handleRepeatUnitChange}
+                    disabled={disabled}
+                    aria-label={REPEAT_UNIT_LABEL}
+                    data-test-subj="osquery-frequency-selector-unit"
+                  />
+                }
+                data-test-subj="osquery-frequency-selector-every"
+              />
+            </EuiFormRow>
           </EuiPanel>
         </EuiFlexItem>
       ) : null}

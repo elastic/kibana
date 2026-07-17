@@ -338,18 +338,32 @@ export const internalStateSlice = createSlice({
         syncProfileStateSnapshot(tab, action.payload.profileId, action.payload.appState);
       }),
 
-    setProfileState: (state, action: TabAction<{ key: string; profileState: object }>) =>
+    setProfileState: (
+      state,
+      action: TabAction<{ key: string; profileState: object | undefined }>
+    ) =>
       withTab(state, action.payload, (tab) => {
-        tab.profileState[action.payload.key] = action.payload.profileState;
+        if (action.payload.profileState && Object.keys(action.payload.profileState).length > 0) {
+          tab.profileState[action.payload.key] = action.payload.profileState;
+        } else {
+          delete tab.profileState[action.payload.key];
+        }
       }),
 
     /**
-     * Set the tab app state and previous app state, overwriting existing state and pushing to URL history
+     * Set the initial tab app and profile state
      */
-    resetAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
+    initializeTabState: (
+      state,
+      action: TabAction<{
+        initialAppState: TabState['appState'];
+        initialProfileState: TabState['profileState'];
+      }>
+    ) =>
       withTab(state, action.payload, (tab) => {
-        tab.previousAppState = action.payload.appState;
-        tab.appState = action.payload.appState;
+        tab.previousAppState = action.payload.initialAppState;
+        tab.appState = action.payload.initialAppState;
+        tab.profileState = action.payload.initialProfileState;
       }),
 
     /**
@@ -796,7 +810,7 @@ export type InternalStateStore = ReturnType<typeof createInternalStateStore>;
 
 export type InternalStateDispatch = InternalStateStore['dispatch'];
 
-type InternalStateThunkAction<TReturn = void> = ThunkAction<
+export type InternalStateThunkAction<TReturn = void> = ThunkAction<
   TReturn,
   InternalStateDispatch extends ThunkDispatch<infer TState, never, never> ? TState : never,
   InternalStateDispatch extends ThunkDispatch<never, infer TExtra, never> ? TExtra : never,
