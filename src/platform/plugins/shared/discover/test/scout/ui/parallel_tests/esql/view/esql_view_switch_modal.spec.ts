@@ -104,17 +104,12 @@ spaceTest.describe(
     spaceTest(
       'shows available data views and results after switching to classic mode',
       async ({ page, pageObjects }) => {
-        const { discover, dataGrid } = pageObjects;
+        const { discover } = pageObjects;
 
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         await discover.selectDataViewMode({ discardModal: true });
         await discover.waitUntilTabIsLoaded();
-
-        // The hit count can take a moment to refresh after the mode switch
-        // (the FTR original retried this same assertion for 2s via
-        // `discover.assertHitCount`), so poll instead of a single read.
-        await expect.poll(() => discover.getHitCountInt()).toBe(14004);
 
         // Only assert the data views loaded by this test's archives: extras
         // like the managed "All logs" data view are environment-specific
@@ -124,9 +119,14 @@ spaceTest.describe(
           expect(availableDataViews).toContain(item);
         }
 
-        await discover.selectDataView('kibana_sample_data_flights');
-        await dataGrid.waitForLoad();
-        expect(await discover.getSelectedDataViewName()).toBe('kibana_sample_data_flights');
+        // Explicitly select logstash-*: the data view Discover lands on after
+        // the mode switch is environment-dependent (e.g. the observability
+        // root profile defaults to its "All logs" ad hoc data view, which
+        // excludes logstash indices).
+        await discover.selectDataView('logstash-*');
+        await discover.waitUntilTabIsLoaded();
+        expect(await discover.getSelectedDataViewName()).toBe('logstash-*');
+        await expect.poll(() => discover.getHitCountInt()).toBe(14004);
       }
     );
   }
