@@ -9,7 +9,7 @@
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
-import { schema } from '@kbn/config-schema';
+import { schema, ValidationError } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -50,10 +50,10 @@ export const registerGetRoute = (
               body: () => discoverSessionApiResponseSchema,
               description: 'Success',
             },
-            400: { description: 'Invalid request' },
             403: { description: 'Forbidden' },
             404: { description: 'Not found' },
             409: { description: 'Conflict' },
+            500: { description: 'Internal server error' },
           },
         },
       },
@@ -69,6 +69,11 @@ export const registerGetRoute = (
               logRequest(logger, request, 'debug', message);
 
               return response.notFound({ body: { message } });
+            }
+
+            if (error instanceof ValidationError) {
+              logRequest(logger, request, 'error', error.stack ?? error.message);
+              throw error;
             }
 
             return writeErrorHandler(error, response, logger, request);

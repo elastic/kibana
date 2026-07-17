@@ -9,6 +9,7 @@
 
 import { apiTest, tags, type KibanaRole, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import {
   COMMON_HEADERS,
   DISCOVER_SESSION_API_BASE_PATH,
@@ -28,6 +29,8 @@ const DEV_TOOLS_READ_ROLE: KibanaRole = {
     },
   ],
 };
+
+const INVALID_DISCOVER_SESSION_ID = 'invalid-discover-session';
 
 apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
@@ -124,4 +127,53 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
 
     expect(response).toHaveStatusCode(403);
   });
+
+  apiTest(
+    'returns 500 when the stored Discover session fails response validation',
+    async ({ apiClient, kbnClient }) => {
+      const { attributes, references } =
+        await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
+          type: 'search',
+          id: TEST_DISCOVER_SESSION_ID,
+        });
+      const [firstTab, ...otherTabs] = attributes.tabs;
+      const controlGroup = JSON.parse(firstTab.attributes.controlGroupJson!);
+      const controlId = Object.keys(controlGroup)[0];
+
+      controlGroup[controlId].width = 'extra_large';
+
+      await kbnClient.savedObjects.create({
+        type: 'search',
+        id: INVALID_DISCOVER_SESSION_ID,
+        overwrite: true,
+        attributes: {
+          ...attributes,
+          tabs: [
+            {
+              ...firstTab,
+              attributes: {
+                ...firstTab.attributes,
+                controlGroupJson: JSON.stringify(controlGroup),
+              },
+            },
+            ...otherTabs,
+          ],
+        },
+        references,
+      });
+
+      const response = await apiClient.get(
+        `${DISCOVER_SESSION_API_BASE_PATH}/${INVALID_DISCOVER_SESSION_ID}`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...viewerCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        }
+      );
+
+      expect(response).toHaveStatusCode(500);
+    }
+  );
 });
