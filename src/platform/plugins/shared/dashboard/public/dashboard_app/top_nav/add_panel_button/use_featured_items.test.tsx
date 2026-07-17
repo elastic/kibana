@@ -36,7 +36,16 @@ describe('useFeaturedItems', () => {
     order: 50,
     getDisplayName: () => 'Create visualization',
     getIconType: () => 'lensApp',
-    getDisplayNameTooltip: () => 'Create a visualization',
+    getDisplayNameTooltip: () => 'Build charts, metrics, and tables with a point-and-click editor.',
+    execute: jest.fn(),
+  };
+
+  const esqlAction = {
+    id: 'ACTION_CREATE_ESQL_CHART',
+    order: 40,
+    getDisplayName: () => 'Create visualization (with query)',
+    getIconType: () => 'editorCodeBlock',
+    getDisplayNameTooltip: () => 'Build charts, metrics, and tables with ES|QL.',
     execute: jest.fn(),
   };
 
@@ -56,7 +65,7 @@ describe('useFeaturedItems', () => {
   } as unknown as DashboardApi;
 
   beforeEach(() => {
-    mockGetTriggerCompatibleActions.mockReset().mockResolvedValue([featuredAction]);
+    mockGetTriggerCompatibleActions.mockReset().mockResolvedValue([featuredAction, esqlAction]);
     mockHasAction.mockReset().mockReturnValue(false);
     mockGetAction.mockReset();
   });
@@ -66,8 +75,32 @@ describe('useFeaturedItems', () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(result.current.featuredItems.map((item) => item.id)).toEqual(['addLensPanelAction']);
+    expect(result.current.featuredItems.map((item) => item.id)).toEqual([
+      'addLensPanelAction',
+      'ACTION_CREATE_ESQL_CHART',
+    ]);
     expect(mockGetAction).not.toHaveBeenCalled();
+  });
+
+  it('applies featured-card copy for Lens and ES|QL actions', async () => {
+    const { result } = renderHook(() => useFeaturedItems({ dashboardApi }));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.featuredItems.find((item) => item.id === 'addLensPanelAction')).toEqual(
+      expect.objectContaining({
+        name: 'Create visualization',
+        description: 'Point-and-click editor',
+      })
+    );
+    expect(
+      result.current.featuredItems.find((item) => item.id === 'ACTION_CREATE_ESQL_CHART')
+    ).toEqual(
+      expect.objectContaining({
+        name: 'Create visualization (with query)',
+        description: 'ES|QL editor',
+      })
+    );
   });
 
   it('prepends the open-dashboard-chat action when requested and available', async () => {
@@ -83,6 +116,7 @@ describe('useFeaturedItems', () => {
     expect(result.current.featuredItems.map((item) => item.id)).toEqual([
       OPEN_DASHBOARD_CHAT_ACTION_ID,
       'addLensPanelAction',
+      'ACTION_CREATE_ESQL_CHART',
     ]);
     expect(result.current.featuredItems[0].isHighlighted).toBe(true);
     expect(result.current.featuredItems[0]['data-test-subj']).toBe(
@@ -103,6 +137,9 @@ describe('useFeaturedItems', () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(result.current.featuredItems.map((item) => item.id)).toEqual(['addLensPanelAction']);
+    expect(result.current.featuredItems.map((item) => item.id)).toEqual([
+      'addLensPanelAction',
+      'ACTION_CREATE_ESQL_CHART',
+    ]);
   });
 });

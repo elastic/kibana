@@ -10,6 +10,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -31,7 +32,7 @@ const metricsPrompt = i18n.translate('dashboard.emptyScreen.metricsPromptButtonL
 });
 
 const logsPrompt = i18n.translate('dashboard.emptyScreen.logsPromptButtonLabel', {
-  defaultMessage: 'Build a dashboard to monitor my logs',
+  defaultMessage: 'Monitor my logs',
 });
 
 const promptSuggestions = [
@@ -45,8 +46,8 @@ const promptSuggestions = [
   },
 ] as const;
 
-const getActionContext = (initialMessage: string) => ({
-  initialMessage,
+const getActionContext = (initialMessage?: string) => ({
+  ...(initialMessage !== undefined ? { initialMessage } : {}),
   trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
 });
 
@@ -116,7 +117,7 @@ export const DashboardEmptyScreenChat = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup gutterSize="xs" responsive={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
               {promptSuggestions.map(({ prompt, testSubject }) => (
                 <EuiFlexItem grow={false} key={prompt}>
                   <EuiButton
@@ -132,6 +133,20 @@ export const DashboardEmptyScreenChat = ({
                   </EuiButton>
                 </EuiFlexItem>
               ))}
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  color="text"
+                  flush="both"
+                  css={styles.openChatButton}
+                  onClick={() => action.execute(getActionContext(''))}
+                  data-test-subj="dashboardCreateWithChatOpenChat"
+                >
+                  {i18n.translate('dashboard.emptyScreen.openChatButtonLabel', {
+                    defaultMessage: 'Open chat →',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -159,6 +174,10 @@ const styles = {
   promptButtonContent: ({ euiTheme }: UseEuiTheme) =>
     css({
       paddingInline: euiTheme.size.xxs,
+    }),
+  openChatButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textAssistance,
     }),
   content: css({
     minWidth: 0,

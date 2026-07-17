@@ -38,7 +38,7 @@ const customTitles: Record<string, string> = {
     defaultMessage: 'Create visualization',
   }),
   ACTION_CREATE_ESQL_CHART: i18n.translate('dashboard.emptyScreen.createEsqlVisualizationTitle', {
-    defaultMessage: 'Create visualization (query)',
+    defaultMessage: 'Create visualization (with query)',
   }),
 };
 
@@ -77,7 +77,7 @@ export function DashboardEmptyScreen() {
   const title = (() => {
     const titleString = showEditPrompt
       ? i18n.translate('dashboard.emptyScreen.editModeTitle', {
-          defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
+          defaultMessage: 'This dashboard is empty',
         })
       : showWriteControls
       ? i18n.translate('dashboard.emptyScreen.viewModeTitle', {
@@ -90,8 +90,11 @@ export function DashboardEmptyScreen() {
   })();
 
   const body = (() => {
-    if (showEditPrompt) return undefined;
-    const bodyString = showWriteControls
+    const bodyString = showEditPrompt
+      ? i18n.translate('dashboard.emptyScreen.editModeSubtitle', {
+          defaultMessage: 'Choose how you want to create a visualization',
+        })
+      : showWriteControls
       ? i18n.translate('dashboard.emptyScreen.viewModeSubtitle', {
           defaultMessage: 'Enter edit mode, and then start adding your visualizations.',
         })

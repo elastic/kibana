@@ -89,7 +89,7 @@ describe('DashboardEmptyScreen', () => {
     renderComponent('edit');
 
     expect(await screen.findByText('Create with Chat')).toBeInTheDocument();
-    expect(screen.queryByTestId('dashboardEmptyScreenActionsSeparator')).not.toBeInTheDocument();
+    expect(screen.getByTestId('dashboardCreateWithChatOpenChat')).toBeInTheDocument();
     expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
   });
 
@@ -100,6 +100,17 @@ describe('DashboardEmptyScreen', () => {
 
     expect(execute).toHaveBeenCalledWith({
       initialMessage: 'Create a dashboard for my metrics',
+      trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
+    });
+  });
+
+  test('opens Chat without a prefilled prompt from Open chat', async () => {
+    renderComponent('edit');
+
+    fireEvent.click(await screen.findByTestId('dashboardCreateWithChatOpenChat'));
+
+    expect(execute).toHaveBeenCalledWith({
+      initialMessage: '',
       trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
     });
   });

@@ -16,10 +16,17 @@ interface FeaturedItemCardProps {
   item: MenuItem;
   /** Optional title override; defaults to the item name. */
   title?: string;
+  /** Optional description override; defaults to the item description. */
+  description?: string;
   className?: string;
 }
 
-export const FeaturedItemCard = ({ item, title, className }: FeaturedItemCardProps) => (
+export const FeaturedItemCard = ({
+  item,
+  title,
+  description,
+  className,
+}: FeaturedItemCardProps) => (
   <EuiPanel
     element="button"
     hasBorder
@@ -37,7 +44,7 @@ export const FeaturedItemCard = ({ item, title, className }: FeaturedItemCardPro
           <strong className="featuredPanelItem__title">{title ?? item.name}</strong>
         </EuiText>
         <EuiText size="xs" color="subdued">
-          {item.description}
+          {description ?? item.description}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
