@@ -24,6 +24,9 @@ const UNIFIED_QUERY = `${BASE_QUERY} ${ALERT_SEGMENT}`;
 const RULE_NAME = 'scout-compose-discover-create';
 const EDIT_RULE_NAME = 'scout-compose-discover-edit';
 const EDITED_RULE_NAME = 'scout-compose-discover-edited';
+const NO_TIME_FIELD_RULE_NAME = 'scout-compose-discover-no-time-field';
+// `logs-*` is never ingested, so no date field resolves — the sad path.
+const NO_TIME_FIELD_QUERY = 'FROM logs-* | LIMIT 10';
 const RUNBOOK_TEXT = 'Investigate failed transactions';
 
 test.describe(
@@ -151,7 +154,7 @@ test.describe(
             recovery_strategy: undefined,
             query: {
               format: 'standalone',
-              breach: { query: 'FROM logs-* | LIMIT 10' },
+              breach: { query: TEST_QUERY },
             },
             metadata: { name: EDIT_RULE_NAME },
             artifacts: [
@@ -199,6 +202,67 @@ test.describe(
             timeout: 30_000,
           })
           .toBe(EDITED_RULE_NAME);
+      });
+    });
+
+    test('edit flow (sad path): a rule with no resolvable time field triggers validation and blocks Next', async ({
+      pageObjects,
+      apiServices,
+    }) => {
+      let ruleId: string;
+
+      await test.step('seed a rule whose query targets an index with no date field', async () => {
+        const rule = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            kind: 'signal',
+            state_transition: undefined,
+            recovery_strategy: undefined,
+            query: {
+              format: 'standalone',
+              breach: { query: NO_TIME_FIELD_QUERY },
+            },
+            metadata: { name: NO_TIME_FIELD_RULE_NAME },
+          })
+        );
+        ruleId = rule.id;
+      });
+
+      await test.step('refresh the rules list', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+      });
+
+      await test.step('open the edit flyout', async () => {
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+      });
+
+      await test.step('time field is flagged invalid and Next is blocked', async () => {
+        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveAttribute(
+          'aria-invalid',
+          'true'
+        );
+        await expect(
+          pageObjects.composeDiscover.flyout.getByText('No time field could be resolved')
+        ).toBeVisible();
+        await expect(pageObjects.composeDiscover.nextButton).toBeDisabled();
+      });
+
+      await test.step('editing the query to target data with a date field clears the error', async () => {
+        await pageObjects.composeDiscover.editQueryButton.click();
+        await pageObjects.composeDiscover.setSandboxQuery(TEST_QUERY);
+        await pageObjects.composeDiscover.clickApply();
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
+
+        // EUI omits `aria-invalid` when valid rather than setting it to "false".
+        await expect(pageObjects.composeDiscover.timeFieldSelector).not.toHaveAttribute(
+          'aria-invalid',
+          'true'
+        );
+        await expect(
+          pageObjects.composeDiscover.flyout.getByText('No time field could be resolved')
+        ).toBeHidden();
+        await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
     });
 
