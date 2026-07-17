@@ -41,17 +41,16 @@ export const EntityTabContent: React.FC<CommonAttachmentTabViewProps> = ({
   // Filter in-memory first to avoid firing an ES query when no attachments match the search.
   // `attachmentId` holds the canonical entity.id (EUID), so we only need the ids here.
   const entityIds = useMemo<string[]>(
-    () =>
-      [
-        ...new Set(
-          caseData.comments.flatMap((comment) =>
-            isEntityAttachment(comment) &&
-            (!searchTerm || matchesSearchTerm(comment.metadata, searchTerm))
-              ? [comment.attachmentId]
-              : []
-          )
-        ),
-      ],
+    () => [
+      ...new Set(
+        caseData.comments.flatMap((comment) =>
+          isEntityAttachment(comment) &&
+          (!searchTerm || matchesSearchTerm(comment.metadata, searchTerm))
+            ? [comment.attachmentId]
+            : []
+        )
+      ),
+    ],
     [caseData.comments, searchTerm]
   );
 

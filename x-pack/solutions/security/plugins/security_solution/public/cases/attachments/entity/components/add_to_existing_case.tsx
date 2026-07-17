@@ -63,10 +63,9 @@ export const AddToExistingCase: FC<AddToExistingCaseProps> = ({
         return generateEntityAttachmentsWithoutOwner(entity);
       },
       noAttachmentsToaster: {
-        title: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.cases.alreadyAttachedTitle',
-          { defaultMessage: 'Entity already attached' }
-        ),
+        title: i18n.translate('xpack.securitySolution.entityAnalytics.cases.alreadyAttachedTitle', {
+          defaultMessage: 'Entity already attached',
+        }),
         content: i18n.translate(
           'xpack.securitySolution.entityAnalytics.cases.alreadyAttachedContent',
           { defaultMessage: 'This entity is already attached to the selected case.' }
