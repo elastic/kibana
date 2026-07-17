@@ -29,7 +29,9 @@ import {
   fetchAllPackagePolicies,
   findMatchingShards,
   getInitialPolicies,
+  groupAgentPolicyIdsByPackagePolicy,
   makePackKey,
+  resolveSharedPackagePolicyShard,
   validatePackScheduleFields,
   buildScheduleResponseSlice,
   stripPerQueryRruleFields,
@@ -226,13 +228,19 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
 
         if (enabled && policiesList.length) {
+          // Group by resolved package-policy id first: a package policy's
+          // `policy_ids` can span multiple of this pack's agent policies, so
+          // writing per-agent-policy-id (as before) could issue concurrent
+          // updates against the same package policy from the same stale base.
+          const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
+            policiesList,
+            packagePolicies
+          );
+
           await Promise.all(
-            policiesList.map((agentPolicyId) => {
-              const packagePolicy = packagePolicies.find((policy) =>
-                policy.policy_ids.includes(agentPolicyId)
-              );
-              if (packagePolicy) {
-                return packagePolicyService?.update(
+            Array.from(packagePolicyWriteTargets.values()).map(
+              ({ packagePolicy, agentPolicyIds }) =>
+                packagePolicyService?.update(
                   spaceScopedClient,
                   esClient,
                   packagePolicy.id,
@@ -256,7 +264,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       }
                     );
                     set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
-                      shard: policyShards[agentPolicyId] ?? 100,
+                      shard: resolveSharedPackagePolicyShard(agentPolicyIds, policyShards),
                       pack_id: packSO.id,
                       // Human-readable name osquerybeat stamps on scheduled
                       // result docs (config.Pack.pack_name contract).
@@ -267,9 +275,8 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
                     return draft;
                   })
-                );
-              }
-            })
+                )
+            )
           );
         }
 
