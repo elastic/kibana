@@ -2613,7 +2613,7 @@ x-pack/platform/plugins/shared/actions/server/lib/build_client_assertion.ts @ela
 x-pack/platform/plugins/shared/actions/server/lib/build_client_assertion.test.ts @elastic/response-ops @elastic/workchat-eng
 
 ## API key query
-src/platform/packages/shared/kbn-connector-specs/src/auth_types/api_key_query.ts @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/api_key_query.ts `@elastic/response-ops` `@elastic/workchat-eng`
 src/platform/packages/shared/kbn-connector-specs/src/auth_types/api_key_query.test.ts @elastic/workchat-eng
 
 ## EARS
