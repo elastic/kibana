@@ -18,6 +18,7 @@ import {
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
+import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
 import {
   STREAMS_API_PRIVILEGES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
@@ -196,6 +197,9 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
 
       if (enabledChanged || (nextEnabled && configChanged)) {
         const spaceId = await getSpaceId(request);
+        if (nextEnabled && server.agentBuilder) {
+          await installDiscoveryAgents({ agentBuilder: server.agentBuilder, spaceId });
+        }
         await workflowService.ensureWorkflow({
           enabled: nextEnabled,
           request,
