@@ -127,12 +127,21 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
                   customFields={caseData.customFields}
                   customFieldsConfiguration={casesConfiguration.customFields}
                   onSubmit={onSubmitCustomField}
+                  editVariant="inline"
                 />
-                {/* Global (isGlobal) fields apply to every case regardless of the template. Renders
-                    nothing when there are none; self-labels when no template owns the heading. */}
-                <GlobalCaseFields caseData={caseData} onUpdateField={onUpdateField} />
+                {/* Global (isGlobal) fields apply to every case regardless of the template.
+                    Redesign accordion already labels this section — hide Extended fields heading. */}
+                <GlobalCaseFields
+                  caseData={caseData}
+                  onUpdateField={onUpdateField}
+                  showSectionTitle={false}
+                />
                 {caseData.template?.id ? (
-                  <TemplateFields caseData={caseData} onUpdateField={onUpdateField} />
+                  <TemplateFields
+                    caseData={caseData}
+                    onUpdateField={onUpdateField}
+                    showHeader={false}
+                  />
                 ) : (
                   <EuiText
                     size="s"
