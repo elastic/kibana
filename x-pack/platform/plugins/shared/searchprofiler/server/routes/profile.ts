@@ -7,7 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { API_BASE_PATH } from '../../common/constants';
-import { RouteDependencies } from '../types';
+import { hasIndices } from '../lib/has_indices';
+import type { RouteDependencies } from '../types';
 
 export const register = ({ router, getLicenseStatus, log }: RouteDependencies) => {
   router.post(
@@ -98,11 +99,11 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
 
       try {
         const client = (await ctx.core).elasticsearch.client.asCurrentUser;
-        const hasIndices = await client.indices.exists({ index: '*,*:*' });
+        const indicesExist = await hasIndices(client, log);
 
         return response.ok({
           body: {
-            hasIndices,
+            hasIndices: indicesExist,
           },
         });
       } catch (err) {
