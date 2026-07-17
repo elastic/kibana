@@ -120,21 +120,19 @@ describe('createInitialState', () => {
 
 describe('reducer', () => {
   describe('KIND_CHANGE', () => {
-    it('kind=alert opens child on the base tab and resets to step 0', () => {
-      const state = createState({ step: 2, childOpen: false, activeTab: 'alert' });
+    it('kind=alert keeps the current step', () => {
+      const state = createState({ step: 1, childOpen: false, activeTab: 'alert' });
       const next = reducer(state, { type: 'KIND_CHANGE', kind: 'alert' });
 
-      expect(next.childOpen).toBe(true);
-      expect(next.step).toBe(0);
-      expect(next.activeTab).toBe('base');
+      expect(next.step).toBe(1);
     });
 
-    it('kind=signal keeps child open, resets step and recoveryType', () => {
+    it('kind=signal keeps the current step and resets recoveryType', () => {
       const state = createState({ step: 1, childOpen: true, recoveryType: 'custom' });
       const next = reducer(state, { type: 'KIND_CHANGE', kind: 'signal' });
 
       expect(next.childOpen).toBe(true);
-      expect(next.step).toBe(0);
+      expect(next.step).toBe(1);
       expect(next.recoveryType).toBe('default');
     });
   });

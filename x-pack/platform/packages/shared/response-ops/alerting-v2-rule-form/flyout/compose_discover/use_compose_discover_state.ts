@@ -116,13 +116,12 @@ export function reducer(
       };
     case 'KIND_CHANGE':
       // Reset manual split when switching kind — the unified query is rebuilt.
+      // Keep the user on the current step (the ModeSelect lives on the Behaviour step).
       return action.kind === 'alert'
-        ? { ...state, step: 0, childOpen: true, activeTab: 'base', manualSplitEnabled: false }
+        ? { ...state, manualSplitEnabled: false }
         : {
             ...state,
             recoveryType: 'default',
-            step: 0,
-            activeTab: 'alert',
             manualSplitEnabled: false,
           };
     case 'SET_TAB':
