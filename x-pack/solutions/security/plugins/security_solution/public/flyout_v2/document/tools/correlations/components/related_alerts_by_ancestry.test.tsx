@@ -12,6 +12,7 @@ import { DocumentDetailsContext } from '../../../../../flyout/document_details/s
 import { mockContextValue } from '../../../../../flyout/document_details/shared/mocks/mock_context';
 import {
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_DATE_PICKER_TEST_ID,
+  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_ERROR_TEST_ID,
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
 } from './test_ids';
@@ -134,14 +135,18 @@ describe('<RelatedAlertsByAncestry />', () => {
     expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render null if error', () => {
+  it('should render an inline error and keep the date picker mounted when the query errors', () => {
     (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
       loading: false,
       error: true,
     });
 
-    const { container } = renderRelatedAlertsByAncestry();
-    expect(container).toBeEmptyDOMElement();
+    const { getByTestId, queryByTestId } = renderRelatedAlertsByAncestry();
+    expect(
+      getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_DATE_PICKER_TEST_ID)
+    ).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_ERROR_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render no data message', () => {

@@ -7,12 +7,13 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { OnTimeChangeProps } from '@elastic/eui';
-import { EuiSpacer, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiSuperDatePicker } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
 import { useFetchRelatedAlertsByAncestry } from '../../../main/hooks/use_fetch_related_alerts_by_ancestry';
 import {
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_DATE_PICKER_TEST_ID,
+  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_ERROR_TEST_ID,
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
 } from './test_ids';
 import { getColumns } from '../utils/get_columns';
@@ -94,10 +95,6 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
     [scopeId, onShowAlert, useLegacyExpandableFlyout]
   );
 
-  if (error) {
-    return null;
-  }
-
   return (
     <>
       <EuiSuperDatePicker
@@ -110,27 +107,46 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
         width="full"
       />
       <EuiSpacer size="m" />
-      <CorrelationsDetailsAlertsTable
-        title={
+      {error ? (
+        <EuiCallOut
+          color="danger"
+          iconType="warning"
+          data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_ERROR_TEST_ID}
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.correlations.ancestryAlertsErrorTitle"
+              defaultMessage="Unable to load alerts related by ancestry"
+            />
+          }
+        >
           <FormattedMessage
-            id="xpack.securitySolution.flyout.correlations.ancestryAlertsTitle"
-            defaultMessage="{count} {count, plural, one {alert} other {alerts}} related by ancestry"
-            values={{ count: dataCount }}
+            id="xpack.securitySolution.flyout.correlations.ancestryAlertsErrorDescription"
+            defaultMessage="Try narrowing the selected time range and refreshing."
           />
-        }
-        loading={loading}
-        alertIds={data}
-        scopeId={scopeId}
-        eventId={documentId}
-        noItemsMessage={
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.correlations.ancestryAlertsNoDataDescription"
-            defaultMessage="No alerts related by ancestry."
-          />
-        }
-        columns={columns}
-        data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}
-      />
+        </EuiCallOut>
+      ) : (
+        <CorrelationsDetailsAlertsTable
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.correlations.ancestryAlertsTitle"
+              defaultMessage="{count} {count, plural, one {alert} other {alerts}} related by ancestry"
+              values={{ count: dataCount }}
+            />
+          }
+          loading={loading}
+          alertIds={data}
+          scopeId={scopeId}
+          eventId={documentId}
+          noItemsMessage={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.correlations.ancestryAlertsNoDataDescription"
+              defaultMessage="No alerts related by ancestry."
+            />
+          }
+          columns={columns}
+          data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}
+        />
+      )}
     </>
   );
 };

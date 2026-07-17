@@ -15,12 +15,10 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
-  CORRELATIONS_ANCESTRY_SECTION_TABLE,
   CORRELATIONS_SESSION_SECTION_TABLE,
   CORRELATIONS_SOURCE_SECTION_TABLE,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel_correlations_tab';
 import {
-  clickExpandFromRelatedByAncestry,
   clickExpandFromRelatedBySession,
   clickExpandFromRelatedBySource,
   openCorrelationsTab,
@@ -152,10 +150,12 @@ describe(
     });
 
     it('should open a new flyout when footer link is clicked', () => {
-      cy.log('open alert preview from related alerts by ancestry');
-      // the new date time picker default to last one day and we don't have any alerts in that window
-      cy.get(CORRELATIONS_ANCESTRY_SECTION_TABLE).should('not.exist');
-      clickExpandFromRelatedByAncestry();
+      cy.log('open alert preview from related alerts by source event');
+      // the ancestry section's date picker defaults to the last 1 day, which has no alerts in
+      // this test's data, so this is driven from the source event section instead, which is
+      // unaffected by that change and still has data
+      cy.get(CORRELATIONS_SOURCE_SECTION_TABLE).should('exist');
+      clickExpandFromRelatedBySource();
 
       cy.log('Verify preview section is visible');
 
