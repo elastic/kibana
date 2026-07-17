@@ -90,7 +90,8 @@ describe.skip('render', () => {
             order: 0,
           }}
           parentApi={parentApi}
-          setControlPanelRef={jest.fn()}
+          index={0}
+          onKeyboardReorder={jest.fn()}
         />
       );
       await waitFor(() => {
@@ -111,7 +112,8 @@ describe.skip('render', () => {
             grow: true,
           }}
           parentApi={parentApi}
-          setControlPanelRef={jest.fn()}
+          index={0}
+          onKeyboardReorder={jest.fn()}
         />
       );
       await waitFor(() => {

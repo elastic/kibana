@@ -8,29 +8,16 @@
  */
 
 import { css } from '@emotion/react';
-import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { default as React, useCallback, useEffect, useMemo, useState } from 'react';
 import { distinctUntilChanged } from 'rxjs';
 
-import type { DragEndEvent } from '@dnd-kit/core';
-import {
-  DndContext,
-  DragOverlay,
-  KeyboardSensor,
-  MeasuringStrategy,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  arrayMove,
-  rectSortingStrategy,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
-import { EuiFlexGroup } from '@elastic/eui';
+import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+import { EuiFlexGroup, EuiScreenReaderOnly } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
+import { moveControlByStep, reorderControlsByEdge } from './components/drag_drop_reorder';
 import type { ControlsLayout, ControlsRendererParentApi } from './types';
 import { apiPublishesFocusedPanelId } from './utils';
 
@@ -43,12 +30,8 @@ export const ControlsRenderer = ({
   onControlsChanged: (controls: ControlsLayout) => void;
   parentApi: ControlsRendererParentApi;
 }) => {
-  const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
-  const setControlPanelRef = useCallback((id: string, ref: HTMLElement | null) => {
-    controlPanelRefs.current = { ...controlPanelRefs.current, [id]: ref };
-  }, []);
-
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
+  const [announcement, setAnnouncement] = useState('');
 
   const controlsInOrder: Array<ControlsLayout['controls'][string] & { id: string }> =
     useMemo(() => {
@@ -70,83 +53,90 @@ export const ControlsRenderer = ({
     }
   }, [parentApi]);
 
-  /** Handle drag and drop */
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
-  const [draggingId, setDraggingId] = useState<string | null>(null);
-  const onDragEnd = useCallback(
-    ({ over, active }: DragEndEvent) => {
-      const oldIndex = active?.data.current?.sortable.index;
-      const newIndex = over?.data.current?.sortable.index;
-      if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
-        const result = arrayMove([...controlsInOrder], oldIndex, newIndex);
-        onControlsChanged({
-          // based on the result of `arrayMove`, assign the order to each control
-          controls: result.reduce((prev, control, index) => {
-            const { id, ...rest } = control;
-            return { ...prev, [id!]: { ...rest, order: index } };
-          }, {}),
-        });
-      }
-      (document.activeElement as HTMLElement)?.blur(); // hide hover actions on drop; otherwise, they get stuck
-      setDraggingId(null);
+  /** Keyboard-driven reordering, triggered from each control's drag handle */
+  const onKeyboardReorder = useCallback(
+    (id: string, direction: 'back' | 'forward') => {
+      const result = moveControlByStep({
+        controls: controlState.controls,
+        id,
+        offset: direction === 'back' ? -1 : 1,
+      });
+      if (!result) return;
+      onControlsChanged({ controls: result.controls });
+      setAnnouncement(
+        i18n.translate('controls.controlGroup.ariaLive.controlMoved', {
+          defaultMessage: 'Control moved to position {position} of {total}',
+          values: { position: result.position + 1, total: result.total },
+        })
+      );
     },
-    [onControlsChanged, controlsInOrder]
+    [controlState.controls, onControlsChanged]
   );
+
+  /** Pointer drag-and-drop reordering, handled by a single monitor for the whole group */
+  useEffect(() => {
+    return monitorForElements({
+      canMonitor: ({ source }) =>
+        typeof source.data.id === 'string' && Boolean(controlState.controls[source.data.id]),
+      onDrop: ({ location, source }) => {
+        const target = location.current.dropTargets[0];
+        if (!target) return;
+
+        const sourceId = source.data.id;
+        const targetId = target.data.id;
+        if (typeof sourceId !== 'string' || typeof targetId !== 'string' || sourceId === targetId) {
+          return;
+        }
+
+        const result = reorderControlsByEdge({
+          controls: controlState.controls,
+          sourceId,
+          targetId,
+          closestEdge: extractClosestEdge(target.data),
+        });
+        if (result) {
+          onControlsChanged({ controls: result });
+        }
+
+        (document.activeElement as HTMLElement)?.blur(); // hide hover actions on drop; otherwise, they get stuck
+      },
+    });
+  }, [controlState.controls, onControlsChanged]);
 
   if (controlsInOrder.length === 0) {
     return null;
   }
 
   return (
-    <DndContext
-      onDragStart={({ active }) => {
-        setDraggingId(`${active.id}`);
-      }}
-      onDragEnd={onDragEnd}
-      onDragCancel={() => setDraggingId(null)}
-      sensors={sensors}
-      measuring={{
-        droppable: {
-          strategy: MeasuringStrategy.BeforeDragging,
-        },
-      }}
-    >
-      <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
-        <EuiFlexGroup
-          component="ul"
-          className={`controlGroup ${isEditFlyoutOpen ? 'controlsGroup--editing' : ''}`}
-          css={controlsGroupStyles.controlsGroup}
-          alignItems="center"
-          gutterSize="s"
-          wrap={true}
-          data-test-subj="controls-group-wrapper"
-        >
-          {controlsInOrder.map((control) => (
-            <ControlPanel
-              key={control.id}
-              parentApi={parentApi}
-              control={{
-                ...control,
-                id: control.id!,
-              }}
-              setControlPanelRef={setControlPanelRef}
-            />
-          ))}
-        </EuiFlexGroup>
-      </SortableContext>
-      <DragOverlay>
-        {draggingId ? (
-          <ControlClone
-            key={draggingId}
-            state={parentApi.getSerializedStateForChild(draggingId)}
-            width={controlPanelRefs.current[draggingId]?.getBoundingClientRect().width}
+    <>
+      <EuiFlexGroup
+        component="ul"
+        className={`controlGroup ${isEditFlyoutOpen ? 'controlsGroup--editing' : ''}`}
+        css={controlsGroupStyles.controlsGroup}
+        alignItems="center"
+        gutterSize="s"
+        wrap={true}
+        data-test-subj="controls-group-wrapper"
+      >
+        {controlsInOrder.map((control, index) => (
+          <ControlPanel
+            key={control.id}
+            parentApi={parentApi}
+            control={{
+              ...control,
+              id: control.id!,
+            }}
+            index={index}
+            onKeyboardReorder={onKeyboardReorder}
           />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+        ))}
+      </EuiFlexGroup>
+      <EuiScreenReaderOnly>
+        <div aria-live="assertive" role="status">
+          {announcement}
+        </div>
+      </EuiScreenReaderOnly>
+    </>
   );
 };
 
