@@ -234,7 +234,7 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
     (_context, req, res) =>
       res.ok({
         body: { cookie: req.headers.cookie ?? null },
-        headers: { 'set-cookie': 'inner=secret; Path=/' },
+        headers: { 'set-cookie': 'inner=value; Path=/' },
       })
   );
 
@@ -421,7 +421,7 @@ describe('Http self client', () => {
     it('does not forward Cookie or relay Set-Cookie', async () => {
       const response = await supertest
         .get('/self/call_cookie_target')
-        .set('cookie', 'outer=secret')
+        .set('cookie', 'outer=value')
         .expect(200, { cookie: null });
 
       expect(response.headers['set-cookie']).toBeUndefined();
@@ -445,7 +445,7 @@ describe('Http self client', () => {
       server = started.server;
 
       await started.supertest
-        .get('/self/not_opted?secret=query')
+        .get('/self/not_opted?filter=raw-value')
         .set('x-kbn-self-call', 'true')
         .expect(200, { ok: true });
 
@@ -461,7 +461,7 @@ describe('Http self client', () => {
         })
       );
       expect(JSON.stringify((started.logger.get().info as jest.Mock).mock.calls)).not.toContain(
-        'secret=query'
+        'filter=raw-value'
       );
 
       (started.logger.get().info as jest.Mock).mockClear();
