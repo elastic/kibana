@@ -14,7 +14,7 @@ import type {
   SnapshotSummary,
 } from '@kbn/slo-schema';
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { partition } from 'lodash';
+import { groupBy, partition } from 'lodash';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { DateRange, SLODefinition } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toDateRange, toErrorBudget } from '../domain/services';
@@ -58,13 +58,11 @@ export class SnapshotService {
     const uniqueIds = [...new Set(requests.map((r) => r.id))];
     const definitions = await this.repository.findAllByIds(uniqueIds);
     const definitionMap = new Map<string, SLODefinition>(definitions.map((d) => [d.id, d]));
-    const missingIds = new Set(uniqueIds.filter((id) => !definitionMap.has(id)));
-
     const results: SnapshotResult[] = [];
     const foundRequests: FoundRequest[] = [];
 
     for (const req of requests) {
-      if (missingIds.has(req.id)) {
+      if (!definitionMap.has(req.id)) {
         results.push({
           id: req.id,
           instanceId: req.instanceId ?? ALL_VALUE,
@@ -79,14 +77,7 @@ export class SnapshotService {
       return { at: at.toISOString(), results };
     }
 
-    const grouped = new Map<string, FoundRequest[]>();
-    for (const fr of foundRequests) {
-      const key = toTimeWindowKey(fr.slo);
-      if (!grouped.has(key)) grouped.set(key, []);
-      grouped.get(key)!.push(fr);
-    }
-
-    const groups = [...grouped.values()];
+    const groups = Object.values(groupBy(foundRequests, (fr) => toTimeWindowKey(fr.slo)));
     const groupResults = await Promise.allSettled(
       groups.map((group) => this.computeGroup(at, group))
     );
@@ -127,8 +118,7 @@ export class SnapshotService {
 
     const namedAggs: Record<string, AggregationsAggregationContainer> = {};
 
-    for (let i = 0; i < specifics.length; i++) {
-      const { slo, req } = specifics[i];
+    specifics.forEach(({ slo, req }, i) => {
       namedAggs[`specific_${i}`] = {
         filter: {
           bool: {
@@ -141,10 +131,9 @@ export class SnapshotService {
         },
         aggs: buildMetricAggs(slo),
       };
-    }
+    });
 
-    for (let i = 0; i < wildcards.length; i++) {
-      const { slo } = wildcards[i];
+    wildcards.forEach(({ slo }, i) => {
       namedAggs[`wildcard_${i}`] = {
         filter: {
           bool: {
@@ -158,7 +147,7 @@ export class SnapshotService {
           },
         },
       };
-    }
+    });
 
     const response = await this.esClient.search({
       index: SLI_DESTINATION_INDEX_PATTERN,
@@ -185,20 +174,18 @@ export class SnapshotService {
     const aggs = response.aggregations as Record<string, unknown> | undefined;
     const results: SnapshotResult[] = [];
 
-    for (let i = 0; i < specifics.length; i++) {
-      const { slo, req } = specifics[i];
+    specifics.forEach(({ slo, req }, i) => {
       const bucket = aggs?.[`specific_${i}`] as AggBucket | undefined;
       const good = bucket?.good?.value ?? 0;
       const total = bucket?.total?.value ?? 0;
       results.push({
         id: slo.id,
         instanceId: req.instanceId!,
-        summary: toSnapshotSummary(slo, good, total, dateRange),
+        summary: toSnapshotSummary(slo, good, total, fullRange),
       });
-    }
+    });
 
-    for (let i = 0; i < wildcards.length; i++) {
-      const { slo } = wildcards[i];
+    wildcards.forEach(({ slo }, i) => {
       const wildcardAgg = aggs?.[`wildcard_${i}`] as
         | { instances?: { buckets?: TermsBucket[] } }
         | undefined;
@@ -211,11 +198,11 @@ export class SnapshotService {
           results.push({
             id: slo.id,
             instanceId: b.key,
-            summary: toSnapshotSummary(slo, b.good.value, b.total.value, dateRange),
+            summary: toSnapshotSummary(slo, b.good.value, b.total.value, fullRange),
           });
         }
       }
-    }
+    });
 
     return results;
   }
@@ -247,11 +234,13 @@ const toSnapshotSummary = (
   slo: SLODefinition,
   good: number,
   total: number,
-  dateRange: DateRange
+  // sliceRange must be the full (unclamped) time-window period so the timeslices denominator
+  // matches historical_summary_client and summary_client: slices with no data count as good.
+  sliceRange: DateRange
 ): SnapshotSummary => {
   const sliValue =
     timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && slo.objective.timesliceWindow
-      ? computeSLI(good, total, getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow))
+      ? computeSLI(good, total, getSlicesFromDateRange(sliceRange, slo.objective.timesliceWindow))
       : computeSLI(good, total);
 
   if (sliValue < 0) {
@@ -265,11 +254,7 @@ const toSnapshotSummary = (
   return {
     status: computeSummaryStatus(slo.objective, sliValue, errorBudget),
     sliValue,
-    errorBudget: {
-      initial: errorBudget.initial,
-      consumed: errorBudget.consumed,
-      remaining: errorBudget.remaining,
-    },
+    errorBudget,
     good,
     total,
   };

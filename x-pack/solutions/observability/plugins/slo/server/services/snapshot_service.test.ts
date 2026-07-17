@@ -273,6 +273,54 @@ describe('SnapshotService', () => {
       expect(rangeFilter.range['@timestamp'].lte).toBe('2024-01-10T10:00:00.000Z');
     });
 
+    it('uses the full calendar period for the timeslices denominator, not the elapsed portion', async () => {
+      // ISO week of 2024-01-08 (Mon 00:00Z) → 2024-01-14 (Sun 23:59:59.999Z).
+      // moment.diff in minutes = 10079  ⇒  Math.ceil(10079 / 2) = 5040 slices (full period).
+      // timesliceWindow = 2 minutes.
+      // Snapshot at 2024-01-10T10:00Z (~2.4 days elapsed).
+      // Elapsed: Math.ceil(3480 / 2) = 1740 slices.
+      // good=100, total=200.
+      //
+      // Correct (full-period denominator):   SLI = 1 - (200 - 100) / 5040 ≈ 0.98016
+      // Wrong   (clamped/elapsed denom):     SLI = 1 - (200 - 100) / 1740 ≈ 0.94253
+      //
+      // The two values are far enough apart to catch the regression unambiguously.
+      const slo = createSLOWithTimeslicesBudgetingMethod({
+        id: 'slo-cal-timeslices',
+        timeWindow: weeklyCalendarAligned(),
+      });
+      repositoryMock.findAllByIds.mockResolvedValueOnce([slo]);
+
+      esClientMock.search.mockResolvedValueOnce(
+        buildEsResponse({
+          specific_0: { doc_count: 200, good: { value: 100 }, total: { value: 200 } },
+        }) as any
+      );
+
+      const midWeek = new Date('2024-01-10T10:00:00.000Z');
+      const service = createService();
+      const result = await service.bulkCompute(midWeek, [
+        { id: 'slo-cal-timeslices', instanceId: 'inst-1' },
+      ]);
+
+      // Query is still clamped to `at`
+      const searchCall = esClientMock.search.mock.calls[0][0] as any;
+      const rangeFilter = searchCall.query.bool.filter.find(
+        (f: { range?: unknown }) => f.range !== undefined
+      );
+      expect(rangeFilter.range['@timestamp'].lte).toBe('2024-01-10T10:00:00.000Z');
+
+      // SLI must use the full 7-day period (2520 slices), not the elapsed ~2.4 days
+      const item = result.results[0];
+      expect(item).toMatchObject({ id: 'slo-cal-timeslices', instanceId: 'inst-1' });
+      if ('summary' in item) {
+        // Full-period: 1 - (200 - 100) / 5040 ≈ 0.98016
+        expect(item.summary.sliValue).toBeCloseTo(1 - 100 / 5040, 4);
+        // Elapsed-period value (wrong): 1 - 100 / 1740 ≈ 0.94253 — must not match
+        expect(item.summary.sliValue).not.toBeCloseTo(1 - 100 / 1740, 3);
+      }
+    });
+
     it('returns per-item errors when a time-window group query fails', async () => {
       const slo1 = createSLO({ id: 'slo-1', timeWindow: sevenDaysRolling() });
       const slo2 = createSLO({ id: 'slo-2', timeWindow: thirtyDaysRolling() });
