@@ -84,6 +84,7 @@
     "@kbn/apm-utils",
     "@kbn/es-query",
     "@kbn/actions-utils",
-    "@kbn/datemath"
+    "@kbn/datemath",
+    "@kbn/core-http-server-utils"
   ]
 }
