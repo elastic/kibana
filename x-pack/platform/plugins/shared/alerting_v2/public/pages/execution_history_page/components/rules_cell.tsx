@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import type { PolicyExecutionHistoryItem } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 interface Props {
   rules: PolicyExecutionHistoryItem['rules'];
@@ -37,6 +37,12 @@ export const RulesCell = ({
   onRuleClick,
   canReadRules,
 }: Props) => {
+  const getClickProps = useCallback(
+    (ruleId: string, label: string) =>
+      canReadRules ? { onClick: () => onRuleClick(ruleId), onClickAriaLabel: label } : {},
+    [canReadRules, onRuleClick]
+  );
+
   if (totalRuleCount === 0) return null;
   const visible = rules.slice(0, maxVisibleRules);
   const hiddenRules = rules.slice(maxVisibleRules);
@@ -47,9 +53,7 @@ export const RulesCell = ({
       {visible.map((rule) => {
         const isActive = rule.id === activeRuleId;
         const label = rule.name ?? rule.id;
-        const clickProps = canReadRules
-          ? { onClick: () => onRuleClick(rule.id), onClickAriaLabel: label }
-          : {};
+        const clickProps = getClickProps(rule.id, label);
         return (
           <EuiBadge
             key={rule.id}
@@ -87,6 +91,18 @@ const OverflowPopover = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const total = hiddenRules.length + notShownCount;
+
+  const getRuleClickHandler = useCallback(
+    (ruleId: string) =>
+      canReadRules
+        ? () => {
+            setIsOpen(false);
+            onRuleClick(ruleId);
+          }
+        : undefined,
+    [canReadRules, onRuleClick]
+  );
+
   return (
     <EuiPopover
       isOpen={isOpen}
@@ -124,14 +140,7 @@ const OverflowPopover = ({
                 iconType="bell"
                 label={label}
                 title={label}
-                onClick={
-                  canReadRules
-                    ? () => {
-                        setIsOpen(false);
-                        onRuleClick(rule.id);
-                      }
-                    : undefined
-                }
+                onClick={getRuleClickHandler(rule.id)}
               />
             );
           })}

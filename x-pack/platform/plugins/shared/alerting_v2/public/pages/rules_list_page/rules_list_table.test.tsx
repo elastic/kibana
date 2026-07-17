@@ -546,11 +546,13 @@ describe('RulesListTable', () => {
       expect(screen.queryByTestId('clearSelectionButton')).not.toBeInTheDocument();
     });
 
-    it('still renders the enabled switch but disables it', () => {
+    it('hides the enabled switch and shows a read-only status badge instead', () => {
       renderTable({ canWrite: false });
 
-      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeDisabled();
-      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-2')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledBadge-rule-1')).toHaveTextContent('Enabled');
+      expect(screen.getByTestId('ruleEnabledBadge-rule-2')).toHaveTextContent('Disabled');
     });
 
     it('keeps read-only affordances (name link, expand) available', () => {

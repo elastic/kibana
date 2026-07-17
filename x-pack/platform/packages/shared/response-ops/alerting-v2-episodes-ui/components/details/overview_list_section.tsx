@@ -10,13 +10,12 @@ import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
-import { isRuleError, isRuleLoaded } from '../../types/rule_state';
-import { isRuleForbiddenError } from '../../utils/is_rule_forbidden_error';
+import { isRuleError, isRuleForbidden, isRuleLoaded, isRuleNotFound } from '../../types/rule_state';
 import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../hooks/use_fetch_group_actions';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
 import { parseEpisodeDataJson } from '../../utils/episode_grouping_data';
-import { AlertEpisodeOverviewList } from './overview_list';
+import { AlertEpisodeOverviewList, type GroupingRowStatus } from './overview_list';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 
@@ -44,7 +43,7 @@ export const AlertEpisodeOverviewListSection = ({
   const triggeredAt = episode?.triggered_at;
   const durationMs = episode?.duration;
 
-  const { ruleState, error: ruleError } = useFetchRule({ id: ruleId, http: services.http });
+  const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
 
   const {
     data: episodeActionsMap,
@@ -70,12 +69,7 @@ export const AlertEpisodeOverviewListSection = ({
     dataViews: services.dataViews,
     http: services.http,
   });
-
-  // A forbidden rule (403) must not fail the whole episode overview.
-  const isGroupingForbidden = isRuleError(ruleState) && isRuleForbiddenError(ruleError);
-  const isRuleFatalError = isRuleError(ruleState) && !isGroupingForbidden;
-
-  if (isEpisodeError || isRuleFatalError || isEpisodeActionsError || isGroupActionsError) {
+  if (isEpisodeError || isEpisodeActionsError || isGroupActionsError) {
     return (
       <EuiText size="s" color="danger" data-test-subj="alertingV2EpisodeOverviewListSectionError">
         {i18n.OVERVIEW_LIST_SECTION_LOAD_ERROR}
@@ -90,6 +84,12 @@ export const AlertEpisodeOverviewListSection = ({
   }
 
   const groupingFields = isRuleLoaded(ruleState) ? ruleState.rule.grouping?.fields ?? [] : [];
+  const groupingStatus: GroupingRowStatus =
+    isRuleForbidden(ruleState) || isRuleNotFound(ruleState)
+      ? 'hidden'
+      : isRuleError(ruleState)
+      ? 'error'
+      : 'visible';
   const groupingData = parseEpisodeDataJson(episode?.episode_data);
   const assigneeUid = episode?.last_assignee_uid ?? undefined;
   const episodeAction = episodeActionsMap?.get(episodeId);
@@ -100,7 +100,7 @@ export const AlertEpisodeOverviewListSection = ({
       groupingFields={groupingFields}
       groupingData={groupingData}
       groupingDataView={sourceDataView}
-      isGroupingForbidden={isGroupingForbidden}
+      groupingStatus={groupingStatus}
       triggeredAt={triggeredAt}
       durationMs={durationMs}
       assigneeUid={assigneeUid}

@@ -342,8 +342,29 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         ),
         width: '8%',
         sortable: true,
-        render: (enabled: boolean, rule: RuleApiResponse) =>
-          togglingRuleId === rule.id ? (
+        render: (enabled: boolean, rule: RuleApiResponse) => {
+          if (!canWrite) {
+            return (
+              <EuiBadge
+                color={enabled ? 'success' : 'default'}
+                data-test-subj={`ruleEnabledBadge-${rule.id}`}
+              >
+                {enabled ? (
+                  <FormattedMessage
+                    id="xpack.alertingV2.rulesList.column.enabled.enabledBadge"
+                    defaultMessage="Enabled"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.alertingV2.rulesList.column.enabled.disabledBadge"
+                    defaultMessage="Disabled"
+                  />
+                )}
+              </EuiBadge>
+            );
+          }
+
+          return togglingRuleId === rule.id ? (
             <EuiLoadingSpinner data-test-subj={`ruleEnabledSpinner-${rule.id}`} size="m" />
           ) : (
             <EuiSwitch
@@ -354,11 +375,12 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                 values: { ruleName: rule.metadata?.name ?? rule.id },
               })}
               checked={enabled}
-              disabled={!canWrite || Boolean(togglingRuleId) || Boolean(isBulkTogglingEnabled)}
+              disabled={Boolean(togglingRuleId) || Boolean(isBulkTogglingEnabled)}
               onChange={() => onToggleEnabled(rule)}
               data-test-subj={`ruleEnabledSwitch-${rule.id}`}
             />
-          ),
+          );
+        },
       },
       ...(canWrite
         ? ([

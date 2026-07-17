@@ -1188,7 +1188,7 @@ describe('RulesListPage', () => {
       expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
     });
 
-    it('renders the enabled switch as disabled', () => {
+    it('hides the enabled switch and shows a read-only status badge instead', () => {
       mockUseFetchRules.mockReturnValue({
         data: { items: mockRules, total: 2, page: 1, perPage: 20 },
         isLoading: false,
@@ -1198,7 +1198,8 @@ describe('RulesListPage', () => {
 
       renderPage();
 
-      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeDisabled();
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledBadge-rule-1')).toHaveTextContent('Enabled');
     });
   });
 

@@ -15,7 +15,6 @@ import {
   isRuleLoaded,
   isRuleLoading,
 } from '../../types/rule_state';
-import { isRuleForbiddenError } from '../../utils/is_rule_forbidden_error';
 import { getRuleDetailsPath } from '../../constants';
 import { AlertEpisodeRuleOverviewPanel } from './rule_overview_panel';
 import type { AlertEpisodeDetailsServices } from './types';
@@ -38,7 +37,7 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
 
   const ruleId = episode?.['rule.id'];
 
-  const { ruleState, error: ruleError } = useFetchRule({
+  const { ruleState } = useFetchRule({
     id: ruleId,
     http: services.http,
   });
@@ -51,12 +50,6 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
       />
     );
   }
-
-  // Hide the rule overview when the user lacks permission to read the rule (403).
-  if (isRuleError(ruleState) && isRuleForbiddenError(ruleError)) {
-    return null;
-  }
-
   if (isEpisodeError || isRuleError(ruleState)) {
     return (
       <EuiEmptyPrompt
