@@ -40,6 +40,15 @@ interface ResolvedAgent {
  * agent_id resolution attempted via `platform.core.execute_esql` or
  * `platform.core.search`. This tool exists so `osquery.run_live_query` always
  * has a working host -> agent_id path regardless of the caller's ES privileges.
+ *
+ * A host can have MULTIPLE agent enrollments over its lifetime (reinstall,
+ * agent upgrade, re-enrollment after a broken install) — Fleet keeps the old
+ * (offline/uninstalled) records around alongside the current one, all
+ * matching the same `local_metadata.host.hostname`. Picking the first match
+ * with no ordering previously returned a stale agent id nondeterministically,
+ * which silently broke every downstream `run_live_query`/`get_endpoint_status`
+ * call against that "resolved" but dead agent. Always prefer an `online`
+ * agent, and within ties prefer the most recently enrolled one.
  */
 export const resolveAgentIdsTool = (
   osqueryContext: OsqueryAppContext,
@@ -93,16 +102,26 @@ export const resolveAgentIdsTool = (
         });
 
       const resolved: ResolvedAgent[] = hostnames.map((hostname) => {
-        const match = agents.find(
+        const matches = agents.filter(
           (a) =>
             a.local_metadata?.host?.hostname === hostname ||
             a.local_metadata?.host?.name === hostname
         );
 
+        // Prefer the currently online agent; among ties (or if none are
+        // online) prefer the most recently enrolled — see the multi-
+        // enrollment note above.
+        const best = [...matches].sort((a, b) => {
+          const aOnline = a.status === 'online' ? 1 : 0;
+          const bOnline = b.status === 'online' ? 1 : 0;
+          if (aOnline !== bOnline) return bOnline - aOnline;
+          return (b.enrolled_at ?? '').localeCompare(a.enrolled_at ?? '');
+        })[0];
+
         return {
           hostname,
-          agent_id: match?.id ?? null,
-          status: match?.status ?? null,
+          agent_id: best?.id ?? null,
+          status: best?.status ?? null,
         };
       });
 
