@@ -24,3 +24,8 @@ export interface MarkReadConversationResponse {
   id: string;
   read: boolean;
 }
+
+export interface MarkPinnedConversationResponse {
+  id: string;
+  pinned: boolean;
+}
