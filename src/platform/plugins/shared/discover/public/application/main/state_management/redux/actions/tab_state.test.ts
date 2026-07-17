@@ -299,6 +299,7 @@ describe('tab_state actions', () => {
       const dataView = dataViewMockWithTimeField;
 
       const query = { query: "foo: 'bar'", language: 'kuery' };
+      const columns = ['message', 'bytes'];
       const filters = [{ meta: { index: 'the-data-view-id' }, query: { match_all: {} } }];
       internalState.dispatch(
         internalStateActions.setGlobalState({
@@ -311,6 +312,7 @@ describe('tab_state actions', () => {
           tabId,
           appState: {
             query,
+            columns,
             dataSource: {
               type: DataSourceType.DataView,
               dataViewId: 'the-data-view-id',
@@ -328,6 +330,7 @@ describe('tab_state actions', () => {
       const prevDefaultProfileState = tab.defaultProfileState;
 
       expect(tab.appState.query).toStrictEqual(query);
+      expect(tab.appState.columns).toEqual(columns);
       expect(tab.appState.sort).toEqual([
         ['@timestamp', 'asc'],
         ['bytes', 'desc'],
@@ -344,7 +347,7 @@ describe('tab_state actions', () => {
       expect(prevDefaultProfileState.resetId).not.toEqual('');
       expect(prevDefaultProfileState.snapshotsByProfileId[profileId]).toEqual({
         breakdownField: undefined,
-        columns: undefined,
+        columns,
         hideChart: undefined,
         hideTable: undefined,
         rowHeight: undefined,
@@ -366,6 +369,7 @@ describe('tab_state actions', () => {
       expect(tab.appState.query).toStrictEqual({
         esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""")',
       });
+      expect(tab.appState.columns).toEqual(columns);
       expect(tab.appState.sort).toBeUndefined();
       expect(tab.globalState.filters).toStrictEqual([]);
       expect(tab.appState.filters).toStrictEqual([]);
@@ -373,11 +377,17 @@ describe('tab_state actions', () => {
         type: DataSourceType.Esql,
       });
 
-      expect(tab.defaultProfileState.fieldsToReset).toBe('all');
+      expect(tab.defaultProfileState.fieldsToReset).toEqual([
+        'rowHeight',
+        'breakdownField',
+        'hideChart',
+        'hideTable',
+        'hideSidebar',
+      ]);
       expect(typeof tab.defaultProfileState.resetId).toBe('string');
       expect(tab.defaultProfileState.snapshotsByProfileId[profileId]).toEqual({
         breakdownField: undefined,
-        columns: [],
+        columns,
         hideChart: undefined,
         hideTable: undefined,
         rowHeight: undefined,

@@ -44,6 +44,7 @@ import type {
 } from '../types';
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
+import { getFieldsToReset } from '../../utils/default_profile_state';
 
 export interface RawAppStatePayload {
   appState: DiscoverAppState;
@@ -273,11 +274,19 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
   function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
-    // Mark all profile state fields to reset when transitioning to ES|QL mode
+    // Preserve the selected columns when transitioning to ES|QL mode while resetting the
+    // remaining profile state fields that can differ between query modes.
     dispatch(
       internalStateSlice.actions.setProfileStateFieldsToReset({
         tabId,
-        fieldsToReset: 'all',
+        fieldsToReset: getFieldsToReset({
+          columns: false,
+          rowHeight: true,
+          breakdownField: true,
+          hideChart: true,
+          hideTable: true,
+          hideSidebar: true,
+        }),
       })
     );
 
@@ -299,7 +308,6 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
           dataSource: {
             type: DataSourceType.Esql,
           },
-          columns: [],
           sort: undefined,
         },
       })
