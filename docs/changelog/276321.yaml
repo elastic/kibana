@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/276321
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+areas:
+- Alerting and reporting
+title: Fix OAuth token parsing for 2xx non-200 responses

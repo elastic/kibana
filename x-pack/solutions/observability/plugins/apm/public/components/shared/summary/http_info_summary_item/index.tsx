@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/react';
 import { HttpStatusCode } from '@kbn/apm-ui-shared';
-import { unit } from '../../../../utils/style';
+import { unit } from '@kbn/apm-common';
 
 const urlStyles = css`
   display: inline-block;

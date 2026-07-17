@@ -69,14 +69,29 @@ export const getFilteredLinks = async (
   );
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
+  const enableAlertsAndAttacksAlignment = core.uiSettings.get(
+    ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+    experimentalFeatures.enableAlertsAndAttacksAlignment
+  );
 
   return Object.freeze([
     dashboardsLinks,
-    core.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
-      ? alertDetectionsLinks
-      : alertsLink,
+    enableAlertsAndAttacksAlignment ? alertDetectionsLinks : alertsLink,
     alertSummaryLink,
-    attackDiscoveryLinks,
+    // When the new Attacks page is enabled, we hide the legacy Attack Discovery link
+    // from both the side navigation and the global navigation. However, we keep it in
+    // the appLinks array so that SecurityRoutePageWrapper still considers the route
+    // authorized/available, allowing our custom redirect logic in routes.tsx to execute.
+    ...(enableAlertsAndAttacksAlignment
+      ? [
+          {
+            ...attackDiscoveryLinks,
+            sideNavDisabled: true,
+            globalNavPosition: undefined,
+            globalSearchDisabled: true,
+          },
+        ]
+      : [attackDiscoveryLinks]),
     findingsLinks,
     casesLinks,
     filteredConfigurationsLinks,

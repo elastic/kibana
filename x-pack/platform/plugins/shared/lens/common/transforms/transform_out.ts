@@ -11,6 +11,7 @@ import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-com
 import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
 import { flow } from 'lodash';
 import { transformToV1LensItemAttributes } from '../content_management/v1';
 import { transformToV2LensItemAttributes } from '../content_management/v2';
@@ -23,6 +24,7 @@ import type {
 import { findLensReference } from './utils';
 import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
 import { stripInheritedContext } from './helpers';
+import { toLegacyDurationUnits } from './ga_schema_validator';
 
 /**
  * Transform from Lens Stored State to Lens API format
@@ -32,7 +34,13 @@ export const getTransformOut = (
   transformDrilldownsOut: DrilldownTransforms['transformOut'],
   isDashboardAppRequest: boolean
 ): LensTransformOut => {
-  return function transformOut(storedState, panelReferences) {
+  return function transformOut(
+    storedState,
+    panelReferences,
+    containerReferences,
+    id,
+    useGASchemas = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+  ) {
     const transformsFlow = flow(
       transformTitlesOut<LensSerializedState>,
       transformTimeRangeOut<LensSerializedState>,
@@ -64,7 +72,16 @@ export const getTransformOut = (
       return injectedState as LensByValueTransformOutResult;
     }
 
-    const chartType = builder.getType(migratedAttributes);
+    // Use the reference-injected attributes (not `migratedAttributes`) so the
+    // resolved/remapped panel references win over the chart's embedded ones.
+    // When a dashboard is copied to another space, SO import remaps the panel
+    // `index-pattern` references; `toAPIFormat` reads data view ids from the
+    // attributes' references, so it must see the remapped ids. Otherwise the
+    // panel keeps the original (wrong-space) data view id and fails to render.
+    // See https://github.com/elastic/kibana/issues/268821.
+    const injectedAttributes = injectedState.attributes ?? migratedAttributes;
+
+    const chartType = builder.getType(injectedAttributes);
     // should be filtered out my unmapped panel check
     if (!builder.isSupported(chartType)) {
       throw new Error(`Lens "${chartType}" chart type is not supported`);
@@ -75,8 +92,8 @@ export const getTransformOut = (
       description: attributesDescription,
       ...apiConfig
     } = builder.toAPIFormat({
-      ...migratedAttributes,
-      visualizationType: migratedAttributes.visualizationType ?? LENS_UNKNOWN_VIS,
+      ...injectedAttributes,
+      visualizationType: injectedAttributes.visualizationType ?? LENS_UNKNOWN_VIS,
     });
 
     // For by-value panels the panel-level title/description take precedence and the
@@ -96,12 +113,18 @@ export const getTransformOut = (
         ? { description: attributesDescription }
         : {};
 
-    return {
+    let apiPanelConfig = {
       ...titleFallback,
       ...descriptionFallback,
       ...state,
       ...apiConfig,
     } satisfies LensByValueTransformOutResult;
+
+    if (!useGASchemas) {
+      apiPanelConfig = toLegacyDurationUnits(apiPanelConfig);
+    }
+
+    return apiPanelConfig;
   };
 };
 

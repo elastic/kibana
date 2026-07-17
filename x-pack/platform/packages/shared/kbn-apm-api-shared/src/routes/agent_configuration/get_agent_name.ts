@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 
 export interface AgentConfigurationAgentNameResponse {
@@ -13,7 +13,7 @@ export interface AgentConfigurationAgentNameResponse {
 
 export const agentConfigurationAgentNameRoute = defineRoute<AgentConfigurationAgentNameResponse>()({
   endpoint: 'GET /api/apm/settings/agent-configuration/agent_name 2023-10-31',
-  params: t.type({
-    query: t.type({ serviceName: t.string }),
+  params: z.object({
+    query: z.object({ serviceName: z.string() }),
   }),
 });

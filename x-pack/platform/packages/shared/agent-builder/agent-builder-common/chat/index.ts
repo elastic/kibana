@@ -9,10 +9,11 @@ export {
   ConversationAccessControlMode,
   getDefaultConversationAccessControl,
   type ConversationAccessControl,
-} from './access_control/types';
+} from './access_control';
 export {
   ConversationRoundStatus,
   ConversationDisplayStatus,
+  ConversationOriginType,
   type ConversationAction,
   type RoundInput,
   type ConverseInput,
@@ -20,6 +21,10 @@ export {
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
+  type ConversationOrigin,
+  type ConversationOriginAuthor,
+  type RoundInputOrigin,
+  type ConversationRoundOrigin,
   type ConversationInternalState,
   type TodoItem,
   type TodoStatus,

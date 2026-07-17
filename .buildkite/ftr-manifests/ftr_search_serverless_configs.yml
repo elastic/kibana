@@ -17,7 +17,6 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group1.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group2.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group3.ts
-  - x-pack/platform/test/serverless/functional/configs/search/config.group4.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group5.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group6.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.reporting.ts
@@ -33,5 +32,4 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group17.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group18.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group19.ts
-  - x-pack/platform/test/serverless/functional/configs/search/config.group20.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.feature_flags.ts

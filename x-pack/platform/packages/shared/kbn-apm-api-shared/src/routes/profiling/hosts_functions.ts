@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
 import type { TopNFunctions } from '@kbn/profiling-utils';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt, kueryRt, serviceTransactionDataSourceRt } from '../../default_api_types';
+import {
+  rangeSchema,
+  kuerySchema,
+  serviceTransactionDataSourceSchema,
+} from '../../default_api_types';
 
 export interface ProfilingHostsFunctionsResponse {
   functions: TopNFunctions;
@@ -19,14 +22,12 @@ export interface ProfilingHostsFunctionsResponse {
 
 export const profilingHostsFunctionsRoute = defineRoute<ProfilingHostsFunctionsResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/profiling/hosts/functions',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      rangeRt,
-      environmentRt,
-      serviceTransactionDataSourceRt,
-      t.type({ startIndex: toNumberRt, endIndex: toNumberRt }),
-      kueryRt,
-    ]),
+  params: z.object({
+    path: z.object({ serviceName: z.string() }),
+    query: rangeSchema
+      .merge(environmentSchema)
+      .merge(serviceTransactionDataSourceSchema)
+      .merge(z.object({ startIndex: z.coerce.number(), endIndex: z.coerce.number() }))
+      .merge(kuerySchema),
   }),
 });
