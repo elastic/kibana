@@ -106,8 +106,55 @@ export const useConversationListMutations = ({
     [updateReadStatus]
   );
 
+  const updatePinnedStatus = useCallback(
+    (conversationId: string, pinned: boolean) => {
+      queryClient.setQueryData<Conversation>(
+        queryKeys.conversations.byId(conversationId),
+        (current) => {
+          if (!current) return current;
+          return produce(current, (draft) => {
+            draft.pinned = pinned;
+          });
+        }
+      );
+
+      queryClient.setQueryData<ConversationWithoutRounds[]>(listQueryKey, (current) => {
+        if (!current) return current;
+        return produce(current, (draft) => {
+          const conv = draft.find((c) => c.id === conversationId);
+          if (conv) {
+            conv.pinned = pinned;
+          }
+        });
+      });
+
+      conversationsService.updatePinnedStatus({ conversationId, pinned }).catch(() => {
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
+        queryClient.invalidateQueries({ queryKey: listQueryKey });
+      });
+    },
+    [conversationsService, queryClient, listQueryKey]
+  );
+
+  const markAsPinned = useCallback(
+    (conversationId: string) => updatePinnedStatus(conversationId, true),
+    [updatePinnedStatus]
+  );
+
+  const markAsUnpinned = useCallback(
+    (conversationId: string) => updatePinnedStatus(conversationId, false),
+    [updatePinnedStatus]
+  );
+
   return useMemo(
-    () => ({ deleteConversation, renameConversation, markAsRead, markAsUnread }),
-    [deleteConversation, renameConversation, markAsRead, markAsUnread]
+    () => ({
+      deleteConversation,
+      renameConversation,
+      markAsRead,
+      markAsUnread,
+      markAsPinned,
+      markAsUnpinned,
+    }),
+    [deleteConversation, renameConversation, markAsRead, markAsUnread, markAsPinned, markAsUnpinned]
   );
 };
