@@ -41,11 +41,11 @@ Setup: <connector name>, role: <role>
 Specs: <URL or file path to PRD / acceptance criteria / design doc>   # optional
 Session-timeout: 90    # optional, total session cap in minutes (default 90)
 Session-dir: .exploratory-session/entity-analytics-20260714-093022  # optional — resume a prior session
-Environment: profile <name>  # optional — load a saved environment profile from .exploratory-session/environments/<name>.json
+Environment: profile <name>  # optional — or just: Environment: <name> if the profile file exists
 Session-config: <path>       # optional — read all inputs from a YAML file instead of this block
 ```
 
-Guided intake: if `Area`/`Flows` missing, the agent asks interactively with defaults (`phases/0-setup.md`). Environment profiles: `Environment: profile <name>` loads a saved profile; create one with `Environment: profile save` (`phases/0-setup.md`). Session-config: `Session-config: <path>` reads all inputs from YAML; copy `templates/session.example.yaml` as a template.
+Guided intake: if `Area`/`Flows` missing, the agent asks interactively with defaults (`phases/0-setup.md`). Environment profiles: `Environment: profile <name>` loads a saved profile; the agent offers to save a new profile after validating a user-provided environment (`phases/0-setup.md`). Session-config: `Session-config: <path>` reads all inputs from YAML; copy `templates/session.example.yaml` as a template.
 
 Each session writes its output to an isolated subfolder of `.exploratory-session/` named `<area-slug>-<YYYYMMDD-HHMMSS>`, so multiple agents can run sessions in parallel without interfering. To resume a prior session, pass its folder path as `Session-dir:`.
 

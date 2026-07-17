@@ -108,14 +108,15 @@ Resolve env var references in credentials (`$VAR` → environment variable value
 If this is a newly typed user-provided environment (not loaded from a profile), offer once:
 > _"Would you like to save this environment as a reusable profile so you don't have to retype
 > credentials next time? I'll write it to `.exploratory-session/environments/<name>.json`
-> (already gitignored). Prefer `$VAR` references for secrets — they never land on disk in plain
-> text. Reply with a profile name, `skip`, or `$var` to use environment variable references."_
+> (already gitignored). Reply with a profile name or `skip`."_
 
 Wait for the reply:
-- **A name** (e.g. `staging`): write the profile file — see `templates/environment-profile.example.json`
-  for the schema. If the user said `$var`, write `$KIBANA_TEST_URL`, `$KIBANA_TEST_USERNAME`,
-  `$KIBANA_TEST_PASSWORD`, `$KIBANA_API_KEY` as the field values (resolve them at load time, not
-  now). Tell the user: _"Profile saved at `.exploratory-session/environments/staging.json`."_
+- **A name** (e.g. `staging`): ask a follow-up: _"Use `$VAR` environment variable references for
+  secrets? (yes / no — inline values)"_. If yes, write `$KIBANA_TEST_URL`, `$KIBANA_TEST_USERNAME`,
+  `$KIBANA_TEST_PASSWORD`, `$KIBANA_API_KEY` as the field values (resolved at load time, not now).
+  If no, write the literal resolved values. Either way, use the schema from
+  `templates/environment-profile.example.json`. Tell the user:
+  _"Profile saved at `.exploratory-session/environments/<name>.json`."_
 - **`skip`** or no reply / anything unrecognised: continue without saving. Do not ask again.
 
 ---
@@ -218,9 +219,9 @@ immediately before asking the next.
    >   c) Load a saved profile (profile name?)"_
 
    - **Option a**: use `stateful-classic` default; no further credential questions.
-   - **Option b**: ask for `url`, `username`, `password`, `api-key` (remind user: Kibana-native key
-     from Stack Management → API Keys, not an ES key), `space` [exploratory-testing], `role`
-     [platform_engineer].
+   - **Option b**: ask for `url`, `username`, `password` (tip: use `$KIBANA_TEST_PASSWORD`),
+     `api-key` (Kibana-native key from Stack Management → API Keys, not an ES key — tip: use
+     `$KIBANA_API_KEY`), `space` [exploratory-testing], `role` [platform_engineer].
    - **Option c**: ask for profile name, load `.exploratory-session/environments/<name>.json`.
 
 4. **Setup / role** (if not provided):
@@ -238,6 +239,8 @@ After collecting all answers, summarise what was collected and ask:
 > <W>. Proceed? (yes / adjust)"_
 
 If the user says "adjust", revisit the specific item they name and re-ask just that question.
+
+Once the user confirms, proceed to Step 0c.
 
 ---
 
