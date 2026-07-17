@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
 
@@ -43,58 +44,69 @@ const SIGNAL_DESCRIPTION = i18n.translate(
   }
 );
 
-const MODE_OPTIONS: Array<{
-  value: RuleKind;
-  inputDisplay: string;
-  dropdownDisplay: React.ReactNode;
-}> = [
-  {
-    value: 'alert',
-    inputDisplay: ALERT_TITLE,
-    dropdownDisplay: (
-      <>
-        <strong>{ALERT_TITLE}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{ALERT_DESCRIPTION}</p>
-        </EuiText>
-      </>
-    ),
-  },
-  {
-    value: 'signal',
-    inputDisplay: SIGNAL_TITLE,
-    dropdownDisplay: (
-      <>
-        <strong>{SIGNAL_TITLE}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{SIGNAL_DESCRIPTION}</p>
-        </EuiText>
-      </>
-    ),
-  },
-];
+const ALERT_CARD_ID = 'modeSelectAlert';
+const SIGNAL_CARD_ID = 'modeSelectSignal';
+const RADIO_GROUP_NAME = 'ruleKindMode';
+
+const cardStyle = css`
+  width: 100%;
+`;
 
 /**
  * Presentational Mode select. Switches a rule between `alert` (stateful lifecycle)
- * and `signal` (stateless detection) modes. Each option renders its title and a
- * description in the dropdown.
+ * and `signal` (stateless detection) modes using checkable cards.
  */
 export const ModeSelect = ({
   value,
   onChange,
   disabled = false,
-  compressed = false,
   'data-test-subj': dataTestSubj = 'ruleV2ModeSelect',
-}: ModeSelectProps) => (
-  <EuiFormRow label={LABEL_TEXT} fullWidth>
-    <EuiSuperSelect<RuleKind>
-      options={MODE_OPTIONS}
-      valueOfSelected={value}
-      onChange={onChange}
-      disabled={disabled}
-      compressed={compressed}
-      fullWidth
-      data-test-subj={dataTestSubj}
-    />
-  </EuiFormRow>
-);
+}: ModeSelectProps) => {
+  const handleAlertChange = useCallback(() => onChange('alert'), [onChange]);
+  const handleSignalChange = useCallback(() => onChange('signal'), [onChange]);
+
+  return (
+    <EuiFormRow label={LABEL_TEXT} fullWidth data-test-subj={dataTestSubj}>
+      <EuiFlexGroup gutterSize="s" direction="row">
+        <EuiFlexItem>
+          <EuiCheckableCard
+            id={ALERT_CARD_ID}
+            name={RADIO_GROUP_NAME}
+            checked={value === 'alert'}
+            disabled={disabled}
+            onChange={handleAlertChange}
+            css={cardStyle}
+            data-test-subj="modeSelectAlertCard"
+            label={
+              <>
+                <strong>{ALERT_TITLE}</strong>
+                <EuiText size="xs" color="subdued">
+                  <p>{ALERT_DESCRIPTION}</p>
+                </EuiText>
+              </>
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCheckableCard
+            id={SIGNAL_CARD_ID}
+            name={RADIO_GROUP_NAME}
+            checked={value === 'signal'}
+            disabled={disabled}
+            onChange={handleSignalChange}
+            css={cardStyle}
+            data-test-subj="modeSelectSignalCard"
+            label={
+              <>
+                <strong>{SIGNAL_TITLE}</strong>
+                <EuiText size="xs" color="subdued">
+                  <p>{SIGNAL_DESCRIPTION}</p>
+                </EuiText>
+              </>
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+};

@@ -485,13 +485,14 @@ describe('shell shared fields', () => {
     expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
   });
 
-  it('disables ModeSelect when query is not committed', () => {
+  it('disables ModeSelect cards when query is not committed', () => {
     renderShell({ step: 1, queryCommitted: false });
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
+    expect(screen.getByTestId('modeSelectAlertCard')).toBeDisabled();
+    expect(screen.getByTestId('modeSelectSignalCard')).toBeDisabled();
   });
 
-  it('disables ModeSelect in edit mode', () => {
+  it('disables ModeSelect cards in edit mode', () => {
     const services = { ...createMockServices(), dashboard: mockDashboard };
     render(
       <ComposeDiscoverForm
@@ -505,18 +506,21 @@ describe('shell shared fields', () => {
       { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES }, services) }
     );
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
+    expect(screen.getByTestId('modeSelectAlertCard')).toBeDisabled();
+    expect(screen.getByTestId('modeSelectSignalCard')).toBeDisabled();
   });
 
-  it('enables ModeSelect in create mode when query is committed and sandbox is closed', () => {
+  it('enables ModeSelect cards in create mode when query is committed and sandbox is closed', () => {
     renderShell({ step: 1, queryCommitted: true, childOpen: false });
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).not.toBeDisabled();
+    expect(screen.getByTestId('modeSelectAlertCard')).not.toBeDisabled();
+    expect(screen.getByTestId('modeSelectSignalCard')).not.toBeDisabled();
   });
 
-  it('disables ModeSelect when sandbox is open', () => {
+  it('disables ModeSelect cards when sandbox is open', () => {
     renderShell({ step: 1, queryCommitted: true, childOpen: true });
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
+    expect(screen.getByTestId('modeSelectAlertCard')).toBeDisabled();
+    expect(screen.getByTestId('modeSelectSignalCard')).toBeDisabled();
   });
 });

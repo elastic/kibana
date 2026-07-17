@@ -12,33 +12,38 @@ import { ModeSelect } from './mode_select';
 
 // Failing: See https://github.com/elastic/kibana/issues/277206
 describe.skip('ModeSelect', () => {
-  it('renders the Mode label and the selected value', () => {
+  it('renders the Mode label and both options', () => {
     render(<ModeSelect value="alert" onChange={jest.fn()} />);
 
     expect(screen.getByText('Mode')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleV2ModeSelect')).toHaveTextContent('Alert');
+    expect(screen.getByText('Alert')).toBeInTheDocument();
+    expect(screen.getByText('Signal')).toBeInTheDocument();
   });
 
-  it('calls onChange with the selected kind', async () => {
+  it('calls onChange with signal when signal card is clicked', async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     const onChange = jest.fn();
     render(<ModeSelect value="alert" onChange={onChange} />);
 
-    await user.click(screen.getByTestId('ruleV2ModeSelect'));
-    await user.click(screen.getByText('Signal'));
+    await user.click(screen.getByTestId('modeSelectSignalCard'));
 
     expect(onChange).toHaveBeenCalledWith('signal');
   });
 
-  it('honors a custom data-test-subj', () => {
-    render(<ModeSelect value="signal" onChange={jest.fn()} data-test-subj="customMode" />);
+  it('calls onChange with alert when alert card is clicked', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const onChange = jest.fn();
+    render(<ModeSelect value="signal" onChange={onChange} />);
 
-    expect(screen.getByTestId('customMode')).toHaveTextContent('Signal');
+    await user.click(screen.getByTestId('modeSelectAlertCard'));
+
+    expect(onChange).toHaveBeenCalledWith('alert');
   });
 
-  it('disables the select when disabled', () => {
+  it('disables both cards when disabled', () => {
     render(<ModeSelect value="alert" onChange={jest.fn()} disabled />);
 
-    expect(screen.getByTestId('ruleV2ModeSelect')).toBeDisabled();
+    expect(screen.getByTestId('modeSelectAlertCard')).toBeDisabled();
+    expect(screen.getByTestId('modeSelectSignalCard')).toBeDisabled();
   });
 });
