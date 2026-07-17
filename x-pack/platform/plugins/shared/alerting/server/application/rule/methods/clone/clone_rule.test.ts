@@ -28,6 +28,11 @@ import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { validateScheduleLimit } from '../get_schedule_frequency';
+
+jest.mock('../get_schedule_frequency', () => ({
+  validateScheduleLimit: jest.fn(),
+}));
 
 describe('clone', () => {
   const taskManager = taskManagerMock.createStart();
@@ -81,6 +86,7 @@ describe('clone', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (validateScheduleLimit as jest.Mock).mockResolvedValue(null);
     getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
     rulesClient = new RulesClient(rulesClientParams);
   });
@@ -114,7 +120,10 @@ describe('clone', () => {
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(disabledRule);
       unsecuredSavedObjectsClient.create.mockResolvedValue(disabledRule);
 
-      await rulesClient.clone({ id: 'test-rule', newId: 'cloned-rule' });
+      await rulesClient.clone({
+        id: disabledRule.id,
+        newId: 'cloned-rule',
+      });
 
       const createdAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain;
       expect(createdAttributes.apiKey).toBeNull();
@@ -171,13 +180,115 @@ describe('clone', () => {
         enabled: true,
       });
 
-      await rulesClient.clone({ id: 'test-rule', newId: 'cloned-rule' });
+      await rulesClient.clone({
+        id: enabledRule.id,
+        newId: 'cloned-rule',
+      });
 
       const createdAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain;
       expect(createdAttributes.apiKey).toBe(freshApiKey);
       expect(createdAttributes.apiKeyOwner).toBe('elastic');
       expect(createdAttributes.apiKeyCreatedByUser).toBe(false);
       expect(createdAttributes.uiamApiKey).not.toBe(sourceUiamApiKey);
+    });
+  });
+
+  describe('schedule limit', () => {
+    const baseRule = {
+      id: 'test-rule',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        name: 'My rule',
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [],
+        executionStatus: {},
+        apiKey: null,
+      },
+      references: [],
+    };
+
+    taskManager.schedule.mockResolvedValue({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+
+    it('does not call validateScheduleLimit when the rule is disabled', async () => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...baseRule,
+        attributes: { ...baseRule.attributes, enabled: false },
+      });
+      unsecuredSavedObjectsClient.create.mockResolvedValue(baseRule);
+
+      await rulesClient.clone({
+        id: baseRule.id,
+        newId: 'cloned-rule',
+      });
+
+      expect(validateScheduleLimit).not.toHaveBeenCalled();
+    });
+
+    it('calls validateScheduleLimit with the correct interval when the rule is enabled', async () => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...baseRule,
+        attributes: { ...baseRule.attributes, enabled: true },
+      });
+      unsecuredSavedObjectsClient.create.mockResolvedValue(baseRule);
+      taskManager.schedule.mockResolvedValueOnce({
+        id: 'scheduled-task-id',
+        taskType: 'alerting:123',
+        scheduledAt: new Date(),
+        attempts: 1,
+        status: TaskStatus.Idle,
+        runAt: new Date(),
+        startedAt: null,
+        retryAt: null,
+        state: {},
+        params: {},
+        ownerId: null,
+        enabled: true,
+      });
+
+      await rulesClient.clone({
+        id: baseRule.id,
+        newId: 'cloned-rule',
+      });
+
+      expect(validateScheduleLimit).toHaveBeenCalledWith(
+        expect.objectContaining({ updatedInterval: '10s' })
+      );
+    });
+
+    it('throws a circuit breaker error when the schedule limit is exceeded', async () => {
+      (validateScheduleLimit as jest.Mock).mockResolvedValue({
+        interval: 100,
+        intervalAvailable: 50,
+      });
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...baseRule,
+        attributes: { ...baseRule.attributes, enabled: true },
+      });
+
+      await expect(
+        rulesClient.clone({
+          id: baseRule.id,
+          newId: 'cloned-rule',
+        })
+      ).rejects.toThrow(/Error validating circuit breaker/i);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
   });
 

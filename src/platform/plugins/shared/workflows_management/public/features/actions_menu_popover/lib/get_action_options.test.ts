@@ -92,6 +92,7 @@ describe('getActionOptions', () => {
         id: 'cases.updated',
         title: 'Case updated',
         description: 'When a case is created or updated.',
+        stability: 'tech_preview',
       },
     ]);
 
@@ -102,10 +103,81 @@ describe('getActionOptions', () => {
     if (triggersGroup && isActionGroup(triggersGroup)) {
       const builtInCount = 3;
       expect(triggersGroup.options).toHaveLength(builtInCount + 1);
+
       const casesOption = triggersGroup.options.find((opt) => opt.id === 'cases.updated');
       expect(casesOption).toBeDefined();
       if (casesOption && isActionOption(casesOption)) {
         expect(casesOption.stability).toBe('tech_preview');
+      }
+      expect(triggersGroup.options.find((opt) => opt.id === 'triggers.cases')).toBeUndefined();
+    }
+  });
+
+  it('should group registered triggers by namespace inside the triggers menu', () => {
+    (triggerSchemas.getTriggerDefinitions as jest.Mock).mockReturnValueOnce([
+      {
+        id: 'cases.caseCreated',
+        title: 'Cases - Case created',
+        description: 'When a case is created.',
+        stability: 'tech_preview',
+      },
+      {
+        id: 'cases.caseUpdated',
+        title: 'Cases - Case updated',
+        description: 'When a case is updated.',
+        stability: 'tech_preview',
+      },
+      {
+        id: 'alerting.ruleCreated',
+        title: 'Alerting - Rule created',
+        description: 'When a rule is created.',
+        stability: 'tech_preview',
+      },
+    ]);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const triggersGroup = result.find((group) => group.id === 'triggers');
+
+    expect(triggersGroup).toBeDefined();
+    if (triggersGroup && isActionGroup(triggersGroup)) {
+      expect(triggersGroup.options.slice(0, 3).map((opt) => opt.id)).toEqual([
+        'manual',
+        'alert',
+        'scheduled',
+      ]);
+      expect(triggersGroup.options.slice(3).map((opt) => opt.id)).toEqual([
+        'alerting.ruleCreated',
+        'triggers.cases',
+      ]);
+    }
+  });
+
+  it('should set pathIds on trigger namespace groups for navigation from search', () => {
+    (triggerSchemas.getTriggerDefinitions as jest.Mock).mockReturnValueOnce([
+      {
+        id: 'cases.caseCreated',
+        title: 'Cases - Case created',
+        description: 'When a case is created.',
+        stability: 'tech_preview',
+      },
+      {
+        id: 'cases.caseUpdated',
+        title: 'Cases - Case updated',
+        description: 'When a case is updated.',
+        stability: 'tech_preview',
+      },
+    ]);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const triggersGroup = result.find((group) => group.id === 'triggers');
+
+    expect(triggersGroup).toBeDefined();
+    if (triggersGroup && isActionGroup(triggersGroup)) {
+      expect(triggersGroup.pathIds).toEqual(['triggers']);
+      const casesGroup = triggersGroup.options.find((opt) => opt.id === 'triggers.cases');
+      expect(casesGroup).toBeDefined();
+      if (casesGroup && isActionGroup(casesGroup)) {
+        expect(casesGroup.pathIds).toEqual(['triggers', 'triggers.cases']);
       }
     }
   });
@@ -116,12 +188,13 @@ describe('getActionOptions', () => {
 
     expect(flowControlGroup).toBeDefined();
     if (flowControlGroup && 'options' in flowControlGroup) {
-      expect(flowControlGroup.options).toHaveLength(8);
+      expect(flowControlGroup.options).toHaveLength(9);
       expect(flowControlGroup.options.map((opt) => opt.id)).toEqual([
         'if',
         'switch',
         'foreach',
         'while',
+        'parallel',
         'wait',
         'waitForInput',
         'workflow.execute',
