@@ -47,6 +47,39 @@ describe('Edit ', () => {
     expect(screen.queryByTestId(confirmTestId)).not.toBeInTheDocument();
   });
 
+  it('shows the optional label when the field is not required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          customField={customField}
+          customFieldConfiguration={{ ...customFieldConfiguration, required: false }}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('form-optional-field-label')).toBeInTheDocument();
+  });
+
+  it('does not show the optional label when the field is required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId(formFieldTestId)).toBeInTheDocument();
+    expect(screen.queryByTestId('form-optional-field-label')).not.toBeInTheDocument();
+  });
+
   it('disables the field if the user does not have permissions', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>

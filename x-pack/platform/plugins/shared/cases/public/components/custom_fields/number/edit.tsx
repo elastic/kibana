@@ -22,6 +22,7 @@ import type { CustomFieldType } from '../types';
 import { POPULATED_WITH_DEFAULT } from '../translations';
 import { getNumberFieldConfig } from './config';
 import { InlineFieldActions } from '../../templates_v2/field_types/controls/inline_field_actions';
+import { OptionalFieldLabel } from '../../optional_field_label';
 
 const isEmpty = (value: number | null | undefined) => {
   return value == null;
@@ -85,11 +86,17 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
         label={customFieldConfiguration.label}
         helpText={populatedWithDefault && POPULATED_WITH_DEFAULT}
         componentProps={{
-          labelAppend: isLoading ? (
-            <EuiLoadingSpinner
-              data-test-subj={`case-number-custom-field-loading-${customFieldConfiguration.key}`}
-            />
-          ) : undefined,
+          labelAppend:
+            !customFieldConfiguration.required || isLoading ? (
+              <>
+                {!customFieldConfiguration.required ? OptionalFieldLabel : null}
+                {isLoading ? (
+                  <EuiLoadingSpinner
+                    data-test-subj={`case-number-custom-field-loading-${customFieldConfiguration.key}`}
+                  />
+                ) : null}
+              </>
+            ) : undefined,
           euiFieldProps: {
             fullWidth: true,
             disabled: isLoading || !canUpdate,
