@@ -99,7 +99,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
             objectType={embeddable.getTypeDisplayName?.() ?? embeddable.type}
             closeFlyout={closeFlyout}
             isByReference={isByReference}
-            exportJson={(byReference = false) => {
+            getExportJson={(byReference = false) => {
               if (supportsByReference && !byReference) {
                 return embeddable.getSerializedStateByValue();
               } else {
@@ -111,7 +111,10 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
                 buildPath(`${DASHBOARD_INTERNAL_API_PATH}/_sanitize`),
                 {
                   version: '1',
-                  body: JSON.stringify({ type: embeddable.type, config: state }),
+                  body: JSON.stringify({
+                    type: embeddable.type,
+                    config: state,
+                  }),
                 }
               );
               return {

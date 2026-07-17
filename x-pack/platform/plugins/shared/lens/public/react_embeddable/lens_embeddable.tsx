@@ -203,10 +203,7 @@ export const createLensEmbeddableFactory = (
           ...integrationsConfig.api,
           ...stateConfig.api,
           ...dashboardConfig.api,
-          supportsJsonExport: Boolean(
-            builder?.isEnabled &&
-              builder?.isSupported(builder?.getType(initialRuntimeState.attributes))
-          ),
+          supportsJsonExport: true,
           apiPath: LENS_VIS_API_PATH,
         }
       );

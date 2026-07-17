@@ -46,13 +46,13 @@ const ExportDashboardJsonFlyout = ({ closeFlyout }: { closeFlyout: () => void })
     'exportDerivatives'
   );
   const typedSharingData = sharingData as unknown as ExportJsonSharingData<DashboardState>;
-  const { title, exportJson, isByReference } = typedSharingData;
+  const { title, getExportJson, isByReference } = typedSharingData;
 
   return (
     <ExportJsonFlyout<DashboardState, DashboardSanitizeResponseBody['data']>
       apiPath={DASHBOARD_API_PATH}
       closeFlyout={closeFlyout}
-      exportJson={exportJson}
+      getExportJson={getExportJson}
       isByReference={isByReference}
       objectType={objectTypeAlias ?? objectType.toLocaleLowerCase()}
       sanitizeState={sanitizeDashboard}

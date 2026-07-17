@@ -56,7 +56,7 @@ export const ExportJsonFlyout = <
   title,
   objectType,
   closeFlyout,
-  exportJson,
+  getExportJson,
   isByReference = false,
   apiPath,
   sanitizeState,
@@ -67,7 +67,7 @@ export const ExportJsonFlyout = <
   sanitizeState: SanitizeStateFunction<State, SanitizedState>;
 }) => {
   const [exportFullState, setExportFullState] = useState<boolean>(false);
-  const state = useMemo(() => exportJson(!exportFullState), [exportJson, exportFullState]);
+  const state = useMemo(() => getExportJson(!exportFullState), [getExportJson, exportFullState]);
 
   const { status, data, warnings, error, retry } = useSanitizedState<State, SanitizedState>({
     state,

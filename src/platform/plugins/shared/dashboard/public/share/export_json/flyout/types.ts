@@ -12,7 +12,7 @@ export type ExportJsonStatus = 'loading' | 'success' | 'error';
 export interface ExportJsonSharingData<State extends object> {
   title: string;
   isByReference?: boolean;
-  exportJson: (byReference?: boolean) => State;
+  getExportJson: (byReference?: boolean) => State;
 }
 
 export interface ExportJsonSanitizedState<SanitizedState extends object> {
