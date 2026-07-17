@@ -19,16 +19,19 @@ import { normalizeVegaSpec } from './normalize_spec';
 import { validateVegaSpec } from './vega_validator';
 import {
   createAuthorVegaSpecPrompt,
+  radarEsqlAdditionalInstructions,
   sunburstEsqlAdditionalInstructions,
   vegaEsqlAdditionalInstructions,
 } from './prompts';
 import { buildReferenceExamplesBlock } from './reference_examples';
 import { resolveDialectGate } from './dialect_gate';
 import {
-  SUNBURST_DISCLOSED_FALLBACK_CONTEXT,
+  disclosedFallbackContextForCatalog,
   formatParentChildIntegrityError,
-  hasParentChildColumns,
+  formatRadarIntegrityError,
+  isRawVegaCatalogId,
   validateParentChildRows,
+  validateRadarRows,
   type VegaCatalogId,
   type VegaDialect,
 } from './dialect';
@@ -137,6 +140,11 @@ const VegaStateAnnotation = Annotation.Root({
     reducer: (_, newValue) => newValue,
     default: () => false,
   }),
+  /** Catalog that triggered disclosed VL fallback (for authoring disclosure text). */
+  disclosedFallbackCatalog: Annotation<VegaCatalogId>({
+    reducer: (_, newValue) => newValue,
+    default: () => 'none' as VegaCatalogId,
+  }),
   /**
    * Whether the model has already been given one authoring pass with the Vega
    * warnings in hand. After that pass we accept its judgment (fix or keep) and
@@ -187,9 +195,22 @@ export const createVegaGraph = async (
     return {
       catalogId: gate.catalogId,
       dialect: gate.dialect,
-      // Sunburst comes with its own Raw Vega example; VL selection may still run.
+      // Allowlisted Raw Vega comes with its own example; VL selection may still run.
       referenceExamples: gate.referenceExamples || state.referenceExamples,
     };
+  };
+
+  const catalogEsqlExtraInstructions = (catalogId: VegaCatalogId, dialect: VegaDialect): string => {
+    if (dialect !== 'vega') {
+      return vegaEsqlAdditionalInstructions;
+    }
+    if (catalogId === 'sunburst') {
+      return `${vegaEsqlAdditionalInstructions}\n${sunburstEsqlAdditionalInstructions}`;
+    }
+    if (catalogId === 'radar') {
+      return `${vegaEsqlAdditionalInstructions}\n${radarEsqlAdditionalInstructions}`;
+    }
+    return vegaEsqlAdditionalInstructions;
   };
 
   // Resolve the ES|QL query and its result columns. A query may reference
@@ -197,15 +218,13 @@ export const createVegaGraph = async (
   // server-side. Kibana binds the live range at render time.
   const generateESQLNode = async (state: VegaState) => {
     const timeRangeParams = buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE);
-    const extraInstructions =
-      state.catalogId === 'sunburst' && state.dialect === 'vega'
-        ? `${vegaEsqlAdditionalInstructions}\n${sunburstEsqlAdditionalInstructions}`
-        : vegaEsqlAdditionalInstructions;
+    const extraInstructions = catalogEsqlExtraInstructions(state.catalogId, state.dialect);
 
     let action: GenerateEsqlAction;
     let dialect = state.dialect;
     let catalogId = state.catalogId;
     let disclosedFallback = state.disclosedFallback;
+    let disclosedFallbackCatalog = state.disclosedFallbackCatalog;
     let referenceExamples = state.referenceExamples;
 
     try {
@@ -277,7 +296,7 @@ export const createVegaGraph = async (
           };
         }
         query = generated.query;
-        // Prefer a fresh execute so sunburst integrity can inspect result rows.
+        // Prefer a fresh execute so catalog integrity can inspect result rows.
         // Fall back to generation-time columns only when execute fails but the
         // generator already returned columns; otherwise surface the execute error.
         try {
@@ -291,15 +310,31 @@ export const createVegaGraph = async (
         }
       }
 
-      // Sunburst: single-root Parent–child table; every parent id must exist as
-      // an id (leaf-only / multiple-roots tables break Vega stratify).
-      if (catalogId === 'sunburst' && dialect === 'vega') {
-        let integrity = validateParentChildRows({ columns, values });
+      // Allowlisted Raw Vega: catalog-specific row integrity (one regenerate, then
+      // disclosed Vega-Lite fallback). Headless validation stubs empty data, so
+      // data-dependent transform failures must be caught here.
+      if (isRawVegaCatalogId(catalogId) && dialect === 'vega') {
+        const checkIntegrity = (): { ok: boolean; error: string; label: string } => {
+          if (catalogId === 'radar') {
+            const integrity = validateRadarRows({ columns, values });
+            return {
+              ok: integrity.ok,
+              error: formatRadarIntegrityError(integrity),
+              label: 'radar',
+            };
+          }
+          const integrity = validateParentChildRows({ columns, values });
+          return {
+            ok: integrity.ok,
+            error: formatParentChildIntegrityError(integrity),
+            label: 'sunburst',
+          };
+        };
 
-        // One regeneration pass when the hierarchy is not stratify-ready.
+        let integrity = checkIntegrity();
+
         if (!integrity.ok && query) {
-          const integrityError = formatParentChildIntegrityError(integrity);
-          logger.warn(`${integrityError}; regenerating ES|QL once`);
+          logger.warn(`${integrity.error}; regenerating ES|QL once`);
 
           const regenerated = await generateVisualizationEsql({
             nlQuery: state.nlQuery,
@@ -310,7 +345,7 @@ export const createVegaGraph = async (
             logger,
             esClient,
             timeRange: DEFAULT_VALIDATION_TIME_RANGE,
-            extraInstructions: `${extraInstructions}\n\n## Fix required\n${integrityError}`,
+            extraInstructions: `${extraInstructions}\n\n## Fix required\n${integrity.error}`,
           });
 
           if (regenerated.query) {
@@ -324,14 +359,15 @@ export const createVegaGraph = async (
                 throw executeError;
               }
             }
-            integrity = validateParentChildRows({ columns, values });
+            integrity = checkIntegrity();
           }
         }
 
         if (!integrity.ok) {
           logger.warn(
-            'Sunburst selected but ES|QL did not yield a usable Parent–child table; falling back to Vega-Lite with disclosure'
+            `${integrity.label} selected but ES|QL did not yield a usable table; falling back to Vega-Lite with disclosure`
           );
+          disclosedFallbackCatalog = catalogId;
           dialect = 'vega-lite';
           catalogId = 'none';
           disclosedFallback = true;
@@ -353,6 +389,7 @@ export const createVegaGraph = async (
       dialect,
       catalogId,
       disclosedFallback,
+      disclosedFallbackCatalog,
       referenceExamples,
     };
   };
@@ -409,7 +446,9 @@ export const createVegaGraph = async (
       .filter(Boolean)
       .join('\n');
 
-    const fallbackContext = state.disclosedFallback ? SUNBURST_DISCLOSED_FALLBACK_CONTEXT : '';
+    const fallbackContext = state.disclosedFallback
+      ? disclosedFallbackContextForCatalog(state.disclosedFallbackCatalog)
+      : '';
     const retryContext = previousContext
       ? `Previous attempts:\n${previousContext}\n\nReturn a single valid JSON object matching the response schema ("title" and "spec"). Fix any error above. For each warning, decide for yourself whether it signals a real authoring mistake (e.g. an encoding or property Vega dropped or ignored) and fix it, or whether it is harmless or unavoidable and can be left as-is (validation runs against empty sample data, so warnings about empty/infinite extents or disabled external data loading are expected). If a warning needs no change, keep that part of the spec unchanged.`
       : '';
@@ -425,6 +464,7 @@ export const createVegaGraph = async (
       referenceExamples: state.referenceExamples,
       additionalContext,
       dialect: state.dialect,
+      catalogId: state.catalogId,
     });
 
     let action: AuthorSpecAction;

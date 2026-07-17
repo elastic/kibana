@@ -36,6 +36,13 @@ describe('selectVegaCatalogId', () => {
     );
   });
 
+  it('returns radar when the classifier selects it', async () => {
+    const { model } = mockModel({ catalogId: 'radar' });
+    await expect(selectVegaCatalogId({ nlQuery: 'radar of metrics', model })).resolves.toBe(
+      'radar'
+    );
+  });
+
   it('returns none for unrelated catalog values and on failure', async () => {
     const { model } = mockModel({ catalogId: 'sankey' });
     await expect(selectVegaCatalogId({ nlQuery: 'sankey', model })).resolves.toBe('none');
@@ -52,16 +59,37 @@ describe('selectVegaCatalogId', () => {
 });
 
 describe('resolveDialectGate', () => {
-  it('pins Raw Vega from an existing spec without calling the classifier', async () => {
+  it('pins Raw Vega from an existing sunburst spec without calling the classifier', async () => {
     const { model, invoke } = mockModel({ catalogId: 'none' });
     const gate = await resolveDialectGate({
       nlQuery: 'make it blue',
-      existingSpec: JSON.stringify({ $schema: VEGA_SCHEMA, marks: [] }),
+      existingSpec: JSON.stringify({
+        $schema: VEGA_SCHEMA,
+        data: [{ transform: [{ type: 'stratify' }] }],
+        marks: [],
+      }),
       model,
     });
 
     expect(gate).toMatchObject({ catalogId: 'sunburst', dialect: 'vega' });
     expect(gate.referenceExamples).toContain('Sunburst');
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it('pins Raw Vega radar from an existing radar spec without calling the classifier', async () => {
+    const { model, invoke } = mockModel({ catalogId: 'none' });
+    const gate = await resolveDialectGate({
+      nlQuery: 'make it blue',
+      existingSpec: JSON.stringify({
+        $schema: VEGA_SCHEMA,
+        scales: [{ name: 'angular' }, { name: 'radial' }],
+        marks: [],
+      }),
+      model,
+    });
+
+    expect(gate).toMatchObject({ catalogId: 'radar', dialect: 'vega' });
+    expect(gate.referenceExamples).toContain('Radar');
     expect(invoke).not.toHaveBeenCalled();
   });
 
@@ -75,5 +103,17 @@ describe('resolveDialectGate', () => {
     expect(gate.dialect).toBe('vega');
     expect(gate.catalogId).toBe('sunburst');
     expect(gate.referenceExamples).toContain('stratify');
+  });
+
+  it('selects radar for new radar visualizations', async () => {
+    const { model } = mockModel({ catalogId: 'radar' });
+    const gate = await resolveDialectGate({
+      nlQuery: 'radar chart of latency dimensions',
+      model,
+    });
+
+    expect(gate.dialect).toBe('vega');
+    expect(gate.catalogId).toBe('radar');
+    expect(gate.referenceExamples).toContain('linear-closed');
   });
 });

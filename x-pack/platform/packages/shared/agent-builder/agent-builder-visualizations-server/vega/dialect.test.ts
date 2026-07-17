@@ -12,9 +12,13 @@ import {
   dialectFromSpec,
   formatMissingParentsError,
   formatParentChildIntegrityError,
+  formatRadarIntegrityError,
   hasParentChildColumns,
+  hasRadarColumns,
+  inferRawVegaCatalogId,
   isRawVegaSchema,
   validateParentChildRows,
+  validateRadarRows,
 } from './dialect';
 
 describe('dialect helpers', () => {
@@ -142,5 +146,100 @@ describe('validateParentChildRows', () => {
     expect(formatParentChildIntegrityError({ ok: false, reason: 'no_root' })).toContain(
       'no root row'
     );
+  });
+});
+
+describe('validateRadarRows', () => {
+  const columns = [
+    { name: 'key', type: 'keyword' as const },
+    { name: 'value', type: 'long' as const },
+  ];
+
+  it('detects radar columns with aliases', () => {
+    expect(hasRadarColumns(columns)).toBe(true);
+    expect(
+      hasRadarColumns([
+        { name: 'category', type: 'keyword' },
+        { name: 'metric', type: 'double' },
+      ])
+    ).toBe(true);
+    expect(hasRadarColumns([{ name: 'key', type: 'keyword' }])).toBe(false);
+  });
+
+  it('passes for ≥3 distinct keys with numeric values', () => {
+    expect(
+      validateRadarRows({
+        columns,
+        values: [
+          ['A', 1],
+          ['B', 2],
+          ['C', 3],
+        ],
+      })
+    ).toEqual({ ok: true });
+  });
+
+  it('passes vacuously when there are no rows', () => {
+    expect(validateRadarRows({ columns, values: [] })).toEqual({ ok: true });
+  });
+
+  it('fails when there are fewer than 3 distinct keys', () => {
+    expect(
+      validateRadarRows({
+        columns,
+        values: [
+          ['A', 1],
+          ['B', 2],
+        ],
+      })
+    ).toEqual({ ok: false, reason: 'too_few_keys', keyCount: 2 });
+  });
+
+  it('fails when values are non-numeric', () => {
+    expect(
+      validateRadarRows({
+        columns,
+        values: [
+          ['A', 'x'],
+          ['B', 2],
+          ['C', 3],
+        ],
+      })
+    ).toEqual({ ok: false, reason: 'non_numeric_values' });
+  });
+
+  it('formats radar regeneration errors', () => {
+    expect(formatRadarIntegrityError({ ok: false, reason: 'too_few_keys', keyCount: 1 })).toContain(
+      'at least 3'
+    );
+    expect(formatRadarIntegrityError({ ok: false, reason: 'missing_columns' })).toContain(
+      'key/value'
+    );
+  });
+});
+
+describe('inferRawVegaCatalogId', () => {
+  it('infers sunburst from stratify/partition transforms', () => {
+    expect(
+      inferRawVegaCatalogId({
+        $schema: VEGA_SCHEMA,
+        data: [{ transform: [{ type: 'stratify' }, { type: 'partition' }] }],
+      })
+    ).toBe('sunburst');
+  });
+
+  it('infers radar from angular/radial scales or linear-closed marks', () => {
+    expect(
+      inferRawVegaCatalogId({
+        $schema: VEGA_SCHEMA,
+        scales: [{ name: 'angular' }, { name: 'radial' }],
+      })
+    ).toBe('radar');
+    expect(
+      inferRawVegaCatalogId({
+        $schema: VEGA_SCHEMA,
+        marks: [{ encode: { enter: { interpolate: { value: 'linear-closed' } } } }],
+      })
+    ).toBe('radar');
   });
 });

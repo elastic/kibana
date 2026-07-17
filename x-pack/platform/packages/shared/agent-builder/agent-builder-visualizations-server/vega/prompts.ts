@@ -8,8 +8,8 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { VegaDialect } from './dialect';
-import { CANONICAL_ESQL_SOURCE_NAME } from './dialect';
+import type { VegaCatalogId, VegaDialect } from './dialect';
+import { CANONICAL_ESQL_SOURCE_NAME, RADAR_MIN_KEYS } from './dialect';
 
 // Vega-specific ES|QL guidance; see issue #275519 for the time-filtering quirk.
 export const vegaEsqlAdditionalInstructions = `
@@ -68,6 +68,46 @@ Rules:
 - Keep column names exactly \`id\`, \`parent\`, \`name\`, and \`value\` when possible.
 - Still obey the Vega time-range and dotted-field rules above when the index is time-based.`;
 
+/** Extra ES|QL instructions when authoring a Radar key/value table. */
+export const radarEsqlAdditionalInstructions = `
+## Radar / spider rows (required)
+
+This query feeds a Raw Vega radar chart. Emit a flat table with:
+- \`key\`: axis / spoke label (keyword/string) — the multivariate dimension
+- \`value\`: numeric measure on that axis (COUNT, SUM, AVG, …)
+- \`series\` (optional): series / group label when comparing multiple radars on one chart
+
+CRITICAL — radar integrity:
+- At least ${RADAR_MIN_KEYS} distinct \`key\` values (a radar with fewer spokes is not useful).
+- \`value\` must be numeric for every row.
+- Prefer a modest number of axes (about 5–8) so labels stay readable — SORT + LIMIT when needed.
+- For a single series, either omit \`series\` or set a constant (e.g. \`EVAL series = "all"\`).
+- For multi-series, emit one row per (series, key) pair with the same key set across series when possible.
+
+Recommended single-series pattern:
+
+\`\`\`esql
+FROM kibana_sample_data_flights
+| WHERE OriginCountry IS NOT NULL
+| STATS value = COUNT() BY key = OriginCountry
+| SORT value DESC
+| LIMIT 6
+\`\`\`
+
+Recommended multi-series pattern (same keys across series):
+
+\`\`\`esql
+FROM kibana_sample_data_flights
+| WHERE OriginCountry IS NOT NULL AND Cancelled IS NOT NULL
+| STATS value = COUNT() BY series = Cancelled, key = OriginCountry
+| SORT value DESC
+| LIMIT 24
+\`\`\`
+
+Rules:
+- Keep column names exactly \`key\`, \`value\`, and optional \`series\` when possible.
+- Still obey the Vega time-range and dotted-field rules above when the index is time-based.`;
+
 const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
   if (!columns || columns.length === 0) {
     return 'No column information is available; infer fields from the ES|QL query.';
@@ -103,7 +143,7 @@ const createVegaLiteAuthorPrompt = ({
       'system',
       `You are a Vega-Lite visualization expert. Author a single valid Vega-Lite (v6) specification for the user's request.
 
-Author Vega-Lite ONLY — never raw Vega (v5). Use Vega-Lite for charts a standard Lens chart cannot express, for example faceted charts / small multiples, layered or combination charts (e.g. bars with an overlaid line), or scatter/bubble plots with an encoded size. If the request needs a diagram Vega-Lite cannot express (e.g. Sankey / flow, network, chord, radar) and it is not an allowlisted Raw Vega chart the system already selected, build the closest chart Vega-Lite supports (such as a sorted bar chart of the top combinations) rather than attempting an unsupported diagram.
+Author Vega-Lite ONLY — never raw Vega (v5). Use Vega-Lite for charts a standard Lens chart cannot express, for example faceted charts / small multiples, layered or combination charts (e.g. bars with an overlaid line), or scatter/bubble plots with an encoded size. If the request needs a diagram Vega-Lite cannot express (e.g. Sankey / flow, network, chord) and it is not an allowlisted Raw Vega chart the system already selected, build the closest chart Vega-Lite supports (such as a sorted bar chart of the top combinations) rather than attempting an unsupported diagram.
 ${chartTypeHint}
 ${
   existingSpec
@@ -184,6 +224,32 @@ ${additionalContext ?? ''}`,
   ];
 };
 
+const catalogChartRules = (catalogId: VegaCatalogId): string => {
+  switch (catalogId) {
+    case 'radar':
+      return `RADAR / SPIDER RULES:
+- Expect a key / value table (optional series). Need ≥${RADAR_MIN_KEYS} distinct keys.
+- Scales: angular (point, domain = key, range [-PI, PI]) and radial (linear, domain = value, range [0, radius]).
+- Marks: grid rules + labels from aggregated keys; closed polygon via line marks with interpolate "linear-closed".
+  - Multi-series: facet the Canonical source by series (groupby series) and draw one closed line per facet.
+  - Single-series (no series column): one closed line from "${CANONICAL_ESQL_SOURCE_NAME}" (no facet required).
+- Center the chart with encode.enter x/y = width/2, height/2 (or equivalent radius signal).
+- STATIC DIAGRAM ONLY: do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
+- Built-in width/height signals for layout (e.g. radius = min(width, height) / 2) are fine.
+- DO NOT set top-level "width" or "height"; the panel sizes the view.
+- Do NOT hardcode hex colors for marks; prefer a scale (e.g. category10 for series).`;
+    case 'sunburst':
+    default:
+      return `SUNBURST RULES:
+- Expect a Parent–child table with id / parent / name / value (or clear aliases present in <columns>). Exactly one root (parent null); every other parent id must exist as an id row — otherwise stratify fails with "missing: <id>" / "multiple roots" and partition cannot run.
+- Pipeline: source → stratify(key=id, parentKey=parent) → partition(field=value) → arc marks. Put both transforms on the same derived dataset that sources "${CANONICAL_ESQL_SOURCE_NAME}".
+- STATIC DIAGRAM ONLY: do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
+- Built-in width/height signals for layout (e.g. partition size, arc x/y) are fine.
+- DO NOT set top-level "width" or "height"; the panel sizes the view.
+- Do NOT hardcode hex colors for marks; prefer a scale. Sequential schemes ("blues") are OK for depth/value.`;
+  }
+};
+
 const createRawVegaAuthorPrompt = ({
   nlQuery,
   esqlQuery,
@@ -191,6 +257,7 @@ const createRawVegaAuthorPrompt = ({
   existingSpec,
   referenceExamples,
   additionalContext,
+  catalogId,
 }: {
   nlQuery: string;
   esqlQuery: string;
@@ -198,15 +265,18 @@ const createRawVegaAuthorPrompt = ({
   existingSpec?: string;
   referenceExamples?: string;
   additionalContext?: string;
+  catalogId: VegaCatalogId;
 }): BaseMessageLike[] => {
   const esqlQueryJson = JSON.stringify(esqlQuery);
+  const chartLabel =
+    catalogId === 'radar' ? 'radar / spider' : 'sunburst / hierarchy';
 
   return [
     [
       'system',
-      `You are a Raw Vega (v5) visualization expert. Author a single valid Raw Vega specification for an allowlisted chart (currently: sunburst / hierarchy).
+      `You are a Raw Vega (v5) visualization expert. Author a single valid Raw Vega specification for an allowlisted chart (currently: ${chartLabel}).
 
-Author Raw Vega ONLY — never Vega-Lite. Use "data" as an array, "marks" (plural), scales, and transforms such as "stratify" / "partition". Do NOT use Vega-Lite "mark"/"encoding"/"facet".
+Author Raw Vega ONLY — never Vega-Lite. Use "data" as an array, "marks" (plural), scales, and transforms. Do NOT use Vega-Lite "mark"/"encoding"/"facet".
 ${
   existingSpec
     ? `Existing specification to modify (keep what still applies, change only what the request asks for):
@@ -218,7 +288,7 @@ ${existingSpec}
 }
 DATA SOURCE RULES:
 1. Declare a Canonical ES|QL dataset named "${CANONICAL_ESQL_SOURCE_NAME}" whose url is { "%type%": "esql", "query": <the exact query below> }. Use the query verbatim — the system re-binds and validates it.
-2. Put hierarchy transforms (\`stratify\`, \`partition\`) on a DERIVED dataset that \`"source": "${CANONICAL_ESQL_SOURCE_NAME}"\` — do not invent a second ES|QL url.
+2. Put derived transforms on datasets that \`"source": "${CANONICAL_ESQL_SOURCE_NAME}"\` — do not invent a second ES|QL url.
 3. The only fields you may reference are the result columns of this query: ${esqlQueryJson}
 4. If the query uses ?_tstart / ?_tend, add "%timefield%": "@timestamp" on the Canonical source url.
 
@@ -227,13 +297,7 @@ Columns available in the data (reference these EXACT names):
 ${formatColumns(columns)}
 </columns>
 
-SUNBURST RULES:
-- Expect a Parent–child table with id / parent / name / value (or clear aliases present in <columns>). Exactly one root (parent null); every other parent id must exist as an id row — otherwise stratify fails with "missing: <id>" / "multiple roots" and partition cannot run.
-- Pipeline: source → stratify(key=id, parentKey=parent) → partition(field=value) → arc marks. Put both transforms on the same derived dataset that sources "${CANONICAL_ESQL_SOURCE_NAME}".
-- STATIC DIAGRAM ONLY: do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
-- Built-in width/height signals for layout (e.g. partition size, arc x/y) are fine.
-- DO NOT set top-level "width" or "height"; the panel sizes the view.
-- Do NOT hardcode hex colors for marks; prefer a scale. Sequential schemes ("blues") are OK for depth/value.
+${catalogChartRules(catalogId)}
 
 DOTS IN FIELD NAMES:
 - Escape dots in field strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']).
@@ -266,6 +330,7 @@ export const createAuthorVegaSpecPrompt = ({
   referenceExamples,
   additionalContext,
   dialect = 'vega-lite',
+  catalogId = 'none',
 }: {
   nlQuery: string;
   esqlQuery: string;
@@ -276,6 +341,7 @@ export const createAuthorVegaSpecPrompt = ({
   referenceExamples?: string;
   additionalContext?: string;
   dialect?: VegaDialect;
+  catalogId?: VegaCatalogId;
 }): BaseMessageLike[] => {
   if (dialect === 'vega') {
     return createRawVegaAuthorPrompt({
@@ -285,6 +351,7 @@ export const createAuthorVegaSpecPrompt = ({
       existingSpec,
       referenceExamples,
       additionalContext,
+      catalogId,
     });
   }
   return createVegaLiteAuthorPrompt({

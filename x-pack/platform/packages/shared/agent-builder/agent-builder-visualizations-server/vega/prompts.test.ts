@@ -8,6 +8,7 @@
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   createAuthorVegaSpecPrompt,
+  radarEsqlAdditionalInstructions,
   sunburstEsqlAdditionalInstructions,
   vegaEsqlAdditionalInstructions,
 } from './prompts';
@@ -39,12 +40,26 @@ describe('createAuthorVegaSpecPrompt', () => {
       nlQuery: 'sunburst of categories',
       esqlQuery: 'FROM logs-*',
       dialect: 'vega',
+      catalogId: 'sunburst',
     });
     const text = String((system as [string, string])[1]);
     expect(text).toContain('Raw Vega (v5)');
     expect(text).toContain('Author Raw Vega ONLY');
     expect(text).toContain('stratify');
+    expect(text).toContain('SUNBURST RULES');
     expect(text).not.toContain('Vega-Lite ONLY');
+  });
+
+  it('instructs radar rules when catalog is radar', () => {
+    const [system] = createAuthorVegaSpecPrompt({
+      nlQuery: 'radar of metrics',
+      esqlQuery: 'FROM logs-* | STATS value = COUNT() BY key = status',
+      dialect: 'vega',
+      catalogId: 'radar',
+    });
+    const text = String((system as [string, string])[1]);
+    expect(text).toContain('RADAR / SPIDER RULES');
+    expect(text).toContain('linear-closed');
   });
 
   it('always includes the dotted-field escaping guidance', () => {
@@ -119,6 +134,15 @@ describe('sunburstEsqlAdditionalInstructions', () => {
     expect(sunburstEsqlAdditionalInstructions).toContain('Leaf-only tables are INVALID');
     expect(sunburstEsqlAdditionalInstructions).toContain('TO_STRING(null)');
     expect(sunburstEsqlAdditionalInstructions).toContain('FORK');
+  });
+});
+
+describe('radarEsqlAdditionalInstructions', () => {
+  it('requires a key/value table for radar', () => {
+    expect(radarEsqlAdditionalInstructions).toContain('`key`');
+    expect(radarEsqlAdditionalInstructions).toContain('`value`');
+    expect(radarEsqlAdditionalInstructions).toContain('`series`');
+    expect(radarEsqlAdditionalInstructions).toContain('At least 3 distinct');
   });
 });
 

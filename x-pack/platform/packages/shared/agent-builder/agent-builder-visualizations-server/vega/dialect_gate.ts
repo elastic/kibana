@@ -9,8 +9,12 @@ import { z } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { Logger } from '@kbn/logging';
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import type { VegaCatalogId } from './dialect';
-import { dialectFromSpec } from './dialect';
+import {
+  dialectFromSpec,
+  inferRawVegaCatalogId,
+  isRawVegaCatalogId,
+  type VegaCatalogId,
+} from './dialect';
 import { formatReferenceExamples, loadReferenceExamples } from './reference_examples';
 import type { VegaReferenceExample } from './reference_examples';
 
@@ -22,11 +26,16 @@ const RAW_VEGA_CATALOG: ReadonlyArray<{ id: Exclude<VegaCatalogId, 'none'>; desc
       description:
         'Radial hierarchy / sunburst / ring partition of a parent-child tree (not a treemap, pie, or donut).',
     },
+    {
+      id: 'radar',
+      description:
+        'Radar / spider / polar multivariate chart comparing numeric measures across several axes (not a pie or radial bar).',
+    },
   ];
 
 const catalogSelectionSchema = z.object({
   catalogId: z
-    .enum(['sunburst', 'none'])
+    .enum(['sunburst', 'radar', 'none'])
     .describe(
       'Allowlisted Raw Vega catalog id when the request clearly needs that chart; otherwise "none".'
     ),
@@ -48,9 +57,11 @@ ${RAW_VEGA_CATALOG.map((entry) => `- id: "${entry.id}" — ${entry.description}`
 
 RULES:
 1. Return "sunburst" ONLY when the user clearly wants a sunburst / radial hierarchy / ring partition of a tree.
-2. Return "none" for Vega-Lite charts (bars, lines, facets, scatter, heatmap, gantt, …) and for unsupported Raw Vega diagrams (Sankey, radar, network, chord, …).
-3. Do NOT return "sunburst" for Lens treemap/pie/donut requests unless the user explicitly asks for a sunburst.
-4. Only return ids from the allowlist or "none".`,
+2. Return "radar" ONLY when the user clearly wants a radar / spider / polar multivariate chart across several numeric axes.
+3. Return "none" for Vega-Lite charts (bars, lines, facets, scatter, heatmap, gantt, …) and for unsupported Raw Vega diagrams (Sankey, network, chord, …).
+4. Do NOT return "sunburst" for Lens treemap/pie/donut requests unless the user explicitly asks for a sunburst.
+5. Do NOT return "radar" for pie/donut/radial-bar requests unless the user explicitly asks for a radar or spider chart.
+6. Only return ids from the allowlist or "none".`,
   ],
   [
     'human',
@@ -78,7 +89,10 @@ export const selectVegaCatalogId = async ({
       name: 'select_vega_catalog',
     });
     const response = await selectorModel.invoke(createCatalogSelectorPrompt({ nlQuery }));
-    return response?.catalogId === 'sunburst' ? 'sunburst' : 'none';
+    const catalogId = response?.catalogId;
+    return isRawVegaCatalogId(catalogId as VegaCatalogId)
+      ? (catalogId as Exclude<VegaCatalogId, 'none'>)
+      : 'none';
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     logger?.warn(`Vega catalog selection failed; defaulting to Vega-Lite: ${message}`);
@@ -94,26 +108,40 @@ const SUNBURST_EXAMPLE: VegaReferenceExample = {
   load: () => import('./reference_examples/sunburst').then((module) => module.spec),
 };
 
+const RADAR_EXAMPLE: VegaReferenceExample = {
+  id: 'radar',
+  title: 'Radar / spider (Raw Vega polar)',
+  description:
+    'Static radar: key/value rows (≥3 distinct keys; optional series) → angular + radial scales → faceted `line` marks with `linear-closed`. Bind the Canonical ES|QL source named `source`; do not add Kibana interaction signals.',
+  load: () => import('./reference_examples/radar').then((module) => module.spec),
+};
+
+const RAW_VEGA_EXAMPLES: Record<Exclude<VegaCatalogId, 'none'>, VegaReferenceExample> = {
+  sunburst: SUNBURST_EXAMPLE,
+  radar: RADAR_EXAMPLE,
+};
+
 /** Load the curated Raw Vega reference block for a catalog id (empty when none). */
 export const buildRawVegaReferenceBlock = async (catalogId: VegaCatalogId): Promise<string> => {
-  if (catalogId !== 'sunburst') {
+  if (!isRawVegaCatalogId(catalogId)) {
     return '';
   }
-  return formatReferenceExamples(await loadReferenceExamples([SUNBURST_EXAMPLE]));
+  return formatReferenceExamples(await loadReferenceExamples([RAW_VEGA_EXAMPLES[catalogId]]));
 };
 
 export interface DialectGateResult {
   catalogId: VegaCatalogId;
   /** Authoring Dialect after the gate (and edit pin) resolves. */
   dialect: 'vega-lite' | 'vega';
-  /** Preloaded Raw Vega reference block when catalog is sunburst. */
+  /** Preloaded Raw Vega reference block when an allowlisted catalog is selected. */
   referenceExamples: string;
 }
 
 /**
  * Resolve Dialect for a create or edit:
- * - edits pin Dialect from the stored `$schema` (skip classifier),
- * - creates run the catalog classifier; `sunburst` → Raw Vega + example.
+ * - edits pin Dialect from the stored `$schema` (skip classifier for Dialect),
+ *   and resolve catalog from the existing spec (fallback: classifier),
+ * - creates run the catalog classifier; allowlisted id → Raw Vega + example.
  */
 export const resolveDialectGate = async ({
   nlQuery,
@@ -129,21 +157,30 @@ export const resolveDialectGate = async ({
   if (existingSpec) {
     const dialect = dialectFromSpec(existingSpec);
     if (dialect === 'vega') {
+      let catalogId = inferRawVegaCatalogId(existingSpec);
+      if (catalogId === 'none') {
+        // Structural cue missing (unusual); classify among allowlisted charts.
+        catalogId = await selectVegaCatalogId({ nlQuery, model, logger });
+        if (!isRawVegaCatalogId(catalogId)) {
+          // Still Raw Vega edit — default to sunburst so ES|QL/author stay Raw Vega.
+          catalogId = 'sunburst';
+        }
+      }
       return {
-        catalogId: 'sunburst',
+        catalogId,
         dialect: 'vega',
-        referenceExamples: await buildRawVegaReferenceBlock('sunburst'),
+        referenceExamples: await buildRawVegaReferenceBlock(catalogId),
       };
     }
     return { catalogId: 'none', dialect: 'vega-lite', referenceExamples: '' };
   }
 
   const catalogId = await selectVegaCatalogId({ nlQuery, model, logger });
-  if (catalogId === 'sunburst') {
+  if (isRawVegaCatalogId(catalogId)) {
     return {
       catalogId,
       dialect: 'vega',
-      referenceExamples: await buildRawVegaReferenceBlock('sunburst'),
+      referenceExamples: await buildRawVegaReferenceBlock(catalogId),
     };
   }
   return { catalogId: 'none', dialect: 'vega-lite', referenceExamples: '' };

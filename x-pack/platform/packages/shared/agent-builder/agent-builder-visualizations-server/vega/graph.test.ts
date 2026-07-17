@@ -322,6 +322,62 @@ describe('createVegaGraph', () => {
     expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('DISCLOSED FALLBACK');
   });
 
+  it('authors a Raw Vega radar when the Dialect gate selects radar and columns are key/value', async () => {
+    classifyInvoke.mockResolvedValue({ catalogId: 'radar' });
+    mockedExecuteEsql.mockResolvedValue({
+      columns: [
+        { name: 'key', type: 'keyword' },
+        { name: 'value', type: 'long' },
+      ],
+      values: [
+        ['A', 1],
+        ['B', 2],
+        ['C', 3],
+      ],
+    } as Awaited<ReturnType<typeof executeEsql>>);
+    invoke.mockResolvedValue(
+      asCodeBlock({
+        $schema: 'https://vega.github.io/schema/vega/v5.json',
+        data: [{ name: 'source' }],
+        scales: [{ name: 'angular' }, { name: 'radial' }],
+        marks: [{ type: 'line', encode: { enter: { interpolate: { value: 'linear-closed' } } } }],
+      })
+    );
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.error).toBeNull();
+    const spec = JSON.parse(state.spec!);
+    expect(spec.$schema).toBe('https://vega.github.io/schema/vega/v5.json');
+    expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('RADAR / SPIDER RULES');
+  });
+
+  it('falls back to Vega-Lite with disclosure when radar has too few keys', async () => {
+    classifyInvoke.mockResolvedValue({ catalogId: 'radar' });
+    mockedExecuteEsql.mockResolvedValue({
+      columns: [
+        { name: 'key', type: 'keyword' },
+        { name: 'value', type: 'long' },
+      ],
+      values: [
+        ['A', 1],
+        ['B', 2],
+      ],
+    } as Awaited<ReturnType<typeof executeEsql>>);
+    mockedGenerateEsql.mockResolvedValue({
+      query: 'FROM metrics-* | STATS value = COUNT() BY key = status | LIMIT 2',
+    } as Awaited<ReturnType<typeof generateEsql>>);
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.error).toBeNull();
+    expect(JSON.parse(state.spec!).$schema).toBe(VEGA_LITE_SCHEMA);
+    const authorPrompt = JSON.stringify(invoke.mock.calls[0][0]);
+    expect(authorPrompt).toContain('DISCLOSED FALLBACK');
+    expect(authorPrompt).toContain('radar');
+  });
+
   it('authors without a reference block when selection returns none', async () => {
     invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
 
