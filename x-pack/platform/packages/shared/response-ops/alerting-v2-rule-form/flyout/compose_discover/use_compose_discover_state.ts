@@ -18,13 +18,13 @@ import type {
 
 export const getStepIds = (isAlert: boolean): StepId[] =>
   isAlert
-    ? ['alertCondition', 'recoveryCondition', 'details', 'notifications']
-    : ['alertCondition', 'details'];
+    ? ['alertCondition', 'behaviour', 'details', 'notifications']
+    : ['alertCondition', 'behaviour', 'details'];
 
 export const getBuilderStepIds = (isAlert: boolean): StepId[] =>
   isAlert
-    ? ['builderCondition', 'recoveryCondition', 'details', 'notifications']
-    : ['builderCondition', 'details'];
+    ? ['builderCondition', 'behaviour', 'details', 'notifications']
+    : ['builderCondition', 'behaviour', 'details'];
 
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
@@ -87,7 +87,7 @@ export function getSandboxTabs(
     }
     return ['base', 'alert'];
   }
-  if (stepId === 'recoveryCondition' && state.recoveryType === 'custom') return ['recovery'];
+  if (stepId === 'behaviour' && state.recoveryType === 'custom') return ['recovery'];
   return undefined;
 }
 

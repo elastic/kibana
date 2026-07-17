@@ -29,6 +29,8 @@ import { EsqlQuerySummarySection } from './esql_query_summary_section';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { useComposeDiscoverTimeField } from '../compose_discover_time_field_context';
 import { getTimeFieldResolutionQuery } from '../get_time_field_resolution_query';
+import { ScheduleField } from '../../../form/fields/schedule_field';
+import { LookbackWindowField } from '../../../form/fields/lookback_window_field';
 
 interface AlertConditionStepProps {
   state: ComposeDiscoverState;
@@ -223,6 +225,10 @@ export function AlertConditionStep({
           data-test-subj="composeDiscoverGroupFields"
         />
       </EuiFormRow>
+      <EuiSpacer size="m" />
+      <ScheduleField />
+      <EuiSpacer size="m" />
+      <LookbackWindowField />
     </>
   );
 }

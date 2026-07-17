@@ -289,12 +289,12 @@ describe('getSandboxTabs', () => {
     expect(getSandboxTabs(true, state)).toBeUndefined();
   });
 
-  it('returns [recovery] on recoveryCondition step with custom recovery', () => {
+  it('returns [recovery] on behaviour step with custom recovery', () => {
     const state = createState({ step: 1, recoveryType: 'custom' });
     expect(getSandboxTabs(true, state)).toEqual(['recovery']);
   });
 
-  it('returns undefined on recoveryCondition step with default recovery', () => {
+  it('returns undefined on behaviour step with default recovery', () => {
     const state = createState({ step: 1, recoveryType: 'default' });
     expect(getSandboxTabs(true, state)).toBeUndefined();
   });

@@ -20,6 +20,7 @@ export type QueryTab = 'base' | 'alert' | 'recovery';
 export type StepId =
   | 'alertCondition'
   | 'builderCondition'
+  | 'behaviour'
   | 'recoveryCondition'
   | 'details'
   | 'notifications';
@@ -39,8 +40,10 @@ export interface StepRenderProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
+  onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
   ruleId?: string;
+  builderType?: string;
   renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
   /** Opts the user into manual split mode from the form (e.g. split-failed CTA). */
   onManualSplit?: () => void;

@@ -290,9 +290,9 @@ describe('step validation', () => {
   });
 
   describe('step registry', () => {
-    it('recoveryCondition has no validate function', () => {
-      const recoveryStep = getSteps(true).steps.find((s) => s.id === 'recoveryCondition')!;
-      expect(recoveryStep.validate).toBeUndefined();
+    it('behaviour has no validate function', () => {
+      const behaviourStep = getSteps(true).steps.find((s) => s.id === 'behaviour')!;
+      expect(behaviourStep.validate).toBeUndefined();
     });
 
     it('builderCondition does not inherit queryCommitted meetsPrecondition from the ES|QL registry', () => {
@@ -420,10 +420,14 @@ describe('step validation', () => {
   });
 
   it('includes the correct steps based on isAlert', () => {
-    expect(getSteps(false).steps.map((step) => step.id)).toEqual(['alertCondition', 'details']);
+    expect(getSteps(false).steps.map((step) => step.id)).toEqual([
+      'alertCondition',
+      'behaviour',
+      'details',
+    ]);
     expect(getSteps(true).steps.map((step) => step.id)).toEqual([
       'alertCondition',
-      'recoveryCondition',
+      'behaviour',
       'details',
       'notifications',
     ]);
@@ -449,39 +453,40 @@ describe('shell shared fields', () => {
     );
   };
 
-  it('renders ModeSelect, AlertDelayField, ScheduleField, and LookbackWindowField on alert condition step', () => {
+  it('renders ScheduleField and LookbackWindowField on condition step', () => {
     renderShell({ step: 0 }, { kind: 'alert' });
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
-    expect(screen.getByTestId('alertDelayFormRow')).toBeInTheDocument();
     expect(screen.getByText('Schedule')).toBeInTheDocument();
     expect(screen.getByText('Lookback Window')).toBeInTheDocument();
   });
 
+  it('renders ModeSelect and AlertDelayField on behaviour step', () => {
+    renderShell({ step: 1 }, { kind: 'alert' });
+
+    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('alertDelayFormRow')).toBeInTheDocument();
+  });
+
   it('does not render AlertDelayField when kind is signal', () => {
     renderShell(
-      { step: 0 },
+      { step: 1 },
       { kind: 'signal', query: { format: 'standalone', breach: { query: 'FROM logs-*' } } }
     );
 
     expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
     expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
-    expect(screen.getByText('Schedule')).toBeInTheDocument();
-    expect(screen.getByText('Lookback Window')).toBeInTheDocument();
   });
 
-  it('does not render shared fields on non-alert-condition steps', () => {
-    // step 2 = 'details' when isAlert=true (alertCondition -> recoveryCondition -> details)
+  it('does not render behaviour fields on non-behaviour steps', () => {
+    // step 2 = 'details' when isAlert=true (alertCondition -> behaviour -> details -> notifications)
     renderShell({ step: 2 });
 
     expect(screen.queryByTestId('composeDiscoverModeSelect')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
-    expect(screen.queryByText('Schedule')).not.toBeInTheDocument();
-    expect(screen.queryByText('Lookback Window')).not.toBeInTheDocument();
   });
 
   it('disables ModeSelect when query is not committed', () => {
-    renderShell({ step: 0, queryCommitted: false });
+    renderShell({ step: 1, queryCommitted: false });
 
     expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
   });
@@ -490,7 +495,7 @@ describe('shell shared fields', () => {
     const services = { ...createMockServices(), dashboard: mockDashboard };
     render(
       <ComposeDiscoverForm
-        state={createState({ queryCommitted: true, step: 0 })}
+        state={createState({ queryCommitted: true, step: 1 })}
         dispatch={jest.fn()}
         services={services}
         onRecoveryTypeChange={jest.fn()}
@@ -504,13 +509,13 @@ describe('shell shared fields', () => {
   });
 
   it('enables ModeSelect in create mode when query is committed and sandbox is closed', () => {
-    renderShell({ step: 0, queryCommitted: true, childOpen: false });
+    renderShell({ step: 1, queryCommitted: true, childOpen: false });
 
     expect(screen.getByTestId('composeDiscoverModeSelect')).not.toBeDisabled();
   });
 
   it('disables ModeSelect when sandbox is open', () => {
-    renderShell({ step: 0, queryCommitted: true, childOpen: true });
+    renderShell({ step: 1, queryCommitted: true, childOpen: true });
 
     expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
   });
