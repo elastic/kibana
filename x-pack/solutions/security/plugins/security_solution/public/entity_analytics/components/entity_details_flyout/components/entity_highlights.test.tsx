@@ -119,7 +119,7 @@ describe('EntityHighlights', () => {
   };
   const defaultFetchEntityDetailsHighlights = {
     fetchEntityHighlights: mockFetchEntityHighlights,
-    isChatLoading: false,
+    isGeneratingSummary: false,
     result: null,
     error: null,
   };
@@ -360,7 +360,7 @@ describe('EntityHighlights', () => {
   it('shows generating skeleton when chat is loading and there is no result yet', () => {
     mockUseFetchEntityDetailsHighlights.mockReturnValue({
       ...defaultFetchEntityDetailsHighlights,
-      isChatLoading: true,
+      isGeneratingSummary: true,
     });
 
     render(<EntityHighlightsAccordion {...defaultProps} />, {
@@ -427,7 +427,7 @@ describe('EntityHighlights', () => {
     mockUseFetchEntityDetailsHighlights.mockReturnValue({
       ...defaultFetchEntityDetailsHighlights,
       result: mockAssistantResult,
-      isChatLoading: true,
+      isGeneratingSummary: true,
     });
 
     render(<EntityHighlightsAccordion {...defaultProps} />, {
