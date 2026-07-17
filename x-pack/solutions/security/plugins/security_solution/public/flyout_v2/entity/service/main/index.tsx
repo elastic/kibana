@@ -153,7 +153,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
     : undefined;
 
   const onShowService = useCallback(() => {
-    openServiceFlyoutAsChild({ serviceName, entityId, scopeId, title: serviceName });
+    openServiceFlyoutAsChild({ serviceName, entityId, scopeId });
   }, [openServiceFlyoutAsChild, serviceName, entityId, scopeId]);
 
   const onShowRelatedEntity = useCallback(
@@ -181,7 +181,6 @@ export const Service: FC<ServiceProps> = memo(function Service({
             entityName: serviceName,
             entityId: entityStoreEntityId,
             onShowEntity: onShowService,
-            title: serviceName,
           });
         case EntityDetailsLeftPanelTab.GRAPH_VIEW:
           if (!entityStoreEntityId) return;
@@ -191,7 +190,6 @@ export const Service: FC<ServiceProps> = memo(function Service({
             entityName: serviceName,
             onShowEntity: onShowRelatedEntity,
             onShowOriginatingEntity: onShowService,
-            title: serviceName,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -202,7 +200,6 @@ export const Service: FC<ServiceProps> = memo(function Service({
             scopeId,
             onShowEntity: onShowService,
             onShowRelatedEntity,
-            title: serviceName,
           });
       }
     },
