@@ -24,8 +24,8 @@ export const MAX_CLOUD_ONBOARDING_NEXT_LENGTH = 2048;
 /** Opaque Cloud onboarding token — keep the original generous bound. */
 export const MAX_CLOUD_ONBOARDING_TOKEN_LENGTH = 1024;
 
-/** Cloud deployment id (DeploymentIdSpec: 32 safe alphanumerics). */
+/** Cloud deployment id (exactly 32 safe alphanumerics in Cloud DeploymentId). */
 export const MAX_CLOUD_DEPLOYMENT_ID_LENGTH = 64;
 
-/** Cloud deployment display name (backend MAX_DEPLOYMENT_NAME_LENGTH = 255). */
+/** Cloud deployment display name (Cloud MAX_DEPLOYMENT_NAME_LENGTH = 255). */
 export const MAX_CLOUD_DEPLOYMENT_NAME_LENGTH = 256;

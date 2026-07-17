@@ -52,6 +52,6 @@ describe('cloudOnboardingQuerySchema maxLength bounds', () => {
       },
     ],
   ])('rejects over-limit %s', (_label, query) => {
-    expect(() => cloudOnboardingQuerySchema.validate(query)).toThrow(/maxLength|longer/i);
+    expect(() => cloudOnboardingQuerySchema.validate(query)).toThrow(/maximum length/i);
   });
 });

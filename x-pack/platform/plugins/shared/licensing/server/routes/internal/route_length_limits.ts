@@ -8,9 +8,9 @@
 /**
  * Per-field route validation bounds for licensing internal feature-usage APIs.
  *
- * `featureId` values in-repo top out around 44 chars (e.g. maps geo_tile
- * aggregation labels). `licenseType` is a closed LICENSE_TYPE enum (longest
- * key: `enterprise`).
+ * `featureId` values in-repo top out at 44 chars (`geo_tile aggregation on
+ * geo_shape field-type` in maps `licensed_features.ts`). `licenseType` is a
+ * closed LICENSE_TYPE enum (longest key: `enterprise` = 10).
  */
 
 /** Feature usage registration / notify identifier. */

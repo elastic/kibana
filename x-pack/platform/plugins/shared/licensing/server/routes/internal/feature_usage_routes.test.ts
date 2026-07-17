@@ -40,7 +40,7 @@ describe('licensing feature usage route maxLength bounds', () => {
           featureId: 'a'.repeat(MAX_LICENSING_FEATURE_ID_LENGTH + 1),
           lastUsed: 1,
         })
-      ).toThrow(/maxLength|longer/i);
+      ).toThrow(/maximum length/i);
     });
   });
 
@@ -77,7 +77,7 @@ describe('licensing feature usage route maxLength bounds', () => {
             licenseType: 'enterprise',
           },
         ])
-      ).toThrow(/maxLength|longer/i);
+      ).toThrow(/maximum length/i);
     });
 
     it('rejects a licenseType over the configured limit before enum validation', () => {
@@ -89,7 +89,7 @@ describe('licensing feature usage route maxLength bounds', () => {
             licenseType: 'a'.repeat(MAX_LICENSING_LICENSE_TYPE_LENGTH + 1),
           },
         ])
-      ).toThrow(/maxLength|longer/i);
+      ).toThrow(/maximum length/i);
     });
   });
 });

@@ -140,7 +140,7 @@ describe('POST /internal/cloud/solution', () => {
             token: 'a'.repeat(MAX_CLOUD_ONBOARDING_TOKEN_LENGTH + 1),
           },
         })
-      ).toThrow(/maxLength|longer/i);
+      ).toThrow(/maximum length/i);
     });
   });
 });
