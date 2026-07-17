@@ -20,6 +20,9 @@ export const getCaseStepDefinition = (
   createServerStepDefinition({
     ...getCaseStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: GetCaseStepInput) => {
+      // `include_comments` is deprecated (see common definition) but behavior is preserved
+      // to avoid breaking existing workflows. Prefer the `cases.getAllAttachments` step.
+      // Hard removal is deferred to v10, gated on usage telemetry.
       const theCase = await client.cases.get({
         id: input.case_id,
         includeComments: input.include_comments,

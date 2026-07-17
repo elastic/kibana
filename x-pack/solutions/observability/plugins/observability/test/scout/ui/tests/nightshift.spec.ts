@@ -7,20 +7,32 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
-} from '@kbn/management-settings-ids';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import { test } from '../fixtures';
 
 test.describe(
   'Nightshift navigation from Significant Events Discovery',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ kbnClient }) => {
-      await kbnClient.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY]: true,
+    test.beforeAll(async ({ apiServices, config }) => {
+      // Significant events discovery is gated behind the streams.significantEventsAvailable feature
+      // flag (defaults to false). The /internal/core/_settings route used to force it on is only
+      // registered when coreApp.allowDynamicConfigOverrides=true (Scout's local base configs);
+      // ECH/MKI deployments don't carry that override, so the PUT 404s — skip there.
+      // eslint-disable-next-line playwright/no-skipped-test
+      test.skip(
+        config.isCloud === true,
+        `Cannot override '${STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG}' on Cloud deployments`
+      );
+      // skip() in beforeAll only skips the tests, not the hook body, so guard the requests too.
+      if (config.isCloud) {
+        return;
+      }
+
+      await apiServices.core.settings({
+        'feature_flags.overrides': {
+          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+        },
       });
     });
 
@@ -28,10 +40,14 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient }) => {
-      await kbnClient.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY]: false,
+    test.afterAll(async ({ apiServices, config }) => {
+      if (config.isCloud) {
+        return;
+      }
+      await apiServices.core.settings({
+        'feature_flags.overrides': {
+          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: false,
+        },
       });
     });
 
