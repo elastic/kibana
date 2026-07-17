@@ -56,3 +56,4 @@ export type * from './src/timeseries';
 export type * from './src/traces';
 export * from './src/privilege_type';
 export type * from './src/metrics_types';
+export * from './src/waterfall';

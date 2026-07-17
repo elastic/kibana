@@ -18,7 +18,6 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   ENABLE_NEW_FLYOUT_SETTING,
-  ENABLE_RULE_CHANGES_HISTORY_SETTING,
 } from '../common/constants';
 
 describe('initUiSettings', () => {
@@ -26,7 +25,7 @@ describe('initUiSettings', () => {
   const mockExperimentalFeatures = {
     enableAlertsAndAttacksAlignment: false,
     extendedRuleExecutionLoggingEnabled: false,
-    newFlyoutSystemEnabled: false,
+    newFlyoutSystemDisabled: false,
     ruleChangesHistoryEnabled: false,
   } as ExperimentalFeatures;
 
@@ -101,20 +100,8 @@ describe('initUiSettings', () => {
     );
   });
 
-  it('does NOT register ENABLE_NEW_FLYOUT_SETTING when newFlyoutSystemEnabled flag is disabled', () => {
+  it('registers ENABLE_NEW_FLYOUT_SETTING when newFlyoutSystemDisabled flag is disabled', () => {
     initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
-
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).not.toHaveProperty(ENABLE_NEW_FLYOUT_SETTING);
-  });
-
-  it('registers ENABLE_NEW_FLYOUT_SETTING when newFlyoutSystemEnabled flag is enabled', () => {
-    const enabledFeatures = {
-      ...mockExperimentalFeatures,
-      newFlyoutSystemEnabled: true,
-    };
-
-    initUiSettings(mockUiSettings, enabledFeatures, false);
 
     const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
     expect(registeredSettings).toHaveProperty(ENABLE_NEW_FLYOUT_SETTING);
@@ -128,30 +115,15 @@ describe('initUiSettings', () => {
     );
   });
 
-  it('does NOT register ENABLE_RULE_CHANGES_HISTORY_SETTING when ruleChangesHistoryEnabled flag is disabled', () => {
-    initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
-
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).not.toHaveProperty(ENABLE_RULE_CHANGES_HISTORY_SETTING);
-  });
-
-  it('registers ENABLE_RULE_CHANGES_HISTORY_SETTING when ruleChangesHistoryEnabled flag is enabled', () => {
-    const enabledFeatures = {
+  it('does NOT register ENABLE_NEW_FLYOUT_SETTING when newFlyoutSystemDisabled flag is enabled', () => {
+    const disabledFeatures = {
       ...mockExperimentalFeatures,
-      ruleChangesHistoryEnabled: true,
+      newFlyoutSystemDisabled: true,
     };
 
-    initUiSettings(mockUiSettings, enabledFeatures, false);
+    initUiSettings(mockUiSettings, disabledFeatures, false);
 
     const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).toHaveProperty(ENABLE_RULE_CHANGES_HISTORY_SETTING);
-    expect(registeredSettings[ENABLE_RULE_CHANGES_HISTORY_SETTING]).toEqual(
-      expect.objectContaining({
-        name: 'Enable detection rule changes history',
-        value: false,
-        type: 'boolean',
-        requiresPageReload: true,
-      })
-    );
+    expect(registeredSettings).not.toHaveProperty(ENABLE_NEW_FLYOUT_SETTING);
   });
 });
