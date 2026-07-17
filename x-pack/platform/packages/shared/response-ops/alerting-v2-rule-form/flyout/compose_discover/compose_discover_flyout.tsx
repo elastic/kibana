@@ -1152,7 +1152,7 @@ export function ComposeDiscoverFlyout({
           {
             name: i18n.translate(
               'xpack.alertingV2.composeDiscover.querySandbox.editSeparatelyButtonLabel',
-              { defaultMessage: 'Edit separately' }
+              { defaultMessage: 'Define condition manually' }
             ),
             icon: 'inputOutput',
             onClick: () => {
