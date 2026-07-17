@@ -33,14 +33,6 @@ apiTest.describe(
   'Managed workflows',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    apiTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.enableMemory();
-    });
-
-    apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.disableMemory();
-    });
-
     for (const workflowId of MANAGED_WORKFLOW_IDS) {
       apiTest(`${workflowId}: is installed and valid`, async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();

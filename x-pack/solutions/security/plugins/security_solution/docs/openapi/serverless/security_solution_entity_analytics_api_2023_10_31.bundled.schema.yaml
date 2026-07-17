@@ -1691,15 +1691,6 @@ paths:
               - propagated
               - resolution
             type: string
-        - description: Maximum number of history entries to return per request.
-          in: query
-          name: page_size
-          required: false
-          schema:
-            default: 100
-            maximum: 1000
-            minimum: 1
-            type: integer
         - description: When true, each entry also includes the contributions recorded for
             that scoring run (`inputs`, `modifiers`, category 2 fields, and
             `criticality_level`), when present on the underlying document.
@@ -2317,9 +2308,16 @@ components:
           items:
             $ref: '#/components/schemas/RiskScoreHistoryEntry'
           type: array
+        interval:
+          description: The effective Elasticsearch `date_histogram` interval expression
+            the entries were aggregated into (for example `3h`, `1d`, `1w`),
+            derived from the requested time range.
+          maxLength: 10
+          type: string
       required:
         - entity_id
         - entity_type
+        - interval
         - entries
     RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.

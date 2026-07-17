@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. High value feature that touches many surfaces.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -31,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const toasts = getService('toasts');
   const dataGrid = getService('dataGrid');
 
-  describe('discover async search', () => {
+  describe('discover background search', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/platform/test/functional/fixtures/kbn_archives/discover/default'
