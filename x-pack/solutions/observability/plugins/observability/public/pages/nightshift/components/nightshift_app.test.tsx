@@ -7,6 +7,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftApp } from './nightshift_app';
@@ -16,6 +17,18 @@ import { useKibana } from '../../../utils/kibana_react';
 jest.mock('../hooks/use_fetch_significant_events');
 jest.mock('../../../utils/kibana_react');
 
+// The flyout's own behavior is covered by event_flyout.test.tsx.
+jest.mock('./event_flyout', () => ({
+  EventFlyout: ({ event, onClose }: { event: SignificantEvent; onClose: () => void }) => (
+    <div data-test-subj="stubEventFlyout">
+      <span>{`Flyout: ${event.title}`}</span>
+      <button data-test-subj="stubEventFlyoutClose" onClick={onClose}>
+        Close
+      </button>
+    </div>
+  ),
+}));
+
 const mockUseFetchSignificantEvents = useFetchSignificantEvents as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 
@@ -23,18 +36,21 @@ const openChat = jest.fn();
 const scrollIntoView = jest.fn();
 const OriginalMutationObserver = global.MutationObserver;
 
-const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
-  '@timestamp': new Date().toISOString(),
-  event_id: 'evt-1',
-  event_uuid: 'evt-uuid-1',
-  status: 'open',
-  stream_names: ['service-a', 'service-b'],
-  title: 'Test significant event',
-  summary: 'Something happened',
-  severity: '60-high',
-  confidence: 0.9,
-  ...overrides,
-});
+const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => {
+  const eventId = overrides.event_id ?? 'evt-1';
+  return {
+    '@timestamp': new Date().toISOString(),
+    status: 'open',
+    stream_names: ['service-a', 'service-b'],
+    title: 'Test significant event',
+    summary: 'Something happened',
+    severity: '60-high',
+    confidence: 0.9,
+    ...overrides,
+    event_id: eventId,
+    event_uuid: overrides.event_uuid ?? `${eventId}-uuid`,
+  };
+};
 
 interface FetchState {
   events?: SignificantEvent[];
@@ -52,8 +68,15 @@ function setEvents({ events = [], total, isLoading = false, error = null }: Fetc
   });
 }
 
-function renderWithIntl(ui: React.ReactElement = <NightshiftApp />) {
-  return render(<I18nProvider>{ui}</I18nProvider>);
+function renderWithIntl(
+  ui: React.ReactElement = <NightshiftApp />,
+  { initialEntries = ['/'] }: { initialEntries?: string[] } = {}
+) {
+  return render(
+    <I18nProvider>
+      <MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>
+    </I18nProvider>
+  );
 }
 
 describe('NightshiftApp', () => {
@@ -317,6 +340,35 @@ describe('NightshiftApp', () => {
         'Showing 1 of 120 significant events. Open “Show all events” to see the rest.'
       )
     ).toBeInTheDocument();
+  });
+
+  it('opens the event flyout when a row is clicked and closes it again', () => {
+    setEvents({ events: [mockEvent({ title: 'Clickable event' })] });
+    renderWithIntl();
+
+    expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('nightshiftSignificantEventItem'));
+    expect(screen.getByText('Flyout: Clickable event')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('stubEventFlyoutClose'));
+    expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
+  });
+
+  it('restores the open flyout from the eventUuid URL parameter', () => {
+    setEvents({
+      events: [mockEvent({ event_uuid: 'evt-uuid-1', title: 'Deep linked event' })],
+    });
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventUuid=evt-uuid-1'] });
+
+    expect(screen.getByText('Flyout: Deep linked event')).toBeInTheDocument();
+  });
+
+  it('does not render a flyout for an unknown eventUuid URL parameter', () => {
+    setEvents({ events: [mockEvent({ event_uuid: 'evt-uuid-1' })] });
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventUuid=evt-unknown'] });
+
+    expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
   });
 
   it('ranks blast radius chips by highest severity, not raw event count', () => {
