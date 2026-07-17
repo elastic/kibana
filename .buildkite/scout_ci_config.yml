@@ -26,6 +26,7 @@ plugins:
     - dev_tools
     - discover
     - discover_enhanced
+    - embeddable_alerts_table
     - discoveries
     - entity_store
     - error_boundary_example
