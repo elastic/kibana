@@ -26,6 +26,8 @@ Explore a Kibana Security Solution feature area through a real browser, collect 
 
 **Mode:** Single for new areas (full investigation chains). Parallel when `knowledge/` is populated — investigation limited to one level (`phases/2-explore.md`).
 
+**The entire invocation block below is optional.** If `Area` or `Flows` is missing, the agent runs a short guided intake.
+
 ```
 Read and follow exploratory-tester/SKILL.md [in parallel mode] [for issue/PR #N]
 Area: <feature area>
@@ -39,8 +41,11 @@ Setup: <connector name>, role: <role>
 Specs: <URL or file path to PRD / acceptance criteria / design doc>   # optional
 Session-timeout: 90    # optional, total session cap in minutes (default 90)
 Session-dir: .exploratory-session/entity-analytics-20260714-093022  # optional — resume a prior session
+Environment: profile <name>  # optional — load a saved environment profile from .exploratory-session/environments/<name>.json
+Session-config: <path>       # optional — read all inputs from a YAML file instead of this block
 ```
-`Specs:`, `Session-timeout:`, `isolate:`, `Session-dir:` optional. User-provided: add `Environment:` block with `api-key:` for ECH/ESS (`phases/0-setup.md`).
+
+Guided intake: if `Area`/`Flows` missing, the agent asks interactively with defaults (`phases/0-setup.md`). Environment profiles: `Environment: profile <name>` loads a saved profile; create one with `Environment: profile save` (`phases/0-setup.md`). Session-config: `Session-config: <path>` reads all inputs from YAML; copy `templates/session.example.yaml` as a template.
 
 Each session writes its output to an isolated subfolder of `.exploratory-session/` named `<area-slug>-<YYYYMMDD-HHMMSS>`, so multiple agents can run sessions in parallel without interfering. To resume a prior session, pass its folder path as `Session-dir:`.
 
