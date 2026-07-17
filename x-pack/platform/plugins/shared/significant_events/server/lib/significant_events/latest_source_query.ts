@@ -73,7 +73,7 @@ const parseSourceResponse = <T>(response: ESQLSearchResponse): T[] => {
   });
 };
 
-const executeEsqlQuery = async <T>({
+export const executeEsqlQuery = async <T>({
   esClient,
   query,
 }: {
@@ -90,7 +90,7 @@ const executeEsqlQuery = async <T>({
   }
 };
 
-const executeCountQuery = async ({
+export const executeCountQuery = async ({
   esClient,
   query,
 }: {

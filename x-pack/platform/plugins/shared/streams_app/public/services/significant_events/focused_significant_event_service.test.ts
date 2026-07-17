@@ -16,10 +16,9 @@ const createEvent = (eventId: string): SignificantEvent => ({
   stream_names: ['logs.payment'],
   title: `Event ${eventId}`,
   summary: 'Summary',
-  root_cause: 'Root cause',
-  severity: 'high',
+  symptom_hypothesis: 'Root cause',
+  severity: '60-high',
   confidence: 0.8,
-  recommendations: [],
   status: 'open',
 });
 

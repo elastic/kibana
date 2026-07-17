@@ -43,10 +43,7 @@ export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
     // Derive the expected grouping from the canonical expected_discoveries: each discovery's
     // detection signals form one group, keyed by rule_uuid from signal metadata.
     const expectedGroups = expected?.expected_discoveries?.map((discovery) =>
-      (discovery.signals ?? [])
-        .filter((s) => s.metadata?.kind !== 'quiet')
-        .map((s) => detectionKey(s.metadata ?? {}))
-        .filter(Boolean)
+      (discovery.signals ?? []).map((s) => detectionKey(s.metadata ?? {})).filter(Boolean)
     );
     if (!expectedGroups || expectedGroups.length === 0) {
       return Promise.resolve({
@@ -66,10 +63,7 @@ export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
     }
     const actualGroups = discoveries.map((discovery) => {
       const signals = discovery.signals ?? [];
-      return signals
-        .filter((s) => s.metadata?.kind !== 'quiet')
-        .map((s) => detectionKey(s.metadata ?? {}))
-        .filter(Boolean);
+      return signals.map((s) => detectionKey(s.metadata ?? {})).filter(Boolean);
     });
 
     const totalRules = new Set(expectedGroups.flat()).size;

@@ -11,10 +11,16 @@ import { evidenceCollectionEvaluator } from './evidence_collection';
 const detectionSignal = (ruleUuid: string, ruleName?: string, hasEvidence = true): SignalEntry => ({
   type: 'detection',
   description: 'Testing: something. Expected: error. Found: 1 row. Verdict: confirms.',
-  ...(hasEvidence
-    ? { evidence: { esql_query: 'FROM logs | LIMIT 1', result: 'found', row_count: 1 } }
-    : {}),
-  metadata: { kind: 'detection', rule_uuid: ruleUuid, rule_name: ruleName },
+  confirmed: true,
+  stream_name: 'logs',
+  ...(hasEvidence ? { evidence: { esql_query: 'FROM logs | LIMIT 1', result: 'found' } } : {}),
+  metadata: {
+    rule_uuid: ruleUuid,
+    rule_name: ruleName,
+    detection_id: `${ruleUuid}-det`,
+    change_point_type: 'spike',
+    p_value: 0,
+  },
 });
 
 const evaluate = (discoveries: Partial<Discovery>[]) =>
@@ -26,18 +32,6 @@ const evaluate = (discoveries: Partial<Discovery>[]) =>
     expected: {} as never,
     metadata: null,
   });
-
-const createDetection = (
-  ruleUuid: string,
-  extra: Partial<Discovery['detections'][number]> = {}
-): Discovery['detections'][number] => ({
-  detection_id: `${ruleUuid}-det`,
-  rule_uuid: ruleUuid,
-  rule_name: ruleUuid,
-  change_point_type: 'spike',
-  p_value: 0,
-  ...extra,
-});
 
 describe('evidenceCollectionEvaluator', () => {
   it('is unavailable when there are no detection signals', async () => {

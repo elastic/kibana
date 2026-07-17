@@ -30,7 +30,7 @@ const attachment: SignificantEventAttachment = {
     stream_names: ['logs.payment'],
     title: 'Payment outage',
     summary: 'Payments are failing.',
-    severity: 'high',
+    severity: '60-high',
     confidence: 0.8,
   },
 };

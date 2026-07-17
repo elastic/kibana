@@ -17,7 +17,11 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Discovery, EventLifecycleResponse } from '@kbn/significant-events-schema';
+import {
+  getSeverityLabel,
+  type Discovery,
+  type EventLifecycleResponse,
+} from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { changeTypeLabel } from '../shared/translations';
 import {
@@ -69,7 +73,7 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
         discovery.kind === 'discovery' && discovery.severity != null
           ? i18n.translate('xpack.streams.lifecycle.severity', {
               defaultMessage: 'Severity: {severity}',
-              values: { severity: discovery.severity },
+              values: { severity: getSeverityLabel(discovery.severity) },
             })
           : undefined,
     }));
@@ -86,7 +90,7 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
         event.severity != null
           ? i18n.translate('xpack.streams.lifecycle.severity', {
               defaultMessage: 'Severity: {severity}',
-              values: { severity: event.severity },
+              values: { severity: getSeverityLabel(event.severity) },
             })
           : undefined,
 

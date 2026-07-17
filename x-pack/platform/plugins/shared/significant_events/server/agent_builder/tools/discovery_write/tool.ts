@@ -29,6 +29,7 @@ const discoveryWriteSchema = discoverySchema
     discovery_id: true,
     event_id: true,
     title: true,
+    symptom_hypothesis: true,
     summary: true,
     stream_names: true,
     severity: true,
@@ -46,7 +47,7 @@ const discoveryWriteSchema = discoverySchema
       .string()
       .default('now-1h')
       .describe(
-        'Deduplication window as an ES date math expression (e.g. "now-1h"). Applies only to new events with auto-generated event_id: if a document with the same kind and event_id already exists within this window, the write is skipped and the existing discovery_id is returned. Continuation and clearance writes (explicit event_id) are never deduped. Defaults to "now-1h".'
+        'Deduplication window as an ES date math expression (e.g. "now-1h"). Applies only to new events without an explicit event_id: if a kind:discovery document with the same primary stream and detection rule UUIDs already exists within this window, the write is skipped and the existing discovery_id is returned. Continuation writes (explicit event_id) are never deduped. Defaults to "now-1h".'
       ),
   });
 
@@ -67,7 +68,7 @@ export function createDiscoveryWriteTool({
     description: dedent`
       Append a discovery document to the discoveries data stream. The data stream is immutable — each write creates a new version; the latest-source pattern resolves to the most recent document per slug.
 
-      Use kind "discovery" or "clearance" to record an open investigation event.
+      Use kind "discovery" or "clearance" to record an open investigation event. 
       Use kind "handled" to stamp the event as fully processed after the corresponding significant event has been written.
     `,
     schema: discoveryWriteSchema,
@@ -76,10 +77,10 @@ export function createDiscoveryWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getDiscoveryClient, licensing, uiSettingsClient } = await getScopedClients({
+        const { getDiscoveryClient, licensing } = await getScopedClients({
           request,
         });
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        await assertSignificantEventsAccess({ server, licensing });
 
         const data = await discoveryWriteHandler({
           discoveryClient: getDiscoveryClient(),

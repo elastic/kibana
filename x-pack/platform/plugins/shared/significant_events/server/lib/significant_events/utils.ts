@@ -8,21 +8,6 @@
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { orderBy } from 'lodash';
 
-interface WithSignalNames {
-  stream_names?: string[];
-  signals?: Array<{ stream_name?: string | null }>;
-}
-
-export function enrichFromEvidences<T extends WithSignalNames>(doc: T): T {
-  const signals = doc.signals ?? [];
-  const streamNames = doc.stream_names?.length
-    ? doc.stream_names
-    : [...new Set(signals.map((s) => s.stream_name).filter((s): s is string => !!s))];
-
-  if (streamNames === doc.stream_names) return doc;
-  return { ...doc, stream_names: streamNames };
-}
-
 /**
  * Sort query links for the Discovery "Queries" table.
  */

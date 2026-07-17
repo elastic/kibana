@@ -11,7 +11,11 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/core/server';
-import { significantEventSchema, type SignificantEvent } from '@kbn/significant-events-schema';
+import {
+  getSeverityLabel,
+  significantEventSchema,
+  type SignificantEvent,
+} from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients } from '../../routes/types';
 
@@ -33,9 +37,10 @@ export const formatSignificantEventAsText = (event: SignificantEvent): string =>
     `Event ID: ${event.event_id}`,
     `Event UUID: ${event.event_uuid}`,
     `Status: ${event.status}`,
-    `Severity: ${event.severity}`,
+    `Severity: ${getSeverityLabel(event.severity)}`,
     `Confidence: ${event.confidence}`,
     `Streams: ${formatList(event.stream_names)}`,
+    event.symptom_hypothesis ? `Symptom hypothesis: ${event.symptom_hypothesis}` : undefined,
     `Summary: ${event.summary}`,
   ]
     .filter((line): line is string => Boolean(line))

@@ -6,6 +6,7 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/data-streams';
+import { significantEventSchema } from '@kbn/significant-events-schema';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
@@ -29,6 +30,18 @@ export const eventsMappings = {
 } satisfies MappingsDefinition;
 export type StoredEvent = GetFieldsOf<typeof eventsMappings>;
 export type { SignificantEvent };
+
+/**
+ * Stored form of a SignificantEvent document:
+ * - `severity` is encoded as a sortable prefixed keyword (e.g. `"60-high"`)
+ * - `stream_names` is derived from `signals[].stream_name` when not provided
+ */
+export const storedEventSchema = significantEventSchema.transform((doc) => ({
+  ...doc,
+  stream_names: doc.stream_names?.length
+    ? doc.stream_names
+    : [...new Set((doc.signals ?? []).map((s) => s.stream_name).filter(Boolean))],
+}));
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,

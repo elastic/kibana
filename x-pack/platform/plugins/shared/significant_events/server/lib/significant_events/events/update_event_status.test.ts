@@ -18,7 +18,7 @@ const createSignificantEvent = (overrides: Partial<SignificantEvent> = {}): Sign
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: 'medium',
+  severity: '40-medium',
   confidence: 0.8,
   ...overrides,
 });

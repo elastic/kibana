@@ -160,7 +160,7 @@ interface AgentToolEventSearchProps {
   result_count: number;
   has_query: boolean;
   has_stream_filter: boolean;
-  state_filter?: 'open' | 'closed';
+  status_filter?: SignificantEventStatus;
   error_message?: string;
 }
 

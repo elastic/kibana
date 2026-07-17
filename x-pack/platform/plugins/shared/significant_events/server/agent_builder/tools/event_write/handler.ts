@@ -6,9 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { type SignificantEvent } from '@kbn/significant-events-schema';
 import type { EventClient } from '../../../lib/significant_events/events';
-import { toSortableSeverity } from '../../../lib/significant_events/severity';
 
 /**
  * Input for writing a significant event document. Derived from the canonical SignificantEvent
@@ -25,6 +24,7 @@ export type EventsWriteInput = Pick<
   | 'status'
   | 'stream_names'
   | 'title'
+  | 'symptom_hypothesis'
   | 'summary'
   | 'severity'
   | 'confidence'
@@ -70,23 +70,12 @@ export async function eventsWriteHandler({
   await eventClient.bulkCreate(
     [
       {
+        ...input,
         '@timestamp': now,
         event_uuid: eventUuid,
-        previous_event_uuid: latestEvent?.event_uuid,
         event_id: eventId,
-        discovery_id: input.discovery_id,
-        status: input.status,
-        stream_names: input.stream_names,
-        title: input.title,
-        summary: input.summary,
-        severity: toSortableSeverity(input.severity),
-        confidence: input.confidence,
-        assessment_note: input.assessment_note,
-        signals: input.signals,
-        causal_features: input.causal_features,
-        blast_radius: input.blast_radius,
-        workflow_execution_id: input.workflow_execution_id,
-        conversation_id: input.conversation_id,
+        previous_event_uuid: latestEvent?.event_uuid,
+        severity: input.severity,
       },
     ],
     { throwOnFail: true }

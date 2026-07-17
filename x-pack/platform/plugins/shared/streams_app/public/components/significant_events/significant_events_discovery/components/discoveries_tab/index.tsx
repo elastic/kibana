@@ -11,7 +11,7 @@ import { EuiBasicTable, EuiBadge, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { Discovery } from '@kbn/significant-events-schema';
+import { getSeverityLabel, type Discovery } from '@kbn/significant-events-schema';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import {
   useFetchDiscoveriesEntities,
@@ -92,7 +92,7 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
       defaultMessage: 'Severity',
     }),
     width: '100px',
-    render: (value: string | undefined) => value ?? '-',
+    render: (value: Discovery['severity']) => getSeverityLabel(value),
   },
   {
     field: 'confidence',

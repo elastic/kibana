@@ -28,8 +28,9 @@ const event: SignificantEvent = {
   workflow_execution_id: 'workflow-1',
   stream_names: ['logs.payment'],
   title: 'Payment outage',
+  symptom_hypothesis: 'Payment gateway timeout.',
   summary: 'Payments are failing.',
-  severity: 'high',
+  severity: '60-high',
   confidence: 0.8,
 };
 
@@ -142,7 +143,7 @@ describe('createSignificantEventAttachmentType', () => {
     });
 
     expect(formatSignificantEventAsText(event)).toContain('Payment outage');
-    expect(formatSignificantEventAsText(event)).toContain('Payments are failing.');
+    expect(formatSignificantEventAsText(event)).toContain('Payment gateway timeout.');
     expect(type.isReadonly).toBe(true);
     expect(type.getTools?.()).toEqual([]);
     expect(type.getAgentDescription?.()).toContain('significant event attachment');

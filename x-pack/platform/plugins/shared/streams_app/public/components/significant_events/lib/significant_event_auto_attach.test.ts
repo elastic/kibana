@@ -28,7 +28,7 @@ const createEvent = (overrides?: Partial<SignificantEvent>): SignificantEvent =>
   stream_names: ['logs.payment'],
   title: 'Payment outage',
   summary: 'Payments are failing.',
-  severity: 'high',
+  severity: '60-high',
   confidence: 0.8,
   status: 'open',
   ...overrides,

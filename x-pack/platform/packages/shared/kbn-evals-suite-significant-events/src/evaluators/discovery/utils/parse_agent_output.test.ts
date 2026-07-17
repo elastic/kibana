@@ -63,7 +63,7 @@ describe('extractSignificantEventsFromToolCall', () => {
           discovery_id: 'd-1',
           event_id: 'slug-1',
           status: 'open',
-          severity: 'high',
+          severity: '60-high',
           confidence: 0.9,
           assessment_note: 'High confidence DB issue',
           signals: [],
@@ -95,13 +95,13 @@ describe('extractSignificantEventsFromToolCall', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-1',
-        params: { discovery_id: 'd-1', status: 'open', severity: 'critical' },
+        params: { discovery_id: 'd-1', status: 'open', severity: '80-critical' },
       },
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-2',
-        params: { discovery_id: 'd-2', status: 'dismissed', severity: 'low' },
+        params: { discovery_id: 'd-2', status: 'dismissed', severity: '20-low' },
       },
     ];
     const events = extractSignificantEventsFromToolCall(steps);

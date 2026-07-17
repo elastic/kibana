@@ -6,19 +6,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import dedent from 'dedent';
 import { significantEventBaseSchema } from '../common_schemas';
-import { MAX_TEXT_LENGTH, MAX_ID_LENGTH } from '../constants';
+import { MAX_TEXT_LENGTH, MAX_ID_LENGTH, NO_RAW_SENSITIVE_VALUES_RULE } from '../constants';
 
 export const SIGNIFICANT_EVENT_STATUS_OPTIONS = ['open', 'closed', 'dismissed'] as const;
 
-export const significantEventStatusSchema = z
-  .enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
-  .describe(
-    '"open" = incident is active and being tracked; ' +
-      '"closed" = incident is confirmed resolved; ' +
-      '"dismissed" = severity is low AND confidence is also low — too few corroborating signals to trust the finding. ' +
-      'A low-severity but well-corroborated finding stays "open"; only dismiss when the evidence itself is too thin.'
-  );
+export const significantEventStatusSchema = z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
+  .describe(dedent`
+    "open" = incident is active and being tracked;
+    "closed" = incident is confirmed resolved;
+    "dismissed" = severity is low AND confidence is also low — too few corroborating signals to trust the finding.
+  `);
+
 export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema>;
 
 /**
@@ -33,11 +33,7 @@ export const significantEventInvestigationSchema = z.object({
   workflow_execution_id: z
     .string()
     .max(MAX_ID_LENGTH)
-    .describe(
-      'ID of the investigation workflow execution. Use it to fetch the full investigation ' +
-        'state (hypotheses, conclusion, etc.) — that workflow execution document is the ' +
-        "single source of truth for the investigation's content."
-    ),
+    .describe('ID of the investigation workflow execution.'),
   started_at: z.iso.datetime({ offset: true }).describe('When this investigation run started.'),
   completed_at: z.iso
     .datetime({ offset: true })
@@ -67,8 +63,11 @@ export const significantEventSchema = significantEventBaseSchema.extend({
     .max(MAX_TEXT_LENGTH)
     .optional()
     .describe(
-      'Free-text note from the analyst or agent that assessed this event. ' +
-        'Use to capture investigation rationale, ambiguities, or caveats not covered by other fields.'
+      dedent`
+        Free-text note from the analyst or agent that assessed this event. Use to capture investigation rationale, ambiguities, or caveats not covered by other fields.
+        
+        ${NO_RAW_SENSITIVE_VALUES_RULE}
+      `
     ),
   investigations: z.array(significantEventInvestigationSchema).max(100).optional(),
 });

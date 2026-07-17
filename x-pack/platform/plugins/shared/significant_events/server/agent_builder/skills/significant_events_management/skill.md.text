@@ -13,7 +13,7 @@ Examples of conversation signals that may indicate a SignificantEvent:
 </significant_events_concept>
 
 <tools>
-- **event_search** — search existing significant events by query, stream, and/or latest `state`. Always run this first before creating an event to avoid duplicates. `query` is optional; omit `stream_names` for cross-stream searches. Use `state: "open"` to focus on active events.
+- **event_search** — search existing significant events by query, stream, and/or latest `status`. Always run this first before creating an event to avoid duplicates. `query` is optional; omit `stream_names` for cross-stream searches. Use `status: "open"` to focus on active events.
 - **event_create** — create a new significant event. Only after confirming no similar event exists. The system generates internal identifiers and timestamps automatically.
 - **event_status_update** — update an existing event's status to `open`, `closed`, or `dismissed`. Creates a new event version on success.
 - **search_knowledge_indicators** — query the service knowledge base for feature and query KIs. Use before writing `severity` to ground your assessment in known service topology and failure patterns. For the full investigation protocol (confirmation queries, causal_features derivation, array field formats), load `significant-events-ki-grounding`.
@@ -21,7 +21,7 @@ Examples of conversation signals that may indicate a SignificantEvent:
 
 <severity_and_confidence>
 
-`severity` is one of `critical` | `high` | `medium` | `low`, reflecting user-experience impact; `confidence` is a float 0.0–1.0 measuring root-cause correctness. Tier definitions and scoring rules are embedded in the tool schema field descriptions — read them when calling `event_create` or `event_status_update`. When uncertain, choose the lower tier.
+`severity` is one of `80-critical` | `60-high` | `40-medium` | `20-low`, reflecting user-experience impact; `confidence` is a float 0.0–1.0 measuring root-cause correctness. Tier definitions and scoring rules are embedded in the tool schema field descriptions — read them when calling `event_create` or `event_status_update`. When uncertain, choose the lower tier.
 
 </severity_and_confidence>
 
@@ -125,7 +125,7 @@ Example: create a new significant event
 Tool: `event_create`
 {
   "status": "open",
-  "severity": "high",
+  "severity": "60-high",
   "title": "Checkout service — connection pool: timeouts",
   "summary": "Checkout service: requests failing with connection timeout. Users cannot complete purchases; payment-gateway is exposed. ~150 errors/min since 14:22 UTC, no sign of recovery. Immediately scale checkout connection pool.",
   "stream_names": ["logs.checkout", "logs.payment"],

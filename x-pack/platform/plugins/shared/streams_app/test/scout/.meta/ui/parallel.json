@@ -1,5 +1,5 @@
 {
-  "sha1": "ef03613f3702e59b5f58126bb427ccb9e6207acd",
+  "sha1": "ad700b25722dfcace1a88674c4b846b655e94b14",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1235,7 +1235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_classic.spec.ts",
-        "line": 38,
+        "line": 34,
         "column": 9
       }
     },
@@ -1251,7 +1251,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_classic.spec.ts",
-        "line": 81,
+        "line": 77,
         "column": 9
       }
     },
@@ -1267,7 +1267,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_wired.spec.ts",
-        "line": 41,
+        "line": 37,
         "column": 9
       }
     },
@@ -1283,7 +1283,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_wired.spec.ts",
-        "line": 87,
+        "line": 83,
         "column": 9
       }
     },
@@ -1301,7 +1301,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/esql_source_enrichment.spec.ts",
-        "line": 34,
+        "line": 30,
         "column": 9
       }
     },

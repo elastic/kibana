@@ -10,8 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { MAX_ID_LENGTH, significantEventStatusSchema } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import { significantEventSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -23,23 +22,9 @@ import { updateEventStatusToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;
 
-const eventStatusUpdateSchema = z.object({
-  event_uuid: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .describe(
-      i18n.translate(
-        'xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.schema.eventUuid',
-        {
-          defaultMessage: 'Identifier of the significant event to update.',
-        }
-      )
-    ),
-  status: significantEventStatusSchema.describe(
-    i18n.translate('xpack.streams.agentBuilder.tools.eventStatusUpdate.schema.status', {
-      defaultMessage: 'The new status to set on the significant event.',
-    })
-  ),
+const eventStatusUpdateSchema = significantEventSchema.pick({
+  status: true,
+  event_uuid: true,
 });
 
 export function createEventStatusUpdateTool({
@@ -67,8 +52,8 @@ export function createEventStatusUpdateTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        const { getEventClient, licensing } = await getScopedClients({ request });
+        await assertSignificantEventsAccess({ server, licensing });
 
         const data = await updateEventStatusToolHandler({
           eventClient: getEventClient(),

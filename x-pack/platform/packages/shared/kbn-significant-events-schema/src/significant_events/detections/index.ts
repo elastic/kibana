@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import dedent from 'dedent';
 import { MAX_ID_LENGTH, MAX_RULE_NAME_LENGTH } from '../constants';
 
 /**
@@ -52,25 +53,21 @@ export const detectionSchema = z.object({
     .optional()
     .describe('Human-readable name of the alerting rule.'),
   stream_name: z.string().max(MAX_ID_LENGTH),
-  change_point_type: z
-    .enum(CHANGE_POINT_TYPES)
-    .describe(
-      'Change point type detected by the alerting rule. ' +
-        '"spike" = Sudden increase in alert volume | Load surge, cascading failure, noisy rule. **Escalation.**; ' +
-        '"dip" = Sudden decrease in alert volume | Service down (no data to alert on), rule disabled, data pipeline failure. **Escalation** — a drop to silence usually means the service went DOWN, not that it recovered. ' +
-        '"step_change" = Sustained level shift | Config change, new deployment, capacity change. **Direction decides:** a shift up is an escalation; a shift back down toward low volume is a recovery. ' +
-        '"trend_change" = Gradual directional shift | Growing workload, degrading performance, slow leak. **Direction decides:** an upward trend is an escalation; a downward trend toward low volume is a recovery. ' +
-        '"distribution_change" = Overall distribution shifted | Mixed traffic pattern change, deployment rollout. Escalation unless the shift is clearly back toward baseline.' +
-        '"non_stationary" = No discrete change point, but not stationary | Gradual drift, chronic instability — weak signal. ' +
-        '"stationary" = The alert rate is flat — no recent change up or down | Steady state. Steady is **not** benign: a stationary rule can be an ongoing failure holding a flat rate. Confirm with a query (signature query if no exact-match KI) and score severity from the **evidence and user impact**, never from the shape or the raw `alert_count`. When observed **after a prior escalation** on the same rule, treat as candidate recovery (confirm with a recovery-lens query).'
-    ),
+  change_point_type: z.enum(CHANGE_POINT_TYPES).describe(
+    dedent`
+        "spike" = Sudden increase in alert volume | Load surge, cascading failure, noisy rule. **Escalation.**
+        "dip" = Sudden decrease in alert volume | Service down (no data to alert on), rule disabled, data pipeline failure. **Escalation** — a drop to silence usually means the service went DOWN, not that it recovered.
+        "step_change" = Sustained level shift | Config change, new deployment, capacity change. **Direction decides:** a shift up is an escalation; a shift back down toward low volume is a recovery.
+        "trend_change" = Gradual directional shift | Growing workload, degrading performance, slow leak. **Direction decides:** an upward trend is an escalation; a downward trend toward low volume is a recovery.
+        "distribution_change" = Overall distribution shifted | Mixed traffic pattern change, deployment rollout. Escalation unless the shift is clearly back toward baseline.
+        "non_stationary" = No discrete change point, but not stationary | Gradual drift, chronic instability — weak signal.
+        "stationary" = The alert rate is flat — no recent change up or down | Steady state. Steady is **not** benign: a stationary rule can be an ongoing failure holding a flat rate. Confirm with a query (signature query if no exact-match KI) and score severity from the **evidence and user impact**, never from the shape or the raw \`alert_count\`. When observed **after a prior escalation** on the same rule, treat as candidate recovery (confirm with a recovery-lens query).
+      `
+  ),
   p_value: z
     .number()
     .describe(
-      'Statistical p_value of the change point detection. Lower values indicate stronger signal. ' +
-        '≤0.05: credible signal — proceed with full investigation. ' +
-        '0.05–0.10: weak signal — require KI backing or confirming failure rows before escalating. ' +
-        '>0.10: low credibility — likely noise; do not promote without strong corroborating evidence.'
+      'Statistical p_value of the change point detection. Lower values indicate stronger signal.'
     ),
   severity_score: z
     .number()

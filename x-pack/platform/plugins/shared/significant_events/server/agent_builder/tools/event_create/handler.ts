@@ -16,7 +16,7 @@ import { eventsWriteHandler, type EventsWriteInput } from '../event_write/handle
  */
 export type EventCreateInput = Pick<
   EventsWriteInput,
-  'title' | 'summary' | 'stream_names' | 'severity' | 'confidence'
+  'title' | 'symptom_hypothesis' | 'summary' | 'stream_names' | 'severity' | 'confidence'
 > & {
   status?: EventsWriteInput['status'];
 };

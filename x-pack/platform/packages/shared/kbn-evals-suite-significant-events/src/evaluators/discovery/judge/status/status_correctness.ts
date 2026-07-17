@@ -10,14 +10,22 @@ import type { DiscoveryJudgeEvaluationExample, DiscoveryJudgeAgentOutput } from 
 
 /** Status decision gates, mirrored from the judge instructions so the LLM grades evidence justification. */
 const STATUS_DECISION_RUBRIC = [
-  "As Incident Commander, each event's `status` and `severity` must follow these gates:",
-  '- `status: "open"` with `severity: "critical"` (kind:discovery only): credible signal (p_value ≤ 0.05) AND ≥1 `confirmed: true` signal the judge verified this cycle AND a blocked user task or confirmed live sensitive-data (PII/credentials/secrets) exposure AND blast radius spans ≥2 exposed downstream services or a core user journey.',
-  '- `status: "open"` with `severity: "high"`: signal is real and credible (p_value ≤ 0.05) with confirmed user impact but bounded blast radius. This is the default when the call is borderline between critical and lower.',
-  '- `status: "open"` with `severity: "medium"`: signal credible but impact not confirmed, or evidence is ambiguous.',
-  '- `status: "open"` with `severity: "low"` (kind:discovery only): confirmed false alarm or recovered, but still corroborated (confidence ≥ 0.5, e.g. ≥1 confirmed:true signal) — p_value > 0.1 with no KI corroboration, or the current-state check shows the stream alive with errors cleared. Stays open — closing is a user decision, not the judge\'s.',
-  '- `status: "dismissed"` (kind:discovery only): same low-severity finding as above, but confidence is ALSO low (< 0.5) — too few corroborating signals to trust the finding at all.',
-  '- `status: "closed"` (kind:clearance only): recovery independently confirmed, no active-failure evidence.',
-  'Hard constraints: never `closed` from a discovery input. When genuinely uncertain, the correct call is the more conservative one (`open/medium` over `open/critical`, `open/medium` over `open/low`, `open/low` over `dismissed`).',
+  "Grade whether the agent's `status` and `severity` for each event are correct given the gates below.",
+  'You are grading the agent output — you cannot run queries. Use the `confirmedSignalCount` field (number of `confirmed: true` signals in the agent output) as a proxy for whether the agent gathered sufficient evidence.',
+  '',
+  'Active episode (escalation signals):',
+  '- `status: "open"` with `severity: "80-critical"`: evidence supports the critical tier, the signal is credible (reflected in ≥1 `confirmed: true` signal in the output). When evidence does not clearly establish that tier\'s scope, `"60-high"` is the correct call — the agent must never downgrade by crediting an unconfirmed workaround or mitigation.',
+  '- `status: "open"` with `severity: "60-high"`: the signal is real and credible (reflected in confirmed evidence in the output) and evidence supports the high tier.',
+  '- `status: "open"` with `severity: "40-medium"`: the signal is credible and evidence supports the medium tier. `"40-medium"` must not be picked merely to hedge on ambiguous signal quality — that belongs in `confidence` instead.',
+  '- `status: "open"` with `severity: "20-low"`: confirmed false alarm or recovered, but still corroborated enough to surface (confidence ≥ 0.5, ≥1 `confirmed: true` signal). Stays `open` unless the doubly-confirmed recovery exception below applies.',
+  '- `status: "dismissed"`: same low-severity finding as above but confidence is also low (< 0.5) — too few corroborating signals to trust the finding at all (e.g. confirmedSignalCount == 0, a single weak signal, or no KI corroboration). Too thin to surface.',
+  '- `status: "closed"` — doubly-confirmed recovery exception: an active episode may close without a settled-shape signal only when the agent\'s output shows it performed two independent negative/healthy checks (a fresh re-verification returned 0/stale rows AND a follow-up `COUNT(*)` confirmed a live, non-gapped stream). Anything less is not doubly confirmed and must stay `open`.',
+  '- All other active-episode outcomes: must not be `closed`.',
+  '',
+  'Settled episode (downward/settle detection signals):',
+  '- `status: "closed"`: the episode is fully settled — every signal\'s `metadata.change_point_type` is a settled/downward value (`stationary` after a prior escalation, or a settle-direction change point; a `dip` is escalation, never recovery). Fresh settled signals require the agent to have re-verified recovery (no active failure rows); carried signals are trusted on their `change_point_type` without re-verification.',
+  '',
+  'Hard constraints: `closed` for an active episode is only valid under the doubly-confirmed recovery exception above. When genuinely uncertain, the correct call is the more conservative one (`open/40-medium` over `open/80-critical`, `open/40-medium` over `open/20-low`, `open/20-low` over `dismissed`).',
 ].join('\n');
 
 /**
@@ -58,7 +66,7 @@ export const createStatusCorrectnessEvaluator = (
           `${STATUS_DECISION_RUBRIC}\n\n` +
           `Expected outcome: ${expectedGroundTruth}. ` +
           `The discovery judge agent returned: ${JSON.stringify(eventsSummary)}. ` +
-          `PASS only if each discovery's returned status+severity matches the expected outcome (match by title/content, not by exact event_id) AND is justified by the event's ` +
+          `PASS only if each discovery's returned status matches the expected outcome (match by title/content, not by exact event_id) AND is justified by the event's ` +
           `signals, severity, and the gates above. An over-escalation, under-escalation, or ` +
           `constraint violation is a FAIL even if it is "close".`,
       },

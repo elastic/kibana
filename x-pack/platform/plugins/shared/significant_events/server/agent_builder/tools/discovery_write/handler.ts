@@ -8,17 +8,17 @@
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import dateMath from '@kbn/datemath';
-import type { Discovery, SignalEntry } from '@kbn/significant-events-schema';
+import { type Discovery, type SignalEntry } from '@kbn/significant-events-schema';
 import type { DiscoveryClient } from '../../../lib/significant_events/discoveries';
-import { toSortableSeverity } from '../../../lib/significant_events/severity';
 
 export type DiscoveryWriteInput = Pick<
   Discovery,
   | 'kind'
   | 'title'
+  | 'symptom_hypothesis'
   | 'summary'
-  | 'stream_names'
   | 'severity'
+  | 'stream_names'
   | 'confidence'
   | 'signals'
   | 'causal_features'
@@ -27,10 +27,8 @@ export type DiscoveryWriteInput = Pick<
   | 'workflow_execution_id'
   | 'conversation_id'
 > & {
-  /** Omit for new events — deterministically generated from stream names + rule uuids. Pass verbatim for continuation. */
+  /** Omit for new events — auto-generated (stream + rule UUIDs + random suffix; dedup uses `makeFingerprint`, not this id). Pass verbatim for continuation. */
   event_id?: Discovery['event_id'];
-  /** Auto-generated when omitted. Required for `kind: 'handled'` to reference the target. */
-  discovery_id?: Discovery['discovery_id'];
   /** Deduplication window (ES date math, e.g. `"now-1h"`). Not stored in the document. */
   dedup_window?: string;
 };
@@ -59,15 +57,21 @@ const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
 };
 
 /**
- * Deterministic event id: a hash of the primary stream name plus every detection rule's
- * `rule_uuid`, sorted for order-independence. The same stream+rules combination always produces
- * the same id, so a rule firing again under identical conditions naturally lands on the same
- * event rather than requiring a separate fingerprint-matching dedup pass.
+ * Per-incident event id: a hash of the primary stream name plus every detection rule's
+ * `rule_uuid` and a random UUID8 suffix. The suffix keeps each new incident instance unique so
+ * resolved incidents and new ones for the same rules are treated as separate events in the UI.
+ * Dedup uses `makeFingerprint` (stream + rules only, no suffix) rather than this id.
  */
 export const generateEventId = (streamNames: string[], ruleUuids: string[]): string => {
+  const suffix = uuidv4().replace(/-/g, '').slice(0, 8);
   const primaryStream = [...streamNames].sort()[0] ?? 'unknown';
-  const basis = [primaryStream, ...[...ruleUuids].sort()].join('|');
+  const basis = [primaryStream, ...[...ruleUuids].sort(), suffix].join('|');
   return createHash('sha256').update(basis).digest('hex').slice(0, 16);
+};
+
+export const makeFingerprint = (streamNames: string[], ruleUuids: string[]): string => {
+  const primaryStream = [...streamNames].sort()[0] ?? 'unknown';
+  return [primaryStream, ...[...ruleUuids].sort()].join('|');
 };
 
 /**
@@ -121,13 +125,15 @@ export const mergeSignalsLatestPerRule = (
 
 const findDuplicateDiscovery = async ({
   discoveryClient,
-  resolvedEventId,
+  streamNames,
+  signals,
   dedupWindow,
   kind,
   isExplicitEventId,
 }: {
   discoveryClient: DiscoveryClient;
-  resolvedEventId: string;
+  streamNames: string[];
+  signals: SignalEntry[] | undefined;
   dedupWindow: string | undefined;
   kind: Discovery['kind'];
   isExplicitEventId: boolean;
@@ -139,8 +145,17 @@ const findDuplicateDiscovery = async ({
   }
 
   const cutoffIso = new Date(Date.now() - windowMs).toISOString();
-  const { hits } = await discoveryClient.findByEventId(resolvedEventId);
-  return hits.find((h) => h['@timestamp'] >= cutoffIso && h.kind !== 'handled');
+  const fingerprint = makeFingerprint(streamNames, extractRuleUuids(signals));
+  // Scan recent active discoveries and match on stream+rules fingerprint in memory. ES|QL `IN`
+  // does not perform membership checks on multivalued keyword fields such as `stream_names`.
+  // Uses findLatest (grouped by event_id, excludes handled) so only the latest doc per incident
+  // is considered — prevents stale resolved incidents from blocking new ones.
+  const { hits } = await discoveryClient.findLatest({ from: cutoffIso });
+  return hits.find(
+    (h) =>
+      h.kind === 'discovery' &&
+      makeFingerprint(h.stream_names ?? [], extractRuleUuids(h.signals)) === fingerprint
+  );
 };
 
 const prepareSnapshotSignals = async ({
@@ -159,7 +174,10 @@ const prepareSnapshotSignals = async ({
   }
 
   const { hits: priorDocs } = await discoveryClient.findByEventId(input.event_id);
-  return mergeSignalsLatestPerRule(priorDocs, input.signals ?? [], timestamp);
+  // Exclude handled stamps — the old findStateBySlug path filtered these out so processed
+  // cycles do not carry their detection signals into a fresh continuation write.
+  const stateDocs = priorDocs.filter((doc) => doc.kind !== 'handled');
+  return mergeSignalsLatestPerRule(stateDocs, input.signals ?? [], timestamp);
 };
 
 export async function discoveryWriteHandler({
@@ -177,14 +195,14 @@ export async function discoveryWriteHandler({
   const discoveryInput = {
     ...rest,
     event_id: resolvedEventId,
-    severity: toSortableSeverity(rest.severity),
   };
 
   const isExplicitEventId = Boolean(event_id);
 
   const duplicate = await findDuplicateDiscovery({
     discoveryClient,
-    resolvedEventId,
+    streamNames: rest.stream_names,
+    signals: rest.signals,
     dedupWindow,
     kind: rest.kind,
     isExplicitEventId,
@@ -192,7 +210,7 @@ export async function discoveryWriteHandler({
   if (duplicate) {
     return {
       discovery_id: duplicate.discovery_id,
-      event_id: resolvedEventId,
+      event_id: duplicate.event_id ?? resolvedEventId,
       kind: discoveryInput.kind,
       written: false,
       skipped: true,
@@ -214,12 +232,12 @@ export async function discoveryWriteHandler({
   await discoveryClient.bulkCreate(
     [
       {
+        ...discoveryInput,
         '@timestamp': timestamp,
         discovered_at: discoveryInput.kind === 'discovery' ? timestamp : undefined,
-        ...discoveryInput,
         signals,
         discovery_id: discoveryId,
-        processed: discoveryInput.kind === 'handled',
+        severity: discoveryInput.severity,
       },
     ],
     { throwOnFail: true }

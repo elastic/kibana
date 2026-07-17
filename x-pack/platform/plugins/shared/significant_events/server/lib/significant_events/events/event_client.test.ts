@@ -9,7 +9,7 @@ import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { BulkCreateOperationError } from '../query_utils';
 import { EventClient } from './event_client';
-import type { SignificantEvent } from './data_stream';
+import { storedEventSchema, type SignificantEvent } from './data_stream';
 
 const createEvent = (): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -19,7 +19,7 @@ const createEvent = (): SignificantEvent => ({
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: 'medium',
+  severity: '40-medium',
   confidence: 0.8,
 });
 
@@ -50,29 +50,13 @@ const countResponse = (total: number): ESQLSearchResponse =>
     values: [[total]],
   } as unknown as ESQLSearchResponse);
 
-const createSearchClient = ({
-  openHits,
-  closedHits,
-  allHits = [],
-  total,
-}: {
-  openHits: SignificantEvent[];
-  closedHits: SignificantEvent[];
-  allHits?: SignificantEvent[];
-  total: number;
-}) => {
+const createSearchClient = ({ hits, total }: { hits: SignificantEvent[]; total: number }) => {
   const query = jest.fn(async (request: { query: string }) => {
     const { query: q } = request;
     if (q.includes('STATS total')) {
       return countResponse(total);
     }
-    if (q.includes('status NOT IN')) {
-      return sourceResponse(closedHits);
-    }
-    if (q.includes('status IN')) {
-      return sourceResponse(openHits);
-    }
-    return sourceResponse(allHits);
+    return sourceResponse(hits);
   });
 
   return {
@@ -98,7 +82,8 @@ describe('EventClient', () => {
       await expect(client.bulkCreate([event])).resolves.toBe(response);
       expect(dataStreamClient.create).toHaveBeenCalledWith({
         space: 'default',
-        documents: [event],
+        documents: [storedEventSchema.parse(event)],
+        refresh: undefined,
       });
     });
 
@@ -136,14 +121,12 @@ describe('EventClient', () => {
 
   describe('findLatestByCurrentStatePaginated', () => {
     it('filters open state after latest-per-slug reduction', async () => {
-      const closedLatest = { ...createEvent(), status: 'closed' as const };
       const { client, query } = createSearchClient({
-        openHits: [],
-        closedHits: [closedLatest],
+        hits: [],
         total: 0,
       });
 
-      const result = await client.findLatestByCurrentStatePaginated({ state: 'open' });
+      const result = await client.findLatestByCurrentStatePaginated({ status: ['open'] });
 
       expect(result.hits).toEqual([]);
       const dataQuery = query.mock.calls
@@ -158,12 +141,11 @@ describe('EventClient', () => {
     it('treats closed as latest status not in open set', async () => {
       const closedLatest = { ...createEvent(), status: 'closed' as const };
       const { client } = createSearchClient({
-        openHits: [],
-        closedHits: [closedLatest],
+        hits: [closedLatest],
         total: 1,
       });
 
-      const result = await client.findLatestByCurrentStatePaginated({ state: 'closed' });
+      const result = await client.findLatestByCurrentStatePaginated({ status: ['closed'] });
 
       expect(result.hits).toHaveLength(1);
       expect(result.hits[0].status).toBe('closed');

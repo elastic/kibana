@@ -38,7 +38,7 @@ interface SigEventDetailsProps {
 
 export const SigEventDetails = ({ event }: SigEventDetailsProps) => {
   const signals = event.signals ?? [];
-  const detectionSignals = signals.filter((s) => s.metadata?.kind === 'detection');
+  const detectionSignals = signals.filter((s) => s.type === 'detection');
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">

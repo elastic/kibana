@@ -136,9 +136,6 @@ export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, str
   open: i18n.translate('xpack.streams.significantEvent.status.open', {
     defaultMessage: 'Open',
   }),
-  closed: i18n.translate('xpack.streams.significantEvent.status.closed', {
-    defaultMessage: 'Closed',
-  }),
   dismissed: i18n.translate('xpack.streams.significantEvent.status.dismissed', {
     defaultMessage: 'Dismissed',
   }),

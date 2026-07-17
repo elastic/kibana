@@ -7,10 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-const PREFIX = 'xpack.dataLifecyclePhases.retentionSelector';
-
 export const retentionSelectorStrings = {
-  noOptionsFoundDescription: i18n.translate(`${PREFIX}.noOptionsFoundDescription`, {
-    defaultMessage: 'No options found',
+  noOptionsFoundDescription: i18n.translate(
+    'xpack.dataLifecyclePhases.retentionSelector.noOptionsFoundDescription',
+    {
+      defaultMessage: 'No options found',
+    }
+  ),
+  listAriaLabel: i18n.translate('xpack.dataLifecyclePhases.retentionSelector.listAriaLabel', {
+    defaultMessage: 'Options list',
   }),
 };

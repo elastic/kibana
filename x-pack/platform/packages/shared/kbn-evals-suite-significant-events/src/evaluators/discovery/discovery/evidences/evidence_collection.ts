@@ -19,7 +19,7 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
     const issues: string[] = [];
 
     for (const [i, discovery] of discoveries.entries()) {
-      const signals = (discovery.signals ?? []).filter((s) => s.metadata?.kind === 'detection');
+      const signals = (discovery.signals ?? []).filter((s) => s.type === 'detection');
 
       for (const signal of signals) {
         const ruleUuid = signal.metadata?.rule_uuid;

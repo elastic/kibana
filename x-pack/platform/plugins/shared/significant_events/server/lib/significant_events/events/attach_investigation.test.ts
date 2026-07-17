@@ -19,7 +19,7 @@ const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEven
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: 'medium',
+  severity: '40-medium',
   confidence: 0.8,
   ...overrides,
 });
@@ -266,7 +266,7 @@ describe('attachInvestigationToEvent', () => {
      * always returns E0, so the terminal write branches off E0 instead of chaining off the
      * pending-written E1 — producing siblings that lose prior investigation history.
      */
-    const pending = createInvestigation({ workflow_execution_id: 'exec-1', status: 'pending' });
+    const pending = createInvestigation({ workflow_execution_id: 'exec-1' });
     const e0 = createEvent({ event_uuid: 'event-0', event_id: 'slug-1' });
     const e1 = createEvent({
       event_uuid: 'event-1',

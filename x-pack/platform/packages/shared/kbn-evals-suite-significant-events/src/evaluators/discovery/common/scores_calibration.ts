@@ -24,7 +24,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'critical_severity_requires_confirmed_impact',
-    text: '"critical" severity is warranted only for confirmed user-task-blocking failures affecting a core user journey or confirmed live sensitive-data exposure with broad blast radius; bounded or partial impact belongs at "high" or "medium".',
+    text: '"80-critical" severity is warranted only for confirmed user-task-blocking failures affecting a core user journey or confirmed live sensitive-data exposure with broad blast radius; bounded or partial impact belongs at "60-high" or "40-medium".',
   },
   {
     id: 'weak_signals_low_severity',
@@ -40,7 +40,7 @@ const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'no_ki_caps_confidence',
-    text: 'Failure findings with no KI match and no confirmed failure evidence should not claim high confidence (kept at or below ~0.65 without KI backing). Exception: refuted discoveries — where queries returned healthy rows (`row_count > 0`, no error signature) confirming the signal is a non-event — are confirmed non-events, not unconfirmed findings, so they may sit in the 0.65–0.75 range without KI backing and are exempt from this cap.',
+    text: 'Failure findings with no KI match and no confirmed failure evidence should not claim high confidence (kept at or below ~0.65 without KI backing). Exception: refuted discoveries — where queries returned healthy rows (`evidence.result: "found"` with no error signature) confirming the signal is a non-event — are confirmed non-events, not unconfirmed findings, so they may sit in the 0.65–0.75 range without KI backing and are exempt from this cap.',
   },
   {
     id: 'strong_corroboration_high_confidence',

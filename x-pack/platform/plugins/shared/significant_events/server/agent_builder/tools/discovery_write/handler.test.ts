@@ -6,15 +6,25 @@
  */
 
 import type { DiscoveryWriteInput } from './handler';
-import { discoveryWriteHandler, generateEventId, mergeSignalsLatestPerRule } from './handler';
+import {
+  discoveryWriteHandler,
+  generateEventId,
+  makeFingerprint,
+  mergeSignalsLatestPerRule,
+} from './handler';
 import type { SignalEntry } from '@kbn/significant-events-schema';
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('12345678'),
+}));
 
 const baseInput: DiscoveryWriteInput = {
   kind: 'discovery',
   title: 'Checkout latency',
+  symptom_hypothesis: 'Checkout requests are delayed because the payment dependency is timing out.',
   summary: 'P99 latency breached SLO',
   stream_names: ['logs.checkout'],
-  severity: 'high' as const,
+  severity: '60-high',
   confidence: 0.8,
   signals: [],
 };
@@ -25,7 +35,10 @@ const createSignal = (
 ): Extract<SignalEntry, { type: 'detection' }> => ({
   type: 'detection' as const,
   description: `Testing: ${ruleUuid} rule fired.`,
+  confirmed: true,
+  stream_name: 'logs.checkout',
   metadata: {
+    detection_id: 'detection-1',
     rule_uuid: ruleUuid,
     rule_name: ruleUuid,
     change_point_type: 'spike',
@@ -44,40 +57,8 @@ const signalsByRule = (
       .map((s) => [s.metadata.rule_uuid!, s])
   );
 
-describe('generateEventId', () => {
-  it('is deterministic for the same stream names and rule uuids', () => {
-    const a = generateEventId(['logs.checkout'], ['rule-uuid-1']);
-    const b = generateEventId(['logs.checkout'], ['rule-uuid-1']);
-    expect(a).toBe(b);
-  });
-
-  it('is independent of rule uuid order', () => {
-    const a = generateEventId(['logs.checkout'], ['rule-uuid-1', 'rule-uuid-2']);
-    const b = generateEventId(['logs.checkout'], ['rule-uuid-2', 'rule-uuid-1']);
-    expect(a).toBe(b);
-  });
-
-  it('differs when the rule uuids differ', () => {
-    expect(generateEventId(['logs.checkout'], ['rule-uuid-1'])).not.toBe(
-      generateEventId(['logs.checkout'], ['rule-uuid-2'])
-    );
-  });
-
-  it('differs when the stream names differ', () => {
-    expect(generateEventId(['logs.checkout'], ['rule-uuid-1'])).not.toBe(
-      generateEventId(['logs.payments'], ['rule-uuid-1'])
-    );
-  });
-
-  it('falls back to "unknown" stream when stream_names is empty', () => {
-    expect(generateEventId([], ['rule-uuid-1'])).toBe(
-      generateEventId(['unknown'], ['rule-uuid-1'])
-    );
-  });
-});
-
 describe('discoveryWriteHandler', () => {
-  it('writes a new discovery with a deterministically generated event_id', async () => {
+  it('writes a new discovery and returns event_id', async () => {
     const discoveryClient = {
       findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
       bulkCreate: jest.fn().mockResolvedValue(undefined),
@@ -89,8 +70,11 @@ describe('discoveryWriteHandler', () => {
     });
 
     expect(discoveryClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(discoveryClient.bulkCreate.mock.calls[0][0][0].symptom_hypothesis).toBe(
+      baseInput.symptom_hypothesis
+    );
     expect(result.written).toBe(true);
-    expect(result.event_id).toBe(generateEventId(baseInput.stream_names, []));
+    expect(result.event_id).toBeDefined();
   });
 
   it('uses the provided event_id verbatim', async () => {
@@ -123,28 +107,27 @@ describe('discoveryWriteHandler', () => {
     expect(result.event_id).toBe(generateEventId(baseInput.stream_names, ['rule-uuid-1']));
   });
 
-  it('skips write when a non-handled duplicate exists within the dedup window', async () => {
-    const autoEventId = generateEventId(baseInput.stream_names, []);
+  it('skips write when a matching active discovery exists within the dedup window', async () => {
+    const activeDoc = {
+      discovery_id: 'existing-disc-id',
+      event_id: 'some-event-id',
+      kind: 'discovery' as const,
+      stream_names: baseInput.stream_names,
+      signals: [],
+      '@timestamp': new Date().toISOString(),
+    };
     const discoveryClient = {
-      findByEventId: jest.fn().mockResolvedValue({
-        hits: [
-          {
-            discovery_id: 'existing-disc-id',
-            event_id: autoEventId,
-            kind: 'discovery',
-            '@timestamp': new Date().toISOString(),
-          },
-        ],
-      }),
+      findLatest: jest.fn().mockResolvedValue({ hits: [activeDoc] }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
       bulkCreate: jest.fn(),
     };
 
-    // No explicit event_id — auto-generated, dedup applies
     const result = await discoveryWriteHandler({
       discoveryClient: discoveryClient as never,
       input: { ...baseInput, dedup_window: 'now-1h' },
     });
 
+    expect(discoveryClient.findLatest).toHaveBeenCalledWith({ from: expect.any(String) });
     expect(discoveryClient.bulkCreate).not.toHaveBeenCalled();
     expect(result.written).toBe(false);
     expect(result.skipped).toBe(true);
@@ -152,21 +135,76 @@ describe('discoveryWriteHandler', () => {
     expect(result.existing_discovery_id).toBe('existing-disc-id');
   });
 
-  it('does not skip when the existing hit is outside the dedup window', async () => {
+  it('deduplicates discoveries with multivalued stream_names', async () => {
+    const streamNames = ['logs.checkout', 'logs.payment'];
+    const activeDoc = {
+      discovery_id: 'existing-multi-stream-disc-id',
+      event_id: 'existing-multi-stream-event-id',
+      kind: 'discovery' as const,
+      stream_names: [...streamNames].reverse(),
+      signals: [],
+      '@timestamp': new Date().toISOString(),
+    };
     const discoveryClient = {
-      findByEventId: jest.fn().mockResolvedValue({
-        hits: [
-          {
-            discovery_id: 'existing-disc-id',
-            kind: 'discovery',
-            '@timestamp': new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          },
-        ],
-      }),
+      findLatest: jest.fn().mockResolvedValue({ hits: [activeDoc] }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+      bulkCreate: jest.fn(),
+    };
+
+    const result = await discoveryWriteHandler({
+      discoveryClient: discoveryClient as never,
+      input: { ...baseInput, stream_names: streamNames, dedup_window: 'now-1h' },
+    });
+
+    expect(discoveryClient.findLatest).toHaveBeenCalledWith({ from: expect.any(String) });
+    expect(discoveryClient.bulkCreate).not.toHaveBeenCalled();
+    expect(result).toEqual(
+      expect.objectContaining({
+        event_id: 'existing-multi-stream-event-id',
+        written: false,
+        reason: 'duplicate_within_window',
+      })
+    );
+  });
+
+  it('does not skip when a matching discovery exists but has a different stream', async () => {
+    const differentStreamDoc = {
+      discovery_id: 'other-disc-id',
+      kind: 'discovery' as const,
+      stream_names: ['logs.other'],
+      signals: [],
+      '@timestamp': new Date().toISOString(),
+    };
+    const discoveryClient = {
+      findLatest: jest.fn().mockResolvedValue({ hits: [differentStreamDoc] }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
       bulkCreate: jest.fn().mockResolvedValue(undefined),
     };
 
-    // No explicit event_id — auto-generated, dedup applies but existing hit is outside the window
+    const result = await discoveryWriteHandler({
+      discoveryClient: discoveryClient as never,
+      input: { ...baseInput, dedup_window: 'now-1h' },
+    });
+
+    expect(discoveryClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(result.written).toBe(true);
+  });
+
+  it('does not skip when the only recent doc for the fingerprint is a clearance (resolved incident)', async () => {
+    // A clearance means the incident was resolved; the next detection should be a fresh incident.
+    const clearedDoc = {
+      discovery_id: 'cleared-disc-id',
+      kind: 'clearance' as const,
+      stream_names: baseInput.stream_names,
+      signals: [],
+      '@timestamp': new Date().toISOString(),
+    };
+    const discoveryClient = {
+      findLatest: jest.fn().mockResolvedValue({ hits: [clearedDoc] }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+      bulkCreate: jest.fn().mockResolvedValue(undefined),
+    };
+
     const result = await discoveryWriteHandler({
       discoveryClient: discoveryClient as never,
       input: { ...baseInput, dedup_window: 'now-1h' },
@@ -178,7 +216,8 @@ describe('discoveryWriteHandler', () => {
 
   it('skips dedup entirely for continuation writes (explicit event_id)', async () => {
     const discoveryClient = {
-      // findByEventId only called for signal merging, never for dedup
+      // findLatest never called for dedup; findByEventId called once for signal merging
+      findLatest: jest.fn(),
       findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
       bulkCreate: jest.fn().mockResolvedValue(undefined),
     };
@@ -192,7 +231,7 @@ describe('discoveryWriteHandler', () => {
       },
     });
 
-    // dedup skipped; findByEventId called once for signal merging only
+    expect(discoveryClient.findLatest).not.toHaveBeenCalled();
     expect(discoveryClient.findByEventId).toHaveBeenCalledTimes(1);
     expect(discoveryClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(result.written).toBe(true);
@@ -201,6 +240,7 @@ describe('discoveryWriteHandler', () => {
 
   it('skips dedup for clearance writes', async () => {
     const discoveryClient = {
+      findLatest: jest.fn(),
       findByEventId: jest.fn(),
       bulkCreate: jest.fn().mockResolvedValue(undefined),
     };
@@ -215,6 +255,7 @@ describe('discoveryWriteHandler', () => {
       },
     });
 
+    expect(discoveryClient.findLatest).not.toHaveBeenCalled();
     expect(discoveryClient.findByEventId).not.toHaveBeenCalled();
     expect(discoveryClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(result.written).toBe(true);
@@ -223,6 +264,7 @@ describe('discoveryWriteHandler', () => {
 
   it('does not skip when no matching discovery exists within the dedup window', async () => {
     const discoveryClient = {
+      findLatest: jest.fn().mockResolvedValue({ hits: [] }),
       findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
       bulkCreate: jest.fn().mockResolvedValue(undefined),
     };
@@ -232,14 +274,15 @@ describe('discoveryWriteHandler', () => {
       input: { ...baseInput, dedup_window: 'now-1h' },
     });
 
-    expect(discoveryClient.findByEventId).toHaveBeenCalled();
+    expect(discoveryClient.findLatest).toHaveBeenCalled();
     expect(discoveryClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(result.written).toBe(true);
   });
 
   it('skips dedup when dedup_window is unrecognised', async () => {
     const discoveryClient = {
-      // findByEventId is still called for signal merging when event_id is explicit
+      // findLatest never called (invalid window); findByEventId called once for signal merging
+      findLatest: jest.fn(),
       findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
       bulkCreate: jest.fn().mockResolvedValue(undefined),
     };
@@ -249,7 +292,7 @@ describe('discoveryWriteHandler', () => {
       input: { ...baseInput, event_id: 'checkout-event-id', dedup_window: 'invalid' },
     });
 
-    // dedup is skipped (invalid window), write proceeds; findByEventId called once for signal merging only
+    expect(discoveryClient.findLatest).not.toHaveBeenCalled();
     expect(discoveryClient.findByEventId).toHaveBeenCalledTimes(1);
     expect(discoveryClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(result.written).toBe(true);
@@ -257,6 +300,7 @@ describe('discoveryWriteHandler', () => {
 
   it('skips dedup check for kind:handled', async () => {
     const discoveryClient = {
+      findLatest: jest.fn(),
       findByEventId: jest.fn(),
       bulkCreate: jest.fn().mockResolvedValue(undefined),
     };
@@ -271,43 +315,24 @@ describe('discoveryWriteHandler', () => {
       },
     });
 
+    expect(discoveryClient.findLatest).not.toHaveBeenCalled();
     expect(discoveryClient.findByEventId).not.toHaveBeenCalled();
     expect(discoveryClient.bulkCreate).toHaveBeenCalledTimes(1);
   });
 
-  it('generates a discovery_id when omitted, and reuses one when provided', async () => {
+  it('generates a discovery_id for each new write', async () => {
     const discoveryClient = {
       findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
       bulkCreate: jest.fn().mockResolvedValue(undefined),
     };
 
-    const generated = await discoveryWriteHandler({
+    const result = await discoveryWriteHandler({
       discoveryClient: discoveryClient as never,
       input: baseInput,
     });
-    expect(generated.discovery_id).toHaveLength(36);
 
-    const provided = await discoveryWriteHandler({
-      discoveryClient: discoveryClient as never,
-      input: { ...baseInput, discovery_id: 'explicit-discovery-id' },
-    });
-    expect(provided.discovery_id).toBe('explicit-discovery-id');
-  });
-
-  it('sets processed only for kind:handled', async () => {
-    const discoveryClient = {
-      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
-      bulkCreate: jest.fn().mockResolvedValue(undefined),
-    };
-
-    await discoveryWriteHandler({
-      discoveryClient: discoveryClient as never,
-      input: { ...baseInput, kind: 'handled', event_id: 'checkout-event-id' },
-    });
-
-    const [[documents]] = discoveryClient.bulkCreate.mock.calls;
-    expect(documents[0].processed).toBe(true);
-    expect(documents[0].discovered_at).toBeUndefined();
+    expect(result.discovery_id).toBeDefined();
+    expect(discoveryClient.bulkCreate.mock.calls[0][0][0].discovery_id).toBe(result.discovery_id);
   });
 
   it('sets discovered_at only for kind:discovery', async () => {
@@ -323,7 +348,62 @@ describe('discoveryWriteHandler', () => {
 
     const [[documents]] = discoveryClient.bulkCreate.mock.calls;
     expect(documents[0].discovered_at).toBeDefined();
-    expect(documents[0].processed).toBe(false);
+  });
+});
+
+/**
+ * `generateEventId` intentionally includes a random suffix so each new incident gets a unique id
+ * for grouping. Dedup uses `makeFingerprint` (deterministic, no suffix) instead of event_id.
+ */
+describe('generateEventId', () => {
+  let mockV4: jest.Mock;
+
+  beforeEach(() => {
+    mockV4 = (jest.requireMock('uuid') as { v4: jest.Mock }).v4;
+  });
+
+  it('produces different ids for the same inputs when uuid returns different values', () => {
+    mockV4.mockReturnValueOnce('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+    const a = generateEventId(['logs.checkout'], ['rule-uuid-1']);
+
+    mockV4.mockReturnValueOnce('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb');
+    const b = generateEventId(['logs.checkout'], ['rule-uuid-1']);
+
+    // Each new incident instance gets a distinct event_id — this is intentional.
+    // Dedup is handled separately via makeFingerprint, not via event_id comparison.
+    expect(a).not.toBe(b);
+  });
+});
+
+describe('makeFingerprint', () => {
+  it('is deterministic for the same stream names and rule uuids', () => {
+    expect(makeFingerprint(['logs.checkout'], ['rule-uuid-1'])).toBe(
+      makeFingerprint(['logs.checkout'], ['rule-uuid-1'])
+    );
+  });
+
+  it('is independent of rule uuid order', () => {
+    expect(makeFingerprint(['logs.checkout'], ['rule-uuid-1', 'rule-uuid-2'])).toBe(
+      makeFingerprint(['logs.checkout'], ['rule-uuid-2', 'rule-uuid-1'])
+    );
+  });
+
+  it('differs when stream names differ', () => {
+    expect(makeFingerprint(['logs.checkout'], ['rule-uuid-1'])).not.toBe(
+      makeFingerprint(['logs.payments'], ['rule-uuid-1'])
+    );
+  });
+
+  it('differs when rule uuids differ', () => {
+    expect(makeFingerprint(['logs.checkout'], ['rule-uuid-1'])).not.toBe(
+      makeFingerprint(['logs.checkout'], ['rule-uuid-2'])
+    );
+  });
+
+  it('falls back to "unknown" stream when stream_names is empty', () => {
+    expect(makeFingerprint([], ['rule-uuid-1'])).toBe(
+      makeFingerprint(['unknown'], ['rule-uuid-1'])
+    );
   });
 });
 
@@ -409,6 +489,38 @@ describe('discoveryWriteHandler — continuation snapshot merge', () => {
     expect(Object.keys(signalsByRule(persisted)).sort()).toEqual(['ruleA', 'ruleB']); // ruleA carried forward
   });
 
+  it('excludes handled prior docs from the continuation signal merge', async () => {
+    const discoveryClient = {
+      findByEventId: jest.fn().mockResolvedValue({
+        hits: [
+          {
+            kind: 'discovery',
+            '@timestamp': '2026-01-01T00:00:00.000Z',
+            signals: [createSignal('ruleA')],
+          },
+          {
+            kind: 'handled',
+            '@timestamp': '2026-01-02T00:00:00.000Z',
+            signals: [createSignal('ruleB', { change_point_type: 'spike' })],
+          },
+        ],
+      }),
+      bulkCreate: jest.fn().mockResolvedValue(undefined),
+    };
+
+    await discoveryWriteHandler({
+      discoveryClient: discoveryClient as never,
+      input: {
+        ...baseInput,
+        event_id: 'otel__x-abc12345',
+        signals: [createSignal('ruleC')],
+      },
+    });
+
+    const persisted: SignalEntry[] = discoveryClient.bulkCreate.mock.calls[0][0][0].signals;
+    expect(Object.keys(signalsByRule(persisted)).sort()).toEqual(['ruleA', 'ruleC']);
+  });
+
   it('does not merge or fetch prior docs for a handled marker write', async () => {
     const discoveryClient = {
       findByEventId: jest.fn(),
@@ -444,7 +556,7 @@ describe('discoveryWriteHandler — continuation snapshot merge', () => {
       input: { ...baseInput, signals: [createSignal('ruleA')] },
     });
 
-    // findByEventId is called for dedup check (no dedup_window here → skipped), but not for merging
+    // auto event_id → no merging; no dedup_window → findLatest not called either
     expect(discoveryClient.findByEventId).not.toHaveBeenCalled();
   });
 });

@@ -11,7 +11,6 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { significantEventSchema } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -22,32 +21,23 @@ import { eventsWriteHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
-const eventsWriteSchema = significantEventSchema
-  .pick({
-    event_id: true,
-    discovery_id: true,
-    status: true,
-    stream_names: true,
-    title: true,
-    summary: true,
-    severity: true,
-    confidence: true,
-    assessment_note: true,
-    signals: true,
-    causal_features: true,
-    blast_radius: true,
-    workflow_execution_id: true,
-  })
-  .extend({
-    // Override the base schema's description — it's written for discovery_write, where
-    // event_id is optional and auto-generated for new events. Here it always refers
-    // to an existing discovery, so it's required and must never be omitted.
-    event_id: significantEventSchema.shape.event_id.describe(
-      'Required. Stable event identifier of the discovery being reviewed — ' +
-        'copy it verbatim from the input discovery.'
-    ),
-    conversation_id: z.string().optional(),
-  });
+const eventsWriteSchema = significantEventSchema.pick({
+  event_id: true,
+  discovery_id: true,
+  status: true,
+  stream_names: true,
+  title: true,
+  symptom_hypothesis: true,
+  summary: true,
+  severity: true,
+  confidence: true,
+  assessment_note: true,
+  signals: true,
+  causal_features: true,
+  blast_radius: true,
+  workflow_execution_id: true,
+  conversation_id: true,
+});
 
 export function createEventsWriteTool({
   getScopedClients,
@@ -73,8 +63,8 @@ export function createEventsWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        const { getEventClient, licensing } = await getScopedClients({ request });
+        await assertSignificantEventsAccess({ server, licensing });
 
         const data = await eventsWriteHandler({
           eventClient: getEventClient(),

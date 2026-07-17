@@ -28,13 +28,18 @@ const evaluate = (significantEvents: unknown, steps: ConverseStep[]) =>
   });
 
 describe('confirmedEvidencesEvaluator', () => {
-  it('is unavailable when nothing is open+critical', async () => {
-    const result = await evaluate([{ status: 'open', severity: 'medium' }], [esqlStep]);
+  it('is unavailable when nothing is open', async () => {
+    const result = await evaluate([], [esqlStep]);
     expect(result.score).toBeNull();
   });
 
+  it('scores 0 for an open event of any severity with no confirmed signal', async () => {
+    const result = await evaluate([{ status: 'open', severity: '40-medium' }], [esqlStep]);
+    expect(result.score).toBe(0);
+  });
+
   it('is unavailable when dismissed', async () => {
-    const result = await evaluate([{ status: 'dismissed', severity: 'low' }], [esqlStep]);
+    const result = await evaluate([{ status: 'dismissed', severity: '20-low' }], [esqlStep]);
     expect(result.score).toBeNull();
   });
 
@@ -42,7 +47,7 @@ describe('confirmedEvidencesEvaluator', () => {
     const events = [
       {
         status: 'open',
-        severity: 'critical',
+        severity: '80-critical',
         signals: [{ type: 'detection', description: 'confirms.', confirmed: true }],
       },
     ];
@@ -53,12 +58,12 @@ describe('confirmedEvidencesEvaluator', () => {
     const events = [
       {
         status: 'open',
-        severity: 'critical',
+        severity: '80-critical',
         signals: [
           {
             type: 'detection',
             description: 'found row.',
-            evidence: { result: 'found', row_count: 1 },
+            evidence: { result: 'found' },
           },
         ],
       },
@@ -70,7 +75,7 @@ describe('confirmedEvidencesEvaluator', () => {
     const events = [
       {
         status: 'open',
-        severity: 'critical',
+        severity: '80-critical',
         signals: [{ type: 'detection', description: 'confirms.', confirmed: true }],
       },
     ];
@@ -81,12 +86,12 @@ describe('confirmedEvidencesEvaluator', () => {
     const events = [
       {
         status: 'open',
-        severity: 'critical',
+        severity: '80-critical',
         signals: [{ type: 'detection', description: 'confirms.', confirmed: true }],
       },
       {
         status: 'open',
-        severity: 'critical',
+        severity: '80-critical',
         signals: [{ type: 'detection', description: 'confirms.', confirmed: true }],
       },
     ];
@@ -98,17 +103,17 @@ describe('confirmedEvidencesEvaluator', () => {
     const events = [
       {
         status: 'open',
-        severity: 'critical',
+        severity: '80-critical',
         signals: [{ type: 'detection', description: 'confirms.', confirmed: true }],
       },
       {
         status: 'open',
-        severity: 'critical',
+        severity: '80-critical',
         signals: [
           {
             type: 'detection',
             description: 'empty result.',
-            evidence: { result: 'empty', row_count: 0 },
+            evidence: { result: 'empty' },
           },
         ],
       },

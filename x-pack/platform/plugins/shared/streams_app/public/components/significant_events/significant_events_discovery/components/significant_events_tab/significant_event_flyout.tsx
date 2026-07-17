@@ -26,10 +26,11 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  copyToClipboard,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { getSeverityLabel, type SignificantEvent } from '@kbn/significant-events-schema';
 import { useFetchSignificantEventLifecycle } from '../../../../../hooks/significant_events/use_fetch_significant_event_lifecycle';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
@@ -63,6 +64,14 @@ const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
   }
 );
 
+const COPY_LINK_ARIA_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.copyLink', {
+  defaultMessage: 'Copy link to this event',
+});
+
+const COPY_LINK_SUCCESS = i18n.translate('xpack.streams.sigEventsTab.flyout.copyLinkSuccess', {
+  defaultMessage: 'Copied link to event',
+});
+
 const RUN_LABEL = i18n.translate('xpack.streams.sigEventsTab.runInvestigationButton.label', {
   defaultMessage: 'Run investigation',
 });
@@ -93,6 +102,7 @@ interface SignificantEventFlyoutProps {
 export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyoutProps) => {
   const {
     services: { focusedSignificantEventService },
+    core: { notifications },
   } = useKibana();
   const {
     data: lifecycleData,
@@ -198,6 +208,21 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
+          <EuiToolTip content={COPY_LINK_ARIA_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="sigEventFlyoutCopyLinkButton"
+              iconType="link"
+              aria-label={COPY_LINK_ARIA_LABEL}
+              onClick={() => {
+                const ok = copyToClipboard(window.location.href);
+                if (ok) {
+                  notifications.toasts.addSuccess({ title: COPY_LINK_SUCCESS });
+                }
+              }}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="sigEventFlyoutCloseButton"
@@ -223,7 +248,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             {formatTimestamp(event['@timestamp'])}
-            {event.severity != null && ` · ${SEVERITY_LABEL}: ${event.severity}`}
+            {` · ${SEVERITY_LABEL}: ${getSeverityLabel(event.severity)}`}
             {event.confidence != null &&
               ` · ${CONFIDENCE_LABEL}: ${Math.round(event.confidence * 100)}%`}
           </EuiText>

@@ -647,7 +647,7 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
       description: 'Whether the search included a stream_names filter',
     },
   },
-  state_filter: {
+  status_filter: {
     type: 'keyword',
     _meta: {
       description: 'The state filter applied to the search (open or closed)',

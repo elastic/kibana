@@ -15,8 +15,15 @@ const buildDiscovery = (...ruleUuids: string[]): Partial<Discovery> => ({
   signals: ruleUuids.map(
     (rule_uuid): SignalEntry => ({
       type: 'detection',
+      stream_name: 'logs',
+      confirmed: true,
       description: 'Testing: something.',
-      metadata: { kind: 'detection', rule_uuid },
+      metadata: {
+        rule_uuid,
+        detection_id: 'detection-1',
+        change_point_type: 'spike',
+        p_value: 0.01,
+      },
     })
   ),
 });

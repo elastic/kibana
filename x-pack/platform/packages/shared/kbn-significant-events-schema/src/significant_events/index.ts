@@ -18,9 +18,12 @@ export {
   blastRadiusEntrySchema,
   causalFeatureSchema,
   signalEntrySchema,
+  severitySchema,
+  getSeverityLabel,
   type BlastRadiusEntry,
   type CausalFeature,
   type SignalEntry,
+  type Severity,
 } from './common_schemas';
 export type { KnowledgeIndicator } from '../queries';
 export {

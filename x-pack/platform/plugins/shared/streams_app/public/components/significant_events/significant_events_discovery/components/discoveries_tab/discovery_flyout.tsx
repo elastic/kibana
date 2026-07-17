@@ -24,13 +24,13 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Discovery } from '@kbn/significant-events-schema';
+import { getSeverityLabel, type Discovery } from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { CHANGE_TYPE_LABELS, DISCOVERY_KIND_LABELS } from '../shared/translations';
 import { DISCOVERY_KIND_COLORS } from '../shared/constants';
 
 const timelineLabel = (entry: Discovery, prev: Discovery | undefined): string => {
-  const severity = entry.severity ?? '-';
+  const severity = getSeverityLabel(entry.severity);
   switch (entry.kind) {
     case 'discovery':
       if (prev?.kind === 'clearance') {
@@ -85,7 +85,7 @@ export const DiscoveryFlyout = ({
         title: i18n.translate('xpack.streams.discoveryFlyout.severity', {
           defaultMessage: 'Severity',
         }),
-        description: discovery.severity ?? '-',
+        description: getSeverityLabel(discovery.severity),
       },
       {
         title: i18n.translate('xpack.streams.discoveryFlyout.confidence', {
