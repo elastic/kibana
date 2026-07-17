@@ -23,14 +23,16 @@ export interface StartDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataFederationPluginStart {}
 
+export interface FederatedDataFeatureFlags {
+  enableFederatedIdentityAuth?: boolean;
+  enableGoogleCloudStorageDataSourceType?: boolean;
+  enableAzureDataSourceType?: boolean;
+}
+
 export interface DataFederationKibanaServices {
   dataSourcesClient: DataSourcesClient;
   datasetsClient: DatasetsClient;
   toasts: ToastsStart;
   cloudInfo?: FederatedIdentityClusterInfo;
-  featureFlags?: {
-    enableFederatedIdentityAuth?: boolean;
-    enableGoogleCloudStorageDataSourceType?: boolean;
-    enableAzureDataSourceType?: boolean;
-  };
+  featureFlags?: FederatedDataFeatureFlags;
 }
