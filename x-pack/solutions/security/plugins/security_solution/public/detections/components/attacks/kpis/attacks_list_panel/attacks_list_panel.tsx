@@ -101,6 +101,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
                     indexName: dataView.getIndexPattern(),
                     onAttackUpdated: refetch,
                     origin: FLYOUT_ORIGIN.ATTACKS_KPI,
+                    attackTitle: item.name,
                   });
                 } else {
                   openFlyout({

@@ -12,6 +12,7 @@ import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/l
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { useFlyoutSessionContext } from '../session_context';
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import type { MisconfigurationProps } from './misconfiguration/main';
 import type { VulnerabilityProps } from './vulnerability/main';
 
@@ -108,7 +109,7 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
           ...defaultDocumentFlyoutProperties,
           historyKey,
           session: FLYOUT_SESSION_KIND.INHERIT,
-          title: options?.title,
+          title: options?.title ? buildFlyoutNavTitle(options.title) : undefined,
         },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
@@ -150,7 +151,7 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
           ...defaultDocumentFlyoutProperties,
           historyKey,
           session: FLYOUT_SESSION_KIND.INHERIT,
-          title: options?.title,
+          title: options?.title ? buildFlyoutNavTitle(options.title) : undefined,
         },
         {
           surface: FLYOUT_SURFACE.FLYOUT,

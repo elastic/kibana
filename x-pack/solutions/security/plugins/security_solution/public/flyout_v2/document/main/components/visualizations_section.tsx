@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
@@ -20,15 +19,9 @@ import { GraphPreviewContainer } from './graph_preview_container';
 import { useGraphPreview } from '../hooks/use_graph_preview';
 import { useSessionViewConfig } from '../../tools/session_view/hooks/use_session_view_config';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { VISUALIZATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 
 export const VISUALIZATION_SECTION_TEST_ID = `${PREFIX}Visualizations` as const;
-
-export const VISUALIZATION_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.visualizations.sectionTitle',
-  {
-    defaultMessage: 'Visualizations',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'visualizations';
 

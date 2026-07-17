@@ -185,6 +185,7 @@ describe('RenderRuleName', () => {
       expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({
         ruleId: defaultProps.linkValue,
         origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
+        title: 'Rule: Test Rule Name',
       });
       expect(mockOpenFlyout).not.toHaveBeenCalled();
       expect(mockNavigateToApp).not.toHaveBeenCalled();

@@ -7,9 +7,8 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useMemo } from 'react';
-import { ALERT_RULE_UUID, EVENT_KIND } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID, EVENT_KIND } from '@kbn/rule-data-utils';
 import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
@@ -17,6 +16,11 @@ import { ExpandableSection } from '../../../shared/components/expandable_section
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { isEcsAllowedValue } from '../utils/event_utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
+import {
+  ABOUT_SECTION_TITLE,
+  formatFlyoutTitle,
+  RULE_TITLE,
+} from '../../../shared/constants/flyout_titles';
 import { AlertDescription } from './alert_description';
 import { AlertReason } from './alert_reason';
 import { AlertStatus } from './alert_status';
@@ -27,13 +31,6 @@ import { EventRenderer } from './event_renderer';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
-
-export const ABOUT_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.about.sectionTitle',
-  {
-    defaultMessage: 'About',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'about';
 
@@ -61,12 +58,16 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
     () => (isAlert ? (getFieldValue(hit, ALERT_RULE_UUID) as string) : undefined),
     [hit, isAlert]
   );
+  const ruleName = useMemo(
+    () => (isAlert ? (getFieldValue(hit, ALERT_RULE_NAME) as string | undefined) : undefined),
+    [hit, isAlert]
+  );
 
   const onShowRuleSummary = useCallback(() => {
     if (ruleId) {
-      openRuleFlyout({ ruleId, origin: FLYOUT_ORIGIN.ABOUT_SECTION });
+      openRuleFlyout({ ruleId, origin: FLYOUT_ORIGIN.ABOUT_SECTION, title: formatFlyoutTitle(RULE_TITLE, ruleName) });
     }
-  }, [openRuleFlyout, ruleId]);
+  }, [openRuleFlyout, ruleId, ruleName]);
 
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,

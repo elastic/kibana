@@ -173,6 +173,7 @@ export const TableSection = React.memo(
               attackId: attack.id,
               indexName: dataView.getIndexPattern(),
               origin: FLYOUT_ORIGIN.ATTACKS_TABLE,
+              attackTitle: attack.title,
             });
           } else {
             openFlyout({

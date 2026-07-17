@@ -9,13 +9,19 @@ import type { ReactNode } from 'react';
 import React, { lazy, useCallback, useMemo } from 'react';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
+import {
+  type Indicator,
+  RawIndicatorFieldId,
+} from '../../../common/threat_intelligence/types/indicator';
+import { getIndicatorFieldAndValue } from '../../threat_intelligence/modules/indicators/utils/field_value';
 import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
 import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
+import { formatFlyoutTitle, IOC_TITLE } from '../shared/constants/flyout_titles';
 import { useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the IOC flyout graph into their
@@ -65,11 +71,17 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
   // here so callers never have to reason about it: they pick `openIocFlyout` (main) or
   // `openIocFlyoutAsChild` (child) and this helper maps that to the right session.
   const open = useCallback(
-    (children: ReactNode, session: FlyoutSessionKind, origin?: FlyoutOrigin) => {
+    (
+      children: ReactNode,
+      session: FlyoutSessionKind,
+      title: OverlaySystemFlyoutOpenOptions['title'],
+      origin?: FlyoutOrigin
+    ) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
+        title,
       };
       openFlyout(
         children,
@@ -95,15 +107,30 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
     []
   );
 
+  const getTitle = useCallback(
+    ({ indicator }: OpenIocFlyoutParams) =>
+      formatFlyoutTitle(
+        IOC_TITLE,
+        getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Name).value
+      ),
+    []
+  );
+
   const openIocFlyout = useCallback(
-    (params: OpenIocFlyoutParams) => open(buildContent(params), sessionMode, params.origin),
-    [open, buildContent, sessionMode]
+    (params: OpenIocFlyoutParams) =>
+      open(buildContent(params), sessionMode, getTitle(params), params.origin),
+    [open, buildContent, sessionMode, getTitle]
   );
 
   const openIocFlyoutAsChild = useCallback(
     (params: OpenIocFlyoutParams) =>
-      open(buildContent(params), FLYOUT_SESSION_KIND.INHERIT, params.origin),
-    [open, buildContent]
+      open(
+        buildContent(params),
+        FLYOUT_SESSION_KIND.INHERIT,
+        buildFlyoutNavTitle(getTitle(params)),
+        params.origin
+      ),
+    [open, buildContent, getTitle]
   );
 
   return useMemo(

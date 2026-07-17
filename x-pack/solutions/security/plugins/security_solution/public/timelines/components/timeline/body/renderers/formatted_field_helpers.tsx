@@ -29,6 +29,10 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import type { FlyoutOrigin } from '../../../../../common/lib/telemetry';
+import {
+  formatFlyoutTitle,
+  RULE_TITLE,
+} from '../../../../../flyout_v2/shared/constants/flyout_titles';
 
 interface RenderRuleNameProps {
   children?: React.ReactNode;
@@ -92,7 +96,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       }
 
       if (enableNewFlyout && ruleId) {
-        openRuleFlyout({ ruleId, origin });
+        openRuleFlyout({ ruleId, origin, title: formatFlyoutTitle(RULE_TITLE, ruleName) });
         return;
       }
 
@@ -116,6 +120,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       isInTimelineContext,
       enableNewFlyout,
       openRuleFlyout,
+      ruleName,
     ]
   );
 

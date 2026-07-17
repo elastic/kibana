@@ -106,10 +106,22 @@ describe('ShowAlertButton', () => {
       indexName: 'alert-index',
       renderCellActions: casesCellActionRenderer,
       origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+      title: 'Alert',
     });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(mockReportEvent).toHaveBeenCalled();
     expect(navigateToCaseView).not.toHaveBeenCalled();
+  });
+
+  it('includes the rule name in the flyout history title when provided', () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+    render(<ShowAlertButton {...props} ruleName="My Detection Rule" />);
+    fireEvent.click(screen.getByTestId('comment-action-show-alert-action-id'));
+
+    expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Alert: My Detection Rule' })
+    );
   });
 
   it('opens the legacy EASE flyout when the EASE capability is on, regardless of the new flyout flag', () => {

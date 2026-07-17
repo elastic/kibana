@@ -15,6 +15,7 @@ import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common/schedule';
 import type { Shard } from '../../../common/utils/converters';
 import type { ScheduleFormData } from '../../components/schedule_section/types';
+import type { DeserializeScheduleInput } from '../form/schedule_serializer';
 import { deserializeSchedule, serializeSchedule } from '../form/schedule_serializer';
 
 export interface UsePackQueryFormProps {
@@ -26,6 +27,12 @@ export interface UsePackQueryFormProps {
     schedule_type?: ScheduleType;
     interval?: number;
     rrule_schedule?: RRuleScheduleConfig;
+    // Whether the pack SO actually persisted this schedule (true), vs. the
+    // client synthesizing an interval-mode default purely so the pack form
+    // has something to render for a legacy pack that predates schedule_type
+    // (false/undefined). Only a real pack-level schedule is a legitimate
+    // inheritance target for a non-override query — see elastic/kibana#277700.
+    hasExplicitSchedule?: boolean;
   };
 }
 
@@ -77,7 +84,8 @@ const isSameScheduleMode = (
 
 const stripInheritedScheduleFields = (
   base: PackSOQueryFormData,
-  packScheduleType: ScheduleType | undefined
+  packScheduleType: ScheduleType | undefined,
+  hasExplicitPackSchedule: boolean
 ): PackSOQueryFormData => {
   if (packScheduleType === 'rrule') {
     const { interval: _interval, timeout: _timeout, ...stripped } = base;
@@ -85,7 +93,12 @@ const stripInheritedScheduleFields = (
     return stripped as PackSOQueryFormData;
   }
 
-  if (packScheduleType === 'interval') {
+  // Only strip the query's own interval when the pack genuinely persisted an
+  // interval-mode schedule. A legacy pack with no real pack-level schedule
+  // still reports `packScheduleType === 'interval'` (the client synthesizes
+  // that default so the form has something to render), but there the query's
+  // own interval is authoritative and must survive the round-trip.
+  if (packScheduleType === 'interval' && hasExplicitPackSchedule) {
     const { interval: _interval, ...stripped } = base;
 
     return stripped as PackSOQueryFormData;
@@ -95,27 +108,52 @@ const stripInheritedScheduleFields = (
 };
 
 /**
+ * Resolve the schedule a non-override query inherits. Inheriting is only
+ * meaningful when the pack schedule is a real one — either the pack SO
+ * actually persisted an interval schedule (`hasExplicitSchedule`) or the pack
+ * is in recurrence mode (rrule schedules only ever come from an explicit
+ * pack-level choice, never a synthesized default). Otherwise (legacy pack,
+ * no real pack-level schedule) the query's own interval is authoritative.
+ */
+export const resolveInheritedScheduleInput = (
+  packSchedule: UsePackQueryFormProps['packSchedule'],
+  queryInterval: number | undefined
+): DeserializeScheduleInput => {
+  const inheritsRealPackSchedule =
+    packSchedule?.schedule_type === 'rrule' || !!packSchedule?.hasExplicitSchedule;
+
+  if (inheritsRealPackSchedule) {
+    return {
+      schedule_type: packSchedule?.schedule_type,
+      interval: packSchedule?.interval,
+      rrule_schedule: packSchedule?.rrule_schedule,
+    };
+  }
+
+  return { schedule_type: 'interval', interval: queryInterval };
+};
+
+/**
  * Deserializes the query's own override, or falls back to the inherited
- * pack schedule. Reused for both `defaultValues.schedule` and
- * `originalStartDate` so they can't diverge.
+ * pack schedule (resolved via `resolveInheritedScheduleInput` so a legacy
+ * pack's synthesized default never clobbers the query's own interval).
+ * Reused for both `defaultValues.schedule` and `originalStartDate` so they
+ * can't diverge.
  */
 const deserializeQuerySchedule = (
   payload: PackSOQueryFormData | undefined,
   packSchedule?: UsePackQueryFormProps['packSchedule']
 ): ScheduleFormData => {
   const hasOverride = payload?.schedule_type !== undefined;
+  const queryInterval = payload?.interval ? parseInt(payload.interval, 10) : undefined;
 
   return hasOverride
     ? deserializeSchedule({
         schedule_type: payload?.schedule_type,
-        interval: payload?.interval ? parseInt(payload.interval, 10) : undefined,
+        interval: queryInterval,
         rrule_schedule: payload?.rrule_schedule,
       })
-    : deserializeSchedule({
-        schedule_type: packSchedule?.schedule_type,
-        interval: packSchedule?.interval,
-        rrule_schedule: packSchedule?.rrule_schedule,
-      });
+    : deserializeSchedule(resolveInheritedScheduleInput(packSchedule, queryInterval));
 };
 
 const deserializer = (
@@ -123,11 +161,12 @@ const deserializer = (
   deserializedSchedule: ScheduleFormData
 ): PackQueryFormData => {
   const hasOverride = payload.schedule_type !== undefined;
+  const queryInterval = payload.interval ? parseInt(payload.interval, 10) : undefined;
 
   return {
     id: payload.id,
     query: payload.query,
-    interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
+    interval: queryInterval ?? 3600,
     timeout: payload.timeout || QUERY_TIMEOUT.DEFAULT,
     snapshot: payload.snapshot,
     removed: payload.removed,
@@ -179,13 +218,15 @@ const serializer = (
     }
   );
 
+  const hasExplicitPackSchedule = !!packSchedule?.hasExplicitSchedule;
+
   if (!overridePackSchedule || !schedule) {
-    return stripInheritedScheduleFields(base, packSchedule?.schedule_type);
+    return stripInheritedScheduleFields(base, packSchedule?.schedule_type, hasExplicitPackSchedule);
   }
 
   const serialized = serializeSchedule(schedule);
   if (!isSameScheduleMode(packSchedule?.schedule_type, serialized.schedule_type)) {
-    return stripInheritedScheduleFields(base, packSchedule?.schedule_type);
+    return stripInheritedScheduleFields(base, packSchedule?.schedule_type, hasExplicitPackSchedule);
   }
 
   if (serialized.schedule_type === 'rrule' && serialized.rrule_schedule) {

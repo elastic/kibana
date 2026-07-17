@@ -70,7 +70,7 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
       ? [
           {
             id: ECH_AGENTLESS_OUTPUT_ID,
-            name: 'Internal output for agentless',
+            name: 'Internal output for managed integrations',
             type: 'elasticsearch' as const,
             hosts: appContextService.getCloud()?.elasticsearchUrl
               ? [appContextService.getCloud()!.elasticsearchUrl]

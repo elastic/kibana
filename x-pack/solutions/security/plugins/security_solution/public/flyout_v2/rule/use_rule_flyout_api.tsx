@@ -12,6 +12,8 @@ import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry
 import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
+import { RULE_TITLE } from '../shared/constants/flyout_titles';
 import { useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the rule flyout graph into their
@@ -23,6 +25,11 @@ export interface OpenRuleFlyoutParams {
   ruleId: string;
   /** Which UI trigger opened this flyout, when known. */
   origin?: FlyoutOrigin;
+  /**
+   * Flyout-history title to use for this open, e.g. `formatFlyoutTitle(RULE_TITLE, ruleName)`.
+   * Omitted falls back to the bare "Rule" title.
+   */
+  title?: string;
 }
 
 export interface RuleFlyoutApi {
@@ -60,11 +67,17 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
   // here so callers never have to reason about it: they pick `openRuleFlyout` (main) or
   // `openRuleFlyoutAsChild` (child) and this helper maps that to the right session.
   const open = useCallback(
-    (children: ReactNode, session: FlyoutSessionKind, origin?: FlyoutOrigin) => {
+    (
+      children: ReactNode,
+      session: FlyoutSessionKind,
+      title: OverlaySystemFlyoutOpenOptions['title'],
+      origin?: FlyoutOrigin
+    ) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
+        title,
       };
       openFlyout(
         children,
@@ -77,15 +90,20 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
   );
 
   const openRuleFlyout = useCallback(
-    ({ ruleId, origin }: OpenRuleFlyoutParams) => {
-      open(<RuleDetails ruleId={ruleId} />, sessionMode, origin);
+    ({ ruleId, title, origin }: OpenRuleFlyoutParams) => {
+      open(<RuleDetails ruleId={ruleId} />, sessionMode, title ?? RULE_TITLE, origin);
     },
     [open, sessionMode]
   );
 
   const openRuleFlyoutAsChild = useCallback(
-    ({ ruleId, origin }: OpenRuleFlyoutParams) => {
-      open(<RuleDetails ruleId={ruleId} />, FLYOUT_SESSION_KIND.INHERIT, origin);
+    ({ ruleId, title, origin }: OpenRuleFlyoutParams) => {
+      open(
+        <RuleDetails ruleId={ruleId} />,
+        FLYOUT_SESSION_KIND.INHERIT,
+        buildFlyoutNavTitle(title ?? RULE_TITLE),
+        origin
+      );
     },
     [open]
   );

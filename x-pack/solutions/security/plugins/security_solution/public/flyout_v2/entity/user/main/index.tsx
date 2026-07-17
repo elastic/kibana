@@ -381,7 +381,6 @@ export const User: FC<UserProps> = memo(function User({
               managedUser: oktaManagedUser,
               value: userName,
               onOpenUser,
-              title: userName,
             });
           }
           break;
@@ -393,7 +392,6 @@ export const User: FC<UserProps> = memo(function User({
               managedUser: entraManagedUser,
               value: userName,
               onOpenUser,
-              title: userName,
             });
           }
           break;

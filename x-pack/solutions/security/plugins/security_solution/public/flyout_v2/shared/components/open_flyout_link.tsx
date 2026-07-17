@@ -15,7 +15,8 @@ import {
 } from '../hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../hooks/use_open_flyout';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
-import { buildFlyoutContent, getFlyoutTypeForField } from '../utils/build_flyout_content';
+import { buildFlyoutContent, getFlyoutTypeForField, buildFlyoutTitleFromField } from '../utils/build_flyout_content';
+import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
 import { useFlyoutSessionContext } from '../../session_context';
 import { FLYOUT_ORIGIN, FLYOUT_SESSION_KIND, FLYOUT_SURFACE } from '../../../common/lib/telemetry';
 
@@ -25,9 +26,16 @@ export interface OpenFlyoutLinkProps {
    */
   field: string;
   /**
-   * Field value
+   * Field value. Used both to open the flyout and, by default, to derive its history title.
    */
   value: string;
+  /**
+   * Value to use for the link text and history title instead of `value`. For fields where the
+   * navigation target and the display text differ (e.g. rule name links, which navigate by rule
+   * UUID but display the rule name), pass the display value here so the title isn't derived from
+   * the UUID.
+   */
+  displayValue?: string;
   /**
    * The source document record. When provided, enables entity resolution for host/user flyouts.
    */
@@ -63,6 +71,7 @@ export type OpenFlyoutLinkRenderer = FC<OpenFlyoutLinkProps>;
 export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   field,
   value,
+  displayValue,
   hit,
   asParent = false,
   children,
@@ -74,6 +83,11 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
   const flyoutType = useMemo(() => getFlyoutTypeForField(field), [field]);
+  const titleValue = displayValue ?? value;
+  const flyoutTitle = useMemo(
+    () => buildFlyoutTitleFromField(field, titleValue) ?? titleValue,
+    [field, titleValue]
+  );
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
@@ -88,6 +102,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
           historyKey,
           session,
           outsideClickCloses: asParent,
+          title: session === FLYOUT_SESSION_KIND.INHERIT ? buildFlyoutNavTitle(flyoutTitle) : flyoutTitle,
         },
         flyoutType
           ? {
@@ -100,7 +115,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
         asParent ? FLYOUT_SESSION_KIND.START : undefined
       );
     }
-  }, [defaultDocumentFlyoutProperties, open, flyoutContent, flyoutType, asParent, historyKey]);
+  }, [defaultDocumentFlyoutProperties, open, flyoutContent, flyoutType, asParent, historyKey, flyoutTitle]);
 
   if (!flyoutContent) {
     return <>{children}</>;
@@ -108,7 +123,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 
   return (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>
-      {children ?? value}
+      {children ?? titleValue}
     </EuiLink>
   );
 };

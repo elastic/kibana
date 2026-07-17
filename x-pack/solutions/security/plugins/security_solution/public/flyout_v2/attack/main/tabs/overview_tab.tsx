@@ -44,13 +44,14 @@ export const OverviewTab = memo(({ hit, onAttackUpdated, renderCellActions }: Ov
   const alertIds = useAttackAlertIds(hit);
 
   const onShowAlert = useCallback(
-    (id: string, indexName: string) =>
+    (id: string, indexName: string, title?: string) =>
       openDocumentFlyoutFromIndexAsChild({
         documentId: id,
         indexName,
         renderCellActions,
         onAlertUpdated: onAttackUpdated,
         origin: FLYOUT_ORIGIN.CORRELATIONS_ALERT,
+        title,
       }),
     [openDocumentFlyoutFromIndexAsChild, onAttackUpdated, renderCellActions]
   );

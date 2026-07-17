@@ -22,6 +22,14 @@ import {
   FLYOUT_TOOL,
   FLYOUT_TYPE,
 } from '../../common/lib/telemetry';
+import {
+  ATTACK_CORRELATIONS_TITLE,
+  ATTACK_ENTITIES_TITLE,
+  ATTACK_TITLE,
+  formatFlyoutTitle,
+} from '../shared/constants/flyout_titles';
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
+import { getAttackTitleValue } from './utils/get_attack_title';
 import { useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the attack flyout graph into their
@@ -43,6 +51,12 @@ export interface OpenAttackFlyoutParams {
   indexName: string;
   /** Invoked after the attack is mutated inside the flyout, to let the caller refresh. Defaults to a no-op. */
   onAttackUpdated?: () => void;
+  /**
+   * Display title of the attack, if already known by the caller (e.g. from a list/table row).
+   * Used to build the flyout-history title; when omitted, the history entry falls back to the
+   * bare "Attack" label.
+   */
+  attackTitle?: string;
   /** Renderer for cell actions in nested alert flyouts. Defaults to the standard `cellActionRenderer`. */
   renderCellActions?: CellActionRenderer;
   /** Which UI trigger opened this flyout, when known. */
@@ -55,7 +69,7 @@ export interface OpenAttackCorrelationsParams {
   /** Ids of the alerts correlated to the attack. */
   alertIds: string[];
   /** Optional callback to open one of the correlated alerts. */
-  onShowAlert?: (id: string, indexName: string) => void;
+  onShowAlert?: (id: string, indexName: string, title?: string) => void;
   /** Which UI trigger opened the correlations tool, when known. */
   origin?: FlyoutOrigin;
 }
@@ -108,6 +122,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
       attackId,
       indexName,
       onAttackUpdated = noop,
+      attackTitle,
       renderCellActions = cellActionRenderer,
       origin,
     }: OpenAttackFlyoutParams) => {
@@ -118,7 +133,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           onAttackUpdated={onAttackUpdated}
           renderCellActions={renderCellActions}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode },
+        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode, title: formatFlyoutTitle(ATTACK_TITLE, attackTitle) },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.ATTACK,
@@ -135,6 +150,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
       attackId,
       indexName,
       onAttackUpdated = noop,
+      attackTitle,
       renderCellActions = cellActionRenderer,
       origin,
     }: OpenAttackFlyoutParams) => {
@@ -145,7 +161,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           onAttackUpdated={onAttackUpdated}
           renderCellActions={renderCellActions}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.INHERIT },
+        { ...defaultDocumentFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.INHERIT, title: buildFlyoutNavTitle(formatFlyoutTitle(ATTACK_TITLE, attackTitle)) },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.ATTACK,
@@ -162,7 +178,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
     ({ hit, alertIds, onShowAlert, origin }: OpenAttackCorrelationsParams) => {
       open(
         <CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
+        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START, title: formatFlyoutTitle(ATTACK_CORRELATIONS_TITLE, getAttackTitleValue(hit)) },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.CORRELATIONS,
@@ -180,7 +196,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
     ({ hit, alertIds, origin }: OpenAttackEntitiesParams) => {
       open(
         <EntitiesDetails hit={hit} alertIds={alertIds} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
+        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START, title: formatFlyoutTitle(ATTACK_ENTITIES_TITLE, getAttackTitleValue(hit)) },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.ENTITIES,

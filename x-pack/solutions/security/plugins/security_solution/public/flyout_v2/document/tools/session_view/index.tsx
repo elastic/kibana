@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
@@ -22,6 +21,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useSessionViewConfig } from './hooks/use_session_view_config';
 import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
+import { buildFlyoutNavTitle } from '../../../shared/utils/build_flyout_nav_title';
+import {
+  formatFlyoutTitle,
+  SESSION_VIEW_DETAILS_TITLE,
+  SESSION_VIEW_TITLE,
+} from '../../../shared/constants/flyout_titles';
 import { SessionViewDetails } from './components/session_view_details';
 import { useFlyoutSessionContext } from '../../../session_context';
 import {
@@ -33,10 +38,6 @@ import {
 } from '../../../../common/lib/telemetry';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
-
-const TITLE = i18n.translate('xpack.securitySolution.flyout.sessionView.title', {
-  defaultMessage: 'Session view',
-});
 
 const EUI_HEADER_HEIGHT = 96;
 const EXPANDABLE_FLYOUT_LEFT_SECTION_HEADER_HEIGHT = 72;
@@ -138,6 +139,8 @@ export const SessionView: FC<SessionViewProps> = memo(
           return;
         }
 
+        const processName = selectedProcess.getDetails().process?.name;
+
         open(
           <SessionViewDetails
             selectedProcess={selectedProcess}
@@ -153,6 +156,7 @@ export const SessionView: FC<SessionViewProps> = memo(
             ...defaultFlyoutProperties,
             historyKey,
             session: FLYOUT_SESSION_KIND.INHERIT,
+            title: buildFlyoutNavTitle(formatFlyoutTitle(SESSION_VIEW_DETAILS_TITLE, processName)),
           },
           {
             surface: FLYOUT_SURFACE.TOOL,
@@ -198,7 +202,7 @@ export const SessionView: FC<SessionViewProps> = memo(
           `}
         >
           <DocumentToolsFlyoutHeader
-            title={TITLE}
+            title={SESSION_VIEW_TITLE}
             hit={hit}
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}

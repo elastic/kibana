@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
 import {
   GraphGroupedNodePreviewPanel,
@@ -16,6 +15,12 @@ import {
 import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../../../../shared/hooks/use_open_flyout';
+import { buildFlyoutNavTitle } from '../../../../shared/utils/build_flyout_nav_title';
+import {
+  ENTITIES_TITLE,
+  ENTITY_GRAPH_VIEW_TITLE,
+  EVENT_TITLE,
+} from '../../../../shared/constants/flyout_titles';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
@@ -28,9 +33,7 @@ import {
   FLYOUT_TOOL,
 } from '../../../../../common/lib/telemetry';
 
-const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.graphView.title', {
-  defaultMessage: 'Graph',
-});
+const TITLE = ENTITY_GRAPH_VIEW_TITLE;
 
 export interface GraphViewProps {
   /** Entity Store v2 id (`entity.id`) to center the graph on. */
@@ -62,13 +65,14 @@ export const GraphView = memo(
     const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
 
     const onShowDocument = useCallback(
-      (documentId: string, indexName?: string) =>
+      (documentId: string, indexName?: string, isEvent?: boolean) =>
         openDocumentFlyoutFromIndexAsChild({
           documentId,
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
           origin: FLYOUT_ORIGIN.GRAPH_DOCUMENT_NODE,
+          title: isEvent ? EVENT_TITLE : undefined,
         }),
       [openDocumentFlyoutFromIndexAsChild]
     );
@@ -97,7 +101,14 @@ export const GraphView = memo(
             onShowDocument={onShowDocument}
             onShowEntity={onShowEntity}
           />,
-          { ...defaultFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.INHERIT },
+          {
+            ...defaultFlyoutProperties,
+            historyKey,
+            session: FLYOUT_SESSION_KIND.INHERIT,
+            title: buildFlyoutNavTitle(
+              params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE
+            ),
+          },
           {
             surface: FLYOUT_SURFACE.TOOL,
             tool: FLYOUT_TOOL.GRAPH_VIEW,

@@ -13,7 +13,10 @@ import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { noop } from 'lodash/fp';
 import { EventKind } from '../../document/main/constants/event_kinds';
-import { getDocumentTitle } from '../../document/main/utils/get_header_title';
+import {
+  getDocumentHistoryTitle,
+  getDocumentTitle,
+} from '../../document/main/utils/get_header_title';
 import { useKibana } from '../../../common/lib/kibana';
 import type { CellActionRenderer } from '../components/cell_actions';
 import { noopCellActionRenderer } from '../components/cell_actions';
@@ -27,6 +30,7 @@ import {
   FLYOUT_SURFACE,
   FLYOUT_TYPE,
 } from '../../../common/lib/telemetry';
+import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
 import { DocumentSeverity } from '../../document/main/components/severity';
 import { Timestamp } from '../components/timestamp';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
@@ -74,6 +78,7 @@ export const useDocumentFlyoutTitle = ({
   );
 
   const label = useMemo(() => getDocumentTitle(hit), [hit]);
+  const sessionTitle = useMemo(() => getDocumentHistoryTitle(hit), [hit]);
   const iconType = isAlert ? 'warning' : 'analyzeEvent';
 
   const onTitleClick = useCallback(() => {
@@ -94,7 +99,12 @@ export const useDocumentFlyoutTitle = ({
           </FlyoutSessionContextProvider>
         ),
       }),
-      { ...defaultFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.INHERIT }
+      {
+        ...defaultFlyoutProperties,
+        historyKey,
+        session: FLYOUT_SESSION_KIND.INHERIT,
+        title: buildFlyoutNavTitle(sessionTitle),
+      }
     );
     if (!ref) return;
     const meta = {
@@ -116,6 +126,7 @@ export const useDocumentFlyoutTitle = ({
     reportClosed,
     reportOpened,
     services,
+    sessionTitle,
     store,
   ]);
 

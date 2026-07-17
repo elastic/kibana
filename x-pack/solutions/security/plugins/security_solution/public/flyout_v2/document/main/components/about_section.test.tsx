@@ -13,7 +13,8 @@ import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
-import { ABOUT_SECTION_TEST_ID, ABOUT_SECTION_TITLE, AboutSection } from './about_section';
+import { ABOUT_SECTION_TEST_ID, AboutSection } from './about_section';
+import { ABOUT_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 
 jest.mock('../../../use_flyout_api');
 
@@ -64,6 +65,7 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
 const alertHit = createMockHit({
   'event.kind': 'signal',
   'kibana.alert.rule.uuid': 'rule-uuid-123',
+  'kibana.alert.rule.name': 'My Rule',
 });
 
 describe('AboutSection', () => {
@@ -139,6 +141,7 @@ describe('AboutSection', () => {
     expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({
       ruleId: 'rule-uuid-123',
       origin: FLYOUT_ORIGIN.ABOUT_SECTION,
+      title: 'Rule: My Rule',
     });
   });
 

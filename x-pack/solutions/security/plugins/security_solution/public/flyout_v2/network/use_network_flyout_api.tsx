@@ -13,6 +13,8 @@ import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry
 import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
+import { formatFlyoutTitle, NETWORK_TITLE } from '../shared/constants/flyout_titles';
 import { useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the network flyout graph into their
@@ -63,11 +65,17 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
   // here so callers never have to reason about it: they pick `openNetworkFlyout` (main) or
   // `openNetworkFlyoutAsChild` (child) and this helper maps that to the right session.
   const open = useCallback(
-    (children: ReactNode, session: FlyoutSessionKind, origin?: FlyoutOrigin) => {
+    (
+      children: ReactNode,
+      session: FlyoutSessionKind,
+      title: OverlaySystemFlyoutOpenOptions['title'],
+      origin?: FlyoutOrigin
+    ) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
+        title,
       };
       openFlyout(
         children,
@@ -81,14 +89,19 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
 
   const openNetworkFlyout = useCallback(
     ({ ip, flowTarget, origin }: OpenNetworkFlyoutParams) => {
-      open(<Network ip={ip} flowTarget={flowTarget} />, sessionMode, origin);
+      open(<Network ip={ip} flowTarget={flowTarget} />, sessionMode, formatFlyoutTitle(NETWORK_TITLE, ip), origin);
     },
     [open, sessionMode]
   );
 
   const openNetworkFlyoutAsChild = useCallback(
     ({ ip, flowTarget, origin }: OpenNetworkFlyoutParams) => {
-      open(<Network ip={ip} flowTarget={flowTarget} />, FLYOUT_SESSION_KIND.INHERIT, origin);
+      open(
+        <Network ip={ip} flowTarget={flowTarget} />,
+        FLYOUT_SESSION_KIND.INHERIT,
+        buildFlyoutNavTitle(formatFlyoutTitle(NETWORK_TITLE, ip)),
+        origin
+      );
     },
     [open]
   );

@@ -97,6 +97,7 @@ describe('AlertEvent', () => {
     expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({
       ruleId: 'rule-1',
       origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+      title: 'Rule: My rule',
     });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
   });

@@ -11,6 +11,8 @@ import type { FlyoutOrigin } from '../../../common/lib/telemetry';
 import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TOOL } from '../../../common/lib/telemetry';
 import { defaultToolsFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../hooks/use_open_flyout';
+import { formatFlyoutTitle, NOTES_TITLE } from '../constants/flyout_titles';
+import { getDocumentTitle } from '../../document/main/utils/get_header_title';
 import { useFlyoutSessionContext } from '../../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the shared tool graph into their
@@ -50,7 +52,12 @@ export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
     ({ hit, origin }: OpenNotesParams) => {
       open(
         <NotesDetails hit={hit} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.START },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
+        },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.NOTES,
