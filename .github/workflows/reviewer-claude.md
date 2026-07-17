@@ -86,6 +86,7 @@ permissions:
   issues: read
   pull-requests: read
 env:
+  AWF_DEFAULT_AI_CREDITS_PRICING: '{"input":3,"output":15,"cachedInput":0.3,"cacheWrite":3.75}'
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   REPOSITORY: ${{ github.repository }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
