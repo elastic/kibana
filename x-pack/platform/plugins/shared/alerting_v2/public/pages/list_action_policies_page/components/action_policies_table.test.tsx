@@ -113,8 +113,9 @@ jest.mock('../../../hooks/use_fetch_workflow', () => ({
   useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
 }));
 
+let mockTagNames: string[] = [];
 jest.mock('../../../hooks/use_fetch_tags', () => ({
-  useFetchTags: () => ({ data: [], isLoading: false }),
+  useFetchTags: () => ({ data: mockTagNames, isLoading: false }),
 }));
 
 jest.mock('../action_policies_data_source', () => ({
@@ -176,6 +177,7 @@ describe('ActionPoliciesTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCapabilities = WRITE_CAPABILITIES;
+    mockTagNames = [];
 
     mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
@@ -326,6 +328,79 @@ describe('ActionPoliciesTable', () => {
 
       await waitFor(() => {
         expect(lastFindItemsFilters()['enabled']).toBeUndefined();
+      });
+    });
+  });
+
+  describe('Tags filter', () => {
+    const openTagsFilter = async () => {
+      await waitFor(() =>
+        expect(screen.getByTestId('actionPoliciesTagsFilter')).toBeInTheDocument()
+      );
+      fireEvent.click(screen.getByTestId('actionPoliciesTagsFilter'));
+    };
+
+    const lastFindItemsFilters = () => {
+      const calls = mockFindItems.mock.calls;
+      return calls[calls.length - 1][0].filters;
+    };
+
+    beforeEach(() => {
+      mockTagNames = ['critical', 'staging', 'production'];
+    });
+
+    it('renders the Tags filter button in the toolbar', async () => {
+      renderTable();
+
+      await waitFor(() =>
+        expect(screen.getByTestId('actionPoliciesTagsFilter')).toBeInTheDocument()
+      );
+    });
+
+    it('calls findItems with the selected tag when a tag is chosen', async () => {
+      renderTable();
+
+      await openTagsFilter();
+      fireEvent.click(await screen.findByText('critical'));
+
+      await waitFor(() => {
+        expect(lastFindItemsFilters()['tag']).toMatchObject({ include: ['critical'] });
+      });
+    });
+
+    it('calls findItems with multiple tags when several are selected', async () => {
+      renderTable();
+
+      await openTagsFilter();
+      fireEvent.click(await screen.findByText('critical'));
+      await waitFor(() =>
+        expect(lastFindItemsFilters()['tag']).toMatchObject({ include: ['critical'] })
+      );
+
+      await openTagsFilter();
+      fireEvent.click(await screen.findByText('staging'));
+
+      await waitFor(() => {
+        expect(lastFindItemsFilters()['tag']).toMatchObject({
+          include: expect.arrayContaining(['critical', 'staging']),
+        });
+      });
+    });
+
+    it('calls findItems without tag filter after deselecting the active tag', async () => {
+      renderTable();
+
+      await openTagsFilter();
+      fireEvent.click(await screen.findByText('critical'));
+      await waitFor(() =>
+        expect(lastFindItemsFilters()['tag']).toMatchObject({ include: ['critical'] })
+      );
+
+      await openTagsFilter();
+      fireEvent.click(await screen.findByText('critical'));
+
+      await waitFor(() => {
+        expect(lastFindItemsFilters()['tag']).toBeUndefined();
       });
     });
   });
