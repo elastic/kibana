@@ -41,7 +41,7 @@ const SIGNAL_TITLE = i18n.translate('xpack.alertingV2.ruleForm.modeField.signal.
 
 const ALERT_DESCRIPTION = i18n.translate('xpack.alertingV2.ruleForm.modeField.alert.description', {
   defaultMessage:
-    'You have a known condition that needs attention. The rule tracks each problem as an episode from first breach to recovery, notifying your team along the way.',
+    'Each problem is tracked as an episode from detection to recovery. Notifications and workflows can be triggered based on state changes.',
 });
 
 const SIGNAL_DESCRIPTION = i18n.translate(
