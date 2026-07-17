@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import {
+  MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
@@ -119,6 +120,14 @@ export const TemplateSchema = z.object({
    * Whether this template is enabled. Disabled templates are not shown in the case creation flow.
    */
   isEnabled: z.boolean().optional(),
+
+  /**
+   * The originating v1 template `key`, recorded only on templates created by the v1 -> v2 templates
+   * migration. v1 templates were identified by `key` (their `name` was not unique), so this
+   * preserves the exact lineage that a rule's stored legacy key needs to resolve back to the correct
+   * migrated template. Absent on templates created directly in v2.
+   */
+  legacyKey: z.string().min(1).max(MAX_TEMPLATE_KEY_LENGTH).optional(),
 });
 
 export type Template = z.infer<typeof TemplateSchema>;
