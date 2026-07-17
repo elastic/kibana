@@ -11,6 +11,9 @@ if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
   BOOTSTRAP_PARAMS+=(--force-install)
 fi
 
+# Remove this once we have pnpm store in the agent cache
+rm -rf ./node_modules
+
 # Use packages baked into the agent image as a cache, but only when the workspace
 # is not on local ssd or in memory — moving many small files between disks is
 # slower than linking from the pnpm store.
