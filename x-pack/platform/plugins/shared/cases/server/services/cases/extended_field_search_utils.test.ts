@@ -610,6 +610,8 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 
     expect(mappings).toHaveProperty('ef_summary_as_keyword');
     expect(mappings.ef_summary_as_keyword.type).toBe('keyword');
+    expect(mappings.ef_summary_as_keyword.script?.source).toContain('emit(raw);');
+    expect(mappings.ef_summary_as_keyword.script?.source).not.toContain("raw.startsWith('[')");
   });
 
   it('builds runtime mapping for TEXTAREA (needs substring matching)', () => {
@@ -627,6 +629,8 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 
     expect(mappings).toHaveProperty('ef_notes_as_keyword');
     expect(mappings.ef_notes_as_keyword.type).toBe('keyword');
+    expect(mappings.ef_notes_as_keyword.script?.source).toContain('emit(raw);');
+    expect(mappings.ef_notes_as_keyword.script?.source).not.toContain("raw.startsWith('[')");
   });
 });
 

@@ -120,6 +120,11 @@ const buildPainlessScript = (
     return `${readRaw}${splitArrayScript}`;
   }
 
+  // Free-text controls can legitimately start with `[`, so preserve their punctuation verbatim.
+  if (control === INPUT_TEXT || control === TEXTAREA) {
+    return `${readRaw}emit(raw);`;
+  }
+
   // Auto-detect JSON arrays for keyword fields (e.g. legacy templates without a control type).
   if (runtimeType === 'keyword') {
     return `${readRaw}if (raw.startsWith('[')) { ${splitArrayScript} } else { emit(raw); }`;
