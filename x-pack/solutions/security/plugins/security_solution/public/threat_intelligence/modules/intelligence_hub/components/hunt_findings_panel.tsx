@@ -21,7 +21,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '../../../../common/lib/kibana';
 import { deployEsqlRule } from '../lib/deploy_esql_rule';
+import { getEsqlDiscoverUrl } from '../lib/open_esql_in_discover';
 
 export interface HuntFindingListItem {
   id: string;
@@ -69,12 +71,13 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
   notifications,
   application,
 }) => {
+  const { share } = useKibana().services;
   const [expandedId, setExpandedId] = useState<string | undefined>();
-  const [deployingId, setDeployingId] = useState<string | undefined>();
+  const [creatingRuleId, setCreatingRuleId] = useState<string | undefined>();
 
-  const handleDeploy = useCallback(
+  const handleCreateRule = useCallback(
     async (finding: HuntFindingListItem) => {
-      setDeployingId(finding.id);
+      setCreatingRuleId(finding.id);
       try {
         const result = await deployEsqlRule(http, {
           name:
@@ -93,11 +96,11 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
         });
         notifications.toasts.addSuccess({
           title: i18n.translate(
-            'xpack.securitySolution.threatIntelligence.app.huntFindingsDeploySuccessTitle',
+            'xpack.securitySolution.threatIntelligence.app.huntFindingsCreateRuleSuccessTitle',
             { defaultMessage: 'Detection rule created (disabled)' }
           ),
           text: i18n.translate(
-            'xpack.securitySolution.threatIntelligence.app.huntFindingsDeploySuccessBody',
+            'xpack.securitySolution.threatIntelligence.app.huntFindingsCreateRuleSuccessBody',
             {
               defaultMessage: 'Rule "{name}" is ready to review before enabling.',
               values: { name: result.ruleName },
@@ -111,15 +114,32 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
       } catch (err) {
         notifications.toasts.addError(err as Error, {
           title: i18n.translate(
-            'xpack.securitySolution.threatIntelligence.app.huntFindingsDeployErrorTitle',
+            'xpack.securitySolution.threatIntelligence.app.huntFindingsCreateRuleErrorTitle',
             { defaultMessage: 'Failed to create detection rule' }
           ),
         });
       } finally {
-        setDeployingId(undefined);
+        setCreatingRuleId(undefined);
       }
     },
     [application, http, notifications]
+  );
+
+  const handleOpenInDiscover = useCallback(
+    (esql: string) => {
+      const url = getEsqlDiscoverUrl(share, esql);
+      if (!url) {
+        notifications.toasts.addDanger(
+          i18n.translate(
+            'xpack.securitySolution.threatIntelligence.app.huntFindingsOpenDiscoverError',
+            { defaultMessage: 'Unable to open Discover for this ES|QL query.' }
+          )
+        );
+        return;
+      }
+      window.open(url, '_blank', 'noopener,noreferrer');
+    },
+    [notifications.toasts, share]
   );
 
   return (
@@ -212,13 +232,13 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
                         size="xs"
-                        isLoading={deployingId === finding.id}
-                        onClick={() => handleDeploy(finding)}
-                        data-test-subj={`threatIntelHuntFindingDeploy-${finding.id}`}
+                        isLoading={creatingRuleId === finding.id}
+                        onClick={() => handleCreateRule(finding)}
+                        data-test-subj={`threatIntelHuntFindingCreateRule-${finding.id}`}
                       >
                         {i18n.translate(
-                          'xpack.securitySolution.threatIntelligence.app.huntFindingsDeploy',
-                          { defaultMessage: 'Deploy' }
+                          'xpack.securitySolution.threatIntelligence.app.huntFindingsCreateRule',
+                          { defaultMessage: 'Create rule' }
                         )}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
@@ -266,6 +286,21 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
                   {isExpanded && finding.proposed_esql_rule ? (
                     <>
                       <EuiSpacer size="s" />
+                      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            iconType="discoverApp"
+                            onClick={() => handleOpenInDiscover(finding.proposed_esql_rule)}
+                            data-test-subj={`threatIntelHuntFindingOpenDiscover-${finding.id}`}
+                          >
+                            {i18n.translate(
+                              'xpack.securitySolution.threatIntelligence.app.huntFindingsOpenDiscover',
+                              { defaultMessage: 'Open in Discover' }
+                            )}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                       <EuiCodeBlock language="esql" fontSize="s" paddingSize="s" isCopyable>
                         {finding.proposed_esql_rule}
                       </EuiCodeBlock>
