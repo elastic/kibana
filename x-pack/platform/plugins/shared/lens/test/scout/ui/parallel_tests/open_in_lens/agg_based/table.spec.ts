@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { EuiComboBoxWrapper, spaceTest, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   testData,
@@ -20,14 +20,7 @@ const getDimensionFlyoutComboBoxSelectedOptions = async (
   page: ScoutPage,
   comboBoxTestSubj: string
 ): Promise<string[]> => {
-  const comboBox = new EuiComboBoxWrapper(page, comboBoxTestSubj);
-  const selectedOptions = await comboBox.getSelectedMultiOptions();
-  if (selectedOptions.length > 0) {
-    return selectedOptions;
-  }
-
-  const value = await comboBox.getSelectedValue();
-  return value ? [value] : [];
+  return page.components.comboBox(comboBoxTestSubj).getSelectedOptions();
 };
 
 spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.stateful.classic }, () => {
