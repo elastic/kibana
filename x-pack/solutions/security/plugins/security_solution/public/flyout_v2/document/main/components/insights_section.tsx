@@ -127,8 +127,8 @@ export const InsightsSection = memo(
     );
 
     const renderFlyoutLink = useCallback(
-      (props: OpenFlyoutLinkProps) => <OpenFlyoutLink {...props} />,
-      []
+      (props: OpenFlyoutLinkProps) => <OpenFlyoutLink {...props} hit={hit} />,
+      [hit]
     );
 
     const onShowPrevalenceDetails = useCallback(() => {
