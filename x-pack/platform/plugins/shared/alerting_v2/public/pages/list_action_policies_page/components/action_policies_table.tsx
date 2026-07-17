@@ -99,7 +99,6 @@ const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsPro
 const toPolicy = (item: ContentListItem): ActionPolicyResponse =>
   (item as ActionPolicyContentListItem).policy;
 
-// Pure column — no component state needed.
 const DestinationsColumn = createColumn({
   id: 'destinations',
   name: i18n.translate('xpack.alertingV2.actionPoliciesList.column.destinations', {
@@ -178,7 +177,6 @@ const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
 );
 
 export const ActionPoliciesTable = () => {
-//   useBreadcrumbs('action_policies_list');
 
   const refetchRef = useRef<() => void>(() => {});
   const onRefetchReady = useCallback((refetchFn: () => void) => {
