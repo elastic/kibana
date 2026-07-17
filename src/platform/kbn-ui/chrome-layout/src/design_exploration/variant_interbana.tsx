@@ -12,6 +12,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { layoutVarName } from '@kbn/ui-chrome-layout-constants';
 import {
   DASHBOARD_CONTAINER_SELECTOR,
+  DASHBOARDS_APP_HAS_SELECTOR,
   DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR,
   DESIGN_EXPLORATION_GAP,
   DESIGN_EXPLORATION_PADDING,
@@ -108,9 +109,17 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
        step). Separation comes from spacing and the active-item pill alone. */
     ${scope} [class*='css-'][class*='-euiPageSection-grow-l-top-plain'],
     ${scope} [class*='css-'][class*='-euiPageInner-panelled'] {
-      background-color: ${colors.backgroundBasePlain} !important;
+      background-color: ${INTERBANA_SURFACE} !important;
       box-shadow: none !important;
       border: none !important;
+    }
+
+    ${scope} [class*='css-'][class*='-euiPageSection__content'][class*='-restrictWidth'] {
+      max-width: none !important;
+    }
+
+    ${scope} [class*='css-'][class*='-euiTable'][class*='-hasBackground-desktop'] {
+      background-color: transparent !important;
     }
 
     ${scope} .kbnChromeLayoutNavigation {
@@ -696,20 +705,27 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       padding-top: ${DESIGN_EXPLORATION_PADDING}px !important;
     }
 
+    ${scope} [class*='css-'][class*='-euiTab__content-m'] {
+      font-weight: 500 !important;
+    }
+
     /* ----- App header ----- */
-    /* Flat, static, no glass/blur — same philosophy as Linbana — but no
-       bottom hairline by default; Intercom relies on spacing rather than a
-       divider to separate the header from content below it. */
-    ${scope}:has([data-test-subj='dashboardContainer'], #dashboardListingHeading)
-      [data-test-subj='appHeader'] {
+    /* Flat, static, no glass/blur — same philosophy as Linbana. */
+    ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader'] {
       padding-inline: ${INTERBANA_PADDING}px !important;
-      padding-block: 8px !important;
+      padding-block-start: 16px !important;
+      padding-block-end: 8px !important;
       margin-inline: 0 !important;
       margin-top: 0 !important;
       border-radius: 0 !important;
       border: none !important;
+      border-block-end: ${INTERBANA_HAIRLINE} !important;
       box-shadow: none !important;
       background-color: ${INTERBANA_SURFACE} !important;
+    }
+
+    ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader']:has([data-test-subj='appHeaderTabs']) {
+      padding-block-end: 0 !important;
     }
 
     /* Title width is driven by a hidden sizer span in the same grid cell as
@@ -793,13 +809,13 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       transition: height ${INTERBANA_APP_HEADER_TRANSITION_MS}ms ease !important;
     }
 
-    ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR}) [data-test-subj='appHeader'] {
+    ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader'] {
       opacity: 1 !important;
       position: relative !important;
       top: auto !important;
     }
 
-    ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR}) [data-test-subj='appHeader'] > div {
+    ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader'] > div {
       opacity: 1;
       transition: opacity ${INTERBANA_APP_HEADER_TRANSITION_MS}ms ease
         ${INTERBANA_APP_HEADER_TRANSITION_MS}ms !important;

@@ -53,6 +53,16 @@ export const DESIGN_EXPLORATION_APP_HEADER_TOGGLE_COOLDOWN_MS = 300;
 
 export const DASHBOARD_CONTAINER_SELECTOR = '[data-test-subj="dashboardContainer"]';
 
+/** Empty listing prompt heading; absent on the populated listing table. */
+export const DASHBOARD_LISTING_HEADING_SELECTOR = '#dashboardListingHeading';
+
+/** Create-dashboard action in the inline listing AppHeader. */
+export const DASHBOARD_LISTING_CREATE_BUTTON_SELECTOR =
+  '[data-test-subj="dashboardListingCreateButton"]';
+
+/** Scope to dashboard view or listing (not other apps). */
+export const DASHBOARDS_APP_HAS_SELECTOR = `:has(${DASHBOARD_CONTAINER_SELECTOR}, ${DASHBOARD_LISTING_HEADING_SELECTOR}, ${DASHBOARD_LISTING_CREATE_BUTTON_SELECTOR})`;
+
 const panelSelectorList = [
   '.kbnChromeLayoutNavigation',
   '.kbnChromeLayoutApplication',
