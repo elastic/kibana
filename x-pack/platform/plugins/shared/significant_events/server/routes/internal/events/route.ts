@@ -25,7 +25,7 @@ import type { PaginatedResponse } from '../../../lib/significant_events/query_ut
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
-const toArray = (val: string | string[] | undefined): string[] | undefined =>
+const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
 
 // Detections carry `change_point_type`; processed-marker docs do not.
@@ -36,8 +36,10 @@ const collectEmbeddedDetections = (discoveries: Discovery[]) => {
   const result: Array<Omit<LifecycleDetection, '@timestamp'>> = [];
 
   for (const discovery of discoveries) {
-    for (const det of discovery.detections ?? []) {
-      const { detection_id, rule_name, stream_name, change_point_type } = det;
+    for (const signal of discovery.signals ?? []) {
+      if (signal.type !== 'detection') continue;
+      const { detection_id, rule_name, change_point_type } = signal.metadata;
+      const streamName = signal.stream_name;
       if (!detection_id || seen.has(detection_id)) continue;
       seen.add(detection_id);
       // The embedded discovery detection types `change_point_type` as a free-form string
@@ -45,7 +47,7 @@ const collectEmbeddedDetections = (discoveries: Discovery[]) => {
       result.push({
         detection_id,
         rule_name,
-        stream_name,
+        stream_name: streamName,
         change_point_type: change_point_type as LifecycleDetection['change_point_type'],
       });
     }
@@ -72,7 +74,9 @@ const eventsSearchRoute = createServerRoute({
       to: z.iso.datetime().optional(),
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
-      status: z.union([z.string().max(50), z.array(z.string().max(50)).max(50)]).optional(),
+      status: z
+        .union([significantEventStatusSchema, z.array(significantEventStatusSchema).max(3)])
+        .optional(),
       stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
       search: z.string().max(500).optional(),
     }),
@@ -83,13 +87,13 @@ const eventsSearchRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<PaginatedResponse<SignificantEvent>> => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { status, stream, search, ...rest } = params.query;
 
-    return getEventClient().findLatestPaginated({
+    return getEventClient().findLatestByCurrentStatePaginated({
       ...rest,
       status: toArray(status),
       stream: toArray(stream),
@@ -121,11 +125,11 @@ const eventsHistoryRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ hits: SignificantEvent[] }> => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
-    return getEventClient().findById(params.path.id);
+    return getEventClient().findByEventUuid(params.path.id);
   },
 });
 
@@ -145,9 +149,9 @@ const eventsBulkCreateRoute = createServerRoute({
     body: z.array(significantEventSchema),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return getEventClient().bulkCreate(params.body);
   },
@@ -177,21 +181,21 @@ const eventsLifecycleRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<EventLifecycleResponse> => {
-    const { getEventClient, getDiscoveryClient, getDetectionClient, licensing, uiSettingsClient } =
+    const { getEventClient, getDiscoveryClient, getDetectionClient, licensing } =
       await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
-    const { hits: initialHits } = await getEventClient().findById(params.path.id);
+    const { hits: initialHits } = await getEventClient().findByEventUuid(params.path.id);
     if (initialHits.length === 0) {
       return { detections: [], discoveries: [], events: [] };
     }
 
-    const { discovery_slug: slug } = initialHits[0];
+    const { event_id: eventId } = initialHits[0];
 
     const [{ hits: events }, { hits: discoveries }] = await Promise.all([
-      getEventClient().findByDiscoverySlug(slug),
-      getDiscoveryClient().findBySlug(slug),
+      getEventClient().findByEventId(eventId),
+      getDiscoveryClient().findByEventId(eventId),
     ]);
 
     const embedded = collectEmbeddedDetections(discoveries);
@@ -250,13 +254,13 @@ const eventsAttachInvestigationRoute = createServerRoute({
     body: significantEventInvestigationSchema,
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return attachInvestigationToEvent({
       eventClient: getEventClient(),
-      eventId: params.path.id,
+      eventUuid: params.path.id,
       investigation: params.body,
     });
   },
@@ -287,17 +291,18 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     server,
     logger,
   }): Promise<{ executionId: string }> => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
-    const { hits } = await getEventClient().findById(params.path.id);
+    const { hits } = await getEventClient().findByEventUuid(params.path.id);
     if (hits.length === 0) {
       throw notFound(`Significant event "${params.path.id}" not found.`);
     }
 
     const executionId = await triggerInvestigationWorkflow({
       workflowsManagement: server.workflowsManagement,
+      agentBuilder: server.agentBuilder,
       spaces: server.spaces,
       request,
       logger,
@@ -336,13 +341,13 @@ const eventsUpdateRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getEventClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return updateSignificantEventStatus({
       eventClient: getEventClient(),
-      eventId: params.path.id,
+      eventUuid: params.path.id,
       status: params.body.status,
     });
   },
