@@ -483,14 +483,16 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 )
               );
             } else {
+              // Remove the pack from EVERY package policy that carries it on
+              // the wire (the `policyHasPack` scan in `currentPackagePolicies`),
+              // not just the ones reachable through the pack SO's agent-policy
+              // references. Post-upgrade (9.4.3 → 9.5.0) the wire attachments and
+              // the SO references can diverge; matching by references left the
+              // pack block on the wire, so agents kept running the schedule while
+              // the SO read `enabled: false`. This mirrors delete_pack_route.
               await Promise.all(
-                currentAgentPolicyIds.map((agentPolicyId) => {
-                  const packagePolicy = currentPackagePolicies.find((policy) =>
-                    policy.policy_ids.includes(agentPolicyId)
-                  );
-                  if (!packagePolicy) return;
-
-                  return packagePolicyService?.update(
+                currentPackagePolicies.map((packagePolicy) =>
+                  packagePolicyService?.update(
                     spaceScopedClient,
                     esClient,
                     packagePolicy.id,
@@ -500,8 +502,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
                       return draft;
                     })
-                  );
-                })
+                  )
+                )
               );
             }
           } else {
