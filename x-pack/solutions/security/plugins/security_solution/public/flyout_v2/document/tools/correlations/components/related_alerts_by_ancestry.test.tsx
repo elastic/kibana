@@ -146,7 +146,9 @@ describe('<RelatedAlertsByAncestry />', () => {
       getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_DATE_PICKER_TEST_ID)
     ).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_ERROR_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
   });
 
   it('should render no data message', () => {
