@@ -7,7 +7,7 @@
 
 import { pick } from 'lodash';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import {
   createTaskRunError,
   TaskErrorSource,
@@ -220,7 +220,7 @@ function getFakeRequest(apiKey: string | undefined, spaceId: string) {
 
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    spaceId: asSpaceId(spaceId),
+    spaceId: brandSpaceId(spaceId),
   };
 
   return kibanaRequestFactory(fakeRawRequest);

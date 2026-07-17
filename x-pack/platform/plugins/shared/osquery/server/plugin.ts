@@ -11,21 +11,14 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 
 import type { Subscription } from 'rxjs';
-import {
-  getInternalSavedObjectsClient,
-  getInternalSavedObjectsClientForSpaceId,
-} from './utils/get_internal_saved_object_client';
+import { getInternalSavedObjectsClient } from './utils/get_internal_saved_object_client';
 import { upgradeIntegration } from './utils/upgrade_integration';
-import type { PackSavedObject } from './common/types';
-import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
-import { packSavedObjectType } from '../common/types';
+import { getPackagePolicyCreateCallback } from './lib/create_package_policy_callback';
 import { createConfig } from './create_config';
 import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
@@ -196,47 +189,15 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         if (registerIngestCallback) {
           registerIngestCallback(
             'packagePolicyCreate',
-            async (
-              newPackagePolicy: NewPackagePolicy,
-              soClient: SavedObjectsClientContract
-            ): Promise<UpdatePackagePolicy> => {
-              if (newPackagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
-                await this.initialize(core, dataViewsService);
-                const allPacks = await client
-                  .find<PackSavedObject>({
-                    type: packSavedObjectType,
-                  })
-                  .then((data) => ({
-                    ...data,
-                    saved_objects: data.saved_objects.map((pack) => ({
-                      ...pack.attributes,
-                      saved_object_id: pack.id,
-                      references: pack.references,
-                    })),
-                  }));
-
-                if (allPacks.saved_objects) {
-                  const spaceScopedClient = getInternalSavedObjectsClientForSpaceId(
-                    core,
-                    soClient.getCurrentNamespace()
-                  );
-
-                  return updateGlobalPacksCreateCallback(
-                    newPackagePolicy,
-                    spaceScopedClient,
-                    allPacks.saved_objects,
-                    this.osqueryAppContextService,
-                    soClient.getCurrentNamespace(),
-                    this.rruleSchedulingEnabled
-                  );
-                }
-              }
-
-              return newPackagePolicy;
-            }
+            getPackagePolicyCreateCallback(
+              core,
+              this.osqueryAppContextService,
+              () => this.initialize(core, dataViewsService),
+              this.rruleSchedulingEnabled
+            )
           );
 
-          registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client));
+          registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(core));
           registerIngestCallback('agentPolicyPostUpdate', getAgentPolicyPostUpdateCallback(core));
         }
 
