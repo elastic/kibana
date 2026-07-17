@@ -138,7 +138,7 @@ export interface OpenDocumentCorrelationsParams {
   /** Callback to open one of the correlated alerts. */
   onShowAlert: (id: string, indexName: string, title?: string) => void;
   /** Optional callback to open a correlated attack; when omitted the attack column is hidden. */
-  onShowAttack?: (id: string, indexName: string) => void;
+  onShowAttack?: (id: string, indexName: string, title?: string) => void;
   /** Which UI trigger opened the correlations tool, when known. */
   origin?: FlyoutOrigin;
 }

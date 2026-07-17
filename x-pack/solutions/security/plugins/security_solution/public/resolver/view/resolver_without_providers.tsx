@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext } from 'react';
-import { useSelector, useStore } from 'react-redux';
+import { useSelector, useStore } from 'react-redux-v7';
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';

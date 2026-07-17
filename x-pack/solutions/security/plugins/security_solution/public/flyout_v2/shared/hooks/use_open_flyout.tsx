@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { Suspense, useCallback } from 'react';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';

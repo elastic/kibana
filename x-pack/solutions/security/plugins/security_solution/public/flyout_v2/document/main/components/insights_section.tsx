@@ -59,6 +59,7 @@ export const InsightsSection = memo(
       openDocumentCorrelations,
       openDocumentThreatIntelligence,
       openDocumentPrevalence,
+      openAttackFlyoutAsChild,
     } = useFlyoutApi();
 
     const expanded = useExpandSection({
@@ -106,6 +107,12 @@ export const InsightsSection = memo(
       [openDocumentEntities, hit]
     );
 
+    const onShowAttack = useCallback(
+      (id: string, indexName: string, title?: string) =>
+        openAttackFlyoutAsChild({ attackId: id, indexName, attackTitle: title }),
+      [openAttackFlyoutAsChild]
+    );
+
     const onShowCorrelationsDetails = useCallback(
       () =>
         openDocumentCorrelations({
@@ -113,9 +120,10 @@ export const InsightsSection = memo(
           scopeId: '',
           isRulePreview: false,
           onShowAlert,
+          onShowAttack,
           origin: FLYOUT_ORIGIN.INSIGHTS_CORRELATIONS,
         }),
-      [openDocumentCorrelations, hit, onShowAlert]
+      [openDocumentCorrelations, hit, onShowAlert, onShowAttack]
     );
 
     const renderFlyoutLink = useCallback(
