@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { agentPolicyService, appContextService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
@@ -106,7 +107,17 @@ export const rotateUninstallTokenHandler: FleetRequestHandler<
 
   logger.debug(`Rotating uninstall token for agent policy [${agentPolicyId}]`);
 
-  const agentPolicy = await agentPolicyService.get(soClient, agentPolicyId);
+  let agentPolicy;
+  try {
+    agentPolicy = await agentPolicyService.get(soClient, agentPolicyId);
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return response.notFound({
+        body: { message: `Agent policy not found with id ${agentPolicyId}` },
+      });
+    }
+    throw error;
+  }
 
   if (!agentPolicy) {
     return response.notFound({
