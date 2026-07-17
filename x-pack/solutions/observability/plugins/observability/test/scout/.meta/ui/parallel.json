@@ -1,5 +1,5 @@
 {
-  "sha1": "790b1758575bcde2ed6f576ff1b05a1658c2efe4",
+  "sha1": "6282413691a0658d5a23ec580e091a3fc2f913e4",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -733,7 +733,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 162,
+        "line": 163,
         "column": 9
       }
     },
@@ -802,8 +802,8 @@
       }
     },
     {
-      "id": "c30849bf17a1231-b87bedab0eccd3a",
-      "title": "Rule Details Page - Viewer should not show actions button for viewer user",
+      "id": "c30849bf17a1231-f5df63d939c7a0e",
+      "title": "Rule Details Page - Viewer should not show edit or delete actions for viewer user",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
