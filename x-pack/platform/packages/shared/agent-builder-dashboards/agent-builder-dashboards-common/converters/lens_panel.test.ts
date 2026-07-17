@@ -20,6 +20,8 @@ const metricApiConfig = {
   description: 'Attributes description',
   data_source: { type: 'esql' as const, query: 'FROM logs | STATS count = COUNT(*)' },
   metrics: [{ type: 'primary' as const, column: 'count' }],
+  sampling: 1,
+  ignore_global_filters: false,
 };
 
 const buildLensAttributes = (): LensAttributes =>
