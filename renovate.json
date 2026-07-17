@@ -1016,7 +1016,6 @@
     {
       "groupName": "CLI tooling",
       "matchDepNames": [
-        "argsplit",
         "chalk",
         "cli-progress",
         "cli-table3",
@@ -1101,8 +1100,7 @@
         "mocha-junit-reporter",
         "mocha-multi-reporters",
         "mochawesome",
-        "mochawesome-merge",
-        "regenerate"
+        "mochawesome-merge"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -1378,15 +1376,6 @@
     {
       "groupName": "borc",
       "matchDepNames": ["borc"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "cpy",
-      "matchDepNames": ["cpy"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1880,7 +1869,6 @@
         "minimist",
         "object-hash",
         "require-in-the-middle",
-        "tape",
         "tough-cookie",
         "xml-crypto",
         "@elastic/node-crypto",
@@ -2000,8 +1988,7 @@
         "jest-mock",
         "jest-runtime",
         "jest-snapshot",
-        "jest-styled-components",
-        "mutation-observer"
+        "jest-styled-components"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],

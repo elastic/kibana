@@ -9,6 +9,6 @@ import { smlIndexName } from './sml_storage';
 
 describe('smlIndexName', () => {
   it('is the context-idx-sml-data index', () => {
-    expect(smlIndexName).toBe('.context-idx-sml-data');
+    expect(smlIndexName).toBe('.ai-index-idx-sml-data');
   });
 });
