@@ -69,20 +69,6 @@ export class Inspector {
     await this.page.testSubj.click(`tablePagination-${size}-rows`);
   }
 
-  async getTableData(): Promise<string[][]> {
-    await this.panel.locator('tbody').waitFor({ state: 'visible' });
-    const tableRows = this.panel.locator('tbody tr');
-
-    return tableRows.evaluateAll((rows) =>
-      rows.map((row) =>
-        Array.from(row.querySelectorAll('td')).map((cell) => {
-          const euiTableCellContent = cell.querySelector('.euiTableCellContent');
-          return (euiTableCellContent ?? cell).textContent?.trim() ?? '';
-        })
-      )
-    );
-  }
-
   async close() {
     await this.closeButton.click();
     await this.panel.waitFor({ state: 'hidden' });
@@ -112,5 +98,19 @@ export class Inspector {
     }
 
     await this.openInspectorView('Requests');
+  }
+
+  async getTableData(): Promise<string[][]> {
+    await this.panel.locator('tbody').waitFor({ state: 'visible' });
+    const tableRows = this.panel.locator('tbody tr');
+
+    return tableRows.evaluateAll((rows) =>
+      rows.map((row) =>
+        Array.from(row.querySelectorAll('td')).map((cell) => {
+          const euiTableCellContent = cell.querySelector('.euiTableCellContent');
+          return (euiTableCellContent ?? cell).textContent?.trim() ?? '';
+        })
+      )
+    );
   }
 }

@@ -28,9 +28,7 @@ const EXPECTED_FLIGHTS_DATA = [
   { x: 1540281240000, y: 6943.55 },
 ];
 
-function getNonEmptyLineSeries(
-  state: DebugState
-): Array<Array<{ x: number; y: number }>> {
+function getNonEmptyLineSeries(state: DebugState): Array<Array<{ x: number; y: number }>> {
   return (
     state.lines
       ?.map(({ points }) =>

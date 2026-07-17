@@ -29,13 +29,9 @@ function getDiscoverDataViewIdFromUrl(url: string): string {
   );
   return matches[0] ?? '';
 }
-
-// Matches FTR: ad hoc DV is scoped to functional logstash only (see AD_HOC_DATA_VIEW_NAME).
 const AD_HOC_DISCOVER_HITS = '14,005';
 
-// Exact terms(ip) × average(bytes) bars on ad hoc logstash-only DV.
-// Lens DEFAULT_SIZE is 9 ("Top 9 values" + Other). FTR forced size 5 when the
-// default was lower; setTermsNumberOfValues does not reliably commit in Scout.
+// Default terms size is Top 9 (+ Other); FTR forced size 5 — skipped here (Playwright/ValuesInput).
 const AD_HOC_CHART_EXPECTED_BARS = [
   { x: '97.220.3.248', y: 19755 },
   { x: '169.228.188.120', y: 18994 },
@@ -170,13 +166,19 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
         await expect(page.testSubj.locator('lnsFieldListPanelField-runtimefield')).toHaveCount(0);
 
         await switchDataPanelIndexPattern(page, testData.AD_HOC_DATA_VIEW_NAME);
+        // Scope to Available fields — the same test subject also appears under Selected.
         await expect(
-          page.testSubj.locator('lnsFieldListPanelField-runtimefield').first()
+          page.testSubj
+            .locator('lnsIndexPatternAvailableFields')
+            .getByTestId('lnsFieldListPanelField-runtimefield')
         ).toBeVisible();
       });
 
       await spaceTest.step('remove the runtime field', async () => {
-        await page.testSubj.locator('lnsFieldListPanelField-runtimefield').first().click();
+        await page.testSubj
+          .locator('lnsIndexPatternAvailableFields')
+          .getByTestId('lnsFieldListPanelField-runtimefield')
+          .click();
         await page.testSubj.locator('fieldPopoverHeader_deleteField-runtimefield').click();
         await expect(
           page.testSubj.locator('fieldPopoverHeader_deleteField-runtimefield')
