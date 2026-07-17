@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { ComposeDiscoverAction, ComposeDiscoverState, RecoveryType } from '../types';
 import type { CustomRecoveryRenderProps } from '../types';
@@ -48,16 +49,17 @@ export const BehaviourStep: React.FC<BehaviourStepProps> = ({
         compressed
         data-test-subj="composeDiscoverModeSelect"
       />
-      <EuiSpacer size="m" />
       {isAlert && (
         <>
-          <RecoveryConditionStep
-            state={state}
-            dispatch={dispatch}
-            onRecoveryTypeChange={onRecoveryTypeChange}
-            renderCustomRecovery={renderCustomRecovery}
-          />
           <EuiSpacer size="m" />
+          <EuiTitle size="xxs">
+            <h4>
+              {i18n.translate('xpack.alertingV2.composeDiscover.behaviour.alertConditionsTitle', {
+                defaultMessage: 'Alert conditions',
+              })}
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <AlertDelayField />
           <EuiSpacer size="m" />
           <NoDataStrategySelect
@@ -65,6 +67,21 @@ export const BehaviourStep: React.FC<BehaviourStepProps> = ({
             onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
             compressed
             data-test-subj="composeDiscoverNoDataStrategy"
+          />
+          <EuiHorizontalRule margin="m" />
+          <EuiTitle size="xxs">
+            <h4>
+              {i18n.translate('xpack.alertingV2.composeDiscover.behaviour.recoveryConditionsTitle', {
+                defaultMessage: 'Recovery conditions',
+              })}
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <RecoveryConditionStep
+            state={state}
+            dispatch={dispatch}
+            onRecoveryTypeChange={onRecoveryTypeChange}
+            renderCustomRecovery={renderCustomRecovery}
           />
         </>
       )}
