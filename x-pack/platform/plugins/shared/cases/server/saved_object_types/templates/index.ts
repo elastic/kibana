@@ -11,6 +11,7 @@ import { type Template } from '../../../common/types/domain/template/latest';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import { modelVersion1 } from './model_versions/model_version_1';
 import { modelVersion2 } from './model_versions/model_version_2';
+import { modelVersion3 } from './model_versions/model_version_3';
 
 const mappings = {
   dynamic: false,
@@ -82,6 +83,11 @@ const mappings = {
     isEnabled: {
       type: 'boolean',
     },
+    // Originating v1 template key, set only by the v1 -> v2 templates migration (see model_version_3).
+    legacyKey: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
   },
 } as const;
 
@@ -100,6 +106,7 @@ export const caseTemplateSavedObjectType: SavedObjectsType = {
   modelVersions: {
     1: modelVersion1,
     2: modelVersion2,
+    3: modelVersion3,
   },
 };
 

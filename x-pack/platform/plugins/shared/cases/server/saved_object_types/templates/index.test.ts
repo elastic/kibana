@@ -71,6 +71,10 @@ describe('caseTemplateSavedObjectType', () => {
           "lastUsedAt": Object {
             "type": "date",
           },
+          "legacyKey": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
           "name": Object {
             "ignore_above": 1024,
             "type": "keyword",
