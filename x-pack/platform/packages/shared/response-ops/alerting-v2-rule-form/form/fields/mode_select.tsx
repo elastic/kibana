@@ -48,7 +48,7 @@ const SIGNAL_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleForm.modeField.signal.description',
   {
     defaultMessage:
-      "You're exploring - building detection logic, establishing baselines, or collecting evidence before wiring up notifications. Matches are recorded as queryable data points, nothing more.",
+      'Matches are stored as queryable data points. No alerts, no notifications - just data.',
   }
 );
 
