@@ -88,7 +88,6 @@ enabled:
   - src/platform/test/functional/apps/discover/group1/config.ts
   - src/platform/test/functional/apps/discover/group3/config.ts
   - src/platform/test/functional/apps/discover/group4/config.ts
-  - src/platform/test/functional/apps/discover/group5/config.ts
   - src/platform/test/functional/apps/discover/group6/config.ts
   - src/platform/test/functional/apps/discover/group11/config.ts
   - src/platform/test/functional/apps/discover/group12/config.ts
