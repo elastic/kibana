@@ -323,7 +323,7 @@ export class DiscoverApp {
   }
 
   async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
-    await this.page.testSubj.click('discoverSaveButton');
+    await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.fill('savedObjectTitle', name);
     if (storeTimeRange !== undefined) {
       const switchControl = this.page.testSubj.locator('storeTimeWithSearch');

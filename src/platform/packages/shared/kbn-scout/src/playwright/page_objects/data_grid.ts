@@ -98,6 +98,13 @@ export class DataGrid {
     });
   }
 
+  /**
+   * Closes the row-details flyout opened via `openDocumentDetails`.
+   */
+  async closeFlyout() {
+    await this.page.testSubj.click('euiFlyoutCloseButton');
+  }
+
   async closeInTableSearch() {
     const input = this.getInTableSearchInput();
 
