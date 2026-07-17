@@ -638,6 +638,90 @@ describe('EndpointActionsClient', () => {
     });
   });
 
+  describe('#killProcess()', () => {
+    describe('when `kill_descendents` parameter is set to `true`', () => {
+      beforeEach(() => {
+        // @ts-expect-error mocking this for testing purposes
+        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendents =
+          true;
+      });
+
+      it('should throw error when feature flag is disabled', async () => {
+        // @ts-expect-error mocking this for testing purposes
+        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendents =
+          false;
+
+        await expect(
+          endpointActionsClient.killProcess(
+            responseActionsClientMock.createKillProcessOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { pid: 123, kill_descendents: true },
+            })
+          )
+        ).rejects.toThrow('kill-process `kill_descendents` parameter is not enabled');
+      });
+
+      it('should throw error when endpoint does not support `kill_process_descendents` capability', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.killProcess(
+            responseActionsClientMock.createKillProcessOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { pid: 123, kill_descendents: true },
+            })
+          )
+        ).rejects.toThrow('The following agent IDs do not support killing process descendents');
+      });
+
+      it('should succeed when feature flag is enabled and endpoint supports the capability', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(
+              generator.generate({ Endpoint: { capabilities: ['kill_process_descendents'] } })
+            ),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.killProcess(
+            responseActionsClientMock.createKillProcessOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { pid: 123, kill_descendents: true },
+            })
+          )
+        ).resolves.toBeDefined();
+      });
+
+      it('should succeed without checking capability when `kill_descendents` is false', async () => {
+        // @ts-expect-error mocking this for testing purposes
+        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendents =
+          false;
+
+        await expect(
+          endpointActionsClient.killProcess(
+            responseActionsClientMock.createKillProcessOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { pid: 123, kill_descendents: false },
+            })
+          )
+        ).resolves.toBeDefined();
+      });
+    });
+  });
+
   describe('#memoryDump()', () => {
     it('should error when feature flag is false', async () => {
       // @ts-expect-error mocking this for testing purposes
