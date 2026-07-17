@@ -9,9 +9,11 @@ import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { EntityToAttach } from '..';
 import { generateEntityAttachmentsWithoutOwner } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
+import { isEntityAttachment } from '../utils';
 
 export interface AddToExistingCaseProps {
   /**
@@ -48,7 +50,29 @@ export const AddToExistingCase: FC<AddToExistingCaseProps> = ({
 
   const menuItemClicked = useCallback(() => {
     onClick();
-    selectCaseModal.open({ getAttachments: () => generateEntityAttachmentsWithoutOwner(entity) });
+    selectCaseModal.open({
+      getAttachments: ({ theCase }) => {
+        if (theCase) {
+          const alreadyAttached = theCase.comments
+            .filter(isEntityAttachment)
+            .some((comment) => comment.attachmentId === entity.id);
+          if (alreadyAttached) {
+            return [];
+          }
+        }
+        return generateEntityAttachmentsWithoutOwner(entity);
+      },
+      noAttachmentsToaster: {
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.cases.alreadyAttachedTitle',
+          { defaultMessage: 'Entity already attached' }
+        ),
+        content: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.cases.alreadyAttachedContent',
+          { defaultMessage: 'This entity is already attached to the selected case.' }
+        ),
+      },
+    });
   }, [entity, onClick, selectCaseModal]);
 
   return (

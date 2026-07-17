@@ -42,12 +42,16 @@ export const EntityTabContent: React.FC<CommonAttachmentTabViewProps> = ({
   // `attachmentId` holds the canonical entity.id (EUID), so we only need the ids here.
   const entityIds = useMemo<string[]>(
     () =>
-      caseData.comments.flatMap((comment) =>
-        isEntityAttachment(comment) &&
-        (!searchTerm || matchesSearchTerm(comment.metadata, searchTerm))
-          ? [comment.attachmentId]
-          : []
-      ),
+      [
+        ...new Set(
+          caseData.comments.flatMap((comment) =>
+            isEntityAttachment(comment) &&
+            (!searchTerm || matchesSearchTerm(comment.metadata, searchTerm))
+              ? [comment.attachmentId]
+              : []
+          )
+        ),
+      ],
     [caseData.comments, searchTerm]
   );
 
