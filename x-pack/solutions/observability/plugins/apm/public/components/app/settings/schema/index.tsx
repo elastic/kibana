@@ -13,9 +13,12 @@ import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { SchemaOverview } from './schema_overview';
 import { ConfirmSwitchModal } from './confirm_switch_modal';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { getApmInternalServices } from '../../../../plugin';
+import {
+  type APIReturnType,
+  callApmApi as callLegacyApmApi,
+} from '../../../../services/rest/create_call_apm_api';
 
 type FleetMigrationCheckResponse = APIReturnType<'GET /internal/apm/fleet/migration_check'>;
 
@@ -43,6 +46,7 @@ export function Schema() {
     status,
   } = useFetcher((callApi) => callApi('GET /internal/apm/fleet/migration_check'), [], {
     preservePreviousData: false,
+    useLegacyCallApmApi: true,
   });
   const isLoading = status !== FETCH_STATUS.SUCCESS;
   const cloudApmMigrationEnabled = !!data.cloud_apm_migration_enabled;
@@ -108,6 +112,7 @@ export function Schema() {
 }
 
 async function getUnsupportedApmServerConfigs(toasts: NotificationsStart['toasts']) {
+  const { callApmApi } = getApmInternalServices();
   try {
     const { unsupported } = await callApmApi(
       'GET /internal/apm/fleet/apm_server_schema/unsupported',
@@ -132,7 +137,7 @@ async function createCloudApmPackagePolicy(
 ) {
   updateLocalStorage(FETCH_STATUS.LOADING);
   try {
-    const { cloudApmPackagePolicy } = await callApmApi(
+    const { cloudApmPackagePolicy } = await callLegacyApmApi(
       'POST /internal/apm/fleet/cloud_apm_package_policy',
       {
         signal: null,

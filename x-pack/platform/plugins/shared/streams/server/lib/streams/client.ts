@@ -28,6 +28,7 @@ import {
   LOGS_ECS_STREAM_NAME,
   ROOT_STREAM_NAMES,
 } from '@kbn/streams-schema';
+import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import type { StreamSummary } from '../../../common';
 import type { AttachmentClient } from './attachments/attachment_client';
 import {
@@ -42,8 +43,7 @@ import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { upsertDataStream } from './data_streams/manage_data_streams';
-import { shouldExcludeFromStreamsList } from './data_streams/should_exclude_from_streams_list';
-import type { KnowledgeIndicatorClient } from './ki';
+import { shouldIncludeFromStreamsList } from './data_streams/should_include_from_streams_list';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -84,7 +84,7 @@ export class StreamsClient {
       esClientAsInternalUser: ElasticsearchClient;
       esClient: ElasticsearchClient;
       attachmentClient: AttachmentClient;
-      getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClient>;
+      getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClientContract>;
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;
@@ -904,6 +904,20 @@ export class StreamsClient {
     });
   }
 
+  /**
+   * Lists both managed and unmanaged classic streams
+   */
+  async listClassicStreams(): Promise<Streams.ClassicStream.Definition[]> {
+    const streams = await this.listStreamsWithDataStreamExistence();
+
+    return streams
+      .filter(
+        (data): data is { stream: Streams.ClassicStream.Definition; exists: boolean } =>
+          data.stream.type === 'classic'
+      )
+      .map(({ stream }) => stream);
+  }
+
   async listStreamsWithDataStreamExistence(): Promise<
     Array<{ stream: Streams.all.Definition; exists: boolean }>
   > {
@@ -917,11 +931,13 @@ export class StreamsClient {
     );
 
     unmanagedStreams.forEach((stream) => {
-      if (!allDefinitionsById.get(stream.name)) {
+      const definition = allDefinitionsById.get(stream.name);
+
+      if (!definition) {
         allDefinitionsById.set(stream.name, { stream, exists: true });
       } else {
         allDefinitionsById.set(stream.name, {
-          ...allDefinitionsById.get(stream.name)!,
+          ...definition,
           exists: true,
         });
       }
@@ -948,21 +964,19 @@ export class StreamsClient {
 
     const now = new Date().toISOString();
 
-    return response.data_streams
-      .filter((dataStream) => !shouldExcludeFromStreamsList(dataStream))
-      .map((dataStream) => ({
-        type: 'classic' as const,
-        name: dataStream.name,
-        description: '',
-        updated_at: now,
-        ingest: {
-          lifecycle: { inherit: {} },
-          processing: { steps: [], updated_at: now },
-          settings: {},
-          classic: {},
-          failure_store: { inherit: {} },
-        },
-      }));
+    return response.data_streams.filter(shouldIncludeFromStreamsList).map((dataStream) => ({
+      type: 'classic' as const,
+      name: dataStream.name,
+      description: '',
+      updated_at: now,
+      ingest: {
+        lifecycle: { inherit: {} },
+        processing: { steps: [], updated_at: now },
+        settings: {},
+        classic: {},
+        failure_store: { inherit: {} },
+      },
+    }));
   }
 
   /**

@@ -10,6 +10,18 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { useActionPolicyForm } from './use_action_policy_form';
 import { DEFAULT_FORM_STATE } from './constants';
 
+jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  isActionValid: (action: {
+    source: 'existing' | 'inline';
+    workflowId?: string | null;
+    connectorId?: string | null;
+    params?: string;
+  }) =>
+    action.source === 'existing'
+      ? Boolean(action.workflowId)
+      : action.connectorId != null && (action.params ?? '').trim() !== '',
+}));
+
 const EXISTING_POLICY: ActionPolicyResponse = {
   id: 'policy-1',
   version: 'WzEsMV0=',
@@ -57,7 +69,7 @@ describe('useActionPolicyForm', () => {
       expect(result.current.methods.getValues()).toEqual(DEFAULT_FORM_STATE);
     });
 
-    it('calls onSubmitCreate with the create payload on submit', async () => {
+    it('calls onSubmitCreate with the raw form values on submit', async () => {
       const onSubmitCreate = jest.fn();
       const { result } = renderHook(() =>
         useActionPolicyForm({
@@ -79,37 +91,67 @@ describe('useActionPolicyForm', () => {
       expect(onSubmitCreate).toHaveBeenCalledWith({
         name: 'My policy',
         description: 'A description',
+        tags: [],
+        matcher: '',
         groupingMode: 'per_episode',
-        throttle: { strategy: 'on_status_change', interval: null },
+        groupBy: [],
+        throttleStrategy: 'on_status_change',
+        throttleInterval: '',
         destinations: [],
+        inlineActions: [],
       });
     });
+  });
 
-    it('omits optional empty fields from the create payload', async () => {
-      const onSubmitCreate = jest.fn();
+  describe('submit gating (isSubmitEnabled)', () => {
+    it('is disabled without a name or destination', () => {
       const { result } = renderHook(() =>
-        useActionPolicyForm({
-          onSubmitCreate,
-          onSubmitUpdate: jest.fn(),
-        })
+        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
+      );
+
+      expect(result.current.isSubmitEnabled).toBe(false);
+    });
+
+    it('is enabled with only a valid inline action and no existing destinations', async () => {
+      const { result } = renderHook(() =>
+        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
       );
 
       await act(async () => {
-        result.current.methods.setValue('name', 'Minimal');
-        result.current.methods.setValue('description', 'Desc');
-        result.current.methods.setValue('matcher', '');
-        result.current.methods.setValue('groupBy', []);
+        result.current.methods.setValue('name', 'Inline only');
+        result.current.methods.setValue('inlineActions', [
+          {
+            id: 'draft-1',
+            source: 'inline',
+            stepType: 'slack2.sendMessage',
+            connectorId: 'connector-1',
+            params: 'message: hi',
+          },
+        ]);
       });
+
+      expect(result.current.isSubmitEnabled).toBe(true);
+    });
+
+    it('is disabled when an inline action is incomplete', async () => {
+      const { result } = renderHook(() =>
+        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
+      );
 
       await act(async () => {
-        await result.current.handleSubmit();
+        result.current.methods.setValue('name', 'Inline only');
+        result.current.methods.setValue('inlineActions', [
+          {
+            id: 'draft-1',
+            source: 'inline',
+            stepType: 'slack2.sendMessage',
+            connectorId: null,
+            params: 'message: ""',
+          },
+        ]);
       });
 
-      const payload = onSubmitCreate.mock.calls[0][0];
-      expect(payload).not.toHaveProperty('matcher');
-      expect(payload).not.toHaveProperty('groupBy');
-      expect(payload.groupingMode).toBe('per_episode');
-      expect(payload.throttle).toEqual({ strategy: 'on_status_change', interval: null });
+      expect(result.current.isSubmitEnabled).toBe(false);
     });
   });
 
@@ -145,6 +187,7 @@ describe('useActionPolicyForm', () => {
         throttleStrategy: 'time_interval',
         throttleInterval: '5m',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        inlineActions: [],
       });
     });
 
@@ -166,7 +209,7 @@ describe('useActionPolicyForm', () => {
       expect(result.current.methods.getValues().throttleStrategy).toBe('on_status_change');
     });
 
-    it('calls onSubmitUpdate with id, payload, and version on submit', async () => {
+    it('calls onSubmitUpdate with id, raw form values, and version on submit', async () => {
       const onSubmitUpdate = jest.fn();
       const { result } = renderHook(() =>
         useActionPolicyForm({
@@ -181,17 +224,22 @@ describe('useActionPolicyForm', () => {
       });
 
       expect(onSubmitUpdate).toHaveBeenCalledTimes(1);
-      expect(onSubmitUpdate).toHaveBeenCalledWith('policy-1', {
-        version: 'WzEsMV0=',
-        name: 'Critical production alerts',
-        description: 'Routes critical alerts',
-        groupingMode: 'per_field',
-        tags: ['production'],
-        matcher: 'data.severity : "critical"',
-        groupBy: ['host.name', 'service.name'],
-        throttle: { strategy: 'time_interval', interval: '5m' },
-        destinations: [{ type: 'workflow', id: 'workflow-2' }],
-      });
+      expect(onSubmitUpdate).toHaveBeenCalledWith(
+        'policy-1',
+        {
+          name: 'Critical production alerts',
+          description: 'Routes critical alerts',
+          groupingMode: 'per_field',
+          tags: ['production'],
+          matcher: 'data.severity : "critical"',
+          groupBy: ['host.name', 'service.name'],
+          throttleStrategy: 'time_interval',
+          throttleInterval: '5m',
+          destinations: [{ type: 'workflow', id: 'workflow-2' }],
+          inlineActions: [],
+        },
+        'WzEsMV0='
+      );
     });
 
     it('does not call onSubmitCreate in edit mode', async () => {

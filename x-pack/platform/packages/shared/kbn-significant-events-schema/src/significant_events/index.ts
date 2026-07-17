@@ -5,19 +5,55 @@
  * 2.0.
  */
 
-export { detectionSchema, type Detection } from './detections';
+export {
+  detectionSchema,
+  processedMarkerSchema,
+  CHANGE_POINT_TYPES,
+  type Detection,
+  type ProcessedMarker,
+  type ChangePointType,
+} from './detections';
 export { discoverySchema, type Discovery } from './discoveries';
+export {
+  blastRadiusEntrySchema,
+  causalFeatureSchema,
+  signalEntrySchema,
+  severitySchema,
+  SEVERITY_OPTIONS,
+  getSeverityLabel,
+  type BlastRadiusEntry,
+  type CausalFeature,
+  type SignalEntry,
+  type Severity,
+} from './common_schemas';
 export type { KnowledgeIndicator } from '../queries';
 export {
+  type SignificantEvent,
+  type SignificantEventInvestigation,
+  type SignificantEventStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  significantEventInvestigationSchema,
   significantEventSchema,
   significantEventStatusSchema,
-  type SignificantEvent,
-  type SignificantEventStatus,
 } from './events';
 export {
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,
-  MAX_TITLE_LENGTH,
   MAX_TEXT_LENGTH,
+  MAX_TITLE_LENGTH,
 } from './constants';
+export {
+  INVESTIGATION_PROGRESS_UI_EVENT,
+  INVESTIGATE_STEP_ID,
+  investigationStateSchema,
+  type InvestigationHypothesis,
+  type InvestigationState,
+} from './investigation_state';
+export {
+  type SignificantEventsTuningConfig,
+  type TuningConfigFieldBounds,
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
+  significantEventsTuningConfigSchema,
+  validateSignificantEventsTuningConfig,
+} from './tuning_config';

@@ -146,7 +146,7 @@ export const search = async (
     const templateMetadata = templateSOs.map((so) => ({
       templateId: so.attributes.templateId,
       templateVersion: so.attributes.templateVersion,
-      fieldNames: so.attributes.fieldNames,
+      fieldDefinitions: so.attributes.fieldDefinitions,
     }));
 
     const rawFilters = paramArgs.extendedFieldFilters;

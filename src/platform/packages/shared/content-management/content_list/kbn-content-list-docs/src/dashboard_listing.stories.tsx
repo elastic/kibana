@@ -20,6 +20,7 @@ import {
 } from '@kbn/content-list';
 import {
   ContentListClientProvider,
+  createFilterControl,
   defineContentListFilter,
   defineContentListSortField,
   type ContentListClientProviderProps,
@@ -74,6 +75,12 @@ const timeRestoreFilter = defineContentListFilter<DashboardMockItem, TimeRestore
     { value: 'restoresTime', label: 'Restores time range' },
     { value: 'usesGlobalTime', label: 'Uses global time' },
   ],
+});
+
+// Registering the dimension above powers KQL search + facet counts; the toolbar
+// control is placed explicitly below.
+const TimeRestoreFilter = createFilterControl(timeRestoreFilter, {
+  'data-test-subj': 'contentListTimeRestoreFilter',
 });
 
 const timeRestoreSort = defineContentListSortField<DashboardMockItem>({
@@ -334,7 +341,14 @@ const ClientProviderExtensionsStory = () => {
         />
         <Section>
           <ContentList emptyState={<DashboardListingEmptyPromptMock />}>
-            <ContentListToolbar />
+            <ContentListToolbar>
+              <Filters>
+                <Filters.Tags />
+                <Filters.CreatedBy />
+                <TimeRestoreFilter />
+                <Filters.Sort />
+              </Filters>
+            </ContentListToolbar>
             <ContentListTable title="Dashboards">
               <Column.Name showDescription showTags />
               <Column

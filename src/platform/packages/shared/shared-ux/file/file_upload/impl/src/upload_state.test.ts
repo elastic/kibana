@@ -212,9 +212,59 @@ describe('UploadState', () => {
           {
             file,
             status: 'idle',
-            error: new Error('File is too large. Maximum size is 1,000 bytes.'),
+            error: new Error('File is too large. Maximum size is 1000.00 B.'),
           },
         ],
+      });
+    });
+  });
+
+  it('clears a previous error when a valid file is picked', () => {
+    const tooLarge = { name: 'big', size: 1001 } as File;
+    const valid = { name: 'small', size: 1, type: 'text/plain' } as File;
+
+    uploadState.setFiles([tooLarge]);
+    expect(uploadState.error$.getValue()).toEqual(
+      new Error('File is too large. Maximum size is 1000.00 B.')
+    );
+
+    // re-picking a valid file must not retain the previous oversize error
+    uploadState.setFiles([valid]);
+    expect(uploadState.error$.getValue()).toBeUndefined();
+  });
+
+  it('supports a per-file callback for maxSizeBytes', () => {
+    const callbackUploadState = new UploadState(
+      {
+        id: 'test',
+        http: {},
+        maxSizeBytes: (file) => (file.type === 'image/png' ? 500 : 5000),
+      } as FileKindBrowser,
+      filesClient,
+      {},
+      imageMetadataFactory
+    );
+
+    getTestScheduler().run(({ expectObservable }) => {
+      const image = { name: 'image', size: 1000, type: 'image/png' } as File;
+      callbackUploadState.setFiles([image]);
+      expectObservable(callbackUploadState.files$).toBe('a', {
+        a: [
+          {
+            file: image,
+            status: 'idle',
+            error: new Error('File is too large. Maximum size is 500.00 B.'),
+          },
+        ],
+      });
+    });
+
+    getTestScheduler().run(({ expectObservable }) => {
+      // same size passes under the larger non-image limit
+      const doc = { name: 'doc', size: 1000, type: 'text/plain' } as File;
+      callbackUploadState.setFiles([doc]);
+      expectObservable(callbackUploadState.files$).toBe('a', {
+        a: [{ file: doc, status: 'idle' }],
       });
     });
   });
@@ -239,6 +289,45 @@ describe('UploadState', () => {
         ],
       });
     });
+  });
+
+  it('omits the allowed mime type list when listAllowedMimeTypesInError is false', () => {
+    const conciseUploadState = new UploadState(
+      {
+        id: 'test',
+        http: {},
+        allowedMimeTypes: ['text/plain', 'image/png'],
+        listAllowedMimeTypesInError: false,
+      } as FileKindBrowser,
+      filesClient,
+      {},
+      imageMetadataFactory
+    );
+
+    getTestScheduler().run(({ expectObservable }) => {
+      const file = { name: 'script.sh', size: 123, type: 'text/x-sh' } as File;
+      conciseUploadState.setFiles([file]);
+      expectObservable(conciseUploadState.files$).toBe('a', {
+        a: [
+          {
+            file,
+            status: 'idle',
+            error: new Error('File type "text/x-sh" is not supported.'),
+          },
+        ],
+      });
+    });
+  });
+
+  it('tags validation errors with a stable code', () => {
+    uploadState.setFiles([{ name: 'empty', size: 0 } as File]);
+    expect((uploadState.error$.getValue() as { code?: string }).code).toBe('fileEmpty');
+
+    uploadState.setFiles([{ name: 'big', size: 1001 } as File]);
+    expect((uploadState.error$.getValue() as { code?: string }).code).toBe('fileTooLarge');
+
+    uploadState.setFiles([{ name: 'script.sh', size: 1, type: 'text/x-sh' } as File]);
+    expect((uploadState.error$.getValue() as { code?: string }).code).toBe('mimeTypeNotSupported');
   });
 
   it('option "allowRepeatedUploads" calls clear after upload is done', () => {

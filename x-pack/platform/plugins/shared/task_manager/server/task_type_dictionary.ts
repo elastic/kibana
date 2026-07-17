@@ -33,12 +33,19 @@ export const REMOVED_TYPES: string[] = [
 
   // Legacy SML crawler task types
   'agent_builder:sml_crawler',
+  'agent_context_layer:sml_crawler',
 
   // removed in https://github.com/elastic/kibana/pull/250218
   'logs-data-telemetry',
 
   // one-off cleanup task removed after completing in its target project (added in #273285)
   'alerting:clear_stale_uiam_api_keys',
+
+  // Legacy streams KI task types removed after migrating onboarding, feature
+  // identification, and queries generation to managed workflows (https://github.com/elastic/kibana/pull/271468)
+  'streams_onboarding',
+  'streams_features_identification',
+  'streams_significant_events_queries_generation',
 ];
 
 export const SHARED_CONCURRENCY_TASKS: string[][] = [

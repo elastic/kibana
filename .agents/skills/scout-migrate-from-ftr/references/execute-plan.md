@@ -45,13 +45,13 @@ For each FTR file the plan marked as **API test**, **UI test**, or **unit test (
 
 - UI: `<module-root>/test/scout*/ui/{tests,parallel_tests}/**/*.spec.ts`
 - API: `<module-root>/test/scout*/api/{tests,parallel_tests}/**/*.spec.ts`
-- UI: use `ui/parallel_tests/` + `spaceTest` when the flow can be space-isolated (state is scoped to a Kibana space) and should run in parallel; otherwise use `ui/tests/` + `test`. See [Scout parallelism](../../../../docs/extend/scout/parallelism.md) for details on when to choose parallel vs sequential.
+- UI: use `ui/parallel_tests/` + `spaceTest` when the flow can be space-isolated (state is scoped to a Kibana space) and should run in parallel; otherwise use `ui/tests/` + `test`. See [Scout parallelism](../../../../docs/extend/testing/parallelism.md) for details on when to choose parallel vs sequential.
 - API: default to `api/tests/` (sequential). Use `api/parallel_tests/` + `parallel.playwright.config.ts` only when the test is safe to run in parallel (no shared state) and you need the speedup.
 - Parallel UI: avoid hardcoded saved object IDs (they can differ per space) and make names unique when needed (often suffix with `scoutSpace.id`).
 
 #### Tags when the FTR suite was "deployment agnostic"
 
-For available tag helpers and their meaning, see [Deployment tags](../../../../docs/extend/scout/deployment-tags.md).
+For available tag helpers and their meaning, see [Deployment tags](../../../../docs/extend/testing/deployment-tags.md).
 
 FTR **deployment-agnostic** configs often load the same files under both stateful and serverless. In Scout, **do not assume** `tags.deploymentAgnostic` is the right default for every migrated spec. Instead:
 
@@ -115,7 +115,7 @@ test('create and edit entity', async () => {
 
 #### Scout API auth (`cookieHeader` vs API key)
 
-For general Scout API auth patterns (`requestAuth`, `samlAuth`, common headers, code examples), see [Authentication in Scout API tests](../../../../docs/extend/scout/api-auth.md).
+For general Scout API auth patterns (`requestAuth`, `samlAuth`, common headers, code examples), see [Authentication in Scout API tests](../../../../docs/extend/testing/api-auth.md).
 
 **FTR mapping:** FTR `roleScopedSupertest` with `useCookieHeader: true` / `withInternalHeaders` maps to **`samlAuth`** + **`cookieHeader`** merged with common headers on `apiClient` requests. FTR `supertest` with API key auth maps to **`requestAuth.getApiKey(...)`** + **`apiKeyHeader`**.
 

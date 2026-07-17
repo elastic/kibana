@@ -54,6 +54,7 @@ import type { AgentExecutionService } from '@kbn/agent-builder-server/execution'
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
 import type { AttachmentServiceStart } from '../../attachments';
+import type { RendererServiceStart } from '../../renderers';
 import type { ModelProviderFactoryFn } from './model_provider';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import {
@@ -84,6 +85,7 @@ export interface CreateScopedRunnerDeps {
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
   attachmentsService: AttachmentServiceStart;
+  renderersService: RendererServiceStart;
   promptManager: PromptManager;
   stateManager: ConversationStateManager;
   trackingService?: TrackingService;
@@ -206,6 +208,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     request,
     defaultConnectorId,
     telemetryMetadata,
+    maxContentLength,
     conversation,
     nextInput,
     promptState,
@@ -215,6 +218,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     request: KibanaRequest;
     defaultConnectorId?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
+    maxContentLength?: number;
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
@@ -234,7 +238,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
 
-    const modelProvider = modelProviderFactory({ request, defaultConnectorId, telemetryMetadata });
+    const modelProvider = modelProviderFactory({
+      request,
+      defaultConnectorId,
+      telemetryMetadata,
+      maxContentLength,
+    });
 
     const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
 
@@ -309,6 +318,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         request,
         defaultConnectorId,
         telemetryMetadata,
+        maxContentLength,
         abortSignal,
         executionMode = AgentExecutionMode.conversation,
         ...otherParams
@@ -318,6 +328,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         request,
         defaultConnectorId,
         telemetryMetadata,
+        maxContentLength,
         conversation,
         nextInput,
         abortSignal,

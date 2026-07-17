@@ -24,12 +24,7 @@ import type { ESBoolQuery } from '../../../../../../common/typed_json';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
 import type { EntityURLStateResult } from '../hooks/use_entity_url_state';
-import {
-  ENTITY_FIELDS,
-  ENTITY_GROUPING_OPTIONS,
-  ENTITY_TYPE_FILTER,
-  LOCAL_STORAGE_GROUPING_KEY,
-} from '../constants';
+import { ENTITY_FIELDS, ENTITY_GROUPING_OPTIONS, ENTITY_TYPE_FILTER } from '../constants';
 import {
   type EntitiesGroupingAggregation,
   type EntitiesGroupingQuery,
@@ -147,7 +142,9 @@ export const buildResolutionGroupingQuery = ({
         },
         bucket_truncate: {
           bucket_sort: {
-            from: pageIndex * pageSize,
+            // the terms agg above never returns more than MAX_QUERY_SIZE buckets, so requesting
+            // an offset beyond that window would always come back empty
+            from: Math.min(pageIndex * pageSize, Math.max(MAX_QUERY_SIZE - pageSize, 0)),
             size: pageSize,
           },
         },
@@ -168,10 +165,20 @@ export const useEntityGrouping = ({
   state,
   groupFilters = [],
   selectedGroup,
+  tableId,
+  groupingId,
 }: {
   state: EntityURLStateResult;
   groupFilters?: Filter[];
   selectedGroup?: string;
+  /** Forwarded to `createGroupPanelRenderer` so resolution group flyouts open in the right scope. */
+  tableId: string;
+  /**
+   * Identifier used by `@kbn/grouping` to persist the active grouping
+   * selection. Required so independent mounts (e.g. the cases attachments
+   * accordion) pass their own and grouping state doesn't leak between tables.
+   */
+  groupingId: string;
 }) => {
   const { query, setUrlQuery, pageSize, pageIndex } = state;
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
@@ -202,7 +209,7 @@ export const useEntityGrouping = ({
   const initialGroupings = useMemo(
     () => ({
       groupById: {
-        [LOCAL_STORAGE_GROUPING_KEY]: {
+        [groupingId]: {
           activeGroups: hasResolutionLicense
             ? [ENTITY_GROUPING_OPTIONS.RESOLUTION]
             : [ENTITY_GROUPING_OPTIONS.NONE],
@@ -210,7 +217,7 @@ export const useEntityGrouping = ({
         },
       },
     }),
-    [defaultGroupingOptions, hasResolutionLicense]
+    [defaultGroupingOptions, hasResolutionLicense, groupingId]
   );
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
@@ -313,8 +320,8 @@ export const useEntityGrouping = ({
   const targetMetadata = useFetchTargetMetadata(targetEntityIds);
 
   const groupPanelRenderer = useMemo(
-    () => createGroupPanelRenderer(targetMetadata),
-    [targetMetadata]
+    () => createGroupPanelRenderer(targetMetadata, tableId),
+    [targetMetadata, tableId]
   );
 
   const groupStatsRenderer = useMemo(
@@ -332,7 +339,7 @@ export const useEntityGrouping = ({
     defaultGroupingOptions,
     initialGroupings,
     fields: dataViewIsLoading ? [] : dataView.fields,
-    groupingId: LOCAL_STORAGE_GROUPING_KEY,
+    groupingId,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     title: groupingTitle,
     onGroupChange: ({ groupByFields }) => {
