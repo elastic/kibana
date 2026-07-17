@@ -78,6 +78,70 @@ export const resolveV2Template = async (
   return definition;
 };
 
+export interface ResolvedV2Template {
+  definition: ParsedTemplateDefinition;
+  templateId: string;
+  templateVersion: number;
+}
+
+/**
+ * Resolves the latest enabled v2 template with a given identity `name` for an owner. Used to bridge
+ * a rule that still stores a legacy (v1) template key: the migration re-creates each v1 template as
+ * a v2 template of the same name, so a name match yields the migrated template. Returns null when no
+ * template matches (e.g. the migration has not run) so the caller can fall back to the legacy path.
+ *
+ * Name comparison is case-insensitive and trimmed to mirror the uniqueness rule enforced on template
+ * create/rename, which guarantees at most one latest template per (name, owner).
+ */
+export const resolveV2TemplateByName = async (
+  casesClient: CasesClient,
+  name: string,
+  owner: string,
+  logger: Logger
+): Promise<ResolvedV2Template | null> => {
+  const { templates } = await casesClient.templates.getAllTemplates({
+    page: 1,
+    perPage: 10000,
+    sortField: 'name',
+    sortOrder: 'asc',
+    search: '',
+    tags: [],
+    author: [],
+    owner: [owner],
+    isDeleted: false,
+    isEnabled: true,
+  });
+
+  const normalizedName = name.trim().toLocaleLowerCase();
+  const matched = templates.find(
+    (template) =>
+      template.owner === owner && template.name.trim().toLocaleLowerCase() === normalizedName
+  );
+
+  if (!matched) {
+    logger.warn(
+      `[CasesConnector][resolveV2TemplateByName] No migrated v2 template found for legacy template name "${name}" (owner "${owner}"). Falling back to the legacy template path.`,
+      { tags: ['case-connector:resolveV2TemplateByName'] }
+    );
+    return null;
+  }
+
+  const definition = parseTemplateDefinition(matched.definition);
+  if (!definition) {
+    logger.warn(
+      `[CasesConnector][resolveV2TemplateByName] Migrated v2 template "${matched.templateId}" (name "${name}") has an invalid definition. Falling back to the legacy template path.`,
+      { tags: ['case-connector:resolveV2TemplateByName'] }
+    );
+    return null;
+  }
+
+  return {
+    definition,
+    templateId: matched.templateId,
+    templateVersion: matched.templateVersion,
+  };
+};
+
 /**
  * Fetches the owner's field-definition library and resolves all template fields
  * (both inline and `$ref` entries) into a flat `extended_fields` map of defaults.

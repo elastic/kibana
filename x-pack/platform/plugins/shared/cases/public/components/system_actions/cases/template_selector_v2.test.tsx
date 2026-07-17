@@ -73,6 +73,35 @@ describe('TemplateSelectorV2', () => {
     expect(onChange).toHaveBeenCalledWith({ templateId: null, templateVersion: null });
   });
 
+  it('displays the selected v2 template by templateId', async () => {
+    render(<TemplateSelectorV2 owner="securitySolution" templateId="tmpl-2" onChange={onChange} />);
+    expect(await screen.findByRole('combobox')).toHaveValue('Template Two');
+  });
+
+  it('displays the migrated v2 template when the rule still stores a legacy template key', async () => {
+    render(
+      <TemplateSelectorV2
+        owner="securitySolution"
+        templateId="legacy-key-1"
+        legacyTemplates={[{ key: 'legacy-key-1', name: 'Template One' }]}
+        onChange={onChange}
+      />
+    );
+    expect(await screen.findByRole('combobox')).toHaveValue('Template One');
+  });
+
+  it('shows no selection when a stored legacy key has no migrated template', async () => {
+    render(
+      <TemplateSelectorV2
+        owner="securitySolution"
+        templateId="legacy-key-unmapped"
+        legacyTemplates={[{ key: 'legacy-key-unmapped', name: 'Nonexistent Template' }]}
+        onChange={onChange}
+      />
+    );
+    expect(await screen.findByRole('combobox')).toHaveValue('No template selected');
+  });
+
   it('is disabled when isDisabled=true', async () => {
     render(
       <TemplateSelectorV2

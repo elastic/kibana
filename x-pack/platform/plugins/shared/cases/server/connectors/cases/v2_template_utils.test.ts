@@ -12,6 +12,7 @@ import {
   buildExtendedFieldsFromTemplate,
   parseTemplateDefinition,
   resolveV2Template,
+  resolveV2TemplateByName,
 } from './v2_template_utils';
 import type { CasesClient } from '../../client';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
@@ -161,6 +162,107 @@ describe('resolveV2Template', () => {
       expect.stringContaining('invalid definition'),
       expect.any(Object)
     );
+  });
+});
+
+describe('resolveV2TemplateByName', () => {
+  const makeClientWithTemplates = (
+    templates: Array<Partial<Template> & { definition: string }>
+  ): CasesClient =>
+    ({
+      templates: {
+        getAllTemplates: jest.fn().mockResolvedValue({
+          templates: templates.map((t) => ({
+            templateId: 'tmpl-id',
+            name: 'Test template',
+            owner: 'securitySolution',
+            templateVersion: 1,
+            fieldSearchMatches: false,
+            ...t,
+          })),
+          page: 1,
+          perPage: 10000,
+          total: templates.length,
+        }),
+      },
+    } as unknown as CasesClient);
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('resolves the migrated template by name (case-insensitive) and returns id + version', async () => {
+    const client = makeClientWithTemplates([
+      { templateId: 'v2-id', name: 'TestTemplateOne', templateVersion: 3, definition: childYaml },
+    ]);
+
+    const result = await resolveV2TemplateByName(
+      client,
+      'testtemplateone',
+      'securitySolution',
+      mockLogger
+    );
+
+    expect(result).not.toBeNull();
+    expect(result?.templateId).toBe('v2-id');
+    expect(result?.templateVersion).toBe(3);
+    expect(result?.definition.name).toBe('Child Template');
+  });
+
+  it('returns null and logs when no template matches the name', async () => {
+    const client = makeClientWithTemplates([
+      { templateId: 'v2-id', name: 'Some Other Template', definition: childYaml },
+    ]);
+
+    const result = await resolveV2TemplateByName(
+      client,
+      'TestTemplateOne',
+      'securitySolution',
+      mockLogger
+    );
+
+    expect(result).toBeNull();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('No migrated v2 template found'),
+      expect.any(Object)
+    );
+  });
+
+  it('returns null and logs when the matched template has an invalid definition', async () => {
+    const client = makeClientWithTemplates([
+      { templateId: 'v2-id', name: 'TestTemplateOne', definition: ': invalid yaml [' },
+    ]);
+
+    const result = await resolveV2TemplateByName(
+      client,
+      'TestTemplateOne',
+      'securitySolution',
+      mockLogger
+    );
+
+    expect(result).toBeNull();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('invalid definition'),
+      expect.any(Object)
+    );
+  });
+
+  it('does not match a template with the same name but a different owner', async () => {
+    const client = makeClientWithTemplates([
+      {
+        templateId: 'v2-id',
+        name: 'TestTemplateOne',
+        owner: 'observability',
+        definition: childYaml,
+      },
+    ]);
+
+    const result = await resolveV2TemplateByName(
+      client,
+      'TestTemplateOne',
+      'securitySolution',
+      mockLogger
+    );
+
+    expect(result).toBeNull();
   });
 });
 
