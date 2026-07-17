@@ -71,7 +71,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(enabledFeatureFlags)}`,
 
         // FIXME:PT REMOVE PRIOR TO COMMIT TO MAIN
-        `logging.loggers=${JSON.stringify([{ name: 'plugins.securitySolution', level: 'debug' }])}`,
+        `--logging.loggers=${JSON.stringify([
+          { name: 'plugins.securitySolution', level: 'debug' },
+        ])}`,
       ],
     },
     testRunner: DefendWorkflowsCypressCliTestRunner,
