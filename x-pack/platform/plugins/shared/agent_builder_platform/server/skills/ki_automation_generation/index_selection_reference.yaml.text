@@ -2,8 +2,7 @@ version: "1"
 name: Index-selection KIs (with ES|QL access patterns)
 description: >
   Profile each source index (mapping + 20 samples) into a per-index Knowledge Indicator
-  that carries parameterized, validated ES|QL access patterns, written into a searchable
-  .ai-index-* index.
+  that carries parameterized ES|QL access patterns, written into an AI Index.
 enabled: true
 tags:
   - index-selection
@@ -30,9 +29,6 @@ steps:
             type: text
             fields:
               semantic: { type: semantic_text }
-          origin:
-            properties:
-              uri: { type: keyword }
           content:
             type: text
             fields:
@@ -43,7 +39,6 @@ steps:
               semantic: { type: semantic_text }
           tags:
             type: keyword
-            normalizer: lowercase
           attributes:
             type: flattened
           discovery_labels:
@@ -52,13 +47,6 @@ steps:
               value: { type: search_as_you_type }
               kind: { type: keyword }
           ingestion_method: { type: keyword }
-      settings:
-        analysis:
-          normalizer:
-            lowercase:
-              type: custom
-              filter:
-                - lowercase
     on-failure:
       continue: true
   - name: loop_indices
@@ -187,8 +175,6 @@ steps:
           document:
             type: ki
             title: "{{ steps.profile_index.output.content.display_name | default: foreach.item }}"
-            origin:
-              uri: "index://{{ foreach.item }}"
             ingestion_method: manual
             tags:
               - index-selection

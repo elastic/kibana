@@ -8,10 +8,9 @@ You produce Kibana Workflows that build KIs; you do not answer the underlying da
 
 ## What a KI is
 
-A **Knowledge Indicator (KI)** is a structured fact stored in a searchable `.ai-index-*` index or datastream.
-If the use case calls for KIs to be timeseries, use `.ai-index-ds-*`.
-Otherwise, use `.ai-index-idx-*`.
-See the index templates for both for the above prefixes for more details.
+A **Knowledge Indicator (KI)** is a structured fact stored in a searchable AI Index index or datastream.
+Use `.ai-index-ds-*` for timeseries KIs, `.ai-index-idx-*` otherwise.
+See the index templates for those prefixes for field details.
 
 AI agents retrieve KIs at query time instead of scanning raw data — reducing token cost and
 improving answer consistency.
@@ -210,7 +209,7 @@ same sequential workflow.
 **For larger scale**: switch to a **parent/child fan-out pair** using `workflow.executeAsync`.
 
 - **Child workflow** (`<strategy>_process_item`): processes one item's identifier, does the
-  per-item work (fetch → `ai.prompt` → `contextEngine.addEntry`), and finishes.
+  per-item work (fetch → `ai.prompt` → `elasticsearch.index`), and finishes.
 - **Parent workflow** (`<strategy>_dispatch`): queries the full corpus (with any agreed filter,
   pagination, etc), loops with a `foreach` whose body calls `workflow.executeAsync` with
   the child's workflow ID and the item as input — without waiting. After dispatching, polls for
@@ -225,7 +224,7 @@ pagination pattern.
 
 ## KI document shape
 
-The `.ai-index-*` schema has these base fields (all required unless noted):
+The AI Index schema has these base fields (all required unless noted):
 
 | Field | Type | Purpose |
 |---|---|---|
@@ -235,7 +234,6 @@ The `.ai-index-*` schema has these base fields (all required unless noted):
 | `content` | text + semantic | Free-text for semantic retrieval: purpose, questions answered, access patterns |
 | `tags` | keyword[] | Filter facets |
 | `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on |
-| `origin.uri` | keyword | Source URI — `index://<name>`, `connector://<record_id>`, etc |
 
 **Rule**: structured facts belong in both `content` and `attributes`, to facilitate exact-match and filter queries, as well as semantic searches.
 
@@ -249,8 +247,6 @@ Use it for strategy-specific structured output: status, severity, themes, produc
 id:          <index name or connector_id>
 type:        <type>
 title:       <display_name>
-origin:
-  uri:       "index://<index name>"    # or "connector://<record_id>"
 tags:        [...]
 attributes:
   # Repeat structured values here for exact-match / filter queries.
@@ -291,7 +287,6 @@ Before presenting any workflow to the user:
 - [ ] Steps ordered logically within foreach: reads before AI step
 - [ ] Pilot LIMIT is set to 1–3 outputs
 - [ ] Structured, filterable fields (status, severity, themes, entity names, etc.) appear in both `attributes` (for exact/filter queries) and as prose in `content` (for semantic retrieval)
-- [ ] `origin.uri` is set to a stable URI pointing back to the source (`index://<name>` `connector://<record_id>`, etc)
 - [ ] `id` on `elasticsearch.index` is set to a stable unique value for idempotent upserts
 - [ ] `triggers: [{type: manual}]`
 - [ ] Corpus filter (Phase 3) is applied
@@ -315,7 +310,7 @@ An `elasticsearch.esql.query` pulling docs with id, title, and body fields;
 truncate body to 12,000 chars with `EVAL body = SUBSTRING(body_field, 1, 12000)`. A `foreach`
 over the results. Per iteration: `ai.prompt` producing title, summary, answers_questions,
 key_entities, topics, and access_patterns. Then `elasticsearch.index` with `id` set to
-`<index>/<doc_id>` (stable, for idempotent upserts) and `origin.uri` set to `index://<index>`.
+`<index>/<doc_id>` (stable, for idempotent upserts).
 Put structured fields (key_entities, topics, any domain-specific categorical
 values like status, severity, product_mentions) into `attributes`; put summary, answers_questions,
 and access_patterns into `content`.
@@ -331,7 +326,7 @@ Put filterable fields (severity, error_type, affected_component) into `attribute
 An `elasticsearch.esql.query` pulling docs, full text truncated to 24,000 chars. An
 `ai.prompt` extracting a list of discrete atomic claims: `{ facts: [{ claim, entities, topics }] }`.
 A `foreach` over the facts. Per iteration: `elasticsearch.index` with `id` set to
-`<index>/<doc_id>-fact-<n>` and `origin.uri` set to `index://<index>`.
+`<index>/<doc_id>-fact-<n>`.
 Put entities and topics into `attributes` on each fact KI.
 
 **Cumulative / Wiki-style:**
@@ -339,8 +334,7 @@ A top-level `foreach` over a hardcoded list of 1–2 entity IDs (pilot). Per ent
 `elasticsearch.esql.query` finding all documents referencing that entity (`LIMIT 10` for pilot).
 An `ai.prompt` synthesizing them into an entity profile: entity_name, summary, key_facts,
 open_questions, related_indices, and access_patterns. `elasticsearch.index` with `id` set to
-the entity ID and `origin.uri` set to `index://<primary_index>` — re-runs upsert to enrich the
-same KI over time. Put entity_name, entity_type, and related_indices into `attributes`.
+the entity ID — re-runs upsert to enrich the same KI over time. Put entity_name, entity_type, and related_indices into `attributes`.
 
 **Connector:**
 Call `platform.workflows.get_step_definitions` with the connector type to get correct step params.
