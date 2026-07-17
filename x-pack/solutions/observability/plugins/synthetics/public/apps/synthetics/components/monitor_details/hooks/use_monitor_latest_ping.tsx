@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import {
   ConfigKey,
-  isRemoteSyntheticsMonitor,
+  isExternalSyntheticsMonitor,
   type Ping,
 } from '../../../../../../common/runtime_types';
 import { useGetUrlParams } from '../../../hooks';
@@ -46,11 +46,12 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
 
   const latestPingId = latestPing?.monitor.id;
 
-  // CUSTOM_HEARTBEAT_ID is the project-monitor override on the local SO; remote
-  // monitors don't expose it (their `monitor.id` already equals the ping's
-  // monitor.id), so the equality check above is sufficient for remote.
+  // CUSTOM_HEARTBEAT_ID is the project-monitor override on the local SO; external
+  // monitors (remote CCS and local Heartbeat/Agent) don't expose it — their
+  // `monitor.id` already equals the ping's monitor.id — so the equality check
+  // above is sufficient for them.
   const customHeartbeatId =
-    monitor && !isRemoteSyntheticsMonitor(monitor)
+    monitor && !isExternalSyntheticsMonitor(monitor)
       ? monitor[ConfigKey.CUSTOM_HEARTBEAT_ID]
       : undefined;
   const isIdSame = latestPingId === monitorId || latestPingId === customHeartbeatId;
