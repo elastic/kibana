@@ -17,7 +17,6 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiButton,
-  EuiIcon,
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -489,8 +488,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 iconType="warning"
               >
                 <p>
-                  <EuiIcon color="warning" type="warning" aria-hidden={true} />
-                  &nbsp;
                   {getRuleStatusWarningReasonText()}
                   &nbsp;
                   {rule.executionStatus.warning?.message}
@@ -510,8 +507,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 size="s"
               >
                 <p>
-                  <EuiIcon color="warning" type="warning" aria-hidden={true} />
-                  &nbsp;
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerTitle"
                     defaultMessage="There is an issue with one of the connectors associated with this rule."
