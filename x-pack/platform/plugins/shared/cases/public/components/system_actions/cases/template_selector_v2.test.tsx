@@ -90,6 +90,30 @@ describe('TemplateSelectorV2', () => {
     expect(await screen.findByRole('combobox')).toHaveValue('Template One');
   });
 
+  it('bridges a stored legacy key to the migrated template by its recorded legacyKey', async () => {
+    // The migrated template carries the originating v1 key; its name may even differ from the v1
+    // configure name. legacyKey must still resolve it (this is what disambiguates v1 duplicate names).
+    mockUseGetTemplates.mockReturnValue({
+      data: {
+        templates: [
+          { templateId: 'v2-x', name: 'Renamed In V2', templateVersion: 5, legacyKey: 'old-key' },
+        ],
+      },
+      isLoading: false,
+    });
+
+    render(
+      <TemplateSelectorV2
+        owner="securitySolution"
+        templateId="old-key"
+        legacyTemplates={[{ key: 'old-key', name: 'Original V1 Name' }]}
+        onChange={onChange}
+      />
+    );
+
+    expect(await screen.findByRole('combobox')).toHaveValue('Renamed In V2');
+  });
+
   it('bridges a legacy key whose name differs only by case/whitespace from the migrated template', async () => {
     render(
       <TemplateSelectorV2

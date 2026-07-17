@@ -58,7 +58,7 @@ import { toStringArray } from '../../../common/utils/attachments/string_utils';
 import {
   buildExtendedFieldsFromTemplate,
   resolveV2Template,
-  resolveV2TemplateByName,
+  resolveV2TemplateForLegacyKey,
 } from './v2_template_utils';
 import type { ParsedTemplateDefinition } from './v2_template_utils';
 
@@ -1450,19 +1450,17 @@ export class CasesConnectorExecutor {
     }
 
     // A rule authored before the v2 migration stores the legacy (v1) template key with no version.
-    // Bridge it to the migrated v2 template (same name) so newly created cases get `extended_fields`
-    // and a v2 template reference. When the key cannot be bridged (no matching configure template or
-    // the migration has not run) we return null and the caller falls back to the legacy path.
+    // Bridge it to the migrated v2 template so newly created cases get `extended_fields` and a v2
+    // template reference. The migration records the originating key as `legacyKey`, so this resolves
+    // by key (name is a fallback for pre-`legacyKey` migrations). When the key cannot be bridged
+    // (the migration has not run) we return null and the caller falls back to the legacy path.
     const legacyName = templatesForOwner?.find(
       (template) => template.key === params.templateId
     )?.name;
 
-    if (!legacyName) {
-      return { v2Template: null, extendedFields: undefined, templateRef: undefined };
-    }
-
-    const resolved = await resolveV2TemplateByName(
+    const resolved = await resolveV2TemplateForLegacyKey(
       this.casesClient,
+      params.templateId,
       legacyName,
       params.owner,
       this.logger

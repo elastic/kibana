@@ -12,7 +12,7 @@ import {
   buildExtendedFieldsFromTemplate,
   parseTemplateDefinition,
   resolveV2Template,
-  resolveV2TemplateByName,
+  resolveV2TemplateForLegacyKey,
 } from './v2_template_utils';
 import type { CasesClient } from '../../client';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
@@ -165,7 +165,7 @@ describe('resolveV2Template', () => {
   });
 });
 
-describe('resolveV2TemplateByName', () => {
+describe('resolveV2TemplateForLegacyKey', () => {
   const makeClientWithTemplates = (
     templates: Array<Partial<Template> & { definition: string }>
   ): CasesClient =>
@@ -189,14 +189,21 @@ describe('resolveV2TemplateByName', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('resolves the migrated template by name (case-insensitive) and returns id + version', async () => {
+  it('resolves by legacyKey (exact v1 lineage) and returns id + version', async () => {
     const client = makeClientWithTemplates([
-      { templateId: 'v2-id', name: 'TestTemplateOne', templateVersion: 3, definition: childYaml },
+      {
+        templateId: 'v2-id',
+        name: 'TestTemplateOne',
+        legacyKey: 'v1-key-1',
+        templateVersion: 3,
+        definition: childYaml,
+      },
     ]);
 
-    const result = await resolveV2TemplateByName(
+    const result = await resolveV2TemplateForLegacyKey(
       client,
-      'testtemplateone',
+      'v1-key-1',
+      'TestTemplateOne',
       'securitySolution',
       mockLogger
     );
@@ -207,13 +214,48 @@ describe('resolveV2TemplateByName', () => {
     expect(result?.definition.name).toBe('Child Template');
   });
 
-  it('returns null and logs when no template matches the name', async () => {
+  it('prefers legacyKey over name to disambiguate v1 templates that shared a name', async () => {
+    const client = makeClientWithTemplates([
+      { templateId: 'v2-id-a', name: 'Shared Name', legacyKey: 'v1-key-a', definition: childYaml },
+      { templateId: 'v2-id-b', name: 'Shared Name', legacyKey: 'v1-key-b', definition: childYaml },
+    ]);
+
+    const result = await resolveV2TemplateForLegacyKey(
+      client,
+      'v1-key-b',
+      'Shared Name',
+      'securitySolution',
+      mockLogger
+    );
+
+    expect(result?.templateId).toBe('v2-id-b');
+  });
+
+  it('falls back to a normalized name match when no legacyKey is recorded', async () => {
+    const client = makeClientWithTemplates([
+      { templateId: 'v2-id', name: 'TestTemplateOne', templateVersion: 2, definition: childYaml },
+    ]);
+
+    const result = await resolveV2TemplateForLegacyKey(
+      client,
+      'v1-key-unknown',
+      '  testtemplateone  ',
+      'securitySolution',
+      mockLogger
+    );
+
+    expect(result?.templateId).toBe('v2-id');
+    expect(result?.templateVersion).toBe(2);
+  });
+
+  it('returns null and logs when neither the key nor the name matches', async () => {
     const client = makeClientWithTemplates([
       { templateId: 'v2-id', name: 'Some Other Template', definition: childYaml },
     ]);
 
-    const result = await resolveV2TemplateByName(
+    const result = await resolveV2TemplateForLegacyKey(
       client,
+      'v1-key-1',
       'TestTemplateOne',
       'securitySolution',
       mockLogger
@@ -228,11 +270,17 @@ describe('resolveV2TemplateByName', () => {
 
   it('returns null and logs when the matched template has an invalid definition', async () => {
     const client = makeClientWithTemplates([
-      { templateId: 'v2-id', name: 'TestTemplateOne', definition: ': invalid yaml [' },
+      {
+        templateId: 'v2-id',
+        name: 'TestTemplateOne',
+        legacyKey: 'v1-key-1',
+        definition: ': invalid yaml [',
+      },
     ]);
 
-    const result = await resolveV2TemplateByName(
+    const result = await resolveV2TemplateForLegacyKey(
       client,
+      'v1-key-1',
       'TestTemplateOne',
       'securitySolution',
       mockLogger
@@ -245,18 +293,20 @@ describe('resolveV2TemplateByName', () => {
     );
   });
 
-  it('does not match a template with the same name but a different owner', async () => {
+  it('does not match a template with the same legacyKey but a different owner', async () => {
     const client = makeClientWithTemplates([
       {
         templateId: 'v2-id',
         name: 'TestTemplateOne',
+        legacyKey: 'v1-key-1',
         owner: 'observability',
         definition: childYaml,
       },
     ]);
 
-    const result = await resolveV2TemplateByName(
+    const result = await resolveV2TemplateForLegacyKey(
       client,
+      'v1-key-1',
       'TestTemplateOne',
       'securitySolution',
       mockLogger

@@ -74,9 +74,9 @@ const TemplateSelectorV2Component: React.FC<Props> = ({
   );
 
   // A rule authored before the v2 migration stores the legacy template `key`, which never matches a
-  // v2 `templateId`. Bridge it to the migrated template (same name) so it still displays. The stored
-  // value stays the legacy key until the user actively picks a template (the connector resolves it
-  // at runtime), preserving the deprecated v1 path until it is removed.
+  // v2 `templateId`. Bridge it to the migrated template so it still displays. The stored value stays
+  // the legacy key until the user actively picks a template (the connector resolves it at runtime),
+  // preserving the deprecated v1 path until it is removed.
   const effectiveTemplateId = useMemo(() => {
     if (!templateId) {
       return null;
@@ -85,13 +85,17 @@ const TemplateSelectorV2Component: React.FC<Props> = ({
     if (v2Templates.some((template) => template.templateId === templateId)) {
       return templateId;
     }
+    // Prefer the exact v1 lineage recorded by the migration (`legacyKey`). v1 keyed identity on
+    // `key`, not name, so this disambiguates v1 templates that shared a name — and mirrors the
+    // server-side connector bridge (`resolveV2TemplateForLegacyKey`).
+    const byLegacyKey = v2Templates.find((template) => template.legacyKey === templateId);
+    if (byLegacyKey) {
+      return byLegacyKey.templateId;
+    }
+    // Fallback for environments migrated before `legacyKey` was recorded: match by normalized name
+    // (case/whitespace-insensitive, mirroring the template-name uniqueness rule).
     const legacyName = legacyTemplates?.find((template) => template.key === templateId)?.name;
     if (legacyName) {
-      // Normalize case/whitespace to mirror the server-side bridge (`resolveV2TemplateByName`) and
-      // the template-name uniqueness rule, so the displayed selection stays consistent with the
-      // template the connector resolves at runtime. Both paths read the same find endpoint (sorted
-      // by name, then templateId), so `find` picks the same template even when v1 duplicate names
-      // produced more than one migrated template sharing that name.
       const normalizedLegacyName = legacyName.trim().toLocaleLowerCase();
       return (
         v2Templates.find(
