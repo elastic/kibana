@@ -11,10 +11,6 @@
  * ES|QL saved-search column persistence: initial and custom columns for both
  * non-transformational and transformational commands are saved, restored on
  * reload, and restored again when switching between saved searches.
- *
- * This is a single long journey (rather than several independent tests)
- * because the "switch between saved searches" step depends on all four
- * searches created earlier in the flow.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -27,11 +23,9 @@ const SAVED_SEARCH_TRANSFORMATIONAL_INITIAL_COLUMNS = 'transformationalInitialCo
 const SAVED_SEARCH_TRANSFORMATIONAL_CUSTOM_COLUMNS = 'transformationalCustomColumns';
 
 spaceTest.describe(
-  'Discover ES|QL columns - saved searches',
+  'Discover ES|QL columns - saved searches / discover sessions',
   { tag: '@local-stateful-classic' },
   () => {
-    spaceTest.use({ viewport: { width: 1600, height: 1200 } });
-
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
@@ -40,8 +34,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.discover.goto({ queryMode: 'classic' });
-      await pageObjects.discover.selectTextBaseLang();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
       await pageObjects.discover.waitUntilTabIsLoaded();
     });
 

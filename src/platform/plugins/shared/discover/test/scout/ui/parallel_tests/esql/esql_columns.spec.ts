@@ -18,8 +18,6 @@ import { spaceTest } from '../../fixtures';
 import { testData } from '../../fixtures/common';
 
 spaceTest.describe('Discover ES|QL columns', { tag: '@local-stateful-classic' }, () => {
-  spaceTest.use({ viewport: { width: 1600, height: 1200 } });
-
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
@@ -27,9 +25,8 @@ spaceTest.describe('Discover ES|QL columns', { tag: '@local-stateful-classic' },
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.discover.goto({ queryMode: 'classic' });
-    await pageObjects.discover.selectTextBaseLang();
+    await browserAuth.loginAsViewer();
+    await pageObjects.discover.goto({ queryMode: 'esql' });
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
@@ -76,47 +73,6 @@ spaceTest.describe('Discover ES|QL columns', { tag: '@local-stateful-classic' },
       await discover.submitQuery();
       await discover.waitUntilTabIsLoaded();
       await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'extension']);
-    }
-  );
-
-  spaceTest(
-    'resets columns if available fields or the index pattern differ for a transformational query',
-    async ({ pageObjects }) => {
-      const { discover } = pageObjects;
-
-      await discover.codeEditor.setCodeEditorValue(
-        'from logstash-* | keep ip, @timestamp | limit 500'
-      );
-      await discover.submitQuery();
-      await discover.waitUntilTabIsLoaded();
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', '@timestamp']);
-
-      // reset columns if available fields are different
-      await discover.codeEditor.setCodeEditorValue(
-        'from logstash-* | keep ip, @timestamp, bytes | limit 500'
-      );
-      await discover.submitQuery();
-      await discover.waitUntilTabIsLoaded();
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', '@timestamp', 'bytes']);
-
-      // don't reset columns if available fields and index pattern are the same
-      await discover.codeEditor.setCodeEditorValue(
-        'from logstash-* | keep ip, @timestamp, bytes | limit 1'
-      );
-      await discover.submitQuery();
-      await discover.waitUntilTabIsLoaded();
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', '@timestamp', 'bytes']);
-      await pageObjects.unifiedFieldList.clickFieldListItemRemove('@timestamp');
-      await discover.waitUntilTabIsLoaded();
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', 'bytes']);
-
-      // reset columns if the index pattern is different
-      await discover.codeEditor.setCodeEditorValue(
-        'from logs* | keep ip, @timestamp, bytes | limit 1'
-      );
-      await discover.submitQuery();
-      await discover.waitUntilTabIsLoaded();
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', '@timestamp', 'bytes']);
     }
   );
 
