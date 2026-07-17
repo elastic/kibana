@@ -859,6 +859,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Non-default value of the scheduled Significant Events detection interval (minutes).',
     },
   },
+  'observability:streamsSigEventsScheduledDiscoveryTargetCoverageMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events target coverage window (minutes).',
+    },
+  },
   'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': {
     type: 'long',
     _meta: {
