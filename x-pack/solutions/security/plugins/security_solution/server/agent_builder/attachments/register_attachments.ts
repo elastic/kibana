@@ -17,6 +17,7 @@ import { createEntityAnalyticsDashboardAttachmentType } from './entity_analytics
 import { createSiemReadinessAttachmentType } from './siem_readiness';
 import { createRulePreviewAttachmentType, getRulePreviewAlertCount } from './rule_preview';
 import { ALL_ATTACHMENT_TYPES as THREAT_INTELLIGENCE_ATTACHMENT_TYPES } from './threat_intelligence_attachment_types';
+import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 /**
  * Registers all security agent builder attachments with the agentBuilder plugin.
@@ -46,7 +47,9 @@ export const registerAttachments = async (
     );
   }
 
-  agentBuilder.attachments.registerType(createSiemReadinessAttachmentType());
+  if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
+    agentBuilder.attachments.registerType(createSiemReadinessAttachmentType());
+  }
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.attachments.registerType(
