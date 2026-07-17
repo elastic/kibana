@@ -251,8 +251,9 @@ export async function getUnmanagedElasticsearchAssetDetails({
  * is only safe when the caller has verified the parent is not itself a query
  * stream.
  *
- * Returns `undefined` when no real parent source can be resolved; callers
- * must then deny access (fail-closed).
+ * Returns `undefined` when no ingest ancestor can be resolved (e.g. a
+ * root-level query stream with no dotted parent). Callers should allow access
+ * in that case — there is no parent ingest index to authorize against.
  */
 export function getStreamPrivilegeSource(
   definition: Streams.all.Definition,

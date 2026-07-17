@@ -127,9 +127,10 @@ describe('getStreamPrivilegeSource', () => {
     });
   });
 
-  describe('returns undefined (fail-closed) when no parent can be derived', () => {
+  describe('returns undefined when no ingest ancestor can be derived', () => {
     it('returns undefined for a query stream with a single-segment name (no parent)', () => {
       // getParentId('orphan') returns undefined; the while loop never executes.
+      // Callers treat undefined as "no ingest parent to check" — allow access.
       const definition = makeQueryStream('orphan', 'logs.*');
       expect(getStreamPrivilegeSource(definition)).toBeUndefined();
     });

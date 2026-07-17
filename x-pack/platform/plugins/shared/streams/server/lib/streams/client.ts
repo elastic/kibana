@@ -652,15 +652,18 @@ export class StreamsClient {
       } else if (Streams.QueryStream.Definition.is(streamDefinition)) {
         const ancestorsByName = await this.getRawStreamDefinitionsByName(getAncestors(name));
         const privilegeSource = getStreamPrivilegeSource(streamDefinition, ancestorsByName);
-        const privileges = privilegeSource
-          ? await checkAccess({
-              name: privilegeSource,
-              esClient: this.dependencies.esClient,
-              isSecurityEnabled: this.dependencies.isSecurityEnabled,
-            })
-          : { read: false, write: false };
-        if (!privileges.read) {
-          throw new SecurityError(`Cannot read stream, insufficient privileges`);
+        // privilegeSource is undefined when the query stream has no ingest ancestor
+        // (e.g. a root-level query stream with a single-segment name). In that case
+        // there is no parent ingest index to authorize against, so no check is needed.
+        if (privilegeSource !== undefined) {
+          const privileges = await checkAccess({
+            name: privilegeSource,
+            esClient: this.dependencies.esClient,
+            isSecurityEnabled: this.dependencies.isSecurityEnabled,
+          });
+          if (!privileges.read) {
+            throw new SecurityError(`Cannot read stream, insufficient privileges`);
+          }
         }
       }
       return streamDefinition;
@@ -1053,7 +1056,10 @@ export class StreamsClient {
 
     return streams.filter((stream) => {
       const source = privilegeSourceByStream.get(stream.name);
-      return source != null && privileges[source]?.read === true;
+      // source is undefined when the query stream has no ingest ancestor (e.g. a
+      // root-level query stream). Allow those through — there is no parent ingest
+      // index to authorize against.
+      return source == null || privileges[source]?.read === true;
     });
   }
 
