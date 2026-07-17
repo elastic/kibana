@@ -265,7 +265,7 @@ const buildCaseInitialPayload = (
 export const buildFindingCardUiDefinition = (
   core: CoreStart
 ): AttachmentUIDefinition<FindingCardAttachment> => {
-  const handleDeploy = async (attachment: FindingCardAttachment) => {
+  const handleCreateRule = async (attachment: FindingCardAttachment) => {
     const data = attachment.data;
     try {
       const result = await deployEsqlRule(core.http, {
@@ -280,13 +280,13 @@ export const buildFindingCardUiDefinition = (
       });
       core.notifications.toasts.addSuccess({
         title: i18n.translate(
-          'xpack.securitySolution.threatIntelligence.attachments.findingCard.deployToastTitle',
+          'xpack.securitySolution.threatIntelligence.attachments.findingCard.createRuleToastTitle',
           {
             defaultMessage: 'Detection rule created (disabled)',
           }
         ),
         text: i18n.translate(
-          'xpack.securitySolution.threatIntelligence.attachments.findingCard.deployToastBody',
+          'xpack.securitySolution.threatIntelligence.attachments.findingCard.createRuleToastBody',
           {
             defaultMessage: 'Rule "{name}" is ready to review before enabling.',
             values: { name: result.ruleName },
@@ -300,7 +300,7 @@ export const buildFindingCardUiDefinition = (
     } catch (err) {
       core.notifications.toasts.addError(err as Error, {
         title: i18n.translate(
-          'xpack.securitySolution.threatIntelligence.attachments.findingCard.deployErrorTitle',
+          'xpack.securitySolution.threatIntelligence.attachments.findingCard.createRuleErrorTitle',
           { defaultMessage: 'Failed to create detection rule' }
         ),
       });
@@ -363,14 +363,14 @@ export const buildFindingCardUiDefinition = (
       return [
         {
           label: i18n.translate(
-            'xpack.securitySolution.threatIntelligence.attachments.findingCard.deployAction',
+            'xpack.securitySolution.threatIntelligence.attachments.findingCard.createRuleAction',
             {
-              defaultMessage: 'Deploy',
+              defaultMessage: 'Create rule',
             }
           ),
           type: ActionButtonType.PRIMARY,
           icon: 'plusInCircle',
-          handler: () => handleDeploy(attachment),
+          handler: () => handleCreateRule(attachment),
         },
         {
           label: i18n.translate(
