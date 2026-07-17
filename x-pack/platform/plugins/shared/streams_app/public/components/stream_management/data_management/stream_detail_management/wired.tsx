@@ -16,11 +16,11 @@ import { RedirectTo } from '../../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
+import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamOverview } from '../../../stream_detail_overview';
 import { Wrapper } from './wrapper';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { PendingRootDataStreamCallout } from './pending_root_data_stream_callout';
-import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { WiredStreamBadge } from '../../../stream_badges';
@@ -29,6 +29,10 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
 import { StreamDetailCanvas } from '../stream_detail_canvas';
+import {
+  ImportLifecycleFlyoutProvider,
+  useImportLifecycleFlyoutContext,
+} from '../stream_detail_lifecycle/import_from_stream';
 
 const wiredStreamManagementSubTabs = [
   'overview',
@@ -36,7 +40,6 @@ const wiredStreamManagementSubTabs = [
   'processing',
   'schema',
   'lifecycle',
-  'significantEvents',
   'dataQuality',
   'attachments',
   'canvas',
@@ -62,6 +65,23 @@ export function WiredStreamDetailManagement({
   definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  return (
+    <ImportLifecycleFlyoutProvider>
+      <WiredStreamDetailManagementContent
+        definition={definition}
+        refreshDefinition={refreshDefinition}
+      />
+    </ImportLifecycleFlyoutProvider>
+  );
+}
+
+function WiredStreamDetailManagementContent({
+  definition,
+  refreshDefinition,
+}: {
+  definition: Streams.WiredStream.GetResponse;
+  refreshDefinition: () => void;
+}) {
   const {
     core: { notifications },
     dependencies: {
@@ -73,13 +93,12 @@ export function WiredStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
-  const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
-    definition,
-    refreshDefinition,
-  });
+  const isProcessingEnabled = !definition.replicated;
   const {
-    features: { canvas },
+    features: { canvas, significantEvents },
+    isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
@@ -202,6 +221,8 @@ export function WiredStreamDetailManagement({
               share,
               router,
               timeRange: { rangeFrom, rangeTo },
+              onImportFromStream: importLifecycleFlyout?.open,
+              isImportFromStreamDisabled: importLifecycleFlyout?.isDisabled,
             }),
           },
         }
@@ -214,7 +235,21 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Partitioning',
       }),
     },
-    ...(processing ? { processing } : {}),
+    ...(isProcessingEnabled
+      ? {
+          processing: {
+            content: (
+              <StreamDetailEnrichment
+                definition={definition}
+                refreshDefinition={refreshDefinition}
+              />
+            ),
+            label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+              defaultMessage: 'Processing',
+            }),
+          },
+        }
+      : {}),
     schema: {
       content: (
         <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
@@ -261,7 +296,6 @@ export function WiredStreamDetailManagement({
           },
         }
       : {}),
-    ...otherTabs,
   };
 
   const redirectConfig = tabRedirects[tab];
@@ -274,11 +308,32 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  // Render a valid subtab only when its content is actually present. Tabs are hidden depending on
-  // context (e.g. canvas disabled, or significant events not rolled out via the
-  // streams.significantEventsAvailable feature flag); in that case fall through to the redirects
-  // below so we never render an empty body for a hidden tab.
+  if (tab === 'significantEvents') {
+    if (isPrivilegesLoading) {
+      return null;
+    }
+
+    if (significantEvents?.available) {
+      return (
+        <RedirectTo
+          path="/_discovery/{tab}"
+          params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
+        />
+      );
+    }
+
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
+    );
+  }
+
   if (isValidManagementSubTab(tab) && tabs[tab]?.content) {
+    if (tab === 'canvas' && !canvas.enabled) {
+      return (
+        <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
+      );
+    }
+
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
@@ -286,10 +341,6 @@ export function WiredStreamDetailManagement({
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
     );
-  }
-
-  if (isLoading) {
-    return null;
   }
 
   return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />;
