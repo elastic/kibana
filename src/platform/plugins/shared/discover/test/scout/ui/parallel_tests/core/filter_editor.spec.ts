@@ -97,7 +97,7 @@ spaceTest.describe('Discover filter editor', { tag: '@local-stateful-classic' },
 
     expect(await filterBar.getFilterEditorSelectedPhrases()).toStrictEqual(['jpg']);
 
-    await filterBar.ensureFieldEditorModalIsClosed();
+    await filterBar.closeFieldEditorModal();
   });
 
   spaceTest('should support filtering on nested fields', async ({ pageObjects }) => {

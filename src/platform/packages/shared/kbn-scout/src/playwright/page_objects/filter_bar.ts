@@ -151,12 +151,11 @@ export class FilterBar {
       .evaluateAll((elements) => elements.map((element) => element.textContent?.trim() ?? ''));
   }
 
-  async ensureFieldEditorModalIsClosed() {
+  async closeFieldEditorModal() {
     const popover = this.page.testSubj.locator('addFilterPopover');
-    if (await popover.isVisible()) {
-      await this.page.keyboard.press('Escape');
-      await popover.waitFor({ state: 'hidden' });
-    }
+    await popover.waitFor({ state: 'visible' });
+    await this.page.keyboard.press('Escape');
+    await popover.waitFor({ state: 'hidden' });
   }
 
   async toggleFilterNegated(field: string) {
