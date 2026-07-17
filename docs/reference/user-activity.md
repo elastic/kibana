@@ -54,19 +54,19 @@ Each filter has:
 :::::{include} user-activity/_snippets/user-activity-actions-list.md
 :::::
 
-## Dashboard action fields
+## Dashboard event fields
 
 All dashboard actions include the [common log fields](#logs-schema) and populate `object.id`, `object.name`, `object.type`, and `object.tags`. The `object.type` value is `dashboard`, and `object.tags` contains the dashboard tag names.
 
-| **Action** | **`event.type`** | **Additional fields** |
-| --- | --- | --- |
-| `dashboard_create` | `creation` | No action-specific fields. |
-| `dashboard_update` | `change` | No action-specific fields. |
-| `dashboard_delete` | `deletion` | No action-specific fields. |
-| `dashboard_view` | `access` | `event.start`, `event.end`, and `event.duration` record each continuous period that the dashboard is visible. A period ends when the user navigates away, closes or reloads the tab, or switches browser tabs. |
-| `dashboard_refresh` | `access` | `event.start`, `event.end`, and `event.duration` cover the refresh from the start of the query until the dashboard data finishes loading. `event.outcome` is `success` when no panels return blocking errors and `failure` otherwise. |
+### Dashboard view
 
-The `dashboard_refresh` action also populates the following metadata fields:
+`dashboard_view` sets `event.type` to `access`. `event.start`, `event.end`, and `event.duration` record each continuous period that the dashboard is visible. A period ends when the user navigates away, closes or reloads the tab, or switches browser tabs.
+
+### Dashboard refresh
+
+`dashboard_refresh` sets `event.type` to `access`. `event.start`, `event.end`, and `event.duration` cover the refresh from the start of the query until the dashboard data finishes loading. `event.outcome` is `success` when no panels return blocking errors and `failure` otherwise.
+
+The action also populates the following metadata fields:
 
 | **Field** | **Description** |
 | --- | --- |
@@ -153,7 +153,7 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 
 | **Field** | **Description** |
 | --- | --- |
-| `metadata` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log. For dashboard refresh metadata, refer to [Dashboard action fields](#dashboard-action-fields). |
+| `metadata` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log. For dashboard refresh metadata, refer to [Dashboard event fields](#dashboard-event-fields). |
 
 ### Error fields
 
