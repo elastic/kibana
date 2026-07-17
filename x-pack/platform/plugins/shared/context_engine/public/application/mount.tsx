@@ -7,10 +7,13 @@
 
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ContextEngineRoutes } from './routes';
+
+const queryClient = new QueryClient();
 
 export const mountApp = ({
   core,
@@ -24,9 +27,11 @@ export const mountApp = ({
   ReactDOM.render(
     core.rendering.addContext(
       <KibanaContextProvider services={core}>
-        <Router history={history}>
-          <ContextEngineRoutes />
-        </Router>
+        <QueryClientProvider client={queryClient}>
+          <Router history={history}>
+            <ContextEngineRoutes />
+          </Router>
+        </QueryClientProvider>
       </KibanaContextProvider>
     ),
     element

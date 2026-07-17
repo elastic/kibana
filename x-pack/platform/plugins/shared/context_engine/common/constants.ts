@@ -11,6 +11,12 @@ export const aiIndexPath = `${publicApiPath}/ai_index`;
 export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
 
 /**
+ * Version of the public AI index API, shared between the server route
+ * registration and browser clients.
+ */
+export const AI_INDEX_API_VERSION = '2023-10-31';
+
+/**
  * Hard limit on the number of AI indices returned by the list API.
  * TODO: Remove this limit (or make it configurable) and add pagination support to List API.
  */
