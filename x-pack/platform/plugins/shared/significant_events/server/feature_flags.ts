@@ -16,6 +16,7 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
@@ -37,6 +38,7 @@ import {
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
+  DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
@@ -144,6 +146,29 @@ export function registerFeatureFlags(
               readonly: true,
               readonlyMode: 'ui',
             },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES]: {
+            category: ['observability'],
+            name: i18n.translate(
+              'xpack.significantEvents.scheduledSigEventsDiscoveryTargetCoverageMinutesName',
+              {
+                defaultMessage: 'Scheduled Significant Events target coverage (minutes)',
+              }
+            ) as string,
+            value: DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
+            description: i18n.translate(
+              'xpack.significantEvents.scheduledSigEventsDiscoveryTargetCoverageMinutesDescription',
+              {
+                defaultMessage:
+                  'Every active rule is scanned at least once within this many minutes. Must exceed the detection interval for round-robin to spread the fleet across runs; equal or less scans the whole fleet each run.',
+              }
+            ),
+            type: 'number',
+            schema: schema.number({ min: MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES }),
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+            readonly: true,
+            readonlyMode: 'ui',
+          },
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: {
             category: ['observability'],
             name: i18n.translate(

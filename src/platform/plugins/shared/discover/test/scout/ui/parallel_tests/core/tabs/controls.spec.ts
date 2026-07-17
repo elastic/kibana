@@ -8,7 +8,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { EuiComboBoxWrapper, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures/common';
 
@@ -34,9 +34,9 @@ const createEsqlControl = async (
   await page.testSubj.locator('create_esql_control_flyout').waitFor({ state: 'visible' });
 
   if (values) {
-    const valuesComboBox = new EuiComboBoxWrapper(page, 'esqlValuesOptions');
+    const valuesComboBox = page.components.comboBox('esqlValuesOptions');
     for (const value of values) {
-      await valuesComboBox.setCustomMultiOption(value, { useFill: true });
+      await valuesComboBox.setCustomSelectedOptions([value]);
     }
   }
 

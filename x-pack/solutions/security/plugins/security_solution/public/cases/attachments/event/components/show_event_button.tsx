@@ -17,6 +17,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { EVENT_TITLE } from '../../../../flyout_v2/shared/constants/flyout_titles';
 import { SHOW_EVENT_TOOLTIP } from '../translations';
 
 export interface ShowEventButtonProps {
@@ -41,6 +42,7 @@ const ShowEventButtonComponent = ({ id, eventId, index }: ShowEventButtonProps) 
           documentId: eventId,
           indexName: index,
           renderCellActions: casesCellActionRenderer,
+          title: EVENT_TITLE,
         });
       } else {
         openFlyout({

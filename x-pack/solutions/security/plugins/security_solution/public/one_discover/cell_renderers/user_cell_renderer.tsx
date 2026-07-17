@@ -14,6 +14,7 @@ import { getOrEmptyTagFromValue } from '../../common/components/empty_value';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
+import { formatFlyoutTitle, USER_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
 import { DataViewManagerBootstrap } from '../alert_flyout_overview_tab_component/data_view_manager_bootstrap';
 import { User } from '../../flyout_v2/entity/user/main';
 import type { StartServices } from '../../types';
@@ -64,6 +65,7 @@ export const UserCellRenderer = React.memo<UserCellRendererProps>(
           }),
           {
             ...defaultDocumentFlyoutProperties,
+            title: formatFlyoutTitle(USER_TITLE, userName),
             historyKey,
             session: 'start',
           }
