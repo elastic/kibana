@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ConversationDisplayStatus, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { appPaths } from '../../../../../utils/app_paths';
 import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
@@ -27,29 +27,7 @@ import {
   createActiveConversationListItemStyles,
 } from '../../../../conversations/conversation_list_item_styles';
 import { ConversationListItemRow } from './conversation_list_item_row';
-
-const deriveDisplayStatus = (
-  conversation: { read?: boolean; status?: ConversationRoundStatus },
-  isStreaming: boolean,
-  hasError: boolean,
-  isActive: boolean
-): ConversationDisplayStatus | undefined => {
-  if (isStreaming || conversation.status === ConversationRoundStatus.inProgress) {
-    return ConversationDisplayStatus.inProgress;
-  }
-  if (hasError) {
-    return ConversationDisplayStatus.error;
-  }
-  if (conversation.status === ConversationRoundStatus.awaitingPrompt) {
-    return ConversationDisplayStatus.awaitingPrompt;
-  }
-  // Do not show the "unread" status for the "active" (current) conversation.
-  // Since the user is actively viewing it, a request to mark it as read has likely already been sent.
-  if (conversation.read === false && !isActive) {
-    return ConversationDisplayStatus.unread;
-  }
-  return undefined;
-};
+import { deriveDisplayStatus } from './derive_display_status';
 
 const newConversationLabel = i18n.translate(
   'xpack.agentBuilder.sidebar.conversation.newConversation',
