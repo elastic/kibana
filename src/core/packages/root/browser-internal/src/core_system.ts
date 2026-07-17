@@ -354,7 +354,6 @@ export class CoreSystem {
         theme,
         userProfile,
         authc: security.authc,
-        coreEnv: this.coreContext.env,
       });
 
       const notifications = this.notifications.start({

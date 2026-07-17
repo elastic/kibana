@@ -93,7 +93,15 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const avatar = user ? (
     <UserAvatar
       user={{ username: user.username, email: user.email, full_name: user.fullName }}
-      avatar={user.avatar}
+      avatar={
+        user.avatar
+          ? {
+              ...user.avatar,
+              initials: user.avatar.initials ?? undefined,
+              color: user.avatar.color ?? undefined,
+            }
+          : undefined
+      }
       size="s"
       data-test-subj="userMenuAvatar"
     />
