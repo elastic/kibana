@@ -103,4 +103,70 @@ describe('console query DSL autocomplete globals', () => {
       );
     });
   });
+
+  describe('WHEN generating put_mapping autocomplete rules', () => {
+    const dynamicTemplateMatchTypeValues = [
+      '*',
+      'string',
+      'object',
+      'long',
+      'double',
+      'boolean',
+      'date',
+      'binary',
+    ];
+
+    it('SHOULD expose dynamic mapping and dynamic template suggestions', () => {
+      expect(endpoints.put_mapping.data_autocomplete_rules).toMatchObject({
+        dynamic: {
+          __one_of: ['true', 'false', 'strict', 'runtime'],
+        },
+        dynamic_templates: [
+          {
+            '*': {
+              mapping: expect.any(Object),
+              runtime: expect.any(Object),
+              match: '',
+              match_pattern: {
+                __one_of: ['simple', 'regex'],
+              },
+              match_mapping_type: {
+                __one_of: [
+                  {
+                    __one_of: dynamicTemplateMatchTypeValues,
+                  },
+                  [
+                    {
+                      __one_of: dynamicTemplateMatchTypeValues,
+                    },
+                  ],
+                ],
+              },
+              path_match: '',
+              path_unmatch: '',
+              unmatch: '',
+              unmatch_mapping_type: {
+                __one_of: [
+                  {
+                    __one_of: dynamicTemplateMatchTypeValues,
+                  },
+                  [
+                    {
+                      __one_of: dynamicTemplateMatchTypeValues,
+                    },
+                  ],
+                ],
+              },
+            },
+          },
+        ],
+      });
+    });
+
+    it('SHOULD link the generated indices.put_mapping endpoint to the put_mapping body rules', () => {
+      expect(endpoints['indices.put_mapping'].data_autocomplete_rules).toEqual({
+        __scope_link: 'put_mapping',
+      });
+    });
+  });
 });
