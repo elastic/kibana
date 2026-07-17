@@ -8,7 +8,6 @@
 import pRetry, { AbortError } from 'p-retry';
 import { AgentExecutionMode, ExecutionStatus, type ChatEvent } from '@kbn/agent-builder-common';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
-import type { RelayClientContract } from '@kbn/actions-plugin/server';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type {
   CallbackPayload,
@@ -99,7 +98,7 @@ export class CallbackDeliveryService {
     this.validateCallbackUrl(callbackUrl);
 
     const { timeout } = this.actions.getActionsConfigurationUtilities().getResponseSettings();
-    const relayClient: RelayClientContract | undefined = this.actions.getRelayClient();
+    const relayClient = this.actions.getRelayClient();
 
     const headers = {
       'Content-Type': 'application/json',
