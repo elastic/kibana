@@ -5606,9 +5606,6 @@ importers:
       msw:
         specifier: 2.11.6
         version: 2.11.6(@types/node@24.10.13)(typescript@5.9.3)
-      mutation-observer:
-        specifier: 1.0.3
-        version: 1.0.3
       nock:
         specifier: 12.0.3
         version: 12.0.3(supports-color@8.1.1)
@@ -18997,9 +18994,6 @@ packages:
   mustache@4.2.0:
     resolution: {integrity: sha512-71ippSywq5Yb7/tVYyGbkBggbU8H3u5Rz56fH60jGFgr8uHwxs+aSKeqmluIVzM0m0kB7xQjKS6qPfd0b2ZoqQ==}
     hasBin: true
-
-  mutation-observer@1.0.3:
-    resolution: {integrity: sha512-M/O/4rF2h776hV7qGMZUH3utZLO/jK7p8rnNgGkjKUw8zCGjRQPxB8z6+5l8+VjRUQ3dNYu4vjqXYLr+U8ZVNA==}
 
   mute-stream@0.0.8:
     resolution: {integrity: sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==}
@@ -36736,8 +36730,6 @@ snapshots:
   murmurhash@2.0.1: {}
 
   mustache@4.2.0: {}
-
-  mutation-observer@1.0.3: {}
 
   mute-stream@0.0.8: {}
 
