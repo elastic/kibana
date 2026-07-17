@@ -139,7 +139,22 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.listClients(request, 'c1');
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.listOAuthClients).toHaveBeenCalledWith('essu_access_token', 'c1');
+      expect(mockUiam.listOAuthClients).toHaveBeenCalledWith('essu_access_token', 'c1', undefined);
+    });
+
+    it('forwards project_id filter to UIAM service', async () => {
+      const mockResponse = { clients: [] };
+      mockUiam.listOAuthClients.mockResolvedValue(mockResponse);
+      const request = createMockRequest('Bearer essu_access_token');
+
+      const result = await uiamOAuth.listClients(request, undefined, 'my-project-id');
+
+      expect(result).toEqual(mockResponse);
+      expect(mockUiam.listOAuthClients).toHaveBeenCalledWith(
+        'essu_access_token',
+        undefined,
+        'my-project-id'
+      );
     });
   });
 
@@ -332,6 +347,40 @@ describe('UiamOAuth', () => {
         'conn1',
         'reason'
       );
+    });
+  });
+
+  describe('resolveUsers()', () => {
+    it('returns null when license is not enabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+      const request = createMockRequest('Bearer essu_token');
+
+      const result = await uiamOAuth.resolveUsers(request, ['user-1']);
+
+      expect(result).toBeNull();
+      expect(mockUiam.resolveUsers).not.toHaveBeenCalled();
+    });
+
+    it('resolves users successfully', async () => {
+      const mockResponse = {
+        users: {
+          'user-1': { email: 'a@example.com', first_name: 'Ada', last_name: 'Lovelace' },
+        },
+      };
+      mockUiam.resolveUsers.mockResolvedValue(mockResponse);
+      const request = createMockRequest('Bearer essu_access_token');
+
+      const result = await uiamOAuth.resolveUsers(request, ['user-1']);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockUiam.resolveUsers).toHaveBeenCalledWith('essu_access_token', ['user-1']);
+    });
+
+    it('propagates the error when UIAM call fails', async () => {
+      mockUiam.resolveUsers.mockRejectedValue(new Error('UIAM error'));
+      const request = createMockRequest('Bearer essu_access_token');
+
+      await expect(uiamOAuth.resolveUsers(request, ['user-1'])).rejects.toThrow('UIAM error');
     });
   });
 

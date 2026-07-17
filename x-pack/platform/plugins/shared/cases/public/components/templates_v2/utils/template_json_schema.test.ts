@@ -106,6 +106,7 @@ describe('getTemplateDefinitionJsonSchema', () => {
       SELECT_BASIC: 'Select',
       TEXTAREA: 'Textarea',
       DATE_PICKER: 'Date Picker',
+      TOGGLE: 'Toggle',
       CHECKBOX_GROUP: 'Checkbox Group',
       RADIO_GROUP: 'Radio Group',
       USER_PICKER: 'User Picker',
@@ -256,11 +257,11 @@ describe('getTemplateDefinitionJsonSchema', () => {
     expect(inputNumberEntry).toBeDefined();
   });
 
-  // `connector` and `settings` are edited in the Settings tab and merged into the definition on
-  // save, so the editor schema deliberately omits them — it must not suggest blocks the YAML buffer
-  // never persists.
-  describe('connector and settings (Settings-tab managed)', () => {
-    it('omits connector and settings from the editor schema', () => {
+  describe('connector and settings', () => {
+    it('omits connector and settings from the editor schema (panel-owned, not in the buffer)', () => {
+      // They are edited on the Configuration tab and merged into the definition on save, so the
+      // editor must not suggest them — otherwise a value typed in the Fields YAML would be silently
+      // overwritten by the panel state on save.
       const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
       const props = schema.properties as JsonSchemaObject;
 
@@ -268,12 +269,83 @@ describe('getTemplateDefinitionJsonSchema', () => {
       expect(props.settings).toBeUndefined();
     });
 
-    it('still exposes the field properties (name and fields)', () => {
+    it('exposes the editable case-default and fields properties but no template_* identity keys', () => {
       const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
       const props = schema.properties as JsonSchemaObject;
 
+      // Template identity is not part of the YAML anymore.
+      expect(props.template_name).toBeUndefined();
+      expect(props.template_description).toBeUndefined();
+      expect(props.template_tags).toBeUndefined();
+
       expect(props.name).toBeDefined();
+      expect(props.description).toBeDefined();
+      expect(props.tags).toBeDefined();
+      expect(props.severity).toBeDefined();
+      expect(props.category).toBeDefined();
+      expect(props.assignees).toBeDefined();
       expect(props.fields).toBeDefined();
+    });
+
+    it('marks only the structural fields block as required so Monaco flags its removal', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const required = (schema.required as string[]) ?? [];
+
+      expect(required).toEqual(['fields']);
+    });
+
+    it('does not mark any case-default block as required (all optional)', () => {
+      // Only the template identity name (a saved-object attribute) is required to create a template;
+      // every case default in the YAML is optional and must not be flagged when absent.
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const required = (schema.required as string[]) ?? [];
+
+      for (const key of ['name', 'description', 'severity', 'category', 'tags', 'assignees']) {
+        expect(required).not.toContain(key);
+      }
+    });
+
+    it('does not mark the renderer-managed connector/settings blocks as required', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const required = (schema.required as string[]) ?? [];
+
+      expect(required).not.toContain('settings');
+      expect(required).not.toContain('connector');
+    });
+  });
+
+  describe('null is never offered as an autocomplete value', () => {
+    // The runtime Zod schema keeps case defaults nullable for back-compat, but the editor schema
+    // must not surface `null` (as a branch, a `null` type, or a `null` enum member) — otherwise
+    // Monaco suggests it as a value.
+    const containsNull = (node: unknown): boolean => {
+      if (node === null || node === 'null') {
+        return true;
+      }
+      if (Array.isArray(node)) {
+        return node.some(containsNull);
+      }
+      if (node && typeof node === 'object') {
+        return Object.values(node as Record<string, unknown>).some(containsNull);
+      }
+      return false;
+    };
+
+    it('strips null from the nullable case-default properties (severity/description/category)', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const props = schema.properties as JsonSchemaObject;
+
+      for (const key of ['severity', 'description', 'category']) {
+        expect(containsNull(props[key])).toBe(false);
+      }
+    });
+
+    it('keeps the concrete severities suggestable after stripping null', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const props = schema.properties as JsonSchemaObject;
+      const severityEnum = (props.severity as JsonSchemaObject).enum as unknown[] | undefined;
+
+      expect(severityEnum).toEqual(expect.arrayContaining(['low', 'medium', 'high', 'critical']));
     });
   });
 });

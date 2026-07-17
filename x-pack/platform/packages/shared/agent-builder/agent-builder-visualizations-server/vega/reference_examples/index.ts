@@ -39,35 +39,35 @@ export const VEGA_REFERENCE_EXAMPLES: readonly VegaReferenceExample[] = [
     id: 'faceted_small_multiples',
     title: 'Faceted small multiples (one panel per category)',
     description:
-      'Split one chart into a grid of small multiples: a top-level `facet` (the splitting field) plus a per-cell `spec`, with `columns` as a SIBLING of `facet`/`spec` (never inside `facet`). Auto-sizing does not apply to facets, so set explicit `width`/`height` on the inner `spec`. Keep the facet field low-cardinality (pre-limit in ES|QL).',
+      'Split one chart into a grid of small multiples: a top-level `facet` (the splitting field) plus a per-cell `spec`, with `columns` as a SIBLING of `facet`/`spec` (never inside `facet`). Auto-sizing does not apply to facets, so set explicit `width`/`height` on the inner `spec`. Keep the facet field low-cardinality so the grid stays readable.',
     load: () => import('./faceted_small_multiples').then((module) => module.spec),
   },
   {
     id: 'scatter_bubble',
     title: 'Scatter / bubble plot (encoded size)',
     description:
-      'Relate two measures per entity with a `point` mark: quantitative `x` and `y`, a third measure as `size` (bubble), and a category as `color`. Disable zero baselines (`scale.zero = false`) when comparing magnitudes. Still filter by the time picker even without a temporal axis.',
+      'Relate two measures per entity with a `point` mark: quantitative `x` and `y`, a third measure as `size` (bubble), and a category as `color`. Disable zero baselines (`scale.zero = false`) when comparing magnitudes.',
     load: () => import('./scatter_bubble').then((module) => module.spec),
   },
   {
     id: 'heatmap',
     title: 'Heatmap (two categories + color measure)',
     description:
-      'Density across two dimensions with a `rect` mark: an ordinal/nominal `x` and `y`, and a sequential `color` scheme for the measure. Extract categorical buckets with `EVAL`, but keep the time-picker filter on the raw source field.',
+      'Density across two dimensions with a `rect` mark: an ordinal/nominal `x` and `y`, and a sequential `color` scheme for the measure.',
     load: () => import('./heatmap').then((module) => module.spec),
   },
   {
     id: 'timeline_gantt',
     title: 'Timeline / Gantt (ranged bars)',
     description:
-      'Show the start-to-end span of each item as a horizontal ranged bar: a `bar` mark with a temporal `x` (start) and `x2` (end) against a nominal `y` (the item). Produce the start/end columns in ES|QL (e.g. `MIN`/`MAX` of the time field per item), pre-sort by start and set `sort: null` on `y`. Keep the time-picker filter on the raw source field.',
+      'Show the start-to-end span of each item as a horizontal ranged bar: a `bar` mark with a temporal `x` (start) and `x2` (end) against a nominal `y` (the item). Pre-sort by start and set `sort: null` on `y`.',
     load: () => import('./timeline_gantt').then((module) => module.spec),
   },
   {
     id: 'calendar_heatmap',
     title: 'Calendar heatmap (week × weekday grid)',
     description:
-      'GitHub-style calendar heatmap: a `rect` mark with an ordinal `x` for the week and an ordinal `y` for the weekday (explicitly sorted Mon→Sun via `sort`), colored by a sequential `scheme`. Derive the week/weekday buckets with `EVAL DATE_FORMAT(...)` and keep the time-picker filter on the raw source field.',
+      'GitHub-style calendar heatmap: a `rect` mark with an ordinal `x` for the week and an ordinal `y` for the weekday (explicitly sorted Mon→Sun via `sort`), colored by a sequential `scheme`.',
     load: () => import('./calendar_heatmap').then((module) => module.spec),
   },
 ];
@@ -219,5 +219,11 @@ export const buildReferenceExamplesBlock = async ({
   if (selected.length === 0) {
     return '';
   }
-  return formatReferenceExamples(await loadReferenceExamples(selected));
+  try {
+    return formatReferenceExamples(await loadReferenceExamples(selected));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger?.warn(`Reference-example loading failed; authoring without examples: ${message}`);
+    return '';
+  }
 };

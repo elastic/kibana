@@ -134,6 +134,8 @@ describe('getFilteredLinks', () => {
       expect(resultIds).toContain('dashboards');
       expect(resultIds).toContain('alert_detections');
       expect(resultIds).toContain('attack_discovery');
+      const attackDiscoveryLink = result.find((link) => link.id === 'attack_discovery');
+      expect(attackDiscoveryLink?.sideNavDisabled).toBe(true);
       expect(resultIds).toContain('cases');
       expect(resultIds).toContain('configurations');
       expect(resultIds).toContain('launchpad');

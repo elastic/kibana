@@ -62,7 +62,11 @@ export const DEFAULT_TIME_RANGE = {
 export const DEFAULT_CONFIG: MetricsIndexConfig = {
   indexName: METRICS_TEST_INDEX_NAME,
   dimensions: generateDimensions(30),
-  metrics: [...generateMetrics(23, 'gauge'), ...generateMetrics(22, 'counter')],
+  metrics: [
+    ...generateMetrics(23, 'gauge'),
+    ...generateMetrics(22, 'counter'),
+    ...generateMetrics(5, 'histogram'),
+  ],
   timeRange: INDEX_TIME_RANGE,
 };
 
@@ -123,17 +127,29 @@ function getEsMapping({ type }: MetricDefinition): EsMappingProperty {
       return { type: 'double', time_series_metric: 'gauge' };
     case 'counter':
       return { type: 'long', time_series_metric: 'counter' };
+    case 'histogram':
+      return { type: 'histogram', time_series_metric: 'histogram' };
     default:
       throw new Error(`Unsupported metric type: ${type}`);
   }
 }
 
-function generateValue({ type }: MetricDefinition): number {
+interface HistogramValue {
+  readonly values: readonly number[];
+  readonly counts: readonly number[];
+}
+
+function generateValue({ type }: MetricDefinition): number | HistogramValue {
   switch (type) {
     case 'gauge':
       return Math.random() * 100;
     case 'counter':
       return Math.floor(Math.random() * 10000);
+    case 'histogram':
+      return {
+        values: [0.1, 0.5, 1, 5],
+        counts: Array.from({ length: 4 }, () => Math.floor(Math.random() * 5) + 1),
+      };
     default:
       throw new Error(`Unsupported metric type: ${type}`);
   }

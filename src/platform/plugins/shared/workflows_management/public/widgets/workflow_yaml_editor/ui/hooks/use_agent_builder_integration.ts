@@ -13,11 +13,16 @@ import { v4 } from 'uuid';
 import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat/events';
 import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { setAiAssisted } from '../../../../entities/workflows/store/workflow_detail/slice';
-import { AttachmentBridge, ProposalManager } from '../../../../features/ai_integration';
+import {
+  AttachmentBridge,
+  consumeSidebarRestoreFor,
+  ProposalManager,
+  setActiveProposalManager,
+  setLastCreateAttachmentId,
+  setSidebarOpen,
+} from '../../../../features/ai_integration';
 import { ProposalTracker } from '../../../../features/ai_integration/proposal_tracker';
 import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -62,9 +67,6 @@ export const useAgentBuilderIntegration = ({
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
   const { workflowsManagement } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
-  const isExperimentalEnabled = useUiSetting<boolean>(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-  );
   const telemetry = useTelemetry();
   const dispatch = useDispatch();
   const proposalManagerRef = useRef<ProposalManager | null>(null);
@@ -85,7 +87,7 @@ export const useAgentBuilderIntegration = ({
 
   useEffect(() => {
     const editor = editorRef.current;
-    if (!isEditorMounted || !editor || !agentBuilder || !isExperimentalEnabled) {
+    if (!isEditorMounted || !editor || !agentBuilder) {
       return;
     }
 
@@ -164,10 +166,21 @@ export const useAgentBuilderIntegration = ({
     });
 
     proposalManagerRef.current = manager;
+    setActiveProposalManager(manager);
+
+    // Only set on the create route — the value is consumed by
+    // `carryConversationToWorkflow` in the save thunk. Clearing here on
+    // workflowId presence would race that consume after setWorkflow re-fires
+    // this effect.
+    if (!workflowId) {
+      setLastCreateAttachmentId(attachmentId);
+    }
 
     const bridge = new AttachmentBridge();
     bridge.start(agentBuilder.events.chat$, manager, editorRef, tracker, {
-      workflowId: attachmentId,
+      attachmentId,
+      workflowId,
+      getChatEvents$: agentBuilder.events.getChatEvents$?.bind(agentBuilder.events),
       onProposalReceived: ({ proposalId, toolId }) => {
         telemetry.reportAiProposalReceived({
           workflowId,
@@ -261,10 +274,13 @@ export const useAgentBuilderIntegration = ({
       }
       modelListener?.dispose();
       conversationIdSub.unsubscribe();
-      chatRefHandle.current = null;
+      // Don't close the sidebar here — this runs on every deps change
+      // (including the workflowId flip after Save). Close lives in the
+      // unmount-only effect below.
       agentBuilder.clearChatConfig();
       bridge.stop();
       attachmentBridgeRef.current = null;
+      setActiveProposalManager(null);
       manager.dispose();
       proposalManagerRef.current = null;
       unsubAllResolved();
@@ -273,20 +289,11 @@ export const useAgentBuilderIntegration = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (window as any).__wfTestBridge;
     };
-  }, [
-    isEditorMounted,
-    editorRef,
-    agentBuilder,
-    isExperimentalEnabled,
-    attachmentId,
-    workflowId,
-    telemetry,
-    dispatch,
-  ]);
+  }, [isEditorMounted, editorRef, agentBuilder, attachmentId, workflowId, telemetry, dispatch]);
 
   const openAgentChat = useCallback(
     (options?: OpenAgentChatOptions) => {
-      if (!agentBuilder || !isExperimentalEnabled) {
+      if (!agentBuilder) {
         return;
       }
 
@@ -306,8 +313,10 @@ export const useAgentBuilderIntegration = ({
             diagnostics: serializeClientDiagnostics(validationErrors),
           }),
         ],
+        onClose: () => setSidebarOpen(false),
       });
       chatRefHandle.current = chatRef;
+      setSidebarOpen(true);
 
       if (!chatOpenedReportedRef.current) {
         sessionAutoOpenedRef.current = options?.isAutoOpen === true;
@@ -320,32 +329,46 @@ export const useAgentBuilderIntegration = ({
         chatOpenedReportedRef.current = true;
       }
     },
-    [
-      agentBuilder,
-      isExperimentalEnabled,
-      editorRef,
-      attachmentId,
-      workflowId,
-      workflowName,
-      validationErrors,
-      telemetry,
-    ]
+    [agentBuilder, editorRef, attachmentId, workflowId, workflowName, validationErrors, telemetry]
   );
 
-  // Auto-open the sidebar once per editor mount so users land on the workflow
-  // editor with the AI Agent already available. Guarded by hasAutoOpenedRef so
-  // it never re-fires within the same session — if the user closes the sidebar,
-  // it stays closed until they open it again.
+  // Auto-open only on /workflows/create, or on a saved workflow whose sidebar
+  // the save thunk requested we restore. Never on an existing workflow the
+  // user navigated to directly. Guarded per-mount so a manual close stays.
   useEffect(() => {
-    if (!isEditorMounted || !agentBuilder || !isExperimentalEnabled) return;
-    if (hasAutoOpenedRef.current) return;
+    if (!isEditorMounted || !agentBuilder) {
+      return;
+    }
+    if (hasAutoOpenedRef.current) {
+      return;
+    }
+
+    const shouldRestoreForSavedWorkflow =
+      workflowId != null && consumeSidebarRestoreFor(workflowId);
+
+    if (workflowId != null && !shouldRestoreForSavedWorkflow) {
+      return;
+    }
+
     hasAutoOpenedRef.current = true;
     openAgentChat({ isAutoOpen: true });
-  }, [isEditorMounted, agentBuilder, isExperimentalEnabled, openAgentChat]);
+  }, [isEditorMounted, agentBuilder, workflowId, openAgentChat]);
+
+  // Close the sidebar on unmount (leaving the workflow scope). Empty deps so
+  // it does not fire on prop changes. `application.navigateToApp` remounts
+  // the tree, so create → detail also fires this — the save thunk handles
+  // that case via `requestSidebarRestore`.
+  useEffect(() => {
+    return () => {
+      chatRefHandle.current?.close();
+      chatRefHandle.current = null;
+      setSidebarOpen(false);
+    };
+  }, []);
 
   return {
     openAgentChat,
-    isAgentBuilderAvailable: agentBuilder != null && isExperimentalEnabled,
+    isAgentBuilderAvailable: agentBuilder != null,
     proposalManager: proposalManagerRef.current,
   };
 };

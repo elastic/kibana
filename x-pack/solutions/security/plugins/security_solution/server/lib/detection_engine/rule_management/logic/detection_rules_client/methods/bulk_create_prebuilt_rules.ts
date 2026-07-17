@@ -10,7 +10,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { BulkCreateRulesParams, RulesClient } from '@kbn/alerting-plugin/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../../../common';
-import { PREBUILT_RULES_ALERTING_BULK_CREATE_BATCH_SIZE } from '../../../../prebuilt_rules/constants';
+import { PREBUILT_RULES_BULK_CREATE_BATCH_SIZE } from '../../../../prebuilt_rules/constants';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { RuleParams } from '../../../../rule_schema';
@@ -55,7 +55,7 @@ export const bulkCreatePrebuiltRules = async ({
   try {
     const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
       rules: bulkInputs,
-      batchSize: PREBUILT_RULES_ALERTING_BULK_CREATE_BATCH_SIZE,
+      batchSize: PREBUILT_RULES_BULK_CREATE_BATCH_SIZE,
       changeTracking,
     });
 

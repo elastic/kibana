@@ -73,7 +73,7 @@ describe('Agent policy API handlers', () => {
       });
 
       await expect(createAgentPolicyHandler(context, request, response)).rejects.toThrow(
-        /To create agentless agent policies/
+        /To create managed integrations/
       );
       expect(createAgentPolicyWithPackages).not.toHaveBeenCalled();
     });
@@ -141,7 +141,7 @@ describe('Agent policy API handlers', () => {
       } as AgentPolicy);
 
       await expect(copyAgentPolicyHandler(context, getCopyRequest(), response)).rejects.toThrow(
-        /Agentless agent policies cannot be copied.*Source agent policy: source-policy\./
+        /Managed integrations cannot be copied.*Offending ID: source-policy\./
       );
       expect(agentPolicyServiceMock.copy).not.toHaveBeenCalled();
     });
