@@ -397,6 +397,35 @@ describe('normalizeVegaSpec', () => {
       expect(mark.encode.update.tooltip.signal).toBe("datum.stk1 + ' -> ' + datum.stk2");
     });
 
+    it('rewrites Sankey y.domain [0,1] onto stacked nodes.y1', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          data: [
+            { name: 'source' },
+            { name: 'nodes', source: 'source', transform: [] },
+            { name: 'groups', source: 'nodes', transform: [] },
+            { name: 'edges', source: 'nodes', transform: [] },
+          ],
+          scales: [
+            {
+              name: 'y',
+              type: 'linear',
+              range: 'height',
+              nice: true,
+              zero: true,
+              domain: [0, 1],
+            },
+          ],
+        },
+        esqlQuery: 'FROM logs-* | STATS size = COUNT() BY stk1 = a, stk2 = b',
+        dialect: 'vega',
+      });
+
+      const yScale = (result.scales as Array<Record<string, unknown>>).find((s) => s.name === 'y');
+      expect(yScale?.domain).toEqual({ data: 'nodes', field: 'y1' });
+    });
+
     it('keeps sequential schemes such as blues for continuous color', () => {
       const result = normalizeVegaSpec({
         spec: {

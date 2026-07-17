@@ -104,11 +104,28 @@ FROM kibana_sample_data_flights
 | LIMIT 24
 \`\`\`
 
+To keep only series that appear on ≥${RADAR_MIN_KEYS} keys, use INLINE STATS on the
+already-aggregated grain (do **not** COUNT_DISTINCT the same field you group by):
+
+\`\`\`esql
+FROM kibana_sample_data_flights
+| WHERE OriginCountry IS NOT NULL AND Carrier IS NOT NULL
+| STATS value = COUNT() BY series = Carrier, key = OriginCountry
+| INLINE STATS n_keys = COUNT_DISTINCT(key) BY series
+| WHERE n_keys >= ${RADAR_MIN_KEYS}
+| DROP n_keys
+| SORT value DESC
+| LIMIT 40
+\`\`\`
+
 Rules:
 - Keep column names exactly \`key\`, \`value\`, and optional \`series\` when possible.
 - Prefer ONE numeric measure. Do NOT use FORK / wide unpivots that mix units
   (e.g. flight time vs ticket price vs distance) unless you also normalize each
   key to a 0–1 scale — mixed units make a useless radar and often break layout.
+- NEVER write \`STATS … COUNT_DISTINCT(OriginCountry) BY … key = OriginCountry\` (or the
+  same field for both). That distinct count is always 1, so \`WHERE … >= 3\` returns
+  **zero rows** and the chart goes blank (Infinite extent warnings).
 - Still obey the Vega time-range and dotted-field rules above when the index is time-based.`;
 
 /** Extra ES|QL instructions when authoring a Sankey flow table. */
@@ -274,6 +291,9 @@ const catalogChartRules = (catalogId: VegaCatalogId): string => {
 - STATIC DIAGRAM ONLY: do NOT add groupSelector / groupHover click signals, kibanaAddFilter, or "show all" buttons.
 - DO NOT set top-level "width", "height", or root "encode" x/y; the panel sizes the view.
 - COLOR: on the ordinal color scale set range: "category" (Kibana binds this to the theme palette). Never category10/category20/hex, and never scheme "elastic" (that name is not valid in stock Vega).
+- Y SCALE (critical — wrong domain blanks the chart): MUST be
+  \`{ "name": "y", "type": "linear", "range": "height", "nice": true, "zero": true, "domain": { "data": "nodes", "field": "y1" } }\`.
+  Never \`domain: [0, 1]\` or any fixed numeric interval — stack totals are real counts/sums, not unit fractions.
 - EXPRESSIONS: always lowercase helpers — scale(, bandwidth(, domain(, range(. Never Scale( / Bandwidth(.
 - TOOLTIPS: ASCII only in signal strings (use " -> ", not unicode arrows).`;
     case 'radar':

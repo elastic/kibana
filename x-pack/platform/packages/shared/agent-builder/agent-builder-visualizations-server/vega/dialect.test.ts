@@ -182,8 +182,14 @@ describe('validateRadarRows', () => {
     ).toEqual({ ok: true });
   });
 
-  it('passes vacuously when there are no rows', () => {
-    expect(validateRadarRows({ columns, values: [] })).toEqual({ ok: true });
+  it('fails when there are no rows (empty tables blank the chart)', () => {
+    expect(validateRadarRows({ columns, values: [] })).toEqual({
+      ok: false,
+      reason: 'empty_result',
+    });
+    expect(formatRadarIntegrityError({ ok: false, reason: 'empty_result' })).toContain(
+      'COUNT_DISTINCT'
+    );
   });
 
   it('fails when there are fewer than 3 distinct keys', () => {

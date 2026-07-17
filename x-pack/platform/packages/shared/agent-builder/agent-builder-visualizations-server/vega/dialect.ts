@@ -219,16 +219,16 @@ export const hasRadarColumns = (columns: EsqlEsqlColumnInfo[] | undefined): bool
 export type RadarIntegrityResult =
   | { ok: true }
   | { ok: false; reason: 'missing_columns' }
+  | { ok: false; reason: 'empty_result' }
   | { ok: false; reason: 'too_few_keys'; keyCount: number }
   | { ok: false; reason: 'non_numeric_values' };
 
 /**
  * Cheap post-query check for a radar-ready table:
  * - `key` + `value` columns present,
- * - at least {@link RADAR_MIN_KEYS} distinct keys when rows exist,
+ * - at least one result row (empty tables blank the chart / VL extents),
+ * - at least {@link RADAR_MIN_KEYS} distinct keys,
  * - every non-null value is numeric.
- *
- * Empty result sets pass vacuously (nothing to violate).
  */
 export const validateRadarRows = ({
   columns,
@@ -244,7 +244,7 @@ export const validateRadarRows = ({
   const keyIndex = findColumnIndex(columns, KEY_COLUMN_ALIASES);
   const valueIndex = findColumnIndex(columns, VALUE_COLUMN_ALIASES);
   if (!values?.length) {
-    return { ok: true };
+    return { ok: false, reason: 'empty_result' };
   }
 
   const keys = new Set<string>();
@@ -282,6 +282,12 @@ export const formatRadarIntegrityError = (result: RadarIntegrityResult): string 
       return (
         'ES|QL result is missing key/value columns required for a radar chart. ' +
         'Emit columns named key and value (optional series for multi-series radars).'
+      );
+    case 'empty_result':
+      return (
+        'Radar integrity failed: ES|QL returned 0 rows. Remove filters that empty the table ' +
+        '(common bug: COUNT_DISTINCT(key) while also grouping BY key is always 1). ' +
+        'Use STATS value BY series, key then SORT/LIMIT — or INLINE STATS n_keys = COUNT_DISTINCT(key) BY series before filtering series.'
       );
     case 'too_few_keys':
       return (

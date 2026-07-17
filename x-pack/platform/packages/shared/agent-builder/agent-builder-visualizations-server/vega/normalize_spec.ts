@@ -411,6 +411,68 @@ export const rewriteRawVegaColorScales = (
   return { ...spec, scales: nextScales };
 };
 
+/** Correct Sankey y-domain: stacked node extents, not a unit interval. */
+export const SANKEY_Y_DOMAIN = { data: 'nodes', field: 'y1' } as const;
+
+const dataSetNames = (spec: Record<string, unknown>): Set<string> => {
+  const names = new Set<string>();
+  if (!Array.isArray(spec.data)) {
+    return names;
+  }
+  for (const entry of spec.data) {
+    if (entry && typeof entry === 'object' && !Array.isArray(entry)) {
+      const { name } = entry as { name?: unknown };
+      if (typeof name === 'string') {
+        names.add(name);
+      }
+    }
+  }
+  return names;
+};
+
+const looksLikeSankeySpec = (spec: Record<string, unknown>): boolean => {
+  const names = dataSetNames(spec);
+  return names.has('nodes') && (names.has('edges') || names.has('groups'));
+};
+
+const isNodesY1Domain = (domain: unknown): boolean =>
+  !!domain &&
+  typeof domain === 'object' &&
+  !Array.isArray(domain) &&
+  (domain as { data?: unknown }).data === 'nodes' &&
+  (domain as { field?: unknown }).field === 'y1';
+
+/**
+ * Models often emit Sankey `y.domain: [0, 1]` (unit interval / radar muscle
+ * memory). Stacked flight counts are hundreds–thousands, so every mark scales
+ * off-screen and the panel looks empty. Force the reference domain.
+ */
+export const rewriteSankeyYScaleDomain = (
+  spec: Record<string, unknown>
+): Record<string, unknown> => {
+  if (!looksLikeSankeySpec(spec) || !Array.isArray(spec.scales)) {
+    return spec;
+  }
+
+  let changed = false;
+  const nextScales = spec.scales.map((scale) => {
+    if (!scale || typeof scale !== 'object' || Array.isArray(scale)) {
+      return scale;
+    }
+    const entry = scale as Record<string, unknown>;
+    if (entry.name !== 'y') {
+      return scale;
+    }
+    if (isNodesY1Domain(entry.domain)) {
+      return scale;
+    }
+    changed = true;
+    return { ...entry, domain: { ...SANKEY_Y_DOMAIN } };
+  });
+
+  return changed ? { ...spec, scales: nextScales } : spec;
+};
+
 /**
  * Make a model-authored Vega-family spec safe to render in Kibana:
  * - pin `$schema` for the chosen Dialect (Vega-Lite v6 or Vega v5),
@@ -419,6 +481,7 @@ export const rewriteRawVegaColorScales = (
  * - for Raw Vega: inject a named Canonical ES|QL source and keep derived datasets,
  * - rewrite categorical color schemes to the named `category` range (Kibana theme),
  * - rewrite mistyped expression helpers (`Scale(` → `scale(`) and unicode arrows,
+ * - force Sankey y domain onto stacked `nodes.y1` (never a unit `[0, 1]` interval),
  * - escape dotted ES|QL column names in field references.
  *
  * Returns a new object; the input is not mutated.
@@ -445,7 +508,8 @@ export const normalizeVegaSpec = ({
       $schema: VEGA_SCHEMA,
       data: buildRawVegaDataArray({ modelData: data, url }),
     });
-    const normalized = rewriteRawVegaExpressions(withColors) as Record<string, unknown>;
+    const withSankeyY = rewriteSankeyYScaleDomain(withColors);
+    const normalized = rewriteRawVegaExpressions(withSankeyY) as Record<string, unknown>;
     return escapeVegaFieldReferences(normalized);
   }
 

@@ -149,6 +149,8 @@ describe('radarEsqlAdditionalInstructions', () => {
     expect(radarEsqlAdditionalInstructions).toContain('`value`');
     expect(radarEsqlAdditionalInstructions).toContain('`series`');
     expect(radarEsqlAdditionalInstructions).toContain('At least 3 distinct');
+    expect(radarEsqlAdditionalInstructions).toContain('INLINE STATS');
+    expect(radarEsqlAdditionalInstructions).toContain('NEVER write');
   });
 });
 
@@ -178,6 +180,8 @@ describe('createAuthorVegaSpecPrompt sankey', () => {
     expect(text).toContain('INSIDE');
     expect(text).toContain('Never Scale(');
     expect(text).toContain('ASCII only');
+    expect(text).toContain('domain": { "data": "nodes", "field": "y1" }');
+    expect(text).toContain('Never `domain: [0, 1]`');
   });
 });
 
