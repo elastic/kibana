@@ -243,7 +243,15 @@ describe('ActionPoliciesTable', () => {
         .filter(Boolean);
 
       expect(columnHeaders).toEqual(
-        expect.arrayContaining(['Name', 'Tags', 'Destinations', 'Last updated', 'State', 'Notify', 'Actions'])
+        expect.arrayContaining([
+          'Name',
+          'Tags',
+          'Destinations',
+          'Last updated',
+          'State',
+          'Notify',
+          'Actions',
+        ])
       );
     });
   });
@@ -299,7 +307,7 @@ describe('ActionPoliciesTable', () => {
       fireEvent.click(await screen.findByText('Enabled'));
 
       await waitFor(() => {
-        expect(lastFindItemsFilters()['enabled']).toMatchObject({ include: ['enabled'] });
+        expect(lastFindItemsFilters().enabled).toMatchObject({ include: ['enabled'] });
       });
     });
 
@@ -310,7 +318,7 @@ describe('ActionPoliciesTable', () => {
       fireEvent.click(await screen.findByText('Disabled'));
 
       await waitFor(() => {
-        expect(lastFindItemsFilters()['enabled']).toMatchObject({ include: ['disabled'] });
+        expect(lastFindItemsFilters().enabled).toMatchObject({ include: ['disabled'] });
       });
     });
 
@@ -320,14 +328,14 @@ describe('ActionPoliciesTable', () => {
       await openStateFilter();
       fireEvent.click(await screen.findByText('Enabled'));
       await waitFor(() =>
-        expect(lastFindItemsFilters()['enabled']).toMatchObject({ include: ['enabled'] })
+        expect(lastFindItemsFilters().enabled).toMatchObject({ include: ['enabled'] })
       );
 
       await openStateFilter();
       fireEvent.click(await screen.findByText('Enabled'));
 
       await waitFor(() => {
-        expect(lastFindItemsFilters()['enabled']).toBeUndefined();
+        expect(lastFindItemsFilters().enabled).toBeUndefined();
       });
     });
   });
@@ -364,7 +372,7 @@ describe('ActionPoliciesTable', () => {
       fireEvent.click(await screen.findByText('critical'));
 
       await waitFor(() => {
-        expect(lastFindItemsFilters()['tag']).toMatchObject({ include: ['critical'] });
+        expect(lastFindItemsFilters().tag).toMatchObject({ include: ['critical'] });
       });
     });
 
@@ -374,14 +382,14 @@ describe('ActionPoliciesTable', () => {
       await openTagsFilter();
       fireEvent.click(await screen.findByText('critical'));
       await waitFor(() =>
-        expect(lastFindItemsFilters()['tag']).toMatchObject({ include: ['critical'] })
+        expect(lastFindItemsFilters().tag).toMatchObject({ include: ['critical'] })
       );
 
       await openTagsFilter();
       fireEvent.click(await screen.findByText('staging'));
 
       await waitFor(() => {
-        expect(lastFindItemsFilters()['tag']).toMatchObject({
+        expect(lastFindItemsFilters().tag).toMatchObject({
           include: expect.arrayContaining(['critical', 'staging']),
         });
       });
@@ -393,14 +401,14 @@ describe('ActionPoliciesTable', () => {
       await openTagsFilter();
       fireEvent.click(await screen.findByText('critical'));
       await waitFor(() =>
-        expect(lastFindItemsFilters()['tag']).toMatchObject({ include: ['critical'] })
+        expect(lastFindItemsFilters().tag).toMatchObject({ include: ['critical'] })
       );
 
       await openTagsFilter();
       fireEvent.click(await screen.findByText('critical'));
 
       await waitFor(() => {
-        expect(lastFindItemsFilters()['tag']).toBeUndefined();
+        expect(lastFindItemsFilters().tag).toBeUndefined();
       });
     });
   });

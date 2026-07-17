@@ -16,7 +16,6 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { ActionPoliciesTable } from './components/action_policies_table';
 
-
 const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
   'xpack.alertingV2.actionPoliciesList.pageTitle',
   { defaultMessage: 'Action Policies' }
@@ -48,7 +47,6 @@ export const ListActionPoliciesPage = () => {
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
-
 
   const navigateToCreate = useCallback(() => {
     navigateToUrl(basePath.prepend(paths.actionPolicyCreate));

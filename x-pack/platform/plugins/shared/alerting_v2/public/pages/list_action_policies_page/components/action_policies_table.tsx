@@ -154,13 +154,7 @@ const FEATURES_FIELDS: FieldDefinition[] = [enabledFieldDefinition, tagFieldDefi
 const EnabledFilter = filter.createComponent({
   resolve: () => ({
     type: 'custom_component' as const,
-    component: ({
-      query,
-      onChange,
-    }: {
-      query?: Query;
-      onChange?: (query: Query) => void;
-    }) => (
+    component: ({ query, onChange }: { query?: Query; onChange?: (query: Query) => void }) => (
       <SelectableFilterPopover
         fieldName={ENABLED_FILTER_ID}
         title={ENABLED_FILTER_TITLE}
@@ -189,10 +183,7 @@ const TagsFilterComponent = ({
   onChange?: (query: Query) => void;
 }) => {
   const { data: tagNames = [] } = useFetchTags();
-  const options = useMemo(
-    () => tagNames.map((tag) => ({ key: tag, label: tag })),
-    [tagNames]
-  );
+  const options = useMemo(() => tagNames.map((tag) => ({ key: tag, label: tag })), [tagNames]);
   return (
     <SelectableFilterPopover
       fieldName={TAG_FILTER_ID}
@@ -221,7 +212,6 @@ const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
 );
 
 export const ActionPoliciesTable = () => {
-
   const refetchRef = useRef<() => void>(() => {});
   const onRefetchReady = useCallback((refetchFn: () => void) => {
     refetchRef.current = refetchFn;
@@ -360,10 +350,7 @@ export const ActionPoliciesTable = () => {
             scrollableInline
             responsiveBreakpoint={false}
           >
-            <Column.Name
-              showDescription
-              onClick={(item) => setPolicyToView(toPolicy(item))}
-            />
+            <Column.Name showDescription onClick={(item) => setPolicyToView(toPolicy(item))} />
             <Column
               id="tags"
               name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.tags', {

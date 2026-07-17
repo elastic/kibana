@@ -20,10 +20,10 @@ export const ENABLED_FILTER_ID = 'enabled';
 
 export type ActionPolicyContentListItem = ContentListItem & {
   policy: ActionPolicyResponse;
-}
+};
 
 const toContentListItem = (policy: ActionPolicyResponse): ActionPolicyContentListItem => ({
-  id: policy.id,  
+  id: policy.id,
   title: policy.name,
   tags: policy.tags ?? undefined,
   createdBy: policy.createdBy ?? undefined,
