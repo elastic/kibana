@@ -12,6 +12,7 @@ import type {
   CreateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import type { Query } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,7 +29,9 @@ import {
 } from '@kbn/content-list';
 import type { ContentListItem } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
+import { TAG_FILTER_ID } from '@kbn/content-list-provider';
 import { filter } from '@kbn/content-list-toolbar';
+import { useFetchTags } from '../../../hooks/use_fetch_tags';
 import { ActionPolicyDestinationsSummary } from '../../../components/action_policy/action_policy_destinations_summary';
 import { ActionPolicySnoozePopover } from '../../../components/action_policy/action_policy_snooze_popover';
 import { ActionPolicyStateBadge } from '../../../components/action_policy/action_policy_state_badge';
@@ -140,7 +143,13 @@ const enabledFieldDefinition: FieldDefinition = {
   },
 };
 
-const FEATURES_FIELDS: FieldDefinition[] = [enabledFieldDefinition];
+const tagFieldDefinition: FieldDefinition = {
+  fieldName: TAG_FILTER_ID,
+  resolveIdToDisplay: (id) => id,
+  resolveDisplayToId: (displayValue) => displayValue,
+};
+
+const FEATURES_FIELDS: FieldDefinition[] = [enabledFieldDefinition, tagFieldDefinition];
 
 const EnabledFilter = filter.createComponent({
   resolve: () => ({
@@ -165,6 +174,44 @@ const EnabledFilter = filter.createComponent({
         data-test-subj="actionPoliciesEnabledFilter"
       />
     ),
+  }),
+});
+
+const TAGS_FILTER_TITLE = i18n.translate('xpack.alertingV2.actionPoliciesList.filter.tags.title', {
+  defaultMessage: 'Tags',
+});
+
+const TagsFilterComponent = ({
+  query,
+  onChange,
+}: {
+  query?: Query;
+  onChange?: (query: Query) => void;
+}) => {
+  const { data: tagNames = [] } = useFetchTags();
+  const options = useMemo(
+    () => tagNames.map((tag) => ({ key: tag, label: tag })),
+    [tagNames]
+  );
+  return (
+    <SelectableFilterPopover
+      fieldName={TAG_FILTER_ID}
+      title={TAGS_FILTER_TITLE}
+      query={query}
+      onChange={onChange}
+      options={options}
+      renderOption={(option, { isActive }) => (
+        <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
+      )}
+      data-test-subj="actionPoliciesTagsFilter"
+    />
+  );
+};
+
+const TagsFilter = filter.createComponent({
+  resolve: () => ({
+    type: 'custom_component' as const,
+    component: TagsFilterComponent,
   }),
 });
 
@@ -303,7 +350,7 @@ export const ActionPoliciesTable = () => {
           <RefetchConnector onReady={onRefetchReady} />
           <ContentListToolbar>
             <ContentListToolbar.Filters>
-              <ContentListToolbar.Filters.Tags />
+              <TagsFilter />
               <EnabledFilter />
             </ContentListToolbar.Filters>
           </ContentListToolbar>
@@ -317,6 +364,25 @@ export const ActionPoliciesTable = () => {
               showDescription
               onClick={(item) => setPolicyToView(toPolicy(item))}
             />
+            <Column
+              id="tags"
+              name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.tags', {
+                defaultMessage: 'Tags',
+              })}
+              render={(item) => {
+                const { tags } = toPolicy(item);
+                if (!tags?.length) return null;
+                return (
+                  <EuiFlexGroup gutterSize="xs" wrap>
+                    {tags.map((tag) => (
+                      <EuiFlexItem grow={false} key={tag}>
+                        <EuiBadge color="hollow">{tag}</EuiBadge>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                );
+              }}
+            />
             <DestinationsColumn />
             <Column.UpdatedAt />
             <Column.CreatedBy />
@@ -326,7 +392,6 @@ export const ActionPoliciesTable = () => {
               name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.state', {
                 defaultMessage: 'State',
               })}
-              width="120px"
               render={(item) => {
                 const policy = toPolicy(item);
                 return (
@@ -369,7 +434,6 @@ export const ActionPoliciesTable = () => {
               name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.actions', {
                 defaultMessage: 'Actions',
               })}
-              width="120px"
               render={(item) => {
                 const policy = toPolicy(item);
                 return (

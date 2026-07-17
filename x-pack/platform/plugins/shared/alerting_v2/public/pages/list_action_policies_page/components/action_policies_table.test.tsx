@@ -241,7 +241,7 @@ describe('ActionPoliciesTable', () => {
         .filter(Boolean);
 
       expect(columnHeaders).toEqual(
-        expect.arrayContaining(['Name', 'Destinations', 'Last updated', 'State', 'Notify', 'Actions'])
+        expect.arrayContaining(['Name', 'Tags', 'Destinations', 'Last updated', 'State', 'Notify', 'Actions'])
       );
     });
   });
