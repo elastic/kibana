@@ -31,8 +31,19 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       .keyUp(Key.SHIFT)
       .perform();
 
-    await retry.waitFor('open tab context menu', async () => {
-      return await testSubjects.exists('unifiedTabs_tabMenuItem_enterRenamingMode');
+    // Wait for the menu to appear AND for keyboard focus to land inside it.
+    // EUI auto-focuses the first menu item on keyboard-triggered open, but the
+    // focus transfer is async. Checking DOM presence alone races with that
+    // transfer — callers that send ARROW_DOWN immediately would navigate past
+    // the already-focused first item to the second one.
+    await retry.waitFor('open tab context menu with keyboard focus', async () => {
+      if (!(await testSubjects.exists('unifiedTabs_tabMenuItem_enterRenamingMode'))) {
+        return false;
+      }
+      return await browser.execute(() => {
+        const active = document.activeElement;
+        return active != null && active.closest('[role="menu"]') != null;
+      });
     });
   };
 
@@ -112,7 +123,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
       await unifiedTabs.createNewTab();
       await openTabContextMenuWithKeyboard();
-      await browser.pressKeys(browser.keys.ARROW_DOWN);
+      // "Rename" is the first item and is already focused when the menu opens
+      // via keyboard; pressing ENTER activates it directly.
       await browser.pressKeys(browser.keys.ENTER);
       await unifiedTabs.enterNewTabLabel('Test label');
       expect(await unifiedTabs.getTabLabels()).to.eql([
