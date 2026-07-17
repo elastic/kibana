@@ -247,7 +247,8 @@ describe.skip('EditForm', () => {
     expect(onFormMutatedMock).toHaveBeenCalled();
   });
 
-  describe('when isWorkflowsEnabled is false (feature flag OFF)', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/277801
+  describe.skip('when isWorkflowsEnabled is false (feature flag OFF)', () => {
     it('does NOT render AlertRetrievalContent', async () => {
       await renderComponent();
 
@@ -321,7 +322,8 @@ describe.skip('EditForm', () => {
     });
   });
 
-  describe('when isWorkflowsEnabled is true', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/277801
+  describe.skip('when isWorkflowsEnabled is true', () => {
     const mockUseListWorkflows = useListWorkflows as jest.MockedFunction<typeof useListWorkflows>;
     const mockUseGenerateWorkflow = useGenerateWorkflow as jest.MockedFunction<
       typeof useGenerateWorkflow
@@ -562,7 +564,8 @@ describe.skip('EditForm', () => {
       });
     });
 
-    describe('when editing an existing ES|QL schedule', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/277819
+    describe.skip('when editing an existing ES|QL schedule', () => {
       const esqlQuery = 'FROM .alerts-security.alerts-default | WHERE event.kind == "signal"';
 
       const esqlWorkflowConfig = {

@@ -11,14 +11,12 @@ import { EuiLink } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { flyoutProviders } from './flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { useKibana } from '../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
-import { buildFlyoutContent } from '../utils/build_flyout_content';
+import { buildFlyoutContent, buildFlyoutTitleFromField } from '../utils/build_flyout_content';
+import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
 
 export interface OpenFlyoutLinkProps {
@@ -27,9 +25,16 @@ export interface OpenFlyoutLinkProps {
    */
   field: string;
   /**
-   * Field value
+   * Field value. Used both to open the flyout and, by default, to derive its history title.
    */
   value: string;
+  /**
+   * Value to use for the link text and history title instead of `value`. For fields where the
+   * navigation target and the display text differ (e.g. rule name links, which navigate by rule
+   * UUID but display the rule name), pass the display value here so the title isn't derived from
+   * the UUID.
+   */
+  displayValue?: string;
   /**
    * The source document record. When provided, enables entity resolution for host/user flyouts.
    */
@@ -65,6 +70,7 @@ export type OpenFlyoutLinkRenderer = FC<OpenFlyoutLinkProps>;
 export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   field,
   value,
+  displayValue,
   hit,
   asParent = false,
   children,
@@ -75,22 +81,25 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   const store = useStore();
   const history = useHistory();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
+  const titleValue = displayValue ?? value;
+  const flyoutTitle = useMemo(
+    () => buildFlyoutTitleFromField(field, titleValue) ?? titleValue,
+    [field, titleValue]
+  );
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
-      const resolvedSession = asParent ? 'start' : mainFlyoutSessionMode;
+      const resolvedSession = asParent ? 'start' : sessionMode;
       overlays.openSystemFlyout(
         flyoutProviders({
           services,
           store,
           history,
           children: (
-            <FlyoutSessionContextProvider value={resolvedSession}>
+            <FlyoutSessionContextProvider value={{ session: resolvedSession, historyKey }}>
               {flyoutContent}
             </FlyoutSessionContextProvider>
           ),
@@ -100,6 +109,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
           historyKey,
           session: resolvedSession,
           outsideClickCloses: resolvedSession === 'start',
+          title: resolvedSession === 'inherit' ? buildFlyoutNavTitle(flyoutTitle) : flyoutTitle,
         }
       );
     }
@@ -108,11 +118,12 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
     history,
     flyoutContent,
     historyKey,
-    mainFlyoutSessionMode,
     overlays,
     services,
+    sessionMode,
     store,
     asParent,
+    flyoutTitle,
   ]);
 
   if (!flyoutContent) {
@@ -121,7 +132,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 
   return (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>
-      {children ?? value}
+      {children ?? titleValue}
     </EuiLink>
   );
 };
