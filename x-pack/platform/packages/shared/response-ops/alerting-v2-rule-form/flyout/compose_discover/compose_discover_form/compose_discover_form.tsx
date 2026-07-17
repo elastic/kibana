@@ -212,7 +212,7 @@ export const ComposeDiscoverForm = ({
       {stepContent}
       {isAlert && (
         <>
-          <EuiSpacer size="m" />
+          <EuiHorizontalRule margin="m" />
           <EuiTitle size="xs">
             <h3>
               <FormattedMessage
@@ -232,7 +232,7 @@ export const ComposeDiscoverForm = ({
           />
         </>
       )}
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="m" />
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
