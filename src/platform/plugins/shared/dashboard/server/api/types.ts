@@ -26,7 +26,7 @@ export type DashboardOptions = TypeOf<typeof optionsSchema>;
 /** Grid position and size data for a panel. */
 export type GridData = TypeOf<typeof panelGridSchema>;
 /** A panel in a dashboard containing an embeddable visualization. */
-export type DashboardPanel = TypeOf<ReturnType<typeof getPanelSchema>>;
+export type DashboardPanel = TypeOf<ReturnType<typeof getPanelSchema<false, false>>>;
 /** A section in a dashboard that groups panels. */
 export type DashboardSection = TypeOf<ReturnType<typeof getSectionSchema>>;
 /** The complete state of a dashboard including panels, filters, and settings. */
@@ -35,10 +35,17 @@ export type DashboardPinnedPanelsState = TypeOf<ReturnType<typeof getPinnedPanel
 export type DashboardPinnedPanel = DashboardPinnedPanelsState[number];
 export type Operation = 'create' | 'read' | 'update' | 'search';
 
-export type PanelSchemaType = ObjectType<{
-  grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
-  id: Type<string | undefined>;
-  version: Type<string | undefined>;
-  type: Type<string>;
-  config: ObjectType<{}>;
-}>;
+/** Types used to determine return type of get schema functions depending on isDashboardAppRequest */
+export type GenericObjectType = Type<Readonly<{}>>;
+export type PanelSchemaType<ConfigOnly extends boolean = false> = ConfigOnly extends true
+  ? ObjectType<{
+      type: Type<string>;
+      config: ObjectType<{}>;
+    }>
+  : ObjectType<{
+      grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
+      id: Type<string | undefined>;
+      version: Type<string | undefined>;
+      type: Type<string>;
+      config: ObjectType<{}>;
+    }>;

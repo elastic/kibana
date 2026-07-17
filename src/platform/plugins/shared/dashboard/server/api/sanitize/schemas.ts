@@ -20,7 +20,7 @@ export function getSanitizeResponseBodySchema() {
 
 export function getSanitizePanelResponseBodySchema() {
   return schema.object({
-    data: getPanelSchema(true),
+    data: getPanelSchema(true, true),
     warnings: schema.maybe(warningsSchema),
   });
 }
