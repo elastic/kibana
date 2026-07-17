@@ -35,8 +35,8 @@ export const INTERBANA_VARIANT_ID = 'interbana';
 //     not from a shared hairline splitting one container into rows
 //   - low size-contrast type scale — panel titles sit much closer in size to
 //     body text than Linear's stronger heading/body contrast
-//   - no nav-vs-content color step — Intercom's sidebar is the same white as
-//     content; wayfinding relies on the active-item pill + spacing alone
+//   - canvas vs content contrast — blue-gray canvas (~Intercom #EFF0EB luminance)
+//     lifts a true-white app surface; secondary nav side panel gets a subtle shade
 //   - warm orange accent instead of Linear's cool indigo
 const INTERBANA_RADIUS_CONTROL = 8; // inputs, nav selection pill
 const INTERBANA_RADIUS_BUTTON = 999; // full capsule/pill buttons
@@ -45,15 +45,18 @@ const INTERBANA_RADIUS_PANEL = 12; // cards, panels
 const INTERBANA_RADIUS_PANEL_COMPACT = 12; // compact single-stat / metric panels
 const INTERBANA_ACCENT = '#F26522'; // warm orange accent (est. from reference)
 const INTERBANA_MENU_ITEM_TEXT_COLOR = '#333333';
-const INTERBANA_SURFACE = 'lch(98.94 0.5 282)'; // content surface
-const INTERBANA_SURFACE_NAV = 'lch(98.94 0.5 282)'; // no step off content — same as surface
+const INTERBANA_SURFACE = '#FFFFFF'; // elevated app / content card
+/** Secondary nav side panel — whisper darker than app white. */
+const INTERBANA_SURFACE_NAV = '#F5F7FA';
+/** Blue-hue canvas at ~Intercom #EFF0EB luminance — visible step off white surface. */
+const INTERBANA_CANVAS = '#EBEEF4';
 const INTERBANA_PANEL_PADDING = DESIGN_EXPLORATION_PADDING_COMPACT + 12; // roomier than Linbana
 const INTERBANA_PADDING = 24; // airier outer padding than Linbana's 20
 const INTERBANA_GUTTER = 20; // more generous panel-to-panel gap than Linbana's 8
 const INTERBANA_TOP_BAR_HEIGHT = 80;
 const INTERBANA_APP_HEADER_TRANSITION_MS = 200;
 const INTERBANA_NAV_EXPANDED_WIDTH = 220;
-const INTERBANA_NAV_WIDE_WIDTH = 460;
+const INTERBANA_NAV_WIDE_WIDTH = 468;
 
 const INTERBANA_NAV_EXPANDED_SELECTOR = `[data-test-subj='sideNavCollapseButton'][aria-pressed='true']`;
 
@@ -99,16 +102,14 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
   const INTERBANA_SURFACE_HOVER_FILL = `color-mix(in srgb, ${colors.textParagraph} 4%, transparent)`;
 
   return css`
-    // ${scope} {
-    //   ${layoutVarName('application.marginRight')}: 0px !important;
-    // }
+    ${scope} {
+      background-color: ${INTERBANA_CANVAS} !important;
+    }
 
     /* ----- Base surfaces ----- */
-    /* No color-step between nav and content — both read as the same near-
-       white surface, per the Intercom reference (unlike Linbana's cooler nav
-       step). Separation comes from spacing and the active-item pill alone. */
+    /* Canvas (body) is blue-gray; app is white; side panel is a subtle step between them. */
     ${scope} [class*='css-'][class*='-euiPageSection-grow-l-top-plain'],
-    ${scope} [class*='css-'][class*='-euiPageInner-panelled'] {
+    ${scope} [class*='css-'][class*='-euiPageInner-'][class*='-panelled'] {
       background-color: ${INTERBANA_SURFACE} !important;
       box-shadow: none !important;
       border: none !important;
@@ -120,6 +121,17 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [class*='css-'][class*='-euiTable'][class*='-hasBackground-desktop'] {
       background-color: transparent !important;
+    }
+
+    ${scope} .euiTableCellContent .euiLink[class*='-euiLink-primary'],
+    ${scope} .euiTableCellContent [class*='css-'][class*='-euiLink-primary'] {
+      color: ${colors.textParagraph} !important;
+      font-weight: 500 !important;
+    }
+
+    ${scope} .euiTableCellContent .euiButtonIcon[class*='-empty-primary'],
+    ${scope} .euiTableCellContent [class*='css-'][class*='-euiButtonIcon-'][class*='-empty-primary'] {
+      color: ${colors.textParagraph} !important;
     }
 
     ${scope} .kbnChromeLayoutNavigation {
@@ -483,7 +495,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} [data-test-subj*='kbnChromeNav-sidePanel'],
     ${scope} [class*='getSidePanelWrapperStyles'] {
       background-color: ${INTERBANA_SURFACE_NAV} !important;
-      border-radius: ${INTERBANA_RADIUS_CONTAINER}px 0 0 ${INTERBANA_RADIUS_CONTAINER}px !important;
+      border-radius: ${INTERBANA_RADIUS_CONTAINER}px !important;
       box-shadow: none !important;
       outline: none !important;
       margin-top: 0 !important;
@@ -498,6 +510,22 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       font-size: 14px !important;
       font-weight: 500 !important;
       padding-inline-start: ${INTERBANA_PADDING}px !important;
+    }
+
+    ${scope} [class*='css-'][class*='-secondary_menu--titleWithBadgeStyles'],
+    ${scope} [class*='css-'][class*='-secondary_menu--titleStyles'] {
+      background-color: transparent !important;
+    }
+
+    ${scope} [class*='css-'][class*='-section--secondaryMenuWrapperStyles']:not(:last-child)::after {
+      display: none !important;
+    }
+
+    ${scope} [class*='css-'][class*='-section--labelStyles'] {
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      color: #516381b3 !important;
+      text-transform: uppercase !important;
     }
 
     ${scope} .kbnChromeNav-sidePanel
@@ -709,6 +737,20 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [class*='css-'][class*='-euiTab__content-m'] {
       font-weight: 500 !important;
+    }
+
+    ${scope} .euiTab:not(.euiTab-isSelected):not([aria-selected='true']) {
+      color: ${colors.textSubdued} !important;
+    }
+
+    ${scope} .euiTab.euiTab-isSelected,
+    ${scope} .euiTab[aria-selected='true'] {
+      color: ${colors.textParagraph} !important;
+    }
+
+    ${scope} .euiTab.euiTab-isSelected::after,
+    ${scope} .euiTab[aria-selected='true']::after {
+      border-color: ${colors.primary} !important;
     }
 
     /* ----- App header ----- */

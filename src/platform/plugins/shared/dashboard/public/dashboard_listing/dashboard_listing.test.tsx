@@ -65,7 +65,7 @@ test('renders TabbedTableListView with correct title and dashboards tab', () => 
   expect(props).toMatchObject({
     headingId: 'dashboardListingHeading',
   });
-  expect(props.tabs[0]).toMatchObject({ id: 'dashboards', title: 'Dashboards' });
+  expect(props.tabs[0]).toMatchObject({ id: 'dashboards', title: 'All' });
   expect(props.tabs.length).toBe(1);
 });
 
