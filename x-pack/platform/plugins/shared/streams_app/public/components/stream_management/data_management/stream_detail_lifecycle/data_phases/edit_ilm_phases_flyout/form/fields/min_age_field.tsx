@@ -11,13 +11,8 @@ import type { PhaseName } from '@kbn/streams-schema';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 
-import {
-  formatDuration,
-  getTimingBoundHelpText,
-  getUnitSelectOptions,
-  useBlurCommitDraft,
-  type HelpTextBound,
-} from '../../../shared';
+import { getTimingBoundHelpText, type HelpTextBound } from '@kbn/data-lifecycle-phases';
+import { formatDuration, getUnitSelectOptions, useBlurCommitDraft } from '../../../shared';
 import { getRelativeBoundsInMs } from '../utils';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';
 import { getMinAgeFieldsToValidateOnChange } from '../schema';
