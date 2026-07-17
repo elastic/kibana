@@ -42091,11 +42091,17 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            maxLength: 50
             type: string
       responses:
         '200':
           content:
             application/json:
+              examples:
+                rotateUninstallTokenExample:
+                  description: Uninstall token rotated successfully for the given agent policy
+                  value:
+                    message: Uninstall token rotated successfully.
               schema:
                 additionalProperties: false
                 type: object
@@ -42104,10 +42110,23 @@ paths:
                     type: string
                 required:
                   - message
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+                notProtectedExample:
+                  description: Agent policy does not have tamper protection enabled
+                  value:
+                    error: Bad Request
+                    message: Agent policy [policy-id-1] does not have tamper protection enabled. Uninstall tokens can only be rotated for protected policies.
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -42126,10 +42145,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  description: No agent policy was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Agent policy not found with id policy-id-1
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -42148,7 +42174,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Not found.
+          description: Not Found
       summary: Rotate an uninstall token
       tags:
         - Fleet uninstall tokens

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
 import { testUsers } from '../test_users';
 import { generateNAgentPolicies } from '../../helpers';
-import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
