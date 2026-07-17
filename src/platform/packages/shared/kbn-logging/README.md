@@ -35,13 +35,23 @@ with `a.b` context is an ancestor of logger with `a.b.c` context. All top-level 
 logger with `root` context that resides at the top of the logger hierarchy. This logger always exists and 
 fully configured.
 
-Developer can configure _log level_ and _appenders_ that should be used within particular context. If logger configuration
-specifies only _log level_ then _appenders_ configuration will be inherited from the ancestor logger. 
+Developer can configure _log level_, _appenders_, and _meta filters_ that should be used within particular context. If logger configuration
+specifies only _log level_ then _appenders_ and _meta filters_ configuration will be inherited from the ancestor logger when left empty.
 
 __Note:__ in the current implementation log messages are only forwarded to appenders configured for a particular logger 
 context or to appenders of the closest ancestor if current logger doesn't have any appenders configured. That means that
 we __don't support__ so called _appender additivity_ when log messages are forwarded to _every_ distinct appender within
 ancestor chain including `root`.
+
+## Meta filters
+
+Loggers can define _meta filters_ that temporarily lower the effective log level for records whose {@link LogRecord.meta}
+matches configured key-value predicates. Filters inherit from ancestor loggers when a child logger entry omits them
+or sets `filters: []`, similar to appenders. Set `filters: null` on a child logger to opt out of inherited filters.
+
+Matching is strict equality. Filter paths support nested meta (`labels.ruleType`) and flat top-level keys
+(`'labels.ruleType'`). {@link Logger.isLevelEnabled} ignores filters — pass meta on the log call or use a message function
+to benefit from filter-based verbosity.
 
 ## Log level
 
