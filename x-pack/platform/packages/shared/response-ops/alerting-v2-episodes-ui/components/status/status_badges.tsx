@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ALERT_EPISODE_ACTION_TYPE, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../../types/action';
 import { AlertEpisodeStatusBadge } from './status_badge';
+import { FlappingBadge } from '../flapping/flapping_badge';
 
 // Flex anchor avoids inline line-height missizing
 const tooltipAnchorProps = { css: { display: 'flex' } };
@@ -20,12 +21,14 @@ export interface AlertEpisodeStatusBadgesProps {
   status: AlertEpisodeStatus;
   episodeAction?: EpisodeActionState;
   groupAction?: EpisodeStatusGroupAction;
+  isFlapping?: boolean;
 }
 
 export function AlertEpisodeStatusBadges({
   status,
   episodeAction,
   groupAction,
+  isFlapping = false,
 }: AlertEpisodeStatusBadgesProps) {
   const isAcknowledged = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isSnoozed = groupAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE;
@@ -41,6 +44,11 @@ export function AlertEpisodeStatusBadges({
       <EuiFlexItem grow={false}>
         <AlertEpisodeStatusBadge status={status} />
       </EuiFlexItem>
+      {isFlapping && (
+        <EuiFlexItem grow={false}>
+          <FlappingBadge />
+        </EuiFlexItem>
+      )}
       {isSnoozed && (
         <EuiFlexItem grow={false}>
           <EuiToolTip

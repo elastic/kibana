@@ -32,6 +32,7 @@ import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fet
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
+import { useEpisodeFlapping } from '@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping';
 import { isRuleLoaded } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
@@ -112,6 +113,11 @@ export function EpisodeDetailsPage() {
   const { data: groupActionsMap } = useFetchGroupActions({
     groupHashes: groupHash ? [groupHash] : [],
     services: { expressions: services.expressions, spaces: services.spaces },
+  });
+
+  const { isFlapping } = useEpisodeFlapping({
+    episodeId,
+    services: { data, spaces },
   });
 
   const episodeAction = episodeId ? episodeActionsMap?.get(episodeId) : undefined;
@@ -216,8 +222,9 @@ export function EpisodeDetailsPage() {
         tags,
         episodeAction,
         groupAction,
+        isFlapping,
       }),
-    [episode, tags, episodeAction, groupAction]
+    [episode, tags, episodeAction, groupAction, isFlapping]
   );
 
   const headerMenu = useMemo(

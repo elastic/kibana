@@ -156,4 +156,43 @@ describe('getEpisodeHeaderBadges', () => {
       }),
     ]);
   });
+
+  it('adds a flapping badge when isFlapping is true', () => {
+    const badges = getEpisodeHeaderBadges({
+      status: ALERT_EPISODE_STATUS.ACTIVE,
+      severity: undefined,
+      tags: [],
+      episodeAction: undefined,
+      groupAction: undefined,
+      isFlapping: true,
+    });
+
+    expect(badges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: 'Flapping',
+          color: 'hollow',
+          'data-test-subj': 'alertingV2EpisodeDetailsHeaderFlappingBadge',
+          renderCustomBadge: expect.any(Function),
+        }),
+      ])
+    );
+  });
+
+  it('does not add a flapping badge when isFlapping is false', () => {
+    const badges = getEpisodeHeaderBadges({
+      status: ALERT_EPISODE_STATUS.ACTIVE,
+      severity: undefined,
+      tags: [],
+      episodeAction: undefined,
+      groupAction: undefined,
+      isFlapping: false,
+    });
+
+    expect(
+      badges.find(
+        (badge) => badge['data-test-subj'] === 'alertingV2EpisodeDetailsHeaderFlappingBadge'
+      )
+    ).toBeUndefined();
+  });
 });

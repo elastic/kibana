@@ -24,6 +24,8 @@ import {
   isSupportedEpisodeSeverity,
   normalizeEpisodeSeverity,
 } from '@kbn/alerting-v2-episodes-ui/components/severity/severity_utils';
+import { FlappingBadge } from '@kbn/alerting-v2-episodes-ui/components/flapping/flapping_badge';
+import { FLAPPING_BADGE_LABEL } from '@kbn/alerting-v2-episodes-ui/components/flapping/translations';
 import * as i18n from '../translations';
 
 export interface EpisodeHeaderBadgesArgs {
@@ -32,6 +34,7 @@ export interface EpisodeHeaderBadgesArgs {
   tags: string[];
   episodeAction: EpisodeActionState | undefined;
   groupAction: AlertEpisodeGroupAction | undefined;
+  isFlapping?: boolean;
 }
 
 type AppHeaderBadgeColor = NonNullable<AppHeaderBadge['color']>;
@@ -122,12 +125,15 @@ const renderFilledBadge =
       </EuiBadge>
     );
 
+const renderFlappingBadge = (_props: { badgeText: string }) => <FlappingBadge />;
+
 export const getEpisodeHeaderBadges = ({
   status,
   severity,
   tags,
   episodeAction,
   groupAction,
+  isFlapping = false,
 }: EpisodeHeaderBadgesArgs): AppHeaderBadge[] => {
   const badges: AppHeaderBadge[] = [];
   const effectiveStatus = getEffectiveStatus(status, groupAction);
@@ -137,6 +143,17 @@ export const getEpisodeHeaderBadges = ({
       label: getStatusBadgeLabel(effectiveStatus),
       color: getStatusBadgeColor(effectiveStatus),
       'data-test-subj': 'alertingV2EpisodeDetailsHeaderStatusBadge',
+    });
+  }
+
+  if (isFlapping) {
+    badges.push({
+      label: FLAPPING_BADGE_LABEL,
+      color: 'hollow',
+      'data-test-subj': 'alertingV2EpisodeDetailsHeaderFlappingBadge',
+      // Shared FlappingBadge owns the popover; render it via custom badge so AppHeader
+      // does not wrap it in a plain EuiBadge.
+      renderCustomBadge: renderFlappingBadge,
     });
   }
 

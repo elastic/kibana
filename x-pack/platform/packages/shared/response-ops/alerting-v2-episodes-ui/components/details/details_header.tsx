@@ -26,6 +26,7 @@ export interface AlertEpisodeDetailsHeaderProps {
   severity: string | undefined | null;
   episodeAction: EpisodeActionState | undefined;
   groupAction: AlertEpisodeGroupAction | undefined;
+  isFlapping?: boolean;
   titleSize?: EuiTitleSize;
 }
 
@@ -37,6 +38,7 @@ export const AlertEpisodeDetailsHeader = ({
   severity,
   episodeAction,
   groupAction,
+  isFlapping = false,
   titleSize = 'l',
 }: AlertEpisodeDetailsHeaderProps) => {
   const { euiTheme } = useEuiTheme();
@@ -75,6 +77,7 @@ export const AlertEpisodeDetailsHeader = ({
                     status={status}
                     episodeAction={episodeAction}
                     groupAction={groupAction}
+                    isFlapping={isFlapping}
                   />
                 </EuiFlexItem>
               ) : null}
