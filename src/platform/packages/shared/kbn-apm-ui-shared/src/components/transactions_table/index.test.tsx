@@ -22,12 +22,30 @@ jest.mock('@elastic/eui', () => ({
   useIsWithinMaxBreakpoint: jest.fn(),
 }));
 
+jest.mock('../sparkline', () => ({
+  Sparkline: ({ isLoading }: { isLoading?: boolean }) =>
+    isLoading ? (
+      <div data-test-subj="sparkline-loading" />
+    ) : (
+      <div data-test-subj="sparkline-chart" />
+    ),
+}));
+
 const items: TransactionGroup[] = [
   {
     name: 'GET /api',
     latency: { value: 100000 },
     throughput: { value: 10 },
     errorRate: { value: 0.01 },
+  },
+];
+
+const itemsWithSeries: TransactionGroup[] = [
+  {
+    name: 'GET /api',
+    latency: { value: 100000, series: { value: [{ x: 1, y: 200 }] } },
+    throughput: { value: 10, series: { value: [{ x: 1, y: 5 }] } },
+    errorRate: { value: 0.01, series: { value: [{ x: 1, y: 0.01 }] } },
   },
 ];
 
@@ -276,6 +294,71 @@ describe('TransactionsTable', () => {
       );
       expect(screen.getByRole('heading', { name: 'Transactions' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Open in APM' })).toBeInTheDocument();
+    });
+  });
+
+  describe('isSparklineLoading', () => {
+    it('shows a loading indicator in each metric cell when isSparklineLoading is true and items have no series', () => {
+      renderWithIntl(
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={items}
+          isLoading={false}
+          maxCountExceeded={false}
+          showSparklines={true}
+          isSparklineLoading={true}
+        />
+      );
+
+      expect(screen.getAllByTestId('sparkline-loading')).toHaveLength(3);
+      expect(screen.queryByTestId('sparkline-chart')).not.toBeInTheDocument();
+    });
+
+    it('shows no sparkline slot when isSparklineLoading is false and items have no series', () => {
+      renderWithIntl(
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={items}
+          isLoading={false}
+          maxCountExceeded={false}
+          showSparklines={true}
+          isSparklineLoading={false}
+        />
+      );
+
+      expect(screen.queryByTestId('sparkline-loading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sparkline-chart')).not.toBeInTheDocument();
+    });
+
+    it('renders the sparkline chart (not loading) when the item already has series data', () => {
+      renderWithIntl(
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={itemsWithSeries}
+          isLoading={false}
+          maxCountExceeded={false}
+          showSparklines={true}
+          isSparklineLoading={true}
+        />
+      );
+
+      expect(screen.queryByTestId('sparkline-loading')).not.toBeInTheDocument();
+      expect(screen.getAllByTestId('sparkline-chart')).toHaveLength(3);
+    });
+
+    it('suppresses loading indicators when showSparklines is false', () => {
+      renderWithIntl(
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={items}
+          isLoading={false}
+          maxCountExceeded={false}
+          showSparklines={false}
+          isSparklineLoading={true}
+        />
+      );
+
+      expect(screen.queryByTestId('sparkline-loading')).not.toBeInTheDocument();
     });
   });
 

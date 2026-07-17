@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { AppHeader } from '@kbn/app-header';
 import {
   EuiBasicTable,
   EuiButtonIcon,
@@ -30,6 +29,8 @@ import { useDeleteFieldDefinition } from '../hooks/use_delete_field_definition';
 import { FieldDefinitionFlyout } from '../components/field_definition_flyout';
 import * as i18n from '../translations';
 import * as templatesI18n from '../../templates_v2/translations';
+import { CasesAppHeader } from '../../app/cases_app_header';
+import { CasesPageBody } from '../../app/cases_page_body';
 
 export type AllFieldDefinitionsPageProps = Record<string, never>;
 
@@ -114,7 +115,6 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
     {
       field: 'description',
       name: i18n.DESCRIPTION_COLUMN,
-      truncateText: true,
       render: (description: string | undefined) => (
         <EuiText size="s" color="subdued">
           {description ?? '—'}
@@ -194,53 +194,58 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
 
   return (
     <>
-      <AppHeader
+      <CasesAppHeader
         title={i18n.FIELD_LIBRARY_TITLE}
         back={fieldLibraryBack}
         menu={fieldLibraryMenu}
-        sticky={false}
+        // This route can render under the legacy layout (templates enabled, settings redesign
+        // off), where CasesAppHeader doesn't force padding; pin it to the pre-existing 'none' so
+        // making the header sticky doesn't also change its padding there.
+        padding="none"
       />
-      <EuiText size="s" color="subdued">
-        <p>{i18n.FIELD_LIBRARY_DESCRIPTION}</p>
-      </EuiText>
-      <EuiSpacer size="l" />
-      {isLoading ? (
-        <EuiSkeletonText lines={5} />
-      ) : (
-        <EuiBasicTable
-          items={fieldDefinitions}
-          rowHeader="name"
-          columns={columns}
-          data-test-subj="fieldDefinitionsTable"
-        />
-      )}
+      <CasesPageBody>
+        <EuiText size="s" color="subdued">
+          <p>{i18n.FIELD_LIBRARY_DESCRIPTION}</p>
+        </EuiText>
+        <EuiSpacer size="l" />
+        {isLoading ? (
+          <EuiSkeletonText lines={5} />
+        ) : (
+          <EuiBasicTable
+            items={fieldDefinitions}
+            rowHeader="name"
+            columns={columns}
+            data-test-subj="fieldDefinitionsTable"
+          />
+        )}
 
-      {flyoutOpen && (
-        <FieldDefinitionFlyout
-          owner={Array.isArray(owner) ? owner[0] : owner}
-          fieldDefinition={editingFieldDef}
-          onSave={handleSave}
-          onClose={() => {
-            setFlyoutOpen(false);
-            setEditingFieldDef(undefined);
-          }}
-          isSaving={isCreating || isUpdating}
-        />
-      )}
+        {flyoutOpen && (
+          <FieldDefinitionFlyout
+            owner={Array.isArray(owner) ? owner[0] : owner}
+            fieldDefinition={editingFieldDef}
+            onSave={handleSave}
+            onClose={() => {
+              setFlyoutOpen(false);
+              setEditingFieldDef(undefined);
+            }}
+            isSaving={isCreating || isUpdating}
+          />
+        )}
 
-      {deletingFieldDef && (
-        <EuiConfirmModal
-          title={i18n.DELETE_CONFIRM_TITLE}
-          onCancel={() => setDeletingFieldDef(undefined)}
-          onConfirm={handleConfirmDelete}
-          cancelButtonText={i18n.CANCEL}
-          confirmButtonText={i18n.DELETE_FIELD_DEFINITION}
-          buttonColor="danger"
-          data-test-subj="fieldDefinitionDeleteConfirmModal"
-        >
-          <p>{i18n.DELETE_CONFIRM_BODY(deletingFieldDef.name)}</p>
-        </EuiConfirmModal>
-      )}
+        {deletingFieldDef && (
+          <EuiConfirmModal
+            title={i18n.DELETE_CONFIRM_TITLE}
+            onCancel={() => setDeletingFieldDef(undefined)}
+            onConfirm={handleConfirmDelete}
+            cancelButtonText={i18n.CANCEL}
+            confirmButtonText={i18n.DELETE_FIELD_DEFINITION}
+            buttonColor="danger"
+            data-test-subj="fieldDefinitionDeleteConfirmModal"
+          >
+            <p>{i18n.DELETE_CONFIRM_BODY(deletingFieldDef.name)}</p>
+          </EuiConfirmModal>
+        )}
+      </CasesPageBody>
     </>
   );
 };

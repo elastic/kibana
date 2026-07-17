@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
-import { payloadRt } from './custom_link_types';
+import { payloadSchema } from './custom_link_types';
 
 export const updateCustomLinkRoute = defineRoute<void>()({
   endpoint: 'PUT /internal/apm/settings/custom_links/{id}',
-  params: t.type({
-    path: t.type({
-      id: t.string,
+  params: z.object({
+    path: z.object({
+      id: z.string().max(1024),
     }),
-    body: payloadRt,
+    body: payloadSchema,
   }),
 });

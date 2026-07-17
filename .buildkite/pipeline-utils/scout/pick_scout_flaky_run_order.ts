@@ -141,7 +141,8 @@ const buildSteps = (
  * resulting steps via the Buildkite agent.
  *
  * The manifest must already exist on disk; the caller is responsible for placing it
- * there (e.g. by downloading the artifact uploaded by the discovery step).
+ * there. In the flaky runner it is produced by a scoped
+ * `scout discover-playwright-configs --configs <paths>` run (only the requested configs).
  */
 export async function pickScoutFlakyRunOrder(
   scoutConfigsPath: string,

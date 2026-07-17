@@ -9,8 +9,6 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
@@ -46,14 +44,21 @@ import {
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
 } from '../common/constants';
 
+// Fields are optional and unknown keys are ignored so that a config persisted
+// before a field was added to SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS (or after
+// one was removed/renamed) doesn't fail schema validation wholesale and get
+// silently reset to full defaults. validateSignificantEventsTuningConfig
+// already tolerates missing keys, and getSignificantEventsTuningConfig merges
+// the stored value with defaults for any that are absent.
 const sigEventsTuningConfigSchema = schema.object(
   Object.fromEntries(
     Object.entries(SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS).map(([key, { min, max }]) => [
       key,
-      schema.number({ min, max }),
+      schema.maybe(schema.number({ min, max })),
     ])
-  ) as Record<string, ReturnType<typeof schema.number>>,
+  ) as Record<string, ReturnType<typeof schema.maybe>>,
   {
+    unknowns: 'ignore',
     validate: (value) => {
       const errors = validateSignificantEventsTuningConfig(value as Record<string, unknown>);
       return errors.length ? errors.join('; ') : undefined;
@@ -71,27 +76,6 @@ export function registerFeatureFlags(
     .then((isSignificantEventsAvailable) => {
       if (isSignificantEventsAvailable) {
         core.uiSettings.register({
-          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: {
-            category: ['observability'],
-            name: i18n.translate('xpack.significantEvents.significantEventsSettingsName', {
-              defaultMessage: 'Streams significant events',
-            }) as string,
-            value: false,
-            description: i18n.translate(
-              'xpack.significantEvents.significantEventsSettingsDescription',
-              {
-                defaultMessage: 'Enable streams significant events.',
-              }
-            ),
-            type: 'boolean',
-            schema: schema.boolean(),
-            requiresPageReload: true,
-            solutionViews: ['classic', 'oblt'],
-            technicalPreview: true,
-          },
-        });
-
-        core.uiSettings.register({
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS]: {
             category: ['observability'],
             name: i18n.translate('xpack.significantEvents.sigEventsIndexPatternsSettingsName', {
@@ -108,29 +92,6 @@ export function registerFeatureFlags(
             type: 'string',
             schema: schema.string(),
             requiresPageReload: false,
-            solutionViews: ['classic', 'oblt'],
-            technicalPreview: true,
-            readonly: true,
-            readonlyMode: 'ui',
-          },
-        });
-
-        core.uiSettings.register({
-          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY]: {
-            category: ['observability'],
-            name: i18n.translate('xpack.significantEvents.significantEventsDiscoverySettingsName', {
-              defaultMessage: 'Streams significant events discovery',
-            }) as string,
-            value: false,
-            description: i18n.translate(
-              'xpack.significantEvents.significantEventsDiscoverySettingsDescription',
-              {
-                defaultMessage: 'Enable streams significant events discovery.',
-              }
-            ),
-            type: 'boolean',
-            schema: schema.boolean(),
-            requiresPageReload: true,
             solutionViews: ['classic', 'oblt'],
             technicalPreview: true,
             readonly: true,
