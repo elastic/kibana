@@ -66,7 +66,7 @@ export const allowedExperimentalValues = Object.freeze({
    * `cancel` response action for Elastic Defend Endpoint
    * Release: 9.5
    */
-  responseActionsEndpointCancel: false,
+  responseActionsEndpointCancel: true,
 
   /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
