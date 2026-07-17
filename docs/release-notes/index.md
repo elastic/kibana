@@ -33,42 +33,42 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Features and enhancements [kibana-9.5.0-features-enhancements]
 
 **Elastic Agent Builder**:
-* Add install, open, and delete controls to the **Agent Builder Traces** option on the **GenAI Settings** page, and prevent deleted dashboards from being reinstalled when {{kib}} restarts [#276643]({{kib-pull}}276643).
-* Make Agent Builder tracing generally available so you can view trace waterfalls for each response, use the built-in traces skill, and monitor activity in the overview dashboard while excluding sensitive prompts and tool parameters by default [#276174]({{kib-pull}}276174).
-* Add an embeddable Agent Builder conversation input that opens **Agent Builder** and sends the message with attachments preserved [#272166]({{kib-pull}}272166).
-* Set a resizable custom width for Agent Builder attachment canvas flyouts in full-screen view and overlay mode in the sidebar [#265200]({{kib-pull}}265200).
-* Share private agents with selected people using per-agent access control alongside **Public**, **Shared**, and **Private** visibility [#267530]({{kib-pull}}267530).
 * Create skills in Agent Builder chat, preview drafts in attachments, and save them from the conversation [#265883]({{kib-pull}}265883).
 * Enable Agent Builder to pause and ask up to five clarifying multiple-choice questions before acting, then resume after you answer [#274672]({{kib-pull}}274672).
+* Share private agents with selected people using per-agent access control alongside **Public**, **Shared**, and **Private** visibility [#267530]({{kib-pull}}267530).
+* Add an embeddable Agent Builder conversation input that opens **Agent Builder** and sends the message with attachments preserved [#272166]({{kib-pull}}272166).
+* Make Agent Builder tracing generally available so you can view trace waterfalls for each response, use the built-in traces skill, and monitor activity in the overview dashboard while excluding sensitive prompts and tool parameters by default [#276174]({{kib-pull}}276174).
+* Add install, open, and delete controls to the **Agent Builder Traces** option on the **GenAI Settings** page, and prevent deleted dashboards from being reinstalled when {{kib}} restarts [#276643]({{kib-pull}}276643).
+* Set a resizable custom width for Agent Builder attachment canvas flyouts in full-screen view and overlay mode in the sidebar [#265200]({{kib-pull}}265200).
 * Limit which connectors an agent can use with optional `connector_ids`, so `@` autocomplete and connector search respect the agent's allowed set [#267333]({{kib-pull}}267333).
 * Show permitted system indices and aliases in Agent Builder index selection, including alerts, ML anomaly results, SLOs, the entity store, exception lists, SIEM signals, and {{stack-monitor-app}} [#265819]({{kib-pull}}265819).
 
 **Alerting and cases**:
-* Add **Add to chat** and **Summarize case** actions to the case details page when `xpack.cases.chat.enabled` is true [#276635]({{kib-pull}}276635).
+* Snooze and unsnooze individual alerts with optional expiry or auto-unsnooze conditions [#264090]({{kib-pull}}264090).
 * Search, summarize, and update cases from Agent Builder chat with a cases skill, tools, and case attachments [#271438]({{kib-pull}}271438).
-* Improve case templates with toggle fields, unique template names, and a simplified default starter template when case templates v2 is enabled [#277626]({{kib-pull}}277626).
-* Split the case template editor into **Fields** and **Configuration** tabs when case templates v2 is enabled [#277269]({{kib-pull}}277269).
-* Set default connectors and case settings in case templates when `xpack.cases.templates.enabled` is true [#275690]({{kib-pull}}275690).
-* Add a display-only Markdown field type when case templates v2 is enabled [#278329]({{kib-pull}}278329).
+* Add **Add to chat** and **Summarize case** actions to the case details page when `xpack.cases.chat.enabled` is true [#276635]({{kib-pull}}276635).
 * Attach **Lens** visualizations to cases from **Attach saved object** when case attachments are enabled [#274959]({{kib-pull}}274959).
-* Extract case observables automatically when alerts are added through the API, workflows, or Agent Builder [#273455]({{kib-pull}}273455).
 * Attach Discover sessions, dashboards, and maps to cases when `xpack.cases.attachments.enabled` is true [#272423]({{kib-pull}}272423).
 * Add an **Attach** button to the case **Activity** and **Attachments** tabs, including **Upload file** [#269560]({{kib-pull}}269560).
 * Add **Type** and **Author** filters on the case **Attachments** tab [#272759]({{kib-pull}}272759).
 * Redesign the case **Attachments** tab so each attachment type appears only when data exists, and add a **Refresh** control [#270518]({{kib-pull}}270518).
-* Snooze and unsnooze individual alerts with optional expiry or auto-unsnooze conditions [#264090]({{kib-pull}}264090).
+* Extract case observables automatically when alerts are added through the API, workflows, or Agent Builder [#273455]({{kib-pull}}273455).
+* Improve case templates with toggle fields, unique template names, and a simplified default starter template when case templates v2 is enabled [#277626]({{kib-pull}}277626).
+* Split the case template editor into **Fields** and **Configuration** tabs when case templates v2 is enabled [#277269]({{kib-pull}}277269).
+* Set default connectors and case settings in case templates when `xpack.cases.templates.enabled` is true [#275690]({{kib-pull}}275690).
+* Add a display-only Markdown field type when case templates v2 is enabled [#278329]({{kib-pull}}278329).
 * Add `xpack.alerting.alertsService.totalFieldsLimit` (default `2800`, range `2500`–`5000`) to control {{es}} `index.mapping.total_fields.limit` on `.alerts-*` indices and templates [#274024]({{kib-pull}}274024).
 
 **Connectivity**:
-* Add a **Filter by feature** control to the create-connector flyout, and show the HTTP connector in standard connector lists [#271686]({{kib-pull}}271686).
-* Improve authentication options for Agent Builder connectors by listing recommended methods first with a **Recommended** badge and hiding legacy options when you create new connectors [#273410]({{kib-pull}}273410).
-* Add `secretQueryParams` support to the HTTP connector so encrypted query parameters are stored in connector secrets and injected into request URLs [#258291]({{kib-pull}}258291).
 * Add a **OneDrive** connector to search files, browse drives, and read file content in Agent Builder and Workflows [#275244]({{kib-pull}}275244).
 * Add a **Box** connector to search files and folders and read file content in Agent Builder and Workflows [#271306]({{kib-pull}}271306).
 * Add an **Outlook** connector to search and browse email messages and download attachments in Agent Builder and Workflows [#266766]({{kib-pull}}266766).
 * Add a **Snowflake** connector to run SQL queries, explore databases and tables, and search with Cortex Search in Agent Builder and Workflows [#264827]({{kib-pull}}264827).
 * Add an **Azure Blob Storage** connector to list containers and blobs, read blob content, and search storage in Agent Builder and Workflows [#259439]({{kib-pull}}259439).
 * Add a **HubSpot** connector to search and retrieve contacts, companies, deals, tickets, and engagements in Agent Builder and Workflows [#257675]({{kib-pull}}257675).
+* Add a **Filter by feature** control to the create-connector flyout, and show the HTTP connector in standard connector lists [#271686]({{kib-pull}}271686).
+* Improve authentication options for Agent Builder connectors by listing recommended methods first with a **Recommended** badge and hiding legacy options when you create new connectors [#273410]({{kib-pull}}273410).
+* Add `secretQueryParams` support to the HTTP connector so encrypted query parameters are stored in connector secrets and injected into request URLs [#258291]({{kib-pull}}258291).
 * Add workflow steps to the **Slack (v2)** connector to look up conversation history, channel details, workspace users, and users by email [#273548]({{kib-pull}}273548).
 * Enable OAuth authorization for the **GitHub** and **Slack (v2)** connectors so you can connect using your own OAuth apps [#259549]({{kib-pull}}259549).
 * Add **OAuth Client Credentials (Private Key JWT)** authentication to the **SharePoint Online** connector so you can authenticate with a certificate instead of a client secret [#268847]({{kib-pull}}268847).
@@ -79,15 +79,15 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add **Links** panel support to the Dashboards API [#268965]({{kib-pull}}268965).
 * Add `access_control.access_mode` support to `PUT /api/dashboards/{id}` for updating dashboard permissions [#266700]({{kib-pull}}266700).
 * Add a **Write a query** values source for filter controls so you can pre-filter options-list and range-slider values with {{esql}} [#266492]({{kib-pull}}266492).
-* Add a **Density** option to **Lens** Metric charts, with **Default** used for new charts and **Compact** preserved for existing ones [#265526]({{kib-pull}}265526).
-* Add **Style template** presets (**Top**, **Middle**, **Bottom**, **Custom**) to **Lens** Metric charts [#265304]({{kib-pull}}265304).
-* Add a **Use global filters** layer setting to {{esql}} visualizations in **Lens** [#264613]({{kib-pull}}264613).
-* Apply the same **Fast mode** approximation setting from {{esql}} dashboard panels to **Vega** visualizations that use the same query [#276999]({{kib-pull}}276999).
-* Place unpinned controls above the top dashboard section instead of below it [#273089]({{kib-pull}}273089).
-* Change the default **Include empty rows** setting in **Lens** to depend on visualization type [#271856]({{kib-pull}}271856).
 * Highlight related dashboard panels when you select an {{esql}} control label [#264426]({{kib-pull}}264426).
 * Add feedback when filters or drilldowns cannot apply to computed values on {{esql}} XY, heatmap, and partition charts [#269722]({{kib-pull}}269722).
 * Show unavailable filter and drilldown actions with an explanation when a {{esql}} data table column is not filterable [#269635]({{kib-pull}}269635).
+* Apply the same **Fast mode** approximation setting from {{esql}} dashboard panels to **Vega** visualizations that use the same query [#276999]({{kib-pull}}276999).
+* Add a **Use global filters** layer setting to {{esql}} visualizations in **Lens** [#264613]({{kib-pull}}264613).
+* Add a **Density** option to **Lens** Metric charts, with **Default** used for new charts and **Compact** preserved for existing ones [#265526]({{kib-pull}}265526).
+* Add **Style template** presets (**Top**, **Middle**, **Bottom**, **Custom**) to **Lens** Metric charts [#265304]({{kib-pull}}265304).
+* Place unpinned controls above the top dashboard section instead of below it [#273089]({{kib-pull}}273089).
+* Change the default **Include empty rows** setting in **Lens** to depend on visualization type [#271856]({{kib-pull}}271856).
 * Update the dashboard empty state in edit mode to card-style actions aligned with **Add to dashboard** [#269407]({{kib-pull}}269407).
 * Set numeric **Lens** heatmap Y-axis buckets to descending sort by default for natural numeric order [#268961]({{kib-pull}}268961).
 * Add a **Go to dashboard** button to the dashboard save toast when saving from outside the **Dashboard** app [#268326]({{kib-pull}}268326).
@@ -100,9 +100,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Data ingestion and {{fleet}}**:
 * Add an ILM policy picker to **Data retention settings** in the integration policy editor so you can assign an ILM policy to an integration namespace (requires namespace opt-in) [#275197]({{kib-pull}}275197).
+* Add opt-in namespace-level customization for integrations so you can manage per-namespace index templates (for example, `{namespace}@custom`) [#262568]({{kib-pull}}262568).
+* Add bulk revoke and delete actions, filtering, and search to the **Enrollment tokens** page in {{fleet}} [#265916]({{kib-pull}}265916).
 * Add a **Cancel unenrollment** action in the agent activity flyout so you can cancel a scheduled automatic unenrollment during the grace period [#271270]({{kib-pull}}271270).
 * Add **Remove collector** actions for OpAMP collectors in {{fleet}}, including bulk removal [#268711]({{kib-pull}}268711).
-* Add bulk revoke and delete actions, filtering, and search to the **Enrollment tokens** page in {{fleet}} [#265916]({{kib-pull}}265916).
 * Enable automatic installation of dependencies for composable integration packages during package installation [#263762]({{kib-pull}}263762).
 * Rename user-facing **Cloud Connector** copy to **Federated Identity** across {{fleet}} federated-identity onboarding flows [#261353]({{kib-pull}}261353).
 * Enable OpenTelemetry-based permission verification for **Federated Identity** setups in {{fleet}} by default [#265619]({{kib-pull}}265619).
@@ -113,7 +114,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add **Condition** fields to integration, input, and stream settings in the package policy editor [#270315]({{kib-pull}}270315).
 * Add support for a remote {{es}} output as an exporter for OpenTelemetry integrations in {{fleet}} [#270267]({{kib-pull}}270267).
 * Add a `data_stream.type` variable to the simplified package policy API so input-only packages can route data to a different index prefix (for example, `logs-*` instead of `metrics-*`) [#269895]({{kib-pull}}269895).
-* Add opt-in namespace-level customization for integrations so you can manage per-namespace index templates (for example, `{namespace}@custom`) [#262568]({{kib-pull}}262568).
 
 **Data management**:
 * Add `min_age`, `min_docs`, `min_size`, `min_primary_shard_docs`, and `min_primary_shard_size` rollover conditions to **Index Lifecycle Management** hot-phase actions [#270398]({{kib-pull}}270398).
@@ -124,14 +124,14 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Discover**:
 * Add **Save to Dashboard** in Discover so you can save sessions directly to a dashboard from the save modal [#260092]({{kib-pull}}260092).
-* Render inline highlighting in Discover for {{esql}} `TOP_SNIPPETS` results when the `highlight` option is enabled [#271519]({{kib-pull}}271519).
-* Improve Agent Builder time-over-time analysis in Discover by overlaying the selected and preceding time ranges as separate lines on the same time axis [#270338]({{kib-pull}}270338).
-* Integrate Agent Builder with {{esql}} Discover for data analysis, context sync, drill-down queries, and **Run in new tab** [#261970]({{kib-pull}}261970).
-* Add tab-scoped actions to Discover's application menu, including inspect and mode switching [#269590]({{kib-pull}}269590).
 * Add a change point chart view for {{esql}} change-point results [#265331]({{kib-pull}}265331).
 * Show a **Change point chart** in the row flyout for {{esql}} change-point result rows [#271793]({{kib-pull}}271793).
 * Remove the **Technical preview** badge from change point views in **Discover** and on the **Change point detection** page [#274950]({{kib-pull}}274950).
 * Show sparkline charts in the table for {{esql}} queries that return a `Sparkline` column [#268785]({{kib-pull}}268785).
+* Integrate Agent Builder with {{esql}} Discover for data analysis, context sync, drill-down queries, and **Run in new tab** [#261970]({{kib-pull}}261970).
+* Improve Agent Builder time-over-time analysis in Discover by overlaying the selected and preceding time ranges as separate lines on the same time axis [#270338]({{kib-pull}}270338).
+* Render inline highlighting in Discover for {{esql}} `TOP_SNIPPETS` results when the `highlight` option is enabled [#271519]({{kib-pull}}271519).
+* Add tab-scoped actions to Discover's application menu, including inspect and mode switching [#269590]({{kib-pull}}269590).
 * Open background-search **Inspect** details in a child flyout from **Background searches** in Discover [#250252]({{kib-pull}}250252).
 
 **{{product.observability}} solution**:
@@ -146,30 +146,31 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Add **Out-of-range date handling** to the MongoDB native connector so syncs clamp or convert out-of-range dates instead of failing [#277685]({{kib-pull}}277685).
 
 **{{esql}} editor**:
-* Enable **Natural language** to {{esql}} in the {{esql}} editor when your subscription level includes this feature [#266561]({{kib-pull}}266561).
+* Enable **Fast mode** in Discover and Dashboards to run eligible {{esql}} `STATS` queries faster by using [approximate results](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) [#276384]({{kib-pull}}276384).
 * Add AI-driven inline code completion in the {{esql}} editor, including ghost hints and **Undo AI fix** / **Keep AI fix** review actions [#256857]({{kib-pull}}256857).
 * Add **Fix with AI** quick-fix actions for {{esql}} validation errors in the editor [#269455]({{kib-pull}}269455).
+* Enable **Natural language** to {{esql}} in the {{esql}} editor when your subscription level includes this feature [#266561]({{kib-pull}}266561).
 * Warn when a closed lookup index is referenced in `LOOKUP JOIN` instead of offering **Create lookup index** [#274534]({{kib-pull}}274534).
 * Sort columns in the **Lookup Index** editor [#273734]({{kib-pull}}273734).
 * Replace free-text filtering with **KQL** search and autocomplete in the **Lookup Index** editor [#271284]({{kib-pull}}271284).
 * Make the {{esql}} `FUSE` command generally available [#273994]({{kib-pull}}273994).
 * Improve recommended {{esql}} queries for remote-cluster sources [#273292]({{kib-pull}}273292).
-* Enable **Fast mode** in Discover and Dashboards to run eligible {{esql}} `STATS` queries faster by using [approximate results](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) [#276384]({{kib-pull}}276384).
 
 **{{kib}} platform**:
-* Search within **Inspect** flyouts for request and response details, background searches, and saved objects [#269744]({{kib-pull}}269744).
-* Persist your last selected space in the user profile and restore it on the next visit when **Remember last selected space** is enabled [#268053]({{kib-pull}}268053).
-* Add create, read, update, and delete routes at `/api/tags` for saved-object tags while keeping legacy `/api/saved_objects_tagging` routes deprecated [#266220]({{kib-pull}}266220).
-* Use the browser `Accept-Language` header to select the UI language on all deployment types when no profile language or locale cookie is set [#275996]({{kib-pull}}275996).
-* Set the `theme:darkMode` default to **System** so {{kib}} matches your OS appearance on first visit [#273826]({{kib-pull}}273826).
 * Add a customization modal for reordering and hiding solution navigation items, with personalized preferences preserved across sessions [#270276]({{kib-pull}}270276).
-* Enforce the `form-action` Content Security Policy directive, previously available only in report-only mode [#267937]({{kib-pull}}267937).
-* Add UI in **Snapshot and Restore** to view and set the `persistent.repositories.default_repository` cluster setting [#265592]({{kib-pull}}265592).
-* Add display language selection (Beta) to the profile and user menu [#260835]({{kib-pull}}260835).
-* Add `notifications.connectors.default.email` as a Docker environment variable [#272761]({{kib-pull}}272761).
 * Add a technical-preview date range picker in Discover and Dashboards that accepts flexible relative and absolute time ranges in plain text [#260163]({{kib-pull}}260163).
+* Add display language selection (Beta) to the profile and user menu [#260835]({{kib-pull}}260835).
+* Use the browser `Accept-Language` header to select the UI language on all deployment types when no profile language or locale cookie is set [#275996]({{kib-pull}}275996).
+* Persist your last selected space in the user profile and restore it on the next visit when **Remember last selected space** is enabled [#268053]({{kib-pull}}268053).
+* Set the `theme:darkMode` default to **System** so {{kib}} matches your OS appearance on first visit [#273826]({{kib-pull}}273826).
+* Search within **Inspect** flyouts for request and response details, background searches, and saved objects [#269744]({{kib-pull}}269744).
+* Add UI in **Snapshot and Restore** to view and set the `persistent.repositories.default_repository` cluster setting [#265592]({{kib-pull}}265592).
+* Add create, read, update, and delete routes at `/api/tags` for saved-object tags while keeping legacy `/api/saved_objects_tagging` routes deprecated [#266220]({{kib-pull}}266220).
+* Enforce the `form-action` Content Security Policy directive, previously available only in report-only mode [#267937]({{kib-pull}}267937).
+* Add `notifications.connectors.default.email` as a Docker environment variable [#272761]({{kib-pull}}272761).
 
 **Machine learning and {{infer}}**:
+* Replace the standalone **Select data view** page with an inline data source picker on AIOps and Data Visualizer pages [#266672]({{kib-pull}}266672).
 * Show warnings on the **Feature settings** page when assigned models or endpoints are unavailable [#262262]({{kib-pull}}262262).
 * Add a **Geographies** tab to the **Manage region preferences** modal for restricting Elastic {{infer-cap}} Service routing by geo zone instead of individual CSP regions [#277331]({{kib-pull}}277331).
 * Add a read-only privilege tier for browsing {{infer}} endpoints and **Feature settings** in **Model Management** without write access [#272204]({{kib-pull}}272204).
@@ -181,21 +182,20 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Prefer Jina Embeddings v5 when installing **Elastic documentation** on Elastic {{infer-cap}} Service, with ELSER as a fallback [#275461]({{kib-pull}}275461).
 * Add **Token usage tracking** for {{infer}} calls, and install a token usage dashboard when you enable the setting in **GenAI Settings** [#260956]({{kib-pull}}260956).
 * Add `SPARKLINE` to the recommended {{esql}} query for **Identify patterns** in Log Pattern Analysis [#269438]({{kib-pull}}269438).
-* Replace the standalone **Select data view** page with an inline data source picker on AIOps and Data Visualizer pages [#266672]({{kib-pull}}266672).
 * Add model memory estimation to the edit-job flyout for anomaly detection and data frame analytics jobs, with **Apply** on **Model memory limit** [#266590]({{kib-pull}}266590).
 * Route anomaly detection and data frame analytics feedback through the shared **Give feedback** experience with ML-specific questions [#265015]({{kib-pull}}265015).
 * Restore **Start deployment** and **Update deployment** for rerank trained models, and tailor the deployment flyout for rerank models [#261119]({{kib-pull}}261119).
 
 **Workflows**:
+* Enable AI-assisted workflow authoring in the Elastic Workflows editor [#278343]({{kib-pull}}278343).
 * Show **What do you want to automate?** in the Agent Builder sidebar on the Elastic Workflows YAML editor, and auto-open the sidebar when the editor loads [#276297]({{kib-pull}}276297).
 * Auto-open Agent Builder in the workflow YAML editor, remove the separate toolbar chat button, and align workflow attachment and diff previews with the editor styling [#275765]({{kib-pull}}275765).
-* Enable AI-assisted workflow authoring in the Elastic Workflows editor [#278343]({{kib-pull}}278343).
+* Add human-in-the-loop approval and external input steps to approve, reject, or submit structured input in {{kib}} or through signed links and Slack notifications [#275273]({{kib-pull}}275273).
 * Add a built-in Agent Builder tool to list recent workflow runs without an execution ID [#269335]({{kib-pull}}269335).
 * Add a `cases.removeTags` workflow step to remove tags from a case in one step [#268465]({{kib-pull}}268465).
 * Add a `cases.pushCases` workflow step to push cases to their external connectors [#267539]({{kib-pull}}267539).
 * Add case workflow triggers so workflows can start when cases are created, updated, change status, receive attachments, or receive comments [#257284]({{kib-pull}}257284).
 * Make Elastic Workflows version history generally available, recording every save so you can compare versions and restore a previous definition [#276311]({{kib-pull}}276311).
-* Add human-in-the-loop approval and external input steps to approve, reject, or submit structured input in {{kib}} or through signed links and Slack notifications [#275273]({{kib-pull}}275273).
 * Add a `queue` concurrency strategy so excess runs wait in a durable backlog until a slot opens, with configurable `queue-size` and `queue-ttl` [#268596]({{kib-pull}}268596).
 * Add a date range filter when you select a historical workflow or step execution for replay or testing [#266706]({{kib-pull}}266706).
 * Show a read-only workflow graph in the editor when **Elastic Workflows: Experimental Features** is enabled in **Advanced Settings** [#276383]({{kib-pull}}276383).
