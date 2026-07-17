@@ -15,7 +15,6 @@ import type { MemoryToolsOptions } from '../memory_and_investigation/tools/memor
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
 import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
-import { registerInvestigationAgents } from '../memory_and_investigation/agents/investigation';
 
 export const createMemoryToolsOptions = ({
   getScopedClients,
@@ -48,11 +47,6 @@ export const createMemoryToolsOptions = ({
  * flag: their registration APIs are setup-only and cannot be driven dynamically once `start()`
  * has run, so they rely on request-time gating instead. Skills, which support start-phase
  * registration, are gated by the availability flag from `start()` (see `registerSignificantEventsSkills`).
- *
- * `investigationEnabled` is a one-time snapshot of `streams.investigationEnabled` read at setup, so
- * the investigation agents are only registered when that flag is already on at boot. The matching
- * investigation *skill* is registered at start and can flip on at runtime, so enabling investigation
- * after boot exposes the skill immediately but the agents only after a restart.
  */
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
@@ -60,19 +54,14 @@ export const registerStreamsAgentBuilder = async ({
   server,
   logger,
   telemetry,
-  investigationEnabled = false,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-  investigationEnabled?: boolean;
 }): Promise<void> => {
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
   registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
-  if (investigationEnabled) {
-    registerInvestigationAgents(agentBuilder);
-  }
 };

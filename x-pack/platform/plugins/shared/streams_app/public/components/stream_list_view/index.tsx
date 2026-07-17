@@ -57,7 +57,7 @@ export function StreamListView() {
 
   const {
     ui: { manage: canManageStreamsKibana },
-    features: { significantEventsDiscovery, queryStreams },
+    features: { significantEvents, queryStreams },
   } = useStreamsPrivileges();
 
   const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
@@ -166,9 +166,7 @@ export function StreamListView() {
     { defaultMessage: 'Classic stream' }
   );
 
-  const showSignificantEventsDiscovery = Boolean(
-    significantEventsDiscovery?.available && significantEventsDiscovery.enabled
-  );
+  const showSignificantEventsDiscovery = Boolean(significantEvents?.available);
   const showQueryStreams = Boolean(queryStreams?.enabled);
   const canCreateClassicStream = canManageStreamsKibana && canManageClassicElasticsearch;
   const significantEventsDiscoveryHref = router.link('/_discovery');
@@ -252,7 +250,7 @@ export function StreamListView() {
 
   return (
     <>
-      <StreamsAppHeader title={pageTitle} menu={menu} docLink={streamsDocsLink} padding="m" />
+      <StreamsAppHeader title={pageTitle} menu={menu} docLink={streamsDocsLink} />
       <StreamsAppPageTemplate.Body grow paddingSize="m">
         {streamsListFetch.loading && streamsListFetch.value === undefined ? (
           <EuiEmptyPrompt
