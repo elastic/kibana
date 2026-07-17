@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LifecycleDetection, SignalEntry } from '@kbn/significant-events-schema';
+import type { Discovery, LifecycleDetection, SignalEntry } from '@kbn/significant-events-schema';
 import { findDetectionSignal } from './resolve_detection_signal';
 
 const mockDetection = (overrides: Partial<LifecycleDetection> = {}): LifecycleDetection => ({
@@ -18,17 +18,34 @@ const mockDetection = (overrides: Partial<LifecycleDetection> = {}): LifecycleDe
   ...overrides,
 });
 
+const mockSignalMetadata = {
+  detection_id: 'det-1',
+  rule_uuid: 'rule-uuid-1',
+  rule_name: 'latency-p95-spike',
+  change_point_type: 'spike' as const,
+  p_value: 0.01,
+};
+
 const mockSignal = (overrides: Partial<SignalEntry> = {}): SignalEntry => ({
   type: 'detection',
   stream_name: 'logs.web-frontend',
   description: 'Latency spike detected',
   evidence: { esql_query: 'FROM logs | LIMIT 1', result: 'found' },
-  metadata: {
-    detection_id: 'det-1',
-    rule_uuid: 'rule-uuid-1',
-    rule_name: 'latency-p95-spike',
-    change_point_type: 'spike',
-  },
+  metadata: mockSignalMetadata,
+  ...overrides,
+});
+
+const mockDiscovery = (overrides: Partial<Discovery> = {}): Discovery => ({
+  '@timestamp': '2026-07-10T12:00:00Z',
+  kind: 'discovery',
+  discovery_id: 'disc-1',
+  event_id: 'evt-1',
+  processed: false,
+  title: 'Web latency spike',
+  summary: 'Latency increased on web-frontend.',
+  severity: '60-high',
+  confidence: 0.9,
+  stream_names: ['logs.web-frontend'],
   ...overrides,
 });
 
@@ -41,10 +58,8 @@ describe('findDetectionSignal', () => {
   it('does not match a different detection_id on the same stream', () => {
     const signal = mockSignal({
       metadata: {
+        ...mockSignalMetadata,
         detection_id: 'det-other',
-        rule_uuid: 'rule-uuid-1',
-        rule_name: 'latency-p95-spike',
-        change_point_type: 'spike',
       },
     });
     expect(findDetectionSignal(mockDetection(), { eventSignals: [signal] })).toBeUndefined();
@@ -62,14 +77,9 @@ describe('findDetectionSignal', () => {
     expect(
       findDetectionSignal(mockDetection(), {
         discoveries: [
-          {
-            '@timestamp': '2026-07-10T12:00:00Z',
-            kind: 'discovery',
-            discovery_id: 'disc-1',
-            event_id: 'evt-1',
-            processed: false,
+          mockDiscovery({
             signals: [discoverySignal],
-          },
+          }),
         ],
         eventSignals: [eventSignal],
       })

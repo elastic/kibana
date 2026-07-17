@@ -16,19 +16,16 @@ interface StreamFeaturesResponse {
 export const useFetchStreamFeatures = (
   streamName: string | undefined
 ): UseQueryResult<Feature[], Error> => {
-  const { streams } = useKibana().services;
+  const { http } = useKibana().services;
 
   return useQuery<Feature[], Error>({
     queryKey: ['nightshift.streamFeatures', streamName],
     enabled: Boolean(streamName),
     queryFn: async ({ signal }) => {
-      const response = await streams.streamsRepositoryClient.fetch<StreamFeaturesResponse>(
-        'GET /internal/streams/{name}/features',
+      const response = await http.get<StreamFeaturesResponse>(
+        `/internal/streams/${encodeURIComponent(streamName!)}/features`,
         {
-          params: {
-            path: { name: streamName! },
-            query: { include_excluded: true },
-          },
+          query: { include_excluded: true },
           signal,
         }
       );

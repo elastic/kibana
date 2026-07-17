@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AgentBuilderPublicPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 export interface SignificantEventsPublicPluginSetupDependencies {}
 
 export interface SignificantEventsPublicPluginStartDependencies {
-  agentBuilder?: AgentBuilderPublicPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }

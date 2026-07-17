@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
-import type { AgentBuilderPublicPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import {
   SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
   type SignificantEventDetectionAttachment,
@@ -33,7 +33,7 @@ export const significantEventDetectionAttachmentDefinition: AttachmentUIDefiniti
 export const registerSignificantEventDetectionAttachment = ({
   agentBuilder,
 }: {
-  agentBuilder: AgentBuilderPublicPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
 }): void => {
   agentBuilder.attachments.addAttachmentType(
     SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
