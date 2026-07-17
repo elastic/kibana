@@ -6,7 +6,7 @@
  */
 
 import {
-  type KbnComboBoxObject,
+  type EuiComboBoxObject,
   type KibanaUrl,
   type Locator,
   type ScoutPage,
@@ -44,7 +44,7 @@ export class ServiceMapPage {
   public serviceMapFindMatchSummary: Locator;
   public readonly serviceMapEmbeddable: Locator;
   public readonly serviceMapEditorSaveButton: Locator;
-  public readonly serviceMapEditorServiceNameComboBox: KbnComboBoxObject;
+  public readonly serviceMapEditorServiceNameComboBox: EuiComboBoxObject;
   public readonly serviceMapEditorKueryInput: Locator;
   public readonly serviceMapViewFullMapButton: Locator;
   public readonly dashboardEmbeddablePanel: Locator;
