@@ -105,6 +105,9 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
     });
 
     expect(response).toHaveStatusCode(404);
+    expect(response.body.message).toBe(
+      'A Discover session with ID [does-not-exist] was not found.'
+    );
   });
 
   apiTest('returns 403 when the user cannot read Discover sessions', async ({ apiClient }) => {
