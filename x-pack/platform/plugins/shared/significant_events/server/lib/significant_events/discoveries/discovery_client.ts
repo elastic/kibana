@@ -9,6 +9,7 @@ import { esql } from '@elastic/esql';
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLAstExpression } from '@elastic/esql/types';
+import type { Discovery } from '@kbn/significant-events-schema';
 import {
   type BulkCreateOptions,
   type CommonSearchOptions,
@@ -25,11 +26,14 @@ import {
 } from '../latest_source_query';
 import {
   DISCOVERIES_DATA_STREAM,
-  type Discovery,
+  storedDiscoverySchema,
   type StoredDiscovery,
   type discoveriesMappings,
 } from './data_stream';
-import { FIELD_DISCOVERY_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
+import { FIELD_DISCOVERY_ID, FIELD_EVENT_ID } from '../field_names';
+
+/** Shape of a raw ES document before the `processed` flag is computed. */
+type RawDiscoveryRow = Omit<Discovery, 'processed'>;
 
 const PROCESSED_CHUNK_SIZE = 250;
 
@@ -50,10 +54,13 @@ export class DiscoveryClient {
     }
   ) {}
 
-  async bulkCreate(discoveries: Discovery[], { throwOnFail = false }: BulkCreateOptions = {}) {
+  async bulkCreate(
+    discoveries: RawDiscoveryRow[],
+    { throwOnFail = false }: BulkCreateOptions = {}
+  ) {
     const response = await this.clients.dataStreamClient.create({
       space: this.clients.space,
-      documents: discoveries,
+      documents: discoveries.map((d) => storedDiscoverySchema.parse(d)),
     });
 
     if (throwOnFail) {
@@ -64,28 +71,26 @@ export class DiscoveryClient {
   }
 
   private buildWhere(): ESQLAstExpression {
-    const where: ESQLAstExpression = esql.exp`${esql.col('kind')} != ${esql.str(KIND_HANDLED)}`;
-
-    return where;
+    return esql.exp`${esql.col('kind')} != ${esql.str(KIND_HANDLED)}`;
   }
 
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: Discovery[] }> {
-    const result = await runLatestSourceEsqlQuery<Discovery>({
+    const result = await runLatestSourceEsqlQuery<RawDiscoveryRow>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: DISCOVERIES_DATA_STREAM,
       where: this.buildWhere(),
-      groupBy: FIELD_DISCOVERY_SLUG,
+      groupBy: FIELD_EVENT_ID,
     });
 
-    const processedSlugs = await this.getProcessedSlugs(
-      result.hits.map((h) => h.discovery_slug).filter((slug): slug is string => Boolean(slug))
+    const processedEventIds = await this.getProcessedEventIds(
+      result.hits.map((h) => h.event_id).filter((id): id is string => Boolean(id))
     );
     return {
       hits: result.hits.map((raw) => ({
         ...raw,
-        processed: processedSlugs.has(raw.discovery_slug ?? ''),
+        processed: processedEventIds.has(raw.event_id),
       })),
     };
   }
@@ -93,37 +98,37 @@ export class DiscoveryClient {
   async findLatestPaginated(
     options: PaginatedSearchOptions = {}
   ): Promise<PaginatedResponse<Discovery>> {
-    const result = await runPaginatedLatestSourceEsqlQuery<Discovery>({
+    const result = await runPaginatedLatestSourceEsqlQuery<RawDiscoveryRow>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: DISCOVERIES_DATA_STREAM,
       where: this.buildWhere(),
-      groupBy: FIELD_DISCOVERY_SLUG,
+      groupBy: FIELD_EVENT_ID,
     });
 
-    if (!result.hits.length) return result;
+    if (!result.hits.length) return { ...result, hits: [] };
 
-    const processedSlugs = await this.getProcessedSlugs(
-      result.hits.map((h) => h.discovery_slug).filter((slug): slug is string => Boolean(slug))
+    const processedEventIds = await this.getProcessedEventIds(
+      result.hits.map((h) => h.event_id).filter((id): id is string => Boolean(id))
     );
 
     return {
       ...result,
       hits: result.hits.map((raw) => ({
         ...raw,
-        processed: processedSlugs.has(raw.discovery_slug),
+        processed: processedEventIds.has(raw.event_id),
       })),
     };
   }
 
-  private async getProcessedSlugs(slugs: string[]): Promise<Set<string>> {
+  private async getProcessedEventIds(eventIds: string[]): Promise<Set<string>> {
     return runGetProcessedIds({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DISCOVERIES_DATA_STREAM,
-      idField: FIELD_DISCOVERY_SLUG,
-      idValues: slugs,
+      idField: FIELD_EVENT_ID,
+      idValues: eventIds,
       stateKinds: ['discovery', KIND_CLEARANCE],
       handledKind: KIND_HANDLED,
       chunkSize: PROCESSED_CHUNK_SIZE,
@@ -131,43 +136,65 @@ export class DiscoveryClient {
   }
 
   async findById(discoveryId: string): Promise<{ hits: Discovery[] }> {
-    return runFindByIdEsqlQuery<Discovery>({
+    const result = await runFindByIdEsqlQuery<RawDiscoveryRow>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DISCOVERIES_DATA_STREAM,
       idField: FIELD_DISCOVERY_ID,
       idValue: discoveryId,
     });
+
+    const processedEventIds = await this.getProcessedEventIds(
+      result.hits.map((h) => h.event_id).filter((id): id is string => Boolean(id))
+    );
+
+    return {
+      hits: result.hits.map((raw) => ({
+        ...raw,
+        processed: processedEventIds.has(raw.event_id),
+      })),
+    };
   }
 
   async findByIds(discoveryIds: string[]): Promise<{ hits: Discovery[] }> {
-    return runFindByIdsEsqlQuery<Discovery>({
+    const result = await runFindByIdsEsqlQuery<RawDiscoveryRow>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DISCOVERIES_DATA_STREAM,
       idField: FIELD_DISCOVERY_ID,
       idValues: discoveryIds,
     });
+
+    const processedEventIds = await this.getProcessedEventIds(
+      result.hits.map((h) => h.event_id).filter((id): id is string => Boolean(id))
+    );
+
+    return {
+      hits: result.hits.map((raw) => ({
+        ...raw,
+        processed: processedEventIds.has(raw.event_id),
+      })),
+    };
   }
 
-  async findBySlug(slug: string): Promise<{ hits: Discovery[] }> {
-    return runFindByIdEsqlQuery<Discovery>({
+  async findByEventId(eventId: string): Promise<{ hits: Discovery[] }> {
+    const result = await runFindByIdEsqlQuery<RawDiscoveryRow>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DISCOVERIES_DATA_STREAM,
-      idField: FIELD_DISCOVERY_SLUG,
-      idValue: slug,
+      idField: FIELD_EVENT_ID,
+      idValue: eventId,
     });
-  }
 
-  async findStateBySlug(slug: string): Promise<{ hits: Discovery[] }> {
-    return runFindByIdEsqlQuery<Discovery>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      index: DISCOVERIES_DATA_STREAM,
-      idField: FIELD_DISCOVERY_SLUG,
-      idValue: slug,
-      where: this.buildWhere(),
-    });
+    const processedEventIds = await this.getProcessedEventIds(
+      result.hits.map((h) => h.event_id).filter((id): id is string => Boolean(id))
+    );
+
+    return {
+      hits: result.hits.map((raw) => ({
+        ...raw,
+        processed: processedEventIds.has(raw.event_id),
+      })),
+    };
   }
 }
