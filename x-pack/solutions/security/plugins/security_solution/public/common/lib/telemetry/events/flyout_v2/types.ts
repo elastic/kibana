@@ -63,68 +63,105 @@ export type FlyoutTool = (typeof FLYOUT_TOOL)[keyof typeof FLYOUT_TOOL];
  * to distinguish otherwise-identical opens of the same tool from different buttons.
  */
 export const FLYOUT_ORIGIN = {
-  // Document/attack flyout: opened from the flyout's own header vs. the footer take-action menu.
+  // Document/attack flyout header badge or footer "Take action" menu.
+  // Header badge/button in the document or attack flyout.
   FLYOUT_HEADER: 'flyout_header',
+  // "Take action" dropdown in the document flyout footer.
   FOOTER_TAKE_ACTION: 'footer_take_action',
-  // Document overview tab preview sections (`document/main/components/*_section.tsx`).
+  // Document flyout overview tab — preview section buttons.
+  // Insights > Entities preview button.
   INSIGHTS_ENTITIES: 'insights_entities',
+  // Insights > Threat Intelligence preview button.
   INSIGHTS_THREAT_INTEL: 'insights_threat_intel',
+  // Insights > Correlations preview button.
   INSIGHTS_CORRELATIONS: 'insights_correlations',
+  // Insights > Prevalence preview button.
   INSIGHTS_PREVALENCE: 'insights_prevalence',
+  // Visualizations > Analyzer preview button.
   VISUALIZATIONS_ANALYZER: 'visualizations_analyzer',
+  // Visualizations > Session View preview button.
   VISUALIZATIONS_SESSION_VIEW: 'visualizations_session_view',
+  // Visualizations > Graph preview button.
   VISUALIZATIONS_GRAPH: 'visualizations_graph',
+  // Investigation Guide preview button.
   INVESTIGATION_GUIDE: 'investigation_guide',
+  // Response preview button.
   RESPONSE_SECTION: 'response_section',
+  // About preview button.
   ABOUT_SECTION: 'about_section',
-  // Entity flyout left-panel detail tools (`openDetailsPanel` in `entity/*/main/index.tsx`).
+  // Entity flyout left panel — tool-open buttons in each detail section.
+  // Risk Summary > entity name link.
   RISK_SUMMARY_ENTITY: 'risk_summary_entity',
+  // Risk Summary > resolution link.
   RISK_SUMMARY_RESOLUTION: 'risk_summary_resolution',
+  // Anomalies section open button.
   ANOMALIES_SECTION: 'anomalies_section',
+  // Insights > Alerts open button.
   INSIGHTS_ALERTS: 'insights_alerts',
+  // Insights > Misconfigurations open button.
   INSIGHTS_MISCONFIGURATION: 'insights_misconfiguration',
+  // Insights > Vulnerabilities open button.
   INSIGHTS_VULNERABILITY: 'insights_vulnerability',
+  // Resolution section open button.
   RESOLUTION_SECTION: 'resolution_section',
+  // Fields section open button.
   FIELDS_SECTION: 'fields_section',
-  // Nested navigation inside a tool flyout (graph nodes, resolution links, the tool-header title
-  // button that reopens the parent document/entity flyout, the document Entities tool list,
-  // session view, CSP finding rows, and clicking an alert row inside a tool's own alert list —
-  // the only signal that distinguishes which tool the alert was opened from, since the resulting
-  // document flyout's own event always reports `flyoutType: FLYOUT_TYPE.DOCUMENT`).
+  // Inside an open tool flyout — clicks that open another flyout.
+  // Graph tool: entity node.
   GRAPH_NODE: 'graph_node',
+  // Graph tool: grouped entity node.
   GRAPH_GROUPED_NODE: 'graph_grouped_node',
+  // Graph tool: document/alert node.
   GRAPH_DOCUMENT_NODE: 'graph_document_node',
+  // Graph tool: network/IP node.
   GRAPH_NETWORK_NODE: 'graph_network_node',
+  // Resolution tool: entity link.
   RESOLUTION_ENTITY_LINK: 'resolution_entity_link',
+  // Tool header title button; reopens the parent document/entity flyout.
   TOOL_HEADER_TITLE: 'tool_header_title',
+  // Entities tool: entity row.
   ENTITIES_LIST: 'entities_list',
+  // Session view tool: process node.
   SESSION_VIEW_PROCESS: 'session_view_process',
+  // Session view tool: alert badge.
   SESSION_VIEW_ALERT: 'session_view_alert',
+  // Vulnerability insights tool: finding row.
   VULNERABILITY_FINDING: 'vulnerability_finding',
+  // Misconfiguration insights tool: finding row.
   MISCONFIGURATION_FINDING: 'misconfiguration_finding',
+  // Correlations tool: alert row.
   CORRELATIONS_ALERT: 'correlations_alert',
+  // Alerts insights tool: alert row.
   ALERTS_INSIGHTS_ALERT: 'alerts_insights_alert',
+  // Risk inputs tool: alert row.
   RISK_INPUTS_ALERT: 'risk_inputs_alert',
-  // A clickable field value (host/user/ip/rule name) rendered inside an already-open flyout.
-  // FLYOUT_FIELD_LINK = in a flyout's overview/section panels (via OpenFlyoutLink).
-  // FLYOUT_TABLE_FIELD_LINK = in a flyout's own table tab (via TableFieldValueCell).
-  // TABLE_FIELD_LINK = in a top-level standalone table/grid (alerts table, timeline, ...).
-  // All three share the same low-level field renderer, so this is the only signal telling them apart.
+  // Clickable field value (host/user/IP/rule name) — three surfaces share the same renderer so
+  // this is the only signal distinguishing them: overview/section panels, flyout table tab, or
+  // a top-level table (alerts table, timeline, …).
+  // Field value link in a flyout's overview/section panels.
   FLYOUT_FIELD_LINK: 'flyout_field_link',
+  // Field value link in a flyout's own table tab.
   FLYOUT_TABLE_FIELD_LINK: 'flyout_table_field_link',
+  // Field value link in a top-level table (alerts table, timeline, …).
   TABLE_FIELD_LINK: 'table_field_link',
-  // Top-level flyouts opened from outside any flyout.
+  // Top-level entry points outside any open flyout.
+  // Alerts table row.
   ALERTS_TABLE: 'alerts_table',
+  // Attacks table row.
   ATTACKS_TABLE: 'attacks_table',
+  // Attacks KPI widget.
   ATTACKS_KPI: 'attacks_kpi',
+  // Timeline event row.
   TIMELINE: 'timeline',
+  // Case detail attachment.
   CASE_ATTACHMENT: 'case_attachment',
+  // Legacy Analyzer (Resolver) graph node.
   RESOLVER_NODE: 'resolver_node',
+  // Note preview document link.
   NOTE_PREVIEW: 'note_preview',
+  // Threat intelligence table row.
   THREAT_INTEL_TABLE: 'threat_intel_table',
-  // A row-action button (e.g. "Analyze event") shared across several table surfaces (alerts
-  // table, timeline, rule preview, legacy flyout nav) — deliberately generic since the component
-  // is reused across surfaces this union doesn't otherwise distinguish.
+  // "Analyze event" row-action button, shared across alerts table, timeline, and rule preview.
   ROW_ACTION: 'row_action',
 } as const;
 export type FlyoutOrigin = (typeof FLYOUT_ORIGIN)[keyof typeof FLYOUT_ORIGIN];
