@@ -172,6 +172,9 @@ export const createFeatureSettingsController = ({
           target: CONTINUOUS_SETTING_TARGET,
           error: `Failed to read continuous onboarding setting: ${toMessage(error)}`,
         });
+        // Uncertain read: prefer restore on resume over leaving continuous
+        // onboarding permanently off after a partial pause.
+        next.continuousOnboardingWasEnabled = true;
       }
       // Record restore intent from a successful read even if the write fails, so
       // Resume can still recover the setting after a partial pause.
@@ -210,6 +213,10 @@ export const createFeatureSettingsController = ({
             target: scheduledSettingTarget(spaceId),
             error: `Failed to read scheduled discovery setting: ${toMessage(error)}`,
           });
+          // Uncertain read: prefer restore on resume for this space.
+          if (!next.scheduledDiscoveryEnabledSpaceIds.includes(spaceId)) {
+            next.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
+          }
         }
         if (scheduledEnabled && !next.scheduledDiscoveryEnabledSpaceIds.includes(spaceId)) {
           next.scheduledDiscoveryEnabledSpaceIds.push(spaceId);

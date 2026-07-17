@@ -67,8 +67,10 @@ export function SignificantEventsDiscoveryPage() {
   } = useKibana();
 
   const {
+    ui: streamsUiPrivileges,
     features: { significantEvents },
   } = useStreamsPrivileges();
+  const canManageStreams = streamsUiPrivileges.manage;
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const { isBlocked, status: maintenanceStatus } = useBlocksNewActivity();
@@ -263,10 +265,21 @@ export function SignificantEventsDiscoveryPage() {
                   )}
                 >
                   <p>
-                    {i18n.translate('xpack.streams.significantEventsDiscovery.pausedBannerBody', {
-                      defaultMessage:
-                        'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
-                    })}
+                    {canManageStreams
+                      ? i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.pausedBannerBody',
+                          {
+                            defaultMessage:
+                              'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.pausedBannerBodyReadOnly',
+                          {
+                            defaultMessage:
+                              'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Streams manage privilege must resume activity from Settings.',
+                          }
+                        )}
                   </p>
                   {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
                     <p>
@@ -274,22 +287,24 @@ export function SignificantEventsDiscoveryPage() {
                         'xpack.streams.significantEventsDiscovery.pausedBannerPartialFailures',
                         {
                           defaultMessage:
-                            'Some pause operations could not be completed. Check Settings and the Kibana server logs for details.',
+                            'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
                         }
                       )}
                     </p>
                   )}
-                  <EuiButton
-                    href={router.link('/_discovery/{tab}', { path: { tab: 'settings' } })}
-                    color="warning"
-                    size="s"
-                    data-test-subj="significantEventsPausedBannerSettingsLink"
-                  >
-                    {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.pausedBannerSettingsButton',
-                      { defaultMessage: 'Go to Settings' }
-                    )}
-                  </EuiButton>
+                  {canManageStreams && (
+                    <EuiButton
+                      href={router.link('/_discovery/{tab}', { path: { tab: 'settings' } })}
+                      color="warning"
+                      size="s"
+                      data-test-subj="significantEventsPausedBannerSettingsLink"
+                    >
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.pausedBannerSettingsButton',
+                        { defaultMessage: 'Go to Settings' }
+                      )}
+                    </EuiButton>
+                  )}
                 </EuiCallOut>
                 <EuiSpacer />
               </>

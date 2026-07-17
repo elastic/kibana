@@ -33,6 +33,8 @@ describe('assertNotPaused', () => {
     await expect(assertNotPaused({ maintenanceService, request: REQUEST })).rejects.toMatchObject({
       statusCode: 409,
     });
+    expect(maintenanceService.getState).toHaveBeenCalledWith({ request: REQUEST });
+    expect(maintenanceService.getStatus).not.toHaveBeenCalled();
   });
 
   it('resolves without throwing in a state that allows activity', async () => {
@@ -41,5 +43,7 @@ describe('assertNotPaused', () => {
     await expect(
       assertNotPaused({ maintenanceService, request: REQUEST })
     ).resolves.toBeUndefined();
+    expect(maintenanceService.getState).toHaveBeenCalledWith({ request: REQUEST });
+    expect(maintenanceService.getStatus).not.toHaveBeenCalled();
   });
 });

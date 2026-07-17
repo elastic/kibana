@@ -86,20 +86,21 @@ export const useMaintenanceStatus = () => {
 /**
  * Whether new Significant Events activity should be blocked in the UI.
  * `isBlocked` is true only once status is known and blocking.
- * `blocksActivity` is also true while status is loading (pessimistic) so
- * enable toggles / run buttons do not briefly look available on a paused
- * deployment before the first fetch lands.
+ * `blocksActivity` is also true while status is loading or the status query
+ * failed (pessimistic) so enable toggles / run buttons do not look available
+ * when pause state is unknown.
  */
 export const useBlocksNewActivity = (): {
   blocksActivity: boolean;
   isBlocked: boolean;
   isLoading: boolean;
+  isError: boolean;
   status: SignificantEventsMaintenanceStatus | undefined;
 } => {
-  const { data: status, isLoading } = useMaintenanceStatus();
+  const { data: status, isLoading, isError } = useMaintenanceStatus();
   const isBlocked = status ? stateBlocksNewActivity(status.state) : false;
-  const blocksActivity = isLoading || isBlocked;
-  return { blocksActivity, isBlocked, isLoading, status };
+  const blocksActivity = isLoading || isError || isBlocked;
+  return { blocksActivity, isBlocked, isLoading, isError, status };
 };
 
 /** Pause and resume actions. Each is a single synchronous API call that returns

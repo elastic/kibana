@@ -248,6 +248,24 @@ function makeService(params?: {
 }
 
 describe('SignificantEventsMaintenanceService', () => {
+  describe('getState', () => {
+    it('returns running when no state has been persisted', async () => {
+      const { service } = makeService();
+      await expect(service.getState({ request: REQUEST })).resolves.toBe('running');
+    });
+
+    it('returns the persisted state without reading feature settings', async () => {
+      const { api } = makeManagementApi();
+      const { service, globalUiSettingsClient } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+      globalUiSettingsClient.get.mockClear();
+
+      await expect(service.getState({ request: REQUEST })).resolves.toBe('paused');
+      expect(globalUiSettingsClient.get).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getStatus', () => {
     it('reports the running state when no state has been persisted', async () => {
       const { service } = makeService();
@@ -544,6 +562,27 @@ describe('SignificantEventsMaintenanceService', () => {
       });
     });
 
+    it('records a backlog failure when cancel pass-2 hits the round cap with remaining executions', async () => {
+      let call = 0;
+      const { api } = makeManagementApi();
+      api.getWorkflowExecutions.mockImplementation(async (params: { workflowId: string }) => {
+        if (params.workflowId !== SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID) {
+          return { results: [], total: 0 };
+        }
+        call += 1;
+        // Every re-check returns a brand-new id so cancel always accepts until the cap.
+        return { results: [{ id: `exec-${call}` }], total: 1 };
+      });
+      const { service } = makeService({ management: api });
+
+      const summary = await service.pause({ request: REQUEST });
+
+      expect(summary.partialFailures).toContainEqual({
+        target: expect.stringContaining('execution-backlog:'),
+        error: expect.stringContaining('after 50 rounds'),
+      });
+    });
+
     it('records restore flags when settings were enabled even if set(false) fails', async () => {
       const { api } = makeManagementApi();
       const { service, soClient } = makeService({
@@ -656,6 +695,19 @@ describe('SignificantEventsMaintenanceService', () => {
         'so write failed'
       );
       expect(soClient.create.mock.calls.length).toBe(writesAfterPause + 1);
+    });
+  });
+
+  describe('persist write failures', () => {
+    it('propagates a pause persist failure after the sweep has already applied side effects', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient } = makeService({ management: api });
+
+      soClient.create.mockRejectedValueOnce(new Error('so write failed on pause'));
+
+      await expect(service.pause({ request: REQUEST })).rejects.toThrow('so write failed on pause');
+      // Sweep still disabled workflows before the failed write.
+      expect(updateWorkflow).toHaveBeenCalled();
     });
   });
 
@@ -909,6 +961,80 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(lastWrite.disabledWorkflows.map((workflow) => workflow.id)).toContain(
         SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID
       );
+    });
+
+    it('re-disables the matching scheduled workflow when scheduled-discovery restore fails', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, spaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: false,
+        scheduledDiscoveryEnabled: true,
+        internalSpaceIds: ['default', 'space-a'],
+      });
+
+      await service.pause({ request: REQUEST });
+      updateWorkflow.mockClear();
+
+      spaceUiSettingsClient.set.mockImplementation(async (key: string) => {
+        if (key === OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED) {
+          throw new Error('set failed for scheduled');
+        }
+      });
+
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(summary.state).toBe('paused');
+      expect(summary.partialFailures).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            target: expect.stringContaining('settings:scheduled-discovery@'),
+            error: expect.stringContaining('Failed to resume'),
+          }),
+        ])
+      );
+
+      const scheduledDocId = `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-default`;
+      const scheduledEnableCalls = updateWorkflow.mock.calls.filter(
+        (call) => call[0] === scheduledDocId && call[1]?.enabled === true
+      );
+      const scheduledDisableCalls = updateWorkflow.mock.calls.filter(
+        (call) => call[0] === scheduledDocId && call[1]?.enabled === false
+      );
+      expect(scheduledEnableCalls.length).toBeGreaterThan(0);
+      expect(scheduledDisableCalls.length).toBeGreaterThan(0);
+
+      const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        state: string;
+        disabledWorkflows: Array<{ id: string; spaceId: string }>;
+      };
+      expect(lastWrite.state).toBe('paused');
+      expect(lastWrite.disabledWorkflows.map((workflow) => workflow.id)).toContain(scheduledDocId);
+    });
+
+    it('rolls runtime back toward paused when resume persist fails after re-enabling', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1'],
+        continuousOnboardingEnabled: true,
+      });
+
+      await service.pause({ request: REQUEST });
+      updateWorkflow.mockClear();
+
+      // First create after pause is the resume write — reject it.
+      soClient.create.mockRejectedValueOnce(new Error('so write failed on resume'));
+
+      await expect(service.resume({ request: REQUEST })).rejects.toThrow(
+        'so write failed on resume'
+      );
+
+      // Compensating disable after the failed write.
+      const disableAfterResume = updateWorkflow.mock.calls.filter(
+        (call) => call[1]?.enabled === false
+      );
+      expect(disableAfterResume.length).toBeGreaterThan(0);
+      await expect(service.getState({ request: REQUEST })).resolves.toBe('paused');
     });
   });
 });

@@ -24,7 +24,7 @@ const SECTION_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.settings.maintenance.description',
   {
     defaultMessage:
-      'Pause all Significant Events activity across the entire deployment (every Kibana space), not only this space: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Existing data is kept. Resume restores managed workflows and rules Pause disabled, and turns scheduled discovery / continuous onboarding back on only if they were enabled before pause.',
+      'Pause all Significant Events activity across the entire deployment (every Kibana space), not only this space: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Existing data is kept. Resume restores managed workflows and rules that Pause disabled, and turns scheduled discovery / continuous onboarding back on only if they were enabled before pause.',
   }
 );
 
@@ -69,7 +69,7 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
         <p data-test-subj="streams-settings-maintenance-partial-failures">
           <FormattedMessage
             id="xpack.streams.significantEventsDiscovery.settings.maintenance.partialFailures"
-            defaultMessage="{failureCount, plural, one {# operation} other {# operations}} could not be completed. Check the Kibana server logs for details."
+            defaultMessage="{failureCount, plural, one {# maintenance operation} other {# maintenance operations}} could not be completed. Check the Kibana server logs for details. Resume retries incomplete resume work; Pause again while paused re-sweeps disable/cancel."
             values={{ failureCount }}
           />
         </p>
@@ -79,12 +79,13 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
 }
 
 export function MaintenanceSection({ canManage }: { canManage: boolean }) {
-  const { data: status, isLoading } = useMaintenanceStatus();
+  const { data: status, isLoading, isError, refetch } = useMaintenanceStatus();
   const { pause, resume, isPausing, isResuming } = useSignificantEventsMaintenanceActions();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const paused = status?.state === 'paused';
   const isMutating = isPausing || isResuming;
+  const statusReady = !isLoading && !isError && status !== undefined;
 
   const onConfirm = () => {
     setIsModalOpen(false);
@@ -107,9 +108,71 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
           <p>{SECTION_DESCRIPTION}</p>
         </EuiText>
         <EuiSpacer />
+        {isError && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="danger"
+              iconType="error"
+              data-test-subj="streams-settings-maintenance-status-error"
+              title={i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.maintenance.statusErrorTitle',
+                { defaultMessage: 'Could not load maintenance status' }
+              )}
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.maintenance.statusErrorBody',
+                  {
+                    defaultMessage:
+                      'Pause and Resume are unavailable until status can be loaded. Activity controls stay disabled while status is unknown.',
+                  }
+                )}
+              </p>
+              <EuiButton
+                size="s"
+                onClick={() => refetch()}
+                data-test-subj="streams-settings-maintenance-status-retry"
+              >
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.maintenance.statusRetry',
+                  { defaultMessage: 'Retry' }
+                )}
+              </EuiButton>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
         {paused && status && (
           <>
             <PausedCallout status={status} />
+            <EuiSpacer />
+          </>
+        )}
+        {!canManage && statusReady && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="primary"
+              iconType="lock"
+              data-test-subj="streams-settings-maintenance-no-manage"
+              title={i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.maintenance.noManageTitle',
+                { defaultMessage: 'Administrator access required' }
+              )}
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.maintenance.noManageBody',
+                  {
+                    defaultMessage:
+                      'You can view pause status, but pausing or resuming Significant Events activity requires the Streams manage privilege.',
+                  }
+                )}
+              </p>
+            </EuiCallOut>
             <EuiSpacer />
           </>
         )}
@@ -117,11 +180,16 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
           data-test-subj="streams-settings-maintenance-toggle-button"
           color={paused ? 'primary' : 'warning'}
           iconType={paused ? 'play' : 'pause'}
-          isLoading={isMutating}
-          isDisabled={!canManage || isLoading || isMutating}
+          isLoading={isMutating || isLoading}
+          isDisabled={!canManage || !statusReady || isMutating}
           onClick={() => setIsModalOpen(true)}
         >
-          {paused
+          {isLoading
+            ? i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.maintenance.loadingButton',
+                { defaultMessage: 'Checking status…' }
+              )
+            : paused
             ? i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.maintenance.resumeButton',
                 { defaultMessage: 'Resume Significant Events activity' }
@@ -133,7 +201,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
         </EuiButton>
       </EuiPanel>
 
-      {isModalOpen && (
+      {isModalOpen && statusReady && (
         <EuiConfirmModal
           data-test-subj="streams-settings-maintenance-confirm-modal"
           aria-label={i18n.translate(

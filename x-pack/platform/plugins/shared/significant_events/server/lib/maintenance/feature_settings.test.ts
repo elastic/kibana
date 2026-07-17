@@ -11,7 +11,12 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
-import { shouldRestoreSettingsBackedWorkflow } from './feature_settings';
+import {
+  hasFailedSettingsRestore,
+  parseFailedSettingsRestores,
+  shouldRestoreSettingsBackedWorkflow,
+  shouldRevertSettingsBackedWorkflow,
+} from './feature_settings';
 
 describe('shouldRestoreSettingsBackedWorkflow', () => {
   it('restores continuous onboarding only when the setting was previously enabled', () => {
@@ -82,5 +87,60 @@ describe('shouldRestoreSettingsBackedWorkflow', () => {
         undefined
       )
     ).toBe(true);
+  });
+});
+
+describe('parseFailedSettingsRestores / shouldRevertSettingsBackedWorkflow', () => {
+  it('parses continuous and per-space scheduled restore failures', () => {
+    const failed = parseFailedSettingsRestores([
+      { target: 'settings:continuous-onboarding', error: 'boom' },
+      { target: 'settings:scheduled-discovery@space-a', error: 'boom' },
+      { target: 'workflow:other@*', error: 'unrelated' },
+    ]);
+    expect(failed.continuousOnboarding).toBe(true);
+    expect([...failed.scheduledDiscoverySpaceIds]).toEqual(['space-a']);
+    expect(hasFailedSettingsRestore(failed)).toBe(true);
+  });
+
+  it('reverts only the settings-backed workflows that match failed restores', () => {
+    const failed = parseFailedSettingsRestores([
+      { target: 'settings:continuous-onboarding', error: 'boom' },
+      { target: 'settings:scheduled-discovery@space-a', error: 'boom' },
+    ]);
+    expect(
+      shouldRevertSettingsBackedWorkflow(
+        { id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID, spaceId: 'default' },
+        failed
+      )
+    ).toBe(true);
+    expect(
+      shouldRevertSettingsBackedWorkflow(
+        {
+          id: `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
+          spaceId: 'space-a',
+        },
+        failed
+      )
+    ).toBe(true);
+    expect(
+      shouldRevertSettingsBackedWorkflow(
+        {
+          id: `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-b`,
+          spaceId: 'space-b',
+        },
+        failed
+      )
+    ).toBe(false);
+    expect(
+      shouldRevertSettingsBackedWorkflow(
+        { id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID, spaceId: '*' },
+        failed
+      )
+    ).toBe(false);
+  });
+
+  it('reports no failed restores for an empty failure list', () => {
+    const failed = parseFailedSettingsRestores([]);
+    expect(hasFailedSettingsRestore(failed)).toBe(false);
   });
 });
