@@ -18,6 +18,7 @@ import {
   BILLABLE_ASSETS_CONFIG,
   GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS,
   GCP_COMPUTE_INSTANCE_SUB_TYPE,
+  GCP_COMPUTE_DURATION_RUNTIME_FIELD,
 } from './constants';
 import type { ResourceSubtypeCounter, Tier, UsageRecord } from '../types';
 import type {
@@ -165,10 +166,6 @@ export const getSearchQueryByCloudSecuritySolution = (
     });
   }
 
-  if (cloudSecuritySolution === CSPM) {
-    mustFilters.push(getGcpComputeDurationFilter());
-  }
-
   return {
     bool: {
       must: mustFilters,
@@ -177,16 +174,70 @@ export const getSearchQueryByCloudSecuritySolution = (
 };
 
 /**
- * Returns a filter clause that excludes GCP compute instances with running duration < 24h.
- * For non-gcp-compute-instance resources, documents pass through unchanged.
- * For gcp-compute-instance resources, a Painless script checks:
- *   - If status == "RUNNING": running duration = now - lastStartTimestamp
- *   - If status != "RUNNING" (TERMINATED/STOPPED): running duration = lastStopTimestamp - lastStartTimestamp
- * Only resources with running duration >= 24h are included.
+ * Returns the runtime_mappings entry that computes GCP compute instance running duration in ms.
+ *
+ * resource.raw is stored with enabled:false so its sub-fields have no doc values and cannot be
+ * accessed via doc[...] in a script query. Runtime field scripts are the only Painless context
+ * where params['_source'] is available, so we define a transient long field here and range-filter
+ * on it instead.
+ *
+ * Fields read from _source:
+ *   resource.raw.resource.data.status            — "RUNNING" | "TERMINATED" | "STOPPING" | ...
+ *   resource.raw.resource.data.lastStartTimestamp — ISO-8601 string with offset
+ *   resource.raw.resource.data.lastStopTimestamp  — ISO-8601 string with offset (TERMINATED only)
+ */
+export const getGcpComputeDurationRuntimeMapping = (nowMillis: number) => ({
+  [GCP_COMPUTE_DURATION_RUNTIME_FIELD]: {
+    type: 'long',
+    script: {
+      lang: 'painless',
+      source: `
+        if (doc['resource.sub_type'].size() == 0) return;
+        if (!doc['resource.sub_type'].value.equals(params['subType'])) return;
+
+        def src = params['_source'];
+        if (src == null) return;
+        def resourceMap = (Map) src.get('resource');
+        if (resourceMap == null) return;
+        def raw = (Map) resourceMap.get('raw');
+        if (raw == null) return;
+        def rawResource = (Map) raw.get('resource');
+        if (rawResource == null) return;
+        def data = (Map) rawResource.get('data');
+        if (data == null) return;
+
+        def status = (String) data.get('status');
+        def lastStartStr = (String) data.get('lastStartTimestamp');
+        if (lastStartStr == null || lastStartStr.length() == 0) return;
+
+        long lastStartMs = ZonedDateTime.parse(lastStartStr).toInstant().toEpochMilli();
+        long duration;
+
+        if ('RUNNING'.equals(status)) {
+          duration = params['nowMillis'] - lastStartMs;
+        } else {
+          def lastStopStr = (String) data.get('lastStopTimestamp');
+          if (lastStopStr == null || lastStopStr.length() == 0) return;
+          duration = ZonedDateTime.parse(lastStopStr).toInstant().toEpochMilli() - lastStartMs;
+        }
+
+        emit(duration);
+      `,
+      params: {
+        nowMillis,
+        subType: GCP_COMPUTE_INSTANCE_SUB_TYPE,
+      },
+    },
+  },
+});
+
+/**
+ * Returns a bool filter that passes non-gcp-compute-instance docs unchanged, and only passes
+ * gcp-compute-instance docs whose runtime-computed running duration meets the minimum threshold.
+ * Must be used alongside getGcpComputeDurationRuntimeMapping() in the same search request.
  */
 export const getGcpComputeDurationFilter = () => {
   const minDurationMillis = GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS * 60 * 60 * 1000;
-  const nowMillis = Date.now();
 
   return {
     bool: {
@@ -201,31 +252,8 @@ export const getGcpComputeDurationFilter = () => {
             must: [
               { term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } },
               {
-                script: {
-                  script: {
-                    source: `
-                      def status = doc['resource.raw.status'].size() > 0 ? doc['resource.raw.status'].value : '';
-                      def lastStart = doc['resource.raw.lastStartTimestamp'].size() > 0 ? doc['resource.raw.lastStartTimestamp'].value.toInstant().toEpochMilli() : 0L;
-
-                      if (lastStart == 0L) { return false; }
-
-                      long duration;
-                      if (status == 'RUNNING') {
-                        duration = params.nowMillis - lastStart;
-                      } else {
-                        def lastStop = doc['resource.raw.lastStopTimestamp'].size() > 0 ? doc['resource.raw.lastStopTimestamp'].value.toInstant().toEpochMilli() : 0L;
-                        if (lastStop == 0L) { return false; }
-                        duration = lastStop - lastStart;
-                      }
-
-                      return duration >= params.minDurationMillis;
-                    `,
-                    lang: 'painless',
-                    params: {
-                      minDurationMillis,
-                      nowMillis,
-                    },
-                  },
+                range: {
+                  [GCP_COMPUTE_DURATION_RUNTIME_FIELD]: { gte: minDurationMillis },
                 },
               },
             ],
@@ -242,6 +270,21 @@ export const getAssetAggQueryByCloudSecuritySolution = (
 ) => {
   const query = getSearchQueryByCloudSecuritySolution(cloudSecuritySolution);
   const aggs = getAggregationByCloudSecuritySolution(cloudSecuritySolution);
+
+  if (cloudSecuritySolution === CSPM) {
+    const nowMillis = Date.now();
+    return {
+      index: METERING_CONFIGS[cloudSecuritySolution].index,
+      runtime_mappings: getGcpComputeDurationRuntimeMapping(nowMillis),
+      query: {
+        bool: {
+          must: [query, getGcpComputeDurationFilter()],
+        },
+      },
+      size: 0,
+      aggs,
+    };
+  }
 
   return {
     index: METERING_CONFIGS[cloudSecuritySolution].index,

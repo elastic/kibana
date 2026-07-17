@@ -12,6 +12,8 @@ import {
   getCloudSecurityUsageRecord,
   getSearchQueryByCloudSecuritySolution,
   getGcpComputeDurationFilter,
+  getGcpComputeDurationRuntimeMapping,
+  getAssetAggQueryByCloudSecuritySolution,
 } from './cloud_security_metering_task';
 
 import type { ServerlessSecurityConfig } from '../config';
@@ -25,6 +27,7 @@ import {
   BILLABLE_ASSETS_CONFIG,
   GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS,
   GCP_COMPUTE_INSTANCE_SUB_TYPE,
+  GCP_COMPUTE_DURATION_RUNTIME_FIELD,
 } from './constants';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
@@ -262,7 +265,6 @@ describe('getSearchQueryByCloudSecuritySolution', () => {
               'rule.benchmark.posture_type': 'cspm',
             },
           },
-          getGcpComputeDurationFilter(),
         ],
       },
     });
@@ -311,9 +313,10 @@ describe('getSearchQueryByCloudSecuritySolution', () => {
 });
 
 describe('getGcpComputeDurationFilter', () => {
-  it('should return a filter that passes non-gcp-compute-instance docs or gcp-compute-instance docs with sufficient running duration', () => {
+  const minDurationMillis = GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS * 60 * 60 * 1000;
+
+  it('should pass non-gcp-compute-instance docs and gate gcp-compute-instance docs on the runtime field', () => {
     const filter = getGcpComputeDurationFilter();
-    const minDurationMillis = GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS * 60 * 60 * 1000;
 
     expect(filter).toEqual({
       bool: {
@@ -328,15 +331,8 @@ describe('getGcpComputeDurationFilter', () => {
               must: [
                 { term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } },
                 {
-                  script: {
-                    script: {
-                      source: expect.any(String),
-                      lang: 'painless',
-                      params: {
-                        minDurationMillis,
-                        nowMillis: expect.any(Number),
-                      },
-                    },
+                  range: {
+                    [GCP_COMPUTE_DURATION_RUNTIME_FIELD]: { gte: minDurationMillis },
                   },
                 },
               ],
@@ -350,20 +346,57 @@ describe('getGcpComputeDurationFilter', () => {
 
   it('should use 24 hours as the minimum running duration', () => {
     const filter = getGcpComputeDurationFilter();
-    const expectedMillis = 24 * 60 * 60 * 1000;
+    const rangeClause = (filter.bool.should as any[])[1].bool.must[1];
+    expect(rangeClause.range[GCP_COMPUTE_DURATION_RUNTIME_FIELD].gte).toBe(minDurationMillis);
+  });
+});
 
-    const scriptClause = (filter.bool.should as any[])[1].bool.must[1];
-    expect(scriptClause.script.script.params.minDurationMillis).toBe(expectedMillis);
+describe('getGcpComputeDurationRuntimeMapping', () => {
+  it('should define a long runtime field with nowMillis and subType params', () => {
+    const nowMillis = Date.now();
+    const mapping = getGcpComputeDurationRuntimeMapping(nowMillis);
+
+    expect(mapping[GCP_COMPUTE_DURATION_RUNTIME_FIELD]).toMatchObject({
+      type: 'long',
+      script: {
+        lang: 'painless',
+        params: {
+          nowMillis,
+          subType: GCP_COMPUTE_INSTANCE_SUB_TYPE,
+        },
+      },
+    });
   });
 
-  it('should pass current time as nowMillis parameter', () => {
-    const before = Date.now();
-    const filter = getGcpComputeDurationFilter();
-    const after = Date.now();
+  it('should read _source via params and not use doc[] for resource.raw fields', () => {
+    const mapping = getGcpComputeDurationRuntimeMapping(Date.now());
+    const source: string = mapping[GCP_COMPUTE_DURATION_RUNTIME_FIELD].script.source;
 
-    const scriptClause = (filter.bool.should as any[])[1].bool.must[1];
-    expect(scriptClause.script.script.params.nowMillis).toBeGreaterThanOrEqual(before);
-    expect(scriptClause.script.script.params.nowMillis).toBeLessThanOrEqual(after);
+    expect(source).toContain("params['_source']");
+    expect(source).not.toContain("doc['resource.raw");
+    expect(source).toContain('lastStartTimestamp');
+    expect(source).toContain('lastStopTimestamp');
+    expect(source).toContain('emit(');
+  });
+});
+
+describe('getAssetAggQueryByCloudSecuritySolution', () => {
+  it('should include runtime_mappings and GCP duration filter for CSPM', () => {
+    const result = getAssetAggQueryByCloudSecuritySolution(CSPM);
+
+    expect(result).toHaveProperty('runtime_mappings');
+    expect((result as any).runtime_mappings).toHaveProperty(GCP_COMPUTE_DURATION_RUNTIME_FIELD);
+    expect((result.query as any).bool.must).toHaveLength(2);
+  });
+
+  it('should not include runtime_mappings for KSPM', () => {
+    const result = getAssetAggQueryByCloudSecuritySolution(KSPM);
+    expect(result).not.toHaveProperty('runtime_mappings');
+  });
+
+  it('should not include runtime_mappings for CNVM', () => {
+    const result = getAssetAggQueryByCloudSecuritySolution(CNVM);
+    expect(result).not.toHaveProperty('runtime_mappings');
   });
 });
 
