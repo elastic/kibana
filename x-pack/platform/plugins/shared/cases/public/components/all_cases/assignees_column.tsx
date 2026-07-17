@@ -10,10 +10,9 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { CaseUI } from '../../../common/ui/types';
 import { getEmptyCellValue } from '../empty_value';
-import { UserToolTip } from '../user_profiles/user_tooltip';
 import { useAssignees } from '../../containers/user_profiles/use_assignees';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
-import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
+import { CaseUserAvatar } from '../user_profiles/user_avatar';
 import * as i18n from './translations';
 
 const COMPRESSED_AVATAR_LIMIT = 3;
@@ -71,9 +70,7 @@ const AssigneesColumnComponent: React.FC<AssigneesColumnProps> = ({
             key={assignee.uid}
             data-test-subj={`case-table-column-assignee-${dataTestSubjName}`}
           >
-            <UserToolTip userInfo={assignee.profile}>
-              <SmallUserAvatar userInfo={assignee.profile} />
-            </UserToolTip>
+            <CaseUserAvatar size="s" userInfo={assignee.profile} />
           </EuiFlexItem>
         );
       })}
