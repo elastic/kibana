@@ -113,6 +113,25 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   const packHasExplicitSchedule =
     isRruleSchedulingEnabled && (!editMode || defaultValue?.schedule_type !== undefined);
 
+  // Computed once and reused for both `defaultValues.schedule` and
+  // `originalStartDate` so they can't diverge on independent `new Date()` calls.
+  const deserializedSchedule = useMemo(
+    () =>
+      isRruleSchedulingEnabled
+        ? deserializeSchedule(
+            defaultValue
+              ? {
+                  schedule_type: defaultValue.schedule_type,
+                  interval: defaultValue.interval,
+                  rrule_schedule: defaultValue.rrule_schedule,
+                }
+              : undefined
+          )
+        : undefined,
+
+    [isRruleSchedulingEnabled, defaultValue]
+  );
+
   const deserializer = (payload: PackItem) => {
     const defaultPolicyIds = filter(
       payload.policy_ids,
@@ -133,13 +152,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       policy_ids: defaultPolicyIds ?? [],
       queries: convertPackQueriesToSO(payload.queries),
       shards: omit(payload.shards, '*') ?? {},
-      schedule: isRruleSchedulingEnabled
-        ? deserializeSchedule({
-            schedule_type: payloadScheduleType,
-            interval: payloadInterval,
-            rrule_schedule: payloadRruleSchedule,
-          })
-        : undefined,
+      schedule: deserializedSchedule,
     };
   };
 
@@ -155,7 +168,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           enabled: true,
           queries: [],
           pack_type: 'policy',
-          schedule: isRruleSchedulingEnabled ? deserializeSchedule(undefined) : undefined,
+          schedule: deserializedSchedule,
         },
   });
 
@@ -179,12 +192,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       return undefined;
     }
 
-    return deserializeSchedule({
-      schedule_type: defaultValue.schedule_type,
-      interval: defaultValue.interval,
-      rrule_schedule: defaultValue.rrule_schedule,
-    }).startDate;
-  }, [editMode, defaultValue]);
+    return deserializedSchedule?.startDate;
+  }, [editMode, defaultValue, deserializedSchedule]);
 
   const scheduleErrors = useMemo(() => {
     if (!isRruleSchedulingEnabled || !schedule) {
@@ -237,6 +246,18 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [setValue]
   );
 
+  // Surface schedule errors so a blocked submit is never a silent no-op.
+  const showScheduleErrorsToast = useCallback(
+    (errors: string[]) => {
+      setShowScheduleErrors(true);
+      toasts.addDanger({
+        title: SCHEDULE_ERRORS_TOAST_TITLE,
+        text: errors.join('\n'),
+      });
+    },
+    [toasts]
+  );
+
   const onSubmit = useCallback(
     async (values: PackFormData) => {
       // RHF field errors alone don't block submit for the controlled
@@ -246,6 +267,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           originalStartDate,
         });
         if (submitScheduleErrors.length > 0) {
+          showScheduleErrorsToast(submitScheduleErrors);
+
           return;
         }
       }
@@ -302,6 +325,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       isRruleSchedulingEnabled,
       originalStartDate,
       shards,
+      showScheduleErrorsToast,
       updateAsync,
     ]
   );
@@ -329,11 +353,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     }
 
     if (scheduleErrors.length > 0) {
-      setShowScheduleErrors(true);
-      toasts.addDanger({
-        title: SCHEDULE_ERRORS_TOAST_TITLE,
-        text: scheduleErrors.join('\n'),
-      });
+      showScheduleErrorsToast(scheduleErrors);
 
       return;
     }
@@ -345,7 +365,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     }
 
     handleSubmitForm();
-  }, [agentCount, handleSubmitForm, scheduleErrors, toasts, trigger]);
+  }, [agentCount, handleSubmitForm, scheduleErrors, showScheduleErrorsToast, trigger]);
 
   const handleConfirmConfirmationClick = useCallback(async () => {
     setShowConfirmationModal(false);

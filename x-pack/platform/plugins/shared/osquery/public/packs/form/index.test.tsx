@@ -445,6 +445,81 @@ describe('PackForm', () => {
     });
   });
 
+  describe('interval → rrule edit transition (issue #276903)', () => {
+    // Regression: a stale interval-era startDate tripped a false
+    // START_DATE_IN_PAST_ERROR and silently blocked the save.
+    const NOW = new Date('2026-06-19T12:00:00.000Z');
+
+    beforeEach(() => {
+      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockAddDanger.mockClear();
+      jest.useFakeTimers().setSystemTime(NOW);
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+    });
+
+    const enabledIntervalPack = {
+      id: 'pack-transition',
+      saved_object_id: 'saved-transition',
+      name: 'interval-to-rrule-pack',
+      description: '',
+      enabled: true,
+      queries: {},
+      created_at: '2024-01-01',
+      created_by: 'test-user',
+      updated_at: '2024-01-01',
+      updated_by: 'test-user',
+      policy_ids: [],
+      references: [],
+      schedule_type: 'interval' as const,
+      interval: 3600,
+    };
+
+    it('persists the rrule schedule and preserves enabled when an enabled interval pack switches to Date & time and saves', async () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={enabledIntervalPack} />
+      );
+
+      fireEvent.click(getByTestId('osquery-schedule-type-rrule'));
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      expect(submitted.schedule_type).toBe('rrule');
+      expect(submitted.rrule_schedule).toBeDefined();
+      expect(submitted.enabled).toBe(true);
+      // The false past-start error must never fire for an unedited transition.
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
+
+    it('does not block submit or show an error for the unedited interval-to-recurrence transition', async () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={enabledIntervalPack} />
+      );
+
+      fireEvent.click(getByTestId('osquery-schedule-type-rrule'));
+
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
+
+    // The genuinely-blocked-submit path isn't reproducible via this UI (the
+    // date picker can't select a past slot) — covered in `validation.test.ts`.
+  });
+
   describe('schedule submit-gate UX (toast on click)', () => {
     beforeEach(() => {
       mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });

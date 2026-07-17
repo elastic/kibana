@@ -80,7 +80,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   } = useKibana().services;
   const [isEditMode] = useState(!!defaultValue);
   const isRruleSchedulingEnabled = ExperimentalFeaturesService.get().rruleScheduling;
-  const { serializer, idSet, ...hooksForm } = usePackQueryForm({
+  const { serializer, idSet, deserializedSchedule, ...hooksForm } = usePackQueryForm({
     uniqueQueryIds,
     defaultValue,
     packSchedule,
@@ -99,22 +99,11 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
 
   const queryOwnInterval = defaultValue?.interval ? parseInt(defaultValue.interval, 10) : undefined;
 
-  const originalStartDate = useMemo(() => {
-    if (!isRruleSchedulingEnabled) {
-      return undefined;
-    }
-
-    const hasOverride = !!defaultValue?.schedule_type;
-
-    return deserializeSchedule(
-      hasOverride
-        ? {
-            schedule_type: defaultValue?.schedule_type,
-            rrule_schedule: defaultValue?.rrule_schedule,
-          }
-        : resolveInheritedScheduleInput(packSchedule, queryOwnInterval)
-    ).startDate;
-  }, [isRruleSchedulingEnabled, defaultValue, packSchedule, queryOwnInterval]);
+  // Reuse the schedule that seeded the form's defaultValue so the "unchanged
+  // start" check compares against the same timestamp, not a fresh one. The
+  // seeded schedule already resolves inherited-vs-override (and the legacy-pack
+  // interval-authority case) via `deserializeQuerySchedule`.
+  const originalStartDate = isRruleSchedulingEnabled ? deserializedSchedule.startDate : undefined;
 
   // Single source of truth for the override schedule. Only an
   // active override has a schedule to validate — an inherited query defers to

@@ -7,7 +7,7 @@
 
 import type { DiscoveryEvaluator } from '../../types';
 
-/** CODE evaluator: every detection rule must carry ≥1 attributed evidence. Score = covered / total rules. */
+/** CODE evaluator: every active detection signal must carry an `evidence` entry. Score = covered / total rules. */
 export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
   name: 'evidence_collection',
   kind: 'CODE',
@@ -19,22 +19,20 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
     const issues: string[] = [];
 
     for (const [i, discovery] of discoveries.entries()) {
-      const detections = discovery.detections ?? [];
-      const evidences = discovery.evidences ?? [];
-      const evidenceRuleUuids = new Set(
-        evidences.map((e) => e.rule_uuid).filter((id): id is string => Boolean(id))
-      );
+      const signals = (discovery.signals ?? []).filter((s) => s.type === 'detection');
 
-      for (const det of detections) {
-        const ruleUuid = det.rule_uuid;
+      for (const signal of signals) {
+        const ruleUuid = signal.metadata?.rule_uuid;
         if (!ruleUuid) {
           continue;
         }
         totalRules++;
-        if (evidenceRuleUuids.has(ruleUuid)) {
+        if (signal.evidence != null) {
           covered++;
         } else {
-          issues.push(`[${i}] no evidence collected for rule "${det.rule_name ?? ruleUuid}"`);
+          issues.push(
+            `[${i}] no evidence collected for rule "${signal.metadata?.rule_name ?? ruleUuid}"`
+          );
         }
       }
     }
@@ -43,7 +41,7 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
       return Promise.resolve({
         score: null,
         label: 'unavailable',
-        explanation: 'No detections present — nothing to collect evidence for',
+        explanation: 'No detection signals present — nothing to collect evidence for',
       });
     }
 

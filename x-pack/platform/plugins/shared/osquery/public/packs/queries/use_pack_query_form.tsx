@@ -133,9 +133,32 @@ export const resolveInheritedScheduleInput = (
   return { schedule_type: 'interval', interval: queryInterval };
 };
 
+/**
+ * Deserializes the query's own override, or falls back to the inherited
+ * pack schedule (resolved via `resolveInheritedScheduleInput` so a legacy
+ * pack's synthesized default never clobbers the query's own interval).
+ * Reused for both `defaultValues.schedule` and `originalStartDate` so they
+ * can't diverge.
+ */
+const deserializeQuerySchedule = (
+  payload: PackSOQueryFormData | undefined,
+  packSchedule?: UsePackQueryFormProps['packSchedule']
+): ScheduleFormData => {
+  const hasOverride = payload?.schedule_type !== undefined;
+  const queryInterval = payload?.interval ? parseInt(payload.interval, 10) : undefined;
+
+  return hasOverride
+    ? deserializeSchedule({
+        schedule_type: payload?.schedule_type,
+        interval: queryInterval,
+        rrule_schedule: payload?.rrule_schedule,
+      })
+    : deserializeSchedule(resolveInheritedScheduleInput(packSchedule, queryInterval));
+};
+
 const deserializer = (
   payload: PackSOQueryFormData,
-  packSchedule?: UsePackQueryFormProps['packSchedule']
+  deserializedSchedule: ScheduleFormData
 ): PackQueryFormData => {
   const hasOverride = payload.schedule_type !== undefined;
   const queryInterval = payload.interval ? parseInt(payload.interval, 10) : undefined;
@@ -151,13 +174,7 @@ const deserializer = (
     version: payload.version ? [payload.version] : [],
     ecs_mapping: payload.ecs_mapping ?? {},
     override_pack_schedule: hasOverride,
-    schedule: hasOverride
-      ? deserializeSchedule({
-          schedule_type: payload.schedule_type,
-          interval: queryInterval,
-          rrule_schedule: payload.rrule_schedule,
-        })
-      : deserializeSchedule(resolveInheritedScheduleInput(packSchedule, queryInterval)),
+    schedule: deserializedSchedule,
   };
 };
 
@@ -243,12 +260,18 @@ export const usePackQueryForm = ({
     [uniqueQueryIds, defaultValue]
   );
 
+  const deserializedSchedule = useMemo(
+    () => deserializeQuerySchedule(defaultValue, packSchedule),
+    [defaultValue, packSchedule]
+  );
+
   return {
     serializer: (payload: PackQueryFormData) => serializer(payload, packSchedule),
     idSet,
+    deserializedSchedule,
     ...useHookForm<PackQueryFormData>({
       defaultValues: defaultValue
-        ? deserializer(defaultValue, packSchedule)
+        ? deserializer(defaultValue, deserializedSchedule)
         : {
             id: '',
             query: '',
@@ -257,7 +280,7 @@ export const usePackQueryForm = ({
             removed: false,
             platform: DEFAULT_PLATFORM,
             override_pack_schedule: false,
-            schedule: deserializeSchedule(resolveInheritedScheduleInput(packSchedule, undefined)),
+            schedule: deserializedSchedule,
           },
     }),
   };
