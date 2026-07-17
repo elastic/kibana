@@ -29,6 +29,7 @@ export const DESIGN_EXPLORATION_VARIANT_OPTIONS: DesignExplorationVariantOption[
   { id: 'baseline', label: 'Baseline' },
   { id: 'linbana', label: 'Linbana' },
   { id: 'attbana', label: 'Attbana' },
+  { id: 'interbana', label: 'Interbana' },
 ];
 
 type FeatureFlagsBooleanReader = Pick<FeatureFlagsStart, 'getBooleanValue'>;

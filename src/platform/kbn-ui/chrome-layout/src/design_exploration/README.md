@@ -10,6 +10,7 @@ POC chrome overrides gated by `core.chrome.designExploration` (requires Chrome N
 | Baseline | `baseline` | `variant_baseline.tsx` |
 | Linbana | `linbana` | `variant_linbana.tsx` |
 | Attbana | `attbana` | `variant_attbana.tsx` |
+| Interbana | `interbana` | `variant_interbana.tsx` |
 
 - Slug ids must match `DESIGN_EXPLORATION_VARIANT_OPTIONS` in `@kbn/core-chrome-feature-flags`.
 - CSS is scoped with `body[data-design-exploration='true'][data-design-exploration-variant='{slug}']`.

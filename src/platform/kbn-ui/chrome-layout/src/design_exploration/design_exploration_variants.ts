@@ -16,6 +16,7 @@ import {
 } from '@kbn/core-chrome-feature-flags';
 import { BASELINE_VARIANT_ID, createBaselineStyles } from './variant_baseline';
 import { ATTBANA_VARIANT_ID, createAttbanaStyles } from './variant_attbana';
+import { INTERBANA_VARIANT_ID, createInterbanaStyles } from './variant_interbana';
 import { LINBANA_VARIANT_ID, createLinbanaStyles } from './variant_linbana';
 import { VERBANA_VARIANT_ID, createVerbanaStyles } from './variant_verbana';
 
@@ -45,6 +46,11 @@ export const DESIGN_EXPLORATION_VARIANTS: DesignExplorationVariantDefinition[] =
     id: ATTBANA_VARIANT_ID,
     label: 'Attbana',
     createStyles: createAttbanaStyles,
+  },
+  {
+    id: INTERBANA_VARIANT_ID,
+    label: 'Interbana',
+    createStyles: createInterbanaStyles,
   },
 ];
 
