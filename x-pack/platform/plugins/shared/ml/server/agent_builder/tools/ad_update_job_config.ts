@@ -23,6 +23,8 @@ const calendarEventSchema = z.object({
   description: z.string().describe('Description of the scheduled event.'),
 });
 
+type CalendarEventInput = z.infer<typeof calendarEventSchema>;
+
 const delayedDataCheckSchema = z.object({
   enabled: z.boolean(),
   check_window: z.string().optional().describe('Duration string, e.g. "2h".'),
@@ -35,7 +37,18 @@ const schema = z.object({
     'update_delayed_data_check',
     'create_calendar_event',
   ]),
-  job_id: z.string().describe('The anomaly detection job ID.'),
+  job_id: z
+    .string()
+    .optional()
+    .describe(
+      'Required for update_* operations (or pass job_ids with exactly one entry). For create_calendar_event, prefer job_ids when attaching multiple jobs to one calendar. If omitted and job_ids has one entry, that entry is used as job_id.'
+    ),
+  job_ids: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'For create_calendar_event: all job IDs that should share this calendar. Pass every job in one call so events are created once. A single-entry array is treated as job_id. Empty array with no job_id is an error.'
+    ),
   memory_limit: z
     .string()
     .optional()
@@ -62,7 +75,7 @@ const schema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional for create_calendar_event. Calendar ID to create or update. Defaults to "calendar-{job_id}".'
+      'Optional for create_calendar_event. Calendar ID to create or update. Defaults to "calendar-{first_job_id}".'
     ),
 });
 
@@ -81,6 +94,82 @@ const isAlreadyExistsError = (err: unknown): boolean => {
   );
 };
 
+const toEpochMs = (value: string | number | Date): number => {
+  if (value instanceof Date) {
+    return value.getTime();
+  }
+  if (typeof value === 'number') {
+    return value;
+  }
+  const trimmed = value.trim();
+  if (/^\d+$/.test(trimmed)) {
+    return Number(trimmed);
+  }
+  return Date.parse(trimmed);
+};
+
+interface CalendarEventTimeFields {
+  description: string;
+  start_time: string | number | Date;
+  end_time: string | number | Date;
+}
+
+const isSameCalendarEvent = (
+  left: CalendarEventTimeFields,
+  right: CalendarEventTimeFields
+): boolean =>
+  left.description === right.description &&
+  toEpochMs(left.start_time) === toEpochMs(right.start_time) &&
+  toEpochMs(left.end_time) === toEpochMs(right.end_time);
+
+/**
+ * Resolves job identifiers from job_id and/or job_ids.
+ * - If jobIds.length === 1 and jobId is missing, jobId is inferred as jobIds[0].
+ * - If jobId is missing and jobIds is empty/missing, returns an error.
+ */
+const resolveJobIdentifiers = (
+  jobId?: string,
+  jobIds?: string[]
+): { jobId: string; jobIds: string[] } | { error: string } => {
+  const inputJobIds = jobIds ?? [];
+
+  if (!jobId && inputJobIds.length === 0) {
+    return { error: 'job_id or job_ids is required' };
+  }
+
+  const resolvedJobId = jobId ?? (inputJobIds.length === 1 ? inputJobIds[0] : undefined);
+  const uniqueJobIds = [...new Set([...(resolvedJobId ? [resolvedJobId] : []), ...inputJobIds])];
+
+  return {
+    // Primary job for defaults / single-job ops: explicit jobId, else sole jobIds entry, else first.
+    jobId: resolvedJobId ?? uniqueJobIds[0],
+    jobIds: uniqueJobIds,
+  };
+};
+
+const filterNewCalendarEvents = (
+  requested: CalendarEventInput[],
+  existing: Array<{
+    description?: string;
+    start_time?: string | number | Date;
+    end_time?: string | number | Date;
+  }>
+): CalendarEventInput[] =>
+  requested.filter(
+    (event) =>
+      !existing.some(
+        (existingEvent) =>
+          existingEvent.description !== undefined &&
+          existingEvent.start_time !== undefined &&
+          existingEvent.end_time !== undefined &&
+          isSameCalendarEvent(event, {
+            description: existingEvent.description,
+            start_time: existingEvent.start_time,
+            end_time: existingEvent.end_time,
+          })
+      )
+  );
+
 export const createAdUpdateJobConfigTool = (
   resolveMlCapabilities: ResolveMlCapabilities,
   authorization?: MlAuthorizationService,
@@ -91,12 +180,13 @@ export const createAdUpdateJobConfigTool = (
   type: ToolType.builtin,
   tags: ['ml', 'anomaly-detection'],
   description:
-    'Update ML job config: memory limit, datafeed query_delay, delayed data check config, or create a calendar event. For create_calendar_event: ensures the calendar exists (PUT), posts events, then associates the calendar with the job.',
+    'Update ML job config: memory limit, datafeed query_delay, delayed data check config, or create a calendar event. For create_calendar_event: ensures the calendar exists (PUT), posts only missing events, then associates all job_ids with the calendar. Pass every job that should share the calendar in one call.',
   schema,
   handler: async (
     {
       operation,
       job_id: jobId,
+      job_ids: jobIdsInput,
       memory_limit,
       query_delay,
       delayed_data_check,
@@ -114,32 +204,76 @@ export const createAdUpdateJobConfigTool = (
       enabledFeatures
     );
     const ml = esClient.asCurrentUser.ml;
-    const datafeedId = `datafeed-${jobId}`;
 
     try {
       switch (operation) {
         case 'update_memory_limit': {
+          const resolved = resolveJobIdentifiers(jobId, jobIdsInput);
+          if ('error' in resolved) {
+            return {
+              results: [createErrorResult('job_id is required for update_memory_limit')],
+            };
+          }
+          if (resolved.jobIds.length > 1) {
+            return {
+              results: [
+                createErrorResult(
+                  'update_memory_limit accepts a single job_id (or job_ids with exactly one entry)'
+                ),
+              ],
+            };
+          }
           await hasMlCapabilities(['canUpdateJob']);
           const response = await ml.updateJob({
-            job_id: jobId,
+            job_id: resolved.jobId,
             body: { analysis_limits: { model_memory_limit: memory_limit } } as any,
           });
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'update_query_delay': {
+          const resolved = resolveJobIdentifiers(jobId, jobIdsInput);
+          if ('error' in resolved) {
+            return {
+              results: [createErrorResult('job_id is required for update_query_delay')],
+            };
+          }
+          if (resolved.jobIds.length > 1) {
+            return {
+              results: [
+                createErrorResult(
+                  'update_query_delay accepts a single job_id (or job_ids with exactly one entry)'
+                ),
+              ],
+            };
+          }
           await hasMlCapabilities(['canUpdateDatafeed']);
           const response = await ml.updateDatafeed({
-            datafeed_id: datafeedId,
+            datafeed_id: `datafeed-${resolved.jobId}`,
             body: { query_delay } as any,
           });
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'update_delayed_data_check': {
+          const resolved = resolveJobIdentifiers(jobId, jobIdsInput);
+          if ('error' in resolved) {
+            return {
+              results: [createErrorResult('job_id is required for update_delayed_data_check')],
+            };
+          }
+          if (resolved.jobIds.length > 1) {
+            return {
+              results: [
+                createErrorResult(
+                  'update_delayed_data_check accepts a single job_id (or job_ids with exactly one entry)'
+                ),
+              ],
+            };
+          }
           await hasMlCapabilities(['canUpdateDatafeed']);
           const response = await ml.updateDatafeed({
-            datafeed_id: datafeedId,
+            datafeed_id: `datafeed-${resolved.jobId}`,
             body: { delayed_data_check_config: delayed_data_check } as any,
           });
           return { results: [{ type: ToolResultType.other, data: response }] };
@@ -147,6 +281,15 @@ export const createAdUpdateJobConfigTool = (
 
         case 'create_calendar_event': {
           await hasMlCapabilities(['canCreateCalendar']);
+          const resolved = resolveJobIdentifiers(jobId, jobIdsInput);
+          if ('error' in resolved) {
+            return {
+              results: [
+                createErrorResult('job_id or job_ids is required for create_calendar_event'),
+              ],
+            };
+          }
+          const { jobId: primaryJobId, jobIds } = resolved;
           const events = calendar_events ?? (calendar_event ? [calendar_event] : undefined);
           if (!events?.length) {
             return {
@@ -157,31 +300,39 @@ export const createAdUpdateJobConfigTool = (
               ],
             };
           }
-          const calendarId = calendar_id ?? `calendar-${jobId}`;
+          const calendarId = calendar_id ?? `calendar-${primaryJobId}`;
 
-          // 1. Ensure calendar exists (PUT). If it already exists, associate the job and continue.
+          // 1. Ensure calendar exists with all jobs attached.
           let calendarCreated = true;
           try {
             await ml.putCalendar({
               calendar_id: calendarId,
-              job_ids: [jobId],
+              job_ids: jobIds,
             });
           } catch (err) {
             if (!isAlreadyExistsError(err)) {
               throw err;
             }
             calendarCreated = false;
+            // Attach every job in one request (comma-separated).
             await ml.putCalendarJob({
               calendar_id: calendarId,
-              job_id: jobId,
+              job_id: jobIds.join(','),
             });
           }
 
-          // 2. Post events only after the calendar is confirmed to exist.
-          const response = await ml.postCalendarEvents({
+          // 2. Post only events that are not already on the calendar (shared across jobs).
+          const { events: existingEvents } = await ml.getCalendarEvents({
             calendar_id: calendarId,
-            events,
           });
+          const eventsToAdd = filterNewCalendarEvents(events, existingEvents ?? []);
+          const response =
+            eventsToAdd.length > 0
+              ? await ml.postCalendarEvents({
+                  calendar_id: calendarId,
+                  events: eventsToAdd,
+                })
+              : { events: [] };
 
           return {
             results: [
@@ -190,7 +341,11 @@ export const createAdUpdateJobConfigTool = (
                 data: {
                   calendar_id: calendarId,
                   calendar_created: calendarCreated,
-                  job_id: jobId,
+                  job_id: primaryJobId,
+                  job_ids: jobIds,
+                  events_requested: events.length,
+                  events_added: eventsToAdd.length,
+                  events_skipped_existing: events.length - eventsToAdd.length,
                   ...response,
                 },
               },

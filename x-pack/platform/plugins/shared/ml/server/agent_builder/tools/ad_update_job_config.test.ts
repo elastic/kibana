@@ -19,6 +19,7 @@ const createMlMock = () => ({
   updateDatafeed: jest.fn().mockResolvedValue({ datafeed_id: 'datafeed-my-job' }),
   putCalendar: jest.fn().mockResolvedValue({ calendar_id: 'calendar-my-job' }),
   putCalendarJob: jest.fn().mockResolvedValue({ calendar_id: 'calendar-my-job' }),
+  getCalendarEvents: jest.fn().mockResolvedValue({ events: [] }),
   postCalendarEvents: jest.fn().mockResolvedValue({ events: [] }),
 });
 
@@ -39,6 +40,18 @@ describe('adUpdateJobConfigTool', () => {
       const ml = createMlMock();
       await adUpdateJobConfigTool.handler(
         { operation: 'update_memory_limit', job_id: 'my-job', memory_limit: '512mb' },
+        createContext(ml)
+      );
+      expect(ml.updateJob).toHaveBeenCalledWith({
+        job_id: 'my-job',
+        body: { analysis_limits: { model_memory_limit: '512mb' } },
+      });
+    });
+
+    it('operation=update_memory_limit infers job_id from a single job_ids entry', async () => {
+      const ml = createMlMock();
+      await adUpdateJobConfigTool.handler(
+        { operation: 'update_memory_limit', job_ids: ['my-job'], memory_limit: '512mb' },
         createContext(ml)
       );
       expect(ml.updateJob).toHaveBeenCalledWith({
@@ -88,13 +101,36 @@ describe('adUpdateJobConfigTool', () => {
         job_ids: ['my-job'],
       });
       expect(ml.putCalendarJob).not.toHaveBeenCalled();
+      expect(ml.getCalendarEvents).toHaveBeenCalledWith({ calendar_id: 'calendar-my-job' });
       expect(ml.postCalendarEvents).toHaveBeenCalledWith({
         calendar_id: 'calendar-my-job',
         events: [event],
       });
     });
 
-    it('operation=create_calendar_event uses provided calendar_id and calendar_events', async () => {
+    it('operation=create_calendar_event infers job_id when job_ids has one entry', async () => {
+      const ml = createMlMock();
+      const event = {
+        start_time: '2024-01-01T00:00:00Z',
+        end_time: '2024-01-02T00:00:00Z',
+        description: 'holiday',
+      };
+      const result = await adUpdateJobConfigTool.handler(
+        { operation: 'create_calendar_event', job_ids: ['solo-job'], calendar_event: event },
+        createContext(ml)
+      );
+      expect(ml.putCalendar).toHaveBeenCalledWith({
+        calendar_id: 'calendar-solo-job',
+        job_ids: ['solo-job'],
+      });
+      const standardResult = result as {
+        results: Array<{ type: string; data: { job_id: string; job_ids: string[] } }>;
+      };
+      expect(standardResult.results[0].data.job_id).toBe('solo-job');
+      expect(standardResult.results[0].data.job_ids).toEqual(['solo-job']);
+    });
+
+    it('operation=create_calendar_event attaches all job_ids in one call and posts events once', async () => {
       const ml = createMlMock();
       const events = [
         {
@@ -111,7 +147,7 @@ describe('adUpdateJobConfigTool', () => {
       await adUpdateJobConfigTool.handler(
         {
           operation: 'create_calendar_event',
-          job_id: 'my-job',
+          job_ids: ['job-a', 'job-b'],
           calendar_id: 'seasonal_sales_events',
           calendar_events: events,
         },
@@ -119,42 +155,152 @@ describe('adUpdateJobConfigTool', () => {
       );
       expect(ml.putCalendar).toHaveBeenCalledWith({
         calendar_id: 'seasonal_sales_events',
-        job_ids: ['my-job'],
+        job_ids: ['job-a', 'job-b'],
       });
+      expect(ml.postCalendarEvents).toHaveBeenCalledTimes(1);
       expect(ml.postCalendarEvents).toHaveBeenCalledWith({
         calendar_id: 'seasonal_sales_events',
         events,
       });
     });
 
-    it('operation=create_calendar_event associates job when calendar already exists', async () => {
+    it('operation=create_calendar_event associates jobs and skips events that already exist', async () => {
       const ml = createMlMock();
       ml.putCalendar.mockRejectedValue({
         statusCode: 409,
         message: 'resource_already_exists_exception',
       });
+      const existingEvent = {
+        description: 'holiday',
+        start_time: 1704067200000, // 2024-01-01T00:00:00Z
+        end_time: 1704153600000, // 2024-01-02T00:00:00Z
+      };
+      const newEvent = {
+        start_time: '2024-02-01T00:00:00Z',
+        end_time: '2024-02-02T00:00:00Z',
+        description: 'maintenance',
+      };
+      const duplicateEvent = {
+        start_time: '2024-01-01T00:00:00Z',
+        end_time: '2024-01-02T00:00:00Z',
+        description: 'holiday',
+      };
+      ml.getCalendarEvents.mockResolvedValue({ events: [existingEvent] });
+
+      const result = await adUpdateJobConfigTool.handler(
+        {
+          operation: 'create_calendar_event',
+          job_ids: ['job-a', 'job-b'],
+          calendar_id: 'holiday-cal',
+          calendar_events: [duplicateEvent, newEvent],
+        },
+        createContext(ml)
+      );
+
+      expect(ml.putCalendarJob).toHaveBeenCalledWith({
+        calendar_id: 'holiday-cal',
+        job_id: 'job-a,job-b',
+      });
+      expect(ml.postCalendarEvents).toHaveBeenCalledTimes(1);
+      expect(ml.postCalendarEvents).toHaveBeenCalledWith({
+        calendar_id: 'holiday-cal',
+        events: [newEvent],
+      });
+
+      const standardResult = result as {
+        results: Array<{
+          type: string;
+          data: {
+            events_requested: number;
+            events_added: number;
+            events_skipped_existing: number;
+          };
+        }>;
+      };
+      expect(standardResult.results[0].data.events_requested).toBe(2);
+      expect(standardResult.results[0].data.events_added).toBe(1);
+      expect(standardResult.results[0].data.events_skipped_existing).toBe(1);
+    });
+
+    it('operation=create_calendar_event does not post when all events already exist', async () => {
+      const ml = createMlMock();
+      ml.putCalendar.mockRejectedValue({ statusCode: 409 });
       const event = {
         start_time: '2024-01-01T00:00:00Z',
         end_time: '2024-01-02T00:00:00Z',
         description: 'holiday',
       };
+      ml.getCalendarEvents.mockResolvedValue({
+        events: [
+          {
+            description: 'holiday',
+            start_time: '2024-01-01T00:00:00Z',
+            end_time: '2024-01-02T00:00:00Z',
+          },
+        ],
+      });
+
       await adUpdateJobConfigTool.handler(
         {
           operation: 'create_calendar_event',
-          job_id: 'my-job',
+          job_id: 'job-b',
           calendar_id: 'holiday-cal',
           calendar_event: event,
         },
         createContext(ml)
       );
+
       expect(ml.putCalendarJob).toHaveBeenCalledWith({
         calendar_id: 'holiday-cal',
-        job_id: 'my-job',
+        job_id: 'job-b',
       });
-      expect(ml.postCalendarEvents).toHaveBeenCalledWith({
-        calendar_id: 'holiday-cal',
-        events: [event],
-      });
+      expect(ml.postCalendarEvents).not.toHaveBeenCalled();
+    });
+
+    it('operation=create_calendar_event returns error when job_id and job_ids are missing', async () => {
+      const ml = createMlMock();
+      const result = await adUpdateJobConfigTool.handler(
+        {
+          operation: 'create_calendar_event',
+          calendar_event: {
+            start_time: '2024-01-01T00:00:00Z',
+            end_time: '2024-01-02T00:00:00Z',
+            description: 'holiday',
+          },
+        },
+        createContext(ml)
+      );
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe(
+        'job_id or job_ids is required for create_calendar_event'
+      );
+      expect(ml.putCalendar).not.toHaveBeenCalled();
+    });
+
+    it('operation=create_calendar_event returns error when job_ids is empty and job_id is missing', async () => {
+      const ml = createMlMock();
+      const result = await adUpdateJobConfigTool.handler(
+        {
+          operation: 'create_calendar_event',
+          job_ids: [],
+          calendar_event: {
+            start_time: '2024-01-01T00:00:00Z',
+            end_time: '2024-01-02T00:00:00Z',
+            description: 'holiday',
+          },
+        },
+        createContext(ml)
+      );
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe(
+        'job_id or job_ids is required for create_calendar_event'
+      );
     });
 
     it('operation=create_calendar_event returns error when events are missing', async () => {
