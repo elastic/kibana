@@ -61,7 +61,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Connectivity**:
 * Add a **Filter by feature** control to the create-connector flyout, and show the HTTP connector in standard connector lists [#271686]({{kib-pull}}271686).
-* Add {{ecloud}} deployment or project identifiers to the `User-Agent` header on outbound connector requests [#268069]({{kib-pull}}268069).
 * Improve authentication options for Agent Builder connectors by listing recommended methods first with a **Recommended** badge and hiding legacy options when you create new connectors [#273410]({{kib-pull}}273410).
 * Add `secretQueryParams` support to the HTTP connector so encrypted query parameters are stored in connector secrets and injected into request URLs [#258291]({{kib-pull}}258291).
 * Add a **OneDrive** connector to search files, browse drives, and read file content in Agent Builder and Workflows [#275244]({{kib-pull}}275244).
@@ -92,7 +91,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Set numeric **Lens** heatmap Y-axis buckets to descending sort by default for natural numeric order [#268961]({{kib-pull}}268961).
 * Add a **Go to dashboard** button to the dashboard save toast when saving from outside the **Dashboard** app [#268326]({{kib-pull}}268326).
 * Re-enable **Go to Discover** drilldowns for {{esql}} **Lens** charts, carrying filters and the query bar state [#267245]({{kib-pull}}267245).
-* Log dashboard create, update, delete, view, and refresh actions in the audit log [#265821]({{kib-pull}}265821).
+* Record dashboard create, update, delete, view, and refresh actions as structured user activity events [#265821]({{kib-pull}}265821).
 * Redesign **Add to dashboard** with **New** and **From library** tabs, featured items, and a renamed **Vega** entry [#264457]({{kib-pull}}264457).
 * Update default **Lens** annotation colors to improve contrast with chart palettes while preserving colors you set [#262507]({{kib-pull}}262507).
 * Add spacing above collapsible dashboard section headers to clarify which panels belong to each section [#274377]({{kib-pull}}274377).
@@ -216,7 +215,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the missing loading state for inline attachments while Agent Builder is still streaming the attachment [#264408]({{kib-pull}}264408).
 * Fix **Conversation not found** errors when you send the first message in a new Agent Builder conversation [#270597]({{kib-pull}}270597).
 * Fix the converse API returning `500` instead of the correct status when {{infer}} fails, including `404` for unknown endpoints and `410` for deprecated models [#266147]({{kib-pull}}266147).
-* Fix Searchable Metadata Layer index mapping mismatches after schema changes [#263754]({{kib-pull}}263754).
+* Fix Agent Builder metadata indexing failures caused by stale field mappings after schema changes [#263754]({{kib-pull}}263754).
 * Fix **Manage components** resetting your selected agent to the default when you collapse the panel [#263044]({{kib-pull}}263044).
 * Fix agent execution returning `500` instead of `403` when connector privileges are missing [#267329]({{kib-pull}}267329).
 * Fix the inability to remove all tools from an agent, including auto-included tools, when Elastic capabilities are turned off [#264632]({{kib-pull}}264632).
