@@ -18,12 +18,12 @@ import {
   createBadRequestError,
   AgentExecutionMode,
   ConversationAccessControlMode,
-  ConversationSourceType,
+  ConversationOriginType,
   ExecutionStatus,
 } from '@kbn/agent-builder-common';
 import type {
   AgentExecutionService,
-  ExecutionConversationSource,
+  ExecutionConversationOrigin,
 } from '@kbn/agent-builder-server/execution';
 import {
   ConnectorOrInferenceIdConflictError,
@@ -298,9 +298,9 @@ export const conversePayloadSchema = schema.object({
 });
 
 export const callbackConversePayloadSchema = conversePayloadSchema.extends({
-  source: schema.maybe(
+  origin: schema.maybe(
     schema.object({
-      type: schema.literal(ConversationSourceType.Slack),
+      type: schema.literal(ConversationOriginType.Slack),
       external_conversation_id: schema.string({ minLength: 1, maxLength: 1024 }),
       author: schema.maybe(
         schema.object({
@@ -382,19 +382,19 @@ export function registerChatRoutes({
   /**
    * Derives execution options shared by all converse routes.
    * Public requests may opt into local or Task Manager execution with _execution_mode,
-   * while callback requests always use Task Manager and carry the callback and source.
+   * while callback requests always use Task Manager and carry the callback and origin.
    */
   const resolveExecutionOptions = (
     payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload
   ): {
     useTaskManager: boolean | undefined;
-    source: ExecutionConversationSource | undefined;
+    origin: ExecutionConversationOrigin | undefined;
     callback: { url: string } | undefined;
   } => {
     if (isChatCallbackRequestBodyPayload(payload)) {
       return {
         useTaskManager: true,
-        source: payload.source,
+        origin: payload.origin,
         callback: payload.callback,
       };
     }
@@ -404,7 +404,7 @@ export function registerChatRoutes({
     return {
       useTaskManager:
         executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined,
-      source: undefined,
+      origin: undefined,
       callback: undefined,
     };
   };
@@ -433,7 +433,7 @@ export function registerChatRoutes({
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
-    const { useTaskManager, source, callback } = resolveExecutionOptions(payload);
+    const { useTaskManager, origin, callback } = resolveExecutionOptions(payload);
 
     return executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
@@ -446,7 +446,7 @@ export function registerChatRoutes({
         conversationId,
         autoCreateConversationWithId: true,
         accessControl,
-        source,
+        origin,
         callback,
         capabilities,
         browserApiTools,
