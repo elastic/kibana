@@ -43,5 +43,11 @@ export {
 } from './src/authentication';
 export { isUiamCredential, isMissingApiKey, isRevokedApiKey } from './src/uiam';
 export type { CoreFipsService } from './src/fips';
-export { AuthzDisabled, AuthzOptOutReason, unwindNestedSecurityPrivileges } from './src/authz';
+export {
+  AuthzDisabled,
+  AuthzOptOutReason,
+  unwindNestedSecurityPrivileges,
+  groupSecurityPrivileges,
+  flattenSecurityPrivileges,
+} from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';

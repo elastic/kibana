@@ -18,7 +18,10 @@ import type {
   PrivilegeSet,
   RouteAuthz,
 } from '@kbn/core/server';
-import { unwindNestedSecurityPrivileges } from '@kbn/core-security-server';
+import {
+  flattenSecurityPrivileges,
+  unwindNestedSecurityPrivileges,
+} from '@kbn/core-security-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
   AuthorizationServiceSetup,
@@ -34,25 +37,6 @@ const isAuthzDisabled = (authz?: RecursiveReadonly<RouteAuthz>): authz is AuthzD
 
 const isReservedPrivilegeSet = (privilege: string): privilege is ReservedPrivilegesSet => {
   return Object.hasOwn(ReservedPrivilegesSet, privilege);
-};
-
-const flattenPrivilegeEntries = (
-  privilegeEntries: AuthzEnabled['requiredPrivileges']
-): string[] => {
-  const privileges: string[] = [];
-
-  for (const privilegeEntry of privilegeEntries) {
-    if (typeof privilegeEntry === 'object') {
-      privileges.push(
-        ...unwindNestedSecurityPrivileges<AllRequiredCondition>(privilegeEntry.allRequired ?? []),
-        ...unwindNestedSecurityPrivileges<AnyRequiredCondition>(privilegeEntry.anyRequired ?? [])
-      );
-    } else {
-      privileges.push(privilegeEntry);
-    }
-  }
-
-  return privileges;
 };
 
 interface InitApiAuthorization extends AuthorizationServiceSetup {
@@ -226,13 +210,13 @@ export function initAPIAuthorization(
       return kibanaPrivileges[kbPrivilege];
     };
 
-    const requiredPrivilegeNames = new Set(flattenPrivilegeEntries(requiredPrivileges));
+    const requiredPrivilegeNames = new Set(flattenSecurityPrivileges(requiredPrivileges));
 
     for (const privilege of requiredPrivileges) {
       if (!hasRequestedPrivilege(privilege)) {
         // Only list missing *required* privileges in the 403 body. Extended privileges are
         // never part of the access decision and must not appear to grant the route.
-        const missingPrivileges = [...requiredPrivilegeNames].filter(
+        const missingPrivileges = Array.from(requiredPrivilegeNames).filter(
           (key) => !kibanaPrivileges[key]
         );
         const forbiddenMessage = `API [${request.route.method.toUpperCase()} ${

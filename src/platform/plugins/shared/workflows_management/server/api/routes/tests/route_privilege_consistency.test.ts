@@ -189,7 +189,9 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     label: 'read only (no execution history)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: false,
+      [WorkflowsManagementApiActions.readManagedExecution]: false,
     },
     effectivePrivileges: [WorkflowsManagementApiActions.read],
   },
@@ -198,6 +200,7 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     label: 'read + readExecution (with execution history)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: true,
       [WorkflowsManagementApiActions.readManagedExecution]: false,
     },
@@ -211,6 +214,7 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     label: 'read + readExecution + readManagedExecution (with managed execution history)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: true,
       [WorkflowsManagementApiActions.readManagedExecution]: true,
     },
@@ -225,7 +229,9 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     label: 'read only (no execution stats)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: false,
+      [WorkflowsManagementApiActions.readManagedExecution]: false,
     },
     effectivePrivileges: [WorkflowsManagementApiActions.read],
   },
@@ -234,6 +240,7 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     label: 'read + readExecution (with execution stats)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: true,
       [WorkflowsManagementApiActions.readManagedExecution]: false,
     },
@@ -247,6 +254,7 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     label: 'read + readExecution + readManagedExecution (with managed execution stats)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: true,
       [WorkflowsManagementApiActions.readManagedExecution]: true,
     },

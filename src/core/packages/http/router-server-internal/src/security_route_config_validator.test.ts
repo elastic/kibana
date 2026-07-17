@@ -580,6 +580,19 @@ describe('RouteSecurity validation', () => {
     );
   });
 
+  it('should fail validation listing all overlapping extendedPrivileges', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: ['read', 'write'],
+          extendedPrivileges: ['read', 'readExecution', 'write'],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz]: extendedPrivileges cannot overlap with requiredPrivileges: [read, write]"`
+    );
+  });
+
   it('should fail validation when extendedPrivileges overlaps with nested requiredPrivileges', () => {
     expect(() =>
       validRouteSecurity({

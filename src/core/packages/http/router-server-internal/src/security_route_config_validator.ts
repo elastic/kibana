@@ -8,14 +8,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type {
-  RouteSecurity,
-  AllRequiredCondition,
-  AnyRequiredCondition,
-  Privileges,
-} from '@kbn/core-http-server';
+import type { RouteSecurity, Privileges } from '@kbn/core-http-server';
 import { ReservedPrivilegesSet } from '@kbn/core-http-server';
-import { unwindNestedSecurityPrivileges } from '@kbn/core-security-server';
+import {
+  flattenSecurityPrivileges,
+  groupSecurityPrivileges,
+} from '@kbn/core-security-server';
 import type { DeepPartial } from '@kbn/utility-types';
 
 const privilegeSetSchema = schema.object(
@@ -48,37 +46,6 @@ const privilegeSetSchema = schema.object(
   }
 );
 
-const groupRequiredPrivileges = (
-  privileges: Privileges
-): { anyRequired: string[]; allRequired: string[] } => {
-  const anyRequired: string[] = [];
-  const allRequired: string[] = [];
-
-  for (const privilege of privileges) {
-    if (typeof privilege === 'string') {
-      allRequired.push(privilege);
-    } else {
-      if (privilege.anyRequired) {
-        anyRequired.push(
-          ...unwindNestedSecurityPrivileges<AnyRequiredCondition>(privilege.anyRequired)
-        );
-      }
-      if (privilege.allRequired) {
-        allRequired.push(
-          ...unwindNestedSecurityPrivileges<AllRequiredCondition>(privilege.allRequired)
-        );
-      }
-    }
-  }
-
-  return { anyRequired, allRequired };
-};
-
-const flattenRequiredPrivileges = (privileges: Privileges): string[] => {
-  const { anyRequired, allRequired } = groupRequiredPrivileges(privileges);
-  return [...allRequired, ...anyRequired];
-};
-
 const requiredPrivilegesSchema = schema.arrayOf(
   schema.oneOf([privilegeSetSchema, schema.string()]),
   {
@@ -88,7 +55,7 @@ const requiredPrivilegesSchema = schema.arrayOf(
         return undefined;
       }
 
-      const { anyRequired, allRequired } = groupRequiredPrivileges(value);
+      const { anyRequired, allRequired } = groupSecurityPrivileges(value as Privileges);
 
       if (anyRequired.includes(ReservedPrivilegesSet.superuser)) {
         return 'Using superuser privileges in anyRequired is not allowed';
@@ -196,11 +163,14 @@ const authzSchema = schema.object(
         return 'requiredPrivileges must be specified when extendedPrivileges is present';
       }
 
-      const requiredPrivileges = flattenRequiredPrivileges(value.requiredPrivileges);
-      for (const privilege of value.extendedPrivileges) {
-        if (requiredPrivileges.includes(privilege)) {
-          return `extendedPrivileges cannot overlap with requiredPrivileges: [${privilege}]`;
-        }
+      const requiredPrivileges = flattenSecurityPrivileges(value.requiredPrivileges);
+      const overlaps = value.extendedPrivileges.filter((privilege) =>
+        requiredPrivileges.includes(privilege)
+      );
+      if (overlaps.length) {
+        return `extendedPrivileges cannot overlap with requiredPrivileges: [${overlaps.join(
+          ', '
+        )}]`;
       }
     },
   }
