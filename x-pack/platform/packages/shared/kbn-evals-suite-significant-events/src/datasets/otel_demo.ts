@@ -6,8 +6,211 @@
  */
 
 import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
+import type { Detection, Discovery } from '@kbn/significant-events-schema';
 import { GCS_BUCKET, OTEL_DEMO_GCS_BASE_PATH_PREFIX, OTEL_DEMO_NAMESPACE } from '../constants';
 import type { DatasetConfig } from './types';
+
+/**
+ * Flatten the detections declared on each expected discovery into the input detection list the
+ * discovery agent receives. Mirrors the bank_of_anthos pattern: the canonical input and the
+ * expected answer stay self-consistent because both derive from the same discovery objects.
+ */
+const toInputDetections = (discoveries: Array<Partial<Discovery>>): Array<Partial<Detection>> =>
+  discoveries
+    .flatMap((discovery) => discovery.detections ?? [])
+    .map((detection) => ({
+      ...detection,
+      change_point_type: 'spike' as const,
+      p_value: 0.0001,
+    }));
+
+/**
+ * Canonical payment-unreachable cascade — the SigEvents discovery agent should collapse the charge
+ * failures, the gRPC transport/dialing errors, and the checkout PlaceOrder failures into ONE
+ * discovery rooted at the unreachable payment service.
+ *
+ * Criteria and root cause are phrased at the incident level (service/dependency/error-signature),
+ * NOT against ingest-specific values (IPs, doc counts, transaction IDs), because the log set this
+ * runs against is the local otel-demo capture, not a pinned shared snapshot. The stable error
+ * signatures used here ("failed to charge card", "dial tcp", "i/o timeout") are otel-demo
+ * application constants, so they survive re-ingest.
+ */
+const PAYMENT_UNREACHABLE_CASCADE_DISCOVERY: Partial<Discovery> = {
+  kind: 'discovery',
+  discovery_slug: 'checkout__payment-unreachable-charge-failures',
+  title:
+    'checkout — payment service unreachable: charge failures cascading to frontend gRPC errors',
+  summary:
+    'The payment service is unreachable, so checkout cannot charge cards during PlaceOrder and the frontend surfaces gRPC code 13 INTERNAL / code 14 UNAVAILABLE errors ("failed to charge card"). Users cannot complete orders. Onset correlates with the payment disruption; healthy traffic across cart, recommendation, and ad continues unaffected.',
+  root_cause:
+    'The payment service is unreachable over the network (transport dialing failures — "dial tcp … i/o timeout" / "connection refused"). checkout calls payment during PlaceOrder to charge the card; because payment cannot be reached, the charge fails and the failure surfaces to the frontend as gRPC code 13 INTERNAL / code 14 UNAVAILABLE ("failed to charge card"). The blast radius is the checkout path; services that do not depend on payment continue to operate normally.',
+  criticality: 88,
+  confidence: 80,
+  detections: [
+    {
+      detection_id: 'otel-pay-charge-fail-det',
+      rule_name: 'Frontend Payment Charge Failures',
+      rule_uuid: 'a1e0b2c3-1111-4a5b-8c9d-0e1f2a3b4c50',
+      stream_name: 'logs',
+      change_point_type: 'spike',
+      p_value: 0.0001,
+    },
+    {
+      detection_id: 'otel-pay-grpc-transport-det',
+      rule_name: 'gRPC Transport Dialing Errors Reaching Payment',
+      rule_uuid: 'a1e0b2c3-2222-4a5b-8c9d-0e1f2a3b4c51',
+      stream_name: 'logs',
+      change_point_type: 'spike',
+      p_value: 0.0001,
+    },
+    {
+      detection_id: 'otel-checkout-placeorder-det',
+      rule_name: 'Checkout PlaceOrder Failures',
+      rule_uuid: 'a1e0b2c3-3333-4a5b-8c9d-0e1f2a3b4c52',
+      stream_name: 'logs',
+      change_point_type: 'spike',
+      p_value: 0.0001,
+    },
+  ],
+  cause_kis: [
+    { name: 'payment', stream_name: 'logs' },
+    { name: 'checkout', stream_name: 'logs' },
+    { name: 'frontend', stream_name: 'logs' },
+  ],
+  dependency_edges: [
+    { source: 'frontend', target: 'checkout', exposure: 'exposed' },
+    { source: 'checkout', target: 'payment', exposure: 'exposed' },
+  ],
+  // Lean evidence trail using stable otel-demo application signatures (no ingest-specific IPs). The
+  // judge, if run, re-verifies each query via execute_esql before promoting.
+  evidences: [
+    {
+      rule_name: 'Frontend Payment Charge Failures',
+      rule_uuid: 'a1e0b2c3-1111-4a5b-8c9d-0e1f2a3b4c50',
+      stream_name: 'logs',
+      result: 'found',
+      row_count: 1,
+      description:
+        'Testing: whether the frontend is failing to charge cards because payment is unreachable. Expected if true: "failed to charge card" errors in frontend logs. Verdict: confirms — checkout→payment charge calls are failing and the failure is user-visible at the frontend.',
+      esql_query:
+        'FROM logs | WHERE resource.attributes.app == "frontend" AND MATCH_PHRASE(body.text, "failed to charge card") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+    },
+    {
+      rule_name: 'gRPC Transport Dialing Errors Reaching Payment',
+      rule_uuid: 'a1e0b2c3-2222-4a5b-8c9d-0e1f2a3b4c51',
+      stream_name: 'logs',
+      result: 'found',
+      row_count: 1,
+      description:
+        'Testing: whether the charge failures are caused by the payment service being unreachable at the transport layer. Expected if true: "transport: Error while dialing" / "dial tcp" / "i/o timeout" in frontend logs. Verdict: confirms — the root cause is network unreachability of payment, not an application error in checkout.',
+      esql_query:
+        'FROM logs | WHERE MATCH_PHRASE(body.text, "dial tcp") OR MATCH_PHRASE(body.text, "i/o timeout") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+    },
+    {
+      rule_name: 'Checkout PlaceOrder Failures',
+      rule_uuid: 'a1e0b2c3-3333-4a5b-8c9d-0e1f2a3b4c52',
+      stream_name: 'logs',
+      result: 'found',
+      row_count: 1,
+      description:
+        'Testing: whether the impact reaches the checkout order path. Expected if true: PlaceOrder activity in checkout logs coinciding with the charge failures. Verdict: confirms — order completion is blocked because the charge step fails.',
+      esql_query:
+        'FROM logs | WHERE resource.attributes.app == "checkout" AND MATCH_PHRASE(body.text, "PlaceOrder") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+    },
+  ],
+};
+
+/**
+ * Cart-service Redis/Valkey cutoff — cartservice loses connectivity to its backing store,
+ * crashes, and the frontend starts surfacing gRPC code 14 UNAVAILABLE on cart operations.
+ */
+const CART_REDIS_CUTOFF_DISCOVERY: Partial<Discovery> = {
+  kind: 'discovery',
+  event_id: 'cartservice__cart-valkey-connection-refused',
+  title: 'Cart Service — Valkey store connection refused',
+  symptom_hypothesis:
+    'Cart operations are failing because cartservice cannot reach its Valkey/Redis backing store.',
+  summary:
+    'cartservice is failing to connect to its Valkey/Redis backing store (connection refused), so cart operations error and the service crashes; the frontend then sees gRPC UNAVAILABLE when fetching carts during checkout. Users cannot retrieve or update their carts. Restore Valkey connectivity / roll back the cart cache change.',
+  severity: '80-critical',
+  confidence: 0.8,
+  stream_names: ['logs'],
+  signals: [
+    {
+      type: 'detection',
+      stream_name: 'logs',
+      confirmed: true,
+      description:
+        'Testing: whether cartservice lost connectivity to its Valkey/Redis backing store. Expected if true: "Wasn\'t able to connect to redis" and ValkeyCartStore failures in cart logs. Found: connection-refused errors from cartservice.cartstore.ValkeyCartStore. Verdict: confirms — the cache backend is unreachable, breaking cart operations.',
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE MATCH_PHRASE(body.text, "Wasn\'t able to connect to redis") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: 'otel-cart-valkey-conn-det',
+        rule_name: 'Cart Valkey Connection Failures',
+        rule_uuid: 'c3d4e5f6-5555-4a5b-8c9d-0e1f2a3b4c70',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
+    },
+  ],
+  causal_features: [{ feature_id: 'cartservice', name: 'cartservice', stream_name: 'logs' }],
+  blast_radius: [
+    {
+      type: 'dependency',
+      feature_id: 'cartservice-valkey',
+      source: 'cartservice',
+      target: 'valkey',
+      stream_name: 'logs',
+    },
+    {
+      type: 'dependency',
+      feature_id: 'frontend-cartservice',
+      source: 'frontend',
+      target: 'cartservice',
+      stream_name: 'logs',
+    },
+  ],
+};
+
+/** Benign recommendation activity spike — must stay a SEPARATE discovery from the failure cascade. */
+const BENIGN_RECOMMENDATION_DISCOVERY: Partial<Discovery> = {
+  kind: 'discovery',
+  discovery_slug: 'recommendation__list-recommendations-activity',
+  title: 'recommendation — ListRecommendations: successful request-volume spike',
+  summary:
+    'The recommendation service is logging a spike in successful ListRecommendations requests. No failure symptoms are present — all observed events are normal request handling, consistent with load-generator traffic. This is an independent signal from the payment-unreachable cascade and is not an incident.',
+  root_cause:
+    'Normal load-driven increase in recommendation request volume; all operations succeeded — no failure condition.',
+  criticality: 10,
+  confidence: 65,
+  detections: [
+    {
+      detection_id: 'otel-recommendation-volume-det',
+      rule_name: 'Recommendation ListRecommendations Volume',
+      rule_uuid: 'b2f1c3d4-4444-4a5b-8c9d-0e1f2a3b4c60',
+      stream_name: 'logs',
+      change_point_type: 'spike',
+      p_value: 0.0001,
+    },
+  ],
+  cause_kis: [{ name: 'recommendation', stream_name: 'logs' }],
+  evidences: [
+    {
+      rule_name: 'Recommendation ListRecommendations Volume',
+      rule_uuid: 'b2f1c3d4-4444-4a5b-8c9d-0e1f2a3b4c60',
+      stream_name: 'logs',
+      result: 'found',
+      row_count: 1,
+      description:
+        'Testing: whether the recommendation volume spike represents a failure or anomalous activity. Expected if true: error/exception patterns in recommendation logs. Verdict: refutes — the spike is successful ListRecommendations request handling, consistent with load-generator activity.',
+      esql_query:
+        'FROM logs | WHERE resource.attributes.app == "recommendation" AND MATCH_PHRASE(body.text, "Receive ListRecommendations for product ids") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+    },
+  ],
+};
 
 export const otelDemoDataset: DatasetConfig = {
   id: OTEL_DEMO_NAMESPACE,
@@ -600,8 +803,152 @@ export const otelDemoDataset: DatasetConfig = {
       },
     },
   ],
-  discovery: [],
-  discoveryJudge: [],
+  discovery: [
+    {
+      input: {
+        scenario_id: 'payment-unreachable',
+        stream_name: 'logs',
+        detections: toInputDetections([
+          PAYMENT_UNREACHABLE_CASCADE_DISCOVERY,
+          BENIGN_RECOMMENDATION_DISCOVERY,
+        ]),
+      },
+      // Ordered ground-truth continuation chains (by `rule_name`); the continuation eval replays one
+      // rule per cycle. Each chain legitimately continues ONE episode, so the agent should reuse a
+      // single slug. `cascade` = upstream unreachability → downstream user-facing failure.
+      continuationChains: {
+        cascade: [
+          'gRPC Transport Dialing Errors Reaching Payment',
+          'Frontend Payment Charge Failures',
+          'Checkout PlaceOrder Failures',
+        ],
+      },
+      output: {
+        expected_ground_truth:
+          'discoveries=[payment-unreachable-cascade (payment unreachable via dial tcp / i/o timeout; checkout→payment charge failures surfacing as frontend gRPC code 13/14 "failed to charge card"; PlaceOrder blocked), benign-recommendation (successful ListRecommendations volume spike, no failures)]',
+        expected_discoveries: [
+          PAYMENT_UNREACHABLE_CASCADE_DISCOVERY,
+          BENIGN_RECOMMENDATION_DISCOVERY,
+        ],
+        criteria: [
+          {
+            id: 'root-cause-payment-unreachable',
+            text: 'Identifies the payment service being unreachable at the network/transport layer (dial tcp / i/o timeout / connection refused) as the root cause, rather than blaming checkout or the frontend.',
+            score: 3,
+          },
+          {
+            id: 'cascade-grouping',
+            text: 'Groups the frontend charge failures, the gRPC transport/dialing errors, and the checkout PlaceOrder failures into a single discovery rooted at the unreachable payment service — not three separate service-scoped discoveries.',
+            score: 2,
+          },
+          {
+            id: 'dependency-chain',
+            text: 'Names the checkout→payment dependency (charge on PlaceOrder) and the frontend→checkout exposure that makes the failure user-facing.',
+            score: 1,
+          },
+          {
+            id: 'separate-benign-recommendation',
+            text: 'Keeps the benign recommendation activity spike as a separate discovery (or omits it), and does not lump it into the payment incident.',
+            score: 2,
+          },
+          {
+            id: 'error-signatures',
+            text: 'Cites observed error signatures ("failed to charge card", gRPC code 13 INTERNAL / code 14 UNAVAILABLE, "dial tcp" / "i/o timeout") rather than generic phrasing.',
+            score: 1,
+          },
+        ],
+      },
+      metadata: {
+        difficulty: 'medium',
+        failure_domain: 'checkout',
+        failure_mode: 'payment_unreachable',
+      },
+    },
+    {
+      input: {
+        scenario_id: 'cart-redis-cutoff',
+        stream_name: 'logs',
+        detections: [
+          {
+            detection_id: 'otel-cart-valkey-conn-det',
+            rule_name: 'Cart Valkey Connection Failures',
+            rule_uuid: 'c3d4e5f6-5555-4a5b-8c9d-0e1f2a3b4c70',
+            stream_name: 'logs',
+            change_point_type: 'spike',
+            p_value: 0.0001,
+          },
+        ],
+      },
+      output: {
+        criteria: [
+          {
+            id: 'root-cause-valkey',
+            text: 'Must identify that cartservice lost connectivity to its Valkey/Redis backing store (evidence: cart logs "Wasn\'t able to connect to redis", "fail cartservice.cartstore.ValkeyCartStore").',
+            score: 3,
+          },
+          {
+            id: 'cart-crash',
+            text: 'Should note the cart service crash/shutdown ("Application is shutting down") as part of the episode.',
+            score: 2,
+          },
+          {
+            id: 'frontend-impact',
+            text: 'Should capture the upstream user impact in frontend (gRPC code 14 UNAVAILABLE, ECONNREFUSED, "failed to get user cart during checkout").',
+            score: 2,
+          },
+        ],
+        expected_min_evidence_count: 1,
+        expected_ground_truth: 'discoveries=[cartservice-valkey-connection-refused]',
+        expected_discoveries: [CART_REDIS_CUTOFF_DISCOVERY],
+      },
+      metadata: {
+        difficulty: 'medium',
+        failure_domain: 'cart',
+        failure_mode: 'redis_cutoff',
+      },
+    },
+  ],
+  discoveryJudge: [
+    {
+      id: 'payment-unreachable',
+      input: {
+        scenario_id: 'payment-unreachable',
+        discoveries: [PAYMENT_UNREACHABLE_CASCADE_DISCOVERY, BENIGN_RECOMMENDATION_DISCOVERY],
+      },
+      output: {
+        expected_ground_truth:
+          'payment-unreachable cascade (payment unreachable → checkout charge failures → frontend gRPC 13/14, PlaceOrder blocked)=promoted; ' +
+          'benign recommendation volume spike (successful ListRecommendations only, no failures)=demoted',
+        criteria: [
+          {
+            id: 'promote-active-cascade',
+            text: 'Promotes the payment-unreachable cascade: active charge failures blocking order completion warrant immediate on-call action.',
+            score: 3,
+          },
+          {
+            id: 'independent-verification',
+            text: "Independently verifies at least one key evidence via execute_esql before deciding — re-runs an esql_query from the cascade discovery's input evidences[] and stamps confirmed: true from its own query results, rather than trusting pre-collected findings at face value.",
+            score: 2,
+          },
+          {
+            id: 'demote-benign-recommendation',
+            text: 'Demotes the benign recommendation volume spike: successful request volume without failure symptoms or user impact is not an actionable incident.',
+            score: 3,
+          },
+          {
+            id: 'do-not-escalate-benign-recommendation',
+            text: 'Does not promote or fold the benign recommendation spike into the payment incident; it stays separate non-incident noise.',
+            score: 2,
+          },
+        ],
+      },
+      metadata: {
+        difficulty: 'medium',
+        failure_domain: 'checkout',
+        failure_mode: 'payment_unreachable',
+      },
+    },
+  ],
   kiQueryGeneration: [
     {
       input: {

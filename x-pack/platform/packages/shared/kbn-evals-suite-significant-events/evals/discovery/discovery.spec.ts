@@ -22,6 +22,10 @@ import {
   canonicalSignificantEventFromGroundTruth,
 } from '../../src/data_generators/replay';
 import { replayKnowledgeIndicatorsSnapshot } from '../../src/data_generators/replay_knowledge_indicators_snapshot';
+import {
+  indexExtraKnowledgeIndicators,
+  cartRedisCutoffExtraKis,
+} from '../../src/data_generators/extra_knowledge_indicators';
 import { evaluate } from '../../src/evaluate';
 import {
   getActiveDatasets,
@@ -39,6 +43,9 @@ import { buildAvailableSnapshotsBySource } from '../shared';
 import { extractDiscoveriesFromToolCall } from '../../src/evaluators/discovery/utils/parse_agent_output';
 import { buildDiscoveryInput } from '../../src/evaluators/discovery/discovery/build_agent_input';
 import type { ContinuationCycle } from '../../src/evaluators/discovery/discovery/continuation/continuation_stability';
+
+// A/B lever: 'old' (baseline KIs only) vs 'old+new' (baseline + extra KIs). Default 'old'.
+const KI_SET = process.env.SIGEVENTS_KI_SET === 'old+new' ? 'old+new' : 'old';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
@@ -181,7 +188,7 @@ evaluate.describe(
                 datasets: [
                   {
                     name: `sigevents: Discovery (${dataset.id})`,
-                    description: `[${dataset.id}] discovery agent across scenarios`,
+                    description: `[${dataset.id}] discovery agent across scenarios [ki_set=${KI_SET}]`,
                     examples: collectedExamples.map(({ scenario }) => ({
                       id: scenario.input.scenario_id,
                       input: { ...scenario.input, snapshot_source: scenario.snapshot_source },
@@ -239,6 +246,12 @@ evaluate.describe(
                     snapshotSource.snapshotName,
                     snapshotSource.gcs
                   );
+
+                  // A/B: when running the 'old+new' variant, add the extra KIs on top of the
+                  // baseline for scenarios that have them. Superset of 'old'.
+                  if (KI_SET === 'old+new' && input.scenario_id === 'cart-redis-cutoff') {
+                    await indexExtraKnowledgeIndicators(esClient, log, cartRedisCutoffExtraKis);
+                  }
 
                   // Same message shape as the production batch.
                   const agentInput = buildDiscoveryInput({ detections });
