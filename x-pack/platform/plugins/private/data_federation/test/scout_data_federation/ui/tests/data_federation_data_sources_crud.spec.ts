@@ -15,93 +15,90 @@ const S3_ACCESS_KEY = 'AKIAIOSFODNN7EXAMPLE';
 const S3_SECRET_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
 
 test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.stateful.classic }, () => {
-  test('creates, edits, and deletes a data source', async ({
-    browserAuth,
-    kbnClient,
-    page,
-    pageObjects,
-  }) => {
-    const dataSourceName = `scout-data-source-${randomUUID().slice(0, 8)}`;
+  let dataSourceName: string | undefined;
+
+  test.afterAll(async ({ kbnClient }) => {
+    if (!dataSourceName) {
+      return;
+    }
+
+    try {
+      await kbnClient.request({
+        method: 'DELETE',
+        path: getDataSourceByIdApiPath(dataSourceName),
+      });
+    } catch {
+      // ignore cleanup errors
+    }
+  });
+
+  test('creates, edits, and deletes a data source', async ({ browserAuth, page, pageObjects }) => {
+    const createdDataSourceName = `scout-data-source-${randomUUID().slice(0, 8)}`;
+    dataSourceName = createdDataSourceName;
     const initialDescription = 'Scout data source (initial)';
     const updatedDescription = 'Scout data source (updated)';
 
-    const cleanupDataSource = async () => {
-      try {
-        await kbnClient.request({
-          method: 'DELETE',
-          path: getDataSourceByIdApiPath(dataSourceName),
-        });
-      } catch {
-        // ignore cleanup errors
-      }
-    };
-
     await browserAuth.loginWithCustomRole(CUSTOM_ROLES.data_federation_manager);
 
-    // todo remove try / catch wrap
-    try {
-      await test.step('navigate to the Data Federation management app', async () => {
-        await pageObjects.dataFederation.goto();
+    await test.step('navigate to the Data Federation management app', async () => {
+      await pageObjects.dataFederation.goto();
 
-        await page.getByRole('tab', { name: 'Data sources' }).click();
-        await expect(page.getByRole('tab', { name: 'Data sources' })).toHaveAttribute(
-          'aria-selected',
-          'true'
-        );
-        await expect(pageObjects.dataFederation.dataSourcesTable).toBeVisible();
-      });
+      await page.getByRole('tab', { name: 'Data sources' }).click();
+      await expect(page.getByRole('tab', { name: 'Data sources' })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+      await expect(pageObjects.dataFederation.dataSourcesTable).toBeVisible();
+    });
 
-      await test.step('page has no accessibility violations', async () => {
-        const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
-        expect(violations).toStrictEqual([]);
-      });
+    await test.step('page has no accessibility violations', async () => {
+      const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+      expect(violations).toStrictEqual([]);
+    });
 
-      await test.step('create a new S3 data source', async () => {
-        await pageObjects.dataFederation.connectDataSourceButton.click();
+    await test.step('create a new S3 data source', async () => {
+      await pageObjects.dataFederation.connectDataSourceButton.click();
 
-        await expect(page.testSubj.locator('createDataSourceFlyout')).toBeVisible();
+      await expect(page.testSubj.locator('createDataSourceFlyout')).toBeVisible();
 
-        await page.testSubj.locator('createDataSourceFlyoutName').fill(dataSourceName);
-        await page.testSubj.locator('createDataSourceFlyoutDescription').fill(initialDescription);
-        await page.testSubj.locator('createDataSourceFlyoutS3Region').fill('us-east-1');
-        await page.testSubj.locator('createDataSourceFlyoutS3AccessKey').fill(S3_ACCESS_KEY);
-        await page.testSubj.locator('createDataSourceFlyoutS3SecretKey').fill(S3_SECRET_KEY);
+      await page.testSubj.locator('createDataSourceFlyoutName').fill(createdDataSourceName);
+      await page.testSubj.locator('createDataSourceFlyoutDescription').fill(initialDescription);
+      await page.testSubj.locator('createDataSourceFlyoutS3Region').fill('us-east-1');
+      await page.testSubj.locator('createDataSourceFlyoutS3AccessKey').fill(S3_ACCESS_KEY);
+      await page.testSubj.locator('createDataSourceFlyoutS3SecretKey').fill(S3_SECRET_KEY);
 
-        await page.testSubj.locator('createDataSourceFlyoutSubmit').click();
-        await expect(page.testSubj.locator('createDataSourceFlyoutSaveError')).toHaveCount(0);
-        await expect(page.testSubj.locator('createDataSourceFlyout')).toBeHidden();
-      });
+      await page.testSubj.locator('createDataSourceFlyoutSubmit').click();
+      await expect(page.testSubj.locator('createDataSourceFlyoutSaveError')).toHaveCount(0);
+      await expect(page.testSubj.locator('createDataSourceFlyout')).toBeHidden();
+    });
 
-      const row = pageObjects.dataFederation.dataSourcesTable.locator('tr').filter({
-        hasText: dataSourceName,
-      });
+    const row = pageObjects.dataFederation.dataSourcesTable.locator('tr').filter({
+      hasText: createdDataSourceName,
+    });
 
-      await test.step('new data source appears in the table', async () => {
-        await expect(row).toBeVisible();
-        await expect(row).toContainText(initialDescription);
-      });
+    await test.step('new data source appears in the table', async () => {
+      await expect(row).toBeVisible();
+      await expect(row).toContainText(initialDescription);
+    });
 
-      await test.step('edit the data source description', async () => {
-        await row.locator('[data-test-subj="dataSetsEditButton"]').click();
-        await expect(page.testSubj.locator('editDataSourceFlyout')).toBeVisible();
+    await test.step('edit the data source description', async () => {
+      await row.locator('[data-test-subj="dataSetsEditButton"]').click();
+      await expect(page.testSubj.locator('editDataSourceFlyout')).toBeVisible();
 
-        await page.testSubj.locator('createDataSourceFlyoutDescription').fill(updatedDescription);
-        await page.testSubj.locator('createDataSourceFlyoutSubmit').click();
+      await page.testSubj.locator('createDataSourceFlyoutDescription').fill(updatedDescription);
+      await page.testSubj.locator('createDataSourceFlyoutSubmit').click();
 
-        await expect(page.testSubj.locator('editDataSourceFlyout')).toBeHidden();
-        await expect(row).toContainText(updatedDescription);
-      });
+      await expect(page.testSubj.locator('editDataSourceFlyout')).toBeHidden();
+      await expect(row).toContainText(updatedDescription);
+    });
 
-      await test.step('delete the data source', async () => {
-        await row.locator('[data-test-subj="dataSetsDeleteIconButton"]').click();
+    await test.step('delete the data source', async () => {
+      await row.locator('[data-test-subj="dataSetsDeleteIconButton"]').click();
 
-        const modal = page.getByRole('alertdialog');
+      const modal = page.getByRole('alertdialog');
 
-        await modal.getByRole('button', { name: 'Delete' }).click();
-        await expect(row).toBeHidden();
-      });
-    } finally {
-      await cleanupDataSource();
-    }
+      await modal.getByRole('button', { name: 'Delete' }).click();
+      await expect(row).toBeHidden();
+    });
   });
 });

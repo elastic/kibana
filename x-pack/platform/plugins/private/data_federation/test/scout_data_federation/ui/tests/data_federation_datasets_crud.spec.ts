@@ -12,26 +12,19 @@ import { getDataSetByIdApiPath, getDataSourceByIdApiPath } from '../fixtures/api
 import { test, CUSTOM_ROLES } from '../fixtures';
 
 test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.classic }, () => {
-  test('creates, edits, and deletes a dataset', async ({
-    browserAuth,
-    kbnClient,
-    page,
-    pageObjects,
-  }) => {
-    const dataSourceName = `scout-data-source-${randomUUID().slice(0, 8)}`;
-    const dataSetName = `scout-dataset-${randomUUID().slice(0, 8)}`;
-    const initialResource = 's3://scout-bucket/path/**/*.parquet';
-    const updatedResource = 's3://scout-bucket/updated/**/*.parquet';
+  let dataSourceName: string | undefined;
+  let dataSetName: string | undefined;
 
-    const cleanupDataSet = async () => {
+  test.afterAll(async ({ kbnClient }) => {
+    if (dataSetName) {
       try {
         await kbnClient.request({ method: 'DELETE', path: getDataSetByIdApiPath(dataSetName) });
       } catch {
         // ignore cleanup errors
       }
-    };
+    }
 
-    const cleanupDataSource = async () => {
+    if (dataSourceName) {
       try {
         await kbnClient.request({
           method: 'DELETE',
@@ -40,97 +33,106 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
       } catch {
         // ignore cleanup errors
       }
-    };
+    }
+  });
+
+  test('creates, edits, and deletes a dataset', async ({
+    browserAuth,
+    kbnClient,
+    page,
+    pageObjects,
+  }) => {
+    const createdDataSourceName = `scout-data-source-${randomUUID().slice(0, 8)}`;
+    const createdDataSetName = `scout-dataset-${randomUUID().slice(0, 8)}`;
+    dataSourceName = createdDataSourceName;
+    dataSetName = createdDataSetName;
+    const initialResource = 's3://scout-bucket/path/**/*.parquet';
+    const updatedResource = 's3://scout-bucket/updated/**/*.parquet';
 
     await browserAuth.loginWithCustomRole(CUSTOM_ROLES.data_federation_manager);
 
-    try {
-      await test.step('ensure a data source exists (setup)', async () => {
-        await kbnClient.request({
-          method: 'PUT',
-          path: getDataSourceByIdApiPath(dataSourceName),
-          body: {
-            type: 's3',
-            description: 'Scout dataset CRUD source',
-            settings: {
-              region: 'us-east-1',
-              access_key: 'AKIAIOSFODNN7EXAMPLE',
-              secret_key: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-            },
+    await test.step('ensure a data source exists (setup)', async () => {
+      await kbnClient.request({
+        method: 'PUT',
+        path: getDataSourceByIdApiPath(createdDataSourceName),
+        body: {
+          type: 's3',
+          description: 'Scout dataset CRUD source',
+          settings: {
+            region: 'us-east-1',
+            access_key: 'AKIAIOSFODNN7EXAMPLE',
+            secret_key: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
           },
-        });
+        },
+      });
+    });
+
+    await test.step('navigate to the Data Federation management app and ensure the data sets tab is selected', async () => {
+      await pageObjects.dataFederation.goto();
+
+      await page.getByRole('tab', { name: 'Datasets' }).click();
+      await expect(page.getByRole('tab', { name: 'Datasets' })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+      await expect(pageObjects.dataFederation.dataSetsTable).toBeVisible();
+    });
+
+    await test.step('page has no accessibility violations', async () => {
+      const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+      expect(violations).toStrictEqual([]);
+    });
+
+    await test.step('create a dataset', async () => {
+      await expect(pageObjects.dataFederation.createDataSetButton).toBeEnabled();
+      await pageObjects.dataFederation.createDataSetButton.click();
+
+      await expect(page.testSubj.locator('createDatasetFlyout')).toBeVisible();
+
+      await page.testSubj
+        .locator('createDatasetFlyoutDataSource')
+        .selectOption({ value: createdDataSourceName });
+      await page.testSubj.locator('createDatasetFlyoutName').fill(createdDataSetName);
+      await page.testSubj.locator('createDatasetFlyoutResource').fill(initialResource);
+      await page.testSubj.locator('createDatasetFlyoutSettingsFormat').selectOption({
+        value: 'parquet',
       });
 
-      await test.step('navigate to the Data Federation management app and ensure the data sets tab is selected', async () => {
-        await pageObjects.dataFederation.goto();
+      await page.testSubj.locator('createDatasetFlyoutSubmit').click();
+      await expect(page.testSubj.locator('createDatasetFlyoutSaveError')).toHaveCount(0);
+      await expect(page.testSubj.locator('createDatasetFlyout')).toBeHidden();
+    });
 
-        await page.getByRole('tab', { name: 'Datasets' }).click();
-        await expect(page.getByRole('tab', { name: 'Datasets' })).toHaveAttribute(
-          'aria-selected',
-          'true'
-        );
-        await expect(pageObjects.dataFederation.dataSetsTable).toBeVisible();
-      });
+    const row = pageObjects.dataFederation.dataSetsTable.locator('tr').filter({
+      hasText: createdDataSetName,
+    });
 
-      await test.step('page has no accessibility violations', async () => {
-        const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
-        expect(violations).toStrictEqual([]);
-      });
+    await test.step('dataset appears in the table', async () => {
+      await expect(row).toBeVisible();
+      await expect(row).toContainText(createdDataSourceName);
+      await expect(row).toContainText(initialResource);
+    });
 
-      await test.step('create a dataset', async () => {
-        await expect(pageObjects.dataFederation.createDataSetButton).toBeEnabled();
-        await pageObjects.dataFederation.createDataSetButton.click();
+    await test.step('edit the dataset resource', async () => {
+      await row.locator('[data-test-subj="dataSetsSetsEditButton"]').click();
+      await expect(page.testSubj.locator('editDatasetFlyout')).toBeVisible();
 
-        await expect(page.testSubj.locator('createDatasetFlyout')).toBeVisible();
+      await page.testSubj.locator('createDatasetFlyoutResource').fill(updatedResource);
+      await page.testSubj.locator('createDatasetFlyoutSubmit').click();
 
-        await page.testSubj
-          .locator('createDatasetFlyoutDataSource')
-          .selectOption({ value: dataSourceName });
-        await page.testSubj.locator('createDatasetFlyoutName').fill(dataSetName);
-        await page.testSubj.locator('createDatasetFlyoutResource').fill(initialResource);
-        await page.testSubj
-          .locator('createDatasetFlyoutSettingsFormat')
-          .selectOption({ value: 'parquet' });
+      await expect(page.testSubj.locator('editDatasetFlyout')).toBeHidden();
+      await expect(row).toContainText(updatedResource);
+    });
 
-        await page.testSubj.locator('createDatasetFlyoutSubmit').click();
-        await expect(page.testSubj.locator('createDatasetFlyoutSaveError')).toHaveCount(0);
-        await expect(page.testSubj.locator('createDatasetFlyout')).toBeHidden();
-      });
+    await test.step('delete the dataset', async () => {
+      await row.locator('[data-test-subj="dataSetsSetsDeleteIconButton"]').click();
 
-      const row = pageObjects.dataFederation.dataSetsTable
-        .locator('tr')
-        .filter({ hasText: dataSetName });
+      const modal = page.getByRole('alertdialog');
+      await expect(modal).toBeVisible();
 
-      await test.step('dataset appears in the table', async () => {
-        await expect(row).toBeVisible();
-        await expect(row).toContainText(dataSourceName);
-        await expect(row).toContainText(initialResource);
-      });
-
-      await test.step('edit the dataset resource', async () => {
-        await row.locator('[data-test-subj="dataSetsSetsEditButton"]').click();
-        await expect(page.testSubj.locator('editDatasetFlyout')).toBeVisible();
-
-        await page.testSubj.locator('createDatasetFlyoutResource').fill(updatedResource);
-        await page.testSubj.locator('createDatasetFlyoutSubmit').click();
-
-        await expect(page.testSubj.locator('editDatasetFlyout')).toBeHidden();
-        await expect(row).toContainText(updatedResource);
-      });
-
-      await test.step('delete the dataset', async () => {
-        await row.locator('[data-test-subj="dataSetsSetsDeleteIconButton"]').click();
-
-        const modal = page.getByRole('alertdialog');
-        await expect(modal).toBeVisible();
-
-        await modal.locator('[data-test-subj="confirmModalConfirmButton"]').click();
-        await expect(modal).toBeHidden();
-        await expect(row).toBeHidden();
-      });
-    } finally {
-      await cleanupDataSet();
-      await cleanupDataSource();
-    }
+      await modal.locator('[data-test-subj="confirmModalConfirmButton"]').click();
+      await expect(modal).toBeHidden();
+      await expect(row).toBeHidden();
+    });
   });
 });
