@@ -104,6 +104,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add bulk revoke and delete actions, filtering, and search to the **Enrollment tokens** page in {{fleet}} [#265916]({{kib-pull}}265916).
 * Add a **Cancel unenrollment** action in the agent activity flyout so you can cancel a scheduled automatic unenrollment during the grace period [#271270]({{kib-pull}}271270).
 * Add **Remove collector** actions for OpAMP collectors in {{fleet}}, including bulk removal [#268711]({{kib-pull}}268711).
+* Show dedicated **Health**, **Info**, and **Config** tabs and the collector configuration view for OpAMP-managed collectors in {{fleet}} as a technical preview [#278816]({{kib-pull}}278816).
 * Enable automatic installation of dependencies for composable integration packages during package installation [#263762]({{kib-pull}}263762).
 * Rename user-facing **Cloud Connector** copy to **Federated Identity** across {{fleet}} federated-identity onboarding flows [#261353]({{kib-pull}}261353).
 * Enable OpenTelemetry-based permission verification for **Federated Identity** setups in {{fleet}} by default [#265619]({{kib-pull}}265619).
@@ -172,7 +173,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 **Machine learning and {{infer}}**:
 * Replace the standalone **Select data view** page with an inline data source picker on AIOps and Data Visualizer pages [#266672]({{kib-pull}}266672).
 * Show warnings on the **Feature settings** page when assigned models or endpoints are unavailable [#262262]({{kib-pull}}262262).
-* Add a **Geographies** tab to the **Manage region preferences** modal for restricting Elastic {{infer-cap}} Service routing by geo zone instead of individual CSP regions [#277331]({{kib-pull}}277331).
+* Add **Manage region preferences** to the Elastic {{infer-cap}} Service page, including a **Geographies** tab for restricting {{infer}} routing by geography or cloud region and region availability badges in model details [#278461]({{kib-pull}}278461) [#277331]({{kib-pull}}277331).
 * Add a read-only privilege tier for browsing {{infer}} endpoints and **Feature settings** in **Model Management** without write access [#272204]({{kib-pull}}272204).
 * Add **Feature settings** entries for `ai.prompt`, `ai.summarize`, and `ai.classify` workflow steps so each step can use a model configured per space [#268945]({{kib-pull}}268945).
 * Show **Preview**, **Deprecated**, and **End-of-life** badges on Elastic {{infer-cap}} Service models and the **Feature settings** page, with callouts when assigned models are deprecated or past end of life [#268083]({{kib-pull}}268083).
@@ -187,9 +188,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Restore **Start deployment** and **Update deployment** for rerank trained models, and tailor the deployment flyout for rerank models [#261119]({{kib-pull}}261119).
 
 **Workflows**:
-* Enable AI-assisted workflow authoring in the Elastic Workflows editor [#278343]({{kib-pull}}278343).
-* Show **What do you want to automate?** in the Agent Builder sidebar on the Elastic Workflows YAML editor, and auto-open the sidebar when the editor loads [#276297]({{kib-pull}}276297).
-* Auto-open Agent Builder in the workflow YAML editor, remove the separate toolbar chat button, and align workflow attachment and diff previews with the editor styling [#275765]({{kib-pull}}275765).
+* Integrate Agent Builder into the Elastic Workflows YAML editor when **Elastic Agent Builder: Experimental Features** is enabled in **Advanced Settings**: open the sidebar automatically with **What do you want to automate?**, and align workflow attachment and diff previews with the editor [#276297]({{kib-pull}}276297) [#275765]({{kib-pull}}275765).
 * Add human-in-the-loop approval and external input steps to approve, reject, or submit structured input in {{kib}} or through signed links and Slack notifications [#275273]({{kib-pull}}275273).
 * Add a built-in Agent Builder tool to list recent workflow runs without an execution ID [#269335]({{kib-pull}}269335).
 * Add a `cases.removeTags` workflow step to remove tags from a case in one step [#268465]({{kib-pull}}268465).
@@ -270,6 +269,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix default colored badges missing color when data table columns are created through the Visualizations API [#268425]({{kib-pull}}268425).
 * Fix the Visualizations API rejecting unsupported pipeline operations for **Lens** gauge `min`, `max`, and `goal` metrics [#268168]({{kib-pull}}268168).
 * Fix **Lens** gauge color stops extending beyond configured ranges or losing palette continuity when using the Visualizations API [#272123]({{kib-pull}}272123).
+* Fix dashboard PDF exports using a stale time range after you change the time picker when the dashboard does not save the time range [#278262]({{kib-pull}}278262).
 * Fix **Canvas** tables exceeding the 10,000-row limit from large `createTable` expressions [#276502]({{kib-pull}}276502).
 * Fix **Canvas** autoplay not advancing past the first page [#272619]({{kib-pull}}272619).
 * Fix **Canvas** autoplay skipping pages after slides are added or removed [#268398]({{kib-pull}}268398).
@@ -349,6 +349,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix a Windows-specific **Dev Tools Console** editor issue that could corrupt multi-line edited text after refresh [#277007]({{kib-pull}}277007).
 * Fix the **Dev Tools Console** response copy action silently failing to copy output [#276365]({{kib-pull}}276365).
 * Fix **Dev Tools Console** autocomplete matching the wrong API endpoint when a URL matches both a literal path and a parameterized one [#276239]({{kib-pull}}276239).
+* Fix **Dev Tools Console** autocomplete not suggesting mapping options for nested objects and multi-fields [#278508]({{kib-pull}}278508).
 * Fix **Dev Tools Console** {{esql}} source autocomplete repeatedly fetching the source list on every keystroke [#275535]({{kib-pull}}275535).
 * Fix **Dev Tools Console** autocomplete in filter context to suggest query DSL instead of obsolete {{es}} 1.x filter DSL [#272907]({{kib-pull}}272907).
 * Fix **Dev Tools Console** requests missing from the `elasticsearch.query` debug log and proxied requests failing when `elasticsearch.hosts` includes a URL path prefix [#271562]({{kib-pull}}271562).
