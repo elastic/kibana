@@ -8,11 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { FieldPath } from 'react-hook-form';
-import {
-  getIntervalBoundHelpText,
-  getTimingBoundHelpText,
-  PRESERVED_TIME_UNITS,
-} from '../../shared';
+import { getIntervalBoundHelpText, getTimingBoundHelpText } from '@kbn/data-lifecycle-phases';
+import { PRESERVED_TIME_UNITS } from '../../shared';
 import type { IlmPhasesFlyoutFormInternal } from './types';
 import { DOWNSAMPLE_PHASES, type DownsamplePhase } from './types';
 import { toMilliseconds } from './utils';

@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type { FormData, ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
+import { getIntervalBoundHelpText, getTimingBoundHelpText } from '@kbn/data-lifecycle-phases';
 import type { DslStepMetaFields, PreservedTimeUnit } from './types';
 import { toMilliseconds } from './utils';
-import { getIntervalBoundHelpText, getTimingBoundHelpText } from '../../shared';
 
 const { emptyField, isInteger } = fieldValidators;
 

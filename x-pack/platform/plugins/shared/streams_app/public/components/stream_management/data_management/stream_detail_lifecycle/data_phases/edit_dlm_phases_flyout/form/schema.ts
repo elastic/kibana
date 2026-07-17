@@ -7,12 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import {
-  formatDuration,
-  getTimingBoundHelpText,
-  PRESERVED_TIME_UNITS,
-  toMilliseconds,
-} from '../../shared';
+import { getTimingBoundHelpText } from '@kbn/data-lifecycle-phases';
+import { formatDuration, PRESERVED_TIME_UNITS, toMilliseconds } from '../../shared';
 import type { DlmPhasesFlyoutFormInternal } from './types';
 
 export const getDlmPhasesFlyoutFormSchema = (): z.ZodType<DlmPhasesFlyoutFormInternal> => {
