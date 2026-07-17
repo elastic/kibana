@@ -25,6 +25,7 @@ jest.mock('../../application/breadcrumb_context', () => ({
 
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
+let mockCanWriteRules = true;
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -68,7 +69,12 @@ jest.mock('@kbn/core-di-browser', () => ({
       return {};
     }
     if (typeof token === 'function') {
-      return {};
+      // UserCapabilities service token
+      return {
+        canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+        canRead: () => true,
+        can: () => mockCanWriteRules,
+      };
     }
     throw new Error(`Unexpected token in useService mock: ${String(token)}`);
   },
@@ -162,6 +168,7 @@ describe('RulesListPage', () => {
     jest.clearAllMocks();
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
+    mockCanWriteRules = true;
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
       isLoading: false,
@@ -710,8 +717,8 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    const statusHeader = screen.getByRole('columnheader', { name: /^status$/i });
-    fireEvent.click(within(statusHeader).getByRole('button'));
+    const enabledHeader = screen.getByRole('columnheader', { name: /^enabled$/i });
+    fireEvent.click(within(enabledHeader).getByRole('button'));
 
     await waitFor(() => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
@@ -735,8 +742,8 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    const statusHeader = screen.getByRole('columnheader', { name: /^status$/i });
-    fireEvent.click(within(statusHeader).getByRole('button'));
+    const enabledHeader = screen.getByRole('columnheader', { name: /^enabled$/i });
+    fireEvent.click(within(enabledHeader).getByRole('button'));
 
     await waitFor(() => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith(
@@ -744,7 +751,7 @@ describe('RulesListPage', () => {
       );
     });
 
-    fireEvent.click(within(statusHeader).getByRole('button'));
+    fireEvent.click(within(enabledHeader).getByRole('button'));
 
     await waitFor(() => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith(
@@ -877,7 +884,7 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('hides agent builder options when agent builder is not available', async () => {
+  it('disables the split button agent option (does not hide it) when agent builder is not available', async () => {
     mockAgentBuilderShow = false;
     mockExperimentalFeaturesEnabled = false;
 
@@ -896,10 +903,15 @@ describe('RulesListPage', () => {
       expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();
     });
 
-    expect(screen.queryByTestId('createWithAgentButton')).not.toBeInTheDocument();
+    const agentButton = screen.getByTestId('createWithAgentButton');
+    expect(agentButton).toBeInTheDocument();
+    expect(agentButton).toBeDisabled();
+
+    fireEvent.click(agentButton);
+    expect(mockNavigateToApp).not.toHaveBeenCalled();
   });
 
-  it('hides agent builder options in empty state when agent builder is not available', () => {
+  it('disables the empty state agent card (does not hide it) when agent builder is not available', () => {
     mockAgentBuilderShow = false;
     mockExperimentalFeaturesEnabled = false;
 
@@ -913,7 +925,9 @@ describe('RulesListPage', () => {
     renderPage();
 
     expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument();
-    expect(screen.queryByTestId('createWithAgentCard')).not.toBeInTheDocument();
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).toBeInTheDocument();
+    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {
@@ -969,7 +983,7 @@ describe('RulesListPage', () => {
     );
   });
 
-  it('renders the Status column with Enabled and Disabled badges', () => {
+  it('renders the Enabled column with switches reflecting each rule state', () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
@@ -979,11 +993,11 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByText('Enabled')).toBeInTheDocument();
-    expect(screen.getByText('Disabled')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toHaveAttribute('aria-checked', 'false');
   });
 
-  it('shows "Disable" action for enabled rules and "Enable" for disabled rules', async () => {
+  it('calls toggleEnabledMutation when the Enabled switch is clicked', async () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
@@ -993,29 +1007,8 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    // Open the context menu for the enabled rule (rule-1)
-    fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('toggleEnabledRule-rule-1')).toHaveTextContent('Disable');
-    });
-  });
-
-  it('calls toggleEnabledMutation when toggle action is clicked', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
-    renderPage();
-
-    // Open the context menu for the enabled rule (rule-1)
-    fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-
-    // Click the toggle action — should disable the enabled rule
-    fireEvent.click(screen.getByTestId('toggleEnabledRule-rule-1'));
+    // Click the switch for the enabled rule (rule-1) — should disable it
+    fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
 
     expect(mockToggleEnabledMutate).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
   });
@@ -1143,6 +1136,70 @@ describe('RulesListPage', () => {
       await waitFor(() => {
         expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
       });
+    });
+  });
+
+  describe('when the user only has read privilege', () => {
+    beforeEach(() => {
+      mockCanWriteRules = false;
+    });
+
+    it('hides the header create controls even when rules exist', () => {
+      mockUseFetchRules.mockReturnValue({
+        data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderPage();
+
+      expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
+      expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
+    });
+
+    it('shows a read-only empty prompt (not the create panel) when there are no rules', () => {
+      mockUseFetchRules.mockReturnValue({
+        data: { items: [], total: 0, page: 1, perPage: 20 },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderPage();
+
+      expect(screen.getByTestId('rulesListReadOnlyEmpty')).toBeInTheDocument();
+      expect(screen.queryByTestId('createEsqlRuleCard')).not.toBeInTheDocument();
+    });
+
+    it('hides row selection, quick edit, and actions menu affordances', () => {
+      mockUseFetchRules.mockReturnValue({
+        data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderPage();
+
+      expect(screen.queryByTestId('selectAllRulesOnPage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('checkboxSelectRow-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('hides the enabled switch and shows a read-only status badge instead', () => {
+      mockUseFetchRules.mockReturnValue({
+        data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderPage();
+
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledBadge-rule-1')).toHaveTextContent('Enabled');
     });
   });
 

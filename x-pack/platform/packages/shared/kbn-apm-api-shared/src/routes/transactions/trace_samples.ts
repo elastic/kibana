@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema } from '../../default_api_types';
 
 export interface TransactionTraceSamplesResponse {
   traceSamples: Array<{
@@ -21,19 +20,22 @@ export interface TransactionTraceSamplesResponse {
 
 export const transactionTraceSamplesRoute = defineRoute<TransactionTraceSamplesResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      t.type({ transactionType: t.string, transactionName: t.string }),
-      t.partial({
-        transactionId: t.string,
-        traceId: t.string,
-        sampleRangeFrom: toNumberRt,
-        sampleRangeTo: toNumberRt,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
+  params: z.object({
+    path: z.object({ serviceName: z.string() }),
+    query: z
+      .object({ transactionType: z.string(), transactionName: z.string() })
+      .merge(
+        z
+          .object({
+            transactionId: z.string(),
+            traceId: z.string(),
+            sampleRangeFrom: z.coerce.number(),
+            sampleRangeTo: z.coerce.number(),
+          })
+          .partial()
+      )
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(rangeSchema),
   }),
 });

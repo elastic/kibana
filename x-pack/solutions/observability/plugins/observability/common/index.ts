@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { OBSERVABILITY_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+
 export type { AsDuration, AsPercent, TimeUnitChar, TimeFormatter } from './utils/formatters';
 
 export {
@@ -58,7 +60,7 @@ export const casesFeatureId = 'observabilityCases';
 export const casesFeatureIdV2 = 'observabilityCasesV2';
 export const casesFeatureIdV3 = 'observabilityCasesV3';
 export const sloFeatureId = 'slo';
-export const observabilityAlertsFeatureId = 'observabilityAlerts';
+export const observabilityAlertsFeatureId = OBSERVABILITY_ALERTS_FEATURE_ID;
 // The ID of the observability app. Should more appropriately be called
 // 'observability' but it's used in telemetry by applicationUsage so we don't
 // want to change it.

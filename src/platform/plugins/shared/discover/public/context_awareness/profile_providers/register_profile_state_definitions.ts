@@ -9,10 +9,12 @@
 
 import type { ProfileStateRegistry } from '../profile_state';
 import { registerExampleProfileStateDefinitions } from './example/profile_state';
+import { registerMetricsProfileStateDefinitions } from './common/metrics_data_source_profile/profile_state';
 
 /**
  * Registers all profile state definitions supported by Discover.
  */
 export const registerProfileStateDefinitions = (registry: ProfileStateRegistry) => {
   registerExampleProfileStateDefinitions(registry);
+  registerMetricsProfileStateDefinitions(registry);
 };

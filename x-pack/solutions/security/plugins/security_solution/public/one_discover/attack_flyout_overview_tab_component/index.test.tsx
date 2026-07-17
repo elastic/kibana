@@ -30,6 +30,14 @@ jest.mock('../../flyout_v2/attack/main/tabs/overview_tab', () => ({
   ),
 }));
 
+jest.mock('../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: () => false,
+}));
+
+jest.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', () => ({
+  DataViewManagerBootstrap: () => null,
+}));
+
 describe('AttackFlyoutOverviewTab', () => {
   beforeEach(() => {
     mockFlyoutProviders.mockClear();
@@ -59,6 +67,7 @@ describe('AttackFlyoutOverviewTab', () => {
         hit={buildHit()}
         servicesPromise={new Promise<StartServices>(() => undefined)}
         storePromise={new Promise<ReturnType<typeof createStore>>(() => undefined) as never}
+        onAttackUpdated={jest.fn()}
       />
     );
 
@@ -73,6 +82,7 @@ describe('AttackFlyoutOverviewTab', () => {
         hit={buildHit()}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
+        onAttackUpdated={jest.fn()}
       />
     );
 
@@ -96,6 +106,7 @@ describe('AttackFlyoutOverviewTab', () => {
         hit={buildHit()}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
+        onAttackUpdated={jest.fn()}
       />
     );
 
@@ -115,6 +126,7 @@ describe('AttackFlyoutOverviewTab', () => {
         hit={buildHit()}
         servicesPromise={Promise.reject(new Error('services failed'))}
         storePromise={Promise.resolve(store as never)}
+        onAttackUpdated={jest.fn()}
       />
     );
 
