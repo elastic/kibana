@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type {
-  AttachmentVersionRef,
-  VersionedAttachment,
+import {
+  type AttachmentVersionRef,
+  type VersionedAttachment,
+  ATTACHMENT_REF_OPERATION,
+  getLatestVersion,
 } from '@kbn/agent-builder-common/attachments';
-import { ATTACHMENT_REF_OPERATION } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 
@@ -77,19 +78,29 @@ export const buildAttachmentContext = (
 export interface AttachmentContextProvider {
   areTypeInstructionsNeeded(type: string): boolean;
   markTypeInstructionsProvided(type: string): void;
+  existingByContentKey: Map<string, string>;
 }
 
-export function makeAttachmentContextProvider(): AttachmentContextProvider {
+export function makeAttachmentContextProvider(
+  attachmentStateManager: AttachmentStateManager
+): AttachmentContextProvider {
   const typeInstructionsProvided = new Set<string>();
+  const existingByContentKey = new Map<string, string>(); // contentKey -> attachmentId
 
   const areTypeInstructionsNeeded = (attachmentType: string): boolean =>
     !typeInstructionsProvided.has(attachmentType);
   const markTypeInstructionsProvided = (attachmentType: string) => {
     typeInstructionsProvided.add(attachmentType);
   };
+  for (const existing of attachmentStateManager.getAll()) {
+    const latest = getLatestVersion(existing);
+    if (!latest) continue;
+    existingByContentKey.set(`${existing.type}:${latest.content_hash}`, existing.id);
+  }
 
   return {
     areTypeInstructionsNeeded,
     markTypeInstructionsProvided,
+    existingByContentKey,
   };
 }

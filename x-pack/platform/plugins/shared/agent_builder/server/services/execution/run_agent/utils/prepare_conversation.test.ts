@@ -118,7 +118,6 @@ describe('prepareConversation', () => {
       });
 
       expect(result).toMatchObject({
-        attachments: [],
         attachmentTypes: [],
         nextInput: {
           message: 'Hello',
@@ -526,9 +525,15 @@ describe('prepareConversation', () => {
       expect(result.attachmentStateManager.getAll().map((a) => a.id)).toContain(
         'prev-attachment-id'
       );
-      // attachment_refs are NOT backfilled on historical rounds — only the current round's
-      // attachment_refs are set (at round-completion time via addRoundCompleteEvent).
-      expect(result.previousRounds[0].input.attachment_refs).toBeUndefined();
+      expect(result.previousRounds[0].input.attachment_refs).toBeDefined();
+      expect(result.previousRounds[0].input.attachment_refs).toHaveLength(1);
+      // Attachment migrated to ref so we can render metadata with round
+      expect(result.previousRounds[0].input.attachment_refs![0]).toMatchObject({
+        attachment_id: attachment.id,
+        operation: 'created',
+        actor: 'user',
+        version: 1,
+      });
     });
 
     it("preserves a previous round's attachment_refs and attachment_context verbatim (never recomputed)", async () => {

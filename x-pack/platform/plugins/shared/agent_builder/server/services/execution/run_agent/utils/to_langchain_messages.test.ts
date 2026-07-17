@@ -81,7 +81,6 @@ describe('convertPreviousRounds', () => {
     return {
       nextInput: { message: '', attachments: [] },
       previousRounds: [],
-      attachments: [],
       attachmentTypes: [],
       attachmentStateManager: createAttachmentStateManager([], {
         getTypeDefinition: (type: string) =>
