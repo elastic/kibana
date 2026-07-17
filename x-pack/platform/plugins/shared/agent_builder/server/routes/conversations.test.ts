@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConversationRoundStatus, ConversationSourceType } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, ConversationOriginType } from '@kbn/agent-builder-common';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { publicApiPath } from '../../common/constants';
 import { registerConversationRoutes } from './conversations';
@@ -14,7 +14,7 @@ import { registerConversationRoutes } from './conversations';
 const GET_CONVERSATION_PATH = `${publicApiPath}/conversations/{conversation_id}`;
 
 describe('registerConversationRoutes', () => {
-  it('returns stored source authorship details when getting a conversation', async () => {
+  it('returns stored origin authorship details when getting a conversation', async () => {
     let getConversationHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const conversation = {
       id: 'conversation-1',
@@ -27,7 +27,7 @@ describe('registerConversationRoutes', () => {
       title: 'Slack conversation',
       created_at: '2026-07-10T00:00:00.000Z',
       updated_at: '2026-07-10T00:00:01.000Z',
-      source: {
+      origin: {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       },
       rounds: [
@@ -36,15 +36,15 @@ describe('registerConversationRoutes', () => {
           status: ConversationRoundStatus.completed,
           input: {
             message: 'hello',
-            source: {
+            origin: {
               author: {
                 id: 'U123',
                 name: 'Bruno',
               },
             },
           },
-          source: {
-            type: ConversationSourceType.Slack,
+          origin: {
+            type: ConversationOriginType.Slack,
           },
           steps: [],
           response: {
@@ -120,19 +120,19 @@ describe('registerConversationRoutes', () => {
 
     expect(get).toHaveBeenCalledWith('conversation-1');
     expect(result.payload).toBe(conversation);
-    expect(result.payload.source).toEqual({
+    expect(result.payload.origin).toEqual({
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
     });
-    expect(result.payload.rounds[0].source).toEqual({
-      type: ConversationSourceType.Slack,
+    expect(result.payload.rounds[0].origin).toEqual({
+      type: ConversationOriginType.Slack,
     });
-    expect(result.payload.rounds[0].input.source.author).toEqual({
+    expect(result.payload.rounds[0].input.origin.author).toEqual({
       id: 'U123',
       name: 'Bruno',
     });
   });
 
-  it('returns stored source details when listing conversations', async () => {
+  it('returns stored origin details when listing conversations', async () => {
     let listConversationsHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const conversation = {
       id: 'conversation-1',
@@ -145,7 +145,7 @@ describe('registerConversationRoutes', () => {
       title: 'Slack conversation',
       created_at: '2026-07-10T00:00:00.000Z',
       updated_at: '2026-07-10T00:00:01.000Z',
-      source: {
+      origin: {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       },
     };
@@ -204,7 +204,7 @@ describe('registerConversationRoutes', () => {
     );
 
     expect(list).toHaveBeenCalledWith({ agentId: undefined });
-    expect(result.payload.results[0].source).toEqual({
+    expect(result.payload.results[0].origin).toEqual({
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
     });
   });
