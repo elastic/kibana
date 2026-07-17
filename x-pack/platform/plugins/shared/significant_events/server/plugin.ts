@@ -413,8 +413,8 @@ export class SignificantEventsPlugin
     // Editable investigation + discovery/judge agents: installed via agents.ensure when
     // significant events is available. skip(1) on availabilityEnabled$ drops the initial
     // emission, so catch up at startup as well. Per-space installs also happen just-in-time
-    // from triggerInvestigationWorkflow (investigation) and scheduled discovery enablement
-    // (discovery/judge).
+    // from triggerInvestigationWorkflow (investigation), scheduled discovery enablement,
+    // and manual discovery execute (discovery/judge).
     if (plugins.agentBuilder) {
       const agentBuilder = plugins.agentBuilder;
       const installAgents = () =>
