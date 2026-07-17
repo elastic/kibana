@@ -116,8 +116,11 @@ spaceTest.describe(
         // `discover.assertHitCount`), so poll instead of a single read.
         await expect.poll(() => discover.getHitCountInt()).toBe(14004);
 
+        // Only assert the data views loaded by this test's archives: extras
+        // like the managed "All logs" data view are environment-specific
+        // (present on some serverless projects, absent on others).
         const availableDataViews = await discover.getAvailableDataViewNames();
-        for (const item of ['All logs', 'kibana_sample_data_flights', 'logstash-*']) {
+        for (const item of ['kibana_sample_data_flights', 'logstash-*']) {
           expect(availableDataViews).toContain(item);
         }
 

@@ -25,7 +25,10 @@ spaceTest.describe('Discover ES|QL view - UI elements', { tag: tags.deploymentAg
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    // Admin login: the classic-mode step asserts the field "Edit" action
+    // (`discoverFieldListPanelEdit-*`), which requires data-view edit
+    // permissions that the serverless privileged (editor) role lacks.
+    await browserAuth.loginAsAdmin();
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilTabIsLoaded();
   });

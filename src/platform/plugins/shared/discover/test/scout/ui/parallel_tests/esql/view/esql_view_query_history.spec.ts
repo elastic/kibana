@@ -40,9 +40,11 @@ spaceTest.describe('Discover ES|QL view - query history', { tag: tags.deployment
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.discover.goto({ queryMode: 'esql' });
     await pageObjects.discover.waitUntilTabIsLoaded();
-    // Explicitly (re-)submit the default query so it is recorded as an
-    // actual history entry, rather than relying on the implicit query run on
-    // initial page load.
+    // Submit an explicit query so a known entry is recorded in the history.
+    // The implicit query run on initial page load can't be relied on: it is
+    // environment-dependent (e.g. the observability root profile defaults to
+    // `FROM <all logs index pattern>` instead of the default data view).
+    await pageObjects.discover.codeEditor.setCodeEditorValue('FROM logstash-* | LIMIT 10');
     await pageObjects.discover.submitQuery();
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
