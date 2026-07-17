@@ -198,8 +198,11 @@ steps:
               when_to_use: "{{ steps.profile_index.output.content.when_to_use }}"
               joins: "{{ steps.profile_index.output.content.joins | join: ', ' }}"
             content: |
-              Backing index: {{ foreach.item }}. {{ steps.profile_index.output.content.purpose }} Questions answered: {{ steps.profile_index.output.content.answers_questions | join: " | " }} When to use: {{ steps.profile_index.output.content.when_to_use }}
-              Key fields: {{ steps.profile_index.output.content.key_fields | join: ", " }} Joins: {{ steps.profile_index.output.content.joins | join: ", " }}
+              Backing index: {{ foreach.item }}. {{ steps.profile_index.output.content.purpose }}
+              Questions answered: {{ steps.profile_index.output.content.answers_questions | join: " | " }}
+              When to use: {{ steps.profile_index.output.content.when_to_use }}
+              Key fields: {{ steps.profile_index.output.content.key_fields | join: ", " }}
+              Joins: {{ steps.profile_index.output.content.joins | join: ", " }}
 
               Access patterns:
               {% for pattern in steps.profile_index.output.content.access_patterns %}
