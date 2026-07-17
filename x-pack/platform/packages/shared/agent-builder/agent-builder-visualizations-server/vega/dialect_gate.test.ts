@@ -43,9 +43,16 @@ describe('selectVegaCatalogId', () => {
     );
   });
 
-  it('returns none for unrelated catalog values and on failure', async () => {
+  it('returns sankey when the classifier selects it', async () => {
     const { model } = mockModel({ catalogId: 'sankey' });
-    await expect(selectVegaCatalogId({ nlQuery: 'sankey', model })).resolves.toBe('none');
+    await expect(selectVegaCatalogId({ nlQuery: 'sankey of traffic', model })).resolves.toBe(
+      'sankey'
+    );
+  });
+
+  it('returns none for unrelated catalog values and on failure', async () => {
+    const { model } = mockModel({ catalogId: 'chord' });
+    await expect(selectVegaCatalogId({ nlQuery: 'chord', model })).resolves.toBe('none');
 
     const failing = mockModel(() => {
       throw new Error('boom');
@@ -115,5 +122,34 @@ describe('resolveDialectGate', () => {
     expect(gate.dialect).toBe('vega');
     expect(gate.catalogId).toBe('radar');
     expect(gate.referenceExamples).toContain('linear-closed');
+  });
+
+  it('pins Raw Vega sankey from an existing sankey spec without calling the classifier', async () => {
+    const { model, invoke } = mockModel({ catalogId: 'none' });
+    const gate = await resolveDialectGate({
+      nlQuery: 'make it blue',
+      existingSpec: JSON.stringify({
+        $schema: VEGA_SCHEMA,
+        data: [{ transform: [{ type: 'linkpath' }] }],
+        marks: [],
+      }),
+      model,
+    });
+
+    expect(gate).toMatchObject({ catalogId: 'sankey', dialect: 'vega' });
+    expect(gate.referenceExamples).toContain('linkpath');
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it('selects sankey for new sankey visualizations', async () => {
+    const { model } = mockModel({ catalogId: 'sankey' });
+    const gate = await resolveDialectGate({
+      nlQuery: 'sankey of origin to destination countries',
+      model,
+    });
+
+    expect(gate.dialect).toBe('vega');
+    expect(gate.catalogId).toBe('sankey');
+    expect(gate.referenceExamples).toContain('linkpath');
   });
 });

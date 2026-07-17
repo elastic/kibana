@@ -20,6 +20,7 @@ import { validateVegaSpec } from './vega_validator';
 import {
   createAuthorVegaSpecPrompt,
   radarEsqlAdditionalInstructions,
+  sankeyEsqlAdditionalInstructions,
   sunburstEsqlAdditionalInstructions,
   vegaEsqlAdditionalInstructions,
 } from './prompts';
@@ -29,9 +30,11 @@ import {
   disclosedFallbackContextForCatalog,
   formatParentChildIntegrityError,
   formatRadarIntegrityError,
+  formatSankeyIntegrityError,
   isRawVegaCatalogId,
   validateParentChildRows,
   validateRadarRows,
+  validateSankeyRows,
   type VegaCatalogId,
   type VegaDialect,
 } from './dialect';
@@ -210,6 +213,9 @@ export const createVegaGraph = async (
     if (catalogId === 'radar') {
       return `${vegaEsqlAdditionalInstructions}\n${radarEsqlAdditionalInstructions}`;
     }
+    if (catalogId === 'sankey') {
+      return `${vegaEsqlAdditionalInstructions}\n${sankeyEsqlAdditionalInstructions}`;
+    }
     return vegaEsqlAdditionalInstructions;
   };
 
@@ -321,6 +327,14 @@ export const createVegaGraph = async (
               ok: integrity.ok,
               error: formatRadarIntegrityError(integrity),
               label: 'radar',
+            };
+          }
+          if (catalogId === 'sankey') {
+            const integrity = validateSankeyRows({ columns, values });
+            return {
+              ok: integrity.ok,
+              error: formatSankeyIntegrityError(integrity),
+              label: 'sankey',
             };
           }
           const integrity = validateParentChildRows({ columns, values });

@@ -9,6 +9,7 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import {
   createAuthorVegaSpecPrompt,
   radarEsqlAdditionalInstructions,
+  sankeyEsqlAdditionalInstructions,
   sunburstEsqlAdditionalInstructions,
   vegaEsqlAdditionalInstructions,
 } from './prompts';
@@ -148,6 +149,30 @@ describe('radarEsqlAdditionalInstructions', () => {
     expect(radarEsqlAdditionalInstructions).toContain('`value`');
     expect(radarEsqlAdditionalInstructions).toContain('`series`');
     expect(radarEsqlAdditionalInstructions).toContain('At least 3 distinct');
+  });
+});
+
+describe('sankeyEsqlAdditionalInstructions', () => {
+  it('requires a stk1/stk2/size flow table for sankey', () => {
+    expect(sankeyEsqlAdditionalInstructions).toContain('`stk1`');
+    expect(sankeyEsqlAdditionalInstructions).toContain('`stk2`');
+    expect(sankeyEsqlAdditionalInstructions).toContain('`size`');
+    expect(sankeyEsqlAdditionalInstructions).toContain('At least 2 flow');
+  });
+});
+
+describe('createAuthorVegaSpecPrompt sankey', () => {
+  it('instructs sankey rules when catalog is sankey', () => {
+    const [system] = createAuthorVegaSpecPrompt({
+      nlQuery: 'sankey of traffic',
+      esqlQuery: 'FROM logs-* | STATS size = COUNT() BY stk1 = a, stk2 = b',
+      dialect: 'vega',
+      catalogId: 'sankey',
+    });
+    const text = String((system as [string, string])[1]);
+    expect(text).toContain('SANKEY / FLOW RULES');
+    expect(text).toContain('linkpath');
+    expect(text).toContain('STATIC DIAGRAM ONLY');
   });
 });
 

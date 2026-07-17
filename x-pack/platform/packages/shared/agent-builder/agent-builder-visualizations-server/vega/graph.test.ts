@@ -378,6 +378,71 @@ describe('createVegaGraph', () => {
     expect(authorPrompt).toContain('radar');
   });
 
+  it('authors a Raw Vega sankey when the Dialect gate selects sankey and columns are flows', async () => {
+    classifyInvoke.mockResolvedValue({ catalogId: 'sankey' });
+    mockedExecuteEsql.mockResolvedValue({
+      columns: [
+        { name: 'stk1', type: 'keyword' },
+        { name: 'stk2', type: 'keyword' },
+        { name: 'size', type: 'long' },
+      ],
+      values: [
+        ['US', 'IT', 10],
+        ['US', 'JP', 4],
+      ],
+    } as Awaited<ReturnType<typeof executeEsql>>);
+    invoke.mockResolvedValue(
+      asCodeBlock({
+        $schema: 'https://vega.github.io/schema/vega/v5.json',
+        data: [
+          { name: 'source' },
+          {
+            name: 'nodes',
+            source: 'source',
+            transform: [{ type: 'fold', fields: ['stk1', 'stk2'] }],
+          },
+          {
+            name: 'edges',
+            source: 'nodes',
+            transform: [{ type: 'linkpath' }],
+          },
+        ],
+        marks: [{ type: 'path', from: { data: 'edges' } }],
+      })
+    );
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.error).toBeNull();
+    const spec = JSON.parse(state.spec!);
+    expect(spec.$schema).toBe('https://vega.github.io/schema/vega/v5.json');
+    expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('SANKEY / FLOW RULES');
+  });
+
+  it('falls back to Vega-Lite with disclosure when sankey has too few flows', async () => {
+    classifyInvoke.mockResolvedValue({ catalogId: 'sankey' });
+    mockedExecuteEsql.mockResolvedValue({
+      columns: [
+        { name: 'stk1', type: 'keyword' },
+        { name: 'stk2', type: 'keyword' },
+        { name: 'size', type: 'long' },
+      ],
+      values: [['US', 'IT', 10]],
+    } as Awaited<ReturnType<typeof executeEsql>>);
+    mockedGenerateEsql.mockResolvedValue({
+      query: 'FROM metrics-* | STATS size = COUNT() BY stk1 = a, stk2 = b | LIMIT 1',
+    } as Awaited<ReturnType<typeof generateEsql>>);
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.error).toBeNull();
+    expect(JSON.parse(state.spec!).$schema).toBe(VEGA_LITE_SCHEMA);
+    const authorPrompt = JSON.stringify(invoke.mock.calls[0][0]);
+    expect(authorPrompt).toContain('DISCLOSED FALLBACK');
+    expect(authorPrompt).toContain('Sankey');
+  });
+
   it('authors without a reference block when selection returns none', async () => {
     invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
 

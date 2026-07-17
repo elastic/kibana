@@ -9,7 +9,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { VegaCatalogId, VegaDialect } from './dialect';
-import { CANONICAL_ESQL_SOURCE_NAME, RADAR_MIN_KEYS } from './dialect';
+import { CANONICAL_ESQL_SOURCE_NAME, RADAR_MIN_KEYS, SANKEY_MIN_FLOWS } from './dialect';
 
 // Vega-specific ES|QL guidance; see issue #275519 for the time-filtering quirk.
 export const vegaEsqlAdditionalInstructions = `
@@ -108,6 +108,34 @@ Rules:
 - Keep column names exactly \`key\`, \`value\`, and optional \`series\` when possible.
 - Still obey the Vega time-range and dotted-field rules above when the index is time-based.`;
 
+/** Extra ES|QL instructions when authoring a Sankey flow table. */
+export const sankeyEsqlAdditionalInstructions = `
+## Sankey / flow rows (required)
+
+This query feeds a Raw Vega two-stack Sankey (source → destination flows). Emit:
+- \`stk1\`: source / left-stack category (keyword/string)
+- \`stk2\`: destination / right-stack category (keyword/string)
+- \`size\`: numeric flow weight (COUNT, SUM, …)
+
+CRITICAL — Sankey integrity:
+- At least ${SANKEY_MIN_FLOWS} flow rows (source→destination pairs).
+- Filter null/empty endpoints before aggregating.
+- Prefer a modest number of flows (SORT size DESC + LIMIT ~20–40) so stacks stay readable.
+- Keep column names exactly \`stk1\`, \`stk2\`, and \`size\` when possible.
+
+Recommended pattern (e.g. OriginCountry → DestCountry):
+
+\`\`\`esql
+FROM kibana_sample_data_flights
+| WHERE OriginCountry IS NOT NULL AND DestCountry IS NOT NULL
+| STATS size = COUNT() BY stk1 = OriginCountry, stk2 = DestCountry
+| SORT size DESC
+| LIMIT 40
+\`\`\`
+
+Rules:
+- Still obey the Vega time-range and dotted-field rules above when the index is time-based.`;
+
 const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
   if (!columns || columns.length === 0) {
     return 'No column information is available; infer fields from the ES|QL query.';
@@ -143,7 +171,7 @@ const createVegaLiteAuthorPrompt = ({
       'system',
       `You are a Vega-Lite visualization expert. Author a single valid Vega-Lite (v6) specification for the user's request.
 
-Author Vega-Lite ONLY — never raw Vega (v5). Use Vega-Lite for charts a standard Lens chart cannot express, for example faceted charts / small multiples, layered or combination charts (e.g. bars with an overlaid line), or scatter/bubble plots with an encoded size. If the request needs a diagram Vega-Lite cannot express (e.g. Sankey / flow, network, chord) and it is not an allowlisted Raw Vega chart the system already selected, build the closest chart Vega-Lite supports (such as a sorted bar chart of the top combinations) rather than attempting an unsupported diagram.
+Author Vega-Lite ONLY — never raw Vega (v5). Use Vega-Lite for charts a standard Lens chart cannot express, for example faceted charts / small multiples, layered or combination charts (e.g. bars with an overlaid line), or scatter/bubble plots with an encoded size. If the request needs a diagram Vega-Lite cannot express (e.g. network, chord) and it is not an allowlisted Raw Vega chart the system already selected, build the closest chart Vega-Lite supports (such as a sorted bar chart of the top combinations) rather than attempting an unsupported diagram.
 ${chartTypeHint}
 ${
   existingSpec
@@ -226,6 +254,18 @@ ${additionalContext ?? ''}`,
 
 const catalogChartRules = (catalogId: VegaCatalogId): string => {
   switch (catalogId) {
+    case 'sankey':
+      return `SANKEY / FLOW RULES:
+- Expect a two-stack flow table with stk1 / stk2 / size (or clear aliases in <columns>). Need ≥${SANKEY_MIN_FLOWS} flows.
+- Follow the Elastic Kibana Sankey pattern (static slice — NO click-to-filter signals):
+  1. Canonical source "${CANONICAL_ESQL_SOURCE_NAME}" with the ES|QL url.
+  2. Derived "nodes": formula key=stk1+stk2 → fold stk1/stk2 into stack/grpId → stack by stack on size → yc midpoint.
+  3. Derived "groups": aggregate nodes by stack+grpId → stack totals → scale y0/y1 to screen.
+  4. Derived "destinationNodes" (filter stack==stk2) and "edges" (filter stk1, lookup target, linkpath diagonal, strokeWidth).
+  5. Marks: path (edges), rect (groups), text (labels). Optional bottom axis with stackNames scale (Source / Destination).
+- STATIC DIAGRAM ONLY: do NOT add groupSelector / groupHover click signals, kibanaAddFilter, or "show all" buttons.
+- DO NOT set top-level "width", "height", or root "encode" x/y; the panel sizes the view.
+- Do NOT hardcode hex colors; use an ordinal color scale (e.g. category20) over stk1/stk2/grpId.`;
     case 'radar':
       return `RADAR / SPIDER RULES:
 - Expect a key / value table (optional series). Need ≥${RADAR_MIN_KEYS} distinct keys.
@@ -274,7 +314,11 @@ const createRawVegaAuthorPrompt = ({
 }): BaseMessageLike[] => {
   const esqlQueryJson = JSON.stringify(esqlQuery);
   const chartLabel =
-    catalogId === 'radar' ? 'radar / spider' : 'sunburst / hierarchy';
+    catalogId === 'radar'
+      ? 'radar / spider'
+      : catalogId === 'sankey'
+      ? 'sankey / flow'
+      : 'sunburst / hierarchy';
 
   return [
     [

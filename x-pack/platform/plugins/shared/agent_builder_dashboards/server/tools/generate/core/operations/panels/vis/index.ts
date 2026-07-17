@@ -128,7 +128,7 @@ export const panelRequestSchema = z.object({
     .enum(['lens', 'vega'])
     .optional()
     .describe(
-      '(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-family visualizations (Vega-Lite by default, or allowlisted Raw Vega such as sunburst and radar) — small multiples/faceting, layered or combination charts, scatter/bubble plots, sunburst/hierarchy, radar/spider, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Ignored when editing an existing panel (edits keep the existing renderer).'
+      '(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-family visualizations (Vega-Lite by default, or allowlisted Raw Vega such as sunburst, radar, and sankey) — small multiples/faceting, layered or combination charts, scatter/bubble plots, sunburst/hierarchy, radar/spider, sankey/flow, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Ignored when editing an existing panel (edits keep the existing renderer).'
     ),
   index: z
     .string()

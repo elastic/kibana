@@ -67,7 +67,7 @@ const createVisualizationSchema = z.object({
     .enum(['lens', 'vega'])
     .optional()
     .describe(
-      '(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-family visualizations (Vega-Lite by default, or allowlisted Raw Vega such as sunburst and radar) — small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, sunburst/hierarchy, radar/spider, or when the user explicitly asks for Vega/Vega-Lite. Ignored when updating an existing attachment (edits keep the existing renderer).'
+      '(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-family visualizations (Vega-Lite by default, or allowlisted Raw Vega such as sunburst, radar, and sankey) — small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, sunburst/hierarchy, radar/spider, sankey/flow, or when the user explicitly asks for Vega/Vega-Lite. Ignored when updating an existing attachment (edits keep the existing renderer).'
     ),
   chartType: z
     .nativeEnum(SupportedChartType)
@@ -90,13 +90,13 @@ export const createVisualizationTool = (): BuiltinToolDefinition<
   return {
     id: platformCoreTools.createVisualization,
     type: ToolType.builtin,
-    description: `Create or update a visualization from a natural language description. Supports standard Lens charts AND custom Vega-family visualizations: Vega-Lite for most custom charts, plus allowlisted Raw Vega (currently sunburst / hierarchy and radar / spider). Prefer this tool over telling the user a chart cannot be built whenever the request fits Lens, Vega-Lite, or an allowlisted Raw Vega chart; you do not author Vega specs by hand or ask the user to paste anything. If a request needs unsupported Raw Vega (e.g. Sankey/flow, network, chord, custom signals/interactivity), it is not supported yet — be honest with the user and offer alternatives instead of producing a broken chart.
+    description: `Create or update a visualization from a natural language description. Supports standard Lens charts AND custom Vega-family visualizations: Vega-Lite for most custom charts, plus allowlisted Raw Vega (currently sunburst / hierarchy, radar / spider, and sankey / flow). Prefer this tool over telling the user a chart cannot be built whenever the request fits Lens, Vega-Lite, or an allowlisted Raw Vega chart; you do not author Vega specs by hand or ask the user to paste anything. If a request needs unsupported Raw Vega (e.g. network, chord, custom signals/interactivity), it is not supported yet — be honest with the user and offer alternatives instead of producing a broken chart.
 
 You choose how to render the request via the "renderer" parameter:
 - "lens" (the default when omitted) for a standard Lens chart (${Object.values(
       SupportedChartType
     ).join(', ')}).
-- "vega" for a custom Vega-family specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, sunburst / hierarchy, radar / spider, or custom tooltips/encodings. The tool selects Vega-Lite vs allowlisted Raw Vega automatically.
+- "vega" for a custom Vega-family specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, sunburst / hierarchy, radar / spider, sankey / flow, or custom tooltips/encodings. The tool selects Vega-Lite vs allowlisted Raw Vega automatically.
 
 This tool will:
 1. If attachment_id is provided, read the existing visualization from that attachment (edits keep the same renderer)

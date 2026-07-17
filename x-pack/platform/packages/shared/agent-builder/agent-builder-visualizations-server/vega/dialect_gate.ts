@@ -31,11 +31,16 @@ const RAW_VEGA_CATALOG: ReadonlyArray<{ id: Exclude<VegaCatalogId, 'none'>; desc
       description:
         'Radar / spider / polar multivariate chart comparing numeric measures across several axes (not a pie or radial bar).',
     },
+    {
+      id: 'sankey',
+      description:
+        'Sankey / flow / alluvial diagram of weighted flows between a source category and a destination category (two stacks).',
+    },
   ];
 
 const catalogSelectionSchema = z.object({
   catalogId: z
-    .enum(['sunburst', 'radar', 'none'])
+    .enum(['sunburst', 'radar', 'sankey', 'none'])
     .describe(
       'Allowlisted Raw Vega catalog id when the request clearly needs that chart; otherwise "none".'
     ),
@@ -58,10 +63,12 @@ ${RAW_VEGA_CATALOG.map((entry) => `- id: "${entry.id}" — ${entry.description}`
 RULES:
 1. Return "sunburst" ONLY when the user clearly wants a sunburst / radial hierarchy / ring partition of a tree.
 2. Return "radar" ONLY when the user clearly wants a radar / spider / polar multivariate chart across several numeric axes.
-3. Return "none" for Vega-Lite charts (bars, lines, facets, scatter, heatmap, gantt, …) and for unsupported Raw Vega diagrams (Sankey, network, chord, …).
-4. Do NOT return "sunburst" for Lens treemap/pie/donut requests unless the user explicitly asks for a sunburst.
-5. Do NOT return "radar" for pie/donut/radial-bar requests unless the user explicitly asks for a radar or spider chart.
-6. Only return ids from the allowlist or "none".`,
+3. Return "sankey" ONLY when the user clearly wants a Sankey / flow / alluvial diagram of weighted flows between categories.
+4. Return "none" for Vega-Lite charts (bars, lines, facets, scatter, heatmap, gantt, …) and for unsupported Raw Vega diagrams (network, chord, …).
+5. Do NOT return "sunburst" for Lens treemap/pie/donut requests unless the user explicitly asks for a sunburst.
+6. Do NOT return "radar" for pie/donut/radial-bar requests unless the user explicitly asks for a radar or spider chart.
+7. Do NOT return "sankey" for ordinary bar/line breakdowns unless the user asks for Sankey, flow, or alluvial.
+8. Only return ids from the allowlist or "none".`,
   ],
   [
     'human',
@@ -116,9 +123,18 @@ const RADAR_EXAMPLE: VegaReferenceExample = {
   load: () => import('./reference_examples/radar').then((module) => module.spec),
 };
 
+const SANKEY_EXAMPLE: VegaReferenceExample = {
+  id: 'sankey',
+  title: 'Sankey / flow (Raw Vega two-stack)',
+  description:
+    'Static two-stack Sankey: stk1/stk2/size flow rows → fold+stack nodes → groups + linkpath edges → path/rect/text. Bind the Canonical ES|QL source named `source`; do not add click-to-filter signals.',
+  load: () => import('./reference_examples/sankey').then((module) => module.spec),
+};
+
 const RAW_VEGA_EXAMPLES: Record<Exclude<VegaCatalogId, 'none'>, VegaReferenceExample> = {
   sunburst: SUNBURST_EXAMPLE,
   radar: RADAR_EXAMPLE,
+  sankey: SANKEY_EXAMPLE,
 };
 
 /** Load the curated Raw Vega reference block for a catalog id (empty when none). */

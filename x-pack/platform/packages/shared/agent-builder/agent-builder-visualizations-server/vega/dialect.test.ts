@@ -13,12 +13,15 @@ import {
   formatMissingParentsError,
   formatParentChildIntegrityError,
   formatRadarIntegrityError,
+  formatSankeyIntegrityError,
   hasParentChildColumns,
   hasRadarColumns,
+  hasSankeyColumns,
   inferRawVegaCatalogId,
   isRawVegaSchema,
   validateParentChildRows,
   validateRadarRows,
+  validateSankeyRows,
 } from './dialect';
 
 describe('dialect helpers', () => {
@@ -218,6 +221,68 @@ describe('validateRadarRows', () => {
   });
 });
 
+describe('validateSankeyRows', () => {
+  const columns = [
+    { name: 'stk1', type: 'keyword' as const },
+    { name: 'stk2', type: 'keyword' as const },
+    { name: 'size', type: 'long' as const },
+  ];
+
+  it('detects sankey columns with aliases', () => {
+    expect(hasSankeyColumns(columns)).toBe(true);
+    expect(
+      hasSankeyColumns([
+        { name: 'source', type: 'keyword' },
+        { name: 'dest', type: 'keyword' },
+        { name: 'count', type: 'long' },
+      ])
+    ).toBe(true);
+    expect(hasSankeyColumns([{ name: 'stk1', type: 'keyword' }])).toBe(false);
+  });
+
+  it('passes for ≥2 flows with numeric size', () => {
+    expect(
+      validateSankeyRows({
+        columns,
+        values: [
+          ['US', 'IT', 10],
+          ['US', 'JP', 4],
+        ],
+      })
+    ).toEqual({ ok: true });
+  });
+
+  it('fails when there are fewer than 2 flows', () => {
+    expect(
+      validateSankeyRows({
+        columns,
+        values: [['US', 'IT', 10]],
+      })
+    ).toEqual({ ok: false, reason: 'too_few_flows', flowCount: 1 });
+  });
+
+  it('fails when endpoints are blank', () => {
+    expect(
+      validateSankeyRows({
+        columns,
+        values: [
+          ['US', 'IT', 10],
+          [null, 'JP', 4],
+        ],
+      })
+    ).toEqual({ ok: false, reason: 'blank_endpoints' });
+  });
+
+  it('formats sankey regeneration errors', () => {
+    expect(formatSankeyIntegrityError({ ok: false, reason: 'missing_columns' })).toContain(
+      'stk1/stk2/size'
+    );
+    expect(
+      formatSankeyIntegrityError({ ok: false, reason: 'too_few_flows', flowCount: 1 })
+    ).toContain('at least 2');
+  });
+});
+
 describe('inferRawVegaCatalogId', () => {
   it('infers sunburst from stratify/partition transforms', () => {
     expect(
@@ -226,6 +291,28 @@ describe('inferRawVegaCatalogId', () => {
         data: [{ transform: [{ type: 'stratify' }, { type: 'partition' }] }],
       })
     ).toBe('sunburst');
+  });
+
+  it('infers sankey from linkpath or fold+stk1/stk2', () => {
+    expect(
+      inferRawVegaCatalogId({
+        $schema: VEGA_SCHEMA,
+        data: [{ transform: [{ type: 'linkpath' }] }],
+      })
+    ).toBe('sankey');
+    expect(
+      inferRawVegaCatalogId({
+        $schema: VEGA_SCHEMA,
+        data: [
+          {
+            transform: [
+              { type: 'fold', fields: ['stk1', 'stk2'] },
+              { type: 'stack', field: 'size' },
+            ],
+          },
+        ],
+      })
+    ).toBe('sankey');
   });
 
   it('infers radar from angular/radial scales or linear-closed marks', () => {

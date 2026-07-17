@@ -9,11 +9,11 @@ Which grammar a generated specification uses: Vega-Lite or raw Vega.
 _Avoid_: renderer, engine, format (when meaning the grammar)
 
 **Dialect gate**:
-The allowlist of Raw Vega chart intents (currently Sunburst and Radar). Selection is performed by a small classifier model call that returns a catalog id or `none`; when `none`, authoring stays within Vega-Lite (unsupported diagrams still get an honest refusal).
+The allowlist of Raw Vega chart intents (currently Sunburst, Radar, and Sankey). Selection is performed by a small classifier model call that returns a catalog id or `none`; when `none`, authoring stays within Vega-Lite (unsupported diagrams still get an honest refusal).
 _Avoid_: model-chosen free-form dialect, keyword-only routing
 
 **Catalog id**:
-A stable identifier for a curated Raw Vega (or later shared) chart intent returned by the Dialect gate classifier (e.g. `sunburst`, `radar`), or `none` when no allowlisted intent matches.
+A stable identifier for a curated Raw Vega (or later shared) chart intent returned by the Dialect gate classifier (e.g. `sunburst`, `radar`, `sankey`), or `none` when no allowlisted intent matches.
 _Avoid_: chartType (unless referring to the existing Lens/tool enum), renderer
 
 **Canonical ES|QL source**:
@@ -41,11 +41,11 @@ Graph ordering for new visualizations: run the Dialect gate classifier first, th
 _Avoid_: classify in parallel with ES|QL, classify after ES|QL
 
 **Disclosed fallback**:
-When an allowlisted chart is selected but its required ES|QL table cannot be produced (Parent–child for Sunburst; key/value with ≥3 keys for Radar), do not silently claim success: produce the closest Vega-Lite approximation and disclose that the requested chart was not possible.
+When an allowlisted chart is selected but its required ES|QL table cannot be produced (Parent–child for Sunburst; key/value with ≥3 keys for Radar; stk1/stk2/size flows for Sankey), do not silently claim success: produce the closest Vega-Lite approximation and disclose that the requested chart was not possible.
 _Avoid_: silent VL fallback, hard fail with no alternative chart
 
 **Allowlist refusal**:
-For Raw Vega diagram intents not yet in the Dialect gate allowlist (Sankey, network, chord, …), do not author Raw Vega: refuse honestly and offer Vega-Lite / Lens / multi-chart alternatives. Widen the allowlist chart-by-chart.
+For Raw Vega diagram intents not yet in the Dialect gate allowlist (network, chord, …), do not author Raw Vega: refuse honestly and offer Vega-Lite / Lens / multi-chart alternatives. Widen the allowlist chart-by-chart.
 _Avoid_: free-form Raw Vega, silent VL substitution for named unsupported diagrams
 
 **Vega-Lite**:
