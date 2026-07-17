@@ -323,9 +323,10 @@ describe('initAPIAuthorization', () => {
           expect(mockResponse.forbidden).toHaveBeenCalled();
           expect(mockPostAuthToolkit.authzResultNext).not.toHaveBeenCalled();
 
-          const forbiddenMessage = mockResponse.forbidden.mock.calls[0]?.[0]?.body?.message as
-            | string
+          const forbiddenBody = mockResponse.forbidden.mock.calls[0]?.[0]?.body as
+            | { message?: string }
             | undefined;
+          const forbiddenMessage = forbiddenBody?.message;
           for (const included of asserts.forbiddenMessageIncludes ?? []) {
             expect(forbiddenMessage).toContain(included);
           }
