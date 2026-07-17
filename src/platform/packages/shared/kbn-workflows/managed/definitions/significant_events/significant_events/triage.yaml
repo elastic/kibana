@@ -54,25 +54,20 @@ steps:
     with:
       spaceId: '{{ workflow.spaceId }}'
 
-  # Broadcast the latest seen timestamp to each event, exclude seen markers, then select the latest
-  # real state with _id as a deterministic tie-break. Only events whose latest state is discovery
-  # remain eligible. Scoring combines severity with minutes since last consideration.
+  # Select the latest real state per event (_id tie-break). Only events whose latest
+  # state is discovery remain eligible. Score by severity + age of that discovery doc.
   - name: get_unassessed_discoveries
     type: elasticsearch.esql.query
     with:
       query: |-
         FROM .significant_events-discoveries METADATA _id, _source
-        | EVAL seen_timestamp = CASE(seen_by IS NOT NULL, @timestamp, null)
-        | INLINE STATS last_seen_timestamp = MAX(seen_timestamp) BY event_id
-        | WHERE seen_by IS NULL
         | INLINE STATS latest_timestamp = MAX(@timestamp) BY event_id
         | WHERE @timestamp == latest_timestamp
         | INLINE STATS latest_id = MAX(_id) BY event_id
         | WHERE _id == latest_id AND kind == "discovery"
         | EVAL severity_score = CASE(severity == "80-critical", 80, severity == "60-high", 60, severity == "40-medium", 40, severity == "20-low", 20, 0)
-        | EVAL staleness_minutes = DATE_DIFF("minute", COALESCE(last_seen_timestamp, @timestamp), NOW())
-        | EVAL first_consideration_bonus = CASE(last_seen_timestamp IS NULL, 101, 0)
-        | EVAL score = first_consideration_bonus + severity_score + staleness_minutes
+        | EVAL staleness_minutes = DATE_DIFF("minute", @timestamp, NOW())
+        | EVAL score = severity_score + staleness_minutes
         | SORT score DESC, @timestamp ASC, _id ASC
         | LIMIT ?1
         | KEEP event_id, _source, score
@@ -94,9 +89,6 @@ steps:
     with:
       query: |-
         FROM .significant_events-discoveries METADATA _id, _source
-        | EVAL seen_timestamp = CASE(seen_by IS NOT NULL, @timestamp, null)
-        | INLINE STATS last_seen_timestamp = MAX(seen_timestamp) BY event_id
-        | WHERE seen_by IS NULL
         | INLINE STATS latest_timestamp = MAX(@timestamp) BY event_id
         | WHERE @timestamp == latest_timestamp
         | INLINE STATS latest_id = MAX(_id) BY event_id
@@ -112,25 +104,6 @@ steps:
                   gte: '{{ inputs.discoveryLookback }}'
     on-failure:
       continue: true
-
-  - name: foreach_stamp_seen
-    type: foreach
-    foreach: '${{ steps.get_unassessed_discoveries.output.values | default: [] }}'
-    steps:
-      - name: write_seen_marker
-        type: elasticsearch.request
-        with:
-          method: POST
-          path: '/{{ consts.DISCOVERIES_INDEX }}/_doc'
-          body:
-            '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-            kibana:
-              space_ids:
-                - '{{ variables.spaceId }}'
-            event_id: '{{ foreach.item[0] }}'
-            seen_by: '{{ execution.id }}'
-        on-failure:
-          continue: true
 
   # NOTE: cross-step references chaining a `.size` property accessor (e.g.
   # `steps.x.output.findings.size`) resolve to undefined once referenced from

@@ -20,7 +20,6 @@ export const discoveriesMappings = {
     kind: mappings.keyword(),
     discovery_id: mappings.keyword(),
     event_id: mappings.keyword(),
-    seen_by: mappings.keyword(),
     stream_names: mappings.keyword(),
     severity: mappings.keyword(),
     signals: mappings.object({

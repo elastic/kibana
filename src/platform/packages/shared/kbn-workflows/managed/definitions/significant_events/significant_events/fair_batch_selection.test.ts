@@ -17,6 +17,7 @@ interface WorkflowStep {
   type: string;
   with?: {
     query?: string;
+    filter?: unknown;
   };
 }
 
@@ -45,8 +46,9 @@ describe('significant events fair batch selection', () => {
     expect(selection.type).toBe('elasticsearch.esql.query');
     expect(selection.with?.query).toContain('INLINE STATS processed_count');
     expect(selection.with?.query).toContain('INLINE STATS latest_timestamp');
-    expect(selection.with?.query).toContain('first_consideration_bonus');
+    expect(selection.with?.query).toContain('staleness_minutes');
     expect(selection.with?.query).toContain('LIMIT ?1');
+    expect(selection.with?.query).not.toContain('seen_by');
     expect(count.with?.query).toContain('STATS candidate_count = COUNT(*)');
     expect(count.with?.query).not.toContain('LIMIT');
   });
@@ -56,26 +58,24 @@ describe('significant events fair batch selection', () => {
     const count = getStep(TRIAGE_YAML, 'count_unassessed_discoveries');
 
     expect(selection.type).toBe('elasticsearch.esql.query');
-    expect(selection.with?.query).toContain('INLINE STATS last_seen_timestamp');
     expect(selection.with?.query).toContain('INLINE STATS latest_timestamp');
     expect(selection.with?.query).toContain('BY event_id');
     expect(selection.with?.query).toContain('severity_score');
+    expect(selection.with?.query).toContain('staleness_minutes');
     expect(selection.with?.query).not.toContain('discovery_slug');
-    expect(selection.with?.query).toContain('first_consideration_bonus');
+    expect(selection.with?.query).not.toContain('seen_by');
     expect(selection.with?.query).toContain('LIMIT ?1');
     expect(count.with?.query).toContain('STATS candidate_count = COUNT(*)');
     expect(count.with?.query).not.toContain('LIMIT');
   });
 
-  it('stamps every selected detection and discovery before agent execution', () => {
+  it('stamps written-rule backlogs with one query instead of per-rule ES|QL', () => {
+    const backlog = getStep(DISCOVERY_YAML, 'get_written_rules_backlog');
     const discovery = parse(DISCOVERY_YAML) as { steps: WorkflowStep[] };
-    const triage = parse(TRIAGE_YAML) as { steps: WorkflowStep[] };
 
-    expect(discovery.steps.findIndex(({ name }) => name === 'foreach_stamp_seen')).toBeLessThan(
-      discovery.steps.findIndex(({ name }) => name === 'run_discovery_agent')
-    );
-    expect(triage.steps.findIndex(({ name }) => name === 'foreach_stamp_seen')).toBeLessThan(
-      triage.steps.findIndex(({ name }) => name === 'run_judge_agent')
-    );
+    expect(backlog.type).toBe('elasticsearch.esql.query');
+    expect(JSON.stringify(backlog.with?.filter)).toContain('written_rule_uuids');
+    expect(discovery.steps.some(({ name }) => name === 'get_rule_backlog')).toBe(false);
+    expect(discovery.steps.some(({ name }) => name === 'foreach_stamp_seen')).toBe(false);
   });
 });

@@ -152,24 +152,6 @@ describe('DiscoveryClient', () => {
     });
   });
 
-  describe('findByEventId', () => {
-    it('excludes internal seen markers from discovery history', async () => {
-      const discovery = createDiscovery({
-        '@timestamp': '2026-01-02T00:00:00.000Z',
-        event_id: 'svc__rule',
-      });
-      const { client, query } = createClient({
-        discoveries: [discovery],
-        processedSlugs: [],
-      });
-
-      await client.findByEventId('svc__rule');
-
-      const request = query.mock.calls[0][0] as { query: string };
-      expect(request.query).toContain('seen_by IS NULL');
-    });
-  });
-
   describe('findLatestPaginated', () => {
     it('collapses two discoveries sharing one event_id (different ids) into a single hit', async () => {
       const latest = createDiscovery({

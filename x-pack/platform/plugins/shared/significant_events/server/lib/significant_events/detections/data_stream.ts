@@ -23,7 +23,6 @@ export const detectionsMappings = {
     p_value: { type: 'double' as const },
     severity_score: mappings.integer(),
     processed_by: mappings.keyword(),
-    seen_by: mappings.keyword(),
   },
 } satisfies MappingsDefinition;
 

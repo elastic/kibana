@@ -184,7 +184,6 @@ export class DiscoveryClient {
       index: DISCOVERIES_DATA_STREAM,
       idField: FIELD_EVENT_ID,
       idValue: eventId,
-      where: esql.exp`${esql.col('seen_by')} IS NULL`,
     });
 
     const processedEventIds = await this.getProcessedEventIds(
