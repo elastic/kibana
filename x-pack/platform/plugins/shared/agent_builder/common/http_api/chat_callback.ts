@@ -6,14 +6,19 @@
  */
 
 import type {
-  ConversationSource,
+  ConversationOrigin,
+  ConversationOriginAuthor,
+  ConversationOriginType,
   ExecutionStatus,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { ChatRequestBodyPayload, ChatResponse } from './chat';
 
 export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
-  source?: ConversationSource;
+  origin?: ConversationOrigin & {
+    type: ConversationOriginType;
+    author?: ConversationOriginAuthor;
+  };
   callback: {
     url: string;
   };

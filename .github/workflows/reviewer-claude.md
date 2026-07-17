@@ -30,7 +30,6 @@ engine:
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
-    ENABLE_PROMPT_CACHING_1H: "1"
     # Route Claude Code's 1M Opus alias through LiteLLM.
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5

@@ -260,12 +260,11 @@ const dispatchReviewerComment = async ({ github, context, core }) => {
     repo,
     workflow_id: reviewer.workflowId,
     ref: context.payload.repository.default_branch,
-    inputs: buildWorkflowDispatchInputs({
-      reviewerId: reviewer.id,
-      pullNumber,
-      commentId,
-      commentType: artifact.comment_type,
-    }),
+    inputs: {
+      pr_number: String(pullNumber),
+      comment_id: String(commentId),
+      comment_type: artifact.comment_type,
+    },
   });
 
   core.info(`Dispatched ${reviewer.workflowId} for PR #${pullNumber} from comment ${commentId}.`);

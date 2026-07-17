@@ -9,15 +9,7 @@ import React from 'react';
 
 import { useActions } from 'kea';
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiIcon,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { TextExpansionCallOutState } from './text_expansion_callout';
@@ -40,9 +32,6 @@ export const ModelDeployed = ({
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon color="success" type="checkCircleFill" aria-hidden />
-            </EuiFlexItem>
             <EuiFlexItem grow>
               <EuiText color="success" size="xs">
                 <h3>
