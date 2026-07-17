@@ -83,17 +83,6 @@ describe('useDocumentFlyoutApi', () => {
     );
   });
 
-  it('openNotes opens a tools flyout without a session (inherits the parent)', () => {
-    const { result } = renderHook(() => useDocumentFlyoutApi());
-    result.current.openNotes({ hit });
-
-    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
-      'FLYOUT_CONTENT',
-      expect.objectContaining({ size: 'm', historyKey: documentFlyoutHistoryKey })
-    );
-    expect(getProperties().session).toBeUndefined();
-  });
-
   it('openAnalyzer opens a tools flyout as a new session', () => {
     const { result } = renderHook(() => useDocumentFlyoutApi());
     result.current.openAnalyzer({ hit });
@@ -114,7 +103,7 @@ describe('useDocumentFlyoutApi', () => {
     );
   });
 
-  it('openDocumentEntities opens a tools flyout as a new session', () => {
+  it('openDocumentEntities opens a tools flyout as a new session and propagates inherit context to its content', () => {
     const { result } = renderHook(() => useDocumentFlyoutApi());
     result.current.openDocumentEntities({ hit });
 
@@ -122,9 +111,14 @@ describe('useDocumentFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 'm', session: 'start' })
     );
+    const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
   });
 
-  it('openDocumentCorrelations opens a tools flyout as a new session', () => {
+  it('openDocumentCorrelations opens a tools flyout as a new session and propagates inherit context to its content', () => {
     const { result } = renderHook(() => useDocumentFlyoutApi());
     result.current.openDocumentCorrelations({
       hit,
@@ -137,6 +131,31 @@ describe('useDocumentFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 'm', session: 'start' })
     );
+    const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
+  });
+
+  it('openDocumentPrevalence opens a tools flyout as a new session and propagates inherit context to its content', () => {
+    const { result } = renderHook(() => useDocumentFlyoutApi());
+    result.current.openDocumentPrevalence({
+      hit,
+      investigationFields: [],
+      scopeId: '',
+      columns: [],
+    });
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      'FLYOUT_CONTENT',
+      expect.objectContaining({ size: 'm', session: 'start' })
+    );
+    const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
   });
 
   it.each([
@@ -144,7 +163,6 @@ describe('useDocumentFlyoutApi', () => {
     ['openDocumentThreatIntelligence', () => ({ hit })],
     ['openDocumentInvestigationGuide', () => ({ hit })],
     ['openDocumentGraph', () => ({ hit })],
-    ['openDocumentPrevalence', () => ({ hit, investigationFields: [], scopeId: '', columns: [] })],
   ] as const)('%s opens a tools flyout as a new session', (method, buildParams) => {
     const { result } = renderHook(() => useDocumentFlyoutApi());
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -159,7 +177,7 @@ describe('useDocumentFlyoutApi', () => {
   it('uses the doc-viewer history key when outside the security app', () => {
     (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
     const { result } = renderHook(() => useDocumentFlyoutApi());
-    result.current.openNotes({ hit });
+    result.current.openAnalyzer({ hit });
 
     expect(getProperties().historyKey).toBe(DOC_VIEWER_FLYOUT_HISTORY_KEY);
   });
