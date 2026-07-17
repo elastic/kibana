@@ -3,7 +3,7 @@
   "tests": [
     {
       "id": "aca8c749b1f9679-c1aa05b35aa13cc",
-      "title": "ES|QL Data Federation — Stack Management loads the management app and can open the connect data source flyout",
+      "title": "ES|QL Data Federation",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

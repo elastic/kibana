@@ -33,11 +33,8 @@ export class DataFederationPage {
   }
 
   async goto(): Promise<void> {
-    this.page.setDefaultNavigationTimeout(60000);
     await this.page.gotoApp('management');
-    await this.page.testSubj
-      .locator('data_federation')
-      .click({ timeout: 30000, noWaitAfter: true });
-    await this.pageTitle.waitFor({ state: 'visible', timeout: 30000 });
+    await this.page.testSubj.locator('data_federation').click();
+    await this.pageTitle.waitFor({ state: 'visible' });
   }
 }
