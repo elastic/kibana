@@ -34,7 +34,7 @@ const createRequest = ({
       path: '/api/items/{id}',
       settings: { app: { selfCallable } },
     },
-    url: new URL('http://localhost/api/items/private-id?secret=query'),
+    url: new URL('http://localhost/api/items/raw-id?filter=raw-value'),
   } as unknown as Request);
 
 const responseToolkit = { continue: Symbol('continue') } as unknown as ResponseToolkit;
@@ -66,8 +66,8 @@ describe('self-call receiving policy', () => {
         },
       }
     );
-    expect(JSON.stringify((log.info as jest.Mock).mock.calls)).not.toContain('private-id');
-    expect(JSON.stringify((log.info as jest.Mock).mock.calls)).not.toContain('secret=query');
+    expect(JSON.stringify((log.info as jest.Mock).mock.calls)).not.toContain('raw-id');
+    expect(JSON.stringify((log.info as jest.Mock).mock.calls)).not.toContain('filter=raw-value');
   });
 
   it('rejects a non-opted route during pre-auth with a stable 403 response', () => {
