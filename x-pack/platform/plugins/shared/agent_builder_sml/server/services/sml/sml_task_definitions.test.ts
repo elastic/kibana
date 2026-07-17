@@ -70,7 +70,7 @@ function getRegisteredTaskRunner(params: { attachmentType?: string }) {
   return taskDef.createTaskRunner(
     taskManagerMock.createRunContext({
       taskInstance: { params } as any,
-      abortController: mockAbortController,
+      signal: mockAbortController.signal,
     })
   );
 }

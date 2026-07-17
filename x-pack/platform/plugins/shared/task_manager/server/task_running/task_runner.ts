@@ -469,7 +469,7 @@ export class TaskManagerRunner implements TaskRunner {
           this.task = definition.createTaskRunner({
             taskInstance: sanitizedTaskInstance,
             fakeRequest,
-            abortController,
+            signal: abortController.signal,
             enrichRequest,
             executionUuid: this.uuid,
           });

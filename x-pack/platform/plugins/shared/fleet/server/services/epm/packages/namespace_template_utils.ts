@@ -40,15 +40,12 @@ export async function fetchIndexTemplate(
   esClient: ElasticsearchClient,
   templateName: string,
   logContext: string,
-  abortController?: AbortController
+  signal?: AbortSignal
 ): Promise<IndexTemplate | undefined> {
   const logger = appContextService.getLogger();
   let rawTemplate;
   try {
-    const res = await esClient.indices.getIndexTemplate(
-      { name: templateName },
-      { signal: abortController?.signal }
-    );
+    const res = await esClient.indices.getIndexTemplate({ name: templateName }, { signal });
     rawTemplate = res.index_templates[0]?.index_template;
   } catch (err: unknown) {
     if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {

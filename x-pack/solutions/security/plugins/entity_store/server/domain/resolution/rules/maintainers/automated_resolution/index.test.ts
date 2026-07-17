@@ -79,7 +79,7 @@ const runConfig = async (
       state: persistedState,
       taskStatus: 'started',
     },
-    abortController: new AbortController(),
+    signal: new AbortController().signal,
     logger: loggerMock.create(),
     esClient,
     cpsEsClient: esClient,

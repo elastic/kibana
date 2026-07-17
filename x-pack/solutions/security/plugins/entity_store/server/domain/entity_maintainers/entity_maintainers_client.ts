@@ -75,7 +75,7 @@ interface EntityMaintainersClientDeps {
 interface SyncExecutionContext {
   taskId: string;
   status: EntityMaintainerStatus;
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
   fakeRequest: KibanaRequest;
   esClient: ElasticsearchClient;
@@ -350,7 +350,7 @@ export class EntityMaintainersClient {
       status,
       fakeRequest: request,
       logger,
-      abortController,
+      signal: abortController.signal,
       esClient,
       cpsEsClient,
       crudClient,

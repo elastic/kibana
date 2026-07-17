@@ -73,7 +73,7 @@ const createDeps = ({
   esClient,
   logger: loggerMock.create(),
   resolutionClient,
-  abortController: new AbortController(),
+  signal: new AbortController().signal,
   telemetry,
 });
 

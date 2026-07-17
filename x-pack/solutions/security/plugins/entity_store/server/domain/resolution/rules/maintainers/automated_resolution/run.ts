@@ -39,12 +39,12 @@ export interface RunDeps {
   esClient: ElasticsearchClient;
   logger: Logger;
   resolutionClient: ResolutionClient;
-  abortController: AbortController;
+  signal: AbortSignal;
   telemetry: MaintainerTelemetryClient;
 }
 
 export async function runEmailRuleResolution(deps: RunDeps): Promise<PerRuleState> {
-  const { state, namespace, esClient, logger, resolutionClient, abortController, telemetry } = deps;
+  const { state, namespace, esClient, logger, resolutionClient, signal, telemetry } = deps;
   const index = getLatestEntitiesIndexName(namespace);
 
   // Step 1: Collect new email values
@@ -60,7 +60,7 @@ export async function runEmailRuleResolution(deps: RunDeps): Promise<PerRuleStat
 
   logger.debug(`Step 1: Collected ${values.length} email values, maxTimestamp: ${maxTimestamp}`);
 
-  if (abortController.signal.aborted) {
+  if (signal.aborted) {
     logger.debug('Aborted after Step 1');
     return state;
   }
@@ -69,7 +69,7 @@ export async function runEmailRuleResolution(deps: RunDeps): Promise<PerRuleStat
   const matchBuckets = await findMatchingGroups(esClient, index, values, logger);
   logger.debug(`Step 2: Found ${matchBuckets.length} match groups`);
 
-  if (abortController.signal.aborted) {
+  if (signal.aborted) {
     logger.debug('Aborted after Step 2');
     return state;
   }

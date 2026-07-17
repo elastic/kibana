@@ -21,7 +21,7 @@ type TaskRunnerConstructor<T> = new (...args: never[]) => T;
 export interface AlertingTaskRunner {
   run(params: {
     taskInstance: RunContext['taskInstance'];
-    abortController: RunContext['abortController'];
+    signal: RunContext['signal'];
   }): Promise<RunResult>;
 }
 
@@ -86,7 +86,7 @@ export function createTaskRunnerFactory({
   getInjection: () => CoreDiServiceStart;
 }): TaskRunnerFactory {
   return ({ taskRunnerClass, taskType, requiresFakeRequest = true }) => {
-    return ({ taskInstance, abortController, fakeRequest }: RunContext) => ({
+    return ({ taskInstance, signal, fakeRequest }: RunContext) => ({
       run: async () => {
         if (requiresFakeRequest && !fakeRequest) {
           throw new Error(
@@ -106,7 +106,7 @@ export function createTaskRunnerFactory({
 
         try {
           const runner = scope.get(taskRunnerClass);
-          return await runner.run({ taskInstance, abortController });
+          return await runner.run({ taskInstance, signal });
         } finally {
           await scope.unbindAll();
         }

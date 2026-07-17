@@ -108,7 +108,10 @@ describe('syncNamespaceTemplatesTask', () => {
         taskManager.registerTaskDefinitions.mock.calls[0][0]['fleet:sync_namespace_templates'];
       const abortController = new AbortController();
       const runner = registeredDef.createTaskRunner(
-        taskManagerMock.createRunContext({ taskInstance: { params } as any, abortController })
+        taskManagerMock.createRunContext({
+          taskInstance: { params } as any,
+          signal: abortController.signal,
+        })
       );
       return { runner, abortController };
     };
@@ -131,7 +134,7 @@ describe('syncNamespaceTemplatesTask', () => {
         packageName: 'nginx',
         addedNamespaces: ['production'],
         removedNamespaces: ['staging'],
-        abortController,
+        signal: abortController.signal,
       });
     });
 

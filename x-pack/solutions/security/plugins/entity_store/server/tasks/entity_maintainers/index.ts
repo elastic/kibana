@@ -110,7 +110,7 @@ export function registerEntityMaintainerTask({
             title,
             description,
             timeout: effectiveTimeout,
-            createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
+            createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
               run: async () => {
                 const status = taskInstance.state;
 
@@ -123,7 +123,7 @@ export function registerEntityMaintainerTask({
                   status,
                   request: fakeRequest,
                   taskId: taskInstance.id,
-                  taskAbortController: abortController,
+                  signal,
                   id,
                   run,
                   setup,

@@ -46,7 +46,7 @@ export interface RunRelatedUserAliasResolutionDeps {
   esClient: ElasticsearchClient;
   logger: Logger;
   resolutionClient: ResolutionClient;
-  abortController: AbortController;
+  signal: AbortSignal;
   telemetry: MaintainerTelemetryClient;
 }
 
@@ -224,9 +224,9 @@ const findCandidates = async ({
 export async function runRelatedUserAliasResolution(
   deps: RunRelatedUserAliasResolutionDeps
 ): Promise<PerRuleState> {
-  const { state, namespace, esClient, logger, resolutionClient, abortController, telemetry } = deps;
+  const { state, namespace, esClient, logger, resolutionClient, signal, telemetry } = deps;
   const index = getLatestEntitiesIndexName(namespace);
-  const seeds = await collectSeeds({ esClient, index, abortSignal: abortController.signal });
+  const seeds = await collectSeeds({ esClient, index, abortSignal: signal });
   const lastRun: RelatedUserAliasResolutionLastRun = {
     seedsScanned: seeds.length,
     linksCreated: 0,
@@ -237,14 +237,14 @@ export async function runRelatedUserAliasResolution(
   };
 
   for (const seed of seeds) {
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       return state;
     }
 
     const sourceRelatedUserValues = await readRelatedUserBundleForSeed({
       esClient,
       seed,
-      abortSignal: abortController.signal,
+      abortSignal: signal,
     });
     if (!sourceRelatedUserValues) {
       continue;
@@ -256,7 +256,7 @@ export async function runRelatedUserAliasResolution(
     );
     const candidatesForSeed = new Map<string, CandidateEntity>();
     for (const value of values) {
-      if (abortController.signal.aborted) {
+      if (signal.aborted) {
         return state;
       }
 
@@ -265,7 +265,7 @@ export async function runRelatedUserAliasResolution(
           esClient,
           index,
           value,
-          abortSignal: abortController.signal,
+          abortSignal: signal,
         });
         const candidatesExcludingSeed = candidates.filter(
           (candidate) => candidate.entityId !== seed.entityId

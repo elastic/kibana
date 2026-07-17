@@ -125,7 +125,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
   const runTask = async (taskInstance = MOCK_TASK_INSTANCE) => {
     const mockTaskManagerStart = tmStartMock();
     await mockTask.start({ taskManager: mockTaskManagerStart });
-    return mockTask.runTask(taskInstance, mockCore, new AbortController());
+    return mockTask.runTask(taskInstance, mockCore, new AbortController().signal);
   };
 
   describe('Task lifecycle', () => {
@@ -205,7 +205,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         config: { taskInterval: '1m' },
       });
 
-      await unstartedTask.runTask(MOCK_TASK_INSTANCE, mockCore, new AbortController());
+      await unstartedTask.runTask(MOCK_TASK_INSTANCE, mockCore, new AbortController().signal);
 
       expect(mockAgentPolicyService.fetchAllAgentPolicies).not.toHaveBeenCalled();
     });
