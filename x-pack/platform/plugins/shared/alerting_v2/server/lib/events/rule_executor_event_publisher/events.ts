@@ -49,7 +49,9 @@ export const RULE_EXECUTION_FAILED_EVENT_TYPE = 'rule.execution.failed' as const
  * Payload of {@link RuleExecutionFailedEvent}.
  */
 export interface RuleExecutionFailedPayload {
-  readonly ruleId: string;
+  readonly rule: {
+    readonly id: string;
+  };
   readonly error: string;
 }
 

@@ -42,7 +42,7 @@ describe('RuleExecutorEventPublisher', () => {
     const { publisher, eventBus, request } = createRuleExecutorEventPublisher();
 
     const payload: RuleExecutionFailedPayload = {
-      ruleId: 'rule-1',
+      rule: { id: 'rule-1' },
       error: 'Something went wrong',
     };
 

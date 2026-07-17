@@ -9,26 +9,50 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import type { WorkflowService } from '../../services/workflow_service/workflow_service';
-import { RULE_CREATED_EVENT_TYPE, type RuleCreatedEvent } from '../rule_event_publisher/events';
+import {
+  RULE_EXECUTION_SUCCEEDED_EVENT_TYPE,
+  RULE_EXECUTION_FAILED_EVENT_TYPE,
+  type RuleExecutionSucceededEvent,
+  type RuleExecutionFailedEvent,
+} from '../rule_executor_event_publisher/events';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import type { EventBus, Subscription } from '../event_bus';
 import { createWorkflowSubscriberMocks, handlerFor } from '../test_utils';
-import { RuleWorkflowSubscriber } from './rule_workflow_subscriber';
-import { RULE_WORKFLOW_TRIGGERS, RuleCreatedTriggerId } from './triggers';
+import { RuleExecutorWorkflowSubscriber } from './rule_executor_workflow_subscriber';
+import {
+  RULE_EXECUTOR_WORKFLOW_TRIGGERS,
+  RuleEventsGeneratedTriggerId,
+  RuleExecutionFailedTriggerId,
+} from './triggers';
 
-const ruleCreatedEvent: RuleCreatedEvent = {
-  type: RULE_CREATED_EVENT_TYPE,
-  payload: { rule: { ruleId: 'rule-1', spaceId: 'my-space' } },
+const succeededEvent: RuleExecutionSucceededEvent = {
+  type: RULE_EXECUTION_SUCCEEDED_EVENT_TYPE,
+  payload: {
+    executionId: 'execution-uuid',
+    scheduledAt: '2025-01-01T00:00:00.000Z',
+    ruleEventsGenerated: 4,
+    rule: {
+      ruleId: 'rule-1',
+      spaceId: 'my-space',
+      kind: 'signal',
+      tags: ['security'],
+    },
+  },
 };
 
-describe('RuleWorkflowSubscriber', () => {
+const failedEvent: RuleExecutionFailedEvent = {
+  type: RULE_EXECUTION_FAILED_EVENT_TYPE,
+  payload: { rule: { id: 'rule-1' }, error: 'boom' },
+};
+
+describe('RuleExecutorWorkflowSubscriber', () => {
   let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
   let workflowService: WorkflowService;
   let workflowsExtensions: jest.Mocked<WorkflowsExtensionsServerPluginStart>;
   let mockEmitEvent: jest.Mock;
   let loggerService: LoggerService;
   let mockLogger: jest.Mocked<Logger>;
-  let subscriber: RuleWorkflowSubscriber;
+  let subscriber: RuleExecutorWorkflowSubscriber;
   let request: KibanaRequest;
 
   beforeEach(() => {
@@ -41,17 +65,17 @@ describe('RuleWorkflowSubscriber', () => {
       mockLogger,
       request,
     } = createWorkflowSubscriberMocks());
-    subscriber = new RuleWorkflowSubscriber(bus, workflowService, loggerService);
+    subscriber = new RuleExecutorWorkflowSubscriber(bus, workflowService, loggerService);
   });
 
   describe('start()', () => {
     it("subscribes one handler per binding in the catalog, using each binding's eventType", () => {
       subscriber.start();
 
-      expect(bus.subscribe).toHaveBeenCalledTimes(RULE_WORKFLOW_TRIGGERS.length);
+      expect(bus.subscribe).toHaveBeenCalledTimes(RULE_EXECUTOR_WORKFLOW_TRIGGERS.length);
 
       const subscribedEventTypes = bus.subscribe.mock.calls.map(([eventType]) => eventType);
-      const catalogEventTypes = RULE_WORKFLOW_TRIGGERS.map((t) => t.eventType);
+      const catalogEventTypes = RULE_EXECUTOR_WORKFLOW_TRIGGERS.map((t) => t.eventType);
       expect(subscribedEventTypes.sort()).toEqual(catalogEventTypes.sort());
     });
 
@@ -65,16 +89,41 @@ describe('RuleWorkflowSubscriber', () => {
   });
 
   describe('event dispatch', () => {
-    it("forwards context.request through WorkflowService, with the binding's triggerId and the event payload", async () => {
+    it('forwards a succeeded event as the reshaped workflow payload under the acting request', async () => {
       subscriber.start();
 
-      await handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, { request });
+      await handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(succeededEvent, { request });
 
-      // The acting user's request must reach getClient so the workflow runs with
-      // the same credentials/space that changed the rule (RNA #504 requirement 3).
       expect(workflowsExtensions.getClient).toHaveBeenCalledWith(request);
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
-      expect(mockEmitEvent).toHaveBeenCalledWith(RuleCreatedTriggerId, ruleCreatedEvent.payload);
+      expect(mockEmitEvent).toHaveBeenCalledWith(RuleEventsGeneratedTriggerId, {
+        rule: { id: 'rule-1', spaceId: 'my-space', kind: 'signal', tags: ['security'] },
+        execution: { executionId: 'execution-uuid', scheduledAt: '2025-01-01T00:00:00.000Z' },
+        ruleEventsGenerated: 4,
+      });
+    });
+
+    it('forwards a failed event as { rule: { id }, error }', async () => {
+      subscriber.start();
+
+      await handlerFor(bus, RULE_EXECUTION_FAILED_EVENT_TYPE)(failedEvent, { request });
+
+      expect(mockEmitEvent).toHaveBeenCalledTimes(1);
+      expect(mockEmitEvent).toHaveBeenCalledWith(RuleExecutionFailedTriggerId, {
+        rule: { id: 'rule-1' },
+        error: 'boom',
+      });
+    });
+
+    it('skips emission when a succeeded run produced no rule events (binding gate returns null)', async () => {
+      subscriber.start();
+
+      await handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(
+        { ...succeededEvent, payload: { ...succeededEvent.payload, ruleEventsGenerated: 0 } },
+        { request }
+      );
+
+      expect(mockEmitEvent).not.toHaveBeenCalled();
     });
 
     it('catches WorkflowService failures, logs them, and does not let the rejection escape the handler', async () => {
@@ -83,7 +132,7 @@ describe('RuleWorkflowSubscriber', () => {
       subscriber.start();
 
       await expect(
-        handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, { request })
+        handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(succeededEvent, { request })
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
@@ -100,7 +149,7 @@ describe('RuleWorkflowSubscriber', () => {
       });
 
       subscriber.start();
-      expect(unsubscribers.length).toBe(RULE_WORKFLOW_TRIGGERS.length);
+      expect(unsubscribers.length).toBe(RULE_EXECUTOR_WORKFLOW_TRIGGERS.length);
 
       subscriber.stop();
 

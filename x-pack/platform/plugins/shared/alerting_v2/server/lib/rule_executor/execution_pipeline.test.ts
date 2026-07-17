@@ -535,7 +535,7 @@ describe('RuleExecutionPipeline', () => {
       expect(eventPublisher.publishExecutionSucceeded).not.toHaveBeenCalled();
       expect(eventPublisher.publishExecutionFailed).toHaveBeenCalledTimes(1);
       expect(eventPublisher.publishExecutionFailed).toHaveBeenCalledWith({
-        ruleId: 'rule-42',
+        rule: { id: 'rule-42' },
         error: 'Step blew up',
       });
     });
