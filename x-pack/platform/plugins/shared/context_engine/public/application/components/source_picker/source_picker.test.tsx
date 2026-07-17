@@ -78,6 +78,27 @@ describe('SourcePicker', () => {
     expect(toggleButton).toHaveAttribute('aria-pressed', 'false');
   });
 
+  it('does not show the source type tag or an "Added" badge in the editable picker list', async () => {
+    renderWithProviders(<Harness />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contextAddEsqlViewButton-BigQuery revenue view')).toBeEnabled();
+    });
+
+    // The type tag only belongs on the read-only detail list, not the picker.
+    expect(
+      screen.queryByTestId('contextEsqlViewTypeBadge-BigQuery revenue view')
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextAddEsqlViewButton-BigQuery revenue view'));
+
+    // Selecting adds a chip, but no "Added" badge is shown on the picker row.
+    expect(screen.getByTestId('contextSelectedSource-BigQuery revenue view')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextEsqlViewAddedBadge-BigQuery revenue view')
+    ).not.toBeInTheDocument();
+  });
+
   it('removes a selected source when its chip is dismissed', async () => {
     renderWithProviders(<Harness />);
 

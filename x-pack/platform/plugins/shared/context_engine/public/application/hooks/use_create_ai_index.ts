@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import { buildPath } from '@kbn/core-http-browser';
+import { useMutation } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { useCallback, useState } from 'react';
-import {
-  AI_INDEX_API_VERSION,
-  DEFAULT_AI_INDEX_DATA_STREAM,
-  DEFAULT_AI_INDEX_NAME,
-  aiIndexByIdPath,
-} from '../../../common/constants';
-import type {
-  AiIndexProperties,
-  AiIndexSource,
-  PutAiIndexResponse,
-} from '../../../common/http_api/ai_indices';
+import { useCallback } from 'react';
+import { DEFAULT_AI_INDEX_DATA_STREAM, DEFAULT_AI_INDEX_NAME } from '../../../common/constants';
+import type { AiIndexProperties, AiIndexSource } from '../../../common/http_api/ai_indices';
+import { putAiIndex } from '../api/ai_indices';
 import type { SelectedSource } from '../components/source_picker';
+import { getErrorMessage } from '../utils/get_error_message';
+import { toAiIndexSources } from '../utils/sources';
 import { useKibana } from './use_kibana';
 
 interface CreatedAiIndex {
@@ -40,66 +34,39 @@ const buildAiIndexProperties = (sources: AiIndexSource[]): { id: string } & AiIn
   sources,
 });
 
-const toAiIndexSources = (selectedSources: SelectedSource[]): AiIndexSource[] =>
-  selectedSources
-    .filter((source) => source.type === 'esql_view')
-    .map((source) => ({ type: 'esql', value: source.value }));
-
-/**
- * Kibana HTTP errors carry the server-provided detail (e.g. why a `dest`
- * failed validation) on `error.body.message`, which is far more useful than the
- * generic `error.message` (`Bad Request`). Falls back to the generic message.
- */
-const getErrorMessage = (error: unknown): string | undefined => {
-  if (typeof error === 'object' && error !== null && 'body' in error) {
-    const { body } = error;
-    if (
-      typeof body === 'object' &&
-      body !== null &&
-      'message' in body &&
-      typeof body.message === 'string'
-    ) {
-      return body.message;
-    }
-  }
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return undefined;
-};
-
 export const useCreateAiIndex = () => {
   const {
     services: { http, notifications },
   } = useKibana();
-  const [isCreating, setIsCreating] = useState(false);
+
+  const { mutateAsync, isLoading } = useMutation<CreatedAiIndex, Error, SelectedSource[]>({
+    mutationFn: async (selectedSources) => {
+      const { id, ...properties } = buildAiIndexProperties(toAiIndexSources(selectedSources));
+      await putAiIndex(http, { aiIndexId: id, properties });
+      return { id };
+    },
+    onError: (error) => {
+      const toastMessage = getErrorMessage(error);
+      notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.contextEngine.createAiIndex.errorTitle', {
+          defaultMessage: 'Unable to create AI index',
+        }),
+        ...(toastMessage ? { toastMessage } : {}),
+      });
+    },
+  });
 
   const createAiIndex = useCallback(
     async (selectedSources: SelectedSource[]): Promise<CreatedAiIndex | undefined> => {
-      setIsCreating(true);
-      const { id, ...properties } = buildAiIndexProperties(toAiIndexSources(selectedSources));
-
       try {
-        await http.put<PutAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId: id }), {
-          version: AI_INDEX_API_VERSION,
-          body: JSON.stringify(properties),
-        });
-        return { id };
-      } catch (error) {
-        const toastMessage = getErrorMessage(error);
-        notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
-          title: i18n.translate('xpack.contextEngine.createAiIndex.errorTitle', {
-            defaultMessage: 'Unable to create AI index',
-          }),
-          ...(toastMessage ? { toastMessage } : {}),
-        });
+        return await mutateAsync(selectedSources);
+      } catch {
+        // The error toast is surfaced by the mutation's onError handler.
         return undefined;
-      } finally {
-        setIsCreating(false);
       }
     },
-    [http, notifications]
+    [mutateAsync]
   );
 
-  return { createAiIndex, isCreating };
+  return { createAiIndex, isCreating: isLoading };
 };
