@@ -41,7 +41,7 @@ const SIGNAL_TITLE = i18n.translate('xpack.alertingV2.ruleForm.modeField.signal.
 
 const ALERT_DESCRIPTION = i18n.translate('xpack.alertingV2.ruleForm.modeField.alert.description', {
   defaultMessage:
-    'Each problem is tracked as an episode from detection to recovery. Notifications and workflows can be triggered based on state changes.',
+    'The rule tracks each problem as an alert episode from first breach to recovery, notifying your team along the way.',
 });
 
 const SIGNAL_DESCRIPTION = i18n.translate(
