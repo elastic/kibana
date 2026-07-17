@@ -8,6 +8,7 @@
  */
 
 import type { Dispatcher } from 'undici';
+import type { Logger } from '@kbn/logging';
 import type {
   AuthHeaders,
   HttpSelfFetchHeaders,
@@ -54,6 +55,7 @@ interface HttpSelfClientParams {
   readonly getServerInfo: () => HttpServerInfo;
   readonly getHttpConfig: () => HttpConfig;
   readonly kibanaVersion: string;
+  readonly log: Logger;
   readonly target: 'auto' | 'local';
 }
 
@@ -97,6 +99,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
 
     const fetchOptions = { ...options, path };
     const request = this.createRequest(path, options);
+    this.logAttempt(request.method);
     const cleanup: Array<() => void> = [];
 
     try {
@@ -131,6 +134,20 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     } finally {
       cleanup.forEach((clean) => clean());
     }
+  }
+
+  private logAttempt(targetMethod: string): void {
+    const targetMode =
+      this.params.target === 'auto' && this.params.basePath.publicBaseUrl ? 'public' : 'local';
+
+    this.params.log.debug('Kibana scoped self HTTP call attempted', {
+      labels: {
+        self_http_source_method: this.request.route.method.toUpperCase(),
+        self_http_source_route_template: this.request.route.path,
+        self_http_target_method: targetMethod,
+        self_http_target_mode: targetMode,
+      },
+    });
   }
 
   private validateRequestContext(): void {

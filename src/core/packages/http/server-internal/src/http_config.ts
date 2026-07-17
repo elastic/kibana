@@ -79,10 +79,7 @@ const configSchema = schema.object(
       target: schema.oneOf([schema.literal('auto'), schema.literal('local')], {
         defaultValue: 'auto' as const,
       }),
-      selfCallableEnforcement: schema.oneOf(
-        [schema.literal('observe'), schema.literal('enforce')],
-        { defaultValue: 'observe' as const }
-      ),
+      selfCallableEnforcement: schema.boolean({ defaultValue: false }),
       ssl: schema.object({
         certificateAuthorities: schema.maybe(
           schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 100 }), schema.string()])
@@ -403,7 +400,7 @@ export class HttpConfig implements IHttpConfig {
   public publicBaseUrl?: string;
   public selfHttp: {
     target: 'auto' | 'local';
-    selfCallableEnforcement: 'observe' | 'enforce';
+    selfCallableEnforcement: boolean;
     ssl: { certificateAuthorities?: string[] };
   };
   public rewriteBasePath: boolean;
@@ -472,7 +469,7 @@ export class HttpConfig implements IHttpConfig {
     this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
     this.selfHttp = {
       target: rawHttpConfig.selfHttp.target,
-      selfCallableEnforcement: rawHttpConfig.selfHttp.selfCallableEnforcement ?? 'observe',
+      selfCallableEnforcement: rawHttpConfig.selfHttp.selfCallableEnforcement ?? false,
       ssl: {
         certificateAuthorities: readCertificateAuthorities(
           rawHttpConfig.selfHttp.ssl?.certificateAuthorities

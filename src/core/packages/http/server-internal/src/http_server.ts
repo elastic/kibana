@@ -66,7 +66,11 @@ import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 import { type InternalStaticAssets, StaticAssets } from './static_assets';
-import { createSelfCallPreAuthHandler, createSelfCallPreHandler } from './self_client_policy';
+import {
+  createSelfCallPreAuthHandler,
+  createSelfCallPreHandler,
+  createSelfCallPreResponseHandler,
+} from './self_client_policy';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -232,6 +236,7 @@ export class HttpServer {
   private readonly authResponseHeaders: AuthHeadersStorage;
   private readonly env: Env;
   private redactedSessionIdGetter?: (request: KibanaRequest) => Promise<string | undefined>;
+  private selfCallableEnforcement = false;
 
   constructor(
     private readonly coreContext: CoreContext,
@@ -249,6 +254,10 @@ export class HttpServer {
 
   public isListening() {
     return this.server !== undefined && this.server.listener.listening;
+  }
+
+  public setSelfCallableEnforcement(enforcement: boolean): void {
+    this.selfCallableEnforcement = enforcement;
   }
 
   /** @internal */
@@ -325,15 +334,11 @@ export class HttpServer {
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
     this.setupRequestStateAssignment(config, basePathService, executionContext, userActivity);
-    const selfCallableEnforcement = config.selfHttp?.selfCallableEnforcement ?? 'observe';
-    this.server.ext(
-      'onPreAuth',
-      createSelfCallPreAuthHandler(selfCallableEnforcement, this.log.get('self-client'))
-    );
-    this.server.ext(
-      'onPreHandler',
-      createSelfCallPreHandler(selfCallableEnforcement, this.log.get('self-client'))
-    );
+    this.selfCallableEnforcement = config.selfHttp?.selfCallableEnforcement ?? false;
+    const getSelfCallableEnforcement = () => this.selfCallableEnforcement;
+    this.server.ext('onPreAuth', createSelfCallPreAuthHandler(getSelfCallableEnforcement));
+    this.server.ext('onPreHandler', createSelfCallPreHandler(getSelfCallableEnforcement));
+    this.server.ext('onPreResponse', createSelfCallPreResponseHandler(this.log.get('self-client')));
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();

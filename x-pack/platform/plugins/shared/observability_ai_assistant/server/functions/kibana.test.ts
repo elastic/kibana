@@ -41,9 +41,13 @@ function registerFunction(
     request: {
       url:
         overrides.requestUrl ??
-        new URL('https://source.example/internal/observability_ai_assistant/chat/complete'),
+        new URL('https://source.example/internal/observability_ai_assistant/chat/private-id'),
       basePath: overrides.basePath ?? '',
       rewrittenUrl: overrides.rewrittenUrl,
+      route: {
+        method: 'post',
+        path: '/internal/observability_ai_assistant/chat/{action}',
+      },
       headers: overrides.headers ?? {
         'content-type': 'application/json',
         host: 'attacker.example',
@@ -69,12 +73,37 @@ function registerFunction(
   };
 }
 
+const createFetchError = ({
+  status,
+  code,
+  message = 'private raw error message',
+  errorCode,
+}: {
+  status: number;
+  code: string;
+  message?: string;
+  errorCode?: string;
+}) => {
+  const error = Object.assign(new Error(message), {
+    name: 'HttpSelfFetchError',
+    ...(errorCode ? { code: errorCode } : {}),
+    request: { url: 'https://target.example/api/private-target/private-id?secret=value' },
+    response: { status },
+    body: {
+      statusCode: status,
+      message: 'private response body',
+      attributes: { code },
+    },
+  });
+  return error;
+};
+
 describe('kibana tool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('calls Kibana through the Core scoped self client', async () => {
+  it('calls Kibana through the Core scoped self client without logging literal URLs', async () => {
     const { handler, coreStart, fetch, resources } = registerFunction();
     const signal = new AbortController().signal;
 
@@ -82,52 +111,33 @@ describe('kibana tool', () => {
       {
         arguments: {
           method: 'POST',
-          pathname: '/api/apm/agent_keys',
-          query: { type: 'dashboard' },
-          body: { foo: 'bar' },
+          pathname: '/api/apm/agent_keys/private-target-id',
+          query: { type: 'private-query-value' },
+          body: { secret: 'private-body-value' },
         },
       },
       signal
     );
 
     expect(coreStart.http.selfClient.asScoped).toHaveBeenCalledWith(resources.request);
-    expect(fetch).toHaveBeenCalledWith('/api/apm/agent_keys', {
+    expect(fetch).toHaveBeenCalledWith('/api/apm/agent_keys/private-target-id', {
       method: 'POST',
-      query: { type: 'dashboard' },
-      body: { foo: 'bar' },
+      query: { type: 'private-query-value' },
+      body: { secret: 'private-body-value' },
       signal,
       forwardRequestHeaders: true,
       asResponse: true,
     });
     expect(result).toEqual({ content: { ok: true } });
+    expect(resources.logger.info).not.toHaveBeenCalled();
+    expect(resources.logger.error).not.toHaveBeenCalled();
   });
 
-  it('logs the source request and resolved target url', async () => {
-    const { handler, fetch, resources } = registerFunction({ basePath: '/s/my-space' });
-
-    await handler({
-      arguments: {
-        method: 'GET',
-        pathname: '/api/saved_objects/_find',
-        query: { type: 'dashboard' },
-      },
-    });
-
-    expect(resources.logger.info).toHaveBeenCalledWith(
-      expect.stringContaining('GET https://target.example/base/api/saved_objects/_find')
-    );
-    expect(fetch).toHaveBeenCalledWith(
-      '/api/saved_objects/_find',
-      expect.objectContaining({
-        method: 'GET',
-        query: { type: 'dashboard' },
-      })
-    );
-  });
-
-  it('logs the resolved target URL when the self call fails', async () => {
-    const error = Object.assign(new Error('Not found'), {
-      request: { url: 'https://target.example/base/api/missing' },
+  it('logs only stable redacted diagnostics when a self call fails', async () => {
+    const error = createFetchError({
+      status: 500,
+      code: 'PRIVATE_RESPONSE_CODE',
+      errorCode: 'UND_ERR_SOCKET',
     });
     const { handler, resources } = registerFunction({ fetchError: error });
 
@@ -135,30 +145,62 @@ describe('kibana tool', () => {
       handler({
         arguments: {
           method: 'GET',
-          pathname: '/api/missing',
+          pathname: '/api/private-target/private-id',
+          query: { secret: 'private-query-value' },
         },
       })
-    ).rejects.toThrow('Not found');
+    ).rejects.toBe(error);
 
-    expect(resources.logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('GET https://target.example/base/api/missing')
-    );
+    expect(resources.logger.error).toHaveBeenCalledWith('Kibana self HTTP API call failed', {
+      labels: {
+        self_http_source_route_template: '/internal/observability_ai_assistant/chat/{action}',
+        self_http_target_method: 'GET',
+        self_http_error_type: 'HttpSelfFetchError',
+        self_http_error_code: 'UND_ERR_SOCKET',
+      },
+      http: { response: { status_code: 500 } },
+    });
+    const serializedLog = JSON.stringify((resources.logger.error as jest.Mock).mock.calls);
+    expect(serializedLog).not.toContain('private-id');
+    expect(serializedLog).not.toContain('private-target');
+    expect(serializedLog).not.toContain('private-query-value');
+    expect(serializedLog).not.toContain('private raw error message');
+    expect(serializedLog).not.toContain('private response body');
+    expect(serializedLog).not.toContain('PRIVATE_RESPONSE_CODE');
+    expect(serializedLog).not.toContain('target.example');
+    expect(serializedLog).not.toContain('source.example');
   });
 
-  it('uses the rewritten url in logs when present', async () => {
-    const rewrittenUrl = new URL('https://source.example/s/space/original');
-    const { handler, resources } = registerFunction({ rewrittenUrl });
+  it('maps SELF_CALL_NOT_ALLOWED to a safe response without retrying', async () => {
+    const error = createFetchError({ status: 403, code: 'SELF_CALL_NOT_ALLOWED' });
+    const { handler, fetch } = registerFunction({ fetchError: error });
 
-    await handler({
-      arguments: {
-        method: 'GET',
-        pathname: '/api/status',
-      },
+    await expect(
+      handler({
+        arguments: {
+          method: 'GET',
+          pathname: '/api/private-target/private-id',
+        },
+      })
+    ).resolves.toEqual({
+      content: 'The requested Kibana API is not available to the AI Assistant.',
     });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
 
-    expect(resources.logger.info).toHaveBeenCalledWith(
-      expect.stringContaining(String(rewrittenUrl))
-    );
+  it('keeps ordinary 403 authorization handling distinct', async () => {
+    const error = createFetchError({ status: 403, code: 'FORBIDDEN' });
+    const { handler, fetch } = registerFunction({ fetchError: error });
+
+    await expect(
+      handler({
+        arguments: {
+          method: 'GET',
+          pathname: '/api/private-target/private-id',
+        },
+      })
+    ).rejects.toBe(error);
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
   it('opts into Core safe request header forwarding for self calls', async () => {

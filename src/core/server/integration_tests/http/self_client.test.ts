@@ -16,6 +16,7 @@ import { readFileSync } from 'node:fs';
 import http from 'node:http';
 import https from 'node:https';
 import Supertest from 'supertest';
+import { BehaviorSubject } from 'rxjs';
 import {
   fetch as undiciFetch,
   Headers as UndiciHeaders,
@@ -30,6 +31,7 @@ import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { createConfigService } from '@kbn/core-http-server-mocks';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import {
   config as httpConfigDescriptor,
   type HttpConfigType,
@@ -67,7 +69,10 @@ type TestHttpConfig = Omit<Partial<HttpConfigType>, 'selfHttp' | 'ssl' | 'versio
   versioned?: Partial<HttpConfigType['versioned']>;
 };
 
-const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) => {
+const startServer = async (
+  serverConfig: TestHttpConfig = { port: TEST_PORT },
+  featureFlags = coreFeatureFlagsMock.createStart()
+) => {
   const logger = loggingSystemMock.create();
   const server = createInternalHttpService({
     logger,
@@ -359,9 +364,9 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
     }
   );
 
-  started.httpStart = await server.start();
+  started.httpStart = await server.start({ featureFlags });
 
-  return { server, httpStart: started.httpStart, lifecycleCalls, logger, supertest };
+  return { server, httpStart: started.httpStart, featureFlags, lifecycleCalls, logger, supertest };
 };
 
 describe('Http self client', () => {
@@ -440,9 +445,10 @@ describe('Http self client', () => {
     it('allows and safely logs non-opted routes in observe mode after authorization', async () => {
       const started = await startServer({
         port: TEST_PORT,
-        selfHttp: { target: 'auto', selfCallableEnforcement: 'observe', ssl: {} },
+        selfHttp: { target: 'auto', selfCallableEnforcement: false, ssl: {} },
       });
       server = started.server;
+      (started.logger.get().info as jest.Mock).mockClear();
 
       await started.supertest
         .get('/self/not_opted?filter=raw-value')
@@ -453,13 +459,18 @@ describe('Http self client', () => {
         'Kibana self HTTP call targeted a route that has not opted in',
         expect.objectContaining({
           event: { action: 'kibana_self_http_route_not_allowed' },
-          http: { request: { method: 'GET' } },
+          http: {
+            request: { method: 'GET' },
+            response: { status_code: 200 },
+          },
           labels: expect.objectContaining({
             self_http_route_template: '/self/not_opted',
             self_http_enforcement_mode: 'observe',
+            self_http_status_class: '2xx',
           }),
         })
       );
+      expect(started.logger.get().info).toHaveBeenCalledTimes(1);
       expect(JSON.stringify((started.logger.get().info as jest.Mock).mock.calls)).not.toContain(
         'filter=raw-value'
       );
@@ -469,10 +480,10 @@ describe('Http self client', () => {
       expect(started.logger.get().info).not.toHaveBeenCalled();
     });
 
-    it('denies non-opted routes before other pre-auth work in enforce mode', async () => {
+    it('uses the true config fallback to deny non-opted routes', async () => {
       const started = await startServer({
         port: TEST_PORT,
-        selfHttp: { target: 'auto', selfCallableEnforcement: 'enforce', ssl: {} },
+        selfHttp: { target: 'auto', selfCallableEnforcement: true, ssl: {} },
       });
       server = started.server;
 
@@ -488,12 +499,53 @@ describe('Http self client', () => {
         })
       );
       expect(started.lifecycleCalls).toEqual({ preAuthForNonOpted: 0, nonOptedHandler: 0 });
+      expect(started.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
+        'core.http.selfCallableEnforcement',
+        true
+      );
+      expect(started.logger.get().info).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          http: {
+            request: { method: 'GET' },
+            response: { status_code: 403 },
+          },
+          labels: expect.objectContaining({
+            self_http_enforcement_mode: 'enforce',
+            self_http_status_class: '4xx',
+          }),
+        })
+      );
+    });
+
+    it('updates cached enforcement when the feature flag changes without per-request evaluation', async () => {
+      const enforcement$ = new BehaviorSubject(false);
+      const featureFlags = coreFeatureFlagsMock.createStart();
+      featureFlags.getBooleanValue$.mockReturnValue(enforcement$);
+      const started = await startServer(
+        {
+          port: TEST_PORT,
+          selfHttp: { target: 'auto', selfCallableEnforcement: false, ssl: {} },
+        },
+        featureFlags
+      );
+      server = started.server;
+
+      await started.supertest.get('/self/not_opted').set('x-kbn-self-call', 'true').expect(200);
+      enforcement$.next(true);
+      await started.supertest.get('/self/not_opted').set('x-kbn-self-call', 'true').expect(403);
+
+      expect(featureFlags.getBooleanValue$).toHaveBeenCalledTimes(1);
+      expect(featureFlags.getBooleanValue$).toHaveBeenCalledWith(
+        'core.http.selfCallableEnforcement',
+        false
+      );
     });
 
     it('allows opted public, internal, and versioned routes in enforce mode', async () => {
       const started = await startServer({
         port: TEST_PORT,
-        selfHttp: { target: 'auto', selfCallableEnforcement: 'enforce', ssl: {} },
+        selfHttp: { target: 'auto', selfCallableEnforcement: true, ssl: {} },
       });
       server = started.server;
 

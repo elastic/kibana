@@ -10,6 +10,7 @@
 import { NEVER } from 'rxjs';
 import type { IAuthHeadersStorage, KibanaRequest } from '@kbn/core-http-server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { HttpConfig } from './http_config';
 import {
   createInternalHttpSelfClient,
@@ -27,7 +28,12 @@ const createRequest = (overrides: Partial<KibanaRequest> = {}): KibanaRequest =>
       completed$: NEVER,
     },
     headers: {},
-    url: new URL('https://source.example/base/s/my-space/app/home'),
+    route: {
+      method: 'post',
+      path: '/internal/source/{sourceId}',
+      options: {},
+    },
+    url: new URL('https://source.example/base/s/my-space/internal/source/private-source-id'),
     ...overrides,
   } as KibanaRequest);
 
@@ -51,6 +57,7 @@ const createClient = ({
     get: jest.fn().mockReturnValue(authHeaders),
     set: jest.fn(),
   } as jest.Mocked<IAuthHeadersStorage>;
+  const log = loggingSystemMock.createLogger();
 
   const self = createInternalHttpSelfClient({
     authRequestHeaders,
@@ -69,10 +76,11 @@ const createClient = ({
     }),
     getHttpConfig,
     kibanaVersion: '9.9.9',
+    log,
     target,
   });
 
-  return { authRequestHeaders, getHttpConfig, self };
+  return { authRequestHeaders, getHttpConfig, log, self };
 };
 
 describe('InternalHttpSelfScopedClient', () => {
@@ -113,6 +121,32 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(request.headers.get('user-agent')).toBe('KibanaSelfHttpClient/9.9.9');
     expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 60_000);
     setTimeoutSpy.mockRestore();
+  });
+
+  it('logs only the source route template and methods plus the target mode', async () => {
+    const { log, self } = createClient();
+
+    await self.asScoped(createRequest()).fetch('/api/private-target/private-target-id', {
+      method: 'PATCH',
+      query: { secret: 'private-query-value' },
+      body: { secret: 'private-body-value' },
+      headers: { 'x-private-header': 'private-header-value' },
+    });
+
+    expect(log.debug).toHaveBeenCalledWith('Kibana scoped self HTTP call attempted', {
+      labels: {
+        self_http_source_method: 'POST',
+        self_http_source_route_template: '/internal/source/{sourceId}',
+        self_http_target_method: 'PATCH',
+        self_http_target_mode: 'public',
+      },
+    });
+    const serializedLog = JSON.stringify((log.debug as jest.Mock).mock.calls);
+    expect(serializedLog).not.toContain('private-source-id');
+    expect(serializedLog).not.toContain('private-target');
+    expect(serializedLog).not.toContain('private-query-value');
+    expect(serializedLog).not.toContain('private-body-value');
+    expect(serializedLog).not.toContain('private-header-value');
   });
 
   it('builds a local URL from server info when publicBaseUrl is absent', async () => {

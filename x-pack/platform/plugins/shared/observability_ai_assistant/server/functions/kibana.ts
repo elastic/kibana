@@ -9,10 +9,45 @@ import type { HttpSelfFetchQuery, KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
 
-const getErrorTargetUrl = (error: unknown): string | undefined => {
-  if (error instanceof Error && 'request' in error) {
-    return (error as Error & { request?: Request }).request?.url;
+const SELF_CALL_NOT_ALLOWED_CODE = 'SELF_CALL_NOT_ALLOWED';
+const SELF_CALL_NOT_ALLOWED_TOOL_RESPONSE =
+  'The requested Kibana API is not available to the AI Assistant.';
+const SAFE_ERROR_CODE = /^(?:UND_ERR_[A-Z0-9_]+|E[A-Z0-9_]+|ABORT_ERR)$/;
+const SAFE_ERROR_TYPES = new Set(['AbortError', 'Error', 'HttpSelfFetchError', 'TypeError']);
+
+interface ErrorDiagnostics {
+  readonly type: string;
+  readonly code?: string;
+  readonly statusCode?: number;
+}
+
+const getErrorDiagnostics = (error: unknown): ErrorDiagnostics => {
+  if (!(error instanceof Error)) {
+    return { type: 'UnknownError' };
   }
+
+  const errorWithDetails = error as Error & {
+    code?: unknown;
+    response?: { status?: unknown };
+    body?: { attributes?: { code?: unknown }; statusCode?: unknown };
+  };
+  const bodyCode = errorWithDetails.body?.attributes?.code;
+  const rawCode =
+    bodyCode === SELF_CALL_NOT_ALLOWED_CODE ? SELF_CALL_NOT_ALLOWED_CODE : errorWithDetails.code;
+  let code: string | undefined;
+  if (rawCode === SELF_CALL_NOT_ALLOWED_CODE) {
+    code = SELF_CALL_NOT_ALLOWED_CODE;
+  } else if (typeof rawCode === 'string' && SAFE_ERROR_CODE.test(rawCode)) {
+    code = rawCode;
+  }
+  const rawStatusCode = errorWithDetails.response?.status ?? errorWithDetails.body?.statusCode;
+  const statusCode =
+    typeof rawStatusCode === 'number' && rawStatusCode >= 100 && rawStatusCode <= 599
+      ? rawStatusCode
+      : undefined;
+  const type = SAFE_ERROR_TYPES.has(error.name) ? error.name : 'UnknownError';
+
+  return { type, code, statusCode };
 };
 
 export function registerKibanaFunction({
@@ -65,21 +100,25 @@ export function registerKibanaFunction({
 
       try {
         const response = await core.http.selfClient.asScoped(request).fetch(pathname, fetchOptions);
-
-        logger.info(
-          `Called Kibana API by forwarding request from "${
-            request.rewrittenUrl ?? request.url
-          }" to: "${method} ${response.request.url}"`
-        );
-
         return { content: response.body };
       } catch (error) {
-        const targetUrl = getErrorTargetUrl(error) ?? pathname;
-        logger.error(
-          `Error calling Kibana API by forwarding request from "${
-            request.rewrittenUrl ?? request.url
-          }" to: "${method} ${targetUrl}". Failed with ${error}`
-        );
+        const diagnostics = getErrorDiagnostics(error);
+        logger.error('Kibana self HTTP API call failed', {
+          labels: {
+            self_http_source_route_template: request.route.path,
+            self_http_target_method: method,
+            self_http_error_type: diagnostics.type,
+            ...(diagnostics.code ? { self_http_error_code: diagnostics.code } : {}),
+          },
+          ...(diagnostics.statusCode
+            ? { http: { response: { status_code: diagnostics.statusCode } } }
+            : {}),
+        });
+
+        if (diagnostics.code === SELF_CALL_NOT_ALLOWED_CODE) {
+          return { content: SELF_CALL_NOT_ALLOWED_TOOL_RESPONSE };
+        }
+
         throw error;
       }
     }

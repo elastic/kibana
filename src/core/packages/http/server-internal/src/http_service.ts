@@ -24,6 +24,7 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type {
   RequestHandlerContextBase,
   IContextContainer,
@@ -56,6 +57,7 @@ import { registerCoreHandlers } from './register_lifecycle_handlers';
 import type { ExternalUrlConfigType } from './external_url';
 import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 import { createInternalHttpSelfClient, type InternalHttpSelfService } from './self_client';
+import { SELF_CALLABLE_ENFORCEMENT_FEATURE_FLAG } from './feature_flags';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
@@ -66,6 +68,10 @@ export interface SetupDeps {
   context: InternalContextSetup;
   executionContext: InternalExecutionContextSetup;
   userActivity: InternalUserActivityServiceSetup;
+}
+
+export interface StartDeps {
+  featureFlags?: FeatureFlagsStart;
 }
 
 /** @internal */
@@ -79,6 +85,7 @@ export class HttpService
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
   private configSubscription?: Subscription;
+  private selfCallableEnforcementSubscription?: Subscription;
   private currentConfig?: HttpConfig;
   private selfClient?: InternalHttpSelfService;
 
@@ -255,6 +262,7 @@ export class HttpService
         getServerInfo: internalSetup.getServerInfo,
         getHttpConfig: () => this.currentConfig!,
         kibanaVersion: this.env.packageInfo.version,
+        log: this.log.get('self-client'),
         target: internalSetup.config.selfHttp.target,
       })),
       setRedactedSessionIdGetter: (getter) => {
@@ -263,8 +271,34 @@ export class HttpService
     };
   }
 
-  public async start() {
+  public async start({ featureFlags }: StartDeps = {}) {
     const config = await firstValueFrom(this.config$);
+    if (featureFlags) {
+      await new Promise<void>((resolve, reject) => {
+        let initialized = false;
+        this.selfCallableEnforcementSubscription = featureFlags
+          .getBooleanValue$(
+            SELF_CALLABLE_ENFORCEMENT_FEATURE_FLAG,
+            config.selfHttp.selfCallableEnforcement
+          )
+          .subscribe({
+            next: (enforcement) => {
+              this.httpServer.setSelfCallableEnforcement(enforcement);
+              if (!initialized) {
+                initialized = true;
+                resolve();
+              }
+            },
+            error: reject,
+            complete: () => {
+              if (!initialized) {
+                reject(new Error('Self-callable enforcement feature flag produced no value.'));
+              }
+            },
+          });
+      });
+    }
+
     if (this.shouldListen(config)) {
       this.log.debug('stopping preboot server');
       await this.prebootServer.stop();
@@ -394,6 +428,8 @@ export class HttpService
   public async stop() {
     this.configSubscription?.unsubscribe();
     this.configSubscription = undefined;
+    this.selfCallableEnforcementSubscription?.unsubscribe();
+    this.selfCallableEnforcementSubscription = undefined;
 
     if (!this.isPrebootServerStopped) {
       this.isPrebootServerStopped = false;

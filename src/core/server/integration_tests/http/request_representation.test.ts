@@ -142,6 +142,7 @@ describe('request logging', () => {
               xsrfRequired: false,
               deprecated: undefined,
               access: 'internal',
+              selfCallable: false,
               tags: [],
               security: [Object],
               timeout: [Object],
