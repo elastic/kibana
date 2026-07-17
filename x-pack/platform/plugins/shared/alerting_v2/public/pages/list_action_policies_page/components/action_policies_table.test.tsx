@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ListPageTestProviders } from '../../../test_utils/test_providers';
@@ -248,7 +248,7 @@ describe('ActionPoliciesTable', () => {
           'Tags',
           'Destinations',
           'Last updated',
-          'State',
+          'Enabled',
           'Notify',
           'Actions',
         ])
@@ -300,11 +300,16 @@ describe('ActionPoliciesTable', () => {
       );
     });
 
+    const clickFilterOption = async (label: string) => {
+      const list = await screen.findByTestId('actionPoliciesEnabledFilter-list');
+      fireEvent.click(within(list).getByText(label));
+    };
+
     it('calls findItems with enabled:true when Enabled is selected', async () => {
       renderTable();
 
       await openStateFilter();
-      fireEvent.click(await screen.findByText('Enabled'));
+      await clickFilterOption('Enabled');
 
       await waitFor(() => {
         expect(lastFindItemsFilters().enabled).toMatchObject({ include: ['enabled'] });
@@ -315,7 +320,7 @@ describe('ActionPoliciesTable', () => {
       renderTable();
 
       await openStateFilter();
-      fireEvent.click(await screen.findByText('Disabled'));
+      await clickFilterOption('Disabled');
 
       await waitFor(() => {
         expect(lastFindItemsFilters().enabled).toMatchObject({ include: ['disabled'] });
@@ -326,13 +331,13 @@ describe('ActionPoliciesTable', () => {
       renderTable();
 
       await openStateFilter();
-      fireEvent.click(await screen.findByText('Enabled'));
+      await clickFilterOption('Enabled');
       await waitFor(() =>
         expect(lastFindItemsFilters().enabled).toMatchObject({ include: ['enabled'] })
       );
 
       await openStateFilter();
-      fireEvent.click(await screen.findByText('Enabled'));
+      await clickFilterOption('Enabled');
 
       await waitFor(() => {
         expect(lastFindItemsFilters().enabled).toBeUndefined();

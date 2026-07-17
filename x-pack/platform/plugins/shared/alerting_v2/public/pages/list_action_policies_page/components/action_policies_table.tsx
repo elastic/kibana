@@ -12,7 +12,7 @@ import type {
   CreateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import type { Query } from '@elastic/eui';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import {
@@ -34,7 +34,6 @@ import { filter } from '@kbn/content-list-toolbar';
 import { useFetchTags } from '../../../hooks/use_fetch_tags';
 import { ActionPolicyDestinationsSummary } from '../../../components/action_policy/action_policy_destinations_summary';
 import { ActionPolicySnoozePopover } from '../../../components/action_policy/action_policy_snooze_popover';
-import { ActionPolicyStateBadge } from '../../../components/action_policy/action_policy_state_badge';
 import { DeleteActionPolicyConfirmModal } from '../../../components/action_policy/delete_confirmation_modal';
 import { ActionPolicyDetailsFlyout } from '../../../components/action_policy/details_flyout/action_policy_details_flyout';
 import { paths } from '../../../constants';
@@ -373,21 +372,38 @@ export const ActionPoliciesTable = () => {
             <DestinationsColumn />
             <Column.UpdatedAt />
             <Column.CreatedBy />
-            {/* State badge — needs enable/disable loading state */}
             <Column
-              id="state"
-              name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.state', {
-                defaultMessage: 'State',
+              id="enabled"
+              name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.enabled', {
+                defaultMessage: 'Enabled',
               })}
+              width="80px"
               render={(item) => {
                 const policy = toPolicy(item);
+                if (!canWrite) return null;
+                const isLoading =
+                  (isEnabling && enableVariables === policy.id) ||
+                  (isDisabling && disableVariables === policy.id);
                 return (
-                  <ActionPolicyStateBadge
-                    policy={policy}
-                    isLoading={
-                      (isEnabling && enableVariables === policy.id) ||
-                      (isDisabling && disableVariables === policy.id)
-                    }
+                  <EuiSwitch
+                    compressed
+                    checked={policy.enabled}
+                    disabled={isLoading || isBulkActionInProgress}
+                    onChange={() => {
+                      if (policy.enabled) {
+                        disablePolicy(policy.id);
+                      } else {
+                        enablePolicy(policy.id);
+                      }
+                    }}
+                    label=""
+                    aria-label={i18n.translate(
+                      'xpack.alertingV2.actionPoliciesList.column.enabled.ariaLabel',
+                      {
+                        defaultMessage: '{name} enabled',
+                        values: { name: policy.name },
+                      }
+                    )}
                   />
                 );
               }}
@@ -431,15 +447,9 @@ export const ActionPoliciesTable = () => {
                     onEdit={(id) => navigateToEdit(id)}
                     onClone={clonePolicy}
                     onDelete={setPolicyToDelete}
-                    onEnable={(id) => enablePolicy(id)}
-                    onDisable={(id) => disablePolicy(id)}
                     onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
                     onCancelSnooze={(id) => unsnoozePolicy(id)}
                     onUpdateApiKey={(id) => setPolicyToUpdateApiKey(id)}
-                    isStateLoading={
-                      (isEnabling && enableVariables === policy.id) ||
-                      (isDisabling && disableVariables === policy.id)
-                    }
                     isDisabled={isBulkActionInProgress}
                   />
                 );
