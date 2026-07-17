@@ -7,20 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
+import type { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
+import { PAGINATION_DEFAULT_PER_PAGE } from '@kbn/as-code-shared-schemas';
+import type { TypeOf } from '@kbn/config-schema';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
+
+type TagSearchParams = Pick<
+  TypeOf<typeof asCodeSearchRequestSchema>,
+  'tags' | 'excluded_tags' | 'tag_names' | 'excluded_tag_names'
+>;
 
 const normalize = (value?: string | string[]): string[] => {
   if (!value) return [];
   return Array.isArray(value) ? value : [value];
 };
 
-/**
- * Resolves tag names to saved-object IDs in the current space.
- * When multiple tags share a name, all matching IDs are returned (union).
- * Uses `search`/`searchFields` to pre-filter server-side, then filters to exact-name matches;
- * perPage:1000 covers all practical spaces; add pagination if telemetry shows > 1000 tags/space.
- */
 const resolveTagNamesToIds = async (
   names: string[],
   soClient: SavedObjectsClientContract
@@ -42,16 +48,11 @@ const resolveTagNamesToIds = async (
 /**
  * Resolves raw tag search params into SO find options (`hasReference` / `hasNoReference`).
  * Accepts both ID-based (`tags`, `excluded_tags`) and name-based (`tag_names`, `excluded_tag_names`) params.
- * Returns `null` when an include filter was requested but no matching tags exist — callers should
- * short-circuit and return an empty result set rather than issuing an unfiltered SO query.
+ * Returns `null` when an include filter was requested but no matching tags exist — signalling that no
+ * object can match. Internal to `findWithTagFilter`, which handles the `null` case.
  */
-export const resolveTagsToFindOptions = async (
-  params: {
-    tags?: string | string[];
-    excluded_tags?: string | string[];
-    tag_names?: string | string[];
-    excluded_tag_names?: string | string[];
-  },
+const resolveTagsToFindOptions = async (
+  params: TagSearchParams,
   soClient: SavedObjectsClientContract
 ): Promise<ReturnType<typeof tagsToFindOptions> | null> => {
   const included = normalize(params.tags);
@@ -68,4 +69,26 @@ export const resolveTagsToFindOptions = async (
     included: allIncluded.length > 0 ? allIncluded : undefined,
     excluded: allExcluded.length > 0 ? allExcluded : undefined,
   });
+};
+
+/**
+ * Runs a SO `find` with tag filtering resolved from search params. When `tag_names` were requested
+ * but matched no tags, returns an empty response instead of querying — so callers never special-case
+ * that: the empty result flows through their normal response mapping.
+ */
+export const findWithTagFilter = async <T>(
+  soClient: SavedObjectsClientContract,
+  findOptions: SavedObjectsFindOptions,
+  tagParams: TagSearchParams
+): Promise<SavedObjectsFindResponse<T>> => {
+  const tagsFindOptions = await resolveTagsToFindOptions(tagParams, soClient);
+  if (tagsFindOptions === null) {
+    return {
+      saved_objects: [],
+      total: 0,
+      page: findOptions.page ?? 1,
+      per_page: findOptions.perPage ?? PAGINATION_DEFAULT_PER_PAGE,
+    };
+  }
+  return soClient.find<T>({ ...findOptions, ...tagsFindOptions });
 };

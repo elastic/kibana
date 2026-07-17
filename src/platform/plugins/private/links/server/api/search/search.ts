@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMeta, PAGINATION_DEFAULT_PER_PAGE } from '@kbn/as-code-shared-schemas';
-import { resolveTagsToFindOptions } from '@kbn/as-code-utils';
+import { getMeta } from '@kbn/as-code-shared-schemas';
+import { findWithTagFilter } from '@kbn/as-code-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { LINKS_LIBRARY_TYPE } from '../../../common/constants';
 import type { StoredLinksState } from '../../links_saved_object';
@@ -20,29 +20,19 @@ export async function search(
 ): Promise<LinksSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
-  const tagsFindOptions = await resolveTagsToFindOptions(searchParams, core.savedObjects.client);
-  // short-circuit when a tags filter was requested but no matching tags exist
-  if (tagsFindOptions === null) {
-    return {
-      data: [],
-      meta: {
-        page: searchParams.page ?? 1,
-        per_page: searchParams.per_page ?? PAGINATION_DEFAULT_PER_PAGE,
-        total: 0,
-      },
-    };
-  }
-
-  const soResponse = await core.savedObjects.client.find<StoredLinksState>({
-    type: LINKS_LIBRARY_TYPE,
-    searchFields: ['title^3', 'description'],
-    fields: ['description', 'title'],
-    search: searchParams.query,
-    perPage: searchParams.per_page,
-    page: searchParams.page ? +searchParams.page : undefined,
-    defaultSearchOperator: 'AND',
-    ...tagsFindOptions,
-  });
+  const soResponse = await findWithTagFilter<StoredLinksState>(
+    core.savedObjects.client,
+    {
+      type: LINKS_LIBRARY_TYPE,
+      searchFields: ['title^3', 'description'],
+      fields: ['description', 'title'],
+      search: searchParams.query,
+      perPage: searchParams.per_page,
+      page: searchParams.page ? +searchParams.page : undefined,
+      defaultSearchOperator: 'AND',
+    },
+    searchParams
+  );
 
   return {
     data: soResponse.saved_objects.map((so) => {

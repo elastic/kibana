@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMeta, PAGINATION_DEFAULT_PER_PAGE } from '@kbn/as-code-shared-schemas';
-import { resolveTagsToFindOptions } from '@kbn/as-code-utils';
+import { getMeta } from '@kbn/as-code-shared-schemas';
+import { findWithTagFilter } from '@kbn/as-code-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
@@ -31,33 +31,26 @@ export async function search(
 ): Promise<DashboardSearchResponseBody | LegacyDashboardSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
-  const tagsFindOptions = await resolveTagsToFindOptions(searchParams, core.savedObjects.client);
-  // short-circuit when a tags filter was requested but no matching tags exist
-  if (tagsFindOptions === null) {
-    const page = searchParams.page ?? 1;
-    const perPage = searchParams.per_page ?? PAGINATION_DEFAULT_PER_PAGE;
-    return useAsCodeSearchSchemas
-      ? ({ data: [], meta: { total: 0, page, per_page: perPage } } as DashboardSearchResponseBody)
-      : ({ dashboards: [], page, total: 0 } as LegacyDashboardSearchResponseBody);
-  }
-
-  const soResponse = await core.savedObjects.client.find<DashboardSavedObjectAttributes>({
-    type: DASHBOARD_SAVED_OBJECT_TYPE,
-    searchFields: ['title^3', 'description'],
-    fields: [
-      'description',
-      'title',
-      // required fields to load timeRange
-      'timeFrom',
-      'timeTo',
-      'timeRestore',
-    ],
-    search: searchParams.query,
-    perPage: searchParams.per_page,
-    page: searchParams.page,
-    defaultSearchOperator: 'AND',
-    ...tagsFindOptions,
-  });
+  const soResponse = await findWithTagFilter<DashboardSavedObjectAttributes>(
+    core.savedObjects.client,
+    {
+      type: DASHBOARD_SAVED_OBJECT_TYPE,
+      searchFields: ['title^3', 'description'],
+      fields: [
+        'description',
+        'title',
+        // required fields to load timeRange
+        'timeFrom',
+        'timeTo',
+        'timeRestore',
+      ],
+      search: searchParams.query,
+      perPage: searchParams.per_page,
+      page: searchParams.page,
+      defaultSearchOperator: 'AND',
+    },
+    searchParams
+  );
 
   const useGASchemas = await getUseGASchemas(core);
 

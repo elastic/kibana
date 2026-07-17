@@ -8,7 +8,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { resolveTagsToFindOptions } from './resolve_tags';
+import { findWithTagFilter } from './resolve_tags';
 
 const makeSoClient = (tags: Array<{ id: string; name: string }>) => {
   const soClient = savedObjectsClientMock.create();
@@ -27,88 +27,111 @@ const makeSoClient = (tags: Array<{ id: string; name: string }>) => {
   return soClient;
 };
 
-describe('resolveTagsToFindOptions', () => {
-  it('returns null when tag_names is provided but matches no tags', async () => {
+// The entity `find` (the one for the searched type) vs the internal `tag` resolution finds.
+const entityFindArgs = (soClient: ReturnType<typeof makeSoClient>) =>
+  soClient.find.mock.calls.map(([args]) => args).find((args) => args.type === 'dashboard');
+
+describe('findWithTagFilter', () => {
+  it('returns an empty response and skips the entity query when tag_names match no tags', async () => {
     const soClient = makeSoClient([{ id: 'id1', name: 'Security' }]);
-    const result = await resolveTagsToFindOptions({ tag_names: 'does-not-exist' }, soClient);
-    expect(result).toBeNull();
+    const response = await findWithTagFilter(
+      soClient,
+      { type: 'dashboard', page: 2, perPage: 10 },
+      { tag_names: 'does-not-exist' }
+    );
+    expect(response).toEqual({ saved_objects: [], total: 0, page: 2, per_page: 10 });
+    expect(entityFindArgs(soClient)).toBeUndefined();
   });
 
-  it('does not return null when tags ID is provided even if tag_names resolves to nothing', async () => {
+  it('defaults page/per_page in the empty response', async () => {
     const soClient = makeSoClient([]);
-    const result = await resolveTagsToFindOptions({ tags: 'id1' }, soClient);
-    expect(result).not.toBeNull();
-    expect(result?.hasReference).toEqual([{ id: 'id1', type: 'tag' }]);
+    const response = await findWithTagFilter(soClient, { type: 'dashboard' }, { tag_names: 'x' });
+    expect(response).toEqual({ saved_objects: [], total: 0, page: 1, per_page: 20 });
   });
 
-  it('returns null when tag_names is a comma-separated string (treated as one literal name)', async () => {
+  it('skips the entity query when tag_names is a comma-separated string (one literal name)', async () => {
     const soClient = makeSoClient([
       { id: 'id1', name: 'foo' },
       { id: 'id2', name: 'bar' },
     ]);
-    // "foo,bar" is one literal name, not two — no tag has that name → null
-    const result = await resolveTagsToFindOptions({ tag_names: 'foo,bar' }, soClient);
-    expect(result).toBeNull();
+    // "foo,bar" is one literal name, not two — no tag has that name → empty result
+    const response = await findWithTagFilter(
+      soClient,
+      { type: 'dashboard' },
+      { tag_names: 'foo,bar' }
+    );
+    expect(response.saved_objects).toEqual([]);
+    expect(entityFindArgs(soClient)).toBeUndefined();
   });
 
-  it('resolves tag_names to hasReference', async () => {
+  it('uses tags ID even if tag_names resolves to nothing', async () => {
+    const soClient = makeSoClient([]);
+    await findWithTagFilter(soClient, { type: 'dashboard' }, { tags: 'id1' });
+    expect(entityFindArgs(soClient)?.hasReference).toEqual([{ id: 'id1', type: 'tag' }]);
+  });
+
+  it('filters by tag_names as hasReference', async () => {
     const soClient = makeSoClient([
       { id: 'id1', name: 'Security' },
       { id: 'id2', name: 'Observability' },
     ]);
-    const result = await resolveTagsToFindOptions(
-      { tag_names: ['Security', 'Observability'] },
-      soClient
+    await findWithTagFilter(
+      soClient,
+      { type: 'dashboard' },
+      { tag_names: ['Security', 'Observability'] }
     );
-    if (!result) throw new Error('Expected non-null result');
-    expect(result.hasReference).toEqual([
+    expect(entityFindArgs(soClient)?.hasReference).toEqual([
       { id: 'id1', type: 'tag' },
       { id: 'id2', type: 'tag' },
     ]);
   });
 
-  it('resolves excluded_tag_names into hasNoReference', async () => {
+  it('filters by excluded_tag_names as hasNoReference', async () => {
     const soClient = makeSoClient([
       { id: 'id1', name: 'Security' },
       { id: 'id2', name: 'Observability' },
     ]);
-    const result = await resolveTagsToFindOptions({ excluded_tag_names: 'Security' }, soClient);
-    if (!result) throw new Error('Expected non-null result');
-    expect(result.hasNoReference).toEqual([{ id: 'id1', type: 'tag' }]);
-    expect(result.hasReference).toBeUndefined();
+    await findWithTagFilter(soClient, { type: 'dashboard' }, { excluded_tag_names: 'Security' });
+    const args = entityFindArgs(soClient);
+    expect(args?.hasNoReference).toEqual([{ id: 'id1', type: 'tag' }]);
+    expect(args?.hasReference).toBeUndefined();
   });
 
   it('merges excluded_tags IDs and excluded_tag_names', async () => {
     const soClient = makeSoClient([{ id: 'id2', name: 'Observability' }]);
-    const result = await resolveTagsToFindOptions(
-      { excluded_tags: 'id1', excluded_tag_names: 'Observability' },
-      soClient
+    await findWithTagFilter(
+      soClient,
+      { type: 'dashboard' },
+      { excluded_tags: 'id1', excluded_tag_names: 'Observability' }
     );
-    if (!result) throw new Error('Expected non-null result');
-    expect(result.hasNoReference).toEqual([
+    expect(entityFindArgs(soClient)?.hasNoReference).toEqual([
       { id: 'id1', type: 'tag' },
       { id: 'id2', type: 'tag' },
     ]);
   });
 
-  it('returns all IDs when multiple tags share the same name', async () => {
+  it('includes all IDs when multiple tags share the same name', async () => {
     const soClient = makeSoClient([
       { id: 'id1', name: 'Security' },
       { id: 'id2', name: 'Security' },
     ]);
-    const result = await resolveTagsToFindOptions({ tag_names: 'Security' }, soClient);
-    if (!result) throw new Error('Expected non-null result');
-    expect(result.hasReference).toEqual([
+    await findWithTagFilter(soClient, { type: 'dashboard' }, { tag_names: 'Security' });
+    expect(entityFindArgs(soClient)?.hasReference).toEqual([
       { id: 'id1', type: 'tag' },
       { id: 'id2', type: 'tag' },
     ]);
   });
 
-  it('passes searchFields and search to SO find for server-side filtering', async () => {
+  it('resolves tag names server-side with searchFields and phrase search', async () => {
     const soClient = makeSoClient([{ id: 'id1', name: 'Security' }]);
-    await resolveTagsToFindOptions({ tag_names: ['Security', 'Observability'] }, soClient);
+    await findWithTagFilter(
+      soClient,
+      { type: 'dashboard' },
+      { tag_names: ['Security', 'Observability'] }
+    );
     expect(soClient.find).toHaveBeenCalledWith(
       expect.objectContaining({
+        type: 'tag',
         searchFields: ['name'],
         search: '"Security" "Observability"',
         defaultSearchOperator: 'OR',
@@ -121,13 +144,15 @@ describe('resolveTagsToFindOptions', () => {
       { id: 'id1', name: 'Security' },
       { id: 'id2', name: 'Observability' },
     ]);
-    const result = await resolveTagsToFindOptions(
-      { tag_names: 'Security', excluded_tag_names: 'Observability' },
-      soClient
+    await findWithTagFilter(
+      soClient,
+      { type: 'dashboard' },
+      { tag_names: 'Security', excluded_tag_names: 'Observability' }
     );
-    if (!result) throw new Error('Expected non-null result');
-    expect(result.hasReference).toEqual([{ id: 'id1', type: 'tag' }]);
-    expect(result.hasNoReference).toEqual([{ id: 'id2', type: 'tag' }]);
-    expect(soClient.find).toHaveBeenCalledTimes(2);
+    const args = entityFindArgs(soClient);
+    expect(args?.hasReference).toEqual([{ id: 'id1', type: 'tag' }]);
+    expect(args?.hasNoReference).toEqual([{ id: 'id2', type: 'tag' }]);
+    const tagFinds = soClient.find.mock.calls.filter(([a]) => a.type === 'tag');
+    expect(tagFinds).toHaveLength(2);
   });
 });

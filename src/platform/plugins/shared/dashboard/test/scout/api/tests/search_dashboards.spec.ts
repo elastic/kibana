@@ -247,19 +247,20 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     }
   );
 
-  apiTest(
-    'should narrow results when both tags and tag_names are supplied',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(buildUrl({ tags: 'tag-2', tag_names: 'buzz' }), {
-        headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
-        responseType: 'json',
-      });
+  apiTest('should combine tags and tag_names with OR semantics', async ({ apiClient }) => {
+    // tag-1 (foo) is referenced by no dashboard; tag_names=buzz resolves to tag-3, which only
+    // dashboard ...473b8 references. OR returns that dashboard; AND would return nothing (the
+    // dashboard does not reference tag-1). Asserting total=1 pins the behaviour to OR.
+    const response = await apiClient.get(buildUrl({ tags: 'tag-1', tag_names: 'buzz' }), {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.meta.total).toBe(1);
-      expect(response.body.data[0].id).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
-    }
-  );
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(1);
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0].id).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
+  });
 
   apiTest('should exclude results by excluded_tag_names (single name)', async ({ apiClient }) => {
     const response = await apiClient.get(
