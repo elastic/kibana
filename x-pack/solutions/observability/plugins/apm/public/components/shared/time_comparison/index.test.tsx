@@ -176,7 +176,6 @@ describe('TimeComparison component', () => {
             anomalyDetectionJobsStatus: FETCH_STATUS.LOADING,
             anomalyDetectionJobsData: undefined,
             anomalyDetectionSetupState: AnomalyDetectionSetupState.Loading,
-            isAuthorized: true,
           }
         );
 
@@ -215,7 +214,6 @@ describe('TimeComparison component', () => {
             anomalyDetectionJobsStatus: FETCH_STATUS.NOT_INITIATED,
             anomalyDetectionJobsData: undefined,
             anomalyDetectionSetupState: AnomalyDetectionSetupState.Unknown,
-            isAuthorized: false,
           }
         );
 

@@ -38,7 +38,7 @@ describe('alert details anomaly helpers', () => {
       ).toBe(alertStart);
     });
 
-    it('uses the anomaly timestamp when it precedes alertStart', () => {
+    it('uses the anomaly timestamp when isAnomaly and anomalyTimestamp are set', () => {
       expect(
         getAlertDetailsRangeStart({
           alertStart,
@@ -46,16 +46,6 @@ describe('alert details anomaly helpers', () => {
           anomalyTimestamp: new Date('2026-07-16T09:30:00.000Z').getTime(),
         })
       ).toBe('2026-07-16T09:30:00.000Z');
-    });
-
-    it('keeps alertStart when it is earlier than the anomaly timestamp', () => {
-      expect(
-        getAlertDetailsRangeStart({
-          alertStart,
-          isAnomaly: true,
-          anomalyTimestamp: new Date('2026-07-16T10:30:00.000Z').getTime(),
-        })
-      ).toBe(alertStart);
     });
   });
 

@@ -113,6 +113,7 @@ function RedMetricsChartActionsPopover({
 
   const anomalyThreshold =
     anomaly && anomaly.severity !== ML_ANOMALY_SEVERITY.UNKNOWN ? anomaly.severity : undefined;
+  const includeAnomalies = anomalyThreshold !== undefined;
 
   const apmLink = useMemo(() => {
     let serviceOverviewTab: 'errors' | 'transactions' | undefined;
@@ -131,9 +132,9 @@ function RedMetricsChartActionsPopover({
         ...queryForApm,
         rangeFrom: timeRange.from,
         rangeTo: timeRange.to,
-        ...(anomalyThreshold ? { anomalyThreshold } : {}),
-        ...(anomaly
+        ...(includeAnomalies
           ? {
+              anomalyThreshold,
               comparisonEnabled: true,
               offset: TimeRangeComparisonEnum.ExpectedBounds,
             }
@@ -149,7 +150,7 @@ function RedMetricsChartActionsPopover({
     timeRange,
     indexType,
     anomalyThreshold,
-    anomaly,
+    includeAnomalies,
   ]);
 
   const discoverLink = useMemo(() => {

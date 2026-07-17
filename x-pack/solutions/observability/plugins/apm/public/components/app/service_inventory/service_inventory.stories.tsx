@@ -18,7 +18,6 @@ const anomalyDetectionJobsContextValue = {
   anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
   anomalyDetectionJobsRefetch: () => {},
   anomalyDetectionSetupState: AnomalyDetectionSetupState.NoJobs,
-  isAuthorized: true,
 };
 
 const stories: Meta<{}> = {
