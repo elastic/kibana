@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { PageScope } from '../../data_view_manager/constants';
 import { sourcererScopeSelectedDataViewId } from '../../sourcerer/store/selectors';
 import type { State } from '../store';
