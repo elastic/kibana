@@ -211,9 +211,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Save the index
       await indexEditor.saveChangesAndClose();
 
-      // Query should be updated appending the new index name
-      const updatedESQLQuery = await esql.getEsqlEditorQuery();
-      expect(updatedESQLQuery).to.contain(`| LOOKUP JOIN ${INDEX_NAME_MANUAL}`);
+      // Query should be updated appending the new index name. The editor value propagates
+      // asynchronously after the flyout closes, so poll until it reflects the appended name.
+      await retry.try(async () => {
+        const updatedESQLQuery = await esql.getEsqlEditorQuery();
+        expect(updatedESQLQuery).to.contain(`| LOOKUP JOIN ${INDEX_NAME_MANUAL}`);
+      });
 
       // Verify the index is created correctly and contains all the data
       await retry.tryForTime(6000, async () => {
