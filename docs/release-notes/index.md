@@ -400,7 +400,6 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix stale column metadata requests after you close the {{esql}} editor [#267237]({{kib-pull}}267237).
 * Fix **Command-Enter** and **Control-Enter** running a stale query in the {{esql}} editor [#266242]({{kib-pull}}266242).
 * Fix server-side validation errors not appearing in {{esql}} control flyouts [#263020]({{kib-pull}}263020).
-* Fix a crash in NL-to-{{esql}} query correction when an LLM generates a multi-line `WHERE` clause [#277153]({{kib-pull}}277153).
 
 **{{kib}} platform**:
 * Fix the reporting job flyout showing **Kibana version: 7.14.0** when API jobs omit a version [#275469]({{kib-pull}}275469).
