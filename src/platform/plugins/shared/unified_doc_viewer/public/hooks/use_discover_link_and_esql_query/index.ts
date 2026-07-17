@@ -13,7 +13,7 @@ import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
 export interface UseDiscoverLinkAndEsqlQueryParams {
   indexPattern?: string;
   whereClause?: QueryOperator;
-  unmappedFieldsPolicy?: 'NULLIFY' | 'SKIP';
+  unmappedFieldsPolicy?: 'NULLIFY' | 'LOAD';
 }
 
 export function useDiscoverLinkAndEsqlQuery({

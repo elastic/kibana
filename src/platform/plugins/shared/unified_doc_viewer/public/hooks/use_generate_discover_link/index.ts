@@ -22,7 +22,7 @@ export function useGetGenerateDiscoverLink({
   unmappedFieldsPolicy,
 }: {
   indexPattern?: string | (string | undefined)[];
-  unmappedFieldsPolicy?: 'NULLIFY' | 'SKIP';
+  unmappedFieldsPolicy?: 'NULLIFY' | 'LOAD';
 }) {
   const {
     data,
