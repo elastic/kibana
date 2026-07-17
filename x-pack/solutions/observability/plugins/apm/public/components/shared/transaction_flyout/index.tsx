@@ -22,6 +22,8 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import React from 'react';
 import { TransactionMetadata } from '../metadata_table/transaction_metadata';
 import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
+import { getGenAiTabContent } from '../genai_tab/get_genai_tab_content';
+import { useGenAiData } from '../genai_tab/use_genai_data';
 import { TransactionSummary } from '../summary/transaction_summary';
 import { TransactionActionMenu } from '../transaction_action_menu/transaction_action_menu';
 import { FlyoutTopLevelProperties } from './flyout_top_level_properties';
@@ -133,6 +135,14 @@ function TransactionFlyoutBody({
     processorEvent: ProcessorEvent.transaction,
   });
 
+  const { genAi, isGenAiSpan } = useGenAiData({
+    processorEvent: ProcessorEvent.transaction,
+    id: transaction.transaction?.id ?? '',
+    timestamp: transaction['@timestamp'],
+  });
+
+  const genAiTabContent = getGenAiTabContent({ isGenAiSpan, genAi });
+
   const tabs = [
     {
       id: 'metadata',
@@ -146,6 +156,7 @@ function TransactionFlyoutBody({
         </>
       ),
     },
+    ...(genAiTabContent ? [genAiTabContent] : []),
     ...(spanLinksTabContent ? [spanLinksTabContent] : []),
   ];
 

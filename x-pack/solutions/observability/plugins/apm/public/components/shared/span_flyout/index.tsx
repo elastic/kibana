@@ -33,6 +33,8 @@ import type { Span } from '../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { SpanMetadata } from '../metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
+import { useGenAiData } from '../genai_tab/use_genai_data';
+import { getGenAiTabContent } from '../genai_tab/get_genai_tab_content';
 import { Summary } from '../summary';
 import { CompositeSpanDurationSummaryItem } from '../summary/composite_span_duration_summary_item';
 import { HttpInfoSummaryItem } from '../summary/http_info_summary_item';
@@ -238,6 +240,14 @@ function SpanFlyoutBody({
     processorEvent: ProcessorEvent.span,
   });
 
+  const { genAi, isGenAiSpan } = useGenAiData({
+    processorEvent: ProcessorEvent.span,
+    id: span.span?.id,
+    timestamp: span['@timestamp'],
+  });
+
+  const genAiTabContent = getGenAiTabContent({ isGenAiSpan, genAi });
+
   const tabs = [
     {
       id: 'metadata',
@@ -276,6 +286,7 @@ function SpanFlyoutBody({
         ]
       : []),
     ...(spanLinksTabContent ? [spanLinksTabContent] : []),
+    ...(genAiTabContent ? [genAiTabContent] : []),
   ];
 
   const initialTab = tabs.find(({ id }) => id === flyoutDetailTab) ?? tabs[0];
