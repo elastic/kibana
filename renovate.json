@@ -1869,7 +1869,6 @@
         "minimist",
         "object-hash",
         "require-in-the-middle",
-        "tape",
         "tough-cookie",
         "xml-crypto",
         "@elastic/node-crypto",

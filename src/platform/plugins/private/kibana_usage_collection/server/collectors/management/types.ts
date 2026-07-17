@@ -209,6 +209,7 @@ export interface UsageStats {
   'observability:streamsSigEventsIndexPatterns': string;
   'observability:streamsSigEventsScheduledDiscoveryEnabled': boolean;
   'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryTargetCoverageMinutes': number;
   'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': number;
   'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': number;
   'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': number;
