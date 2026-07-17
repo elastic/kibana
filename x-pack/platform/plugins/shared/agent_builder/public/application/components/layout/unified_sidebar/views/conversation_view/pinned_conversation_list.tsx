@@ -68,6 +68,7 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
       droppableId="PINNED"
       spacing="none"
       grow={false}
+      isDropDisabled={isDropDisabled}
       style={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xs }}
     >
       {pinnedConversations.map((conversation, index) => {

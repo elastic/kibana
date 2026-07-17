@@ -129,6 +129,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
       droppableId="CHATS"
       spacing="none"
       grow={false}
+      isDropDisabled={isDropDisabled}
       style={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xs }}
     >
       {sortedConversations.map((conversation, index) => {
