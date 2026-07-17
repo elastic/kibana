@@ -131,9 +131,11 @@ describe('DetectionsList', () => {
 
   it('renders the whole detection card as a clickable element', () => {
     setLifecycle({ detections: [mockDetection()] });
-    renderList();
+    renderList({ onDetectionClick: jest.fn() });
 
-    expect(screen.getByTestId('nightshiftDetectionCard').tagName).toBe('BUTTON');
+    const card = screen.getByTestId('nightshiftDetectionCard');
+    expect(card).toHaveAttribute('role', 'button');
+    expect(card).toHaveAttribute('tabindex', '0');
   });
 
   it('renders the rule name as plain text, not a link', () => {
@@ -152,5 +154,54 @@ describe('DetectionsList', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftDetectionCard'));
     expect(onDetectionClick).toHaveBeenCalledWith(detection);
+  });
+
+  it('marks the selected detection card with aria-pressed', () => {
+    setLifecycle({
+      detections: [
+        mockDetection({ detection_id: 'det-1', rule_name: 'first-detection' }),
+        mockDetection({ detection_id: 'det-2', rule_name: 'second-detection' }),
+      ],
+    });
+    renderList({ selectedDetectionId: 'det-2', onDetectionClick: jest.fn() });
+
+    const cards = screen.getAllByTestId('nightshiftDetectionCard');
+    expect(cards[0]).toHaveAttribute('aria-pressed', 'false');
+    expect(cards[1]).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('only marks the clicked detection as selected when switching detections', () => {
+    setLifecycle({
+      detections: [
+        mockDetection({ detection_id: 'det-1', rule_name: 'first-detection' }),
+        mockDetection({ detection_id: 'det-2', rule_name: 'second-detection' }),
+      ],
+    });
+
+    function DetectionListHarness() {
+      const [selectedDetectionId, setSelectedDetectionId] = React.useState<string>();
+      return (
+        <DetectionsList
+          eventUuid="evt-uuid-001"
+          selectedDetectionId={selectedDetectionId}
+          onDetectionClick={(detection) => setSelectedDetectionId(detection.detection_id)}
+        />
+      );
+    }
+
+    render(
+      <I18nProvider>
+        <DetectionListHarness />
+      </I18nProvider>
+    );
+
+    const cards = screen.getAllByTestId('nightshiftDetectionCard');
+    fireEvent.click(cards[0]);
+    expect(cards[0]).toHaveAttribute('aria-pressed', 'true');
+    expect(cards[1]).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(cards[1]);
+    expect(cards[0]).toHaveAttribute('aria-pressed', 'false');
+    expect(cards[1]).toHaveAttribute('aria-pressed', 'true');
   });
 });

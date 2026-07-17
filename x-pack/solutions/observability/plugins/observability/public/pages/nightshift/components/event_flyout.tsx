@@ -26,7 +26,7 @@ import { AiButton } from '@kbn/shared-ux-ai-components';
 import type { LifecycleDetection, SignificantEvent } from '@kbn/significant-events-schema';
 import { DetectionFlyout } from './detection_flyout';
 import { DetectionsList } from './detections_list';
-import { EventInvestigations } from './event_investigations';
+import { EventInvestigation } from './event_investigation';
 import { InvestigationStatusBadge } from './investigation_status_badge';
 import { formatTimestamp } from '../format_timestamp';
 import { isNeedsActionStatus } from '../significant_event_status';
@@ -151,11 +151,15 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
 
         <EuiSpacer size="l" />
 
-        <DetectionsList eventUuid={event.event_uuid} onDetectionClick={setSelectedDetection} />
+        <DetectionsList
+          eventUuid={event.event_uuid}
+          selectedDetectionId={selectedDetection?.detection_id}
+          onDetectionClick={setSelectedDetection}
+        />
 
         <EuiSpacer size="l" />
 
-        <EventInvestigations event={event} />
+        <EventInvestigation event={event} />
       </EuiFlyoutBody>
 
       {selectedDetection && (

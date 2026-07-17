@@ -37,7 +37,7 @@ export function EntityChip({
         display: inline-flex;
         font: inherit;
         gap: ${euiTheme.size.xs};
-        padding: ${euiTheme.size.xs} calc(${euiTheme.size.s} + ${euiTheme.size.xxs});
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
         transition: background 0.15s;
 
         &:hover,

@@ -48,6 +48,7 @@ import { ChangePointAnnotationTooltip } from './change_point_annotation_tooltip'
 
 export interface DetectionsListProps {
   eventUuid: string;
+  selectedDetectionId?: string;
   onDetectionClick?: (detection: LifecycleDetection) => void;
 }
 
@@ -169,9 +170,11 @@ function DetectionSparkline({
 
 function DetectionCard({
   detection,
+  isSelected = false,
   onClick,
 }: {
   detection: LifecycleDetection;
+  isSelected?: boolean;
   onClick?: (detection: LifecycleDetection) => void;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -181,24 +184,40 @@ function DetectionCard({
     onClick?.(detection);
   };
 
+  const handleKeyDown = (keyboardEvent: React.KeyboardEvent<HTMLDivElement>) => {
+    if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
+      keyboardEvent.preventDefault();
+      onClick?.(detection);
+    }
+  };
+
   return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="m"
-      onClick={handleClick}
+    <div
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-pressed={onClick ? isSelected : undefined}
       data-test-subj="nightshiftDetectionCard"
+      onClick={onClick ? handleClick : undefined}
+      onKeyDown={onClick ? handleKeyDown : undefined}
       css={css`
+        background: ${isSelected
+          ? euiTheme.colors.backgroundBaseInteractiveSelect
+          : euiTheme.colors.backgroundBasePlain};
+        padding: ${euiTheme.size.m};
+        ${onClick
+          ? `
+        cursor: pointer;
         transition: background 0.15s;
 
-        /* Same hover treatment as the significant event rows, instead of the
-           default clickable-panel lift effect. */
-        &:hover,
-        &:focus {
-          background: ${euiTheme.colors.backgroundBaseSubdued};
-          box-shadow: none;
-          transform: none;
+        &:hover {
+          background: ${
+            isSelected
+              ? euiTheme.colors.backgroundBaseInteractiveSelect
+              : euiTheme.colors.backgroundBaseSubdued
+          };
         }
+        `
+          : ''}
       `}
     >
       <EuiFlexGroup
@@ -213,22 +232,28 @@ function DetectionCard({
             flex: 1 1 ${TEXT_CONTENT_MIN_WIDTH};
           `}
         >
-          <EuiText size="s" textAlign="left">
-            <strong>{detection.rule_name ?? detection.detection_id}</strong>
-          </EuiText>
-          <EuiText size="xs" color="subdued" textAlign="left">
-            {formatTimestamp(detection['@timestamp'])}
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
+          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiBadge color="default">{changePointLabel}</EuiBadge>
+              <EuiText size="s" textAlign="left">
+                <strong>{detection.rule_name ?? detection.detection_id}</strong>
+              </EuiText>
             </EuiFlexItem>
-            {detection.stream_name && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{detection.stream_name}</EuiBadge>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" textAlign="left">
+                {formatTimestamp(detection['@timestamp'])}
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="default">{changePointLabel}</EuiBadge>
+                </EuiFlexItem>
+                {detection.stream_name && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">{detection.stream_name}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -238,14 +263,16 @@ function DetectionCard({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </div>
   );
 }
 
 export function DetectionsList({
   eventUuid,
+  selectedDetectionId,
   onDetectionClick,
 }: DetectionsListProps): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
   const { data, isLoading, isError, refetch } = useFetchEventLifecycle(eventUuid);
 
   // Most recent detection first — it is the most actionable one during an incident.
@@ -311,13 +338,34 @@ export function DetectionsList({
       )}
 
       {!isLoading && !isError && detections.length > 0 && (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {detections.map((detection) => (
-            <EuiFlexItem key={detection.detection_id}>
-              <DetectionCard detection={detection} onClick={onDetectionClick} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+          <ol
+            css={css`
+              list-style: none;
+              margin: 0;
+              padding: 0;
+            `}
+          >
+            {detections.map((detection, index) => (
+              <li
+                key={detection.detection_id}
+                css={
+                  index < detections.length - 1
+                    ? css`
+                        border-bottom: ${euiTheme.border.thin};
+                      `
+                    : undefined
+                }
+              >
+                <DetectionCard
+                  detection={detection}
+                  isSelected={detection.detection_id === selectedDetectionId}
+                  onClick={onDetectionClick}
+                />
+              </li>
+            ))}
+          </ol>
+        </EuiPanel>
       )}
     </>
   );

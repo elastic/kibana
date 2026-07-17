@@ -10,7 +10,23 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Feature } from '@kbn/significant-events-schema';
+import {
+  encodeFeatureAttachmentOrigin,
+  SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
+} from '@kbn/significant-events-plugin/common';
 import { EntityFlyout } from './entity_flyout';
+
+const mockOpenChat = jest.fn();
+
+jest.mock('../../../utils/kibana_react', () => ({
+  useKibana: () => ({
+    services: {
+      agentBuilder: {
+        openChat: mockOpenChat,
+      },
+    },
+  }),
+}));
 
 const mockFeature: Feature = {
   uuid: 'feature-uuid-1',
@@ -35,6 +51,10 @@ const mockFeature: Feature = {
 };
 
 describe('EntityFlyout', () => {
+  beforeEach(() => {
+    mockOpenChat.mockClear();
+  });
+
   const renderFlyout = (props: Partial<React.ComponentProps<typeof EntityFlyout>> = {}) =>
     render(
       <I18nProvider>
@@ -52,6 +72,15 @@ describe('EntityFlyout', () => {
     expect(screen.getByText('Service')).toBeInTheDocument();
     expect(screen.getByText('82% confidence')).toBeInTheDocument();
     expect(screen.getByText('logs.synthetics')).toBeInTheDocument();
+  });
+
+  it('does not render the Service badge for non-service entities', () => {
+    renderFlyout({
+      feature: { ...mockFeature, subtype: 'database' },
+    });
+
+    expect(screen.getByText('Entity')).toBeInTheDocument();
+    expect(screen.queryByText('Service')).not.toBeInTheDocument();
   });
 
   it('renders summary, evidence, and raw document sections', () => {
@@ -79,6 +108,26 @@ describe('EntityFlyout', () => {
 
     expect(screen.queryByText('APM service with similar name detected')).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftEntityFlyoutApmLink')).not.toBeInTheDocument();
+  });
+
+  it('opens a new chat with the entity attached when Open in chat is clicked', () => {
+    renderFlyout();
+
+    fireEvent.click(screen.getByTestId('nightshiftEntityFlyoutChatButton'));
+
+    expect(mockOpenChat).toHaveBeenCalledWith({
+      newConversation: true,
+      autoSendInitialMessage: true,
+      initialMessage: 'Tell me about synthetics-task-manager',
+      attachments: [
+        {
+          id: mockFeature.uuid,
+          type: SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
+          origin: encodeFeatureAttachmentOrigin(mockFeature.stream_name, mockFeature.id),
+          data: mockFeature,
+        },
+      ],
+    });
   });
 
   it('calls onClose when the flyout is closed', () => {

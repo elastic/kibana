@@ -14,9 +14,11 @@ import type {
   SignalEntry,
   SignificantEvent,
 } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
 import { DetectionFlyout } from './detection_flyout';
 
 const mockGetRedirectUrl = jest.fn(() => '/app/discover#redirect');
+const mockOpenChat = jest.fn();
 
 jest.mock('../hooks/use_fetch_stream_features', () => ({
   useFetchStreamFeatures: () => ({ data: [] }),
@@ -41,6 +43,9 @@ jest.mock('../../../utils/kibana_react', () => ({
             get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
           },
         },
+      },
+      agentBuilder: {
+        openChat: mockOpenChat,
       },
     },
   }),
@@ -85,6 +90,10 @@ const mockSignal: SignalEntry = {
 };
 
 describe('DetectionFlyout', () => {
+  beforeEach(() => {
+    mockOpenChat.mockClear();
+  });
+
   const renderFlyout = (props: Partial<React.ComponentProps<typeof DetectionFlyout>> = {}) =>
     render(
       <I18nProvider>
@@ -206,10 +215,24 @@ describe('DetectionFlyout', () => {
     expect(screen.queryByText('ES|QL query')).not.toBeInTheDocument();
   });
 
-  it('does not render a footer chat button', () => {
+  it('opens a new chat with the detection attached when Open in chat is clicked', () => {
     renderFlyout();
 
-    expect(screen.queryByTestId('nightshiftDetectionFlyoutChatButton')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutChatButton'));
+
+    expect(mockOpenChat).toHaveBeenCalledWith({
+      newConversation: true,
+      autoSendInitialMessage: true,
+      initialMessage: 'Tell me about latency-p95-spike',
+      attachments: [
+        {
+          id: mockDetection.detection_id,
+          type: SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
+          origin: mockDetection.detection_id,
+          data: mockDetection,
+        },
+      ],
+    });
   });
 
   it('calls onClose when the flyout is closed', () => {

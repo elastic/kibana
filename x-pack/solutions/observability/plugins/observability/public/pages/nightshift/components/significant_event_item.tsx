@@ -17,12 +17,14 @@ import { getStatusColor } from '../significant_event_status';
 
 export interface SignificantEventItemProps {
   event: SignificantEvent;
+  isSelected?: boolean;
   onClick?: (event: SignificantEvent) => void;
   onChatClick?: (event: SignificantEvent) => void;
 }
 
 export function SignificantEventItem({
   event,
+  isSelected = false,
   onClick,
   onChatClick,
 }: SignificantEventItemProps): React.ReactElement {
@@ -56,10 +58,13 @@ export function SignificantEventItem({
       data-test-subj="nightshiftSignificantEventItem"
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
+      aria-pressed={onClick ? isSelected : undefined}
       onClick={onClick ? handleClick : undefined}
       onKeyDown={onClick ? handleKeyDown : undefined}
       css={css`
-        background: ${euiTheme.colors.backgroundBasePlain};
+        background: ${isSelected
+          ? euiTheme.colors.backgroundBaseInteractiveSelect
+          : euiTheme.colors.backgroundBasePlain};
         padding: ${euiTheme.size.m};
         ${onClick
           ? `
@@ -67,7 +72,11 @@ export function SignificantEventItem({
         transition: background 0.15s;
 
         &:hover {
-          background: ${euiTheme.colors.backgroundBaseSubdued};
+          background: ${
+            isSelected
+              ? euiTheme.colors.backgroundBaseInteractiveSelect
+              : euiTheme.colors.backgroundBaseSubdued
+          };
         }
         `
           : ''}

@@ -307,6 +307,7 @@ export function NightshiftApp(): React.ReactElement {
                     onChatClick={onChatClick}
                     onEventClick={handleEventClick}
                     sectionRef={needsActionSectionRef}
+                    selectedEventUuid={selectedEventUuid}
                     statusColor="danger"
                     title={i18n.translate('xpack.observability.nightshift.list.needsActionTitle', {
                       defaultMessage: 'Need action',
@@ -321,6 +322,7 @@ export function NightshiftApp(): React.ReactElement {
                     onChatClick={onChatClick}
                     onEventClick={handleEventClick}
                     sectionRef={resolvedSectionRef}
+                    selectedEventUuid={selectedEventUuid}
                     statusColor="success"
                     title={i18n.translate('xpack.observability.nightshift.list.resolvedTitle', {
                       defaultMessage: 'Resolved',

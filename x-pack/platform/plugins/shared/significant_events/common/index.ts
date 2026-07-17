@@ -41,6 +41,21 @@ export {
   type PendingSignificantEventAttachment,
 } from './significant_event_attachment';
 
+export {
+  SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
+  decodeFeatureAttachmentOrigin,
+  encodeFeatureAttachmentOrigin,
+  type SignificantEventFeatureAttachment,
+  type PendingSignificantEventFeatureAttachment,
+} from './significant_event_feature_attachment';
+
+export {
+  SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
+  lifecycleDetectionAttachmentSchema,
+  type SignificantEventDetectionAttachment,
+  type PendingSignificantEventDetectionAttachment,
+} from './significant_event_detection_attachment';
+
 export { SIGNIFICANT_EVENTS_REQUIRED_PLUGINS } from './significant_events_availability';
 export type {
   SignificantEventsRequiredPlugin,

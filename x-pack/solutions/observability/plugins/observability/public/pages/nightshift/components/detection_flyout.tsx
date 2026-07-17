@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiPanel,
   EuiSpacer,
@@ -41,6 +42,8 @@ import moment from 'moment';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { AiButton } from '@kbn/shared-ux-ai-components';
+import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
 import type {
   ChangePointType,
   LifecycleDetection,
@@ -249,7 +252,8 @@ export function DetectionFlyout({
   signal,
   onClose,
 }: DetectionFlyoutProps): React.ReactElement {
-  const { share } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
+  const { share, agentBuilder } = useKibana().services;
   const [selectedEntity, setSelectedEntity] = useState<DetectionEntityRef | undefined>();
 
   const { data: streamFeatures = [] } = useFetchStreamFeatures(detection.stream_name);
@@ -282,6 +286,25 @@ export function DetectionFlyout({
       ?.getRedirectUrl({ query: { esql: esqlQuery } });
   }, [share, esqlQuery]);
 
+  const handleOpenInChat = useCallback(() => {
+    agentBuilder?.openChat({
+      newConversation: true,
+      autoSendInitialMessage: true,
+      initialMessage: i18n.translate('xpack.observability.nightshift.detectionFlyout.chatPrompt', {
+        defaultMessage: 'Tell me about {detectionName}',
+        values: { detectionName: title },
+      }),
+      attachments: [
+        {
+          id: detection.detection_id,
+          type: SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
+          origin: detection.detection_id,
+          data: detection,
+        },
+      ],
+    });
+  }, [agentBuilder, detection, title]);
+
   return (
     <>
       <EuiFlyout
@@ -290,6 +313,8 @@ export function DetectionFlyout({
         session="inherit"
         aria-label={title}
         data-test-subj="nightshiftDetectionFlyout"
+        type="push"
+        hasAnimation={false}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
@@ -411,6 +436,35 @@ export function DetectionFlyout({
             </>
           )}
         </EuiFlyoutBody>
+
+        {agentBuilder && (
+          <EuiFlyoutFooter
+            css={css`
+              background: ${euiTheme.colors.backgroundBasePlain};
+              border-top: ${euiTheme.border.thin};
+            `}
+          >
+            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <AiButton
+                  variant="empty"
+                  size="s"
+                  iconType="productAgent"
+                  iconSide="left"
+                  data-test-subj="nightshiftDetectionFlyoutChatButton"
+                  onClick={handleOpenInChat}
+                >
+                  {i18n.translate(
+                    'xpack.observability.nightshift.detectionFlyout.openInChatButtonLabel',
+                    {
+                      defaultMessage: 'Open in chat',
+                    }
+                  )}
+                </AiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        )}
       </EuiFlyout>
 
       {selectedEntityFeature && (

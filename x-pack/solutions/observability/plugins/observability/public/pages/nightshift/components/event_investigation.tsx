@@ -110,7 +110,7 @@ function InvestigationRow({
   );
 }
 
-export function EventInvestigations({ event }: EventInvestigationsProps): React.ReactElement {
+export function EventInvestigation({ event }: EventInvestigationsProps): React.ReactElement {
   const investigations = event.investigations ?? [];
 
   return (
@@ -119,7 +119,7 @@ export function EventInvestigations({ event }: EventInvestigationsProps): React.
         <EuiTitle size="xs">
           <h3>
             {i18n.translate('xpack.observability.nightshift.flyout.investigationsTitle', {
-              defaultMessage: 'Investigations',
+              defaultMessage: 'Investigation',
             })}
           </h3>
         </EuiTitle>

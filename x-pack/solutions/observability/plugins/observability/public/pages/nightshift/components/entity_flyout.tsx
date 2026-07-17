@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiBadge,
   EuiCodeBlock,
@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiPanel,
   EuiSpacer,
@@ -24,8 +25,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/significant-events-schema';
-import { upperFirst } from 'lodash';
+import {
+  encodeFeatureAttachmentOrigin,
+  SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
+} from '@kbn/significant-events-plugin/common';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { getConfidenceColor } from '../get_confidence_color';
+import { useKibana } from '../../../utils/kibana_react';
 
 export interface EntityFlyoutProps {
   feature: Feature;
@@ -139,10 +145,30 @@ function EvidenceList({ evidence }: { evidence: string[] }) {
 }
 
 export function EntityFlyout({ feature, onClose }: EntityFlyoutProps): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
+  const { agentBuilder } = useKibana().services;
   const title = feature.title ?? feature.id;
-  const typeLabel = upperFirst(feature.type);
-  const subtypeLabel = feature.subtype ? upperFirst(feature.subtype) : undefined;
   const evidence = feature.evidence ?? [];
+  const isServiceEntity = feature.subtype === 'service';
+
+  const handleOpenInChat = useCallback(() => {
+    agentBuilder?.openChat({
+      newConversation: true,
+      autoSendInitialMessage: true,
+      initialMessage: i18n.translate('xpack.observability.nightshift.entityFlyout.chatPrompt', {
+        defaultMessage: 'Tell me about {entityName}',
+        values: { entityName: title },
+      }),
+      attachments: [
+        {
+          id: feature.uuid,
+          type: SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
+          origin: encodeFeatureAttachmentOrigin(feature.stream_name, feature.id),
+          data: feature,
+        },
+      ],
+    });
+  }, [agentBuilder, feature, title]);
 
   return (
     <EuiFlyout
@@ -151,6 +177,8 @@ export function EntityFlyout({ feature, onClose }: EntityFlyoutProps): React.Rea
       session="inherit"
       aria-label={title}
       data-test-subj="nightshiftEntityFlyout"
+      type="push"
+      hasAnimation={false}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -165,14 +193,13 @@ export function EntityFlyout({ feature, onClose }: EntityFlyoutProps): React.Rea
               })}
             </EuiBadge>
           </EuiFlexItem>
-          {subtypeLabel && (
+          {isServiceEntity && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{subtypeLabel}</EuiBadge>
-            </EuiFlexItem>
-          )}
-          {!subtypeLabel && typeLabel !== 'Entity' && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{typeLabel}</EuiBadge>
+              <EuiBadge color="hollow">
+                {i18n.translate('xpack.observability.nightshift.entityFlyout.serviceBadge', {
+                  defaultMessage: 'Service',
+                })}
+              </EuiBadge>
             </EuiFlexItem>
           )}
           {feature.confidence > 0 && (
@@ -239,6 +266,35 @@ export function EntityFlyout({ feature, onClose }: EntityFlyoutProps): React.Rea
           {JSON.stringify(feature, null, 2)}
         </EuiCodeBlock>
       </EuiFlyoutBody>
+
+      {agentBuilder && (
+        <EuiFlyoutFooter
+          css={css`
+            background: ${euiTheme.colors.backgroundBasePlain};
+            border-top: ${euiTheme.border.thin};
+          `}
+        >
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <AiButton
+                variant="empty"
+                size="s"
+                iconType="productAgent"
+                iconSide="left"
+                data-test-subj="nightshiftEntityFlyoutChatButton"
+                onClick={handleOpenInChat}
+              >
+                {i18n.translate(
+                  'xpack.observability.nightshift.entityFlyout.openInChatButtonLabel',
+                  {
+                    defaultMessage: 'Open in chat',
+                  }
+                )}
+              </AiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      )}
     </EuiFlyout>
   );
 }
