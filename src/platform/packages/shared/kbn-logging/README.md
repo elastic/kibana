@@ -7,6 +7,7 @@ is still in `core` for now.
 
 - [Loggers, Appenders and Layouts](#loggers-appenders-and-layouts)
 - [Logger hierarchy](#logger-hierarchy)
+- [Meta filters](#meta-filters)
 - [Log level](#log-level)
 - [Layouts](#layouts)
 
@@ -52,6 +53,43 @@ or sets `filters: []`, similar to appenders. Set `filters: null` on a child logg
 Matching is strict equality. Filter paths support nested meta (`labels.ruleType`) and flat top-level keys
 (`'labels.ruleType'`). {@link Logger.isLevelEnabled} ignores filters — pass meta on the log call or use a message function
 to benefit from filter-based verbosity.
+
+### Making plugin logs filterable
+
+Meta filters only match values present on `LogRecord.meta` at the call site. For operators to target a single rule,
+connector, or similar entity via `kibana.yml`, plugins should:
+
+1. Pass stable identifiers under ECS `labels` (for example `labels.ruleType`, `labels.ruleId`, `labels.actionId`,
+   `labels.spaceId`) — not only in the message string or in `tags`.
+2. Reserve `tags` for categorical markers (`action-run-failed`, and so on).
+3. Prefer one meta shape consistently (nested `labels` objects are the default recommendation).
+4. Avoid secrets or PII in filterable meta fields; matching records still reach appenders with their full meta.
+
+Example call site:
+
+```ts
+logger.debug('Execution finished', {
+  labels: { ruleType: 'esql', ruleId: rule.id },
+  tags: ['rule-run'],
+});
+```
+
+Corresponding operator config:
+
+```yaml
+logging:
+  loggers:
+    - name: plugins.alerting
+      level: warn
+      filters:
+        - type: meta
+          match:
+            labels.ruleType: esql
+          level: debug
+```
+
+Customer-facing settings reference: Kibana logging settings (`logging.loggers[].filters`).
+Developer tutorial: structured meta section in the logging service docs.
 
 ## Log level
 
