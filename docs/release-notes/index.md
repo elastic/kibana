@@ -258,14 +258,20 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix field-variable suggestions when editing {{esql}} controls in **Dashboard** and **Discover** [#273844]({{kib-pull}}273844).
 * Fix the {{esql}} control editor flyout closing incorrectly when editing existing **Values from query** controls [#267605]({{kib-pull}}267605).
 * Fix case-sensitive wildcard search in {{esql}} control option lists [#266522]({{kib-pull}}266522).
-* Fix **Canvas** tables exceeding the 10,000-row limit from large `createTable` expressions [#276502]({{kib-pull}}276502).
-* Fix **Canvas** autoplay not advancing past the first page [#272619]({{kib-pull}}272619).
-* Fix **Canvas** autoplay skipping pages after slides are added or removed [#268398]({{kib-pull}}268398).
+* Fix the Dashboards API returning `400` instead of `500` for server-side transform failures [#272694]({{kib-pull}}272694).
+* Fix dashboards with very large numbers of panels or filters failing to load [#271326]({{kib-pull}}271326).
+* Fix entire dashboards failing to load when individual panels, filters, or queries are incorrect by dropping only the incorrect content [#270300]({{kib-pull}}270300).
+* Fix **Links** panels causing Dashboards API validation failures [#270230]({{kib-pull}}270230).
+* Fix dashboard control API validation failing when control titles are `null` [#268220]({{kib-pull}}268220).
 * Fix **Lens** waffle chart legend value settings not round-tripping through the Visualizations API [#269774]({{kib-pull}}269774).
 * Fix the Visualizations API returning incorrect legend sizing for **Lens** XY charts with top or bottom legends [#268729]({{kib-pull}}268729).
 * Fix the Visualizations API rejecting `rank_by` with `operation: "count"` on terms buckets when no `field` is specified [#268620]({{kib-pull}}268620).
 * Fix default colored badges missing color when data table columns are created through the Visualizations API [#268425]({{kib-pull}}268425).
 * Fix the Visualizations API rejecting unsupported pipeline operations for **Lens** gauge `min`, `max`, and `goal` metrics [#268168]({{kib-pull}}268168).
+* Fix **Lens** gauge color stops extending beyond configured ranges or losing palette continuity when using the Visualizations API [#272123]({{kib-pull}}272123).
+* Fix **Canvas** tables exceeding the 10,000-row limit from large `createTable` expressions [#276502]({{kib-pull}}276502).
+* Fix **Canvas** autoplay not advancing past the first page [#272619]({{kib-pull}}272619).
+* Fix **Canvas** autoplay skipping pages after slides are added or removed [#268398]({{kib-pull}}268398).
 * Fix keyboard focus not returning to the panel action that opened a dashboard panel settings flyout when the flyout closes [#276475]({{kib-pull}}276475).
 * Fix a startup crash on upgrade when a preserved `node.options` file is present [#276284]({{kib-pull}}276284).
 * Fix extra horizontal padding in the **Lens** dimension editor, including the **Collapse by** row [#275993]({{kib-pull}}275993).
@@ -275,14 +281,8 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix dashboards failing to load when **Defer loading panels below "the fold"** is enabled by leaving the setting visible but inactive in **Advanced Settings** [#275632]({{kib-pull}}275632).
 * Fix **Save and return** for **Maps** visualizations opened from the **Visualize** library [#274002]({{kib-pull}}274002).
 * Fix dashboard filters not being applied after you collapse a section that was expanded on initial load [#272751]({{kib-pull}}272751).
-* Fix the Dashboards API returning `400` instead of `500` for server-side transform failures [#272694]({{kib-pull}}272694).
-* Fix dashboards with very large numbers of panels or filters failing to load [#271326]({{kib-pull}}271326).
-* Fix entire dashboards failing to load when individual panels, filters, or queries are incorrect by dropping only the incorrect content [#270300]({{kib-pull}}270300).
-* Fix **Links** panels causing Dashboards API validation failures [#270230]({{kib-pull}}270230).
 * Fix **Lens** legacy metric chart colors not updating with live data when using non-custom palettes [#275203]({{kib-pull}}275203).
-* Fix **Lens** gauge color stops extending beyond configured ranges or losing palette continuity when using the Visualizations API [#272123]({{kib-pull}}272123).
 * Fix **Markdown** panels appearing in the **Add from library** flyout when a tag filter is applied [#269228]({{kib-pull}}269228).
-* Fix dashboard control API validation failing when control titles are `null` [#268220]({{kib-pull}}268220).
 * Fix the unavailable **Save** tooltip in the **Lens** edit flyout not receiving keyboard focus [#268003]({{kib-pull}}268003).
 * Fix **Save to library** failing silently when a visualization title already exists [#266493]({{kib-pull}}266493).
 * Fix **Lens** XY axis ticks ignoring the **Decimals** number-formatter setting [#265529]({{kib-pull}}265529).
