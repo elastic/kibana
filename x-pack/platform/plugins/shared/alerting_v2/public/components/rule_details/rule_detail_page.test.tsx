@@ -24,10 +24,20 @@ jest.mock('react-router-dom', () => ({
   useHistory: () => ({ push: mockHistoryPush }),
 }));
 
+let mockCanWriteRules = true;
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
+    }
+    if (typeof token === 'function') {
+      // UserCapabilities service token
+      return {
+        canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+        canRead: () => true,
+        can: () => mockCanWriteRules,
+      };
     }
     return {};
   },
@@ -136,6 +146,7 @@ describe('RuleDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsToggling = false;
+    mockCanWriteRules = true;
   });
 
   it('wires breadcrumbs with the rule name', () => {
@@ -276,6 +287,27 @@ describe('RuleDetailPage', () => {
     fireEvent.click(await screen.findByTestId('ruleDetailsDeleteButton'));
     fireEvent.click(screen.getByText('Cancel'));
     expect(screen.queryByTestId('deleteRuleConfirmationModal')).not.toBeInTheDocument();
+  });
+
+  describe('when the user only has read privilege', () => {
+    beforeEach(() => {
+      mockCanWriteRules = false;
+    });
+
+    it('hides the edit button, enabled switch, and overflow write actions', async () => {
+      renderPage(baseRule);
+
+      expect(screen.queryByTestId('openEditRuleFlyoutButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsEnabledSwitch')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsCloneButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsDeleteButton')).not.toBeInTheDocument();
+    });
+
+    it('still shows the read-only enabled status badge', () => {
+      renderPage(baseRule);
+
+      expect(screen.getByTestId('enabledBadge')).toHaveTextContent('Enabled');
+    });
   });
 
   it('does not re-render the header badges when the delete modal opens and closes', async () => {
