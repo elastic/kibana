@@ -25,6 +25,7 @@ import {
   AvailableReferenceLineIcons,
   isPersistedByReferenceAnnotationsLayer,
   isPersistedLinkedByValueAnnotationsLayer,
+  isRuntimeByReferenceAnnotationsLayer,
 } from '@kbn/lens-common';
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
@@ -458,6 +459,13 @@ export function buildAPIAnnotationsLayer(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): AnnotationLayerType {
+  if (isRuntimeByReferenceAnnotationsLayer(layer)) {
+    return {
+      type: 'annotation_group',
+      group_id: layer.annotationGroupId,
+    };
+  }
+
   if (
     isPersistedByReferenceAnnotationsLayer(layer) ||
     isPersistedLinkedByValueAnnotationsLayer(layer)
