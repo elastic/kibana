@@ -236,7 +236,7 @@ describe('step validation', () => {
       expect(recoveryStep.validate).toBeUndefined();
     });
 
-    it('builderCondition stub has no meetsPrecondition/fields (BuilderConditionStepStub)', () => {
+    it('builderCondition does not inherit queryCommitted meetsPrecondition from the ES|QL registry', () => {
       const builderStep = getSteps(true, 'threshold').steps.find(
         (s) => s.id === 'builderCondition'
       )!;

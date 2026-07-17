@@ -10,12 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type {
-  BuilderConditionStepStub,
   ComposeDiscoverState,
   ComposeDiscoverAction,
   RecoveryType,
   StepDefinition,
-  StepId,
   StepRenderProps,
 } from '../types';
 import { isAlertConditionStepId } from '../types';
@@ -49,13 +47,7 @@ interface Props {
   onManualSplit?: () => void;
 }
 
-type StepRegistry = {
-  [K in StepId]: K extends 'builderCondition'
-    ? BuilderConditionStepStub
-    : StepDefinition & { id: K };
-};
-
-const STEP_REGISTRY: StepRegistry = {
+const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   alertCondition: {
     id: 'alertCondition',
     title: i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.stepTitle', {
@@ -129,13 +121,19 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
   const ids = builderType ? getBuilderStepIds(isAlert) : getStepIds(isAlert);
   const definition = builderType ? RULE_BUILDER_REGISTRY[builderType] : undefined;
 
-  const steps = ids.map((id): StepDefinition => {
+  const steps = ids.map((id) => {
+    const base = STEP_REGISTRY[id];
     if (id === 'builderCondition' && definition) {
-      // Typed as BuilderConditionStepStub — no fields/meetsPrecondition/validate to strip.
-      const base = STEP_REGISTRY.builderCondition;
+      // Discard any ES|QL registry keys if the stub ever gains them.
+      const {
+        meetsPrecondition: _meetsPrecondition,
+        validate: _validate,
+        fields: _fields,
+        ...builderBase
+      } = base;
       const builderValidate = definition.validate;
-      return {
-        ...base,
+      const builderStep: StepDefinition = {
+        ...builderBase,
         title: definition.stepTitle,
         render: (props) =>
           definition.renderStep({
@@ -149,8 +147,9 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
             }
           : {}),
       };
+      return builderStep;
     }
-    return STEP_REGISTRY[id];
+    return base;
   });
 
   const renderCustomRecovery = definition?.renderRecoveryStep ?? EsqlRecoveryContent;
