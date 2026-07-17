@@ -18,6 +18,15 @@ import { assertDiscoverHasData } from '../lib/validation_helpers';
  * to spin up a local k8s cluster with the required resources.
  */
 
+/**
+ * Retries are disabled for this spec because each retry remounts the
+ * onboarding flow and mints a fresh onboardingId, but Ensemble runs the
+ * code snippet (helm install) only once — with the first attempt's id.
+ * Subsequent retries poll has-data for an id the collector was never
+ * configured with, so they can never pass and only burn the step budget.
+ */
+test.describe.configure({ retries: 0 });
+
 test.beforeEach(async ({ page, onboardingHomePage }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
   await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
@@ -32,6 +41,15 @@ const INSTRUMENTED_APP_CONTAINER_NAMESPACE = 'java';
 const INSTRUMENTED_APP_NAME = 'java-app';
 
 test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPage }) => {
+  /**
+   * Cold GKE nodes require pulling the EDOT collector image (up to ~6 min),
+   * on top of the helm install, operator readiness wait, and java-app restart.
+   * 20 min covers the full cold-node path: helm (~15s) + operator readiness
+   * (~2 min) + image pull (~6 min) + connect + ingest + 2 min data buffer
+   * + APM/dashboard assertions, with margin to spare.
+   */
+  test.setTimeout(20 * 60_000);
+
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
@@ -62,10 +80,13 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
       ?.replace('myapp', INSTRUMENTED_APP_NAME)
       ?.replace('my-namespace', INSTRUMENTED_APP_CONTAINER_NAMESPACE);
     /**
-     * Adding timeout so Ensemble waits for the
-     * pods to be created before instrumenting the app
+     * Wait for the OTel operator Deployment to be fully Available before
+     * annotating and restarting the java-app. The operator's readiness probe
+     * gates the mutating webhook, so Available means instrumentation injection
+     * will work. This replaces a fixed `sleep 120` with an event-driven wait:
+     * faster on warm nodes, safe on cold nodes (--timeout 300s caps it).
      */
-    const sleepSnippet = `sleep 120`;
+    const sleepSnippet = `kubectl rollout status --watch --timeout=300s deployment/opentelemetry-kube-stack-opentelemetry-operator --namespace opentelemetry-operator-system`;
 
     codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}\n${sleepSnippet}\n${annotateAllResourceSnippet}\n${restartDeploymentSnippet}`;
   } else {
@@ -90,7 +111,7 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
    * after the blur event and shows "We are monitoring your cluster"
    * once both logs and metrics have arrived.
    */
-  await otelKubernetesFlowPage.assertDataReceivedIndicator();
+  await otelKubernetesFlowPage.assertDataReceivedIndicator(15 * 60_000);
 
   /**
    * Additional buffer to ensure data has propagated
