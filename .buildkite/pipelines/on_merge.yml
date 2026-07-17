@@ -28,7 +28,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highcpu-8
-      diskSizeGb: 95
+      diskSizeGb: 130
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution
@@ -56,7 +56,7 @@ steps:
       machineType: n2d-standard-8
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: quick_checks
     timeout_in_minutes: 60
     retry:
@@ -73,7 +73,7 @@ steps:
       machineType: n2d-standard-2
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: checks
     timeout_in_minutes: 60
     retry:
@@ -91,7 +91,7 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -109,7 +109,7 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: linting_with_types
     timeout_in_minutes: 60
     retry:
@@ -127,7 +127,7 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: linting_with_oxlint
     timeout_in_minutes: 60
     retry:
@@ -145,7 +145,7 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: check_types
     timeout_in_minutes: 60
     env:
@@ -164,7 +164,7 @@ steps:
       machineType: n2d-highmem-4
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: check_oas_snapshot
     timeout_in_minutes: 60
     retry:
@@ -197,7 +197,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 105
+      diskSizeGb: 130
     timeout_in_minutes: 15
     retry:
       automatic:
@@ -213,7 +213,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 105
+      diskSizeGb: 130
     timeout_in_minutes: 10
     depends_on:
       - build
@@ -230,7 +230,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 105
+      diskSizeGb: 130
     timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
@@ -249,7 +249,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2d-standard-8
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: build_scout_tests
     timeout_in_minutes: 20
     env:
@@ -287,7 +287,7 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
+      diskSizeGb: 130
     key: storybooks
     depends_on:
       - build
