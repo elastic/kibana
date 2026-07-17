@@ -7,9 +7,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
 import type { httpServiceMock } from '@kbn/core/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
+import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import { nextTick } from '@kbn/test-jest-helpers';
 
