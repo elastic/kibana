@@ -90,8 +90,8 @@ describe('ConversationClient', () => {
   });
 
   describe('list', () => {
-    it('requests access_control and source, and preserves them in listed conversations', async () => {
-      const source = {
+    it('requests access_control and origin, and preserves them in listed conversations', async () => {
+      const origin = {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       };
       mockEsClient.search.mockResolvedValue({
@@ -105,7 +105,7 @@ describe('ConversationClient', () => {
                 ...createConversationDocument({
                   accessMode: ConversationAccessControlMode.Public,
                 })._source!,
-                source,
+                origin,
               },
             },
           ],
@@ -116,7 +116,7 @@ describe('ConversationClient', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          _source: expect.arrayContaining(['access_control', 'source']),
+          _source: expect.arrayContaining(['access_control', 'origin']),
         })
       );
       expect(result[0]).toEqual(
@@ -124,7 +124,7 @@ describe('ConversationClient', () => {
           access_control: {
             access_mode: ConversationAccessControlMode.Public,
           },
-          source,
+          origin,
         })
       );
     });
@@ -346,8 +346,8 @@ describe('ConversationClient', () => {
     });
   });
 
-  describe('getBySource', () => {
-    it('finds a conversation by first-class source in the current space', async () => {
+  describe('getByOrigin', () => {
+    it('finds a conversation by first-class origin in the current space', async () => {
       const document = createConversationDocument();
       mockEsClient.search
         .mockResolvedValueOnce({
@@ -361,7 +361,7 @@ describe('ConversationClient', () => {
           },
         });
 
-      const result = await client.getBySource({
+      const result = await client.getByOrigin({
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       });
 
@@ -375,7 +375,7 @@ describe('ConversationClient', () => {
                 expect.any(Object),
                 {
                   term: {
-                    'source.external_conversation_id':
+                    'origin.external_conversation_id':
                       'team:T123/channel:C123/thread:1712345678.000100',
                   },
                 },

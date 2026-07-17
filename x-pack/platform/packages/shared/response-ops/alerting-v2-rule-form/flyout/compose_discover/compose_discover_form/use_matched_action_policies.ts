@@ -13,7 +13,7 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 
 interface UseMatchedActionPoliciesParams {
-  http?: HttpStart;
+  http: HttpStart;
   ruleId?: string;
   name?: string;
   tags?: string[];
@@ -32,7 +32,7 @@ export const useMatchedActionPolicies = ({
   name,
   tags,
 }: UseMatchedActionPoliciesParams): UseMatchedActionPoliciesResult => {
-  const enabled = Boolean(http) && (Boolean(ruleId) || Boolean(name) || Boolean(tags?.length));
+  const enabled = Boolean(ruleId) || Boolean(name) || Boolean(tags?.length);
 
   const body = {
     rule: {
@@ -44,13 +44,11 @@ export const useMatchedActionPolicies = ({
 
   const { isLoading, error, data } = useQuery({
     queryKey: ['matchedActionPolicies', ruleId, name, tags],
-    queryFn: async (): Promise<MatchActionPoliciesForRuleResponse> => {
-      if (!http) return { items: [], total: 0 };
-      return http.fetch<MatchActionPoliciesForRuleResponse>(
+    queryFn: () =>
+      http.fetch<MatchActionPoliciesForRuleResponse>(
         '/api/alerting/v2/action_policies/_match_for_rule',
         { method: 'POST', body: JSON.stringify(body) }
-      );
-    },
+      ),
     enabled,
     keepPreviousData: true,
     refetchOnWindowFocus: false,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EntityURLStateResult } from '../../../../entity_analytics/components/home/entities_table';
@@ -61,6 +61,16 @@ export const useEntityLocalTableState = ({
     }),
     [pinnedFilter]
   );
+
+  // Reset to the first page whenever the pinned filter changes (e.g. a search term
+  // narrows the attached entities). The grouped table paginates server-side via an
+  // offset (pageIndex * pageSize); without this reset a stale pageIndex requests an
+  // offset past the end of the narrowed result set, so the match on page 1 is hidden
+  // and the accordion shows zero rows.
+  const filterKey = useMemo(() => JSON.stringify(pinnedFilter), [pinnedFilter]);
+  useEffect(() => {
+    setPageIndex(0);
+  }, [filterKey]);
 
   const onChangeItemsPerPage = useCallback((next: number) => {
     setPageSize(next);
