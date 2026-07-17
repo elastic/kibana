@@ -11,7 +11,7 @@ import { of, forkJoin, switchMap } from 'rxjs';
 import type {
   Conversation,
   ConversationAccessControl,
-  ConversationSource,
+  ConversationOrigin,
   RoundCompleteEvent,
   ConversationAction,
 } from '@kbn/agent-builder-common';
@@ -28,7 +28,7 @@ export const createConversation$ = ({
   title$,
   roundCompletedEvents$,
 }: {
-  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control' | 'source'>;
+  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control' | 'origin'>;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
@@ -43,7 +43,7 @@ export const createConversation$ = ({
         title,
         agent_id: conversation.agent_id,
         access_control: conversation.access_control,
-        source: conversation.source,
+        origin: conversation.origin,
         state: roundCompletedEvent.data.conversation_state,
         status: roundCompletedEvent.data.round.status,
         read: false,
@@ -137,8 +137,8 @@ export type ConversationWithOperation = Conversation & { operation: Conversation
 
 /**
  * Resolves the conversation to update, or returns a placeholder for one to create.
- * conversationId takes precedence over source. When no conversationId is provided,
- * source is used to find an existing conversation before creating a new placeholder.
+ * conversationId takes precedence over origin. When no conversationId is provided,
+ * origin is used to find an existing conversation before creating a new placeholder.
  * autoCreateConversationWithId only applies when conversationId is provided: missing
  * conversations are created with that ID when enabled, and rejected by get() otherwise.
  * Note: Validation and manipulation for regenerate is handled in runDefaultAgentMode.
@@ -149,18 +149,18 @@ export const getConversation = async ({
   autoCreateConversationWithId = false,
   conversationClient,
   accessControl,
-  source,
+  origin,
 }: {
   agentId: string;
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
   accessControl?: ConversationAccessControl;
-  source?: ConversationSource;
+  origin?: ConversationOrigin;
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
-    const conversation = source ? await conversationClient.getBySource(source) : undefined;
+    const conversation = origin ? await conversationClient.getByOrigin(origin) : undefined;
 
     if (conversation) {
       return {
@@ -170,7 +170,7 @@ export const getConversation = async ({
     }
 
     return {
-      ...placeholderConversation({ agentId, accessControl, source }),
+      ...placeholderConversation({ agentId, accessControl, origin }),
       operation: 'CREATE',
     };
   }
@@ -192,7 +192,7 @@ export const getConversation = async ({
     };
   } else {
     return {
-      ...placeholderConversation({ conversationId, agentId, accessControl, source }),
+      ...placeholderConversation({ conversationId, agentId, accessControl, origin }),
       operation: 'CREATE',
     };
   }
@@ -202,12 +202,12 @@ export const placeholderConversation = ({
   agentId,
   conversationId,
   accessControl,
-  source,
+  origin,
 }: {
   agentId: string;
   conversationId?: string;
   accessControl?: ConversationAccessControl;
-  source?: ConversationSource;
+  origin?: ConversationOrigin;
 }): Conversation => {
   return {
     id: conversationId ?? uuidv4(),
@@ -215,7 +215,7 @@ export const placeholderConversation = ({
     agent_id: agentId,
     access_control: accessControl ?? getDefaultConversationAccessControl(),
     rounds: [],
-    ...(source ? { source } : {}),
+    ...(origin ? { origin } : {}),
     updated_at: new Date().toISOString(),
     created_at: new Date().toISOString(),
     user: {

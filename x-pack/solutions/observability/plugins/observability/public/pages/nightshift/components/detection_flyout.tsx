@@ -45,7 +45,7 @@ import { i18n } from '@kbn/i18n';
 import type {
   ChangePointType,
   LifecycleDetection,
-  SignificantEvent,
+  SignalEntry,
 } from '@kbn/significant-events-schema';
 import {
   getChangePointIndex,
@@ -60,12 +60,10 @@ import { ChangePointAnnotationTooltip } from './change_point_annotation_tooltip'
 import { useChartThemes } from '../../../hooks/use_chart_themes';
 import { useKibana } from '../../../utils/kibana_react';
 
-type EventEvidence = NonNullable<SignificantEvent['evidences']>[number];
-
 export interface DetectionFlyoutProps {
   detection: LifecycleDetection;
-  /** Evidence collected by the discovery agent for this detection's rule, if any. */
-  evidence?: EventEvidence;
+  /** Signal collected by the discovery agent for this detection's rule, if any. */
+  signal?: SignalEntry;
   onClose: () => void;
 }
 
@@ -237,7 +235,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 export function DetectionFlyout({
   detection,
-  evidence,
+  signal,
   onClose,
 }: DetectionFlyoutProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -249,14 +247,16 @@ export function DetectionFlyout({
   const title = detection.rule_name ?? detection.detection_id;
   const changePointLabel = getChangePointLabel(detection.change_point_type);
 
+  const esqlQuery = signal?.evidence?.esql_query;
+
   const discoverHref = useMemo(() => {
-    if (!evidence?.esql_query) {
+    if (!esqlQuery) {
       return undefined;
     }
     return share.url.locators
       .get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR)
-      ?.getRedirectUrl({ query: { esql: evidence.esql_query } });
-  }, [share, evidence]);
+      ?.getRedirectUrl({ query: { esql: esqlQuery } });
+  }, [share, esqlQuery]);
 
   return (
     <EuiFlyout
@@ -290,7 +290,7 @@ export function DetectionFlyout({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {evidence?.description && (
+        {signal?.description && (
           <>
             <SectionTitle>
               {i18n.translate('xpack.observability.nightshift.detectionFlyout.summaryTitle', {
@@ -299,7 +299,7 @@ export function DetectionFlyout({
             </SectionTitle>
             <EuiSpacer size="s" />
             <EuiText size="s" data-test-subj="nightshiftDetectionFlyoutSummary">
-              <p>{evidence.description}</p>
+              <p>{signal.description}</p>
             </EuiText>
             <EuiSpacer size="l" />
           </>
@@ -356,7 +356,7 @@ export function DetectionFlyout({
           endTime={detection['@timestamp']}
         />
 
-        {evidence?.esql_query && (
+        {esqlQuery && (
           <>
             <EuiSpacer size="l" />
             <EuiFlexGroup
@@ -397,7 +397,7 @@ export function DetectionFlyout({
               overflowHeight={220}
               data-test-subj="nightshiftDetectionFlyoutEsql"
             >
-              {evidence.esql_query}
+              {esqlQuery}
             </EuiCodeBlock>
           </>
         )}

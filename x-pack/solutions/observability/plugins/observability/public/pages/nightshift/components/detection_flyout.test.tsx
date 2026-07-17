@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { LifecycleDetection } from '@kbn/significant-events-schema';
+import type { LifecycleDetection, SignalEntry } from '@kbn/significant-events-schema';
 import { DetectionFlyout } from './detection_flyout';
 
 const mockGetRedirectUrl = jest.fn(() => '/app/discover#redirect');
@@ -44,12 +44,20 @@ const mockDetection: LifecycleDetection = {
   '@timestamp': '2026-07-10T12:00:00Z',
 };
 
-const mockEvidence = {
-  rule_name: 'latency-p95-spike',
-  rule_uuid: 'rule-uuid-001',
-  description: 'P95 latency on web-frontend rose from 120ms to 890ms.',
-  esql_query: 'FROM logs.web-frontend\n| SORT @timestamp DESC',
+const mockSignal: SignalEntry = {
+  type: 'detection',
   stream_name: 'logs.web-frontend',
+  description: 'P95 latency on web-frontend rose from 120ms to 890ms.',
+  evidence: {
+    esql_query: 'FROM logs.web-frontend\n| SORT @timestamp DESC',
+    result: 'found',
+  },
+  metadata: {
+    detection_id: 'det-1',
+    rule_uuid: 'rule-uuid-001',
+    rule_name: 'latency-p95-spike',
+    change_point_type: 'spike',
+  },
 };
 
 describe('DetectionFlyout', () => {
@@ -59,7 +67,7 @@ describe('DetectionFlyout', () => {
         <EuiProvider>
           <DetectionFlyout
             detection={mockDetection}
-            evidence={mockEvidence}
+            signal={mockSignal}
             onClose={jest.fn()}
             {...props}
           />
@@ -87,15 +95,15 @@ describe('DetectionFlyout', () => {
     expect(screen.getByText(/Jul 10, 2026 @ \d{2}:\d{2}:\d{2}/)).toBeInTheDocument();
   });
 
-  it('renders the summary section from the evidence description', () => {
+  it('renders the summary section from the signal description', () => {
     renderFlyout();
 
     expect(screen.getByText('Summary')).toBeInTheDocument();
-    expect(screen.getByText(mockEvidence.description)).toBeInTheDocument();
+    expect(screen.getByText(mockSignal.description)).toBeInTheDocument();
   });
 
-  it('hides the summary section without an evidence description', () => {
-    renderFlyout({ evidence: undefined });
+  it('hides the summary section without a signal description', () => {
+    renderFlyout({ signal: undefined });
 
     expect(screen.queryByText('Summary')).not.toBeInTheDocument();
   });
@@ -133,12 +141,17 @@ describe('DetectionFlyout', () => {
       '/app/discover#redirect'
     );
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
-      query: { esql: mockEvidence.esql_query },
+      query: { esql: mockSignal.evidence?.esql_query },
     });
   });
 
-  it('hides the ES|QL section without an evidence query', () => {
-    renderFlyout({ evidence: { ...mockEvidence, esql_query: undefined } });
+  it('hides the ES|QL section without a signal query', () => {
+    renderFlyout({
+      signal: {
+        ...mockSignal,
+        evidence: undefined,
+      },
+    });
 
     expect(screen.queryByText('ES|QL query')).not.toBeInTheDocument();
   });

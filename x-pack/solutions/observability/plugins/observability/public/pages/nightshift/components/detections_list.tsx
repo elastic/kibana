@@ -47,7 +47,7 @@ import {
 import { ChangePointAnnotationTooltip } from './change_point_annotation_tooltip';
 
 export interface DetectionsListProps {
-  eventId: string;
+  eventUuid: string;
   onDetectionClick?: (detection: LifecycleDetection) => void;
 }
 
@@ -243,10 +243,10 @@ function DetectionCard({
 }
 
 export function DetectionsList({
-  eventId,
+  eventUuid,
   onDetectionClick,
 }: DetectionsListProps): React.ReactElement {
-  const { data, isLoading, isError, refetch } = useFetchEventLifecycle(eventId);
+  const { data, isLoading, isError, refetch } = useFetchEventLifecycle(eventUuid);
 
   // Most recent detection first — it is the most actionable one during an incident.
   const detections = useMemo(

@@ -57,7 +57,7 @@ function setLifecycle({
 const renderList = (props: Partial<React.ComponentProps<typeof DetectionsList>> = {}) =>
   render(
     <I18nProvider>
-      <DetectionsList eventId="evt-001" {...props} />
+      <DetectionsList eventUuid="evt-uuid-001" {...props} />
     </I18nProvider>
   );
 

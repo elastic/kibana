@@ -13,17 +13,14 @@ import { SignificantEventItem } from './significant_event_item';
 
 const mockEvent: SignificantEvent = {
   '@timestamp': new Date().toISOString(),
-  created_at: new Date().toISOString(),
   event_id: 'evt-1',
-  discovery_slug: 'disc-1',
-  status: 'promoted',
+  event_uuid: 'evt-uuid-1',
+  status: 'open',
   stream_names: ['service-a'],
   title: 'Test significant event',
   summary: 'Something happened',
-  root_cause: 'Root cause text',
-  criticality: 80,
+  severity: '60-high',
   confidence: 0.9,
-  recommendations: ['Fix it'],
 };
 
 describe('SignificantEventItem', () => {

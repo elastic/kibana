@@ -44,15 +44,19 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
   const [summaryExpanded, setSummaryExpanded] = useState(false);
   const [selectedDetection, setSelectedDetection] = useState<LifecycleDetection | undefined>();
 
-  // Evidence collected by the discovery agent for the selected detection's rule.
-  const selectedDetectionEvidence = useMemo(() => {
+  // Signal collected by the discovery agent for the selected detection's rule.
+  const selectedDetectionSignal = useMemo(() => {
     if (!selectedDetection) {
       return undefined;
     }
-    return event.evidences?.find(
-      ({ rule_uuid: ruleUuid, rule_name: ruleName }) =>
-        (selectedDetection.rule_uuid != null && ruleUuid === selectedDetection.rule_uuid) ||
-        (selectedDetection.rule_name != null && ruleName === selectedDetection.rule_name)
+    return event.signals?.find(
+      (signal) =>
+        signal.type === 'detection' &&
+        ((selectedDetection.rule_uuid != null &&
+          signal.metadata.rule_uuid === selectedDetection.rule_uuid) ||
+          (selectedDetection.rule_name != null &&
+            signal.metadata.rule_name === selectedDetection.rule_name) ||
+          signal.metadata.detection_id === selectedDetection.detection_id)
     );
   }, [event, selectedDetection]);
 
@@ -86,7 +90,7 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
           <h2>{event.title}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
+        <EuiFlexGroup gutterSize="s" wrap responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiBadge color="default">
               {i18n.translate('xpack.observability.nightshift.flyout.badge.significantEventLabel', {
@@ -147,7 +151,7 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
 
         <EuiSpacer size="l" />
 
-        <DetectionsList eventId={event.event_id} onDetectionClick={setSelectedDetection} />
+        <DetectionsList eventUuid={event.event_uuid} onDetectionClick={setSelectedDetection} />
 
         <EuiSpacer size="l" />
 
@@ -159,7 +163,7 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
         <DetectionFlyout
           key={selectedDetection.detection_id}
           detection={selectedDetection}
-          evidence={selectedDetectionEvidence}
+          signal={selectedDetectionSignal}
           onClose={closeDetectionFlyout}
         />
       )}
