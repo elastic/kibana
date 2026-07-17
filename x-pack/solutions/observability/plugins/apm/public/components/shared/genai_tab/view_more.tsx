@@ -22,9 +22,7 @@ export function ViewMore({ children }: Props) {
     <>
       <div
         style={
-          expanded
-            ? undefined
-            : { maxHeight: MAX_HEIGHT, overflow: 'hidden', position: 'relative' }
+          expanded ? undefined : { maxHeight: MAX_HEIGHT, overflow: 'hidden', position: 'relative' }
         }
       >
         {children}
@@ -43,7 +41,7 @@ export function ViewMore({ children }: Props) {
       </div>
       <EuiSpacer size="xs" />
       <EuiText size="xs">
-        <EuiLink onClick={() => setExpanded((v) => !v)}>
+        <EuiLink data-test-subj="apmViewMoreLink" onClick={() => setExpanded((v) => !v)}>
           {expanded
             ? i18n.translate('xpack.apm.genAi.viewMore.viewLess', { defaultMessage: 'View less' })
             : i18n.translate('xpack.apm.genAi.viewMore.viewMore', { defaultMessage: 'View more' })}

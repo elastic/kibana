@@ -32,8 +32,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const CHAT_INPUT_MESSAGES = JSON.stringify([
   {
     role: 'system',
-    content:
-      'You are an expert software engineer. Be concise and precise in your answers.',
+    content: 'You are an expert software engineer. Be concise and precise in your answers.',
   },
   {
     role: 'user',
@@ -96,7 +95,13 @@ const LONG_CONTENT = JSON.stringify([
     content: [
       'Please analyze the following large document and summarize the key points:',
       '',
-      ...Array.from({ length: 40 }, (_, i) => `Section ${i + 1}: This is a detailed paragraph about topic ${i + 1}. It contains important information that spans multiple lines and covers various aspects of the subject matter in great detail.`),
+      ...Array.from(
+        { length: 40 },
+        (_, i) =>
+          `Section ${i + 1}: This is a detailed paragraph about topic ${
+            i + 1
+          }. It contains important information that spans multiple lines and covers various aspects of the subject matter in great detail.`
+      ),
     ].join('\n'),
   },
 ]);

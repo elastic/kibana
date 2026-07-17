@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  getGenAiFields,
-  hasGenAiData,
-  parseGenAiMessages,
-} from './get_genai_fields';
+import { getGenAiFields, hasGenAiData, parseGenAiMessages } from './get_genai_fields';
 
 describe('hasGenAiData', () => {
   it('returns true when attributes.gen_ai.* field is present', () => {
@@ -94,12 +90,8 @@ describe('getGenAiFields', () => {
     'attributes.gen_ai.request.max_tokens': [2048],
     'attributes.gen_ai.response.model': ['gpt-4o-2024-08-06'],
     'attributes.gen_ai.response.id': ['resp-abc123'],
-    'attributes.gen_ai.input.messages': [
-      JSON.stringify([{ role: 'user', content: 'Hello' }]),
-    ],
-    'attributes.gen_ai.output.messages': [
-      JSON.stringify([{ role: 'assistant', content: 'Hi!' }]),
-    ],
+    'attributes.gen_ai.input.messages': [JSON.stringify([{ role: 'user', content: 'Hello' }])],
+    'attributes.gen_ai.output.messages': [JSON.stringify([{ role: 'assistant', content: 'Hi!' }])],
   };
 
   it('extracts all core fields correctly', () => {

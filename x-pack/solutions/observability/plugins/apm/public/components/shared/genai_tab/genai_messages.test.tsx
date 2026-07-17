@@ -70,10 +70,7 @@ describe('GenAiMessages', () => {
   });
 
   it('renders output messages after input messages', () => {
-    renderMessages(
-      [{ role: 'user', content: 'Hello' }],
-      [{ role: 'assistant', content: 'Hi' }]
-    );
+    renderMessages([{ role: 'user', content: 'Hello' }], [{ role: 'assistant', content: 'Hi' }]);
     const messages = screen.getAllByTestId(/genAiMessage-/);
     expect(messages).toHaveLength(2);
   });
