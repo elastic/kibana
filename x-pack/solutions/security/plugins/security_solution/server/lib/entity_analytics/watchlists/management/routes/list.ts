@@ -16,6 +16,8 @@ import type { ListWatchlistsResponse } from '../../../../../../common/api/entity
 import { WatchlistConfigClient } from '../watchlist_config';
 import { getWatchlistSavedObjectClient } from '../../shared/utils';
 import { ensurePrebuiltWatchlists } from '../../migrations/install_prebuilt_watchlists';
+import { buildScopedInternalSavedObjectsClientUnsafe } from '../../../risk_score/tasks/helpers';
+import { watchlistEntitySourceTypeName } from '../../entity_sources/infra';
 
 export const listWatchlistsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -47,26 +49,50 @@ export const listWatchlistsRoute = (
             const namespace = secSol.getSpaceId();
             const soClient = getWatchlistSavedObjectClient(core);
             const esClient = core.elasticsearch.client.asCurrentUser;
+            const internalEsClient = core.elasticsearch.client.asInternalUser;
 
             const watchlistClient = new WatchlistConfigClient({
               namespace,
               soClient,
               esClient,
-              internalEsClient: core.elasticsearch.client.asInternalUser,
+              internalEsClient,
               logger,
             });
 
             // Lazily install prebuilt watchlists so spaces created after the
             // startup migration ran (or that missed it) self-heal on first read.
-            await ensurePrebuiltWatchlists({
-              watchlistClient,
-              soClient,
+            // Uses an internal SO client so read-only users can still trigger
+            // the self-heal without needing write privileges on watchlist-config.
+            // Best-effort: a self-heal failure must not break the list read path.
+            const [coreStart] = await getStartServices();
+            const internalSoClient = buildScopedInternalSavedObjectsClientUnsafe({
+              coreStart,
               namespace,
-              logger,
-              esClient,
-              getStartServices,
-              hasEncryptionKey,
+              includedHiddenTypes: [watchlistEntitySourceTypeName],
             });
+            const internalWatchlistClient = new WatchlistConfigClient({
+              namespace,
+              soClient: internalSoClient,
+              esClient: internalEsClient,
+              internalEsClient,
+              logger,
+            });
+            try {
+              await ensurePrebuiltWatchlists({
+                watchlistClient: internalWatchlistClient,
+                soClient: internalSoClient,
+                namespace,
+                logger,
+                esClient: internalEsClient,
+                getStartServices,
+                hasEncryptionKey,
+              });
+            } catch (installError) {
+              const { message } = transformError(installError);
+              logger.warn(
+                `Failed to lazily install prebuilt watchlists for namespace '${namespace}': ${message}`
+              );
+            }
 
             const body = await watchlistClient.list();
             return response.ok({ body });
