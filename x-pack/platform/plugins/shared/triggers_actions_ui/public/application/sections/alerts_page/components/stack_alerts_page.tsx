@@ -30,7 +30,9 @@ import type {
   AlertsTableSupportedConsumers,
 } from '@kbn/response-ops-alerts-table/types';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
+import type { RuleTypeIndex } from '../../../../types';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
 import type { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
@@ -50,7 +52,6 @@ import type { RuleTypeIdsByFeatureId } from '../hooks/use_rule_type_ids_by_featu
 import { useRuleTypeIdsByFeatureId } from '../hooks/use_rule_type_ids_by_feature_id';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 import { NON_SIEM_CONSUMERS } from '../../alerts_search_bar/constants';
-import { ALL_NON_SIEM_RULE_TYPE_IDS } from '../constants';
 import { RuleAlertActionsCell } from '../../rule_details/components/rule_alert_actions_cell';
 
 /**
@@ -84,9 +85,17 @@ const PageContentWrapperComponent: React.FC = () => {
   } = useKibana().services;
 
   const {
-    ruleTypesState: { data: ruleTypesIndex, isInitialLoad: isInitialLoadingRuleTypes },
+    ruleTypesState: { isInitialLoad: isInitialLoadingRuleTypes },
     authorizedToReadAnyRules,
   } = useGetRuleTypesPermissions({ http, toasts, filteredRuleTypes: [] });
+
+  const { data: internalRuleTypes, isLoading: isLoadingInternalRuleTypes } =
+    useGetInternalRuleTypesQuery({ http, includeAlertViewableTypes: true });
+
+  const ruleTypesIndex = useMemo<RuleTypeIndex>(
+    () => new Map((internalRuleTypes ?? []).map((ruleType) => [ruleType.id, ruleType])),
+    [internalRuleTypes]
+  );
 
   // The Stack Alerts and Observability Alerts features grant read access to alerts
   // without requiring rule read privileges, so their `show` capability also unlocks
@@ -103,7 +112,7 @@ const PageContentWrapperComponent: React.FC = () => {
     docTitle.change(getCurrentDocTitle('alerts'));
   }, [docTitle, setBreadcrumbs]);
 
-  return !isInitialLoadingRuleTypes ? (
+  return !isInitialLoadingRuleTypes && !isLoadingInternalRuleTypes ? (
     <PageContent
       isLoading={isInitialLoadingRuleTypes}
       authorizedToReadAnyAlerts={authorizedToReadAnyAlerts}
@@ -155,15 +164,9 @@ const PageContentComponent: React.FC<PageContentProps> = ({
   const ruleTypeIdsByFeatureIdEntries = Object.entries(ruleTypeIdsByFeatureId);
 
   const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
-  const [ruleTypeIds, setRuleTypeIds] = useState<string[]>(() => {
-    const fromApi = getInitialRuleTypeIds(ruleTypeIdsByFeatureId);
-    // When the user has alert-read but not rule-read (e.g. stackAlertsOnly),
-    // the rule types API returns nothing and fromApi is empty. Without a fallback,
-    // useSearchAlertsQuery is disabled (ruleTypeIds.length === 0) and the table
-    // stays permanently empty. Fall back to ALL_NON_SIEM_RULE_TYPE_IDS so the
-    // query runs; server-side RBAC enforces what the user can actually see.
-    return fromApi.length > 0 ? fromApi : ALL_NON_SIEM_RULE_TYPE_IDS;
-  });
+  const [ruleTypeIds, setRuleTypeIds] = useState<string[]>(() =>
+    getInitialRuleTypeIds(ruleTypeIdsByFeatureId)
+  );
 
   const [consumers, setConsumers] = useState<string[]>(NON_SIEM_CONSUMERS);
   const [filterControls, setFilterControls] = useState<Filter[]>();
@@ -203,8 +206,7 @@ const PageContentComponent: React.FC<PageContentProps> = ({
         return;
       }
 
-      const fromApi = getInitialRuleTypeIds(ruleTypeIdsByFeatureId);
-      setRuleTypeIds(fromApi.length > 0 ? fromApi : ALL_NON_SIEM_RULE_TYPE_IDS);
+      setRuleTypeIds(getInitialRuleTypeIds(ruleTypeIdsByFeatureId));
       setConsumers(NON_SIEM_CONSUMERS);
     },
     [ruleTypeIdsByFeatureId]
