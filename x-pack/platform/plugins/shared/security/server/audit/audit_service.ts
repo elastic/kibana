@@ -49,6 +49,11 @@ export const AUDIT_OTEL_FIELD_DEFAULTS: Record<string, string | string[]> = {
   'event.type': ['access'],
 };
 
+// OTel semantic conventions require HTTP method to be uppercase (e.g. 'GET' not 'get').
+// Kibana's route method is lowercase; the upstream AuditEvent is left as-is so that
+// non-OTel appenders (file, console) continue to receive the original casing.
+export const AUDIT_OTEL_FIELD_UPPERCASE: string[] = ['http.request.method'];
+
 const normalize = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);
 
 interface AuditServiceSetupParams {
@@ -207,6 +212,7 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
             fieldRenames: { ...baseAppender.fieldRenames, ...AUDIT_OTEL_FIELD_RENAMES },
             fieldDrops: [...(baseAppender.fieldDrops ?? []), ...AUDIT_OTEL_FIELD_DROPS],
             fieldDefaults: { ...AUDIT_OTEL_FIELD_DEFAULTS, ...baseAppender.fieldDefaults },
+            fieldUppercase: [...(baseAppender.fieldUppercase ?? []), ...AUDIT_OTEL_FIELD_UPPERCASE],
           }
         : baseAppender;
 

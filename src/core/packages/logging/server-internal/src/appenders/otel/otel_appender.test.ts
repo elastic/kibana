@@ -131,13 +131,22 @@ describe('OtelAppender', () => {
       expect(result.fieldRenames).toBeUndefined();
     });
 
-    it('fieldDrops and fieldDefaults are optional and absent by default', () => {
+    it('fieldDrops, fieldUppercase and fieldDefaults are optional and absent by default', () => {
       const result = OtelAppender.configSchema.validate({
         type: 'otel',
         url: 'http://collector:4318/v1/logs',
       });
       expect(result.fieldDrops).toBeUndefined();
+      expect(result.fieldUppercase).toBeUndefined();
       expect(result.fieldDefaults).toBeUndefined();
+    });
+
+    it('accepts fieldUppercase as an array of strings', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        fieldUppercase: ['http.request.method'],
+      });
+      expect(result.fieldUppercase).toEqual(['http.request.method']);
     });
 
     it('accepts fieldDrops as an array of strings', () => {
@@ -842,6 +851,50 @@ describe('OtelAppender', () => {
 
       const { attributes } = mockEmit.mock.calls[0][0];
       expect(attributes).not.toHaveProperty(['event.type']);
+    });
+  });
+
+  describe('fieldUppercase', () => {
+    it('uppercases a string attribute value', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldUppercase: ['http.request.method'],
+      });
+      appender.append(makeRecord({ meta: { http: { request: { method: 'get' } } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['http.request.method'], 'GET');
+    });
+
+    it('silently skips non-string values', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldUppercase: ['event.category'],
+      });
+      appender.append(makeRecord({ meta: { event: { category: ['web'] } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      // Array value is untouched.
+      expect(attributes).toHaveProperty(['event.category'], ['web']);
+    });
+
+    it('silently skips absent keys', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldUppercase: ['http.request.method'],
+      });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['http.request.method']);
+    });
+
+    it('leaves attributes unchanged when fieldUppercase is not configured', () => {
+      const appender = new OtelAppender(validConfig);
+      appender.append(makeRecord({ meta: { http: { request: { method: 'get' } } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['http.request.method'], 'get');
     });
   });
 

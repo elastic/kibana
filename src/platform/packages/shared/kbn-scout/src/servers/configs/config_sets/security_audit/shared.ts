@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Must match the fileName in the test file (audit_log.spec.ts)
 export const AUDIT_LOG_PATH = '/tmp/kibana-scout-security-audit.log';
 
 export const securityAuditServerArgs = [

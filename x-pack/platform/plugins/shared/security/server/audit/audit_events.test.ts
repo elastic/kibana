@@ -594,7 +594,7 @@ describe('#httpRequestEvent', () => {
         },
         "http": Object {
           "request": Object {
-            "method": "GET",
+            "method": "get",
           },
         },
         "message": "User is requesting [/path] endpoint",
@@ -634,7 +634,7 @@ describe('#httpRequestEvent', () => {
         },
         "http": Object {
           "request": Object {
-            "method": "GET",
+            "method": "get",
           },
         },
         "message": "User is requesting [/original/path] endpoint",

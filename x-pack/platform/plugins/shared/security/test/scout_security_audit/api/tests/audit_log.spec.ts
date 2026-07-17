@@ -7,11 +7,8 @@
 
 import { readFileSync } from 'fs';
 
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest, AUDIT_LOG_PATH, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-
-// Must match the fileName in config_sets/security_audit/shared.ts
-const AUDIT_LOG_PATH = '/tmp/kibana-scout-security-audit.log';
 
 const waitForAuditEvent = async (
   filter: (event: Record<string, unknown>) => boolean,
@@ -66,7 +63,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'http_request: trace.id present, method uppercase, kibana.space_id set',
+      'http_request: trace.id present, method lowercase (ECS), kibana.space_id set',
       async ({ apiClient, samlAuth }) => {
         const testStart = Date.now();
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
@@ -86,9 +83,10 @@ apiTest.describe(
         const trace = e.trace as Record<string, unknown> | undefined;
         expect(trace?.id).toBeDefined();
 
-        // http.request.method is uppercase in ECS (audit_events.ts calls .toUpperCase())
+        // http.request.method is lowercase in ECS — uppercase is applied only by the OTel
+        // appender via fieldUppercase, so non-OTel outputs retain the original route casing.
         const http = e.http as Record<string, unknown> | undefined;
-        expect((http?.request as Record<string, unknown>)?.method).toBe('GET');
+        expect((http?.request as Record<string, unknown>)?.method).toBe('get');
 
         // ECS format: kibana.space_id (not yet renamed to kibana.space.id — that's the OTel layer)
         const kibana = e.kibana as Record<string, unknown> | undefined;

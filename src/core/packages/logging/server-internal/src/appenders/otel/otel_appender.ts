@@ -124,7 +124,8 @@ const toAttributes = (
   includeLogMeta: boolean,
   fieldRenames?: Record<string, string | string[]>,
   fieldDrops?: string[],
-  fieldDefaults?: Record<string, string | string[]>
+  fieldDefaults?: Record<string, string | string[]>,
+  fieldUppercase?: string[]
 ): Attributes => {
   const attrs: Attributes = {
     'log.logger': record.context,
@@ -201,6 +202,14 @@ const toAttributes = (
     }
   }
 
+  if (fieldUppercase) {
+    for (const key of fieldUppercase) {
+      if (typeof attrs[key] === 'string') {
+        attrs[key] = (attrs[key] as string).toUpperCase();
+      }
+    }
+  }
+
   return attrs;
 };
 
@@ -237,6 +246,7 @@ export class OtelAppender implements DisposableAppender {
       )
     ),
     fieldDrops: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    fieldUppercase: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
     fieldDefaults: schema.maybe(
       schema.recordOf(
         schema.string(),
@@ -289,6 +299,7 @@ export class OtelAppender implements DisposableAppender {
   private readonly fieldRenames?: Record<string, string | string[]>;
   private readonly fieldDrops?: string[];
   private readonly fieldDefaults?: Record<string, string | string[]>;
+  private readonly fieldUppercase?: string[];
 
   constructor(config: OtelAppenderConfig) {
     const exporter = createExporter(config);
@@ -329,6 +340,7 @@ export class OtelAppender implements DisposableAppender {
     this.fieldRenames = config.fieldRenames;
     this.fieldDrops = config.fieldDrops;
     this.fieldDefaults = config.fieldDefaults;
+    this.fieldUppercase = config.fieldUppercase;
   }
 
   public append(record: LogRecord): void {
@@ -355,7 +367,8 @@ export class OtelAppender implements DisposableAppender {
         !this.useStructuredBody,
         this.fieldRenames,
         this.fieldDrops,
-        this.fieldDefaults
+        this.fieldDefaults,
+        this.fieldUppercase
       ),
     });
   }

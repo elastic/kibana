@@ -133,4 +133,11 @@ export interface OtelAppenderConfig {
    * Values may be a string or an array of strings.
    */
   fieldDefaults?: Record<string, string | string[]>;
+  /**
+   * Optional list of attribute keys whose string values should be uppercased at emit time.
+   * Applied after all other field transforms. Use for fields where OTel semantic conventions
+   * require uppercase but the upstream event carries lowercase (e.g. `http.request.method`).
+   * Non-string values and absent keys are silently skipped.
+   */
+  fieldUppercase?: string[];
 }

@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest, OTEL_RECEIVER_PORT, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { type FlatAttributes, OtlpLogReceiver } from '../lib/otlp_log_receiver';
-
-// Must match OTEL_RECEIVER_PORT in the security_audit_otel Scout config set.
-const OTEL_RECEIVER_PORT = 18923;
 
 const KBN_XSRF = { 'kbn-xsrf': 'xxx', 'x-elastic-internal-origin': 'kibana' };
 const TEST_DASHBOARD_ID = 'audit-log-otel-test-dashboard';
