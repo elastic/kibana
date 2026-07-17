@@ -8,19 +8,7 @@
 import moment from 'moment-timezone';
 import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
-import {
-  unset,
-  has,
-  difference,
-  filter,
-  map,
-  mapKeys,
-  mapValues,
-  uniq,
-  some,
-  isEmpty,
-  keyBy,
-} from 'lodash';
+import { unset, has, filter, map, mapKeys, mapValues, some, isEmpty, keyBy } from 'lodash';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -507,17 +495,28 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               );
             }
           } else {
-            // Diff current vs. target: remove the pack from policies no longer
-            // targeted, then (re)write every still-targeted package policy once.
-            const agentPolicyIdsToRemove = uniq(difference(currentAgentPolicyIds, policiesList));
+            // Diff current vs. target. Resolve the still-targeted package
+            // policies (write targets) first, then remove the pack from every
+            // package policy that currently carries it on the wire but is no
+            // longer targeted. Scanning the wire (`currentPackagePolicies`)
+            // rather than resolving the SO's agent-policy references keeps
+            // detach correct even when references and wire attachments have
+            // diverged (e.g. after a 9.4.3 → 9.5.0 upgrade); see #279224.
+            const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
+              policiesList,
+              packagePolicies
+            );
+            const writeTargetIds = new Set(
+              Array.from(packagePolicyWriteTargets.values()).map(
+                ({ packagePolicy }) => packagePolicy.id
+              )
+            );
 
             await Promise.all(
-              agentPolicyIdsToRemove.map((agentPolicyId) => {
-                const packagePolicy = currentPackagePolicies.find((policy) =>
-                  policy.policy_ids.includes(agentPolicyId)
-                );
-                if (packagePolicy) {
-                  return packagePolicyService?.update(
+              currentPackagePolicies
+                .filter((packagePolicy) => !writeTargetIds.has(packagePolicy.id))
+                .map((packagePolicy) =>
+                  packagePolicyService?.update(
                     spaceScopedClient,
                     esClient,
                     packagePolicy.id,
@@ -527,14 +526,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
                       return draft;
                     })
-                  );
-                }
-              })
-            );
-
-            const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
-              policiesList,
-              packagePolicies
+                  )
+                )
             );
 
             await Promise.all(

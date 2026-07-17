@@ -40,8 +40,10 @@ export const updateGlobalPacksCreateCallback = async (
   allPacks.map((pack) => {
     // Never (re)attach a disabled global pack to a newly created package policy;
     // otherwise enrolling a new agent silently re-schedules a pack the user
-    // already turned off. Fail closed on a falsy `enabled`, matching how
-    // create_pack_route (`if (enabled && ...)`) and the reconciler gate wire writes.
+    // already turned off. Fail closed on a falsy `enabled` — an unset
+    // (`undefined`) `enabled` is intentionally treated as "do not attach",
+    // matching how create_pack_route (`if (enabled && ...)`) and the reconciler
+    // (`pack.attributes.enabled && ...`) gate wire writes.
     if (!pack.enabled) {
       return;
     }
