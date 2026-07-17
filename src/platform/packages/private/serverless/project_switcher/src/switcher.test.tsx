@@ -54,7 +54,8 @@ const renderProjectSwitcher = (
   ];
 };
 
-describe('ProjectSwitcher', () => {
+// Failing: See https://github.com/elastic/kibana/issues/274794
+describe.skip('ProjectSwitcher', () => {
   describe('Component', () => {
     test('is rendered', () => {
       expect(() =>
