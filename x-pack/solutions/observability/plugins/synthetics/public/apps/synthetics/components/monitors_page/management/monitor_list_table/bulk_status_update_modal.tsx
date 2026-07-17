@@ -180,8 +180,7 @@ const getDescription = (enabled: boolean, count: number) =>
 const getSuccessMessage = (enabled: boolean, count: number) =>
   enabled
     ? i18n.translate('xpack.synthetics.bulkStatusUpdateModal.enableSuccess', {
-        defaultMessage:
-          '{count, plural, one {# monitor} other {# monitors}} enabled successfully.',
+        defaultMessage: '{count, plural, one {# monitor} other {# monitors}} enabled successfully.',
         values: { count },
       })
     : i18n.translate('xpack.synthetics.bulkStatusUpdateModal.disableSuccess', {

@@ -83,8 +83,7 @@ export const BulkOperations = ({
             }),
       icon: 'play',
       disabled: isActionDisabled || enableIds.length === 0,
-      toolTipContent:
-        disabledTooltip ?? (enableIds.length === 0 ? ALL_ALREADY_ENABLED : undefined),
+      toolTipContent: disabledTooltip ?? (enableIds.length === 0 ? ALL_ALREADY_ENABLED : undefined),
       'data-test-subj': 'syntheticsBulkEnableMonitorsItem',
       onClick: () => {
         closePopover();
@@ -170,16 +169,10 @@ export const BulkOperations = ({
   );
 };
 
-const ALL_ALREADY_ENABLED = i18n.translate(
-  'xpack.synthetics.bulkOperations.allAlreadyEnabled',
-  {
-    defaultMessage: 'All selected monitors are already enabled.',
-  }
-);
+const ALL_ALREADY_ENABLED = i18n.translate('xpack.synthetics.bulkOperations.allAlreadyEnabled', {
+  defaultMessage: 'All selected monitors are already enabled.',
+});
 
-const ALL_ALREADY_DISABLED = i18n.translate(
-  'xpack.synthetics.bulkOperations.allAlreadyDisabled',
-  {
-    defaultMessage: 'All selected monitors are already disabled.',
-  }
-);
+const ALL_ALREADY_DISABLED = i18n.translate('xpack.synthetics.bulkOperations.allAlreadyDisabled', {
+  defaultMessage: 'All selected monitors are already disabled.',
+});

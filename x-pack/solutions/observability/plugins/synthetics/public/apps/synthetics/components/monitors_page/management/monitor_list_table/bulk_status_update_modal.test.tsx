@@ -102,9 +102,7 @@ describe('<BulkStatusUpdateModal />', () => {
   });
 
   it('disables the confirm button when every selected monitor is skipped', () => {
-    const monitors = [
-      makeMonitor('project-1', 'Project monitor', { origin: SourceType.PROJECT }),
-    ];
+    const monitors = [makeMonitor('project-1', 'Project monitor', { origin: SourceType.PROJECT })];
 
     const { getByTestId } = render(
       <BulkStatusUpdateModal
@@ -145,10 +143,7 @@ describe('<BulkStatusUpdateModal />', () => {
   });
 
   it('shows a partial-failure warning toast when some updates fail', async () => {
-    const monitors = [
-      makeMonitor('ui-1', 'UI monitor 1'),
-      makeMonitor('ui-2', 'UI monitor 2'),
-    ];
+    const monitors = [makeMonitor('ui-1', 'UI monitor 1'), makeMonitor('ui-2', 'UI monitor 2')];
     fetchBulkUpdateMonitorsMock.mockResolvedValue({
       result: [
         { id: 'ui-1', updated: true },
@@ -169,7 +164,9 @@ describe('<BulkStatusUpdateModal />', () => {
 
     await waitFor(() => {
       expect(kibanaService.toasts.addWarning).toHaveBeenCalledWith(
-        expect.objectContaining({ title: '1 disabled, 1 failed. Check that the failed monitors are editable and try again.' })
+        expect.objectContaining({
+          title: '1 disabled, 1 failed. Check that the failed monitors are editable and try again.',
+        })
       );
     });
     expect(kibanaService.toasts.addSuccess).not.toHaveBeenCalled();
