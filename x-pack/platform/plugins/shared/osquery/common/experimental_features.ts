@@ -39,7 +39,7 @@ export const allowedExperimentalValues = Object.freeze({
    * be referenced by skills such as endpoint-forensic-analysis. Tools are
    * fleet-wide-capable and gated behind the osquery integration being installed.
    */
-  agentBuilderTools: false,
+  agentBuilderTools: true,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
