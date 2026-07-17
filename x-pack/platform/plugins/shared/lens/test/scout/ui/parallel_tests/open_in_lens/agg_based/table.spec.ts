@@ -23,7 +23,7 @@ const getDimensionFlyoutComboBoxSelectedOptions = async (
   return page.components.comboBox(comboBoxTestSubj).getSelectedOptions();
 };
 
-spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
     archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.TABLE,
     dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.TABLE,
