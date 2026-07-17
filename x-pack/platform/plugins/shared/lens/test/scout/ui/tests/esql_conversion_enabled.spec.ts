@@ -24,8 +24,8 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       },
     });
 
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.LOGSTASH);
-    await kbnClient.importExport.load(testData.KBN_ARCHIVE_PATHS.ESQL_CONVERSION_DASHBOARD);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
+    await kbnClient.importExport.load(testData.KBN_ARCHIVES.ESQL_CONVERSION_DASHBOARD);
     await uiSettings.set({
       defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
       'dateFormat:tz': 'UTC',
