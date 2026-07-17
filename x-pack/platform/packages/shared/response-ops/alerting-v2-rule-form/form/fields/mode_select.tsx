@@ -67,7 +67,7 @@ export const ModeSelect = ({
 
   return (
     <EuiFormRow label={LABEL_TEXT} fullWidth data-test-subj={dataTestSubj}>
-      <EuiFlexGroup gutterSize="s" direction="row">
+      <EuiFlexGroup gutterSize="s" direction="column">
         <EuiFlexItem>
           <EuiCheckableCard
             id={ALERT_CARD_ID}
