@@ -10,6 +10,7 @@ import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts'
 import React from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { unit } from '@kbn/apm-common';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -18,7 +19,6 @@ import type { AnomalyThreshold } from '../../../../common/anomaly_detection/anom
 import type { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { unit } from '../../../utils/style';
 import { getTimeZone } from './helper/timezone';
 import { TimeseriesChart } from './timeseries_chart';
 

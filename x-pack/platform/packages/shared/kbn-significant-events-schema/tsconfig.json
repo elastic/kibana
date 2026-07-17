@@ -10,8 +10,9 @@
     "@kbn/zod-helpers",
     "@kbn/streamlang",
     "@kbn/inference-common",
-    "@kbn/streams-schema",
-    "@kbn/workflows"
+    "@kbn/workflows",
+    "@kbn/licensing-types",
+    "@kbn/i18n"
   ],
   "exclude": ["target/**/*"]
 }

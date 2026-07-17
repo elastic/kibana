@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
-import { rangeRt } from '../../default_api_types';
+import { rangeSchema } from '../../default_api_types';
 
 export interface ObservabilityOverviewResponse {
   serviceCount: number;
@@ -19,7 +18,10 @@ export interface ObservabilityOverviewResponse {
 
 export const observabilityOverviewRoute = defineRoute<ObservabilityOverviewResponse>()({
   endpoint: 'GET /internal/apm/observability_overview',
-  params: t.type({
-    query: t.intersection([rangeRt, t.type({ bucketSize: toNumberRt, intervalString: t.string })]),
+  params: z.object({
+    query: rangeSchema.extend({
+      bucketSize: z.coerce.number(),
+      intervalString: z.string(),
+    }),
   }),
 });

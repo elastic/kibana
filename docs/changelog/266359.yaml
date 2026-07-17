@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/266359
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+title: Fix orphaned migration on partial upload failure
+description: "Fixes orphaned migration entries left behind when uploading invalid rules or dashboard migration files."

@@ -64,6 +64,7 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   model?: string;
   signal?: AbortSignal;
   timeout?: number;
+  maxContentLength?: number;
   telemetryMetadata?: ConnectorTelemetryMetadata;
 }
 
@@ -105,6 +106,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   protected model?: string;
   protected signal?: AbortSignal;
   protected timeout?: number;
+  protected maxContentLength?: number;
 
   constructor(args: InferenceChatModelParams) {
     super(args);
@@ -117,6 +119,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.model = args.model;
     this.signal = args.signal;
     this.timeout = args.timeout;
+    this.maxContentLength = args.maxContentLength;
     this.maxRetries = args.maxRetries;
   }
 
@@ -204,6 +207,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       maxRetries: this.maxRetries,
       metadata: { connectorTelemetry: this.telemetryMetadata },
       timeout: options.timeout ?? this.timeout,
+      maxContentLength: this.maxContentLength,
     };
   }
 

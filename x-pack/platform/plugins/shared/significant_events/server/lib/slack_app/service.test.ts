@@ -52,15 +52,20 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
   } as unknown as Logger;
   (logger.get as jest.Mock).mockReturnValue(logger);
 
+  const getLicense = jest.fn().mockResolvedValue({ type: 'platinum' });
+
   const server = {
     logger,
     config: { relayService: { url: 'https://relay.test' } },
     agentBuilder: {},
+    kibanaVersion: '9.2.0',
     relayClient: hasRelayClient ? { startInstall, fetchClaim, unbind } : undefined,
     core: {
       savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
       featureFlags: { getBooleanValue },
+      http: { basePath: { publicBaseUrl: 'https://kibana.test' }, getServerInfo: jest.fn() },
     },
+    licensing: { getLicense },
     security: {
       authc: {
         apiKeys: { grantAsInternalUser, invalidateAsInternalUser },
@@ -108,7 +113,8 @@ describe('SlackAppService', () => {
           metadata: expect.objectContaining({ managed: true, managed_by: 'nightshift-relay' }),
           kibana_role_descriptors: {
             nightshift_relay_agent_builder: expect.objectContaining({
-              kibana: [{ spaces: ['*'], feature: { agentBuilder: ['read'] } }],
+              elasticsearch: { cluster: ['monitor_inference'], indices: [], run_as: [] },
+              kibana: [{ spaces: ['*'], feature: { agentBuilder: ['read'], actions: ['read'] } }],
             }),
           },
         })
@@ -117,6 +123,9 @@ describe('SlackAppService', () => {
       // secret exists anywhere in the exchange.
       expect(startInstall).toHaveBeenCalledWith({
         kibana_api_key: Buffer.from('key-1:secret').toString('base64'),
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
         created_by_user_key: 'admin',
       });
       expect(soClient.create).toHaveBeenCalledWith(

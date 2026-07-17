@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { type Coordinate } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt, offsetRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
 
 export interface CrashDistributionResponse {
   currentPeriod: Array<{ x: number; y: number }>;
@@ -18,18 +18,17 @@ export interface CrashDistributionResponse {
 
 export const crashDistributionRoute = defineRoute<CrashDistributionResponse>()({
   endpoint: 'GET /internal/apm/mobile-services/{serviceName}/crashes/distribution',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
+  params: z.object({
+    path: z.object({
+      serviceName: z.string(),
     }),
-    query: t.intersection([
-      t.partial({
-        groupId: t.string,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      offsetRt,
-    ]),
+    query: z
+      .object({
+        groupId: z.string().optional(),
+      })
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(rangeSchema)
+      .merge(offsetSchema),
   }),
 });

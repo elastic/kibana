@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { type Coordinate } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt, offsetRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
 
 export interface ColdstartRateResponse {
   currentPeriod: {
@@ -23,11 +23,13 @@ export interface ColdstartRateResponse {
 
 export const transactionChartsColdstartRateRoute = defineRoute<ColdstartRateResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      t.type({ transactionType: t.string }),
-      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
-    ]),
+  params: z.object({
+    path: z.object({ serviceName: z.string() }),
+    query: z
+      .object({ transactionType: z.string() })
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(rangeSchema)
+      .merge(offsetSchema),
   }),
 });
