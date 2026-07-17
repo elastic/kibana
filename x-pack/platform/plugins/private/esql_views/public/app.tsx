@@ -22,7 +22,10 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { mockEsqlViews, type EsqlView } from './mock_views';
-import { CreateEditEsqlViewFlyout } from './create_edit_view_flyout';
+import {
+  CreateEditEsqlViewFlyout,
+  type CreateEditEsqlViewFlyoutProps,
+} from './create_edit_view_flyout';
 import { deleteView } from './services/views_client';
 import { getAllLocalViewMetadata, removeLocalViewMetadata } from './services/local_metadata';
 
@@ -30,6 +33,11 @@ export interface EsqlViewsAppProps {
   notifications: NotificationsStart;
   http: HttpStart;
   data: DataPublicPluginStart;
+  /**
+   * Lets prototype versions (see `versioned_app.tsx`) swap in an alternate take on the
+   * create/edit flyout while reusing this table/list page as-is. Defaults to the V1 flyout.
+   */
+  FlyoutComponent?: React.FunctionComponent<CreateEditEsqlViewFlyoutProps>;
 }
 
 interface FlyoutState {
@@ -67,6 +75,7 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
   notifications,
   http,
   data,
+  FlyoutComponent = CreateEditEsqlViewFlyout,
 }) => {
   const [views, setViews] = useState<EsqlView[]>(buildInitialViews);
   const [flyoutState, setFlyoutState] = useState<FlyoutState | null>(null);
@@ -225,7 +234,7 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
         data-test-subj="esqlViewsTable"
       />
       {flyoutState && (
-        <CreateEditEsqlViewFlyout
+        <FlyoutComponent
           mode={flyoutState.mode}
           initialView={flyoutState.view}
           http={http}

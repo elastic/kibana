@@ -9,7 +9,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { EsqlViewsApp } from './app';
+import { VersionedEsqlViewsApp } from './versioned_app';
+import { PrototypeVersionSwitcher } from './prototype_version_switcher';
 import type { StartDependencies } from './types';
 
 export const mountManagementSection = (
@@ -17,9 +18,14 @@ export const mountManagementSection = (
   pluginsStart: StartDependencies,
   { element }: ManagementAppMountParams
 ) => {
+  const unregisterVersionSwitcher = coreStart.chrome.setBreadcrumbsAppendExtension({
+    content: <PrototypeVersionSwitcher />,
+    order: 0,
+  });
+
   ReactDOM.render(
     coreStart.rendering.addContext(
-      <EsqlViewsApp
+      <VersionedEsqlViewsApp
         notifications={coreStart.notifications}
         http={coreStart.http}
         data={pluginsStart.data}
@@ -29,6 +35,7 @@ export const mountManagementSection = (
   );
 
   return () => {
+    unregisterVersionSwitcher();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

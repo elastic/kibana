@@ -10,6 +10,7 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
+  EuiEmptyPrompt,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -283,42 +284,62 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
           }
           dataTestSubj="esqlViewsQueryEditor"
         />
-        {previewResult && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiAccordion
-              id="esqlViewsResultsAccordion"
-              buttonContent={
-                <EuiTitle size="xxs">
-                  <h4>
-                    {i18n.translate('esqlViews.flyout.resultsAccordionTitle', {
-                      defaultMessage: 'ES|QL Query Results',
-                    })}
-                  </h4>
-                </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiAccordion
+          id="esqlViewsResultsAccordion"
+          buttonContent={
+            <EuiTitle size="xxs">
+              <h4>
+                {i18n.translate('esqlViews.flyout.resultsAccordionTitle', {
+                  defaultMessage: 'ES|QL Query Results',
+                })}
+              </h4>
+            </EuiTitle>
+          }
+          forceState={isAccordionOpen ? 'open' : 'closed'}
+          onToggle={setIsAccordionOpen}
+          extraAction={
+            previewResult ? (
+              <EuiNotificationBadge size="m" color="subdued">
+                {previewResult.rows.length}
+              </EuiNotificationBadge>
+            ) : undefined
+          }
+          data-test-subj="esqlViewsResultsAccordion"
+        >
+          <EuiSpacer size="s" />
+          {previewResult ? (
+            <ESQLDataGrid
+              rows={previewResult.rows}
+              columns={previewResult.columns}
+              dataView={previewResult.dataView}
+              query={query}
+              flyoutType="overlay"
+              initialRowHeight={0}
+              controlColumnIds={['openDetails']}
+            />
+          ) : (
+            <EuiEmptyPrompt
+              titleSize="xs"
+              iconType="search"
+              title={
+                <h4>
+                  {i18n.translate('esqlViews.flyout.resultsEmptyPromptTitle', {
+                    defaultMessage: 'No results yet',
+                  })}
+                </h4>
               }
-              forceState={isAccordionOpen ? 'open' : 'closed'}
-              onToggle={setIsAccordionOpen}
-              extraAction={
-                <EuiNotificationBadge size="m" color="subdued">
-                  {previewResult.rows.length}
-                </EuiNotificationBadge>
+              body={
+                <p>
+                  {i18n.translate('esqlViews.flyout.resultsEmptyPromptBody', {
+                    defaultMessage: 'Run the query above to preview its results here.',
+                  })}
+                </p>
               }
-              data-test-subj="esqlViewsResultsAccordion"
-            >
-              <EuiSpacer size="s" />
-              <ESQLDataGrid
-                rows={previewResult.rows}
-                columns={previewResult.columns}
-                dataView={previewResult.dataView}
-                query={query}
-                flyoutType="overlay"
-                initialRowHeight={0}
-                controlColumnIds={['openDetails']}
-              />
-            </EuiAccordion>
-          </>
-        )}
+              data-test-subj="esqlViewsResultsEmptyPrompt"
+            />
+          )}
+        </EuiAccordion>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
