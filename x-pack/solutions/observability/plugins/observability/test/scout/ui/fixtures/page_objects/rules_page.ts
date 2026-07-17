@@ -77,10 +77,6 @@ export class RulesPage {
    * Clicks the settings link to open the flyout
    */
   async openSettingsFlyout() {
-    await this.page.testSubj.waitForSelector('app-menu', { state: 'visible' });
-    if (!(await this.settingsLink.isVisible())) {
-      await this.page.testSubj.click('app-menu-overflow-button');
-    }
     await expect(this.settingsLink).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.settingsLink.click();
     await expect(this.settingsFlyout).toBeVisible();

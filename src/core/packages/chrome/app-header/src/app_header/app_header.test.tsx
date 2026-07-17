@@ -59,7 +59,9 @@ describe('AppHeaderView', () => {
     expect(runShare).toHaveBeenCalledTimes(1);
 
     // The share item remains visible in the trailing app menu.
-    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    if (!screen.queryByTestId('shareTopNavButton')) {
+      fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    }
     expect(await screen.findByTestId('shareTopNavButton')).toBeInTheDocument();
   });
 

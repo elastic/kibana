@@ -20,8 +20,8 @@ const Example = ({ config }: Props) => {
 ## Responsive behavior
 
 Inside the Chrome application layout, the menu responds to the application's available width using
-the active EUI theme breakpoints. It collapses at `xs` and `s`, shows its medium layout at `m`, and
-shows the full menu at `l` and `xl`. This includes width changes caused by pushed flyouts.
+the active EUI theme breakpoints. It collapses at `xs`, shows its medium layout at `s`, and shows the
+full menu at `m`, `l`, and `xl`. This includes width changes caused by pushed flyouts.
 
 When no Chrome application measurement is available, the menu falls back to the corresponding
 viewport breakpoint using the previous viewport mapping: `xs` and `s` collapse, `m` and `l` use
