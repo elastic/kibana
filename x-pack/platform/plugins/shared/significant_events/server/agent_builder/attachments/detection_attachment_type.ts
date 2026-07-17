@@ -12,10 +12,8 @@ import type {
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/core/server';
 import type { Detection, LifecycleDetection } from '@kbn/significant-events-schema';
-import {
-  lifecycleDetectionAttachmentSchema,
-  SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
-} from '../../../common';
+import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '../../../common/significant_event_detection_attachment';
+import { lifecycleDetectionAttachmentSchema } from '../../../common/significant_event_detection_attachment_schema';
 import type { GetScopedClients } from '../../routes/types';
 
 interface CreateSignificantEventDetectionAttachmentTypeOptions {

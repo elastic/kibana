@@ -52,7 +52,6 @@ export {
 
 export {
   SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
-  lifecycleDetectionAttachmentSchema,
   type SignificantEventDetectionAttachment,
   type PendingSignificantEventDetectionAttachment,
 } from './significant_event_detection_attachment';

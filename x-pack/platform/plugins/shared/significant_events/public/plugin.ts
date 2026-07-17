@@ -6,24 +6,12 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { registerSignificantEventFeatureAttachment } from './agent_builder/feature_attachment';
-import { registerSignificantEventDetectionAttachment } from './agent_builder/detection_attachment';
-import type {
-  SignificantEventsPublicPluginSetupDependencies,
-  SignificantEventsPublicPluginStartDependencies,
-} from './types';
 
 export type SignificantEventsPublicPluginSetup = Record<string, never>;
 export type SignificantEventsPublicPluginStart = Record<string, never>;
 
 export class SignificantEventsPublicPlugin
-  implements
-    Plugin<
-      SignificantEventsPublicPluginSetup,
-      SignificantEventsPublicPluginStart,
-      SignificantEventsPublicPluginSetupDependencies,
-      SignificantEventsPublicPluginStartDependencies
-    >
+  implements Plugin<SignificantEventsPublicPluginSetup, SignificantEventsPublicPluginStart>
 {
   constructor(_ctx: PluginInitializerContext) {}
 
@@ -31,15 +19,7 @@ export class SignificantEventsPublicPlugin
     return {};
   }
 
-  start(
-    _core: CoreStart,
-    plugins: SignificantEventsPublicPluginStartDependencies
-  ): SignificantEventsPublicPluginStart {
-    if (plugins.agentBuilder) {
-      registerSignificantEventFeatureAttachment({ agentBuilder: plugins.agentBuilder });
-      registerSignificantEventDetectionAttachment({ agentBuilder: plugins.agentBuilder });
-    }
-
+  start(_core: CoreStart): SignificantEventsPublicPluginStart {
     return {};
   }
 }

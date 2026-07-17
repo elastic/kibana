@@ -11,7 +11,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import {
   SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
   type SignificantEventDetectionAttachment,
-} from '../../common';
+} from '@kbn/significant-events-plugin/common';
 
 export const significantEventDetectionAttachmentDefinition: AttachmentUIDefinition<SignificantEventDetectionAttachment> =
   {

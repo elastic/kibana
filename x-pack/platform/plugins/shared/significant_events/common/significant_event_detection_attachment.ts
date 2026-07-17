@@ -6,8 +6,7 @@
  */
 
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { CHANGE_POINT_TYPES, type LifecycleDetection } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import type { LifecycleDetection } from '@kbn/significant-events-schema';
 
 export const SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE = 'platform.sig_event_detection' as const;
 
@@ -20,12 +19,3 @@ export type PendingSignificantEventDetectionAttachment = AttachmentInput<
   typeof SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
   LifecycleDetection
 >;
-
-export const lifecycleDetectionAttachmentSchema = z.object({
-  '@timestamp': z.string(),
-  detection_id: z.string(),
-  rule_name: z.string().optional(),
-  rule_uuid: z.string().optional(),
-  stream_name: z.string().optional(),
-  change_point_type: z.enum(CHANGE_POINT_TYPES).optional(),
-});

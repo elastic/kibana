@@ -560,6 +560,14 @@ export class Plugin
       );
     });
 
+    if (pluginsStart.agentBuilder) {
+      void import('./pages/nightshift/agent_builder/register_attachments').then(
+        ({ registerNightshiftAgentBuilderAttachments }) => {
+          registerNightshiftAgentBuilderAttachments({ agentBuilder: pluginsStart.agentBuilder! });
+        }
+      );
+    }
+
     return {
       config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
