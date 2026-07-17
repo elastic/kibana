@@ -244,7 +244,7 @@ export function SignificantEventsDiscoveryPage() {
 
   return (
     <>
-      <StreamsAppHeader title={pageTitle} menu={menu} tabs={tabs} spacing="standard" />
+      <StreamsAppHeader title={pageTitle} menu={menu} tabs={tabs} />
       <KiGenerationProvider onFailed={onOnboardingFailed}>
         <SignificantEventsDiscoveryProvider>
           <StreamsAppPageTemplate.Body grow>
