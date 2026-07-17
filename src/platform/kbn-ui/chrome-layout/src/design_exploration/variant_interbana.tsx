@@ -95,6 +95,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
   // used far more sparingly than in Linbana — mainly on individual cards and
   // controls, not as internal row dividers within a shared container.
   const INTERBANA_HAIRLINE = `1px solid color-mix(in srgb, ${colors.borderBaseSubdued} 70%, transparent)`;
+  const INTERBANA_SURFACE_HOVER_FILL = `color-mix(in srgb, ${colors.textParagraph} 4%, transparent)`;
 
   return css`
     // ${scope} {
@@ -551,6 +552,10 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       border-radius: ${INTERBANA_RADIUS_PANEL_COMPACT}px !important;
     }
 
+    ${scope} .dshLayout--editing .embPanel__header:hover {
+      background-color: ${INTERBANA_SURFACE_HOVER_FILL} !important;
+    }
+
     ${scope}
     [class*='css-'][class*='use_hover_actions_styles--containerStyles-use_hover_actions_styles--singleWrapperStyles-use_hover_actions_styles--singleWrapperStyles-use_hover_actions_styles--hoverActionStyles-use_hover_actions_styles--containerStyles']
       .embPanel {
@@ -740,6 +745,28 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       [class*='app_menu_action_button--buttonCss'] {
       background-color: transparent !important;
       border-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
+    }
+
+    ${scope} [data-test-subj='appHeader'] [class*='css-'][class*='-euiButtonDisplay-euiButtonEmpty'][class*='app_menu_item--buttonCss'] {
+      border-radius: ${INTERBANA_RADIUS_CONTROL}px !important;
+    }
+
+    ${scope} [data-test-subj='appHeader'] [class*='css-'][class*='-euiButtonIcon']:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary) {
+      border-radius: ${INTERBANA_RADIUS_CONTROL}px !important;
+    }
+
+    ${scope} [data-test-subj='appHeader'] .euiSplitButtonActionPrimary {
+      border-start-start-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
+      border-end-start-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
+      border-start-end-radius: 0 !important;
+      border-end-end-radius: 0 !important;
+    }
+
+    ${scope} [data-test-subj='appHeader'] .euiSplitButtonActionSecondary {
+      border-start-end-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
+      border-end-end-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
+      border-start-start-radius: 0 !important;
+      border-end-start-radius: 0 !important;
     }
 
     ${scope} .kbnChromeLayoutApplication:has([data-test-subj='appHeader']) {
