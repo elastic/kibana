@@ -45,7 +45,7 @@ export const BehaviourStep: React.FC<BehaviourStepProps> = ({
       <ModeSelect
         value={isAlert ? 'alert' : 'signal'}
         onChange={onKindChange}
-        disabled={(!builderType && !state.queryCommitted) || isEditing || state.childOpen}
+        disabled={(!builderType && !state.queryCommitted) || isEditing}
         data-test-subj="composeDiscoverModeSelect"
       />
       {isAlert && (
