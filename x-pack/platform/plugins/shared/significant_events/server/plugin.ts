@@ -20,7 +20,6 @@ import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { SignificantEventsConfig } from '../common/config';
-import { isSignificantEventsMemoryEnabled } from './memory_and_investigation/lib/memory/is_significant_events_memory_enabled';
 import { RelayClient } from './lib/slack_app/relay_client';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import {
@@ -64,11 +63,8 @@ import {
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
-import { isInvestigationEnabled } from './memory_and_investigation/lib/investigation/is_investigation_enabled';
-import {
-  SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG,
-  SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
-} from '../common/memory_and_investigation';
+import { installInvestigationAgent } from './memory_and_investigation/lib/investigation/install_investigation_agent';
+import { registerInvestigationAgentType } from './memory_and_investigation/agents/investigation';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
 import { isSignificantEventsAvailable } from './lib/feature_flags/is_significant_events_available';
@@ -252,20 +248,18 @@ export class SignificantEventsPlugin
     }
 
     if (plugins.agentBuilder) {
+      registerInvestigationAgentType(plugins.agentBuilder);
       void core
         .getStartServices()
-        .then(async ([coreStart]) => {
+        .then(async () => {
           const { getScopedClients, server } = this;
           if (!getScopedClients || !server) return;
-          const investigationEnabled = await isInvestigationEnabled(coreStart.featureFlags);
-
           await registerStreamsAgentBuilder({
             agentBuilder: plugins.agentBuilder!,
             getScopedClients,
             server,
             logger: this.logger,
             telemetry: telemetryClient,
-            investigationEnabled,
           });
         })
         .catch((err) => {
@@ -369,10 +363,11 @@ export class SignificantEventsPlugin
       }
     }
 
-    // Each flag observable emits its current value on subscribe. `skip(1)` drops that initial
-    // emission so these streams represent *changes* only; the initial install/registration is driven
-    // explicitly below. `filter((enabled) => enabled)` then keeps only the off->on transitions, since
-    // installation only ever adds resources (a flip back to off is handled by request-time gating).
+    // The availability flag observable emits its current value on subscribe. `skip(1)` drops that
+    // initial emission so the stream represents *changes* only; the initial install/registration is
+    // driven explicitly below. `filter((enabled) => enabled)` then keeps only the off->on
+    // transitions, since installation only ever adds resources (a flip back to off is handled by
+    // request-time gating).
     const availabilityEnabled$ = core.featureFlags
       .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false)
       .pipe(
@@ -381,41 +376,23 @@ export class SignificantEventsPlugin
         filter((enabled) => enabled)
       );
 
-    const memoryEnabled$ = core.featureFlags
-      .getBooleanValue$(SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
-      .pipe(
-        distinctUntilChanged(),
-        skip(1),
-        filter((enabled) => enabled)
-      );
-
-    const investigationEnabled$ = core.featureFlags
-      .getBooleanValue$(SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG, false)
-      .pipe(
-        distinctUntilChanged(),
-        skip(1),
-        filter((enabled) => enabled)
-      );
-
     // Managed workflows go through a single serialized installer that owns the only `ready()` call,
     // so a runtime flag flip can never close the reconciliation window with a partial set (which
-    // would prune the owner's other workflows). Created here so both the availability path and the
-    // memory/investigation flips below share the same instance.
+    // would prune the owner's other workflows). Created here so the availability path below reuses
+    // the same instance.
     if (plugins.workflowsExtensions) {
       const { workflowsExtensions } = plugins;
       this.managedWorkflowsInstaller = createManagedWorkflowsInstaller({
         getClient: () =>
           workflowsExtensions.initManagedWorkflowsClient(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER),
         isAvailable: () => isSignificantEventsAvailable(core.featureFlags),
-        isMemoryEnabled: () => isSignificantEventsMemoryEnabled(core.featureFlags),
-        isInvestigationEnabled: () => isInvestigationEnabled(core.featureFlags),
         logger: this.logger,
       });
     }
 
     // ES templates and managed workflows are installed only when significant events is available,
     // and (re)installed if the availability flag flips on at runtime. This keeps a deployment fully
-    // clean while the feature has never been enabled, mirroring the memory/investigation flip pattern.
+    // clean while the feature has never been enabled.
     void this.ensureSignificantEventsInstalled(core).catch((error: unknown) => {
       this.logManagedResourceError('startup', error);
     });
@@ -428,27 +405,25 @@ export class SignificantEventsPlugin
       })
     );
 
-    if (this.managedWorkflowsInstaller) {
-      const installer = this.managedWorkflowsInstaller;
+    // Editable investigation agent: installed via agents.ensure when significant events is
+    // available. skip(1) on availabilityEnabled$ drops the initial emission, so catch up at
+    // startup as well. Per-space installs also happen just-in-time from triggerInvestigationWorkflow.
+    if (plugins.agentBuilder) {
+      const agentBuilder = plugins.agentBuilder;
+      const installAgent = () =>
+        installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID }).catch(
+          (error: unknown) => {
+            this.logManagedResourceError('investigation agent', error);
+          }
+        );
 
-      // Memory/investigation flips (re)install the full workflow set so newly enabled workflows are
-      // added. They reuse the serialized installer above (the sole `ready()` caller), so a flip can
-      // never close the reconciliation window with only its own subset installed.
-      this.subscriptions.push(
-        memoryEnabled$.subscribe(() => {
-          void installer.install().catch((error: unknown) => {
-            this.logManagedResourceError('memory feature flag change', error);
-          });
-        })
-      );
+      void (async () => {
+        if (await isSignificantEventsAvailable(core.featureFlags)) {
+          await installAgent();
+        }
+      })();
 
-      this.subscriptions.push(
-        investigationEnabled$.subscribe(() => {
-          void installer.install().catch((error: unknown) => {
-            this.logManagedResourceError('investigation feature flag change', error);
-          });
-        })
-      );
+      this.subscriptions.push(availabilityEnabled$.subscribe(() => void installAgent()));
     }
 
     if (plugins.agentBuilder && this.server && this.getScopedClients) {
@@ -461,10 +436,6 @@ export class SignificantEventsPlugin
         logger: this.logger,
       });
 
-      const isMemoryEnabled = async () =>
-        (await isSignificantEventsAvailable(core.featureFlags)) &&
-        (await isSignificantEventsMemoryEnabled(core.featureFlags));
-
       // Managed resources (templates + workflows) and agent-builder skills install on independent
       // async paths, so on a runtime flip skills can be advertised a moment before their templates and
       // workflows finish installing. We accept that transient window rather than serializing skills
@@ -473,9 +444,8 @@ export class SignificantEventsPlugin
       // runtime flips are rare admin actions. On a normal boot with the flag already on there is no
       // window, since installation runs before any request can reach a skill.
 
-      // Core + investigation skills: registered through the start-phase skills API, gated by the
-      // availability flag (the investigation skill carries an extra investigation-flag gate), and
-      // (re)registered when either flag flips on.
+      // Core skills (including investigation): registered through the start-phase skills API, gated
+      // by the availability flag and (re)registered when the flag flips on.
       registerSignificantEventsSkills({
         agentBuilder,
         telemetry,
@@ -483,41 +453,39 @@ export class SignificantEventsPlugin
         memoryToolsOptions,
         logger: this.logger,
         isAvailable: () => isSignificantEventsAvailable(core.featureFlags),
-        isInvestigationEnabled: () => isInvestigationEnabled(core.featureFlags),
       })
         .then(({ ensureRegistered }) => {
           const onFlip = () => {
             void ensureRegistered().catch((error: unknown) => {
-              this.logSkillsRegistrationError('core/investigation', error);
+              this.logSkillsRegistrationError('core', error);
             });
           };
           this.subscriptions.push(availabilityEnabled$.subscribe(onFlip));
-          this.subscriptions.push(investigationEnabled$.subscribe(onFlip));
-          // A flag may have flipped between the initial registration inside the registrar and these
-          // subscriptions; `skip(1)` would have dropped that emission, so re-check current state once
-          // now. `ensureRegistered` is idempotent, so this is a no-op when nothing changed.
+          // The availability flag may have flipped between the initial registration inside the
+          // registrar and this subscription; `skip(1)` would have dropped that emission, so re-check
+          // current state once now. `ensureRegistered` is idempotent, so this is a no-op when
+          // nothing changed.
           onFlip();
         })
         .catch((err) => {
           this.logger.error(`Failed to register significant events skills: ${err.message}`);
         });
 
-      // Memory skills: gated by availability AND the memory flag; (re)registered on either flip.
+      // Memory skills: gated by availability; (re)registered when the flag flips on.
       registerStreamsMemoryAgentBuilder({
         agentBuilder,
         memoryToolsOptions,
         logger: this.logger,
-        isMemoryEnabled,
+        isAvailable: () => isSignificantEventsAvailable(core.featureFlags),
       })
-        .then(({ onMemoryEnabled }) => {
+        .then(({ ensureRegistered }) => {
           const onFlip = () => {
-            void onMemoryEnabled().catch((error: unknown) => {
+            void ensureRegistered().catch((error: unknown) => {
               this.logSkillsRegistrationError('memory', error);
             });
           };
           this.subscriptions.push(availabilityEnabled$.subscribe(onFlip));
-          this.subscriptions.push(memoryEnabled$.subscribe(onFlip));
-          // Catch up on any flip that landed before these subscriptions (see the note above).
+          // Catch up on any flip that landed before this subscription (see the note above).
           onFlip();
         })
         .catch((err) => {
