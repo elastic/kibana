@@ -241,8 +241,7 @@ export const RuleDetailsPage = connector(
       'ruleChangesHistoryEnabled'
     );
     const [ruleChangesHistoryAdvancedSetting] = useUiSetting$<boolean>(
-      ENABLE_RULE_CHANGES_HISTORY_SETTING,
-      false
+      ENABLE_RULE_CHANGES_HISTORY_SETTING
     );
     const isRuleChangesHistoryEnabled =
       ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;

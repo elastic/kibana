@@ -224,7 +224,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       },
       management: {
         insightsAndAlerting: {
-          triggersActions: true,
+          triggersActionsRules: true,
         },
       },
       indexPatterns: {

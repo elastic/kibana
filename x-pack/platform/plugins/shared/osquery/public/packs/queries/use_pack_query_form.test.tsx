@@ -277,4 +277,74 @@ describe('usePackQueryForm', () => {
       expect(result.rrule_schedule?.start_date).toMatch(RFC3339_REGEX);
     });
   });
+
+  describe('deserializedSchedule', () => {
+    // Regression (#276903): must be a single memoized value, not two
+    // independent `deserializeSchedule` calls that can diverge.
+    const NOW = new Date('2026-06-19T12:00:00.000Z');
+
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(NOW);
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    // Missing `start_date` forces `deserializeSchedule`'s `new Date()` fallback.
+    const rruleWithoutStartDate = { rrule: 'FREQ=DAILY' } as unknown as {
+      rrule: string;
+      start_date: string;
+    };
+
+    it('matches the schedule seeded onto defaultValues.schedule when the query has no explicit override', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          packSchedule: {
+            schedule_type: 'rrule',
+            rrule_schedule: rruleWithoutStartDate,
+          },
+        })
+      );
+
+      expect(result.current.deserializedSchedule).toEqual(result.current.getValues('schedule'));
+    });
+
+    it('matches the schedule seeded onto defaultValues.schedule for an existing per-query override', () => {
+      const defaultValue = makeBasePayload({
+        schedule_type: 'rrule' as const,
+        rrule_schedule: rruleWithoutStartDate,
+      }) as unknown as PackSOQueryFormData;
+
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue,
+        })
+      );
+
+      expect(result.current.deserializedSchedule).toEqual(result.current.getValues('schedule'));
+    });
+
+    it('re-renders with the exact same startDate rather than a freshly re-evaluated `new Date()`', () => {
+      const packSchedule = {
+        schedule_type: 'rrule' as const,
+        rrule_schedule: rruleWithoutStartDate,
+      };
+      const initialProps = { uniqueQueryIds: [] as string[], packSchedule };
+
+      const { result, rerender } = renderHook(
+        (props: Parameters<typeof usePackQueryForm>[0]) => usePackQueryForm(props),
+        { initialProps }
+      );
+
+      const firstStartDate = result.current.deserializedSchedule.startDate.getTime();
+
+      jest.setSystemTime(new Date(NOW.getTime() + 60_000));
+      rerender(initialProps);
+
+      expect(result.current.deserializedSchedule.startDate.getTime()).toBe(firstStartDate);
+    });
+  });
 });
