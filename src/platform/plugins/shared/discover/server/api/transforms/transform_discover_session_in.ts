@@ -53,16 +53,16 @@ const extractEsqlFingerprint = (
   const adHocDataViews = get(attributes, 'state.adHocDataViews');
 
   if (!isRecord(adHocDataViews)) return undefined;
-  const dataViewSpec = adHocDataViews[dataViewId];
+  const lensDataViewSpec = adHocDataViews[dataViewId];
 
-  if (!isRecord(dataViewSpec) || dataViewSpec.type !== ESQL_TYPE) {
+  if (!isRecord(lensDataViewSpec) || lensDataViewSpec.type !== ESQL_TYPE) {
     return undefined;
   }
 
   return {
     dataViewId,
-    ...(typeof dataViewSpec.timeFieldName === 'string' &&
-      dataViewSpec.timeFieldName !== '' && { timeField: dataViewSpec.timeFieldName }),
+    ...(typeof lensDataViewSpec.timeFieldName === 'string' &&
+      lensDataViewSpec.timeFieldName !== '' && { timeField: lensDataViewSpec.timeFieldName }),
   };
 };
 
