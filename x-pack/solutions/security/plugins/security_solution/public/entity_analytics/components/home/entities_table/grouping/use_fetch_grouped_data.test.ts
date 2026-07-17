@@ -461,6 +461,29 @@ describe('useFetchResolutionGroupDataPathA', () => {
     expect(esqlQuery).toContain(`${ENTITY_FIELDS.RESOLVED_TO} IS NULL`);
   });
 
+  it('sorts by effective_risk DESC then entity.id ASC for stable pagination ties', async () => {
+    (getESQLResults as jest.Mock).mockResolvedValue(makePathAEsqlResponse([]));
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: {
+          hits: { total: { value: 0 } },
+          aggregations: { aliases_by_target: { buckets: [] } },
+        },
+      })
+    );
+
+    renderHook(() => useFetchResolutionGroupDataPathA({ pageIndex: 0, pageSize: 10 }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(getESQLResults as jest.Mock).toHaveBeenCalled());
+
+    const { esqlQuery } = (getESQLResults as jest.Mock).mock.calls[0][0];
+    expect(esqlQuery).toContain(
+      `SORT effective_risk DESC NULLS LAST, ${ENTITY_FIELDS.ENTITY_ID} ASC`
+    );
+  });
+
   it('uses track_total_hits result as groupsCount', async () => {
     (getESQLResults as jest.Mock).mockResolvedValue(makePathAEsqlResponse([]));
     mockSearch.mockReturnValue(
@@ -726,6 +749,20 @@ describe('useFetchResolutionGroupDataPathB', () => {
     expect(esqlQuery).toContain(
       `COALESCE(${ENTITY_FIELDS.RESOLVED_TO}, ${ENTITY_FIELDS.ENTITY_ID})`
     );
+  });
+
+  it('sorts by group_risk DESC, group_size DESC, then group_key ASC for stable pagination ties', async () => {
+    (getESQLResults as jest.Mock).mockResolvedValue(makePathBEsqlResponse([]));
+    mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: { value: 0 }, hits: [] } } }));
+
+    renderHook(() => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10 }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(getESQLResults as jest.Mock).toHaveBeenCalled());
+
+    const { esqlQuery } = (getESQLResults as jest.Mock).mock.calls[0][0];
+    expect(esqlQuery).toContain('SORT group_risk DESC NULLS LAST, group_size DESC, group_key ASC');
   });
 
   it('reports the distinct-group count as groupsCount so filtered views paginate past page 1', async () => {

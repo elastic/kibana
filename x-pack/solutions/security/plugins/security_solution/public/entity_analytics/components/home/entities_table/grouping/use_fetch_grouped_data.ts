@@ -206,7 +206,7 @@ const buildTopNTargetsEsql = (indexPattern: string, limit: number): string =>
   `FROM ${indexPattern}
 | WHERE ${ENTITY_FIELDS.ENTITY_TYPE} IN (${typeList}) AND ${ENTITY_FIELDS.RESOLVED_TO} IS NULL
 | EVAL effective_risk = COALESCE(${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}, ${ENTITY_FIELDS.ENTITY_RISK})
-| SORT effective_risk DESC NULLS LAST
+| SORT effective_risk DESC NULLS LAST, ${ENTITY_FIELDS.ENTITY_ID} ASC
 | LIMIT ${limit}
 | KEEP ${ENTITY_FIELDS.ENTITY_ID}, ${ENTITY_FIELDS.ENTITY_NAME}, ${ENTITY_FIELDS.ENTITY_TYPE}, effective_risk, ${ENTITY_FIELDS.ENTITY_RISK}, ${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}`;
 
@@ -215,7 +215,7 @@ const buildStatsJoinEsql = (indexPattern: string, limit: number): string =>
 | WHERE ${ENTITY_FIELDS.ENTITY_TYPE} IN (${typeList})
 | EVAL group_key = COALESCE(${ENTITY_FIELDS.RESOLVED_TO}, ${ENTITY_FIELDS.ENTITY_ID})
 | STATS group_risk = MAX(COALESCE(${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}, ${ENTITY_FIELDS.ENTITY_RISK})) WHERE ${ENTITY_FIELDS.RESOLVED_TO} IS NULL, group_size = COUNT(*) BY group_key
-| SORT group_risk DESC NULLS LAST, group_size DESC
+| SORT group_risk DESC NULLS LAST, group_size DESC, group_key ASC
 | LIMIT ${limit}`;
 
 /**
