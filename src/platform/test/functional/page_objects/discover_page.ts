@@ -98,7 +98,7 @@ export class DiscoverPageObject extends FtrService {
     saveAsNew?: boolean,
     { tags = [], storeTimeRange }: { tags?: string[]; storeTimeRange?: boolean } = {}
   ) {
-    const mode = await this.globalNav.getFirstBreadcrumb();
+    const isEmbeddedEditor = await this.isOnDashboardsEditMode();
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
     await this.retry.waitFor(
@@ -145,7 +145,9 @@ export class DiscoverPageObject extends FtrService {
     // that issue.  But it does typically take about 3 retries to
     // complete with the expected searchName.
 
-    if (mode === 'Discover') {
+    // Skip the persist-verification wait only in the embedded Dashboards editor, where the last
+    // breadcrumb is `Editing {title}` and never matches searchName. See loadSavedSearch above.
+    if (!isEmbeddedEditor) {
       await this.retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
         const last = await this.getCurrentQueryName();
 
@@ -298,12 +300,16 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async loadSavedSearch(searchName: string) {
-    const mode = await this.globalNav.getFirstBreadcrumb();
+    const isEmbeddedEditor = await this.isOnDashboardsEditMode();
     await this.openLoadSavedSearchPanel();
     await this.savedObjectsFinder.filterEmbeddableNames(`"${searchName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
     await this.header.waitUntilLoadingHasFinished();
-    if (mode === 'Discover') {
+    // Skip the load-verification wait only in the embedded Dashboards editor, where the last
+    // breadcrumb is `Editing {title}` and never matches searchName. The previous `getFirstBreadcrumb`
+    // check also skipped it in serverless standalone Discover (first breadcrumb = solution name),
+    // leaving the load race unguarded there.
+    if (!isEmbeddedEditor) {
       await this.retry.waitFor(`saved search ${searchName} is loaded`, async () => {
         const currentName = await this.getCurrentQueryName();
         return currentName === searchName;
