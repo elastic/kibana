@@ -1114,23 +1114,33 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('updates a custom field correctly', async () => {
-        const inputField = await testSubjects.find(
-          `case-text-custom-field-form-field-${customFields[0].key}`
-        );
-        expect(await inputField.getAttribute('value')).equal('this is a text field value');
+        const textField = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
+        expect(await textField.getVisibleText()).equal('this is a text field value');
 
         const toggle = await testSubjects.find(
           `case-toggle-custom-field-form-field-${customFields[1].key}`
         );
         expect(await toggle.getAttribute('aria-checked')).equal('true');
 
+        await testSubjects.click(`case-text-custom-field-edit-button-${customFields[0].key}`);
+
+        await retry.waitFor('custom field edit form to exist', async () => {
+          return await testSubjects.exists(
+            `case-text-custom-field-form-field-${customFields[0].key}`
+          );
+        });
+
+        const inputField = await testSubjects.find(
+          `case-text-custom-field-form-field-${customFields[0].key}`
+        );
+
         await inputField.type(' edited!!');
 
-        await testSubjects.click(`template-field-confirm-${customFields[0].key}`);
+        await testSubjects.click(`case-text-custom-field-submit-button-${customFields[0].key}`);
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await inputField.getAttribute('value')).equal('this is a text field value edited!!');
+        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
 
         await toggle.click();
 
@@ -1147,18 +1157,30 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('updates a number custom field correctly', async () => {
+        const numberField = await testSubjects.find(
+          `case-number-custom-field-${customFields[2].key}`
+        );
+        expect(await numberField.getVisibleText()).equal('1234');
+
+        await testSubjects.click(`case-number-custom-field-edit-button-${customFields[2].key}`);
+
+        await retry.waitFor('custom field edit form to exist', async () => {
+          return await testSubjects.exists(
+            `case-number-custom-field-form-field-${customFields[2].key}`
+          );
+        });
+
         const inputField = await testSubjects.find(
           `case-number-custom-field-form-field-${customFields[2].key}`
         );
-        expect(await inputField.getAttribute('value')).equal('1234');
 
         await inputField.type('12345');
 
-        await testSubjects.click(`template-field-confirm-${customFields[2].key}`);
+        await testSubjects.click(`case-number-custom-field-submit-button-${customFields[2].key}`);
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await inputField.getAttribute('value')).equal('123412345');
+        expect(await numberField.getVisibleText()).equal('123412345');
       });
     });
   });
