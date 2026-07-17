@@ -28,6 +28,7 @@ import {
   CASE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  registerOwnerPrefix,
 } from '../common/constants';
 
 import type { CasesClient } from './client';
@@ -284,7 +285,9 @@ export class CasePlugin
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.agentBuilder) {
-      registerCasesAgentBuilderTools(plugins.agentBuilder, getCasesClient, core);
+      registerCasesAgentBuilderTools(plugins.agentBuilder, getCasesClient, core, {
+        analyticsV2Enabled: this.caseConfig.analyticsV2.enabled,
+      });
     }
 
     return {
@@ -302,6 +305,9 @@ export class CasePlugin
       config: this.caseConfig,
       registerCloseReasonValidator: (owner: string, validator: CloseReasonValidator) => {
         this.closeReasonValidators.set(owner, validator);
+      },
+      registerOwnerPrefix: (owner: string, prefix: string) => {
+        registerOwnerPrefix(owner, prefix);
       },
     };
   }

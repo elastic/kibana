@@ -24,6 +24,7 @@ const storageSettings = {
     properties: {
       execution_id: types.keyword({}),
       '@timestamp': types.date({}),
+      last_heartbeat: types.date({}),
       status: types.keyword({}),
       agent_id: types.keyword({}),
       execution_mode: types.keyword({}),
@@ -47,6 +48,7 @@ const storageSettings = {
 export interface AgentExecutionProperties {
   execution_id: string;
   '@timestamp': string;
+  last_heartbeat?: string;
   status: ExecutionStatus;
   agent_id: string;
   execution_mode?: string;

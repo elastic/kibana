@@ -4,7 +4,7 @@ exports[`Task priority checks detects tasks with priority definitions 1`] = `
 Array [
   Object {
     "priority": 1,
-    "taskType": "agent_context_layer:sml_crawler",
+    "taskType": "agent_builder_sml:sml_crawler",
   },
   Object {
     "priority": 1,
