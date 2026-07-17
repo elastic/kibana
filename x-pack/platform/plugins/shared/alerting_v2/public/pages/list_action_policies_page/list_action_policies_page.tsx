@@ -8,7 +8,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
-import type { ActionPolicyBulkAction, ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
+import type {
+  ActionPolicyBulkAction,
+  ActionPolicyResponse,
+  CreateActionPolicyData,
+} from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import {
@@ -17,9 +21,14 @@ import {
   ContentListProvider,
   ContentListTable,
   ContentListToolbar,
+  createColumn,
+  useContentListSelection,
 } from '@kbn/content-list';
 import type { ContentListItem } from '@kbn/content-list';
 import { ExperimentalBadge } from '../../components/experimental_badge';
+import { ActionPolicyDestinationsSummary } from '../../components/action_policy/action_policy_destinations_summary';
+import { ActionPolicySnoozePopover } from '../../components/action_policy/action_policy_snooze_popover';
+import { ActionPolicyStateBadge } from '../../components/action_policy/action_policy_state_badge';
 import { DeleteActionPolicyConfirmModal } from '../../components/action_policy/delete_confirmation_modal';
 import { ActionPolicyDetailsFlyout } from '../../components/action_policy/details_flyout/action_policy_details_flyout';
 import { paths } from '../../constants';
@@ -33,11 +42,61 @@ import { useSnoozeActionPolicy } from '../../hooks/use_snooze_action_policy';
 import { useUnsnoozeActionPolicy } from '../../hooks/use_unsnooze_action_policy';
 import { useUpdateActionPolicyApiKey } from '../../hooks/use_update_action_policy_api_key';
 import { UserCapabilities } from '../../services/user_capabilities';
+import { ActionPoliciesBulkActions } from './components/action_policies_bulk_actions';
+import { ActionPolicyActionsCell } from './components/action_policy_actions_cell';
 import { UpdateApiKeyConfirmationModal } from './components/update_api_key_confirmation_modal';
 import { useActionPoliciesDataSource } from './action_policies_data_source';
 import type { ActionPolicyContentListItem } from './action_policies_data_source';
 
-const { Column, Action } = ContentListTable;
+const { Column } = ContentListTable;
+
+type BulkActionMutate = ReturnType<typeof useBulkActionActionPolicies>['mutate'];
+
+interface ConnectedBulkActionsProps {
+  bulkAction: BulkActionMutate;
+  isLoading: boolean;
+}
+
+const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsProps) => {
+  const { selectedItems, selectedCount, clearSelection } = useContentListSelection();
+
+  if (selectedCount === 0) return null;
+
+  const selectedPolicies = selectedItems.map((item) => toPolicy(item));
+
+  const handleBulkAction = (
+    action: 'enable' | 'disable' | 'delete' | 'snooze' | 'unsnooze' | 'update_api_key',
+    snoozedUntil?: string
+  ) => {
+    const ids = selectedPolicies.map((p) => p.id);
+    const actions: ActionPolicyBulkAction[] =
+      action === 'snooze' && snoozedUntil
+        ? ids.map((id) => ({ id, action: 'snooze', snoozedUntil }))
+        : ids.map((id) => ({ id, action } as ActionPolicyBulkAction));
+    bulkAction({ actions }, { onSuccess: clearSelection });
+  };
+
+  return (
+    <ActionPoliciesBulkActions
+      selectedPolicies={selectedPolicies}
+      onClearSelection={clearSelection}
+      onBulkAction={handleBulkAction}
+      isLoading={isLoading}
+    />
+  );
+};
+
+const toPolicy = (item: ContentListItem): ActionPolicyResponse =>
+  (item as ActionPolicyContentListItem).policy;
+
+// Pure column — no component state needed.
+const DestinationsColumn = createColumn({
+  id: 'destinations',
+  name: i18n.translate('xpack.alertingV2.actionPoliciesList.column.destinations', {
+    defaultMessage: 'Destinations',
+  }),
+  render: (item) => <ActionPolicyDestinationsSummary destinations={toPolicy(item).destinations} />,
+});
 
 const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
   'xpack.alertingV2.actionPoliciesList.pageTitle',
@@ -69,7 +128,7 @@ export const ListActionPoliciesPage = () => {
 
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
-  const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
+  const [policyToView, setPolicyToView] = useState<ActionPolicyResponse | null>(null);
 
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
@@ -87,10 +146,18 @@ export const ListActionPoliciesPage = () => {
     isLoading: isDisabling,
     variables: disableVariables,
   } = useDisableActionPolicy();
-  const { mutate: snoozePolicy } = useSnoozeActionPolicy();
-  const { mutate: unsnoozePolicy } = useUnsnoozeActionPolicy();
+  const {
+    mutate: snoozePolicy,
+    isLoading: isSnoozing,
+    variables: snoozeVariables,
+  } = useSnoozeActionPolicy();
+  const {
+    mutate: unsnoozePolicy,
+    isLoading: isUnsnoozing,
+    variables: unsnoozeVariables,
+  } = useUnsnoozeActionPolicy();
   const { mutate: updateApiKey, isLoading: isUpdatingApiKey } = useUpdateActionPolicyApiKey();
-  const { mutate: bulkAction } = useBulkActionActionPolicies();
+  const { mutate: bulkAction, isLoading: isBulkActionInProgress } = useBulkActionActionPolicies();
 
   const navigateToCreate = useCallback(() => {
     navigateToUrl(basePath.prepend(paths.actionPolicyCreate));
@@ -122,29 +189,7 @@ export const ListActionPoliciesPage = () => {
 
   const dataSource = useActionPoliciesDataSource();
 
-  const itemConfig = useMemo(
-    () => ({
-      actions: {
-        delete: {
-          onBulkAction: async (items: ContentListItem[]) => {
-            const actions: ActionPolicyBulkAction[] = items.map(({ id }) => ({
-              id,
-              action: 'delete',
-            }));
-            await new Promise<void>((resolve, reject) =>
-              bulkAction({ actions }, { onSuccess: resolve, onError: reject })
-            );
-          },
-        },
-      },
-    }),
-    [bulkAction]
-  );
-
-  const policyToView = useMemo<ActionPolicyResponse | null>(() => {
-    // resolved from the flyout's own data fetch in a future step
-    return null;
-  }, []);
+  const itemConfig = useMemo(() => ({}), []);
 
   const actionPoliciesMenu = useMemo(
     () => getActionPoliciesListMenu({ navigateToCreate, canWrite }),
@@ -198,17 +243,93 @@ export const ListActionPoliciesPage = () => {
       >
         <ContentList>
           <ContentListToolbar />
+          <ConnectedBulkActions bulkAction={bulkAction} isLoading={isBulkActionInProgress} />
           <ContentListTable
             title={ACTION_POLICIES_LIST_PAGE_TITLE}
             scrollableInline
             responsiveBreakpoint={false}
           >
-            <Column.Name showDescription />
+            <Column.Name
+              showDescription
+              onClick={(item) => setPolicyToView(toPolicy(item))}
+            />
+            <DestinationsColumn />
             <Column.UpdatedAt />
             <Column.CreatedBy />
-            <Column.Actions>
-              <Action.Delete />
-            </Column.Actions>
+            {/* State badge — needs enable/disable loading state */}
+            <Column
+              id="state"
+              name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.state', {
+                defaultMessage: 'State',
+              })}
+              width="120px"
+              render={(item) => {
+                const policy = toPolicy(item);
+                return (
+                  <ActionPolicyStateBadge
+                    policy={policy}
+                    isLoading={
+                      (isEnabling && enableVariables === policy.id) ||
+                      (isDisabling && disableVariables === policy.id)
+                    }
+                  />
+                );
+              }}
+            />
+            {/* Snooze popover — only for enabled policies when user can write */}
+            <Column
+              id="notify"
+              name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.notify', {
+                defaultMessage: 'Notify',
+              })}
+              width="50px"
+              render={(item) => {
+                const policy = toPolicy(item);
+                if (!policy.enabled || !canWrite) return null;
+                return (
+                  <ActionPolicySnoozePopover
+                    policy={policy}
+                    onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
+                    onCancelSnooze={(id) => unsnoozePolicy(id)}
+                    isLoading={
+                      (isSnoozing && snoozeVariables?.id === policy.id) ||
+                      (isUnsnoozing && unsnoozeVariables === policy.id)
+                    }
+                  />
+                );
+              }}
+            />
+            {/* Row actions */}
+            <Column
+              id="actions"
+              name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.actions', {
+                defaultMessage: 'Actions',
+              })}
+              width="120px"
+              render={(item) => {
+                const policy = toPolicy(item);
+                return (
+                  <ActionPolicyActionsCell
+                    policy={policy}
+                    canWrite={canWrite}
+                    onViewDetails={setPolicyToView}
+                    onEdit={(id) => navigateToEdit(id)}
+                    onClone={clonePolicy}
+                    onDelete={setPolicyToDelete}
+                    onEnable={(id) => enablePolicy(id)}
+                    onDisable={(id) => disablePolicy(id)}
+                    onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
+                    onCancelSnooze={(id) => unsnoozePolicy(id)}
+                    onUpdateApiKey={(id) => setPolicyToUpdateApiKey(id)}
+                    isStateLoading={
+                      (isEnabling && enableVariables === policy.id) ||
+                      (isDisabling && disableVariables === policy.id)
+                    }
+                    isDisabled={isBulkActionInProgress}
+                  />
+                );
+              }}
+            />
           </ContentListTable>
           <ContentListFooter />
         </ContentList>
@@ -244,17 +365,17 @@ export const ListActionPoliciesPage = () => {
         <ActionPolicyDetailsFlyout
           policy={policyToView}
           canWrite={canWrite}
-          onClose={() => setPolicyToViewId(null)}
+          onClose={() => setPolicyToView(null)}
           onEdit={(id) => {
-            setPolicyToViewId(null);
+            setPolicyToView(null);
             navigateToEdit(id);
           }}
           onClone={(p) => {
-            setPolicyToViewId(null);
+            setPolicyToView(null);
             clonePolicy(p);
           }}
           onDelete={(p) => {
-            setPolicyToViewId(null);
+            setPolicyToView(null);
             setPolicyToDelete(p);
           }}
           onEnable={(id) => enablePolicy(id)}
@@ -262,7 +383,7 @@ export const ListActionPoliciesPage = () => {
           onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
           onCancelSnooze={(id) => unsnoozePolicy(id)}
           onUpdateApiKey={(id) => {
-            setPolicyToViewId(null);
+            setPolicyToView(null);
             setPolicyToUpdateApiKey(id);
           }}
           isStateLoading={
