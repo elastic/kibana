@@ -50,38 +50,6 @@
       }
     },
     {
-      "id": "017789e0b431bee-3428dc06d0d6721",
-      "title": "EUI testing wrapper: EuiComboBox with multiple selections (pills)",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 19,
-        "column": 9
-      }
-    },
-    {
-      "id": "017789e0b431bee-5331af19c193bbb",
-      "title": "EUI testing wrapper: EuiComboBox with the single selection",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 68,
-        "column": 9
-      }
-    },
-    {
       "id": "971167b9a56711d-061f9fed6becd0d",
       "title": "EUI testing wrapper: EuiDataGrid data grid, run",
       "expectedStatus": "skipped",

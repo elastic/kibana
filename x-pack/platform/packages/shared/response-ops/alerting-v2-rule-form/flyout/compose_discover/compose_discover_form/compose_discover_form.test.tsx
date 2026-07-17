@@ -15,7 +15,12 @@ import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ComposeDiscoverForm, getSteps } from '.';
 import { validateStep } from '../validate_step';
-import { Comparator, Aggregation } from '../rule_builder/threshold/form_types';
+import {
+  Comparator,
+  Aggregation,
+  DEFAULT_THRESHOLD_FORM_VALUES,
+} from '../rule_builder/threshold/form_types';
+import { BuilderStateProvider } from '../rule_builder/builder_state_context';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
 import { createMockServices, createTestQueryClient } from '../../../test_utils';
 import type { FormValues } from '../../../form/types';
@@ -256,6 +261,7 @@ describe('step validation', () => {
     it('renders runbook and related dashboard artifact fields', () => {
       renderComposeDiscoverDetailsStep();
 
+      expect(screen.getByText('Rule details')).toBeInTheDocument();
       expect(screen.getByText('Artifacts')).toBeTruthy();
       expect(screen.getByText('Runbook')).toBeTruthy();
       expect(screen.getByTestId('addRunbookButton')).toBeTruthy();
@@ -453,6 +459,8 @@ describe('shell shared fields', () => {
     renderShell({ step: 0 }, { kind: 'alert' });
 
     expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
+    expect(screen.getByText('Alert conditions')).toBeInTheDocument();
+    expect(screen.getByText('Rule execution')).toBeInTheDocument();
     expect(screen.getByTestId('alertDelayFormRow')).toBeInTheDocument();
     expect(screen.getByText('Schedule')).toBeInTheDocument();
     expect(screen.getByText('Lookback Window')).toBeInTheDocument();
@@ -465,9 +473,33 @@ describe('shell shared fields', () => {
     );
 
     expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
+    expect(screen.queryByText('Alert conditions')).not.toBeInTheDocument();
+    expect(screen.getByText('Rule execution')).toBeInTheDocument();
     expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
     expect(screen.getByText('Schedule')).toBeInTheDocument();
     expect(screen.getByText('Lookback Window')).toBeInTheDocument();
+  });
+
+  it('renders section titles on the threshold builder alert condition step', () => {
+    const services = { ...createMockServices(), dashboard: mockDashboard };
+    const builderState = DEFAULT_THRESHOLD_FORM_VALUES;
+    render(
+      <BuilderStateProvider builderState={builderState} setBuilderState={jest.fn()}>
+        <ComposeDiscoverForm
+          state={createState({ queryCommitted: true, step: 0 })}
+          dispatch={jest.fn()}
+          services={services}
+          onRecoveryTypeChange={jest.fn()}
+          onKindChange={jest.fn()}
+          isEditing={false}
+          builderType="threshold"
+        />
+      </BuilderStateProvider>,
+      { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES }, services) }
+    );
+
+    expect(screen.getByText('Alert conditions')).toBeInTheDocument();
+    expect(screen.getByText('Rule execution')).toBeInTheDocument();
   });
 
   it('does not render shared fields on non-alert-condition steps', () => {
