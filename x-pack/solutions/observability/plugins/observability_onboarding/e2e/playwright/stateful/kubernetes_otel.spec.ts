@@ -42,11 +42,11 @@ const INSTRUMENTED_APP_NAME = 'java-app';
 
 test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPage }) => {
   /**
-   * Cold GKE nodes require pulling the EDOT collector image (up to ~6 min),
-   * on top of the helm install, operator readiness wait, and java-app restart.
-   * 20 min covers the full cold-node path: helm (~15s) + operator readiness
-   * (~2 min) + image pull (~6 min) + connect + ingest + 2 min data buffer
-   * + APM/dashboard assertions, with margin to spare.
+   * Cold GKE nodes require pulling the EDOT daemon-collector image (~6 min),
+   * on top of helm install, operator + daemon-collector readiness waits, and
+   * java-app restart. 20 min covers: ~30s (helm + operator) + ~6 min (image
+   * pull + daemonset rollout) + ~1 min (connect + ingest) + 2 min buffer
+   * + APM/dashboard assertions.
    */
   test.setTimeout(20 * 60_000);
 
@@ -80,13 +80,17 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
       ?.replace('myapp', INSTRUMENTED_APP_NAME)
       ?.replace('my-namespace', INSTRUMENTED_APP_CONTAINER_NAMESPACE);
     /**
-     * Wait for the OTel operator Deployment to be fully Available before
-     * annotating and restarting the java-app. The operator's readiness probe
-     * gates the mutating webhook, so Available means instrumentation injection
-     * will work. This replaces a fixed `sleep 120` with an event-driven wait:
-     * faster on warm nodes, safe on cold nodes (--timeout 300s caps it).
+     * Wait for the OTel operator AND the daemon-collector DaemonSet before
+     * annotating and restarting the java-app.
+     *
+     * Operator readiness gates the mutating webhook (instrumentation
+     * injection). Daemon-collector readiness ensures its OTLP endpoint
+     * (port 4318) is up before the java-app starts: on cold nodes the image
+     * pull takes ~6 min, and the OTel Java agent will not automatically
+     * reconnect if the endpoint was unavailable at its own startup.
      */
-    const sleepSnippet = `kubectl rollout status --watch --timeout=300s deployment/opentelemetry-kube-stack-opentelemetry-operator --namespace opentelemetry-operator-system`;
+    const sleepSnippet = `kubectl rollout status --watch --timeout=300s deployment/opentelemetry-kube-stack-opentelemetry-operator --namespace opentelemetry-operator-system
+kubectl rollout status --watch --timeout=660s daemonset/opentelemetry-kube-stack-daemon-collector --namespace opentelemetry-operator-system`;
 
     codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}\n${sleepSnippet}\n${annotateAllResourceSnippet}\n${restartDeploymentSnippet}`;
   } else {
