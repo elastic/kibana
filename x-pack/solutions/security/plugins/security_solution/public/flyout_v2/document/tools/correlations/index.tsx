@@ -8,14 +8,10 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import { CorrelationsDetailsView } from './components/correlations_details_view';
-
-const TITLE = i18n.translate('xpack.securitySolution.flyout.correlations.title', {
-  defaultMessage: 'Correlations',
-});
+import { CORRELATIONS_TITLE } from '../../../shared/constants/flyout_titles';
 
 export interface CorrelationsDetailsProps {
   /**
@@ -33,7 +29,7 @@ export interface CorrelationsDetailsProps {
   /**
    * Callback to open an alert preview when clicking the preview button in the correlations table
    */
-  onShowAlert: (id: string, indexName: string) => void;
+  onShowAlert: (id: string, indexName: string, title?: string) => void;
   /**
    * Callback to open an attack preview when clicking the expand button in the related attacks table.
    * When not provided, the expand button column is hidden.
@@ -58,7 +54,7 @@ export const CorrelationsDetails = memo(
             padding-block: ${euiTheme.size.s} !important;
           `}
         >
-          <DocumentToolsFlyoutHeader title={TITLE} hit={hit} />
+          <DocumentToolsFlyoutHeader title={CORRELATIONS_TITLE} hit={hit} />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <CorrelationsDetailsView
