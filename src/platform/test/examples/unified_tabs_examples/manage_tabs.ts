@@ -24,6 +24,15 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   const openTabContextMenuWithKeyboard = async () => {
+    // createNewTab() focuses the "new tab" button via mouse click, so keyboard
+    // focus may sit on that button rather than the newly-created tab. Shift+F10
+    // on the wrong element never opens the tab context menu. Clicking the
+    // selected tab moves focus onto it first.
+    const selectedTab = await unifiedTabs.getSelectedTab();
+    if (selectedTab) {
+      await selectedTab.element.click();
+    }
+
     await browser
       .getActions()
       .keyDown(Key.SHIFT)
@@ -31,19 +40,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       .keyUp(Key.SHIFT)
       .perform();
 
-    // Wait for the menu to appear AND for keyboard focus to land inside it.
-    // EUI auto-focuses the first menu item on keyboard-triggered open, but the
-    // focus transfer is async. Checking DOM presence alone races with that
-    // transfer — callers that send ARROW_DOWN immediately would navigate past
-    // the already-focused first item to the second one.
-    await retry.waitFor('open tab context menu with keyboard focus', async () => {
-      if (!(await testSubjects.exists('unifiedTabs_tabMenuItem_enterRenamingMode'))) {
-        return false;
-      }
-      return await browser.execute(() => {
-        const active = document.activeElement;
-        return active != null && active.closest('[role="menu"]') != null;
-      });
+    await retry.waitFor('open tab context menu', async () => {
+      return await testSubjects.exists('unifiedTabs_tabMenuItem_enterRenamingMode');
     });
   };
 
