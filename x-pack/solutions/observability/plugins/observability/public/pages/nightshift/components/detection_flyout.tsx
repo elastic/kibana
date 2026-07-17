@@ -17,6 +17,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -79,6 +80,8 @@ export interface DetectionFlyoutProps {
   signal?: SignalEntry;
   onClose: () => void;
 }
+
+const MAX_SUMMARY_LENGTH = 300;
 
 const TREND_CHART_HEIGHT = 160;
 // Room above the tallest bar so the diamond isn't clipped at the canvas edge.
@@ -255,6 +258,7 @@ export function DetectionFlyout({
   const { euiTheme } = useEuiTheme();
   const { share, agentBuilder } = useKibana().services;
   const [selectedEntity, setSelectedEntity] = useState<DetectionEntityRef | undefined>();
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
 
   const { data: streamFeatures = [] } = useFetchStreamFeatures(detection.stream_name);
   const associatedEntities = useMemo(
@@ -274,6 +278,19 @@ export function DetectionFlyout({
 
   const title = detection.rule_name ?? detection.detection_id;
   const changePointLabel = getChangePointLabel(detection.change_point_type);
+  const summary = signal?.description;
+
+  // Code points, not UTF-16 units, so truncation cannot split an emoji in half.
+  const summaryCharacters = useMemo(() => Array.from(summary ?? ''), [summary]);
+  const isSummaryLong = summaryCharacters.length > MAX_SUMMARY_LENGTH;
+  const displaySummary =
+    summary != null && isSummaryLong && !summaryExpanded
+      ? summaryCharacters.slice(0, MAX_SUMMARY_LENGTH).join('') + '...'
+      : summary;
+
+  const toggleSummary = useCallback(() => {
+    setSummaryExpanded((prev) => !prev);
+  }, []);
 
   const esqlQuery = signal?.evidence?.esql_query;
 
@@ -340,7 +357,7 @@ export function DetectionFlyout({
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          {signal?.description && (
+          {summary && (
             <>
               <SectionTitle>
                 {i18n.translate('xpack.observability.nightshift.detectionFlyout.summaryTitle', {
@@ -349,8 +366,23 @@ export function DetectionFlyout({
               </SectionTitle>
               <EuiSpacer size="s" />
               <EuiText size="s" data-test-subj="nightshiftDetectionFlyoutSummary">
-                <p>{signal.description}</p>
+                <p>{displaySummary}</p>
               </EuiText>
+              {isSummaryLong && (
+                // eslint-disable-next-line @elastic/eui/require-href-for-link
+                <EuiLink
+                  data-test-subj="nightshiftDetectionFlyoutSummaryToggle"
+                  onClick={toggleSummary}
+                >
+                  {summaryExpanded
+                    ? i18n.translate('xpack.observability.nightshift.flyout.showLessButtonText', {
+                        defaultMessage: 'Show less',
+                      })
+                    : i18n.translate('xpack.observability.nightshift.flyout.showMoreButtonText', {
+                        defaultMessage: 'Show more',
+                      })}
+                </EuiLink>
+              )}
               <EuiSpacer size="l" />
             </>
           )}

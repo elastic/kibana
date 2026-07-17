@@ -142,6 +142,25 @@ describe('DetectionFlyout', () => {
     expect(screen.queryByText('Summary')).not.toBeInTheDocument();
   });
 
+  it('truncates long summaries and shows "Show more"', () => {
+    const longDescription = 'P95 latency on web-frontend rose from 120ms to 890ms. '
+      .repeat(10)
+      .trimEnd();
+    renderFlyout({
+      signal: {
+        ...mockSignal,
+        description: longDescription,
+      },
+    });
+
+    expect(screen.getByText('Show more')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Show more'));
+    expect(screen.getByText('Show less')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionFlyoutSummary')).toHaveTextContent(
+      longDescription
+    );
+  });
+
   it('renders the associated entity chip as a button', () => {
     renderFlyout();
 
