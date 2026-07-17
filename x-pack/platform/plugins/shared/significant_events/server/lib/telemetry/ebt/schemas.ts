@@ -18,6 +18,9 @@ import type {
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
+  AgentToolEventWriteProps,
+  AgentToolDiscoveryWriteProps,
+  AgentToolEventSearchProps,
 } from './types';
 
 const endpointLatencySchema: RootSchema<EndpointLatencyProps> = {
@@ -366,7 +369,7 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
       description: 'Whether the event status update succeeded',
     },
   },
-  event_id: {
+  event_uuid: {
     type: 'keyword',
     _meta: {
       description: 'The identifier of the updated significant event',
@@ -459,6 +462,18 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
       description: 'Number of distinct rules covered by the change-point scan',
     },
   },
+  critical_rule_count: {
+    type: 'long',
+    _meta: {
+      description: 'Rule-backed query count using the critical 1m cadence',
+    },
+  },
+  default_rule_count: {
+    type: 'long',
+    _meta: {
+      description: 'Rule-backed query count using the default 5m cadence',
+    },
+  },
   alerting_engine: {
     type: 'keyword',
     _meta: {
@@ -540,7 +555,7 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
         description: 'Whether the investigation attachment succeeded',
       },
     },
-    event_id: {
+    event_uuid: {
       type: 'keyword',
       _meta: {
         description: 'The identifier of the significant event the investigation was attached to',
@@ -561,11 +576,134 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
     },
   };
 
+const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
+  success: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the workflow event write succeeded',
+    },
+  },
+  event_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The stable event id associated with the written event',
+    },
+  },
+  status: {
+    type: 'keyword',
+    _meta: {
+      description: 'The status value set on the significant event',
+    },
+  },
+  written: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether a new event version was actually written (false when status unchanged)',
+    },
+  },
+  stream_names: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A stream name',
+      },
+    },
+    _meta: {
+      description: 'The names of the streams associated with the event',
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'Error message when the workflow event write fails',
+      optional: true,
+    },
+  },
+};
+
+const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
+  success: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the event search succeeded',
+    },
+  },
+  result_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of significant events returned by the search',
+    },
+  },
+  has_query: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the search included a query filter',
+    },
+  },
+  has_stream_filter: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the search included a stream_names filter',
+    },
+  },
+  status_filter: {
+    type: 'keyword',
+    _meta: {
+      description: 'The state filter applied to the search (open or closed)',
+      optional: true,
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'Error message when the event search fails',
+      optional: true,
+    },
+  },
+};
+
+const agentToolDiscoveryWriteSchema: RootSchema<AgentToolDiscoveryWriteProps> = {
+  success: {
+    type: 'boolean',
+    _meta: { description: 'Whether the discovery write succeeded' },
+  },
+  kind: {
+    type: 'keyword',
+    _meta: {
+      description: 'The kind of discovery document written: discovery, clearance, or handled',
+    },
+  },
+  event_id: {
+    type: 'keyword',
+    _meta: { description: 'The stable event id' },
+  },
+  stream_names: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'A stream name' },
+    },
+    _meta: { description: 'The streams associated with the discovery' },
+  },
+  written: {
+    type: 'boolean',
+    _meta: { description: 'Whether a document was actually written (false when deduplicated)' },
+  },
+  error_message: {
+    type: 'text',
+    _meta: { description: 'Error message when the discovery write fails', optional: true },
+  },
+};
+
 export {
   agentBuilderKnowledgeIndicatorCreatedSchema,
+  agentToolDiscoveryWriteSchema,
   agentToolEventCreateSchema,
   agentToolEventInvestigationAttachSchema,
+  agentToolEventSearchSchema,
   agentToolEventStatusUpdateSchema,
+  agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   codeAnalysisGroundingSchema,
   detectionScanSchema,

@@ -18,6 +18,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -60,6 +61,9 @@ export function SettingsForm() {
   });
 
   const useAllRemoteClustersValue = watch('useAllRemoteClusters');
+
+  const remoteClustersRowId = useGeneratedHtmlId({ prefix: 'remoteClustersRow' });
+  const staleThresholdRowId = useGeneratedHtmlId({ prefix: 'staleThresholdRow' });
 
   const onSubmit = handleSubmit((formValues) => {
     updateSettings({
@@ -139,6 +143,7 @@ export function SettingsForm() {
               }
             >
               <EuiFormRow
+                id={remoteClustersRowId}
                 label={i18n.translate(
                   'xpack.slo.settingsForm.euiFormRow.select.selectRemoteClustersLabel',
                   { defaultMessage: 'Select remote clusters' }
@@ -150,6 +155,7 @@ export function SettingsForm() {
                   render={({ field: { ref, onChange, value, ...field } }) => (
                     <EuiComboBox
                       {...field}
+                      aria-labelledby={`${remoteClustersRowId}-label`}
                       isLoading={loading}
                       options={
                         data?.map((cluster) => ({ label: cluster.name, value: cluster.name })) || []
@@ -188,6 +194,7 @@ export function SettingsForm() {
           }
         >
           <EuiFormRow
+            id={staleThresholdRowId}
             label={i18n.translate('xpack.slo.settingsForm.euiFormRow.select.selectThresholdLabel', {
               defaultMessage: 'Select threshold',
             })}
@@ -198,6 +205,7 @@ export function SettingsForm() {
               render={({ field: { ref, onChange, value, ...field } }) => (
                 <EuiFieldNumber
                   {...field}
+                  aria-labelledby={`${staleThresholdRowId}-label`}
                   min={1}
                   data-test-subj="sloSettingsFormFieldNumber"
                   value={value}

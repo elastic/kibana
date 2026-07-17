@@ -31,6 +31,8 @@ describe('List OAuth Clients route', () => {
     });
   }
 
+  const PROJECT_ID = 'test-project-id';
+
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   let oauthMock: jest.Mocked<UiamOAuthType>;
@@ -39,6 +41,7 @@ describe('List OAuth Clients route', () => {
     oauthMock = authc.oauth as jest.Mocked<UiamOAuthType>;
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
+    mockRouteDefinitionParams.serverlessProjectId = PROJECT_ID;
 
     defineListOAuthClientsRoute(mockRouteDefinitionParams);
 
@@ -73,6 +76,18 @@ describe('List OAuth Clients route', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(mockResponse);
+  });
+
+  it('forwards serverless project id as project_id filter to oauth service', async () => {
+    oauthMock.listClients.mockResolvedValue({ clients: [] });
+
+    await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(oauthMock.listClients).toHaveBeenCalledWith(expect.anything(), undefined, PROJECT_ID);
   });
 
   it('returns 404 when OAuth is not available', async () => {

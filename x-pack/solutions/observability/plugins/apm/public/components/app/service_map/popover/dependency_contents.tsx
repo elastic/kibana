@@ -32,7 +32,11 @@ export function DependencyContents({ selection, environment, start, end }: Conte
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
+    '/mobile-services/{serviceName}/service-map',
+    '/services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/overview',
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
   );
   const { offset, comparisonEnabled } = query;
   const apmRouter = useApmRouter();

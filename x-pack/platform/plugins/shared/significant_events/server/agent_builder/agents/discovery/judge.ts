@@ -6,10 +6,11 @@
  */
 
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import { platformSignificantEventsTools, platformCoreTools } from '@kbn/agent-builder-common/tools';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import instructions from './instructions/judge.md.text';
-import { SIGNIFICANT_EVENTS_DISCOVERY_TOOL_IDS } from './constants';
 import { getSignificantEventsAvailability } from '../../../routes/utils/assert_significant_events_access';
+import { SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID } from '../../skills/significant_events_ki_grounding';
 
 export const SIGNIFICANT_EVENTS_JUDGE_AGENT_ID = 'platform.streams.sig-events.discovery-judge';
 
@@ -31,7 +32,6 @@ export const createSignificantEventsJudgeAgent = ({
         const availability = await getSignificantEventsAvailability({
           server,
           licensing: server.licensing,
-          uiSettingsClient: context.uiSettings,
         });
 
         return availability.available
@@ -41,9 +41,17 @@ export const createSignificantEventsJudgeAgent = ({
     },
     configuration: {
       instructions,
+      skill_ids: [SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID],
+      // The tool set below is fully explicit — the generic platform_core_* tools are irrelevant
+      // to discovery and only add noise to tool selection, so elastic capabilities stay disabled.
+      enable_elastic_capabilities: false,
       tools: [
         {
-          tool_ids: [...SIGNIFICANT_EVENTS_DISCOVERY_TOOL_IDS],
+          tool_ids: [
+            platformCoreTools.executeEsql,
+            platformSignificantEventsTools.searchKnowledgeIndicators,
+            platformSignificantEventsTools.eventsWrite,
+          ],
         },
       ],
     },

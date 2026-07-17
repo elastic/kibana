@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
 import { type Coordinate } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import {
-  kueryRt,
-  rangeRt,
-  offsetRt,
-  filtersRt,
-  serviceTransactionDataSourceRt,
+  kuerySchema,
+  rangeSchema,
+  offsetSchema,
+  filtersSchema,
+  serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
 
 export interface FailedTransactionRateResponse {
@@ -30,12 +29,15 @@ export interface FailedTransactionRateResponse {
 
 export const transactionChartsErrorRateRoute = defineRoute<FailedTransactionRateResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      t.type({ transactionType: t.string, bucketSizeInSeconds: toNumberRt }),
-      t.partial({ transactionName: t.string, filters: filtersRt }),
-      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt, serviceTransactionDataSourceRt]),
-    ]),
+  params: z.object({
+    path: z.object({ serviceName: z.string() }),
+    query: z
+      .object({ transactionType: z.string(), bucketSizeInSeconds: z.coerce.number() })
+      .merge(z.object({ transactionName: z.string(), filters: filtersSchema }).partial())
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(rangeSchema)
+      .merge(offsetSchema)
+      .merge(serviceTransactionDataSourceSchema),
   }),
 });

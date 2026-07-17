@@ -12,31 +12,28 @@ import { PUBLIC_API_HEADERS } from '../../fixtures/constants';
 
 // Inline IDs to avoid pulling in @kbn/workflows which imports YAML files that
 // Playwright's esbuild transform cannot load. These strings are stable managed
-// workflow identifiers defined in @kbn/workflows managed/definitions/streams_memory.
-const MEMORY_WORKFLOW_IDS = [
+// workflow identifiers defined in @kbn/workflows managed/definitions.
+const MANAGED_WORKFLOW_IDS = [
+  // Base significant events workflows (installed when significant events is available)
+  'system-significant-events-discovery',
+  'system-significant-events-triage',
+  // Memory workflows (installed when the memory feature flag is enabled)
   'system-streams-memory-synthesis',
   'system-streams-memory-consolidation',
   'system-streams-memory-conversation-scraper',
 ];
 
 /**
- * Verifies that all three memory managed workflows are installed and marked as valid
- * after the feature flag is enabled. Polls until each workflow appears, since
- * installation is asynchronous (triggered by a reactive observable in plugin start).
+ * Verifies that managed workflows are installed and marked as valid. Significant events
+ * availability is enabled in global setup; memory workflows additionally require the
+ * memory feature flag. Installation is asynchronous (triggered by a reactive observable
+ * in plugin start), so each check polls until the workflow appears as valid.
  */
 apiTest.describe(
-  'Memory managed workflows',
+  'Managed workflows',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    apiTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.enableMemory();
-    });
-
-    apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.disableMemory();
-    });
-
-    for (const workflowId of MEMORY_WORKFLOW_IDS) {
+    for (const workflowId of MANAGED_WORKFLOW_IDS) {
       apiTest(`${workflowId}: is installed and valid`, async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
         const headers = { ...PUBLIC_API_HEADERS, ...cookieHeader };

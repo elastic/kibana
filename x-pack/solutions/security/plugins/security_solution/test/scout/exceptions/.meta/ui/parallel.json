@@ -1,0 +1,37 @@
+{
+  "sha1": "33c386b521bc5fa31b7251a9be1ffee53563ae28",
+  "tests": [
+    {
+      "id": "5060bc123105c69-842632def2d4e28",
+      "title": "Bulk close with a runtime field on an ML rule closes ML rule alerts when the exception references a runtime field on the anomaly index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/exceptions/ui/parallel_tests/bulk_close_runtime_field_ml.spec.ts",
+        "line": 229,
+        "column": 14
+      }
+    },
+    {
+      "id": "e9698fd008378a0-e2c1667939971db",
+      "title": "Bulk close with a runtime field on the source index enables bulk close and closes matching alerts when the exception references a runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/exceptions/ui/parallel_tests/bulk_close_runtime_field.spec.ts",
+        "line": 108,
+        "column": 14
+      }
+    }
+  ]
+}

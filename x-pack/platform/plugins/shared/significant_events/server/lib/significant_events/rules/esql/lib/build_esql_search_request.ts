@@ -6,16 +6,14 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { MAX_ALERTS_PER_EXECUTION } from '../common';
+import { MAX_ALERTS_ESQL_QUERY_LIMIT } from '../common';
 
 /**
  * Builds the ES|QL search request for match-type rule execution.
  *
- * IMPORTANT: Results are hard-capped at {@link MAX_ALERTS_PER_EXECUTION}
- * (currently 1 000). During large incidents this means additional matching
- * documents in the same lookback window are silently dropped. If under-
- * reporting during spikes becomes a problem, consider paging, raising the
- * cap with explicit cost bounds, or aggregating high-cardinality bursts.
+ * IMPORTANT: Results are capped at {@link MAX_ALERTS_PER_EXECUTION}
+ * (currently 1 000). The query requests one extra row so the executor can log
+ * when a run truncated a larger result set.
  */
 export const buildEsqlSearchRequest = ({
   query,
@@ -44,7 +42,7 @@ export const buildEsqlSearchRequest = ({
   const requestFilter: estypes.QueryDslQueryContainer[] = [rangeFilter];
 
   return {
-    query: `${query} | LIMIT ${MAX_ALERTS_PER_EXECUTION}`,
+    query: `${query} | LIMIT ${MAX_ALERTS_ESQL_QUERY_LIMIT}`,
     filter: {
       bool: {
         must_not:

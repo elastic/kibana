@@ -8,52 +8,69 @@
 import { searchEventsToolHandler } from './handler';
 
 describe('searchEventsToolHandler', () => {
-  it('maps params and returns events', async () => {
-    const eventClient = {
-      findLatestPaginated: jest.fn().mockResolvedValue({
-        hits: [{ event_id: 'e1' }],
-        page: 2,
-        perPage: 10,
-        total: 17,
-      }),
-    };
+  const makeClient = (hits: object[] = [{ event_uuid: 'e1', severity: '60-high' }]) => ({
+    findLatestByCurrentStatePaginated: jest
+      .fn()
+      .mockResolvedValue({ hits, page: 1, perPage: 20, total: hits.length }),
+    findLatestPaginated: jest
+      .fn()
+      .mockResolvedValue({ hits, page: 1, perPage: 20, total: hits.length }),
+  });
+
+  it('maps params and returns events for state-scoped search', async () => {
+    const eventClient = makeClient();
 
     const result = await searchEventsToolHandler({
       eventClient: eventClient as never,
-      params: { query: 'timeout', stream_name: 'logs.checkout', status: ['promoted'], page: 2 },
+      params: { query: 'timeout', stream_names: ['logs.checkout'], status: 'open', page: 2 },
     });
 
-    expect(eventClient.findLatestPaginated).toHaveBeenCalledWith({
+    expect(eventClient.findLatestByCurrentStatePaginated).toHaveBeenCalledWith({
       page: 2,
       perPage: undefined,
       search: 'timeout',
       stream: ['logs.checkout'],
-      status: ['promoted'],
+      status: ['open'],
     });
-    expect(result).toEqual({ events: [{ event_id: 'e1' }], page: 2, per_page: 10, total: 17 });
+    expect(eventClient.findLatestPaginated).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      events: [{ event_uuid: 'e1', severity: '60-high' }],
+      page: 1,
+      per_page: 20,
+      total: 1,
+    });
   });
 
-  it('supports cross-stream search when stream_name is omitted', async () => {
-    const eventClient = {
-      findLatestPaginated: jest.fn().mockResolvedValue({
-        hits: [{ event_id: 'e2' }],
-        page: 1,
-        perPage: 20,
-        total: 1,
-      }),
-    };
+  it('supports cross-stream state search when stream_names is omitted', async () => {
+    const eventClient = makeClient([{ event_uuid: 'e2', severity: '20-low' }]);
 
     await searchEventsToolHandler({
       eventClient: eventClient as never,
-      params: { query: 'latency', status: ['promoted'] },
+      params: { status: 'closed' },
     });
 
-    expect(eventClient.findLatestPaginated).toHaveBeenCalledWith({
+    expect(eventClient.findLatestByCurrentStatePaginated).toHaveBeenCalledWith({
       page: undefined,
       perPage: undefined,
-      search: 'latency',
+      search: undefined,
       stream: undefined,
-      status: ['promoted'],
+      status: ['closed'],
     });
+  });
+
+  it('falls back to findLatestPaginated when state is omitted', async () => {
+    const eventClient = makeClient();
+
+    await searchEventsToolHandler({
+      eventClient: eventClient as never,
+      params: {
+        stream_names: ['logs.checkout', 'logs.payment', 'logs.otel'],
+      },
+    });
+
+    expect(eventClient.findLatestPaginated).toHaveBeenCalledWith(
+      expect.objectContaining({ stream: ['logs.checkout', 'logs.payment', 'logs.otel'] })
+    );
+    expect(eventClient.findLatestByCurrentStatePaginated).not.toHaveBeenCalled();
   });
 });

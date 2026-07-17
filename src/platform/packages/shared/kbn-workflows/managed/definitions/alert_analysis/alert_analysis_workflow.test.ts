@@ -25,6 +25,23 @@ const findStepByName = (steps: unknown[], name: string): Record<string, unknown>
   return undefined;
 };
 
+// Look the agent step up by type rather than name so these assertions survive the
+// onechat_runAgent_step -> runAgent_step rename that lands in a separate PR.
+const findStepByType = (steps: unknown[], type: string): Record<string, unknown> | undefined => {
+  for (const step of steps) {
+    const s = step as Record<string, unknown>;
+    if (s.type === type) return s;
+    for (const key of ['steps', 'else']) {
+      const nested = s[key];
+      if (Array.isArray(nested)) {
+        const found = findStepByType(nested, type);
+        if (found) return found;
+      }
+    }
+  }
+  return undefined;
+};
+
 describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   // The workflow is installed statically (no template rendering); it reads per-space config at run
   // time. These assertions run against the static yaml the definition ships.
@@ -70,13 +87,13 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(setTagsStep).toBeDefined();
     // The short tag names: `.classification.` and `.confidence.`, not the old longer
     // `.output.classification.` / `.output.confidence_score.` segments. (The trailing
-    // `steps.onechat_runAgent_step.output.structured_output.*` is the agent step's output value that
+    // `steps.runAgent_step.output.structured_output.*` is the agent step's output value that
     // fills the tag, not part of the tag name.)
     expect(setTagsStep.with.tags_to_add).toEqual([
       '{{ variables.tag_prefix }}',
       '{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}',
-      '{{ variables.tag_prefix }}.classification.{{ steps.onechat_runAgent_step.output.structured_output.classification | downcase }}',
-      '{{ variables.tag_prefix }}.confidence.{{ steps.onechat_runAgent_step.output.structured_output.confidence_score }}',
+      '{{ variables.tag_prefix }}.classification.{{ steps.runAgent_step.output.structured_output.classification | downcase }}',
+      '{{ variables.tag_prefix }}.confidence.{{ steps.runAgent_step.output.structured_output.confidence_score }}',
     ]);
     // The auto-close suffix is short too.
     expect(workflow.consts.closed_tag_suffix).toBe('closed');
@@ -103,7 +120,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   });
 
   it('passes the runtime connector id and create-conversation flag to the AI agent step', () => {
-    const agentStep = findStepByName(workflow.steps, 'onechat_runAgent_step') as {
+    const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
       'connector-id': string;
       'create-conversation': string;
     };
@@ -112,6 +129,58 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(agentStep['connector-id']).toBe('{{ variables.connector_id }}');
     // `${{ }}` preserves the boolean; a plain `{{ }}` would render the string "false" (truthy).
     expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
+  });
+
+  it('trims the alert with the pick filter over the configured allow-list before the agent step', () => {
+    const minimalAlertStep = findStepByName(workflow.steps, 'build_minimal_alert') as {
+      type: string;
+      with: { minimal_alert: string };
+    };
+
+    expect(minimalAlertStep).toBeDefined();
+    expect(minimalAlertStep.type).toBe('data.set');
+    // Delegates the field selection to the `pick` filter + the shared const list, rather than
+    // hand-reshaping ~60 nested fields inline.
+    expect(minimalAlertStep.with.minimal_alert).toBe(
+      '${{ foreach.item | pick: consts.model_alert_fields }}'
+    );
+  });
+
+  it('lists the high-signal allow-list fields in consts.model_alert_fields', () => {
+    const fields = workflow.consts.model_alert_fields as string[];
+
+    expect(fields).toEqual(
+      expect.arrayContaining(['_id', '_index', 'process.command_line', 'kibana.alert.rule.name'])
+    );
+  });
+
+  it('sends the trimmed alert (not the full foreach item) to the agent attachment', () => {
+    const agentStep = findStepByType(workflow.steps, 'ai.agent') as {
+      with: { attachments: Array<{ type: string; data: { alert: string } }> };
+    };
+
+    expect(agentStep.with.attachments[0].data.alert).toBe('{{ variables.minimal_alert | json:2 }}');
+  });
+
+  it('adds token usage metadata to the verdict note', () => {
+    const verdictNoteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+    const note = verdictNoteStep.with.body.note.note;
+
+    expect(note).toContain('steps.runAgent_step.output.metadata.usage.inputTokens');
+    expect(note).toContain('steps.runAgent_step.output.metadata.usage.outputTokens');
+    expect(note).toContain('steps.runAgent_step.output.metadata.usage.totalTokens');
+  });
+
+  it('formats the verdict note timestamp with a human-readable date filter', () => {
+    const verdictNoteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+
+    expect(verdictNoteStep.with.body.note.note).toContain(
+      "{{ execution.startedAt | date: '%B %d, %Y at %H:%M:%S UTC' }}"
+    );
   });
 
   it('gates auto-close on the runtime thresholds using a 0-1 confidence scale', () => {
@@ -129,7 +198,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       'variables.auto_close_confidence_score_max_threshold'
     );
 
-    const agentStep = findStepByName(workflow.steps, 'onechat_runAgent_step') as {
+    const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
       with: { schema: { properties: { confidence_score: { minimum: number; maximum: number } } } };
     };
     // The LLM schema maximum must stay on the same 0-1 scale as the thresholds, or `score <= 1.0`
