@@ -50,3 +50,9 @@ jszip
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
 just-bash
+immer-v9
+react-redux-v7
+redux-thunk-v2
+redux-toolkit-v1
+redux-v4
+reselect-v4
