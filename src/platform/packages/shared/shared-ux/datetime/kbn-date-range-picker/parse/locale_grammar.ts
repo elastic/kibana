@@ -65,6 +65,38 @@ export interface LocaleGrammar {
    * deterministically (localized absolute-date parsing is deferred — see plan).
    */
   guardWords?: string[];
+  /**
+   * Unit aliases whose SHORTHAND form requires an explicit `now` or sign
+   * prefix. A bare count+unit in these units reads as a calendar date, not a
+   * duration ("22日" is the 22nd, "2025年" is the year 2025 — native-review
+   * verdict on the CJK grammars), so it must reject. Prefixed shorthand
+   * ("-22日", "now-22日") stays unambiguous and parses, and natural-language
+   * phrases ("3日前", "過去3日") are unaffected — templates resolve units
+   * independently of the shorthand path.
+   */
+  shorthandPrefixRequired?: string[];
+  /**
+   * How whitespace in `durationTemplates`/`instantTemplates` is matched when
+   * RECOGNIZING input. `'required'` (default) compiles template spaces to
+   * `\s+`, keeping word-language templates strict ("last7days" must not
+   * parse). `'optional'` — for CJK locales, where spaces carry no meaning
+   * between tokens — tolerates whitespace between ALL template segments, so a
+   * single authored template accepts every spacing mix an IME produces
+   * ("最近 7 天", "最近7天", "最近 7天", "最近7 天"). Generation always uses
+   * the template text verbatim.
+   */
+  templateWhitespace?: 'required' | 'optional';
+  /**
+   * Additional words recognised as "now" on input (e.g. Japanese 現在
+   * alongside 今). Generated text always uses `nowKeyword`.
+   */
+  nowAliases?: string[];
+  /**
+   * Suffix words stripped from the END side of a delimited range before that
+   * side is parsed — the Japanese circumfix "から…まで": "3日前から今まで"
+   * splits on the から delimiter, then まで is stripped from "今まで".
+   */
+  rangeEndSuffixes?: string[];
   // TODO: rename — bare `generation` reads like a version counter rather than an
   // exception layer applied when generating text.
   /**
@@ -240,8 +272,12 @@ export interface CompiledGrammar {
   unitAliases: Record<string, TimeUnit>;
   namedRanges: Record<string, { start: string; end: string }>;
   namedRangeAliases: Record<string, string>;
-  /** Every recognised "now" literal (English + locale). */
+  /** Every recognised "now" literal (English + locale, including `nowAliases`). */
   nowKeywords: string[];
+  /** Locale suffixes stripped from the END side of a delimited range ("まで"). */
+  rangeEndSuffixes: readonly string[];
+  /** Surface unit forms whose shorthand needs a now/sign prefix — see {@link LocaleGrammar.shorthandPrefixRequired}. */
+  shorthandPrefixRequired: ReadonlySet<string>;
   /**
    * Every natural-language word this grammar recognises — unit aliases,
    * duration/instant template words, and "now" keywords — lowercased. A
@@ -367,25 +403,35 @@ const LENIENT_UNIT_PATTERN = '[\\p{L}\\p{M}]+';
  * re-searching the input for literal text (robust to case/whitespace
  * differences between the template and the actual matched input).
  */
-function compileTemplate(template: string): CompiledTemplate {
+function compileTemplate(
+  template: string,
+  whitespace: 'required' | 'optional' = 'required'
+): CompiledTemplate {
   const parts = template.split(/(\{count}|\{unit})/).filter((part) => part !== '');
   const segments: TemplateSegment[] = [];
+  // 'optional' additionally tolerates whitespace at every segment boundary
+  // (not just where the template has a space): CJK input mixes spaced and
+  // glued forms freely ("最近 7天", "3天 前"), and no boundary is ambiguous —
+  // counts are digits, units are letters, literals are fixed words.
+  const ws = whitespace === 'optional' ? '\\s*' : '\\s+';
+  const glue = whitespace === 'optional' ? '\\s*' : '';
   let pattern = '';
   let groupIdx = 0;
   let countGroup = -1;
   let unitGroup = -1;
 
   for (const part of parts) {
+    const joiner = pattern ? glue : '';
     if (part === '{count}') {
       countGroup = ++groupIdx;
-      pattern += '(\\d+)';
+      pattern += `${joiner}(\\d+)`;
       segments.push({ type: 'count' });
     } else if (part === '{unit}') {
       unitGroup = ++groupIdx;
-      pattern += `(${LENIENT_UNIT_PATTERN})`;
+      pattern += `${joiner}(${LENIENT_UNIT_PATTERN})`;
       segments.push({ type: 'unit' });
     } else {
-      pattern += escapeRegExp(part).replace(/ /g, '\\s+');
+      pattern += joiner + escapeRegExp(part).replace(/ /g, ws);
       segments.push({ type: 'literal', text: part });
     }
   }
@@ -450,7 +496,9 @@ function compileMergedGrammar(locale: LocaleGrammar | undefined): CompiledGramma
     ? dedupeDelimiters([...ENGLISH_GRAMMAR.delimiters, ...locale.delimiters])
     : ENGLISH_GRAMMAR.delimiters;
   const nowKeywords = locale
-    ? Array.from(new Set([ENGLISH_GRAMMAR.nowKeyword, locale.nowKeyword]))
+    ? Array.from(
+        new Set([ENGLISH_GRAMMAR.nowKeyword, locale.nowKeyword, ...(locale.nowAliases ?? [])])
+      )
     : [ENGLISH_GRAMMAR.nowKeyword];
 
   const unitPattern = Object.keys(unitAliases)
@@ -471,6 +519,14 @@ function compileMergedGrammar(locale: LocaleGrammar | undefined): CompiledGramma
     ? [...ENGLISH_GRAMMAR.instantTemplates.future, ...locale.instantTemplates.future]
     : ENGLISH_GRAMMAR.instantTemplates.future;
 
+  // Templates compile with their SOURCE grammar's whitespace mode: English
+  // stays strict even when merged under a CJK locale.
+  const localeWhitespace = locale?.templateWhitespace ?? 'required';
+  const compileMergedTemplates = (english: string[], localeTemplates: string[] | undefined) => [
+    ...english.map((template) => compileTemplate(template)),
+    ...(localeTemplates ?? []).map((template) => compileTemplate(template, localeWhitespace)),
+  ];
+
   const delimiterPatterns = [...delimiters, { text: '-' }]
     .map(buildDelimiterPattern)
     .filter((p): p is RegExp => p !== null);
@@ -482,6 +538,7 @@ function compileMergedGrammar(locale: LocaleGrammar | undefined): CompiledGramma
       extractTemplateWords
     ),
     ...(locale?.guardWords ?? []).map((word) => word.toLowerCase()),
+    ...(locale?.rangeEndSuffixes ?? []).map((word) => word.toLowerCase()),
   ];
   const vocabulary = new Set(vocabularyWords);
   const cjkVocabulary = Array.from(
@@ -490,16 +547,30 @@ function compileMergedGrammar(locale: LocaleGrammar | undefined): CompiledGramma
 
   return {
     shorthandRegex: new RegExp(`^(now)?([+-]?)(\\d+)(${unitPattern})(\\/[smhdwMy])?$`),
-    durationPast: concatPast.map(compileTemplate),
-    durationFuture: concatFuture.map(compileTemplate),
-    instantPast: instantPast.map(compileTemplate),
-    instantFuture: instantFuture.map(compileTemplate),
+    durationPast: compileMergedTemplates(
+      ENGLISH_GRAMMAR.durationTemplates.past,
+      locale?.durationTemplates.past
+    ),
+    durationFuture: compileMergedTemplates(
+      ENGLISH_GRAMMAR.durationTemplates.future,
+      locale?.durationTemplates.future
+    ),
+    instantPast: compileMergedTemplates(
+      ENGLISH_GRAMMAR.instantTemplates.past,
+      locale?.instantTemplates.past
+    ),
+    instantFuture: compileMergedTemplates(
+      ENGLISH_GRAMMAR.instantTemplates.future,
+      locale?.instantTemplates.future
+    ),
     delimiters,
     delimiterPatterns,
     unitAliases,
     namedRanges,
     namedRangeAliases,
     nowKeywords,
+    rangeEndSuffixes: locale?.rangeEndSuffixes ?? [],
+    shorthandPrefixRequired: new Set(locale?.shorthandPrefixRequired ?? []),
     vocabulary,
     cjkVocabulary,
   };

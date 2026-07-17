@@ -574,6 +574,36 @@ const parseSide = (
   const trimmed = getTrimmedSide(side, offset);
   if (!trimmed.text) return [];
 
+  // The END side may carry a range-end suffix (Japanese "3日前から今まで" →
+  // right side "今まで"): parse the inner text and emit the suffix as a
+  // non-navigable literal, mirroring `parse_text.ts`'s suffix strip.
+  if (rangeIndex === 1) {
+    for (const suffix of compiled.rangeEndSuffixes) {
+      if (trimmed.text.length > suffix.length && trimmed.text.endsWith(suffix)) {
+        const inner = parseSide(
+          trimmed.text.slice(0, -suffix.length),
+          trimmed.offset,
+          rangeIndex,
+          compiled
+        );
+        if (inner.length) {
+          const suffixStart = trimmed.offset + trimmed.text.length - suffix.length;
+          return [
+            ...inner,
+            {
+              text: suffix,
+              start: suffixStart,
+              end: suffixStart + suffix.length,
+              kind: 'literal',
+              navigable: false,
+              rangeIndex,
+            },
+          ];
+        }
+      }
+    }
+  }
+
   if (compiled.nowKeywords.includes(trimmed.text)) {
     return [
       {

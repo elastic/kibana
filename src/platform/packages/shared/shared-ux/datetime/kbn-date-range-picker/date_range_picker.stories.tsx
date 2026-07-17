@@ -81,8 +81,8 @@ const LOCALIZED_PRESETS: Record<string, TimeRangeBoundsOption[]> = {
     { start: 'now/d', end: 'now/d', label: "Aujourd'hui" },
   ],
   'ja-JP': [
-    { start: 'now-15m', end: 'now', label: '過去15分' },
-    { start: 'now-7d', end: 'now', label: '過去7日' },
+    { start: 'now-15m', end: 'now', label: '過去15分間' },
+    { start: 'now-7d', end: 'now', label: '過去7日間' },
     { start: 'now/d', end: 'now/d', label: '今日' },
   ],
   'zh-CN': [

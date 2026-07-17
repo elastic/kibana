@@ -199,7 +199,11 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   for (const splitDelimiter of splitDelimiters) {
     for (const candidate of findDelimiterSplits(trimmed, splitDelimiter)) {
       const startDateString = instantToDateString(candidate.left, compiled, formats);
-      const endDateString = instantToDateString(candidate.right, compiled, formats);
+      const endDateString = instantToDateString(
+        stripRangeEndSuffix(candidate.right, compiled),
+        compiled,
+        formats
+      );
       if (startDateString && endDateString) {
         const roundedStart = applyStartBoundRounding(startDateString, roundRelativeTime);
         return buildRange(text, roundedStart, endDateString, formats, false);
@@ -297,7 +301,12 @@ function instantToDateString(
   const shorthandMatch = trimmed.match(compiled.shorthandRegex);
   if (shorthandMatch) {
     const unit = resolveUnit(shorthandMatch[4], compiled.unitAliases);
-    if (unit) {
+    // A bare count+unit in a prefix-required unit reads as a calendar date
+    // ("22日" is the 22nd, "2025年" is the year 2025), never a duration —
+    // only the unambiguous now/sign-prefixed forms parse as shorthand. The
+    // bare form falls through and rejects via the vocabulary guard below.
+    const hasPrefix = Boolean(shorthandMatch[1]) || shorthandMatch[2] !== '';
+    if (unit && (hasPrefix || !compiled.shorthandPrefixRequired.has(shorthandMatch[4]))) {
       const operator = shorthandMatch[2] === '+' ? '+' : '-';
       return `now${operator}${shorthandMatch[3]}${unit}${shorthandMatch[5] ?? ''}`;
     }
@@ -326,6 +335,22 @@ function instantToDateString(
   if (absoluteDate !== null) return absoluteDate.toISOString();
 
   return null;
+}
+
+/**
+ * Strips a locale range-end suffix from the END side of a delimited range —
+ * the Japanese circumfix "から…まで": "3日前から今まで" splits on the から
+ * delimiter, then まで is stripped here so the side parses as "今". No-ops
+ * when no suffix matches or nothing would remain.
+ */
+function stripRangeEndSuffix(text: string, compiled: CompiledGrammar): string {
+  const trimmed = text.trim();
+  for (const suffix of compiled.rangeEndSuffixes) {
+    if (trimmed.length > suffix.length && trimmed.endsWith(suffix)) {
+      return trimmed.slice(0, -suffix.length).trim();
+    }
+  }
+  return trimmed;
 }
 
 /**

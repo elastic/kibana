@@ -1453,6 +1453,24 @@ describe('parser corpus: textToTimeRange (zh-CN)', () => {
         expected: { start: 'now-1M/M', end: 'now-1M/M', isNaturalLanguage: true, isInvalid: false },
       },
       {
+        input: '下月',
+        options: { locale },
+        note: 'short synonym for "next month" (alongside 下个月) — native review symmetry with 上月',
+        expected: { start: 'now+1M/M', end: 'now+1M/M', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '前天',
+        options: { locale },
+        note: 'named range "the day before yesterday"',
+        expected: { start: 'now-2d/d', end: 'now-2d/d', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '后天',
+        options: { locale },
+        note: 'named range "the day after tomorrow"',
+        expected: { start: 'now+2d/d', end: 'now+2d/d', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
         input: '明年',
         options: { locale },
         note: 'Chinese named range "next year"',
@@ -1542,10 +1560,40 @@ describe('parser corpus: textToTimeRange (zh-CN)', () => {
         expected: { start: 'now-1M', end: 'now', isNaturalLanguage: false, isInvalid: false },
       },
       {
+        input: '最近 7天',
+        options: { locale },
+        note: 'MIXED spacing parses — IMEs make it common and it carries no meaning (native report)',
+        expected: { start: 'now-7d', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '最近7 天',
+        options: { locale },
+        note: 'the opposite spacing mix parses too',
+        expected: { start: 'now-7d', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '1个小时前',
+        options: { locale },
+        note: 'the measure word 个 is idiomatic before 小时 (native suggestion)',
+        expected: { start: 'now-1h', end: 'now', isNaturalLanguage: false, isInvalid: false },
+      },
+      {
+        input: '最近 3 个星期',
+        options: { locale },
+        note: 'the measure word 个 is idiomatic before 星期 too',
+        expected: { start: 'now-3w', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
         input: '30分钟',
         options: { locale },
         note: 'bare count+unit shorthand works glued (consistent with English "30m")',
         expected: { start: 'now-30m', end: 'now', isInvalid: false },
+      },
+      {
+        input: '22天',
+        options: { locale },
+        note: 'bare 天 duration stays valid — 天 is a pure counter, unlike calendar-date 日/年',
+        expected: { start: 'now-22d', end: 'now', isInvalid: false },
       },
     ]);
   });
@@ -1627,9 +1675,19 @@ describe('parser corpus: textToTimeRange (zh-CN)', () => {
         expected: { isInvalid: true },
       },
       {
+        input: '2025年',
+        options: { locale },
+        note:
+          'bare "2025年" means the calendar year, not "2025 years" — rejects rather than ' +
+          'misparse (年 stays an alias so 3年前/最近 3 年 keep working)',
+        expected: { isInvalid: true },
+      },
+      {
         input: '3日前',
         options: { locale },
-        note: 'known casualty of guarding 日: the literary "3日前" is rejected — use 3天前',
+        note:
+          'known casualty of guarding 日: the literary "3日前" is rejected — use 3天前 ' +
+          '(confirmed acceptable by native review: 天 is the natural counter here)',
         expected: { isInvalid: true },
       },
       {
@@ -1756,12 +1814,94 @@ describe('parser corpus: textToTimeRange (ja-JP)', () => {
         expected: { start: 'now-1M', end: 'now', isNaturalLanguage: false, isInvalid: false },
       },
       {
-        input: '22日',
+        input: '1ヵ月前',
         options: { locale },
-        note:
-          'KNOWN AMBIGUITY (flagged for native review): bare "22日" (the 22nd) parses as ' +
-          '"22 days" because 日 must stay an alias for the standard instant form 2日前',
+        note: 'small-ヵ spelling variant of ヶ月 (native review: all conventional spellings parse)',
+        expected: { start: 'now-1M', end: 'now', isInvalid: false },
+      },
+      {
+        input: '1か月前',
+        options: { locale },
+        note: 'hiragana-か spelling variant of ヶ月',
+        expected: { start: 'now-1M', end: 'now', isInvalid: false },
+      },
+      {
+        input: '1ケ月前',
+        options: { locale },
+        note: 'full-size-ケ spelling variant of ヶ月',
+        expected: { start: 'now-1M', end: 'now', isInvalid: false },
+      },
+      {
+        input: '1箇月前',
+        options: { locale },
+        note: 'full-kanji 箇 spelling variant of ヶ月 (formal writing)',
+        expected: { start: 'now-1M', end: 'now', isInvalid: false },
+      },
+      {
+        input: '過去 2日',
+        options: { locale },
+        note: 'MIXED spacing parses — whitespace between CJK tokens carries no meaning',
+        expected: { start: 'now-2d', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '過去15分間',
+        options: { locale },
+        note: '分間 duration counter (native preference; also the generated display form)',
+        expected: { start: 'now-15m', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '過去3年間',
+        options: { locale },
+        note: '年間 duration counter — the unambiguous bare-duration form of 年',
+        expected: { start: 'now-3y', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: 'ここ2日',
+        options: { locale },
+        note: 'ここ recognized alongside 過去 for past durations (native suggestion)',
+        expected: { start: 'now-2d', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '直近2日',
+        options: { locale },
+        note: '直近 recognized alongside 過去 for past durations (native suggestion)',
+        expected: { start: 'now-2d', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '未来3日',
+        options: { locale },
+        note: '未来 recognized alongside 今後 for future durations (native suggestion)',
+        expected: { start: 'now', end: 'now+3d', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '22日間',
+        options: { locale },
+        note: 'bare 日間 duration stays valid — the counter form is unambiguous (cf. bare 22日)',
         expected: { start: 'now-22d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '-22日',
+        options: { locale },
+        note: 'sign-prefixed shorthand stays valid — the prefix disambiguates it from the 22nd',
+        expected: { start: 'now-22d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '昨年',
+        options: { locale },
+        note: 'business-formal "last year" recognized alongside everyday 去年',
+        expected: { start: 'now-1y/y', end: 'now-1y/y', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '一昨日',
+        options: { locale },
+        note: 'named range "the day before yesterday"',
+        expected: { start: 'now-2d/d', end: 'now-2d/d', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '明後日',
+        options: { locale },
+        note: 'named range "the day after tomorrow"',
+        expected: { start: 'now+2d/d', end: 'now+2d/d', isNaturalLanguage: true, isInvalid: false },
       },
     ]);
   });
@@ -1787,6 +1927,36 @@ describe('parser corpus: textToTimeRange (ja-JP)', () => {
         note: 'full-width tilde "～" (U+FF5E, Windows IMEs) — same range, different codepoint',
         expected: { start: 'now-3d', end: 'now', isInvalid: false },
       },
+      {
+        input: '3日前から今',
+        options: { locale },
+        note: 'から ("from") as a delimiter, without a closing まで (native review: natural on its own)',
+        expected: { start: 'now-3d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '3日前から今まで',
+        options: { locale },
+        note: 'the full から…まで circumfix — まで is stripped from the end side before parsing',
+        expected: { start: 'now-3d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '昨日から明日まで',
+        options: { locale },
+        note: 'named ranges as range sides stay unsupported — fails whole, like English "yesterday to now"',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '3日前～現在',
+        options: { locale },
+        note: '現在 recognized as a synonym of 今 (native suggestion); generated text keeps 今',
+        expected: { start: 'now-3d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '現在',
+        options: { locale },
+        note: 'bare 現在 resolves to now, like bare 今',
+        expected: { start: 'now', end: 'now', isInvalid: false },
+      },
     ]);
   });
 
@@ -1796,6 +1966,26 @@ describe('parser corpus: textToTimeRange (ja-JP)', () => {
         input: '1月',
         options: { locale },
         note: '"1月" means January, NOT "1 month" — guard word 月 rejects it (ヶ月 covers month counts)',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '22日',
+        options: { locale },
+        note:
+          'NATIVE-REVIEW VERDICT: bare "22日" means the 22nd, not "22 days" — it rejects ' +
+          'rather than misparse (日 stays an alias so 2日前/過去2日/22日間 keep working)',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '2025年',
+        options: { locale },
+        note: 'bare "2025年" means the calendar year, not "2025 years" — rejects rather than misparse',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '3時',
+        options: { locale },
+        note: '"3時" is 3 o\'clock, not a duration — guard word 時 rejects it (時間 covers hour counts)',
         expected: { isInvalid: true },
       },
       {

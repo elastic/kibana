@@ -203,11 +203,22 @@ describe('timeRangeToDisplayText', () => {
     });
 
     it('generates a Japanese compact relative label (future), glued', () => {
-      expect(toDisplay('now to +15m', { locale: 'ja-JP' })).toBe('今後15分');
+      expect(toDisplay('now to +15m', { locale: 'ja-JP' })).toBe('今後15分間');
+    });
+
+    it('generates the Japanese 〜間 counter forms for duration labels (native preference)', () => {
+      expect(toDisplay('-15m', { locale: 'ja-JP' })).toBe('過去15分間');
+      expect(toDisplay('-7d', { locale: 'ja-JP' })).toBe('過去7日間');
+      expect(toDisplay('-3y', { locale: 'ja-JP' })).toBe('過去3年間');
     });
 
     it('generates Japanese relative-to-relative instant phrasing', () => {
       expect(toDisplay('-15m to -5m', { locale: 'ja-JP' })).toBe('15分前 → 5分前');
+    });
+
+    it('generates the bare unit (not 〜間) inside Japanese instants', () => {
+      expect(toDisplay('-7d to -3d', { locale: 'ja-JP' })).toBe('7日前 → 3日前');
+      expect(toDisplay('-3y to -1y', { locale: 'ja-JP' })).toBe('3年前 → 1年前');
     });
 
     it('generates "今" for bare now in Japanese', () => {
