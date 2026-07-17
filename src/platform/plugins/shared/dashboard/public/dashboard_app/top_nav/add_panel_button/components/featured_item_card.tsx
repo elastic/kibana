@@ -8,7 +8,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import type { MenuItem } from '../types';
 
@@ -34,19 +36,32 @@ export const FeaturedItemCard = ({
     onClick={item.onClick}
     className={className}
     data-test-subj={item['data-test-subj']}
+    css={styles.panel}
   >
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={item.icon} size="m" aria-hidden={true} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="s">
-          <strong className="featuredPanelItem__title">{title ?? item.name}</strong>
-        </EuiText>
-        <EuiText size="xs" color="subdued">
-          {description ?? item.description}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div css={styles.titleRow}>
+      <EuiIcon type={item.icon} size="m" aria-hidden={true} />
+      <EuiText size="s" textAlign="left">
+        <strong className="featuredPanelItem__title">{title ?? item.name}</strong>
+      </EuiText>
+    </div>
+    <EuiText size="xs" color="subdued" textAlign="left" css={styles.description}>
+      {description ?? item.description}
+    </EuiText>
   </EuiPanel>
 );
+
+const styles = {
+  panel: css({
+    textAlign: 'left',
+  }),
+  titleRow: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      alignItems: 'center',
+      gap: euiTheme.size.s,
+    }),
+  description: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginTop: euiTheme.size.xs,
+    }),
+};

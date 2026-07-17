@@ -17,6 +17,8 @@ import {
   EuiImage,
   EuiPageTemplate,
   EuiText,
+  euiBreakpoint,
+  euiMinBreakpoint,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
@@ -111,7 +113,11 @@ export function DashboardEmptyScreen() {
   const actions = (() => {
     if (showEditPrompt) {
       const featuredItemPanels = featuredItems.map((item) => (
-        <EuiFlexItem key={item.id} grow={Boolean(openDashboardChatAction)}>
+        <EuiFlexItem
+          key={item.id}
+          grow={Boolean(openDashboardChatAction)}
+          css={styles.featuredItem}
+        >
           <FeaturedItemCard item={item} title={customTitles[item.id]} css={styles.actionPanel} />
         </EuiFlexItem>
       ));
@@ -125,7 +131,7 @@ export function DashboardEmptyScreen() {
               </EuiFlexItem>
               {featuredItemPanels.length > 0 && (
                 <EuiFlexItem>
-                  <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+                  <EuiFlexGroup gutterSize="s" wrap>
                     {featuredItemPanels}
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -170,32 +176,67 @@ const emptyScreenStyles = {
     display: 'flex',
     flexGrow: 1,
     height: '100%',
+    minWidth: 0,
+    width: '100%',
   }),
   template: css({
     backgroundColor: 'inherit',
     paddingBlockStart: '0 !important',
+    width: '100%',
+    minWidth: 0,
   }),
-  widgetContainer: ({ euiTheme }: UseEuiTheme) =>
-    css({
+  widgetContainer: (euiThemeContext: UseEuiTheme) => {
+    const { euiTheme } = euiThemeContext;
+    return css({
+      width: '100%',
+      // Wide enough for "Create visualization (with query)" to stay on one line
+      // beside its icon when the two featured cards sit side-by-side on laptop.
+      maxWidth: '56rem',
+      minWidth: 0,
+      boxSizing: 'border-box',
       padding: euiTheme.size.xl,
       paddingTop: '0 !important',
       borderRadius: euiTheme.border.radius.medium,
+      [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
+        maxWidth: '100%',
+        padding: euiTheme.size.base,
+        paddingTop: '0 !important',
+      },
+      [euiMinBreakpoint(euiThemeContext, 'm')]: {
+        maxWidth: '56rem',
+        width: '49rem',
+      },
       '.euiEmptyPrompt__icon': {
         marginBottom: euiTheme.size.l,
         paddingRight: euiTheme.size.s,
+        maxWidth: '100%',
+        [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
+          marginBottom: euiTheme.size.m,
+          paddingRight: 0,
+        },
       },
-      '.euiEmptyPrompt__content': {
-        maxWidth: '44em',
+      '.euiEmptyPrompt__content, .euiEmptyPrompt__actions': {
+        width: '100%',
+        maxWidth: '100%',
+        minWidth: 0,
       },
-    }),
+    });
+  },
   actionsWrapper: css({
-    width: '44em',
+    width: '100%',
     maxWidth: '100%',
+    minWidth: 0,
+  }),
+  featuredItem: css({
+    minWidth: 0,
   }),
   actionPanel: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
       cursor: 'pointer',
       height: '100%',
+      width: '100%',
+      minWidth: 0,
+      boxSizing: 'border-box',
     }),
 };

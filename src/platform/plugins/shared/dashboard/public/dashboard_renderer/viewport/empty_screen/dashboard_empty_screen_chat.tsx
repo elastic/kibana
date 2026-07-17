@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiPanel,
   EuiText,
+  euiBreakpoint,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -101,23 +102,38 @@ export const DashboardEmptyScreenChat = ({
   action: Action<OpenDashboardChatActionContext>;
 }) => (
   <EuiPanel hasBorder paddingSize="none" css={styles.panel}>
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+    <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="productAgent" size="m" css={styles.assistanceText} aria-hidden={true} />
-      </EuiFlexItem>
-      <EuiFlexItem css={styles.content}>
-        <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="productAgent" size="m" css={styles.assistanceText} aria-hidden={true} />
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s" textAlign="left" css={styles.assistanceText}>
               <strong>
                 {i18n.translate('dashboard.emptyScreen.createWithChatTitle', {
-                  defaultMessage: 'Create with Chat',
+                  defaultMessage: 'Create with chat',
                 })}
               </strong>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={styles.content}>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          responsive={false}
+          css={styles.promptsRow}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+              css={styles.promptsRow}
+            >
               {promptSuggestions.map(({ prompt, testSubject }) => (
                 <EuiFlexItem grow={false} key={prompt}>
                   <EuiButton
@@ -133,21 +149,21 @@ export const DashboardEmptyScreenChat = ({
                   </EuiButton>
                 </EuiFlexItem>
               ))}
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  color="text"
-                  flush="both"
-                  css={styles.openChatButton}
-                  onClick={() => action.execute(getActionContext(''))}
-                  data-test-subj="dashboardCreateWithChatOpenChat"
-                >
-                  {i18n.translate('dashboard.emptyScreen.openChatButtonLabel', {
-                    defaultMessage: 'Open chat →',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
             </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              css={styles.openChatButton}
+              size="s"
+              color="text"
+              flush="both"
+              onClick={() => action.execute(getActionContext(''))}
+              data-test-subj="dashboardCreateWithChatOpenChat"
+            >
+              {i18n.translate('dashboard.emptyScreen.openChatButtonLabel', {
+                defaultMessage: 'Open chat →',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -162,24 +178,37 @@ const styles = {
       padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
       textAlign: 'left',
       width: '100%',
+      maxWidth: '100%',
+      minWidth: 0,
+      boxSizing: 'border-box',
+    }),
+  openChatButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingLeft: euiTheme.size.s,
     }),
   assistanceText: ({ euiTheme }: UseEuiTheme) =>
     css({
       color: euiTheme.colors.textAssistance,
     }),
-  promptButton: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      borderRadius: euiTheme.size.m,
-    }),
+  promptButton: css({
+    borderRadius: '8px',
+    maxWidth: '100%',
+    whiteSpace: 'nowrap',
+  }),
   promptButtonContent: ({ euiTheme }: UseEuiTheme) =>
     css({
       paddingInline: euiTheme.size.xxs,
     }),
-  openChatButton: ({ euiTheme }: UseEuiTheme) =>
+  promptsRow: (euiThemeContext: UseEuiTheme) =>
     css({
-      color: euiTheme.colors.textAssistance,
+      flexWrap: 'nowrap',
+      justifyContent: 'flex-start',
+      [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
+        flexWrap: 'wrap',
+      },
     }),
   content: css({
     minWidth: 0,
+    maxWidth: '100%',
   }),
 };

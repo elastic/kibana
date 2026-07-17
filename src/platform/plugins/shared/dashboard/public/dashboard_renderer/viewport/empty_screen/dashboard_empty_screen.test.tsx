@@ -88,7 +88,7 @@ describe('DashboardEmptyScreen', () => {
   test('renders Chat when its action is registered and compatible', async () => {
     renderComponent('edit');
 
-    expect(await screen.findByText('Create with Chat')).toBeInTheDocument();
+    expect(await screen.findByText('Create with chat')).toBeInTheDocument();
     expect(screen.getByTestId('dashboardCreateWithChatOpenChat')).toBeInTheDocument();
     expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
   });
