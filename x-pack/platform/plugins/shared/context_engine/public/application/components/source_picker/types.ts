@@ -13,4 +13,9 @@ export interface SelectedSource {
   id: string;
   /** Human-readable label rendered in the selected-source chips. */
   label: string;
+  /**
+   * Underlying source value sent to the AI index API (e.g. the ES|QL query for
+   * an `esql_view` source).
+   */
+  value: string;
 }

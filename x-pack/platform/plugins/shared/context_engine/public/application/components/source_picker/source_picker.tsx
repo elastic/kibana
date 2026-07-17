@@ -51,7 +51,10 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
       );
       return;
     }
-    onChange([...selectedSources, { type: 'esql_view', id: view.name, label: view.name }]);
+    onChange([
+      ...selectedSources,
+      { type: 'esql_view', id: view.name, label: view.name, value: view.query },
+    ]);
   };
 
   const removeSource = (source: SelectedSource) => {

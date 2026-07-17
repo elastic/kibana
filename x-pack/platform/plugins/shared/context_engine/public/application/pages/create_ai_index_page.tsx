@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -17,17 +16,41 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { TryInConsoleButton } from '@kbn/try-in-console';
 import React, { useState } from 'react';
+import { DEFAULT_AI_INDEX_DATA_STREAM } from '../../../common/constants';
 import { SourcePicker } from '../components/source_picker';
 import type { SelectedSource } from '../components/source_picker';
+import { useCreateAiIndex } from '../hooks/use_create_ai_index';
+import { useKibana } from '../hooks/use_kibana';
 import { useNavigation } from '../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../paths';
 
+const CREATE_AI_INDEX_DEST_REQUEST = `# Create an index template so the data stream gets created with the right settings
+PUT _index_template/ai-index-ds-template
+{
+  "index_patterns": [".ai-index-ds-*"],
+  "data_stream": {},
+  "priority": 500
+}
+
+# Create the backing data stream used by the "Continue" button below
+PUT _data_stream/${DEFAULT_AI_INDEX_DATA_STREAM}`;
+
 export const CreateAiIndexPage = () => {
+  const {
+    services: { application, share, console: consolePlugin },
+  } = useKibana();
   const { navigateToContextEngine } = useNavigation();
+  const { createAiIndex, isCreating } = useCreateAiIndex();
   const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
 
-  const goToAiIndex = () => navigateToContextEngine(getAiIndexDetailPath('new'));
+  const createAndContinue = async () => {
+    const created = await createAiIndex(selectedSources);
+    if (created) {
+      navigateToContextEngine(getAiIndexDetailPath(created.id));
+    }
+  };
 
   return (
     <KibanaPageTemplate data-test-subj="contextCreateAiIndexPage">
@@ -64,11 +87,18 @@ export const CreateAiIndexPage = () => {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty data-test-subj="contextSkipSourcesButton" onClick={goToAiIndex}>
-                    {i18n.translate('xpack.contextEngine.createAiIndex.skipButton', {
-                      defaultMessage: 'Skip for now',
+                  <TryInConsoleButton
+                    type="emptyButton"
+                    iconType="plusInCircle"
+                    request={CREATE_AI_INDEX_DEST_REQUEST}
+                    application={application}
+                    sharePlugin={share}
+                    consolePlugin={consolePlugin}
+                    data-test-subj="contextCreateAiIndexDestButton"
+                    content={i18n.translate('xpack.contextEngine.createAiIndex.createDestButton', {
+                      defaultMessage: 'Create AI index dest',
                     })}
-                  </EuiButtonEmpty>
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
@@ -76,7 +106,9 @@ export const CreateAiIndexPage = () => {
                     iconType="arrowRight"
                     iconSide="right"
                     data-test-subj="contextContinueButton"
-                    onClick={goToAiIndex}
+                    onClick={createAndContinue}
+                    isLoading={isCreating}
+                    isDisabled={selectedSources.length === 0}
                   >
                     {i18n.translate('xpack.contextEngine.createAiIndex.continueButton', {
                       defaultMessage: 'Continue',
