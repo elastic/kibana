@@ -56,11 +56,6 @@ const NOT_ENABLED_BODY_MESSAGES: Record<NotEnabledReason, () => string> = {
     i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.licenseBody', {
       defaultMessage: 'An Enterprise license or higher is required to use significant events.',
     }),
-  ui_setting: () =>
-    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.uiSettingBody', {
-      defaultMessage:
-        'Significant events is disabled. Enable it in Advanced Settings to start using it.',
-    }),
   unknown: () =>
     i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.unknownBody', {
       defaultMessage:

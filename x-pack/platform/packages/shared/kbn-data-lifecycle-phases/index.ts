@@ -19,3 +19,4 @@ export * from './src/phase_requirement_badges';
 export * from './src/searchable_snapshot_repository_info';
 export * from './src/frozen_phase_callouts';
 export * from './src/get_bound_help_text';
+export * from './src/hooks/use_push_flyout_focus';
