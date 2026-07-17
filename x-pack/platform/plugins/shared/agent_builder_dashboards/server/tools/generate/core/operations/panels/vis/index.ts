@@ -12,6 +12,7 @@ import {
   VEGA_VIS_TYPE,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
+import { sanitizePanelVegaSpec } from '@kbn/agent-builder-visualizations-server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
@@ -66,6 +67,8 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
 
   // A Vega visualization's `visualization` field is a `{ spec }` config: accept
   // it by value and bound the serialized spec, matching the attachment schema.
+  // Agents often double-encode that string when packing generate_dashboard; heal
+  // one layer and rewrite mistyped Scale(/Bandwidth( before the panel is stored.
   if ('spec' in config) {
     const { spec } = config as { spec?: unknown };
     if (typeof spec !== 'string' || spec.length === 0) {
@@ -74,7 +77,26 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
         message: 'Vega panel config must provide a non-empty `spec` string.',
         input: config,
       });
-    } else if (spec.length > MAX_VEGA_SPEC_LENGTH) {
+      return;
+    }
+    if (spec.length > MAX_VEGA_SPEC_LENGTH) {
+      ctx.issues.push({
+        code: 'custom',
+        message: `Vega panel \`spec\` must be at most ${MAX_VEGA_SPEC_LENGTH} characters.`,
+        input: config,
+      });
+      return;
+    }
+    const sanitized = sanitizePanelVegaSpec(spec);
+    if (!sanitized.ok) {
+      ctx.issues.push({
+        code: 'custom',
+        message: sanitized.message,
+        input: config,
+      });
+      return;
+    }
+    if (sanitized.spec.length > MAX_VEGA_SPEC_LENGTH) {
       ctx.issues.push({
         code: 'custom',
         message: `Vega panel \`spec\` must be at most ${MAX_VEGA_SPEC_LENGTH} characters.`,
@@ -103,7 +125,7 @@ export const visPanelConfigInputSchema = z.object({
   type: z.literal('vis'),
   grid: panelGridSchema,
   config: visPanelConfigSchema.describe(
-    'Already-resolved visualization config, passed by value from a visualization attachment\'s `visualization` field: either a Lens API config (has a top-level `type`) or a Vega config (`{ spec }`). Do not hand-build a config for a new visualization here — use source: "request" instead.'
+    'Already-resolved visualization config, passed by value from a visualization attachment\'s `visualization` field: either a Lens API config (has a top-level `type`) or a Vega config (`{ spec }`). For Vega, copy `visualization.spec` verbatim as a JSON object string — never re-stringify/double-encode it and never rewrite Vega expressions. Do not hand-build a config for a new visualization here — use source: "request" instead.'
   ),
 });
 
@@ -182,7 +204,17 @@ export type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;
 export const visPanelDefinition = definePanelType({
   embeddableType: LENS_EMBEDDABLE_TYPE,
   buildPanelContent: (config) => {
-    const isVegaConfig = typeof (config as { spec?: unknown })?.spec === 'string';
-    return { type: isVegaConfig ? VEGA_VIS_TYPE : LENS_EMBEDDABLE_TYPE, config };
+    const rawSpec = (config as { spec?: unknown })?.spec;
+    if (typeof rawSpec !== 'string') {
+      return { type: LENS_EMBEDDABLE_TYPE, config };
+    }
+    // Schema already rejected unsanitizable specs; re-run so the stored panel
+    // keeps the healed JSON (unwrap double-encoding, rewrite Scale(, etc.).
+    const sanitized = sanitizePanelVegaSpec(rawSpec);
+    const spec = sanitized.ok ? sanitized.spec : rawSpec;
+    return {
+      type: VEGA_VIS_TYPE,
+      config: { ...(config as Record<string, unknown>), spec },
+    };
   },
 });

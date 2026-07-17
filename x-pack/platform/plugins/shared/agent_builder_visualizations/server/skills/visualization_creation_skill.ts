@@ -17,20 +17,20 @@ export const visualizationCreationSkill = defineSkillType({
   name: 'visualization-creation',
   basePath: 'skills/platform/visualization',
   description:
-    'Create Lens or Vega visualizations (including Raw Vega sankey/flow, sunburst/hierarchy, and radar/spider) via create_visualization. Use for any chart/visualization request — never hand-author Vega JSON or persist charts with attachments.add.',
+    'Create standalone Lens or Vega visualizations (including Raw Vega sankey/flow, sunburst/hierarchy, and radar/spider) via create_visualization. For dashboards, use dashboard-management instead — never hand-author Vega JSON or persist charts with attachments.add.',
   content: `## When to Use This Skill
 
 Use this skill when:
-- A user asks for one or more standalone visualizations (chart, metric, trend, breakdown, distribution).
-- A user asks for **Vega**, **Vega-Lite**, **sankey / flow**, **sunburst / hierarchy**, or **radar / spider** charts.
-- You explicitly want a reusable visualization attachment ID for later use.
+- A user asks for one or more **standalone** visualizations (chart, metric, trend, breakdown, distribution) with **no dashboard** in the request.
+- A user asks for a standalone **Vega**, **Vega-Lite**, **sankey / flow**, **sunburst / hierarchy**, or **radar / spider** chart (again: no dashboard).
+- You explicitly want a reusable visualization attachment ID for later use outside a dashboard.
 - A user asks to update an existing visualization by attachment ID.
 
 Do **not** use this skill when:
 - The user only needs raw documents or table/query output without a visualization.
 - The user first needs broad data discovery and exploration across unknown sources.
 - The request is about persisted saved objects instead of in-memory attachment workflows.
-- The primary goal is to compose or update a dashboard. Use the dashboard-management skill for dashboard panel creation and layout.
+- The user wants a **dashboard** (create one, or add/edit panels on one) — even if the panels are Vega/sankey/sunburst/radar. Load **dashboard-management** and create panels with \`source: "request"\` (\`renderer: "vega"\` when needed). Do **not** call create_visualization and then copy the spec into the dashboard.
 
 ## Hard Rules (do not violate)
 
@@ -102,6 +102,7 @@ Do **not** use this skill when:
 4. **Interpret output and preserve artifacts**
    - Each successful call returns \`data.attachment_id\` and \`data.version\`. Save them: they identify the persisted attachment for rendering and for later updates (pass \`attachment_id\` back to update it in place).
    - If \`data.attachment_id\` is missing, persistence failed; report that and treat the result as non-renderable and non-reusable.
+   - If the user later asks to put charts on a **dashboard**, switch to the dashboard-management skill and create panels with \`source: "request"\` — do not copy this tool's \`visualization.spec\` into generate_dashboard.
 
 ## Inline Rendering Guidelines
 

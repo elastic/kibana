@@ -31,4 +31,12 @@ describe('registerSkills', () => {
     expect(dashboardManagementSkill.content).toContain('Dashboard Composition Guidelines');
     expect(dashboardManagementSkill.content).toContain('Grid Packing Rules');
   });
+
+  it('routes new dashboard visualizations through source:request, not create_visualization', () => {
+    expect(dashboardManagementSkill.description).toContain('source:"request"');
+    expect(dashboardManagementSkill.description).toContain('do not call create_visualization first');
+    expect(dashboardManagementSkill.content).toContain('source: "request"');
+    expect(dashboardManagementSkill.content).toContain('renderer: "vega"');
+    expect(dashboardManagementSkill.content).toContain('do **not** call create_visualization first');
+  });
 });

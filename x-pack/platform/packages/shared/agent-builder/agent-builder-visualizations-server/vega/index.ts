@@ -10,10 +10,13 @@ export type { BuildVegaConfigParams, BuildVegaConfigResult } from './build_confi
 export { createVegaGraph } from './graph';
 export {
   normalizeVegaSpec,
+  rewriteRawVegaExpressions,
   VEGA_LITE_SCHEMA,
   VEGA_SCHEMA,
   CANONICAL_ESQL_SOURCE_NAME,
 } from './normalize_spec';
+export { sanitizePanelVegaSpec } from './sanitize_panel_vega_spec';
+export type { SanitizePanelVegaSpecResult } from './sanitize_panel_vega_spec';
 export { escapeVegaFieldReferences } from './field_escaping';
 export { createAuthorVegaSpecPrompt } from './prompts';
 export type { VegaDialect, VegaCatalogId } from './dialect';

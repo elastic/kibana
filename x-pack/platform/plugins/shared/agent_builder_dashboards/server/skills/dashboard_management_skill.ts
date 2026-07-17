@@ -15,17 +15,18 @@ export const dashboardManagementSkill = defineSkillType({
   name: 'dashboard-management',
   basePath: 'skills/platform/dashboard',
   description:
-    'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing.',
+    'Compose and update Kibana dashboards: create Lens or Vega panels (including sankey/flow, sunburst/hierarchy, radar/spider) via generate_dashboard with source:"request", plus layout, sections, and controls. Use whenever the user wants a dashboard — do not call create_visualization first.',
   content: `## When to Use This Skill
 
 Use this skill when:
 - A user asks to find, list, inspect, or modify existing Kibana dashboards.
-- A user asks to create a dashboard from one or more visualizations.
+- A user asks to **create a dashboard** (with any panels — Lens, Vega-Lite, sankey/flow, sunburst/hierarchy, radar/spider, markdown).
+- A user asks to **add a visualization to a dashboard** (new or existing). Create that panel inside generate_dashboard with \`source: "request"\` — do **not** call create_visualization first and then copy a config.
 - A user asks to update a dashboard created earlier in the conversation.
 - A request involves dashboard metadata, markdown, panel, or section changes.
 
 Do **not** use this skill when:
-- The user asks for a standalone visualization and does not mention a dashboard context.
+- The user asks for a **standalone** visualization (no dashboard mentioned). Use the visualization-creation skill instead.
 - The user needs help exploring data, fields, or query logic.
 
 ${dashboardGeneration.guidance}
