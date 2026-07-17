@@ -27,7 +27,12 @@ import type { ESBoolQuery } from '../../../../../../common/typed_json';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
 import type { EntityURLStateResult } from '../hooks/use_entity_url_state';
-import { ENTITY_FIELDS, ENTITY_GROUPING_OPTIONS, ENTITY_TYPE_FILTER } from '../constants';
+import {
+  ALLOWED_ENTITY_TYPES,
+  ENTITY_FIELDS,
+  ENTITY_GROUPING_OPTIONS,
+  ENTITY_TYPE_FILTER,
+} from '../constants';
 import {
   type EntitiesGroupingAggregation,
   type EntitiesGroupingQuery,
@@ -40,11 +45,6 @@ import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_gro
 import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
 
 const MAX_GROUPING_LEVELS = 3;
-
-// entity.EngineMetadata.Type is restricted to ALLOWED_ENTITY_TYPES (user/host/service) by
-// ENTITY_TYPE_FILTER, so the terms agg only ever needs a handful of buckets. Kept slightly above
-// ALLOWED_ENTITY_TYPES.length so the query stays correct if another allowed type is introduced.
-const ENTITY_TYPE_BUCKET_SIZE = 5;
 
 const EMPTY_TARGET_METADATA: TargetMetadataMap = new Map();
 
@@ -246,21 +246,19 @@ export const useEntityGrouping = ({
     // Entity type: use the plain mapped field directly — no Painless script needed.
     // A plain terms agg is both correct and much faster than the generic runtime-field path.
     if (selectedGroup === ENTITY_GROUPING_OPTIONS.ENTITY_TYPE) {
+      const lastEntityTypePageIndex = Math.floor((ALLOWED_ENTITY_TYPES.length - 1) / pageSize);
       return {
         size: 0,
         aggs: {
           groupByFields: {
-            terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: ENTITY_TYPE_BUCKET_SIZE },
+            terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: ALLOWED_ENTITY_TYPES.length },
             aggs: {
               entityType: { terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: 1 } },
               bucket_truncate: {
                 bucket_sort: {
-                  // the terms agg never returns more than ENTITY_TYPE_BUCKET_SIZE buckets, so an
-                  // offset beyond that window would always come back empty
-                  from: Math.min(
-                    pageIndex * pageSize,
-                    Math.max(ENTITY_TYPE_BUCKET_SIZE - pageSize, 0)
-                  ),
+                  // ENTITY_TYPE_FILTER restricts the result to ALLOWED_ENTITY_TYPES. Clamp stale
+                  // page indexes to the last page that can contain an allowed entity type.
+                  from: Math.min(pageIndex, lastEntityTypePageIndex) * pageSize,
                   size: pageSize,
                 },
               },

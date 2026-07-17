@@ -13,7 +13,7 @@ import type { ESBoolQuery } from '../../../../../../common/typed_json';
 import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
-import { ENTITY_FIELDS, ENTITY_GROUPING_OPTIONS } from '../constants';
+import { ALLOWED_ENTITY_TYPES, ENTITY_FIELDS, ENTITY_GROUPING_OPTIONS } from '../constants';
 import type { EntityURLStateResult } from '../hooks/use_entity_url_state';
 import { getAggregationsByGroupField, useEntityGrouping } from './use_entity_grouping';
 import type { Filter } from '@kbn/es-query';
@@ -186,7 +186,7 @@ describe('useEntityGrouping — entity type plain-field query', () => {
     const { query } = (useFetchGroupedData as jest.Mock).mock.calls[0][0];
     expect(query.runtime_mappings).toBeUndefined();
     expect(query.aggs?.groupByFields?.terms?.field).toBe(ENTITY_FIELDS.ENTITY_TYPE);
-    expect(query.aggs?.groupByFields?.terms?.size).toBe(5);
+    expect(query.aggs?.groupByFields?.terms?.size).toBe(ALLOWED_ENTITY_TYPES.length);
   });
 
   it('includes entityType size-1 sub-agg inside groupByFields', () => {
@@ -238,7 +238,7 @@ describe('useEntityGrouping — entity type plain-field query', () => {
     );
 
     const { query } = (useFetchGroupedData as jest.Mock).mock.calls[0][0];
-    // offset 2*25=50 is past the 5-bucket window, so it clamps to 0 (avoids an always-empty page)
+    // offset 2*25=50 is past the allowed-type bucket window, so it clamps to 0.
     expect(query.aggs?.groupByFields?.aggs?.bucket_truncate?.bucket_sort?.from).toBe(0);
     expect(query.aggs?.groupByFields?.aggs?.bucket_truncate?.bucket_sort?.size).toBe(25);
   });
@@ -256,7 +256,7 @@ describe('useEntityGrouping — entity type plain-field query', () => {
     );
 
     const { query } = (useFetchGroupedData as jest.Mock).mock.calls[0][0];
-    // offset 1*2=2 fits under max(5-2,0)=3, so it is used as-is
+    // Three allowed types with page size 2 produce pages starting at offsets 0 and 2.
     expect(query.aggs?.groupByFields?.aggs?.bucket_truncate?.bucket_sort?.from).toBe(2);
   });
 });
