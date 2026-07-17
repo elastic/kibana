@@ -124,7 +124,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Discover**:
 * Add **Save to Dashboard** in Discover so you can save sessions directly to a dashboard from the save modal [#260092]({{kib-pull}}260092).
-* Highlight {{esql}} search results in Discover when the query uses {{esql}} `HIGHLIGHT` [#271519]({{kib-pull}}271519).
+* Render inline highlighting in Discover for {{esql}} `TOP_SNIPPETS` results when the `highlight` option is enabled [#271519]({{kib-pull}}271519).
 * Improve the Agent Builder period-comparison skill to overlay both periods on one chart [#270338]({{kib-pull}}270338).
 * Start data analysis automatically when you open Agent Builder from a new {{esql}} Discover tab [#268615]({{kib-pull}}268615).
 * Integrate Agent Builder with {{esql}} Discover for data analysis, context sync, drill-down queries, and **Run in new tab** [#261970]({{kib-pull}}261970).
