@@ -42,7 +42,7 @@ spaceTest.describe('Discover URL state', { tag: '@local-stateful-classic' }, () 
   });
 
   spaceTest(
-    'should show a warning and fall back to the current data view when navigating to a URL with an invalid data view ID',
+    'should show a warning and fall back to the default data view when navigating to a URL with an invalid data view ID',
     async ({ page, pageObjects, apiServices, scoutSpace }) => {
       const defaultDataViewId = await apiServices.dataViews.getIdByTitle(
         testData.DEFAULT_DATA_VIEW,
@@ -50,11 +50,15 @@ spaceTest.describe('Discover URL state', { tag: '@local-stateful-classic' }, () 
       );
       const defaultDataViewUrl = getDiscoverUrlWithDataViewId(page.url(), defaultDataViewId);
 
+      // Force a fresh Discover load so there is no current data view in app state.
+      await page.goto('about:blank');
       await page.goto(defaultDataViewUrl.replace(defaultDataViewId, INVALID_DATA_VIEW_ID));
       await pageObjects.discover.waitUntilTabIsLoaded();
 
       await expect(pageObjects.discover.getSelectedDataView()).toBeVisible();
-      await expect(page.testSubj.locator('dscDataViewNotFoundShowSavedWarning')).toBeVisible();
+      await expect(page.testSubj.locator('dscDataViewNotFoundShowDefaultWarning')).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(`dataViewId:?['"]?${defaultDataViewId}`));
+      await expect(page).not.toHaveURL(new RegExp(INVALID_DATA_VIEW_ID));
     }
   );
 
