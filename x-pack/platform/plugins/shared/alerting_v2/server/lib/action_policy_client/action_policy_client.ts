@@ -353,7 +353,7 @@ export class ActionPolicyClient {
         resolvedTags = ruleTags ?? rule.attributes.metadata.tags ?? [];
       } catch (e) {
         if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-          return { items: [] };
+          return { items: [], total: 0 };
         }
         throw e;
       }
@@ -400,7 +400,7 @@ export class ActionPolicyClient {
       }
     }
 
-    return { items };
+    return { items, total: allPolicies.total };
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
@@ -520,14 +520,6 @@ export class ActionPolicyClient {
     const conditions: KueryNode[] = [];
     const attrPrefix = `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
 
-    if (params.destinationType) {
-      conditions.push(nodeBuilder.is(`${attrPrefix}.destinations.type`, params.destinationType));
-    }
-
-    if (params.createdBy) {
-      conditions.push(nodeBuilder.is(`${attrPrefix}.createdBy`, params.createdBy));
-    }
-
     if (params.enabled !== undefined) {
       conditions.push(nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false'));
     }
@@ -553,8 +545,8 @@ export class ActionPolicyClient {
 
     const sortFieldMap: Record<string, string> = {
       name: 'name.keyword',
-      createdAt: 'createdAt',
-      updatedAt: 'updatedAt',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
     };
 
     return sortFieldMap[sortField];

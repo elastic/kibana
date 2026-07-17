@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstUserAgentCommand, ESQLList } from '@elastic/esql/types';
-import { isAssignment, isMap, isList, isStringLiteral } from '@elastic/esql';
+import type { ESQLAstUserAgentCommand } from '@elastic/esql/types';
+import { isAssignment, isMap } from '@elastic/esql';
+import { getMapEntryByStringKeyFromAst } from '../../definitions/utils/maps';
 
 export enum UserAgentPosition {
   AFTER_USER_AGENT_KEYWORD = 'after_user_agent_keyword',
@@ -19,19 +20,6 @@ export enum UserAgentPosition {
   WITHIN_OPTIONS = 'within_options',
   WITHIN_PROPERTIES_ARRAY = 'within_properties_array',
   AFTER_COMMAND = 'after_command',
-}
-
-/** Returns the list AST node for the `properties` map entry, if any. */
-export function getPropertiesList(command: ESQLAstUserAgentCommand): ESQLList | undefined {
-  const { namedParameters } = command;
-  if (!isMap(namedParameters)) return undefined;
-
-  const propertiesEntry = namedParameters.entries.find(
-    (entry) => isStringLiteral(entry.key) && entry.key.valueUnquoted === 'properties'
-  );
-  if (!propertiesEntry) return undefined;
-
-  return isList(propertiesEntry.value) ? propertiesEntry.value : undefined;
 }
 
 export function getPosition(
@@ -52,9 +40,7 @@ export function getPosition(
     if (!isWithinMap) return UserAgentPosition.AFTER_COMMAND;
 
     // Check if cursor is inside the `properties` entry value (handles empty [] too)
-    const propertiesEntry = map.entries.find(
-      (entry) => isStringLiteral(entry.key) && entry.key.valueUnquoted === 'properties'
-    );
+    const propertiesEntry = getMapEntryByStringKeyFromAst(map, 'properties');
     if (
       propertiesEntry &&
       cursorPosition >= propertiesEntry.value.location.min &&

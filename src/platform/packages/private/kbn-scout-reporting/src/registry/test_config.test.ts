@@ -13,6 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'node:fs';
 import fg from 'fast-glob';
 import path from 'node:path';
+import { testChannels } from '@kbn/scout-info';
 
 jest.mock('node:fs');
 jest.mock('fast-glob');
@@ -23,6 +24,7 @@ jest.mock('../helpers/read_manifest', () => ({
 const dummyManifestProps = {
   exists: false,
   sha1: '000000000000000-000000000000000',
+  testChannels: testChannels.default,
   tests: [],
 };
 
@@ -106,6 +108,7 @@ describe('test_config module', () => {
         const scoutRoot = path.join(moduleRoot, `test/${scoutDirName}`);
         const validManifestContent = {
           sha1: 'b72df4fa5abc546e5f21e6c2f6eaaaa523755720',
+          testChannels: testChannels.default,
           tests: [
             {
               id: 'f44f18cc703276d-178a4921f7b18d0',
@@ -355,6 +358,91 @@ describe('test_config module', () => {
 
     it('can be easily filtered by package name', () => {
       expect(testConfigs.forPackage('halt_who_goes_there')).toHaveLength(1);
+    });
+  });
+
+  describe('testConfigs mixed structure guard', () => {
+    const moduleRoot = 'src/platform/plugins/shared/mixy_mc_mixface';
+
+    const mockGlobPaths = (relativePaths: string[]) => {
+      jest
+        .spyOn(fg, 'globSync')
+        .mockReturnValue(relativePaths.map((relativePath) => path.join(REPO_ROOT, relativePath)));
+      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+    };
+
+    beforeEach(() => {
+      testConfigs._configs = null;
+    });
+
+    afterEach(() => {
+      testConfigs._configs = null;
+    });
+
+    it('throws when a scout root mixes root-level and namespace configs', () => {
+      mockGlobPaths([
+        `${moduleRoot}/test/scout/api/playwright.config.ts`,
+        `${moduleRoot}/test/scout/foo_namespace/ui/playwright.config.ts`,
+      ]);
+
+      expect(() => testConfigs.reload()).toThrow(
+        new RegExp(
+          `Mixed test structure detected[\\s\\S]*` +
+            `${moduleRoot}/test/scout: root-level \\{ui,api\\}/ coexists ` +
+            `with namespace dirs \\[foo_namespace\\]`
+        )
+      );
+    });
+
+    it('lists every offending namespace for a mixed scout root', () => {
+      mockGlobPaths([
+        `${moduleRoot}/test/scout/api/playwright.config.ts`,
+        `${moduleRoot}/test/scout/foo_namespace/ui/playwright.config.ts`,
+        `${moduleRoot}/test/scout/bar_namespace/api/playwright.config.ts`,
+      ]);
+
+      expect(() => testConfigs.reload()).toThrow(/\[foo_namespace, bar_namespace\]/);
+    });
+
+    it('does not throw when every config in a scout root is root-level', () => {
+      mockGlobPaths([
+        `${moduleRoot}/test/scout/api/playwright.config.ts`,
+        `${moduleRoot}/test/scout/ui/playwright.config.ts`,
+      ]);
+
+      expect(() => testConfigs.reload()).not.toThrow();
+      expect(testConfigs.all).toHaveLength(2);
+    });
+
+    it('does not throw when every config in a scout root is namespace-based', () => {
+      mockGlobPaths([
+        `${moduleRoot}/test/scout/foo_namespace/api/playwright.config.ts`,
+        `${moduleRoot}/test/scout/bar_namespace/ui/playwright.config.ts`,
+      ]);
+
+      expect(() => testConfigs.reload()).not.toThrow();
+      expect(testConfigs.all).toHaveLength(2);
+    });
+
+    it('treats scout and scout_<custom> as independent roots (no false positive)', () => {
+      mockGlobPaths([
+        `${moduleRoot}/test/scout/api/playwright.config.ts`,
+        `${moduleRoot}/test/scout_examples/foo_namespace/ui/playwright.config.ts`,
+      ]);
+
+      expect(() => testConfigs.reload()).not.toThrow();
+      expect(testConfigs.all).toHaveLength(2);
+    });
+
+    it('does not conflate identical namespace layouts across different modules', () => {
+      const otherModuleRoot = 'x-pack/solutions/security/packages/othy_mc_othface';
+      mockGlobPaths([
+        `${moduleRoot}/test/scout/api/playwright.config.ts`,
+        `${otherModuleRoot}/test/scout/foo_namespace/ui/playwright.config.ts`,
+      ]);
+
+      expect(() => testConfigs.reload()).not.toThrow();
+      expect(testConfigs.all).toHaveLength(2);
     });
   });
 });

@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { OperatorFunction } from 'rxjs';
-import { map, merge, share, toArray } from 'rxjs';
+import { map, merge, shareReplay, toArray } from 'rxjs';
 import type {
   RoundCompleteEvent,
   RoundInput,
@@ -26,6 +26,7 @@ import type {
   TodosStep,
   UserQuestionAskedEvent,
 } from '@kbn/agent-builder-common';
+import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
@@ -88,6 +89,7 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
 export const addRoundCompleteEvent = ({
   pendingRound,
   userInput,
+  origin,
   startTime,
   endTime,
   getConversationState,
@@ -98,9 +100,15 @@ export const addRoundCompleteEvent = ({
   compactionResult,
   roundId: providedRoundId,
   initialTodos,
+  getWorkspaceId,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
+  /**
+   * External origin that initiated this execution. Stamped as authorship on newly created
+   * rounds; resumed rounds keep their original attribution.
+   */
+  origin?: ExecutionConversationOrigin;
   startTime: Date;
   modelProvider: ModelProvider;
   stateManager: ConversationStateManager;
@@ -114,9 +122,11 @@ export const addRoundCompleteEvent = ({
   roundId?: string;
   /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
   initialTodos?: TodoItem[];
+  /** Returns the workspace_id used in this round, if any */
+  getWorkspaceId?: () => string | undefined;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
-    const shared$ = events$.pipe(share());
+    const shared$ = events$.pipe(shareReplay());
     return merge(
       shared$,
       shared$.pipe(
@@ -139,6 +149,7 @@ export const addRoundCompleteEvent = ({
                 roundId: providedRoundId,
                 events,
                 input: userInput,
+                origin,
                 startTime,
                 endTime,
                 modelProvider,
@@ -150,6 +161,7 @@ export const addRoundCompleteEvent = ({
 
           round.state = buildRoundState({ round, events, stateManager });
 
+          const workspaceId = getWorkspaceId?.();
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
             data: {
@@ -157,6 +169,7 @@ export const addRoundCompleteEvent = ({
               resumed: pendingRound !== undefined,
               conversation_state: getConversationState(),
               attachments: attachmentStateManager.getAll(),
+              ...(workspaceId ? { workspace_id: workspaceId } : {}),
             },
           };
 
@@ -260,6 +273,7 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
+    origin: previous.origin,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
   };
 
@@ -301,6 +315,7 @@ const createRound = ({
   roundId: providedRoundId,
   events,
   input,
+  origin,
   startTime,
   endTime = new Date(),
   modelProvider,
@@ -312,6 +327,7 @@ const createRound = ({
   roundId?: string;
   events: SourceEvents[];
   input: RoundInput;
+  origin?: ExecutionConversationOrigin;
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
@@ -419,9 +435,11 @@ const createRound = ({
     state: undefined,
     input: {
       ...input,
+      ...(origin?.author ? { origin: { author: origin.author } } : {}),
       ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
     },
     steps,
+    ...(origin ? { origin: { type: origin.type } } : {}),
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
@@ -485,9 +503,15 @@ const createToolCallStep = ({
 const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
   let inputTokens = 0;
   let outputTokens = 0;
+  let cachedInputTokens = 0;
+  let hasCachedInputTokens = false;
   for (const call of stats.calls) {
     inputTokens += call.tokens?.prompt ?? 0;
     outputTokens += call.tokens?.completion ?? 0;
+    if (call.tokens?.cached !== undefined) {
+      cachedInputTokens += call.tokens.cached;
+      hasCachedInputTokens = true;
+    }
   }
   const modelFromResponse = stats.calls.find((call) => call.model)?.model;
 
@@ -497,6 +521,7 @@ const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
     llm_calls: stats.calls.length,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
+    ...(hasCachedInputTokens ? { cached_input_tokens: cachedInputTokens } : {}),
     ...(modelFromResponse ? { model: modelFromResponse } : {}),
   };
 };
@@ -566,6 +591,9 @@ const mergeModelUsage = (
     llm_calls: a.llm_calls + b.llm_calls,
     input_tokens: a.input_tokens + b.input_tokens,
     output_tokens: a.output_tokens + b.output_tokens,
+    ...(a.cached_input_tokens !== undefined || b.cached_input_tokens !== undefined
+      ? { cached_input_tokens: (a.cached_input_tokens ?? 0) + (b.cached_input_tokens ?? 0) }
+      : {}),
     model: a.model ?? b.model,
   };
 };

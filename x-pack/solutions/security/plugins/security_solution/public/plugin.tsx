@@ -25,6 +25,9 @@ import type {
   SecuritySolutionAlertFlyoutFooterFeature,
   SecuritySolutionAlertFlyoutHeaderTitleFeature,
   SecuritySolutionAlertFlyoutOverviewTabFeature,
+  SecuritySolutionAttackFlyoutFooterFeature,
+  SecuritySolutionAttackFlyoutHeaderFeature,
+  SecuritySolutionAttackFlyoutOverviewTabFeature,
   SecuritySolutionCellRendererFeature,
   SecuritySolutionIOCFlyoutFooterFeature,
   SecuritySolutionIOCFlyoutHeaderFeature,
@@ -142,7 +145,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     if (workflowsExtensions) {
-      registerWorkflowSteps(workflowsExtensions, core);
+      registerWorkflowSteps(workflowsExtensions, this.experimentalFeatures);
     }
 
     // Lazily instantiate subPlugins and initialize services
@@ -298,6 +301,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     cases.attachmentFramework.registerUnified(getEventType());
     cases.attachmentFramework.registerUnified(getSecurityAlertType());
     cases.attachmentFramework.registerUnified(getTimelineAttachment());
+
+    // Always register the entity attachment renderer so that attachments created
+    // while the feature flag was enabled continue to display correctly after the
+    // flag is disabled. The flag gates server-side writes; client-side rendering
+    // must be unconditional to avoid "Attachment type is not registered" errors.
+    // Lazily imported to keep the entity attachment module out of the page-load bundle.
+    import('./cases/attachments/entity')
+      .then(({ getEntityAttachment }) => {
+        cases.attachmentFramework.registerUnified(getEntityAttachment());
+      })
+      .catch((e) => {
+        this.logger.error('Failed to register entity attachment type', e);
+      });
 
     this.registerDiscoverSharedFeatures(core, plugins);
 
@@ -622,6 +638,85 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     };
     discoverFeatureRegistry.register(iocFlyoutHeaderFeature);
+
+    const LazyAttackFlyoutOverviewTab = React.lazy(async () => {
+      const { AttackFlyoutOverviewTab } = await this.getLazyDiscoverSharedDeps();
+      return { default: AttackFlyoutOverviewTab };
+    });
+
+    const attackFlyoutOverviewTabFeature: SecuritySolutionAttackFlyoutOverviewTabFeature = {
+      id: 'security-solution-attack-flyout-overview-tab',
+      render: ({ hit, onAttackUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAttackFlyoutOverviewTab
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              onAttackUpdated={onAttackUpdated}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(attackFlyoutOverviewTabFeature);
+
+    const LazyAttackFlyoutHeader = React.lazy(async () => {
+      const { AttackFlyoutHeader } = await this.getLazyDiscoverSharedDeps();
+      return { default: AttackFlyoutHeader };
+    });
+
+    const attackFlyoutHeaderFeature: SecuritySolutionAttackFlyoutHeaderFeature = {
+      id: 'security-solution-attack-flyout-header',
+      renderHeader: ({ hit, onAttackUpdated }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAttackFlyoutHeader
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              onAttackUpdated={onAttackUpdated}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(attackFlyoutHeaderFeature);
+
+    const LazyAttackFlyoutFooter = React.lazy(async () => {
+      const { AttackFlyoutFooter } = await this.getLazyDiscoverSharedDeps();
+      return { default: AttackFlyoutFooter };
+    });
+
+    const attackFlyoutFooterFeature: SecuritySolutionAttackFlyoutFooterFeature = {
+      id: 'security-solution-attack-flyout-footer',
+      renderFooter: ({ hit, onAttackUpdated }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAttackFlyoutFooter
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              onAttackUpdated={onAttackUpdated}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(attackFlyoutFooterFeature);
   }
 
   public async getLazyDiscoverSharedDeps() {

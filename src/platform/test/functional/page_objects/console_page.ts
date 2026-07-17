@@ -248,36 +248,18 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickPlayAndWaitForResults() {
-    const hadStatusBadge = await this.testSubjects.exists('consoleResponseStatusBadge');
-    const initialStatusText = hadStatusBadge
-      ? await this.testSubjects.getVisibleText('consoleResponseStatusBadge')
-      : '';
-    const hadOutput = await this.testSubjects.exists('consoleMonacoOutput');
-    const initialOutputText = hadOutput ? await this.getOutputText() : '';
-
-    await this.clickPlay();
-
-    // Wait for the UI to reflect request progress or completion.
-    // We capture state before clicking to correctly detect "already done" results.
+    // Retry the Play click until the request starts. A single click can be a no-op if the editor
+    // hasn't finished registering the current request (see #240147).
     await this.retry.try(async () => {
-      const loadingIndicatorsVisible =
+      await this.clickPlay();
+      const started =
         (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
-        (await this.testSubjects.exists('consoleRequestInProgressBadge'));
-      const hasStatusBadge = await this.testSubjects.exists('consoleResponseStatusBadge');
-      const currentStatusText = hasStatusBadge
-        ? await this.testSubjects.getVisibleText('consoleResponseStatusBadge')
-        : '';
-      const statusChanged = currentStatusText !== initialStatusText;
-      const hasOutput = await this.testSubjects.exists('consoleMonacoOutput');
-      const currentOutputText = hasOutput ? await this.getOutputText() : '';
-      const outputChanged = currentOutputText !== initialOutputText;
-
-      if (!loadingIndicatorsVisible && !statusChanged && !outputChanged) {
-        throw new Error('Expected console request to update the UI');
-      }
+        (await this.testSubjects.exists('consoleRequestInProgressBadge')) ||
+        (await this.testSubjects.exists('consoleMonacoOutput'));
+      if (!started) throw new Error('Console request did not start after clicking Play');
     });
 
-    // Wait for the request to finish: loading indicators go away and output/status are present.
+    // Wait for loading indicators to clear and output to be present.
     await this.waitForRequestToComplete();
   }
 
@@ -640,5 +622,35 @@ export class ConsolePageObject extends FtrService {
 
   public async isOutputPanelEmptyStateVisible() {
     return await this.testSubjects.exists('consoleOutputPanelEmptyState');
+  }
+
+  public async clickOutputFilterButton() {
+    await this.testSubjects.click('consoleOutputFilterButton');
+  }
+
+  public async isOutputFilterRowVisible() {
+    return (
+      (await this.testSubjects.exists('filterJq')) ||
+      (await this.testSubjects.exists('filterRegex'))
+    );
+  }
+
+  public async typeInFilterInput(text: string) {
+    const testSubj = (await this.testSubjects.exists('filterJq')) ? 'filterJq' : 'filterRegex';
+    const input = await this.testSubjects.find(testSubj);
+    await input.clearValueWithKeyboard();
+    await input.type(text);
+  }
+
+  public async submitFilter() {
+    await this.testSubjects.click('consoleOutputFilterApply');
+  }
+
+  public async isOutputFilterButtonActive() {
+    const button = await this.testSubjects.find('consoleOutputFilterButton');
+    const wrapper = await button.findByXpath('..');
+    // The dot indicator is a sibling span inside the wrapper div
+    const children = await wrapper.findAllByCssSelector('span[style*="border-radius"]');
+    return children.length > 0;
   }
 }

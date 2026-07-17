@@ -15,6 +15,8 @@ import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/lin
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
+import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
 
@@ -27,11 +29,12 @@ export const createNavigationTree = (
     AGENT_BUILDER_NAV_AT_TOP_FLAG,
     false
   );
+
   const agentBuilderLink = {
     icon: 'productAgent',
     link: 'agent_builder' as AppDeepLinkId,
   };
-  const showAlertingV2 = Boolean(services.application.capabilities.alertingVTwo);
+
   return {
     body: [
       {
@@ -52,16 +55,17 @@ export const createNavigationTree = (
       },
       defaultNavigationTree.dashboards(),
       defaultNavigationTree.rules(),
-      services.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
+      services.uiSettings.get(
+        ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+        services.experimentalFeatures?.enableAlertsAndAttacksAlignment
+      )
         ? defaultNavigationTree.alertDetections()
         : {
             id: SecurityPageName.alerts,
             icon: 'warning',
             link: securityLink(SecurityPageName.alerts),
           },
-      {
-        link: 'workflows',
-      },
+      ...getWorkflowsNavPanel(services),
       // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
       ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink] : []),
       {
@@ -174,6 +178,7 @@ export const createNavigationTree = (
               { link: 'management:snapshot_restore' },
               { link: 'management:transform' },
               { link: 'management:rollup_jobs' },
+              { link: 'management:data_federation' },
               { link: 'management:data_quality' },
             ],
           },
@@ -211,21 +216,7 @@ export const createNavigationTree = (
               { link: 'monitoring' },
             ],
           },
-          ...(showAlertingV2
-            ? [
-                {
-                  id: 'v2_alerting_preview',
-                  title: i18nStrings.stackManagementV2.v2AlertingPreview.title,
-                  renderAs: 'panelOpener' as const,
-                  children: [
-                    { link: 'management:rules' as const },
-                    { link: 'management:episodes' as const },
-                    { link: 'management:action_policies' as const },
-                    { link: 'management:execution_history' as const },
-                  ],
-                },
-              ]
-            : []),
+          ...getAlertingV2ManagementNavPanel(services),
           {
             title: i18nStrings.stackManagementV2.alertsAndInsights.title,
             children: [

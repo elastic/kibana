@@ -615,6 +615,57 @@ describe('MetricsGrid', () => {
       expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
     });
 
+    it('marks the originating chart as selected when its flyout is open', () => {
+      const { getAllByRole } = renderMetricsGrid();
+
+      const firstChartProps = (Chart as jest.Mock).mock.calls[0][0];
+
+      act(() => {
+        firstChartProps.onViewDetails();
+      });
+
+      const cells = getAllByRole('gridcell');
+      expect(cells[0]).toHaveAttribute('aria-selected', 'true');
+      expect(cells[1]).toHaveAttribute('aria-selected', 'false');
+    });
+
+    it('marks the restored metric chart as selected', () => {
+      const { getAllByRole } = renderMetricsGridWithInitialFlyoutState({
+        gridPosition: 1,
+        metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
+        esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
+        selectedTabId: 'overview',
+      });
+
+      const cells = getAllByRole('gridcell');
+      expect(cells[0]).toHaveAttribute('aria-selected', 'false');
+      expect(cells[1]).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('does not mark any chart as selected when no flyout is open', () => {
+      const { getAllByRole } = renderMetricsGrid();
+
+      getAllByRole('gridcell').forEach((cell) => {
+        expect(cell).toHaveAttribute('aria-selected', 'false');
+      });
+    });
+
+    it('does not mark any chart as selected when the owning tab is not active', () => {
+      const { getAllByRole } = renderMetricsGridWithInitialFlyoutState(
+        {
+          gridPosition: 1,
+          metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
+          esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
+          selectedTabId: 'overview',
+        },
+        { isTabSelected: false }
+      );
+
+      getAllByRole('gridcell').forEach((cell) => {
+        expect(cell).toHaveAttribute('aria-selected', 'false');
+      });
+    });
+
     it('renders the flyout when initial restorable flyoutState references an existing metric', () => {
       const { queryByTestId } = renderMetricsGridWithInitialFlyoutState({
         gridPosition: 1,
@@ -871,7 +922,7 @@ describe('MetricsGrid', () => {
       },
     ];
 
-    it('recomputes esqlQuery for every ChartItem when dimensions change, even items with no applicable dimensions', () => {
+    it('recomputes esqlQuery only for metrics whose applicable dimensions changed', () => {
       const { rerender } = render(
         <MetricsExperienceStateProvider profileId="test-profile">
           <MetricsGrid
@@ -887,15 +938,7 @@ describe('MetricsGrid', () => {
       (createESQLQuery as jest.Mock).mockClear();
 
       // Select 'host.name'. Only system.cpu.utilization supports it —
-      // k8s.container.cpu has no overlap, so its applicableDimensions stays
-      // logically empty ([] → []).
-      //
-      // ChartItem computes applicableDimensions internally via useMemo with
-      // [dimensions, metricItem.dimensionFields] as deps. When `dimensions`
-      // gets a new array reference, both memos re-run. For k8s.container.cpu
-      // the filter still returns an empty array, but it's a NEW empty array
-      // reference — so the downstream esqlQuery memo fires too, and
-      // createESQLQuery is called again despite the query being identical.
+      // k8s.container.cpu stays at [] → [] with a stable empty array reference.
       rerender(
         <MetricsExperienceStateProvider profileId="test-profile">
           <MetricsGrid
@@ -907,12 +950,67 @@ describe('MetricsGrid', () => {
         </MetricsExperienceStateProvider>
       );
 
-      // BUG: createESQLQuery is called for both items even though
-      // k8s.container.cpu's applicable dimensions did not change ([] → []).
-      // After the fix (pre-compute applicableDimensions per item in MetricsGrid
-      // using a Set, then stabilise the per-item reference so items with no
-      // overlap receive the same [] across renders), this count should be 1.
+      expect(createESQLQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not recompute esqlQuery when dimensions get a new array with identical content', () => {
+      const dimensions = [{ name: 'host.name' }];
+      const { rerender } = render(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={nonOverlappingMetrics}
+            dimensions={dimensions}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
       expect(createESQLQuery).toHaveBeenCalledTimes(nonOverlappingMetrics.length);
+      (createESQLQuery as jest.Mock).mockClear();
+
+      rerender(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={nonOverlappingMetrics}
+            dimensions={[{ name: 'host.name' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).not.toHaveBeenCalled();
+    });
+
+    it('recomputes esqlQuery when a dimension type changes but the name stays the same', () => {
+      const hostMetric = nonOverlappingMetrics[0];
+      const { rerender } = render(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={[hostMetric]}
+            dimensions={[{ name: 'host.name', type: 'keyword' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(1);
+      (createESQLQuery as jest.Mock).mockClear();
+
+      rerender(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={[hostMetric]}
+            dimensions={[{ name: 'host.name', type: 'ip' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(1);
     });
 
     it('re-renders every ChartItem when flyoutState changes, exposing a spurious context subscription', () => {
@@ -941,6 +1039,33 @@ describe('MetricsGrid', () => {
       // no prop change. After the fix (pass profileId as a prop from MetricsGrid
       // instead of reading it inside ChartItem), this count should be 0.
       expect(Chart).toHaveBeenCalledTimes(metricItems.length);
+    });
+  });
+
+  describe('gridSettings', () => {
+    it('forwards gridSettings from context into createESQLQuery for each metric', () => {
+      render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          gridSettings={{
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p90',
+          }}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          gridSettings: {
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p90',
+          },
+        })
+      );
     });
   });
 });

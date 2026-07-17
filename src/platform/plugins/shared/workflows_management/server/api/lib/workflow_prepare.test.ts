@@ -13,8 +13,10 @@ import {
   applyFieldUpdates,
   applyYamlUpdate,
   getTriggerTypesFromDefinition,
+  prepareWorkflowDocumentFromYaml,
   workflowYamlDeclaresTopLevelEnabled,
 } from './workflow_prepare';
+import { getWorkflowZodSchema } from '../../../common/schema';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
 
 describe('getTriggerTypesFromDefinition', () => {
@@ -161,5 +163,117 @@ describe('applyYamlUpdate', () => {
     expect(result.updatedDataPatch.enabled).toBe(false);
     expect(result.updatedDataPatch.valid).toBe(false);
     expect(result.updatedDataPatch.triggerTypes).toEqual([]);
+  });
+
+  it('recovers name/description from YAML that has a valid title but fails schema validation', () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithName = [
+      'version: "1"',
+      'name: Multi-Source IOC Enrichment and Tiered Response',
+      'description: Check an IOC against six threat-intel sources in parallel, aggregate the risk, then route to a tiered response.',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+
+    const result = applyYamlUpdate({
+      workflowYaml: invalidYamlWithName,
+      zodSchema,
+      triggerDefinitions: [],
+    });
+
+    expect(result.updatedDataPatch.name).toBe('Multi-Source IOC Enrichment and Tiered Response');
+    expect(result.updatedDataPatch.description).toBe(
+      'Check an IOC against six threat-intel sources in parallel, aggregate the risk, then route to a tiered response.'
+    );
+    expect(result.updatedDataPatch.valid).toBe(false);
+    expect(result.updatedDataPatch.definition).toBeNull();
+  });
+
+  it('omits name/description from the patch when invalid YAML has no title, so the stored name is preserved', () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithoutName = [
+      'version: "1"',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+
+    const result = applyYamlUpdate({
+      workflowYaml: invalidYamlWithoutName,
+      zodSchema,
+      triggerDefinitions: [],
+    });
+
+    expect(result.updatedDataPatch).not.toHaveProperty('name');
+    expect(result.updatedDataPatch).not.toHaveProperty('description');
+  });
+});
+
+describe('prepareWorkflowDocumentFromYaml', () => {
+  const now = new Date('2024-01-01T00:00:00.000Z');
+
+  it('recovers name/description from YAML that has a valid title but fails schema validation', () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithName = [
+      'version: "1"',
+      'name: Multi-Source IOC Enrichment and Tiered Response',
+      'description: Check an IOC against six threat-intel sources in parallel, aggregate the risk, then route to a tiered response.',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+
+    const result = prepareWorkflowDocumentFromYaml({
+      yaml: invalidYamlWithName,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+    });
+
+    expect(result.workflowData.name).toBe('Multi-Source IOC Enrichment and Tiered Response');
+    expect(result.workflowData.description).toBe(
+      'Check an IOC against six threat-intel sources in parallel, aggregate the risk, then route to a tiered response.'
+    );
+    expect(result.workflowData.valid).toBe(false);
+    expect(result.workflowData.definition).toBeNull();
+  });
+
+  it('falls back to "Untitled workflow" when invalid YAML has no name', () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithoutName = [
+      'version: "1"',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+
+    const result = prepareWorkflowDocumentFromYaml({
+      yaml: invalidYamlWithoutName,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+    });
+
+    expect(result.workflowData.name).toBe('Untitled workflow');
+    expect(result.workflowData.description).toBeUndefined();
   });
 });

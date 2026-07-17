@@ -46,10 +46,17 @@ export {
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
+  getAnySourceCommandFromESQLQuery,
 } from './utils/get_index_pattern_from_query';
 export type { ESQLIndexPatterns } from './utils/get_index_pattern_from_query';
+export { classifyESQLSource, isSingleSource } from './utils/classify_esql_source';
+export type { ESQLSourceKind } from './utils/classify_esql_source';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
-export { appendToESQLQuery } from './utils/append_to_query/utils';
+export {
+  appendToESQLQuery,
+  escapeStringValue,
+  buildJoinedFilter,
+} from './utils/append_to_query/utils';
 export { appendStatsByToQuery } from './utils/append_to_query/append_stats_by';
 export { appendWhereClauseToESQLQuery } from './utils/append_to_query/append_where';
 export { appendLimitToQuery } from './utils/append_to_query/append_limit';
@@ -70,6 +77,7 @@ export {
   isESQLFieldGroupable,
 } from './utils/esql_fields_utils';
 export { sanitazeESQLInput } from './utils/sanitaze_input';
+export { escapeEsqlColumnName } from '@kbn/esql-language';
 export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
 export { extractCategorizeTokens } from './utils/extract_categorize_tokens';
 export { getLookupIndicesFromQuery } from './utils/get_lookup_indices';
