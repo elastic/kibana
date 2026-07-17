@@ -160,7 +160,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         return {
           isValid: false,
           error: new ResponseActionsClientError(
-            `The following agent IDs do not support memory dump: ${unsupportedAgents.join(', ')}`
+            `The following agent IDs do not support memory dump: ${unsupportedAgents.join(' | ')}`
           ),
         };
       }
