@@ -1,5 +1,5 @@
 {
-  "sha1": "862a2e85233a0981ef7059c06b98399e5e2b3378",
+  "sha1": "84b3e4fe4872134751fbce65eb55ff7a52936a1f",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1000,8 +1000,8 @@
       }
     },
     {
-      "id": "23808d62419391b-262e240da1d7249",
-      "title": "Agent Builder - converse callback API stores callback source authorship on list and get conversation responses",
+      "id": "23808d62419391b-92f5e782bc9e4c1",
+      "title": "Agent Builder - converse callback API stores callback origin authorship on list and get conversation responses",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1048,8 +1048,8 @@
       }
     },
     {
-      "id": "23808d62419391b-9c2526964eb5768",
-      "title": "Agent Builder - converse callback API continues conversation for repeated Slack source",
+      "id": "23808d62419391b-8077e4c805574b4",
+      "title": "Agent Builder - converse callback API continues conversation for repeated Slack origin",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
