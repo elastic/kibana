@@ -46,13 +46,14 @@ let mockIsAppMenuSwitchInline = true;
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
+  useCurrentEuiBreakpoint: () => 'xl',
   useIsWithinBreakpoints: (breakpoints: string[]) => {
     const isWorkflowInlineSwitchCheck =
       breakpoints.includes('m') && breakpoints.includes('l') && breakpoints.includes('xl');
     if (isWorkflowInlineSwitchCheck) {
       return mockIsAppMenuSwitchInline;
     }
-    // Keep other app menu breakpoint checks on xl for inline menu items.
+    // Keep other breakpoint checks on xl.
     return breakpoints.includes('xl');
   },
 }));

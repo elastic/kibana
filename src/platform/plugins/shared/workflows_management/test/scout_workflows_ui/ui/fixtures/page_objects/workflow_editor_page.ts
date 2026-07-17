@@ -296,6 +296,11 @@ export class WorkflowEditorPage {
    * Click the run button (opens execute modal or unsaved changes confirmation)
    */
   async clickRunButton() {
+    await this.page.testSubj.waitForSelector('app-menu', { state: 'visible' });
+    if (!(await this.runButton.isVisible())) {
+      await this.page.testSubj.click('app-menu-overflow-button');
+      await this.runButton.waitFor({ state: 'visible' });
+    }
     await this.runButton.click();
   }
 
