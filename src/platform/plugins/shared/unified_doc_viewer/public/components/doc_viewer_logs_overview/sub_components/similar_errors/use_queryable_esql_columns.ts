@@ -40,11 +40,11 @@ async function fetchQueryableColumns(
 
 /**
  * Resolves the set of columns that can be referenced in an ES|QL query against
- * the given index pattern. Referencing a column that is unmapped or
- * inconsistently mapped across the pattern's indices fails the whole query
- * with a verification_exception. The columns are resolved through ES|QL itself
+ * `indexPattern`. Referencing a column that is unmapped or inconsistently
+ * mapped across the pattern's indices fails the whole query with
+ * a verification_exception. The columns are resolved through ES|QL itself
  * (`FROM <pattern> | LIMIT 0`) rather than field caps, because field caps does
- * not surface all mapping conflicts that ES|QL rejects (e.g. a field mapped as
+ * not surface all mapping conflicts that ES|QL rejects (a field mapped as
  * `object` in one index and `text` in another is reported by field caps as a
  * plain text field, but is an unsupported column in ES|QL).
  */
@@ -53,9 +53,6 @@ export function useQueryableEsqlColumns(indexPattern?: string): UseQueryableEsql
     data: { search },
   } = getUnifiedDocViewerServices();
 
-  // The callback must stay synchronous for the no-pattern bail-out: a sync
-  // return resolves inside useAbortableAsync without flipping `loading` or
-  // scheduling a post-render state update.
   const { value, error, loading } = useAbortableAsync(
     ({ signal }) =>
       indexPattern ? fetchQueryableColumns(indexPattern, search.search, signal) : undefined,
