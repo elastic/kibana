@@ -127,12 +127,22 @@ export function compileTemplate(
   try {
     const yamlFromCompiledTemplate = parse(compiledTemplate);
 
-    // Hack to keep empty string ('') values around in the end yaml because
-    // `load` replaces empty strings with null
+    // Restore values that yaml.parse silently coerced away from the user's intent:
+    // - empty string: yaml.parse converts '' to null; restore it.
+    // - boolean/null-like strings: yaml.parse coerces bare `true`/`false`/`null` to
+    //   their typed equivalents; if the original var was a string, restore it.
+    //   Templates that already wrap the slot in YAML quotes (e.g. `key: "{{var}}"`)
+    //   are unaffected because yaml.parse returns a string for those and the
+    //   condition below never triggers.
     const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
       (acc, [key, value]) => {
         if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
           acc[key] = '';
+        } else if (
+          (typeof value === 'boolean' || value === null) &&
+          typeof vars[key] === 'string'
+        ) {
+          acc[key] = vars[key];
         } else {
           acc[key] = value;
         }
@@ -236,7 +246,7 @@ function buildTemplateVariables(
         varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
       }
     } else {
-      varPart[lastKeyPart] = quoteStringIfCoercibleByYaml(recordEntry.value);
+      varPart[lastKeyPart] = recordEntry.value;
     }
     return acc;
   }, {} as { [k: string]: any });
@@ -244,32 +254,6 @@ function buildTemplateVariables(
   vars._meta = metaVariable;
 
   return { vars, yamlValues };
-}
-
-/**
- * If a plain-string value would be silently coerced to a boolean or null by
- * yaml.parse (e.g. "true" → boolean true, "null" → null), return a
- * single-quoted YAML representation so the value survives the template
- * compilation parse step as a string.
- *
- * Number coercion (e.g. "100" → 100) is intentional: integration templates
- * that need a number use an unquoted {{var}}, while those that need a string
- * use !!str {{var}}.  Boolean/null coercion is never intentional for a
- * string-typed user value.
- */
-function quoteStringIfCoercibleByYaml(value: unknown): unknown {
-  if (typeof value !== 'string' || !value) {
-    return value;
-  }
-  try {
-    const parsed = parse(value);
-    if (typeof parsed === 'boolean' || parsed === null) {
-      return escapeStringHelper(value) ?? value;
-    }
-  } catch {
-    // Not a valid YAML scalar; leave as-is.
-  }
-  return value;
 }
 
 function containsHelper(this: any, item: string, check: string | string[], options: any) {

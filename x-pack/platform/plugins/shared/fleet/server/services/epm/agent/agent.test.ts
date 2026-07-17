@@ -160,6 +160,20 @@ disabled_filter: {{disabled_filter}}
     expect(typeof output.null_field).toBe('string');
   });
 
+  it('should not corrupt string values when the template slot is already YAML-quoted', () => {
+    // Regression guard: templates that wrap {{var}} in double-quotes (e.g. `value: "{{fill_gaps}}"`)
+    // already prevent yaml.parse coercion via the surrounding quotes.  The fix must not
+    // introduce literal quote characters into those values.
+    // https://github.com/elastic/kibana/issues/279096
+    const streamTemplate = `value: "{{fill_gaps}}"\n`;
+    const vars = {
+      fill_gaps: { type: 'text', value: 'true' },
+    };
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({ value: 'true' });
+    expect(typeof output.value).toBe('string');
+  });
+
   it('should support yaml values', () => {
     const streamTemplate = `
 input: redis/metrics
