@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/run_knip');
+require('@kbn/dev/run_knip');
