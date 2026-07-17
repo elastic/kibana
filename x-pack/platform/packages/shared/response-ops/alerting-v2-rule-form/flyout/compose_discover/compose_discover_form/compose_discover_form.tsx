@@ -223,9 +223,7 @@ export const ComposeDiscoverForm = ({
               <EuiSpacer size="m" />
               <NoDataStrategySelect
                 value={noDataStrategy ?? 'none'}
-                onChange={(strategy) =>
-                  setValue('noDataStrategy', strategy, { shouldDirty: true })
-                }
+                onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
                 compressed
                 data-test-subj="composeDiscoverNoDataStrategy"
               />
