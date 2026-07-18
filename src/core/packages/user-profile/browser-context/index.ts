@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare module 'vega-tooltip' {
-  export * from 'vega-tooltip/build';
-}
+export { CurrentUserContext } from './src/current_user_context';
+export type { CurrentUserServices } from './src/current_user_context';
+export { CurrentUserProvider } from './src/current_user_provider';
+export type { CurrentUserProviderProps } from './src/current_user_provider';

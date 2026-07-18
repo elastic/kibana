@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare module '@opentelemetry/semantic-conventions/incubating' {
-  export * from '@opentelemetry/semantic-conventions/build/src/index-incubating';
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/user-profile/browser-context'],
+};
