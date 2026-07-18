@@ -1,5 +1,9 @@
 {
-  "sha1": "714656dacd0404ea1484117d08d2b62d20d03a9c",
+  "sha1": "5201ff61da7dc4bc356eb35f2103214410fd7b00",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "cf54e1b20d6357b-1f97aad70eeb339",
@@ -36,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
-        "line": 120,
-        "column": 7
+        "line": 122,
+        "column": 5
       }
     },
     {
@@ -49,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
-        "line": 143,
-        "column": 7
+        "line": 144,
+        "column": 20
       }
     },
     {
@@ -62,8 +66,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/certificates.spec.ts",
-        "line": 161,
-        "column": 7
+        "line": 162,
+        "column": 20
       }
     },
     {
