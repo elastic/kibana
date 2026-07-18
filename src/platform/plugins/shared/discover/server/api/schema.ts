@@ -9,7 +9,13 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { asCodeIdSchema, asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import {
+  asCodeIdSchema,
+  asCodeMetaSchema,
+  asCodePaginationParamsSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 import { optionsListESQLControlSchema } from '@kbn/controls-schemas';
 import {
   CONTROL_WIDTH_LARGE,
@@ -237,13 +243,55 @@ export const discoverSessionApiDataSchema = schema.object(
 );
 
 export const discoverSessionApiResponseSchema = schema.object({
-  id: asCodeIdSchema,
+  id: schema.string({
+    meta: { description: 'The Discover session ID.' },
+  }),
   data: discoverSessionApiDataSchema,
   meta: asCodeMetaSchema,
 });
 
+export const discoverSessionSearchParamsSchema = asCodePaginationParamsSchema.extends({
+  query: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
+      },
+    })
+  ),
+});
+
+const discoverSessionSearchItemSchema = schema.object({
+  id: schema.string({
+    meta: { description: 'The Discover session ID.' },
+  }),
+  data: schema.object({
+    title: schema.string({
+      meta: { description: 'Discover session title.' },
+    }),
+    description: schema.string({
+      meta: { description: 'Discover session description.' },
+    }),
+  }),
+  meta: asCodeMetaSchema,
+});
+
+export const discoverSessionSearchResponseSchema = schema.object({
+  data: schema.arrayOf(discoverSessionSearchItemSchema, {
+    // Mirror the request's production-enforced `per_page` maximum in OAS and dev response validation.
+    maxSize: PAGINATION_MAX_SIZE,
+    meta: {
+      description:
+        'List of Discover sessions matching the query. Each entry includes summary fields but not the full session state.',
+    },
+  }),
+  meta: asCodePaginationResponseMetaSchema,
+});
+
 export type DiscoverSessionApiData = TypeOf<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = TypeOf<typeof discoverSessionApiResponseSchema>;
+export type DiscoverSessionSearchParams = TypeOf<typeof discoverSessionSearchParamsSchema>;
+export type DiscoverSessionSearchResponse = TypeOf<typeof discoverSessionSearchResponseSchema>;
 export type DiscoverSessionApiClassicTab = TypeOf<typeof discoverSessionClassicTabSchema>;
 export type DiscoverSessionApiEsqlTab = TypeOf<typeof discoverSessionEsqlTabSchema>;
 export type DiscoverSessionApiTab = TypeOf<typeof discoverSessionApiTabSchema>;
