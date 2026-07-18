@@ -81,6 +81,12 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
     # Standard mode: compare this build's experiment against the latest baseline on main.
     COMPARE_ARGS+=(--baseline-branch main)
 
+    # Pass the PR branch so compare can resolve the base build ID to the full
+    # composite execution ID (e.g. "bk-BUILD_ID::suite::model") via the experiments API.
+    if [[ -n "${BUILDKITE_BRANCH:-}" ]]; then
+      COMPARE_ARGS+=(--pr-branch "$BUILDKITE_BRANCH")
+    fi
+
     # Pass refresh URL so the markdown includes a link to the block step.
     if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
       COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-refresh-block")

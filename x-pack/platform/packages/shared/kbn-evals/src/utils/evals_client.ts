@@ -291,6 +291,53 @@ export class EvalsClient {
     }
   }
 
+  async findLatestExperimentForBuild({
+    suiteId,
+    branch,
+    baseExecutionId,
+  }: {
+    suiteId: string;
+    branch: string;
+    baseExecutionId: string;
+  }): Promise<BaselineExperiment | undefined> {
+    try {
+      const response = await this.kbnClient.request({
+        path: EVALS_EXPERIMENTS_URL,
+        method: 'GET',
+        query: {
+          suite_id: suiteId,
+          branch,
+          page: 1,
+          per_page: 10,
+        },
+        headers: VERSIONED_HEADERS,
+      });
+
+      const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
+      const match = parsed.experiments.find(
+        (exp) => exp.execution_id != null && exp.execution_id.startsWith(`${baseExecutionId}::`)
+      );
+
+      if (!match || !match.execution_id) {
+        return undefined;
+      }
+
+      return {
+        executionId: match.execution_id,
+        timestamp: match.timestamp,
+        gitCommitSha: match.git_commit_sha ?? null,
+        gitBranch: match.git_branch ?? null,
+      };
+    } catch (error: unknown) {
+      this.log.error(
+        `Failed to find experiment for build ${baseExecutionId} on branch ${branch}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
+    }
+  }
+
   async findLatestBaselineExperiment({
     suiteId,
     branch,

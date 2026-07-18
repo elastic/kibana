@@ -32,6 +32,8 @@ export const compareCmd: Command<void> = {
 
   Options:
     --baseline-branch  Branch to find the latest baseline experiment on (e.g. "main")
+    --pr-branch        Branch of the PR experiment; used to resolve the full execution ID
+                       when the positional arg is a base build ID (e.g. "bk-BUILD_ID")
     --suite            Suite ID filter for baseline lookup and score filtering
     --format           Output format: "terminal" (default) or "markdown"
     --kibana-url       Kibana URL for generating compare page links in markdown
@@ -43,9 +45,18 @@ export const compareCmd: Command<void> = {
     EVALUATIONS_KBN_API_KEY  API key for authenticating to the target Kibana
   `,
   flags: {
-    string: ['baseline-branch', 'suite', 'format', 'kibana-url', 'output', 'refresh-url'],
+    string: [
+      'baseline-branch',
+      'pr-branch',
+      'suite',
+      'format',
+      'kibana-url',
+      'output',
+      'refresh-url',
+    ],
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
+      --pr-branch        Branch of the PR experiment for resolving the full execution ID
       --suite            Suite ID filter for baseline lookup and score filtering
       --format           Output format: "terminal" (default) or "markdown"
       --kibana-url       Kibana URL for generating compare page links in markdown
@@ -56,6 +67,7 @@ export const compareCmd: Command<void> = {
   run: async ({ log, flagsReader }) => {
     const positionals = flagsReader.getPositionals();
     const baselineBranch = flagsReader.string('baseline-branch');
+    const prBranch = flagsReader.string('pr-branch');
     const suiteId = flagsReader.string('suite');
     const format = flagsReader.string('format') ?? 'terminal';
     const kibanaUrl = flagsReader.string('kibana-url');
@@ -106,6 +118,28 @@ export const compareCmd: Command<void> = {
         throw createFlagError(
           'One experiment ID is required with --baseline-branch. Example: node scripts/evals compare <experiment-id> --baseline-branch main --suite <suite-id>'
         );
+      }
+
+      // In CI the positional is a base build ID (e.g. "bk-BUILD_ID"). Resolve it to the
+      // full composite execution ID (e.g. "bk-BUILD_ID::suite::model") so the server's
+      // exact term query on metadata.execution_id finds the scores.
+      if (prBranch && !firstExperimentId.includes('::')) {
+        log.info(
+          `Resolving PR experiment for suite "${suiteId}" on branch "${prBranch}" (base ID: ${firstExperimentId})...`
+        );
+        const prExperiment = await evalsClient.findLatestExperimentForBuild({
+          suiteId,
+          branch: prBranch,
+          baseExecutionId: firstExperimentId,
+        });
+        if (prExperiment) {
+          firstExperimentId = prExperiment.executionId;
+          log.info(`Resolved PR experiment: ${firstExperimentId}`);
+        } else {
+          log.warning(
+            `No PR experiment found for suite "${suiteId}" on branch "${prBranch}" with base ID "${firstExperimentId}". Proceeding with raw ID.`
+          );
+        }
       }
 
       log.info(
