@@ -96,6 +96,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod
