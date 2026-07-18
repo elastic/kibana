@@ -29,8 +29,14 @@ export interface EndpointLookupService {
  *   own “single search-strategy point” refactor in Osquery/Defend Workflows
  *   (`#274308`) and keeps hostname escaping, space validation, and multi-vendor
  *   `agentType` resolution in one place.
- * - `perPage: 1` is intentionally kept here; if we later decide to surface
- *   ambiguous hostname collisions, we change one helper, not five tools.
+ * - A host can have MULTIPLE agent records over its lifetime (reinstall,
+ *   agent upgrade, re-enrollment after a broken install) — Fleet keeps prior
+ *   (offline/uninstalled) enrollments around alongside the current one, all
+ *   matching the same `local_metadata.host.name`. We fetch a small page and
+ *   pick the best match (online first, most recently enrolled as tiebreak)
+ *   rather than trusting Fleet's default sort to always put the live agent
+ *   first — otherwise isolate/unisolate/status tools can silently act on a
+ *   dead agent while reporting success.
  */
 export function createEndpointLookupService(
   endpointAppContextService: EndpointAppContextService,
@@ -44,14 +50,19 @@ export function createEndpointLookupService(
         showInactive: true,
         kuery: `local_metadata.host.name: ${escapeKuery(hostName)}`,
         page: 1,
-        perPage: 1,
+        perPage: 10,
       });
 
       if (!agents?.agents?.length) {
         return null;
       }
 
-      const agent = agents.agents[0];
+      const agent = [...agents.agents].sort((a, b) => {
+        const aOnline = a.status === 'online' ? 1 : 0;
+        const bOnline = b.status === 'online' ? 1 : 0;
+        if (aOnline !== bOnline) return bOnline - aOnline;
+        return (b.enrolled_at ?? '').localeCompare(a.enrolled_at ?? '');
+      })[0];
       const agentId = agent.id;
 
       // Reject hosts that live in a different space than the caller's active
