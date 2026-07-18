@@ -7,8 +7,9 @@
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { PackageInstallContext } from '../../../../../common/types';
+import type { Installation, PackageInstallContext } from '../../../../../common/types';
 import type { KibanaAssetReference, KibanaAssetType } from '../../../../types';
+import { appContextService } from '../../..';
 import { getPathParts } from '../../archive';
 
 import { saveKibanaAssetsRefs } from '../../packages/install';
