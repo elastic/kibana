@@ -167,7 +167,7 @@ describe('unisolateHostTool', () => {
           showInactive: true,
           kuery: 'local_metadata.host.name: my-host',
           page: 1,
-          perPage: 1,
+          perPage: 10,
         });
       } finally {
         mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;

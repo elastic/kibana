@@ -48,7 +48,7 @@ describe('createEndpointLookupService', () => {
     expect(listAgents).toHaveBeenCalledWith(
       expect.objectContaining({
         kuery: 'local_metadata.host.name: missing-host',
-        perPage: 1,
+        perPage: 10,
       })
     );
   });
@@ -115,5 +115,53 @@ describe('createEndpointLookupService', () => {
       agentType: 'endpoint',
       packages: [],
     });
+  });
+
+  it('prefers the online agent over stale offline/uninstalled enrollments for the same hostname', async () => {
+    // A host re-enrolled multiple times (reinstall, agent upgrade) leaves
+    // every prior Fleet agent record behind, all matching the same hostname.
+    const { lookup } = buildService({
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [
+          {
+            id: 'old-9.4.3',
+            status: 'uninstalled',
+            enrolled_at: '2026-07-17T10:26:33.000Z',
+            packages: ['endpoint'],
+          },
+          {
+            id: 'broken-snapshot',
+            status: 'offline',
+            enrolled_at: '2026-07-17T13:07:14.000Z',
+            packages: ['endpoint'],
+          },
+          {
+            id: 'current-ga',
+            status: 'online',
+            enrolled_at: '2026-07-17T13:42:02.000Z',
+            packages: ['endpoint'],
+          },
+        ],
+      }),
+    });
+
+    const result = await lookup.resolveByHostName('multi-enrolled-host');
+
+    expect(result?.agentId).toBe('current-ga');
+  });
+
+  it('falls back to the most recently enrolled agent when none are online', async () => {
+    const { lookup } = buildService({
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [
+          { id: 'older', status: 'offline', enrolled_at: '2026-07-17T10:00:00.000Z' },
+          { id: 'newer', status: 'offline', enrolled_at: '2026-07-17T13:00:00.000Z' },
+        ],
+      }),
+    });
+
+    const result = await lookup.resolveByHostName('all-offline-host');
+
+    expect(result?.agentId).toBe('newer');
   });
 });
