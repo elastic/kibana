@@ -7,6 +7,11 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { notificationWriteSchema } from '../common/notification_schema';
+import {
+  NOTIFICATION_TYPE_FLAGS,
+  NOTIFICATION_TYPE_ENABLED_DEFAULT,
+} from '../common/feature_flags';
+import { notificationTypeId } from '../common/notification_registry_utils';
 import type { NotificationDocument } from '../common/types';
 import { getNotificationDataStreamClient } from './data_stream/notification_data_stream';
 import type {
@@ -37,13 +42,24 @@ export const buildSubmitNotification =
       throw new NotificationValidationError(parsed.error.message);
     }
 
+    const { namespace, type } = parsed.data;
+    const [{ dataStreams, featureFlags }] = await core.getStartServices();
+
+    // A notification type without a flag defined in the registry will pass through.
+    const flagKey = NOTIFICATION_TYPE_FLAGS[notificationTypeId(namespace, type)];
+    const enabled = flagKey
+      ? await featureFlags.getBooleanValue(flagKey, NOTIFICATION_TYPE_ENABLED_DEFAULT)
+      : true;
+    if (!enabled) {
+      return { status: 'skipped_disabled' };
+    }
+
     const document: NotificationDocument = {
       ...parsed.data,
       '@timestamp': new Date().toISOString(),
     };
 
     // Core caches one client per data stream name, so resolve it at the write site.
-    const [{ dataStreams }] = await core.getStartServices();
     const client = await getNotificationDataStreamClient(dataStreams);
 
     const response = await client.create({ documents: [document] });
@@ -51,4 +67,6 @@ export const buildSubmitNotification =
       const reason = response.items[0]?.create?.error?.reason ?? 'unknown error';
       throw new Error(`Failed to append notification: ${reason}`);
     }
+
+    return { status: 'submitted' };
   };

@@ -13,8 +13,8 @@ both **off by default**:
 
 | Key                                    | Purpose                              |
 | -------------------------------------- | ------------------------------------ |
-| `notificationCenter.uiEnabled`         | Kibana UI visibility                 |
-| `notificationCenter.types.modelStatus` | Inference model status notifications |
+| `notificationCenter.uiEnabled`                   | Kibana UI visibility                 |
+| `notificationCenter.types.inference.modelStatus` | Inference model status notifications |
 
 Individual notification _types_ (model status, etc.) are gated separately and land as
 consumers are introduced.
@@ -53,18 +53,31 @@ touch the Feature Flags service themselves.
 
 ### Registering a type is two edits:
 
-1. Add an entry to `NOTIFICATION_TYPE_FLAGS` in
-   [`common/feature_flags.ts`](./common/feature_flags.ts):
+1. Add the type to `NOTIFICATION_REGISTRY` in
+   [`common/notification_registry.ts`](./common/notification_registry.ts) under its
+   namespace, with a static `feature_flag` key by convention
+   `notificationCenter.types.<namespace>.<typeId>`. `NOTIFICATION_TYPE_FLAGS` is derived
+   from these entries; omit `feature_flag` to send the type ungated:
    ```ts
-   export const NOTIFICATION_TYPE_FLAGS = {
-     modelStatus: 'notificationCenter.types.modelStatus',
+   export const NOTIFICATION_REGISTRY = {
+     inference: {
+       display_name: 'Elastic Inference Service',
+       description: 'Lifecycle changes to inference models.',
+       types: {
+         modelStatus: {
+           display_name: 'Model status',
+           description: 'A change to the lifecycle status of an inference model.',
+           feature_flag: 'notificationCenter.types.inference.modelStatus',
+         },
+       },
+     },
    } as const;
    ```
 2. Open a PR against [`elastic/kibana-feature-flags`](https://github.com/elastic/kibana-feature-flags)
    adding a YAML file under `feature-flags/search/search-kibana/` that defines the
    flag with the same key:
    ```yaml
-   notificationCenter.types.modelStatus:
+   notificationCenter.types.inference.modelStatus:
      description: Enables the Model Status notification type in the Notification Center.
      prs:
        - https://github.com/elastic/kibana/pull/<this-pr>
@@ -77,17 +90,10 @@ touch the Feature Flags service themselves.
      evaluation-rules: {}
    ```
 
-Flag gates can read from the registry, off by default:
-
-```ts
-await featureFlags.getBooleanValue(
-  NOTIFICATION_TYPE_FLAGS.modelStatus,
-  NOTIFICATION_TYPE_ENABLED_DEFAULT
-);
-```
-
-Notifications of a certain type are shown only when the plugin is visible: `notificationCenter.uiEnabled`
-and its own `notificationCenter.types.<typeId>` flag is on.
+`submitNotification` performs the gate check itself, reading the derived flag off by default;
+producers never call the Feature Flags service directly. Notifications of a type are shown only
+when the plugin is visible (`notificationCenter.uiEnabled`) and the type's own
+`notificationCenter.types.<namespace>.<typeId>` flag is on.
 
 ## Notification schema
 
@@ -152,6 +158,11 @@ Re-pushing the same `notification_id` appends another document; at display/query
 duplicates are collapsed and a separate cleanup-task keeps the index size under control.
 Invalid drafts throw `NotificationValidationError` and nothing is written.
 
+`submitNotification` resolves to `{ status: 'submitted' | 'skipped_disabled' }`. A type whose
+`feature_flag` is off (including when the LaunchDarkly value is unreachable — flags default to
+`false`) is **not an error**: nothing is written and the call resolves with `skipped_disabled`.
+Producers that need delivery guaranteed must ensure the type's flag is enabled.
+
 ### Example usage
 
 A plugin declares `notificationCenter` in `requiredPlugins` and calls `submitNotification`
@@ -181,10 +192,11 @@ export async function registerDeprecationCheck(notificationCenter: NotificationC
       entity: endpoint.id,
       state: 'deprecated',
     }),
+    namespace: 'inference',
     type: 'modelStatus',
     title: `${endpoint.name} is deprecated`,
-    source_app_id: 'inference',
     // ...plus `description`, `severity`, `cta` — see common/notification_schema.ts
+    // namespace/type must be a registered pair — see common/notification_registry.ts
   });
 }
 ```

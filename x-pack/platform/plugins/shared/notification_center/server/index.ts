@@ -16,6 +16,10 @@ import type {
 
 export type { NotificationCenterPluginSetup, NotificationCenterPluginStart } from './types';
 
+// Deterministic notification_id builders used by notification center clients.
+export { buildStaticStateNotificationId, buildEventNotificationId } from '../common';
+export type { StaticStateNotificationIdParts, EventNotificationIdParts } from '../common';
+
 export const config: PluginConfigDescriptor<NotificationCenterConfig> = {
   schema: configSchema,
 };

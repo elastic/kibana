@@ -23,16 +23,16 @@ import type { NotificationCenterPluginStart, NotificationCenterStartDependencies
 const draft = (overrides: Partial<NotificationInput> = {}): NotificationInput => ({
   notification_id: 'inference:my-endpoint:deprecated',
   event_timestamp: '2026-07-09T12:00:00.000Z',
+  namespace: 'inference',
   type: 'modelStatus',
   title: 'Model deprecated',
   description: 'Your endpoint model is deprecated.',
-  source_app_id: 'inference',
   ...overrides,
 });
 
 describe('notificationCenter submit() [integration]', () => {
   let esServer: EsTestCluster;
-  let submit: (input: NotificationInput) => Promise<void>;
+  let submit: ReturnType<typeof buildSubmitNotification>;
   let esClient: ReturnType<EsTestCluster['getClient']>;
 
   const countById = async (notificationId: string) => {
@@ -65,10 +65,10 @@ describe('notificationCenter submit() [integration]', () => {
     // submit() resolves its client via core.getStartServices().dataStreams;
     // mock the start service to return the test client bound to the test ES cluster.
     const dataStreams = { initializeClient: async () => client } as unknown as DataStreamsStart;
-    const core = { getStartServices: async () => [{ dataStreams }] } as unknown as CoreSetup<
-      NotificationCenterStartDependencies,
-      NotificationCenterPluginStart
-    >;
+    const featureFlags = { getBooleanValue: async () => true };
+    const core = {
+      getStartServices: async () => [{ dataStreams, featureFlags }],
+    } as unknown as CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>;
     submit = buildSubmitNotification(core);
   });
 
@@ -84,7 +84,8 @@ describe('notificationCenter submit() [integration]', () => {
     expect(hits).toHaveLength(1);
     const source = hits[0]._source as Record<string, unknown>;
     expect(source.notification_id).toBe(notificationId);
-    expect(source.source_app_id).toBe('inference');
+    expect(source.namespace).toBe('inference');
+    expect(source.type).toBe('modelStatus');
     expect(source.severity).toBe('info');
     expect(typeof source['@timestamp']).toBe('string');
   });

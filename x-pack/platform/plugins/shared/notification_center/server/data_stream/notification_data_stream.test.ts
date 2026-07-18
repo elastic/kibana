@@ -59,8 +59,8 @@ describe('registerNotificationDataStream', () => {
       expect(properties['@timestamp'].type).toBe('date');
       expect(properties.event_timestamp.type).toBe('date');
       expect(properties.notification_id.type).toBe('keyword');
+      expect(properties.namespace.type).toBe('keyword');
       expect(properties.type.type).toBe('keyword');
-      expect(properties.source_app_id.type).toBe('keyword');
       expect(properties.severity.type).toBe('keyword');
     });
 

@@ -11,12 +11,21 @@ import type {
   notificationReadSchema,
   ctaSchema,
 } from './notification_schema';
+import type { NotificationTypeRef } from './notification_registry_utils';
 
 /** A stored notification (read contract); the shape the app programs against. */
 export type Notification = z.infer<typeof notificationReadSchema>;
 
-/** Producer submit input; defaulted (`severity`) and optional (`cta`) fields may be omitted. */
-export type NotificationInput = z.input<typeof notificationWriteSchema>;
+/**
+ * Producer submit input.
+ * `namespace` and `type` are replaced by the typed pair from NotificationTypeRef,
+ * so a type from the wrong namespace does not typecheck.
+ */
+export type NotificationInput = Omit<
+  z.input<typeof notificationWriteSchema>,
+  'namespace' | 'type'
+> &
+  NotificationTypeRef;
 
 /**
  * The exact document shape in the NC index: validated write payload (`severity` resolved) plus

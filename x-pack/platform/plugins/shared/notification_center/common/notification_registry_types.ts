@@ -1,0 +1,30 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/** Display metadata shared by every registry entry (namespace or type). */
+export interface NotificationDisplayMetadata {
+  /** Human-readable label shown in UI filters and notification detail. */
+  display_name: string;
+  /** Short explanation of what the entry represents. */
+  description: string;
+}
+
+/** UI-facing definition of one notification type within a namespace. */
+export interface NotificationTypeDefinition extends NotificationDisplayMetadata {
+  /**
+   * Static LaunchDarkly key gating this type, by convention
+   * `notificationCenter.types.<namespace>.<typeId>`. Kept as a literal so the
+   * feature flag code-ref scanner can discover it.
+   * Omit to send this notification type immediately without a feature flag gate.
+   */
+  feature_flag?: string;
+}
+
+/** UI-facing definition of a namespace and the types it owns. */
+export interface NotificationNamespaceDefinition extends NotificationDisplayMetadata {
+  types: Readonly<Record<string, NotificationTypeDefinition>>;
+}

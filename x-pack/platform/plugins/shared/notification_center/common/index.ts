@@ -14,7 +14,6 @@ export {
   NOTIFICATION_TYPE_FLAGS,
   NOTIFICATION_TYPE_ENABLED_DEFAULT,
 } from './feature_flags';
-export type { NotificationTypeId } from './feature_flags';
 
 export {
   notificationWriteSchema,
@@ -22,6 +21,23 @@ export {
   ctaSchema,
   SEVERITIES,
 } from './notification_schema';
+
+export { NOTIFICATION_REGISTRY } from './notification_registry';
+export {
+  NOTIFICATION_NAMESPACES,
+  isRegisteredNotificationRef,
+  notificationTypeId,
+} from './notification_registry_utils';
+export type {
+  NotificationNamespace,
+  NotificationTypeRef,
+  NotificationTypeId,
+} from './notification_registry_utils';
+export type {
+  NotificationDisplayMetadata,
+  NotificationNamespaceDefinition,
+  NotificationTypeDefinition,
+} from './notification_registry_types';
 
 export {
   NOTIFICATION_ID_SEPARATOR,

@@ -7,10 +7,22 @@
 
 import type { NotificationInput } from '../common/types';
 
+/**
+ * Outcome of a `submitNotification` call. `skipped_disabled` means the draft was
+ * valid but its notification type's feature flag is off, so nothing was written.
+ */
+export interface SubmitNotificationResult {
+  status: 'submitted' | 'skipped_disabled';
+}
+
 /** Public server-side setup contract. */
 export interface NotificationCenterPluginSetup {
-  /** Validate a draft, stamp `@timestamp`, and append it to the `.kibana-notification-center` data stream. */
-  submitNotification: (draft: NotificationInput) => Promise<void>;
+  /**
+   * Validate a draft, check its notification type's feature flag,
+   * stamp `@timestamp` and append it to the `.kibana-notification-center`
+   * data stream.
+   */
+  submitNotification: (draft: NotificationInput) => Promise<SubmitNotificationResult>;
 }
 
 export type NotificationCenterPluginStart = Record<string, never>;
