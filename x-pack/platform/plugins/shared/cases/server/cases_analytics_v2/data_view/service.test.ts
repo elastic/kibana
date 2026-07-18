@@ -587,6 +587,39 @@ describe('CasesAnalyticsV2DataViewService', () => {
       const [spec] = dvService.createAndSave.mock.calls[0];
       expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual([]);
     });
+
+    /**
+     * Positive counterpart to the empty-overlay case above. The
+     * `cases-analyticsV2` service only runs when `analyticsV2.enabled` is
+     * true, and the per-space walk no longer short-circuits on
+     * `templatesEnabled` — it always reads BOTH the `cases-templates` and
+     * `cases-field-definitions` SO types. This locks in that, with documents
+     * present, the always-on walk still *derives* runtime fields (from a
+     * template field and a global field-definition) rather than only handling
+     * the empty case — so the removed short-circuit didn't silently stop
+     * projecting fields.
+     */
+    it('derives runtime fields from the always-on walk when template and field-definition docs are present', async () => {
+      const { service, dvService, internalSoClient, deps } = setup([]);
+      stubFindByType(internalSoClient, {
+        templates: [
+          makeTemplate('tpl-1', [{ name: 'risk', type: 'long', control: 'INPUT_NUMBER' }]),
+        ],
+        fieldDefinitions: [
+          makeFieldDefinition('fd-1', { name: 'sla_breached', type: 'keyword', isGlobal: true }),
+        ],
+      });
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      expect(internalSoClient.find).toHaveBeenCalled();
+      expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
+      const [spec] = dvService.createAndSave.mock.calls[0];
+      expect(new Set(Object.keys(spec.runtimeFieldMap ?? {}))).toEqual(
+        new Set(['case.risk_as_long', 'case.sla_breached_as_keyword'])
+      );
+    });
   });
 
   describe('refreshForSpace', () => {
