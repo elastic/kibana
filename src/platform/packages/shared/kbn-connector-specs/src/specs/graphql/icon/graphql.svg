@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!--
+    GraphQL logo — official hexagonal star design.
+    Color: #E10098 (GraphQL brand pink).
+    Paths and circle positions from the GraphQL Foundation brand assets.
+  -->
+  <path fill="#E10098" d="M57.468 302.66l-14.376-8.3 160.15-277.38 14.376 8.3z"/>
+  <path fill="#E10098" d="M39.8 272.2h320.3v16.6H39.8z"/>
+  <path fill="#E10098" d="M206.348 374.026l-160.21-92.5 8.3-14.376 160.21 92.5z"/>
+  <path fill="#E10098" d="M345.522 132.947l-160.21-92.5 8.3-14.376 160.21 92.5z"/>
+  <path fill="#E10098" d="M54.482 132.883l-8.3-14.375 160.21-92.5 8.3 14.376z"/>
+  <path fill="#E10098" d="M342.568 302.663l-160.15-277.38 14.376-8.3 160.15 277.38z"/>
+  <path fill="#E10098" d="M39.8 111.2h320.3v16.6H39.8z"/>
+  <path fill="#E10098" d="M203.522 374.026l-8.3-14.376 160.21-92.5 8.3 14.375z"/>
+  <!-- Vertex circles -->
+  <circle fill="#E10098" cx="200" cy="88.1" r="28.1"/>
+  <circle fill="#E10098" cx="200" cy="311.9" r="28.1"/>
+  <circle fill="#E10098" cx="55" cy="200" r="28.1"/>
+  <circle fill="#E10098" cx="345" cy="200" r="28.1"/>
+  <circle fill="#E10098" cx="122.5" cy="130.2" r="28.1"/>
+  <circle fill="#E10098" cx="277.5" cy="130.2" r="28.1"/>
+  <circle fill="#E10098" cx="122.5" cy="269.8" r="28.1"/>
+  <circle fill="#E10098" cx="277.5" cy="269.8" r="28.1"/>
+</svg>
