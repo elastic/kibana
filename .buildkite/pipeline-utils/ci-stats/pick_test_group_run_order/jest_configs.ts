@@ -26,15 +26,14 @@ export function discoverJestUnitConfigs(limitSolutions: string[] | undefined): s
 
 /**
  * Discover Jest integration configs honoring LIMIT_SOLUTIONS, the disabled list,
- * and the shard map. Integration configs are intentionally not filtered for
- * emptiness (matches historical behavior).
+ * the empty-config filter, and the shard map.
  */
 export function discoverJestIntegrationConfigs(limitSolutions: string[] | undefined): string[] {
   const raw = globJestConfigs(
     ['**/jest.integration.config.js', '!**/__fixtures__/**'],
     limitSolutions
   );
-  return expandShardedJestConfigs(raw);
+  return expandShardedJestConfigs(filterEmptyJestConfigs(raw));
 }
 
 /**
