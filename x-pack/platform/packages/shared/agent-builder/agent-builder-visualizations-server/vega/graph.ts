@@ -86,12 +86,14 @@ const hasRenderableView = (spec: Record<string, unknown>, dialect: VegaDialect):
 
 /**
  * Parse the model response into `{ title?, spec }`. Preferred shape is the
- * prompt envelope; a bare Vega-Lite object is still accepted for retries.
+ * prompt envelope; a bare Vega-family object is still accepted for retries.
  * An envelope is distinguished from a faceted Vega-Lite chart (which also has
- * a nested `spec`) by the absence of renderable view keys at the top level.
+ * a nested `spec`) by the absence of a renderable view at the top level for
+ * the active Dialect.
  */
 const parseAuthoringResponse = (
-  responseText: string
+  responseText: string,
+  dialect: VegaDialect
 ): { spec: Record<string, unknown>; title?: string } => {
   const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
   const jsonText = jsonMatches.length > 0 ? jsonMatches[0][1].trim() : responseText.trim();
@@ -106,16 +108,18 @@ const parseAuthoringResponse = (
     nestedSpec !== null &&
     typeof nestedSpec === 'object' &&
     !Array.isArray(nestedSpec) &&
-    !hasRenderableView(record);
+    !hasRenderableView(record, dialect);
 
   if (isEnvelope) {
     const title = typeof record.title === 'string' ? record.title.trim() || undefined : undefined;
     return { spec: nestedSpec as Record<string, unknown>, title };
   }
 
-  if (!hasRenderableView(record)) {
+  if (!hasRenderableView(record, dialect)) {
     throw new Error(
-      'Response must be { "title": string, "spec": <Vega-Lite> } or a Vega-Lite object with a mark/composite view'
+      dialect === 'vega'
+        ? 'Response must be { "title": string, "spec": <Vega> } or a Raw Vega object with a non-empty "marks" array'
+        : 'Response must be { "title": string, "spec": <Vega-Lite> } or a Vega-Lite object with a mark/composite view'
     );
   }
 
@@ -484,7 +488,10 @@ export const createVegaGraph = async (
     let action: AuthorSpecAction;
     try {
       const response = await defaultModel.chatModel.invoke(prompt);
-      const { spec, title } = parseAuthoringResponse(extractTextFromMessage(response));
+      const { spec, title } = parseAuthoringResponse(
+        extractTextFromMessage(response),
+        state.dialect
+      );
       action = { type: 'author_spec', success: true, spec, title, attempt };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
