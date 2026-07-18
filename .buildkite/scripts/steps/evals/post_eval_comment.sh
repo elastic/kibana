@@ -15,6 +15,11 @@ set -euo pipefail
 #    experiment against the fresh main experiment (this build) using direct
 #    two-ID comparison.
 
+# Bootstrap is required so that workspace packages (e.g. @kbn/setup-node-env)
+# are available when calling `node scripts/evals compare`.
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+.buildkite/scripts/bootstrap.sh
+
 GITHUB_PR_NUMBER="${GITHUB_PR_NUMBER:-${BUILDKITE_PULL_REQUEST:-}}"
 if [[ -z "$GITHUB_PR_NUMBER" ]] || [[ "$GITHUB_PR_NUMBER" == "false" ]]; then
   echo "Not a PR build; skipping eval comparison comment."
