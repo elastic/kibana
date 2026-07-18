@@ -12,7 +12,7 @@ import {
   AgentBuilderErrorCode,
   ChatEventType,
   ConversationAccessControlMode,
-  ConversationSourceType,
+  ConversationOriginType,
   createBadRequestError,
   type ChatEvent,
   type RoundCompleteEvent,
@@ -48,18 +48,18 @@ describe('handleAgentExecution', () => {
     jest.clearAllMocks();
   });
 
-  it('reports metering with the resolved conversation id when continuing by source', async () => {
-    const source = {
+  it('reports metering with the resolved conversation id when continuing by origin', async () => {
+    const origin = {
       external_conversation_id: 'team:T123/channel:C123/thread:callback-continuation',
     };
     const conversation = createEmptyConversation({
-      id: 'conversation-from-source',
+      id: 'conversation-from-origin',
       title: 'Existing conversation',
       agent_id: 'test-agent',
-      source,
+      origin,
     });
     const conversationClient = createConversationClientMock();
-    conversationClient.getBySource.mockResolvedValue(conversation);
+    conversationClient.getByOrigin.mockResolvedValue(conversation);
     conversationClient.update.mockResolvedValue(conversation);
 
     const roundCompleteEvent: ChatEvent = {
@@ -91,7 +91,7 @@ describe('handleAgentExecution', () => {
       executionMode: AgentExecutionMode.conversation,
       agentParams: {
         agentId: 'test-agent',
-        source,
+        origin,
         nextInput: {
           message: 'Continue this thread',
         },
@@ -118,28 +118,28 @@ describe('handleAgentExecution', () => {
 
     expect(reportExecution).toHaveBeenCalledWith(
       expect.objectContaining({
-        conversationId: 'conversation-from-source',
+        conversationId: 'conversation-from-origin',
       })
     );
   });
 
-  describe('round source attribution', () => {
-    const sourceAuthor = { id: 'U123', name: 'Jane Doe', handle: 'jane' };
-    const source = {
-      type: ConversationSourceType.Slack,
+  describe('round origin attribution', () => {
+    const originAuthor = { id: 'U123', name: 'Jane Doe', handle: 'jane' };
+    const origin = {
+      type: ConversationOriginType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-      author: sourceAuthor,
+      author: originAuthor,
     };
 
     const setup = ({ roundCompleteEvent }: { roundCompleteEvent: RoundCompleteEvent }) => {
       const conversation = createEmptyConversation({
-        id: 'conversation-from-source',
+        id: 'conversation-from-origin',
         agent_id: 'test-agent',
-        source: { external_conversation_id: source.external_conversation_id },
+        origin: { external_conversation_id: origin.external_conversation_id },
       });
       const conversationClient = createConversationClientMock();
       conversationClient.get.mockResolvedValue(conversation);
-      conversationClient.getBySource.mockResolvedValue(conversation);
+      conversationClient.getByOrigin.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
 
       executeAgentMock.mockReturnValue(of(roundCompleteEvent));
@@ -173,10 +173,10 @@ describe('handleAgentExecution', () => {
 
     const runExecution = async ({
       deps,
-      executionSource,
+      executionOrigin,
     }: {
       deps: unknown;
-      executionSource?: typeof source;
+      executionOrigin?: typeof origin;
     }) => {
       const events$ = await handleAgentExecution({
         execution: {
@@ -184,8 +184,8 @@ describe('handleAgentExecution', () => {
           executionMode: AgentExecutionMode.conversation,
           agentParams: {
             agentId: 'test-agent',
-            source: executionSource,
-            conversationId: executionSource ? undefined : 'conversation-from-source',
+            origin: executionOrigin,
+            conversationId: executionOrigin ? undefined : 'conversation-from-origin',
             nextInput: { message: 'Continue this thread' },
           },
         } as never,
@@ -197,7 +197,7 @@ describe('handleAgentExecution', () => {
       return lastValueFrom(events$.pipe(toArray()));
     };
 
-    it('resolves the conversation by external id only and forwards the full source to the agent run', async () => {
+    it('resolves the conversation by external id only and forwards the full origin to the agent run', async () => {
       const { conversationClient, deps } = setup({
         roundCompleteEvent: {
           type: ChatEventType.roundComplete,
@@ -205,12 +205,12 @@ describe('handleAgentExecution', () => {
         },
       });
 
-      await runExecution({ deps, executionSource: source });
+      await runExecution({ deps, executionOrigin: origin });
 
-      expect(conversationClient.getBySource).toHaveBeenCalledWith({
-        external_conversation_id: source.external_conversation_id,
+      expect(conversationClient.getByOrigin).toHaveBeenCalledWith({
+        external_conversation_id: origin.external_conversation_id,
       });
-      expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ source }));
+      expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ origin }));
     });
   });
 });
