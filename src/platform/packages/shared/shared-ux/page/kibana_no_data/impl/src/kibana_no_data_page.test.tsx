@@ -54,6 +54,29 @@ describe('KibanaNoDataPage', () => {
     });
   });
 
+  it('renders ES|QL card alongside integrations when onTryESQL is provided and no ES data', async () => {
+    const onTryESQL = jest.fn();
+    const services = getKibanaNoDataPageServicesMock(config);
+
+    render(
+      <KibanaNoDataPageProvider {...services}>
+        <KibanaNoDataPage
+          noDataConfig={noDataConfig}
+          onDataViewCreated={onDataViewCreated}
+          showPlainSpinner={false}
+          onTryESQL={onTryESQL}
+        />
+      </KibanaNoDataPageProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Add Integrations')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Query with ES|QL')).toBeInTheDocument();
+    expect(screen.getByTestId('kbnNoDataPageTryEsql')).toBeInTheDocument();
+  });
+
   it('renders NoDataViewsPrompt when ES data exists but no user data views', async () => {
     const services = getKibanaNoDataPageServicesMock({ ...config, hasESData: true });
 

@@ -9,6 +9,7 @@
 
 import React from 'react';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { NoDataCardProps } from '@kbn/shared-ux-card-no-data';
 import { NoDataCard } from '@kbn/shared-ux-card-no-data';
 import type { ActionCardProps } from '@kbn/shared-ux-page-no-data-types';
@@ -17,16 +18,28 @@ export type NoDataPageActions = NoDataCardProps;
 
 export const KEY_ELASTIC_AGENT = 'elasticAgent';
 
+const getActionKey = (actionKey: string) =>
+  actionKey === KEY_ELASTIC_AGENT ? 'empty-page-agent-action' : `empty-page-${actionKey}-action`;
+
 export const ActionCard = ({ action }: ActionCardProps) => {
   const actionKeys = Object.keys(action);
 
-  if (actionKeys.length !== 1) {
+  if (actionKeys.length === 0) {
     return null;
   }
 
-  const actionKey = actionKeys[0];
-  const key =
-    actionKey === KEY_ELASTIC_AGENT ? 'empty-page-agent-action' : `empty-page-${actionKey}-action`;
+  if (actionKeys.length === 1) {
+    const actionKey = actionKeys[0];
+    return <NoDataCard key={getActionKey(actionKey)} {...action[actionKey]} />;
+  }
 
-  return <NoDataCard key={key} {...action[actionKey]} />;
+  return (
+    <EuiFlexGroup gutterSize="l" justifyContent="center" wrap>
+      {actionKeys.map((actionKey) => (
+        <EuiFlexItem key={getActionKey(actionKey)} grow={false}>
+          <NoDataCard {...action[actionKey]} />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
 };
