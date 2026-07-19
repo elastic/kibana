@@ -612,6 +612,10 @@ apiTest.describe(
           expect(typeof entry.maxScore).toBe('number');
           expect(entry.maxScore).toBeGreaterThan(0);
           expect(Array.isArray(entry.threatTactics)).toBe(true);
+          expect(typeof entry.tacticCounts).toBe('object');
+          for (const c of Object.values(entry.tacticCounts ?? {})) {
+            expect(c).toBeGreaterThan(0);
+          }
         }
 
         // auth_high_count_logon_events_ea contributes 'Credential Access' and 'Initial Access'
@@ -639,6 +643,9 @@ apiTest.describe(
         expect(body.anomalyByTimeBucket.length).toBeGreaterThanOrEqual(1);
         const highestBucketMax = Math.max(...body.anomalyByTimeBucket.map((a) => a.maxScore));
         expect(highestBucketMax).toBeGreaterThanOrEqual(31);
+        // Both records share the same timestamp so they land in one bucket; tacticCounts reflects both.
+        const bucket = body.anomalyByTimeBucket[0];
+        expect(bucket.tacticCounts?.['Credential Access']).toBe(2);
       }
     );
 

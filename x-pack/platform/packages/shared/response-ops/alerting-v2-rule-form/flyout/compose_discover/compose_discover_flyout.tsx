@@ -56,6 +56,7 @@ import {
 } from './rule_builder';
 import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { isBuilderConditionStepId } from './types';
+import { validateStep, evaluateStepValidation } from './validate_step';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import {
@@ -180,14 +181,12 @@ export interface ComposeDiscoverFlyoutProps {
   /**
    * Called with id + update payload when the user submits in edit mode. When the user
    * configures simple actions, `notifications` carries the captured action draft list so
-   * the caller can create or update linked action policies; otherwise it is `undefined`.
-   * `notificationsDirty` is true only when the user changed the simple actions in this session.
+   * the caller can create linked action policies; otherwise it is `undefined`.
    */
   onUpdateRule?: (
     id: string,
     payload: ReturnType<typeof composeFormToUpdateRequest>,
-    notifications?: RuleNotificationsValue,
-    notificationsDirty?: boolean
+    notifications?: RuleNotificationsValue
   ) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
@@ -394,10 +393,6 @@ export function ComposeDiscoverFlyout({
   const yamlBaselineRef = useRef<string | null>(null);
   const yamlTextRef = useRef('');
   const hasBeenEditedRef = useRef(false);
-  const notificationsDirtyRef = useRef(false);
-  if (methods.formState.dirtyFields.notifications) {
-    notificationsDirtyRef.current = true;
-  }
 
   /*
    * recoveryType lives in uiState (not RHF), so toggling it doesn't mark
@@ -871,12 +866,7 @@ export function ComposeDiscoverFlyout({
     if (isCreate) {
       onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(
-        ruleId,
-        composeFormToUpdateRequest(values, builderType),
-        values.notifications,
-        notificationsDirtyRef.current || Boolean(methods.formState.dirtyFields.notifications)
-      );
+      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType), values.notifications);
     }
   });
 
@@ -913,8 +903,8 @@ export function ComposeDiscoverFlyout({
     if (hasValidationErrors) {
       return;
     }
-    if (currentStep?.validate) {
-      const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
+    if (currentStep) {
+      const valid = await validateStep(currentStep, methods, uiState, baseServices, builderState);
       if (!valid) return;
     }
     dispatch({ type: 'GO_NEXT', isAlert, isBuilderMode });
@@ -934,8 +924,8 @@ export function ComposeDiscoverFlyout({
     if (hasValidationErrors) {
       return;
     }
-    if (currentStep?.validate) {
-      const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
+    if (currentStep) {
+      const valid = await validateStep(currentStep, methods, uiState, baseServices, builderState);
       if (!valid) return;
     }
     handleSubmit();
@@ -950,9 +940,16 @@ export function ComposeDiscoverFlyout({
   ]);
 
   const isBuilderStepValid = useMemo(() => {
-    if (!currentStep || !isBuilderConditionStepId(currentStep.id) || !currentStep.validate)
+    if (!currentStep || !isBuilderConditionStepId(currentStep.id)) {
       return true;
-    const result = currentStep.validate(methods, uiState, baseServices, builderState);
+    }
+    const result = evaluateStepValidation(
+      currentStep,
+      methods,
+      uiState,
+      baseServices,
+      builderState
+    );
     return typeof result === 'boolean' ? result : true;
   }, [currentStep, methods, uiState, baseServices, builderState]);
 

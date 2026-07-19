@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { Reducer, CombinedState } from 'redux';
+import type { Reducer, CombinedState } from 'redux-v4';
 import { routes } from './routes';
 import type { StartPlugins } from '../types';
 import type { SecuritySubPluginWithStore } from '../app/types';
