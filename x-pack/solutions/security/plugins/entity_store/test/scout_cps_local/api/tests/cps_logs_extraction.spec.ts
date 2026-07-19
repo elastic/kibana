@@ -20,6 +20,7 @@ import {
   clearEntityStoreIndices,
   forceLogExtraction,
   installAllEntityTypes,
+  normalizeKeywordList,
   uninstallAllEntityTypes,
 } from '../../../scout/api/fixtures/helpers';
 
@@ -139,6 +140,75 @@ apiTest.describe(
         });
         expect(hits.hits.hits).toHaveLength(1);
         expect(get(hits.hits.hits[0]._source, ['entity', 'name'])).toBe(userName);
+      }
+    );
+
+    apiTest(
+      'preserves raw_identifiers relationship fields after the CPS extract → promote round-trip',
+      async ({ apiClient, esClient, linkedProject }) => {
+        const hostName = `cps_rel_host_${Date.now()}`;
+        const hostId = `${hostName}-id`;
+        const adminTargetHostId = `admin-target-${Date.now()}`;
+
+        // Ingest a host log with an administers relationship field into the linked cluster.
+        // The source field `host.entity.relationships.administers.host.id` maps to destination
+        // `entity.relationships.administers.raw_identifiers.host.id` in the entity index.
+        await ingestLogOnLinked(linkedProject.esClient, {
+          '@timestamp': new Date(NOW - 5 * 60_000).toISOString(),
+          host: {
+            name: hostName,
+            id: hostId,
+            entity: {
+              relationships: {
+                administers: {
+                  host: { id: adminTargetHostId },
+                },
+              },
+            },
+          },
+        });
+
+        // Run 1: CPS remote path writes a partial entity doc into the updates data stream.
+        const firstExtraction = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'host',
+          WINDOW_FROM,
+          WINDOW_TO
+        );
+        expect(firstExtraction.statusCode).toBe(200);
+        expect((firstExtraction.body as { success: boolean }).success).toBe(true);
+
+        // Make the updates doc visible before the main path reads it.
+        await esClient.indices.refresh({ index: UPDATES_INDEX });
+
+        // Run 2: main local path reads the updates data stream and promotes into the latest index.
+        const secondExtraction = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'host',
+          WINDOW_FROM,
+          WINDOW_TO
+        );
+        expect(secondExtraction.statusCode).toBe(200);
+        expect((secondExtraction.body as { success: boolean }).success).toBe(true);
+
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
+
+        const hits = await esClient.search({
+          index: LATEST_ALIAS,
+          query: { term: { 'host.name': hostName } },
+        });
+        expect(hits.hits.hits).toHaveLength(1);
+
+        const source = hits.hits.hits[0]._source as Record<string, unknown>;
+
+        // raw_identifiers must survive the CPS round-trip: remote extraction writes them to the
+        // updates data stream, and the main path must promote them into the latest index.
+        const rawIdentifierHostIds = normalizeKeywordList(
+          get(source, ['entity', 'relationships', 'administers', 'raw_identifiers', 'host', 'id'])
+        );
+        expect(rawIdentifierHostIds).toContain(adminTargetHostId);
       }
     );
   }

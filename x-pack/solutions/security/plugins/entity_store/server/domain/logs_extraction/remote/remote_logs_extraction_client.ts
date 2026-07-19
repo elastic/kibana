@@ -15,6 +15,7 @@ import { entityStoreMetrics } from '../../../monitor/metrics';
 import type { Entity } from '../../../../common/domain/definitions/entity.gen';
 import {
   EntityType,
+  type EntityField,
   type ManagedEntityDefinition,
 } from '../../../../common/domain/definitions/entity_schema';
 import {
@@ -645,7 +646,7 @@ export class RemoteLogsExtractionClient {
           logger: this.logger,
           abortController,
           fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
-          transformDocument: this.buildTransformDocument(type),
+          transformDocument: this.buildTransformDocument(type, entityDefinition.fields),
           refresh: false,
           onDropped: () =>
             entityStoreMetrics.extractionBulkDropped.add(1, {
@@ -701,22 +702,48 @@ export class RemoteLogsExtractionClient {
    * picks up these updates in the correct order. This is bounded by the `delay`
    * configured on the main extraction.
    */
-  private buildTransformDocument(type: EntityType) {
+  private buildTransformDocument(type: EntityType, fields: EntityField[]) {
+    // Build a map from destination path → entity-relative source path for asymmetric fields.
+    // The remote ESQL result uses destination paths as column names (e.g.
+    // "entity.relationships.administers.raw_identifiers.host.id"), but the main extraction
+    // query reads the updates data stream using source paths
+    // (e.g. "host.entity.relationships.administers.host.id"). For symmetric fields the
+    // re-nesting step in transformDocForUpsert already produces the right result; only
+    // asymmetric fields (where destination ≠ "entity.<source-suffix>") need remapping.
+    const entityPrefix = `${type}.entity.`;
+    const destToEntityRelativeSource = new Map<string, string>();
+    for (const field of fields) {
+      if (field.retention.operation === 'managed') continue;
+      if (!field.source.startsWith(entityPrefix)) continue;
+      const entityRelativeSource = `entity.${field.source.slice(entityPrefix.length)}`;
+      if (entityRelativeSource !== field.destination) {
+        destToEntityRelativeSource.set(field.destination, entityRelativeSource);
+      }
+    }
+
     let timestampIncrement = 1;
     return (doc: Record<string, unknown>) => {
       timestampIncrement++;
       const timestamp = moment().utc().add(timestampIncrement, 'ms').toISOString();
-      return this.transformDocForUpsert(type, doc, timestamp);
+      return this.transformDocForUpsert(type, doc, timestamp, destToEntityRelativeSource);
     };
   }
 
   private transformDocForUpsert(
     type: EntityType,
     data: Partial<Entity>,
-    timestamp: string
+    timestamp: string,
+    destToEntityRelativeSource: Map<string, string> = new Map()
   ): Record<string, unknown> {
+    // Remap asymmetric field destination paths to their entity-relative source paths before
+    // unflattening, so the updates doc matches what the main ESQL query reads.
+    const remapped: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+      remapped[destToEntityRelativeSource.get(key) ?? key] = value;
+    }
+
     const doc: Record<string, unknown> = unflattenObject({
-      ...data,
+      ...remapped,
       '@timestamp': timestamp,
     });
 
