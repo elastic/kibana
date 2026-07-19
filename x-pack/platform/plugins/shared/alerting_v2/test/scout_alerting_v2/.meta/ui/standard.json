@@ -1,6 +1,75 @@
 {
-  "sha1": "c67a72f3c62981c8c7ae8ad0442a1d552eecdb08",
+  "sha1": "5a2a4386c9c481e6e37930bc64c2915c01ed36fe",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
+    {
+      "id": "a3812d69333baa9-c6dcf15528a3e01",
+      "title": "Action Policies - read/write privileges editor sees every write affordance",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_privileges.spec.ts",
+        "line": 42,
+        "column": 7
+      }
+    },
+    {
+      "id": "a3812d69333baa9-5993a4bf6be8200",
+      "title": "Action Policies - read/write privileges read-only user cannot access write affordances",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_privileges.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "a3812d69333baa9-1c84e85eee0a8b0",
+      "title": "Action Policies - read/write privileges read-only user is blocked from the edit route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_privileges.spec.ts",
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "111cb1ae871d64d-b09eb1a312f8f14",
+      "title": "Alerts page - read/write privileges editor sees the mutating episode actions menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/alerts_privileges.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "111cb1ae871d64d-b9996e6bd3ada37",
+      "title": "Alerts page - read/write privileges read-only user only sees the read-safe open-in-discover action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/alerts_privileges.spec.ts",
+        "line": 56,
+        "column": 7
+      }
+    },
     {
       "id": "a3a9f820a79c452-b8b452a1ef0f11e",
       "title": "ComposeDiscoverFlyout — create and edit flows create flow: open flyout, define query, step through, and submit",
@@ -443,6 +512,32 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rules_list_bulk_respects_filters.spec.ts",
         "line": 47,
         "column": 9
+      }
+    },
+    {
+      "id": "09e07de2d99cb33-6cccb255189b3d2",
+      "title": "Rules list - read/write privileges editor can create rules and toggle enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rules_list_privileges.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "09e07de2d99cb33-c897612ecadbffe",
+      "title": "Rules list - read/write privileges read-only user cannot create rules or toggle enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rules_list_privileges.spec.ts",
+        "line": 48,
+        "column": 7
       }
     }
   ]
