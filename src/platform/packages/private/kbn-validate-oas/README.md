@@ -1,5 +1,7 @@
 # @kbn/validate-oas
 
+Validates the generated Kibana OAS bundles (`oas_docs/output/*.yaml`).
+
 ```bash
 node ./scripts/validate_oas_docs.js --help
 ```
@@ -18,6 +20,7 @@ Every finding is classified on two axes:
 
 Compatibility findings are not part of this taxonomy; they keep a separate hard-fail path and are excluded from baseline counts.
 
+
 ## Default output
 
 Per bundle the CLI prints `N errors, M warnings`. Add `--breakdown` to also print the
@@ -35,7 +38,7 @@ structural/quality subtotals within each severity bucket:
 
 ```json
 {
-  "./oas_docs/output/kibana.yaml": { "errors": 1, "warnings": 16 }
+  "./oas_docs/output/kibana.yaml": { "errors": 0, "warnings": 16 }
 }
 ```
 
