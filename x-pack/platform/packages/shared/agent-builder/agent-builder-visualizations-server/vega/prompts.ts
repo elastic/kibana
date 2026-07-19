@@ -25,9 +25,9 @@ Therefore, for EVERY time-based chart — time series AND plain metrics/categori
 ## Field names for Vega
 
 Vega interprets a dot in a field name as a nested-object path, but ES|QL result columns are flat, so a column whose name contains a dot (e.g. \`host.name\`) is misread and renders as "undefined".
-- Prefer RENAME every such column to a readable, dotless alias in the query, e.g. \`RENAME host.name AS host\` or \`RENAME geo.dest AS destination\`, and reference the alias in the spec.
-- If a dotted name must remain in the result, leave it; the authoring step will escape it in the spec (backslash-escape in field strings / bracket access in expressions).
-- This applies to dimension/metric columns only. Do NOT rename the time field this way — keep filtering and bucketing on the raw source time field exactly as required above.`;
+- PRIMARY: RENAME every such dimension/metric column to a readable, dotless alias in the query, e.g. \`RENAME host.name AS host\` or \`RENAME geo.dest AS destination\`. The visualization will reference those aliases.
+- Fallback only: if renaming is impossible, leave the dotted name in the result — do not invent escape syntax in ES|QL. Spec authoring (and normalize) will escape remaining dotted names.
+- Do NOT rename the time field this way — keep filtering and bucketing on the raw source time field exactly as required above.`;
 
 const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
   if (!columns || columns.length === 0) {
@@ -60,7 +60,7 @@ TITLE RULES:
 - Prefer the panel title over redundant axis or legend titles; NEVER duplicate the same wording across them.
 
 DOTS IN FIELD NAMES:
-- Prefer renaming dotted ES|QL columns in the query (see Field names for Vega). When a dotted column remains (e.g. "geo.dest"), backslash-escape every dot in "field" strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']).`;
+- If a name in <columns> still contains a dot (e.g. "geo.dest"), backslash-escape every dot in "field" strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']). Do not invent a rename here — the ES|QL query is already fixed.`;
 
 const createVegaLiteAuthorPrompt = ({
   nlQuery,

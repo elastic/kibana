@@ -65,8 +65,13 @@ describe('createAuthorVegaSpecPrompt', () => {
     expect(text).toContain('min(width, height) / 2 - 40');
   });
 
-  it('always includes the dotted-field escaping guidance', () => {
-    expect(systemText('any chart')).toContain('DOTS IN FIELD NAMES');
+  it('always includes dotted-field escape guidance for remaining column names', () => {
+    const text = systemText('any chart');
+    expect(text).toContain('DOTS IN FIELD NAMES');
+    expect(text).toContain('backslash-escape');
+    // Authoring owns escape only; ES|QL generation owns RENAME (separate prompt).
+    const dotsSection = text.slice(text.indexOf('DOTS IN FIELD NAMES'));
+    expect(dotsSection).not.toContain('RENAME');
   });
 
   it('guides faceting: columns as a sibling and explicit per-cell sizing', () => {
@@ -245,10 +250,13 @@ describe('vegaEsqlAdditionalInstructions', () => {
     );
   });
 
-  it('prefers RENAME for dotted columns and treats spec escaping as fallback', () => {
+  it('makes RENAME the primary dotted-column contract for ES|QL generation', () => {
     expect(vegaEsqlAdditionalInstructions).toContain('Field names for Vega');
     expect(vegaEsqlAdditionalInstructions).toContain('RENAME host.name AS host');
     expect(vegaEsqlAdditionalInstructions).toContain('Do NOT rename the time field');
-    expect(vegaEsqlAdditionalInstructions).toContain('If a dotted name must remain');
+    expect(vegaEsqlAdditionalInstructions).toContain('PRIMARY');
+    expect(vegaEsqlAdditionalInstructions).toContain('leave the dotted name');
+    // Escaping mechanics belong in the author prompt, not ES|QL generation.
+    expect(vegaEsqlAdditionalInstructions).not.toContain('backslash-escape');
   });
 });
