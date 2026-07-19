@@ -9,15 +9,227 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { of, forkJoin, switchMap } from 'rxjs';
 import type {
+  ChatEvent,
   Conversation,
   ConversationAccessControl,
+  ConversationRound,
   ConversationSource,
   RoundCompleteEvent,
   ConversationAction,
+  RoundInput,
 } from '@kbn/agent-builder-common';
-import { getDefaultConversationAccessControl } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  createAskUserQuestionStep,
+  getDefaultConversationAccessControl,
+  isBackgroundAgentCompleteEvent,
+  isMessageChunkEvent,
+  isMessageCompleteEvent,
+  isPromptRequestEvent,
+  isReasoningEvent,
+  isTodosUpdatedEvent,
+  isToolCallEvent,
+  isToolCallStep,
+  isToolProgressEvent,
+  isToolResultEvent,
+  isUserQuestionAskedEvent,
+} from '@kbn/agent-builder-common';
+import type { RuntimeAgentConfigurationOverrides } from '@kbn/agent-builder-common/agents';
+import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
+import {
+  ConversationRoundStepType,
+  createReasoningStep,
+  createToolCallStep,
+} from '@kbn/agent-builder-common/chat/conversation';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
+
+const TEMPORARY_TITLE_MAX_LENGTH = 80;
+
+export const getTemporaryConversationTitle = (message?: string): string => {
+  const normalized = message?.trim().replace(/\s+/g, ' ');
+  if (!normalized) return 'New conversation';
+  if (normalized.length <= TEMPORARY_TITLE_MAX_LENGTH) return normalized;
+  return `${normalized.slice(0, TEMPORARY_TITLE_MAX_LENGTH - 1).trimEnd()}…`;
+};
+
+export const createInProgressRound = ({
+  input,
+  configurationOverrides,
+}: {
+  input: RoundInput;
+  configurationOverrides?: RuntimeAgentConfigurationOverrides;
+}): ConversationRound => {
+  const now = new Date().toISOString();
+  return {
+    id: uuidv4(),
+    status: ConversationRoundStatus.inProgress,
+    input,
+    response: { message: '' },
+    steps: [],
+    started_at: now,
+    time_to_first_token: 0,
+    time_to_last_token: 0,
+    model_usage: {
+      connector_id: 'unknown',
+      input_tokens: 0,
+      output_tokens: 0,
+      llm_calls: 0,
+    },
+    configuration_overrides: configurationOverrides,
+  };
+};
+
+export const applyProgressEventToRound = ({
+  round,
+  event,
+}: {
+  round: ConversationRound;
+  event: ChatEvent;
+}): boolean => {
+  if (isMessageChunkEvent(event)) {
+    round.response.message += event.data.text_chunk;
+    return true;
+  }
+
+  if (isMessageCompleteEvent(event)) {
+    round.response = {
+      message: event.data.message_content,
+      structured_output: event.data.structured_output,
+    };
+    return true;
+  }
+
+  if (isReasoningEvent(event)) {
+    if (event.data.transient) {
+      return false;
+    }
+    round.response.message = '';
+    round.steps.push(
+      createReasoningStep({
+        reasoning: event.data.reasoning,
+        tool_call_id: event.data.tool_call_id,
+        tool_call_group_id: event.data.tool_call_group_id,
+      })
+    );
+    return true;
+  }
+
+  if (isToolCallEvent(event)) {
+    round.steps.push(
+      createToolCallStep({
+        tool_id: event.data.tool_id,
+        params: event.data.params,
+        results: [],
+        tool_call_id: event.data.tool_call_id,
+        tool_call_group_id: event.data.tool_call_group_id,
+        tool_origin: event.data.tool_origin,
+        tool_type: event.data.tool_type,
+      })
+    );
+    return true;
+  }
+
+  if (isToolProgressEvent(event)) {
+    const step = round.steps
+      .filter(isToolCallStep)
+      .find((toolStep) => toolStep.tool_call_id === event.data.tool_call_id);
+    if (!step) {
+      return false;
+    }
+    step.progression = [
+      ...(step.progression ?? []),
+      {
+        message: event.data.message,
+        metadata: event.data.metadata,
+      },
+    ];
+    return true;
+  }
+
+  if (isToolResultEvent(event)) {
+    const step = round.steps
+      .filter(isToolCallStep)
+      .find((toolStep) => toolStep.tool_call_id === event.data.tool_call_id);
+    if (!step) {
+      return false;
+    }
+    step.results = event.data.results;
+    return true;
+  }
+
+  if (isBackgroundAgentCompleteEvent(event)) {
+    round.steps.push({
+      type: ConversationRoundStepType.backgroundAgentComplete,
+      ...event.data.execution,
+    });
+    return true;
+  }
+
+  if (isTodosUpdatedEvent(event)) {
+    const existing = round.steps.find(
+      (step) => step.type === ConversationRoundStepType.updateTodos
+    );
+    if (existing?.type === ConversationRoundStepType.updateTodos) {
+      existing.todos = event.data.data.todos;
+      existing.carried_over = false;
+    } else {
+      round.steps.push({
+        type: ConversationRoundStepType.updateTodos,
+        todos: event.data.data.todos,
+      });
+    }
+    return true;
+  }
+
+  if (isPromptRequestEvent(event)) {
+    round.pending_prompts = [...(round.pending_prompts ?? []), event.data.prompt];
+    round.status = ConversationRoundStatus.awaitingPrompt;
+    return true;
+  }
+
+  if (isUserQuestionAskedEvent(event)) {
+    round.steps.push(
+      createAskUserQuestionStep({
+        prompt_id: event.data.prompt_id,
+        questions: event.data.questions,
+      })
+    );
+    const prompt = round.pending_prompts?.find(
+      (pendingPrompt) =>
+        isAskUserQuestionPrompt(pendingPrompt) && pendingPrompt.id === event.data.prompt_id
+    );
+    if (!prompt) {
+      round.status = ConversationRoundStatus.awaitingPrompt;
+    }
+    return true;
+  }
+
+  return false;
+};
+
+export const createInProgressConversation = async ({
+  conversation,
+  conversationClient,
+  round,
+  title = conversation.title,
+}: {
+  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control' | 'source' | 'title'>;
+  conversationClient: ConversationClient;
+  round: ConversationRound;
+  title?: string;
+}): Promise<Conversation> => {
+  return conversationClient.create({
+    id: conversation.id,
+    title,
+    agent_id: conversation.agent_id,
+    access_control: conversation.access_control,
+    source: conversation.source,
+    status: round.status,
+    read: false,
+    rounds: [round],
+  });
+};
 
 /**
  * Persist a new conversation and emit the corresponding event

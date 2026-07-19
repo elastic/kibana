@@ -9,6 +9,8 @@ import { of } from 'rxjs';
 import type { RoundCompleteEvent } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
+  ConversationRoundStatus,
+  ConversationRoundStepType,
   ConversationAccessControlMode,
   ConversationSourceType,
 } from '@kbn/agent-builder-common';
@@ -17,9 +19,142 @@ import {
   createRound,
   createConversationClientMock,
 } from '../../../test_utils';
-import { getConversation, updateConversation$ } from './conversations';
+import {
+  applyProgressEventToRound,
+  createInProgressConversation,
+  createInProgressRound,
+  getTemporaryConversationTitle,
+  getConversation,
+  updateConversation$,
+} from './conversations';
 
 describe('conversations utils', () => {
+  describe('getTemporaryConversationTitle', () => {
+    it('uses the prompt text as a temporary title', () => {
+      expect(getTemporaryConversationTitle('  Investigate   the failing Slack workflow  ')).toBe(
+        'Investigate the failing Slack workflow'
+      );
+    });
+
+    it('falls back when the prompt is empty', () => {
+      expect(getTemporaryConversationTitle('   ')).toBe('New conversation');
+    });
+
+    it('truncates long prompts', () => {
+      expect(getTemporaryConversationTitle('a'.repeat(100))).toBe(`${'a'.repeat(79)}…`);
+    });
+  });
+
+  describe('createInProgressConversation', () => {
+    it('creates a visible conversation with an in-progress round', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = createEmptyConversation({ id: 'conversation-1' });
+      const round = createInProgressRound({ input: { message: 'hello' } });
+      conversationClient.create.mockResolvedValue({ ...conversation, rounds: [round] });
+
+      await createInProgressConversation({
+        conversation,
+        conversationClient,
+        round,
+        title: 'hello',
+      });
+
+      expect(conversationClient.create).toHaveBeenCalledWith({
+        id: 'conversation-1',
+        title: 'hello',
+        agent_id: conversation.agent_id,
+        access_control: conversation.access_control,
+        source: conversation.source,
+        status: ConversationRoundStatus.inProgress,
+        read: false,
+        rounds: [round],
+      });
+    });
+  });
+
+  describe('applyProgressEventToRound', () => {
+    it('applies streamed message and tool updates to an in-progress round', () => {
+      const round = createInProgressRound({ input: { message: 'hello' } });
+
+      expect(
+        applyProgressEventToRound({
+          round,
+          event: {
+            type: ChatEventType.messageChunk,
+            data: { message_id: 'message-1', text_chunk: 'partial' },
+          },
+        })
+      ).toBe(true);
+      expect(round.response.message).toBe('partial');
+
+      expect(
+        applyProgressEventToRound({
+          round,
+          event: {
+            type: ChatEventType.toolCall,
+            data: {
+              tool_call_id: 'tool-call-1',
+              tool_id: 'tool-1',
+              params: { query: 'test' },
+            },
+          },
+        })
+      ).toBe(true);
+      expect(round.steps).toEqual([
+        expect.objectContaining({
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'tool-call-1',
+          results: [],
+        }),
+      ]);
+
+      expect(
+        applyProgressEventToRound({
+          round,
+          event: {
+            type: ChatEventType.toolProgress,
+            data: { tool_call_id: 'tool-call-1', message: 'running' },
+          },
+        })
+      ).toBe(true);
+      expect(round.steps[0]).toEqual(
+        expect.objectContaining({
+          progression: [{ message: 'running', metadata: undefined }],
+        })
+      );
+
+      expect(
+        applyProgressEventToRound({
+          round,
+          event: {
+            type: ChatEventType.toolResult,
+            data: {
+              tool_call_id: 'tool-call-1',
+              tool_id: 'tool-1',
+              results: [{ type: 'other', data: { ok: true }, tool_result_id: 'result-1' }],
+            },
+          },
+        })
+      ).toBe(true);
+      expect(round.steps[0]).toEqual(
+        expect.objectContaining({
+          results: [{ type: 'other', data: { ok: true }, tool_result_id: 'result-1' }],
+        })
+      );
+
+      expect(
+        applyProgressEventToRound({
+          round,
+          event: {
+            type: ChatEventType.messageComplete,
+            data: { message_id: 'message-1', message_content: 'done' },
+          },
+        })
+      ).toBe(true);
+      expect(round.response.message).toBe('done');
+    });
+  });
+
   describe('getConversation', () => {
     describe('operation determination', () => {
       it('returns CREATE operation when no conversationId is provided', async () => {

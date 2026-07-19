@@ -10,6 +10,10 @@ export { generateTitle } from './generate_title';
 export { handleCancellation } from './handle_cancellation';
 export { executeAgent$ } from './execute_agent';
 export {
+  applyProgressEventToRound,
+  createInProgressConversation,
+  createInProgressRound,
+  getTemporaryConversationTitle,
   getConversation,
   conversationExists,
   updateConversation$,

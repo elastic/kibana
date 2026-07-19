@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-import { merge, of, filter, tap, catchError, throwError, EMPTY } from 'rxjs';
-import type { Observable } from 'rxjs';
+import {
+  merge,
+  of,
+  filter,
+  tap,
+  catchError,
+  throwError,
+  EMPTY,
+  Observable,
+  firstValueFrom,
+} from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
-import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
+import type { ChatEvent, ConversationAction, ConversationRound } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
@@ -40,11 +49,19 @@ import {
   getConversation,
   updateConversation$,
   createConversation$,
+  applyProgressEventToRound,
+  createInProgressConversation,
+  createInProgressRound,
+  getTemporaryConversationTitle,
   resolveServices,
   convertErrors,
   type ConversationWithOperation,
 } from './utils';
-import { createConversationIdSetEvent } from './utils/events';
+import {
+  createConversationCreatedEvent,
+  createConversationIdSetEvent,
+  createConversationUpdatedEvent,
+} from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -52,6 +69,8 @@ import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
 
 import { EVENT_BATCH_INTERVAL_MS } from './constants';
+
+const CONVERSATION_PROGRESS_UPDATE_INTERVAL_MS = 1000;
 
 /**
  * Dependencies needed to build and run an agent event stream.
@@ -148,9 +167,31 @@ const handleConversationExecution = async ({
     source,
   });
 
+  const initialRound =
+    storeConversation && conversation.operation === 'CREATE'
+      ? createInProgressRound({
+          input: {
+            message: nextInput.message ?? '',
+            ...(nextInput.attachment_refs ? { attachment_refs: nextInput.attachment_refs } : {}),
+          },
+          configurationOverrides,
+        })
+      : undefined;
+
+  const createdConversation = initialRound
+    ? await createInProgressConversation({
+        conversation,
+        conversationClient,
+        round: initialRound,
+        title: getTemporaryConversationTitle(nextInput.message),
+      })
+    : undefined;
+
   // Emit conversation ID for new conversations (only when persisting)
   const conversationIdEvent$ =
-    storeConversation && conversation.operation === 'CREATE'
+    createdConversation !== undefined
+      ? of(createConversationCreatedEvent(createdConversation))
+      : storeConversation && conversation.operation === 'CREATE'
       ? of(createConversationIdSetEvent(conversation.id))
       : EMPTY;
 
@@ -185,13 +226,22 @@ const handleConversationExecution = async ({
 
   // Persist conversation (optional)
   const persistenceEvents$ = storeConversation
-    ? buildPersistenceEvents({
-        conversation,
-        conversationClient,
-        title$,
-        agentEvents$,
-        action,
-      })
+    ? createdConversation && initialRound
+      ? buildInProgressPersistenceEvents({
+          conversation,
+          conversationClient,
+          title$,
+          agentEvents$,
+          initialRound,
+          logger,
+        })
+      : buildPersistenceEvents({
+          conversation,
+          conversationClient,
+          title$,
+          agentEvents$,
+          action,
+        })
     : EMPTY;
 
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
@@ -415,6 +465,122 @@ const buildPersistenceEvents = ({
     title$,
     roundCompletedEvents$,
     action,
+  });
+};
+
+const buildInProgressPersistenceEvents = ({
+  conversation,
+  conversationClient,
+  title$,
+  agentEvents$,
+  initialRound,
+  logger,
+}: {
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+  title$: Observable<string>;
+  agentEvents$: Observable<ChatEvent>;
+  initialRound: ConversationRound;
+  logger: Logger;
+}): Observable<ChatEvent> => {
+  return new Observable<ChatEvent>((subscriber) => {
+    const titlePromise = firstValueFrom(title$);
+    const round = initialRound;
+    let dirty = false;
+    let finalized = false;
+    let progressTimer: ReturnType<typeof setTimeout> | undefined;
+    let progressUpdate: Promise<void> = Promise.resolve();
+
+    const clearProgressTimer = () => {
+      if (progressTimer !== undefined) {
+        clearTimeout(progressTimer);
+        progressTimer = undefined;
+      }
+    };
+
+    const persistProgress = () => {
+      progressTimer = undefined;
+      if (!dirty || finalized) return;
+      dirty = false;
+      const snapshot = JSON.parse(JSON.stringify(round)) as ConversationRound;
+      progressUpdate = progressUpdate
+        .then(async () => {
+          await conversationClient.update(
+            {
+              id: conversation.id,
+              rounds: [snapshot],
+              status: snapshot.status,
+              read: false,
+            },
+            { access: 'converse' }
+          );
+        })
+        .catch((error) => {
+          logger.debug(`Failed to persist in-progress conversation: ${(error as Error).message}`);
+        });
+    };
+
+    const scheduleProgress = () => {
+      if (progressTimer === undefined && !finalized) {
+        progressTimer = setTimeout(persistProgress, CONVERSATION_PROGRESS_UPDATE_INTERVAL_MS);
+      }
+    };
+
+    const subscription = agentEvents$.subscribe({
+      next: (event) => {
+        if (isRoundCompleteEvent(event)) {
+          finalized = true;
+          dirty = false;
+          clearProgressTimer();
+
+          const complete = async () => {
+            await progressUpdate;
+            const title = await titlePromise;
+            const finalRound = event.data.round;
+            const updatedConversation = await conversationClient.update(
+              {
+                id: conversation.id,
+                title,
+                rounds: [finalRound],
+                state: event.data.conversation_state,
+                status: finalRound.status,
+                read: false,
+                ...(event.data.attachments !== undefined
+                  ? { attachments: event.data.attachments }
+                  : {}),
+                ...(event.data.workspace_id ? { workspace_id: event.data.workspace_id } : {}),
+              },
+              { access: 'converse' }
+            );
+            subscriber.next(createConversationUpdatedEvent(updatedConversation));
+            subscriber.complete();
+          };
+
+          complete().catch((error) => subscriber.error(error));
+          return;
+        }
+
+        if (applyProgressEventToRound({ round, event })) {
+          dirty = true;
+          scheduleProgress();
+        }
+      },
+      error: (error) => {
+        clearProgressTimer();
+        subscriber.error(error);
+      },
+      complete: () => {
+        clearProgressTimer();
+        if (!finalized) {
+          subscriber.complete();
+        }
+      },
+    });
+
+    return () => {
+      clearProgressTimer();
+      subscription.unsubscribe();
+    };
   });
 };
 
