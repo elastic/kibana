@@ -98,19 +98,18 @@ export const chartType: RawVegaChartTypeEntry = {
     config: {
       rulesHeading: 'RADAR / SPIDER RULES',
       perChartTypeRules: [
-        `Expect a key / value table (optional series). Prefer ≥${RADAR_MIN_KEYS} distinct keys when data allows.`,
+        `Use key / value columns from <columns> (optional series). Prefer ≥${RADAR_MIN_KEYS} distinct keys when data allows — ES|QL generation owns the table shape.`,
         'Scales: angular (point, domain = key, range [-PI, PI]) and radial (linear, domain = value, range [0, radius]).',
         'MARKS ARRAY SHAPE (critical — malformed marks blank the chart):\n  - Top-level "marks" is a FLAT array of sibling mark objects: [group|line, rule, text, line, …].\n  - The faceted series "group" is ONE object whose nested "marks" contains ONLY the closed polygon line(s).\n  - Grid "rule", spoke "text", and outer "line" are SIBLINGS of that group — never extra properties on the group after its nested marks close.\n  - Copy the reference example mark list structure; do not merge siblings into one object.',
         `Marks content: grid rules + labels from aggregated keys; closed polygon via line marks with interpolate "linear-closed".\n  - Multi-series: facet the Canonical source by series (groupby series) and draw one closed line per facet.\n  - Single-series (no series column): one closed line from "${CANONICAL_ESQL_SOURCE_NAME}" (no facet required).`,
-        'RESPONSIVE LAYOUT (required — fill and center the Kibana panel):\n  - NEVER set top-level "encode" x/y (official Vega radar does this; in Kibana it shoves the chart into a corner).\n  - NEVER use autosize "none" — Kibana disables panel sizing and the chart goes blank.\n  - Center in EVERY mark signal: width/2 + …, height/2 + … (same idea as sunburst arc x/y).\n  - radius signal: min(width, height) / 2 - 40 (reserves space for spoke labels inside the panel).\n  - Labels at width/2 + (radius + 8) * cos(…), height/2 + (radius + 8) * sin(…).\n  - Prefer short key labels (LIMIT axes); avoid large fontSize.',
-        'EXPRESSIONS: always lowercase helpers — scale(, cos(, sin(. Never Scale(.',
+        'Radar layout: radius = min(width, height) / 2 - 40; center every mark at width/2 + …, height/2 + …; labels at (radius + 8) * cos/sin. Prefer short key labels (LIMIT axes).',
       ],
       esqlAdditionalInstructions,
     },
   },
   example: {
     description:
-      'Static radar: key/value rows (≥3 distinct keys; optional series) → angular + radial scales → faceted `line` marks with `linear-closed`. Center with absolute width/2 + height/2 in mark signals (never top-level encode). Bind the Canonical ES|QL source named `source`; do not add Kibana interaction signals.',
+      'Radar skeleton: key/value rows → angular + radial scales → closed `line` marks on Canonical source `source`.',
     load: () => import('./radar').then((module) => module.spec),
   },
   disclosedFallbackContext: RADAR_DISCLOSED_FALLBACK_CONTEXT,

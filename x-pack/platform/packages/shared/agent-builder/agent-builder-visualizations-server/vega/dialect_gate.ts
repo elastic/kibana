@@ -43,14 +43,26 @@ ${rawVegaChartTypes
   .join('\n')}
 
 RULES:
-1. Return "sunburst" ONLY when the user clearly wants a sunburst / radial hierarchy / ring partition of a tree.
-2. Return "radar" ONLY when the user clearly wants a radar / spider / polar multivariate chart across several numeric axes.
-3. Return "sankey" ONLY when the user clearly wants a Sankey / flow / alluvial diagram of weighted flows between categories.
-4. Return "none" for Vega-Lite charts (bars, lines, facets, scatter, heatmap, gantt, …) and for unsupported Raw Vega diagrams (network, chord, …).
-5. Do NOT return "sunburst" for Lens treemap/pie/donut requests unless the user explicitly asks for a sunburst.
-6. Do NOT return "radar" for pie/donut/radial-bar requests unless the user explicitly asks for a radar or spider chart.
-7. Do NOT return "sankey" for ordinary bar/line breakdowns unless the user asks for Sankey, flow, or alluvial.
-8. Only return ids from the allowlist or "none".`,
+${rawVegaChartTypes
+  .map((entry, index) => {
+    // selection.guideline is "Choose <id> when …" → "Return "<id>" ONLY when …"
+    const whenClause = entry.prompt.selection.guideline.replace(/^Choose \S+ when\s+/i, '');
+    return `${index + 1}. Return "${entry.id}" ONLY when ${whenClause}`;
+  })
+  .join('\n')}
+${
+  rawVegaChartTypes.length + 1
+}. Return "none" for Vega-Lite charts (bars, lines, facets, scatter, heatmap, gantt, …) and for unsupported Raw Vega diagrams (network, chord, …).
+${
+  rawVegaChartTypes.length + 2
+}. Do NOT return "sunburst" for Lens treemap/pie/donut requests unless the user explicitly asks for a sunburst.
+${
+  rawVegaChartTypes.length + 3
+}. Do NOT return "radar" for pie/donut/radial-bar requests unless the user explicitly asks for a radar or spider chart.
+${
+  rawVegaChartTypes.length + 4
+}. Do NOT return "sankey" for ordinary bar/line breakdowns unless the user asks for Sankey, flow, or alluvial.
+${rawVegaChartTypes.length + 5}. Only return ids from the allowlist or "none".`,
   ],
   [
     'human',

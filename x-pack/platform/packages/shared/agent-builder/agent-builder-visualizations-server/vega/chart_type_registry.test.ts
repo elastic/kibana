@@ -56,7 +56,7 @@ describe('chartTypeRegistry (Raw Vega)', () => {
   it('formats catalog chart rules with heading and bullets', () => {
     const rules = catalogChartRules('sunburst');
     expect(rules).toContain('SUNBURST RULES:');
-    expect(rules).toContain('- Expect a Parent–child table');
+    expect(rules).toContain('- Use the Parent–child columns');
   });
 });
 

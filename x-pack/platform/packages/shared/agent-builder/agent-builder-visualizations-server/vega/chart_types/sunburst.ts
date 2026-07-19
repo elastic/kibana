@@ -76,7 +76,7 @@ export const chartType: RawVegaChartTypeEntry = {
     config: {
       rulesHeading: 'SUNBURST RULES',
       perChartTypeRules: [
-        'Expect a Parent–child table with id / parent / name / value (or clear aliases present in <columns>). Exactly one root (parent null); every other parent id must exist as an id row — otherwise stratify fails with "missing: <id>" / "multiple roots" and partition cannot run.',
+        'Use the Parent–child columns from <columns> (id / parent / name / value or aliases). ES|QL generation owns the single-root / resolvable-parent shape.',
         `Pipeline: source → stratify(key=id, parentKey=parent) → partition(field=value) → arc marks. Put both transforms on the same derived dataset that sources "${CANONICAL_ESQL_SOURCE_NAME}".`,
         'Built-in width/height signals for layout (e.g. partition size, arc x/y) are fine.',
       ],
@@ -85,7 +85,7 @@ export const chartType: RawVegaChartTypeEntry = {
   },
   example: {
     description:
-      'Static radial hierarchy: Parent–child table (parent rows AND leaves — every parent id must exist as an id) → `stratify` + `partition` → `arc` marks. Bind the Canonical ES|QL source named `source`; do not add Kibana interaction signals.',
+      'Radial hierarchy skeleton: Parent–child table → `stratify` + `partition` → `arc` marks on Canonical source `source`.',
     load: () => import('./sunburst').then((module) => module.spec),
   },
   disclosedFallbackContext: SUNBURST_DISCLOSED_FALLBACK_CONTEXT,

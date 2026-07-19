@@ -63,13 +63,10 @@ export const chartType: RawVegaChartTypeEntry = {
     config: {
       rulesHeading: 'SANKEY / FLOW RULES',
       perChartTypeRules: [
-        `Expect a two-stack flow table with stk1 / stk2 / size (or clear aliases in <columns>). Prefer ≥${SANKEY_MIN_FLOWS} flows when data allows.`,
-        `Follow the Elastic Kibana Sankey pattern (static slice — NO click-to-filter signals):\n  1. Canonical source "${CANONICAL_ESQL_SOURCE_NAME}" with the ES|QL url.\n  2. Derived "nodes": formula key=stk1+stk2 → fold stk1/stk2 into stack/grpId → stack by stack on size → yc midpoint.\n  3. Derived "groups": aggregate nodes by stack+grpId → stack totals → scale y0/y1 to screen.\n  4. Derived "destinationNodes" (filter stack==stk2) and "edges" (filter stk1, lookup target, linkpath diagonal, strokeWidth).\n  5. Marks: path (edges), rect (groups), text (labels inward toward the center). Bottom axis with stackNames (Source / Destination).`,
-        'RESPONSIVE LAYOUT (required — labels must stay inside the panel):\n  - Set padding: { left: 8, right: 8, top: 8, bottom: 28 } so the bottom axis is not clipped.\n  - x band scale: paddingOuter ~0.12 and paddingInner ~0.9 so stacks sit inset from the edges.\n  - Place group text labels INSIDE (toward center): left stack at band + 6 (align left); right stack at band - 6 (align right). Never place labels outside the stacks toward the panel edge.\n  - Hide labels when the group height is < ~13px.',
-        'Do NOT add groupSelector / groupHover click signals or "show all" buttons.',
-        'NEVER set top-level root "encode" x/y; the panel sizes the view.',
+        `Use stk1 / stk2 / size columns from <columns> (or aliases). Prefer ≥${SANKEY_MIN_FLOWS} flows when data allows — ES|QL generation owns the table shape.`,
+        `Follow the Elastic Kibana Sankey pattern:\n  1. Canonical source "${CANONICAL_ESQL_SOURCE_NAME}" with the ES|QL url.\n  2. Derived "nodes": formula key=stk1+stk2 → fold stk1/stk2 into stack/grpId → stack by stack on size → yc midpoint.\n  3. Derived "groups": aggregate nodes by stack+grpId → stack totals → scale y0/y1 to screen.\n  4. Derived "destinationNodes" (filter stack==stk2) and "edges" (filter stk1, lookup target, linkpath diagonal, strokeWidth).\n  5. Marks: path (edges), rect (groups), text (labels inward toward the center). Bottom axis with stackNames (Source / Destination).`,
+        'Sankey layout: padding { left: 8, right: 8, top: 8, bottom: 28 }; x band paddingOuter ~0.12 / paddingInner ~0.9; labels inside stacks (left: band+6 align left; right: band-6 align right); hide labels when group height < ~13px.',
         'Y SCALE (critical — wrong domain blanks the chart): MUST be\n  `{ "name": "y", "type": "linear", "range": "height", "nice": true, "zero": true, "domain": { "data": "nodes", "field": "y1" } }`.\n  Never `domain: [0, 1]` or any fixed numeric interval — stack totals are real counts/sums, not unit fractions.',
-        'EXPRESSIONS: always lowercase helpers — scale(, bandwidth(, domain(, range(. Never Scale( / Bandwidth(.',
         'TOOLTIPS: ASCII only in signal strings (use " -> ", not unicode arrows).',
       ],
       esqlAdditionalInstructions,
@@ -77,7 +74,7 @@ export const chartType: RawVegaChartTypeEntry = {
   },
   example: {
     description:
-      'Static two-stack Sankey: stk1/stk2/size flow rows → fold+stack nodes → groups + linkpath edges → path/rect/text. Use range "category" for Kibana theme colors and padding so axis/stack labels stay inside the panel. Bind the Canonical ES|QL source named `source`; do not add click-to-filter signals.',
+      'Two-stack Sankey skeleton: stk1/stk2/size → fold+stack nodes → groups + linkpath edges → path/rect/text on Canonical source `source`.',
     load: () => import('./sankey').then((module) => module.spec),
   },
   disclosedFallbackContext: SANKEY_DISCLOSED_FALLBACK_CONTEXT,

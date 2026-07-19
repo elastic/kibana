@@ -18,19 +18,19 @@ import {
 } from '@kbn/agent-builder-visualizations-common';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
+  ESQL_TOOLS_GROUNDING_ONLY_GUIDANCE,
+  GROUND_INDEX_AGENT_GUIDANCE,
   NEVER_HAND_AUTHOR_VEGA_GUIDANCE,
+  RENDERER_VEGA_SCHEMA_DESCRIBE,
+  RENDERER_VEGA_WHEN_GUIDANCE,
   VEGA_SCOPE_AGENT_GUIDANCE,
   buildLensConfig,
   buildVegaConfig,
   formatRawVegaAllowlist,
-  formatRawVegaAllowlistCompact,
-  formatRawVegaCatalogIds,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
 
 const rawVegaAllowlist = formatRawVegaAllowlist();
-const rawVegaAllowlistCompact = formatRawVegaAllowlistCompact();
-const rawVegaCatalogIds = formatRawVegaCatalogIds();
 
 /**
  * Pull the prior Lens config out of an existing attachment, when it is a Lens
@@ -65,12 +65,7 @@ const createVisualizationSchema = z.object({
     .describe(
       '(optional) ID of an existing visualization attachment to update. If provided, the tool will read the existing configuration and modify it based on the query.'
     ),
-  renderer: z
-    .enum(['lens', 'vega'])
-    .optional()
-    .describe(
-      `(optional) "lens" (default) or "vega". Pass "vega" for Vega/Vega-Lite or allowlisted Raw Vega (${rawVegaAllowlistCompact}); required for ${rawVegaCatalogIds}. Ignored on edits (keeps the existing renderer).`
-    ),
+  renderer: z.enum(['lens', 'vega']).optional().describe(RENDERER_VEGA_SCHEMA_DESCRIBE),
   chartType: z
     .nativeEnum(SupportedChartType)
     .optional()
@@ -92,13 +87,13 @@ export const createVisualizationTool = (): BuiltinToolDefinition<
   return {
     id: platformCoreTools.createVisualization,
     type: ToolType.builtin,
-    description: `REQUIRED tool for creating or updating visualizations from natural language (Lens or Vega-family). Generates ES|QL, authors/validates the spec, and stores an attachment.
-
-Pass \`renderer: "vega"\` for Vega / Vega-Lite / allowlisted Raw Vega (${rawVegaAllowlist}) — required for ${rawVegaCatalogIds}; do not omit. The tool picks Vega-Lite vs Raw Vega from the query. Default is Lens (${Object.values(
+    description: `REQUIRED tool for creating or updating visualizations from natural language (Lens or Vega-family, including allowlisted Raw Vega: ${rawVegaAllowlist}). Generates ES|QL, authors/validates the spec, and stores an attachment. Default renderer is Lens (${Object.values(
       SupportedChartType
-    ).join(', ')}). Edits keep the existing renderer.
+    ).join(', ')}).
 
-${NEVER_HAND_AUTHOR_VEGA_GUIDANCE} Do not substitute generate_esql + execute_esql (grounding only).
+${RENDERER_VEGA_WHEN_GUIDANCE}
+
+${NEVER_HAND_AUTHOR_VEGA_GUIDANCE} ${ESQL_TOOLS_GROUNDING_ONLY_GUIDANCE}
 
 ${VEGA_SCOPE_AGENT_GUIDANCE}
 
@@ -108,7 +103,7 @@ This tool will:
 3. Generate and validate the Lens or Vega visualization
 4. Store the result as an attachment
 
-Ground first: make sure the target index exists and every field you reference is real before calling this tool. If you omit "index" the tool auto-discovers one, but that fails when the referenced fields are invented or absent from the cluster (do NOT assume APM/metrics schemas are present). For multi-panel requests, resolve the index once up front and pass the same "index" to every call rather than firing several index-less calls in parallel.`,
+${GROUND_INDEX_AGENT_GUIDANCE}`,
     schema: createVisualizationSchema,
     tags: [],
     handler: async (

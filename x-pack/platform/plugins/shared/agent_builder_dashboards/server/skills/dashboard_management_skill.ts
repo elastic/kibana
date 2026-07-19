@@ -6,7 +6,10 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { formatRawVegaAllowlistCompact } from '@kbn/agent-builder-visualizations-server';
+import {
+  DASHBOARD_SKILL_DEFER_STANDALONE_GUIDANCE,
+  formatRawVegaAllowlistCompact,
+} from '@kbn/agent-builder-visualizations-server';
 import { generateDashboardTool } from '../tools';
 import { dashboardGeneration } from './generation_guidance';
 import { kibanaRendering } from './rendering_guidance';
@@ -28,7 +31,7 @@ Use this skill when:
 - A request involves dashboard metadata, markdown, panel, or section changes.
 
 Do **not** use this skill when:
-- The user asks for a **standalone** visualization (no dashboard mentioned). Use the visualization-creation skill instead.
+- ${DASHBOARD_SKILL_DEFER_STANDALONE_GUIDANCE}
 - The user needs help exploring data, fields, or query logic.
 
 ${dashboardGeneration.guidance}

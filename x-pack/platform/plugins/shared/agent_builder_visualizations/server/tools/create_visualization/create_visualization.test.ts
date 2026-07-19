@@ -16,9 +16,11 @@ jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildVegaConfig: jest.fn(),
   NEVER_HAND_AUTHOR_VEGA_GUIDANCE: 'Do NOT hand-author Vega/Vega-Lite JSON.',
   VEGA_SCOPE_AGENT_GUIDANCE: 'Scope — Vega-Lite plus allowlisted Raw Vega.',
+  RENDERER_VEGA_WHEN_GUIDANCE: 'Pass renderer: "vega" for Vega-family charts.',
+  RENDERER_VEGA_SCHEMA_DESCRIBE: '(optional) "lens" or "vega".',
+  ESQL_TOOLS_GROUNDING_ONLY_GUIDANCE: 'Do not substitute generate_esql.',
+  GROUND_INDEX_AGENT_GUIDANCE: 'Ground the target index first.',
   formatRawVegaAllowlist: () => 'sunburst / hierarchy, radar / spider, sankey / flow',
-  formatRawVegaAllowlistCompact: () => 'sunburst/hierarchy, radar/spider, sankey/flow',
-  formatRawVegaCatalogIds: () => 'sunburst, radar, sankey',
 }));
 
 const mockBuildLens = buildLensConfig as jest.Mock;

@@ -12,7 +12,12 @@ import {
   VEGA_VIS_TYPE,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
-import { sanitizePanelVegaSpec } from '@kbn/agent-builder-visualizations-server';
+import {
+  DASHBOARD_PANEL_ESQL_SCHEMA_DESCRIBE,
+  DASHBOARD_VIS_CONFIG_SCHEMA_DESCRIBE,
+  RENDERER_VEGA_SCHEMA_DESCRIBE,
+  sanitizePanelVegaSpec,
+} from '@kbn/agent-builder-visualizations-server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
@@ -130,9 +135,7 @@ export const visPanelConfigInputSchema = z.object({
   source: z.literal('config'),
   type: z.literal('vis'),
   grid: panelGridSchema,
-  config: visPanelConfigSchema.describe(
-    'Already-resolved visualization config, passed by value from a visualization attachment\'s `visualization` field: either a Lens API config (has a top-level `type`) or a Vega config (`{ spec }`). For Vega, copy `visualization.spec` verbatim as a JSON object string — never re-stringify/double-encode it and never rewrite Vega expressions. Do not hand-build a config for a new visualization here — use source: "request" instead.'
-  ),
+  config: visPanelConfigSchema.describe(DASHBOARD_VIS_CONFIG_SCHEMA_DESCRIBE),
 });
 
 /**
@@ -152,12 +155,7 @@ export const panelRequestSchema = z.object({
     .string()
     .max(2048)
     .describe('A natural language query describing the desired visualization.'),
-  renderer: z
-    .enum(['lens', 'vega'])
-    .optional()
-    .describe(
-      '(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-family visualizations (Vega-Lite by default, or allowlisted Raw Vega such as sunburst, radar, and sankey) — small multiples/faceting, layered or combination charts, scatter/bubble plots, sunburst/hierarchy, radar/spider, sankey/flow, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Ignored when editing an existing panel (edits keep the existing renderer).'
-    ),
+  renderer: z.enum(['lens', 'vega']).optional().describe(RENDERER_VEGA_SCHEMA_DESCRIBE),
   index: z
     .string()
     .max(256)
@@ -171,13 +169,7 @@ export const panelRequestSchema = z.object({
     .describe(
       '(optional) The type of chart to create as indicated by the user. If not provided, the LLM will suggest the best chart type.'
     ),
-  esql: z
-    .string()
-    .max(4096)
-    .optional()
-    .describe(
-      '(optional) A validated ES|QL query from a prior tool result or explicit user input. Omit this field when composing new visualizations — the tool generates the query from the natural language query. NEVER write or invent an ES|QL query yourself.'
-    ),
+  esql: z.string().max(4096).optional().describe(DASHBOARD_PANEL_ESQL_SCHEMA_DESCRIBE),
 });
 
 export type PanelRequestInput = z.infer<typeof panelRequestSchema>;

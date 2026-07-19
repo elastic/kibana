@@ -60,7 +60,7 @@ describe('createAuthorVegaSpecPrompt', () => {
     expect(text).toContain('linear-closed');
     expect(text).toContain('width/2');
     expect(text).toContain('height/2');
-    expect(text).toContain('NEVER set top-level "encode"');
+    expect(text).toContain('NEVER set top-level root "encode"');
     expect(text).toContain('NEVER use autosize "none"');
     expect(text).toContain('min(width, height) / 2 - 40');
   });
@@ -186,7 +186,7 @@ describe('radarEsqlAdditionalInstructions', () => {
     expect(radarEsqlAdditionalInstructions).toContain('`key`');
     expect(radarEsqlAdditionalInstructions).toContain('`value`');
     expect(radarEsqlAdditionalInstructions).toContain('`series`');
-    expect(radarEsqlAdditionalInstructions).toContain('At least 3 distinct');
+    expect(radarEsqlAdditionalInstructions).toContain('at least 3 distinct');
     expect(radarEsqlAdditionalInstructions).toContain('INLINE STATS');
     expect(radarEsqlAdditionalInstructions).toContain('NEVER write');
   });
@@ -197,7 +197,7 @@ describe('sankeyEsqlAdditionalInstructions', () => {
     expect(sankeyEsqlAdditionalInstructions).toContain('`stk1`');
     expect(sankeyEsqlAdditionalInstructions).toContain('`stk2`');
     expect(sankeyEsqlAdditionalInstructions).toContain('`size`');
-    expect(sankeyEsqlAdditionalInstructions).toContain('At least 2 flow');
+    expect(sankeyEsqlAdditionalInstructions).toContain('at least 2 flow');
   });
 });
 
@@ -213,10 +213,8 @@ describe('createAuthorVegaSpecPrompt sankey', () => {
     expect(text).toContain('SANKEY / FLOW RULES');
     expect(text).toContain('linkpath');
     expect(text).toContain('STATIC DIAGRAM ONLY');
-    expect(text).toContain('groupSelector');
     expect(text).toContain('range: "category"');
     expect(text).toContain('padding');
-    expect(text).toContain('INSIDE');
     expect(text).toContain('Never Scale(');
     expect(text).toContain('ASCII only');
     expect(text).toContain('domain": { "data": "nodes", "field": "y1" }');

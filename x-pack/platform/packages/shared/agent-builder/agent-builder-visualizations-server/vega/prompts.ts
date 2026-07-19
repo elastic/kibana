@@ -62,6 +62,27 @@ TITLE RULES:
 DOTS IN FIELD NAMES:
 - If a name in <columns> still contains a dot (e.g. "geo.dest"), backslash-escape every dot in "field" strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']). Do not invent a rename here — the ES|QL query is already fixed.`;
 
+/** Raw Vega authoring rules shared across allowlisted catalogs (not restated per chart). */
+const sharedRawVegaAuthoringRules = `STATIC DIAGRAM ONLY:
+- Do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
+
+EXPRESSIONS:
+- Always lowercase helpers — scale(, bandwidth(, domain(, range(, cos(, sin(. Never Scale( / Bandwidth(.
+
+RAW VEGA LAYOUT:
+- NEVER set top-level root "encode" x/y; center with width/2 and height/2 in mark signals when needed. NEVER use autosize "none".`;
+
+const authorResponseEnvelope = (dialectLabel: string): string =>
+  `IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. Use this shape — "title" is the Kibana visualization / panel title, and "spec" is the ${dialectLabel} specification (no top-level "title" inside "spec"):
+\`\`\`json
+{
+  "title": "Concise panel title",
+  "spec": {
+    // ${dialectLabel} specification
+  }
+}
+\`\`\``;
+
 const createVegaLiteAuthorPrompt = ({
   nlQuery,
   esqlQuery,
@@ -144,15 +165,7 @@ Your task is to author the visualization specification for the following request
 ${nlQuery}
 </user_query>
 
-IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. Use this shape — "title" is the Kibana visualization / panel title, and "spec" is the Vega-Lite specification (no top-level "title" inside "spec"):
-\`\`\`json
-{
-  "title": "Concise panel title",
-  "spec": {
-    // Vega-Lite v6 specification
-  }
-}
-\`\`\`
+${authorResponseEnvelope('Vega-Lite v6')}
 
 ${additionalContext ?? ''}`,
     ],
@@ -212,8 +225,7 @@ Columns available in the data (reference these EXACT names):
 ${formatColumns(columns)}
 </columns>
 
-STATIC DIAGRAM ONLY:
-- Do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
+${sharedRawVegaAuthoringRules}
 
 ${catalogChartRules(catalogId)}
 
@@ -225,15 +237,7 @@ Your task is to author the visualization specification for the following request
 ${nlQuery}
 </user_query>
 
-IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. Use this shape — "title" is the Kibana visualization / panel title, and "spec" is the Raw Vega specification:
-\`\`\`json
-{
-  "title": "Concise panel title",
-  "spec": {
-    // Raw Vega v5 specification (no top-level "title")
-  }
-}
-\`\`\`
+${authorResponseEnvelope('Raw Vega v5')}
 
 ${additionalContext ?? ''}`,
     ],

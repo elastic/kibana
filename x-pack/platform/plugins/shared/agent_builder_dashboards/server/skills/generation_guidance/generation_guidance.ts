@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DASHBOARD_NEW_VIS_PANEL_GUIDANCE } from '@kbn/agent-builder-visualizations-server';
+import { DASHBOARD_PANEL_INPUTS_GUIDANCE } from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
@@ -34,16 +34,9 @@ For an existing dashboard:
 
 ## Panel Inputs
 
-${DASHBOARD_NEW_VIS_PANEL_GUIDANCE}
-- Ground the index/fields first (list indices + mapping), then put \`index\` on each \`source: "request"\` panel. Omit \`esql\` unless you already have a validated query — the dashboard tool generates ES|QL / Vega internally.
-- Use \`source: "config"\` only for content you have **already** resolved earlier (an existing visualization attachment you must reuse, or markdown). Prefer \`source: "request"\` for anything new. The generation tool never reads an attachment store, so a \`config\` payload must be supplied by value.
-- If you must reuse an existing Vega visualization attachment via \`source: "config"\`, pass \`config: { "spec": "<verbatim visualization.spec>" }\` — copy the string character-for-character; never double-encode or rewrite expressions.
+${DASHBOARD_PANEL_INPUTS_GUIDANCE}
 
 ${dashboardDesignGuidancePrompt}
-
-## ES|QL
-
-Omit the \`esql\` field on visualization panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`.
 
 ## Controls
 
