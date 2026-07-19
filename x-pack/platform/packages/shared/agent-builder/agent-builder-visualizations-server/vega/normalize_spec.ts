@@ -297,13 +297,12 @@ const buildRawVegaDataArray = ({
 };
 
 /**
- * Sequential / continuous schemes we keep. Everything else on an ordinal color
- * scale (category10/20, tableau, hex lists, scheme "elastic", …) is rewritten
- * to Vega's named `category` range. Kibana's Vega parser maps
+ * Sequential / continuous schemes we keep on color scales. Unknown named
+ * schemes (category10/20, tableau, "elastic", invented names like "pinkblue",
+ * …) are rewritten to Vega's named `category` range. Kibana's Vega parser maps
  * `config.range.category` to the theme palette (see
- * visTypeVega vega_parser._setDefaultColors). Do NOT store
- * `scheme: "elastic"` — that name is registered only in the Kibana renderer,
- * not in stock Vega / our headless validator.
+ * visTypeVega vega_parser._setDefaultColors). Explicit hex arrays are kept so
+ * a user-requested custom palette survives normalize.
  */
 const KEEP_COLOR_SCHEMES = new Set([
   'blues',
@@ -325,6 +324,9 @@ export const KIBANA_CATEGORY_COLOR_RANGE = 'category';
 
 const isHexColor = (value: unknown): boolean =>
   typeof value === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(value);
+
+const isHexColorRange = (range: unknown): range is string[] =>
+  Array.isArray(range) && range.length > 0 && range.every(isHexColor);
 
 /**
  * Vega expression helpers are lowercase. Models often emit `Scale(` (from
@@ -371,8 +373,10 @@ export const rewriteRawVegaExpressions = (
 };
 
 /**
- * Force categorical Raw Vega color scales onto Kibana's theme category palette.
- * Models often emit category10/category20 / scheme "elastic" despite prompts.
+ * Default categorical Raw Vega color scales onto Kibana's theme category
+ * palette. Preserve explicit hex arrays (user-requested custom palettes).
+ * Rewrite unknown named schemes — including a mistaken top-level `scheme`
+ * property (models emit `"scheme": "pinkblue"` instead of `range.scheme`).
  */
 export const rewriteRawVegaColorScales = (
   spec: Record<string, unknown>
@@ -392,12 +396,23 @@ export const rewriteRawVegaColorScales = (
       return scale;
     }
 
-    const { range } = entry;
+    const { range, scheme: topLevelScheme, ...rest } = entry;
+
+    // Mistaken top-level `scheme` (valid Vega puts scheme under `range`).
+    if (typeof topLevelScheme === 'string') {
+      const scheme = topLevelScheme.toLowerCase();
+      if (KEEP_COLOR_SCHEMES.has(scheme)) {
+        return { ...rest, range: { scheme: topLevelScheme } };
+      }
+      return { ...rest, range: KIBANA_CATEGORY_COLOR_RANGE };
+    }
+
     if (range === KIBANA_CATEGORY_COLOR_RANGE) {
       return scale;
     }
-    if (Array.isArray(range) && range.length > 0 && range.every(isHexColor)) {
-      return { ...entry, range: KIBANA_CATEGORY_COLOR_RANGE };
+    // User-requested custom palette — keep hex arrays as authored.
+    if (isHexColorRange(range)) {
+      return scale;
     }
     if (range && typeof range === 'object' && !Array.isArray(range)) {
       const scheme = (range as { scheme?: unknown }).scheme;

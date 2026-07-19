@@ -17,14 +17,9 @@ import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { normalizeVegaSpec } from './normalize_spec';
 import { validateVegaSpec } from './vega_validator';
-import {
-  createAuthorVegaSpecPrompt,
-  radarEsqlAdditionalInstructions,
-  sankeyEsqlAdditionalInstructions,
-  sunburstEsqlAdditionalInstructions,
-  vegaEsqlAdditionalInstructions,
-} from './prompts';
+import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
 import { buildReferenceExamplesBlock } from './reference_examples';
+import { catalogEsqlAdditionalInstructions } from './reference_examples/catalog_prompts';
 import { resolveDialectGate } from './dialect_gate';
 import {
   disclosedFallbackContextForCatalog,
@@ -211,16 +206,10 @@ export const createVegaGraph = async (
     if (dialect !== 'vega') {
       return vegaEsqlAdditionalInstructions;
     }
-    if (catalogId === 'sunburst') {
-      return `${vegaEsqlAdditionalInstructions}\n${sunburstEsqlAdditionalInstructions}`;
-    }
-    if (catalogId === 'radar') {
-      return `${vegaEsqlAdditionalInstructions}\n${radarEsqlAdditionalInstructions}`;
-    }
-    if (catalogId === 'sankey') {
-      return `${vegaEsqlAdditionalInstructions}\n${sankeyEsqlAdditionalInstructions}`;
-    }
-    return vegaEsqlAdditionalInstructions;
+    const catalogInstructions = catalogEsqlAdditionalInstructions(catalogId);
+    return catalogInstructions
+      ? `${vegaEsqlAdditionalInstructions}\n${catalogInstructions}`
+      : vegaEsqlAdditionalInstructions;
   };
 
   // Resolve the ES|QL query and its result columns. A query may reference

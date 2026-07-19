@@ -365,6 +365,54 @@ describe('normalizeVegaSpec', () => {
       expect(scales[2].range).toBe('height');
     });
 
+    it('rewrites invented top-level scheme names onto the Kibana category range', () => {
+      // Models often emit `"scheme": "pinkblue"` on the scale (invalid) instead of
+      // range.scheme; that fails headless validation with "Unrecognized scheme name".
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          scales: [
+            {
+              name: 'color',
+              type: 'ordinal',
+              scheme: 'pinkblue',
+              domain: { data: 'source', field: 'stk1' },
+            },
+          ],
+          marks: [{ type: 'rect' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      const scales = result.scales as Array<Record<string, unknown>>;
+      expect(scales[0].range).toBe('category');
+      expect(scales[0]).not.toHaveProperty('scheme');
+    });
+
+    it('keeps an explicit hex color range (user-requested custom palette)', () => {
+      const pinks = ['#FFB6D9', '#FF69B4', '#FF1493'];
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          scales: [
+            {
+              name: 'color',
+              type: 'ordinal',
+              range: pinks,
+              domain: { data: 'source', field: 'stk1' },
+            },
+          ],
+          marks: [{ type: 'rect' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      const scales = result.scales as Array<Record<string, unknown>>;
+      expect(scales[0].range).toEqual(pinks);
+    });
+
     it('rewrites mistyped Scale( helpers and unicode arrows in expressions', () => {
       const result = normalizeVegaSpec({
         spec: {

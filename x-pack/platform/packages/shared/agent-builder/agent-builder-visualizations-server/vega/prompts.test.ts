@@ -6,13 +6,10 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import {
-  createAuthorVegaSpecPrompt,
-  radarEsqlAdditionalInstructions,
-  sankeyEsqlAdditionalInstructions,
-  sunburstEsqlAdditionalInstructions,
-  vegaEsqlAdditionalInstructions,
-} from './prompts';
+import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
+import { esqlAdditionalInstructions as radarEsqlAdditionalInstructions } from './reference_examples/radar';
+import { esqlAdditionalInstructions as sankeyEsqlAdditionalInstructions } from './reference_examples/sankey';
+import { esqlAdditionalInstructions as sunburstEsqlAdditionalInstructions } from './reference_examples/sunburst';
 
 const systemText = (nlQuery: string): string => {
   const [system] = createAuthorVegaSpecPrompt({ nlQuery, esqlQuery: 'FROM logs-*' });
@@ -81,12 +78,29 @@ describe('createAuthorVegaSpecPrompt', () => {
     expect(text).toContain('set explicit "width" and "height" INSIDE the inner "spec"');
   });
 
-  it('defers colors to the Kibana theme instead of hardcoding them', () => {
-    const text = systemText('any chart');
-    expect(text).toContain('Do NOT hardcode colors');
-    expect(text).toContain('theme-aware Elastic palette');
-    // Categorical color should not set a scheme/range (that would override the theme).
-    expect(text).toContain('do NOT set a "scheme", "range"');
+  it('shares theme/color, minimal-spec, layout, and title rules across dialects', () => {
+    const vegaLite = systemText('any chart');
+    const [rawSystem] = createAuthorVegaSpecPrompt({
+      nlQuery: 'sunburst of categories',
+      esqlQuery: 'FROM logs-*',
+      dialect: 'vega',
+      catalogId: 'sunburst',
+    });
+    const rawVega = String((rawSystem as [string, string])[1]);
+
+    for (const text of [vegaLite, rawVega]) {
+      expect(text).toContain('theme-aware Elastic palette');
+      expect(text).toContain('USER OVERRIDE');
+      expect(text).toContain('Never invent named color schemes');
+      expect(text).toContain('explicit hex array');
+      expect(text).toContain('Keep the spec minimal');
+      expect(text).toContain('DO NOT set top-level "width" or "height"');
+      expect(text).toContain('NEVER put a top-level "title" on the "spec"');
+      expect(text).toContain('DOTS IN FIELD NAMES');
+    }
+
+    // Vega-Lite still has encoding-specific default color guidance.
+    expect(vegaLite).toContain('do NOT set a "scheme", "range"');
   });
 
   it('includes axis-readability guidance (labelLimit, time-axis, title:null)', () => {

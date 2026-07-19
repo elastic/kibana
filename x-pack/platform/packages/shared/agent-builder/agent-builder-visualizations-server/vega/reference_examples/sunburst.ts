@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CANONICAL_ESQL_SOURCE_NAME } from '../dialect';
+
 /**
  * Curated Raw Vega sunburst skeleton. Normalize rebinds the Canonical ES|QL
  * source; the model must adapt field names to the Parent–child table columns.
@@ -13,6 +15,58 @@
  * The example query emits ONE synthetic root, mid-level parents, and leaves
  * (via FORK) so Vega `stratify` never hits "missing: <id>" or "multiple roots".
  */
+
+/** Authoring rules injected into the Raw Vega prompt when catalog is sunburst. */
+export const chartRules = `SUNBURST RULES:
+- Expect a Parent–child table with id / parent / name / value (or clear aliases present in <columns>). Exactly one root (parent null); every other parent id must exist as an id row — otherwise stratify fails with "missing: <id>" / "multiple roots" and partition cannot run.
+- Pipeline: source → stratify(key=id, parentKey=parent) → partition(field=value) → arc marks. Put both transforms on the same derived dataset that sources "${CANONICAL_ESQL_SOURCE_NAME}".
+- STATIC DIAGRAM ONLY: do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
+- Built-in width/height signals for layout (e.g. partition size, arc x/y) are fine.
+- DO NOT set top-level "width" or "height"; the panel sizes the view.
+- COLOR (default): categorical colors use range: "category" (Kibana theme); sequential schemes ("blues") are OK only for continuous depth/value. Never invented scheme names or scheme "elastic".
+- COLOR (user override): only when the user asks for a specific palette, set range to an explicit hex array — do not invent a scheme name.`;
+
+/** Extra ES|QL instructions when generating a Parent–child table for sunburst. */
+export const esqlAdditionalInstructions = `
+## Sunburst hierarchy rows (required)
+
+This query feeds a Raw Vega sunburst. Emit a flat Parent–child table the Vega \`stratify\` transform can consume:
+- \`id\`: unique node id (keyword/string)
+- \`parent\`: parent node id (same type); use real \`null\` (not the string "null") for the single root only
+- \`name\`: display label for the node
+- \`value\`: non-negative numeric measure used for partition sizing (typically a COUNT or SUM)
+
+CRITICAL — stratify integrity:
+- Exactly ONE root row: \`id = "root"\`, \`parent = null\`. Multiple category rows with \`parent = null\` → Vega errors with \`multiple roots\` (then partition fails).
+- Do NOT set \`parent = null\` on OriginCountry/category rows. Point those at \`parent = "root"\`.
+- For EVERY non-null \`parent\` value, there MUST be another row whose \`id\` equals that parent (avoid \`missing: X\`).
+- Leaf-only tables are INVALID. Always emit: 1 synthetic root + mid-level parents + leaves.
+- Use \`parent = null\` (literal null), never \`TO_STRING(null)\` (that becomes the string "null").
+
+Recommended pattern (e.g. OriginCountry → DestCountry) with a single synthetic root:
+
+\`\`\`esql
+FROM kibana_sample_data_flights
+| WHERE OriginCountry IS NOT NULL AND DestCountry IS NOT NULL
+| FORK
+  (STATS value = COUNT()
+   | EVAL id = "root", parent = null, name = "All"
+   | KEEP id, parent, name, value)
+  (STATS value = COUNT() BY OriginCountry
+   | EVAL id = OriginCountry, parent = "root", name = OriginCountry
+   | KEEP id, parent, name, value)
+  (STATS value = COUNT() BY OriginCountry, DestCountry
+   | SORT value DESC
+   | LIMIT 40
+   | EVAL id = CONCAT(OriginCountry, "::", DestCountry), parent = OriginCountry, name = DestCountry
+   | KEEP id, parent, name, value)
+\`\`\`
+
+Rules:
+- Prefer aggregating to a modest number of leaf nodes (SORT + LIMIT) so the sunburst stays readable.
+- Keep column names exactly \`id\`, \`parent\`, \`name\`, and \`value\` when possible.
+- Still obey the Vega time-range and dotted-field rules above when the index is time-based.`;
+
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',
   data: [

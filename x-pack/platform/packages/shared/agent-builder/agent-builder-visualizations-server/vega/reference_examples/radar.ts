@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CANONICAL_ESQL_SOURCE_NAME, RADAR_MIN_KEYS } from '../dialect';
+
 /**
  * Curated Raw Vega radar / spider skeleton. Normalize rebinds the Canonical
  * ES|QL source; the model must adapt field names to the key / value (/ series)
@@ -15,6 +17,92 @@
  * offsets the chart into a corner. Reserve label space in the radius signal
  * instead of relying on padding.
  */
+
+/** Authoring rules injected into the Raw Vega prompt when catalog is radar. */
+export const chartRules = `RADAR / SPIDER RULES:
+- Expect a key / value table (optional series). Need ≥${RADAR_MIN_KEYS} distinct keys.
+- Scales: angular (point, domain = key, range [-PI, PI]) and radial (linear, domain = value, range [0, radius]).
+- MARKS ARRAY SHAPE (critical — malformed marks blank the chart):
+  - Top-level "marks" is a FLAT array of sibling mark objects: [group|line, rule, text, line, …].
+  - The faceted series "group" is ONE object whose nested "marks" contains ONLY the closed polygon line(s).
+  - Grid "rule", spoke "text", and outer "line" are SIBLINGS of that group — never extra properties on the group after its nested marks close.
+  - Copy the reference example mark list structure; do not merge siblings into one object.
+- Marks content: grid rules + labels from aggregated keys; closed polygon via line marks with interpolate "linear-closed".
+  - Multi-series: facet the Canonical source by series (groupby series) and draw one closed line per facet.
+  - Single-series (no series column): one closed line from "${CANONICAL_ESQL_SOURCE_NAME}" (no facet required).
+- RESPONSIVE LAYOUT (required — fill and center the Kibana panel):
+  - NEVER set top-level "encode" x/y (official Vega radar does this; in Kibana it shoves the chart into a corner).
+  - NEVER use autosize "none" — Kibana disables panel sizing and the chart goes blank.
+  - Center in EVERY mark signal: width/2 + …, height/2 + … (same idea as sunburst arc x/y).
+  - radius signal: min(width, height) / 2 - 40 (reserves space for spoke labels inside the panel).
+  - Labels at width/2 + (radius + 8) * cos(…), height/2 + (radius + 8) * sin(…).
+  - Prefer short key labels (LIMIT axes); avoid large fontSize.
+- EXPRESSIONS: always lowercase helpers — scale(, cos(, sin(. Never Scale(.
+- STATIC DIAGRAM ONLY: do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
+- DO NOT set top-level "width" or "height"; the panel sizes the view.
+- COLOR (default): categorical series range: "category" (Kibana theme). Never category10 or invented scheme names. Never scheme "elastic".
+- COLOR (user override): only when the user asks for a specific palette, set range to an explicit hex array — do not invent a scheme name.`;
+
+/** Extra ES|QL instructions when generating a key/value table for radar. */
+export const esqlAdditionalInstructions = `
+## Radar / spider rows (required)
+
+This query feeds a Raw Vega radar chart. Emit a flat table with:
+- \`key\`: axis / spoke label (keyword/string) — the multivariate dimension
+- \`value\`: numeric measure on that axis (COUNT, SUM, AVG, …)
+- \`series\` (optional): series / group label when comparing multiple radars on one chart
+
+CRITICAL — radar integrity:
+- At least ${RADAR_MIN_KEYS} distinct \`key\` values (a radar with fewer spokes is not useful).
+- \`value\` must be numeric for every row.
+- Prefer a modest number of axes (about 5–8) so labels stay readable — SORT + LIMIT when needed.
+- For a single series, either omit \`series\` or set a constant (e.g. \`EVAL series = "all"\`).
+- For multi-series, emit one row per (series, key) pair with the same key set across series when possible.
+
+Recommended single-series pattern:
+
+\`\`\`esql
+FROM kibana_sample_data_flights
+| WHERE OriginCountry IS NOT NULL
+| STATS value = COUNT() BY key = OriginCountry
+| SORT value DESC
+| LIMIT 6
+\`\`\`
+
+Recommended multi-series pattern (same keys across series — one measure):
+
+\`\`\`esql
+FROM kibana_sample_data_flights
+| WHERE OriginCountry IS NOT NULL AND Carrier IS NOT NULL
+| STATS value = COUNT() BY series = Carrier, key = OriginCountry
+| SORT value DESC
+| LIMIT 24
+\`\`\`
+
+To keep only series that appear on ≥${RADAR_MIN_KEYS} keys, use INLINE STATS on the
+already-aggregated grain (do **not** COUNT_DISTINCT the same field you group by):
+
+\`\`\`esql
+FROM kibana_sample_data_flights
+| WHERE OriginCountry IS NOT NULL AND Carrier IS NOT NULL
+| STATS value = COUNT() BY series = Carrier, key = OriginCountry
+| INLINE STATS n_keys = COUNT_DISTINCT(key) BY series
+| WHERE n_keys >= ${RADAR_MIN_KEYS}
+| DROP n_keys
+| SORT value DESC
+| LIMIT 40
+\`\`\`
+
+Rules:
+- Keep column names exactly \`key\`, \`value\`, and optional \`series\` when possible.
+- Prefer ONE numeric measure. Do NOT use FORK / wide unpivots that mix units
+  (e.g. flight time vs ticket price vs distance) unless you also normalize each
+  key to a 0–1 scale — mixed units make a useless radar and often break layout.
+- NEVER write \`STATS … COUNT_DISTINCT(OriginCountry) BY … key = OriginCountry\` (or the
+  same field for both). That distinct count is always 1, so \`WHERE … >= 3\` returns
+  **zero rows** and the chart goes blank (Infinite extent warnings).
+- Still obey the Vega time-range and dotted-field rules above when the index is time-based.`;
+
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',
   // Leave room for spoke labels inside the panel (no top-level encode/padding).
