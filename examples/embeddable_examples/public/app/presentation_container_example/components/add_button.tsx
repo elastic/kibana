@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
-import type { IconType } from '@elastic/eui';
+import type { EuiContextMenuItemIcon, IconType } from '@elastic/eui';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -22,7 +22,7 @@ import { of } from 'rxjs';
  * EuiContextMenuItem accepts a string icon name or a React element.
  * Action getIconType() returns IconType, which may be a component — instantiate those.
  */
-export function toContextMenuIcon(iconType: IconType | undefined): ReactNode {
+export function toContextMenuIcon(iconType: IconType | undefined): EuiContextMenuItemIcon {
   if (iconType == null) {
     return 'empty';
   }

@@ -41,9 +41,7 @@
       "group_by": [
         {
           "operation": "terms",
-          "fields": [
-            "geo.dest"
-          ],
+          "fields": ["geo.dest"],
           "limit": 5,
           "other_bucket": {
             "include_documents_without_field": false
