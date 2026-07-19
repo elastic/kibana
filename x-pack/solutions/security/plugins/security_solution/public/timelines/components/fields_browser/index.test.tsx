@@ -8,7 +8,7 @@
 import React from 'react';
 import type { RenderHookResult } from '@testing-library/react';
 import { act, render, renderHook, waitFor } from '@testing-library/react';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import type { FieldEditorActionsRef, UseFieldBrowserOptions, UseFieldBrowserOptionsProps } from '.';
 import { useFieldBrowserOptions } from '.';
 import type { Start } from '@kbn/data-view-field-editor-plugin/public/mocks';
