@@ -259,21 +259,22 @@ describe('executeDashboardOperations', () => {
     );
     const doubleEncoded = JSON.stringify(inner).slice(1, -1);
 
-    const result = await executeDashboardOperations({
-      dashboardData: { title: 'Test dashboard', description: 'Description', panels: [] },
-      operations: [
+    // Tool boundary parses/heals once via schema transform; execution stores that result.
+    const operation = dashboardOperationSchema.parse({
+      operation: 'add_panels',
+      panels: [
         {
-          operation: 'add_panels',
-          panels: [
-            {
-              source: 'config',
-              type: 'vis',
-              config: { spec: doubleEncoded },
-              grid: { x: 0, y: 0, w: 48, h: 14 },
-            },
-          ],
+          source: 'config',
+          type: 'vis',
+          config: { spec: doubleEncoded },
+          grid: { x: 0, y: 0, w: 48, h: 14 },
         },
       ],
+    });
+
+    const result = await executeDashboardOperations({
+      dashboardData: { title: 'Test dashboard', description: 'Description', panels: [] },
+      operations: [operation],
       logger,
     });
 
@@ -1958,6 +1959,41 @@ describe('executeDashboardOperations', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it('returns the healed Vega spec from schema parse (single sanitize)', () => {
+    const inner = JSON.stringify(
+      {
+        marks: [
+          {
+            type: 'text',
+            encode: { update: { x: { signal: "Scale('x', datum.stack)" } } },
+          },
+        ],
+      },
+      null,
+      2
+    );
+    const doubleEncoded = JSON.stringify(inner).slice(1, -1);
+    const result = dashboardOperationSchema.safeParse({
+      operation: 'add_panels',
+      panels: [
+        {
+          source: 'config',
+          type: 'vis',
+          config: { spec: doubleEncoded },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+    const panel = result.data.panels[0] as { config: { spec: string } };
+    const stored = JSON.parse(panel.config.spec);
+    expect(stored.marks[0].encode.update.x.signal).toBe("scale('x', datum.stack)");
   });
 });
 

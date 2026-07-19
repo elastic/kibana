@@ -52,9 +52,11 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
   renderer?: VisualizationRenderer;
 }
 
-const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((ctx) => {
-  const config = ctx.value;
-
+/**
+ * Validate by-value vis config and, for Vega `{ spec }`, heal once here so
+ * `buildPanelContent` can store the parsed result without re-sanitizing.
+ */
+const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).transform((config, ctx) => {
   if ('visualization' in config) {
     ctx.issues.push({
       code: 'custom',
@@ -62,7 +64,7 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
         'config looks like a whole visualization attachment. Pass only its `visualization` field (a Lens API config, or a Vega `{ spec }` config), not the entire attachment.',
       input: config,
     });
-    return;
+    return z.NEVER;
   }
 
   // A Vega visualization's `visualization` field is a `{ spec }` config: accept
@@ -77,7 +79,7 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
         message: 'Vega panel config must provide a non-empty `spec` string.',
         input: config,
       });
-      return;
+      return z.NEVER;
     }
     if (spec.length > MAX_VEGA_SPEC_LENGTH) {
       ctx.issues.push({
@@ -85,7 +87,7 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
         message: `Vega panel \`spec\` must be at most ${MAX_VEGA_SPEC_LENGTH} characters.`,
         input: config,
       });
-      return;
+      return z.NEVER;
     }
     const sanitized = sanitizePanelVegaSpec(spec);
     if (!sanitized.ok) {
@@ -94,7 +96,7 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
         message: sanitized.message,
         input: config,
       });
-      return;
+      return z.NEVER;
     }
     if (sanitized.spec.length > MAX_VEGA_SPEC_LENGTH) {
       ctx.issues.push({
@@ -102,8 +104,9 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
         message: `Vega panel \`spec\` must be at most ${MAX_VEGA_SPEC_LENGTH} characters.`,
         input: config,
       });
+      return z.NEVER;
     }
-    return;
+    return { ...config, spec: sanitized.spec };
   }
 
   if (!('type' in config)) {
@@ -113,7 +116,10 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
         'config is neither a Lens API config (missing a top-level `type`) nor a Vega config (missing `spec`). Pass the `visualization` field read from a visualization attachment.',
       input: config,
     });
+    return z.NEVER;
   }
+
+  return config;
 });
 
 /**
@@ -208,13 +214,10 @@ export const visPanelDefinition = definePanelType({
     if (typeof rawSpec !== 'string') {
       return { type: LENS_EMBEDDABLE_TYPE, config };
     }
-    // Schema already rejected unsanitizable specs; re-run so the stored panel
-    // keeps the healed JSON (unwrap double-encoding, rewrite Scale(, etc.).
-    const sanitized = sanitizePanelVegaSpec(rawSpec);
-    const spec = sanitized.ok ? sanitized.spec : rawSpec;
+    // Schema transform already sanitized `config.spec` (heal + expression rewrite).
     return {
       type: VEGA_VIS_TYPE,
-      config: { ...(config as Record<string, unknown>), spec },
+      config,
     };
   },
 });
