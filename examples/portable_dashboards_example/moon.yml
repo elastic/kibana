@@ -30,7 +30,6 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/control-group-renderer'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/presentation-util-plugin'
   - '@kbn/as-code-filters-schema'
 tags:
   - plugin

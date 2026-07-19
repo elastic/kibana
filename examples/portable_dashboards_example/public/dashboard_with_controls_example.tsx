@@ -13,9 +13,28 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { controlGroupStateBuilder } from '@kbn/control-group-renderer';
+import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 import type { StartDeps } from './plugin';
+
+const toPinnedPanels = (
+  controlGroupState: Partial<ControlGroupRuntimeState>
+): DashboardState['pinned_panels'] => {
+  return Object.entries(controlGroupState.initialChildControlState ?? {})
+    .sort(([, controlA], [, controlB]) => controlA.order - controlB.order)
+    .map(([id, control]) => {
+      const { grow, order: _order, type, width, ...config } = control;
+      return {
+        id,
+        type,
+        ...(grow !== undefined ? { grow } : {}),
+        ...(width !== undefined ? { width } : {}),
+        config,
+      };
+    }) as DashboardState['pinned_panels'];
+};
 
 export const DashboardWithControlsExample = ({
   dataView,
@@ -55,7 +74,7 @@ export const DashboardWithControlsExample = ({
       <EuiPanel hasBorder={true}>
         <DashboardRenderer
           getCreationOptions={async (): Promise<DashboardCreationOptions> => {
-            const controlGroupState = {};
+            const controlGroupState: Partial<ControlGroupRuntimeState> = {};
             await controlGroupStateBuilder.addDataControlFromField(
               controlGroupState,
               {
@@ -81,9 +100,9 @@ export const DashboardWithControlsExample = ({
 
             return {
               getInitialInput: () => ({
-                timeRange: { from: 'now-30d', to: 'now' },
+                time_range: { from: 'now-30d', to: 'now' },
                 viewMode: 'view',
-                controlGroupState,
+                pinned_panels: toPinnedPanels(controlGroupState),
               }),
             };
           }}
