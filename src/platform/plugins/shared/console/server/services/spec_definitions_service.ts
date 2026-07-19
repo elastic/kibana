@@ -133,7 +133,17 @@ export class SpecDefinitionsService {
       const overrideFile = overrideFiles.find((f) => basename(f) === basename(file));
       const loadedDefinition: EndpointDefinition = JSON.parse(readFileSync(file, 'utf8'));
       if (overrideFile) {
-        merge(loadedDefinition, JSON.parse(readFileSync(overrideFile, 'utf8')));
+        const loadedOverride: EndpointDefinition = JSON.parse(readFileSync(overrideFile, 'utf8'));
+        // hand-written body rules are curated as complete definitions: replace
+        // the generated rules wholesale instead of deep-merging, otherwise
+        // shape mismatches (e.g. generated array vs override object) produce
+        // hybrid rules that drop curated keys during JSON serialization
+        Object.entries(loadedOverride).forEach(([endpointName, endpointDescription]) => {
+          if (endpointDescription.data_autocomplete_rules && loadedDefinition[endpointName]) {
+            delete loadedDefinition[endpointName].data_autocomplete_rules;
+          }
+        });
+        merge(loadedDefinition, loadedOverride);
       }
       this.addToJsonDefinitions({ loadedDefinition, jsonDefinitions });
     });

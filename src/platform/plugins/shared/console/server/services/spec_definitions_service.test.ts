@@ -216,6 +216,55 @@ describe('SpecDefinitionsService', () => {
     });
   });
 
+  it('replaces generated data_autocomplete_rules wholesale when the override defines its own', () => {
+    mockGlobbySync.mockImplementation((pattern) => {
+      if (pattern.includes('generated')) {
+        return ['/generated/endpoint1.json'];
+      }
+      if (pattern.includes('overrides')) {
+        return ['/overrides/endpoint1.json'];
+      }
+      return [];
+    });
+
+    mockReadFileSync.mockImplementation((path) => {
+      if (path.toString() === '/generated/endpoint1.json') {
+        return JSON.stringify(
+          getMockEndpoint({
+            endpointName: 'endpoint1',
+            data_autocomplete_rules: {
+              // generated shape conflicts with the curated one (array vs object)
+              actions: [{ add: { alias: '' } }],
+              generated_only_param: '',
+            },
+          })
+        );
+      }
+      if (path.toString() === '/overrides/endpoint1.json') {
+        return JSON.stringify(
+          getMockEndpoint({
+            endpointName: 'endpoint1',
+            data_autocomplete_rules: {
+              __template: [{ add: { index: 'test1', alias: 'alias1' } }],
+              actions: { __any_of: [{ add: {} }] },
+            },
+          })
+        );
+      }
+      return '';
+    });
+    const specDefinitionsService = new SpecDefinitionsService();
+    specDefinitionsService.start({
+      endpointsAvailability: 'stack',
+    });
+    const endpoints = specDefinitionsService.asJson().endpoints;
+    // curated rules are authoritative: no deep-merge leftovers from the generated rules
+    expect(endpoints.endpoint1.data_autocomplete_rules).toEqual({
+      __template: [{ add: { index: 'test1', alias: 'alias1' } }],
+      actions: { __any_of: [{ add: {} }] },
+    });
+  });
+
   it('loads manual definitions if any', () => {
     mockGlobbySync.mockImplementation((pattern) => {
       if (pattern.includes('manual')) {
