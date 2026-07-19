@@ -92,6 +92,21 @@ test.describe(
       await expect(validationAccordion).toContainText('No validation errors');
     });
 
+    test('should render step type icons from data URLs', async ({ pageObjects }) => {
+      await pageObjects.workflowEditor.gotoNewWorkflow();
+      await pageObjects.workflowEditor.setYamlEditorValue(
+        getDummyWorkflowYaml('Step Type Icon Test')
+      );
+
+      await expect
+        .poll(async () => {
+          const { backgroundImage, maskImage } =
+            await pageObjects.workflowEditor.getStepTypeIconStyles('console');
+          return backgroundImage.includes('data:image') || maskImage.includes('data:image');
+        })
+        .toBe(true);
+    });
+
     test('should show step type autocompletion suggestions', async ({ pageObjects, page }) => {
       await pageObjects.workflowEditor.gotoNewWorkflow();
       const workflowName = 'Autocomplete Test';

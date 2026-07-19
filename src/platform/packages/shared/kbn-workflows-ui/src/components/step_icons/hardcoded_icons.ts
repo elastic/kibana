@@ -9,7 +9,9 @@
 
 import beta from './icons/beta.svg';
 import bolt from './icons/bolt.svg';
+import branch from './icons/branch.svg';
 import clock from './icons/clock.svg';
+import console from './icons/console.svg';
 import database from './icons/database.svg';
 import email from './icons/email.svg';
 import fail from './icons/fail.svg';
@@ -17,10 +19,12 @@ import flask from './icons/flask.svg';
 import glyph from './icons/glyph.svg';
 import elasticsearchLogoSvg from './icons/logo_elasticsearch.svg';
 import kibanaLogoSvg from './icons/logo_kibana.svg';
+import slackLogoSvg from './icons/logo_slack.svg';
 import output from './icons/output.svg';
 import parallel from './icons/parallel.svg';
 import plugs from './icons/plugs.svg';
 import productStreamsWired from './icons/product_streams_wired.svg';
+import refresh from './icons/refresh.svg';
 import sparkles from './icons/sparkles.svg';
 import union from './icons/union.svg';
 import user from './icons/user.svg';
@@ -54,4 +58,19 @@ export const HardcodedIcons: Record<string, string> = {
   flask,
   beta,
   default: plugs,
+};
+
+/**
+ * Data URL variants for contexts that render icons through CSS rather than EuiIcon.
+ * Keep EUI icon names in HardcodedIcons for React views, but never pass those names
+ * directly to background-image or mask-image.
+ */
+export const HardcodedIconDataUrls: Record<string, string> = {
+  ...HardcodedIcons,
+  '.slack': slackLogoSvg,
+  '.slack_api': slackLogoSvg,
+  console,
+  foreach: refresh,
+  while: refresh,
+  if: branch,
 };
