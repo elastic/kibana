@@ -12,7 +12,11 @@ const STK1_COLUMN_ALIASES = ['stk1', 'source', 'from', 'origin'] as const;
 const STK2_COLUMN_ALIASES = ['stk2', 'dest', 'destination', 'to', 'target'] as const;
 const FLOW_SIZE_COLUMN_ALIASES = ['size', 'value', 'count', 'doc_count'] as const;
 
-/** Minimum flow rows for a readable two-stack Sankey. */
+/**
+ * Soft guidance for ES|QL authoring (readable two-stack Sankey). Not enforced by
+ * integrity — validation runs against a fixed sample time window that may be
+ * sparse even when a wider live range has enough flows.
+ */
 export const SANKEY_MIN_FLOWS = 2;
 
 /**
@@ -33,17 +37,17 @@ export const hasSankeyColumns = (columns: EsqlEsqlColumnInfo[] | undefined): boo
 export type SankeyIntegrityResult =
   | { ok: true }
   | { ok: false; reason: 'missing_columns' }
-  | { ok: false; reason: 'too_few_flows'; flowCount: number }
   | { ok: false; reason: 'non_numeric_size' }
   | { ok: false; reason: 'blank_endpoints' };
 
 /**
- * Cheap post-query check for a two-stack Sankey-ready table:
+ * Structural post-query check for a two-stack Sankey-ready table:
  * - stk1 + stk2 + size columns,
- * - at least {@link SANKEY_MIN_FLOWS} rows when data exists,
- * - numeric size and non-blank endpoints on every row.
+ * - numeric size and non-blank endpoints on every row when rows exist.
  *
- * Empty result sets pass vacuously (nothing to violate).
+ * Empty / low-cardinality tables pass: integrity runs against a fixed sample
+ * time window (`now-24h`), not the live dashboard range, so sparse results do
+ * not prove the query shape is wrong.
  */
 export const validateSankeyRows = ({
   columns,
@@ -56,16 +60,13 @@ export const validateSankeyRows = ({
     return { ok: false, reason: 'missing_columns' };
   }
 
-  const stk1Index = findColumnIndex(columns, STK1_COLUMN_ALIASES);
-  const stk2Index = findColumnIndex(columns, STK2_COLUMN_ALIASES);
-  const sizeIndex = findColumnIndex(columns, FLOW_SIZE_COLUMN_ALIASES);
   if (!values?.length) {
     return { ok: true };
   }
 
-  if (values.length < SANKEY_MIN_FLOWS) {
-    return { ok: false, reason: 'too_few_flows', flowCount: values.length };
-  }
+  const stk1Index = findColumnIndex(columns, STK1_COLUMN_ALIASES);
+  const stk2Index = findColumnIndex(columns, STK2_COLUMN_ALIASES);
+  const sizeIndex = findColumnIndex(columns, FLOW_SIZE_COLUMN_ALIASES);
 
   let sawNonNumeric = false;
   let sawBlankEndpoint = false;
@@ -111,12 +112,6 @@ export const formatSankeyIntegrityError = (result: SankeyIntegrityResult): strin
         'ES|QL result is missing stk1/stk2/size columns required for a Sankey flow table. ' +
         'Emit columns named stk1, stk2, and size (source→destination flows).'
       );
-    case 'too_few_flows':
-      return (
-        `Sankey integrity failed: found only ${result.flowCount} flow row(s); ` +
-        `need at least ${SANKEY_MIN_FLOWS} source→destination pairs. Aggregate more combinations ` +
-        `or raise LIMIT.`
-      );
     case 'non_numeric_size':
       return (
         'Sankey integrity failed: size column contains non-numeric cells. ' +
@@ -134,4 +129,4 @@ export const formatSankeyIntegrityError = (result: SankeyIntegrityResult): strin
 
 /** Message attached when Sankey falls back to a Vega-Lite approximation. */
 export const SANKEY_DISCLOSED_FALLBACK_CONTEXT = `DISCLOSED FALLBACK:
-The request asked for a Sankey / flow chart, but the resolved ES|QL result is not a usable flow table (needs stk1 + stk2 + numeric size and at least ${SANKEY_MIN_FLOWS} flow rows). Author a Vega-Lite approximation of the request instead, and do NOT claim the result is a Sankey.`;
+The request asked for a Sankey / flow chart, but the resolved ES|QL result is not a usable flow table (needs stk1 + stk2 + numeric size). Author a Vega-Lite approximation of the request instead, and do NOT claim the result is a Sankey.`;

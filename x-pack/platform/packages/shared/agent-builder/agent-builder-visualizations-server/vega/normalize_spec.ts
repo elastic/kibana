@@ -348,10 +348,7 @@ const EXPRESSION_STRING_KEYS = new Set(['signal', 'expr', 'test', 'update', 'ini
  * Walk a Raw Vega spec and rewrite common invalid expression helper casing
  * inside signal/expr strings (and signal `update`/`init` definitions).
  */
-export const rewriteRawVegaExpressions = (
-  value: unknown,
-  parentKey?: string
-): unknown => {
+export const rewriteRawVegaExpressions = (value: unknown, parentKey?: string): unknown => {
   if (typeof value === 'string') {
     if (parentKey && EXPRESSION_STRING_KEYS.has(parentKey)) {
       return rewriteVegaExpressionString(value);
@@ -486,6 +483,40 @@ export const rewriteSankeyYScaleDomain = (
   });
 
   return changed ? { ...spec, scales: nextScales } : spec;
+};
+
+/**
+ * Harden a stored Vega panel spec without rebinding ES|QL (dashboard
+ * `source: "config"` path). Applies the same layout / color / Sankey /
+ * expression / field-escape fixes as {@link normalizeVegaSpec}, but keeps the
+ * existing `data` urls. Does not run the headless validator.
+ *
+ * Returns a new object; the input is not mutated.
+ */
+export const hardenStoredVegaSpec = (spec: Record<string, unknown>): Record<string, unknown> => {
+  const dialect = dialectFromSchema(spec.$schema);
+
+  if (dialect === 'vega') {
+    const { width, height, autosize, encode, $schema, ...rest } = spec;
+    const withColors = rewriteRawVegaColorScales({
+      ...rest,
+      $schema: VEGA_SCHEMA,
+    });
+    const withSankeyY = rewriteSankeyYScaleDomain(withColors);
+    return escapeVegaFieldReferences(
+      rewriteRawVegaExpressions(withSankeyY) as Record<string, unknown>
+    );
+  }
+
+  const { width, height, autosize, ...rest } = spec;
+  const normalized: Record<string, unknown> = {
+    ...rest,
+    $schema: VEGA_LITE_SCHEMA,
+    ...(isCompositeView(rest) ? {} : { autosize: { type: 'fit', contains: 'padding' } }),
+  };
+  return escapeVegaFieldReferences(
+    rewriteRawVegaExpressions(normalized) as Record<string, unknown>
+  );
 };
 
 /**

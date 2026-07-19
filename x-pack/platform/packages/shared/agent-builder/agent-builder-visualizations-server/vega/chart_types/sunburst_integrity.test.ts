@@ -54,7 +54,7 @@ describe('validateParentChildRows', () => {
     ).toEqual({ ok: true });
   });
 
-  it('passes vacuously when there are no rows', () => {
+  it('passes when there are no rows (sample time window may be empty)', () => {
     expect(validateParentChildRows({ columns, values: [] })).toEqual({ ok: true });
   });
 

@@ -28,7 +28,7 @@ describe('validateRadarRows', () => {
     expect(hasRadarColumns([{ name: 'key', type: 'keyword' }])).toBe(false);
   });
 
-  it('passes for ≥3 distinct keys with numeric values', () => {
+  it('passes for distinct keys with numeric values', () => {
     expect(
       validateRadarRows({
         columns,
@@ -41,17 +41,11 @@ describe('validateRadarRows', () => {
     ).toEqual({ ok: true });
   });
 
-  it('fails when there are no rows (empty tables blank the chart)', () => {
-    expect(validateRadarRows({ columns, values: [] })).toEqual({
-      ok: false,
-      reason: 'empty_result',
-    });
-    expect(formatRadarIntegrityError({ ok: false, reason: 'empty_result' })).toContain(
-      'COUNT_DISTINCT'
-    );
+  it('passes when there are no rows (sample time window may be empty)', () => {
+    expect(validateRadarRows({ columns, values: [] })).toEqual({ ok: true });
   });
 
-  it('fails when there are fewer than 3 distinct keys', () => {
+  it('passes when there are fewer than three distinct keys (cardinality is soft guidance)', () => {
     expect(
       validateRadarRows({
         columns,
@@ -60,7 +54,7 @@ describe('validateRadarRows', () => {
           ['B', 2],
         ],
       })
-    ).toEqual({ ok: false, reason: 'too_few_keys', keyCount: 2 });
+    ).toEqual({ ok: true });
   });
 
   it('fails when values are non-numeric', () => {
@@ -77,11 +71,11 @@ describe('validateRadarRows', () => {
   });
 
   it('formats radar regeneration errors', () => {
-    expect(formatRadarIntegrityError({ ok: false, reason: 'too_few_keys', keyCount: 1 })).toContain(
-      'at least 3'
-    );
     expect(formatRadarIntegrityError({ ok: false, reason: 'missing_columns' })).toContain(
       'key/value'
+    );
+    expect(formatRadarIntegrityError({ ok: false, reason: 'non_numeric_values' })).toContain(
+      'non-numeric'
     );
   });
 });

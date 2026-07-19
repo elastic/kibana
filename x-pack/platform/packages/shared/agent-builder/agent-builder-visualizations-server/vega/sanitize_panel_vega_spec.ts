@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rewriteRawVegaExpressions } from './normalize_spec';
+import { hardenStoredVegaSpec } from './normalize_spec';
 
 export type SanitizePanelVegaSpecResult =
   | { ok: true; spec: string }
@@ -44,10 +44,11 @@ const parseSpecObject = (spec: string): Record<string, unknown> | undefined => {
 };
 
 /**
- * Validate and lightly sanitize a by-value Vega panel `config.spec` string:
+ * Validate and harden a by-value Vega panel `config.spec` string:
  * - require a JSON object (Vega / Vega-Lite)
  * - heal one layer of accidental double-encoding from tool-call packing
- * - rewrite mistyped expression helpers (`Scale(` → `scale(`)
+ * - run {@link hardenStoredVegaSpec} (layout strip, color/Sankey fixes,
+ *   expression rewrite, field escaping) without rebinding ES|QL data urls
  *
  * Does not re-run the headless Vega validator (that already ran in
  * create_visualization). Returns a stable serialized object for panel storage.
@@ -72,6 +73,6 @@ export const sanitizePanelVegaSpec = (spec: string): SanitizePanelVegaSpecResult
     };
   }
 
-  const rewritten = rewriteRawVegaExpressions(parsed) as Record<string, unknown>;
-  return { ok: true, spec: JSON.stringify(rewritten) };
+  const hardened = hardenStoredVegaSpec(parsed);
+  return { ok: true, spec: JSON.stringify(hardened) };
 };

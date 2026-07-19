@@ -11,7 +11,11 @@ import { findColumnIndex } from './integrity_utils';
 const KEY_COLUMN_ALIASES = ['key', 'category', 'axis', 'dimension', 'spoke'] as const;
 const VALUE_COLUMN_ALIASES = ['value', 'metric', 'score', 'measure'] as const;
 
-/** Minimum distinct axis keys for a readable radar. */
+/**
+ * Soft guidance for ES|QL authoring (readable radar spokes). Not enforced by
+ * integrity — validation runs against a fixed sample time window that may be
+ * sparse even when a wider live range has enough keys.
+ */
 export const RADAR_MIN_KEYS = 3;
 
 /**
@@ -31,16 +35,16 @@ export const hasRadarColumns = (columns: EsqlEsqlColumnInfo[] | undefined): bool
 export type RadarIntegrityResult =
   | { ok: true }
   | { ok: false; reason: 'missing_columns' }
-  | { ok: false; reason: 'empty_result' }
-  | { ok: false; reason: 'too_few_keys'; keyCount: number }
   | { ok: false; reason: 'non_numeric_values' };
 
 /**
- * Cheap post-query check for a radar-ready table:
+ * Structural post-query check for a radar-ready table:
  * - `key` + `value` columns present,
- * - at least one result row (empty tables blank the chart / VL extents),
- * - at least {@link RADAR_MIN_KEYS} distinct keys,
- * - every non-null value is numeric.
+ * - every non-null value is numeric when rows exist.
+ *
+ * Empty / low-cardinality tables pass: integrity runs against a fixed sample
+ * time window (`now-24h`), not the live dashboard range, so sparse results do
+ * not prove the query shape is wrong.
  */
 export const validateRadarRows = ({
   columns,
@@ -53,33 +57,19 @@ export const validateRadarRows = ({
     return { ok: false, reason: 'missing_columns' };
   }
 
-  const keyIndex = findColumnIndex(columns, KEY_COLUMN_ALIASES);
-  const valueIndex = findColumnIndex(columns, VALUE_COLUMN_ALIASES);
   if (!values?.length) {
-    return { ok: false, reason: 'empty_result' };
+    return { ok: true };
   }
 
-  const keys = new Set<string>();
-  let sawNonNumeric = false;
+  const valueIndex = findColumnIndex(columns, VALUE_COLUMN_ALIASES);
   for (const row of values) {
-    const key = row?.[keyIndex];
-    if (key !== null && key !== undefined && key !== '') {
-      keys.add(String(key));
-    }
     const value = row?.[valueIndex];
     if (value === null || value === undefined || value === '') {
       continue;
     }
     if (typeof value !== 'number' || !Number.isFinite(value)) {
-      sawNonNumeric = true;
+      return { ok: false, reason: 'non_numeric_values' };
     }
-  }
-
-  if (keys.size < RADAR_MIN_KEYS) {
-    return { ok: false, reason: 'too_few_keys', keyCount: keys.size };
-  }
-  if (sawNonNumeric) {
-    return { ok: false, reason: 'non_numeric_values' };
   }
   return { ok: true };
 };
@@ -95,18 +85,6 @@ export const formatRadarIntegrityError = (result: RadarIntegrityResult): string 
         'ES|QL result is missing key/value columns required for a radar chart. ' +
         'Emit columns named key and value (optional series for multi-series radars).'
       );
-    case 'empty_result':
-      return (
-        'Radar integrity failed: ES|QL returned 0 rows. Remove filters that empty the table ' +
-        '(common bug: COUNT_DISTINCT(key) while also grouping BY key is always 1). ' +
-        'Use STATS value BY series, key then SORT/LIMIT — or INLINE STATS n_keys = COUNT_DISTINCT(key) BY series before filtering series.'
-      );
-    case 'too_few_keys':
-      return (
-        `Radar integrity failed: found only ${result.keyCount} distinct key(s); ` +
-        `need at least ${RADAR_MIN_KEYS} axis categories (spokes). Aggregate more dimensions ` +
-        `or use a categorical field with ≥${RADAR_MIN_KEYS} values.`
-      );
     case 'non_numeric_values':
       return (
         'Radar integrity failed: value column contains non-numeric cells. ' +
@@ -119,4 +97,4 @@ export const formatRadarIntegrityError = (result: RadarIntegrityResult): string 
 
 /** Message attached when Radar falls back to a Vega-Lite approximation. */
 export const RADAR_DISCLOSED_FALLBACK_CONTEXT = `DISCLOSED FALLBACK:
-The request asked for a radar / spider chart, but the resolved ES|QL result is not a usable radar table (needs key + numeric value columns and at least ${RADAR_MIN_KEYS} distinct axis keys). Author a Vega-Lite approximation of the request instead, and do NOT claim the result is a radar chart.`;
+The request asked for a radar / spider chart, but the resolved ES|QL result is not a usable radar table (needs key + numeric value columns). Author a Vega-Lite approximation of the request instead, and do NOT claim the result is a radar chart.`;

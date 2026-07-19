@@ -221,7 +221,11 @@ describe('createVegaGraph', () => {
         { name: 'name', type: 'keyword' },
         { name: 'value', type: 'long' },
       ],
-      values: [],
+      values: [
+        ['root', null, 'All', 10],
+        ['IT', 'root', 'Italy', 10],
+        ['IT::US', 'IT', 'US', 4],
+      ],
     } as Awaited<ReturnType<typeof executeEsql>>);
     invoke.mockResolvedValue(
       asCodeBlock({
@@ -377,7 +381,7 @@ describe('createVegaGraph', () => {
     expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('RADAR / SPIDER RULES');
   });
 
-  it('falls back to Vega-Lite with disclosure when radar has too few keys', async () => {
+  it('keeps Raw Vega radar when sample window has few keys (cardinality is soft)', async () => {
     classifyInvoke.mockResolvedValue({ catalogId: 'radar' });
     mockedExecuteEsql.mockResolvedValue({
       columns: [
@@ -389,8 +393,36 @@ describe('createVegaGraph', () => {
         ['B', 2],
       ],
     } as Awaited<ReturnType<typeof executeEsql>>);
+    invoke.mockResolvedValue(
+      asCodeBlock({
+        $schema: 'https://vega.github.io/schema/vega/v5.json',
+        data: [{ name: 'source' }],
+        marks: [{ type: 'line', from: { data: 'source' } }],
+      })
+    );
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.error).toBeNull();
+    expect(JSON.parse(state.spec!).$schema).toBe('https://vega.github.io/schema/vega/v5.json');
+    expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('RADAR / SPIDER RULES');
+  });
+
+  it('falls back to Vega-Lite with disclosure when radar values are non-numeric', async () => {
+    classifyInvoke.mockResolvedValue({ catalogId: 'radar' });
+    mockedExecuteEsql.mockResolvedValue({
+      columns: [
+        { name: 'key', type: 'keyword' },
+        { name: 'value', type: 'keyword' },
+      ],
+      values: [
+        ['A', 'x'],
+        ['B', 'y'],
+        ['C', 'z'],
+      ],
+    } as Awaited<ReturnType<typeof executeEsql>>);
     mockedGenerateEsql.mockResolvedValue({
-      query: 'FROM metrics-* | STATS value = COUNT() BY key = status | LIMIT 2',
+      query: 'FROM metrics-* | STATS value = COUNT() BY key = status',
     } as Awaited<ReturnType<typeof generateEsql>>);
     invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
 
@@ -444,7 +476,7 @@ describe('createVegaGraph', () => {
     expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('SANKEY / FLOW RULES');
   });
 
-  it('falls back to Vega-Lite with disclosure when sankey has too few flows', async () => {
+  it('keeps Raw Vega sankey when sample window has few flows (cardinality is soft)', async () => {
     classifyInvoke.mockResolvedValue({ catalogId: 'sankey' });
     mockedExecuteEsql.mockResolvedValue({
       columns: [
@@ -454,8 +486,40 @@ describe('createVegaGraph', () => {
       ],
       values: [['US', 'IT', 10]],
     } as Awaited<ReturnType<typeof executeEsql>>);
+    invoke.mockResolvedValue(
+      asCodeBlock({
+        $schema: 'https://vega.github.io/schema/vega/v5.json',
+        data: [
+          { name: 'source' },
+          { name: 'nodes', source: 'source' },
+          { name: 'edges', source: 'nodes' },
+        ],
+        marks: [{ type: 'path', from: { data: 'edges' } }],
+      })
+    );
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.error).toBeNull();
+    expect(JSON.parse(state.spec!).$schema).toBe('https://vega.github.io/schema/vega/v5.json');
+    expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('SANKEY / FLOW RULES');
+  });
+
+  it('falls back to Vega-Lite with disclosure when sankey endpoints are blank', async () => {
+    classifyInvoke.mockResolvedValue({ catalogId: 'sankey' });
+    mockedExecuteEsql.mockResolvedValue({
+      columns: [
+        { name: 'stk1', type: 'keyword' },
+        { name: 'stk2', type: 'keyword' },
+        { name: 'size', type: 'long' },
+      ],
+      values: [
+        ['US', 'IT', 10],
+        [null, 'JP', 4],
+      ],
+    } as Awaited<ReturnType<typeof executeEsql>>);
     mockedGenerateEsql.mockResolvedValue({
-      query: 'FROM metrics-* | STATS size = COUNT() BY stk1 = a, stk2 = b | LIMIT 1',
+      query: 'FROM metrics-* | STATS size = COUNT() BY stk1 = a, stk2 = b',
     } as Awaited<ReturnType<typeof generateEsql>>);
     invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
 

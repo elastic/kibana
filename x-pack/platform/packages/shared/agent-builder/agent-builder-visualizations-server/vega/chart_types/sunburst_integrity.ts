@@ -43,11 +43,13 @@ const isAbsentParent = (value: unknown): boolean =>
   (typeof value === 'string' && value.toLowerCase() === 'null');
 
 /**
- * Cheap post-query check for a Vega-stratify-ready hierarchy:
+ * Structural post-query check for a Vega-stratify-ready hierarchy:
  * - exactly one root row (`parent` null/empty),
  * - every non-null `parent` value also appears as some row's `id`.
  *
- * Empty result sets pass vacuously (nothing to violate).
+ * Empty result sets pass: integrity runs against a fixed sample time window
+ * (`now-24h`), not the live dashboard range, so no rows do not prove the query
+ * shape is wrong.
  */
 export const validateParentChildRows = ({
   columns,
@@ -147,4 +149,4 @@ export const formatMissingParentsError = (missingParents: string[]): string =>
 
 /** Message attached when Sunburst falls back to a Vega-Lite approximation. */
 export const SUNBURST_DISCLOSED_FALLBACK_CONTEXT = `DISCLOSED FALLBACK:
-The request asked for a sunburst / hierarchy chart, but the resolved ES|QL result is not a usable parent-child table (needs identity + parent columns, exactly one root, and every parent id present as a row). Author a Vega-Lite approximation of the request instead, and do NOT claim the result is a sunburst.`;
+The request asked for a sunburst / hierarchy chart, but the resolved ES|QL result is not a usable parent-child table (needs identity + parent columns, exactly one root when rows exist, and every parent id present as a row). Author a Vega-Lite approximation of the request instead, and do NOT claim the result is a sunburst.`;

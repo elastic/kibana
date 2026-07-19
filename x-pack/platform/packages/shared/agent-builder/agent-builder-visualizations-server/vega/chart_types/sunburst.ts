@@ -137,7 +137,7 @@ export const spec: Record<string, unknown> = {
       name: 'color',
       type: 'ordinal',
       domain: { data: 'tree', field: 'depth' },
-      range: { scheme: 'blues' },
+      range: 'category',
     },
   ],
   marks: [

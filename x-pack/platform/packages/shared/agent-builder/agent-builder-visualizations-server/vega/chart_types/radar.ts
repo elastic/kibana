@@ -33,9 +33,9 @@ This query feeds a Raw Vega radar chart. Emit a flat table with:
 - \`value\`: numeric measure on that axis (COUNT, SUM, AVG, …)
 - \`series\` (optional): series / group label when comparing multiple radars on one chart
 
-CRITICAL — radar integrity:
-- At least ${RADAR_MIN_KEYS} distinct \`key\` values (a radar with fewer spokes is not useful).
+CRITICAL — radar shape (structural; empty/sparse sample windows are OK):
 - \`value\` must be numeric for every row.
+- Aim for at least ${RADAR_MIN_KEYS} distinct \`key\` values when the data supports it (soft guidance — do not over-filter just to hit a count).
 - Prefer a modest number of axes (about 5–8) so labels stay readable — SORT + LIMIT when needed.
 - For a single series, either omit \`series\` or set a constant (e.g. \`EVAL series = "all"\`).
 - For multi-series, emit one row per (series, key) pair with the same key set across series when possible.
@@ -98,7 +98,7 @@ export const chartType: RawVegaChartTypeEntry = {
     config: {
       rulesHeading: 'RADAR / SPIDER RULES',
       perChartTypeRules: [
-        `Expect a key / value table (optional series). Need ≥${RADAR_MIN_KEYS} distinct keys.`,
+        `Expect a key / value table (optional series). Prefer ≥${RADAR_MIN_KEYS} distinct keys when data allows.`,
         'Scales: angular (point, domain = key, range [-PI, PI]) and radial (linear, domain = value, range [0, radius]).',
         'MARKS ARRAY SHAPE (critical — malformed marks blank the chart):\n  - Top-level "marks" is a FLAT array of sibling mark objects: [group|line, rule, text, line, …].\n  - The faceted series "group" is ONE object whose nested "marks" contains ONLY the closed polygon line(s).\n  - Grid "rule", spoke "text", and outer "line" are SIBLINGS of that group — never extra properties on the group after its nested marks close.\n  - Copy the reference example mark list structure; do not merge siblings into one object.',
         `Marks content: grid rules + labels from aggregated keys; closed polygon via line marks with interpolate "linear-closed".\n  - Multi-series: facet the Canonical source by series (groupby series) and draw one closed line per facet.\n  - Single-series (no series column): one closed line from "${CANONICAL_ESQL_SOURCE_NAME}" (no facet required).`,

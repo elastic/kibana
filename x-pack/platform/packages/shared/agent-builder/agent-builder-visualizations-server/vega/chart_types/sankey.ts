@@ -32,9 +32,9 @@ This query feeds a Raw Vega two-stack Sankey (source → destination flows). Emi
 - \`stk2\`: destination / right-stack category (keyword/string)
 - \`size\`: numeric flow weight (COUNT, SUM, …)
 
-CRITICAL — Sankey integrity:
-- At least ${SANKEY_MIN_FLOWS} flow rows (source→destination pairs).
+CRITICAL — Sankey shape (structural; empty/sparse sample windows are OK):
 - Filter null/empty endpoints before aggregating.
+- Aim for at least ${SANKEY_MIN_FLOWS} flow rows when the data supports it (soft guidance).
 - Prefer a modest number of flows (SORT size DESC + LIMIT ~20–40) so stacks stay readable.
 - Keep column names exactly \`stk1\`, \`stk2\`, and \`size\` when possible.
 
@@ -63,7 +63,7 @@ export const chartType: RawVegaChartTypeEntry = {
     config: {
       rulesHeading: 'SANKEY / FLOW RULES',
       perChartTypeRules: [
-        `Expect a two-stack flow table with stk1 / stk2 / size (or clear aliases in <columns>). Need ≥${SANKEY_MIN_FLOWS} flows.`,
+        `Expect a two-stack flow table with stk1 / stk2 / size (or clear aliases in <columns>). Prefer ≥${SANKEY_MIN_FLOWS} flows when data allows.`,
         `Follow the Elastic Kibana Sankey pattern (static slice — NO click-to-filter signals):\n  1. Canonical source "${CANONICAL_ESQL_SOURCE_NAME}" with the ES|QL url.\n  2. Derived "nodes": formula key=stk1+stk2 → fold stk1/stk2 into stack/grpId → stack by stack on size → yc midpoint.\n  3. Derived "groups": aggregate nodes by stack+grpId → stack totals → scale y0/y1 to screen.\n  4. Derived "destinationNodes" (filter stack==stk2) and "edges" (filter stk1, lookup target, linkpath diagonal, strokeWidth).\n  5. Marks: path (edges), rect (groups), text (labels inward toward the center). Bottom axis with stackNames (Source / Destination).`,
         'RESPONSIVE LAYOUT (required — labels must stay inside the panel):\n  - Set padding: { left: 8, right: 8, top: 8, bottom: 28 } so the bottom axis is not clipped.\n  - x band scale: paddingOuter ~0.12 and paddingInner ~0.9 so stacks sit inset from the edges.\n  - Place group text labels INSIDE (toward center): left stack at band + 6 (align left); right stack at band - 6 (align right). Never place labels outside the stacks toward the panel edge.\n  - Hide labels when the group height is < ~13px.',
         'Do NOT add groupSelector / groupHover click signals or "show all" buttons.',

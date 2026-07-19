@@ -30,7 +30,7 @@ describe('validateSankeyRows', () => {
     expect(hasSankeyColumns([{ name: 'stk1', type: 'keyword' }])).toBe(false);
   });
 
-  it('passes for ≥2 flows with numeric size', () => {
+  it('passes for flows with numeric size', () => {
     expect(
       validateSankeyRows({
         columns,
@@ -42,13 +42,17 @@ describe('validateSankeyRows', () => {
     ).toEqual({ ok: true });
   });
 
-  it('fails when there are fewer than 2 flows', () => {
+  it('passes when there is only one flow (cardinality is soft guidance)', () => {
     expect(
       validateSankeyRows({
         columns,
         values: [['US', 'IT', 10]],
       })
-    ).toEqual({ ok: false, reason: 'too_few_flows', flowCount: 1 });
+    ).toEqual({ ok: true });
+  });
+
+  it('passes when there are no rows (sample time window may be empty)', () => {
+    expect(validateSankeyRows({ columns, values: [] })).toEqual({ ok: true });
   });
 
   it('fails when endpoints are blank', () => {
@@ -63,12 +67,24 @@ describe('validateSankeyRows', () => {
     ).toEqual({ ok: false, reason: 'blank_endpoints' });
   });
 
+  it('fails when size is non-numeric', () => {
+    expect(
+      validateSankeyRows({
+        columns,
+        values: [
+          ['US', 'IT', 10],
+          ['US', 'JP', 'big'],
+        ],
+      })
+    ).toEqual({ ok: false, reason: 'non_numeric_size' });
+  });
+
   it('formats sankey regeneration errors', () => {
     expect(formatSankeyIntegrityError({ ok: false, reason: 'missing_columns' })).toContain(
       'stk1/stk2/size'
     );
-    expect(
-      formatSankeyIntegrityError({ ok: false, reason: 'too_few_flows', flowCount: 1 })
-    ).toContain('at least 2');
+    expect(formatSankeyIntegrityError({ ok: false, reason: 'blank_endpoints' })).toContain(
+      'blank stk1 or stk2'
+    );
   });
 });

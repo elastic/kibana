@@ -214,7 +214,7 @@ export const visPanelDefinition = definePanelType({
     if (typeof rawSpec !== 'string') {
       return { type: LENS_EMBEDDABLE_TYPE, config };
     }
-    // Schema transform already sanitized `config.spec` (heal + expression rewrite).
+    // Schema transform already sanitized `config.spec` (heal + hardenStoredVegaSpec).
     return {
       type: VEGA_VIS_TYPE,
       config,
