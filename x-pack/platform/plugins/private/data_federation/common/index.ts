@@ -17,6 +17,13 @@ export {
   UI_MANAGED_SECRET_FIELDS_BY_TYPE,
 } from './datasource_types';
 
+export {
+  isValidDataSourceName,
+  validateIndexNameRules,
+  type DataSourceNameValidationError,
+  type DataSourceNameValidationResult,
+} from './validate_data_source_name';
+
 export const PLUGIN_ID = 'data_federation';
 
 /** Base path for this plugin's HTTP APIs (internal). */
