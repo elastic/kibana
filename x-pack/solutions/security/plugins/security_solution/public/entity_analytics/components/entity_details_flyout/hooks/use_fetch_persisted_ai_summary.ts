@@ -17,7 +17,10 @@ export interface UseFetchPersistedAiSummaryResult {
   summary: PersistedEntityAiSummary | null;
   /** False when the user has no metadata read access — caller should offer on-demand generation. */
   canRead: boolean;
+  /** True only while the first fetch is in flight and no cached data exists yet. */
   isLoading: boolean;
+  /** True during any fetch, including background refetches */
+  isFetching: boolean;
   refetch: () => void;
 }
 
@@ -38,7 +41,7 @@ export const useFetchPersistedAiSummary = ({
 }): UseFetchPersistedAiSummaryResult => {
   const { fetchPersistedAiSummary } = useEntityAnalyticsRoutes();
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: [PERSISTED_AI_SUMMARY_QUERY_KEY, entityType, entityIdentifier],
     queryFn: ({ signal }) => fetchPersistedAiSummary({ entityType, entityIdentifier }, signal),
     enabled: !skip && Boolean(entityIdentifier),
@@ -49,8 +52,9 @@ export const useFetchPersistedAiSummary = ({
       summary: data?.summary ?? null,
       canRead: data?.canRead ?? false,
       isLoading,
+      isFetching,
       refetch,
     }),
-    [data?.summary, data?.canRead, isLoading, refetch]
+    [data?.summary, data?.canRead, isLoading, isFetching, refetch]
   );
 };

@@ -18,7 +18,7 @@ import { toAsCodeQuery } from '@kbn/as-code-shared-transforms';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { BehaviorSubject } from 'rxjs';
 import type {
   DashboardInitializationState,
