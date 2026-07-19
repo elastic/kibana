@@ -28,9 +28,9 @@ describe('config validation', () => {
             "enabled": true,
           },
           "casesRedesign": Object {
-            "details": false,
-            "list": false,
-            "settings": false,
+            "details": true,
+            "list": true,
+            "settings": true,
           },
           "chat": Object {
             "enabled": true,
