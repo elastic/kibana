@@ -15,6 +15,7 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { HEADER_HEIGHT, COMPACT_WIDTH_THRESHOLD } from './attachment_header';
 
 /**
@@ -34,7 +35,14 @@ export const AttachmentLoadingSkeleton: React.FC = () => {
   `;
 
   return (
-    <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
+    <EuiSplitPanel.Outer
+      grow
+      hasShadow={false}
+      hasBorder={true}
+      css={css`
+        border-radius: ${AB_PANEL_RADIUS}px;
+      `}
+    >
       <div ref={headerRef} style={{ width: '100%' }}>
         <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
           <EuiFlexGroup

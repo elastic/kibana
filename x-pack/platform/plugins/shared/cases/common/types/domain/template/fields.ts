@@ -18,6 +18,8 @@ export const FieldType = {
   CHECKBOX_GROUP: 'CHECKBOX_GROUP',
   RADIO_GROUP: 'RADIO_GROUP',
   USER_PICKER: 'USER_PICKER',
+  /** Display-only: renders static authored markdown as formatted, non-editable text (no value). */
+  MARKDOWN: 'MARKDOWN',
 } as const;
 
 export type FieldType = (typeof FieldType)[keyof typeof FieldType];
@@ -237,6 +239,11 @@ export const RadioGroupFieldSchema = BaseFieldSchema.extend({
  * `metadata.default` is an optional per-template override for the resolved field's default
  * value. It must satisfy the resolved field's control type — this is enforced when the
  * override is merged onto the inline field at resolve time.
+ *
+ * An explicit `null` is distinct from an absent override: `null` means "this template clears the
+ * field" (do not inherit the library default; the field stays empty), whereas an absent
+ * `metadata.default` inherits the library field's default. This is what the v1→v2 template
+ * migration emits for a legacy template custom field whose value was explicitly cleared.
  */
 export const RefFieldSchema = z.object({
   name: z.string().optional(),
@@ -244,13 +251,38 @@ export const RefFieldSchema = z.object({
   metadata: z
     .object({
       default: z
-        .union([z.string(), z.number(), z.boolean(), z.array(z.string()), UserPickerDefaultSchema])
+        .union([
+          z.string(),
+          z.number(),
+          z.boolean(),
+          z.array(z.string()),
+          UserPickerDefaultSchema,
+          z.null(),
+        ])
         .optional(),
     })
     .optional(),
 });
 
 export type RefField = z.infer<typeof RefFieldSchema>;
+
+/**
+ * Display-only field: renders the authored markdown in `metadata.content` as formatted,
+ * non-editable text (e.g. instructions). It is not an input — it holds no value, is never required,
+ * and is excluded from a case's stored `extended_fields` (see isDisplayOnlyField).
+ *
+ * `type` is defaulted to `keyword` (never authored) since a display-only field only inherits it
+ * from BaseFieldSchema to build a snake key, which is then rejected as an unknown extended field.
+ */
+export const MarkdownFieldSchema = BaseFieldSchema.extend({
+  control: z.literal(FieldType.MARKDOWN),
+  type: z.literal('keyword').default('keyword'),
+  metadata: z
+    .object({
+      content: z.string(),
+    })
+    .catchall(z.unknown()),
+});
 
 /**
  * This can be used to parse `fields` section in the YAML `definition` of the template.
@@ -266,6 +298,7 @@ export const FieldSchema = z.union([
   UserPickerFieldSchema,
   CheckboxGroupFieldSchema,
   RadioGroupFieldSchema,
+  MarkdownFieldSchema,
   RefFieldSchema,
 ]);
 
@@ -278,3 +311,10 @@ export const isRefField = (field: Field): field is RefField =>
   '$ref' in field && !('control' in field);
 
 export const isInlineField = (field: Field): field is InlineField => !isRefField(field);
+
+/**
+ * Display-only fields (e.g. MARKDOWN) render static content and hold no value: they are excluded
+ * from a case's stored `extended_fields` and from value validation.
+ */
+export const isDisplayOnlyField = (field: Field): boolean =>
+  isInlineField(field) && field.control === FieldType.MARKDOWN;
