@@ -73,6 +73,19 @@ describe('Update rule request schema, additional validation', () => {
     expect(errors).toEqual(['either "id" or "rule_id" must be set']);
   });
 
+  test('validates that the searched time range is not shorter than the rule interval', () => {
+    const schema: RuleUpdateProps = {
+      ...getUpdateRulesSchemaMock(),
+      interval: '5m',
+      from: 'now-7m',
+      to: 'now-5m',
+    };
+
+    expect(validateUpdateRuleProps(schema)).toEqual([
+      'the time range defined by "from" and "to" must be greater than or equal to "interval"',
+    ]);
+  });
+
   describe('threat mapping validation', () => {
     test('validates threat mapping fields', () => {
       const payload: RuleUpdateProps = {
