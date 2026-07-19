@@ -15,7 +15,6 @@
  */
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',
-  title: 'Hierarchy sunburst',
   data: [
     {
       name: 'source',

@@ -16,7 +16,6 @@
  */
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',
-  title: 'Sankey / flow',
   // Keep stack labels + bottom axis inside the Kibana panel (fit includes padding).
   padding: { left: 8, right: 8, top: 8, bottom: 28 },
   data: [

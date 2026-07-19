@@ -386,6 +386,10 @@ ${catalogChartRules(catalogId)}
 
 DOTS IN FIELD NAMES:
 - Escape dots in field strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']).
+
+TITLE RULES:
+- Always set response "title" to a clear, self-explanatory visualization / dashboard panel title.
+- NEVER put a top-level "title" on the Raw Vega "spec" — Kibana uses response "title" as the panel title, and an in-spec title duplicates it inside the chart.
 ${referenceExamples ?? ''}
 Your task is to author the visualization specification for the following request:
 
@@ -393,10 +397,13 @@ Your task is to author the visualization specification for the following request
 ${nlQuery}
 </user_query>
 
-IMPORTANT: Return ONLY the JSON specification wrapped in a markdown code block:
+IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. Use this shape — "title" is the Kibana visualization / panel title, and "spec" is the Raw Vega specification:
 \`\`\`json
 {
-  // your Raw Vega specification here
+  "title": "Concise panel title",
+  "spec": {
+    // Raw Vega v5 specification (no top-level "title")
+  }
 }
 \`\`\`
 

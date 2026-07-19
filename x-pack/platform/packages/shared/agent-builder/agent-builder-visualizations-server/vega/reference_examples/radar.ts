@@ -17,7 +17,6 @@
  */
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',
-  title: 'Radar / spider',
   // Leave room for spoke labels inside the panel (no top-level encode/padding).
   signals: [{ name: 'radius', update: 'min(width, height) / 2 - 40' }],
   data: [
