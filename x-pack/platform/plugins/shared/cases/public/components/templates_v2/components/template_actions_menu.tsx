@@ -6,14 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiCode,
-  EuiContextMenu,
-  EuiPopover,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiCode, EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
@@ -66,10 +59,11 @@ const SHORTCUT_HINT = isMac ? '⌘K' : 'Ctrl+K';
 const PANEL_WIDTH = 320;
 
 /**
- * A two-line menu row (bold title + subdued description), matching the layout of other Kibana
- * editor action menus. Icons are intentionally omitted (there is no field-type iconography). The
- * small vertical gap keeps the title and description from touching (they otherwise collapse when a
- * row is disabled and both lines grey out).
+ * A two-line menu row (bold title + subdued description). Built from phrasing-content elements only
+ * (`span`/`strong`/`small`) because `EuiContextMenuItem` renders `name` inside a `<button>`, where
+ * block elements are invalid — this keeps the markup valid for assistive tech. The description is
+ * part of the button's accessible name, so a screen reader reads e.g. "New field, Scaffold a custom
+ * field of any type". `textSubdued` meets EUI's AA contrast on the menu surface.
  */
 const MenuItemLabel: React.FC<{ title: string; description?: string }> = ({
   title,
@@ -78,13 +72,9 @@ const MenuItemLabel: React.FC<{ title: string; description?: string }> = ({
   const { euiTheme } = useEuiTheme();
   return (
     <span css={css({ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xxs })}>
-      <EuiText size="s">
-        <strong>{title}</strong>
-      </EuiText>
+      <strong>{title}</strong>
       {description ? (
-        <EuiText size="xs" color="subdued">
-          {description}
-        </EuiText>
+        <small css={css({ color: euiTheme.colors.textSubdued })}>{description}</small>
       ) : null}
     </span>
   );
@@ -216,7 +206,9 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
             name: (
               <MenuItemLabel
                 title={i18n.ACTION_NEW_FIELD_TITLE}
-                description={i18n.ACTION_NEW_FIELD_DESC}
+                description={
+                  bufferHasErrors ? i18n.ACTIONS_MENU_FIX_YAML_FIRST : i18n.ACTION_NEW_FIELD_DESC
+                }
               />
             ),
             panel: PANEL_IDS.newField,
@@ -228,7 +220,11 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
             name: (
               <MenuItemLabel
                 title={i18n.ACTION_FIELD_LIBRARY_TITLE}
-                description={i18n.ACTION_FIELD_LIBRARY_DESC}
+                description={
+                  bufferHasErrors
+                    ? i18n.ACTIONS_MENU_FIX_YAML_FIRST
+                    : i18n.ACTION_FIELD_LIBRARY_DESC
+                }
               />
             ),
             panel: PANEL_IDS.fieldLibrary,
@@ -237,10 +233,12 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
             'data-test-subj': 'templateActionsMenu-fieldLibrary',
           },
           {
+            // When disabled, the reason replaces the description so it is both visible AND part of
+            // the item's accessible name (a hover-only tooltip is unreachable by keyboard/SR users).
             name: (
               <MenuItemLabel
                 title={i18n.ACTION_VALIDATION_TITLE}
-                description={i18n.ACTION_VALIDATION_DESC}
+                description={hasFieldAtCursor ? i18n.ACTION_VALIDATION_DESC : ruleDisabledHint}
               />
             ),
             panel: PANEL_IDS.validation,
@@ -252,7 +250,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
             name: (
               <MenuItemLabel
                 title={i18n.ACTION_CONDITIONAL_TITLE}
-                description={i18n.ACTION_CONDITIONAL_DESC}
+                description={hasFieldAtCursor ? i18n.ACTION_CONDITIONAL_DESC : ruleDisabledHint}
               />
             ),
             panel: PANEL_IDS.conditional,

@@ -246,7 +246,9 @@ export const insertTemplateField = (
     // YAMLSeq exposes its items array; splicing preserves the other entries' nodes (and comments).
     seq.items.splice(insertIndex, 0, fieldNode);
   } else {
-    root.set('fields', doc.createNode([field]));
+    // `setIn` accepts a string path (a parsed map's keys are node-typed, so `root.set('fields', …)`
+    // does not type-check) — mirrors insert_field_from_library.ts.
+    doc.setIn(['fields'], doc.createNode([field]));
   }
 
   return { yaml: doc.toString(), changed: true, insertedName };
@@ -307,13 +309,18 @@ export const applyFieldBlock = (
   if (!isMap(item)) {
     return { yaml, status: 'no-field' };
   }
+  // A parsed map's key type is node-based; casting to `unknown` keys lets us set by string key.
+  const itemMap = item as YAMLMap<unknown, unknown>;
 
-  let block = item.get(blockKey, true);
-  if (!isMap(block)) {
-    block = doc.createNode({});
-    item.set(blockKey, block);
+  const existingBlock = itemMap.get(blockKey, true);
+  let blockMap: YAMLMap<unknown, unknown>;
+  if (isMap(existingBlock)) {
+    blockMap = existingBlock as YAMLMap<unknown, unknown>;
+  } else {
+    blockMap = doc.createNode({}) as YAMLMap<unknown, unknown>;
+    itemMap.set(blockKey, blockMap);
   }
-  const blockMap = block as YAMLMap;
+
   if (blockMap.has(ruleKey)) {
     return { yaml, status: 'exists', fieldName: at.name };
   }

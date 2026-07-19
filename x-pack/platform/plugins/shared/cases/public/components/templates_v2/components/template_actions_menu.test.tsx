@@ -95,6 +95,15 @@ describe('TemplateActionsMenu', () => {
     expect(screen.getByTestId('templateActionsMenu-conditional')).toBeDisabled();
   });
 
+  it('exposes the disabled reason in the item text (reachable without hover) for a11y', async () => {
+    renderMenu({ lineNumber: 1 });
+    await user.click(screen.getByTestId('templateActionsMenuButton'));
+
+    // The reason is in the item content (accessible name), not just a hover-only tooltip.
+    const validation = await screen.findByTestId('templateActionsMenu-validation');
+    expect(validation).toHaveTextContent('Place the cursor on a field to enable this action');
+  });
+
   it('applies a validation rule to the field under the cursor', async () => {
     const { onChange } = renderMenu({ lineNumber: 5 });
     await user.click(screen.getByTestId('templateActionsMenuButton'));

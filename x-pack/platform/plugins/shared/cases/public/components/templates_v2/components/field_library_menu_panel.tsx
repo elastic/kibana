@@ -107,6 +107,7 @@ export const FieldLibraryMenuPanel: React.FC<FieldLibraryMenuPanelProps> = ({
       singleSelection
       searchProps={{
         placeholder: i18n.ACTIONS_MENU_SEARCH_FIELDS,
+        'aria-label': i18n.ACTIONS_MENU_SEARCH_FIELDS,
         compressed: true,
         'data-test-subj': 'templateActionsMenu-fieldLibrary-search',
       }}
