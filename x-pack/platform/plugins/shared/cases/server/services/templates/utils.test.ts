@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { toFieldNames, trimFieldDefaults } from './utils';
+import { toFieldDefinitions, trimFieldDefaults } from './utils';
 
-describe('toFieldNames', () => {
-  it('maps fields to field names with label falling back to name', () => {
+describe('toFieldDefinitions', () => {
+  it('maps fields to field definitions with label falling back to name', () => {
     const fields = [
       {
         name: 'field_one',
@@ -19,14 +19,14 @@ describe('toFieldNames', () => {
       { name: 'field_two', type: 'keyword' as const, control: 'TEXTAREA' as const },
     ];
 
-    expect(toFieldNames(fields)).toEqual([
+    expect(toFieldDefinitions(fields)).toEqual([
       { name: 'field_one', label: 'Field One', type: 'keyword', control: 'INPUT_TEXT' },
       { name: 'field_two', label: 'field_two', type: 'keyword', control: 'TEXTAREA' },
     ]);
   });
 
   it('returns an empty array when given no fields', () => {
-    expect(toFieldNames([])).toEqual([]);
+    expect(toFieldDefinitions([])).toEqual([]);
   });
 });
 
