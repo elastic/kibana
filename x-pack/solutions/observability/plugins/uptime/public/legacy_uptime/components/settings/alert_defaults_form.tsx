@@ -16,7 +16,7 @@ import {
   EuiComboBox,
   EuiIcon,
 } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';

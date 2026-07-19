@@ -429,6 +429,11 @@ export class TemplatesService {
         usageCount: currentTemplate.attributes.usageCount,
         lastUsedAt: currentTemplate.attributes.lastUsedAt,
         isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,
+        // Carry the v1 lineage forward across edits/version bumps. The bridges read only the
+        // `isLatest` version, so dropping this here would silently degrade a migrated template to
+        // name-only resolution on the first edit (losing duplicate-name disambiguation, and breaking
+        // entirely on rename).
+        legacyKey: currentTemplate.attributes.legacyKey,
       } as Template,
       {
         refresh: true,
