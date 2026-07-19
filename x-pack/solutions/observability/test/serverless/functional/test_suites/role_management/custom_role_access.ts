@@ -42,10 +42,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
         ],
       });
-      // login with custom role — default route is /app/observability/landing, which
-      // is inaccessible for discover-only users, so navigate to Discover first
-      await pageObjects.svlCommonPage.loginWithCustomRole();
-      await pageObjects.common.navigateToApp('discover');
+      // Discover-only users cannot open the Observability default route after login.
+      await pageObjects.svlCommonPage.loginWithCustomRole({ initialPath: '/app/discover' });
       await pageObjects.header.waitUntilLoadingHasFinished();
       await pageObjects.svlCommonPage.assertUserAvatarExists();
     });
