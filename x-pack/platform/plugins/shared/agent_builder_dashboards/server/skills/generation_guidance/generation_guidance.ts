@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DASHBOARD_NEW_VIS_PANEL_GUIDANCE } from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
@@ -33,8 +34,7 @@ For an existing dashboard:
 
 ## Panel Inputs
 
-- Use \`source: "request"\` to create or edit a **new** visualization panel from a natural-language query. This is the only correct path for new dashboard panels — Lens **and** Vega (including sankey/flow, sunburst/hierarchy, radar/spider). Never hand-build a \`config\` for a new visualization, and never call create_visualization just to feed a dashboard panel.
-- For Vega-family / sankey / sunburst / radar panels, pass \`renderer: "vega"\` on the \`source: "request"\` item (and say "sankey", "sunburst", or "radar" in \`query\` when that is what the user asked for). Omit \`renderer\` (or use \`"lens"\`) for ordinary Lens charts.
+${DASHBOARD_NEW_VIS_PANEL_GUIDANCE}
 - Ground the index/fields first (list indices + mapping), then put \`index\` on each \`source: "request"\` panel. Omit \`esql\` unless you already have a validated query — the dashboard tool generates ES|QL / Vega internally.
 - Use \`source: "config"\` only for content you have **already** resolved earlier (an existing visualization attachment you must reuse, or markdown). Prefer \`source: "request"\` for anything new. The generation tool never reads an attachment store, so a \`config\` payload must be supplied by value.
 - If you must reuse an existing Vega visualization attachment via \`source: "config"\`, pass \`config: { "spec": "<verbatim visualization.spec>" }\` — copy the string character-for-character; never double-encode or rewrite expressions.

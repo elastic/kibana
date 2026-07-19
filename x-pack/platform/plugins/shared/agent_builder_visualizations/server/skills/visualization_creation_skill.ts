@@ -7,22 +7,30 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
+import {
+  VEGA_SCOPE_AGENT_GUIDANCE,
+  formatRawVegaAllowlist,
+  formatRawVegaAllowlistCompact,
+  formatRawVegaCatalogIds,
+  getChartTypeSelectionPromptContent,
+} from '@kbn/agent-builder-visualizations-server';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 const chartTypeSelectionContent = getChartTypeSelectionPromptContent();
+const rawVegaAllowlist = formatRawVegaAllowlist();
+const rawVegaAllowlistCompact = formatRawVegaAllowlistCompact();
+const rawVegaCatalogIds = formatRawVegaCatalogIds();
 
 export const visualizationCreationSkill = defineSkillType({
   id: 'visualization-creation',
   name: 'visualization-creation',
   basePath: 'skills/platform/visualization',
-  description:
-    'Create standalone Lens or Vega visualizations (including Raw Vega sankey/flow, sunburst/hierarchy, and radar/spider) via create_visualization. For dashboards, use dashboard-management instead — never hand-author Vega JSON or persist charts with attachments.add.',
+  description: `Create standalone Lens or Vega visualizations (including Raw Vega ${rawVegaAllowlistCompact}) via create_visualization. For dashboards, use dashboard-management instead — never hand-author Vega JSON or persist charts with attachments.add.`,
   content: `## When to Use This Skill
 
 Use this skill when:
 - A user asks for one or more **standalone** visualizations (chart, metric, trend, breakdown, distribution) with **no dashboard** in the request.
-- A user asks for a standalone **Vega**, **Vega-Lite**, **sankey / flow**, **sunburst / hierarchy**, or **radar / spider** chart (again: no dashboard).
+- A user asks for a standalone **Vega**, **Vega-Lite**, or allowlisted Raw Vega chart (${rawVegaAllowlist}) (again: no dashboard).
 - You explicitly want a reusable visualization attachment ID for later use outside a dashboard.
 - A user asks to update an existing visualization by attachment ID.
 
@@ -30,14 +38,14 @@ Do **not** use this skill when:
 - The user only needs raw documents or table/query output without a visualization.
 - The user first needs broad data discovery and exploration across unknown sources.
 - The request is about persisted saved objects instead of in-memory attachment workflows.
-- The user wants a **dashboard** (create one, or add/edit panels on one) — even if the panels are Vega/sankey/sunburst/radar. Load **dashboard-management** and create panels with \`source: "request"\` (\`renderer: "vega"\` when needed). Do **not** call create_visualization and then copy the spec into the dashboard.
+- The user wants a **dashboard** (create one, or add/edit panels on one) — even if the panels are Vega / ${rawVegaCatalogIds}. Load **dashboard-management** and create panels with \`source: "request"\` (\`renderer: "vega"\` when needed). Do **not** call create_visualization and then copy the spec into the dashboard.
 
 ## Hard Rules (do not violate)
 
 - **Always** create charts with **${
     platformCoreTools.createVisualization
   }**. That tool authors, validates, and stores the visualization attachment.
-- For Vega / Vega-Lite / sankey / sunburst / radar requests: call ${
+- For Vega / Vega-Lite / ${rawVegaCatalogIds} requests: call ${
     platformCoreTools.createVisualization
   } with \`renderer: "vega"\` after grounding the index. The tool selects Vega-Lite vs allowlisted Raw Vega automatically.
 - **Never** hand-author a Vega/Vega-Lite JSON spec and save it with \`attachments.add\` (or any other attachment tool). That path skips validation and produces broken or non-renderable charts.
@@ -78,7 +86,7 @@ Do **not** use this skill when:
 2. **Prepare visualization intent**
    - Default path: pass the natural-language \`query\` to ${
      platformCoreTools.createVisualization
-   } and let it generate the ES|QL. This is the right choice for almost every request — including sankey / sunburst / radar — do **not** call ${
+   } and let it generate the ES|QL. This is the right choice for almost every request — including ${rawVegaCatalogIds} — do **not** call ${
     platformCoreTools.generateEsql
   } first just to build a query.
    - Only for genuinely complex aggregations or joins you want to control precisely: pre-generate with ${
@@ -89,9 +97,9 @@ Do **not** use this skill when:
 
 3. **Call ${platformCoreTools.createVisualization}**
    - Provide:
-     - \`query\` (required, specific and field-accurate — include chart words like "sankey", "sunburst", or "radar" when the user asked for them)
+     - \`query\` (required, specific and field-accurate — include chart words like ${rawVegaCatalogIds} when the user asked for them)
      - \`index\` (strongly recommended — pass the grounded index; omitting it forces auto-discovery, which fails for ungrounded/invented fields)
-     - \`renderer\` (\`lens\` or \`vega\`, optional — see "Choosing the Renderer"; omit to default to Lens). For Vega / sankey / sunburst / radar, **always** pass \`renderer: "vega"\`.
+     - \`renderer\` (\`lens\` or \`vega\`, optional — see "Choosing the Renderer"; omit to default to Lens). For Vega / ${rawVegaCatalogIds}, **always** pass \`renderer: "vega"\`.
      - \`chartType\` (optional, only if confident; omit for Raw Vega chart families)
      - \`esql\` (optional, when you have a validated ES|QL)
      - \`attachment_id\` (optional, only when updating an existing visualization)
@@ -132,6 +140,7 @@ Good prompt patterns (specific and field-accurate):
 - "Create a Vega sankey of counts from <source field> to <dest field>"
 - "Create a Vega sunburst of <hierarchy fields>"
 - "Create a Vega radar of <category field> by count"
+  (same pattern for any allowlisted Raw Vega chart: ${rawVegaAllowlist})
 
 Poor prompt patterns:
 - "Show CPU" / "Make a chart" / "Display everything" (too vague)
@@ -152,11 +161,11 @@ ${
 
 - Pass \`renderer: "vega"\` when:
   - The user explicitly asks for a Vega or Vega-Lite visualization, OR
-  - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, sunburst / hierarchy, radar / spider, sankey / flow, or custom tooltips/encodings.
+  - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, ${rawVegaAllowlist}, or custom tooltips/encodings.
 - Otherwise pass \`renderer: "lens"\` (the default when omitted) with the best-fitting \`chartType\`.
 - When updating an existing attachment, \`renderer\` is ignored — edits keep the existing renderer.
 
-**Scope — Vega-Lite plus allowlisted Raw Vega.** The Vega renderer authors Vega-Lite by default. It also supports allowlisted Raw Vega charts (currently **sunburst / hierarchy**, **radar / spider**, and **sankey / flow**). It does **not** yet support other Raw Vega diagrams such as network / force or chord, nor custom signals / Kibana filter interactivity. If a request fits neither Lens, Vega-Lite, nor an allowlisted Raw Vega chart, do **not** force a broken or misleading chart. Be honest with the user: explain what is not supported yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
+${VEGA_SCOPE_AGENT_GUIDANCE}
 
 ## Chart Type Guidance
 
@@ -173,7 +182,7 @@ When uncertain, omit \`chartType\` and let ${
 - **Requested field missing:** suggest nearest valid fields from the index mapping.
 - **ES|QL returns no data:** explain and suggest broader time range/filters.
 - **Unsupported chart request:** pick closest supported type and explain the substitution.
-- **Needs unsupported Raw Vega (beyond Vega-Lite and allowlisted charts such as sunburst, radar, and sankey):** do not fake it or ship a broken chart. State plainly that the requested chart is not supported yet, then offer alternatives (closest Vega-Lite approximation, a Lens chart, or multiple charts) and let the user choose.
+- **Needs unsupported Raw Vega (beyond Vega-Lite and allowlisted charts such as ${rawVegaCatalogIds}):** do not fake it or ship a broken chart. State plainly that the requested chart is not supported yet, then offer alternatives (closest Vega-Lite approximation, a Lens chart, or multiple charts) and let the user choose.
 `,
   referencedContent: [
     {

@@ -17,10 +17,19 @@ import {
 } from '@kbn/agent-builder-visualizations-common';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
+  NEVER_HAND_AUTHOR_VEGA_GUIDANCE,
+  VEGA_SCOPE_AGENT_GUIDANCE,
   buildLensConfig,
   buildVegaConfig,
+  formatRawVegaAllowlist,
+  formatRawVegaAllowlistCompact,
+  formatRawVegaCatalogIds,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
+
+const rawVegaAllowlist = formatRawVegaAllowlist();
+const rawVegaAllowlistCompact = formatRawVegaAllowlistCompact();
+const rawVegaCatalogIds = formatRawVegaCatalogIds();
 
 /**
  * Pull the prior Lens config out of an existing attachment, when it is a Lens
@@ -67,7 +76,7 @@ const createVisualizationSchema = z.object({
     .enum(['lens', 'vega'])
     .optional()
     .describe(
-      '(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" when the user asks for Vega/Vega-Lite, or for allowlisted Raw Vega charts (sunburst/hierarchy, radar/spider, sankey/flow/alluvial), or for custom Vega-Lite charts Lens cannot express (small multiples/faceting, layered/combo charts, scatter/bubble with size, custom encodings). Required: pass "vega" for sankey/sunburst/radar/Vega requests — do not omit it. Ignored when updating an existing attachment (edits keep the existing renderer).'
+      `(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" when the user asks for Vega/Vega-Lite, or for allowlisted Raw Vega charts (${rawVegaAllowlistCompact}), or for custom Vega-Lite charts Lens cannot express (small multiples/faceting, layered/combo charts, scatter/bubble with size, custom encodings). Required: pass "vega" for ${rawVegaCatalogIds}/Vega requests — do not omit it. Ignored when updating an existing attachment (edits keep the existing renderer).`
     ),
   chartType: z
     .nativeEnum(SupportedChartType)
@@ -90,17 +99,19 @@ export const createVisualizationTool = (): BuiltinToolDefinition<
   return {
     id: platformCoreTools.createVisualization,
     type: ToolType.builtin,
-    description: `REQUIRED tool for creating or updating visualizations from natural language. Supports Lens charts AND Vega-family charts: Vega-Lite plus allowlisted Raw Vega (sunburst / hierarchy, radar / spider, sankey / flow / alluvial).
+    description: `REQUIRED tool for creating or updating visualizations from natural language. Supports Lens charts AND Vega-family charts: Vega-Lite plus allowlisted Raw Vega (${rawVegaAllowlist}).
 
-Use this tool whenever the user asks for a chart or visualization — especially Vega, Vega-Lite, sankey, sunburst, or radar. Pass renderer: "vega" for those. This tool generates ES|QL and authors/validates the Lens or Vega spec and stores the visualization attachment.
+Use this tool whenever the user asks for a chart or visualization — especially Vega, Vega-Lite, or ${rawVegaCatalogIds}. Pass renderer: "vega" for those. This tool generates ES|QL and authors/validates the Lens or Vega spec and stores the visualization attachment.
 
-Do NOT hand-author Vega/Vega-Lite JSON. Do NOT persist charts with attachments.add. Do NOT substitute generate_esql + execute_esql for this tool (those are only for optional grounding). Prefer this tool over telling the user a chart cannot be built whenever the request fits Lens, Vega-Lite, or an allowlisted Raw Vega chart. If a request needs unsupported Raw Vega (e.g. network, chord, custom signals/interactivity), be honest and offer alternatives.
+${NEVER_HAND_AUTHOR_VEGA_GUIDANCE} Do NOT substitute generate_esql + execute_esql for this tool (those are only for optional grounding). Prefer this tool over telling the user a chart cannot be built whenever the request fits Lens, Vega-Lite, or an allowlisted Raw Vega chart. If a request needs unsupported Raw Vega (e.g. network, chord, custom signals/interactivity), be honest and offer alternatives.
+
+${VEGA_SCOPE_AGENT_GUIDANCE}
 
 Choose "renderer":
 - "lens" (default when omitted) for a standard Lens chart (${Object.values(
       SupportedChartType
     ).join(', ')}).
-- "vega" when the user asks for Vega/Vega-Lite, or when no Lens type fits — e.g. small multiples / faceting, layered or combination charts, scatter / bubble with size, sunburst / hierarchy, radar / spider, sankey / flow, or custom encodings. The tool selects Vega-Lite vs allowlisted Raw Vega automatically from the query.
+- "vega" when the user asks for Vega/Vega-Lite, or when no Lens type fits — e.g. small multiples / faceting, layered or combination charts, scatter / bubble with size, ${rawVegaAllowlist}, or custom encodings. The tool selects Vega-Lite vs allowlisted Raw Vega automatically from the query.
 
 This tool will:
 1. If attachment_id is provided, read the existing visualization from that attachment (edits keep the same renderer)

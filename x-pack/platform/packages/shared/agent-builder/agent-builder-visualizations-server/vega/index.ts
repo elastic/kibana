@@ -20,3 +20,11 @@ export type { SanitizePanelVegaSpecResult } from './sanitize_panel_vega_spec';
 export { escapeVegaFieldReferences } from './field_escaping';
 export { createAuthorVegaSpecPrompt } from './prompts';
 export type { VegaDialect, VegaCatalogId } from './dialect';
+export {
+  DASHBOARD_NEW_VIS_PANEL_GUIDANCE,
+  NEVER_HAND_AUTHOR_VEGA_GUIDANCE,
+  VEGA_SCOPE_AGENT_GUIDANCE,
+  formatRawVegaAllowlist,
+  formatRawVegaAllowlistCompact,
+  formatRawVegaCatalogIds,
+} from './agent_guidance';

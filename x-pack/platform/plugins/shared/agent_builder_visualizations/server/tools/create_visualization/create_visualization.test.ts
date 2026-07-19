@@ -14,6 +14,11 @@ import { createVisualizationTool } from './create_visualization';
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildLensConfig: jest.fn(),
   buildVegaConfig: jest.fn(),
+  NEVER_HAND_AUTHOR_VEGA_GUIDANCE: 'Do NOT hand-author Vega/Vega-Lite JSON.',
+  VEGA_SCOPE_AGENT_GUIDANCE: 'Scope — Vega-Lite plus allowlisted Raw Vega.',
+  formatRawVegaAllowlist: () => 'sunburst / hierarchy, radar / spider, sankey / flow',
+  formatRawVegaAllowlistCompact: () => 'sunburst/hierarchy, radar/spider, sankey/flow',
+  formatRawVegaCatalogIds: () => 'sunburst, radar, sankey',
 }));
 
 const mockBuildLens = buildLensConfig as jest.Mock;

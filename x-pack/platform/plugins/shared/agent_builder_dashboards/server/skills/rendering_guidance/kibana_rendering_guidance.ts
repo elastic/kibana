@@ -7,8 +7,11 @@
 
 import { attachmentTools } from '@kbn/agent-builder-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
+import { formatRawVegaCatalogIds } from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
+
+const rawVegaCatalogIds = formatRawVegaCatalogIds();
 
 const guidance = `## Kibana Workflow
 
@@ -16,7 +19,7 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 
 1. **Resolve inputs**:
    - To work with a saved dashboard, search for it with \`platform.core.sml_search\`, then attach it with \`platform.core.sml_attach\` using the exact \`entry_id\` from the search result. The attached \`${DASHBOARD_ATTACHMENT_TYPE}\` attachment is your editable working copy; pass its \`attachment_id\` to generation as \`dashboardAttachmentId\`.
-   - To **create a new visualization panel on a dashboard**, use \`source: "request"\` (with \`renderer: "vega"\` when the chart is Vega / sankey / sunburst / radar). Do not call create_visualization first.
+   - To **create a new visualization panel on a dashboard**, use \`source: "request"\` (with \`renderer: "vega"\` when the chart is Vega / ${rawVegaCatalogIds}). Do not call create_visualization first.
    - To **reuse an existing** visualization attachment on a dashboard, read it with \`${attachmentTools.read}\` and pass its configuration as a \`source: "config"\` panel input (panel \`type: "vis"\` and \`config\`). The generation core never reads attachments itself, so that config must be passed by value.
    - For an existing Vega attachment via \`source: "config"\`: set \`config\` to exactly \`{ "spec": "<visualization.spec>" }\`. Copy the \`spec\` string character-for-character. Do **not** re-stringify it, wrap it in extra quotes, escape newlines a second time, or edit Vega expressions.
 2. **Generate** (persists automatically):
