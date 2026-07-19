@@ -129,11 +129,9 @@ export const resolveDialectGate = async ({
       let catalogId = inferRawVegaCatalogId(existingSpec);
       if (catalogId === 'none') {
         // Structural cue missing (unusual); classify among allowlisted charts.
+        // Keep `none` when classification also misses — stay on Raw Vega dialect
+        // with shared authoring rules + the existing spec (do not guess sunburst).
         catalogId = await selectVegaCatalogId({ nlQuery, model, logger });
-        if (!isRawVegaCatalogId(catalogId)) {
-          // Still Raw Vega edit — default to sunburst so ES|QL/author stay Raw Vega.
-          catalogId = 'sunburst';
-        }
       }
       return {
         catalogId,

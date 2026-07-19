@@ -179,12 +179,17 @@ const createRawVegaAuthorPrompt = ({
   catalogId: VegaCatalogId;
 }): BaseMessageLike[] => {
   const esqlQueryJson = JSON.stringify(esqlQuery);
-  const chartLabel = getRawVegaCatalogEntry(catalogId)?.chartLabel ?? 'allowlisted Raw Vega chart';
+  const catalogEntry = getRawVegaCatalogEntry(catalogId);
+  const chartFocus = catalogEntry
+    ? `for an allowlisted chart (currently: ${catalogEntry.chartLabel})`
+    : existingSpec
+    ? 'that preserves the existing chart family'
+    : 'for an allowlisted Raw Vega chart';
 
   return [
     [
       'system',
-      `You are a Raw Vega (v5) visualization expert. Author a single valid Raw Vega specification for an allowlisted chart (currently: ${chartLabel}).
+      `You are a Raw Vega (v5) visualization expert. Author a single valid Raw Vega specification ${chartFocus}.
 
 Author Raw Vega ONLY — never Vega-Lite. Use "data" as an array, "marks" (plural), scales, and transforms. Do NOT use Vega-Lite "mark"/"encoding"/"facet".
 ${

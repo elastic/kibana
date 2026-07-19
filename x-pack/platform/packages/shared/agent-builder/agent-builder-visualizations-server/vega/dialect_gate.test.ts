@@ -100,6 +100,23 @@ describe('resolveDialectGate', () => {
     expect(invoke).not.toHaveBeenCalled();
   });
 
+  it('keeps catalog none on Raw Vega edits when structure and classifier both miss', async () => {
+    const { model, invoke } = mockModel({ catalogId: 'none' });
+    const gate = await resolveDialectGate({
+      nlQuery: 'make the colors pink',
+      existingSpec: JSON.stringify({
+        $schema: VEGA_SCHEMA,
+        data: [{ name: 'source' }],
+        marks: [{ type: 'arc' }],
+      }),
+      model,
+    });
+
+    expect(gate).toMatchObject({ catalogId: 'none', dialect: 'vega' });
+    expect(gate.referenceExamples).toBe('');
+    expect(invoke).toHaveBeenCalled();
+  });
+
   it('uses the classifier for new visualizations', async () => {
     const { model } = mockModel({ catalogId: 'sunburst' });
     const gate = await resolveDialectGate({
