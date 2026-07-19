@@ -12,6 +12,7 @@ import {
 } from '@kbn/agent-builder-visualizations-server';
 import {
   VEGA_VIS_TYPE,
+  normalizeVegaConfig,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
@@ -51,12 +52,6 @@ const resolveRenderer = (
     return undefined;
   }
   return requestedRenderer ?? 'lens';
-};
-
-/** Pull the serialized Vega spec out of an existing Vega panel's attachment config. */
-const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string | undefined => {
-  const spec = (existingPanel?.config as { spec?: unknown } | undefined)?.spec;
-  return typeof spec === 'string' ? spec : undefined;
 };
 
 /**
@@ -106,7 +101,7 @@ export const createVisPanelResolver = ({
           nlQuery,
           index,
           esql,
-          existingSpec: getExistingVegaSpec(existingPanel),
+          existingSpec: normalizeVegaConfig(existingPanel?.config)?.spec,
           chartType,
           modelProvider,
           logger,

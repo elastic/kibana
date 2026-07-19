@@ -12,6 +12,7 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   VISUALIZATION_ATTACHMENT_TYPE,
+  normalizeVegaConfig,
   type VisualizationAttachmentData,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
@@ -43,14 +44,6 @@ const getExistingLensConfig = (
   }
   const candidate = data.visualization;
   return candidate && typeof candidate === 'object' ? (candidate as VisualizationConfig) : null;
-};
-
-const getExistingVegaSpec = (data: VisualizationAttachmentData | undefined): string | undefined => {
-  if (!data || data.renderer !== 'vega') {
-    return undefined;
-  }
-  const candidate = data.visualization?.spec;
-  return typeof candidate === 'string' ? candidate : undefined;
 };
 
 const createVisualizationSchema = z.object({
@@ -165,7 +158,10 @@ Ground first: make sure the target index exists and every field you reference is
         let visualizationData: VisualizationAttachmentData & { chart_type?: SupportedChartType };
 
         if (renderer === 'vega') {
-          const existingSpec = getExistingVegaSpec(existingData);
+          const existingSpec =
+            existingData?.renderer === 'vega'
+              ? normalizeVegaConfig(existingData.visualization)?.spec
+              : undefined;
           const { spec, title, esqlQuery } = await buildVegaConfig({
             nlQuery,
             index,
