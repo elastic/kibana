@@ -11,7 +11,6 @@ import moment from 'moment';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import {
   EuiCodeBlockWrapper,
-  EuiComboBoxWrapper,
   EuiDataGridWrapper,
   EuiSuperSelectWrapper,
   KibanaCodeEditorWrapper,
@@ -50,24 +49,17 @@ export class StreamsApp {
   public readonly fetchMoreMatchingSamplesButton;
 
   constructor(private readonly page: ScoutPage) {
-    this.processorFieldComboBox = new EuiComboBoxWrapper(
-      this.page,
+    this.processorFieldComboBox = this.page.components.comboBox(
       'streamsAppProcessorFieldSelectorComboFieldText'
     );
-    this.conditionEditorFieldComboBox = new EuiComboBoxWrapper(
-      this.page,
+    this.conditionEditorFieldComboBox = this.page.components.comboBox(
       'streamsAppConditionEditorFieldText'
     );
-    this.conditionEditorValueComboBox = new EuiComboBoxWrapper(
-      this.page,
+    this.conditionEditorValueComboBox = this.page.components.comboBox(
       'streamsAppConditionEditorValueText'
     );
-    this.processorTypeComboBox = new EuiComboBoxWrapper(
-      this.page,
-      'streamsAppProcessorTypeSelector'
-    );
-    this.dateProcessorFormatsComboBox = new EuiComboBoxWrapper(
-      this.page,
+    this.processorTypeComboBox = this.page.components.comboBox('streamsAppProcessorTypeSelector');
+    this.dateProcessorFormatsComboBox = this.page.components.comboBox(
       'streamsAppDateProcessorFormatsComboBox'
     );
     this.fieldTypeSuperSelect = new EuiSuperSelectWrapper(
@@ -444,10 +436,10 @@ export class StreamsApp {
     operator?: string;
   }) {
     if (field) {
-      await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
+      await this.conditionEditorFieldComboBox.setCustomSelectedOptions([field]);
     }
     if (value) {
-      await this.conditionEditorValueComboBox.setCustomSingleOption(value);
+      await this.conditionEditorValueComboBox.setCustomSelectedOptions([value]);
     }
     if (operator) {
       await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
@@ -743,15 +735,15 @@ export class StreamsApp {
   }
 
   async selectProcessorType(value: string) {
-    await this.processorTypeComboBox.selectSingleOption(value);
+    await this.processorTypeComboBox.setSelectedOptions([value]);
   }
 
   async fillProcessorFieldInput(value: string, options?: { isCustomValue: boolean }) {
     const isCustomValue = options?.isCustomValue || false;
     if (isCustomValue) {
-      return await this.processorFieldComboBox.setCustomSingleOption(value);
+      return await this.processorFieldComboBox.setCustomSelectedOptions([value]);
     }
-    await this.processorFieldComboBox.selectSingleOption(value);
+    await this.processorFieldComboBox.setSelectedOptions([value]);
   }
 
   async fillGrokPatternInput(value: string) {
@@ -777,11 +769,11 @@ export class StreamsApp {
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
-    await this.processorFieldComboBox.setCustomSingleOption(value);
+    await this.processorFieldComboBox.setCustomSelectedOptions([value]);
   }
 
   async fillDateProcessorFormatInput(value: string) {
-    await this.dateProcessorFormatsComboBox.setCustomMultiOption(value);
+    await this.dateProcessorFormatsComboBox.setCustomSelectedOptions([value]);
   }
 
   async fillDateProcessorTargetFieldInput(value: string) {
@@ -817,9 +809,9 @@ export class StreamsApp {
   }
 
   async fillCondition(field: string, operator: string, value: string) {
-    await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
+    await this.conditionEditorFieldComboBox.setCustomSelectedOptions([field]);
     await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
-    await this.conditionEditorValueComboBox.setCustomSingleOption(value);
+    await this.conditionEditorValueComboBox.setCustomSelectedOptions([value]);
   }
 
   async removeProcessor(pos: number) {
