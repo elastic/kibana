@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { CANONICAL_ESQL_SOURCE_NAME } from '../dialect';
+import {
+  CANONICAL_ESQL_SOURCE_NAME,
+  SUNBURST_DISCLOSED_FALLBACK_CONTEXT,
+  formatParentChildIntegrityError,
+  validateParentChildRows,
+} from '../dialect';
+import { wrapIntegrity, type RawVegaChartTypeEntry } from './types';
 
 /**
  * Curated Raw Vega sunburst skeleton. Normalize rebinds the Canonical ES|QL
@@ -16,14 +22,7 @@ import { CANONICAL_ESQL_SOURCE_NAME } from '../dialect';
  * (via FORK) so Vega `stratify` never hits "missing: <id>" or "multiple roots".
  */
 
-/** Authoring rules injected into the Raw Vega prompt when catalog is sunburst. */
-export const chartRules = `SUNBURST RULES:
-- Expect a Parent–child table with id / parent / name / value (or clear aliases present in <columns>). Exactly one root (parent null); every other parent id must exist as an id row — otherwise stratify fails with "missing: <id>" / "multiple roots" and partition cannot run.
-- Pipeline: source → stratify(key=id, parentKey=parent) → partition(field=value) → arc marks. Put both transforms on the same derived dataset that sources "${CANONICAL_ESQL_SOURCE_NAME}".
-- Built-in width/height signals for layout (e.g. partition size, arc x/y) are fine.`;
-
-/** Extra ES|QL instructions when generating a Parent–child table for sunburst. */
-export const esqlAdditionalInstructions = `
+const esqlAdditionalInstructions = `
 ## Sunburst hierarchy rows (required)
 
 This query feeds a Raw Vega sunburst. Emit a flat Parent–child table the Vega \`stratify\` transform can consume:
@@ -61,6 +60,40 @@ FROM kibana_sample_data_flights
 Rules:
 - Prefer aggregating to a modest number of leaf nodes (SORT + LIMIT) so the sunburst stays readable.
 - Keep column names exactly \`id\`, \`parent\`, \`name\`, and \`value\` when possible.`;
+
+export const chartType: RawVegaChartTypeEntry = {
+  dialect: 'vega',
+  id: 'sunburst',
+  chartLabel: 'sunburst / hierarchy',
+  prompt: {
+    selection: {
+      title: 'Sunburst / hierarchy (Raw Vega partition)',
+      description:
+        'Radial hierarchy / sunburst / ring partition of a parent-child tree (not a treemap, pie, or donut).',
+      guideline:
+        'Choose sunburst when the user clearly wants a sunburst / radial hierarchy / ring partition of a tree.',
+    },
+    config: {
+      rulesHeading: 'SUNBURST RULES',
+      perChartTypeRules: [
+        'Expect a Parent–child table with id / parent / name / value (or clear aliases present in <columns>). Exactly one root (parent null); every other parent id must exist as an id row — otherwise stratify fails with "missing: <id>" / "multiple roots" and partition cannot run.',
+        `Pipeline: source → stratify(key=id, parentKey=parent) → partition(field=value) → arc marks. Put both transforms on the same derived dataset that sources "${CANONICAL_ESQL_SOURCE_NAME}".`,
+        'Built-in width/height signals for layout (e.g. partition size, arc x/y) are fine.',
+      ],
+      esqlAdditionalInstructions,
+    },
+  },
+  example: {
+    description:
+      'Static radial hierarchy: Parent–child table (parent rows AND leaves — every parent id must exist as an id) → `stratify` + `partition` → `arc` marks. Bind the Canonical ES|QL source named `source`; do not add Kibana interaction signals.',
+    load: () => import('./sunburst').then((module) => module.spec),
+  },
+  disclosedFallbackContext: SUNBURST_DISCLOSED_FALLBACK_CONTEXT,
+  checkIntegrity: wrapIntegrity(validateParentChildRows, formatParentChildIntegrityError),
+};
+
+/** @deprecated Prefer chartType.prompt.config.esqlAdditionalInstructions */
+export { esqlAdditionalInstructions };
 
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',

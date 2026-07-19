@@ -7,9 +7,9 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
-import { esqlAdditionalInstructions as radarEsqlAdditionalInstructions } from './reference_examples/radar';
-import { esqlAdditionalInstructions as sankeyEsqlAdditionalInstructions } from './reference_examples/sankey';
-import { esqlAdditionalInstructions as sunburstEsqlAdditionalInstructions } from './reference_examples/sunburst';
+import { esqlAdditionalInstructions as radarEsqlAdditionalInstructions } from './chart_types/radar';
+import { esqlAdditionalInstructions as sankeyEsqlAdditionalInstructions } from './chart_types/sankey';
+import { esqlAdditionalInstructions as sunburstEsqlAdditionalInstructions } from './chart_types/sunburst';
 
 const systemText = (nlQuery: string): string => {
   const [system] = createAuthorVegaSpecPrompt({ nlQuery, esqlQuery: 'FROM logs-*' });

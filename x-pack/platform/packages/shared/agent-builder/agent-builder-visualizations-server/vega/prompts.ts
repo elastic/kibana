@@ -10,7 +10,7 @@ import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { VegaCatalogId, VegaDialect } from './dialect';
 import { CANONICAL_ESQL_SOURCE_NAME } from './dialect';
-import { catalogChartRules, getRawVegaCatalogEntry } from './raw_vega_catalog';
+import { catalogChartRules, getRawVegaChartType } from './chart_type_registry';
 
 // Vega-specific ES|QL guidance; see issue #275519 for the time-filtering quirk.
 export const vegaEsqlAdditionalInstructions = `
@@ -179,7 +179,7 @@ const createRawVegaAuthorPrompt = ({
   catalogId: VegaCatalogId;
 }): BaseMessageLike[] => {
   const esqlQueryJson = JSON.stringify(esqlQuery);
-  const catalogEntry = getRawVegaCatalogEntry(catalogId);
+  const catalogEntry = getRawVegaChartType(catalogId);
   const chartFocus = catalogEntry
     ? `for an allowlisted chart (currently: ${catalogEntry.chartLabel})`
     : existingSpec
@@ -257,7 +257,7 @@ export const createAuthorVegaSpecPrompt = ({
   columns?: EsqlEsqlColumnInfo[];
   existingSpec?: string;
   chartType?: SupportedChartType;
-  /** Pre-selected, pre-loaded reference-example block (see `reference_examples`). */
+  /** Pre-selected, pre-loaded reference-example block (see `chart_types/select_reference_examples`). */
   referenceExamples?: string;
   additionalContext?: string;
   dialect?: VegaDialect;

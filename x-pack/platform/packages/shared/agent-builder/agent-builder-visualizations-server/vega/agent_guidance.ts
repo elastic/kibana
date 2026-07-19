@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { RAW_VEGA_CATALOG_ENTRIES } from './raw_vega_catalog';
+import { rawVegaChartTypes } from './chart_type_registry';
 
 /** "sunburst / hierarchy, radar / spider, sankey / flow" */
 export const formatRawVegaAllowlist = (): string =>
-  RAW_VEGA_CATALOG_ENTRIES.map((entry) => entry.chartLabel).join(', ');
+  rawVegaChartTypes.map((entry) => entry.chartLabel).join(', ');
 
 /** Compact form for short skill/tool blurbs: "sunburst/hierarchy, radar/spider, …" */
 export const formatRawVegaAllowlistCompact = (): string =>
-  RAW_VEGA_CATALOG_ENTRIES.map((entry) => entry.chartLabel.replace(/ \/ /g, '/')).join(', ');
+  rawVegaChartTypes.map((entry) => entry.chartLabel.replace(/ \/ /g, '/')).join(', ');
 
 /** Catalog ids for query wording hints: "sunburst, radar, sankey" */
 export const formatRawVegaCatalogIds = (): string =>
-  RAW_VEGA_CATALOG_ENTRIES.map((entry) => entry.id).join(', ');
+  rawVegaChartTypes.map((entry) => entry.id).join(', ');
 
 /** Bold markdown list of allowlisted chart labels. */
 export const formatRawVegaAllowlistBold = (): string =>
-  RAW_VEGA_CATALOG_ENTRIES.map((entry) => `**${entry.chartLabel}**`).join(', ');
+  rawVegaChartTypes.map((entry) => `**${entry.chartLabel}**`).join(', ');
 
 /**
  * Shared Vega renderer scope for agent skills / tool descriptions.
- * Keep in sync with the Raw Vega catalog allowlist.
+ * Keep in sync with the Raw Vega chart type registry allowlist.
  */
 export const VEGA_SCOPE_AGENT_GUIDANCE = `**Scope — Vega-Lite plus allowlisted Raw Vega.** The Vega renderer authors Vega-Lite by default. It also supports allowlisted Raw Vega charts (currently ${formatRawVegaAllowlistBold()}). It does **not** yet support other Raw Vega diagrams such as network / force or chord, nor custom signals / Kibana filter interactivity. If a request fits neither Lens, Vega-Lite, nor an allowlisted Raw Vega chart, do **not** force a broken or misleading chart. Be honest with the user: explain what is not supported yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.`;
 

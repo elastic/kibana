@@ -18,15 +18,15 @@ import { generateVisualizationEsql } from '../shared/generate_visualization_esql
 import { normalizeVegaSpec } from './normalize_spec';
 import { validateVegaSpec } from './vega_validator';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
-import { buildReferenceExamplesBlock } from './reference_examples';
 import { resolveDialectGate } from './dialect_gate';
 import { isRawVegaCatalogId, type VegaCatalogId, type VegaDialect } from './dialect';
 import {
   catalogEsqlAdditionalInstructions,
   checkCatalogIntegrity,
   disclosedFallbackContextForCatalog,
-  getRawVegaCatalogEntry,
-} from './raw_vega_catalog';
+  getRawVegaChartType,
+} from './chart_type_registry';
+import { buildReferenceExamplesBlock } from './chart_types/select_reference_examples';
 import {
   CLASSIFY_DIALECT_NODE,
   GENERATE_ESQL_NODE,
@@ -340,7 +340,7 @@ export const createVegaGraph = async (
         }
 
         if (!integrity.ok) {
-          const label = getRawVegaCatalogEntry(catalogId)?.id ?? catalogId;
+          const label = getRawVegaChartType(catalogId)?.id ?? catalogId;
           logger.warn(
             `${label} selected but ES|QL did not yield a usable table; falling back to Vega-Lite with disclosure`
           );

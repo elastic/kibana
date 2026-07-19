@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { CANONICAL_ESQL_SOURCE_NAME, RADAR_MIN_KEYS } from '../dialect';
+import {
+  CANONICAL_ESQL_SOURCE_NAME,
+  RADAR_DISCLOSED_FALLBACK_CONTEXT,
+  RADAR_MIN_KEYS,
+  formatRadarIntegrityError,
+  validateRadarRows,
+} from '../dialect';
+import { wrapIntegrity, type RawVegaChartTypeEntry } from './types';
 
 /**
  * Curated Raw Vega radar / spider skeleton. Normalize rebinds the Canonical
@@ -18,29 +25,7 @@ import { CANONICAL_ESQL_SOURCE_NAME, RADAR_MIN_KEYS } from '../dialect';
  * instead of relying on padding.
  */
 
-/** Authoring rules injected into the Raw Vega prompt when catalog is radar. */
-export const chartRules = `RADAR / SPIDER RULES:
-- Expect a key / value table (optional series). Need ≥${RADAR_MIN_KEYS} distinct keys.
-- Scales: angular (point, domain = key, range [-PI, PI]) and radial (linear, domain = value, range [0, radius]).
-- MARKS ARRAY SHAPE (critical — malformed marks blank the chart):
-  - Top-level "marks" is a FLAT array of sibling mark objects: [group|line, rule, text, line, …].
-  - The faceted series "group" is ONE object whose nested "marks" contains ONLY the closed polygon line(s).
-  - Grid "rule", spoke "text", and outer "line" are SIBLINGS of that group — never extra properties on the group after its nested marks close.
-  - Copy the reference example mark list structure; do not merge siblings into one object.
-- Marks content: grid rules + labels from aggregated keys; closed polygon via line marks with interpolate "linear-closed".
-  - Multi-series: facet the Canonical source by series (groupby series) and draw one closed line per facet.
-  - Single-series (no series column): one closed line from "${CANONICAL_ESQL_SOURCE_NAME}" (no facet required).
-- RESPONSIVE LAYOUT (required — fill and center the Kibana panel):
-  - NEVER set top-level "encode" x/y (official Vega radar does this; in Kibana it shoves the chart into a corner).
-  - NEVER use autosize "none" — Kibana disables panel sizing and the chart goes blank.
-  - Center in EVERY mark signal: width/2 + …, height/2 + … (same idea as sunburst arc x/y).
-  - radius signal: min(width, height) / 2 - 40 (reserves space for spoke labels inside the panel).
-  - Labels at width/2 + (radius + 8) * cos(…), height/2 + (radius + 8) * sin(…).
-  - Prefer short key labels (LIMIT axes); avoid large fontSize.
-- EXPRESSIONS: always lowercase helpers — scale(, cos(, sin(. Never Scale(.`;
-
-/** Extra ES|QL instructions when generating a key/value table for radar. */
-export const esqlAdditionalInstructions = `
+const esqlAdditionalInstructions = `
 ## Radar / spider rows (required)
 
 This query feeds a Raw Vega radar chart. Emit a flat table with:
@@ -97,6 +82,43 @@ Rules:
 - NEVER write \`STATS … COUNT_DISTINCT(OriginCountry) BY … key = OriginCountry\` (or the
   same field for both). That distinct count is always 1, so \`WHERE … >= 3\` returns
   **zero rows** and the chart goes blank (Infinite extent warnings).`;
+
+export const chartType: RawVegaChartTypeEntry = {
+  dialect: 'vega',
+  id: 'radar',
+  chartLabel: 'radar / spider',
+  prompt: {
+    selection: {
+      title: 'Radar / spider (Raw Vega polar)',
+      description:
+        'Radar / spider / polar multivariate chart comparing numeric measures across several axes (not a pie or radial bar).',
+      guideline:
+        'Choose radar when the user clearly wants a radar / spider / polar multivariate chart across several numeric axes.',
+    },
+    config: {
+      rulesHeading: 'RADAR / SPIDER RULES',
+      perChartTypeRules: [
+        `Expect a key / value table (optional series). Need ≥${RADAR_MIN_KEYS} distinct keys.`,
+        'Scales: angular (point, domain = key, range [-PI, PI]) and radial (linear, domain = value, range [0, radius]).',
+        'MARKS ARRAY SHAPE (critical — malformed marks blank the chart):\n  - Top-level "marks" is a FLAT array of sibling mark objects: [group|line, rule, text, line, …].\n  - The faceted series "group" is ONE object whose nested "marks" contains ONLY the closed polygon line(s).\n  - Grid "rule", spoke "text", and outer "line" are SIBLINGS of that group — never extra properties on the group after its nested marks close.\n  - Copy the reference example mark list structure; do not merge siblings into one object.',
+        `Marks content: grid rules + labels from aggregated keys; closed polygon via line marks with interpolate "linear-closed".\n  - Multi-series: facet the Canonical source by series (groupby series) and draw one closed line per facet.\n  - Single-series (no series column): one closed line from "${CANONICAL_ESQL_SOURCE_NAME}" (no facet required).`,
+        'RESPONSIVE LAYOUT (required — fill and center the Kibana panel):\n  - NEVER set top-level "encode" x/y (official Vega radar does this; in Kibana it shoves the chart into a corner).\n  - NEVER use autosize "none" — Kibana disables panel sizing and the chart goes blank.\n  - Center in EVERY mark signal: width/2 + …, height/2 + … (same idea as sunburst arc x/y).\n  - radius signal: min(width, height) / 2 - 40 (reserves space for spoke labels inside the panel).\n  - Labels at width/2 + (radius + 8) * cos(…), height/2 + (radius + 8) * sin(…).\n  - Prefer short key labels (LIMIT axes); avoid large fontSize.',
+        'EXPRESSIONS: always lowercase helpers — scale(, cos(, sin(. Never Scale(.',
+      ],
+      esqlAdditionalInstructions,
+    },
+  },
+  example: {
+    description:
+      'Static radar: key/value rows (≥3 distinct keys; optional series) → angular + radial scales → faceted `line` marks with `linear-closed`. Center with absolute width/2 + height/2 in mark signals (never top-level encode). Bind the Canonical ES|QL source named `source`; do not add Kibana interaction signals.',
+    load: () => import('./radar').then((module) => module.spec),
+  },
+  disclosedFallbackContext: RADAR_DISCLOSED_FALLBACK_CONTEXT,
+  checkIntegrity: wrapIntegrity(validateRadarRows, formatRadarIntegrityError),
+};
+
+/** @deprecated Prefer chartType.prompt.config.esqlAdditionalInstructions */
+export { esqlAdditionalInstructions };
 
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',

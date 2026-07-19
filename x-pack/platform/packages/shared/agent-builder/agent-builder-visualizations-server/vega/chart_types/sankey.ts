@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { CANONICAL_ESQL_SOURCE_NAME, SANKEY_MIN_FLOWS } from '../dialect';
+import {
+  CANONICAL_ESQL_SOURCE_NAME,
+  SANKEY_DISCLOSED_FALLBACK_CONTEXT,
+  SANKEY_MIN_FLOWS,
+  formatSankeyIntegrityError,
+  validateSankeyRows,
+} from '../dialect';
+import { wrapIntegrity, type RawVegaChartTypeEntry } from './types';
 
 /**
  * Curated Raw Vega two-stack Sankey skeleton, adapted from the Elastic blog
@@ -17,30 +24,7 @@ import { CANONICAL_ESQL_SOURCE_NAME, SANKEY_MIN_FLOWS } from '../dialect';
  * Pipeline: source → fold+stack nodes → groups + edges (linkpath) → path/rect/text.
  */
 
-/** Authoring rules injected into the Raw Vega prompt when catalog is sankey. */
-export const chartRules = `SANKEY / FLOW RULES:
-- Expect a two-stack flow table with stk1 / stk2 / size (or clear aliases in <columns>). Need ≥${SANKEY_MIN_FLOWS} flows.
-- Follow the Elastic Kibana Sankey pattern (static slice — NO click-to-filter signals):
-  1. Canonical source "${CANONICAL_ESQL_SOURCE_NAME}" with the ES|QL url.
-  2. Derived "nodes": formula key=stk1+stk2 → fold stk1/stk2 into stack/grpId → stack by stack on size → yc midpoint.
-  3. Derived "groups": aggregate nodes by stack+grpId → stack totals → scale y0/y1 to screen.
-  4. Derived "destinationNodes" (filter stack==stk2) and "edges" (filter stk1, lookup target, linkpath diagonal, strokeWidth).
-  5. Marks: path (edges), rect (groups), text (labels inward toward the center). Bottom axis with stackNames (Source / Destination).
-- RESPONSIVE LAYOUT (required — labels must stay inside the panel):
-  - Set padding: { left: 8, right: 8, top: 8, bottom: 28 } so the bottom axis is not clipped.
-  - x band scale: paddingOuter ~0.12 and paddingInner ~0.9 so stacks sit inset from the edges.
-  - Place group text labels INSIDE (toward center): left stack at band + 6 (align left); right stack at band - 6 (align right). Never place labels outside the stacks toward the panel edge.
-  - Hide labels when the group height is < ~13px.
-- Do NOT add groupSelector / groupHover click signals or "show all" buttons.
-- NEVER set top-level root "encode" x/y; the panel sizes the view.
-- Y SCALE (critical — wrong domain blanks the chart): MUST be
-  \`{ "name": "y", "type": "linear", "range": "height", "nice": true, "zero": true, "domain": { "data": "nodes", "field": "y1" } }\`.
-  Never \`domain: [0, 1]\` or any fixed numeric interval — stack totals are real counts/sums, not unit fractions.
-- EXPRESSIONS: always lowercase helpers — scale(, bandwidth(, domain(, range(. Never Scale( / Bandwidth(.
-- TOOLTIPS: ASCII only in signal strings (use " -> ", not unicode arrows).`;
-
-/** Extra ES|QL instructions when generating a flow table for sankey. */
-export const esqlAdditionalInstructions = `
+const esqlAdditionalInstructions = `
 ## Sankey / flow rows (required)
 
 This query feeds a Raw Vega two-stack Sankey (source → destination flows). Emit:
@@ -63,6 +47,45 @@ FROM kibana_sample_data_flights
 | SORT size DESC
 | LIMIT 40
 \`\`\``;
+
+export const chartType: RawVegaChartTypeEntry = {
+  dialect: 'vega',
+  id: 'sankey',
+  chartLabel: 'sankey / flow',
+  prompt: {
+    selection: {
+      title: 'Sankey / flow (Raw Vega two-stack)',
+      description:
+        'Sankey / flow / alluvial diagram of weighted flows between a source category and a destination category (two stacks).',
+      guideline:
+        'Choose sankey when the user clearly wants a Sankey / flow / alluvial diagram of weighted flows between categories.',
+    },
+    config: {
+      rulesHeading: 'SANKEY / FLOW RULES',
+      perChartTypeRules: [
+        `Expect a two-stack flow table with stk1 / stk2 / size (or clear aliases in <columns>). Need ≥${SANKEY_MIN_FLOWS} flows.`,
+        `Follow the Elastic Kibana Sankey pattern (static slice — NO click-to-filter signals):\n  1. Canonical source "${CANONICAL_ESQL_SOURCE_NAME}" with the ES|QL url.\n  2. Derived "nodes": formula key=stk1+stk2 → fold stk1/stk2 into stack/grpId → stack by stack on size → yc midpoint.\n  3. Derived "groups": aggregate nodes by stack+grpId → stack totals → scale y0/y1 to screen.\n  4. Derived "destinationNodes" (filter stack==stk2) and "edges" (filter stk1, lookup target, linkpath diagonal, strokeWidth).\n  5. Marks: path (edges), rect (groups), text (labels inward toward the center). Bottom axis with stackNames (Source / Destination).`,
+        'RESPONSIVE LAYOUT (required — labels must stay inside the panel):\n  - Set padding: { left: 8, right: 8, top: 8, bottom: 28 } so the bottom axis is not clipped.\n  - x band scale: paddingOuter ~0.12 and paddingInner ~0.9 so stacks sit inset from the edges.\n  - Place group text labels INSIDE (toward center): left stack at band + 6 (align left); right stack at band - 6 (align right). Never place labels outside the stacks toward the panel edge.\n  - Hide labels when the group height is < ~13px.',
+        'Do NOT add groupSelector / groupHover click signals or "show all" buttons.',
+        'NEVER set top-level root "encode" x/y; the panel sizes the view.',
+        'Y SCALE (critical — wrong domain blanks the chart): MUST be\n  `{ "name": "y", "type": "linear", "range": "height", "nice": true, "zero": true, "domain": { "data": "nodes", "field": "y1" } }`.\n  Never `domain: [0, 1]` or any fixed numeric interval — stack totals are real counts/sums, not unit fractions.',
+        'EXPRESSIONS: always lowercase helpers — scale(, bandwidth(, domain(, range(. Never Scale( / Bandwidth(.',
+        'TOOLTIPS: ASCII only in signal strings (use " -> ", not unicode arrows).',
+      ],
+      esqlAdditionalInstructions,
+    },
+  },
+  example: {
+    description:
+      'Static two-stack Sankey: stk1/stk2/size flow rows → fold+stack nodes → groups + linkpath edges → path/rect/text. Use range "category" for Kibana theme colors and padding so axis/stack labels stay inside the panel. Bind the Canonical ES|QL source named `source`; do not add click-to-filter signals.',
+    load: () => import('./sankey').then((module) => module.spec),
+  },
+  disclosedFallbackContext: SANKEY_DISCLOSED_FALLBACK_CONTEXT,
+  checkIntegrity: wrapIntegrity(validateSankeyRows, formatSankeyIntegrityError),
+};
+
+/** @deprecated Prefer chartType.prompt.config.esqlAdditionalInstructions */
+export { esqlAdditionalInstructions };
 
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',

@@ -9,7 +9,7 @@ Which grammar a generated specification uses: Vega-Lite or raw Vega.
 _Avoid_: renderer, engine, format (when meaning the grammar)
 
 **Dialect gate**:
-The allowlist of Raw Vega chart intents (currently Sunburst, Radar, and Sankey). Selection is performed by a small classifier model call that returns a catalog id or `none`; when `none`, authoring stays within Vega-Lite (unsupported diagrams still get an honest refusal). Catalog metadata (classifier blurbs, reference examples, chart/ES|QL rules, integrity checks) lives in a single `RAW_VEGA_CATALOG` registry.
+The allowlist of Raw Vega chart intents (currently Sunburst, Radar, and Sankey). Selection is performed by a small classifier model call that returns a catalog id or `none`; when `none`, authoring stays within Vega-Lite (unsupported diagrams still get an honest refusal). Chart-type metadata (selection blurbs, curated examples, per-type rules, ES|QL shape instructions, integrity checks) lives in the Lens-style `chart_type_registry` (`chart_types/*` modules, Raw + Vega-Lite).
 _Avoid_: model-chosen free-form dialect, keyword-only routing
 
 **Catalog id**:
@@ -53,7 +53,7 @@ When an allowlisted chart is selected but its required ES|QL table cannot be pro
 _Avoid_: silent VL fallback, hard fail with no alternative chart
 
 **Allowlist refusal**:
-For Raw Vega diagram intents not yet in the Dialect gate allowlist (network, chord, …), do not author Raw Vega: refuse honestly and offer Vega-Lite / Lens / multi-chart alternatives. Widen the allowlist chart-by-chart via the catalog registry.
+For Raw Vega diagram intents not yet in the Dialect gate allowlist (network, chord, …), do not author Raw Vega: refuse honestly and offer Vega-Lite / Lens / multi-chart alternatives. Widen the allowlist chart-by-chart via the chart type registry.
 _Avoid_: free-form Raw Vega, silent VL substitution for named unsupported diagrams
 
 **Vega-Lite**:
@@ -69,5 +69,5 @@ The Agent Builder `create_visualization` / panel choice between Lens and the Veg
 _Avoid_: Dialect, Vega-Lite, raw Vega
 
 **Sunburst / Radar / Sankey**:
-Allowlisted Raw Vega catalog charts: hierarchical radial partition (`stratify` / `partition`); polar multivariate (`linear-closed`); two-stack flow (`linkpath`). Each has colocated `chartRules`, ES|QL shape instructions, reference example, and row-integrity checks in the catalog registry.
+Allowlisted Raw Vega chart types: hierarchical radial partition (`stratify` / `partition`); polar multivariate (`linear-closed`); two-stack flow (`linkpath`). Each lives under `chart_types/` with `prompt.selection` / `prompt.config`, a lazy `example`, and row-integrity checks registered in `chart_type_registry`.
 _Avoid_: treating these as free-form Raw Vega or as Lens treemap/pie/donut substitutes unless the user asked for that chart family
