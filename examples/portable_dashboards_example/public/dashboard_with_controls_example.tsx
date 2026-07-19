@@ -17,7 +17,6 @@ import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { controlGroupStateBuilder } from '@kbn/control-group-renderer';
 import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
-import type { StartDeps } from './plugin';
 
 const toPinnedPanels = (
   controlGroupState: Partial<ControlGroupRuntimeState>
@@ -36,13 +35,7 @@ const toPinnedPanels = (
     }) as DashboardState['pinned_panels'];
 };
 
-export const DashboardWithControlsExample = ({
-  dataView,
-  uiActions,
-}: {
-  dataView: DataView;
-  uiActions: StartDeps['uiActions'];
-}) => {
+export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView }) => {
   const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
 
   // add a filter debugger panel as soon as the dashboard becomes available
@@ -75,28 +68,22 @@ export const DashboardWithControlsExample = ({
         <DashboardRenderer
           getCreationOptions={async (): Promise<DashboardCreationOptions> => {
             const controlGroupState: Partial<ControlGroupRuntimeState> = {};
-            await controlGroupStateBuilder.addDataControlFromField(
-              controlGroupState,
-              {
-                data_view_id: dataView.id ?? '',
-                title: 'Destination country',
-                field_name: 'geo.dest',
-                width: 'medium',
-                grow: false,
-              },
-              uiActions
-            );
-            await controlGroupStateBuilder.addDataControlFromField(
-              controlGroupState,
-              {
-                data_view_id: dataView.id ?? '',
-                field_name: 'bytes',
-                width: 'medium',
-                grow: true,
-                title: 'Bytes',
-              },
-              uiActions
-            );
+            // Use explicit control constructors (not addDataControlFromField) so this example
+            // does not depend on CONTROL_MENU_TRIGGER field-compatibility checks.
+            controlGroupStateBuilder.addOptionsListControl(controlGroupState, {
+              data_view_id: dataView.id ?? '',
+              title: 'Destination country',
+              field_name: 'geo.dest',
+              width: 'medium',
+              grow: false,
+            });
+            controlGroupStateBuilder.addRangeSliderControl(controlGroupState, {
+              data_view_id: dataView.id ?? '',
+              field_name: 'bytes',
+              width: 'medium',
+              grow: true,
+              title: 'Bytes',
+            });
 
             return {
               getInitialInput: () => ({
