@@ -69,7 +69,7 @@ const createVisualizationSchema = z.object({
     .enum(['lens', 'vega'])
     .optional()
     .describe(
-      `(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" when the user asks for Vega/Vega-Lite, or for allowlisted Raw Vega charts (${rawVegaAllowlistCompact}), or for custom Vega-Lite charts Lens cannot express (small multiples/faceting, layered/combo charts, scatter/bubble with size, custom encodings). Required: pass "vega" for ${rawVegaCatalogIds}/Vega requests — do not omit it. Ignored when updating an existing attachment (edits keep the existing renderer).`
+      `(optional) "lens" (default) or "vega". Pass "vega" for Vega/Vega-Lite or allowlisted Raw Vega (${rawVegaAllowlistCompact}); required for ${rawVegaCatalogIds}. Ignored on edits (keeps the existing renderer).`
     ),
   chartType: z
     .nativeEnum(SupportedChartType)
@@ -92,25 +92,21 @@ export const createVisualizationTool = (): BuiltinToolDefinition<
   return {
     id: platformCoreTools.createVisualization,
     type: ToolType.builtin,
-    description: `REQUIRED tool for creating or updating visualizations from natural language. Supports Lens charts AND Vega-family charts: Vega-Lite plus allowlisted Raw Vega (${rawVegaAllowlist}).
+    description: `REQUIRED tool for creating or updating visualizations from natural language (Lens or Vega-family). Generates ES|QL, authors/validates the spec, and stores an attachment.
 
-Use this tool whenever the user asks for a chart or visualization — especially Vega, Vega-Lite, or ${rawVegaCatalogIds}. Pass renderer: "vega" for those. This tool generates ES|QL and authors/validates the Lens or Vega spec and stores the visualization attachment.
+Pass \`renderer: "vega"\` for Vega / Vega-Lite / allowlisted Raw Vega (${rawVegaAllowlist}) — required for ${rawVegaCatalogIds}; do not omit. The tool picks Vega-Lite vs Raw Vega from the query. Default is Lens (${Object.values(
+      SupportedChartType
+    ).join(', ')}). Edits keep the existing renderer.
 
-${NEVER_HAND_AUTHOR_VEGA_GUIDANCE} Do NOT substitute generate_esql + execute_esql for this tool (those are only for optional grounding). Prefer this tool over telling the user a chart cannot be built whenever the request fits Lens, Vega-Lite, or an allowlisted Raw Vega chart. If a request needs unsupported Raw Vega (e.g. network, chord, custom signals/interactivity), be honest and offer alternatives.
+${NEVER_HAND_AUTHOR_VEGA_GUIDANCE} Do not substitute generate_esql + execute_esql (grounding only).
 
 ${VEGA_SCOPE_AGENT_GUIDANCE}
 
-Choose "renderer":
-- "lens" (default when omitted) for a standard Lens chart (${Object.values(
-      SupportedChartType
-    ).join(', ')}).
-- "vega" when the user asks for Vega/Vega-Lite, or when no Lens type fits — e.g. small multiples / faceting, layered or combination charts, scatter / bubble with size, ${rawVegaAllowlist}, or custom encodings. The tool selects Vega-Lite vs allowlisted Raw Vega automatically from the query.
-
 This tool will:
-1. If attachment_id is provided, read the existing visualization from that attachment (edits keep the same renderer)
-2. Generate an ES|QL query if not provided
-3. Generate and validate the visualization (Lens config or Vega-family spec) for the chosen renderer
-4. Store the result as an attachment (creating new or updating existing) for future modifications
+1. Read an existing attachment when attachment_id is provided
+2. Generate ES|QL if not provided
+3. Generate and validate the Lens or Vega visualization
+4. Store the result as an attachment
 
 Ground first: make sure the target index exists and every field you reference is real before calling this tool. If you omit "index" the tool auto-discovers one, but that fails when the referenced fields are invented or absent from the cluster (do NOT assume APM/metrics schemas are present). For multi-panel requests, resolve the index once up front and pass the same "index" to every call rather than firing several index-less calls in parallel.`,
     schema: createVisualizationSchema,
