@@ -186,6 +186,25 @@ const buildDslFilter = (
 });
 
 /**
+ * Pre-casts all typed EUID source fields to KEYWORD before EUID resolution.
+ * Under unmapped_fields="NULLIFY", absent fields are null-typed at plan time.
+ * getEuidEsqlEvaluation emits TO_STRING(field) inside CASE branches — ES|QL
+ * validates those at plan time even for branches that can never execute, causing
+ * "partiallyFold produced type [NULL] but expected [KEYWORD]" on indices where
+ * these fields are unmapped. Unconditional: EUID resolution always runs.
+ */
+const buildEuidSourceFieldCasts = (): string => {
+  const actorFields = (TYPED_ENTITY_PREFIXES as readonly string[])
+    .flatMap((prefix) => GRAPH_ACTOR_EUID_SOURCE_FIELDS[prefix as keyof EuidSourceFields])
+    .filter((f) => !f.startsWith('event.') && !f.startsWith('data_stream.'));
+  const targetFields = (TYPED_ENTITY_PREFIXES as readonly string[])
+    .flatMap((prefix) => GRAPH_TARGET_EUID_SOURCE_FIELDS[prefix as keyof EuidSourceFields])
+    .filter((f) => !f.startsWith('event.') && !f.startsWith('data_stream.'));
+  const uniqueFields = [...new Set([...actorFields, ...targetFields])];
+  return uniqueFields.map((f) => `| EVAL \`${f}\` = TO_STRING(\`${f}\`)`).join('\n');
+};
+
+/**
  * Builds v2 actor resolution using EUID computation.
  * Computes entity.namespace (from event.module/data_stream.dataset) and per-type EUIDs
  * in a combined EVAL to prevent the ES|QL optimizer from pruning intermediate columns.
@@ -399,7 +418,7 @@ FROM ${indexPatterns
     .join(',')} METADATA _id, _index
 | EVAL  __actor_exists = user.id IS NOT NULL OR user.full_name IS NOT NULL OR user.email IS NOT NULL
 | EVAL  __action_exists = event.action IS NOT NULL
-| EVAL data_stream.dataset = COALESCE(event.dataset, data_stream.dataset)
+| EVAL data_stream.dataset = COALESCE(event.dataset, data_stream.dataset, "")
 ${
   integrationRuntimeEvalsEnabled !== false
     ? `// Normalise user.id to keyword: fixes CASE return-type conflicts when user.id is mapped as
@@ -416,6 +435,7 @@ ${buildIntegrationRuntimeEvals({ skipColumns: ['host.ip', 'host.target.ip', 'hos
     OR service.target.id IS NOT NULL OR service.target.name IS NOT NULL
     OR entity.target.id IS NOT NULL OR entity.target.name IS NOT NULL
 ${showUnknownTarget ? '' : '| WHERE __target_exists'}
+${buildEuidSourceFieldCasts()}
 ${buildV2ActorResolution()}
 | WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
 ${buildV2TargetResolution()}

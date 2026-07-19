@@ -33,6 +33,22 @@ describe('buildIntegrationRuntimeEvals — LIKE conditions', () => {
   });
 });
 
+describe('buildIntegrationRuntimeEvals — CASE default type safety', () => {
+  it('uses TO_STRING(null) as the default in every CASE expression to preserve KEYWORD type after constant folding', () => {
+    // ES|QL partiallyFold folds CASE to its default when all conditions are constant-false
+    // (e.g. after COALESCE makes data_stream.dataset a derived constant and user.id has been
+    // pre-cast to KEYWORD so "user.id IS NOT NULL" folds to false). If the default is bare
+    // `null` (null_type) but the CASE was typed as KEYWORD, partiallyFold throws
+    // "partiallyFold produced type [NULL] but expected [KEYWORD]". Using TO_STRING(null) keeps
+    // the default KEYWORD-typed, preventing the mismatch.
+    const query = buildIntegrationRuntimeEvals();
+    // bare `null` as a top-level CASE default must never appear
+    expect(query).not.toMatch(/CASE\([^)]*,\s*\n\s*null\s*\n\s*\)/s);
+    // every CASE default must be TO_STRING(null) instead
+    expect(query).toMatch(/TO_STRING\(null\)/);
+  });
+});
+
 describe('buildIntegrationRuntimeEvals — sysdig field names', () => {
   it('uses sysdig.vulnerability.resource_id, not the missing bare resource.id', () => {
     // sysdig.vulnerability data stream has no top-level "resource.id" field.

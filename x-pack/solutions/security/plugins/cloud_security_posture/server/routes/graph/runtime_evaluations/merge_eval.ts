@@ -201,7 +201,7 @@ export function formatCaseAssignment(assignment: ParsedAssignment): string {
     parts.push(branch.condition, branch.value);
   }
 
-  parts.push(assignment.defaultValue);
+  parts.push(assignment.defaultValue === 'null' ? 'TO_STRING(null)' : assignment.defaultValue);
 
   const lines = parts.map((part, idx) => {
     const suffix = idx < parts.length - 1 ? ',' : '';
