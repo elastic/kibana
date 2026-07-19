@@ -15,6 +15,7 @@ import {
   TEMPLATE_SCHEMA_URI,
 } from '../utils/template_json_schema';
 import { TemplateYamlEditorBase } from './template_yaml_editor';
+import { TemplateActionsMenu } from './template_actions_menu';
 import { TemplateYamlValidationAccordion } from './template_yaml_validation_accordion';
 import { useValidationAccordionPositioning } from '../hooks/use_validation_accordion_positioning';
 import { useFieldNameValidation } from '../hooks/use_field_name_validation';
@@ -150,6 +151,14 @@ export const TemplateYamlEditor = ({
           onValidationChange={handleValidationChange}
           onEditorMount={handleEditorMount}
         />
+        {isEditorMounted ? (
+          <TemplateActionsMenu
+            editor={editorRef.current}
+            value={value}
+            onChange={onChange}
+            owner={owner[0]}
+          />
+        ) : null}
       </div>
       <div css={styles.validationFooter}>
         <TemplateYamlValidationAccordion

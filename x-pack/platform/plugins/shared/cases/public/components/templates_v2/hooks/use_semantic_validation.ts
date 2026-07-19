@@ -76,4 +76,17 @@ export const useSemanticValidation = (
       }
     };
   }, [editor, value]);
+
+  // Clear this owner's markers when the editor is torn down (or swapped). The per-value effect above
+  // deliberately does NOT clear on cleanup — doing so on every keystroke would flicker markers off
+  // and back on. This unmount-scoped effect only fires on editor change/unmount, and guards against a
+  // disposed model (whose markers are already gone) so a reused model never keeps stale diagnostics.
+  useEffect(() => {
+    return () => {
+      const model = editor?.getModel();
+      if (model && !model.isDisposed()) {
+        monaco.editor.setModelMarkers(model, SEMANTIC_VALIDATION_OWNER, []);
+      }
+    };
+  }, [editor]);
 };

@@ -19,13 +19,16 @@ import { FIELD_TYPE_TITLES } from './field_type_titles';
 
 /**
  * Type-specific validation rules — the ones that only take effect on certain controls. The
- * always-applicable rules (`required`, `required_on_close`, `required_when`) are deliberately not
- * listed: they are valid on every input, so they are never flagged.
+ * always-applicable rules (`required`, `required_on_close`, `required_when`, `pattern`) are
+ * deliberately not listed: they are valid on every input, so they are never flagged. In
+ * particular `pattern` is enforced at runtime for every inline control (validateExtendedFields
+ * calls `validatePattern` unconditionally, before the per-control branch), so flagging it as
+ * text-only here would wrongly tell an author to remove a constraint that actually works.
  */
-const TYPE_SPECIFIC_RULES = ['pattern', 'min', 'max', 'min_length', 'max_length'] as const;
+const TYPE_SPECIFIC_RULES = ['min', 'max', 'min_length', 'max_length'] as const;
 type TypeSpecificRule = (typeof TYPE_SPECIFIC_RULES)[number];
 
-const TEXT_RULES: readonly TypeSpecificRule[] = ['pattern', 'min_length', 'max_length'];
+const TEXT_RULES: readonly TypeSpecificRule[] = ['min_length', 'max_length'];
 const NUMBER_RULES: readonly TypeSpecificRule[] = ['min', 'max'];
 
 /**
@@ -33,7 +36,7 @@ const NUMBER_RULES: readonly TypeSpecificRule[] = ['min', 'max'];
  * "Validation by field type" reference: text controls honor `pattern`/length rules, number
  * controls honor `min`/`max`, and every other control honors none of them.
  */
-const getApplicableTypeSpecificRules = (control: string): readonly TypeSpecificRule[] => {
+export const getApplicableTypeSpecificRules = (control: string): readonly TypeSpecificRule[] => {
   switch (control) {
     case FieldType.INPUT_TEXT:
     case FieldType.TEXTAREA:

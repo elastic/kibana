@@ -387,6 +387,10 @@ function convertFieldUnionToIfThenChain(ctx: OverrideCtx) {
     return;
   }
 
+  // Only branches carrying a `control` const become if/then entries. The RefField branch (`$ref`,
+  // no `control`) contributes none and the original oneOf/anyOf is dropped below, so a `- $ref: foo`
+  // entry gets no JSON-Schema validation here. This is intentional: `$ref` completion is served by
+  // the dedicated completion provider (use_ref_field_completion), and inline fields still validate.
   const allOf: Array<Record<string, unknown>> = branchesWithControl.map(
     ({ controlValue, branch }) => ({
       if: { properties: { control: { const: controlValue } }, required: ['control'] },

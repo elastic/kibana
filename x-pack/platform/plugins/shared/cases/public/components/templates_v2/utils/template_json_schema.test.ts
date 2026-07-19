@@ -383,6 +383,28 @@ describe('getTemplateDefinitionJsonSchema', () => {
       }
     });
 
+    it('keeps each control real metadata keys allowed (so additionalProperties:false never false-flags them)', () => {
+      // Because metadata is locked to additionalProperties:false, any real metadata key the renderer
+      // supports must be present as a named property — otherwise Monaco would wrongly flag it as "not
+      // allowed". This guards against a future control prop being dropped from the Zod named props.
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const branches = getFieldsOneOfBranches(schema);
+
+      const metadataKeysFor = (control: string): string[] => {
+        const branch = branches.find(({ controlConst }) => controlConst === control);
+        const metadata = branch ? getBranchMetadata(branch.branch) : undefined;
+        return Object.keys((metadata?.properties as JsonSchemaObject | undefined) ?? {});
+      };
+
+      expect(metadataKeysFor('DATE_PICKER')).toEqual(
+        expect.arrayContaining(['show_time', 'timezone'])
+      );
+      expect(metadataKeysFor('USER_PICKER')).toEqual(expect.arrayContaining(['multiple']));
+      expect(metadataKeysFor('TEXTAREA')).toEqual(expect.arrayContaining(['markdown']));
+      expect(metadataKeysFor('MARKDOWN')).toEqual(expect.arrayContaining(['content']));
+      expect(metadataKeysFor('TOGGLE')).toEqual(expect.arrayContaining(['default']));
+    });
+
     it('includes both options and default in the SELECT_BASIC metadata schema', () => {
       const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
       const branches = getFieldsOneOfBranches(schema);

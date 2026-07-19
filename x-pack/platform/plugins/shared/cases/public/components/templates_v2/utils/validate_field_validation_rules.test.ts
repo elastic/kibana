@@ -48,7 +48,7 @@ fields:
     expect(flagged).toEqual(['min']);
   });
 
-  it('flags all type-specific rules on controls that honor none of them', () => {
+  it('flags length/numeric rules on controls that honor none of them but never pattern', () => {
     const yaml = `name: T
 fields:
   - name: region
@@ -64,7 +64,36 @@ fields:
 
     const flagged = rulesFlagged(yaml);
 
-    expect(flagged.sort()).toEqual(['min', 'pattern']);
+    // `pattern` is enforced at runtime for every control, so it must not be flagged; only the
+    // numeric/length rules that truly no-op on a Select are surfaced.
+    expect(flagged.sort()).toEqual(['min']);
+  });
+
+  it('never flags pattern on controls that are neither text nor number', () => {
+    const yaml = `name: T
+fields:
+  - name: region
+    control: SELECT_BASIC
+    type: keyword
+    metadata:
+      options: [a, b]
+    validation:
+      pattern:
+        regex: "^a"
+  - name: due
+    control: DATE_PICKER
+    type: date
+    validation:
+      pattern:
+        regex: "2024"
+  - name: escalate
+    control: TOGGLE
+    type: keyword
+    validation:
+      pattern:
+        regex: "true"`;
+
+    expect(getInapplicableValidationRuleMarkers(yaml)).toEqual([]);
   });
 
   it('marks the rule as a warning and includes the human-readable field type', () => {
