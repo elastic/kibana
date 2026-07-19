@@ -8,9 +8,8 @@
  */
 
 import type { ErrorObject } from 'ajv-draft-04';
-import type { CompatibilityIssue } from './compatibility';
 
-export type IssueSource = 'schema' | 'compatibility' | 'ref-resolution';
+export type IssueSource = 'schema' | 'ref-resolution';
 export type IssueSeverity = 'error' | 'warning';
 export type IssueCategory = 'structural' | 'quality';
 
@@ -21,10 +20,6 @@ export interface OasIssue {
   source: IssueSource;
   severity: IssueSeverity;
   category: IssueCategory;
-  // Declared for a future autofix pass; unused in policy v1.
-  ruleId?: string;
-  suggestedFix?: string;
-  autofixable?: boolean;
 }
 
 export interface SeverityCounts {
@@ -41,12 +36,7 @@ export type Baseline = Record<string, SeverityCounts>;
 
 const DOC_COMPLETENESS_PROPERTIES = new Set(['description', 'summary', 'example', 'examples']);
 
-/**
- * Classifies a single AJV schema error into an OasIssue, or returns `null` when
- * the error is known noise that should be dropped:
- * - `missingProperty: '$ref'`: `$ref` is an optional optimization, never required.
- * - `passingSchemas: null`: aggregate `anyOf`/`oneOf` noise.
- */
+// Drop known AJV noise: optional `$ref`, aggregate anyOf/oneOf `passingSchemas: null`.
 export const classifySchemaError = (error: ErrorObject): OasIssue | null => {
   const { params, keyword, instancePath, message, schemaPath } = error;
 
@@ -79,25 +69,9 @@ export const classifyRefError = (message: string): OasIssue => ({
   category: 'structural',
 });
 
-export const classifyCompatibilityIssue = (issue: CompatibilityIssue): OasIssue => ({
-  path: issue.path,
-  message: issue.message,
-  source: 'compatibility',
-  severity: 'error',
-  category: 'structural',
-  ruleId: issue.ruleId,
-});
-
-/**
- * Severity counts for the baseline. Compatibility issues are excluded because
- * they keep their independent hard-fail path (see cli.ts).
- */
 export const countSeverities = (issues: OasIssue[]): SeverityCounts =>
   issues.reduce<SeverityCounts>(
     (counts, issue) => {
-      if (issue.source === 'compatibility') {
-        return counts;
-      }
       if (issue.severity === 'error') {
         counts.errors++;
       } else {
@@ -111,9 +85,6 @@ export const countSeverities = (issues: OasIssue[]): SeverityCounts =>
 export const computeBreakdown = (issues: OasIssue[]): CategoryBreakdown =>
   issues.reduce<CategoryBreakdown>(
     (breakdown, issue) => {
-      if (issue.source === 'compatibility') {
-        return breakdown;
-      }
       breakdown[issue.severity === 'error' ? 'errors' : 'warnings'][issue.category]++;
       return breakdown;
     },
@@ -132,6 +103,7 @@ const isSeverityCounts = (value: unknown): value is SeverityCounts =>
 export const isNewBaselineShape = (value: unknown): value is Baseline =>
   typeof value === 'object' &&
   value !== null &&
+  Object.values(value).length > 0 &&
   Object.values(value).every((entry) => isSeverityCounts(entry));
 
 export const isLegacyBaselineShape = (value: unknown): boolean =>
@@ -139,3 +111,17 @@ export const isLegacyBaselineShape = (value: unknown): boolean =>
   value !== null &&
   Object.values(value).length > 0 &&
   Object.values(value).every((entry) => typeof entry === 'number');
+
+// Gates on both axes: a warning increase is also a failure. Without this, a quality-warning
+// increase (missing descriptions) could hide behind a structural cleanup that lowers the error
+// count, leaving the total unchanged and CI green despite a real regression.
+export const hasSeverityIncrease = (
+  baseline: Baseline,
+  current: Baseline,
+  yamlPaths: string[]
+): boolean =>
+  yamlPaths.some((yamlPath) => {
+    const prev = baseline[yamlPath] ?? { errors: 0, warnings: 0 };
+    const curr = current[yamlPath] ?? { errors: 0, warnings: 0 };
+    return curr.errors > prev.errors || curr.warnings > prev.warnings;
+  });
