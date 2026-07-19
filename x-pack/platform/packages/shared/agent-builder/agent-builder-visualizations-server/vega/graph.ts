@@ -575,13 +575,15 @@ export const createVegaGraph = async (
 
   // A query that could not be resolved/executed must not be authored into a
   // spec (the spec would only fail at render), so route straight to finalize.
+  // On success, select VL reference examples before authoring so the first
+  // author pass always sees the selected block (no parallel race with ES|QL).
   const afterGenerateEsqlRouter = (state: VegaState): string => {
     const lastGenerate = [...state.actions].reverse().find(isGenerateEsqlAction);
     if (!lastGenerate?.success) {
       logger.warn('ES|QL resolution failed; finalizing without authoring a Vega spec');
       return FINALIZE_NODE;
     }
-    return AUTHOR_SPEC_NODE;
+    return SELECT_EXAMPLES_NODE;
   };
 
   const shouldRetryRouter = (state: VegaState): string => {
@@ -615,11 +617,11 @@ export const createVegaGraph = async (
     .addNode(FINALIZE_NODE, finalizeNode)
     .addEdge('__start__', CLASSIFY_DIALECT_NODE)
     .addEdge(CLASSIFY_DIALECT_NODE, GENERATE_ESQL_NODE)
-    .addEdge(CLASSIFY_DIALECT_NODE, SELECT_EXAMPLES_NODE)
     .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
-      [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
+      [SELECT_EXAMPLES_NODE]: SELECT_EXAMPLES_NODE,
       [FINALIZE_NODE]: FINALIZE_NODE,
     })
+    .addEdge(SELECT_EXAMPLES_NODE, AUTHOR_SPEC_NODE)
     .addEdge(AUTHOR_SPEC_NODE, VALIDATE_SPEC_NODE)
     .addConditionalEdges(VALIDATE_SPEC_NODE, shouldRetryRouter, {
       [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,

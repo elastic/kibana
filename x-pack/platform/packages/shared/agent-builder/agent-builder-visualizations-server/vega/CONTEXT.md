@@ -37,8 +37,8 @@ The only hierarchical ES|QL result shape supported for Sunburst in the Vertical 
 _Avoid_: path column, level1/level2 unpivot, leaf-only tables, multiple roots
 
 **Classify-then-query**:
-Graph ordering for new visualizations: run the Dialect gate classifier first, then generate ES|QL with catalog-specific instructions (e.g. Parent–child table for Sunburst), then author/normalize/validate in that Dialect.
-_Avoid_: classify in parallel with ES|QL, classify after ES|QL
+Graph ordering for new visualizations: run the Dialect gate classifier first, then generate ES|QL with catalog-specific instructions (e.g. Parent–child table for Sunburst), then (for Vega-Lite) select reference examples, then author/normalize/validate in that Dialect.
+_Avoid_: classify in parallel with ES|QL, classify after ES|QL, author before VL reference-example selection finishes
 
 **Disclosed fallback**:
 When an allowlisted chart is selected but its required ES|QL table cannot be produced (Parent–child for Sunburst; key/value with ≥3 keys for Radar; stk1/stk2/size flows for Sankey), do not silently claim success: produce the closest Vega-Lite approximation and disclose that the requested chart was not possible.

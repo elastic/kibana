@@ -174,7 +174,32 @@ describe('createVegaGraph', () => {
     expect(selectInvoke).toHaveBeenCalledTimes(1);
   });
 
-  it('does not author a spec when ES|QL resolution fails, despite selecting examples in parallel', async () => {
+  it('waits for reference example selection before authoring (no race with ES|QL)', async () => {
+    let resolveSelect!: (value: { exampleIds: string[] }) => void;
+    selectInvoke.mockImplementation(
+      () =>
+        new Promise<{ exampleIds: string[] }>((resolve) => {
+          resolveSelect = resolve;
+        })
+    );
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'point' }));
+
+    const runPromise = run();
+    // Let classify + ES|QL finish while example selection is still pending.
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(selectInvoke).toHaveBeenCalledTimes(1);
+    expect(invoke).not.toHaveBeenCalled();
+
+    resolveSelect({ exampleIds: ['scatter_bubble'] });
+    await runPromise;
+
+    expect(invoke).toHaveBeenCalledTimes(1);
+    const authorPrompt = JSON.stringify(invoke.mock.calls[0][0]);
+    expect(authorPrompt).toContain('REFERENCE EXAMPLES');
+    expect(authorPrompt).toContain('Scatter / bubble plot (encoded size)');
+  });
+
+  it('does not author a spec or select examples when ES|QL resolution fails', async () => {
     mockedGenerateEsql.mockResolvedValue({
       query: 'FROM logs-*',
       error: 'verification_exception: boom',
@@ -183,7 +208,7 @@ describe('createVegaGraph', () => {
     await run();
 
     expect(classifyInvoke).toHaveBeenCalledTimes(1);
-    expect(selectInvoke).toHaveBeenCalledTimes(1);
+    expect(selectInvoke).not.toHaveBeenCalled();
     expect(invoke).not.toHaveBeenCalled();
   });
 
