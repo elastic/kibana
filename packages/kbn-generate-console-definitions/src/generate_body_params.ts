@@ -50,8 +50,8 @@ const convertProperties = (
 ): Record<string, unknown> => {
   const result: Record<string, unknown> = {};
   for (const property of properties) {
-    const { name, serverDefault, type } = property;
-    const converted = convertBodyValueOf(type, serverDefault, schema, visited);
+    const { name, type } = property;
+    const converted = convertBodyValueOf(type, schema, visited);
     result[name] = converted;
   }
   return result;
@@ -59,7 +59,6 @@ const convertProperties = (
 
 const convertBodyValueOf = (
   valueOf: SpecificationTypes.ValueOf,
-  serverDefault: SpecificationTypes.Property['serverDefault'],
   schema: SpecificationTypes.Model,
   visited: Set<string>
 ): BodyParamValue => {
@@ -80,7 +79,6 @@ const convertBodyValueOf = (
     } else if (definedType.kind === 'type_alias') {
       return convertBodyValueOf(
         (definedType as SpecificationTypes.TypeAlias).type,
-        serverDefault,
         schema,
         visited
       );
@@ -104,7 +102,6 @@ const convertBodyValueOf = (
   } else if (kind === 'array_of') {
     const inner = convertBodyValueOf(
       (valueOf as SpecificationTypes.ArrayOf).value,
-      serverDefault,
       schema,
       visited
     );
@@ -113,19 +110,18 @@ const convertBodyValueOf = (
     return [inner];
   } else if (kind === 'union_of') {
     const converted = (valueOf as SpecificationTypes.UnionOf).items.map((item) =>
-      convertBodyValueOf(item, serverDefault, schema, visited)
+      convertBodyValueOf(item, schema, visited)
     );
-    if (converted.some((v) => v === undefined || v === '')) return ''; // open-ended string makes the whole union open-ended
-    const defined = converted as BodyParamValue[];
-    const objectValue = defined.find(isObjectValue); // take first object branch (e.g. boolean | SourceFilter → SourceFilter shape)
+    if (converted.some((v) => v === '')) return ''; // open-ended string makes the whole union open-ended
+    const objectValue = converted.find(isObjectValue); // take first object branch (e.g. boolean | SourceFilter → SourceFilter shape)
     if (objectValue !== undefined) return objectValue; // object branch takes priority — it subsumes booleans and scalars
-    const allValues = defined.flatMap((v) => {
+    const allValues = converted.flatMap((v) => {
       if (isOneOf(v)) return v.__one_of;
       if (typeof v === 'string' && v !== '__flag__') return [v];
       return [];
     });
     if (allValues.length > 0) return oneOf(allValues);
-    if (defined.some((v) => v === '__flag__')) return '__flag__';
+    if (converted.some((v) => v === '__flag__')) return '__flag__';
     return '';
   } else if (kind === 'literal_value') {
     return valueOf.value.toString();

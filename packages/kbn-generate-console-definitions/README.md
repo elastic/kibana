@@ -10,5 +10,5 @@ The definitions files are generated from the Elasticsearch specification [repo](
 
 ## Functionality
 This script generates definitions for all endpoints defined in the ES specification at once. 
-The script generates fully functional autocomplete definition files with properties as described in the [Console README.md file](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/README.md) except `data_autocomplete_rules`. Currently, this property needs to be written manually to add autocomplete suggestions for request body parameters.  
+The script generates fully functional autocomplete definition files with properties as described in the [Console README.md file](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/README.md), including `data_autocomplete_rules` derived from the request body types in the specification. Generated body rules are intentionally coarse; hand-written definitions in `json/overrides` and `js` take precedence over them at runtime and can be used to refine suggestions for specific endpoints.
 

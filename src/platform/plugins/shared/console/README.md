@@ -76,8 +76,7 @@ Autocomplete definitions are all created in the form of javascript objects loade
 ### Creating definitions
 The [`generated`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/generated) folder contains definitions created automatically from Elasticsearch specifications. See this [README](https://github.com/elastic/kibana/blob/main/packages/kbn-generate-console-definitions/README.md) file for more information on the `generate-console-definitions` script. The AppEx/Management team (@elastic/kibana-management) regularly runs the script to update the definitions and is planning to automate this process. 
 
-Manually created override files in the [`overrides`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/overrides) folder contain additions for request body parameters since those
-are not created by the script. Any other fixes such as documentation links, request methods and patterns and url parameters 
+Manually created override files in the [`overrides`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/overrides) folder contain refinements for request body parameters: the script derives coarse body rules from the Elasticsearch specification, and override files take precedence over them for curated suggestions. Any other fixes such as documentation links, request methods and patterns and url parameters 
 should be addressed at the source. That means this should be fixed in Elasticsearch specifications and then 
 autocomplete definitions can be re-generated with the script. 
 
@@ -140,7 +139,7 @@ A property that describes if an endpoint is available in stack and serverless en
 ```
 
 #### `data_autocomplete_rules`
-Request body parameters and their values. Only used in `overrides` files because REST API specs don't contain any information about body request parameters.
+Request body parameters and their values. Generated definitions derive these from the Elasticsearch specification; `overrides` files refine or replace the generated rules where curated suggestions are needed.
 Refer to Elasticsearch REST API documentation when configuring this object. See the [Request body parameters](#request-body-parameters) section below for more info. An example:
 ```json
 {
