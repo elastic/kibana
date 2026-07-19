@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { CANONICAL_ESQL_SOURCE_NAME } from '../dialect';
 import {
-  CANONICAL_ESQL_SOURCE_NAME,
   RADAR_DISCLOSED_FALLBACK_CONTEXT,
   RADAR_MIN_KEYS,
   formatRadarIntegrityError,
   validateRadarRows,
-} from '../dialect';
+} from './radar_integrity';
 import { wrapIntegrity, type RawVegaChartTypeEntry } from './types';
 
 /**

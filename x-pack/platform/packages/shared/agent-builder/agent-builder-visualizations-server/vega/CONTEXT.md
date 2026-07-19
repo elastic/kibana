@@ -69,5 +69,5 @@ The Agent Builder `create_visualization` / panel choice between Lens and the Veg
 _Avoid_: Dialect, Vega-Lite, raw Vega
 
 **Sunburst / Radar / Sankey**:
-Allowlisted Raw Vega chart types: hierarchical radial partition (`stratify` / `partition`); polar multivariate (`linear-closed`); two-stack flow (`linkpath`). Each lives under `chart_types/` with `prompt.selection` / `prompt.config`, a lazy `example`, and row-integrity checks registered in `chart_type_registry`.
+Allowlisted Raw Vega chart types: hierarchical radial partition (`stratify` / `partition`); polar multivariate (`linear-closed`); two-stack flow (`linkpath`). Each lives under `chart_types/` with `prompt.selection` / `prompt.config`, a lazy `example`, and colocated row-integrity helpers (`*_integrity.ts`) wired through `chart_type_registry`.
 _Avoid_: treating these as free-form Raw Vega or as Lens treemap/pie/donut substitutes unless the user asked for that chart family

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { CANONICAL_ESQL_SOURCE_NAME } from '../dialect';
 import {
-  CANONICAL_ESQL_SOURCE_NAME,
   SANKEY_DISCLOSED_FALLBACK_CONTEXT,
   SANKEY_MIN_FLOWS,
   formatSankeyIntegrityError,
   validateSankeyRows,
-} from '../dialect';
+} from './sankey_integrity';
 import { wrapIntegrity, type RawVegaChartTypeEntry } from './types';
 
 /**

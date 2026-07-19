@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { CANONICAL_ESQL_SOURCE_NAME } from '../dialect';
 import {
-  CANONICAL_ESQL_SOURCE_NAME,
   SUNBURST_DISCLOSED_FALLBACK_CONTEXT,
   formatParentChildIntegrityError,
   validateParentChildRows,
-} from '../dialect';
+} from './sunburst_integrity';
 import { wrapIntegrity, type RawVegaChartTypeEntry } from './types';
 
 /**
