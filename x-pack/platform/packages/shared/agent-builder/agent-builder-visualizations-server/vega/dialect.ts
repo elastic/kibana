@@ -6,6 +6,9 @@
  */
 
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
+import { isRawVegaSchema } from './vega_schema';
+
+export { isRawVegaSchema } from './vega_schema';
 
 /** Grammar used when authoring / normalizing a Vega-family spec. */
 export type VegaDialect = 'vega-lite' | 'vega';
@@ -26,12 +29,6 @@ export const VEGA_SCHEMA = 'https://vega.github.io/schema/vega/v5.json';
 
 /** Name of the Canonical ES|QL source dataset injected into Raw Vega specs. */
 export const CANONICAL_ESQL_SOURCE_NAME = 'source';
-
-/** Whether a `$schema` URL identifies Raw Vega (not Vega-Lite). */
-export const isRawVegaSchema = (schema: unknown): boolean =>
-  typeof schema === 'string' &&
-  schema.includes('schema/vega/') &&
-  !schema.includes('schema/vega-lite/');
 
 /** Infer Dialect from a `$schema` value; defaults to Vega-Lite. */
 export const dialectFromSchema = (schema: unknown): VegaDialect =>

@@ -31,10 +31,8 @@ export const chartRules = `SANKEY / FLOW RULES:
   - x band scale: paddingOuter ~0.12 and paddingInner ~0.9 so stacks sit inset from the edges.
   - Place group text labels INSIDE (toward center): left stack at band + 6 (align left); right stack at band - 6 (align right). Never place labels outside the stacks toward the panel edge.
   - Hide labels when the group height is < ~13px.
-- STATIC DIAGRAM ONLY: do NOT add groupSelector / groupHover click signals, kibanaAddFilter, or "show all" buttons.
-- DO NOT set top-level "width", "height", or root "encode" x/y; the panel sizes the view.
-- COLOR (default): ordinal color scale range: "category" (Kibana theme). Never category10/category20 or invented scheme names. Never scheme "elastic".
-- COLOR (user override): only when the user asks for a specific palette, set range to an explicit hex array — do not invent a scheme name.
+- Do NOT add groupSelector / groupHover click signals or "show all" buttons.
+- NEVER set top-level root "encode" x/y; the panel sizes the view.
 - Y SCALE (critical — wrong domain blanks the chart): MUST be
   \`{ "name": "y", "type": "linear", "range": "height", "nice": true, "zero": true, "domain": { "data": "nodes", "field": "y1" } }\`.
   Never \`domain: [0, 1]\` or any fixed numeric interval — stack totals are real counts/sums, not unit fractions.
@@ -64,10 +62,7 @@ FROM kibana_sample_data_flights
 | STATS size = COUNT() BY stk1 = OriginCountry, stk2 = DestCountry
 | SORT size DESC
 | LIMIT 40
-\`\`\`
-
-Rules:
-- Still obey the Vega time-range and dotted-field rules above when the index is time-based.`;
+\`\`\``;
 
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',

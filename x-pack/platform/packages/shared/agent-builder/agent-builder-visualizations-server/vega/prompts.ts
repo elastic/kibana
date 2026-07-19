@@ -25,7 +25,8 @@ Therefore, for EVERY time-based chart — time series AND plain metrics/categori
 ## Field names for Vega
 
 Vega interprets a dot in a field name as a nested-object path, but ES|QL result columns are flat, so a column whose name contains a dot (e.g. \`host.name\`) is misread and renders as "undefined".
-- RENAME every such column to a readable, dotless alias in the query, e.g. \`RENAME host.name AS host\` or \`RENAME geo.dest AS destination\`, and reference the alias in the spec. Prefer this over leaving dotted names for the renderer to escape.
+- Prefer RENAME every such column to a readable, dotless alias in the query, e.g. \`RENAME host.name AS host\` or \`RENAME geo.dest AS destination\`, and reference the alias in the spec.
+- If a dotted name must remain in the result, leave it; the authoring step will escape it in the spec (backslash-escape in field strings / bracket access in expressions).
 - This applies to dimension/metric columns only. Do NOT rename the time field this way — keep filtering and bucketing on the raw source time field exactly as required above.`;
 
 const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
@@ -43,7 +44,7 @@ const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
  */
 const sharedAuthoringRules = `COLOR:
 - DEFAULT: use Kibana's theme-aware Elastic palette (adapts to light/dark mode). Prefer the theme binding — Raw Vega: ordinal color scale \`range: "category"\`; Vega-Lite: leave categorical color to the theme. Do NOT hardcode hex mark fills, config colors, or a custom palette unless the user asked for one.
-- Never invent named color schemes (e.g. "pink", "pinks", "pinkblue") — stock Vega rejects unknown scheme names. Never use scheme "elastic".
+- Never invent named color schemes (e.g. "pink", "pinks", "pinkblue") — stock Vega rejects unknown scheme names. Never use scheme "elastic", "category10", or "category20".
 - Only for a continuous / quantitative color scale may you set a sequential "scheme" ("blues", "viridis").
 - USER OVERRIDE: when the user explicitly asks for a color or palette (e.g. "shades of pink"), set the ordinal color scale \`range\` to an explicit hex array that matches the request (e.g. ["#FFB6D9", "#FF69B4", "#FF1493"]). Do not invent a scheme name for that ask.
 
@@ -59,7 +60,7 @@ TITLE RULES:
 - Prefer the panel title over redundant axis or legend titles; NEVER duplicate the same wording across them.
 
 DOTS IN FIELD NAMES:
-- Vega treats an unescaped dot in a field name as nested-object access, but ES|QL columns are flat. For a column whose name contains a dot (e.g. "geo.dest"), backslash-escape every dot in "field" strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']).`;
+- Prefer renaming dotted ES|QL columns in the query (see Field names for Vega). When a dotted column remains (e.g. "geo.dest"), backslash-escape every dot in "field" strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']).`;
 
 const createVegaLiteAuthorPrompt = ({
   nlQuery,
@@ -121,8 +122,7 @@ AXES:
 - When the panel title already conveys what an axis represents, set "title": null on that axis to drop the redundant axis title.
 
 COLOR (Vega-Lite):
-- Default: use the "color" ENCODING only for a meaningful categorical dimension and leave its scale to the theme — do NOT set a "scheme", "range", or hand-authored "domain" unless the user asked for a custom palette.
-- User override: when they ask for a specific palette, set encoding.color.scale.range to that hex array.
+- Use the "color" ENCODING only for a meaningful categorical dimension; leave its scale to the theme (see COLOR above for defaults and user overrides).
 - Single-series with no color request: omit color — the theme supplies the default series color.
 
 LAYOUT & STYLE (Vega-Lite):
@@ -211,6 +211,9 @@ Columns available in the data (reference these EXACT names):
 <columns>
 ${formatColumns(columns)}
 </columns>
+
+STATIC DIAGRAM ONLY:
+- Do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
 
 ${catalogChartRules(catalogId)}
 

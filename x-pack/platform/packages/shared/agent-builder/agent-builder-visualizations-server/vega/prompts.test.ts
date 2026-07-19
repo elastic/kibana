@@ -99,8 +99,27 @@ describe('createAuthorVegaSpecPrompt', () => {
       expect(text).toContain('DOTS IN FIELD NAMES');
     }
 
-    // Vega-Lite still has encoding-specific default color guidance.
-    expect(vegaLite).toContain('do NOT set a "scheme", "range"');
+    // Vega-Lite still has encoding-specific color guidance (not a second theme block).
+    expect(vegaLite).toContain('COLOR (Vega-Lite)');
+    expect(vegaLite).toContain('omit color — the theme supplies');
+  });
+
+  it('does not repeat shared color/layout rules inside per-catalog chartRules', () => {
+    const catalogs = ['sunburst', 'radar', 'sankey'] as const;
+    for (const catalogId of catalogs) {
+      const [system] = createAuthorVegaSpecPrompt({
+        nlQuery: `${catalogId} chart`,
+        esqlQuery: 'FROM logs-*',
+        dialect: 'vega',
+        catalogId,
+      });
+      const text = String((system as [string, string])[1]);
+      // Shared once via sharedAuthoringRules; catalogs must not restate.
+      expect(text).toContain('USER OVERRIDE');
+      expect(text.match(/USER OVERRIDE/g)).toHaveLength(1);
+      expect(text).not.toContain('COLOR (default)');
+      expect(text).not.toContain('COLOR (user override)');
+    }
   });
 
   it('includes axis-readability guidance (labelLimit, time-axis, title:null)', () => {
@@ -189,6 +208,7 @@ describe('createAuthorVegaSpecPrompt sankey', () => {
     expect(text).toContain('SANKEY / FLOW RULES');
     expect(text).toContain('linkpath');
     expect(text).toContain('STATIC DIAGRAM ONLY');
+    expect(text).toContain('groupSelector');
     expect(text).toContain('range: "category"');
     expect(text).toContain('padding');
     expect(text).toContain('INSIDE');
@@ -225,9 +245,10 @@ describe('vegaEsqlAdditionalInstructions', () => {
     );
   });
 
-  it('asks to RENAME dotted columns to dotless aliases, except the time field', () => {
+  it('prefers RENAME for dotted columns and treats spec escaping as fallback', () => {
     expect(vegaEsqlAdditionalInstructions).toContain('Field names for Vega');
     expect(vegaEsqlAdditionalInstructions).toContain('RENAME host.name AS host');
     expect(vegaEsqlAdditionalInstructions).toContain('Do NOT rename the time field');
+    expect(vegaEsqlAdditionalInstructions).toContain('If a dotted name must remain');
   });
 });

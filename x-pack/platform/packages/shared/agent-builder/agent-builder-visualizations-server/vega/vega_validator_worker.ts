@@ -17,6 +17,7 @@
  */
 
 import { parentPort } from 'node:worker_threads';
+import { isRawVegaSchema } from './vega_schema';
 
 // `vega`/`vega-lite` are ESM-only with top-level await; Kibana's CJS build
 // cannot `require` them, and babel rewrites a direct `await import()` into a CJS
@@ -104,12 +105,6 @@ const loadLibs = () => {
   }
   return libs;
 };
-
-/** Whether `$schema` identifies Raw Vega (not Vega-Lite). */
-const isRawVegaSchema = (schema: unknown): boolean =>
-  typeof schema === 'string' &&
-  schema.includes('schema/vega/') &&
-  !schema.includes('schema/vega-lite/');
 
 /**
  * Swap Kibana ES|QL `data` sources (urls Vega cannot fetch) for inline empty

@@ -20,11 +20,7 @@ import { CANONICAL_ESQL_SOURCE_NAME } from '../dialect';
 export const chartRules = `SUNBURST RULES:
 - Expect a Parent–child table with id / parent / name / value (or clear aliases present in <columns>). Exactly one root (parent null); every other parent id must exist as an id row — otherwise stratify fails with "missing: <id>" / "multiple roots" and partition cannot run.
 - Pipeline: source → stratify(key=id, parentKey=parent) → partition(field=value) → arc marks. Put both transforms on the same derived dataset that sources "${CANONICAL_ESQL_SOURCE_NAME}".
-- STATIC DIAGRAM ONLY: do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
-- Built-in width/height signals for layout (e.g. partition size, arc x/y) are fine.
-- DO NOT set top-level "width" or "height"; the panel sizes the view.
-- COLOR (default): categorical colors use range: "category" (Kibana theme); sequential schemes ("blues") are OK only for continuous depth/value. Never invented scheme names or scheme "elastic".
-- COLOR (user override): only when the user asks for a specific palette, set range to an explicit hex array — do not invent a scheme name.`;
+- Built-in width/height signals for layout (e.g. partition size, arc x/y) are fine.`;
 
 /** Extra ES|QL instructions when generating a Parent–child table for sunburst. */
 export const esqlAdditionalInstructions = `
@@ -64,8 +60,7 @@ FROM kibana_sample_data_flights
 
 Rules:
 - Prefer aggregating to a modest number of leaf nodes (SORT + LIMIT) so the sunburst stays readable.
-- Keep column names exactly \`id\`, \`parent\`, \`name\`, and \`value\` when possible.
-- Still obey the Vega time-range and dotted-field rules above when the index is time-based.`;
+- Keep column names exactly \`id\`, \`parent\`, \`name\`, and \`value\` when possible.`;
 
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',

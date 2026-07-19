@@ -37,11 +37,7 @@ export const chartRules = `RADAR / SPIDER RULES:
   - radius signal: min(width, height) / 2 - 40 (reserves space for spoke labels inside the panel).
   - Labels at width/2 + (radius + 8) * cos(…), height/2 + (radius + 8) * sin(…).
   - Prefer short key labels (LIMIT axes); avoid large fontSize.
-- EXPRESSIONS: always lowercase helpers — scale(, cos(, sin(. Never Scale(.
-- STATIC DIAGRAM ONLY: do NOT add custom interaction signals, and never call kibanaAddFilter / kibanaSetTimeFilter / other Kibana expression helpers.
-- DO NOT set top-level "width" or "height"; the panel sizes the view.
-- COLOR (default): categorical series range: "category" (Kibana theme). Never category10 or invented scheme names. Never scheme "elastic".
-- COLOR (user override): only when the user asks for a specific palette, set range to an explicit hex array — do not invent a scheme name.`;
+- EXPRESSIONS: always lowercase helpers — scale(, cos(, sin(. Never Scale(.`;
 
 /** Extra ES|QL instructions when generating a key/value table for radar. */
 export const esqlAdditionalInstructions = `
@@ -100,8 +96,7 @@ Rules:
   key to a 0–1 scale — mixed units make a useless radar and often break layout.
 - NEVER write \`STATS … COUNT_DISTINCT(OriginCountry) BY … key = OriginCountry\` (or the
   same field for both). That distinct count is always 1, so \`WHERE … >= 3\` returns
-  **zero rows** and the chart goes blank (Infinite extent warnings).
-- Still obey the Vega time-range and dotted-field rules above when the index is time-based.`;
+  **zero rows** and the chart goes blank (Infinite extent warnings).`;
 
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega/v5.json',

@@ -27,8 +27,9 @@ export const catalogChartRules = (catalogId: VegaCatalogId): string => {
     case 'radar':
       return radarChartRules;
     case 'sunburst':
-    default:
       return sunburstChartRules;
+    default:
+      return '';
   }
 };
 
