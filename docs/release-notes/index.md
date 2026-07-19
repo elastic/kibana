@@ -102,21 +102,21 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Increase the maximum combined panels, sections, and pinned controls on a dashboard from 100 to 1,000 [#272931]({{kib-pull}}272931).
 
 **Data ingestion and {{fleet}}**:
-* Add an ILM policy picker to **Data retention settings** in the integration policy editor so you can assign an ILM policy to an integration namespace (requires namespace opt-in) [#275197]({{kib-pull}}275197).
-* Add opt-in namespace-level customization for integrations so you can manage per-namespace index templates (for example, `{namespace}@custom`) [#262568]({{kib-pull}}262568).
-* Add bulk revoke and delete actions, filtering, and search to the **Enrollment tokens** page in {{fleet}} [#265916]({{kib-pull}}265916).
-* Add a **Cancel unenrollment** action in the agent activity flyout so you can cancel a scheduled automatic unenrollment during the grace period [#271270]({{kib-pull}}271270).
-* Add **Remove collector** actions for OpAMP collectors in {{fleet}}, including bulk removal [#268711]({{kib-pull}}268711).
-* Show dedicated **Health**, **Info**, and **Config** tabs and the collector configuration view for OpAMP-managed collectors in {{fleet}} as a technical preview [#278816]({{kib-pull}}278816).
+* Add opt-in namespace-level customization for integrations so you can apply a `{namespace}@custom` component template (for example, `production@custom`) to a namespace's data streams, backed by dedicated namespace-level index templates [#262568]({{kib-pull}}262568).
+* Add an ILM policy picker to **Data retention settings** in the integration policy editor so you can assign an ILM policy to an integration namespace (requires opt-in for namespace-level customization) [#275197]({{kib-pull}}275197).
+* Add bulk revoke and delete actions and status and agent policy filters to the **Enrollment tokens** page in {{fleet}} [#265916]({{kib-pull}}265916).
+* Add a **Cancel unenrollment** action in the agent activity flyout so you can cancel a scheduled automatic unenrollment of inactive agents during the grace period [#271270]({{kib-pull}}271270).
+* Add **Remove collector** actions for OpAMP collectors in {{fleet}}, including bulk removal, as a technical preview [#268711]({{kib-pull}}268711).
+* Show dedicated **Health**, **Info**, and **Config** tabs and the collector configuration view on the details page for OpAMP-managed collectors in {{fleet}} as a technical preview [#278816]({{kib-pull}}278816).
 * Enable automatic installation of dependencies for composable integration packages during package installation [#263762]({{kib-pull}}263762).
 * Rename user-facing **Cloud Connector** copy to **Federated Identity** across {{fleet}} federated-identity onboarding flows [#261353]({{kib-pull}}261353).
 * Enable OpenTelemetry-based permission verification for **Federated Identity** setups in {{fleet}} by default [#265619]({{kib-pull}}265619).
-* Merge the **Status** and **Content** filters on **Browse integrations** into a single **More** filter, and hide deprecated integrations by default [#277812]({{kib-pull}}277812).
+* Replace the **Status** filter on **Browse integrations** with a **More** filter, and hide deprecated integrations and content packs by default [#277812]({{kib-pull}}277812).
 * Add an optional `dryRun` parameter to {{fleet}} bulk agent API endpoints so you can preview affected agent counts without creating actions [#276377]({{kib-pull}}276377).
 * Remove the **Give feedback** button from the {{fleet}} top navigation [#273641]({{kib-pull}}273641).
 * Update the **Add Collector** flyout in {{fleet}} to generate collector configs that ship through the {{ecloud}} Managed OTLP Endpoint when available [#270324]({{kib-pull}}270324).
 * Add **Condition** fields to integration, input, and stream settings in the package policy editor [#270315]({{kib-pull}}270315).
-* Add support for a remote {{es}} output as an exporter for OpenTelemetry integrations in {{fleet}} [#270267]({{kib-pull}}270267).
+* Add support for using a remote {{es}} output as the exporter target for OpenTelemetry integrations as a technical preview [#270267]({{kib-pull}}270267).
 * Add a `data_stream.type` variable to the simplified package policy API so input-only packages can route data to a different index prefix (for example, `logs-*` instead of `metrics-*`) [#269895]({{kib-pull}}269895).
 
 **Data management**:
@@ -297,9 +297,9 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 
 **Data ingestion and {{fleet}}**:
 * Fix `POST /internal/fleet/reset_preconfigured_agent_policies/{id}` returning `404` before the reset completes on deployments where space awareness is turned off and agent policies use legacy saved object types [#276742]({{kib-pull}}276742).
-* Fix a cleared TLS certificate secret repopulating with the previous value when you reopen the **Fleet Server hosts** option on the **Settings** page after saving [#275693]({{kib-pull}}275693).
+* Fix a cleared SSL/TLS private key secret repopulating with its previous value when you reopen a Fleet Server host on the {{fleet}} **Settings** page after saving [#275693]({{kib-pull}}275693).
 * Fix integration policy updates redeploying agents even when `bumpRevision: false` is set [#275626]({{kib-pull}}275626).
-* Fix package installs and upgrades failing when duplicate package records exist in a space [#275552]({{kib-pull}}275552).
+* Fix package installs and upgrades failing with an `ambiguous_conflict` error caused by orphaned duplicate saved objects in a space [#275552]({{kib-pull}}275552).
 * Fix integration alerting assets (rule templates, alert rules, inactivity monitoring) not being created or updated correctly when a package is installed or reinstalled in a {{kib}} space other than the original installation space [#274894]({{kib-pull}}274894).
 * Fix broken {{kib}} asset references in the integration **Assets** tab when an integration is reinstalled or upgraded from a different space than the original installation space [#271800]({{kib-pull}}271800).
 * Fix the {{fleet}} UI blocking one-way TLS for {{ls}} outputs by requiring **Client SSL certificate** and **Client SSL certificate key** only when you configure mTLS [#275453]({{kib-pull}}275453).
@@ -319,16 +319,16 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix missing `.otel` suffix on explicitly named `otelcol` inputs in integration package policies [#269074]({{kib-pull}}269074).
 * Fix incorrect agent index permissions for span events stored in logs data streams for OpenTelemetry trace policies, which prevented ingestion into dynamically routed log datasets [#263415]({{kib-pull}}263415).
 * Fix a crash in the **Integrations** view when a package has no icon [#273191]({{kib-pull}}273191).
-* Fix input packages being hidden from the **Integrations** **Signal type** filter by deriving signal types from policy templates when `data_streams` are absent [#272585]({{kib-pull}}272585).
+* Fix input packages being hidden from the signal type filter in the **Integrations** list by deriving signal types from policy templates when `data_streams` are absent [#272585]({{kib-pull}}272585).
 * Fix the agent logging level dropdown on the **Settings** tab not updating after **Reset to policy** is applied, so the displayed level stays in sync with {{fleet}}-polled agent metadata [#271964]({{kib-pull}}271964).
 * Fix multiline configuration values, such as CEL programs, being corrupted in generated agent policy YAML [#271922]({{kib-pull}}271922).
 * Fix integration upgrades and reinstalls dropping storage-related package settings [#269080]({{kib-pull}}269080).
 * Fix the agent enrollment **Confirm incoming data** step timing out for integrations that ingest backdated data by checking `event.ingested` instead of `@timestamp` [#268224]({{kib-pull}}268224).
-* Fix {{fleet}} agent policy background tasks failing to deploy policies [#267285]({{kib-pull}}267285).
+* Fix {{fleet}} agent policy background tasks, such as unenrolling inactive agents, failing on deployments with many agent policies [#267285]({{kib-pull}}267285).
 * Fix a blank **Assets** tab after installing an integration knowledge base for an input package [#266841]({{kib-pull}}266841).
 * Fix multi-value secret variables showing as cleartext inputs in integration policy forms [#266823]({{kib-pull}}266823).
-* Fix incorrect install and **Add integration** controls on the integration detail **Settings** tab when viewing package versions other than the installed or latest version [#266513]({{kib-pull}}266513).
-* Fix integrations disappearing after refresh when **Integrations** browse filters (`category`, agentless) are set in the URL [#266384]({{kib-pull}}266384).
+* Fix incorrect controls for installing and adding an integration on the integration detail page when viewing package versions other than the installed or latest version [#266513]({{kib-pull}}266513).
+* Fix integrations disappearing when you change category or setup method filters on the **Integrations** page after loading the page with a filter set in the URL [#266384]({{kib-pull}}266384).
 * Fix {{agent}} health failures when TLS certificate file paths in {{fleet}} settings contain whitespace [#266365]({{kib-pull}}266365).
 * Fix YAML downloaded from the agent enrollment flyout truncating at `#` characters by URL-encoding the `data:` URI payload [#264083]({{kib-pull}}264083).
 * Fix installed integration policy counts showing `0` after upgrading from 8.x [#263717]({{kib-pull}}263717).
