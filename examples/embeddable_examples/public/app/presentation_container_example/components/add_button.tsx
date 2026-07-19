@@ -65,7 +65,7 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
             }}
           >
             {action.MenuItem
-              ? action.MenuItem({ context: actionContext })
+              ? React.createElement(action.MenuItem, { context: actionContext })
               : action.getDisplayName(actionContext)}
           </EuiContextMenuItem>
         );
