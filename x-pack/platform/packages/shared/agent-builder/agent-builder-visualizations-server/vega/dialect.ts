@@ -434,20 +434,6 @@ export const formatSankeyIntegrityError = (result: SankeyIntegrityResult): strin
 export const SANKEY_DISCLOSED_FALLBACK_CONTEXT = `DISCLOSED FALLBACK:
 The request asked for a Sankey / flow chart, but the resolved ES|QL result is not a usable flow table (needs stk1 + stk2 + numeric size and at least ${SANKEY_MIN_FLOWS} flow rows). Author a Vega-Lite approximation of the request instead, and do NOT claim the result is a Sankey.`;
 
-/** Disclosed-fallback authoring context for a catalog id (empty when none). */
-export const disclosedFallbackContextForCatalog = (catalogId: VegaCatalogId): string => {
-  switch (catalogId) {
-    case 'sunburst':
-      return SUNBURST_DISCLOSED_FALLBACK_CONTEXT;
-    case 'radar':
-      return RADAR_DISCLOSED_FALLBACK_CONTEXT;
-    case 'sankey':
-      return SANKEY_DISCLOSED_FALLBACK_CONTEXT;
-    default:
-      return '';
-  }
-};
-
 /**
  * Best-effort catalog inference from an existing Raw Vega spec (edit path).
  * Prefers structural cues so "make it blue" edits keep the right chart family.

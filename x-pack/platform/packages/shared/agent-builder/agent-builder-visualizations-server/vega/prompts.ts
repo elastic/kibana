@@ -10,7 +10,7 @@ import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { VegaCatalogId, VegaDialect } from './dialect';
 import { CANONICAL_ESQL_SOURCE_NAME } from './dialect';
-import { catalogChartRules } from './reference_examples/catalog_prompts';
+import { catalogChartRules, getRawVegaCatalogEntry } from './raw_vega_catalog';
 
 // Vega-specific ES|QL guidance; see issue #275519 for the time-filtering quirk.
 export const vegaEsqlAdditionalInstructions = `
@@ -179,12 +179,7 @@ const createRawVegaAuthorPrompt = ({
   catalogId: VegaCatalogId;
 }): BaseMessageLike[] => {
   const esqlQueryJson = JSON.stringify(esqlQuery);
-  const chartLabel =
-    catalogId === 'radar'
-      ? 'radar / spider'
-      : catalogId === 'sankey'
-      ? 'sankey / flow'
-      : 'sunburst / hierarchy';
+  const chartLabel = getRawVegaCatalogEntry(catalogId)?.chartLabel ?? 'allowlisted Raw Vega chart';
 
   return [
     [

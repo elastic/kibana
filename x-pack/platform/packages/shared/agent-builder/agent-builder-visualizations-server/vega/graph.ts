@@ -19,20 +19,14 @@ import { normalizeVegaSpec } from './normalize_spec';
 import { validateVegaSpec } from './vega_validator';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
 import { buildReferenceExamplesBlock } from './reference_examples';
-import { catalogEsqlAdditionalInstructions } from './reference_examples/catalog_prompts';
 import { resolveDialectGate } from './dialect_gate';
+import { isRawVegaCatalogId, type VegaCatalogId, type VegaDialect } from './dialect';
 import {
+  catalogEsqlAdditionalInstructions,
+  checkCatalogIntegrity,
   disclosedFallbackContextForCatalog,
-  formatParentChildIntegrityError,
-  formatRadarIntegrityError,
-  formatSankeyIntegrityError,
-  isRawVegaCatalogId,
-  validateParentChildRows,
-  validateRadarRows,
-  validateSankeyRows,
-  type VegaCatalogId,
-  type VegaDialect,
-} from './dialect';
+  getRawVegaCatalogEntry,
+} from './raw_vega_catalog';
 import {
   CLASSIFY_DIALECT_NODE,
   GENERATE_ESQL_NODE,
@@ -313,32 +307,7 @@ export const createVegaGraph = async (
       // disclosed Vega-Lite fallback). Headless validation stubs empty data, so
       // data-dependent transform failures must be caught here.
       if (isRawVegaCatalogId(catalogId) && dialect === 'vega') {
-        const checkIntegrity = (): { ok: boolean; error: string; label: string } => {
-          if (catalogId === 'radar') {
-            const integrity = validateRadarRows({ columns, values });
-            return {
-              ok: integrity.ok,
-              error: formatRadarIntegrityError(integrity),
-              label: 'radar',
-            };
-          }
-          if (catalogId === 'sankey') {
-            const integrity = validateSankeyRows({ columns, values });
-            return {
-              ok: integrity.ok,
-              error: formatSankeyIntegrityError(integrity),
-              label: 'sankey',
-            };
-          }
-          const integrity = validateParentChildRows({ columns, values });
-          return {
-            ok: integrity.ok,
-            error: formatParentChildIntegrityError(integrity),
-            label: 'sunburst',
-          };
-        };
-
-        let integrity = checkIntegrity();
+        let integrity = checkCatalogIntegrity(catalogId, { columns, values });
 
         if (!integrity.ok && query) {
           logger.warn(`${integrity.error}; regenerating ES|QL once`);
@@ -366,13 +335,14 @@ export const createVegaGraph = async (
                 throw executeError;
               }
             }
-            integrity = checkIntegrity();
+            integrity = checkCatalogIntegrity(catalogId, { columns, values });
           }
         }
 
         if (!integrity.ok) {
+          const label = getRawVegaCatalogEntry(catalogId)?.id ?? catalogId;
           logger.warn(
-            `${integrity.label} selected but ES|QL did not yield a usable table; falling back to Vega-Lite with disclosure`
+            `${label} selected but ES|QL did not yield a usable table; falling back to Vega-Lite with disclosure`
           );
           disclosedFallbackCatalog = catalogId;
           dialect = 'vega-lite';

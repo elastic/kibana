@@ -15,28 +15,8 @@ import {
   isRawVegaCatalogId,
   type VegaCatalogId,
 } from './dialect';
+import { RAW_VEGA_CATALOG_ENTRIES, getRawVegaCatalogEntry } from './raw_vega_catalog';
 import { formatReferenceExamples, loadReferenceExamples } from './reference_examples';
-import type { VegaReferenceExample } from './reference_examples';
-
-/** Allowlisted Raw Vega catalog entries the classifier may return. */
-const RAW_VEGA_CATALOG: ReadonlyArray<{ id: Exclude<VegaCatalogId, 'none'>; description: string }> =
-  [
-    {
-      id: 'sunburst',
-      description:
-        'Radial hierarchy / sunburst / ring partition of a parent-child tree (not a treemap, pie, or donut).',
-    },
-    {
-      id: 'radar',
-      description:
-        'Radar / spider / polar multivariate chart comparing numeric measures across several axes (not a pie or radial bar).',
-    },
-    {
-      id: 'sankey',
-      description:
-        'Sankey / flow / alluvial diagram of weighted flows between a source category and a destination category (two stacks).',
-    },
-  ];
 
 const catalogSelectionSchema = z.object({
   catalogId: z
@@ -58,7 +38,9 @@ export const createCatalogSelectorPrompt = ({
 Return a catalog id by calling the 'select_vega_catalog' tool.
 
 ALLOWLIST:
-${RAW_VEGA_CATALOG.map((entry) => `- id: "${entry.id}" — ${entry.description}`).join('\n')}
+${RAW_VEGA_CATALOG_ENTRIES.map((entry) => `- id: "${entry.id}" — ${entry.classifierDescription}`).join(
+  '\n'
+)}
 
 RULES:
 1. Return "sunburst" ONLY when the user clearly wants a sunburst / radial hierarchy / ring partition of a tree.
@@ -107,42 +89,13 @@ export const selectVegaCatalogId = async ({
   }
 };
 
-const SUNBURST_EXAMPLE: VegaReferenceExample = {
-  id: 'sunburst',
-  title: 'Sunburst / hierarchy (Raw Vega partition)',
-  description:
-    'Static radial hierarchy: Parent–child table (parent rows AND leaves — every parent id must exist as an id) → `stratify` + `partition` → `arc` marks. Bind the Canonical ES|QL source named `source`; do not add Kibana interaction signals.',
-  load: () => import('./reference_examples/sunburst').then((module) => module.spec),
-};
-
-const RADAR_EXAMPLE: VegaReferenceExample = {
-  id: 'radar',
-  title: 'Radar / spider (Raw Vega polar)',
-  description:
-    'Static radar: key/value rows (≥3 distinct keys; optional series) → angular + radial scales → faceted `line` marks with `linear-closed`. Center with absolute width/2 + height/2 in mark signals (never top-level encode). Bind the Canonical ES|QL source named `source`; do not add Kibana interaction signals.',
-  load: () => import('./reference_examples/radar').then((module) => module.spec),
-};
-
-const SANKEY_EXAMPLE: VegaReferenceExample = {
-  id: 'sankey',
-  title: 'Sankey / flow (Raw Vega two-stack)',
-  description:
-    'Static two-stack Sankey: stk1/stk2/size flow rows → fold+stack nodes → groups + linkpath edges → path/rect/text. Use range "category" for Kibana theme colors and padding so axis/stack labels stay inside the panel. Bind the Canonical ES|QL source named `source`; do not add click-to-filter signals.',
-  load: () => import('./reference_examples/sankey').then((module) => module.spec),
-};
-
-const RAW_VEGA_EXAMPLES: Record<Exclude<VegaCatalogId, 'none'>, VegaReferenceExample> = {
-  sunburst: SUNBURST_EXAMPLE,
-  radar: RADAR_EXAMPLE,
-  sankey: SANKEY_EXAMPLE,
-};
-
 /** Load the curated Raw Vega reference block for a catalog id (empty when none). */
 export const buildRawVegaReferenceBlock = async (catalogId: VegaCatalogId): Promise<string> => {
-  if (!isRawVegaCatalogId(catalogId)) {
+  const entry = getRawVegaCatalogEntry(catalogId);
+  if (!entry) {
     return '';
   }
-  return formatReferenceExamples(await loadReferenceExamples([RAW_VEGA_EXAMPLES[catalogId]]));
+  return formatReferenceExamples(await loadReferenceExamples([entry.example]));
 };
 
 export interface DialectGateResult {
