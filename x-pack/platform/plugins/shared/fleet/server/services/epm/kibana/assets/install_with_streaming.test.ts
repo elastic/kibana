@@ -64,6 +64,7 @@ describe('installKibanaAssetsWithStreaming', () => {
         spaceId: 'default',
         packageInstallContext: {
           archiveIterator: createArchiveIteratorFromMap(assetsMap),
+          assetsMap,
           paths: [...assetsMap.keys()],
           packageInfo: {
             title: 'Test',
