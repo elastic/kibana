@@ -33,7 +33,7 @@ const _allowedExperimentalValues = {
   enableOpAMP: true, // When enabled, OpAMP features will be available in the API and UI.
   enableOTelVerifier: true, // When enabled, OTel-based cloud connector permission verification is active.
   enableResolveDependencies: true, // When enabled, the resolve dependencies step will be available during package installation.
-  enableOtelUI: false, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
+  enableOtelUI: true, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
   enableCloudOnboardingDeployments: false, // When enabled, the cloud-onboarding-deployment CRUD API is registered and available.
 };
 

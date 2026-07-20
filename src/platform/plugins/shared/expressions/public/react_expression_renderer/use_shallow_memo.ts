@@ -11,7 +11,7 @@
 /// <reference path="./shallow_equal.d.ts" />
 
 import { useRef } from 'react';
-import { shallowEqual } from 'react-redux';
+import { shallowEqual } from 'react-redux-v7';
 
 export function useShallowMemo<T>(value: T): T {
   const previousRef = useRef(value);
