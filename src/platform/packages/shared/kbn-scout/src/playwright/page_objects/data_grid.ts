@@ -100,6 +100,7 @@ export class DataGrid {
 
   async closeDocumentDetails() {
     await this.page.testSubj.click('euiFlyoutCloseButton');
+    await this.page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
   }
 
   async closeInTableSearch() {

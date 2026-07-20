@@ -192,14 +192,9 @@ export class UnifiedFieldList {
     await this.page.testSubj.click(`field-${field}`);
   }
   /**
-   * Remove a field from the selected fields, given it's selected
+   * Remove a field from the selected fields
    */
   async clickFieldListItemRemove(field: string): Promise<void> {
-    const isSelected = await this.isFieldSelected(field);
-    if (!isSelected) {
-      return;
-    }
-
     await this.page.testSubj.click(`fieldToggle-${field}`);
 
     await expect(

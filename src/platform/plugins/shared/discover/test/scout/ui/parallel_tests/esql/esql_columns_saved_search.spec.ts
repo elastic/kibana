@@ -36,7 +36,7 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ discoverScoutSpace }) => {
-      discoverScoutSpace.teardownDiscoverDefaults();
+      await discoverScoutSpace.teardownDiscoverDefaults();
     });
 
     spaceTest(
@@ -68,10 +68,10 @@ spaceTest.describe(
           const columns = ['@timestamp', 'bytes', 'extension'];
           await unifiedFieldList.clickFieldListItemAdd('bytes');
           await unifiedFieldList.clickFieldListItemAdd('extension');
-          await discover.waitUntilTabIsLoaded();
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
 
           await page.reload();
+          await discover.waitUntilTabIsLoaded();
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
 
           await discover.saveSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_CUSTOM_COLUMNS);
@@ -90,6 +90,7 @@ spaceTest.describe(
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
 
           await page.reload();
+          await discover.waitUntilTabIsLoaded();
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
 
           await discover.saveSearch(SAVED_SEARCH_TRANSFORMATIONAL_INITIAL_COLUMNS);
@@ -112,6 +113,7 @@ spaceTest.describe(
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', 'bytes']);
 
           await page.reload();
+          await discover.waitUntilTabIsLoaded();
           await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', 'bytes']);
 
           await discover.saveSearch(SAVED_SEARCH_TRANSFORMATIONAL_CUSTOM_COLUMNS);
@@ -119,7 +121,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step(
-          'restore columns correctly when switching between saved searches',
+          'restore columns correctly when switching between saved searches/discover sessions',
           async () => {
             await discover.loadSavedSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_INITIAL_COLUMNS);
             await expect

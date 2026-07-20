@@ -34,7 +34,7 @@ spaceTest.describe('Discover ES|QL results formatting', { tag: '@local-stateful-
   spaceTest(
     'formats a value using columnsMeta when its type differs from the data-view field',
     async ({ page, pageObjects }) => {
-      const { discover, dataGrid } = pageObjects;
+      const { discover, dataGrid, unifiedFieldList } = pageObjects;
 
       // This query creates columns with the same names as fields in
       // kibana_sample_data_flights, but with different types (string arrays
@@ -53,11 +53,15 @@ spaceTest.describe('Discover ES|QL results formatting', { tag: '@local-stateful-
       expect(summaryRows[0][0]).toContain('DistanceMiles[w1, w3]');
 
       const expectedValue = '[w1, w3]';
-      await pageObjects.unifiedFieldList.clickFieldListItemAdd('DistanceMiles');
-      const columnRows = await discover.getDataGridRows();
-      expect(columnRows[0][0]).toBe(expectedValue);
+      await unifiedFieldList.clickFieldListItemAdd('DistanceMiles');
+      await expect
+        .poll(async () => {
+          const columnRows = await discover.getDataGridRows();
+          return columnRows[0]?.[0];
+        })
+        .toBe(expectedValue);
 
-      await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });
+      await dataGrid.openDocumentDetails({ rowIndex: 0 });
       await discover.isShowingDocViewer();
       await expect(page.testSubj.locator('tableDocViewRow-DistanceMiles-value')).toHaveText(
         expectedValue
