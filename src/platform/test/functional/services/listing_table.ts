@@ -399,6 +399,10 @@ export class ListingTableService extends FtrService {
    * Clicks item on Landing page by link name if it is present
    */
   public async clickItemLink(appName: AppName, name: string) {
+    // Wait for the listing to finish rendering before probing for the row, otherwise the
+    // short legacy-subject check races the app's initial render and falls through to the
+    // Content List branch — a selector family the legacy listing never renders.
+    await this.waitUntilTableIsLoaded();
     const legacySubj = `${PREFIX_MAP[appName]}ListingTitleLink-${name.split(' ').join('-')}`;
     if (await this.testSubjects.exists(legacySubj, { timeout: 1000 })) {
       await this.testSubjects.click(legacySubj);
