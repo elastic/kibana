@@ -118,30 +118,38 @@ safe-outputs:
     # transport makes the shallow safe_outputs checkout run `git fetch --unshallow`,
     # which on a repo Kibana's size cannot finish within the 15m job timeout.
     patch-format: am
-  # Fills the %%FIX_PR_URL%% / %%FIX_PR_BADGE%% placeholders the agent leaves in the
-  # outcome comment. The agent can't do this itself: it doesn't know the PR number while
-  # it runs (safe_outputs creates the PR afterwards), so this job runs after safe_outputs.
+  # Finalizes the outcome comment after safe_outputs runs. The agent can't do this itself:
+  # it doesn't know the PR outcome while it runs (safe_outputs creates the PR afterwards, and
+  # the push can still fail), so this job runs after safe_outputs and either fills the
+  # %%FIX_PR_URL%% / %%FIX_PR_BADGE%% placeholders (PR created) or strips them and corrects
+  # the heading (no PR — e.g. the push hit a rebase conflict and fell back to a review issue).
   jobs:
     link-fix-pr:
-      description: 'Replace the %%FIX_PR_URL%% and %%FIX_PR_BADGE%% placeholders in the outcome comment with the newly-opened fix PR link and a live PR-state badge. Call this exactly once, and only after you have opened a draft PR.'
+      description: 'Finalize the outcome comment after safe_outputs runs. If the fix PR was created, fill the %%FIX_PR_URL%% / %%FIX_PR_BADGE%% placeholders with its link and a live PR-state badge; if it was not (e.g. the push hit a rebase conflict and fell back to a review issue), strip those placeholders and correct the heading so the comment does not falsely claim a PR is ready. Call this exactly once whenever your outcome comment carries those placeholders.'
       runs-on: ubuntu-latest
       needs: safe_outputs
-      if: needs.safe_outputs.outputs.created_pr_url != '' && needs.safe_outputs.outputs.comment_id != ''
+      # Runs whenever there is an outcome comment to finalize, whether or not a PR was
+      # actually created — the script branches on that.
+      if: needs.safe_outputs.outputs.comment_id != ''
       permissions:
         issues: write
       inputs:
         confirm:
-          description: 'Set to true to link the outcome comment to the opened fix PR. Only call this after a PR has been opened.'
+          description: 'Set to true to finalize the outcome comment (fill the PR placeholders, or strip them and correct the heading if no PR was created). Call this whenever your comment carries the %%FIX_PR_URL%% / %%FIX_PR_BADGE%% placeholders.'
           required: true
           type: boolean
       env:
-        # The URL and number of the fix PR that safe_outputs just created.
+        # The URL and number of the fix PR safe_outputs created — empty when the push failed
+        # and fell back to a review issue.
         GH_AW_PR_URL: ${{ needs.safe_outputs.outputs.created_pr_url }}
         GH_AW_PR_NUMBER: ${{ needs.safe_outputs.outputs.created_pr_number }}
+        # Non-zero when the code push failed (e.g. a competing fix merged first and the rebase
+        # conflicted), which is the usual reason no PR exists.
+        GH_AW_PUSH_FAILURE_COUNT: ${{ needs.safe_outputs.outputs.code_push_failure_count }}
         # The id of the outcome comment safe_outputs just posted (which comment to edit).
         GH_AW_COMMENT_ID: ${{ needs.safe_outputs.outputs.comment_id }}
       steps:
-        - name: Append PR link to outcome comment
+        - name: Finalize outcome comment
           uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
           with:
             github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
@@ -149,23 +157,43 @@ safe-outputs:
               const prUrl = process.env.GH_AW_PR_URL;
               const prNumber = process.env.GH_AW_PR_NUMBER;
               const commentId = Number(process.env.GH_AW_COMMENT_ID);
-              if (!prUrl || !prNumber || !Number.isInteger(commentId)) {
-                core.info('Missing PR URL, PR number, or comment id; nothing to do.');
+              if (!Number.isInteger(commentId)) {
+                core.info('Missing comment id; nothing to do.');
                 return;
               }
               const { owner, repo } = context.repo;
               const { data: comment } = await github.rest.issues.getComment({ owner, repo, comment_id: commentId });
               const body = comment.body || '';
-              // Live PR-state badge (open/draft/merged/closed) linking to the fix PR.
-              const badge = `[<img src="https://img.shields.io/github/pulls/detail/state/${owner}/${repo}/${prNumber}">](${prUrl})`;
-              // Fill the placeholders the agent left in the outcome comment.
-              const updated = body.replaceAll('%%FIX_PR_URL%%', prUrl).replaceAll('%%FIX_PR_BADGE%%', badge);
+              let updated;
+              if (prUrl && prNumber) {
+                // A PR was created: fill the placeholders with its link and a live PR-state badge.
+                const badge = `[<img src="https://img.shields.io/github/pulls/detail/state/${owner}/${repo}/${prNumber}">](${prUrl})`;
+                updated = body.replaceAll('%%FIX_PR_URL%%', prUrl).replaceAll('%%FIX_PR_BADGE%%', badge);
+              } else {
+                // No PR was created (the push failed and fell back to a review issue). Strip the
+                // now-unfillable placeholders and correct the optimistic "A fix PR is ready" heading
+                // so the comment doesn't contradict the fallback notice safe_outputs prepended.
+                if (!body.includes('%%FIX_PR_URL%%') && !body.includes('%%FIX_PR_BADGE%%')) {
+                  core.info('No PR and no placeholders to reconcile; nothing to do.');
+                  return;
+                }
+                const pushFailed = !['', '0'].includes(process.env.GH_AW_PUSH_FAILURE_COUNT || '');
+                const heading = pushFailed
+                  ? '### ⚠️ The fix could not be opened as a PR — the base branch changed while it was being prepared'
+                  : '### ⚠️ No fix PR was opened';
+                updated = body
+                  .replace(/^###[^\n]*A fix PR is ready for review[^\n]*$/m, heading)
+                  .replaceAll('%%FIX_PR_URL%%', '')
+                  .replaceAll('%%FIX_PR_BADGE%%', '')
+                  .replace(/\n{3,}/g, '\n\n')
+                  .trimEnd();
+              }
               if (updated === body) {
-                core.info('No fix-PR placeholders found; nothing to do.');
+                core.info('Nothing to update in the outcome comment.');
                 return;
               }
               await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
-              core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
+              core.info(`Finalized outcome comment ${commentId} (prCreated=${Boolean(prUrl && prNumber)}).`);
     # Requests the author of the PR that introduced the flaky test as a reviewer on the fix PR
     request-fix-review:
       description: 'Request a review on the fix PR from the author of the PR that introduced the flaky test. Only pass a real, non-bot GitHub login.'
@@ -234,10 +262,10 @@ Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed an
 3. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR (no PR opened) and opening a best-effort PR against the version branch.
 4. Apply the smallest test-side patch that addresses the root cause on the target branch. Don't add explanatory code comments to the patch by default — a good test-side fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it to 1–2 sentences; a simple change like a timeout bump never warrants a comment.
 5. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
-6. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below).
+6. **Re-check for a competing fix, then open the PR.** Immediately before opening, re-check against the *latest* tip of the branch you're targeting — the `base` you chose in step 3, which is `main` by default but a version branch when following "Fix already on `main`" — see [Guard against a competing fix](#guard-against-a-competing-fix). If a fix for this issue has already landed or is in flight on that branch (a common race — the test owner often fixes the same flake in parallel), do **not** open a PR; continue to step 7 with the "Existing PR" / already-fixed outcome. Otherwise, decide the backport strategy and open the PR (see "PR format" and "Backport label" below).
 7. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 8. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
-9. **Only if you opened a PR in step 6**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
+9. **Whenever your outcome comment carries the `%%FIX_PR_URL%%` / `%%FIX_PR_BADGE%%` placeholders** (i.e., you attempted to open a PR in step 6), call the `link_fix_pr` tool with `confirm: true` — do this even when you believe the PR was created, and even when you're unsure, because the push can still fail after you finish (e.g. a competing fix merged first and the rebase conflicts). It runs after your comment exists: if the PR was created it fills the placeholders with the PR link and a live PR-state badge; if it was **not** (push conflict → fallback review issue), it strips the placeholders and corrects the heading so the comment doesn't falsely claim a PR is ready. You cannot know the PR outcome while running, so always leave the placeholders in place and never write the URL, number, or badge yourself.
 10. **Only if you opened a PR in step 6 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created.
 
 ## Validate the investigation is current
@@ -251,6 +279,18 @@ The investigator's comment is a starting hint, not a verdict you can trust blind
 To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill).
 
 - Where your fresh conclusion **departs** from the prior comment, say so and why in the PR's Context section.
+
+## Guard against a competing fix
+
+Test-side flakes are frequently fixed by the test's owner (or another contributor) in parallel with this run — often the very PR author you'd `cc` as the introducer. If their fix merges into the branch you're targeting after you started but before your patch is pushed, the push is rebased onto their commit and dies in an unresolvable same-line conflict (you both edited the same spot), so **no PR is opened**. Your early duplicate check (step 1) can't catch this: the competing PR often doesn't exist yet when you run it.
+
+So re-check **immediately before opening the PR** (step 6), against the *latest* tip of your target branch. That is the `base` you chose in step 3 — `main` by default, but a version branch (e.g. `9.3`) when following "Fix already on `main`". Substitute it for `<base>` below (don't assume `main`):
+
+- `git fetch origin <base>` to refresh the branch you'll actually open against.
+- **Look for a competing fix**: an open or recently-merged PR that closes or references this issue **and targets `<base>`** (re-search PRs and re-read the issue timeline — a PR referencing `#<issue>` may have appeared since step 1), or a commit already on `origin/<base>` that addresses this failure.
+- **Confirm the fix is still needed**: the root cause you're patching is still present on `origin/<base>` (the anti-pattern hasn't already been removed there), and your patch still applies cleanly onto it (e.g. `git apply --check` against `origin/<base>`).
+
+If a competing fix already covers it — or your patch no longer applies because the target lines moved — do **not** open a PR. Post the matching outcome instead (["Existing PR already covers it"](#outcome-comment), or the already-fixed variant of "No PR opened") and skip PR creation. Opening anyway just produces a redundant patch that conflicts on push and falls back to a review issue.
 
 ## PR format
 
@@ -341,7 +381,7 @@ Follow this format:
   ```markdown
   ### ➡️ A fix PR is ready for review: %%FIX_PR_URL%%
 
-  <one very concise sentence on what the PR changes>. cc @<github-handle-here>
+  <one very concise sentence on what the PR changes>. cc @${{ env.REQUESTED_BY }}
 
   %%FIX_PR_BADGE%%
   ```
@@ -351,19 +391,19 @@ Follow this format:
   ```markdown
   ### 🔁 A fix is already in flight
 
-  #<PR number> already covers this, so no duplicate PR was opened. cc @<github-handle-here>
+  #<PR number> already covers this, so no duplicate PR was opened. cc @${{ env.REQUESTED_BY }}
   ```
 - **No PR opened**:
   ```markdown
   ### ⏭️ No fix PR was opened
 
-  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @<github-handle-here>
+  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @${{ env.REQUESTED_BY }}
   ```
   Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified.
 - **Backport the existing fix** (fix already on `main`, contained PR — no PR opened):
   ```markdown
   ### The fix is already on `main` — it needs backporting
 
-  #<main-PR> already fixed this on `main`; add the `backport:version` + `<vX.Y.Z>` label(s) to it to backport to <branch(es)>. cc @<github-handle-here>
+  #<main-PR> already fixed this on `main`; add the `backport:version` + `<vX.Y.Z>` label(s) to it to backport to <branch(es)>. cc @${{ env.REQUESTED_BY }}
   ```
   Fill `<vX.Y.Z>` from the branch → version mapping in "Backport label" (only the branches that still need the fix).
