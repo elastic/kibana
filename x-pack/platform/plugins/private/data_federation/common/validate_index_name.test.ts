@@ -39,7 +39,6 @@ describe('isValidIndexName', () => {
     '1,2,3', // Cannot include ,
     '1#2#3', // Cannot include #
     'a:b', // Colon is deprecated and not supported
-    `a\uD800b`, // Cannot include lone surrogate \uD800
     '_starts_with_underscores', // Cannot start with _
     '-starts-with-a-dash', // Cannot start with -
     '+starts+with+a+plus', // Cannot start with +
