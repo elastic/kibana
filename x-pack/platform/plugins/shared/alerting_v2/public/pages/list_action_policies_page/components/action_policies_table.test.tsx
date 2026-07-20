@@ -118,6 +118,10 @@ jest.mock('../../../hooks/use_fetch_tags', () => ({
   useFetchTags: () => ({ data: mockTagNames, isLoading: false }),
 }));
 
+jest.mock('../../../hooks/use_bulk_get_user_profiles', () => ({
+  useBulkGetUserProfiles: () => ({ data: undefined, isLoading: false }),
+}));
+
 jest.mock('../action_policies_data_source', () => ({
   ...jest.requireActual('../action_policies_data_source'),
   useActionPoliciesDataSource: () => ({ findItems: mockFindItems }),

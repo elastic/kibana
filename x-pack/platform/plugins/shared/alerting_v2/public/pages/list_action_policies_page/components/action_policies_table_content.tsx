@@ -1,20 +1,29 @@
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiSwitch, Query } from "@elastic/eui";
-import { ActionPolicySnoozePopover } from "@kbn/alerting-v2-plugin/public/components/action_policy/action_policy_snooze_popover";
+import React, { useEffect, useMemo, useRef } from 'react';
+import type { ActionPolicyBulkAction, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type { Query } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  ContentListFooter,
+  ContentListTable,
+  ContentListToolbar,
+  createColumn,
+  SelectableFilterPopover,
+  StandardFilterOption,
+} from '@kbn/content-list';
+import type { ContentListItem } from '@kbn/content-list';
+import { TAG_FILTER_ID, useContentListItems, useContentListSelection, useContentListState } from '@kbn/content-list-provider';
+import { filter } from '@kbn/content-list-toolbar';
+import { ActionPolicySnoozePopover } from '../../../components/action_policy/action_policy_snooze_popover';
+import { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
+import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import { useFetchTags } from '../../../hooks/use_fetch_tags';
-import { useBulkActionActionPolicies } from "@kbn/alerting-v2-plugin/public/hooks/use_bulk_action_action_policies";
-import { useBulkGetUserProfiles } from "@kbn/alerting-v2-plugin/public/hooks/use_bulk_get_user_profiles";
-import { resolveDisplayName } from "@kbn/alerting-v2-plugin/public/utils/resolve_display_name";
-import { ActionPolicyBulkAction, ActionPolicyResponse } from "@kbn/alerting-v2-schemas";
-import { ContentListFooter } from "@kbn/content-list-footer";
-import { ContentListItem, TAG_FILTER_ID, useContentListItems, useContentListSelection, useContentListState } from "@kbn/content-list-provider";
-import { ContentListTable, createColumn } from "@kbn/content-list-table";
-import { ContentListToolbar, filter, SelectableFilterPopover, StandardFilterOption } from "@kbn/content-list-toolbar";
-import { i18n } from "@kbn/i18n";
-import React, { useEffect, useMemo, useRef } from "react";
-import { ActionPolicyActionsCell } from "./action_policy_actions_cell";
-import { ActionPolicyDestinationsSummary } from "@kbn/alerting-v2-plugin/public/components/action_policy/action_policy_destinations_summary";
-import { ActionPolicyContentListItem, ENABLED_FILTER_ID } from "../action_policies_data_source";
-import { ActionPoliciesBulkActions } from "./action_policies_bulk_actions";
+import { resolveDisplayName } from '../../../utils/resolve_display_name';
+import { ActionPolicyDestinationsSummary } from '../../../components/action_policy/action_policy_destinations_summary';
+import { ActionPoliciesBulkActions } from './action_policies_bulk_actions';
+import { ActionPolicyActionsCell } from './action_policy_actions_cell';
+import type { ActionPolicyContentListItem } from '../action_policies_data_source';
+import { ENABLED_FILTER_ID } from '../action_policies_data_source';
 const { Column } = ContentListTable;
 
 type BulkActionMutate = ReturnType<typeof useBulkActionActionPolicies>['mutate'];
