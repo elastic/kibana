@@ -35,7 +35,7 @@ const TIMESTAMP_ONLY_INDEX = 'test-compose-discover-timestamp-only';
 const TIMESTAMP_ONLY_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | STATS count = COUNT(*) BY Carrier | WHERE count > 100`;
 /**
  * STATS with no WHERE — heuristic cannot isolate an alert condition, so Apply
- * commits alert + standalone (no_alert_condition). 
+ * commits alert + standalone (no_alert_condition).
  */
 const NO_ALERT_CONDITION_TIMESTAMP_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | STATS count = COUNT(*) BY Carrier`;
 const CREATE_SIGNAL_TIMESTAMP_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | WHERE Carrier == "ES-Air" | LIMIT 10`;
@@ -342,9 +342,7 @@ test.describe(
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
         await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeVisible();
         await pageObjects.composeDiscover.selectSandboxTimeField('timestamp');
-        await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue(
-          'timestamp'
-        );
+        await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue('timestamp');
       });
 
       await test.step('apply and save persists timestamp', async () => {
@@ -419,9 +417,7 @@ test.describe(
         // mode switch. ModeSelect stays disabled until a query is committed.
         await pageObjects.composeDiscover.setSandboxQuery(CREATE_SIGNAL_TIMESTAMP_QUERY);
         await pageObjects.composeDiscover.selectSandboxTimeField('timestamp');
-        await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue(
-          'timestamp'
-        );
+        await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue('timestamp');
         await pageObjects.composeDiscover.clickApply();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
         await pageObjects.composeDiscover.selectMode('signal');
