@@ -95,8 +95,8 @@ export const StepActions = React.memo<StepActionsProps>(
     const moveDownLabel = i18n.translate('workflows.yamlEditor.stepActions.moveDown', {
       defaultMessage: 'Move step down',
     });
-    const moveUpTooltip = `${moveUpLabel} (${MODIFIER_KEY} ${ALT_KEY} ↑)`;
-    const moveDownTooltip = `${moveDownLabel} (${MODIFIER_KEY} ${ALT_KEY} ↓)`;
+    const moveUpTooltip = `${moveUpLabel} (${MODIFIER_KEY} ${ALT_KEY} Shift ↑)`;
+    const moveDownTooltip = `${moveDownLabel} (${MODIFIER_KEY} ${ALT_KEY} Shift ↓)`;
 
     if (!focusedStepInfo) {
       return null;

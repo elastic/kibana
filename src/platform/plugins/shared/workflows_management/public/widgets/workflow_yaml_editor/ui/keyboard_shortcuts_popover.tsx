@@ -70,13 +70,13 @@ const shortcuts = [
     label: i18n.translate('workflows.yamlEditor.shortcuts.moveStepUp', {
       defaultMessage: 'Move step up',
     }),
-    keys: [COMMAND_KEY, ALT_KEY, '↑'],
+    keys: [COMMAND_KEY, ALT_KEY, 'Shift', '↑'],
   },
   {
     label: i18n.translate('workflows.yamlEditor.shortcuts.moveStepDown', {
       defaultMessage: 'Move step down',
     }),
-    keys: [COMMAND_KEY, ALT_KEY, '↓'],
+    keys: [COMMAND_KEY, ALT_KEY, 'Shift', '↓'],
   },
 ];
 

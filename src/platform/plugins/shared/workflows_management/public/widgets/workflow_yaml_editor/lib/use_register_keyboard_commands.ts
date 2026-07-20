@@ -146,7 +146,9 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
             defaultMessage: 'Move step up',
           }),
           // eslint-disable-next-line no-bitwise
-          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | monaco.KeyCode.UpArrow],
+          keybindings: [
+            monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.UpArrow,
+          ],
           run: withReadOnlyCheck(() => {
             moveStepUp();
           }),
@@ -159,7 +161,12 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
             defaultMessage: 'Move step down',
           }),
           // eslint-disable-next-line no-bitwise
-          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | monaco.KeyCode.DownArrow],
+          keybindings: [
+            monaco.KeyMod.CtrlCmd |
+              monaco.KeyMod.Alt |
+              monaco.KeyMod.Shift |
+              monaco.KeyCode.DownArrow,
+          ],
           run: withReadOnlyCheck(() => {
             moveStepDown();
           }),
