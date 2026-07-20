@@ -119,6 +119,7 @@ describe('AiIndexService', () => {
         op_type: 'create',
         document: expect.objectContaining({
           ...properties,
+          managed: false,
           date_created: expect.any(String),
           date_modified: expect.any(String),
         }),
@@ -393,6 +394,32 @@ describe('AiIndexService', () => {
         InvalidAiIndexDestError
       );
       expect(storageClient.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('putManaged', () => {
+    const properties = {
+      name: 'elastic',
+      dest: { type: 'index' as const, value: '.ai-index-idx-sml-data' },
+      automations: [],
+      sources: [],
+    };
+
+    it('writes managed: true to the document', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [{ name: '.ai-index-idx-sml-data', attributes: ['open', 'hidden'] }],
+        aliases: [],
+        data_streams: [],
+      });
+      storageClient.get.mockRejectedValue(createNotFoundError());
+
+      await expect(service.putManaged('elastic', properties)).resolves.toBe('created');
+
+      expect(storageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ managed: true }),
+        })
+      );
     });
   });
 
