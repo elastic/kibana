@@ -38,7 +38,7 @@ import { TrackPageview } from '../track_pageview';
 import { ApmHeaderActionMenu } from './apm_header_action_menu';
 import { RedirectDependenciesToDependenciesInventory } from './redirect_dependencies_to_dependencies_inventory';
 import { RedirectWithDefaultDateRange } from './redirect_with_default_date_range';
-import { RedirectWithDefaultEnvironment } from './redirect_with_default_environment';
+import { RedirectWithRememberedEnvironment } from './redirect_with_remembered_environment';
 import { RedirectWithOffset } from './redirect_with_offset';
 import { ScrollToTopOnPathChange } from './scroll_to_top_on_path_change';
 import { UpdateExecutionContextOnRouteChange } from './update_execution_context_on_route_change';
@@ -75,7 +75,7 @@ export function ApmAppRoot({
                     <PerformanceContextProvider>
                       <ApmErrorBoundary>
                         <RedirectDependenciesToDependenciesInventory>
-                          <RedirectWithDefaultEnvironment>
+                          <RedirectWithRememberedEnvironment>
                             <RedirectWithDefaultDateRange>
                               <RedirectWithOffset>
                                 <TrackPageview>
@@ -99,7 +99,7 @@ export function ApmAppRoot({
                                 </TrackPageview>
                               </RedirectWithOffset>
                             </RedirectWithDefaultDateRange>
-                          </RedirectWithDefaultEnvironment>
+                          </RedirectWithRememberedEnvironment>
                         </RedirectDependenciesToDependenciesInventory>
                       </ApmErrorBoundary>
                     </PerformanceContextProvider>
