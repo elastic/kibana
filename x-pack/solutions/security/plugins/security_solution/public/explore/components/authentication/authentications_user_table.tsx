@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { getOr } from 'lodash/fp';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { UserPanelKey, HostPanelKey } from '../../../flyout/entity_details/shared/constants';
 import { AuthStackByField } from '../../../../common/search_strategy/security_solution/users/authentications';
