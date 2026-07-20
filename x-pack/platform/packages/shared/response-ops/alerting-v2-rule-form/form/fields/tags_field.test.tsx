@@ -9,8 +9,39 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useFormContext } from 'react-hook-form';
-import { TagsField } from './tags_field';
+import { TagsField, validateTags } from './tags_field';
 import { createFormWrapper, createMockServices } from '../../test_utils';
+
+describe('validateTags', () => {
+  it('passes when tags are undefined or empty', () => {
+    expect(validateTags(undefined)).toBe(true);
+    expect(validateTags([])).toBe(true);
+  });
+
+  it('passes when a tag is exactly at the length limit', () => {
+    expect(validateTags(['a'.repeat(128)])).toBe(true);
+  });
+
+  it('fails when a tag exceeds the length limit', () => {
+    expect(validateTags(['a'.repeat(129)])).toBe('Each tag must be no longer than 128 characters.');
+  });
+
+  it('passes when exactly at the tag count limit', () => {
+    expect(validateTags(Array.from({ length: 20 }, (_, i) => `tag-${i}`))).toBe(true);
+  });
+
+  it('fails when the tag count exceeds the limit', () => {
+    expect(validateTags(Array.from({ length: 21 }, (_, i) => `tag-${i}`))).toBe(
+      'You can add up to 20 tags.'
+    );
+  });
+
+  it('reports the length error before the count error', () => {
+    const tags = Array.from({ length: 21 }, (_, i) => `tag-${i}`);
+    tags[0] = 'a'.repeat(129);
+    expect(validateTags(tags)).toBe('Each tag must be no longer than 128 characters.');
+  });
+});
 
 /** Helper that triggers form submission so react-hook-form runs validation. */
 const SubmitButton = () => {
