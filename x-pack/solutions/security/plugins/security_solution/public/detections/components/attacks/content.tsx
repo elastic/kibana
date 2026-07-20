@@ -65,8 +65,7 @@ export const ATTACKS_PAGE_TYPE_FILTER_TEST_ID = 'attacks-page-type-filter';
 export const ATTACKS_PAGE_ASSIGNEE_FILTER_TEST_ID = 'attacks-page-assignee-filter';
 export const ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID = 'attacks-page-connector-filter';
 export const ATTACKS_PAGE_STANDARD_FILTERS_TEST_ID = 'attacks-page-standard-filters';
-const GROUP_FILTERS_MAX_WIDTH = 640;
-const STATUS_FILTERS_MIN_WIDTH = 480;
+const FILTERS_SECTION_WIDTH = 480;
 
 const ATTACKS_PAGE = 'attacks';
 const FILTER_CATEGORY = 'filters';
@@ -290,7 +289,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
             <WelcomeTourCallout />
             <AttacksTour />
             <EuiFlexGroup direction="row" responsive={false} wrap={true}>
-              <EuiFlexItem grow={1} style={{ maxWidth: GROUP_FILTERS_MAX_WIDTH }}>
+              <EuiFlexItem grow={1} style={{ maxWidth: FILTERS_SECTION_WIDTH }}>
                 <EuiFlexGroup direction="row" responsive={false}>
                   <EuiFlexItem grow={1} data-test-subj={ATTACKS_PAGE_TYPE_FILTER_TEST_ID}>
                     <TypeFilter
@@ -320,7 +319,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
               <VerticalDivider grow={false} aria-hidden={true} />
               <EuiFlexItem
                 grow={1}
-                style={{ minWidth: STATUS_FILTERS_MIN_WIDTH }}
+                style={{ minWidth: FILTERS_SECTION_WIDTH }}
                 data-test-subj={ATTACKS_PAGE_STANDARD_FILTERS_TEST_ID}
               >
                 <FiltersSection
