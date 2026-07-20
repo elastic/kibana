@@ -158,10 +158,6 @@ export const AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE = 'aiAssistant:preferredAI
 export const AI_CHAT_EXPERIENCE_TYPE = 'aiAssistant:preferredChatExperience';
 export const AI_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
 export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
-export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS =
-  'observability:streamsEnableSignificantEvents';
-export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY =
-  'observability:streamsEnableSignificantEventsDiscovery';
 export const OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS = 'observability:streamsEnableGroupStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS = 'observability:streamsEnableQueryStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS = 'observability:streamsEnableContentPacks';
@@ -183,6 +179,12 @@ export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLE
   'observability:streamsSigEventsScheduledDiscoveryEnabled';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES =
   'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES =
+  'observability:streamsSigEventsScheduledDiscoveryDetectionBucketIntervalMinutes';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES =
+  'observability:streamsSigEventsScheduledDiscoveryDetectionLookbackMinutes';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES =
+  'observability:streamsSigEventsScheduledDiscoveryTargetCoverageMinutes';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES =
   'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE =
@@ -191,8 +193,6 @@ export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE
   'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES =
   'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses';
-export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2 =
-  'observability:streamsEnableSignificantEventsAlertingV2';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings
@@ -239,6 +239,8 @@ export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
   'securitySolution:enableAssetCriticality' as const;
 export const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING =
   'securitySolution:enableAssetInventory' as const;
+export const SECURITY_SOLUTION_ENABLE_SIEM_READINESS_SETTING =
+  'securitySolution:enableSiemReadiness' as const;
 export const SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING =
   'securitySolution:enableCloudConnector' as const;
 export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES =

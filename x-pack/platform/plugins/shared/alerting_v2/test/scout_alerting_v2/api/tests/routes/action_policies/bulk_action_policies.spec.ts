@@ -420,6 +420,25 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest(
+    'validation: rejects body with unknown top-level keys (strict schema)',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({ name: 'bulk-strict-top-level' })
+      );
+
+      const response = await apiClient.post(getBulkActionPoliciesUrl(), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: {
+          actions: [{ id: created.id, action: 'enable' }],
+          unknownField: 'x',
+        },
+      });
+
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
     'validation: rejects snooze action without snoozedUntil',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(

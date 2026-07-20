@@ -45,6 +45,7 @@ import type { CRUDClient } from './domain/crud';
 import type { EntityMetadataClient } from './domain/entity_metadata';
 import type { ResolutionClient } from './domain/resolution';
 import type { ResolutionRulesClient } from './domain/resolution/rules';
+import type { EntityStorePreferencesClient } from './domain/saved_objects';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import type { TelemetryReporter } from './telemetry/events';
 
@@ -70,6 +71,7 @@ export interface EntityStoreApiRequestHandlerContext {
   logger: Logger;
   assetManagerClient: AssetManagerClient;
   entityMaintainersClient: EntityMaintainersClient;
+  preferencesClient: EntityStorePreferencesClient;
   crudClient: CRUDClient;
   entityMetadataClient: EntityMetadataClient;
   resolutionClient: ResolutionClient;
