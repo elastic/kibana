@@ -323,8 +323,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
               {
                 type: ToolResultType.error,
                 data: {
-                  message:
-                    RULE_CREATION_GENERIC_ERROR_MESSAGE,
+                  message: RULE_CREATION_GENERIC_ERROR_MESSAGE,
                 },
               },
             ],
@@ -404,8 +403,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
             {
               type: ToolResultType.error,
               data: {
-                message:
-                  RULE_CREATION_GENERIC_ERROR_MESSAGE,
+                message: RULE_CREATION_GENERIC_ERROR_MESSAGE,
               },
             },
           ],
