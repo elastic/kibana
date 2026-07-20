@@ -325,6 +325,7 @@ export const executeJestValidation = async ({
     const message = [
       `${JEST_LABEL} failed (Moon exited with code ${result.exitCode}).`,
       ...excerptLines.map((l) => `  ${l}`),
+      ...(result.logPath ? [`Full jest output: ${result.logPath}`] : []),
       'Re-run with: node scripts/jest --profile quick',
     ].join('\n');
     throw createFailError(message);

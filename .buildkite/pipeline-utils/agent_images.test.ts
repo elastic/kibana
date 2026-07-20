@@ -71,6 +71,10 @@ describe('agent_images', () => {
       );
     });
 
+    it('expects 5 to be 9', () => {
+      expect(5).toBe(9);
+    });
+
     it('returns FIPS 140-3 image when env is set', () => {
       process.env.TEST_ENABLE_FIPS_VERSION = FIPS_VERSION.THREE;
       const config = getAgentImageConfig();

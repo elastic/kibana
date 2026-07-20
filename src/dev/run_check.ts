@@ -167,6 +167,34 @@ const findJestUnitConfig = (filePath: string): string | undefined => {
 
 const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
 
+/** Best-effort upload of a REPO_ROOT-relative file as a Buildkite artifact (no-op outside CI). */
+const uploadBuildkiteArtifact = async (relPath: string): Promise<void> => {
+  if (!process.env.BUILDKITE) {
+    return;
+  }
+  try {
+    const execa = (await import('execa')).default;
+    await execa('buildkite-agent', ['artifact', 'upload', relPath], {
+      cwd: REPO_ROOT,
+      reject: false,
+    });
+  } catch {
+    // best-effort: the local log path is still printed
+  }
+};
+
+/** Point the developer at the full jest log and, on CI, upload it as a Buildkite artifact. */
+const reportJestFullLog = async (logPath?: string): Promise<void> => {
+  if (!logPath) {
+    return;
+  }
+  writeln(
+    `    full jest output: ${logPath}${process.env.BUILDKITE ? ' (uploaded to Buildkite)' : ''}`
+  );
+  writeln('');
+  await uploadBuildkiteArtifact(logPath);
+};
+
 const runLintTsProjects = async (
   affectedSourceRoots: string[],
   fix: boolean
@@ -506,6 +534,7 @@ run(
             }
             writeln('    $ node scripts/jest --profile quick');
             writeln('');
+            await reportJestFullLog(result.logPath);
             printVerbose();
             errors.push(new Error('jest failed'));
           } else if (result.failed.length > 0) {
@@ -567,6 +596,7 @@ run(
               writeln(`    $ ${jestCmd}`);
               writeln('');
             }
+            await reportJestFullLog(result.logPath);
             printVerbose();
             errors.push(new Error('jest failed'));
           } else {
