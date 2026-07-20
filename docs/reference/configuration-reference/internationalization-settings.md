@@ -13,6 +13,8 @@ applies_to:
 :::{settings} /reference/configuration-reference/internationalization-settings.yml
 :::
 
+To apply these settings in your deployment, refer to [Elastic Stack settings](docs-content://deploy-manage/stack-settings.md). On {{serverless-full}}, Elastic manages these settings for you.
+
 ## Built-in and custom locales
 
 {{kib}} ships translation files for English, French, Japanese, Simplified Chinese, and German. Plugins and admin-installed translation files can add additional locales. Any locale listed in `i18n.locales` for which a translation file exists will be served; locales without translation files fall back to English.
