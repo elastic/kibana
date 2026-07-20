@@ -492,7 +492,11 @@ export function InternalDashboardTopNav({
         />
       )}
       {headerMode === 'legacy' && (
-        <LegacyDashboardHeader badges={badges} config={appMenuConfig} lastSavedId={lastSavedId} />
+        <LegacyDashboardHeader
+          badges={badges}
+          config={{ ...appMenuConfig, historyConfig }}
+          lastSavedId={lastSavedId}
+        />
       )}
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
