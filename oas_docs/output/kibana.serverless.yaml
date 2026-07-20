@@ -49244,8 +49244,10 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - type
@@ -49255,8 +49257,10 @@ paths:
                         type: object
                         properties:
                           id:
+                            maxLength: 512
                             type: string
                           type:
+                            maxLength: 256
                             type: string
                         required:
                           - type
@@ -49274,8 +49278,10 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - type
@@ -49284,11 +49290,14 @@ paths:
                   type: array
                 search:
                   description: Search for documents to export using the Elasticsearch Simple Query String syntax.
+                  maxLength: 10000
                   type: string
                 type:
                   anyOf:
-                    - type: string
+                    - maxLength: 256
+                      type: string
                     - items:
+                        maxLength: 256
                         type: string
                       maxItems: 100
                       type: array
@@ -49570,8 +49579,10 @@ paths:
                       createNewCopy:
                         type: boolean
                       destinationId:
+                        maxLength: 512
                         type: string
                       id:
+                        maxLength: 512
                         type: string
                       ignoreMissingReferences:
                         type: boolean
@@ -49585,10 +49596,13 @@ paths:
                           type: object
                           properties:
                             from:
+                              maxLength: 512
                               type: string
                             to:
+                              maxLength: 512
                               type: string
                             type:
+                              maxLength: 256
                               type: string
                           required:
                             - type
@@ -49597,6 +49611,7 @@ paths:
                         maxItems: 100
                         type: array
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - type
@@ -72321,6 +72336,8 @@ components:
             agent_download_timeout:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
+              nullable: true
+            agent_features_include_tags_in_events_enabled:
               nullable: true
             agent_internal:
               nullable: true
@@ -95071,6 +95088,8 @@ components:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
               nullable: true
+            agent_features_include_tags_in_events_enabled:
+              nullable: true
             agent_internal:
               nullable: true
             agent_limits_go_max_procs:
@@ -106157,6 +106176,8 @@ components:
             agent_download_timeout:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
+              nullable: true
+            agent_features_include_tags_in_events_enabled:
               nullable: true
             agent_internal:
               nullable: true

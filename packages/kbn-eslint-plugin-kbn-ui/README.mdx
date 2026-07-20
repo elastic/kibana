@@ -1,0 +1,96 @@
+---
+id: kibDevDocsOpsEslintPluginKbnUi
+slug: /kibana-dev-docs/ops/kbn-eslint-plugin-kbn-ui
+title: '@kbn/eslint-plugin-kbn-ui'
+description: A package holding an eslint plugin with custom rules for '@kbn/ui-' components used on Kibana
+tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'kbn-ui']
+---
+
+`@kbn/eslint-plugin-kbn-ui` is a collection of custom ESLint rules for `@kbn/ui-` components.
+
+## `@kbn/kbn-ui/prefer_toast_action_props`
+
+Flags legacy usage of passing actions as content to toasts that are added via the `ToastsApi`'s methods (`add()`, `addInfo()`, `addSuccess()`, `addWarning()`, `addDanger()`) as actions should instead be passed via the `actionProps` prop.
+
+### Examples
+
+✅ valid
+
+```tsx
+// Action passed via actionProps
+toasts.addSuccess({
+  title: 'Done',
+  actionProps: { primary: { label: 'Action', onClick: () => {} } },
+});
+
+// Inline hyperlink as part of translated sentence — not a standalone CTA
+toasts.addSuccess({
+  title: 'Done',
+  text: toMountPoint(
+    <FormattedMessage
+      id="x"
+      defaultMessage="See {docs} for details."
+      values={{ docs: <EuiLink href="/">Link</EuiLink> }}
+    />
+  ),
+});
+toasts.addSuccess({
+  title: 'Done',
+  text: toMountPoint(
+    <>
+      <FormattedMessage id="x" defaultMessage="See the docs for details:" />
+      <EuiLink href="/">Link</EuiLink>
+    </>
+  ),
+});
+
+// custom component wrapper (valid, but unexpected)
+toasts.addSuccess({
+  title: 'Done',
+  text: mountReactNode(
+    <CustomComponent>
+      <EuiButton>Action</EuiButton>
+    </CustomComponent>
+  ),
+});
+```
+
+❌ invalid
+
+```tsx
+// Action button embedded in mounted JSX text
+toasts.addSuccess({
+  title: 'Done',
+  text: toMountPoint(
+    <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexItem grow={false}>...</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton>Action</EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>,
+    services
+  ),
+});
+
+// Standalone button CTA
+toasts.addWarning({
+  title: 'Warning',
+  text: mountReactNode(
+    <div>
+      <p>Additional configuration is required before you can proceed.</p>
+      <EuiButton>Action</EuiButton>
+    </div>
+  ),
+});
+
+// Standalone link CTA after body text
+toasts.addWarning({
+  title: 'Warning',
+  text: mountReactNode(
+    <div>
+      <p>Additional configuration is required before you can proceed.</p>
+      <EuiLink href="/">Link</EuiLink>
+    </div>
+  ),
+});
+```
