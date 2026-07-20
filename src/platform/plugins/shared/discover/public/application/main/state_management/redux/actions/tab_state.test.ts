@@ -22,6 +22,7 @@ import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../c
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
@@ -628,9 +629,11 @@ describe('tab_state actions', () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
-      const overriddenVisContextAfterInvalidation = { overridden: true };
+      const esqlVariables = [
+        { key: 'status', type: 'values', value: 'active' } as ESQLControlVariable,
+      ];
 
-      // Set non-default visualization state to verify the transition clears it
+      // Set ES|QL-specific attributes and a shared attribute before the transition
       internalState.dispatch(
         internalStateActions.updateAttributes({
           tabId,
@@ -642,9 +645,9 @@ describe('tab_state actions', () => {
         })
       );
       internalState.dispatch(
-        internalStateActions.setOverriddenVisContextAfterInvalidation({
+        internalStateActions.setEsqlVariables({
           tabId,
-          overriddenVisContextAfterInvalidation,
+          esqlVariables,
         })
       );
       let state = internalState.getState();
@@ -662,7 +665,7 @@ describe('tab_state actions', () => {
         controlGroupState: mockControlState,
         timeRestore: true,
       });
-      expect(tab.overriddenVisContextAfterInvalidation).toBe(overriddenVisContextAfterInvalidation);
+      expect(tab.esqlVariables).toBe(esqlVariables);
 
       expect(prevDefaultProfileState.fieldsToReset).toBe('none');
       expect(typeof prevDefaultProfileState.resetId).toBe('string');
@@ -702,9 +705,9 @@ describe('tab_state actions', () => {
       expect(tab.attributes).toStrictEqual({
         visContext: undefined,
         controlGroupState: undefined,
-        timeRestore: false,
+        timeRestore: true,
       });
-      expect(tab.overriddenVisContextAfterInvalidation).toBeUndefined();
+      expect(tab.esqlVariables).toStrictEqual([]);
 
       expect(tab.defaultProfileState.fieldsToReset).toBe('all');
       expect(typeof tab.defaultProfileState.resetId).toBe('string');

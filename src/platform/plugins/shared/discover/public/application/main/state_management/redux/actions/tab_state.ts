@@ -56,7 +56,6 @@ import type {
 } from '../types';
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
-import { DEFAULT_TAB_STATE } from '../constants';
 
 export interface RawAppStatePayload {
   appState: DiscoverAppState;
@@ -233,19 +232,6 @@ const ALL_PROFILE_STATE_TYPES = new Set([
 ]);
 const NON_URL_PROFILE_STATE_TYPES = new Set([ProfileStateType.Ui, ProfileStateType.Persistent]);
 const URL_PROFILE_STATE_TYPES = new Set([ProfileStateType.Url]);
-
-/**
- * Reset the tab attributes to their default values
- */
-export const cleanAttributes: InternalStateThunkActionCreator<[TabActionPayload]> = ({ tabId }) =>
-  function cleanAttributesThunkFn(dispatch) {
-    dispatch(
-      internalStateSlice.actions.setAttributes({
-        tabId,
-        attributes: { ...DEFAULT_TAB_STATE.attributes },
-      })
-    );
-  };
 
 /**
  * Updates tab profile state for provided definition, and optionally pushes to URL history
@@ -441,11 +427,19 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
       })
     );
 
-    dispatch(cleanAttributes({ tabId }));
     dispatch(
-      internalStateSlice.actions.setOverriddenVisContextAfterInvalidation({
+      updateAttributes({
         tabId,
-        overriddenVisContextAfterInvalidation: undefined,
+        attributes: {
+          visContext: undefined,
+          controlGroupState: undefined,
+        },
+      })
+    );
+    dispatch(
+      internalStateSlice.actions.setEsqlVariables({
+        tabId,
+        esqlVariables: [],
       })
     );
 
