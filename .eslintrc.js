@@ -3101,9 +3101,9 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
-        'src/platform/packages/shared/kbn-apm-ui-shared',
+        'x-pack/solutions/observability/plugins/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/telemetry/ebt_props_should_be_present': 'error',
