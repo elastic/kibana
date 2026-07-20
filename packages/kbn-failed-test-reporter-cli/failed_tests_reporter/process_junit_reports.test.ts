@@ -42,11 +42,29 @@ const makeFailure = (i: number): TestFailure => ({
   likelyIrrelevant: false,
 });
 
-const createParams = (existingFor: Map<TestFailure, ExistingFailedTestIssue>) => {
+const createExistingIssue = (failure: TestFailure): ExistingFailedTestIssue => ({
+  classname: failure.classname,
+  name: failure.name,
+  github: {
+    nodeId: `node-${failure.classname}-${failure.name}`,
+    number: 1,
+    htmlUrl: 'https://github.com/issues/1',
+    body: 'body',
+  },
+});
+
+const createParams = (initialExistingIssues: ExistingFailedTestIssue[] = []) => {
+  const trackedIssues = [...initialExistingIssues];
   const existingIssues = {
     loadForFailures: jest.fn(),
-    getForFailure: jest.fn((failure: TestFailure) => existingFor.get(failure)),
-    addNewlyCreated: jest.fn(),
+    getForFailure: jest.fn((failure: TestFailure) =>
+      trackedIssues.find(
+        (issue) => issue.classname === failure.classname && issue.name === failure.name
+      )
+    ),
+    addNewlyCreated: jest.fn((failure: TestFailure) => {
+      trackedIssues.push(createExistingIssue(failure));
+    }),
   };
 
   const params = {
@@ -77,21 +95,21 @@ beforeEach(() => {
 });
 
 describe('processJUnitReports new-issue cap', () => {
-  it('creates a new issue per failure when under the cap', async () => {
-    const failures = Array.from({ length: 5 }, (_, i) => makeFailure(i));
+  it('creates one new issue when the report has a single unique new failure', async () => {
+    const failures = [makeFailure(0)];
     getFailures.mockReturnValue(failures);
-    const { params } = createParams(new Map());
+    const { params } = createParams();
 
     await processJUnitReports(['report.xml'], params);
 
-    expect(createFailureIssue).toHaveBeenCalledTimes(5);
+    expect(createFailureIssue).toHaveBeenCalledTimes(1);
     expect(createSystemicFailureIssue).not.toHaveBeenCalled();
   });
 
-  it('skips new-issue creation and opens one systemic issue when the cap is exceeded', async () => {
-    const failures = Array.from({ length: 11 }, (_, i) => makeFailure(i));
+  it('skips new-issue creation and opens one systemic issue when more than one unique new failure would open an issue', async () => {
+    const failures = [makeFailure(0), makeFailure(1)];
     getFailures.mockReturnValue(failures);
-    const { params } = createParams(new Map());
+    const { params } = createParams();
 
     await processJUnitReports(['report.xml'], params);
 
@@ -104,57 +122,58 @@ describe('processJUnitReports new-issue cap', () => {
   });
 
   it('still updates existing tracked issues when the cap is exceeded', async () => {
-    const failures = Array.from({ length: 12 }, (_, i) => makeFailure(i));
+    const failures = [makeFailure(0), makeFailure(1), makeFailure(2)];
     getFailures.mockReturnValue(failures);
 
-    const existingFor = new Map<TestFailure, ExistingFailedTestIssue>();
-    existingFor.set(failures[0], {
-      classname: failures[0].classname,
-      name: failures[0].name,
-      github: { nodeId: 'a', number: 1, htmlUrl: 'https://github.com/issues/1', body: 'body' },
-    });
-    const { params } = createParams(existingFor);
+    const { params } = createParams([createExistingIssue(failures[0])]);
 
     await processJUnitReports(['report.xml'], params);
 
-    // 11 failures without an existing issue > cap of 10, so no new issues are opened.
+    // 2 failures without an existing issue > cap of 1, so no new per-test issues are opened.
     expect(createFailureIssue).not.toHaveBeenCalled();
     // The one tracked failure is still updated.
     expect(updateFailureIssue).toHaveBeenCalledTimes(1);
   });
 
   it('does not count failures with an existing issue toward the cap', async () => {
-    const failures = Array.from({ length: 13 }, (_, i) => makeFailure(i));
+    const failures = [makeFailure(0), makeFailure(1), makeFailure(2)];
     getFailures.mockReturnValue(failures);
 
-    // 3 already tracked -> only 10 new, which is within the cap of 10.
-    const existingFor = new Map<TestFailure, ExistingFailedTestIssue>();
-    for (const failure of failures.slice(0, 3)) {
-      existingFor.set(failure, {
-        classname: failure.classname,
-        name: failure.name,
-        github: { nodeId: 'a', number: 1, htmlUrl: 'https://github.com/issues/1', body: 'body' },
-      });
-    }
-    const { params } = createParams(existingFor);
+    // 2 already tracked -> only 1 new, which is within the cap of 1.
+    const { params } = createParams(failures.slice(0, 2).map(createExistingIssue));
 
     await processJUnitReports(['report.xml'], params);
 
-    expect(createFailureIssue).toHaveBeenCalledTimes(10);
-    expect(updateFailureIssue).toHaveBeenCalledTimes(3);
+    expect(createFailureIssue).toHaveBeenCalledTimes(1);
+    expect(updateFailureIssue).toHaveBeenCalledTimes(2);
   });
 
   it('does not count likely-irrelevant failures toward the cap', async () => {
-    const failures = Array.from({ length: 16 }, (_, i) => makeFailure(i));
-    // Mark 6 as likely irrelevant -> only 10 real new failures, within the cap.
-    for (const failure of failures.slice(0, 6)) {
-      failure.likelyIrrelevant = true;
-    }
+    const failures = [makeFailure(0), makeFailure(1)];
+    // Mark 1 as likely irrelevant -> only 1 real new failure, within the cap.
+    failures[0].likelyIrrelevant = true;
     getFailures.mockReturnValue(failures);
-    const { params } = createParams(new Map());
+    const { params } = createParams();
 
     await processJUnitReports(['report.xml'], params);
 
-    expect(createFailureIssue).toHaveBeenCalledTimes(10);
+    expect(createFailureIssue).toHaveBeenCalledTimes(1);
+  });
+
+  it('counts duplicate failures as one unique new issue', async () => {
+    const failures = [
+      makeFailure(0),
+      {
+        ...makeFailure(0),
+        failure: 'another failure entry for the same test',
+      },
+    ];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(createSystemicFailureIssue).not.toHaveBeenCalled();
+    expect(createFailureIssue).toHaveBeenCalledTimes(1);
   });
 });

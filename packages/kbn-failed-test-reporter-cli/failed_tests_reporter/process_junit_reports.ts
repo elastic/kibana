@@ -20,14 +20,17 @@ import { reportFailuresToFile } from './report_failures_to_file';
 import { getReportMessageIter } from './report_metadata';
 import { getRootMetadata, readTestReport } from './test_report';
 
-// A single config that would open more than this many *new* issues in one report is
+// A single config that would open more than this many unique *new* issues in one report is
 // treated as a systemic/environmental failure (e.g. out of disk space) rather than a set
 // of genuine test regressions. `--bail` used to implicitly cap this by stopping a config
 // at its first failure; removing it (behind FTR_SMART_RETRY_ENABLED) let a broken config
 // open an issue per test. When the cap is exceeded we skip mass new-issue creation while
 // still updating existing tracked issues, indexing to ES, and writing failure files
 // (all real signal). See https://github.com/elastic/kibana/issues/278308.
-const MAX_NEW_ISSUES_PER_REPORT = 10;
+const MAX_NEW_ISSUES_PER_REPORT = 1;
+
+const getFailureIssueKey = (failure: { classname: string; name: string }) =>
+  `${failure.classname}\n${failure.name}`;
 
 export async function processJUnitReports(
   reportPaths: string[],
@@ -58,9 +61,20 @@ export async function processJUnitReports(
       await reportFailuresToEs(log, failures);
     }
 
-    const newIssueFailures = failures.filter(
-      (failure) => !failure.likelyIrrelevant && !existingIssues.getForFailure(failure)
-    );
+    const seenNewIssueFailures = new Set<string>();
+    const newIssueFailures = failures.filter((failure) => {
+      if (failure.likelyIrrelevant || existingIssues.getForFailure(failure)) {
+        return false;
+      }
+
+      const key = getFailureIssueKey(failure);
+      if (seenNewIssueFailures.has(key)) {
+        return false;
+      }
+
+      seenNewIssueFailures.add(key);
+      return true;
+    });
     const skipNewIssues = newIssueFailures.length > MAX_NEW_ISSUES_PER_REPORT;
     let systemicIssueUrl: string | undefined;
     if (skipNewIssues) {
