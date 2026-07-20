@@ -2235,7 +2235,7 @@
     "swagger-jsdoc": "6.3.0",
     "swagger-ui-express": "5.0.1",
     "table": "6.9.0",
-    "tar-fs": "3.1.2",
+    "tar-fs": "3.1.3",
     "terser-webpack-plugin": "5.3.17",
     "tough-cookie": "6.0.0",
     "trace": "3.2.0",
