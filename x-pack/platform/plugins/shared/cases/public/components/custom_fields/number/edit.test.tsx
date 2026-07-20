@@ -245,6 +245,42 @@ describe('Edit ', () => {
     });
   });
 
+  it('calls onSubmit with 0 when the value is 0', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          customField={customField}
+          customFieldConfiguration={{ ...customFieldConfiguration, required: false }}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    await userEvent.click(
+      await screen.findByTestId('case-number-custom-field-edit-button-test_key_5')
+    );
+    await userEvent.clear(
+      await screen.findByTestId('case-number-custom-field-form-field-test_key_5')
+    );
+    await userEvent.click(
+      await screen.findByTestId('case-number-custom-field-form-field-test_key_5')
+    );
+    await userEvent.paste('0');
+
+    await userEvent.click(
+      await screen.findByTestId('case-number-custom-field-submit-button-test_key_5')
+    );
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith({
+        ...customField,
+        value: 0,
+      });
+    });
+  });
+
   it('calls onSubmit with defaultValue if no initialValue exists', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
@@ -676,6 +712,33 @@ describe('Edit inline variant', () => {
       expect(onSubmit).toBeCalledWith({
         ...customField,
         value: 12345,
+      });
+    });
+  });
+
+  it('calls onSubmit with 0 when the value is 0', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={{ ...customFieldConfiguration, required: false }}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
+    await userEvent.type(await screen.findByTestId(formFieldTestId), '0');
+
+    await userEvent.click(await screen.findByTestId(confirmTestId));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith({
+        ...customField,
+        value: 0,
       });
     });
   });

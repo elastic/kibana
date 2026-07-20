@@ -169,7 +169,7 @@ const ClassicEdit: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
         ...customField,
         key: customField?.key ?? customFieldConfiguration.key,
         type: CustomFieldTypes.NUMBER,
-        value: data.value ? Number(data.value) : null,
+        value: normalizeNumber(data.value),
       });
     }
     setIsEdit(false);
@@ -307,7 +307,7 @@ const InlineEdit: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
         ...customField,
         key: customField?.key ?? customFieldConfiguration.key,
         type: CustomFieldTypes.NUMBER,
-        value: data.value ? Number(data.value) : null,
+        value: normalizeNumber(data.value),
       });
     }
   }, [customField, customFieldConfiguration.key, formState, onSubmit]);
