@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { EsqlRuleCreateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleCreationState, RejectionCode } from '../state';
 
@@ -14,9 +15,7 @@ export const terminalValidationNode = () => async (state: RuleCreationState) => 
     return {};
   }
 
-  const details = result.error.issues
-    .map((issue) => `${issue.path.join('.') || 'root'}: ${issue.message}`)
-    .join('; ');
+  const details = stringifyZodError(result.error);
 
   return {
     rejectionReason: {
