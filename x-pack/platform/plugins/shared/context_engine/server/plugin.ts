@@ -64,8 +64,6 @@ export class ContextEnginePlugin
       logger: this.logger.get('ai_indices'),
     });
 
-    // asScopedToClient with the unsafe internal client reads from the default space's config SO,
-    // matching what route handlers see — so uiSettings.overrides in kibana.yml works as expected.
     const internalSoClient = coreStart.savedObjects.getUnsafeInternalClient();
     const uiSettings = coreStart.uiSettings.asScopedToClient(internalSoClient);
     const isEnabled = await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
