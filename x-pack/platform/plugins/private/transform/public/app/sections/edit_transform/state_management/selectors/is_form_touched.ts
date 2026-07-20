@@ -8,8 +8,8 @@
 import { isEqual } from 'lodash';
 import { useMemo } from 'react';
 
-import { createSelector } from '@reduxjs/toolkit';
-import { useSelector } from 'react-redux';
+import { createSelector } from 'redux-toolkit-v1';
+import { useSelector } from 'react-redux-v7';
 
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
