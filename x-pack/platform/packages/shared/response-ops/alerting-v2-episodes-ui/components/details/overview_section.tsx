@@ -19,7 +19,7 @@ export interface AlertEpisodeOverviewSectionProps {
   groupHash: string | undefined;
   services: Pick<
     AlertEpisodeDetailsServices,
-    'data' | 'http' | 'expressions' | 'spaces' | 'uiSettings' | 'userProfile'
+    'data' | 'http' | 'expressions' | 'spaces' | 'uiSettings' | 'userProfile' | 'dataViews'
   >;
 }
 

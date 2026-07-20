@@ -142,6 +142,8 @@ export const OBSERVABILITY_MAX_SUGGESTIONS_ID = 'observability:maxSuggestions';
 export const OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR = 'observability:apmEnableTableSearchBar';
 export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
   'observability:apmEnableServiceInventoryTableSearchBar';
+export const OBSERVABILITY_APM_TRACE_LOGS_DEFAULT_COLUMNS_ID =
+  'observability:apmTraceLogsDefaultColumns';
 export const OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID = 'observability:newLogsOverview';
 export const OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID = 'observability:logSources';
 export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
@@ -156,10 +158,6 @@ export const AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE = 'aiAssistant:preferredAI
 export const AI_CHAT_EXPERIENCE_TYPE = 'aiAssistant:preferredChatExperience';
 export const AI_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
 export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
-export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS =
-  'observability:streamsEnableSignificantEvents';
-export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY =
-  'observability:streamsEnableSignificantEventsDiscovery';
 export const OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS = 'observability:streamsEnableGroupStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS = 'observability:streamsEnableQueryStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS = 'observability:streamsEnableContentPacks';
@@ -177,8 +175,24 @@ export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS =
   'observability:streamsSigEventsIndexPatterns';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG =
   'observability:streamsSigEventsTuningConfig';
-export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2 =
-  'observability:streamsEnableSignificantEventsAlertingV2';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED =
+  'observability:streamsSigEventsScheduledDiscoveryEnabled';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES =
+  'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES =
+  'observability:streamsSigEventsScheduledDiscoveryDetectionBucketIntervalMinutes';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES =
+  'observability:streamsSigEventsScheduledDiscoveryDetectionLookbackMinutes';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES =
+  'observability:streamsSigEventsScheduledDiscoveryTargetCoverageMinutes';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES =
+  'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE =
+  'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE =
+  'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES =
+  'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings
@@ -225,6 +239,8 @@ export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
   'securitySolution:enableAssetCriticality' as const;
 export const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING =
   'securitySolution:enableAssetInventory' as const;
+export const SECURITY_SOLUTION_ENABLE_SIEM_READINESS_SETTING =
+  'securitySolution:enableSiemReadiness' as const;
 export const SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING =
   'securitySolution:enableCloudConnector' as const;
 export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES =
@@ -233,6 +249,22 @@ export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE =
   'securitySolution:defaultValueReportRate' as const;
 export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE =
   'securitySolution:defaultValueReportTitle' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED =
+  'securitySolution:alertAnalysisWorkflowAutoCloseEnabled' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD =
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMinThreshold' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD =
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMaxThreshold' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID =
+  'securitySolution:alertAnalysisWorkflowConnectorId' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID =
+  'securitySolution:alertAnalysisWorkflowAgentId' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION =
+  'securitySolution:alertAnalysisWorkflowCreateConversation' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED =
+  'securitySolution:alertAnalysisWorkflowEnabled' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX =
+  'securitySolution:alertAnalysisWorkflowTagPrefix' as const;
 // Cases settings
 export const CASES_MAX_OPEN_CASES_PER_RULE_RUN_ID = 'cases:maxOpenCasesPerRuleRun' as const;
 

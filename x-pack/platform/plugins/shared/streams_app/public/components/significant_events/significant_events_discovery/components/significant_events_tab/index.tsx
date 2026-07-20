@@ -10,19 +10,32 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import {
   EuiBasicTable,
   EuiBadge,
+  EuiButtonIcon,
   EuiCallOut,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import useInterval from 'react-use/lib/useInterval';
 import { i18n } from '@kbn/i18n';
-import { SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/significant-events-schema';
-import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
+import {
+  getSeverityLabel,
+  severitySchema,
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  SEVERITY_OPTIONS,
+} from '@kbn/significant-events-schema';
+import type {
+  SignificantEvent,
+  SignificantEventStatus,
+  Severity,
+} from '@kbn/significant-events-schema';
+import { useSignificantEventsUrlState } from './use_significant_events_url_state';
+import { useFetchSignificantEventLifecycle } from '../../../../../hooks/significant_events/use_fetch_significant_event_lifecycle';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import { useFetchSignificantEvents } from '../../../../../hooks/significant_events/use_fetch_significant_events';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
@@ -36,8 +49,71 @@ import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
+import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
+import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
 
-const MAX_VISIBLE_STREAMS = 3;
+export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['80-critical', '60-high'];
+
+const RUN_ARIA_LABEL = i18n.translate(
+  'xpack.streams.sigEventsTab.runInvestigationButton.ariaLabel',
+  {
+    defaultMessage: 'Run investigation for this event',
+  }
+);
+
+const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
+  'xpack.streams.sigEventsTab.closeEventButton.ariaLabel',
+  {
+    defaultMessage: 'Close this significant event',
+  }
+);
+
+const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
+  const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
+  return (
+    <EuiToolTip content={RUN_ARIA_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="inspect"
+        aria-label={RUN_ARIA_LABEL}
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          if (!isTriggering) triggerInvestigation(event.event_uuid);
+        }}
+        isDisabled={isTriggering}
+        isLoading={isTriggering}
+        size="s"
+        color="primary"
+        data-test-subj="sigEventRunInvestigationIconButton"
+      />
+    </EuiToolTip>
+  );
+};
+
+const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
+  const { updateEventStatus, isUpdating } = useUpdateSignificantEvent();
+
+  if (event.status === 'closed') {
+    return null;
+  }
+
+  return (
+    <EuiToolTip content={CLOSE_EVENT_ARIA_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="cross"
+        aria-label={CLOSE_EVENT_ARIA_LABEL}
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          if (!isUpdating) updateEventStatus({ eventUuid: event.event_uuid, status: 'closed' });
+        }}
+        isDisabled={isUpdating}
+        isLoading={isUpdating}
+        size="s"
+        color="danger"
+        data-test-subj="sigEventCloseIconButton"
+      />
+    </EuiToolTip>
+  );
+};
 
 const clickableRowCss = css`
   cursor: pointer;
@@ -58,10 +134,6 @@ const LOADING_MESSAGE = i18n.translate('xpack.streams.sigEventsTab.loadingMessag
 const EMPTY_MESSAGE = i18n.translate('xpack.streams.sigEventsTab.emptyBody', {
   defaultMessage: 'No significant events found.',
 });
-const MORE_LABEL = i18n.translate('xpack.streams.sigEventsTab.moreLabel', {
-  defaultMessage: 'more',
-});
-
 const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
   {
     field: '@timestamp',
@@ -96,22 +168,43 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
       defaultMessage: 'Streams',
     }),
     width: '160px',
+    // Required for the column's `width` to actually constrain the cell — EUI's
+    // `truncateText` only kicks in when the cell is bounded (see tableLayout="fixed" below).
+    truncateText: true,
     render: (streamNames: string[]) => {
       const names = streamNames ?? [];
-      const visible = names.slice(0, MAX_VISIBLE_STREAMS);
-      const remaining = names.length - visible.length;
+      const [first, ...rest] = names;
+      if (!first) return null;
+      const overflowCount = rest.length;
       return (
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-          {visible.map((name, idx) => (
-            <EuiFlexItem grow={false} key={`${name}-${idx}`}>
-              <EuiBadge color="hollow">{name}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-          {remaining > 0 && (
+        <EuiFlexGroup
+          gutterSize="xs"
+          alignItems="center"
+          responsive={false}
+          css={css`
+            flex-wrap: nowrap;
+            min-width: 0;
+          `}
+        >
+          <EuiFlexItem
+            grow={1}
+            css={css`
+              min-width: 0;
+            `}
+          >
+            <EuiToolTip content={first}>
+              <EuiBadge tabIndex={0} color="hollow">
+                {first}
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+          {overflowCount > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                +{remaining} {MORE_LABEL}
-              </EuiText>
+              <EuiToolTip content={rest.join(', ')}>
+                <EuiText tabIndex={0} size="xs" color="subdued">
+                  +{overflowCount}
+                </EuiText>
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -119,17 +212,39 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
     },
   },
   {
-    field: 'criticality',
-    name: i18n.translate('xpack.streams.sigEventsTab.criticalityColumn', {
-      defaultMessage: 'Criticality',
+    field: 'severity',
+    name: i18n.translate('xpack.streams.sigEventsTab.severityColumn', {
+      defaultMessage: 'Severity',
     }),
     width: '100px',
-    render: (criticality: number | undefined) => <EuiText size="xs">{criticality ?? '-'}</EuiText>,
+    render: (severity: SignificantEvent['severity']) => (
+      <EuiText size="xs">{getSeverityLabel(severity)}</EuiText>
+    ),
+  },
+  {
+    name: '',
+    width: '88px',
+    align: 'right' as const,
+    render: (item: SignificantEvent) => (
+      <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <RunInvestigationCell event={item} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CloseEventCell event={item} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
   },
 ];
 
 const extractCheckedKeys = (options: EuiSelectableOption[]): string[] =>
-  options.filter((opt) => opt.checked === 'on').map((opt) => opt.key ?? opt.label);
+  options.filter((option) => option.checked === 'on').map((option) => option.key ?? option.label);
+
+const isSignificantEventStatus = (value: string): value is SignificantEventStatus =>
+  SIGNIFICANT_EVENT_STATUS_OPTIONS.some((status) => status === value);
+
+const isSeverity = (value: string): value is Severity => severitySchema.safeParse(value).success;
 
 const buildSelectableOptions = <T extends string>({
   values,
@@ -150,7 +265,13 @@ export const SigEventsTab = () => {
   const { timeState } = useTimefilter();
 
   const { filteredStreams } = useKiGeneration();
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  // Closed events are hidden by default; users can opt back in via the Status filter.
+  const [statusFilter, setStatusFilter] = useState<SignificantEventStatus[]>(() =>
+    SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status === 'open')
+  );
+  const [severityFilter, setSeverityFilter] = useState<Severity[]>(() => [
+    ...DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER,
+  ]);
   const [streamFilter, setStreamFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
@@ -168,20 +289,42 @@ export const SigEventsTab = () => {
       from: timeState.start,
       to: timeState.end,
       status: statusFilter.length > 0 ? statusFilter : undefined,
+      severity: severityFilter.length > 0 ? severityFilter : undefined,
       stream: streamFilter.length > 0 ? streamFilter : undefined,
       search: debouncedSearch || undefined,
     });
   useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
 
-  const [selectedEvent, setSelectedEvent] = useState<SignificantEvent | undefined>();
+  const { selectedEventId, openEvent, closeEvent } = useSignificantEventsUrlState();
+
+  // Fast path: event is already loaded in the current list page.
+  const eventFromList = selectedEventId
+    ? (data?.hits ?? []).find((e) => e.event_id === selectedEventId)
+    : undefined;
+
+  // Deeplink fallback: fetch via lifecycle when the event isn't in the current list
+  // (e.g. different time range or page). react-query caches this, so the flyout's
+  // own lifecycle fetch is a cache hit.
+  const { data: lifecycleData } = useFetchSignificantEventLifecycle(
+    selectedEventId && !eventFromList ? selectedEventId : undefined
+  );
+  const eventFromDeeplink = lifecycleData?.events.at(-1);
+
+  const selectedEvent = eventFromList ?? eventFromDeeplink;
 
   const onStatusChange = useCallback(
-    (opts: EuiSelectableOption[]) => setStatusFilter(extractCheckedKeys(opts)),
+    (opts: EuiSelectableOption[]) =>
+      setStatusFilter(extractCheckedKeys(opts).filter(isSignificantEventStatus)),
     []
   );
 
   const onStreamChange = useCallback(
     (opts: EuiSelectableOption[]) => setStreamFilter(extractCheckedKeys(opts)),
+    []
+  );
+
+  const onSeverityChange = useCallback(
+    (opts: EuiSelectableOption[]) => setSeverityFilter(extractCheckedKeys(opts).filter(isSeverity)),
     []
   );
 
@@ -203,6 +346,22 @@ export const SigEventsTab = () => {
         onChange: onStatusChange,
       },
       {
+        label: i18n.translate('xpack.streams.sigEventsTab.filter.severity', {
+          defaultMessage: 'Severity',
+        }),
+        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.severityAriaLabel', {
+          defaultMessage: 'Filter by severity',
+        }),
+        options: buildSelectableOptions({
+          values: SEVERITY_OPTIONS,
+          selected: severityFilter,
+          getLabel: getSeverityLabel,
+        }),
+        numFilters: SEVERITY_OPTIONS.length,
+        numActiveFilters: severityFilter.length,
+        onChange: onSeverityChange,
+      },
+      {
         label: i18n.translate('xpack.streams.sigEventsTab.filter.stream', {
           defaultMessage: 'Stream',
         }),
@@ -219,7 +378,15 @@ export const SigEventsTab = () => {
         onChange: onStreamChange,
       },
     ],
-    [statusFilter, streamFilter, streamOptions, onStatusChange, onStreamChange]
+    [
+      statusFilter,
+      severityFilter,
+      streamFilter,
+      streamOptions,
+      onStatusChange,
+      onSeverityChange,
+      onStreamChange,
+    ]
   );
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
@@ -291,6 +458,7 @@ export const SigEventsTab = () => {
       )}
       <EuiFlexItem grow={false}>
         <EuiBasicTable<SignificantEvent>
+          tableLayout="fixed"
           tableCaption={TABLE_CAPTION}
           items={data?.hits ?? []}
           columns={columns}
@@ -303,15 +471,13 @@ export const SigEventsTab = () => {
           onChange={onTableChange}
           loading={isLoading}
           rowProps={(item) => ({
-            onClick: () => setSelectedEvent(item),
+            onClick: () => openEvent(item.event_id),
             css: clickableRowCss,
           })}
           noItemsMessage={isLoading ? LOADING_MESSAGE : EMPTY_MESSAGE}
         />
       </EuiFlexItem>
-      {selectedEvent && (
-        <SignificantEventFlyout event={selectedEvent} onClose={() => setSelectedEvent(undefined)} />
-      )}
+      {selectedEvent && <SignificantEventFlyout event={selectedEvent} onClose={closeEvent} />}
     </EuiFlexGroup>
   );
 };

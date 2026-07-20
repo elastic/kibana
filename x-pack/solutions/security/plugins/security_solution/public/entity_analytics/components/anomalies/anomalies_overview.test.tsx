@@ -14,6 +14,23 @@ import type {
   GetAnomalyOverviewResponse,
 } from '../../../../common/api/entity_analytics';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import {
+  ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE,
+  ENTITY_ANOMALY_STATE_ERROR_BODY,
+  ENTITY_ANOMALY_STATE_ERROR_TITLE,
+} from './translations';
+import { ANOMALIES_RECENT_TABLE_TEST_ID } from './test_ids';
+
+jest.mock('../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: (appId: string, options?: { path?: string }) =>
+          `/base-path/app/${appId}${options?.path ?? ''}`,
+      },
+    },
+  }),
+}));
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -90,6 +107,7 @@ const makeHit = (overrides: Partial<AnomalyOverviewHit> = {}): AnomalyOverviewHi
   jobName: 'Security Job',
   timestamp: '2026-05-19T13:41:58.725Z',
   anomalousValue: '1000 events',
+  recordId: 'record-1',
   ...overrides,
 });
 
@@ -103,6 +121,7 @@ const makeData = (
   totalAnomaliesCount: 5,
   from: 1_000_000,
   to: 2_000_000,
+  hasJobsMissingThreatTactics: false,
   ...overrides,
 });
 
@@ -292,6 +311,149 @@ describe('AnomaliesOverview', () => {
         { wrapper: Wrapper }
       );
       expect(screen.queryByTestId('mock-anomaly-job-name')).not.toBeInTheDocument();
+    });
+
+    it('renders the empty message when totalAnomaliesCount is 0 and recentAnomalies is empty', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ totalAnomaliesCount: 0, recentAnomalies: [] })}
+          openDetailsPanel={openDetailsPanel}
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.getByText(ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE)).toBeInTheDocument();
+    });
+
+    it('does not render the empty message when totalAnomaliesCount is greater than 0', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ totalAnomaliesCount: 5, recentAnomalies: [] })}
+          openDetailsPanel={openDetailsPanel}
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.queryByText(ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE)).not.toBeInTheDocument();
+    });
+
+    it('does not render the empty message when recentAnomalies has items', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ totalAnomaliesCount: 5, recentAnomalies: [makeHit()] })}
+          openDetailsPanel={openDetailsPanel}
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.queryByText(ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('loading state', () => {
+    it('does not show the total anomaly count heading', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ totalAnomaliesCount: 5 })}
+          openDetailsPanel={openDetailsPanel}
+          isLoading
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument();
+    });
+
+    it('renders a loading skeleton in place of the stat count', () => {
+      const { container } = render(
+        <AnomaliesOverview data={makeData()} openDetailsPanel={openDetailsPanel} isLoading />,
+        { wrapper: Wrapper }
+      );
+      expect(container.querySelector('.euiSkeletonRectangle')).toBeInTheDocument();
+    });
+
+    it('renders a loading chart placeholder in place of the MitreAttackChain', () => {
+      const { container } = render(
+        <AnomaliesOverview data={makeData()} openDetailsPanel={openDetailsPanel} isLoading />,
+        { wrapper: Wrapper }
+      );
+      expect(container.querySelector('.euiLoadingChart')).toBeInTheDocument();
+    });
+
+    it('renders a loading skeleton in place of the recent anomalies table', () => {
+      const { container } = render(
+        <AnomaliesOverview data={makeData()} openDetailsPanel={openDetailsPanel} isLoading />,
+        { wrapper: Wrapper }
+      );
+      expect(container.querySelector('.euiSkeletonText')).toBeInTheDocument();
+      expect(screen.queryByTestId(ANOMALIES_RECENT_TABLE_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('does not render the empty message while loading', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ totalAnomaliesCount: 0, recentAnomalies: [] })}
+          openDetailsPanel={openDetailsPanel}
+          isLoading
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.queryByText(ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('error state', () => {
+    it('renders the error prompt title and body', () => {
+      render(<AnomaliesOverview data={makeData()} openDetailsPanel={openDetailsPanel} isError />, {
+        wrapper: Wrapper,
+      });
+      expect(screen.getByText(ENTITY_ANOMALY_STATE_ERROR_TITLE)).toBeInTheDocument();
+      expect(screen.getByText(ENTITY_ANOMALY_STATE_ERROR_BODY)).toBeInTheDocument();
+    });
+
+    it('does not render the stat count, MitreAttackChain, or recent anomalies table', () => {
+      render(<AnomaliesOverview data={makeData()} openDetailsPanel={openDetailsPanel} isError />, {
+        wrapper: Wrapper,
+      });
+      expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-mitre-attack-chain')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(ANOMALIES_RECENT_TABLE_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('takes precedence over the loading state when both are set', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData()}
+          openDetailsPanel={openDetailsPanel}
+          isError
+          isLoading
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.getByText(ENTITY_ANOMALY_STATE_ERROR_TITLE)).toBeInTheDocument();
+    });
+  });
+
+  describe('missing threat tactics warning', () => {
+    it('does not render the warning when hasJobsMissingThreatTactics is false', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ hasJobsMissingThreatTactics: false })}
+          openDetailsPanel={openDetailsPanel}
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.queryByText(/missing MITRE ATT&CK tactic mappings/)).not.toBeInTheDocument();
+    });
+
+    it('renders the warning with a link to the integrations page when hasJobsMissingThreatTactics is true', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ hasJobsMissingThreatTactics: true })}
+          openDetailsPanel={openDetailsPanel}
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.getByText(/missing MITRE ATT&CK tactic mappings/)).toBeInTheDocument();
+      const link = screen.getByRole('link', { name: /Update to the latest integration version/ });
+      expect(link).toHaveAttribute('href', '/base-path/app/integrations/installed');
+      expect(link).toHaveAttribute('target', '_blank');
     });
   });
 

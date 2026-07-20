@@ -15,7 +15,7 @@ import {
   getResolutionGroupTab,
   getAnomaliesTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
-import { useHasAnomalies } from '../../../entity_analytics/api/hooks/use_has_anomalies';
+import { useAnomalyPrivileges } from '../../../entity_analytics/api/hooks/use_anomaly_privileges';
 import type {
   LeftPanelTabsType,
   EntityDetailsLeftPanelTab,
@@ -64,11 +64,9 @@ export const useTabs = ({
 }: HostDetailsPanelProps): LeftPanelTabsType => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
   const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
-  const hasAnomalies = useHasAnomalies({
-    entityId: entityStoreEntityId ?? '',
-    entityType: EntityType.host,
-    enabled: !!(entityStoreEntityId && isAnomalyDetailsEnabled),
-  });
+  const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
+  const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
+  const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
 
   return useMemo(() => {
     const isRiskScoreTabAvailable = (isRiskScoreExist || entityStoreEntityId) && hostName;
@@ -112,15 +110,14 @@ export const useTabs = ({
           ]
         : [];
 
-    const anomaliesTab =
-      entityStoreEntityId && isAnomalyDetailsEnabled && hasAnomalies
-        ? [
-            getAnomaliesTab({
-              entityId: entityStoreEntityId,
-              entityType: EntityType.host,
-            }),
-          ]
-        : [];
+    const anomaliesTab = loadAnomalies
+      ? [
+          getAnomaliesTab({
+            entityId: entityStoreEntityId,
+            entityType: EntityType.host,
+          }),
+        ]
+      : [];
 
     return [...riskScoreTab, ...anomaliesTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
   }, [
@@ -133,7 +130,6 @@ export const useTabs = ({
     hasNonClosedAlerts,
     entityId,
     hasEntityResolutionLicense,
-    isAnomalyDetailsEnabled,
-    hasAnomalies,
+    loadAnomalies,
   ]);
 };

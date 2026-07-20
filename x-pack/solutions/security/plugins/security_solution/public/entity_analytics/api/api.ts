@@ -11,12 +11,16 @@ import {
   API_VERSIONS as ENTITY_STORE_API_VERSIONS,
   type EntityMaintainerResponseItem,
   ENTITY_STORE_ROUTES,
-  FF_ENABLE_ENTITY_STORE_V2,
   type GetEntityMaintainersResponse,
+  type SaveEntityAiSummaryParams,
+  type GetPersistedAiSummaryResponse,
 } from '@kbn/entity-store/common';
 import { compact } from 'lodash';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
-import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
+import {
+  ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL,
+  ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL,
+} from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
   AnomalyOverviewRequestBody,
   AnomalyOverviewResponse,
@@ -35,7 +39,7 @@ import type {
   InitMonitoringEngineResponse,
   InitRiskEngineResponse,
   InternalUploadAssetCriticalityV2CsvResponse,
-  ListEntitiesRequestQuery,
+  EntityType,
   ListEntitiesResponse,
   ListEntitySourcesResponse,
   PrivMonHealthResponse,
@@ -44,6 +48,8 @@ import type {
   ReadRiskEngineSettingsResponse,
   RiskEngineScheduleNowResponse,
   RiskEngineStatusResponse,
+  RiskScoreHistoryEntry,
+  RiskScoreHistoryResponse,
   RiskScoresEntityCalculationRequest,
   RiskScoresEntityCalculationResponse,
   RiskScoresPreviewRequest,
@@ -97,6 +103,7 @@ import {
   RISK_SCORE_ENTITY_CALCULATION_V2_URL,
   RISK_SCORE_PREVIEW_URL,
   ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL,
+  ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL,
   ENTITY_ANOMALY_SUMMARY_INTERNAL_URL,
 } from '../../../common/constants';
 import {
@@ -105,6 +112,7 @@ import {
   WATCHLISTS_CSV_UPLOAD_URL,
   WATCHLISTS_PRIVILEGES_URL,
 } from '../../../common/entity_analytics/watchlists/constants';
+import { RISK_SCORE_HISTORY_URL } from '../../../common/entity_analytics/risk_score/constants';
 import type { UploadWatchlistCsvResponse } from '../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import {
   GENERATE_LEADS_URL,
@@ -142,14 +150,11 @@ const getMaintainerRouteWithId = (route: string, id: string): string =>
   route.replace('{id}', encodeURIComponent(id));
 
 export const useEntityAnalyticsRoutes = () => {
-  const { http, uiSettings } = useKibana().services;
-  const isEntityStoreV2UiSettingEnabled =
-    uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2) ?? false;
+  const { http } = useKibana().services;
   const isEntityAnalyticsEntityStoreV2Enabled = useIsExperimentalFeatureEnabled(
     'entityAnalyticsEntityStoreV2'
   );
-  const isMaintainerRiskScoreV2Enabled =
-    isEntityStoreV2UiSettingEnabled && isEntityAnalyticsEntityStoreV2Enabled;
+  const isMaintainerRiskScoreV2Enabled = isEntityAnalyticsEntityStoreV2Enabled;
 
   return useMemo(() => {
     const fetchEntityMaintainers = (ids?: string[]) =>
@@ -185,6 +190,30 @@ export const useEntityAnalyticsRoutes = () => {
         version: '1',
         method: 'POST',
         body: JSON.stringify(params),
+        signal,
+      });
+
+    /**
+     * Fetches historical risk score entries for an entity
+     */
+    const fetchRiskScoreHistory = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params: FetchRiskScoreHistoryParams;
+    }) =>
+      http.fetch<RiskScoreHistoryResponse>(RISK_SCORE_HISTORY_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          entity_type: params.entityType,
+          entity_id: params.entityId,
+          from: params.from,
+          to: params.to,
+          score_type: params.scoreType,
+          include_contributions: params.includeContributions,
+        },
         signal,
       });
 
@@ -580,7 +609,7 @@ export const useEntityAnalyticsRoutes = () => {
       const body = new FormData();
       body.append('file', file);
 
-      if (isEntityAnalyticsEntityStoreV2Enabled && isEntityStoreV2UiSettingEnabled) {
+      if (isEntityAnalyticsEntityStoreV2Enabled) {
         const response = await http.fetch<InternalUploadAssetCriticalityV2CsvResponse>(
           ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
           {
@@ -728,6 +757,31 @@ export const useEntityAnalyticsRoutes = () => {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
         body: JSON.stringify(params),
+        signal,
+      });
+
+    const saveEntityAiSummary = (
+      params: SaveEntityAiSummaryParams
+    ): Promise<{ created: boolean }> =>
+      http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+
+    /**
+     * Reads the persisted AI summary for an entity from the metadata datastream.
+     * `canRead: false` in the response means the user lacks metadata read access
+     * and the caller should fall back to on-demand generation.
+     */
+    const fetchPersistedAiSummary = (
+      params: { entityType: string; entityIdentifier: string },
+      signal?: AbortSignal
+    ): Promise<GetPersistedAiSummaryResponse> =>
+      http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+        query: { entityId: params.entityIdentifier, entityType: params.entityType },
         signal,
       });
 
@@ -930,6 +984,12 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
+    const fetchAnomalyPrivileges = () =>
+      http.fetch<EntityAnalyticsPrivileges>(ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+      });
+
     const fetchAnomalySummary = ({
       entityType,
       entityId,
@@ -980,6 +1040,7 @@ export const useEntityAnalyticsRoutes = () => {
 
     return {
       fetchRiskScorePreview,
+      fetchRiskScoreHistory,
       fetchRiskEngineStatus,
       initRiskEngine,
       enableRiskEngine,
@@ -1022,6 +1083,8 @@ export const useEntityAnalyticsRoutes = () => {
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
+      saveEntityAiSummary,
+      fetchPersistedAiSummary,
       fetchWatchlists,
       fetchLeads,
       fetchLeadGenerationStatus,
@@ -1031,17 +1094,32 @@ export const useEntityAnalyticsRoutes = () => {
       enableLeadGeneration,
       disableLeadGeneration,
       fetchLeadGenerationPrivileges,
+      fetchAnomalyPrivileges,
       fetchAnomalyOverview,
       fetchAnomalySummary,
     };
-  }, [
-    http,
-    isEntityStoreV2UiSettingEnabled,
-    isEntityAnalyticsEntityStoreV2Enabled,
-    isMaintainerRiskScoreV2Enabled,
-  ]);
+  }, [http, isEntityAnalyticsEntityStoreV2Enabled, isMaintainerRiskScoreV2Enabled]);
 };
 
 export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;
 
-export type FetchEntitiesListParams = SnakeToCamelCase<ListEntitiesRequestQuery>;
+// CamelCased mirror of `ListEntitiesRequestQuery` for ergonomic UI usage.
+// Hand-written instead of derived via `SnakeToCamelCase` because that utility
+// requires a type literal, while lint requires the source to be an interface.
+export interface FetchEntitiesListParams {
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  perPage?: number;
+  filterQuery?: string;
+  entityTypes: EntityType[];
+}
+
+export interface FetchRiskScoreHistoryParams {
+  entityType: EntityType;
+  entityId: string;
+  from?: string;
+  to?: string;
+  scoreType?: RiskScoreHistoryEntry['score_type'];
+  includeContributions?: boolean;
+}

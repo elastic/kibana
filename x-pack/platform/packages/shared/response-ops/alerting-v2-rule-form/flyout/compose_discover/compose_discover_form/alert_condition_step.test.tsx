@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { useForm, FormProvider, type UseFormReturn } from 'react-hook-form';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createTestQueryClient, createMockServices } from '../../../test_utils';
@@ -16,12 +16,8 @@ import { createInitialState } from '../use_compose_discover_state';
 import type { ComposeDiscoverState } from '../types';
 import type { FormValues, RuleQuery } from '../../../form/types';
 import { AlertConditionStep } from './alert_condition_step';
+import { QueryFieldRules } from './query_field_rules';
 import { ComposeDiscoverTimeFieldContextProvider } from '../compose_discover_time_field_context';
-
-jest.mock('@kbn/code-editor', () => ({
-  ...jest.requireActual('@kbn/code-editor'),
-  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="codeEditorMock">{value}</pre>,
-}));
 
 jest.mock('@kbn/esql-utils', () => ({
   getEsqlColumns: jest.fn(async () => []),
@@ -51,7 +47,9 @@ const BASE_COMPOSE_VALUES: FormValues = {
 
 const createComposeFormWrapper = (
   formValueOverrides: Partial<FormValues> = {},
-  services: RuleFormServices = createMockServices()
+  services: RuleFormServices = createMockServices(),
+  formRef?: { current: UseFormReturn<FormValues> | null },
+  queryCommitted = true
 ) => {
   const queryClient = createTestQueryClient();
   const defaultValues: FormValues = {
@@ -60,7 +58,10 @@ const createComposeFormWrapper = (
   };
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
-    const form = useForm<FormValues>({ defaultValues });
+    const form = useForm<FormValues>({ defaultValues, mode: 'onBlur' });
+    if (formRef) {
+      formRef.current = form;
+    }
     return (
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
@@ -72,6 +73,7 @@ const createComposeFormWrapper = (
                   isTimeFieldResolved: true,
                 }}
               >
+                <QueryFieldRules queryCommitted={queryCommitted} />
                 {children}
               </ComposeDiscoverTimeFieldContextProvider>
             </RuleFormProvider>
@@ -99,6 +101,7 @@ const renderStep = (
   });
   const dispatch = jest.fn();
   const services = createMockServices();
+  const formRef: { current: UseFormReturn<FormValues> | null } = { current: null };
 
   render(
     <AlertConditionStep
@@ -107,10 +110,17 @@ const renderStep = (
       services={services}
       isEditing={isEditing}
     />,
-    { wrapper: createComposeFormWrapper(formValueOverrides, services) }
+    {
+      wrapper: createComposeFormWrapper(
+        formValueOverrides,
+        services,
+        formRef,
+        state.queryCommitted
+      ),
+    }
   );
 
-  return { dispatch, state };
+  return { dispatch, state, formRef };
 };
 
 const STANDALONE_QUERY: RuleQuery = {
@@ -355,6 +365,73 @@ describe('AlertConditionStep', () => {
         expect(comboBox).toBeInTheDocument();
       });
       expect(comboBox.querySelectorAll('[data-test-subj="euiComboBoxPill"]')).toHaveLength(0);
+    });
+  });
+
+  describe('query field validation', () => {
+    it('surfaces an inline error when trigger fails for an incomplete alert query', async () => {
+      const { formRef } = renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: {
+              format: 'composed',
+              base: 'FROM logs-*',
+              breach: { segment: '' },
+            },
+          },
+        }
+      );
+
+      let valid = true;
+      await act(async () => {
+        valid = await formRef.current!.trigger('query');
+      });
+
+      expect(valid).toBe(false);
+      await waitFor(() => {
+        expect(screen.getByTestId('composeDiscoverQueryFieldError')).toHaveTextContent(
+          'Add an alert condition to the query before continuing'
+        );
+      });
+    });
+
+    it('passes trigger for a valid composed alert query', async () => {
+      const { formRef } = renderStep(
+        { queryCommitted: true },
+        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+      );
+
+      let valid = false;
+      await act(async () => {
+        valid = await formRef.current!.trigger('query');
+      });
+
+      expect(valid).toBe(true);
+      expect(screen.queryByTestId('composeDiscoverQueryFieldError')).not.toBeInTheDocument();
+    });
+
+    it('fails trigger for a standalone alert query (no separate alert condition)', async () => {
+      const { formRef } = renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+          },
+        }
+      );
+
+      let valid = true;
+      await act(async () => {
+        valid = await formRef.current!.trigger('query');
+      });
+
+      expect(valid).toBe(false);
+      await waitFor(() => {
+        expect(screen.getByTestId('composeDiscoverQueryFieldError')).toBeInTheDocument();
+      });
     });
   });
 });

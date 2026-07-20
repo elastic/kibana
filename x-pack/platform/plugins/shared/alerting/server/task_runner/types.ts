@@ -26,6 +26,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import type { IAsyncSearchOptions } from '@kbn/data-plugin/common';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { Alert } from '../alert';
 import type { AlertsService } from '../alerts_service/alerts_service';
@@ -94,8 +95,15 @@ export interface RunRuleResult {
 }
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
-  apiKey: RawRule['apiKey'];
-  uiamApiKey?: RawRule['uiamApiKey'];
+  /**
+   * Resolved credential the rule run executes under, ready to use after
+   * `ApiKey ` in an `Authorization` header. For ES rules this is the
+   * base64-encoded `id:secret` stored on the rule SO as `apiKey`; for UIAM
+   * rules it is the decoded raw `essu_…` UIAM secret. Computed once by
+   * `validateRuleAndCreateFakeRequest` so the rest of the rule run never has
+   * to look at the raw `apiKey`/`uiamApiKey` fields again.
+   */
+  effectiveApiKey: string | null;
   fakeRequest: KibanaRequest;
   rule: SanitizedRule<Params> & { snoozedInstances: RawRuleSnoozedInstance[] };
   validatedParams: Params;
@@ -171,7 +179,7 @@ export interface RuleTypeRunnerContext {
   ruleId: string;
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
-  spaceId: string;
+  spaceId: SpaceId;
   isServerless: boolean;
   shouldGrantUiam?: boolean;
 }

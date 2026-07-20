@@ -94,6 +94,7 @@ export class CasesUiPlugin
         id: APP_ID,
         title: APP_TITLE,
         order: 1,
+        mainPaddingSize: 'none',
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
@@ -121,7 +122,11 @@ export class CasesUiPlugin
 
     registerAnalytics({ analyticsService: core.analytics });
 
-    registerCasesSteps(plugins.workflowsExtensions);
+    registerCasesSteps(
+      plugins.workflowsExtensions,
+      this.unifiedAttachmentTypeRegistry,
+      config.attachments?.enabled === true
+    );
     registerCasesWorkflowTriggers(plugins.workflowsExtensions);
 
     return {
@@ -180,10 +185,22 @@ export class CasesUiPlugin
       }
     );
 
+    if (plugins.agentBuilder) {
+      void import('./agent_builder').then(({ registerCasesAgentBuilderAttachments }) => {
+        if (plugins.agentBuilder) {
+          registerCasesAgentBuilderAttachments({
+            attachments: plugins.agentBuilder.attachments,
+            application: core.application,
+          });
+        }
+      });
+    }
+
     return {
       config: {
         templatesEnabled: config?.templates?.enabled ?? false,
         attachmentsEnabled: config?.attachments?.enabled ?? false,
+        chatEnabled: config?.chat?.enabled ?? false,
         casesRedesign: {
           list: config?.casesRedesign?.list ?? false,
           details: config?.casesRedesign?.details ?? false,

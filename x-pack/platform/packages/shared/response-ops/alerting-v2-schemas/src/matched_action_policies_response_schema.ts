@@ -27,8 +27,10 @@ export const matchActionPoliciesForRuleBodySchema = z
           .optional()
           .describe('The tags of the rule, used to evaluate global matcher expressions.'),
       })
+      .strict()
       .optional(),
   })
+  .strict()
   .meta({ id: 'alerting_v2_match_action_policies_for_rule_request' });
 
 export type MatchActionPoliciesForRuleBody = z.infer<typeof matchActionPoliciesForRuleBodySchema>;
@@ -54,6 +56,13 @@ export type MatchedActionPolicy = z.infer<typeof matchedActionPolicySchema>;
 export const matchActionPoliciesForRuleResponseSchema = z
   .object({
     items: z.array(matchedActionPolicySchema).describe('The list of matched action policies.'),
+    total: z
+      .number()
+      .int()
+      .min(0)
+      .describe(
+        'Total number of action policies in the space. If greater than the number evaluated, the match results may be incomplete.'
+      ),
   })
   .describe('Action policies that match a given rule, grouped by match category.')
   .meta({ id: 'alerting_v2_match_action_policies_for_rule_response' });

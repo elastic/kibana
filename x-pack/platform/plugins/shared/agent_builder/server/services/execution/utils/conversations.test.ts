@@ -30,6 +30,29 @@ describe('conversations utils', () => {
         expect(result.operation).toBe('CREATE');
       });
 
+      it('returns UPDATE operation when no conversationId is provided and origin matches an existing conversation', async () => {
+        const conversationClient = createConversationClientMock();
+        const origin = {
+          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+        };
+        const existingConversation = createEmptyConversation({
+          id: 'existing-conversation',
+          origin,
+        });
+        conversationClient.getByOrigin.mockResolvedValue(existingConversation);
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          conversationId: undefined,
+          conversationClient,
+          origin,
+        });
+
+        expect(result.operation).toBe('UPDATE');
+        expect(result.id).toBe('existing-conversation');
+        expect(conversationClient.getByOrigin).toHaveBeenCalledWith(origin);
+      });
+
       it('defaults access control to private for new conversation placeholders', async () => {
         const conversationClient = createConversationClientMock();
 
@@ -170,7 +193,8 @@ describe('conversations utils', () => {
             rounds: [newRound],
             read: false,
             status: newRound.status,
-          })
+          }),
+          { access: 'converse' }
         );
       });
 
@@ -208,7 +232,8 @@ describe('conversations utils', () => {
             rounds: [existingRound, newRound],
             read: false,
             status: newRound.status,
-          })
+          }),
+          { access: 'converse' }
         );
       });
 
@@ -247,7 +272,8 @@ describe('conversations utils', () => {
             rounds: [newRound],
             read: false,
             status: newRound.status,
-          })
+          }),
+          { access: 'converse' }
         );
       });
     });

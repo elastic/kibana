@@ -28,8 +28,6 @@ const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_
  */
 const JS_YAML_LEGACY_CONSUMERS = [
   /^\.buildkite[\/\\]/,
-  /^oas_docs[\/\\]scripts[\/\\]/,
-  /^packages[\/\\]kbn-api-contracts[\/\\]/,
   /^packages[\/\\]kbn-docs-utils[\/\\]/,
   /^packages[\/\\]kbn-moon[\/\\]/,
   /^packages[\/\\]kbn-optimizer[\/\\]/,
@@ -38,10 +36,7 @@ const JS_YAML_LEGACY_CONSUMERS = [
   /^src[\/\\]cli[\/\\]/,
   /^src[\/\\]dev[\/\\]/,
   /^src[\/\\]platform[\/\\]kbn-ui[\/\\]_tooling[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-apm-config-loader[\/\\]/,
   /^src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-gen-ai-functional-testing[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-validate-oas[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-config[\/\\]src[\/\\]raw[\/\\]/,
   /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-connector-cli[\/\\]/,
   /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-edot-collector[\/\\]/,
   /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-es[\/\\]/,
@@ -52,7 +47,6 @@ const JS_YAML_LEGACY_CONSUMERS = [
   /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-synthtrace[\/\\]src[\/\\]cli[\/\\]/,
   /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-test[\/\\]src[\/\\]functional_test_runner[\/\\]/,
   /^src[\/\\]platform[\/\\]plugins[\/\\]private[\/\\]interactive_setup[\/\\]server[\/\\]/,
-  /^src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]telemetry[\/\\]server[\/\\]collectors[\/\\]/,
   /^x-pack[\/\\]packages[\/\\]kbn-synthetics-private-location[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-data-forge[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-evals[\/\\]/,
@@ -138,6 +132,7 @@ module.exports = {
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
     '@kbn/eslint-plugin-alerting-v2',
+    '@kbn/eslint-plugin-kbn-ui',
     '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',
@@ -456,6 +451,11 @@ module.exports = {
     'no-prototype-builtins': 'error',
 
     /**
+     * kbn-ui rules
+     */
+    '@kbn/kbn-ui/prefer_toast_action_props': 'warn',
+
+    /**
      * EUI Team rules
      */
 
@@ -479,6 +479,32 @@ module.exports = {
   },
 
   overrides: [
+    {
+      files: [
+        'src/platform/plugins/private/event_annotation/**/*',
+        'src/platform/plugins/private/event_annotation_listing/**/*',
+        'src/platform/plugins/private/vis_default_editor/**/*',
+        'src/platform/plugins/private/vis_types/**/*',
+        'src/platform/plugins/shared/chart_expressions/**/*',
+        'src/platform/plugins/shared/charts/**/*',
+        'src/platform/plugins/shared/expressions/**/*',
+        'src/platform/plugins/shared/vis_types/**/*',
+        'src/platform/plugins/shared/visualization_listing/**/*',
+        'src/platform/plugins/shared/visualizations/**/*',
+        'x-pack/platform/plugins/shared/lens/**/*',
+        'x-pack/platform/plugins/private/graph/**/*',
+        'src/platform/packages/private/kbn-lens-formula-docs/**/*',
+        'src/platform/packages/shared/kbn-lens-common/**/*',
+        'src/platform/packages/shared/kbn-lens-common-2/**/*',
+        'src/platform/packages/shared/kbn-coloring/**/*',
+        'src/platform/packages/shared/kbn-chart-icons/**/*',
+        'src/platform/packages/shared/kbn-event-annotation-common/**/*',
+        'src/platform/packages/shared/kbn-event-annotation-components/**/*',
+      ],
+      rules: {
+        '@kbn/eslint/no_viz_naming': 'error',
+      },
+    },
     {
       files: [
         'src/platform/plugins/**/server/index.ts',

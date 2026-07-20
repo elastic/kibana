@@ -36,6 +36,7 @@ const workflowActionPolicyDestinationSchema = z
       .describe('The destination type.'),
     id: z.string().min(1).max(ID_MAX_LENGTH).describe('The workflow connector identifier.'),
   })
+  .strict()
   .meta({ id: 'alerting_v2_workflow_action_policy_destination' });
 
 export const actionPolicyDestinationSchema = z
@@ -67,6 +68,7 @@ const throttleSchema = z
         'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'
       ),
   })
+  .strict()
   .meta({ id: 'alerting_v2_action_policy_throttle' });
 
 export const PER_EPISODE_STRATEGIES = new Set<string>([
@@ -133,6 +135,7 @@ export const snoozeActionPolicyBodySchema = z
       .datetime()
       .describe('The ISO datetime until which the action policy should be snoozed.'),
   })
+  .strict()
   .meta({ id: 'alerting_v2_snooze_action_policy_request' });
 
 export type SnoozeActionPolicyBody = z.infer<typeof snoozeActionPolicyBodySchema>;
@@ -142,6 +145,7 @@ const bulkEnableActionSchema = z
     id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
     action: z.literal('enable').describe('The bulk action type.'),
   })
+  .strict()
   .meta({ id: 'alerting_v2_action_policy_bulk_enable' });
 
 const bulkDisableActionSchema = z
@@ -149,6 +153,7 @@ const bulkDisableActionSchema = z
     id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
     action: z.literal('disable').describe('The bulk action type.'),
   })
+  .strict()
   .meta({ id: 'alerting_v2_action_policy_bulk_disable' });
 
 const bulkSnoozeActionSchema = z
@@ -159,6 +164,7 @@ const bulkSnoozeActionSchema = z
       .datetime()
       .describe('The ISO datetime until which the action policy should be snoozed.'),
   })
+  .strict()
   .meta({ id: 'alerting_v2_action_policy_bulk_snooze' });
 
 const bulkUnsnoozeActionSchema = z
@@ -166,6 +172,7 @@ const bulkUnsnoozeActionSchema = z
     id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
     action: z.literal('unsnooze').describe('The bulk action type.'),
   })
+  .strict()
   .meta({ id: 'alerting_v2_action_policy_bulk_unsnooze' });
 
 const bulkDeleteActionSchema = z
@@ -173,6 +180,7 @@ const bulkDeleteActionSchema = z
     id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
     action: z.literal('delete').describe('The bulk action type.'),
   })
+  .strict()
   .meta({ id: 'alerting_v2_action_policy_bulk_delete' });
 
 const bulkUpdateApiKeyActionSchema = z
@@ -180,6 +188,7 @@ const bulkUpdateApiKeyActionSchema = z
     id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
     action: z.literal('update_api_key').describe('The bulk action type.'),
   })
+  .strict()
   .meta({ id: 'alerting_v2_action_policy_bulk_update_api_key' });
 
 export const actionPolicyBulkActionSchema = z
@@ -204,37 +213,40 @@ export const bulkActionActionPoliciesBodySchema = z
       .max(MAX_BULK_ITEMS)
       .describe('The list of bulk actions to perform.'),
   })
+  .strict()
   .meta({ id: 'alerting_v2_bulk_action_policies_request' });
 
 export type BulkActionActionPoliciesBody = z.infer<typeof bulkActionActionPoliciesBodySchema>;
 
-const createActionPolicyDataBaseSchema = z.object({
-  name: z.string().min(1).max(MAX_NAME_LENGTH).describe('The name of the action policy.'),
-  description: z
-    .string()
-    .max(MAX_DESCRIPTION_LENGTH)
-    .describe('A description of the action policy.'),
-  destinations: z
-    .array(actionPolicyDestinationSchema)
-    .min(1, 'At least one destination must be provided')
-    .max(ACTION_POLICY_MAX_DESTINATIONS)
-    .describe('The list of destinations. At least one is required.'),
-  matcher: z
-    .string()
-    .max(MAX_KQL_LENGTH)
-    .optional()
-    .describe('A KQL query string to match alerts.'),
-  groupBy: z
-    .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
-    .max(MAX_GROUPING_FIELDS)
-    .optional()
-    .describe('The fields used to group alerts.'),
-  tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
-  groupingMode: groupingModeSchema
-    .optional()
-    .describe('The grouping mode for alert notifications.'),
-  throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
-});
+const createActionPolicyDataBaseSchema = z
+  .object({
+    name: z.string().min(1).max(MAX_NAME_LENGTH).describe('The name of the action policy.'),
+    description: z
+      .string()
+      .max(MAX_DESCRIPTION_LENGTH)
+      .describe('A description of the action policy.'),
+    destinations: z
+      .array(actionPolicyDestinationSchema)
+      .min(1, 'At least one destination must be provided')
+      .max(ACTION_POLICY_MAX_DESTINATIONS)
+      .describe('The list of destinations. At least one is required.'),
+    matcher: z
+      .string()
+      .max(MAX_KQL_LENGTH)
+      .optional()
+      .describe('A KQL query string to match alerts.'),
+    groupBy: z
+      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+      .max(MAX_GROUPING_FIELDS)
+      .optional()
+      .describe('The fields used to group alerts.'),
+    tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
+    groupingMode: groupingModeSchema
+      .optional()
+      .describe('The grouping mode for alert notifications.'),
+    throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
+  })
+  .strict();
 
 export const createActionPolicyDataSchema = createActionPolicyDataBaseSchema
   .check(validateGroupingModeAndStrategy)

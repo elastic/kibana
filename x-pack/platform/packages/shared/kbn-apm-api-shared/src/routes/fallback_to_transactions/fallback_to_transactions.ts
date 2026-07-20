@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema } from '../../default_api_types';
 
 export interface FallbackToTransactionsResponse {
   fallbackToTransactions: boolean;
@@ -14,7 +14,7 @@ export interface FallbackToTransactionsResponse {
 
 export const fallbackToTransactionsRoute = defineRoute<FallbackToTransactionsResponse>()({
   endpoint: 'GET /internal/apm/fallback_to_transactions',
-  params: t.partial({
-    query: t.intersection([kueryRt, t.partial(rangeRt.props)]),
+  params: z.object({
+    query: kuerySchema.merge(rangeSchema.partial()).optional(),
   }),
 });

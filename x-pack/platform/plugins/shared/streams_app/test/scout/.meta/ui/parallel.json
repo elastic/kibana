@@ -1,5 +1,9 @@
 {
-  "sha1": "494d7293b4fd036ed41196850cd7535e5c473173",
+  "sha1": "1ec7d94b4119efa7b9397d8991a41742c41c1bbc",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "b26b2efa27acfba-7132d4e40af07dc",
@@ -83,7 +87,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/attachments/attachments.spec.ts",
-        "line": 192,
+        "line": 194,
         "column": 9
       }
     },
@@ -1215,7 +1219,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/streams_header.spec.ts",
-        "line": 65,
+        "line": 68,
         "column": 9
       }
     },
@@ -1231,7 +1235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_classic.spec.ts",
-        "line": 38,
+        "line": 34,
         "column": 9
       }
     },
@@ -1247,7 +1251,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_classic.spec.ts",
-        "line": 81,
+        "line": 77,
         "column": 9
       }
     },
@@ -1263,7 +1267,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_wired.spec.ts",
-        "line": 41,
+        "line": 37,
         "column": 9
       }
     },
@@ -1279,7 +1283,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_wired.spec.ts",
-        "line": 87,
+        "line": 83,
         "column": 9
       }
     },
@@ -1297,7 +1301,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/esql_source_enrichment.spec.ts",
-        "line": 34,
+        "line": 30,
         "column": 9
       }
     },

@@ -10,6 +10,10 @@
 import type { IRouter } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows/managed';
 import { registerWorkflowRoutes } from '.';
 import { ManagedWorkflowReadForbiddenError } from '../../managed_workflow_read_error';
 import type { RouteDependencies } from '../types';
@@ -220,6 +224,64 @@ describe('Workflow routes', () => {
         includeExecutionHistory: true,
         includeManagedExecutionHistory: false,
       });
+    });
+
+    it('should normalize selector visibility context to an array for api.getWorkflows', async () => {
+      mockApi.getWorkflows.mockResolvedValue({ workflows: [], total: 0 });
+      const request = httpServerMock.createKibanaRequest({
+        query: {
+          managed: 'all',
+          visibilityContext: getManagedWorkflowSelectorVisibilityContext('rule_action'),
+        },
+      });
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.read]: true,
+        [WorkflowsManagementApiActions.readManaged]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({
+          managedFilter: 'all',
+          visibilityContext: [getManagedWorkflowSelectorVisibilityContext('rule_action')],
+        }),
+        'default-space',
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
+      );
+    });
+
+    it('should pass multiple visibility contexts to api.getWorkflows', async () => {
+      mockApi.getWorkflows.mockResolvedValue({ workflows: [], total: 0 });
+      const visibilityContext = [
+        getManagedWorkflowSelectorVisibilityContext('rule_action'),
+        getManagedWorkflowSolutionVisibilityContext('security'),
+      ];
+      const request = httpServerMock.createKibanaRequest({
+        query: {
+          managed: 'all',
+          visibilityContext,
+        },
+      });
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.read]: true,
+        [WorkflowsManagementApiActions.readManaged]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({
+          managedFilter: 'all',
+          visibilityContext,
+        }),
+        'default-space',
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
+      );
     });
 
     it('should return forbidden when user lacks read privilege', async () => {
@@ -711,6 +773,55 @@ describe('Workflow routes', () => {
       expect(body.manifest.exportedCount).toBe(2);
       expect(body.manifest.version).toBe('1');
       expect(body.manifest.exportedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    });
+
+    it('should return stored yaml verbatim even when definition is present', async () => {
+      // Validates the fix for elastic/security-team#18145 and #18049:
+      // the stored yaml (with correct enabled + user comments) must be preferred
+      // over re-serialising the parsed definition object.
+      const storedYaml = '# user comment\nname: Annotated Workflow\nenabled: true\nsteps: []';
+      mockApi.getWorkflowsByIds.mockResolvedValue([
+        {
+          id: 'w-annotated',
+          name: 'Annotated Workflow',
+          yaml: storedYaml,
+          definition: { name: 'Annotated Workflow', enabled: false, version: '1', steps: [] },
+        },
+      ]);
+
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w-annotated'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+      const { body } = (response.ok as jest.Mock).mock.calls[0][0];
+
+      // Must return the stored yaml, not a re-serialisation of definition
+      // (re-serialising definition would yield enabled: false and drop the comment)
+      expect(body.entries).toEqual([{ id: 'w-annotated', yaml: storedYaml }]);
+    });
+
+    it('should fall back to stringifyWorkflowDefinition when stored yaml is empty', async () => {
+      mockApi.getWorkflowsByIds.mockResolvedValue([
+        {
+          id: 'w-no-yaml',
+          name: 'No Yaml Workflow',
+          yaml: '',
+          definition: { name: 'No Yaml Workflow', enabled: true, version: '1', steps: [] },
+        },
+      ]);
+
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w-no-yaml'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+      const { body } = (response.ok as jest.Mock).mock.calls[0][0];
+
+      // Fallback must still produce some YAML string (not empty / not crashing)
+      expect(body.entries[0].id).toBe('w-no-yaml');
+      expect(typeof body.entries[0].yaml).toBe('string');
+      expect(body.entries[0].yaml.length).toBeGreaterThan(0);
     });
 
     it('should log a warning when some workflow IDs are missing', async () => {

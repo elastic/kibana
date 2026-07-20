@@ -31,13 +31,16 @@ import { useGroupStats } from './grouping_settings/use_group_stats';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 import { useLocalStorage } from '../../../../common/components/local_storage';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
 jest.mock('../../../../common/components/local_storage', () => ({
   useLocalStorage: jest.fn(),
 }));
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
+jest.mock('../../../../flyout_v2/use_flyout_api');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
@@ -77,20 +80,8 @@ jest.mock('./attacks_view_options_popover', () => ({
   ),
 }));
 jest.mock('./grouping_settings/use_group_stats');
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../flyout_v2/shared/hooks/use_default_flyout_properties');
-jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
-  flyoutProviders: jest.fn(({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="flyout-providers">{children}</div>
-  )),
-}));
-jest.mock('../../../../flyout_v2/attack/main/attack_flyout_wrapper', () => ({
-  AttackFlyoutWrapper: (props: unknown) => (
-    <div data-test-subj="attack-flyout-wrapper">{JSON.stringify(props)}</div>
-  ),
-}));
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useStore: () => ({ getState: jest.fn(), dispatch: jest.fn(), subscribe: jest.fn() }),
 }));
 jest.mock('react-router-dom', () => ({
@@ -110,7 +101,6 @@ const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.Mock;
 const mockUseGroupStats = useGroupStats as jest.Mock;
 
 const reportEvent = jest.fn();
-const mockOpenSystemFlyout = jest.fn();
 
 const defaultProps: Parameters<typeof TableSection>[0] = {
   assignees: [],
@@ -123,30 +113,23 @@ const defaultProps: Parameters<typeof TableSection>[0] = {
 };
 
 describe('<TableSection />', () => {
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
+
   beforeEach(() => {
     (useLocalStorage as jest.Mock).mockReturnValue([
       [{ latestTimestamp: { order: 'desc' } }],
       jest.fn(),
     ]);
 
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         telemetry: {
           reportEvent,
         },
-        overlays: {
-          openSystemFlyout: mockOpenSystemFlyout,
-        },
       },
-    });
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-    (useDefaultDocumentFlyoutProperties as jest.Mock).mockReturnValue({
-      maxWidth: 1200,
-      minWidth: 400,
-      ownFocus: false,
-      paddingSize: 'm',
-      resizable: true,
-      size: 's',
     });
     mockUseGetDefaultGroupTitleRenderers.mockReturnValue({
       defaultGroupTitleRenderers: jest.fn(),
@@ -243,7 +226,7 @@ describe('<TableSection />', () => {
     });
   });
 
-  it('should call openFlyout (legacy) when newFlyoutSystemEnabled is false', async () => {
+  it('should call openFlyout (legacy) when enableNewFlyout is false', async () => {
     const mockOpenFlyout = jest.fn();
     mockUseExpandableFlyoutApi.mockReturnValue({ openFlyout: mockOpenFlyout });
     mockUseAttackGroupHandler.mockReturnValue({
@@ -273,11 +256,11 @@ describe('<TableSection />', () => {
         },
       },
     });
-    expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
+    expect(flyoutApi.openAttackFlyout).not.toHaveBeenCalled();
   });
 
-  it('should call openSystemFlyout with AttackFlyoutWrapper when newFlyoutSystemEnabled is true', async () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+  it('should call openAttackFlyout when enableNewFlyout is true', async () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
     mockUseAttackGroupHandler.mockReturnValue({
       getAttack: jest.fn().mockReturnValue({ id: 'attack-1' }),
       isLoading: false,
@@ -296,7 +279,12 @@ describe('<TableSection />', () => {
     const { openAttackDetailsFlyout } = mockUseGetDefaultGroupTitleRenderers.mock.calls[0][0];
     openAttackDetailsFlyout('group-1', {});
 
-    expect(mockOpenSystemFlyout).toHaveBeenCalled();
+    expect(flyoutApi.openAttackFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attackId: 'attack-1',
+        indexName: '.alerts-security.alerts-default',
+      })
+    );
     expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.DetailsFlyoutOpened, {
       id: 'attack-1',
       source: 'attacks_page_table',

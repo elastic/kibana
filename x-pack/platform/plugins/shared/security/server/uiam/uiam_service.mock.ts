@@ -54,5 +54,6 @@ export const uiamServiceMock = {
       resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
       revoked: true,
     }),
+    resolveUsers: jest.fn().mockResolvedValue({ users: {} }),
   }),
 };

@@ -14,3 +14,11 @@ export const MISSING_UPDATE_SCHEDULE_PRIVILEGES_DESCRIPTION = i18n.translate(
       'You are missing the update Attack discovery privilege. Without that privilege you cannot create, edit, enable, disable, or delete schedules.',
   }
 );
+
+export const MISSING_WORKFLOWS_EXECUTE_PRIVILEGES_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.schedule.missingWorkflowsExecutePrivilegesDescription',
+  {
+    defaultMessage:
+      'You are missing the Workflows Management execute privilege. Without that privilege you cannot create, edit, or enable Attack discovery schedules.',
+  }
+);

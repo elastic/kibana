@@ -1,5 +1,9 @@
 {
-  "sha1": "2639e0a6bee3a529e8b28de7dfd4d5d05f81c093",
+  "sha1": "ad1df3285afa3de0d9dc8ab026e072a0e67b1469",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "0e89de24e8ff3a8-faf07b914e53ca6",
@@ -3310,6 +3314,110 @@
       }
     },
     {
+      "id": "3d277402bdac131-477aeb8cdb738c8",
+      "title": "Synthetics multi-space settings [GET] returns defaults anchored to the current space when no SO exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-00458ca127bf246",
+      "title": "Synthetics multi-space settings [PUT] creates exactly one SO and persists the requested attributes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 109,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-9fa1c56ac73b6ff",
+      "title": "Synthetics multi-space settings [PUT] remains a singleton even when the saves come from different spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 134,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-7e5b44173916c75",
+      "title": "Synthetics multi-space settings [GET] returns the SO from another space when shared via ALL_SPACES",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 164,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-3caffe79eda0863",
+      "title": "Synthetics multi-space settings [PUT] removing a space hides the settings from that space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 191,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-e804b1dc151bf2d",
+      "title": "Synthetics multi-space settings [PUT] from a space that does not own the SO still updates the singleton",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 230,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-18ff6a75d38b4ec",
+      "title": "Synthetics multi-space settings [PUT] collapses ALL_SPACES with specific spaces into [*]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 264,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-00a378f9346d5ef",
+      "title": "Synthetics multi-space settings [PUT] is forbidden for a role without uptime-write",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 279,
+        "column": 12
+      }
+    },
+    {
       "id": "46dcd8194641d95-932aa7702808a94",
       "title": "PrivateLocationAPI adds a test private location",
       "expectedStatus": "passed",
@@ -4119,6 +4227,244 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/test_now_monitor.spec.ts",
         "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "57a5a544a5adff3-2b6ead023d7d43a",
+      "title": "tlsRuleBrowserCertsAlert fires an alert for an expiring browser-monitor certificate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/tls_rule_browser_certs_alert.spec.ts",
+        "line": 205,
+        "column": 12
+      }
+    },
+    {
+      "id": "57a5a544a5adff3-369e192742f4aa9",
+      "title": "tlsRuleBrowserCertsAlert recovers the alert once the browser certificate is no longer evaluated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/tls_rule_browser_certs_alert.spec.ts",
+        "line": 215,
+        "column": 12
+      }
+    },
+    {
+      "id": "d67539cdf3c0c05-15ffc48d762c16a",
+      "title": "tlsRuleBrowserCerts evaluates only lightweight monitors when includeBrowserCerts is unset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/tls_rule_browser_certs.spec.ts",
+        "line": 87,
+        "column": 12
+      }
+    },
+    {
+      "id": "d67539cdf3c0c05-5767cc01930b07f",
+      "title": "tlsRuleBrowserCerts also evaluates browser monitors when includeBrowserCerts is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/tls_rule_browser_certs.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-9c91ca8685a7c4d",
+      "title": "UpdateMonitorBulkAPI partially patches a single monitor with a public location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 110,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-9ef299ac98f7736",
+      "title": "UpdateMonitorBulkAPI partially patches a monitor with a private location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 130,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-edb9e2140ad4608",
+      "title": "UpdateMonitorBulkAPI patches multiple monitors in one request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 150,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-9ce215233ce8242",
+      "title": "UpdateMonitorBulkAPI applies a different patch to each id in one request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 171,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-1f629bd44bb0e4b",
+      "title": "UpdateMonitorBulkAPI keeps the monitor decryptable after a partial patch on an AAD field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 199,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-932249d28094a08",
+      "title": "UpdateMonitorBulkAPI rejects project-origin monitors with an origin error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 242,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-17387cda604e40e",
+      "title": "UpdateMonitorBulkAPI rejects schedules outside the allowed set with a validation error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 276,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-cb7bba4c4c5581f",
+      "title": "UpdateMonitorBulkAPI rejects a patch with an unknown field and leaves the monitor unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 300,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-1b1e84d58a8ba20",
+      "title": "UpdateMonitorBulkAPI rejects a name patch that collides with another existing monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 322,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-241e4ab4611b503",
+      "title": "UpdateMonitorBulkAPI renames a monitor to a brand-new unique name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 345,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-c0d77663955abdd",
+      "title": "UpdateMonitorBulkAPI allows a patch that keeps the monitor its own current name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 361,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-79997ce1e1d1b02",
+      "title": "UpdateMonitorBulkAPI rejects every entry when two updates set the same name in one batch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 379,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-075d5d6e34e078b",
+      "title": "UpdateMonitorBulkAPI isolates a name conflict to the offending id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 407,
         "column": 12
       }
     }
