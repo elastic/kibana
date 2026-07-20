@@ -96,6 +96,7 @@ export const useFetchEntityDetailsHighlights = ({
   entitySnapshot,
   refetchEntityRecord,
   refetchPersistedSummary,
+  persistSummary,
 }: {
   connectorId: string;
   anonymizationFields: AnonymizationFieldResponse[];
@@ -108,12 +109,13 @@ export const useFetchEntityDetailsHighlights = ({
   refetchEntityRecord?: () => void;
   /** Refetch the persisted summary from the metadata datastream after a new one is saved. */
   refetchPersistedSummary?: () => void;
+  persistSummary: boolean;
 }) => {
   const { inference } = useKibana().services;
   const { fetchEntityDetailsHighlights, saveEntityAiSummary } = useEntityAnalyticsRoutes();
   const { addError } = useAppToasts();
   const currentUser = useCurrentUser();
-  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [assistantResult, setAssistantResult] = useState<AssistantResult>(() =>
@@ -158,7 +160,7 @@ export const useFetchEntityDetailsHighlights = ({
     // re-clicked while entity data is gathered. The try/finally below always resets it.
     const controller = new AbortController();
     setAbortController(controller);
-    setIsChatLoading(true);
+    setIsGeneratingSummary(true);
 
     try {
       const toDate = Date.now();
@@ -227,46 +229,48 @@ export const useFetchEntityDetailsHighlights = ({
         generatedBy,
       });
 
-      // Persist to entity store — fire-and-forget, don't block UI on this
-      saveEntityAiSummary({
-        entityId: entityIdentifier,
-        entityType,
-        summary: {
-          highlights,
-          recommended_actions: recommendedActions,
-          generated_at: generatedAt,
-          staleness: buildEntitySummaryStaleness({
-            riskScoreNorm: entitySnapshot?.riskScoreNorm ?? null,
-          }),
-        },
-        modelOutputCounts: {
-          highlights: modelHighlightsCount,
-          recommendedActions: modelRecommendedActionsCount,
-        },
-      })
-        .then(() => {
-          // Keep `generationBaseline` as the staleness-suppression source for this session.
-          // The metadata write isn't immediately searchable (index refresh latency), so
-          // clearing the baseline here and leaning on the read-back below would flash the
-          // staleness nudge back on right after a successful regeneration (the read-back
-          // still returns the pre-regeneration snapshot). The baseline is reset on entity
-          // change and superseded by the next generation; genuine later drift still surfaces
-          // via the drift-since-generation check.
-          refetchEntityRecord?.();
-          // Pull the just-persisted summary from the metadata datastream so a
-          // reopen (or another user) reads the same document, not a stale cache.
-          refetchPersistedSummary?.();
+      if (persistSummary) {
+        // Persist to entity store — fire-and-forget, don't block UI on this
+        saveEntityAiSummary({
+          entityId: entityIdentifier,
+          entityType,
+          summary: {
+            highlights,
+            recommended_actions: recommendedActions,
+            generated_at: generatedAt,
+            staleness: buildEntitySummaryStaleness({
+              riskScoreNorm: entitySnapshot?.riskScoreNorm ?? null,
+            }),
+          },
+          modelOutputCounts: {
+            highlights: modelHighlightsCount,
+            recommendedActions: modelRecommendedActionsCount,
+          },
         })
-        .catch((persistError: Error) => {
-          // Persist is best-effort — the in-memory result is still usable this session.
-          // Surface a non-blocking toast so the user is aware the summary was not saved.
-          addError(persistError, {
-            title: i18n.translate(
-              'xpack.securitySolution.flyout.entityDetails.highlights.persistError',
-              { defaultMessage: 'Could not save AI summary — it will not persist after refresh.' }
-            ),
+          .then(() => {
+            // Keep `generationBaseline` as the staleness-suppression source for this session.
+            // The metadata write isn't immediately searchable (index refresh latency), so
+            // clearing the baseline here and leaning on the read-back below would flash the
+            // staleness nudge back on right after a successful regeneration (the read-back
+            // still returns the pre-regeneration snapshot). The baseline is reset on entity
+            // change and superseded by the next generation; genuine later drift still surfaces
+            // via the drift-since-generation check.
+            refetchEntityRecord?.();
+            // Pull the just-persisted summary from the metadata datastream so a
+            // reopen (or another user) reads the same document, not a stale cache.
+            refetchPersistedSummary?.();
+          })
+          .catch((persistError: Error) => {
+            // Persist is best-effort — the in-memory result is still usable this session.
+            // Surface a non-blocking toast so the user is aware the summary was not saved.
+            addError(persistError, {
+              title: i18n.translate(
+                'xpack.securitySolution.flyout.entityDetails.highlights.persistError',
+                { defaultMessage: 'Could not save AI summary — it will not persist after refresh.' }
+              ),
+            });
           });
-        });
+      }
     } catch (e) {
       if (isInferenceRequestAbortedError(e)) {
         return;
@@ -277,7 +281,7 @@ export const useFetchEntityDetailsHighlights = ({
       });
       setError(caughtError);
     } finally {
-      setIsChatLoading(false);
+      setIsGeneratingSummary(false);
       setAbortController(null);
     }
   }, [
@@ -293,19 +297,20 @@ export const useFetchEntityDetailsHighlights = ({
     entitySnapshot,
     refetchEntityRecord,
     refetchPersistedSummary,
+    persistSummary,
   ]);
 
   const abortStream = useCallback(() => {
     if (abortController) {
       abortController.abort();
       setAbortController(null);
-      setIsChatLoading(false);
+      setIsGeneratingSummary(false);
     }
   }, [abortController]);
 
   return {
     fetchEntityHighlights,
-    isChatLoading,
+    isGeneratingSummary,
     abortStream,
     result: assistantResult,
     error,

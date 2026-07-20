@@ -22,10 +22,34 @@ interface LegacyCustomField {
  * extended-fields backfill so the storage key it computes (`<name>_as_<type>`) always matches the
  * type this migration writes into the field definition.
  * - number → `integer` (v1 numbers are integer-only; matches v2's own number fields)
- * - text / toggle / unknown → `keyword`
+ * - toggle → `boolean` (matches the native v2 TOGGLE field's `type`)
+ * - text / unknown → `keyword`
  */
-export const getV2FieldType = (legacyType: string): 'integer' | 'keyword' =>
-  legacyType === CustomFieldTypes.NUMBER ? 'integer' : 'keyword';
+export const getV2FieldType = (legacyType: string): 'integer' | 'boolean' | 'keyword' => {
+  if (legacyType === CustomFieldTypes.NUMBER) return 'integer';
+  if (legacyType === CustomFieldTypes.TOGGLE) return 'boolean';
+  return 'keyword';
+};
+
+/**
+ * Strictly coerces a legacy toggle default to a boolean. Legacy toggle values are booleans in
+ * practice, but the persisted config type allows `string | number | boolean`, so a truthy
+ * `Boolean(value)` would wrongly map the string `'false'` to `true`. We therefore map only the
+ * unambiguous boolean / `'true'` / `'false'` shapes and return `undefined` for anything else so the
+ * caller omits the default rather than inventing one.
+ */
+const coerceLegacyToggleDefault = (value: string | number | boolean): boolean | undefined => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (value === 'true') {
+    return true;
+  }
+  if (value === 'false') {
+    return false;
+  }
+  return undefined;
+};
 
 /**
  * Builds a YAML string for a single FieldSchema entry from a legacy custom field configuration.
@@ -62,15 +86,14 @@ export const buildFieldDefinitionYaml = (
       }
     }
   } else if (type === CustomFieldTypes.TOGGLE) {
-    // A legacy toggle is a boolean. v2 has no native boolean/switch control, so we map it to a
-    // radio group with true/false options — the EUI-appropriate control for two mutually exclusive
-    // values (a dropdown is an anti-pattern for a boolean). The option/default values stay the
-    // string "true"/"false", matching how toggle values are migrated onto templates.
-    fieldDef.control = FieldType.RADIO_GROUP;
-    fieldDef.metadata =
-      defaultValue !== null && defaultValue !== undefined
-        ? { options: ['true', 'false'], default: String(defaultValue) }
-        : { options: ['true', 'false'] };
+    // Legacy toggle maps directly to the native v2 TOGGLE control.
+    fieldDef.control = FieldType.TOGGLE;
+    if (defaultValue !== null && defaultValue !== undefined) {
+      const toggleDefault = coerceLegacyToggleDefault(defaultValue);
+      if (toggleDefault !== undefined) {
+        fieldDef.metadata = { default: toggleDefault };
+      }
+    }
   } else {
     // Unknown type: store as plain keyword text field
     fieldDef.control = FieldType.INPUT_TEXT;
