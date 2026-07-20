@@ -45,6 +45,13 @@ export function getConfigRootDir(
 
   // If configDir is explicitly provided, use it
   if (serverConfigSet) {
+    // Allow `serverConfigSet` to be a path to an external config directory
+    // (e.g. owned by a solution team outside kbn-scout). If the value
+    // contains a path separator or starts with `/`, treat it as a direct
+    // path rather than a name under config_sets/.
+    if (serverConfigSet.includes('/') || path.isAbsolute(serverConfigSet)) {
+      return path.join(serverConfigSet, testTarget.arch);
+    }
     return path.join(configSetsRoot, serverConfigSet, testTarget.arch);
   }
 

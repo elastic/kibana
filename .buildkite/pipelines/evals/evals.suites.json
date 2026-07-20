@@ -348,7 +348,7 @@
       "ciLabels": [
         "evals:detection-rule-preview"
       ],
-      "serverConfigSet": "evals_rule_preview"
+      "serverConfigSet": "x-pack/solutions/security/packages/kbn-evals-suite-detection-rule-preview/config"
     }
   ]
 }
