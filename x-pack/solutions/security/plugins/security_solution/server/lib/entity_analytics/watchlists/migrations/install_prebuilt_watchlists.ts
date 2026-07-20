@@ -216,7 +216,9 @@ export const installPrebuiltWatchlists = async ({
   hasEncryptionKey,
 }: EntityAnalyticsMigrationsParams) => {
   const [coreStart] = await getStartServices();
-  const internalRepo = coreStart.savedObjects.createInternalRepository();
+  // 'space' is a hidden saved object type, so it must be explicitly included or
+  // `find` silently returns an empty result and custom spaces are never discovered.
+  const internalRepo = coreStart.savedObjects.createInternalRepository(['space']);
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 
   const spacesResponse = await internalRepo.find({
