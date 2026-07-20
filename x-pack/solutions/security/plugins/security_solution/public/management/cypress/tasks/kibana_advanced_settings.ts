@@ -13,5 +13,6 @@ export const disableNewFlyout = () => {
     method: 'POST',
     url: '/internal/kibana/settings',
     body: { changes: { [ENABLE_NEW_FLYOUT_SETTING]: false } },
+    failOnStatusCode: false,
   });
 };
