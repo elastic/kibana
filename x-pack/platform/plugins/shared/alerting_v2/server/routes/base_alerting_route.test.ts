@@ -265,52 +265,157 @@ describe('BaseAlertingRoute', () => {
     });
 
     it('returns default options when no routeOptions are declared', () => {
-      expect(TestRoute.options).toEqual({
-        access: 'public',
-        tags: ['oas-tag:alerting-v2'],
-        availability: { stability: 'experimental' },
-      });
+      expect(TestRoute.options).toEqual(
+        expect.objectContaining({
+          access: 'public',
+          tags: ['oas-tag:alerting-v2'],
+          availability: { stability: 'experimental' },
+          oasOperationObject: expect.any(Function),
+        })
+      );
     });
 
     it('merges routeOptions with defaults', () => {
       TestRoute.routeOptions = { summary: 'Get a rule' };
 
-      expect(TestRoute.options).toEqual({
-        access: 'public',
-        tags: ['oas-tag:alerting-v2'],
-        availability: { stability: 'experimental' },
-        summary: 'Get a rule',
-      });
+      expect(TestRoute.options).toEqual(
+        expect.objectContaining({
+          access: 'public',
+          tags: ['oas-tag:alerting-v2'],
+          availability: { stability: 'experimental' },
+          summary: 'Get a rule',
+          oasOperationObject: expect.any(Function),
+        })
+      );
     });
 
     it('overrides defaults with child values', () => {
       TestRoute.routeOptions = { access: 'internal' };
 
-      expect(TestRoute.options).toEqual({
-        access: 'internal',
-        tags: ['oas-tag:alerting-v2'],
-        availability: { stability: 'experimental' },
-      });
+      expect(TestRoute.options).toEqual(
+        expect.objectContaining({
+          access: 'internal',
+          tags: ['oas-tag:alerting-v2'],
+          availability: { stability: 'experimental' },
+          oasOperationObject: expect.any(Function),
+        })
+      );
     });
 
     it('concatenates arrays from parent and child', () => {
       TestRoute.routeOptions = { tags: ['extra-tag'] };
 
-      expect(TestRoute.options).toEqual({
-        access: 'public',
-        tags: ['oas-tag:alerting-v2', 'extra-tag'],
-        availability: { stability: 'experimental' },
-      });
+      expect(TestRoute.options).toEqual(
+        expect.objectContaining({
+          access: 'public',
+          tags: ['oas-tag:alerting-v2', 'extra-tag'],
+          availability: { stability: 'experimental' },
+          oasOperationObject: expect.any(Function),
+        })
+      );
     });
 
     it('deep merges nested objects', () => {
       TestRoute.routeOptions = { availability: { since: '1.0' } };
 
-      expect(TestRoute.options).toEqual({
-        access: 'public',
-        tags: ['oas-tag:alerting-v2'],
-        availability: { stability: 'experimental', since: '1.0' },
-      });
+      expect(TestRoute.options).toEqual(
+        expect.objectContaining({
+          access: 'public',
+          tags: ['oas-tag:alerting-v2'],
+          availability: { stability: 'experimental', since: '1.0' },
+          oasOperationObject: expect.any(Function),
+        })
+      );
+    });
+
+    it('includes shared OAS examples for common error responses', async () => {
+      const oas = await TestRoute.options.oasOperationObject!();
+
+      expect(typeof oas).not.toBe('string');
+      if (typeof oas === 'string') {
+        throw new Error('expected object OAS fragment');
+      }
+
+      expect(oas.responses?.[401]?.content?.['application/json']?.examples?.unauthorized).toEqual(
+        expect.objectContaining({
+          value: expect.objectContaining({ code: 'UNAUTHORIZED' }),
+        })
+      );
+      expect(oas.responses?.[403]?.content?.['application/json']?.examples?.forbidden).toEqual(
+        expect.objectContaining({
+          value: expect.objectContaining({ code: 'FORBIDDEN' }),
+        })
+      );
+      expect(
+        oas.responses?.[500]?.content?.['application/json']?.examples?.internalServerError
+      ).toEqual(
+        expect.objectContaining({
+          value: expect.objectContaining({
+            code: ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR,
+          }),
+        })
+      );
+      expect(
+        oas.responses?.[503]?.content?.['application/json']?.examples?.alertingDisabled
+      ).toEqual(
+        expect.objectContaining({
+          value: expect.objectContaining({
+            code: ALERTING_V2_ERROR_CODES.ALERTING_DISABLED,
+          }),
+        })
+      );
+    });
+
+    it('composes subclass oasOperationObject with common error examples', async () => {
+      TestRoute.routeOptions = {
+        oasOperationObject: () => ({
+          requestBody: {
+            content: {
+              'application/json': {
+                examples: {
+                  createRuleRequest: {
+                    summary: 'Create a rule',
+                    value: { name: 'my rule' },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            200: {
+              content: {
+                'application/json': {
+                  examples: {
+                    createRuleResponse: {
+                      summary: 'Created rule',
+                      value: { id: 'rule-1', name: 'my rule' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }),
+      };
+
+      const oas = await TestRoute.options.oasOperationObject!();
+      expect(typeof oas).not.toBe('string');
+      if (typeof oas === 'string') {
+        throw new Error('expected object OAS fragment');
+      }
+
+      expect(
+        oas.requestBody?.content?.['application/json']?.examples?.createRuleRequest
+      ).toBeDefined();
+      expect(
+        oas.responses?.[200]?.content?.['application/json']?.examples?.createRuleResponse
+      ).toBeDefined();
+      expect(
+        oas.responses?.[401]?.content?.['application/json']?.examples?.unauthorized
+      ).toBeDefined();
+      expect(
+        oas.responses?.[503]?.content?.['application/json']?.examples?.alertingDisabled
+      ).toBeDefined();
     });
   });
 
