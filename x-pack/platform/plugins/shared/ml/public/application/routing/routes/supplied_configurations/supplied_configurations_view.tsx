@@ -53,7 +53,7 @@ const PageWrapper: FC = () => {
           defaultMessage: 'Supplied configurations',
         })}
       />
-      <EuiText>
+      <EuiText data-test-subj="mlPageSuppliedConfigurations">
         {i18n.translate('xpack.ml.suppliedConfigurations.preconfigurecJobsHeaderDescription', {
           defaultMessage:
             'This page lists pre-defined anomaly detection job configurations with related Kibana assets.',

@@ -36,35 +36,28 @@ export const useDataFrameAnalyticsJobsMenu = ({
 
   return useMemo<AppHeaderMenu>(
     () => ({
-      primaryActionItem: canCreateDataFrameAnalytics
-        ? {
-            id: 'createDataFrameAnalyticsJob',
-            label: i18n.translate(
-              'xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton',
-              {
-                defaultMessage: 'Create job',
-              }
-            ),
-            iconType: 'plusInCircle' as const,
-            run: navigateToSourceSelection,
-            testId: 'mlAnalyticsButtonCreate',
-          }
-        : undefined,
+      primaryActionItem: {
+        id: 'createDataFrameAnalyticsJob',
+        label: i18n.translate('xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton', {
+          defaultMessage: 'Create job',
+        }),
+        iconType: 'plusInCircle' as const,
+        run: navigateToSourceSelection,
+        testId: 'mlAnalyticsButtonCreate',
+        disableButton: !canCreateDataFrameAnalytics,
+      },
       items: [
-        ...(canSync
-          ? [
-              {
-                id: 'syncSavedObjects',
-                order: 100,
-                label: i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                  defaultMessage: 'Synchronize saved objects',
-                }),
-                iconType: 'inputOutput' as const,
-                run: onOpenSyncFlyout,
-                testId: 'mlStackMgmtSyncButton',
-              },
-            ]
-          : []),
+        {
+          id: 'syncSavedObjects',
+          order: 100,
+          label: i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+            defaultMessage: 'Synchronize saved objects',
+          }),
+          iconType: 'inputOutput' as const,
+          run: onOpenSyncFlyout,
+          testId: 'mlStackMgmtSyncButton',
+          disableButton: !canSync,
+        },
         ...(showImportExport
           ? [
               {

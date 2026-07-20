@@ -63,20 +63,17 @@ export const useAnomalyDetectionJobsMenu = ({
         testId: 'mlCreateNewJobButton',
       },
       items: [
-        ...(canSync
-          ? [
-              {
-                id: 'syncSavedObjects',
-                order: 100,
-                label: i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                  defaultMessage: 'Synchronize saved objects',
-                }),
-                iconType: 'inputOutput' as const,
-                run: onOpenSyncFlyout,
-                testId: 'mlStackMgmtSyncButton',
-              },
-            ]
-          : []),
+        {
+          id: 'syncSavedObjects',
+          order: 100,
+          label: i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+            defaultMessage: 'Synchronize saved objects',
+          }),
+          iconType: 'inputOutput' as const,
+          run: onOpenSyncFlyout,
+          testId: 'mlStackMgmtSyncButton',
+          disableButton: !canSync,
+        },
         {
           id: 'anomalyDetectionSettings',
           order: 200,

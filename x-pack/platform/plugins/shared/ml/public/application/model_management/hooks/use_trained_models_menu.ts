@@ -29,32 +29,28 @@ export const useTrainedModelsMenu = ({
 
   return useMemo<AppHeaderMenu>(
     () => ({
-      primaryActionItem: canCreateTrainedModels
-        ? {
-            id: 'addTrainedModel',
-            label: i18n.translate('xpack.ml.trainedModels.modelsList.addModelButtonLabel', {
-              defaultMessage: 'Add trained model',
-            }),
-            iconType: 'plusInCircle' as const,
-            run: onOpenAddModelFlyout,
-            testId: 'mlModelsAddTrainedModelButton',
-          }
-        : undefined,
+      primaryActionItem: {
+        id: 'addTrainedModel',
+        label: i18n.translate('xpack.ml.trainedModels.modelsList.addModelButtonLabel', {
+          defaultMessage: 'Add trained model',
+        }),
+        iconType: 'plusInCircle' as const,
+        run: onOpenAddModelFlyout,
+        testId: 'mlModelsAddTrainedModelButton',
+        disableButton: !canCreateTrainedModels,
+      },
       items: [
-        ...(canSync
-          ? [
-              {
-                id: 'syncSavedObjects',
-                order: 100,
-                label: i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                  defaultMessage: 'Synchronize saved objects',
-                }),
-                iconType: 'inputOutput' as const,
-                run: onOpenSyncFlyout,
-                testId: 'mlStackMgmtSyncButton',
-              },
-            ]
-          : []),
+        {
+          id: 'syncSavedObjects',
+          order: 100,
+          label: i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+            defaultMessage: 'Synchronize saved objects',
+          }),
+          iconType: 'inputOutput' as const,
+          run: onOpenSyncFlyout,
+          testId: 'mlStackMgmtSyncButton',
+          disableButton: !canSync,
+        },
       ],
     }),
     [canCreateTrainedModels, canSync, onOpenAddModelFlyout, onOpenSyncFlyout]
