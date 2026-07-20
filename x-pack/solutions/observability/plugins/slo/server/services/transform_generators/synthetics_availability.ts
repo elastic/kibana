@@ -45,7 +45,8 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
       this.buildSettings(slo, this.isServerless ? '@timestamp' : 'event.ingested'),
-      slo
+      slo,
+      this.isServerless
     );
   }
 

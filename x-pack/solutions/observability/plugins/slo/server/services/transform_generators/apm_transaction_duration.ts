@@ -45,7 +45,8 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, '@timestamp'),
-      slo
+      slo,
+      this.isServerless
     );
   }
 

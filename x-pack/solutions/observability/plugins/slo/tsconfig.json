@@ -132,6 +132,7 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-spaces-common",
     "@kbn/inspector-plugin",
-    "@kbn/core-feature-flags-server"
+    "@kbn/core-feature-flags-server",
+    "@kbn/cps-server-utils"
   ]
 }

@@ -71,25 +71,6 @@ export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicat
       style={{ maxWidth: MAX_WIDTH }}
       data-test-subj="sloEditFormIndicatorSection"
     >
-      {isServerless && (
-        <>
-          <EuiCallOut
-            title={i18n.translate('xpack.slo.sloEdit.cpsReadiness.title', {
-              defaultMessage: 'Cross-project search for SLOs coming soon',
-            })}
-            iconType="iInCircle"
-            data-test-subj="sloEditFormCpsReadinessBanner"
-          >
-            <p>
-              {i18n.translate('xpack.slo.sloEdit.cpsReadiness.body', {
-                defaultMessage:
-                  'SLOs are currently scoped to data within this project. Cross-project search support is on the way.',
-              })}
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </>
-      )}
       {!isEditMode && (
         <>
           <EuiFormRow label={indicatorLabel}>

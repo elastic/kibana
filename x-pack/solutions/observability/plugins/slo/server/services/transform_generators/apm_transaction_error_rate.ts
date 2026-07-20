@@ -42,7 +42,8 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
       this.buildSettings(slo, '@timestamp'),
-      slo
+      slo,
+      this.isServerless
     );
   }
 

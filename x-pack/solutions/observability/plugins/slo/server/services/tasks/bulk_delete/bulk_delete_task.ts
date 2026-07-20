@@ -71,7 +71,7 @@ export class BulkDeleteTask {
                 abortController
               );
               const summaryTransformManager = new DefaultSummaryTransformManager(
-                new DefaultSummaryTransformGenerator(),
+                new DefaultSummaryTransformGenerator(false),
                 scopedClusterClient,
                 this.logger,
                 abortController

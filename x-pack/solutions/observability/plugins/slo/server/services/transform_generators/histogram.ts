@@ -39,7 +39,8 @@ export class HistogramTransformGenerator extends TransformGenerator {
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       await this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
-      slo
+      slo,
+      this.isServerless
     );
   }
 
