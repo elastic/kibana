@@ -11,6 +11,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 
 import type { PluginConfig } from '../../config';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
@@ -1169,6 +1170,118 @@ describe('RulesClient', () => {
       await expect(client.deleteRule({ id: 'rule-id-del-404' })).rejects.toMatchObject({
         output: { statusCode: 404 },
       });
+    });
+  });
+
+  describe('runRuleNow', () => {
+    it('runs the executor task for an enabled rule', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: { ...baseSoAttrs, enabled: true },
+        version: 'WzEsMV0=',
+        id: 'rule-id-run-1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+      getRuleExecutorTaskIdMock.mockReturnValueOnce('task:run');
+      taskManager.runSoon.mockResolvedValueOnce({ id: 'task:run' });
+
+      await client.runRuleNow({ id: 'rule-id-run-1' });
+
+      expect(getRuleExecutorTaskIdMock).toHaveBeenCalledWith({
+        ruleId: 'rule-id-run-1',
+        spaceId: 'space-1',
+      });
+      expect(taskManager.runSoon).toHaveBeenCalledWith('task:run');
+    });
+
+    it('throws 404 when rule is not found', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          RULE_SAVED_OBJECT_TYPE,
+          'rule-id-run-404'
+        )
+      );
+
+      await expect(client.runRuleNow({ id: 'rule-id-run-404' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+
+    it('throws 400 RULE_DISABLED when the rule is disabled', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: { ...baseSoAttrs, enabled: false },
+        version: 'WzEsMV0=',
+        id: 'rule-id-run-disabled',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await expect(client.runRuleNow({ id: 'rule-id-run-disabled' })).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: 'RULE_DISABLED', details: { rule_id: 'rule-id-run-disabled' } },
+      });
+
+      expect(taskManager.runSoon).not.toHaveBeenCalled();
+    });
+
+    it('throws 409 RULE_ALREADY_RUNNING when the task is already running', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: { ...baseSoAttrs, enabled: true },
+        version: 'WzEsMV0=',
+        id: 'rule-id-run-active',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+      taskManager.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('task:run'));
+
+      await expect(client.runRuleNow({ id: 'rule-id-run-active' })).rejects.toMatchObject({
+        output: { statusCode: 409 },
+        data: { code: 'RULE_ALREADY_RUNNING', details: { rule_id: 'rule-id-run-active' } },
+      });
+    });
+
+    it('throws 409 RULE_RUN_CONFLICT when runSoon reports a task-store conflict', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: { ...baseSoAttrs, enabled: true },
+        version: 'WzEsMV0=',
+        id: 'rule-id-run-conflict',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+      taskManager.runSoon.mockResolvedValueOnce({
+        id: 'task:run',
+        conflict: true,
+      });
+
+      await expect(client.runRuleNow({ id: 'rule-id-run-conflict' })).rejects.toMatchObject({
+        output: { statusCode: 409 },
+        data: { code: 'RULE_RUN_CONFLICT', details: { rule_id: 'rule-id-run-conflict' } },
+      });
+    });
+
+    it('logs when the task was forced to run', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: { ...baseSoAttrs, enabled: true },
+        version: 'WzEsMV0=',
+        id: 'rule-id-run-forced',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+      taskManager.runSoon.mockResolvedValueOnce({
+        id: 'task:run',
+        forced: true,
+      });
+
+      await client.runRuleNow({ id: 'rule-id-run-forced' });
+
+      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('rule-id-run-forced'));
     });
   });
 

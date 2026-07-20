@@ -21,6 +21,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
@@ -445,6 +446,63 @@ export class RulesClient {
     await this.rulesSavedObjectService.delete({ id });
 
     this.ruleEventPublisher.emitRuleDeleted(this.request, [{ id, spaceId: this.spaceId }]);
+  }
+
+  /**
+   * Manually triggers an immediate run of an enabled rule's executor task
+   * ("run rule now"). This is the recovery path for the no-catch-up scheduling
+   * model: a run missed while Kibana was down is not replayed automatically, so
+   * an operator kicks it here.
+   *
+   * Wraps Task Manager's `runSoon`, which reschedules the per-rule executor task
+   * to run as soon as possible. A disabled rule has no executor task (it is
+   * removed on disable), so we reject before calling `runSoon` rather than
+   * surfacing a confusing not-found from the task store.
+   */
+  @withApm
+  public async runRuleNow({ id }: { id: string }): Promise<void> {
+    const { spaceId } = this.getSpaceContext();
+
+    const { attrs } = await this.getExistingRule(id);
+
+    if (!attrs.enabled) {
+      throw Boom.badRequest(`Rule with id "${id}" is disabled and cannot be run`, {
+        code: ALERTING_V2_ERROR_CODES.RULE_DISABLED,
+        details: { rule_id: id },
+      });
+    }
+
+    const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
+
+    let forced: boolean;
+    let conflict: boolean | undefined;
+    try {
+      ({ forced, conflict } = await this.taskManager.runSoon(taskId));
+    } catch (e) {
+      if (e instanceof TaskAlreadyRunningError) {
+        throw Boom.conflict(`Rule with id "${id}" is already running`, {
+          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_RUNNING,
+          details: { rule_id: id },
+        });
+      }
+      throw e;
+    }
+
+    if (conflict) {
+      // The task store update raced with another concurrent update and was
+      // rejected with a 409 — the task was not actually rescheduled. Surface
+      // as a soft conflict so the caller can retry.
+      throw Boom.conflict(`Running rule with id "${id}" conflicted, please retry`, {
+        code: ALERTING_V2_ERROR_CODES.RULE_RUN_CONFLICT,
+        details: { rule_id: id },
+      });
+    }
+
+    if (forced) {
+      this.logger.info({
+        message: `Rule "${id}" was forced to run despite being in "running" status`,
+      });
+    }
   }
 
   @withApm

@@ -52,6 +52,12 @@ jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
   useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
 }));
 
+const mockRunRuleMutate = jest.fn();
+const mockUseRunRule = jest.fn();
+jest.mock('../../hooks/use_run_rule', () => ({
+  useRunRule: () => mockUseRunRule(),
+}));
+
 const mockRules = [
   {
     id: 'rule-1',
@@ -112,6 +118,10 @@ describe('RulesListTableContainer', () => {
     });
     mockUseBulkDisableRules.mockReturnValue({
       mutate: mockBulkDisableMutate,
+      isLoading: false,
+    });
+    mockUseRunRule.mockReturnValue({
+      mutate: mockRunRuleMutate,
       isLoading: false,
     });
   });
@@ -215,6 +225,22 @@ describe('RulesListTableContainer', () => {
       await waitFor(() => {
         expect(screen.queryByTestId('deleteRuleConfirmationModal')).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('run rule', () => {
+    it('calls runRule mutation when run action is clicked', async () => {
+      renderContainer();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('runRule-rule-1')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('runRule-rule-1'));
+
+      expect(mockRunRuleMutate).toHaveBeenCalledWith({ id: 'rule-1' });
     });
   });
 

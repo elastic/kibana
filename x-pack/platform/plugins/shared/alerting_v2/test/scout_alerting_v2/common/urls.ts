@@ -63,6 +63,8 @@ export const getBulkActionPoliciesUrl = () => `${ACTION_POLICY_API_PATH}/_bulk`;
 
 export const getBulkRulesUrl = () => `${RULE_API_PATH}/_bulk_get`;
 
+export const getRunRuleUrl = (id: string) => `${getRuleUrl(id)}/_run`;
+
 /**
  * URL for the list action policies endpoint, optionally with a query string.
  * Arrays are encoded as repeated `key=value` pairs (e.g. `?tags=a&tags=b`) to

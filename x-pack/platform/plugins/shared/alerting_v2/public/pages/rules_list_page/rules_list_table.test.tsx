@@ -87,6 +87,7 @@ const defaultProps: RulesListTableProps = {
   onClone: jest.fn(),
   onDelete: jest.fn(),
   onToggleEnabled: jest.fn(),
+  onRun: jest.fn(),
   onTableChange: jest.fn(),
 };
 
@@ -464,6 +465,38 @@ describe('RulesListTable', () => {
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
       expect(screen.queryByTestId('toggleEnabledRule-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('calls onRun when run action is clicked for an enabled rule', async () => {
+      const onRun = jest.fn();
+      renderTable({ onRun });
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('runRule-rule-1')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('runRule-rule-1'));
+
+      expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+
+    it('disables the run action for a disabled rule', async () => {
+      const onRun = jest.fn();
+      renderTable({ onRun });
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-2'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('runRule-rule-2')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('runRule-rule-2')).toBeDisabled();
+
+      fireEvent.click(screen.getByTestId('runRule-rule-2'));
+
+      expect(onRun).not.toHaveBeenCalled();
     });
   });
 

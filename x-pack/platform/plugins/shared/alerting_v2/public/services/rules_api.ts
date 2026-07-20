@@ -82,6 +82,10 @@ export class RulesApi {
     return this.http.delete<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${id}`);
   }
 
+  public async runRule(id: string) {
+    return this.http.post<void>(`${ALERTING_V2_RULE_API_PATH}/${id}/_run`);
+  }
+
   public async bulkDeleteRules(params: BulkOperationParams) {
     return this.http.post<BulkOperationResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_delete`, {
       body: JSON.stringify(params),

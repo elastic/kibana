@@ -63,6 +63,9 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `UNSUPPORTED_FILTER_FUNCTION` | 400    | The `filter` uses a KQL function we do not translate yet             | `{ function }`                             |
 | `SCHEDULE_INTERVAL_TOO_SHORT` | 400    | `schedule.every` is below `xpack.alerting_v2.rules.minimumScheduleInterval` | `{ interval, minimumScheduleInterval }`    |
 | `MAX_SCHEDULES_PER_MINUTE_EXCEEDED` | 400 | Scheduling the rule would exceed `xpack.alerting_v2.rules.maxScheduledPerMinute` | `{ interval, maxScheduledPerMinute }` |
+| `RULE_DISABLED`               | 400    | `runRuleNow` was called for a disabled rule (it has no executor task to run)        | `{ rule_id }`                              |
+| `RULE_ALREADY_RUNNING`        | 409    | `runRuleNow` targeted a rule whose executor task is already running                 | `{ rule_id }`                              |
+| `RULE_RUN_CONFLICT`           | 409    | `runRuleNow` raced another writer updating the executor task; retry                 | `{ rule_id }`                              |
 
 ### Action policies (`server/lib/action_policy_client/`)
 
