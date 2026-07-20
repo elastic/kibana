@@ -94,6 +94,7 @@ export const ruleEventsGeneratedEventSchema = z.object({
   ruleEventsGenerated: z
     .number()
     .int()
+    .min(1)
     .describe(
       i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.ruleEventsGenerated', {
         defaultMessage:

@@ -510,7 +510,7 @@ describe('RuleExecutionPipeline', () => {
       expect(eventPublisher.publishExecutionSucceeded).not.toHaveBeenCalled();
     });
 
-    it('publishes rule.execution.failed (not succeeded) with ruleId and error message when a step throws', async () => {
+    it('publishes rule.execution.failed (not succeeded) with rule (id, spaceId) and error message when a step throws', async () => {
       const { loggerService } = createLoggerService();
       const eventPublisher = createMockRuleExecutorEventPublisher();
 
@@ -535,7 +535,7 @@ describe('RuleExecutionPipeline', () => {
       expect(eventPublisher.publishExecutionSucceeded).not.toHaveBeenCalled();
       expect(eventPublisher.publishExecutionFailed).toHaveBeenCalledTimes(1);
       expect(eventPublisher.publishExecutionFailed).toHaveBeenCalledWith({
-        rule: { id: 'rule-42' },
+        rule: { id: 'rule-42', spaceId: 'default' },
         error: 'Step blew up',
       });
     });

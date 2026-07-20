@@ -183,7 +183,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
   private publishExecutionFailed(rawInput: RuleExecutionPipelineInput, error: unknown): void {
     try {
       this.eventPublisher.publishExecutionFailed({
-        rule: { id: rawInput.ruleId },
+        rule: { id: rawInput.ruleId, spaceId: rawInput.spaceId },
         error: error instanceof Error ? error.message : String(error),
       });
     } catch (publishError) {

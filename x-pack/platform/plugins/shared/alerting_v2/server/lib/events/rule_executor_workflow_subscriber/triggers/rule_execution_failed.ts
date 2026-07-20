@@ -39,7 +39,7 @@ export const ruleExecutionFailedTrigger: RuleExecutorWorkflowTriggerBinding<
   triggerId: RuleExecutionFailedTriggerId,
   definition: ruleExecutionFailedTriggerCommonDefinition,
   toPayload: (event) => ({
-    rule: { id: event.payload.rule.id },
+    rule: { id: event.payload.rule.id, spaceId: event.payload.rule.spaceId },
     error: event.payload.error.slice(0, RULE_EXECUTION_FAILED_ERROR_MAX_LENGTH),
   }),
 };

@@ -31,6 +31,14 @@ export const ruleExecutionFailedEventSchema = z.object({
             defaultMessage: 'Unique rule identifier.',
           })
         ),
+      spaceId: z
+        .string()
+        .max(ID_MAX_LENGTH)
+        .describe(
+          i18n.translate('xpack.alertingV2.triggers.ruleExecutionFailed.schema.spaceId', {
+            defaultMessage: 'Kibana space ID where the rule lives.',
+          })
+        ),
     })
     .describe(
       i18n.translate('xpack.alertingV2.triggers.ruleExecutionFailed.schema.rule', {
@@ -66,7 +74,7 @@ export const ruleExecutionFailedTriggerCommonDefinition: CommonTriggerDefinition
       'xpack.alertingV2.workflowTriggers.ruleExecutionFailed.documentation.details',
       {
         defaultMessage:
-          'Emitted after a rule execution fails with an error. The payload includes event.rule.id and event.error.',
+          'Emitted after a rule execution fails with an error. The payload includes event.rule (id, spaceId) and event.error.',
       }
     ),
     examples: [

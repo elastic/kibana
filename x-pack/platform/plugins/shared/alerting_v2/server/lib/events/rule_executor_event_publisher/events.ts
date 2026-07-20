@@ -51,6 +51,7 @@ export const RULE_EXECUTION_FAILED_EVENT_TYPE = 'rule.execution.failed' as const
 export interface RuleExecutionFailedPayload {
   readonly rule: {
     readonly id: string;
+    readonly spaceId: string;
   };
   readonly error: string;
 }

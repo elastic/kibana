@@ -31,9 +31,9 @@ without coupling to Task Manager state.
    `RuleExecutionPipelineResult.metrics`. Publishing to the alerting bus is
    outcome-specific: a successful run publishes `rule.execution.succeeded`
    (carrying the rule's `kind`/`tags` and `ruleEventsGenerated` from the
-   snapshot); a thrown run publishes `rule.execution.failed` (carrying `ruleId`
-   and the error message) before the error propagates. Halted runs publish
-   neither.
+   snapshot); a thrown run publishes `rule.execution.failed` (carrying the
+   rule's `id`/`spaceId` and the error message) before the error propagates.
+   Halted runs publish neither.
 
 Steps never import the collector. They contribute to metrics via one of two
 per-emission channels on `EmissionMeta`:

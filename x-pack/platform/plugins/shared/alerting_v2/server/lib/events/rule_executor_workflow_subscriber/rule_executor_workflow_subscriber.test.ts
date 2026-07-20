@@ -42,7 +42,7 @@ const succeededEvent: RuleExecutionSucceededEvent = {
 
 const failedEvent: RuleExecutionFailedEvent = {
   type: RULE_EXECUTION_FAILED_EVENT_TYPE,
-  payload: { rule: { id: 'rule-1' }, error: 'boom' },
+  payload: { rule: { id: 'rule-1', spaceId: 'my-space' }, error: 'boom' },
 };
 
 describe('RuleExecutorWorkflowSubscriber', () => {
@@ -103,14 +103,14 @@ describe('RuleExecutorWorkflowSubscriber', () => {
       });
     });
 
-    it('forwards a failed event as { rule: { id }, error }', async () => {
+    it('forwards a failed event as { rule: { id, spaceId }, error }', async () => {
       subscriber.start();
 
       await handlerFor(bus, RULE_EXECUTION_FAILED_EVENT_TYPE)(failedEvent, { request });
 
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
       expect(mockEmitEvent).toHaveBeenCalledWith(RuleExecutionFailedTriggerId, {
-        rule: { id: 'rule-1' },
+        rule: { id: 'rule-1', spaceId: 'my-space' },
         error: 'boom',
       });
     });

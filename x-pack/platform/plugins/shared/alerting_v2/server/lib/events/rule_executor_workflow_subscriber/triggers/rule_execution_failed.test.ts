@@ -15,7 +15,7 @@ import { ruleExecutionFailedTrigger } from './rule_execution_failed';
 const baseEvent: RuleExecutionFailedEvent = {
   type: RULE_EXECUTION_FAILED_EVENT_TYPE,
   payload: {
-    rule: { id: 'rule-1' },
+    rule: { id: 'rule-1', spaceId: 'space-1' },
     error: 'Something went wrong',
   },
 };
@@ -27,11 +27,11 @@ describe('ruleExecutionFailedTrigger', () => {
   });
 
   describe('toPayload', () => {
-    it('maps the bus payload to { rule: { id }, error }', () => {
+    it('maps the bus payload to { rule: { id, spaceId }, error }', () => {
       const result = ruleExecutionFailedTrigger.toPayload(baseEvent);
 
       expect(result).toEqual({
-        rule: { id: 'rule-1' },
+        rule: { id: 'rule-1', spaceId: 'space-1' },
         error: 'Something went wrong',
       });
     });
@@ -63,7 +63,9 @@ describe('ruleExecutionFailedTrigger', () => {
 
     it('rejects a payload missing the required `error` field', () => {
       expect(() =>
-        ruleExecutionFailedTrigger.definition.eventSchema.parse({ rule: { id: 'rule-1' } })
+        ruleExecutionFailedTrigger.definition.eventSchema.parse({
+          rule: { id: 'rule-1', spaceId: 'space-1' },
+        })
       ).toThrow();
     });
   });
