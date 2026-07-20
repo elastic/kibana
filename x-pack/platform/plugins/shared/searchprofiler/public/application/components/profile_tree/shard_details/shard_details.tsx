@@ -65,7 +65,7 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
             onClick={() => setShardVisibility(!shardVisibility)}
             data-test-subj="openCloseShardDetails"
           >
-            <EuiIcon type={shardVisibility ? 'chevronSingleDown' : 'chevronSingleRight'} />[
+            <EuiIcon type={shardVisibility ? 'chevronSingleDown' : 'chevronSingleRight'} aria-hidden={true} />[
             {shard.id[0]}][
             {shard.id[2]}]
           </EuiLink>

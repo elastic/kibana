@@ -69,7 +69,7 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
               <EuiCard
                 display="subdued"
                 textAlign="left"
-                icon={<EuiIcon type="logoSlack" size="xl" />}
+                icon={<EuiIcon type="logoSlack" size="xl" aria-hidden={true} />}
                 data-test-subj="streamsSlackAppCard"
                 title={i18n.translate(
                   'xpack.streams.significantEventsDiscovery.settings.apps.slackCardTitle',
