@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import type { ActionPolicyBulkAction, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import type { Query } from '@elastic/eui';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ContentListFooter,
@@ -122,9 +122,11 @@ export const ActionPoliciesTableContent = ({
                 .filter((uid): uid is string => Boolean(uid)),
         [items]
     );
-    const { data: updatedByProfileByUid } = useBulkGetUserProfiles({ uids: updatedByUids });
+    const { data: updatedByProfileByUid, isLoading: isProfileLoading } = useBulkGetUserProfiles({ uids: updatedByUids });
     const updatedByProfileByUidRef = useRef(updatedByProfileByUid);
     updatedByProfileByUidRef.current = updatedByProfileByUid;
+    const isProfileLoadingRef = useRef(isProfileLoading);
+    isProfileLoadingRef.current = isProfileLoading;
 
     return (
         <>
@@ -170,6 +172,7 @@ export const ActionPoliciesTableContent = ({
                     render={(item) => {
                         const { updatedBy } = toPolicy(item);
                         if (!updatedBy) return null;
+                        if (isProfileLoadingRef.current) return <div style={{ width: 120 }}><EuiSkeletonText lines={1} /></div>;
                         return <>{resolveDisplayName(updatedBy, updatedByProfileByUidRef.current, updatedBy)}</>;
                     }}
                 />
@@ -189,6 +192,10 @@ export const ActionPoliciesTableContent = ({
                                 compressed
                                 checked={policy.enabled}
                                 disabled={!canWrite || isLoading || isBulkActionInProgress}
+                                title={!canWrite ? i18n.translate(
+                                    'xpack.alertingV2.actionPoliciesList.column.enabled.disabledTooltip',
+                                    { defaultMessage: 'You do not have permission to enable or disable this policy' }
+                                ) : undefined}
                                 onChange={() => {
                                     if (policy.enabled) {
                                         disablePolicy(policy.id);
