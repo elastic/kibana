@@ -54,7 +54,7 @@ export const AiIndexDetailPage = () => {
         }
       />
       <KibanaPageTemplate.Section>
-        <DescriptionPanel isLoading={isLoading} description={aiIndex?.description} />
+        <DescriptionPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
         <EuiSpacer size="l" />
         <SourcesPanel
           isLoading={isLoading}

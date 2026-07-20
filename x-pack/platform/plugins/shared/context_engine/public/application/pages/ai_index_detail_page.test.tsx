@@ -108,6 +108,44 @@ describe('AiIndexDetailPage', () => {
     expect(await screen.findByTestId('contextAiIndexDetailError')).toHaveTextContent('boom');
   });
 
+  it('edits the description and refetches the AI index', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+    expect(services.http.get).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+
+    const textArea = await screen.findByTestId('contextDescriptionTextArea');
+    fireEvent.change(textArea, { target: { value: 'A brand new description' } });
+    fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'My AI index',
+            dest: { type: 'data_stream', value: '.ai-index-ds-my-ai-index' },
+            automations: [],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
+            description: 'A brand new description',
+          }),
+        })
+      );
+    });
+
+    // The editor closes and the detail data is refetched after a successful save.
+    await waitFor(() => {
+      expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
+    });
+    expect(services.http.get).toHaveBeenCalledTimes(2);
+  });
+
   it('opens the edit sources flyout with the current sources selected', async () => {
     const services = coreMock.createStart();
     services.http.get.mockResolvedValue(aiIndex);

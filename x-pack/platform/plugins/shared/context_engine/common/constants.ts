@@ -17,14 +17,12 @@ export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
 export const AI_INDEX_API_VERSION = '2023-10-31';
 
 /**
- * TODO: delete me !TEMPORARY!
- * Fixed identity used by the create page while it has no dedicated form. The
- * backing data stream is created from Dev Console (the "Create AI index dest"
- * button), and the create call reuses the same name so the two always agree.
- * Because the id is fixed, repeated creates upsert the same AI index record.
+ * Backing data streams and indices follow type-specific naming conventions,
+ * both sharing the common `ai-index-` base.
  */
-export const DEFAULT_AI_INDEX_NAME = 'my-ai-index';
-export const DEFAULT_AI_INDEX_DATA_STREAM = `.ai-index-ds-${DEFAULT_AI_INDEX_NAME}`;
+export const AI_INDEX_DEST_PREFIX = 'ai-index-';
+export const AI_INDEX_DATA_STREAM_PREFIX = `${AI_INDEX_DEST_PREFIX}ds-`;
+export const AI_INDEX_INDEX_PREFIX = `${AI_INDEX_DEST_PREFIX}idx-`;
 
 /**
  * Hard limit on the number of AI indices returned by the list API.

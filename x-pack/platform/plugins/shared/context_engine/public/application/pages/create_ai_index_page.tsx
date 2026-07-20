@@ -6,37 +6,81 @@
  */
 
 import {
+  EuiBadge,
   EuiButton,
+  EuiCheckableCard,
+  EuiCode,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import React, { useState } from 'react';
-import { DEFAULT_AI_INDEX_DATA_STREAM } from '../../../common/constants';
+import type { AiIndexType } from '../../../common/http_api/ai_indices';
 import { SourcePicker } from '../components/source_picker';
 import type { SelectedSource } from '../components/source_picker';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
 import { useKibana } from '../hooks/use_kibana';
 import { useNavigation } from '../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../paths';
+import { getAiIndexDest } from '../utils/ai_index_dest';
 
-const CREATE_AI_INDEX_DEST_REQUEST = `# Create an index template so the data stream gets created with the right settings
+const STORAGE_TYPES: Array<{
+  type: AiIndexType;
+  badge: string;
+  title: string;
+  description: string;
+}> = [
+  {
+    type: 'index',
+    badge: 'idx',
+    title: i18n.translate('xpack.contextEngine.createAiIndex.storageType.index.title', {
+      defaultMessage: 'Index',
+    }),
+    description: i18n.translate('xpack.contextEngine.createAiIndex.storageType.index.description', {
+      defaultMessage:
+        "Enterprise data — docs, tickets, knowledge bases and other reference context that isn't time-based.",
+    }),
+  },
+  {
+    type: 'data_stream',
+    badge: 'ds',
+    title: i18n.translate('xpack.contextEngine.createAiIndex.storageType.dataStream.title', {
+      defaultMessage: 'Data stream',
+    }),
+    description: i18n.translate(
+      'xpack.contextEngine.createAiIndex.storageType.dataStream.description',
+      {
+        defaultMessage:
+          'Observability & security — time-based context for agents (logs, metrics, traces, alerts).',
+      }
+    ),
+  },
+];
+
+const buildCreateDestRequest = (storageType: AiIndexType, destValue: string): string =>
+  storageType === 'data_stream'
+    ? `# Create an index template so the data stream gets created with the right settings
 PUT _index_template/ai-index-ds-template
 {
-  "index_patterns": [".ai-index-ds-*"],
+  "index_patterns": ["ai-index-ds-*"],
   "data_stream": {},
   "priority": 500
 }
 
 # Create the backing data stream used by the "Continue" button below
-PUT _data_stream/${DEFAULT_AI_INDEX_DATA_STREAM}`;
+PUT _data_stream/${destValue}`
+    : `# Create the backing index used by the "Continue" button below
+PUT ${destValue}`;
 
 export const CreateAiIndexPage = () => {
   const {
@@ -45,9 +89,16 @@ export const CreateAiIndexPage = () => {
   const { navigateToContextEngine } = useNavigation();
   const { createAiIndex, isCreating } = useCreateAiIndex();
   const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
+  const [name, setName] = useState('');
+  const [storageType, setStorageType] = useState<AiIndexType>('index');
+  const storageGroupName = useGeneratedHtmlId({ prefix: 'aiIndexStorageType' });
+
+  const trimmedName = name.trim();
+  const destValue = getAiIndexDest(storageType, trimmedName || 'namespace').value;
+  const isDisabled = !trimmedName || selectedSources.length === 0;
 
   const createAndContinue = async () => {
-    const created = await createAiIndex(selectedSources);
+    const created = await createAiIndex({ name, storageType, sources: selectedSources });
     if (created) {
       navigateToContextEngine(getAiIndexDetailPath(created.id));
     }
@@ -61,69 +112,145 @@ export const CreateAiIndexPage = () => {
         })}
         description={i18n.translate('xpack.contextEngine.createAiIndex.description', {
           defaultMessage:
-            'Start by picking a source to build context from or skip and add sources later.',
+            'Start by picking a source to build context from — or skip and add sources later.',
         })}
       />
       <KibanaPageTemplate.Section>
         <EuiPanel hasBorder paddingSize="l">
-          <EuiFlexGroup alignItems="flexStart" gutterSize="m">
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h2>
-                  <FormattedMessage
-                    id="xpack.contextEngine.createAiIndex.addSource.title"
-                    defaultMessage="Add a source"
-                  />
-                </h2>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="xpack.contextEngine.createAiIndex.addSource.description"
-                    defaultMessage="Pick what this AI index should build context from. You can add more than one."
-                  />
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <TryInConsoleButton
-                    type="emptyButton"
-                    iconType="plusInCircle"
-                    request={CREATE_AI_INDEX_DEST_REQUEST}
-                    application={application}
-                    sharePlugin={share}
-                    consolePlugin={consolePlugin}
-                    data-test-subj="contextCreateAiIndexDestButton"
-                    content={i18n.translate('xpack.contextEngine.createAiIndex.createDestButton', {
-                      defaultMessage: 'Create AI index dest',
-                    })}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    iconType="arrowRight"
-                    iconSide="right"
-                    data-test-subj="contextContinueButton"
-                    onClick={createAndContinue}
-                    isLoading={isCreating}
-                    isDisabled={selectedSources.length === 0}
-                  >
-                    <FormattedMessage
-                      id="xpack.contextEngine.createAiIndex.continueButton"
-                      defaultMessage="Continue"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.contextEngine.createAiIndex.addSource.title', {
+                defaultMessage: 'Sources',
+              })}
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
           <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />
         </EuiPanel>
+
+        <EuiSpacer size="l" />
+
+        <EuiPanel hasBorder paddingSize="l">
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.contextEngine.createAiIndex.name.title', {
+                defaultMessage: 'Name',
+              })}
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            fullWidth
+            helpText={
+              <FormattedMessage
+                id="xpack.contextEngine.createAiIndex.name.helpText"
+                defaultMessage="uses {dest} to store pre-computed context"
+                values={{ dest: <EuiCode>{destValue}</EuiCode> }}
+              />
+            }
+          >
+            <EuiFieldText
+              fullWidth
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              data-test-subj="contextAiIndexNameInput"
+              placeholder={i18n.translate('xpack.contextEngine.createAiIndex.name.placeholder', {
+                defaultMessage: 'e.g. Support ticket triage',
+              })}
+              aria-label={i18n.translate('xpack.contextEngine.createAiIndex.name.ariaLabel', {
+                defaultMessage: 'AI index name',
+              })}
+            />
+          </EuiFormRow>
+        </EuiPanel>
+
+        <EuiSpacer size="l" />
+
+        <EuiPanel hasBorder paddingSize="l">
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.contextEngine.createAiIndex.storageType.title', {
+                defaultMessage: 'Storage type',
+              })}
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate('xpack.contextEngine.createAiIndex.storageType.description', {
+                defaultMessage: 'Choose how this AI index stores pre-computed context.',
+              })}
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="column" gutterSize="m">
+            {STORAGE_TYPES.map((option) => (
+              <EuiFlexItem key={option.type}>
+                <EuiCheckableCard
+                  id={`${storageGroupName}-${option.type}`}
+                  name={storageGroupName}
+                  checkableType="radio"
+                  checked={storageType === option.type}
+                  onChange={() => setStorageType(option.type)}
+                  data-test-subj={`contextAiIndexStorageType-${option.type}`}
+                  label={
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <strong>{option.title}</strong>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color="hollow">{option.badge}</EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  }
+                >
+                  <EuiText size="s" color="subdued">
+                    {option.description}
+                  </EuiText>
+                </EuiCheckableCard>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiPanel>
+
+        <EuiSpacer size="l" />
+
+        <EuiFlexGroup
+          gutterSize="s"
+          justifyContent="flexEnd"
+          alignItems="center"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <TryInConsoleButton
+              type="emptyButton"
+              iconType="plusInCircle"
+              request={buildCreateDestRequest(storageType, destValue)}
+              application={application}
+              sharePlugin={share}
+              consolePlugin={consolePlugin}
+              data-test-subj="contextCreateAiIndexDestButton"
+              content={i18n.translate('xpack.contextEngine.createAiIndex.createDestButton', {
+                defaultMessage: 'Create AI index dest',
+              })}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              iconType="arrowRight"
+              iconSide="right"
+              data-test-subj="contextContinueButton"
+              onClick={createAndContinue}
+              isLoading={isCreating}
+              isDisabled={isDisabled}
+            >
+              {i18n.translate('xpack.contextEngine.createAiIndex.continueButton', {
+                defaultMessage: 'Create AI index',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

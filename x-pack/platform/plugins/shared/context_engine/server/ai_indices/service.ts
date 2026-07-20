@@ -8,7 +8,11 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import { MAX_AI_INDICES } from '../../common/constants';
+import {
+  AI_INDEX_DATA_STREAM_PREFIX as DATA_STREAM_PREFIX,
+  AI_INDEX_INDEX_PREFIX as INDEX_PREFIX,
+  MAX_AI_INDICES,
+} from '../../common/constants';
 import type {
   AiIndexDest,
   AiIndexHttpItem,
@@ -17,14 +21,6 @@ import type {
 import { InvalidAiIndexDestError, AiIndexConflictError, AiIndexNotFoundError } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
-
-/**
- * Backing data streams and indices follow type-specific naming conventions,
- * both sharing the common `ai-index-` base.
- */
-const DEST_INDEX_PREFIX = 'ai-index-';
-const DATA_STREAM_PREFIX = `${DEST_INDEX_PREFIX}ds-`;
-const INDEX_PREFIX = `${DEST_INDEX_PREFIX}idx-`;
 
 const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem => ({
   id,
