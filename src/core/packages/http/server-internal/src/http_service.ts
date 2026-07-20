@@ -90,6 +90,7 @@ export class HttpService
   private selfClient?: InternalHttpSelfService;
 
   private readonly log: Logger;
+  private readonly selfCallableEnforcementLog: Logger;
   private readonly env: Env;
   private internalPreboot?: InternalHttpServicePreboot;
   private internalSetup?: InternalHttpServiceSetup;
@@ -100,6 +101,7 @@ export class HttpService
 
     this.env = env;
     this.log = logger.get('http');
+    this.selfCallableEnforcementLog = this.log.get('self-client', 'enforcement');
     this.config$ = combineLatest([
       configService.atPath<HttpConfigType>(httpConfig.path, { ignoreUnchanged: false }),
       configService.atPath<CspConfigType>(cspConfig.path),
@@ -262,7 +264,7 @@ export class HttpService
         getServerInfo: internalSetup.getServerInfo,
         getHttpConfig: () => this.currentConfig!,
         kibanaVersion: this.env.packageInfo.version,
-        log: this.log.get('self-client'),
+        log: this.log.get('self-client', 'outbound'),
         target: internalSetup.config.selfHttp.target,
       })),
       setRedactedSessionIdGetter: (getter) => {
@@ -273,26 +275,39 @@ export class HttpService
 
   public async start({ featureFlags }: StartDeps = {}) {
     const config = await firstValueFrom(this.config$);
+    const enforcementFallback = config.selfHttp.selfCallableEnforcement;
+    this.httpServer.setSelfCallableEnforcement(enforcementFallback);
+
     if (featureFlags) {
-      await new Promise<void>((resolve, reject) => {
+      await new Promise<void>((resolve) => {
         let initialized = false;
+        const finishInitialization = () => {
+          if (!initialized) {
+            initialized = true;
+            resolve();
+          }
+        };
+
         this.selfCallableEnforcementSubscription = featureFlags
-          .getBooleanValue$(
-            SELF_CALLABLE_ENFORCEMENT_FEATURE_FLAG,
-            config.selfHttp.selfCallableEnforcement
-          )
+          .getBooleanValue$(SELF_CALLABLE_ENFORCEMENT_FEATURE_FLAG, enforcementFallback)
           .subscribe({
             next: (enforcement) => {
               this.httpServer.setSelfCallableEnforcement(enforcement);
-              if (!initialized) {
-                initialized = true;
-                resolve();
-              }
+              finishInitialization();
             },
-            error: reject,
+            error: () => {
+              this.httpServer.setSelfCallableEnforcement(enforcementFallback);
+              this.selfCallableEnforcementLog.error(
+                'Self-callable enforcement feature flag failed; using the configured fallback.'
+              );
+              finishInitialization();
+            },
             complete: () => {
               if (!initialized) {
-                reject(new Error('Self-callable enforcement feature flag produced no value.'));
+                this.selfCallableEnforcementLog.error(
+                  'Self-callable enforcement feature flag produced no value; using the configured fallback.'
+                );
+                finishInitialization();
               }
             },
           });

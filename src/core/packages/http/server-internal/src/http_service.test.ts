@@ -10,7 +10,7 @@
 import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, EMPTY, throwError, type Observable } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { hapiMocks } from '@kbn/hapi-mocks';
 import { ConfigService, Env } from '@kbn/config';
@@ -20,6 +20,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import { Router } from '@kbn/core-http-router-server-internal';
 jest.mock('@kbn/core-http-router-server-internal');
 import { HttpService } from './http_service';
@@ -64,6 +65,45 @@ const setupDeps = {
   executionContext: executionContextServiceMock.createInternalSetupContract(),
   userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
+
+const createFeatureFlags = (booleanValue$: Observable<boolean>): FeatureFlagsStart => ({
+  appendContext: jest.fn(),
+  getBooleanValue: jest.fn(),
+  getStringValue: jest.fn(),
+  getNumberValue: jest.fn(),
+  getBooleanValue$: jest.fn().mockReturnValue(booleanValue$),
+  getStringValue$: jest.fn(),
+  getNumberValue$: jest.fn(),
+});
+
+const setupHttpServiceForStart = async (selfCallableEnforcement: boolean) => {
+  const prebootHttpServer = {
+    isListening: () => false,
+    stop: jest.fn(),
+  };
+  const httpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({}),
+    setSelfCallableEnforcement: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  mockHttpServer.mockImplementationOnce(() => prebootHttpServer);
+  mockHttpServer.mockImplementationOnce(() => httpServer);
+
+  const service = new HttpService({
+    coreId,
+    configService: createConfigService({
+      selfHttp: { target: 'auto', selfCallableEnforcement, ssl: {} },
+    }),
+    env,
+    logger,
+  });
+  await service.setup(setupDeps);
+
+  return { httpServer, service };
+};
+
 const fakeHapiServer = {
   start: noop,
   stop: noop,
@@ -83,6 +123,7 @@ test('creates and sets up http server', async () => {
   const httpServer = {
     isListening: () => false,
     setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
+    setSelfCallableEnforcement: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };
@@ -120,11 +161,58 @@ test('creates and sets up http server', async () => {
   await service.stop();
 });
 
+describe('self-callable enforcement initialization', () => {
+  it('applies the config fallback when Feature Flags is absent', async () => {
+    const { httpServer, service } = await setupHttpServiceForStart(true);
+
+    await expect(service.start()).resolves.toBeDefined();
+
+    expect(httpServer.setSelfCallableEnforcement).toHaveBeenCalledTimes(1);
+    expect(httpServer.setSelfCallableEnforcement).toHaveBeenCalledWith(true);
+    expect(logger.get().get).toHaveBeenCalledWith('self-client', 'outbound');
+    await service.stop();
+  });
+
+  it('keeps the config fallback and starts HTTP when the feature flag errors', async () => {
+    const featureFlags = createFeatureFlags(
+      throwError(() => new Error('feature flag unavailable'))
+    );
+    const { httpServer, service } = await setupHttpServiceForStart(true);
+
+    await expect(service.start({ featureFlags })).resolves.toBeDefined();
+
+    expect(httpServer.setSelfCallableEnforcement).toHaveBeenCalledTimes(2);
+    expect(httpServer.setSelfCallableEnforcement).toHaveBeenLastCalledWith(true);
+    expect(httpServer.start).toHaveBeenCalledTimes(1);
+    expect(logger.get().get).toHaveBeenCalledWith('self-client', 'enforcement');
+    expect(loggingSystemMock.collect(logger).error).toContainEqual([
+      'Self-callable enforcement feature flag failed; using the configured fallback.',
+    ]);
+    await service.stop();
+  });
+
+  it('keeps the config fallback and starts HTTP when the feature flag completes empty', async () => {
+    const featureFlags = createFeatureFlags(EMPTY);
+    const { httpServer, service } = await setupHttpServiceForStart(true);
+
+    await expect(service.start({ featureFlags })).resolves.toBeDefined();
+
+    expect(httpServer.setSelfCallableEnforcement).toHaveBeenCalledTimes(1);
+    expect(httpServer.setSelfCallableEnforcement).toHaveBeenCalledWith(true);
+    expect(httpServer.start).toHaveBeenCalledTimes(1);
+    expect(loggingSystemMock.collect(logger).error).toContainEqual([
+      'Self-callable enforcement feature flag produced no value; using the configured fallback.',
+    ]);
+    await service.stop();
+  });
+});
+
 test('spins up `preboot` server until started if configured with `autoListen:true`', async () => {
   const configService = createConfigService();
   const httpServer = {
     isListening: () => false,
     setup: jest.fn().mockReturnValue({}),
+    setSelfCallableEnforcement: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };
@@ -211,6 +299,7 @@ test('stops http server', async () => {
   const httpServer = {
     isListening: () => false,
     setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
+    setSelfCallableEnforcement: jest.fn(),
     start: noop,
     stop: jest.fn(),
   };
@@ -271,6 +360,7 @@ test('does not try to stop `preboot` server if it has been already stopped', asy
   const standardHttpServer = {
     isListening: () => false,
     setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
+    setSelfCallableEnforcement: jest.fn(),
     start: noop,
     stop: jest.fn(),
   };
@@ -435,6 +525,7 @@ test('does not start http server if configured with `autoListen:false`', async (
   const httpServer = {
     isListening: () => false,
     setup: jest.fn().mockReturnValue({}),
+    setSelfCallableEnforcement: jest.fn(),
     start: jest.fn(),
     stop: noop,
   };

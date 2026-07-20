@@ -140,7 +140,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     const targetMode =
       this.params.target === 'auto' && this.params.basePath.publicBaseUrl ? 'public' : 'local';
 
-    this.params.log.debug('Kibana scoped self HTTP call attempted', {
+    this.params.log.debug(() => 'Kibana scoped self HTTP call attempted', {
       labels: {
         self_http_source_method: this.request.route.method.toUpperCase(),
         self_http_source_route_template: this.request.route.path,

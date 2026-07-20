@@ -334,7 +334,6 @@ export class HttpServer {
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
     this.setupRequestStateAssignment(config, basePathService, executionContext, userActivity);
-    this.selfCallableEnforcement = config.selfHttp?.selfCallableEnforcement ?? false;
     const getSelfCallableEnforcement = () => this.selfCallableEnforcement;
     this.server.ext('onPreAuth', createSelfCallPreAuthHandler(getSelfCallableEnforcement));
     this.server.ext('onPreHandler', createSelfCallPreHandler(getSelfCallableEnforcement));

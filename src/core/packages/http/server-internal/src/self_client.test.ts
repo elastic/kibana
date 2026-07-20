@@ -133,7 +133,7 @@ describe('InternalHttpSelfScopedClient', () => {
       headers: { 'x-private-header': 'private-header-value' },
     });
 
-    expect(log.debug).toHaveBeenCalledWith('Kibana scoped self HTTP call attempted', {
+    expect(log.debug).toHaveBeenCalledWith(expect.any(Function), {
       labels: {
         self_http_source_method: 'POST',
         self_http_source_route_template: '/internal/source/{sourceId}',
@@ -141,6 +141,8 @@ describe('InternalHttpSelfScopedClient', () => {
         self_http_target_mode: 'public',
       },
     });
+    const [[message]] = (log.debug as jest.Mock).mock.calls;
+    expect(message()).toBe('Kibana scoped self HTTP call attempted');
     const serializedLog = JSON.stringify((log.debug as jest.Mock).mock.calls);
     expect(serializedLog).not.toContain('private-source-id');
     expect(serializedLog).not.toContain('private-target');
