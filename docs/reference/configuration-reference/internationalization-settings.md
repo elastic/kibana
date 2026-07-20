@@ -19,13 +19,15 @@ applies_to:
 
 ## Per-user language selection
 ```{applies_to}
-stack: ga 9.5
-serverless: ga
+stack: beta 9.5
+serverless: beta
 ```
+
+End users who want to change their own interface language can follow [Change the interface language in Kibana](docs-content://cloud-account/change-interface-language.md).
 
 When `i18n.locales` is not empty, individual users can choose their preferred display language:
 
-* {applies_to}`self:` **User Profile page** — Users can select a language from the **Language** section on their profile page (*User icon → Profile*).
+* {applies_to}`self:` **User Profile page** — Users can select a language from the **Language** section on their profile page (**Edit profile** in the header's user menu).
 * {applies_to}`serverless:` {applies_to}`ech:` **User menu** — Users can select a language from the **Language** option in the user menu available from the application header.
 
 When a user sets a preferred language, it is stored in their user profile and takes effect after a page reload.

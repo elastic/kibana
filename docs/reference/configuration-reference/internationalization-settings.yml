@@ -22,9 +22,9 @@ groups:
         datatype: string
         default: "'en'"
         applies_to:
-          stack: ga 9.5+
-          ech: ga
-          self: ga
+          stack: beta 9.5+
+          ech: beta
+          self: beta
 
       - setting: i18n.locales
         description: |
@@ -35,9 +35,9 @@ groups:
         datatype: list
         default: '["en", "fr-FR", "ja-JP", "zh-CN", "de-DE"]'
         applies_to:
-          stack: ga 9.5+
-          ech: ga
-          self: ga
+          stack: beta 9.5+
+          ech: beta
+          self: beta
 
       - setting: i18n.allowLocaleCookie
         description: |
@@ -48,9 +48,9 @@ groups:
         datatype: boolean
         default: "true"
         applies_to:
-          stack: ga 9.5+
-          ech: ga
-          self: ga
+          stack: beta 9.5+
+          ech: beta
+          self: beta
 
       - setting: i18n.locale
         description: |
