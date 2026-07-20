@@ -53,7 +53,6 @@ dependsOn:
   - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/utils'
   - '@kbn/core'
-  - '@kbn/data-forge'
   - '@kbn/ml-is-populated-object'
   - '@kbn/ml-anomaly-utils'
   - '@kbn/ml-server-schemas'
