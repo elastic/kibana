@@ -206,11 +206,12 @@ The \`security.create_detection_rule\` tool can return a rejection when it delib
 \`\`\`
 
 **When you see \`rejected: true\`:**
-- Do NOT retry the tool. This is not a transient error — the agent tried and made a deliberate decision.
-- Surface the \`message\` field directly to the user. It is already written for the user to read.
+- Do NOT retry the tool under any circumstances — not with a different index pattern, not with a simplified query, not with explicit field names. This is a deliberate decision by the detection engine, not a transient failure.
+- Do NOT use \`attachment_update\` as a fallback to hand-write a rule when the tool rejects. \`attachment_update\` is for editing existing rule fields only — it must never be used to construct a new rule or write a query from scratch.
+- Surface the \`message\` field directly to the user. It is already written for the user to read. Stop there.
 - Follow up based on \`rejectionCode\`:
-  - \`NO_DATA\` — No relevant index was found. Ask the user to name a specific index or data source (e.g. "Which index contains the data you want to detect on?").
-  - \`INVALID_OUTPUT\` — The agent produced a rule but it failed validation. Ask the user to rephrase or add more detail to their request, then retry the tool once with the revised description.
+  - \`NO_DATA\` — The data required for this detection does not exist in this environment. Tell the user what data stream they would need (e.g. "This detection requires \`logs-o365.audit-*\` data. Ingest O365 audit logs first, then try again."). Do NOT retry with a different index and do NOT attempt to build the rule manually.
+  - \`INVALID_OUTPUT\` — The agent produced a rule but it failed schema validation. Ask the user to rephrase or add more detail, then retry the tool **once** with the revised description.
   - \`INCOHERENT\` — The request did not describe a detectable behavior. Ask the user to rephrase and describe the specific activity to detect (e.g. "detect failed logins from a single IP").
   - \`NOT_SECURITY_RELEVANT\` — The request is not a security detection scenario. Ask the user to describe suspicious behavior, attack patterns, or anomalies instead.
 
@@ -436,7 +437,7 @@ Pre-check: user wants to modify existing rule → edit path → proceed to Step 
 5. **ALWAYS render the attachment inline after EVERY modification** — this is the most important rule. Every single call to \`security.create_detection_rule\` or \`attachment_update\` MUST be followed by \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result. NEVER omit this. The user cannot see changes without it.
 6. When creating a **fresh, separate** rule: use \`security.create_detection_rule\` with \`user_query\` only — do NOT include \`attachment_id\`. When **rewriting the query** of an existing rule — including follow-up refinements to a rule you created earlier in this conversation (e.g., "update it to only alert when...", "change the threshold to...") — use \`security.create_detection_rule\` WITH \`attachment_id\` — never omit it.
 7. ALWAYS use \`security.create_detection_rule\` with \`attachment_id\` when rewriting the query.
-8. Use \`attachment_update\` only for non-query field edits (tags, severity, schedule, name, description, MITRE, enabled, etc.). NEVER use \`attachment_update\` to change \`query\`.
+8. Use \`attachment_update\` only for non-query field edits (tags, severity, schedule, name, description, MITRE, enabled, etc.). NEVER use \`attachment_update\` to change \`query\`. NEVER use \`attachment_update\` to construct an entire rule from scratch — if \`security.create_detection_rule\` rejected, that rejection is final; do not circumvent it.
 9. NEVER invent attachment ids. The correct id for any edit-path call (\`security.create_detection_rule\` with \`attachment_id\`, or \`attachment_update\`) is the one that appears in the most recent \`<render_attachment id="...">\` tag — it looks like \`ai-rule-creation\` or \`air:xxxxxxxx-...\`. Using a name you derive from the rule content (e.g. \`"rule-failed-ssh-logins"\`) will create a new orphan attachment and lose the saved-rule link.
 10. NEVER include \`id\` or \`rule_id\` in a generated or draft rule — these are server-assigned identifiers. Including them pollutes the attachment and breaks save/update flows.
 11. **ES|QL only**: If the user explicitly requests a non-ES|QL rule type (KQL, EQL, threshold, new terms, machine learning, indicator match, etc.), do NOT create it and do NOT automatically offer or pivot to an ES|QL alternative. Simply explain the limitation and stop.
