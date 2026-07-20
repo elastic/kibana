@@ -9,15 +9,13 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
 import { logRequest } from '@kbn/as-code-utils';
 import { DASHBOARD_INTERNAL_API_PATH } from '../../../common/constants';
-import { getSanitizePanelResponseBodySchema, getSanitizeResponseBodySchema } from './schemas';
-import { getDashboardStateSchema, getPanelSchema } from '../dashboard_state_schemas';
-import { sanitizeDashboard, sanitizePanel } from './sanitize';
+import { getSanitizeResponseBodySchema } from './schemas';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { sanitize } from './sanitize';
 import { getUseGASchemas } from '../get_use_ga_schemas';
-import type { DashboardPanel, DashboardState } from '../types';
 
 /**
  * Register the sanitize dashboard route.
@@ -52,12 +50,11 @@ export function registerSanitizeRoute(
       version: '1',
       validate: () => ({
         request: {
-          body: schema.oneOf([getDashboardStateSchema(true), getPanelSchema(true)]),
+          body: getDashboardStateSchema(true),
         },
         response: {
           200: {
-            body: () =>
-              schema.oneOf([getSanitizeResponseBodySchema(), getSanitizePanelResponseBodySchema()]),
+            body: () => getSanitizeResponseBodySchema(),
           },
         },
       }),
@@ -66,17 +63,8 @@ export function registerSanitizeRoute(
       try {
         const { core } = await ctx.resolve(['core']);
         const useGASchemas = await getUseGASchemas(core);
-        if ('type' in req.body) {
-          const result = await sanitizePanel(req.body as DashboardPanel, useGASchemas);
-          return res.ok({ body: result });
-        } else {
-          const result = await sanitizeDashboard(
-            getCachedDashboardStateSchema(),
-            req.body as DashboardState,
-            useGASchemas
-          );
-          return res.ok({ body: result });
-        }
+        const result = await sanitize(getCachedDashboardStateSchema(), req.body, useGASchemas);
+        return res.ok({ body: result });
       } catch (e) {
         const message = e.stack ?? e.message;
         logRequest(logger, req, 'error', message);

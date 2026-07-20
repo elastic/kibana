@@ -9,6 +9,7 @@
 
 import React from 'react';
 
+import { buildPath } from '@kbn/core-http-browser';
 import { EXPORT_ACTION_GROUP } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -33,10 +34,10 @@ import {
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { buildPath } from '@kbn/core-http-browser';
 
+import { isDashboardPanel } from '../../common';
 import { DASHBOARD_INTERNAL_API_PATH } from '../../common/constants';
-import type { PanelSanitizeResponseBody } from '../../server/api/sanitize/types';
+import type { DashboardSanitizeResponseBody } from '../../server';
 import { coreServices } from '../services/kibana_services';
 import { ACTION_EXPORT_JSON } from './constants';
 
@@ -104,18 +105,28 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
               }
             }}
             sanitizeState={async (state) => {
-              const result = await coreServices.http.post<PanelSanitizeResponseBody>(
+              const result = await coreServices.http.post<DashboardSanitizeResponseBody>(
                 buildPath(`${DASHBOARD_INTERNAL_API_PATH}/_sanitize`),
                 {
                   version: '1',
+                  // create a mock dashboard with a single panel to use sanitize route
                   body: JSON.stringify({
-                    type: embeddable.type,
-                    config: state,
+                    title: 'Mock Dashboard for Panel Sanitization', // title must have a length of at least 1
+                    panels: [
+                      {
+                        grid: { x: 0, y: 0, w: 1, h: 1 },
+                        type: embeddable.type,
+                        config: state,
+                      },
+                    ],
                   }),
                 }
               );
               return {
-                data: result.data.config,
+                data:
+                  result.data.panels?.length !== 1 || !isDashboardPanel(result.data.panels[0])
+                    ? state
+                    : result.data.panels[0].config,
                 warnings: result.warnings ?? [],
               };
             }}

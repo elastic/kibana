@@ -9,6 +9,7 @@
 
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { asCodeQuerySchema, getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
+import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { getControlsGroupSchema } from '@kbn/controls-schemas';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
@@ -21,7 +22,7 @@ import {
 } from '../../common/constants';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import { embeddableService } from '../kibana_services';
-import type { DashboardPanel, DashboardSection, GenericObjectType, PanelSchemaType } from './types';
+import type { DashboardPanel, DashboardSection } from './types';
 
 const MAX_PANELS = 1000;
 
@@ -55,26 +56,7 @@ export const panelGridSchema = schema.object(
   }
 );
 
-export function getPanelSchema<
-  InternalRequest extends boolean = false,
-  ConfigOnly extends boolean = false,
-  ReturnedSchemaType = InternalRequest extends true
-    ? GenericObjectType
-    : ConfigOnly extends true
-    ? PanelSchemaType<true>
-    : PanelSchemaType
->(
-  isDashboardAppRequest: InternalRequest = false as InternalRequest,
-  configOnly: ConfigOnly = false as ConfigOnly
-): ReturnedSchemaType {
-  if (isDashboardAppRequest) {
-    return schema.object(
-      {},
-      {
-        unknowns: 'allow',
-      }
-    ) as ReturnedSchemaType;
-  }
+export function getPanelSchema() {
   const basePanelProps = {
     grid: panelGridSchema,
     id: schema.maybe(
@@ -92,7 +74,7 @@ export function getPanelSchema<
     .map(([type, { schema: configSchema, title }]) =>
       schema.object(
         {
-          ...(configOnly ? {} : basePanelProps),
+          ...basePanelProps,
           type: schema.literal(type),
           config: configSchema,
         },
@@ -105,14 +87,25 @@ export function getPanelSchema<
       )
     );
 
-  return schema.discriminatedUnion('type', panelSchemas as [PanelSchemaType]) as ReturnedSchemaType;
+  return schema.discriminatedUnion(
+    'type',
+    panelSchemas as [
+      ObjectType<{
+        grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
+        id: Type<string | undefined>;
+        version: Type<string | undefined>;
+        type: Type<string>;
+        config: ObjectType<{}>;
+      }>
+    ]
+  );
 }
 
 const sectionGridSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units.' } }),
 });
 
-export function getSectionSchema(isDashboardAppRequest: boolean = false) {
+export function getSectionSchema() {
   return schema.object(
     {
       title: schema.string({
@@ -126,14 +119,11 @@ export function getSectionSchema(isDashboardAppRequest: boolean = false) {
         defaultValue: false,
       }),
       grid: sectionGridSchema,
-      panels: schema.arrayOf(
-        getPanelSchema(isDashboardAppRequest) as ReturnType<typeof getPanelSchema<false, false>>, // keeps derived types happy
-        {
-          meta: { description: 'The panels that belong to the section.' },
-          defaultValue: [],
-          maxSize: MAX_PANELS,
-        }
-      ),
+      panels: schema.arrayOf(getPanelSchema(), {
+        meta: { description: 'The panels that belong to the section.' },
+        defaultValue: [],
+        maxSize: MAX_PANELS,
+      }),
       id: schema.maybe(
         schema.string({
           meta: { description: 'The unique ID of the section.' },
@@ -269,7 +259,7 @@ export function getDashboardStateSchema(
               {
                 unknowns: 'allow',
               }
-            ) as unknown as ReturnType<typeof getPanelSchema<false, false>>) // keeps derived types happy
+            ) as unknown as ReturnType<typeof getPanelSchema>) // keeps derived types happy
           : schema.oneOf([getPanelSchema(), getSectionSchema()]),
         {
           defaultValue: [],
@@ -317,9 +307,7 @@ export function getDashboardStateSchema(
       },
       validate: (dashboardState) => {
         if (isDashboardAppRequest) return;
-        const panelCount = countPanels(
-          dashboardState.panels as Array<DashboardPanel | DashboardSection>
-        );
+        const panelCount = countPanels(dashboardState.panels);
         const allPanelCount = panelCount + (dashboardState.pinned_panels?.length ?? 0);
         return allPanelCount > MAX_PANELS
           ? `Dashboard contains ${allPanelCount} panels, pinned panels, and sections, which exceeds the maximum of ${MAX_PANELS}.`

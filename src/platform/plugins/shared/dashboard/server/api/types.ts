@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObjectType, Type, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
 import type { getControlsGroupSchema as getPinnedPanelsSchema } from '@kbn/controls-schemas';
 import type {
@@ -26,7 +26,7 @@ export type DashboardOptions = TypeOf<typeof optionsSchema>;
 /** Grid position and size data for a panel. */
 export type GridData = TypeOf<typeof panelGridSchema>;
 /** A panel in a dashboard containing an embeddable visualization. */
-export type DashboardPanel = TypeOf<ReturnType<typeof getPanelSchema<false, false>>>;
+export type DashboardPanel = TypeOf<ReturnType<typeof getPanelSchema>>;
 /** A section in a dashboard that groups panels. */
 export type DashboardSection = TypeOf<ReturnType<typeof getSectionSchema>>;
 /** The complete state of a dashboard including panels, filters, and settings. */
@@ -34,18 +34,3 @@ export type DashboardState = Writable<TypeOf<ReturnType<typeof getDashboardState
 export type DashboardPinnedPanelsState = TypeOf<ReturnType<typeof getPinnedPanelsSchema>>;
 export type DashboardPinnedPanel = DashboardPinnedPanelsState[number];
 export type Operation = 'create' | 'read' | 'update' | 'search';
-
-/** Types used to determine return type of get schema functions depending on isDashboardAppRequest */
-export type GenericObjectType = Type<Readonly<{}>>;
-export type PanelSchemaType<ConfigOnly extends boolean = false> = ConfigOnly extends true
-  ? ObjectType<{
-      type: Type<string>;
-      config: ObjectType<{}>;
-    }>
-  : ObjectType<{
-      grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
-      id: Type<string | undefined>;
-      version: Type<string | undefined>;
-      type: Type<string>;
-      config: ObjectType<{}>;
-    }>;

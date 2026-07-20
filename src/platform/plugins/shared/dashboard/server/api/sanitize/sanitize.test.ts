@@ -22,7 +22,7 @@ jest.mock('../scope_tooling', () => ({
 
 import { stripUnmappedKeys } from '../scope_tooling';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
-import { sanitizeDashboard } from './sanitize';
+import { sanitize } from './sanitize';
 
 const mockedTransformDashboardIn = jest.mocked(transformDashboardIn);
 const mockedTransformDashboardOut = jest.mocked(transformDashboardOut);
@@ -75,7 +75,7 @@ describe('sanitize', () => {
       validate: jest.fn().mockReturnValue(baseDashboardState),
     };
 
-    const result = await sanitizeDashboard(
+    const result = await sanitize(
       dashboardStateSchema as unknown as ReturnType<typeof getDashboardStateSchema>,
       incomingDashboardState
     );
@@ -112,7 +112,7 @@ describe('sanitize', () => {
       validate: jest.fn().mockReturnValue(baseDashboardState),
     };
 
-    const result = await sanitizeDashboard(
+    const result = await sanitize(
       dashboardStateSchema as unknown as ReturnType<typeof getDashboardStateSchema>,
       baseDashboardState
     );

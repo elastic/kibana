@@ -82,9 +82,9 @@ export function transformPanelsIn(
   return { panelsJSON: JSON.stringify(panels), sections, references: panelReferences };
 }
 
-export function transformPanelIn(
+function transformPanelIn(
   panel: DashboardPanel,
-  isDashboardAppRequest: boolean = false,
+  isDashboardAppRequest: boolean,
   useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
 ): {
   storedPanel: SavedDashboardPanel;
