@@ -35,12 +35,12 @@ export function useServiceBadgesData({
   } = useServiceFlyoutContext();
   const { capabilities } = core.application;
   const { canReadAlerts } = getAlertingCapabilities(capabilities);
-  const { start = '', end = '' } = useTimeRange({ rangeFrom, rangeTo });
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
 
   const { data: alertsData, status: alertsStatus } = useFetcher(
     (callApmApi) => {
-      if (!canReadAlerts) return;
+      if (!canReadAlerts || !start || !end) return;
 
       return callApmApi('GET /internal/apm/services/{serviceName}/alerts_count', {
         params: {
@@ -57,7 +57,7 @@ export function useServiceBadgesData({
 
   const { data: anomalyData, status: anomalyStatus } = useFetcher(
     (callApmApi) => {
-      if (!canReadMlJobs) return;
+      if (!canReadMlJobs || !start || !end) return;
 
       return callApmApi('GET /internal/apm/services/{serviceName}/anomaly_score', {
         params: {
