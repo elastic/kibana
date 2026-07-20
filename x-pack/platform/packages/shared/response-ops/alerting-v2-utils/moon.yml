@@ -23,7 +23,7 @@ dependsOn:
   - '@kbn/core-lifecycle-browser'
   - '@kbn/i18n'
 tags:
-  - shared-browser
+  - shared-common
   - package
   - prod
   - group-platform
