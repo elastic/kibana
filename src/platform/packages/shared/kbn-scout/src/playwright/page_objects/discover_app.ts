@@ -267,7 +267,7 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
-  private async clickAppMenuItem(
+  async clickAppMenuItem(
     testId: string,
     { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
   ) {
@@ -506,6 +506,10 @@ export class DiscoverApp {
     return this.page.testSubj.innerText('discoverQueryHits');
   }
 
+  getErrorCalloutMessage(): Locator {
+    return this.page.testSubj.locator('discoverErrorCalloutMessage');
+  }
+
   async getChartTimespan(): Promise<string> {
     // Wait until the attribute no longer contains "Loading"
     const element = this.page.testSubj.locator('unifiedHistogramChart');
@@ -705,6 +709,20 @@ export class DiscoverApp {
 
   getLensEditFlyout(): Locator {
     return this.page.testSubj.locator('lnsChartSwitchPopover');
+  }
+
+  async openEsqlQuickReferenceFlyout() {
+    if (!(await this.esqlMenuPopover.isVisible())) {
+      await this.page.testSubj.click('esql-help-popover-button');
+    }
+
+    await this.esqlMenuPopover.waitFor({ state: 'visible' });
+    await this.page.testSubj.click('esql-quick-reference');
+    await this.getEsqlQuickReferenceFlyout().waitFor({ state: 'visible' });
+  }
+
+  getEsqlQuickReferenceFlyout(): Locator {
+    return this.page.testSubj.locator('esqlInlineDocumentationFlyout');
   }
 
   async getTheColumnFromGrid(): Promise<string[]> {
