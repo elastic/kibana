@@ -114,10 +114,6 @@ export interface UserDetailsProps {
    */
   scopeId: string;
   /**
-   * Whether the panel is expanded on first render. Defaults to true.
-   */
-  expandedOnFirstRender?: boolean;
-  /**
    * When true, related-entity cell actions use the attack flyout implementation.
    * Set for attack flyout entity panels; omit in document details flyout.
    */
@@ -153,7 +149,6 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   entityId,
   timestamp,
   scopeId,
-  expandedOnFirstRender = true,
   isAttackDetails = false,
   renderIpLink,
   onPreviewEntity,
@@ -465,7 +460,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       }}
       expand={{
         expandable: true,
-        expandedOnFirstRender,
+        expandedOnFirstRender: true,
       }}
       data-test-subj={USER_DETAILS_TEST_ID}
     >

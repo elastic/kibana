@@ -126,10 +126,6 @@ export interface HostDetailsProps {
    */
   scopeId: string;
   /**
-   * Whether the panel is expanded on first render. Defaults to true.
-   */
-  expandedOnFirstRender?: boolean;
-  /**
    * When provided (e.g. from EntitiesDetails), use this for entity/risk so the left panel
    * shows host risk level even when global time is still initializing.
    */
@@ -170,7 +166,6 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   entityId,
   timestamp,
   scopeId,
-  expandedOnFirstRender = true,
   hostEntityFromStoreResult,
   isAttackDetails = false,
   renderIpLink,
@@ -487,7 +482,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
         headerContent: relatedUsersCount,
         link: hostLink,
       }}
-      expand={{ expandable: true, expandedOnFirstRender }}
+      expand={{ expandable: true, expandedOnFirstRender: true }}
       data-test-subj={HOST_DETAILS_TEST_ID}
     >
       <EuiTitle size="xxs">

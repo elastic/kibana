@@ -27,24 +27,16 @@ jest.mock('../../../entity_details/shared/hooks/use_entity_from_store', () => ({
 }));
 
 jest.mock('../../../document_details/left/components/host_details', () => ({
-  HostDetails: (props: { hostName: string; expandedOnFirstRender?: boolean }) => (
-    <div
-      data-test-subj="host-details-mock"
-      data-host-name={props.hostName}
-      data-expanded-on-first-render={String(props.expandedOnFirstRender)}
-    >
+  HostDetails: (props: { hostName: string }) => (
+    <div data-test-subj="host-details-mock" data-host-name={props.hostName}>
       {props.hostName}
     </div>
   ),
 }));
 
 jest.mock('../../../document_details/left/components/user_details', () => ({
-  UserDetails: (props: { userName: string; expandedOnFirstRender?: boolean }) => (
-    <div
-      data-test-subj="user-details-mock"
-      data-user-name={props.userName}
-      data-expanded-on-first-render={String(props.expandedOnFirstRender)}
-    >
+  UserDetails: (props: { userName: string }) => (
+    <div data-test-subj="user-details-mock" data-user-name={props.userName}>
       {props.userName}
     </div>
   ),
@@ -76,37 +68,10 @@ describe('AttackHostInsightsRow', () => {
       'Host-dbzugdlqdn'
     );
   });
-
-  it('does not force HostDetails collapsed on first render', () => {
-    const identityFields = {
-      'entity.id': '7eb51035-5582-4cb8-9db2-5e71ef09aa5b',
-      'entity.namespace': 'local',
-    };
-    const sampleSource = {
-      host: { name: 'Host-dbzugdlqdn', id: '7eb51035-5582-4cb8-9db2-5e71ef09aa5b' },
-    };
-
-    render(
-      <EuiProvider>
-        <AttackHostInsightsRow
-          identityFields={identityFields}
-          sampleSource={sampleSource}
-          timestamp="2025-06-01T00:00:00Z"
-          scopeId="attacks-page"
-        />
-      </EuiProvider>
-    );
-
-    // expandedOnFirstRender omitted so HostDetails keeps its default (true)
-    expect(screen.getByTestId('host-details-mock')).toHaveAttribute(
-      'data-expanded-on-first-render',
-      'undefined'
-    );
-  });
 });
 
 describe('AttackUserInsightsRow', () => {
-  it('does not force UserDetails collapsed on first render', () => {
+  it('passes resolved user.name to UserDetails', () => {
     const identityFields = {
       'user.name': 'alice',
     };
@@ -126,10 +91,5 @@ describe('AttackUserInsightsRow', () => {
     );
 
     expect(screen.getByTestId('user-details-mock')).toHaveAttribute('data-user-name', 'alice');
-    // expandedOnFirstRender omitted so UserDetails keeps its default (true)
-    expect(screen.getByTestId('user-details-mock')).toHaveAttribute(
-      'data-expanded-on-first-render',
-      'undefined'
-    );
   });
 });
