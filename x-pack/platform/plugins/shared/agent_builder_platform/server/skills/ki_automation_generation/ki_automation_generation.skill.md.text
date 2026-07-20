@@ -40,8 +40,8 @@ Apply these when deciding what KIs to generate and what each one should contain.
    mapping and sample documents — never invented field names. Dry-run each example before writing
    the KI; a broken query in the KI is worse than none.
 
-4. **The Context Engine is a cache, not a database.** Never generate KIs for the entire corpus
-   eagerly. Apply a filter before starting: a time window (e.g. last 90 days), a status
+4. **The Context Engine is more like a cache than a database.** Avoid generating KIs for the entire corpus
+   eagerly. Prefer data views. Best practice is to apply a filter before starting: a time window (e.g. last 90 days), a status
    condition (e.g. resolved cases only), or a numeric cap (e.g. max 1,000 KIs). Always agree
    on the filter with the user before drafting the workflow.
 
