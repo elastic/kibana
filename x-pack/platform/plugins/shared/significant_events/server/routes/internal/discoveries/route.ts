@@ -38,9 +38,9 @@ const discoveriesSearchRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<PaginatedResponse<Discovery>> => {
-    const { getDiscoveryClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getDiscoveryClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return getDiscoveryClient().findLatestPaginated(params.query);
   },
@@ -69,11 +69,11 @@ const discoveriesHistoryRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ hits: Discovery[] }> => {
-    const { getDiscoveryClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getDiscoveryClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
-    const result = await getDiscoveryClient().findBySlug(params.path.id);
+    const result = await getDiscoveryClient().findByEventId(params.path.id);
     return { hits: result.hits };
   },
 });
@@ -94,9 +94,9 @@ const discoveriesBulkCreateRoute = createServerRoute({
     body: z.array(discoverySchema),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getDiscoveryClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getDiscoveryClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return getDiscoveryClient().bulkCreate(params.body);
   },

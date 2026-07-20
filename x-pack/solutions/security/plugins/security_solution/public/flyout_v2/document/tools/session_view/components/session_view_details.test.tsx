@@ -8,8 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import { Provider } from 'react-redux-v7';
+import { createStore } from 'redux-v4';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';

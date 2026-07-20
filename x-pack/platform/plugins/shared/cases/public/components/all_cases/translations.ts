@@ -121,6 +121,13 @@ export const ALREADY_ATTACHED = i18n.translate('xpack.cases.caseTable.alreadyAtt
     'In this context, "Added" is letting the user know that all of their selected alerts were previously added to the case in question, and the "Add to case" button is disabled',
 });
 
+export const ALREADY_ATTACHED_TOOLTIP = i18n.translate(
+  'xpack.cases.caseTable.alreadyAttachedTooltip',
+  {
+    defaultMessage: 'This item is already added to this case',
+  }
+);
+
 export const REQUIRES_UPDATE = i18n.translate('xpack.cases.caseTable.requiresUpdate', {
   defaultMessage: ' requires update',
 });
