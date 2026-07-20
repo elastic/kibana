@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { InPortal } from 'react-reverse-portal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { css } from '@emotion/react';
