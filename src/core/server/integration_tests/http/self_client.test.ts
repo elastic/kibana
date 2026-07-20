@@ -279,7 +279,9 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
     async (_context, req, res) => {
       const body = await started
         .httpStart!.selfClient.asScoped(req)
-        .fetch<{ internalOrigin: string; marker: string }>(`/self/${req.params.access}_target`);
+        .fetch<{ internalOrigin?: string; marker: string }>(`/self/${req.params.access}_target`, {
+          access: req.params.access,
+        });
       return res.ok({ body });
     }
   );
@@ -455,7 +457,6 @@ describe('Http self client', () => {
       server = started.server;
 
       await started.supertest.get('/self/call_access/public').expect(200, {
-        internalOrigin: 'Kibana',
         marker: 'true',
       });
       await started.supertest.get('/self/call_access/internal').expect(200, {

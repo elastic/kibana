@@ -255,7 +255,7 @@ export class HttpService
         getServerInfo: internalSetup.getServerInfo,
         getHttpConfig: () => this.currentConfig!,
         kibanaVersion: this.env.packageInfo.version,
-        log: this.log.get('self-client', 'outbound'),
+        log: this.log.get('self-client'),
         target: internalSetup.config.selfHttp.target,
       })),
       setRedactedSessionIdGetter: (getter) => {

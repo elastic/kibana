@@ -229,13 +229,17 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     addHeaders(headers, options.headers);
 
     headers.delete('cookie');
+    headers.delete(X_ELASTIC_INTERNAL_ORIGIN_REQUEST);
     headers.set(KIBANA_VERSION_HEADER, this.params.kibanaVersion);
     headers.set(SELF_CALL_HEADER, 'true');
-    headers.set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana');
     headers.set('user-agent', `KibanaSelfHttpClient/${this.params.kibanaVersion}`);
 
     if (options.version) {
       headers.set(ELASTIC_HTTP_VERSION_HEADER, options.version);
+    }
+
+    if (options.access === 'internal') {
+      headers.set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana');
     }
 
     return headers;

@@ -82,6 +82,8 @@ export interface HttpSelfFetchOptions<TRequestBody = unknown> {
   asResponse?: boolean;
   /** When `true`, return the raw `Response` without parsing its body. Requires `asResponse: true`. */
   rawResponse?: boolean;
+  /** Internal APIs are inaccessible unless explicitly requested. Defaults to `public`. */
+  access?: 'public' | 'internal';
 }
 
 /** @public */

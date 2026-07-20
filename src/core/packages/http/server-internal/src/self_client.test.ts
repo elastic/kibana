@@ -121,7 +121,7 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(request.headers.get('authorization')).toBe('test-auth-token');
     expect(request.headers.get('kbn-version')).toBe('9.9.9');
     expect(request.headers.get('x-kbn-self-call')).toBe('true');
-    expect(request.headers.get(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)).toBe('Kibana');
+    expect(request.headers.has(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)).toBe(false);
     expect(request.headers.get('user-agent')).toBe('KibanaSelfHttpClient/9.9.9');
     expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 60_000);
     setTimeoutSpy.mockRestore();
@@ -209,12 +209,21 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it('always sets the Core-owned internal origin header', async () => {
-    const { self } = createClient();
+  it('sets the internal origin header only when explicitly requested', async () => {
+    const { self } = createClient({
+      authHeaders: {
+        authorization: 'test-auth-token',
+        'x-elastic-internal-origin': 'untrusted-origin',
+      },
+    });
+    const scoped = self.asScoped(createRequest());
 
-    await self.asScoped(createRequest()).fetch('/api/status');
+    await scoped.fetch('/api/status');
+    let request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(request.headers.has(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)).toBe(false);
 
-    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    await scoped.fetch('/internal/search', { access: 'internal' });
+    request = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
     expect(request.headers.get(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)).toBe('Kibana');
   });
 
@@ -332,7 +341,7 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(outboundRequest.headers.get('authorization')).toBe('test-auth-token');
     expect(outboundRequest.headers.get('cookie')).toBeNull();
     expect(outboundRequest.headers.get('host')).toBeNull();
-    expect(outboundRequest.headers.get('x-elastic-internal-origin')).toBe('Kibana');
+    expect(outboundRequest.headers.get('x-elastic-internal-origin')).toBeNull();
     expect(outboundRequest.headers.get('user-agent')).toBe('KibanaSelfHttpClient/9.9.9');
   });
 });
