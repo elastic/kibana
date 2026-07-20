@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import type { MapState } from './map';
 import type { MapUiState } from './ui';
 import type { NonSerializableState } from './non_serializable_instances';

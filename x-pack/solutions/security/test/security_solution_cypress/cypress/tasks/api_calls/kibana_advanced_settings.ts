@@ -8,6 +8,7 @@
 import {
   SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID,
   AI_CHAT_EXPERIENCE_TYPE,
+  SECURITY_SOLUTION_ENABLE_SIEM_READINESS_SETTING,
 } from '@kbn/management-settings-ids';
 import { EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { rootRequest } from './common';
@@ -26,6 +27,14 @@ export const enableRelatedIntegrations = () => {
 
 export const disableRelatedIntegrations = () => {
   setKibanaSetting(SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID, false);
+};
+
+export const enableSiemReadiness = () => {
+  setKibanaSetting(SECURITY_SOLUTION_ENABLE_SIEM_READINESS_SETTING, true);
+};
+
+export const disableSiemReadiness = () => {
+  setKibanaSetting(SECURITY_SOLUTION_ENABLE_SIEM_READINESS_SETTING, false);
 };
 
 export const setPreferredChatExperienceToAgent = () => {
