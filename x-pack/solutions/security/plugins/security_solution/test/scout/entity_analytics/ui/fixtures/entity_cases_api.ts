@@ -53,10 +53,7 @@ export interface EntityCasesApiFixture {
  * page-object calls and assertions, and gives the two data shapes a single source
  * of truth.
  */
-export const createEntityCasesApi = (
-  cases: CasesApi,
-  spaceId: string
-): EntityCasesApiFixture => {
+export const createEntityCasesApi = (cases: CasesApi, spaceId: string): EntityCasesApiFixture => {
   const createCase: EntityCasesApiFixture['createCase'] = async (overrides = {}) => {
     const { data } = await cases.create(
       {
@@ -80,7 +77,11 @@ export const createEntityCasesApi = (
         metadata: { entityName, entityType },
         owner: 'securitySolution',
       };
-      await cases.comments.create(created.id, attachment as unknown as CreateCommentParams, spaceId);
+      await cases.comments.create(
+        created.id,
+        attachment as unknown as CreateCommentParams,
+        spaceId
+      );
       return created;
     };
 
