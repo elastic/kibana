@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCallOut, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
@@ -19,7 +19,6 @@ export function SloOutdatedFilterCallout() {
   return (
     <EuiCallOut color="primary">
       <EuiText>
-        <EuiIcon type="info" aria-hidden={true} />{' '}
         {i18n.translate('xpack.slo.outdatedSloFilterCallout.title', {
           defaultMessage:
             "You're currently viewing only outdated SLOs. You can reset them from the action menu to bring them up to date.",

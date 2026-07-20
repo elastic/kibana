@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CellActionsProvider } from '@kbn/cell-actions';
