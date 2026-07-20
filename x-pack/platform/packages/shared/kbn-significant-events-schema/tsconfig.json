@@ -11,7 +11,8 @@
     "@kbn/streamlang",
     "@kbn/inference-common",
     "@kbn/workflows",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/i18n"
   ],
   "exclude": ["target/**/*"]
 }
