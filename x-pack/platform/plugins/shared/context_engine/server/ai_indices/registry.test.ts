@@ -40,9 +40,10 @@ describe('AiIndexRegistry', () => {
 
   describe('register()', () => {
     it('buffers a registration before startupRegister is called', async () => {
-      const service = makeServiceMock({ get: jest.fn().mockResolvedValue(undefined) });
-      service.get.mockRejectedValue(new AiIndexNotFoundError('test'));
-      service.put.mockResolvedValue('created');
+      const service = makeServiceMock({
+        get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('test')),
+        put: jest.fn().mockResolvedValue('created'),
+      });
 
       registry.register('test', makeProperties());
       await registry.startupRegister({ aiIndexService: service, isEnabled: true, logger });
