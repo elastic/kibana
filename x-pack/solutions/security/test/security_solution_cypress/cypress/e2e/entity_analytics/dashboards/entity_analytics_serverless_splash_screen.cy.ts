@@ -33,6 +33,8 @@ describe(
     });
 
     it('should display a splash screen when visited with Security essentials PLI ', () => {
+      expect(true).to.equal(false, 'Intentional failure to verify Cypress checkpoint retries');
+
       cy.get(PAYWALL_DESCRIPTION).should(
         'have.text',
         'Entity risk scoring capability is available in our Security Complete license tier'
