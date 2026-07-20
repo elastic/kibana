@@ -45,77 +45,77 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
 
   const columns = useMemo(
     () => [
-    {
-      field: 'channel' as const,
-      name: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.settings.apps.slackTableChannel',
-        { defaultMessage: 'Channel' }
-      ),
-      render: (_: unknown, binding: SlackChannelBinding) => (
-        <EuiText size="s">{channelLabel(binding)}</EuiText>
-      ),
-    },
-    {
-      field: 'status' as const,
-      name: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.settings.apps.slackTableStatus',
-        { defaultMessage: 'Status' }
-      ),
-      render: (_: unknown, binding: SlackChannelBinding) => {
-        if (binding.status === 'bound_to_self') {
-          return (
-            <EuiBadge color="success">
-              {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.apps.slackStatusBound',
-                { defaultMessage: 'Connected' }
-              )}
-            </EuiBadge>
-          );
-        }
-        if (binding.status === 'not_bound') {
-          return (
-            <EuiBadge color="primary">
-              {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.apps.slackStatusNotBound',
-                { defaultMessage: 'Invited - not Connected' }
-              )}
-            </EuiBadge>
-          );
-        }
-        // bound_to_other_target
-        return (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelUnavailableTooltip',
-              { defaultMessage: 'Bound to another deployment' }
-            )}
-          >
-            <EuiBadge
-              tabIndex={0}
-              color="default"
-              data-test-subj="streamsSlackAppChannelUnavailableBadge"
-            >
-              {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelUnavailable',
-                { defaultMessage: 'Connected to another Kibana' }
-              )}
-            </EuiBadge>
-          </EuiToolTip>
-        );
+      {
+        field: 'channel' as const,
+        name: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.settings.apps.slackTableChannel',
+          { defaultMessage: 'Channel' }
+        ),
+        render: (_: unknown, binding: SlackChannelBinding) => (
+          <EuiText size="s">{channelLabel(binding)}</EuiText>
+        ),
       },
-    },
-    {
-      field: 'actions' as const,
-      name: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.settings.apps.slackTableActions',
-        { defaultMessage: 'Actions' }
-      ),
-      width: '100px',
-      render: (_: unknown, binding: SlackChannelBinding) => (
-        <BindingActionCell binding={binding} canEdit={canEdit} />
-      ),
-    },
-  ],
+      {
+        field: 'status' as const,
+        name: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.settings.apps.slackTableStatus',
+          { defaultMessage: 'Status' }
+        ),
+        render: (_: unknown, binding: SlackChannelBinding) => {
+          if (binding.status === 'bound_to_self') {
+            return (
+              <EuiBadge color="success">
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.apps.slackStatusBound',
+                  { defaultMessage: 'Connected' }
+                )}
+              </EuiBadge>
+            );
+          }
+          if (binding.status === 'not_bound') {
+            return (
+              <EuiBadge color="primary">
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.apps.slackStatusNotBound',
+                  { defaultMessage: 'Invited - not Connected' }
+                )}
+              </EuiBadge>
+            );
+          }
+          // bound_to_other_target
+          return (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelUnavailableTooltip',
+                { defaultMessage: 'Bound to another deployment' }
+              )}
+            >
+              <EuiBadge
+                tabIndex={0}
+                color="default"
+                data-test-subj="streamsSlackAppChannelUnavailableBadge"
+              >
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.apps.slackChannelUnavailable',
+                  { defaultMessage: 'Connected to another Kibana' }
+                )}
+              </EuiBadge>
+            </EuiToolTip>
+          );
+        },
+      },
+      {
+        field: 'actions' as const,
+        name: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.settings.apps.slackTableActions',
+          { defaultMessage: 'Actions' }
+        ),
+        width: '100px',
+        render: (_: unknown, binding: SlackChannelBinding) => (
+          <BindingActionCell binding={binding} canEdit={canEdit} />
+        ),
+      },
+    ],
     [canEdit]
   );
 

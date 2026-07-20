@@ -292,13 +292,19 @@ export class SlackAppService {
     ]);
 
     if (bindingsResult.status === 'rejected') {
-      this.logger.warn(`Failed to list bindings from Relay: ${this.toErrorMessage(bindingsResult.reason)}`);
+      this.logger.warn(
+        `Failed to list bindings from Relay: ${this.toErrorMessage(bindingsResult.reason)}`
+      );
       return { bindings: [] };
     }
     const rawBindings = bindingsResult.value;
 
     if (channelsResult.status === 'rejected') {
-      this.logger.warn(`Failed to list channels from Relay (best-effort): ${this.toErrorMessage(channelsResult.reason)}`);
+      this.logger.warn(
+        `Failed to list channels from Relay (best-effort): ${this.toErrorMessage(
+          channelsResult.reason
+        )}`
+      );
     }
     const memberChannels = channelsResult.status === 'fulfilled' ? channelsResult.value : [];
 
