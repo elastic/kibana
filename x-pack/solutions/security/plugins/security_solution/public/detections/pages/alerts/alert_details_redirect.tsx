@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { Redirect, useLocation, useParams } from 'react-router-dom';
 
 import moment from 'moment';

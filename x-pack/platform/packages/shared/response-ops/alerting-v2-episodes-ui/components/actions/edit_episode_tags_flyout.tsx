@@ -10,7 +10,7 @@ import { EuiCallOut, EuiLoadingSpinner, EuiSelectable, EuiSpacer, useEuiTheme } 
 import type { EuiSelectableOption } from '@elastic/eui';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { MAX_TAG_LENGTH, MAX_TAGS_PER_EPISODE } from '@kbn/alerting-v2-constants';
+import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import { useFetchAlertEpisodeTagSuggestions } from '../../hooks/use_fetch_alert_episode_tag_suggestions';
 import { EpisodeTagsFlyoutActionBar } from './episode_tags_flyout_action_bar';
 import { EpisodeActionFlyout, EpisodeActionFlyoutFooter } from './episode_action_flyout_layout';
@@ -56,13 +56,13 @@ export function AlertEpisodeTagsFlyout({
   }, [suggestionTags, currentTags, selectedTags]);
 
   const trimmedSearch = searchValue.trim();
-  const atTagCountLimit = selectedTags.length >= MAX_TAGS_PER_EPISODE;
+  const atTagCountLimit = selectedTags.length >= MAX_TAGS;
 
   const canAddNew =
     trimmedSearch.length > 0 &&
     trimmedSearch.length <= MAX_TAG_LENGTH &&
     !allKnownTags.some((t) => t === trimmedSearch) &&
-    selectedTags.length < MAX_TAGS_PER_EPISODE;
+    selectedTags.length < MAX_TAGS;
 
   const tagsForSelectAll = useMemo(() => {
     const next = new Set(allKnownTags);
@@ -70,7 +70,7 @@ export function AlertEpisodeTagsFlyout({
       next.add(trimmedSearch);
     }
     const sorted = [...next].sort((a, b) => a.localeCompare(b));
-    return sorted.slice(0, MAX_TAGS_PER_EPISODE);
+    return sorted.slice(0, MAX_TAGS);
   }, [allKnownTags, canAddNew, trimmedSearch]);
 
   const tagTooLong = useMemo(
@@ -79,11 +79,8 @@ export function AlertEpisodeTagsFlyout({
     [trimmedSearch, selectedTags]
   );
 
-  const tooManyTags = useMemo(() => selectedTags.length > MAX_TAGS_PER_EPISODE, [selectedTags]);
-  const tooManyTagsWarning = useMemo(
-    () => selectedTags.length === MAX_TAGS_PER_EPISODE,
-    [selectedTags]
-  );
+  const tooManyTags = useMemo(() => selectedTags.length > MAX_TAGS, [selectedTags]);
+  const tooManyTagsWarning = useMemo(() => selectedTags.length === MAX_TAGS, [selectedTags]);
 
   const selectableOptions: EuiSelectableOption[] = useMemo(() => {
     const base = allKnownTags.map((tag) => ({
@@ -204,7 +201,7 @@ export function AlertEpisodeTagsFlyout({
             iconType="warning"
             data-test-subj="alertingEpisodeTagsFlyoutTooManyTagsWarning"
           >
-            <p>{i18n.getTagsActionTooManyTagsBody(MAX_TAGS_PER_EPISODE)}</p>
+            <p>{i18n.getTagsActionTooManyTagsBody(MAX_TAGS)}</p>
           </EuiCallOut>
         </>
       ) : null}

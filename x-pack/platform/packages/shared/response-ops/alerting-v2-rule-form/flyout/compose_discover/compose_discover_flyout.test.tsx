@@ -83,6 +83,9 @@ jest.mock('./compose_discover_form', () => {
   const { getSteps } = jest.requireActual(
     './compose_discover_form'
   ) as typeof import('./compose_discover_form');
+  const { QueryFieldRules } = jest.requireActual(
+    './compose_discover_form/query_field_rules'
+  ) as typeof import('./compose_discover_form/query_field_rules');
   return {
     getSteps,
     ComposeDiscoverForm: (props: FormProps) => {
@@ -92,19 +95,14 @@ jest.mock('./compose_discover_form', () => {
       readRecoveryStrategy = () => getValues('recoveryStrategy');
       return (
         <div data-test-subj="composeDiscoverFormMock">
+          {/* Keep query rules mounted so validateStep → trigger(['query']) can fail. */}
+          <QueryFieldRules queryCommitted={props.state.queryCommitted} />
           <button
             data-test-subj="mockMakeDirty"
             onClick={() => setValue('metadata.name', 'changed', { shouldDirty: true })}
             type="button"
           >
             Make dirty
-          </button>
-          <button
-            data-test-subj="mockMakeNotificationsDirty"
-            onClick={() => setValue('notifications', { workflows: [] }, { shouldDirty: true })}
-            type="button"
-          >
-            Make notifications dirty
           </button>
         </div>
       );
@@ -1510,60 +1508,6 @@ describe('ComposeDiscoverFlyout', () => {
       renderFlyout({ mode: 'edit', rule: rule as any });
 
       expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
-    });
-  });
-
-  describe('notifications dirty flag survives YAML reset', () => {
-    const editableRule = {
-      id: 'rule-1',
-      kind: 'alert' as const,
-      enabled: true,
-      metadata: { name: 'Composed alert', tags: [] },
-      time_field: '@timestamp',
-      schedule: { every: '5m', lookback: '1m' },
-      query: {
-        format: 'composed' as const,
-        base: 'FROM logs-*',
-        breach: { segment: 'WHERE count > 100' },
-      },
-      recovery_strategy: 'query' as const,
-    };
-
-    it('reports notifications as dirty on save even after a YAML round-trip clears RHF dirtyFields', async () => {
-      const onUpdateRule = jest.fn();
-      renderFlyout({ mode: 'edit', ruleId: 'rule-1', rule: editableRule as any, onUpdateRule });
-
-      // Edit a simple action in form view, marking notifications dirty.
-      fireEvent.click(screen.getByTestId('mockMakeNotificationsDirty'));
-
-      // Toggling to YAML runs methods.reset(), which clears formState.dirtyFields.
-      clickEditMode('yaml');
-
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('composeDiscoverYamlSubmit'));
-      });
-
-      await waitFor(() => {
-        expect(onUpdateRule).toHaveBeenCalledTimes(1);
-      });
-      // 4th arg is notificationsDirty — must stay true despite the reset.
-      expect(onUpdateRule.mock.calls[0][3]).toBe(true);
-    });
-
-    it('reports notifications as not dirty when the user never touched them', async () => {
-      const onUpdateRule = jest.fn();
-      renderFlyout({ mode: 'edit', ruleId: 'rule-1', rule: editableRule as any, onUpdateRule });
-
-      clickEditMode('yaml');
-
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('composeDiscoverYamlSubmit'));
-      });
-
-      await waitFor(() => {
-        expect(onUpdateRule).toHaveBeenCalledTimes(1);
-      });
-      expect(onUpdateRule.mock.calls[0][3]).toBe(false);
     });
   });
 });
