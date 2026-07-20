@@ -23,6 +23,9 @@ export class AiIndexRegistry {
     if (this.started) {
       throw new Error('registerAiIndex called after plugin start');
     }
+    if (this.entries.some((e) => e.id === id)) {
+      throw new Error(`AI index '${id}' is already registered`);
+    }
     this.entries.push({ id, properties });
   }
 
@@ -74,7 +77,7 @@ export class AiIndexRegistry {
     }
 
     try {
-      await aiIndexService.put(id, properties);
+      await aiIndexService.putManaged(id, properties);
       logger.info(`AI index '${id}' registered successfully`);
     } catch (err) {
       if (err instanceof InvalidAiIndexDestError) {

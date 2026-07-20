@@ -22,6 +22,7 @@ const storageSettings = {
     properties: {
       name: types.keyword({}),
       description: types.text({}),
+      managed: types.boolean({}),
       date_created: types.date({}),
       date_modified: types.date({}),
       dest: types.object({
@@ -40,6 +41,7 @@ const storageSettings = {
 export interface AiIndexDocument {
   name: string;
   description?: string;
+  managed: boolean;
   date_created: string;
   date_modified: string;
   dest: AiIndexDest;

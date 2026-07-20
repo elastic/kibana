@@ -30,6 +30,7 @@ const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem =
   id,
   name: document.name,
   ...(document.description !== undefined && { description: document.description }),
+  managed: document.managed,
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
@@ -54,15 +55,41 @@ export class AiIndexService {
   /**
    * Creates or fully replaces an AI index, preserving `date_created` on update.
    * Concurrent writes are guarded with optimistic concurrency control; a losing
-   * writer gets a {@link AiIndexConflictError}.
+   * writer gets an {@link AiIndexConflictError}. Managed entries (registered
+   * by a plugin at startup) are immutable via this method.
    */
   async put(aiIndexId: string, properties: AiIndexProperties): Promise<'created' | 'updated'> {
     await this.assertValidDest(properties.dest);
 
     const existing = await this.findDocument(aiIndexId);
+    if (existing?.document.managed) {
+      throw new AiIndexConflictError(aiIndexId);
+    }
+
+    return this.writeDocument(aiIndexId, { ...properties, managed: false }, existing);
+  }
+
+  /**
+   * Creates or fully replaces a managed AI index. Managed entries are owned by
+   * the registering plugin and cannot be mutated via the public API.
+   */
+  async putManaged(
+    aiIndexId: string,
+    properties: AiIndexProperties
+  ): Promise<'created' | 'updated'> {
+    await this.assertValidDest(properties.dest);
+    const existing = await this.findDocument(aiIndexId);
+    return this.writeDocument(aiIndexId, { ...properties, managed: true }, existing);
+  }
+
+  private async writeDocument(
+    aiIndexId: string,
+    document: Omit<AiIndexDocument, 'date_created' | 'date_modified'>,
+    existing: Awaited<ReturnType<typeof this.findDocument>>
+  ): Promise<'created' | 'updated'> {
     const now = new Date().toISOString();
-    const document: AiIndexDocument = {
-      ...properties,
+    const fullDocument: AiIndexDocument = {
+      ...document,
       date_created: existing?.document.date_created ?? now,
       date_modified: now,
     };
@@ -71,14 +98,14 @@ export class AiIndexService {
       if (existing) {
         await this.storageClient.index({
           id: aiIndexId,
-          document,
+          document: fullDocument,
           if_seq_no: existing.seqNo,
           if_primary_term: existing.primaryTerm,
         });
         return 'updated';
       }
 
-      await this.storageClient.index({ id: aiIndexId, document, op_type: 'create' });
+      await this.storageClient.index({ id: aiIndexId, document: fullDocument, op_type: 'create' });
       return 'created';
     } catch (error) {
       if (isResponseError(error) && error.statusCode === 409) {
@@ -109,12 +136,17 @@ export class AiIndexService {
 
   /**
    * Deletes the AI index entry only; backing indices are left untouched.
+   * Managed entries cannot be deleted via the API.
    */
   async delete(aiIndexId: string): Promise<void> {
-    const { result } = await this.storageClient.delete({ id: aiIndexId });
-    if (result === 'not_found') {
+    const existing = await this.findDocument(aiIndexId);
+    if (!existing) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
+    if (existing.document.managed) {
+      throw new AiIndexConflictError(aiIndexId);
+    }
+    await this.storageClient.delete({ id: aiIndexId });
   }
 
   private async findDocument(aiIndexId: string): Promise<

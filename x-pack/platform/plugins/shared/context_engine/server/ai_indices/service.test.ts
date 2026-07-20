@@ -53,6 +53,7 @@ const createConflictError = () =>
 const aiIndexDocument: AiIndexDocument = {
   name: 'customer_support',
   description: 'KIs representing previously answered, commonly asked questions',
+  managed: false,
   dest: { type: 'data_stream', value: '.ai-index-ds-customer_support*' },
   automations: [{ type: 'workflow', value: 'nightly-refresh' }],
   sources: [{ type: 'esql', value: 'FROM .ai-index-customer_support | LIMIT 10' }],
@@ -171,6 +172,64 @@ describe('AiIndexService', () => {
 
     it('allows a data_stream dest with no matches yet (lazy creation)', async () => {
       esClient.indices.resolveIndex.mockResponse({ indices: [], aliases: [], data_streams: [] });
+      storageClient.get.mockRejectedValue(createNotFoundError());
+
+      await expect(service.put('customer_support', properties)).resolves.toBe('created');
+      expect(storageClient.index).toHaveBeenCalled();
+    });
+
+    it('throws AiIndexConflictError when the entry is managed', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 1,
+        _primary_term: 1,
+        _source: { ...aiIndexDocument, managed: true },
+      });
+
+      await expect(service.put('customer_support', properties)).rejects.toBeInstanceOf(
+        AiIndexConflictError
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects a data_stream dest that does not resolve to a data stream', async () => {
+      esClient.indices.getDataStream.mockResponse({ data_streams: [] });
+
+      await expect(service.put('customer_support', properties)).rejects.toBeInstanceOf(
+        InvalidAiIndexDestError
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects a data_stream dest that does not exist (404 from get data stream)', async () => {
+      esClient.indices.getDataStream.mockRejectedValue(createNotFoundError());
+
+      await expect(
+        service.put('customer_support', {
+          ...properties,
+          dest: { type: 'data_stream', value: '.ai-index-ds-customer_support' },
+        })
+      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects a system data stream dest', async () => {
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [buildDataStream({ system: true })],
+      });
+
+      await expect(service.put('customer_support', properties)).rejects.toBeInstanceOf(
+        InvalidAiIndexDestError
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('allows a hidden but non-system data stream dest', async () => {
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [buildDataStream({ hidden: true, system: false })],
+      });
       storageClient.get.mockRejectedValue(createNotFoundError());
 
       await expect(service.put('customer_support', properties)).resolves.toBe('created');
@@ -431,6 +490,12 @@ describe('AiIndexService', () => {
 
   describe('delete', () => {
     it('resolves when the AI index is deleted', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: aiIndexDocument,
+      });
       storageClient.delete.mockResolvedValue({ acknowledged: true, result: 'deleted' });
 
       await expect(service.delete('customer_support')).resolves.toBeUndefined();
@@ -438,9 +503,22 @@ describe('AiIndexService', () => {
     });
 
     it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
-      storageClient.delete.mockResolvedValue({ acknowledged: true, result: 'not_found' });
+      storageClient.get.mockRejectedValue(createNotFoundError());
 
       await expect(service.delete('missing')).rejects.toBeInstanceOf(AiIndexNotFoundError);
+      expect(storageClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('throws AiIndexConflictError when the entry is managed', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: { ...aiIndexDocument, managed: true },
+      });
+
+      await expect(service.delete('customer_support')).rejects.toBeInstanceOf(AiIndexConflictError);
+      expect(storageClient.delete).not.toHaveBeenCalled();
     });
   });
 });

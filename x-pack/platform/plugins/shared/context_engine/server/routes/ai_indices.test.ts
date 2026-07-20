@@ -187,6 +187,7 @@ describe('ai indices routes', () => {
       const aiIndex = {
         id: 'customer_support',
         name: 'customer_support',
+        managed: false,
         dest: { type: 'data_stream' as const, value: '.ai-index-ds-customer_support*' },
         automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
         sources: [
