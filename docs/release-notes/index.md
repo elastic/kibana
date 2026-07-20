@@ -45,16 +45,21 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Alerting and cases**:
 * Snooze and unsnooze individual alerts with optional expiry or auto-unsnooze conditions [#264090]({{kib-pull}}264090).
+* Add a **Stack Alerts** feature privilege so roles can read and act on alerts without rule management access [#273804]({{kib-pull}}273804).
+* Add an **Inspect** action to view and run the {{es}} query used by custom threshold rules from the rule details page [#262354]({{kib-pull}}262354).
+* Move the unified **Rules** page into {{stack-manage-app}} so navigation context remains visible [#269568]({{kib-pull}}269568).
 * Search, summarize, and update cases from Agent Builder chat with a cases skill, tools, and case attachments [#271438]({{kib-pull}}271438).
 * Add **Add to chat** and **Summarize case** actions to the case details page [#276635]({{kib-pull}}276635) [#279105]({{kib-pull}}279105).
 * Attach **Lens** visualizations to cases from **Attach saved object** [#274959]({{kib-pull}}274959) [#277040]({{kib-pull}}277040).
 * Attach Discover sessions, dashboards, and maps to cases [#272423]({{kib-pull}}272423).
 * Add an **Attach** button to the case **Activity** and **Attachments** tabs, including **Upload file** [#269560]({{kib-pull}}269560).
+* Add a warning when a selected file already exists in a case [#279327]({{kib-pull}}279327).
 * Add **Type** and **Author** filters on the case **Attachments** tab [#272759]({{kib-pull}}272759).
 * Redesign the case **Attachments** tab so each attachment type appears only when data exists, and add a **Refresh** control [#270518]({{kib-pull}}270518).
 * Extract case observables automatically when alerts are added through the API, workflows, or Agent Builder [#273455]({{kib-pull}}273455).
 * Improve case templates with toggle fields, unique template names, and a simplified default starter template when case templates v2 is enabled [#277626]({{kib-pull}}277626).
 * Split the case template editor into **Fields** and **Configuration** tabs when case templates v2 is enabled [#277269]({{kib-pull}}277269).
+* Add autocomplete and inline validation to the case template YAML editor when case templates v2 is enabled [#279346]({{kib-pull}}279346).
 * Set default connectors and case settings in case templates when `xpack.cases.templates.enabled` is true [#275690]({{kib-pull}}275690).
 * Add a display-only Markdown field type when case templates v2 is enabled [#278329]({{kib-pull}}278329).
 * Add `xpack.alerting.alertsService.totalFieldsLimit` (default `2800`, range `2500`–`5000`) to control {{es}} `index.mapping.total_fields.limit` on `.alerts-*` indices and templates [#274024]({{kib-pull}}274024).
@@ -193,7 +198,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Restore **Start deployment** and **Update deployment** for rerank trained models, and tailor the deployment flyout for rerank models [#261119]({{kib-pull}}261119).
 
 **Workflows**:
-* Integrate Agent Builder into the Elastic Workflows YAML editor when **Elastic Agent Builder: Experimental Features** is enabled in **Advanced Settings**: open the sidebar automatically with **What do you want to automate?**, and align workflow attachment and diff previews with the editor [#276297]({{kib-pull}}276297) [#275765]({{kib-pull}}275765).
+* Integrate Agent Builder into the Elastic Workflows YAML editor: open the sidebar automatically with **What do you want to automate?**, and align workflow attachment and diff previews with the editor [#276297]({{kib-pull}}276297) [#275765]({{kib-pull}}275765) [#278343]({{kib-pull}}278343).
 * Add human-in-the-loop approval and external input steps to approve, reject, or submit structured input in {{kib}} or through signed links and Slack notifications [#275273]({{kib-pull}}275273).
 * Add a built-in Agent Builder tool to list recent workflow runs without an execution ID [#269335]({{kib-pull}}269335).
 * Add a `cases.removeTags` workflow step to remove tags from a case in one step [#268465]({{kib-pull}}268465).
