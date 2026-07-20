@@ -468,6 +468,33 @@ describe('DatatableComponent', () => {
     ]);
   });
 
+  test('it normalizes unsupported center alignment for progress columns at render time', () => {
+    renderDatatableComponent({
+      args: {
+        ...args,
+        columns: [
+          { columnId: 'a', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'b', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          {
+            columnId: 'c',
+            alignment: 'center',
+            type: 'lens_datatable_column',
+            colorMode: 'progress',
+            fillStyle: JSON.stringify({ fillMode: 'single' }),
+          },
+        ],
+      },
+    });
+
+    const alignmentsClassNames = screen
+      .getAllByTestId('lnsTableCellContent')
+      .map((cell) => cell.className);
+
+    expect(alignmentsClassNames[0]).toBe('lnsTableCell--center');
+    expect(alignmentsClassNames[1]).toBe('lnsTableCell--center');
+    expect(alignmentsClassNames[2]).toContain('lnsTableCell--right');
+  });
+
   test('it adds default alignment data to context', () => {
     renderDatatableComponent({
       args: {

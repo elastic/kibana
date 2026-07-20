@@ -37,12 +37,125 @@ export const createWorkflowTroubleshootingSkill = (fetcher: WorkflowFetcher) =>
 Diagnose failures in Attack Discovery workflow executions. Attack Discovery uses a
 3-phase pipeline architecture where each phase runs as a separate workflow execution:
 
-1. **Alert Retrieval** (alert retrieval) — Fetches security alerts from Elasticsearch (one or more parallel workflows)
-2. **Generation** (generation) — Sends anonymized alerts to an LLM to produce attack discoveries
-3. **Validation** (validation) — Filters hallucinated alert IDs, deduplicates discoveries, and persists results
+1. **Alert Retrieval** (alert retrieval) — Fetches candidate security alerts from Elasticsearch via the deterministic retrieval toggles (one or more parallel workflows). This phase is optional: it can be empty when only the skill toggle is enabled.
+2. **Generation** (generation) — Runs the **always-on ground-truthing gate** (a separate \`ai.agent\` workflow) over the candidate alerts, then sends the kept anonymized alerts to an LLM to produce attack discoveries. The gate, not just the LLM call, is part of this phase.
+3. **Validation** (validation) — Filters hallucinated alert IDs, deduplicates discoveries, and persists results.
 
 Each phase can fail independently. Your job is to determine which phase(s) failed,
 examine the step-level details and workflow YAML, and provide a clear diagnosis.
+
+## Always-On Ground-Truthing Gate (Generation Phase)
+
+Every Attack Discovery generation runs an **always-on** ground-truthing gate during the
+generation phase, as a **separate workflow** executed before the untouched generate
+workflow. Understanding it is essential when diagnosing generation-phase failures.
+
+- **Universal gate**: the gate runs for the \`manual\`, \`schedule\`, and \`workflow\` triggers.
+  It is skipped only for the \`agent_builder\` trigger (the conversational skill has already
+  ground-truthed its own data before delegating to the pipeline — running the gate again
+  would double-invoke the skill and recurse). This trigger check is the recursion break.
+- **Fail-closed**: the gate is fail-closed — if it errors or times out, the whole run fails
+  loudly. There is no silent pass-through of un-ground-truthed candidates. A generation-phase failure may
+  therefore be a gate failure (the \`ai.agent\` step) rather than the LLM generate step —
+  inspect the step-level details to tell them apart.
+- **Two skill runs per gated run (exactly 2)**: a gated run invokes the Attack Discovery
+  skill exactly twice — (1) the generation-phase gate \`ai.agent\` (ground-truths the
+  candidates and, when the skill toggle is on, retrieves its own additional alerts), and
+  (2) a fire-and-forget report \`ai.agent\` that resumes the gate's conversation after
+  validation to render the Attack Discovery Report. The \`generate\` step is a separate LLM
+  call, not a skill run. The report phase is fire-and-forget, so a report failure never
+  fails the generation outcome.
+- **Decision-only output / pass-through**: the gate returns decisions (a keep-set of alert
+  \`_id\`s + any net-new added alerts + additional context), not rewritten alert content. The
+  orchestration forwards the **original** candidate bytes for the kept \`_id\`s unchanged; it
+  re-fetches by id only for the skill's net-new added alerts.
+
+## Timeouts (ADR-008)
+
+The generation phase now contains two separately-bounded workflows — the gate \`ai.agent\`
+(10m step timeout) and then the generate workflow (up to 10m) — followed by validation (up
+to 5m). The orchestrator enforces a single total pipeline budget of **30 minutes**
+(\`DEFAULT_PIPELINE_TIMEOUT_MS\`), and each phase's consumer-side poll is bounded by the
+**remaining** budget (\`getRemainingBudgetMs()\`). The budget was raised from 15m to 30m so
+the gate plus generate plus validate comfortably fit on every run. The gate deliberately has
+**no \`on-failure: retry\`**: it is conversation-stateful and long-running, so a retry would
+restart from scratch and burn the remaining budget. A \`timed_out\` status on the gate or
+generate step means a slow LLM call exceeded the step timeout or the remaining pipeline
+budget — never a permission problem.
+
+A failure_reason of \`Pipeline budget exceeded (…ms) before starting <phase> phase\` means the
+30-minute total budget ran out before that phase could start (usually because an earlier phase
+— often the gate — was slow). This is the **budget variant of a timeout**: it classifies as the
+\`timeout\` error category, **not** a validation or permission problem, even though the message
+names the validation phase. Remediation is the same as any timeout (fewer alerts, a faster
+connector/model), not RBAC.
+
+## Interrupted Runs (server restart / crash)
+
+A failure_reason containing \`prior run was interrupted\` (often \`Marked workflow execution …
+FAILED after workflow:run retry (attempts=…) - prior run was interrupted\`) means the Kibana
+process **restarted, crashed, or shut down mid-execution** — the workflow engine marks the
+abandoned run FAILED after its retries are exhausted. In local development this is almost always
+the file-watcher restarting the dev server while a long phase (gate, generate, or the report)
+was still running.
+
+- **Error category**: \`interrupted\` (a distinct category — it is not a timeout, conflict,
+  connector, or permission problem). Do not suggest config/model/RBAC changes for it.
+- **Remediation**: simply **re-run** the generation. Nothing is misconfigured. If interruptions
+  recur in production, investigate why Kibana is restarting (deploys, OOM kills, node rollovers)
+  rather than the Attack Discovery configuration.
+
+## Missing Report (skill report phase)
+
+The Attack Discovery Report is rendered by a **4th, separate, fire-and-forget** managed workflow
+(\`system-attack-discovery-skill-report\`) that resumes the gate's Agent Builder conversation
+**after validation completes**. It is **not shown in the execution-details flyout** (which only
+tracks the three pipeline phases), and a report failure **never** fails the generation outcome —
+discoveries are already persisted by the time the report is scheduled.
+
+So "the run succeeded but no Attack Discovery Report appeared in my conversation" is a *report*
+problem, not a pipeline problem. Diagnose the report run separately:
+
+1. Confirm the three pipeline phases succeeded (they will have, independently of the report).
+2. Look up the \`system-attack-discovery-skill-report\` workflow execution for the run's
+   \`execution_uuid\` / \`conversationId\` and check its status with
+   \`${platformCoreTools.getWorkflowExecutionStatus}\`.
+3. A report run that is \`interrupted\` (server restarted mid-report — the report takes a few
+   minutes) or \`failed\` explains a missing report. Re-running generation re-schedules the report.
+
+## Gate Returned No Alerts (skill additional retrieval was the sole source)
+
+A failure_reason of \`Gate returned no alerts: the skill's additional retrieval was the
+sole source (0 deterministic candidate alerts) but the gate added 0 alerts … Failing
+closed\` is a **fail-closed guard**, not a silent "no matching alerts" success. It means
+the run had **no deterministic candidate alerts** — the gate's own additional retrieval
+was the ONLY source of alerts — AND the gate emitted an empty \`added_alert_ids\` (it
+either retrieved nothing or dropped everything it retrieved). Rather than report zero
+alerts as a successful empty run, the pipeline fails loudly so the silent miss is visible.
+
+This is distinct from the normal no-alerts outcome: when a deterministic retrieval toggle
+is enabled and simply finds nothing, the run succeeds with "no matching alerts". The guard
+fires ONLY when the skill was the sole source (skill toggle on, every deterministic
+retrieval toggle off — e.g. \`default_retrieval_enabled: false\` with
+\`alert_retrieval_mode: esql\` and no \`esql_query\` supplied).
+
+- **Error category**: \`validation_error\` (the gate's decision violated the recall-first
+  additional-retrieval contract). It is **not** a timeout, connector, or permission
+  problem — do not suggest model/RBAC changes first.
+- **Surfaces under the \`alert_retrieval\` phase**: although the gate \`ai.agent\` runs in
+  the generation phase, the orchestrator attributes a gate failure to the retrieval→gate
+  boundary, so \`failed_step\` is \`alert_retrieval\`. Read the failure_reason (it names the
+  gate) rather than relying on the phase label.
+- **Remediation**:
+  1. Confirm alerts actually exist in the configured time range. If there genuinely are
+     none, that is expected — widen the time range or wait for data; nothing is
+     misconfigured.
+  2. If alerts DO exist, the gate over-filtered its own retrieval — re-run. The recall-first
+     gate prompt instructs the skill to keep every alert it retrieves and to never drop a
+     self-retrieved alert on inconclusive corroboration.
+  3. Give the run a deterministic candidate source so the gate is no longer the sole
+     source: enable \`default_retrieval_enabled\`, or supply an explicit \`esql_query\` when
+     using \`alert_retrieval_mode: esql\`.
 
 ## Troubleshooting Approach
 
@@ -125,7 +238,7 @@ Summarize your findings using this structure:
 - ❌ Validation: [status summary with error]
 
 ### Error Category
-[If available from the diagnostic report attachment or determinable from the error details, include the structured error category: \`rate_limit\`, \`network_error\`, \`permission_error\`, \`cluster_health\`, \`concurrent_conflict\`, \`anonymization_error\`, \`step_registration_error\`, \`connector_error\`, \`timeout\`, or \`unknown\`]
+[If available from the diagnostic report attachment or determinable from the error details, include the structured error category: \`rate_limit\`, \`network_error\`, \`permission_error\`, \`cluster_health\`, \`concurrent_conflict\`, \`anonymization_error\`, \`step_registration_error\`, \`connector_error\`, \`timeout\`, \`interrupted\`, \`validation_error\`, or \`unknown\`]
 
 ### Root Cause
 [Clear explanation of what went wrong and why]
@@ -489,6 +602,52 @@ determine the category.
 - Check if the LLM provider is experiencing latency issues
 - Review step-level timeouts in the workflow YAML — consider increasing the generation step timeout if the model is consistently slow
 - For alert retrieval timeouts, reduce the \`size\` parameter or narrow the time range
+
+### interrupted
+
+**Pattern:** Error messages containing "interrupted" — most commonly "prior run was interrupted"
+(e.g. "Marked workflow execution … FAILED after workflow:run retry (attempts=…) - prior run was
+interrupted"). The Kibana process restarted, crashed, or shut down while the run was still
+executing, and the workflow engine marked the abandoned run FAILED once retries were exhausted.
+
+⚠️ **Not a timeout, conflict, or permission issue:** Nothing was slow, contended, or
+under-privileged — the host process simply went away mid-run. Do NOT suggest timeout/RBAC/model
+changes for this category.
+
+**Remediation:**
+- Simply **re-run** the generation — the configuration is fine
+- In local development, this is usually the file-watcher restarting the dev server mid-run; wait
+  for the server to finish restarting, then re-run
+- If interruptions recur in production, investigate Kibana restarts (deploys, OOM kills, node
+  rollovers, shutdowns) rather than the Attack Discovery configuration
+- A \`system-attack-discovery-skill-report\` run with this status explains a missing Attack
+  Discovery Report even when the three pipeline phases succeeded (the report is fire-and-forget)
+
+### validation_error
+
+**Pattern:** Error messages containing "Gate returned no alerts", "sole source", or
+"Failing closed", or a generation-phase failure whose \`failed_step\` is \`alert_retrieval\`
+with a failure_reason that names the gate. The most common case is the **gate sole-source
+zero-alerts guard**: the skill's additional retrieval was the only source of alerts (every
+deterministic retrieval toggle off, skill toggle on) and the gate emitted an empty
+\`added_alert_ids\`, so the pipeline fails closed instead of reporting a silent "no matching
+alerts" success.
+
+⚠️ **Not a timeout, connector, or permission issue:** nothing was slow, down, or
+under-privileged — the gate's decision violated the recall-first additional-retrieval
+contract (it returned no alert ids). Do NOT suggest model/RBAC/connector changes first.
+
+**Remediation:**
+- Confirm alerts actually exist in the configured time range. If there genuinely are none,
+  that is expected — widen the time range or wait for data; nothing is misconfigured.
+- If alerts DO exist, the gate over-filtered its own retrieval — **re-run**. The recall-first
+  gate prompt instructs the skill to keep every alert it retrieves.
+- Give the run a deterministic candidate source so the gate is not the sole source: enable
+  \`default_retrieval_enabled\`, or supply an explicit \`esql_query\` for
+  \`alert_retrieval_mode: esql\`.
+- Note this failure surfaces under the \`alert_retrieval\` phase even though the gate runs in
+  the generation phase (the orchestrator attributes gate failures to the retrieval→gate
+  boundary).
 
 ### unknown
 

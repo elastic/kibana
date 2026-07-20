@@ -15,13 +15,21 @@ import {
   type UpdateRuleBody,
 } from './rules_management_client';
 
+interface StubFindResult {
+  data: Array<{ id: string; tags: string[] }>;
+  total: number;
+  page: number;
+  perPage: number;
+}
+
 function makeRulesClient(): jest.Mocked<
   Pick<RulesClient, 'create' | 'update' | 'bulkDeleteRules'>
-> {
+> & { find: jest.MockedFunction<() => Promise<StubFindResult>> } {
   return {
     create: jest.fn().mockResolvedValue({}),
     update: jest.fn().mockResolvedValue({}),
     bulkDeleteRules: jest.fn().mockResolvedValue({}),
+    find: jest.fn().mockResolvedValue({ data: [], total: 0, page: 1, perPage: 500 }),
   };
 }
 
@@ -169,6 +177,67 @@ describe('RulesAdapterV1', () => {
       const adapter = new RulesAdapterV1(rc as unknown as RulesClient);
 
       await expect(adapter.bulkDeleteRules(['id-1'])).rejects.toThrow('storage failure');
+    });
+  });
+
+  describe('findOwnedRuleIds', () => {
+    it('returns rule ids for the given stream', async () => {
+      const rc = makeRulesClient();
+      rc.find.mockResolvedValueOnce({
+        data: [
+          { id: 'r-1', tags: ['streams', 'my-stream'] },
+          { id: 'r-2', tags: ['streams', 'my-stream'] },
+        ],
+        total: 2,
+        page: 1,
+        perPage: 500,
+      });
+      const adapter = new RulesAdapterV1(rc as unknown as RulesClient);
+
+      const ids = await adapter.findOwnedRuleIds('my-stream');
+
+      expect(ids).toEqual(['r-1', 'r-2']);
+      expect(rc.find).toHaveBeenCalledWith({
+        options: expect.objectContaining({
+          consumers: [STREAMS_RULE_CONSUMER],
+          ruleTypeIds: [STREAMS_ESQL_RULE_TYPE_ID],
+          filter: 'alert.attributes.tags: "my-stream"',
+          fields: ['id', 'tags'],
+        }),
+      });
+    });
+
+    it('pages through results until all ids are collected', async () => {
+      const rc = makeRulesClient();
+      rc.find
+        .mockResolvedValueOnce({
+          data: [{ id: 'r-1', tags: ['streams', 'my-stream'] }],
+          total: 2,
+          page: 1,
+          perPage: 500,
+        })
+        .mockResolvedValueOnce({
+          data: [{ id: 'r-2', tags: ['streams', 'my-stream'] }],
+          total: 2,
+          page: 2,
+          perPage: 500,
+        });
+      const adapter = new RulesAdapterV1(rc as unknown as RulesClient);
+
+      const ids = await adapter.findOwnedRuleIds('my-stream');
+
+      expect(ids).toEqual(['r-1', 'r-2']);
+      expect(rc.find).toHaveBeenCalledTimes(2);
+    });
+
+    it('returns empty array when no rules exist', async () => {
+      const rc = makeRulesClient();
+      rc.find.mockResolvedValueOnce({ data: [], total: 0, page: 1, perPage: 500 });
+      const adapter = new RulesAdapterV1(rc as unknown as RulesClient);
+
+      const ids = await adapter.findOwnedRuleIds('my-stream');
+
+      expect(ids).toEqual([]);
     });
   });
 });

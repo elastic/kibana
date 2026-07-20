@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {

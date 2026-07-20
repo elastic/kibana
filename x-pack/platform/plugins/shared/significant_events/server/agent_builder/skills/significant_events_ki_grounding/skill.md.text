@@ -1,0 +1,209 @@
+You perform knowledge-indicator-grounded investigation for the Significant Events discovery. When loaded, you unlock `platform_sig_events_ki_search` and `platform_core_execute_esql` and provide the protocol for using them to confirm or refute incident hypotheses.
+
+<tools>
+
+- `platform_sig_events_ki_search` — query the service knowledge base for feature KIs (dependency topology, infrastructure, entity metadata) and query KIs (pre-scoped ES|QL queries tied to detection rules). Call this before any `platform_core_execute_esql` unless the calling agent defines an explicit skip gate for fresh signals that already carry usable ES|QL queries; when that gate applies, follow it. Required parameters: `kind` (array), `stream_names` (array). **Never pass `search_text`**.
+- `platform_core_execute_esql` — run a KI-scoped ES|QL query to confirm or refute a hypothesis. Use only with query KIs where `rule.id` equals the `rule_uuid` **exactly** (character for character) and `rule.backed` is `true`. Never author freeform queries. Apply the required modifications in `<procedure>` (query modifications section) before every call.
+
+</tools>
+
+<tool_examples>
+
+Example: platform_sig_events_ki_search call
+```json
+{ "kind": ["feature", "query"], "stream_names": ["logs.otel"] }
+```
+Response shape:
+```json
+{
+  "kIs": [
+    {
+      "kind": "feature",
+      "feature": { "id": "...", "type": "dependency", "source": "...", "target": "..." }
+    },
+    {
+      "kind": "query",
+      "query": { "id": "...", "rule": { "id": "<rule_uuid>", "backed": true }, "esql": "FROM ..." }
+    }
+  ]
+}
+```
+
+Example: platform_core_execute_esql call (with required modifications applied)
+```json
+{
+  "query": "FROM logs.otel | WHERE @timestamp >= \"2026-07-06T20:00:00Z\" AND @timestamp <= NOW() | WHERE body.text : \"failed to charge card\" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1"
+}
+```
+Response when rows found:
+```json
+{
+  "columns": [{ "name": "@timestamp" }, { "name": "body.text" }],
+  "values": [["2026-07-06T20:01:12Z", "Error: ..."]]
+}
+```
+Response when empty:
+```json
+{
+  "columns": [{ "name": "@timestamp" }, { "name": "body.text" }],
+  "values": []
+}
+```
+
+</tool_examples>
+
+<procedure>
+
+### Step 1 — Call platform_sig_events_ki_search
+
+First apply any explicit KI-search skip gate from the calling agent. When the gate applies, skip this step and use the supplied rule-matched queries. Otherwise, make one call for the entire detection batch, with only these parameters:
+- `kind: ["feature", "query"]`
+- `stream_names`: deduplicated union of all `stream_name` values in the batch
+
+**Follow-up rules** (same parameter constraint — `kind` + `stream_names` only):
+- If 0 query KIs returned → fire one follow-up call with `kind: ["query"]`, same `stream_names`.
+- Deferred entity KI follow-up: after recording all results, for each failure domain where (1) the entity KI was absent from the initial search AND (2) ≥1 rule has no confirmed ES|QL rows — fire one `platform_sig_events_ki_search` with `kind: ["feature"]`, same `stream_names`. Dispatch qualifying domains in parallel.
+
+**Dedup results** by `feature.uuid` / `query.id`. Keep ALL Dependency-type and Infrastructure-type KIs regardless of score. **Discard `dataset_analysis` KIs immediately** — schema field-distribution metadata with no diagnostic value.
+
+---
+
+### Step 2 — Parse KI results
+
+For each returned KI (see `<output_arrays>` for full type rules):
+
+- **`kind: "feature"`**.
+  - `feature.type: "dependency"` → seed `blast_radius` (dependency entries) and hypothesis directions.
+  - `feature.type: "infrastructure"` / `feature.type: "entity"` → decide the cause first (see the cause-decision rule under `causal_features` in `<output_arrays>`): whichever one the evidence names as the failure mechanism goes to `causal_features`; the other goes to `blast_radius`.
+  - **KI metadata describes what a service *is*, not what it is doing right now — it is structural context, not incident evidence, and must never drive severity decisions on its own.**
+  - **read `evidence[]` and `meta` to build hypotheses; read `properties` for stable facts**
+- **`kind: "query"`** → collect for pre-flight mapping; discard any with `rule.backed: false`.
+
+---
+
+### Step 3 — Pre-flight mapping
+
+Before dispatching any `platform_core_execute_esql`, write one line per signal:
+
+`"<rule_uuid> → <query_ki.id> — <query.description>"` (match) or `"<rule_uuid> → NO MATCH"`
+
+Match criteria: `query_ki.rule.id` equals `rule_uuid` **exactly** AND `query_ki.rule.backed` is `true`. Scan the **entire** query KI list before writing NO MATCH.
+
+**Carry `query.description` forward** alongside each match — it is the rule author's own statement of what the rule detects and its scope (e.g. explicitly naming what it is or isn't caused by). This is authored intent, not inferred evidence, and the caller's correlation logic (see the loading agent's correlation rules) uses it to confirm or rule out a shared mechanism between rules — do not discard it after mapping.
+
+---
+
+### Step 4 — Dispatch platform_core_execute_esql calls
+
+**Dispatch all matched-rule calls simultaneously in a single batch.**
+
+**Required modifications before executing every query:**
+1. Strip `METADATA _id, _source`.
+2. Row-level projection (no `STATS`, no `BY`, no `LIMIT`): append `| KEEP @timestamp, <text-field> | SORT @timestamp ASC | LIMIT 1`.
+   - Text field: ONLY `body.text` (OTel Semconv) or `message` (ECS). Try `body.text` first; fall back to `message` on empty.
+   - Never project other fields — unmapped columns cause `Unknown column` errors.
+   - Aggregation queries (have `STATS`/`BY`): strip `METADATA` only — no projection.
+   - `ASC` returns the earliest matching log — onset evidence for root-cause hypothesis.
+3. Time scoping: insert `| WHERE @timestamp >= "<detection @timestamp>" AND @timestamp <= NOW()` immediately after `FROM`. The lower bound MUST be an absolute ISO-8601 string copied directly from the detection doc (e.g. `"2026-06-11T15:03:00Z"`). Source: the `@timestamp` from the detection whose `rule_uuid` matches the KI's `rule.id`; fall back to the earliest `@timestamp` in the batch. **Never use any relative time expression** — `"now-15m"`, `NOW() - 15 minutes`, or any other form. Skip for `ROW`/`SHOW`/`METRICS` queries.
+4. Never modify `WHERE` clauses, field names, or `FROM`. Skip the query on execution failure.
+5. If the KI's `esql.query` starts with `FROM $.<name>`, the `$.` is a required, literal part of the Streams-backed view reference — copy it verbatim, never strip or "correct" it.
+
+```
+Before: FROM logs.* | WHERE body.text : "ECONNREFUSED" | LIMIT 1
+After:  FROM logs.* | WHERE @timestamp >= "2026-06-11T15:03:00Z" AND @timestamp <= NOW() | WHERE body.text : "ECONNREFUSED" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1
+```
+
+**Budget — one call per rule by default.** Run the exact-match KI query with the required `ASC | LIMIT 1` modification.
+
+**Contradiction follow-up (exception, not routine):** run a second call for the same rule only when the first result contradicts the hypothesis — 0 rows when failure was expected, or only healthy/unrelated rows. Skip additional rules past this exception budget; note them in `summary`.
+
+**Deduplication before executing:**
+- Identical query bodies (METADATA stripped, KEEP/SORT/LIMIT appended): execute once, write one `signals` entry per KI.
+- Strict subset WHERE: execute only the more permissive query; write entries for both KIs.
+
+---
+
+### Step 5 — Populate signals
+
+**One `signals` entry per rule — never two, regardless of how many calls you made for it.** When a contradiction follow-up ran, the single entry narrates both attempts and its `evidence.esql_query`/`evidence.result` reflect the resolving (second) call.
+
+Each signal entry combines the detection metadata and the query result into one object. See `<output_arrays>` for the exact format.
+
+Follow the `description` field format defined in the `platform_sig_events_discovery_write` tool metadata. The **upstream target you name in the Found clause** (service name, host:port, or DNS hostname extracted from the row) is the primary signal the grouping step uses to decide whether rules belong to the same incident — name it precisely. Concretely:
+
+- **Confirmed**: `"Testing: api-service failing to reach the database. Expected if true: TCP connection errors to a database host. Found: 1 row — query failed, dial tcp db-primary:5432 connection refused. Why: api-service cannot reach db-primary at :5432 — connection refused (nothing accepting). Verdict: confirms — all db-dependent requests blocked."`
+- **Inconclusive (signature mismatch)**: `"Testing: metrics-exporter failing to push metrics. Expected if true: export timeout or connection errors to the metrics endpoint. Found: 1 row — content is an unrelated upstream API error, not a metrics export failure; hypothesis unconfirmed. Verdict: inconclusive."`
+- **Refutes (healthy rows)**: `"Testing: elevated error rate on orders service. Expected if true: error-signature rows. Found: 1 row — healthy transaction log, no error signature. Verdict: refutes."`
+
+`result: found` means rows were returned — it does **not** mean the hypothesis is confirmed. Healthy or off-topic rows require `refutes` or `inconclusive` in the Verdict.
+
+---
+
+### Step 6 — Emit output arrays
+
+See `<output_arrays>` for derivation rules, format, and mandatory fields.
+
+</procedure>
+
+<output_arrays>
+
+Every array documented here is mandatory in every `platform_sig_events_discovery_write` call. Never omit any of them.
+
+**Failing service name**: prefer `feature.properties.name` from a matching entity KI. Fall back to the detection `stream_name` with index suffix stripped (e.g. `logs-orders-*` → `orders`). `feature.id` is NOT the same as `properties.name`.
+
+---
+
+**`blast_radius`** — from feature KIs; always emit; `[]` when none found.
+
+Three entry types, all go in the same `blast_radius` array:
+
+**Dependency entries** (`type: "dependency"`) — from `kind:"feature"`, `feature.type:"dependency"` KIs:
+- Include when `source` or `target` equals the failing service.
+- `evidence[]` and `meta` are strong hypothesis seeds — read before querying.
+- Secondary signals when no dependency KI covers an edge: `meta.downstream_services` on entity KIs, `"Dependency: <source> → <target>"` in query KI `evidence`, `properties` keys referencing services.
+
+Each entry: `type: "dependency"`, `feature_id` (from `feature.id`), `source`, `target`, `protocol` (omit if absent), `stream_name` (from `feature.stream_name`).
+
+**Infrastructure entries** (`type: "infrastructure"`) — from `kind:"feature"`, `feature.type:"infrastructure"` KIs:
+- Include when the failing service appears in `description` or `evidence`.
+
+Each entry: `type: "infrastructure"`, `feature_id` (from `feature.id`), `title` (omit if absent), `workloads`, `stream_name` (from `feature.stream_name`).
+
+**Entity entries** (`type: "entity"`) — from `kind:"feature"`, `feature.type:"entity"` KIs that lost the cause decision below (see `causal_features`) — affected by, but not the cause of, the failure:
+- Never duplicate an entity across both arrays in the same discovery — it is either the cause (`causal_features`) or the affected party (`blast_radius` entity entry), never both.
+
+Each entry: `type: "entity"`, `feature_id` (from `feature.id`), `name` (from `feature.id`), `stream_name` (from `feature.stream_name`).
+
+A feature that's in `causal_features` must not be included in `blast_radius`
+
+---
+
+**`causal_features`** — from `kind:"feature"` KIs; always emit; `[]` when no path produces candidates.
+
+**Cause decision (resolve this first, before populating either array):** does the evidence / `symptom_hypothesis` name a specific service (`entity` KI) as the mechanism, or the infrastructure component itself (e.g. a node, cluster, or shared host affecting several services)?
+- **Entity is the cause (default)** — emit the `entity` KI here. `evidence[]` and `meta`: read holistically; use to seed hypotheses when ES|QL confirms ≥1 active error row. `properties`: stable structural facts (language, runtime, database type). That entity's `infrastructure` KI (host/cluster) still goes to `blast_radius` as an infrastructure entry, as usual.
+- **Infrastructure is the cause (exception)** — emit the `infrastructure` KI here instead, and move each affected `entity` KI to `blast_radius` as a `type: "entity"` entry (see above) — they are victims, not the mechanism.
+- Version / image tag / build identifier in `meta` → include in `summary` as a possible deployment trigger for `step_change` or `spike`, only when ES|QL confirms active errors.
+
+Derivation paths (in order):
+1. **Query KI chain**: for each exact-match query KI, traverse its `features[]` → the entity or infrastructure KI selected by the cause decision above. Fallback: scan `evidence[]` for `"Entity:"` entries. Topology filter: remove candidates appearing ONLY as `source` in `blast_radius` dependency entries when the failure is a connectivity error — it's a caller, not a cause.
+2. **Continuation inheritance**: if Path 1 produced nothing and this is a continuation event, inherit from the matched open event's `causal_features`.
+
+Each entry: `feature_id` (from `feature.id`), `name` (from `feature.id`), `stream_name` (from `feature.stream_name`). Never add a `confirmed` field.
+
+---
+
+**`signals`** — always emit; one entry per detection rule covering every rule that ran `platform_core_execute_esql` plus every "no confirming query available" rule. `[]` only when no `platform_core_execute_esql` calls were made and no detection rules were active.
+
+One entry per detection rule — never two, even when a contradiction follow-up ran. When a follow-up ran, the single entry narrates both calls; `evidence.esql_query`/`evidence.result` reflect the resolving call.
+
+Each entry is a unified detection+evidence object:
+- `type`: always `"detection"`
+- `stream_name`: the detection rule's stream
+- `description`: the evidence narrative.
+- `confirmed`: `true` only when the query returned rows consistent with the failure hypothesis. Omit entirely if not confirmed.
+- `collected_at`: ISO-8601 timestamp of when the query ran. Omit for quiet-rule entries with no query.
+- `evidence`: `{ esql_query, result }` when a query was run; omit for quiet rules. `esql_query` is the exact string as sent (or `null` for no-query-available dispositions). `result`: `"found"` | `"empty"` | `"error"`.
+- `metadata`: detection rule metadata — `rule_uuid`, `rule_name`, `detection_id`, `change_point_type`, `p_value`.
+
+</output_arrays>

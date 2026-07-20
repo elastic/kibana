@@ -6,7 +6,7 @@
  */
 
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import {
   RULE_ATTACHMENT_TYPE,
   RULE_SML_TYPE,
@@ -22,16 +22,22 @@ import type { RulesClient } from '../../lib/rules_client';
 interface CreateRuleSmlTypeOptions {
   getScopedRulesClient: (request: KibanaRequest) => RulesClient;
   getInternalRepository: () => ISavedObjectsRepository;
+  getIsAlertingV2Enabled: () => Promise<boolean>;
 }
 
 export const createRuleSmlType = ({
   getScopedRulesClient,
   getInternalRepository,
+  getIsAlertingV2Enabled,
 }: CreateRuleSmlTypeOptions): SmlTypeDefinition => ({
   id: RULE_SML_TYPE,
   fetchFrequency: () => '1m',
 
   async *list() {
+    if (!(await getIsAlertingV2Enabled())) {
+      return;
+    }
+
     const repository = getInternalRepository();
     const finder = repository.createPointInTimeFinder<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
@@ -53,7 +59,11 @@ export const createRuleSmlType = ({
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
+    if (!(await getIsAlertingV2Enabled())) {
+      return undefined;
+    }
+
     try {
       const repository = getInternalRepository();
       const so = await repository.get<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, originId);
@@ -67,13 +77,9 @@ export const createRuleSmlType = ({
       const contentParts = [name, description, kind, tags, query].filter(Boolean);
 
       return {
-        chunks: [
-          {
-            type: RULE_SML_TYPE,
-            title: name,
-            content: contentParts.join('\n'),
-          },
-        ],
+        type: RULE_SML_TYPE,
+        title: name,
+        content: contentParts.join('\n'),
       };
     } catch (error) {
       context.logger.warn(
@@ -89,10 +95,13 @@ export const createRuleSmlType = ({
    */
   getPermissions: () => ({
     kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
-    elasticsearch: { indices: [] },
   }),
 
   toAttachment: async (item, context) => {
+    if (!(await getIsAlertingV2Enabled())) {
+      return undefined;
+    }
+
     try {
       const rulesClient = getScopedRulesClient(context.request);
       const rule = await rulesClient.getRule({ id: item.origin_id ?? '' });
