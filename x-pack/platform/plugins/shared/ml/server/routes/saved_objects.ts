@@ -217,7 +217,11 @@ export function savedObjectsRoutes(
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+            },
+          ],
         },
       },
       summary: 'Update what spaces jobs are assigned to',
