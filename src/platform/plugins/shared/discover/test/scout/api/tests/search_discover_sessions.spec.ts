@@ -87,6 +87,66 @@ apiTest.describe('GET /api/discover_sessions', { tag: tags.deploymentAgnostic },
     expect(response.body.data).toHaveLength(0);
   });
 
+  apiTest(
+    'applies default pagination when page and per_page are omitted',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(buildUrl({ query: 'ESQL' }), {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.meta).toStrictEqual({
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+      expect(response.body.data).toHaveLength(1);
+    }
+  );
+
+  apiTest('returns no results when the query matches nothing', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ query: 'zzznonexistentterm' }), {
+      headers: {
+        ...COMMON_HEADERS,
+        ...viewerCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(0);
+    expect(response.body.data).toHaveLength(0);
+  });
+
+  apiTest('requires all query terms to match (AND operator)', async ({ apiClient }) => {
+    const matchingResponse = await apiClient.get(buildUrl({ query: 'ESQL control' }), {
+      headers: {
+        ...COMMON_HEADERS,
+        ...viewerCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(matchingResponse).toHaveStatusCode(200);
+    expect(matchingResponse.body.data).toHaveLength(1);
+    expect(matchingResponse.body.data[0].id).toBe(TEST_DISCOVER_SESSION_ID);
+
+    const partialResponse = await apiClient.get(buildUrl({ query: 'ESQL zzznonexistentterm' }), {
+      headers: {
+        ...COMMON_HEADERS,
+        ...viewerCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(partialResponse).toHaveStatusCode(200);
+    expect(partialResponse.body.data).toHaveLength(0);
+  });
+
   apiTest('rejects per page limits above the maximum', async ({ apiClient }) => {
     const response = await apiClient.get(buildUrl({ per_page: 1001 }), {
       headers: {

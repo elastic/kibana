@@ -269,9 +269,11 @@ const discoverSessionSearchItemSchema = schema.object({
     title: schema.string({
       meta: { description: 'Discover session title.' },
     }),
-    description: schema.string({
-      meta: { description: 'Discover session description.' },
-    }),
+    description: schema.maybe(
+      schema.string({
+        meta: { description: 'Discover session description.' },
+      })
+    ),
   }),
   meta: asCodeMetaSchema,
 });
