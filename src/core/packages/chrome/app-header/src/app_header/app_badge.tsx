@@ -75,6 +75,7 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
   }
 
   const hasItems = 'items' in badge && badge.items !== undefined;
+  const isClickable = hasItems || badge.onClick !== undefined;
 
   const badgeOnClickAriaLabel =
     badge?.onClickAriaLabel ??
@@ -91,10 +92,13 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
     badge?.onClick?.();
   };
 
+  const interactionProps = isClickable
+    ? { onClick: handleBadgeClick, onClickAriaLabel: badgeOnClickAriaLabel }
+    : {};
+
   const badgeComponent = (
     <EuiBadge
-      onClick={handleBadgeClick}
-      onClickAriaLabel={badgeOnClickAriaLabel}
+      {...interactionProps}
       color={badge?.color ?? 'hollow'}
       data-test-subj={badge?.['data-test-subj']}
       css={badgeStyle}

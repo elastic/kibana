@@ -22,7 +22,7 @@ const {
 
 export class AlertsPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
-  private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
+  private readonly pageObjects = this.ctx.getPageObjects(['common']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly defaultTimeoutMs = this.ctx.getService('config').get('timeouts.waitFor');
@@ -36,7 +36,7 @@ export class AlertsPageObject extends FtrService {
         ensureCurrentUrl: false,
       }
     );
-    await this.pageObjects.header.waitUntilLoadingHasFinished();
+    await this.ensureOnAlertsPage();
   }
 
   getAbsoluteTimerangeFilter(from: string, to: string) {
