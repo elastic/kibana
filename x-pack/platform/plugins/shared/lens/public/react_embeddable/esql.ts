@@ -38,15 +38,21 @@ export async function loadESQLAttributes(
     return;
   }
 
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
   const timeoutFallback = new Promise<LensSerializedState['attributes'] | undefined>((resolve) => {
-    setTimeout(
+    timeoutId = setTimeout(
       () =>
         buildESQLAttributes(FALLBACK_ESQL_QUERY, services).then(resolve, () => resolve(undefined)),
       LOAD_ESQL_ATTRIBUTES_TIMEOUT_MS
     );
   });
 
-  return Promise.race([buildMainESQLAttributes(services), timeoutFallback]);
+  try {
+    return await Promise.race([buildMainESQLAttributes(services), timeoutFallback]);
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 async function buildMainESQLAttributes({
