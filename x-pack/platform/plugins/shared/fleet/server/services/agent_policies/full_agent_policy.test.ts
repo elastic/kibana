@@ -2975,7 +2975,9 @@ describe('generateFleetConfig', () => {
       }
     `);
     expect(res).not.toHaveProperty('proxy_headers');
-    expect(res?.ssl).not.toHaveProperty('key');
+    if (res && 'hosts' in res) {
+      expect(res.ssl).not.toHaveProperty('key');
+    }
   });
 });
 
