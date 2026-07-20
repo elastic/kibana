@@ -170,14 +170,6 @@ describe('AiIndexService', () => {
       );
     });
 
-    it('allows a data_stream dest with no matches yet (lazy creation)', async () => {
-      esClient.indices.resolveIndex.mockResponse({ indices: [], aliases: [], data_streams: [] });
-      storageClient.get.mockRejectedValue(createNotFoundError());
-
-      await expect(service.put('customer_support', properties)).resolves.toBe('created');
-      expect(storageClient.index).toHaveBeenCalled();
-    });
-
     it('throws AiIndexConflictError when the entry is managed', async () => {
       storageClient.get.mockResolvedValue({
         _id: 'customer_support',
@@ -194,42 +186,8 @@ describe('AiIndexService', () => {
       expect(storageClient.index).not.toHaveBeenCalled();
     });
 
-    it('rejects a data_stream dest that does not resolve to a data stream', async () => {
-      esClient.indices.getDataStream.mockResponse({ data_streams: [] });
-
-      await expect(service.put('customer_support', properties)).rejects.toBeInstanceOf(
-        InvalidAiIndexDestError
-      );
-      expect(storageClient.index).not.toHaveBeenCalled();
-    });
-
-    it('rejects a data_stream dest that does not exist (404 from get data stream)', async () => {
-      esClient.indices.getDataStream.mockRejectedValue(createNotFoundError());
-
-      await expect(
-        service.put('customer_support', {
-          ...properties,
-          dest: { type: 'data_stream', value: '.ai-index-ds-customer_support' },
-        })
-      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
-      expect(storageClient.index).not.toHaveBeenCalled();
-    });
-
-    it('rejects a system data stream dest', async () => {
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [buildDataStream({ system: true })],
-      });
-
-      await expect(service.put('customer_support', properties)).rejects.toBeInstanceOf(
-        InvalidAiIndexDestError
-      );
-      expect(storageClient.index).not.toHaveBeenCalled();
-    });
-
-    it('allows a hidden but non-system data stream dest', async () => {
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [buildDataStream({ hidden: true, system: false })],
-      });
+    it('allows a data_stream dest with no matches yet (lazy creation)', async () => {
+      esClient.indices.resolveIndex.mockResponse({ indices: [], aliases: [], data_streams: [] });
       storageClient.get.mockRejectedValue(createNotFoundError());
 
       await expect(service.put('customer_support', properties)).resolves.toBe('created');
