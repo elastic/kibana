@@ -78,6 +78,12 @@ export interface PackTiScenario {
     emerging: string;
   };
   /**
+   * Browsable https article URL written into RSS `<channel>/<item><link>`.
+   * Becomes report `source.url` after mustard ingestion; must be http(s) so
+   * Intelligence Hub's `isBrowsableReportUrl` renders the external link.
+   */
+  articleUrl: string;
+  /**
    * Environment join keys. Must appear in the RSS body (value + optional
    * defanged) AND on pack docs after `ensureEcsSourceIp` + `enrichDocForGraph`
    * in the ECS fields mustard hunt searches.
@@ -276,6 +282,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario> = {
     historicSourceAliases: {
       emerging: 'Okta session intel digest',
     },
+    articleUrl: 'https://www.elastic.co/security-labs/okta-and-lapsus-what-you-need-to-know',
     joinIocs: [
       { type: 'ip', value: '192.0.2.50', defanged: '192[.]0[.]2[.]50' },
       { type: 'email', value: 'cfo@corp.example' },
@@ -349,6 +356,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario> = {
           'aligned to T1098.001, T1078.004, and T1562.008.',
       },
     ],
+    articleUrl: 'https://www.elastic.co/security-labs/exploring-aws-sts-assumeroot',
     joinIocs: [
       { type: 'ip', value: '192.0.2.30', defanged: '192[.]0[.]2[.]30' },
       { type: 'ip', value: '192.0.2.31', defanged: '192[.]0[.]2[.]31' },
@@ -434,6 +442,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario> = {
           'exec-pod. Keep kubernetes.audit hunts on T1552.007, T1078, and T1610.',
       },
     ],
+    articleUrl: 'https://www.elastic.co/security-labs/teampcp-container-attack-scenario',
     joinIocs: [
       { type: 'ip', value: '192.0.2.60', defanged: '192[.]0[.]2[.]60' },
       // Full SA principal — short "compromised-sa" alone is narrative only (not term-matchable).
@@ -518,6 +527,8 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario> = {
           'deploy_key.create. Keep optional hunts on T1567, T1098, and T1195.',
       },
     ],
+    articleUrl:
+      'https://www.elastic.co/security-labs/axios-supply-chain-compromise-detections',
     joinIocs: [
       { type: 'ip', value: '192.0.2.70', defanged: '192[.]0[.]2[.]70' },
       { type: 'email', value: 'dev-contractor-42@corp.example' },
@@ -832,7 +843,7 @@ export const buildPackRssDataUrl = ({
   }
   const mitreLine = scenario.mitre.length ? ` Techniques: ${scenario.mitre.join(', ')}.` : '';
   const description = `${scenario.body}${mitreLine}`;
-  const articleLink = xmlEscape(buildPackArticleDataUrl(scenario));
+  const articleLink = xmlEscape(scenario.articleUrl);
   const itemsXml = reportItems
     .map((item) => {
       const guid = `ti-report-${scenario.packId}-${item.itemKey}`;
