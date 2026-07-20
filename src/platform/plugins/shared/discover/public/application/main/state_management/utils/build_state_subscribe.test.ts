@@ -128,12 +128,12 @@ describe('buildStateSubscribe', () => {
     expect(dataState.refetch$.next).toHaveBeenCalled();
   });
 
-  it('should call refetch$ if useApproximation has changed in ES|QL mode', async () => {
+  it('should call refetch$ if isApproximate has changed in ES|QL mode', async () => {
     await getSubscribeFn()(
       getNextState({
         appState: {
           dataSource: { type: DataSourceType.Esql },
-          useApproximation: true,
+          isApproximate: true,
         },
       })
     );
@@ -141,8 +141,8 @@ describe('buildStateSubscribe', () => {
     expect(dataState.refetch$.next).toHaveBeenCalled();
   });
 
-  it('should not call refetch$ if useApproximation has changed in non-ES|QL mode', async () => {
-    await getSubscribeFn()(getNextState({ appState: { useApproximation: true } }));
+  it('should not call refetch$ if isApproximate has changed in non-ES|QL mode', async () => {
+    await getSubscribeFn()(getNextState({ appState: { isApproximate: true } }));
 
     expect(dataState.refetch$.next).not.toHaveBeenCalled();
   });
@@ -186,10 +186,11 @@ describe('buildStateSubscribe', () => {
     expect(dataState.reset).toBeCalledTimes(1);
 
     toolkit.internalState.dispatch(
-      toolkit.injectCurrentTab(internalStateActions.resetAppState)({
-        appState: {
+      toolkit.injectCurrentTab(internalStateActions.initializeTabState)({
+        initialAppState: {
           dataSource: newDataSource,
         },
+        initialProfileState: toolkit.getCurrentTab().profileState,
       })
     );
 

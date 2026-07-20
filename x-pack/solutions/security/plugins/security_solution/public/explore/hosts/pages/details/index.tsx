@@ -17,7 +17,7 @@ import {
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -80,7 +80,7 @@ import {
   useEntityFromStore,
   type EntityStoreRecord,
 } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { ObservedDataSection as HostObservedDataSection } from '../../../../flyout_v2/entity/host/main/components/observed_data_section';
+import { ObservedDataSection as HostObservedDataSection } from '../../../../flyout_v2/entity/shared/components/observed_data_section';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID } from '../../../../flyout/entity_details/host_right';
 import { useObservedHost } from '../../../../flyout_v2/entity/host/main/hooks/use_observed_host';
 import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
@@ -226,7 +226,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     if (!entityStoreV2Enabled || noEntityInStore) {
       return legacyFilters;
     }
-    const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnDocument(
+    const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnEntityRecord(
       EntityType.host,
       entityFromStoreResult.entityRecord
     );
@@ -253,6 +253,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     startDate: from,
     hostName: detailName,
     entityId: entityStoreV2Enabled ? entityFromStoreResult.entityRecord?.entity?.id : undefined,
+    entityRecord: entityStoreV2Enabled ? entityFromStoreResult.entityRecord : undefined,
+    entityStoreInitialLoading: entityStoreV2Enabled && entityFromStoreResult.isInitialLoading,
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
@@ -406,8 +408,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                   />
                   <EuiSpacer size="m" />
                   <HostObservedDataSection
+                    entityType={EntityType.host}
                     identityFields={resolvedIdentityFields}
-                    observedHost={observedHost}
+                    observedData={observedHost}
                     contextID={PageScope.explore}
                     scopeId={PageScope.explore}
                     queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}

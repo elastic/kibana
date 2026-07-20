@@ -27,6 +27,8 @@ export interface QueryServiceContract {
   executeQueryStream<T = Record<string, unknown>>(params: ExecuteQueryParams): AsyncIterable<T[]>;
 }
 
+const DROP_NULL_COLUMNS = true;
+
 @injectable()
 export class QueryService implements QueryServiceContract {
   constructor(
@@ -48,7 +50,7 @@ export class QueryService implements QueryServiceContract {
       const response = await this.esClient.esql.query(
         {
           query,
-          drop_null_columns: false,
+          drop_null_columns: DROP_NULL_COLUMNS,
           filter,
           params,
         },
@@ -97,13 +99,17 @@ export class QueryService implements QueryServiceContract {
         .esql(
           {
             query,
-            drop_null_columns: false,
+            drop_null_columns: DROP_NULL_COLUMNS,
             filter,
             params,
           },
           { signal: context.signal }
         )
         .toArrowReader();
+
+      if (!reader) {
+        throw new Error('toArrowReader returned undefined');
+      }
 
       yield* this.iterateReader<T>(reader, context);
 

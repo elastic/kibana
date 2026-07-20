@@ -32,12 +32,19 @@ export {
   getLegendLayout,
 } from './legend';
 
-export { getComputedColumnWarningForColumns } from './computed_column_warning';
+export { isFilterableColumnSet, getFilterDrilldownWarningMessage } from './computed_column_warning';
 export { ChartTooltipFooterMessage } from './components/chart_tooltip_footer_message';
 export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
 export { isChartSizeEvent } from './types';
 export type { ExpressionValueVisDimension } from './expression_value_dimension';
 export type { XYLegendValue } from './legend';
+export {
+  ChartPosition,
+  ChartHorizontalAlignment,
+  ChartVerticalAlignment,
+  ChartLayoutDirection,
+  ChartLegendValue,
+} from './constants';
 export type {
   HistogramParams,
   DateHistogramParams,

@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/276643
+issues:
+- https://github.com/elastic/search-team/issues/15105
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- AI and machine Learning
+title: Allow users to reinstall traces dashboard
+description: Users can now install, view, or delete the Agent Builder traces dashboard directly from GenAI Settings. The dashboard is no longer auto-reinstalled on Kibana restart if previously deleted.

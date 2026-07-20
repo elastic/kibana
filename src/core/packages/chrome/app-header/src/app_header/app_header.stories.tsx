@@ -20,13 +20,13 @@ import type {
   AppHeaderTab,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { AppHeaderPadding } from '../types';
+import type { AppHeaderSpacing } from '../types';
 import { AppHeaderView } from './app_header';
 
 interface ComposedHeaderStoryProps {
   title: string;
   editable: boolean;
-  padding: 'none' | 's' | 'm' | 'bleed-l';
+  spacing: AppHeaderSpacing;
   width: number;
   showBack: boolean;
   showTabs: boolean;
@@ -42,7 +42,29 @@ const badges: AppHeaderBadge[] = [
 ];
 
 const tabs: AppHeaderTab[] = [
-  { id: 'overview', label: 'Overview', isSelected: true, onClick: action('tab-overview') },
+  {
+    id: 'overview',
+    label: 'Overview',
+    isSelected: true,
+    onClick: action('tab-overview'),
+    actions: {
+      ariaLabel: 'More actions',
+      items: [
+        {
+          id: 'copy',
+          label: 'Copy API request',
+          iconType: 'copy',
+          onClick: action('tab-overview-copy'),
+        },
+        {
+          id: 'edit',
+          label: 'Edit configuration',
+          iconType: 'gear',
+          onClick: action('tab-overview-edit'),
+        },
+      ],
+    },
+  },
   { id: 'alerts', label: 'Alerts', badge: 3, onClick: action('tab-alerts') },
   {
     id: 'insights',
@@ -80,7 +102,7 @@ const menu: AppMenuConfig = {
 const ComposedHeader = ({
   title: initialTitle,
   editable,
-  padding,
+  spacing,
   width,
   showBack,
   showTabs,
@@ -99,8 +121,6 @@ const ComposedHeader = ({
       setTitle(nextTitle);
     },
   };
-
-  const paddingProp: AppHeaderPadding = padding === 'bleed-l' ? { bleed: 'l' } : padding;
 
   return (
     <ChromeServiceProvider value={{ chrome }}>
@@ -128,7 +148,7 @@ const ComposedHeader = ({
             ) : undefined
           }
           sticky={false}
-          padding={paddingProp}
+          spacing={spacing}
         />
       </div>
     </ChromeServiceProvider>
@@ -156,16 +176,17 @@ const meta: Meta<ComposedHeaderStoryProps> = {
     },
   },
   argTypes: {
-    padding: {
+    spacing: {
       control: 'inline-radio',
-      options: ['none', 's', 'm', 'bleed-l'],
-      description: "Horizontal padding. `bleed-l` cancels a padded container (`{ bleed: 'l' }`).",
+      options: ['standard', 'compact', 'flush', 'bleed', 'largeBleed'],
+      description:
+        'Outer spacing. Standard uses a 16px symmetric gutter; bleed matches the same 16px inside a padded parent and largeBleed a 24px one.',
     },
   },
   args: {
     title: 'System Shells via Services',
     editable: true,
-    padding: 'm',
+    spacing: 'standard',
     width: 900,
     showBack: true,
     showTabs: true,

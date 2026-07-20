@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 import type { ApmSourceMapArtifactBody } from './source_map_types';
 
@@ -29,10 +28,12 @@ export interface ListSourceMapArtifactsResponse {
 }
 export const listSourceMapsRoute = defineRoute<ListSourceMapArtifactsResponse | undefined>()({
   endpoint: 'GET /api/apm/sourcemaps 2023-10-31',
-  params: t.partial({
-    query: t.partial({
-      page: toNumberRt,
-      perPage: toNumberRt,
-    }),
+  params: z.object({
+    query: z
+      .object({
+        page: z.coerce.number().optional(),
+        perPage: z.coerce.number().optional(),
+      })
+      .optional(),
   }),
 });

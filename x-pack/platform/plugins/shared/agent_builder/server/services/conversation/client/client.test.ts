@@ -90,13 +90,24 @@ describe('ConversationClient', () => {
   });
 
   describe('list', () => {
-    it('requests access_control and preserves it in listed conversations', async () => {
+    it('requests access_control and origin, and preserves them in listed conversations', async () => {
+      const origin = {
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      };
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [
-            createConversationDocument({
-              accessMode: ConversationAccessControlMode.Public,
-            }),
+            {
+              ...createConversationDocument({
+                accessMode: ConversationAccessControlMode.Public,
+              }),
+              _source: {
+                ...createConversationDocument({
+                  accessMode: ConversationAccessControlMode.Public,
+                })._source!,
+                origin,
+              },
+            },
           ],
         },
       });
@@ -105,7 +116,7 @@ describe('ConversationClient', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          _source: expect.arrayContaining(['access_control']),
+          _source: expect.arrayContaining(['access_control', 'origin']),
         })
       );
       expect(result[0]).toEqual(
@@ -113,6 +124,7 @@ describe('ConversationClient', () => {
           access_control: {
             access_mode: ConversationAccessControlMode.Public,
           },
+          origin,
         })
       );
     });
@@ -334,6 +346,47 @@ describe('ConversationClient', () => {
     });
   });
 
+  describe('getByOrigin', () => {
+    it('finds a conversation by first-class origin in the current space', async () => {
+      const document = createConversationDocument();
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [document],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [document],
+          },
+        });
+
+      const result = await client.getByOrigin({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+
+      expect(result?.id).toBe('conversation-1');
+      expect(mockEsClient.search).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                expect.any(Object),
+                {
+                  term: {
+                    'origin.external_conversation_id':
+                      'team:T123/channel:C123/thread:1712345678.000100',
+                  },
+                },
+              ],
+            },
+          },
+        })
+      );
+    });
+  });
+
   describe('update', () => {
     it('remains owner-only by default for public conversations', async () => {
       mockEsClient.search.mockResolvedValue({
@@ -441,6 +494,26 @@ describe('ConversationClient', () => {
       );
 
       expect(mockEsClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('returns true when the document was already deleted (404)', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+      const notFoundError = Object.assign(new Error('not found'), { statusCode: 404 });
+      mockEsClient.delete.mockRejectedValue(notFoundError);
+
+      await expect(client.delete('conversation-1')).resolves.toBe(true);
+    });
+
+    it('rethrows non-404 errors from the delete call', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+      const serverError = Object.assign(new Error('internal server error'), { statusCode: 500 });
+      mockEsClient.delete.mockRejectedValue(serverError);
+
+      await expect(client.delete('conversation-1')).rejects.toBe(serverError);
     });
   });
 });
