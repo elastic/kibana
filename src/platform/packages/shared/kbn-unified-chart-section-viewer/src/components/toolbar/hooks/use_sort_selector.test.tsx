@@ -19,7 +19,6 @@ const renderSortSelector = (sort: MetricsSort) => {
 };
 
 describe('useSortSelector', () => {
-  // Hypothetical and does not apply to the current single option. This is the basis for extending testing when new comparators are added.
   it('preserves the current direction when the sort field changes', () => {
     const { result, onChange } = renderSortSelector([
       METRICS_SORT_BY.alphabetically,
@@ -27,14 +26,11 @@ describe('useSortSelector', () => {
     ]);
 
     result.current.handleSortByChange({
-      value: METRICS_SORT_BY.alphabetically,
-      label: 'Alphabetically',
+      value: METRICS_SORT_BY.recency,
+      label: 'Recently explored',
     });
 
-    expect(onChange).toHaveBeenCalledWith([
-      METRICS_SORT_BY.alphabetically,
-      METRICS_SORT_DIRECTION.desc,
-    ]);
+    expect(onChange).toHaveBeenCalledWith([METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc]);
   });
 
   it('falls back to the current field when no option is provided', () => {

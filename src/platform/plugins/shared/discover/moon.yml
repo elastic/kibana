@@ -160,6 +160,7 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/use-observable'
   - '@kbn/core-security-server'
+  - '@kbn/crypto-browser'
 tags:
   - plugin
   - prod

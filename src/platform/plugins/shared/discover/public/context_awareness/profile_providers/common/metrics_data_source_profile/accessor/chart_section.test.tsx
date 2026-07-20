@@ -46,6 +46,8 @@ type UnifiedGridProps = ChartSectionProps & {
   };
   gridSettings?: MetricsGridSettings;
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
+  recentlyExploredMetrics?: readonly string[];
+  onMetricExplored?: (metricUniqueKey: string) => void;
 };
 
 let unifiedGridProps: UnifiedGridProps | undefined;
@@ -90,6 +92,14 @@ const mockEsqlReferenceHref = 'https://www.elastic.co/docs/reference/esql';
 const mockScopedLogger = { __sentinel: 'scopedLogger' };
 const mockLogger = { __sentinel: 'logger', get: jest.fn(() => mockScopedLogger) };
 const mockFeatureFlags = { __sentinel: 'featureFlags' };
+const mockStorage = {
+  get: jest.fn(() => null),
+  set: jest.fn(),
+  remove: jest.fn(),
+  clear: jest.fn(),
+};
+// Stable references so the memoized RecentMetricsStorage instance survives re-renders.
+const mockHttp = { basePath: { get: () => '' } };
 
 jest.mock('../../../../../hooks/use_discover_services', () => ({
   useDiscoverServices: jest.fn(() => ({
@@ -108,7 +118,9 @@ jest.mock('../../../../../hooks/use_discover_services', () => ({
     logger: mockLogger,
     core: {
       featureFlags: mockFeatureFlags,
+      http: mockHttp,
     },
+    storage: mockStorage,
   })),
 }));
 
@@ -256,5 +268,18 @@ describe('MetricsExperienceGridWrapper', () => {
       ...METRICS_GRID_SETTINGS_DEFAULTS,
       counterAggregation: 'max',
     });
+  });
+
+  it('records explored metrics and surfaces them via recentlyExploredMetrics', () => {
+    renderChartSection();
+
+    expect(unifiedGridProps?.recentlyExploredMetrics).toEqual([]);
+
+    act(() => {
+      unifiedGridProps?.onMetricExplored?.('metrics-*::cpu');
+    });
+
+    expect(mockStorage.set).toHaveBeenCalled();
+    expect(unifiedGridProps?.recentlyExploredMetrics).toEqual(['metrics-*::cpu']);
   });
 });

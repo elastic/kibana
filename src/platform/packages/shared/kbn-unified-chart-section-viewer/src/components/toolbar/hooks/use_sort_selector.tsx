@@ -39,6 +39,7 @@ export const useSortSelector = ({
         value,
         label: SORT_BY_LABELS[value],
         checked: value === sortBy ? 'on' : undefined,
+        'data-test-subj': `metricsExperienceSortOption-${value}`,
       })),
     [sortBy]
   );

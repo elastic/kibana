@@ -1068,4 +1068,23 @@ describe('MetricsGrid', () => {
       );
     });
   });
+
+  describe('recently explored', () => {
+    it('records the metric as explored on any click within its cell', () => {
+      const onMetricExplored = jest.fn();
+      const { container } = render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          onMetricExplored={onMetricExplored}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      fireEvent.click(container.querySelector('[data-chart-index="0"]') as HTMLElement);
+
+      expect(onMetricExplored).toHaveBeenCalledTimes(1);
+      expect(onMetricExplored).toHaveBeenCalledWith('metrics-*::system.cpu.utilization');
+    });
+  });
 });
