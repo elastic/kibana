@@ -96,7 +96,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
         } catch (existsError) {
           // Only treat a genuine "not found" as a missing job; any other error
           // (transient ES failure, etc.) must not silently bypass the access check.
-          if (existsError.statusCode !== undefined && existsError.statusCode !== 404) {
+          if (existsError.statusCode !== 404) {
             throw existsError;
           }
           // Job is missing — proceed for this ID only
