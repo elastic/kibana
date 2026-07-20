@@ -20,6 +20,10 @@ These connectors are accessed and managed through the [Elastic {{infer-cap}} Ser
 Elastic Managed LLMs are available exclusively through the Elastic {{infer-cap}} Service.
 You can find the [list of supported models](docs-content://explore-analyze/elastic-inference/eis.md#supported-models) on the EIS documentation page.
 
+::::{note}
+The previous AI connector called **Elastic-Managed-LLM** was deprecated in 9.3.
+::::
+
 ## Region and hosting
 
 The Elastic Managed LLMs use third party service providers for {{infer}}. Refer to [the Elastic {{infer-cap}} Service page](docs-content://explore-analyze/elastic-inference/eis.md) for details.
