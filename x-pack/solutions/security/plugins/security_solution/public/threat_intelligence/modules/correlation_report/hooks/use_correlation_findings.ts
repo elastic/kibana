@@ -30,6 +30,8 @@ export interface UseCorrelationRunsState {
   readonly recentsLoading: boolean;
   readonly startRun: (input: StartRunInput) => Promise<void>;
   readonly loadRun: (runId: string) => Promise<void>;
+  /** Newest correlation run id for a threat report, if any. */
+  readonly findLatestRunIdForReport: (reportId: string) => Promise<string | undefined>;
   readonly refreshRecents: () => Promise<void>;
   readonly clearActive: () => void;
   readonly updateRunTitle: (runId: string, title: string) => Promise<void>;
@@ -137,6 +139,24 @@ export const useCorrelationRuns = (): UseCorrelationRunsState => {
     [clearTimer, http]
   );
 
+  const findLatestRunIdForReport = useCallback(
+    async (reportId: string): Promise<string | undefined> => {
+      try {
+        const result = await http.get<{ runs: CorrelationRun[]; total: number }>(
+          CORRELATION_RUNS_API_PATH,
+          {
+            version: '2023-10-31',
+            query: { report_id: reportId, per_page: 1 },
+          }
+        );
+        return result.runs[0]?.runId;
+      } catch {
+        return undefined;
+      }
+    },
+    [http]
+  );
+
   const refreshRecents = useCallback(async (): Promise<void> => {
     setRecentsLoading(true);
     try {
@@ -187,6 +207,7 @@ export const useCorrelationRuns = (): UseCorrelationRunsState => {
     recentsLoading,
     startRun,
     loadRun,
+    findLatestRunIdForReport,
     refreshRecents,
     clearActive,
     updateRunTitle,

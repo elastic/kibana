@@ -27,7 +27,11 @@ import type { ThreatReportFeedItem } from './types';
 import { SEVERITY_HEX } from './constants';
 import { getSeverityColor, getSeverityLabel } from './severity_labels';
 import { ThreatCategoryBadge } from './threat_category_badge';
-import { getSourceFaviconUrl, isBrowsableReportUrl } from './utils';
+import {
+  getSourceFaviconUrl,
+  isBrowsableReportUrl,
+  onBrowsableReportUrlClick,
+} from './utils';
 
 const metaDividerCss = css({
   opacity: 0.4,
@@ -61,6 +65,14 @@ export const ReportFeedCard: React.FC<{
     void navigateToCorrelateReport(application, item.reportId);
   }, [application, item.reportId]);
 
+  const handleArticleClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (!articleUrl) return;
+      onBrowsableReportUrlClick(event, articleUrl);
+    },
+    [articleUrl]
+  );
+
   useEffect(() => {
     if (isHighlighted && cardRef.current) {
       cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -90,6 +102,7 @@ export const ReportFeedCard: React.FC<{
             href={articleUrl}
             target="_blank"
             external
+            onClick={handleArticleClick}
             data-test-subj={`threatIntelArticleLink-${item.reportId}`}
           >
             <strong>{displayTitle}</strong>

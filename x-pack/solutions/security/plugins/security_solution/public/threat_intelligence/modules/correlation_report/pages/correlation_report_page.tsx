@@ -43,9 +43,11 @@ import {
   CORRELATION_AUTO_RUN_PARAM,
   CORRELATION_REPORT_ID_PARAM,
 } from '../../../lib/navigate_to_correlation_reports';
+import { onBrowsableReportUrlClick } from '../../../components/report_feed/utils';
 import { CorrelationReport, DiamondSvg } from '../components/correlation_report';
 import { useCorrelationRuns } from '../hooks/use_correlation_findings';
 import type { StartRunInput } from '../hooks/use_correlation_findings';
+import { openOrCreateCorrelationForReport } from '../lib/open_or_create_correlation_for_report';
 import type {
   CorrelationDepth,
   CorrelationRun,
@@ -326,7 +328,12 @@ const KnnResultView: FC<{ result: KnnDepthResult }> = ({ result }) => {
           return (
             <div>
               {meta?.url ? (
-                <EuiLink href={meta.url} target="_blank" external>
+                <EuiLink
+                  href={meta.url}
+                  target="_blank"
+                  external
+                  onClick={(event) => onBrowsableReportUrlClick(event, meta.url)}
+                >
                   {title}
                 </EuiLink>
               ) : (
@@ -404,7 +411,12 @@ const KnnResultView: FC<{ result: KnnDepthResult }> = ({ result }) => {
             return (
               <div key={hit.report_id}>
                 {meta?.url ? (
-                  <EuiLink href={meta.url} target="_blank" external>
+                  <EuiLink
+                    href={meta.url}
+                    target="_blank"
+                    external
+                    onClick={(event) => onBrowsableReportUrlClick(event, meta.url)}
+                  >
                     <EuiText size="s" component="span">
                       {title}
                     </EuiText>
@@ -442,7 +454,12 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
     return (
       <div>
         {meta?.url ? (
-          <EuiLink href={meta.url} target="_blank" external>
+          <EuiLink
+            href={meta.url}
+            target="_blank"
+            external
+            onClick={(event) => onBrowsableReportUrlClick(event, meta.url)}
+          >
             {title}
           </EuiLink>
         ) : (
@@ -913,6 +930,7 @@ export const CorrelationReportPage: FC = () => {
     recentsLoading,
     startRun,
     loadRun,
+    findLatestRunIdForReport,
     refreshRecents,
     updateRunTitle,
   } = useCorrelationRuns();
@@ -945,7 +963,7 @@ export const CorrelationReportPage: FC = () => {
     [startRun]
   );
 
-  // Prefill (and optionally auto-run) when navigated from Hub report feed / hunt findings.
+  // Prefill (and optionally open-or-create) when navigated from Hub report feed / hunt findings.
   useEffect(() => {
     if (!skillEnabled || autoStartedFromUrlRef.current) {
       return;
@@ -963,14 +981,31 @@ export const CorrelationReportPage: FC = () => {
     }
 
     autoStartedFromUrlRef.current = true;
-    runWithInput({ input_type: 'report_id', report_id: reportId, depth: 'full' });
     params.delete(CORRELATION_AUTO_RUN_PARAM);
     const nextSearch = params.toString();
     history.replace({
       pathname: location.pathname,
       search: nextSearch ? `?${nextSearch}` : '',
     });
-  }, [skillEnabled, location.pathname, location.search, history, runWithInput]);
+
+    void openOrCreateCorrelationForReport({
+      reportId,
+      findLatestRunIdForReport,
+      loadRun,
+      startRun: async (input) => {
+        lastInputRef.current = input;
+        await startRun(input);
+      },
+    });
+  }, [
+    skillEnabled,
+    location.pathname,
+    location.search,
+    history,
+    findLatestRunIdForReport,
+    loadRun,
+    startRun,
+  ]);
 
   const handleRun = useCallback(() => {
     const text = inputText.trim();

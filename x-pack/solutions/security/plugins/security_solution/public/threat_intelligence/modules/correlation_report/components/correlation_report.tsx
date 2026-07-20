@@ -29,6 +29,7 @@ import type {
   EvidenceItem,
   EvidenceWeight,
 } from '../../../../../common/threat_intelligence/correlation';
+import { onBrowsableReportUrlClick } from '../../../components/report_feed/utils';
 import {
   accordionButtonCss,
   blufDotWrapperCss,
@@ -529,7 +530,14 @@ const LeadCard: React.FC<{
                 const label = candidateLabels?.[id];
                 const chipText = label !== undefined ? `${label} ${vendor ?? id}` : vendor ?? id;
                 return url ? (
-                  <EuiBadge key={id} href={url} target="_blank" color="hollow">
+                  <EuiBadge
+                    key={id}
+                    href={url}
+                    target="_blank"
+                    color="hollow"
+                    onClick={(event) => onBrowsableReportUrlClick(event, url)}
+                    onClickAriaLabel={chipText}
+                  >
                     {chipText}
                   </EuiBadge>
                 ) : (
@@ -589,7 +597,12 @@ const LeadCard: React.FC<{
                 return (
                   <div key={c.id}>
                     {candidateUrl ? (
-                      <EuiLink href={candidateUrl} target="_blank" external>
+                      <EuiLink
+                        href={candidateUrl}
+                        target="_blank"
+                        external
+                        onClick={(event) => onBrowsableReportUrlClick(event, candidateUrl)}
+                      >
                         <EuiText size="xs" component="span">
                           {c.title}
                         </EuiText>

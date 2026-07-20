@@ -37,14 +37,20 @@ export const registerListCorrelationRunsRoute = ({
             query: schema.object({
               page: schema.maybe(schema.number({ min: 1 })),
               per_page: schema.maybe(schema.number({ min: 1, max: 100 })),
+              report_id: schema.maybe(schema.string({ minLength: 1 })),
             }),
           },
         },
       },
       async (context, request, response) => {
-        const { page, per_page: perPage } = request.query as {
+        const {
+          page,
+          per_page: perPage,
+          report_id: reportId,
+        } = request.query as {
           page?: number;
           per_page?: number;
+          report_id?: string;
         };
 
         const core = await context.core;
@@ -54,7 +60,7 @@ export const registerListCorrelationRunsRoute = ({
         const runDataClient = createRunDataClient({ esClient, logger, spaceId });
 
         try {
-          const result = await runDataClient.listRuns({ page, perPage });
+          const result = await runDataClient.listRuns({ page, perPage, reportId });
           return response.ok({ body: result });
         } catch (e) {
           logger.error(`[CorrelationRuns] listRuns failed: ${e}`);

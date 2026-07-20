@@ -11,7 +11,10 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 /** Query param that prefills Correlation Reports with a stored report id. */
 export const CORRELATION_REPORT_ID_PARAM = 'reportId';
 
-/** When set to `1`, Correlation Reports auto-starts a run for `reportId`. */
+/**
+ * When set to `1`, Correlation Reports opens the latest run for `reportId`,
+ * or starts a new full-depth run when none exists.
+ */
 export const CORRELATION_AUTO_RUN_PARAM = 'run';
 
 export const buildCorrelateReportPath = (reportId: string, autoRun = true): string => {
@@ -24,7 +27,7 @@ export const buildCorrelateReportPath = (reportId: string, autoRun = true): stri
 };
 
 /**
- * Navigate to Correlation Reports with a report id prefilled and auto-run enabled.
+ * Navigate to Correlation Reports with a report id prefilled and open-or-create enabled.
  */
 export const navigateToCorrelateReport = async (
   application: ApplicationStart,

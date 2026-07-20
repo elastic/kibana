@@ -42,6 +42,8 @@ export interface RunUpdate {
 export interface RunListParams {
   readonly page?: number;
   readonly perPage?: number;
+  /** When set, only return runs for this threat report id (newest first). */
+  readonly reportId?: string;
 }
 
 export interface RunListResult {
@@ -238,19 +240,25 @@ export const createRunDataClient = ({
   };
 
   // -----------------------------------------------------------------------
-  // listRuns — paginated recent runs for this space
+  // listRuns — paginated recent runs for this space (optional report_id filter)
   // -----------------------------------------------------------------------
   const listRuns = async ({
     page = 1,
     perPage = 20,
+    reportId,
   }: RunListParams = {}): Promise<RunListResult> => {
     try {
+      const query =
+        reportId != null && reportId.length > 0
+          ? { term: { report_id: reportId } }
+          : { match_all: {} };
+
       const resp = await esClient.search<EsRunDoc>({
         index: indexName,
         size: perPage,
         from: (page - 1) * perPage,
         sort: [{ created_at: { order: 'desc' } }],
-        query: { match_all: {} },
+        query,
         track_total_hits: true,
         ignore_unavailable: true,
       });

@@ -47,6 +47,64 @@ export const getSourceFaviconUrl = (sourceUrl?: string): string | undefined => {
   }
 };
 
+/**
+ * Decode a browsable `data:text/html` article URL to HTML.
+ * Returns undefined when the URL is not a data:text/html payload.
+ */
+export const decodeDataHtmlReportUrl = (url: string): string | undefined => {
+  if (!isBrowsableReportUrl(url) || !url.startsWith('data:')) return undefined;
+  const commaIdx = url.indexOf(',');
+  if (commaIdx === -1) return undefined;
+  const meta = url.slice('data:'.length, commaIdx).toLowerCase();
+  const payload = url.slice(commaIdx + 1);
+  try {
+    return meta.includes(';base64') ? atob(payload) : decodeURIComponent(payload);
+  } catch {
+    return undefined;
+  }
+};
+
+export interface OpenDataHtmlReportUrlDeps {
+  readonly createObjectURL?: (blob: Blob) => string;
+  readonly open?: (url: string, target?: string, features?: string) => Window | null;
+  readonly revokeObjectURL?: (url: string) => void;
+  readonly setTimeoutFn?: (handler: () => void, timeout: number) => number;
+}
+
+/**
+ * Chrome blocks top-frame navigations to `data:` URLs from page links, which
+ * yields a blank tab. Open offline HTML articles via a blob: URL instead.
+ * http(s) links should keep native `<a href>` navigation.
+ */
+export const openDataHtmlReportUrl = (
+  url: string,
+  deps: OpenDataHtmlReportUrlDeps = {}
+): void => {
+  const html = decodeDataHtmlReportUrl(url);
+  if (!html) return;
+  const createObjectURL = deps.createObjectURL ?? ((blob) => URL.createObjectURL(blob));
+  const open = deps.open ?? ((href, target, features) => window.open(href, target, features));
+  const revokeObjectURL = deps.revokeObjectURL ?? ((href) => URL.revokeObjectURL(href));
+  const setTimeoutFn =
+    deps.setTimeoutFn ?? ((handler, timeout) => window.setTimeout(handler, timeout));
+
+  const blobUrl = createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+  const opened = open(blobUrl, '_blank', 'noopener,noreferrer');
+  // Give the new tab time to load before revoking the object URL.
+  setTimeoutFn(() => revokeObjectURL(blobUrl), opened ? 60_000 : 0);
+};
+
+/** Call from link onClick: intercept data:text/html, leave http(s) alone. */
+export const onBrowsableReportUrlClick = (
+  event: { preventDefault: () => void },
+  url: string,
+  deps?: OpenDataHtmlReportUrlDeps
+): void => {
+  if (!url.startsWith('data:')) return;
+  event.preventDefault();
+  openDataHtmlReportUrl(url, deps);
+};
+
 export const fromDashboardArticle = (
   article: DashboardOverviewResponse['recent_articles'][number]
 ): ThreatReportFeedItem => ({

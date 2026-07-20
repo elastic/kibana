@@ -12,7 +12,7 @@ import {
 } from './navigate_to_correlation_reports';
 
 describe('buildCorrelateReportPath', () => {
-  it('returns a reportId query with auto-run enabled by default', () => {
+  it('returns a reportId query with open-or-create enabled by default', () => {
     expect(buildCorrelateReportPath('abc123')).toBe('?reportId=abc123&run=1');
   });
 
@@ -22,7 +22,7 @@ describe('buildCorrelateReportPath', () => {
 });
 
 describe('navigateToCorrelateReport', () => {
-  it('navigates to the correlation deep link with the report path', async () => {
+  it('navigates to the correlation deep link with open-or-create path', async () => {
     const navigateToApp = jest.fn().mockResolvedValue(undefined);
 
     await navigateToCorrelateReport({ navigateToApp } as never, 'report-1');

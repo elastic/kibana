@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { getSourceFaviconUrl, isBrowsableReportUrl } from './utils';
+import {
+  decodeDataHtmlReportUrl,
+  getSourceFaviconUrl,
+  isBrowsableReportUrl,
+  onBrowsableReportUrlClick,
+  openDataHtmlReportUrl,
+} from './utils';
 
 describe('isBrowsableReportUrl', () => {
   it('returns true for https URLs', () => {
@@ -48,6 +54,59 @@ describe('isBrowsableReportUrl', () => {
 
   it('returns false for undefined', () => {
     expect(isBrowsableReportUrl(undefined)).toBe(false);
+  });
+});
+
+describe('decodeDataHtmlReportUrl', () => {
+  it('returns decoded HTML for percent-encoded data:text/html URLs', () => {
+    expect(
+      decodeDataHtmlReportUrl('data:text/html;charset=utf-8,%3Ch1%3EReport%3C%2Fh1%3E')
+    ).toBe('<h1>Report</h1>');
+  });
+
+  it('returns undefined for https URLs', () => {
+    expect(decodeDataHtmlReportUrl('https://example.com/a')).toBeUndefined();
+  });
+});
+
+describe('openDataHtmlReportUrl', () => {
+  it('opens a blob URL for data:text/html articles', () => {
+    const open = jest.fn().mockReturnValue({} as Window);
+    const createObjectURL = jest.fn().mockReturnValue('blob:mock');
+    const revokeObjectURL = jest.fn();
+    const setTimeoutFn = jest.fn();
+
+    openDataHtmlReportUrl('data:text/html;charset=utf-8,%3Ch1%3EReport%3C%2Fh1%3E', {
+      open,
+      createObjectURL,
+      revokeObjectURL,
+      setTimeoutFn,
+    });
+
+    expect(open).toHaveBeenCalledWith('blob:mock', '_blank', 'noopener,noreferrer');
+  });
+});
+
+describe('onBrowsableReportUrlClick', () => {
+  it('prevents default for data:text/html URLs', () => {
+    const preventDefault = jest.fn();
+    onBrowsableReportUrlClick(
+      { preventDefault },
+      'data:text/html;charset=utf-8,%3Ch1%3EReport%3C%2Fh1%3E',
+      {
+        open: jest.fn().mockReturnValue(null),
+        createObjectURL: jest.fn().mockReturnValue('blob:mock'),
+        revokeObjectURL: jest.fn(),
+        setTimeoutFn: jest.fn(),
+      }
+    );
+    expect(preventDefault).toHaveBeenCalled();
+  });
+
+  it('does not prevent default for https URLs', () => {
+    const preventDefault = jest.fn();
+    onBrowsableReportUrlClick({ preventDefault }, 'https://example.com/a');
+    expect(preventDefault).not.toHaveBeenCalled();
   });
 });
 
