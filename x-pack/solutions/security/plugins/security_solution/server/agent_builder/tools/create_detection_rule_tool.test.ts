@@ -771,7 +771,6 @@ describe('createDetectionRuleTool', () => {
       expect(context.attachments.add).not.toHaveBeenCalled();
     });
 
-
     it('returns error when graph creates rule with errors', async () => {
       const mockErrors = ['Error 1', 'Error 2'];
       mockIterativeAgent.invoke.mockResolvedValue({ rule: null, errors: mockErrors });
