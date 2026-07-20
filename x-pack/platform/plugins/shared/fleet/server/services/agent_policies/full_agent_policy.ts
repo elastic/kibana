@@ -976,3 +976,32 @@ export function getBinarySourceSettings(
 
   return config;
 }
+
+/**
+ * Strip proxy_headers and ssl.key from a FullAgentPolicy that was already composed
+ * (e.g. retrieved verbatim from the .fleet-policies index via ?revision=N).
+ * Mutates in place and returns the policy for convenience.
+ */
+export function redactProxySecretsFromPolicy(policy: FullAgentPolicy): FullAgentPolicy {
+  if (policy.outputs) {
+    for (const output of Object.values(policy.outputs)) {
+      delete output.proxy_headers;
+      if (output.ssl) {
+        delete output.ssl.key;
+      }
+    }
+  }
+  if (policy.fleet && 'hosts' in policy.fleet) {
+    delete policy.fleet.proxy_headers;
+    if (policy.fleet.ssl) {
+      delete policy.fleet.ssl.key;
+    }
+  }
+  if (policy.agent?.download) {
+    delete policy.agent.download.proxy_headers;
+    if (policy.agent.download.ssl) {
+      delete (policy.agent.download.ssl as Record<string, unknown>).key;
+    }
+  }
+  return policy;
+}

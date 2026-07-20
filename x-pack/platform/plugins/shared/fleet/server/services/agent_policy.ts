@@ -2200,7 +2200,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     id: string,
     agentVersion: string,
-    options?: { standalone: boolean }
+    options?: { standalone: boolean; redactProxySecrets?: boolean }
   ): Promise<string | null> {
     const fullAgentPolicy = await getFullAgentPolicy(soClient, id, options);
     if (fullAgentPolicy) {

@@ -27,6 +27,7 @@ import {
 import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
+import { redactProxySecretsFromPolicy } from '../../services/agent_policies/full_agent_policy';
 import {
   appContextService,
   agentPolicyService,
@@ -781,6 +782,8 @@ export const getFullAgentPolicy: FleetRequestHandler<
     });
   }
 
+  const canReadSettings = fleetContext.authz.fleet.readSettings;
+
   if (request.query.revision) {
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -795,8 +798,9 @@ export const getFullAgentPolicy: FleetRequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
+    const item = fleetServerPolicy.data as unknown as FullAgentPolicy;
     const body: GetFullAgentPolicyResponse = {
-      item: fleetServerPolicy.data as unknown as FullAgentPolicy,
+      item: canReadSettings ? item : redactProxySecretsFromPolicy(item),
     };
     return response.ok({ body });
   }
@@ -808,7 +812,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
       soClient,
       agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true }
+      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
     );
     if (fullAgentConfigMap) {
       const body: GetFullAgentConfigMapResponse = {
@@ -824,7 +828,6 @@ export const getFullAgentPolicy: FleetRequestHandler<
       });
     }
   } else {
-    const canReadSettings = fleetContext.authz.fleet.readSettings;
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
       redactProxySecrets: !canReadSettings,
@@ -862,6 +865,8 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
     });
   }
 
+  const canReadSettings = fleetContext.authz.fleet.readSettings;
+
   if (request.query.revision) {
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -876,8 +881,11 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
-    const fullAgentPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
-    const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
+    const storedPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
+    const body = fullAgentPolicyToYaml(
+      canReadSettings ? storedPolicy : redactProxySecretsFromPolicy(storedPolicy),
+      yaml
+    );
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,
@@ -892,7 +900,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       soClient,
       agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true }
+      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
     );
     if (!fullAgentConfigMap) {
       return response.customError({
@@ -910,7 +918,6 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       headers,
     });
   } else {
-    const canReadSettings = fleetContext.authz.fleet.readSettings;
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
       redactProxySecrets: !canReadSettings,
