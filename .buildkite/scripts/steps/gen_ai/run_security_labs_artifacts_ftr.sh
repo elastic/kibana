@@ -2,20 +2,10 @@
 
 set -euo pipefail
 
-# This pipeline step needs `vault_get`, which is defined in `vault_fns.sh`.
-# Unlike the normal lifecycle entrypoints, this step's command block doesn't
-# automatically source it in this shell.
-source .buildkite/scripts/common/vault_fns.sh
-source .buildkite/scripts/common/util.sh
-
 # The Security Labs builder fetches article markdown from the internal
 # elastic/security-labs-elastic-co repository, which requires a GitHub token.
-# setup_job_env.sh already exports GITHUB_TOKEN from Vault during the lifecycle,
-# but fall back to fetching it directly if it is missing.
-if [[ -z "${GITHUB_TOKEN:-}" ]]; then
-  export GITHUB_TOKEN="$(vault_get kibanamachine github_token)"
-fi
-
+# Expect GITHUB_TOKEN from pre-command (setup_job_env.sh) so Buildkite's
+# *_TOKEN log redaction applies — do not vault_get mid-command.
 if [[ -z "${GITHUB_TOKEN:-}" || "${GITHUB_TOKEN}" == "null" ]]; then
   echo "ERROR: GITHUB_TOKEN is not set; cannot fetch Security Labs content from GitHub." >&2
   exit 1
