@@ -176,12 +176,11 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('createIndexButton');
         await testSubjects.existOrFail('uploadFileButton');
       },
-      async expectDeprecatedLLMConnectorCardsMissing() {
+      async expectPlaygroundLLMConnectorOptionsExists() {
         await testSubjects.existOrFail('create-connector-flyout');
-        await testSubjects.missingOrFail('.gemini-card');
-        await testSubjects.missingOrFail('.bedrock-card');
-        await testSubjects.missingOrFail('.gen-ai-card');
-        await testSubjects.missingOrFail('.inference-card');
+        await testSubjects.existOrFail('.gemini-card');
+        await testSubjects.existOrFail('.bedrock-card');
+        await testSubjects.existOrFail('.gen-ai-card');
       },
 
       async expectPlaygroundStartChatPageIndexCalloutExists() {
@@ -228,6 +227,10 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async createConnectorFlyoutIsVisible() {
         await testSubjects.existOrFail('create-connector-flyout');
+        await testSubjects.existOrFail('.inference-card');
+        await testSubjects.existOrFail('.bedrock-card');
+        await testSubjects.existOrFail('.gemini-card');
+        await testSubjects.existOrFail('.gen-ai-card');
       },
       async createOpenAiConnector(connectorName: string) {
         await testSubjects.existOrFail('.gen-ai-card');

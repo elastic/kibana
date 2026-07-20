@@ -43,6 +43,7 @@ export default function (ftrContext: FtrProviderContext) {
   const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
+  const openaiConnectorName = 'test-openai-connector';
   const indexName = 'my-test-index';
 
   const log = getService('log');
@@ -105,10 +106,21 @@ export default function (ftrContext: FtrProviderContext) {
       });
 
       describe('without existing LLM connectors', () => {
-        it('deprecated LLM connector types are hidden in the create flyout', async () => {
+        after(async () => {
+          await pageObjects.common.navigateToApp('connectors');
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.deleteConnector(
+            openaiConnectorName
+          );
+
+          await browser.refresh();
+        });
+        it('should be able to set up connectors from flyout', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.clickConnectLLMButton();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFlyoutIsVisible();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectDeprecatedLLMConnectorCardsMissing();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.createOpenAiConnector(
+            openaiConnectorName
+          );
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMText();
         });
       });
       describe('with existing indices', () => {
@@ -331,10 +343,10 @@ export default function (ftrContext: FtrProviderContext) {
       });
 
       describe('connectors enabled on Stack', () => {
-        it('does not show deprecated LLM connectors', async () => {
+        it('has all LLM connectors', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.clickConnectLLMButton();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFlyoutIsVisible();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectDeprecatedLLMConnectorCardsMissing();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundLLMConnectorOptionsExists();
         });
       });
     });

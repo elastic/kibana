@@ -47,6 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let removeOpenAIConnector: () => Promise<void>;
     let createOpenaiConnector: () => Promise<void>;
     let proxy: LlmProxy;
+    const openaiConnectorName = 'test-openai-connector';
     const indexName = 'my-test-index';
 
     before(async () => {
@@ -102,10 +103,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('without existing LLM connectors', () => {
-        it('deprecated LLM connector types are hidden in the create flyout', async () => {
+        after(async () => {
+          await svlSearchNavigation.navigateToLandingPage();
+
+          await pageObjects.solutionNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
+          await pageObjects.svlCommonNavigation.sidenav.clickPanelLink(
+            'management:triggersActionsConnectors'
+          );
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.deleteConnector(
+            openaiConnectorName
+          );
+
+          await browser.refresh();
+        });
+        it('should be able to set up connectors from flyout', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.clickConnectLLMButton();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFlyoutIsVisible();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectDeprecatedLLMConnectorCardsMissing();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.createOpenAiConnector(
+            openaiConnectorName
+          );
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMText();
         });
       });
 
@@ -337,10 +354,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('connectors enabled on serverless search', () => {
-      it('does not show deprecated LLM connectors', async () => {
+      it('has all LLM connectors', async () => {
         await pageObjects.searchPlayground.PlaygroundStartChatPage.clickConnectLLMButton();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFlyoutIsVisible();
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectDeprecatedLLMConnectorCardsMissing();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundLLMConnectorOptionsExists();
       });
     });
   });
