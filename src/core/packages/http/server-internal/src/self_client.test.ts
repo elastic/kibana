@@ -43,7 +43,7 @@ const createFakeRequest = (headers: Record<string, string> = {}): KibanaRequest 
 
 const createClient = ({
   publicBaseUrl = 'https://kibana.example.com/base',
-  authHeaders = { authorization: 'test-scoped-authorization' },
+  authHeaders = { authorization: 'test-auth-token' },
   target = 'auto',
   getHttpConfig = jest.fn().mockReturnValue({
     ssl: { enabled: false, requestCert: false },
@@ -118,7 +118,7 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(request.url).toBe(
       'https://kibana.example.com/base/s/my-space/api/status?foo=bar&multi=one&multi=two'
     );
-    expect(request.headers.get('authorization')).toBe('test-scoped-authorization');
+    expect(request.headers.get('authorization')).toBe('test-auth-token');
     expect(request.headers.get('kbn-version')).toBe('9.9.9');
     expect(request.headers.get('x-kbn-self-call')).toBe('true');
     expect(request.headers.get(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)).toBe('Kibana');
@@ -132,8 +132,8 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(createRequest()).fetch('/api/private-target/private-target-id', {
       method: 'PATCH',
-      query: { secret: 'private-query-value' },
-      body: { secret: 'private-body-value' },
+      query: { sensitive: 'private-query-value' },
+      body: { sensitive: 'private-body-value' },
       headers: { 'x-private-header': 'private-header-value' },
     });
 
@@ -305,11 +305,11 @@ describe('InternalHttpSelfScopedClient', () => {
 
   it('forwards safe request headers without forwarding cookies', async () => {
     const { self } = createClient({
-      authHeaders: { authorization: 'test-scoped-authorization', cookie: 'sid=normalized' },
+      authHeaders: { authorization: 'test-auth-token', cookie: 'sid=normalized' },
     });
     const request = createFakeRequest({
       accept: 'application/json',
-      authorization: 'Bearer attacker',
+      authorization: 'test-token-placeholder',
       cookie: 'sid=attacker',
       host: 'attacker.example',
       origin: 'https://origin.example',
@@ -329,7 +329,7 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(outboundRequest.headers.get('sec-fetch-site')).toBeNull();
     expect(outboundRequest.headers.get('x-elastic-product-origin')).toBe('observability');
     expect(outboundRequest.headers.get('x-kbn-context')).toBe('%7B%7D');
-    expect(outboundRequest.headers.get('authorization')).toBe('test-scoped-authorization');
+    expect(outboundRequest.headers.get('authorization')).toBe('test-auth-token');
     expect(outboundRequest.headers.get('cookie')).toBeNull();
     expect(outboundRequest.headers.get('host')).toBeNull();
     expect(outboundRequest.headers.get('x-elastic-internal-origin')).toBe('Kibana');
