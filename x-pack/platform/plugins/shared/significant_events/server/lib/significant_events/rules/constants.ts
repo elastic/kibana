@@ -1,0 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+// Keep generated signal volume within the Alerting framework's per-execution limits.
+export const MAX_ALERTS_PER_EXECUTION = 1_000;
