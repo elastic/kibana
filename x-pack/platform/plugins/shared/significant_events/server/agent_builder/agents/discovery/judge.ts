@@ -32,7 +32,6 @@ export const createSignificantEventsJudgeAgent = ({
         const availability = await getSignificantEventsAvailability({
           server,
           licensing: server.licensing,
-          uiSettingsClient: context.uiSettings,
         });
 
         return availability.available
@@ -51,8 +50,6 @@ export const createSignificantEventsJudgeAgent = ({
           tool_ids: [
             platformCoreTools.executeEsql,
             platformSignificantEventsTools.searchKnowledgeIndicators,
-            platformSignificantEventsTools.searchEvent,
-            platformSignificantEventsTools.discoveryWrite,
             platformSignificantEventsTools.eventsWrite,
           ],
         },

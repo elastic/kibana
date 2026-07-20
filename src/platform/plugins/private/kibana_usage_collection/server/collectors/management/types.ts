@@ -83,10 +83,12 @@ export interface UsageStats {
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
+  'securitySolution:enableNewFlyout': boolean;
   'securitySolution:enableAssetCriticality': boolean;
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:excludeColdAndFrozenTiersInPrevalence': boolean;
   'securitySolution:enableAssetInventory': boolean;
+  'securitySolution:enableSiemReadiness': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'securitySolution:suppressionBehaviorOnAlertClosure': string;
   'securitySolution:defaultValueReportMinutes': string;
@@ -197,9 +199,6 @@ export interface UsageStats {
   'cases:incrementalIdDisplay:enabled': boolean;
   'cases:maxOpenCasesPerRuleRun': number;
   'observability:enableDiagnosticMode': boolean;
-  'observability:streamsEnableSignificantEvents': boolean;
-  'observability:streamsEnableSignificantEventsDiscovery': boolean;
-  'observability:streamsEnableSignificantEventsAlertingV2': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'agentBuilder:prePromptWorkflowIds': string[];
@@ -211,6 +210,9 @@ export interface UsageStats {
   'observability:streamsSigEventsIndexPatterns': string;
   'observability:streamsSigEventsScheduledDiscoveryEnabled': boolean;
   'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryDetectionBucketIntervalMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryDetectionLookbackMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryTargetCoverageMinutes': number;
   'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': number;
   'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': number;
   'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': number;
