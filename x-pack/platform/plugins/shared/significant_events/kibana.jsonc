@@ -29,8 +29,10 @@
     "optionalPlugins": [
       "agentBuilder",
       "agentBuilderSml",
+      "apmSourcesAccess",
       "cloud",
       "esql",
+      "logsDataAccess",
       "serverless",
       "globalSearch",
       "searchInferenceEndpoints",

@@ -7,8 +7,8 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
+import type { SignificantEventsServer } from '../../types';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
 import { SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
@@ -61,7 +61,10 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
     kibanaVersion: '9.2.0',
     relayClient: hasRelayClient ? { startInstall, fetchClaim, unbind } : undefined,
     core: {
-      savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
+      savedObjects: {
+        getScopedClient: jest.fn().mockReturnValue(soClient),
+        createInternalRepository: jest.fn().mockReturnValue({}),
+      },
       featureFlags: { getBooleanValue },
       http: { basePath: { publicBaseUrl: 'https://kibana.test' }, getServerInfo: jest.fn() },
     },
@@ -72,7 +75,7 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
         getCurrentUser: jest.fn().mockReturnValue({ username: 'admin' }),
       },
     },
-  } as unknown as StreamsServer;
+  } as unknown as SignificantEventsServer;
 
   return { server, soClient, grantAsInternalUser, invalidateAsInternalUser, getBooleanValue };
 }
@@ -111,14 +114,49 @@ describe('SlackAppService', () => {
         request,
         expect.objectContaining({
           metadata: expect.objectContaining({ managed: true, managed_by: 'nightshift-relay' }),
-          kibana_role_descriptors: {
-            nightshift_relay_agent_builder: expect.objectContaining({
-              elasticsearch: { cluster: ['monitor_inference'], indices: [], run_as: [] },
-              kibana: [{ spaces: ['*'], feature: { agentBuilder: ['read'], actions: ['read'] } }],
-            }),
-          },
         })
       );
+
+      const { kibana_role_descriptors: descriptors } = grantAsInternalUser.mock.calls[0][1];
+      const descriptor = descriptors.nightshift_relay_agent_builder;
+
+      expect(descriptor.elasticsearch.cluster).toEqual(['monitor_inference']);
+      expect(descriptor.elasticsearch.run_as).toEqual([]);
+      // Read-only: no descriptor grants any mutating index privilege.
+      const allPrivileges = descriptor.elasticsearch.indices.flatMap(
+        (entry: { privileges: string[] }) => entry.privileges
+      );
+      expect(allPrivileges).not.toEqual(
+        expect.arrayContaining(['write', 'create_doc', 'index', 'all'])
+      );
+      expect(new Set(allPrivileges)).toEqual(new Set(['read', 'view_index_metadata']));
+
+      const allIndexNames = descriptor.elasticsearch.indices.flatMap(
+        (entry: { names: string[] }) => entry.names
+      );
+      // SigEvents storage, stream definitions, and streams alerts source are always present.
+      expect(allIndexNames).toEqual(
+        expect.arrayContaining([
+          '.significant_events*',
+          '.kibana_streams*',
+          '.alerts-streams.alerts-*',
+          '.rule-events*',
+        ])
+      );
+      // Observability defaults are used when the data-access plugins are absent.
+      expect(allIndexNames).toEqual(expect.arrayContaining(['logs-*', 'metrics-*', 'apm-*']));
+
+      // Kibana features are read-only and limited to what converse + workflow status need.
+      expect(descriptor.kibana).toEqual([
+        {
+          spaces: ['*'],
+          feature: {
+            agentBuilder: ['read'],
+            actions: ['read'],
+            workflowsManagement: ['read'],
+          },
+        },
+      ]);
       // The minted key is the caller-supplied credential; no relay-minted
       // secret exists anywhere in the exchange.
       expect(startInstall).toHaveBeenCalledWith({

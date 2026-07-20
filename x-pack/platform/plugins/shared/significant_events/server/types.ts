@@ -44,6 +44,9 @@ import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
+import type { ApmSourcesAccessPluginStart } from '@kbn/apm-sources-access-plugin/server';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
+import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 
 export interface SignificantEventsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
@@ -81,4 +84,16 @@ export interface SignificantEventsPluginStartDependencies {
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   streams: StreamsPluginStart;
+  apmSourcesAccess?: ApmSourcesAccessPluginStart;
+  logsDataAccess?: LogsDataAccessPluginStart;
+}
+
+/**
+ * The significant events server object reuses Streams' shared server contract and
+ * carries the extra optional data-access contracts used to resolve the managed
+ * Slack-app key's observability read privileges at connect time.
+ */
+export interface SignificantEventsServer extends StreamsServer {
+  apmSourcesAccess?: ApmSourcesAccessPluginStart;
+  logsDataAccess?: LogsDataAccessPluginStart;
 }

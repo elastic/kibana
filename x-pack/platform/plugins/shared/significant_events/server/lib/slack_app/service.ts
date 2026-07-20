@@ -6,9 +6,10 @@
  */
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import { SavedObjectsClient, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RelayRequestError, type RelayClientContract } from '@kbn/actions-plugin/server';
+import type { SignificantEventsServer } from '../../types';
+import { buildManagedKeyRoleDescriptors } from './resolve_managed_key_role_descriptors';
 import type {
   SlackAppConnectResponse,
   SlackAppDisconnectResponse,
@@ -27,8 +28,18 @@ import { getKibanaUrl } from './get_kibana_url';
 export class SlackAppService {
   private readonly logger: Logger;
 
-  constructor(private readonly server: StreamsServer) {
+  constructor(private readonly server: SignificantEventsServer) {
     this.logger = server.logger.get('slack-app');
+  }
+
+  /**
+   * Internal saved-objects client used to resolve the deployment's configured
+   * observability sources (APM indices, log sources) when minting the managed key.
+   * Internal (not request-scoped) so resolution never depends on the connecting
+   * user's saved-object privileges.
+   */
+  private getInternalSoClient(): SavedObjectsClientContract {
+    return new SavedObjectsClient(this.server.core.savedObjects.createInternalRepository());
   }
 
   /**
@@ -118,21 +129,24 @@ export class SlackAppService {
     // only happens on success.
     const existingConnection = await this.readConnection(soClient);
 
-    // Mint a managed, least-privilege ES API key scoped to Agent Builder read. The key
+    // Mint a managed, read-only, least-privilege ES API key for the Slack agent. The key
     // is granted on behalf of the connecting user but survives their deletion (ES keys
-    // outlive their owner). The connecting user must hold `agentBuilder:read`, otherwise
-    // the granted key is under-privileged (grant intersects with the owner's privileges).
-    // `monitor_inference` and the `actions` feature are required for converse to list
-    // inference endpoints and stack connectors (see getConnectorList).
+    // outlive their owner). Because the grant intersects with the owner's privileges, the
+    // connecting user must themselves hold every privilege below or the key is silently
+    // under-privileged. Observability read patterns are resolved from the deployment's own
+    // APM-sources / log-sources config at connect time (not hardcoded) so custom-configured
+    // sources are covered; the agent tools query them as this key (asCurrentUser).
+    const kibanaRoleDescriptors = await buildManagedKeyRoleDescriptors({
+      soClient: this.getInternalSoClient(),
+      logger: this.logger,
+      apmSourcesAccess: this.server.apmSourcesAccess,
+      logsDataAccess: this.server.logsDataAccess,
+    });
+
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
       metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
-      kibana_role_descriptors: {
-        nightshift_relay_agent_builder: {
-          elasticsearch: { cluster: ['monitor_inference'], indices: [], run_as: [] },
-          kibana: [{ spaces: ['*'], feature: { agentBuilder: ['read'], actions: ['read'] } }],
-        },
-      },
+      kibana_role_descriptors: kibanaRoleDescriptors,
     });
 
     if (!apiKeyResult) {
