@@ -85,10 +85,13 @@ Dashboard query expressions and filter values are recorded without redaction. Ma
 
 When `metadata.errors` is not empty, `error.type` is `panel_errors` and `error.message` contains the error list as JSON.
 
-![Discover results for dashboard refresh events with blocking panel errors](images/dashboard_user_activity_errors.png)
+:::::{image} images/dashboard_user_activity_errors.png
+:alt: Discover results for dashboard refresh events with blocking panel errors
+:screenshot:
+:::::
 
 :::::{note}
-This example uses a custom `user-activity-logs` index. To make user activity events available in Discover, configure a JSON file appender under `user_activity.appenders`, then [ingest the ECS-formatted log file with {{agent}}](docs-content://solutions/observability/logs/ecs-formatted-application-logs.md#add-the-custom-logs-integration-to-your-project). Your index or data stream name depends on your ingestion configuration.
+This example uses a custom `user-activity-logs` index. User activity events are emitted through the configured logging appender. To explore them in Discover, route the events to {{es}} using your logging pipeline. For one option, refer to [ingesting ECS-formatted logs with {{agent}}](docs-content://solutions/observability/logs/ecs-formatted-application-logs.md#step-1-add-the-custom-logs-integration-to-your-project-ecs). Your index or data stream name depends on your ingestion configuration.
 :::::
 
 ## Logs schema
