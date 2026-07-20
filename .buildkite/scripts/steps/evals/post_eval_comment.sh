@@ -61,6 +61,8 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
 
   echo "--- Comparing eval results for suite: ${suite_id}"
 
+  _suite_key_safe="$(printf '%s' "$suite_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+
   BASE_COMPARE_ARGS=(
     --suite "$suite_id"
     --format markdown
@@ -111,7 +113,7 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
       else
         COMPARE_ARGS+=(--baseline-branch main)
         if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
-          COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-refresh-block")
+          COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-${_suite_key_safe}-refresh-block")
         fi
         if node scripts/evals compare "$CONNECTOR_COMPOSITE" "${COMPARE_ARGS[@]}"; then
           HAS_RESULTS="true"
@@ -141,7 +143,7 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
     else
       COMPARE_ARGS+=(--baseline-branch main)
       if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
-        COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-refresh-block")
+        COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-${_suite_key_safe}-refresh-block")
       fi
       if node scripts/evals compare "$SUITE_EXECUTION_ID" "${COMPARE_ARGS[@]}"; then
         HAS_RESULTS="true"
