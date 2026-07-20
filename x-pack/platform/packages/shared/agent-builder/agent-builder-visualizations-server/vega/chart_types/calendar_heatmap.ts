@@ -5,6 +5,24 @@
  * 2.0.
  */
 
+import type { VegaLiteChartTypeEntry } from './types';
+
+export const chartType: VegaLiteChartTypeEntry = {
+  dialect: 'vega-lite',
+  id: 'calendar_heatmap',
+  prompt: {
+    selection: {
+      title: 'Calendar heatmap (week × weekday grid)',
+      description:
+        'GitHub-style calendar heatmap: a `rect` mark with an ordinal `x` for the week and an ordinal `y` for the weekday (explicitly sorted Mon→Sun via `sort`), colored by a sequential `scheme`.',
+      guideline: 'Select when the structure is a calendar heatmap (week × weekday grid).',
+    },
+  },
+  example: {
+    load: () => import('./calendar_heatmap').then((module) => module.spec),
+  },
+};
+
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
   autosize: { type: 'fit', contains: 'padding' },

@@ -15,7 +15,7 @@ import {
   formatReferenceExamples,
   loadReferenceExamples,
   selectReferenceExamples,
-} from './reference_examples';
+} from './chart_types/select_reference_examples';
 
 /**
  * Build a mock ScopedModel whose structured-output selector returns `exampleIds`

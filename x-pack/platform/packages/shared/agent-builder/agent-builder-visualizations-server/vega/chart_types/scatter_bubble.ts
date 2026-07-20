@@ -5,6 +5,24 @@
  * 2.0.
  */
 
+import type { VegaLiteChartTypeEntry } from './types';
+
+export const chartType: VegaLiteChartTypeEntry = {
+  dialect: 'vega-lite',
+  id: 'scatter_bubble',
+  prompt: {
+    selection: {
+      title: 'Scatter / bubble plot (encoded size)',
+      description:
+        'Relate two measures per entity with a `point` mark: quantitative `x` and `y`, a third measure as `size` (bubble), and a category as `color`. Disable zero baselines (`scale.zero = false`) when comparing magnitudes.',
+      guideline: 'Select when the structure is a scatter/bubble with encoded size (and optional color).',
+    },
+  },
+  example: {
+    load: () => import('./scatter_bubble').then((module) => module.spec),
+  },
+};
+
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
   autosize: { type: 'fit', contains: 'padding' },

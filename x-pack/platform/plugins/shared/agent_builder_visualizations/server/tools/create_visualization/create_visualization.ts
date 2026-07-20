@@ -12,15 +12,25 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   VISUALIZATION_ATTACHMENT_TYPE,
+  normalizeVegaConfig,
   type VisualizationAttachmentData,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
+  ESQL_TOOLS_GROUNDING_ONLY_GUIDANCE,
+  GROUND_INDEX_AGENT_GUIDANCE,
+  NEVER_HAND_AUTHOR_VEGA_GUIDANCE,
+  RENDERER_VEGA_SCHEMA_DESCRIBE,
+  RENDERER_VEGA_WHEN_GUIDANCE,
+  VEGA_SCOPE_AGENT_GUIDANCE,
   buildLensConfig,
   buildVegaConfig,
+  formatRawVegaAllowlist,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
+
+const rawVegaAllowlist = formatRawVegaAllowlist();
 
 /**
  * Pull the prior Lens config out of an existing attachment, when it is a Lens
@@ -34,14 +44,6 @@ const getExistingLensConfig = (
   }
   const candidate = data.visualization;
   return candidate && typeof candidate === 'object' ? (candidate as VisualizationConfig) : null;
-};
-
-const getExistingVegaSpec = (data: VisualizationAttachmentData | undefined): string | undefined => {
-  if (!data || data.renderer !== 'vega') {
-    return undefined;
-  }
-  const candidate = data.visualization?.spec;
-  return typeof candidate === 'string' ? candidate : undefined;
 };
 
 const createVisualizationSchema = z.object({
@@ -63,12 +65,7 @@ const createVisualizationSchema = z.object({
     .describe(
       '(optional) ID of an existing visualization attachment to update. If provided, the tool will read the existing configuration and modify it based on the query.'
     ),
-  renderer: z
-    .enum(['lens', 'vega'])
-    .optional()
-    .describe(
-      '(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Ignored when updating an existing attachment (edits keep the existing renderer).'
-    ),
+  renderer: z.enum(['lens', 'vega']).optional().describe(RENDERER_VEGA_SCHEMA_DESCRIBE),
   chartType: z
     .nativeEnum(SupportedChartType)
     .optional()
@@ -90,21 +87,23 @@ export const createVisualizationTool = (): BuiltinToolDefinition<
   return {
     id: platformCoreTools.createVisualization,
     type: ToolType.builtin,
-    description: `Create or update a visualization from a natural language description. Supports BOTH standard Lens charts AND custom Vega-Lite visualizations (the Vega-Lite grammar only — NOT full Vega). Prefer this tool over telling the user a chart cannot be built whenever the request fits Lens or Vega-Lite; you do not author Vega specs by hand or ask the user to paste anything. If a request genuinely needs full Vega (custom signals/interactivity, imperative transforms, or bespoke rendering), it is not supported yet — be honest with the user and offer alternatives instead of producing a broken chart.
-
-You choose how to render the request via the "renderer" parameter:
-- "lens" (the default when omitted) for a standard Lens chart (${Object.values(
+    description: `REQUIRED tool for creating or updating visualizations from natural language (Lens or Vega-family, including allowlisted Raw Vega: ${rawVegaAllowlist}). Generates ES|QL, authors/validates the spec, and stores an attachment. Default renderer is Lens (${Object.values(
       SupportedChartType
     ).join(', ')}).
-- "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
+
+${RENDERER_VEGA_WHEN_GUIDANCE}
+
+${NEVER_HAND_AUTHOR_VEGA_GUIDANCE} ${ESQL_TOOLS_GROUNDING_ONLY_GUIDANCE}
+
+${VEGA_SCOPE_AGENT_GUIDANCE}
 
 This tool will:
-1. If attachment_id is provided, read the existing visualization from that attachment (edits keep the same renderer)
-2. Generate an ES|QL query if not provided
-3. Generate and validate the visualization (Lens config or Vega-Lite spec) for the chosen renderer
-4. Store the result as an attachment (creating new or updating existing) for future modifications
+1. Read an existing attachment when attachment_id is provided
+2. Generate ES|QL if not provided
+3. Generate and validate the Lens or Vega visualization
+4. Store the result as an attachment
 
-Ground first: make sure the target index exists and every field you reference is real before calling this tool. If you omit "index" the tool auto-discovers one, but that fails when the referenced fields are invented or absent from the cluster (do NOT assume APM/metrics schemas are present). For multi-panel requests, resolve the index once up front and pass the same "index" to every call rather than firing several index-less calls in parallel.`,
+${GROUND_INDEX_AGENT_GUIDANCE}`,
     schema: createVisualizationSchema,
     tags: [],
     handler: async (
@@ -150,7 +149,10 @@ Ground first: make sure the target index exists and every field you reference is
         let visualizationData: VisualizationAttachmentData & { chart_type?: SupportedChartType };
 
         if (renderer === 'vega') {
-          const existingSpec = getExistingVegaSpec(existingData);
+          const existingSpec =
+            existingData?.renderer === 'vega'
+              ? normalizeVegaConfig(existingData.visualization)?.spec
+              : undefined;
           const { spec, title, esqlQuery } = await buildVegaConfig({
             nlQuery,
             index,

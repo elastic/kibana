@@ -12,6 +12,7 @@ import {
 } from '@kbn/agent-builder-visualizations-server';
 import {
   VEGA_VIS_TYPE,
+  normalizeVegaConfig,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
@@ -53,12 +54,6 @@ const resolveRenderer = (
   return requestedRenderer ?? 'lens';
 };
 
-/** Pull the serialized Vega spec out of an existing Vega panel's attachment config. */
-const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string | undefined => {
-  const spec = (existingPanel?.config as { spec?: unknown } | undefined)?.spec;
-  return typeof spec === 'string' ? spec : undefined;
-};
-
 /**
  * Default implementation of the generate core's `ResolvePanelContent` seam for
  * `vis` panels.
@@ -66,7 +61,7 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
  * Builds inline visualization panel content from natural language / ES|QL using
  * Kibana plumbing (model provider, ES client, the visualization builders). It
  * resolves to a Lens panel (`buildLensConfig`) or, when the caller asks
- * for Vega, a `vega` panel carrying a serialized Vega-Lite spec in its config
+ * for Vega, a `vega` panel carrying a serialized Vega-family spec in its config
  * (`buildVegaConfig`), and returns it to the core through the type-agnostic
  * {@link PanelContentAttempt} contract.
  *
@@ -106,7 +101,7 @@ export const createVisPanelResolver = ({
           nlQuery,
           index,
           esql,
-          existingSpec: getExistingVegaSpec(existingPanel),
+          existingSpec: normalizeVegaConfig(existingPanel?.config)?.spec,
           chartType,
           modelProvider,
           logger,

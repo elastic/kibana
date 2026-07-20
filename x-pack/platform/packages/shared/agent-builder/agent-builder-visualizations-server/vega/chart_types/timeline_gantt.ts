@@ -5,6 +5,24 @@
  * 2.0.
  */
 
+import type { VegaLiteChartTypeEntry } from './types';
+
+export const chartType: VegaLiteChartTypeEntry = {
+  dialect: 'vega-lite',
+  id: 'timeline_gantt',
+  prompt: {
+    selection: {
+      title: 'Timeline / Gantt (ranged bars)',
+      description:
+        'Show the start-to-end span of each item as a horizontal ranged bar: a `bar` mark with a temporal `x` (start) and `x2` (end) against a nominal `y` (the item). Pre-sort by start and set `sort: null` on `y`.',
+      guideline: 'Select when the structure is a timeline/Gantt with ranged bars (x/x2).',
+    },
+  },
+  example: {
+    load: () => import('./timeline_gantt').then((module) => module.spec),
+  },
+};
+
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
   autosize: { type: 'fit', contains: 'padding' },

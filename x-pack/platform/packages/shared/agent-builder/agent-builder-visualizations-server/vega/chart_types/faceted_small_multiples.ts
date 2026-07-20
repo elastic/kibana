@@ -5,6 +5,24 @@
  * 2.0.
  */
 
+import type { VegaLiteChartTypeEntry } from './types';
+
+export const chartType: VegaLiteChartTypeEntry = {
+  dialect: 'vega-lite',
+  id: 'faceted_small_multiples',
+  prompt: {
+    selection: {
+      title: 'Faceted small multiples (one panel per category)',
+      description:
+        'Split one chart into a grid of small multiples: a top-level `facet` (the splitting field) plus a per-cell `spec`, with `columns` as a SIBLING of `facet`/`spec` (never inside `facet`). Auto-sizing does not apply to facets, so set explicit `width`/`height` on the inner `spec`. Keep the facet field low-cardinality so the grid stays readable.',
+      guideline: 'Select when the structure is faceted small multiples (facet + per-cell spec).',
+    },
+  },
+  example: {
+    load: () => import('./faceted_small_multiples').then((module) => module.spec),
+  },
+};
+
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
   data: {

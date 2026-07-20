@@ -7,83 +7,94 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
+import {
+  ESQL_TOOLS_GROUNDING_ONLY_GUIDANCE,
+  GROUND_INDEX_AGENT_GUIDANCE,
+  NEVER_HAND_AUTHOR_VEGA_GUIDANCE,
+  RENDERER_VEGA_WHEN_GUIDANCE,
+  VEGA_SCOPE_AGENT_GUIDANCE,
+  VIZ_SKILL_DEFER_DASHBOARD_GUIDANCE,
+  formatRawVegaAllowlist,
+  formatRawVegaAllowlistCompact,
+  formatRawVegaCatalogIds,
+  getChartTypeSelectionPromptContent,
+} from '@kbn/agent-builder-visualizations-server';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 const chartTypeSelectionContent = getChartTypeSelectionPromptContent();
+const rawVegaAllowlist = formatRawVegaAllowlist();
+const rawVegaAllowlistCompact = formatRawVegaAllowlistCompact();
+const rawVegaCatalogIds = formatRawVegaCatalogIds();
 
 export const visualizationCreationSkill = defineSkillType({
   id: 'visualization-creation',
   name: 'visualization-creation',
   basePath: 'skills/platform/visualization',
-  description:
-    'Create standalone or reusable visualizations from grounded index and field context.',
+  description: `Create standalone Lens or Vega visualizations (including Raw Vega ${rawVegaAllowlistCompact}) via create_visualization. For dashboards, use dashboard-management instead. ${NEVER_HAND_AUTHOR_VEGA_GUIDANCE}`,
   content: `## When to Use This Skill
 
 Use this skill when:
-- A user asks for one or more standalone visualizations (chart, metric, trend, breakdown, distribution).
-- You explicitly want a reusable visualization attachment ID for later use.
+- A user asks for one or more **standalone** visualizations (chart, metric, trend, breakdown, distribution) with **no dashboard** in the request.
+- A user asks for a standalone **Vega**, **Vega-Lite**, or allowlisted Raw Vega chart (${rawVegaAllowlist}) (again: no dashboard).
+- You explicitly want a reusable visualization attachment ID for later use outside a dashboard.
 - A user asks to update an existing visualization by attachment ID.
 
 Do **not** use this skill when:
 - The user only needs raw documents or table/query output without a visualization.
 - The user first needs broad data discovery and exploration across unknown sources.
 - The request is about persisted saved objects instead of in-memory attachment workflows.
-- The primary goal is to compose or update a dashboard. Use the dashboard-management skill for dashboard panel creation and layout.
+- ${VIZ_SKILL_DEFER_DASHBOARD_GUIDANCE}
+
+## Hard Rules (do not violate)
+
+- **Always** create charts with **${
+    platformCoreTools.createVisualization
+  }**. That tool authors, validates, and stores the visualization attachment.
+- ${RENDERER_VEGA_WHEN_GUIDANCE}
+- ${NEVER_HAND_AUTHOR_VEGA_GUIDANCE}
+- ${ESQL_TOOLS_GROUNDING_ONLY_GUIDANCE} At most, use generate_esql / execute_esql to ground fields; then still call ${
+    platformCoreTools.createVisualization
+  } with the natural-language \`query\` (and optional \`esql\` only when you must).
 
 ## Available Tools
 
 - **${
     platformCoreTools.createVisualization
-  }**: Create or update visualization configurations and return \`attachment_id\` when persistence succeeds. It generates and validates the ES|QL internally from your natural-language \`query\` — you do not need to build ES|QL yourself for the common case.
+  }**: Create or update visualization configurations and return \`attachment_id\` when persistence succeeds. It generates and validates the ES|QL and the Lens/Vega spec internally from your natural-language \`query\`.
 - **${
     platformCoreTools.generateEsql
-  }**: Optional. Only for genuinely complex aggregations/joins you want to control and validate precisely; pass the result to ${
+  }**: Optional. Only for genuinely complex aggregations/joins you want to control precisely; pass the result to ${
     platformCoreTools.createVisualization
   } via \`esql\`. Not a required step before every visualization.
-- **${platformCoreTools.executeEsql}**: Validate ES|QL and inspect sample result shape.
+- **${
+    platformCoreTools.executeEsql
+  }**: Validate ES|QL and inspect sample result shape (grounding only).
 
 ## Visualization Creation Workflow
 
 1. **Ground the index and fields FIRST (required)**
-   - Before the first ${
-     platformCoreTools.createVisualization
-   } call, know the target index and confirm every field you reference exists in its mapping.
-   - If the index and fields are already grounded in context, continue directly.
-   - If not, discover them first: list indices and inspect the index mapping (optionally probe with ${
+   - ${GROUND_INDEX_AGENT_GUIDANCE}
+   - If not already grounded, list indices and inspect the mapping (optionally probe with ${
      platformCoreTools.executeEsql
-   }). Always use real field names from the index mapping — never invent index or field names, and never assume a domain schema (APM, metrics, etc.) is present; verify against the actual cluster.
-   - ${
-     platformCoreTools.createVisualization
-   } auto-discovers an index only when you omit \`index\`, and that discovery FAILS when the referenced fields do not exist in any index. Guessing fields and relying on auto-discovery is the most common cause of failures — ground first.
+   }). Never invent field names or assume a domain schema (APM, metrics, etc.) is present.
 
 2. **Prepare visualization intent**
-   - Default path: pass the natural-language \`query\` to ${
+   - Default: pass the natural-language \`query\` to ${
      platformCoreTools.createVisualization
-   } and let it generate the ES|QL. This is the right choice for almost every request — do **not** call ${
+   } (including ${rawVegaCatalogIds}) — do **not** call ${
     platformCoreTools.generateEsql
   } first just to build a query.
-   - Only for genuinely complex aggregations or joins you want to control precisely: pre-generate with ${
+   - Only for genuinely complex aggregations/joins: pre-generate with ${
      platformCoreTools.generateEsql
-   }, optionally validate the shape with ${platformCoreTools.executeEsql}, then hand the query to ${
-    platformCoreTools.createVisualization
-  } via \`esql\`.
+   }, optionally validate with ${platformCoreTools.executeEsql}, then pass \`esql\`.
 
 3. **Call ${platformCoreTools.createVisualization}**
-   - Provide:
-     - \`query\` (required, specific and field-accurate)
-     - \`index\` (strongly recommended — pass the grounded index; omitting it forces auto-discovery, which fails for ungrounded/invented fields)
-     - \`renderer\` (\`lens\` or \`vega\`, optional — see "Choosing the Renderer"; omit to default to Lens)
-     - \`chartType\` (optional, only if confident)
-     - \`esql\` (optional, when you have a validated ES|QL)
-     - \`attachment_id\` (optional, only when updating an existing visualization)
-   - For multi-panel requests, resolve the index (and validate the fields) ONCE up front, then call ${
-     platformCoreTools.createVisualization
-   } once per panel WITH that \`index\`. Do **not** fan out several index-less calls in parallel — a single failed auto-discovery fails all of them identically.
+   - Provide \`query\` (include chart words like ${rawVegaCatalogIds} when asked), \`index\` (strongly recommended), \`renderer\` / \`chartType\` / \`esql\` / \`attachment_id\` as needed.
+   - For multi-panel requests, resolve the index once, then call once per panel WITH that \`index\`.
 
 4. **Interpret output and preserve artifacts**
-   - Each successful call returns \`data.attachment_id\` and \`data.version\`. Save them: they identify the persisted attachment for rendering and for later updates (pass \`attachment_id\` back to update it in place).
-   - If \`data.attachment_id\` is missing, persistence failed; report that and treat the result as non-renderable and non-reusable.
+   - Save \`data.attachment_id\` and \`data.version\` for rendering and later updates.
+   - If the user later asks for a **dashboard**, switch skills: ${VIZ_SKILL_DEFER_DASHBOARD_GUIDANCE}
 
 ## Inline Rendering Guidelines
 
@@ -110,10 +121,17 @@ Good prompt patterns (specific and field-accurate):
 - "Show average <numeric field> over time grouped by <keyword field>"
 - "Display top 10 <keyword field> values by document count as a bar chart"
 - "Show a single metric for count where <field> is <value>"
+- "Create a Vega sankey of counts from <source field> to <dest field>"
+- "Create a Vega sunburst of <hierarchy fields>"
+- "Create a Vega radar of <category field> by count"
+  (same pattern for any allowlisted Raw Vega chart: ${rawVegaAllowlist})
 
 Poor prompt patterns:
 - "Show CPU" / "Make a chart" / "Display everything" (too vague)
-- Prompts naming fields you have not confirmed exist (e.g. assuming \`system.cpu.total.pct\`, \`transaction.duration.us\`, or \`service.name\` without checking the mapping — these belong to specific integrations that may not be installed)
+- Prompts naming fields you have not confirmed exist
+- Hand-writing Vega JSON after generate_esql / execute_esql instead of calling ${
+    platformCoreTools.createVisualization
+  }
 
 Always reference real fields from the index mapping.
 
@@ -121,15 +139,12 @@ Always reference real fields from the index mapping.
 
 ${
   platformCoreTools.createVisualization
-} renders with **Lens** (standard charts) or **Vega** (custom Vega-Lite). Decide and pass \`renderer\`:
+} renders with **Lens** (standard charts) or **Vega** (Vega-Lite, plus allowlisted Raw Vega).
 
-- Pass \`renderer: "vega"\` when:
-  - The user explicitly asks for a Vega or Vega-Lite visualization, OR
-  - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
+- ${RENDERER_VEGA_WHEN_GUIDANCE}
 - Otherwise pass \`renderer: "lens"\` (the default when omitted) with the best-fitting \`chartType\`.
-- When updating an existing attachment, \`renderer\` is ignored — edits keep the existing renderer.
 
-**Scope — "Vega" here means Vega-Lite, not full Vega.** The Vega renderer only supports the Vega-Lite grammar. It cannot do full Vega features such as custom signals / imperative interactivity, arbitrary data transforms or expressions, or bespoke rendering. If a request fits neither a Lens chart type nor the Vega-Lite grammar, do **not** force a broken or misleading chart. Be honest with the user: explain that the requested chart is not supported in Vega-Lite and that full Vega is not available yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
+${VEGA_SCOPE_AGENT_GUIDANCE}
 
 ## Chart Type Guidance
 
@@ -145,8 +160,7 @@ When uncertain, omit \`chartType\` and let ${
 
 - **Requested field missing:** suggest nearest valid fields from the index mapping.
 - **ES|QL returns no data:** explain and suggest broader time range/filters.
-- **Unsupported chart request:** pick closest supported type and explain the substitution.
-- **Needs full Vega (beyond Vega-Lite):** do not fake it or ship a broken chart. State plainly that the requested chart is not supported in Vega-Lite yet and that full Vega is not available, then offer alternatives (closest Vega-Lite approximation, a Lens chart, or multiple charts) and let the user choose.
+- **Unsupported chart request:** pick closest supported type and explain the substitution (see Vega scope above for unsupported Raw Vega).
 `,
   referencedContent: [
     {
@@ -161,6 +175,28 @@ When uncertain, omit \`chartType\` and let ${
   "query": "Show average system.cpu.total.pct over time grouped by host.name",
   "index": "metrics-system.cpu-default",
   "chartType": "xy"
+}
+\`\`\`
+
+## Create a Vega sankey (allowlisted Raw Vega)
+
+After grounding the index/fields, call create_visualization directly — do not generate ES|QL or hand-write a Vega spec:
+
+\`\`\`json
+{
+  "query": "Create a Vega sankey of flight counts from OriginCountry to DestCountry",
+  "index": "kibana_sample_data_flights",
+  "renderer": "vega"
+}
+\`\`\`
+
+## Create a Vega sunburst or radar
+
+\`\`\`json
+{
+  "query": "Create a Vega sunburst of flight counts from OriginCountry to DestCountry",
+  "index": "kibana_sample_data_flights",
+  "renderer": "vega"
 }
 \`\`\`
 

@@ -8,6 +8,34 @@
 export { buildVegaConfig } from './build_config';
 export type { BuildVegaConfigParams, BuildVegaConfigResult } from './build_config';
 export { createVegaGraph } from './graph';
-export { normalizeVegaSpec, VEGA_LITE_SCHEMA } from './normalize_spec';
+export {
+  normalizeVegaSpec,
+  rewriteRawVegaExpressions,
+  VEGA_LITE_SCHEMA,
+  VEGA_SCHEMA,
+  CANONICAL_ESQL_SOURCE_NAME,
+} from './normalize_spec';
+export { sanitizePanelVegaSpec } from './sanitize_panel_vega_spec';
+export type { SanitizePanelVegaSpecResult } from './sanitize_panel_vega_spec';
 export { escapeVegaFieldReferences } from './field_escaping';
 export { createAuthorVegaSpecPrompt } from './prompts';
+export type { VegaDialect, VegaCatalogId } from './dialect';
+export {
+  DASHBOARD_NEW_VIS_PANEL_GUIDANCE,
+  DASHBOARD_OMIT_ESQL_GUIDANCE,
+  DASHBOARD_PANEL_ESQL_SCHEMA_DESCRIBE,
+  DASHBOARD_PANEL_INPUTS_GUIDANCE,
+  DASHBOARD_SKILL_DEFER_STANDALONE_GUIDANCE,
+  DASHBOARD_VEGA_CONFIG_VERBATIM_GUIDANCE,
+  DASHBOARD_VIS_CONFIG_SCHEMA_DESCRIBE,
+  ESQL_TOOLS_GROUNDING_ONLY_GUIDANCE,
+  GROUND_INDEX_AGENT_GUIDANCE,
+  NEVER_HAND_AUTHOR_VEGA_GUIDANCE,
+  RENDERER_VEGA_SCHEMA_DESCRIBE,
+  RENDERER_VEGA_WHEN_GUIDANCE,
+  VEGA_SCOPE_AGENT_GUIDANCE,
+  VIZ_SKILL_DEFER_DASHBOARD_GUIDANCE,
+  formatRawVegaAllowlist,
+  formatRawVegaAllowlistCompact,
+  formatRawVegaCatalogIds,
+} from './agent_guidance';

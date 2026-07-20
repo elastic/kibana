@@ -52,6 +52,7 @@ export const isValidateSpecAction = (action: VegaAction): action is ValidateSpec
   action.type === 'validate_spec';
 
 // Node name constants
+export const CLASSIFY_DIALECT_NODE = 'classify_dialect';
 export const GENERATE_ESQL_NODE = 'generate_esql_query';
 export const SELECT_EXAMPLES_NODE = 'select_reference_examples';
 export const AUTHOR_SPEC_NODE = 'author_spec';

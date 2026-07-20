@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DASHBOARD_PANEL_INPUTS_GUIDANCE } from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
@@ -33,14 +34,9 @@ For an existing dashboard:
 
 ## Panel Inputs
 
-- Use \`source: "request"\` to create or edit a Lens panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a Lens \`config\` for a new visualization.
-- Use \`source: "config"\` only for content you have already resolved (an existing visualization's config, or markdown). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
+${DASHBOARD_PANEL_INPUTS_GUIDANCE}
 
 ${dashboardDesignGuidancePrompt}
-
-## ES|QL
-
-Omit the \`esql\` field on visualization panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`.
 
 ## Controls
 

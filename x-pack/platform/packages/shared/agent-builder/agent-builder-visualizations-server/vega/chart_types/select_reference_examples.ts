@@ -10,11 +10,13 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { Logger } from '@kbn/logging';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { vegaLiteReferenceTypes } from '../chart_type_registry';
+import type { VegaLiteChartTypeEntry } from './types';
 
+/** Adapter shape used by load/format helpers (Lens-like selection metadata + load). */
 export interface VegaReferenceExample {
   readonly id: string;
   readonly title: string;
-  /** Shown to the model to guide selection. */
   readonly description: string;
   readonly load: () => Promise<Record<string, unknown>>;
 }
@@ -26,51 +28,16 @@ export interface LoadedVegaReferenceExample {
   readonly spec: Record<string, unknown>;
 }
 
-// Spec bodies are referenced (not imported) so they load only when selected.
-export const VEGA_REFERENCE_EXAMPLES: readonly VegaReferenceExample[] = [
-  {
-    id: 'layered_combo_dual_axis',
-    title: 'Combination chart (bars + overlaid line, dual axis)',
-    description:
-      'Two metrics over a shared axis: bars for one, an overlaid line for the other, on independent y-scales. Share the x encoding at the top level, set `sort: null` on any shared categorical axis, give each layer its own y `axis.title`, and put `resolve.scale.y = "independent"` at the top level.',
-    load: () => import('./layered_combo_dual_axis').then((module) => module.spec),
-  },
-  {
-    id: 'faceted_small_multiples',
-    title: 'Faceted small multiples (one panel per category)',
-    description:
-      'Split one chart into a grid of small multiples: a top-level `facet` (the splitting field) plus a per-cell `spec`, with `columns` as a SIBLING of `facet`/`spec` (never inside `facet`). Auto-sizing does not apply to facets, so set explicit `width`/`height` on the inner `spec`. Keep the facet field low-cardinality so the grid stays readable.',
-    load: () => import('./faceted_small_multiples').then((module) => module.spec),
-  },
-  {
-    id: 'scatter_bubble',
-    title: 'Scatter / bubble plot (encoded size)',
-    description:
-      'Relate two measures per entity with a `point` mark: quantitative `x` and `y`, a third measure as `size` (bubble), and a category as `color`. Disable zero baselines (`scale.zero = false`) when comparing magnitudes.',
-    load: () => import('./scatter_bubble').then((module) => module.spec),
-  },
-  {
-    id: 'heatmap',
-    title: 'Heatmap (two categories + color measure)',
-    description:
-      'Density across two dimensions with a `rect` mark: an ordinal/nominal `x` and `y`, and a sequential `color` scheme for the measure.',
-    load: () => import('./heatmap').then((module) => module.spec),
-  },
-  {
-    id: 'timeline_gantt',
-    title: 'Timeline / Gantt (ranged bars)',
-    description:
-      'Show the start-to-end span of each item as a horizontal ranged bar: a `bar` mark with a temporal `x` (start) and `x2` (end) against a nominal `y` (the item). Pre-sort by start and set `sort: null` on `y`.',
-    load: () => import('./timeline_gantt').then((module) => module.spec),
-  },
-  {
-    id: 'calendar_heatmap',
-    title: 'Calendar heatmap (week × weekday grid)',
-    description:
-      'GitHub-style calendar heatmap: a `rect` mark with an ordinal `x` for the week and an ordinal `y` for the weekday (explicitly sorted Mon→Sun via `sort`), colored by a sequential `scheme`.',
-    load: () => import('./calendar_heatmap').then((module) => module.spec),
-  },
-];
+const toReferenceExample = (entry: VegaLiteChartTypeEntry): VegaReferenceExample => ({
+  id: entry.id,
+  title: entry.prompt.selection.title,
+  description: entry.prompt.selection.description,
+  load: entry.example.load,
+});
+
+/** @deprecated Use vegaLiteReferenceTypes from chart_type_registry */
+export const VEGA_REFERENCE_EXAMPLES: readonly VegaReferenceExample[] =
+  vegaLiteReferenceTypes.map(toReferenceExample);
 
 const MAX_SELECTED_EXAMPLES = 2;
 
@@ -226,4 +193,22 @@ export const buildReferenceExamplesBlock = async ({
     logger?.warn(`Reference-example loading failed; authoring without examples: ${message}`);
     return '';
   }
+};
+
+/** Build a Raw Vega reference block from a registry chart type entry. */
+export const formatRawChartTypeExample = async (
+  entry: {
+    prompt: { selection: { title: string; description: string } };
+    example: { load: () => Promise<Record<string, unknown>>; description?: string };
+  }
+): Promise<string> => {
+  const loaded = await loadReferenceExamples([
+    {
+      id: entry.prompt.selection.title,
+      title: entry.prompt.selection.title,
+      description: entry.example.description ?? entry.prompt.selection.description,
+      load: entry.example.load,
+    },
+  ]);
+  return formatReferenceExamples(loaded);
 };

@@ -5,6 +5,24 @@
  * 2.0.
  */
 
+import type { VegaLiteChartTypeEntry } from './types';
+
+export const chartType: VegaLiteChartTypeEntry = {
+  dialect: 'vega-lite',
+  id: 'layered_combo_dual_axis',
+  prompt: {
+    selection: {
+      title: 'Combination chart (bars + overlaid line, dual axis)',
+      description:
+        'Two metrics over a shared axis: bars for one, an overlaid line for the other, on independent y-scales. Share the x encoding at the top level, set `sort: null` on any shared categorical axis, give each layer its own y `axis.title`, and put `resolve.scale.y = "independent"` at the top level.',
+      guideline: 'Select when the structure is a layered combination chart with dual/independent y-scales.',
+    },
+  },
+  example: {
+    load: () => import('./layered_combo_dual_axis').then((module) => module.spec),
+  },
+};
+
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
   autosize: { type: 'fit', contains: 'padding' },

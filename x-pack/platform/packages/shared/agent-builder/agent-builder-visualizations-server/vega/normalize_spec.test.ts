@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { normalizeVegaSpec, VEGA_LITE_SCHEMA } from './normalize_spec';
+import {
+  CANONICAL_ESQL_SOURCE_NAME,
+  normalizeVegaSpec,
+  VEGA_LITE_SCHEMA,
+  VEGA_SCHEMA,
+} from './normalize_spec';
 
 const ESQL = 'FROM logs-* | STATS count = COUNT() BY status';
+const HIERARCHY_ESQL =
+  'FROM logs-* | STATS value = COUNT() BY id, parent, name | KEEP id, parent, name, value';
 
 describe('normalizeVegaSpec', () => {
   it('pins the Vega-Lite v6 schema', () => {
@@ -273,6 +280,261 @@ describe('normalizeVegaSpec', () => {
     expect(result.title).toBe('My chart');
     expect(result.config).toEqual({ view: { stroke: null } });
     expect(spec).toEqual(snapshot);
+  });
+
+  describe('Raw Vega Dialect', () => {
+    it('pins the Vega v5 schema and injects a Canonical ES|QL source dataset', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: 'https://vega.github.io/schema/vega/v5.json',
+          marks: [{ type: 'arc' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      expect(result.$schema).toBe(VEGA_SCHEMA);
+      expect(result.data).toEqual([
+        {
+          name: CANONICAL_ESQL_SOURCE_NAME,
+          url: { '%type%': 'esql', '%context%': true, query: HIERARCHY_ESQL },
+        },
+      ]);
+      expect(result.width).toBeUndefined();
+      expect(result.height).toBeUndefined();
+      expect(result.autosize).toBeUndefined();
+    });
+
+    it('strips root encode so radar-style centering cannot offset into a corner', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          encode: {
+            enter: {
+              x: { signal: 'width / 2' },
+              y: { signal: 'height / 2' },
+            },
+          },
+          autosize: { type: 'none', contains: 'padding' },
+          padding: 40,
+          marks: [{ type: 'line' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      expect(result.encode).toBeUndefined();
+      expect(result.autosize).toBeUndefined();
+      expect(result.padding).toBe(40);
+      expect(result.marks).toEqual([{ type: 'line' }]);
+    });
+
+    it('rewrites categorical color schemes to the Kibana category range', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          scales: [
+            {
+              name: 'color',
+              type: 'ordinal',
+              range: { scheme: 'category10' },
+              domain: { data: 'source', field: 'stk1' },
+            },
+            {
+              name: 'series',
+              type: 'ordinal',
+              range: { scheme: 'elastic' },
+            },
+            {
+              name: 'y',
+              type: 'linear',
+              range: 'height',
+            },
+          ],
+          marks: [{ type: 'rect' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      const scales = result.scales as Array<Record<string, unknown>>;
+      // Named "category" range — Kibana binds it to the theme palette at render.
+      // Do not store scheme "elastic" (unknown to stock Vega / headless validator).
+      expect(scales[0].range).toBe('category');
+      expect(scales[1].range).toBe('category');
+      expect(scales[2].range).toBe('height');
+    });
+
+    it('rewrites invented top-level scheme names onto the Kibana category range', () => {
+      // Models often emit `"scheme": "pinkblue"` on the scale (invalid) instead of
+      // range.scheme; that fails headless validation with "Unrecognized scheme name".
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          scales: [
+            {
+              name: 'color',
+              type: 'ordinal',
+              scheme: 'pinkblue',
+              domain: { data: 'source', field: 'stk1' },
+            },
+          ],
+          marks: [{ type: 'rect' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      const scales = result.scales as Array<Record<string, unknown>>;
+      expect(scales[0].range).toBe('category');
+      expect(scales[0]).not.toHaveProperty('scheme');
+    });
+
+    it('keeps an explicit hex color range (user-requested custom palette)', () => {
+      const pinks = ['#FFB6D9', '#FF69B4', '#FF1493'];
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          scales: [
+            {
+              name: 'color',
+              type: 'ordinal',
+              range: pinks,
+              domain: { data: 'source', field: 'stk1' },
+            },
+          ],
+          marks: [{ type: 'rect' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      const scales = result.scales as Array<Record<string, unknown>>;
+      expect(scales[0].range).toEqual(pinks);
+    });
+
+    it('rewrites mistyped Scale( helpers and unicode arrows in expressions', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          signals: [{ name: 'radius', update: 'min(width, height) / 2 - 40' }],
+          marks: [
+            {
+              type: 'text',
+              encode: {
+                update: {
+                  x: {
+                    signal: "Scale('x', datum.stack) + Bandwidth('x')",
+                  },
+                  tooltip: {
+                    signal: "datum.stk1 + ' → ' + datum.stk2",
+                  },
+                },
+              },
+            },
+          ],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      const mark = (result.marks as Array<Record<string, unknown>>)[0] as {
+        encode: { update: { x: { signal: string }; tooltip: { signal: string } } };
+      };
+      expect(mark.encode.update.x.signal).toBe("scale('x', datum.stack) + bandwidth('x')");
+      expect(mark.encode.update.tooltip.signal).toBe("datum.stk1 + ' -> ' + datum.stk2");
+    });
+
+    it('rewrites Sankey y.domain [0,1] onto stacked nodes.y1', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          data: [
+            { name: 'source' },
+            { name: 'nodes', source: 'source', transform: [] },
+            { name: 'groups', source: 'nodes', transform: [] },
+            { name: 'edges', source: 'nodes', transform: [] },
+          ],
+          scales: [
+            {
+              name: 'y',
+              type: 'linear',
+              range: 'height',
+              nice: true,
+              zero: true,
+              domain: [0, 1],
+            },
+          ],
+        },
+        esqlQuery: 'FROM logs-* | STATS size = COUNT() BY stk1 = a, stk2 = b',
+        dialect: 'vega',
+      });
+
+      const yScale = (result.scales as Array<Record<string, unknown>>).find((s) => s.name === 'y');
+      expect(yScale?.domain).toEqual({ data: 'nodes', field: 'y1' });
+    });
+
+    it('keeps sequential schemes such as blues for continuous color', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          $schema: VEGA_SCHEMA,
+          scales: [
+            {
+              name: 'color',
+              type: 'ordinal',
+              range: { scheme: 'blues' },
+            },
+          ],
+          marks: [{ type: 'arc' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      const scales = result.scales as Array<Record<string, unknown>>;
+      expect(scales[0].range).toEqual({ scheme: 'blues' });
+    });
+
+    it('keeps derived datasets that source the Canonical table and drops extra urls', () => {
+      const result = normalizeVegaSpec({
+        spec: {
+          data: [
+            { name: 'source', url: { '%type%': 'esql', query: 'FROM evil' } },
+            {
+              name: 'tree',
+              source: 'source',
+              transform: [{ type: 'stratify', key: 'id', parentKey: 'parent' }],
+            },
+            { name: 'remote', url: 'https://example.com/x.json' },
+          ],
+          marks: [{ type: 'arc' }],
+        },
+        esqlQuery: HIERARCHY_ESQL,
+        dialect: 'vega',
+      });
+
+      expect(result.data).toEqual([
+        {
+          name: CANONICAL_ESQL_SOURCE_NAME,
+          url: { '%type%': 'esql', '%context%': true, query: HIERARCHY_ESQL },
+        },
+        {
+          name: 'tree',
+          source: 'source',
+          transform: [{ type: 'stratify', key: 'id', parentKey: 'parent' }],
+        },
+      ]);
+    });
+
+    it('infers Raw Vega from $schema when dialect is omitted', () => {
+      const result = normalizeVegaSpec({
+        spec: { $schema: VEGA_SCHEMA, marks: [{ type: 'arc' }] },
+        esqlQuery: HIERARCHY_ESQL,
+      });
+
+      expect(result.$schema).toBe(VEGA_SCHEMA);
+      expect(Array.isArray(result.data)).toBe(true);
+    });
   });
 
   describe('shared-scale layered legend conflicts', () => {

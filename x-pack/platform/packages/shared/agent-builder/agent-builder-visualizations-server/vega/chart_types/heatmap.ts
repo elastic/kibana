@@ -5,6 +5,24 @@
  * 2.0.
  */
 
+import type { VegaLiteChartTypeEntry } from './types';
+
+export const chartType: VegaLiteChartTypeEntry = {
+  dialect: 'vega-lite',
+  id: 'heatmap',
+  prompt: {
+    selection: {
+      title: 'Heatmap (two categories + color measure)',
+      description:
+        'Density across two dimensions with a `rect` mark: an ordinal/nominal `x` and `y`, and a sequential `color` scheme for the measure.',
+      guideline: 'Select when the structure is a two-category density grid colored by a measure.',
+    },
+  },
+  example: {
+    load: () => import('./heatmap').then((module) => module.spec),
+  },
+};
+
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
   autosize: { type: 'fit', contains: 'padding' },

@@ -29,7 +29,7 @@ export interface BuildVegaConfigParams {
 }
 
 export interface BuildVegaConfigResult {
-  /** Serialized, render-ready Vega-Lite specification. */
+  /** Serialized, render-ready Vega-family specification (Vega-Lite or Raw Vega). */
   spec: string;
   /** Visualization / panel title from the authoring response schema. */
   title?: string;
@@ -38,11 +38,12 @@ export interface BuildVegaConfigResult {
 }
 
 /**
- * Orchestrate Vega-Lite spec generation: optionally reuse a caller-provided
+ * Orchestrate Vega-family spec generation: optionally reuse a caller-provided
  * ES|QL query (dropped if it fails validation so the graph regenerates one), on
  * edits seed generation with the query recovered from the existing spec so the
  * graph can modify it when the instruction needs different data, run the
- * generation graph, and surface a clear error if no spec is produced.
+ * generation graph (Dialect gate → ES|QL → author → validate), and surface a
+ * clear error if no spec is produced.
  */
 export const buildVegaConfig = async ({
   nlQuery,

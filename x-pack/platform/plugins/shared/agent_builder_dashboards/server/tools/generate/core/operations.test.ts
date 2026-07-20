@@ -244,6 +244,47 @@ describe('executeDashboardOperations', () => {
     expect(result.failures).toEqual([]);
   });
 
+  it('heals double-encoded Vega specs and rewrites Scale( when adding by value', async () => {
+    const inner = JSON.stringify(
+      {
+        marks: [
+          {
+            type: 'text',
+            encode: { update: { x: { signal: "Scale('x', datum.stack)" } } },
+          },
+        ],
+      },
+      null,
+      2
+    );
+    const doubleEncoded = JSON.stringify(inner).slice(1, -1);
+
+    // Tool boundary parses/heals once via schema transform; execution stores that result.
+    const operation = dashboardOperationSchema.parse({
+      operation: 'add_panels',
+      panels: [
+        {
+          source: 'config',
+          type: 'vis',
+          config: { spec: doubleEncoded },
+          grid: { x: 0, y: 0, w: 48, h: 14 },
+        },
+      ],
+    });
+
+    const result = await executeDashboardOperations({
+      dashboardData: { title: 'Test dashboard', description: 'Description', panels: [] },
+      operations: [operation],
+      logger,
+    });
+
+    expect(result.failures).toEqual([]);
+    const panel = result.dashboardData.panels[0];
+    expect(panel.type).toBe(VEGA_VIS_TYPE);
+    const stored = JSON.parse((panel.config as { spec: string }).spec);
+    expect(stored.marks[0].encode.update.x.signal).toBe("scale('x', datum.stack)");
+  });
+
   it('adds mixed panel kinds in input order across top-level and section targets', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
@@ -1884,6 +1925,75 @@ describe('executeDashboardOperations', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it('rejects a vis config-source Vega panel whose spec is not JSON', () => {
+    const result = dashboardOperationSchema.safeParse({
+      operation: 'add_panels',
+      panels: [
+        {
+          source: 'config',
+          type: 'vis',
+          config: { spec: 'not-a-vega-object' },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a double-encoded Vega spec string at the schema boundary', () => {
+    const inner = JSON.stringify({ mark: 'line' }, null, 2);
+    const doubleEncoded = JSON.stringify(inner).slice(1, -1);
+    const result = dashboardOperationSchema.safeParse({
+      operation: 'add_panels',
+      panels: [
+        {
+          source: 'config',
+          type: 'vis',
+          config: { spec: doubleEncoded },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('returns the healed Vega spec from schema parse (single sanitize)', () => {
+    const inner = JSON.stringify(
+      {
+        marks: [
+          {
+            type: 'text',
+            encode: { update: { x: { signal: "Scale('x', datum.stack)" } } },
+          },
+        ],
+      },
+      null,
+      2
+    );
+    const doubleEncoded = JSON.stringify(inner).slice(1, -1);
+    const result = dashboardOperationSchema.safeParse({
+      operation: 'add_panels',
+      panels: [
+        {
+          source: 'config',
+          type: 'vis',
+          config: { spec: doubleEncoded },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+    const panel = result.data.panels[0] as { config: { spec: string } };
+    const stored = JSON.parse(panel.config.spec);
+    expect(stored.marks[0].encode.update.x.signal).toBe("scale('x', datum.stack)");
   });
 });
 

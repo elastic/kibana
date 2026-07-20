@@ -12,6 +12,12 @@ import {
   VEGA_VIS_TYPE,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
+import {
+  DASHBOARD_PANEL_ESQL_SCHEMA_DESCRIBE,
+  DASHBOARD_VIS_CONFIG_SCHEMA_DESCRIBE,
+  RENDERER_VEGA_SCHEMA_DESCRIBE,
+  sanitizePanelVegaSpec,
+} from '@kbn/agent-builder-visualizations-server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
@@ -51,9 +57,11 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
   renderer?: VisualizationRenderer;
 }
 
-const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((ctx) => {
-  const config = ctx.value;
-
+/**
+ * Validate by-value vis config and, for Vega `{ spec }`, heal once here so
+ * `buildPanelContent` can store the parsed result without re-sanitizing.
+ */
+const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).transform((config, ctx) => {
   if ('visualization' in config) {
     ctx.issues.push({
       code: 'custom',
@@ -61,11 +69,13 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
         'config looks like a whole visualization attachment. Pass only its `visualization` field (a Lens API config, or a Vega `{ spec }` config), not the entire attachment.',
       input: config,
     });
-    return;
+    return z.NEVER;
   }
 
   // A Vega visualization's `visualization` field is a `{ spec }` config: accept
   // it by value and bound the serialized spec, matching the attachment schema.
+  // Agents often double-encode that string when packing generate_dashboard; heal
+  // one layer and rewrite mistyped Scale(/Bandwidth( before the panel is stored.
   if ('spec' in config) {
     const { spec } = config as { spec?: unknown };
     if (typeof spec !== 'string' || spec.length === 0) {
@@ -74,14 +84,34 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
         message: 'Vega panel config must provide a non-empty `spec` string.',
         input: config,
       });
-    } else if (spec.length > MAX_VEGA_SPEC_LENGTH) {
+      return z.NEVER;
+    }
+    if (spec.length > MAX_VEGA_SPEC_LENGTH) {
       ctx.issues.push({
         code: 'custom',
         message: `Vega panel \`spec\` must be at most ${MAX_VEGA_SPEC_LENGTH} characters.`,
         input: config,
       });
+      return z.NEVER;
     }
-    return;
+    const sanitized = sanitizePanelVegaSpec(spec);
+    if (!sanitized.ok) {
+      ctx.issues.push({
+        code: 'custom',
+        message: sanitized.message,
+        input: config,
+      });
+      return z.NEVER;
+    }
+    if (sanitized.spec.length > MAX_VEGA_SPEC_LENGTH) {
+      ctx.issues.push({
+        code: 'custom',
+        message: `Vega panel \`spec\` must be at most ${MAX_VEGA_SPEC_LENGTH} characters.`,
+        input: config,
+      });
+      return z.NEVER;
+    }
+    return { ...config, spec: sanitized.spec };
   }
 
   if (!('type' in config)) {
@@ -91,7 +121,10 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
         'config is neither a Lens API config (missing a top-level `type`) nor a Vega config (missing `spec`). Pass the `visualization` field read from a visualization attachment.',
       input: config,
     });
+    return z.NEVER;
   }
+
+  return config;
 });
 
 /**
@@ -102,9 +135,7 @@ export const visPanelConfigInputSchema = z.object({
   source: z.literal('config'),
   type: z.literal('vis'),
   grid: panelGridSchema,
-  config: visPanelConfigSchema.describe(
-    'Already-resolved visualization config, passed by value from a visualization attachment\'s `visualization` field: either a Lens API config (has a top-level `type`) or a Vega config (`{ spec }`). Do not hand-build a config for a new visualization here — use source: "request" instead.'
-  ),
+  config: visPanelConfigSchema.describe(DASHBOARD_VIS_CONFIG_SCHEMA_DESCRIBE),
 });
 
 /**
@@ -124,12 +155,7 @@ export const panelRequestSchema = z.object({
     .string()
     .max(2048)
     .describe('A natural language query describing the desired visualization.'),
-  renderer: z
-    .enum(['lens', 'vega'])
-    .optional()
-    .describe(
-      '(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Ignored when editing an existing panel (edits keep the existing renderer).'
-    ),
+  renderer: z.enum(['lens', 'vega']).optional().describe(RENDERER_VEGA_SCHEMA_DESCRIBE),
   index: z
     .string()
     .max(256)
@@ -143,13 +169,7 @@ export const panelRequestSchema = z.object({
     .describe(
       '(optional) The type of chart to create as indicated by the user. If not provided, the LLM will suggest the best chart type.'
     ),
-  esql: z
-    .string()
-    .max(4096)
-    .optional()
-    .describe(
-      '(optional) A validated ES|QL query from a prior tool result or explicit user input. Omit this field when composing new visualizations — the tool generates the query from the natural language query. NEVER write or invent an ES|QL query yourself.'
-    ),
+  esql: z.string().max(4096).optional().describe(DASHBOARD_PANEL_ESQL_SCHEMA_DESCRIBE),
 });
 
 export type PanelRequestInput = z.infer<typeof panelRequestSchema>;
@@ -182,7 +202,14 @@ export type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;
 export const visPanelDefinition = definePanelType({
   embeddableType: LENS_EMBEDDABLE_TYPE,
   buildPanelContent: (config) => {
-    const isVegaConfig = typeof (config as { spec?: unknown })?.spec === 'string';
-    return { type: isVegaConfig ? VEGA_VIS_TYPE : LENS_EMBEDDABLE_TYPE, config };
+    const rawSpec = (config as { spec?: unknown })?.spec;
+    if (typeof rawSpec !== 'string') {
+      return { type: LENS_EMBEDDABLE_TYPE, config };
+    }
+    // Schema transform already sanitized `config.spec` (heal + hardenStoredVegaSpec).
+    return {
+      type: VEGA_VIS_TYPE,
+      config,
+    };
   },
 });

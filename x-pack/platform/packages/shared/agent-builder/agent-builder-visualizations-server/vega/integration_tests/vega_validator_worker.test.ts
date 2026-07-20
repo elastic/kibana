@@ -87,6 +87,47 @@ describe('vega_validator_worker', () => {
   // survives; the headless render must not fetch it (blind SSRF / local-file
   // read from the Kibana server). Validation still passes: a blocked load is a
   // Vega warning, not a spec rejection, and the dataset is simply left empty.
+  // Kibana registers scheme "elastic" in the browser Vega parser; the headless
+  // validator must too, so a model-emitted (or pre-normalize) Raw Vega color
+  // scale with scheme "elastic" does not fail with "Unrecognized scheme name".
+  it('accepts Raw Vega scheme "elastic" (registered like Kibana renderer)', async () => {
+    const result = await new Promise<WorkerResponse>((resolve) => {
+      worker.once('message', resolve);
+      worker.postMessage({
+        spec: {
+          $schema: 'https://vega.github.io/schema/vega/v5.json',
+          width: 100,
+          height: 100,
+          data: [{ name: 'source', values: [{ k: 'a' }, { k: 'b' }] }],
+          scales: [
+            {
+              name: 'color',
+              type: 'ordinal',
+              domain: { data: 'source', field: 'k' },
+              range: { scheme: 'elastic' },
+            },
+          ],
+          marks: [
+            {
+              type: 'symbol',
+              from: { data: 'source' },
+              encode: {
+                update: {
+                  x: { value: 10 },
+                  y: { value: 10 },
+                  fill: { scale: 'color', field: 'k' },
+                },
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.error).toBeUndefined();
+  });
+
   it('does not fetch an external lookup.from.data.url during validation', async () => {
     const server: Server = createServer((_req, res) => res.end('[]'));
     await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
