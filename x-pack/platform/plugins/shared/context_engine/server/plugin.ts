@@ -65,6 +65,8 @@ export class ContextEnginePlugin
     });
 
     const internalSoClient = coreStart.savedObjects.createInternalRepository();
+    // globalAsScopedToClient reads from the global SO (config-global), not space-scoped SOs.
+    // To enable startup registration via YAML, use uiSettings.globalOverrides, not uiSettings.overrides.
     const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(internalSoClient);
     const isEnabled = await globalUiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
 
