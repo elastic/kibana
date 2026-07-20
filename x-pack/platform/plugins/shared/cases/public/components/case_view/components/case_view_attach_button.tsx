@@ -11,6 +11,7 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import type { CaseUI } from '../../../../common/ui/types';
 import { UploadFileModal } from '../../attachments/file/upload_file_modal';
+import { getFilesFromComments } from '../../attachments/file/utils';
 import { AttachSavedObjectModalLazy } from '../../attachments/common/saved_object/attach_saved_object_modal_lazy';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useTimelineContext } from '../../timeline_context/use_timeline_context';
@@ -83,6 +84,11 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
     setActiveModal('savedObject');
   }, [closePopover]);
 
+  const existingFiles = useMemo(
+    () => getFilesFromComments(caseData.comments, caseData.owner),
+    [caseData.comments, caseData.owner]
+  );
+
   const attachmentsFlagEnabled = KibanaServices.getConfig()?.attachments?.enabled === true;
 
   const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
@@ -148,7 +154,9 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
-      {activeModal === 'file' && <UploadFileModal caseId={caseData.id} onClose={closeModal} />}
+      {activeModal === 'file' && (
+        <UploadFileModal caseId={caseData.id} existingFiles={existingFiles} onClose={closeModal} />
+      )}
       {activeModal === 'timeline' && SelectTimelineModal && (
         <SelectTimelineModal onSelect={onSelectTimeline} onClose={closeModal} />
       )}
