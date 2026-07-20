@@ -144,9 +144,9 @@ export function getPathForServiceDetail(
   if (!payload.serviceOverviewTab) {
     const overviewQuery = {
       ...query,
-      ...(anomalyThreshold !== undefined ? { anomalyThreshold } : {}),
+      ...{ anomalyThreshold },
       comparisonEnabled: payloadComparisonEnabled ?? isComparisonEnabledByDefault,
-      ...(offset !== undefined ? { offset } : {}),
+      ...{ offset },
     };
     if (payload.isMobileAgentName) {
       return apmRouter.link('/mobile-services/{serviceName}/overview', {
