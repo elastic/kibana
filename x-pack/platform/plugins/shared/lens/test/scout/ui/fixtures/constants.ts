@@ -40,6 +40,15 @@ export const KBN_ARCHIVE_PATHS = {
       GOAL: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/agg_based/goal.json`,
       TABLE: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/agg_based/table.json`,
       HEATMAP: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/agg_based/heatmap.json`,
+      NAVIGATION: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/agg_based/navigation.json`,
+    },
+  },
+} as const;
+
+export const VISUALIZATION_TITLES = {
+  OPEN_IN_LENS: {
+    AGG_BASED: {
+      NAVIGATION_LINE: 'Visualize navigation - Line',
     },
   },
 } as const;
