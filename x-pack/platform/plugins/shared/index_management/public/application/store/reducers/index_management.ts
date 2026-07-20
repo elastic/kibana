@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineReducers } from 'redux';
+import { combineReducers } from 'redux-v4';
 import { indices } from './indices';
 import { rowStatus } from './row_status';
 import { tableState } from './table_state';

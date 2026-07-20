@@ -174,6 +174,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableSiemReadiness': {
+    type: 'boolean',
+    _meta: { description: 'Allows users to enable/disable the SIEM Readiness feature.' },
+  },
   'securitySolution:enableCloudConnector': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -801,25 +805,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Maximum number of cases the Cases connector can open during a single rule run.',
     },
   },
-  'observability:streamsEnableSignificantEvents': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable significant events in streams.',
-    },
-  },
-  'observability:streamsEnableSignificantEventsDiscovery': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Significant events discovery in Streams.',
-    },
-  },
-  'observability:streamsEnableSignificantEventsAlertingV2': {
-    type: 'boolean',
-    _meta: {
-      description:
-        'Back Streams Significant events queries with Alerting v2 (kind: signal) instead of the streams.rules.esql rule type.',
-    },
-  },
   'observability:streamsEnableContentPacks': {
     type: 'boolean',
     _meta: {
@@ -869,6 +854,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: {
       description:
         'Non-default value of the scheduled Significant Events detection interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryTargetCoverageMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events target coverage window (minutes).',
     },
   },
   'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': {
