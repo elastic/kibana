@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout/ui';
 import {
   ROLLED_UP_MEDIAN_WARNING,
   TSDB_DATA_VIEW_ID,
+  TSDB_DOWNSAMPLED_DATA_VIEW_ID,
   TSDB_ES_ARCHIVE,
   TSDB_INDEX,
   TSDB_TIME_RANGE,
@@ -18,7 +19,6 @@ import {
 
 test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnostic }, () => {
   let downsampledTargetIndex = '';
-  let downsampledDataViewId = '';
   const downsampledDataViewTitle = `${TSDB_INDEX},${TSDB_INDEX}_downsampled`;
   const createdDataViewIds: string[] = [];
 
@@ -43,15 +43,16 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
       isStream: false,
     });
     const { data: downsampleDataView } = await apiServices.dataViews.create({
+      id: TSDB_DOWNSAMPLED_DATA_VIEW_ID,
       title: downsampledDataViewTitle,
       timeFieldName: '@timestamp',
       override: true,
     });
-    downsampledDataViewId = downsampleDataView.id;
     createdDataViewIds.push(downsampleDataView.id);
   });
 
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, uiSettings }) => {
+    await uiSettings.set({ defaultIndex: TSDB_DATA_VIEW_ID });
     await browserAuth.loginAsPrivilegedUser();
   });
 
@@ -73,7 +74,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
   }) => {
     await pageObjects.lens.openFullEditor();
     const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
-    // field list may be slow to render after data view switch
+    // field list may be slow to render after Lens loads the data view
     await fieldLocator.waitFor({ state: 'visible', timeout: 10_000 });
     await fieldLocator.dragTo(page.testSubj.locator('workspace-drag-drop-prompt'));
 
@@ -90,14 +91,16 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
   test('defaults to average and shows warnings for rolled-up metrics', async ({
     page,
     pageObjects,
+    uiSettings,
   }) => {
+    await uiSettings.set({ defaultIndex: TSDB_DOWNSAMPLED_DATA_VIEW_ID });
     await pageObjects.lens.openFullEditor();
-    await pageObjects.lens.switchDataPanelDataView({
-      id: downsampledDataViewId,
-      title: downsampledDataViewTitle,
-    });
+    await expect(page.testSubj.locator('lns_layerIndexPatternLabel')).toHaveAttribute(
+      'title',
+      downsampledDataViewTitle
+    );
     const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
-    // field list may be slow to render after data view switch
+    // field list may be slow to render after Lens loads the data view
     await fieldLocator.waitFor({ state: 'visible', timeout: 10_000 });
     await fieldLocator.dragTo(page.testSubj.locator('workspace-drag-drop-prompt'));
 
@@ -251,9 +254,13 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
       .locator('indexPattern-dimension-field')
       .getByTestId('comboBoxInput')
       .click();
+    const optionsList = page.getByRole('listbox');
+    await expect(optionsList).toBeVisible();
+    await expect.poll(() => optionsList.getByRole('option').count()).toBeGreaterThan(0);
+
     // role="presentation" is EUI's combobox group label — no data-test-subj available
     await expect(
-      page.locator('[role="presentation"]').filter({ hasText: 'Time series dimensions' })
+      optionsList.locator('[role="presentation"]').filter({ hasText: 'Time series dimensions' })
     ).toHaveCount(0);
     await pageObjects.lens.closeDimensionEditor();
   });
