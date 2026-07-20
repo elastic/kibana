@@ -253,6 +253,10 @@ export const useGetGroupSelector = ({
   }, [dispatch, groupingId, settings]);
 
   return useMemo(() => {
+    if (settings?.hideGroupSelector) {
+      return null;
+    }
+
     return (
       <GroupSelector
         groupingId={groupingId}
@@ -277,5 +281,6 @@ export const useGetGroupSelector = ({
     title,
     onOpenTracker,
     groupSettings,
+    settings?.hideGroupSelector,
   ]);
 };

@@ -24,7 +24,7 @@ import { Grouping as GroupingComponent } from '../components/grouping';
  */
 export interface UseGrouping<T> {
   getGrouping: (props: DynamicGroupingProps<T>) => React.ReactElement;
-  groupSelector: React.ReactElement<GroupSelectorProps>;
+  groupSelector: React.ReactElement<GroupSelectorProps> | null;
   selectedGroups: string[];
   setSelectedGroups: (selectedGroups: string[]) => void;
 }

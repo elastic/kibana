@@ -410,6 +410,17 @@ describe('Group Selector Hooks', () => {
       });
     });
 
+    it('Returns null when hideGroupSelector is true', () => {
+      const { result } = renderHook(() =>
+        useGetGroupSelector({
+          ...defaultArgs,
+          settings: { hideGroupSelector: true },
+        })
+      );
+
+      expect(result.current).toBeNull();
+    });
+
     describe('enforced groups', () => {
       it('throws error when "none" is in enforcedGroups', () => {
         const settings = {
