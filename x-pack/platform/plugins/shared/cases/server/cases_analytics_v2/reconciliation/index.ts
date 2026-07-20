@@ -331,8 +331,10 @@ export async function resetReconciliationTask({
   intervalMinutes,
   initialState = {},
 }: ResetReconciliationTaskArgs): Promise<void> {
-  await scheduleReconciliationTask({ taskManager, logger, intervalMinutes });
+  // Both steps live inside the try so this function's "never throws" contract is local and
+  // self-evident, rather than depending on `scheduleReconciliationTask` swallowing its own errors.
   try {
+    await scheduleReconciliationTask({ taskManager, logger, intervalMinutes });
     await taskManager.bulkUpdateState([RECONCILIATION_TASK_ID], () => initialState);
   } catch (err) {
     logger.warn(

@@ -545,7 +545,12 @@ permanent, not a transient window, until the case's next real edit.
 
 To close this, the migration fires a one-shot hook when its case
 backfill reaches a terminal state (fully complete **or** gives up after
-the failure cap). The hook calls
+the failure cap). Note the give-up case: the nudge still fires, and the
+full walk faithfully mirrors whatever is currently in the SOs — that
+re-indexes the cases that _were_ backfilled but does **not** mean the
+backfill succeeded for every case. Cases that never backfilled stay
+without `extended_fields` until a later Kibana restart re-runs the
+migration to completion (which fires the nudge again). The hook calls
 `CasesAnalyticsV2Service.triggerBackfillReconciliation()`, which clears
 the reconciliation cursor so the **next tick runs a single full
 backfill walk** (no `updated_at` filter) and mirrors the freshly
