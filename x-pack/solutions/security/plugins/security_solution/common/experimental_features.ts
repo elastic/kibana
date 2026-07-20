@@ -126,7 +126,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics surfaces such as the entity flyout, and registers the
    * `security.entity` unified cases attachment type.
    */
-  entityAttachmentsEnabled: false,
+  entityAttachmentsEnabled: true,
 
   /**
    * Enables AI rule creation feature

@@ -6,55 +6,67 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
+import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import {
   ADD_TO_NEW_CASE_TEST_ID,
   ADD_TO_EXISTING_CASE_TEST_ID,
   ENTITY_TAB_TABLE_TEST_ID,
-  ENTITY_TAB_EMPTY_TEST_ID,
 } from '../../../../../../common/cases/attachments/entity/test_ids';
 
 /**
  * Page object for entity attachment Cases UI interactions:
  * - Entity flyout Take Action popover (Add to new/existing case)
  * - Cases new-case creation flyout
- * - Case view Entities tab
+ * - Case view Attachments tab + the "Entities" attachment accordion
+ *
+ * Note: the Cases UI uses the unified attachment framework, so there is no
+ * dedicated "Entities" tab. Entity attachments render as an accordion
+ * (`case-view-attachment-accordion-security.entity`) inside the consolidated
+ * Attachments tab, and the accordion is only rendered when the case has at
+ * least one entity attachment.
  */
 export class EntityCasesPage {
-  // Alerts table (used to scope entity link lookups to a specific alert row)
-  public readonly alertsTable: Locator;
-
   // Entity flyout – Take Action popover
   public readonly takeActionButton: Locator;
   public readonly addToNewCaseItem: Locator;
   public readonly addToExistingCaseItem: Locator;
 
-  // Case view – Entities tab
-  public readonly entitiesTab: Locator;
+  // Case view – Attachments tab + Entities accordion
+  public readonly attachmentsTab: Locator;
+  public readonly attachmentsContainer: Locator;
+  public readonly entityAccordion: Locator;
   public readonly entityTabTable: Locator;
-  public readonly entityTabEmpty: Locator;
 
   // New-case creation flyout (rendered by the Cases plugin)
   public readonly createCaseNameInput: Locator;
+  public readonly createCaseDescriptionInput: Locator;
   public readonly createCaseSubmitButton: Locator;
 
   // Toast link that navigates to the newly created case
   public readonly caseToastLink: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.alertsTable = page.testSubj.locator('alertsTableIsLoaded');
-
     this.takeActionButton = page.testSubj.locator('take-action-button');
     this.addToNewCaseItem = page.testSubj.locator(ADD_TO_NEW_CASE_TEST_ID);
     this.addToExistingCaseItem = page.testSubj.locator(ADD_TO_EXISTING_CASE_TEST_ID);
 
-    this.entitiesTab = page.testSubj.locator('case-view-tab-title-entities');
+    this.attachmentsTab = page.testSubj.locator('case-view-tab-title-attachments');
+    this.attachmentsContainer = page.testSubj.locator('case-view-attachments');
+    // The unified attachment framework renders one accordion per registered type
+    // that has a tab view AND a non-zero count; the accordion id is the attachment
+    // type id (`security.entity`).
+    this.entityAccordion = page.testSubj.locator(
+      `case-view-attachment-accordion-${SECURITY_ENTITY_ATTACHMENT_TYPE}`
+    );
     this.entityTabTable = page.testSubj.locator(ENTITY_TAB_TABLE_TEST_ID);
-    this.entityTabEmpty = page.testSubj.locator(ENTITY_TAB_EMPTY_TEST_ID);
 
     // Scope to the Cases plugin's stable `caseTitle` form row, then the single
     // `<input>` within it — avoids matching stray `data-test-subj="input"` fields
     // elsewhere on the page and survives aria-label/copy changes.
     this.createCaseNameInput = page.testSubj.locator('caseTitle').locator('input');
+    // A description is required to submit the create-case form; scope to the
+    // `caseDescription` markdown editor row, then its single textarea.
+    this.createCaseDescriptionInput = page.testSubj.locator('caseDescription').locator('textarea');
     this.createCaseSubmitButton = page.testSubj.locator('create-case-submit');
 
     // Exact plugin-owned test-subj for the "View case" link in the case-created
@@ -65,27 +77,15 @@ export class EntityCasesPage {
     this.caseToastLink = page.testSubj.locator('toaster-content-case-view-link');
   }
 
-  async navigateToAlerts() {
-    await this.page.gotoApp('security/alerts');
-  }
-
-  async openHostFlyoutForRule(ruleName: string) {
-    await this.alertsTable.waitFor({ state: 'visible' });
-    await this.rowForRule(ruleName).getByTestId('host-details-button').click();
-  }
-
-  async openUserFlyoutForRule(ruleName: string) {
-    await this.alertsTable.waitFor({ state: 'visible' });
-    await this.rowForRule(ruleName).getByTestId('users-link').click();
-  }
-
-  // Scope to the data grid row whose `ruleName` cell matches, using the stable
-  // ARIA `row` role rather than the internal `euiDataGridRow` EUI class (which an
-  // EUI version bump could rename/wrap and silently break row scoping).
-  private rowForRule(ruleName: string): Locator {
-    return this.alertsTable.getByRole('row').filter({
-      has: this.page.testSubj.locator('ruleName').filter({ hasText: ruleName }),
-    });
+  // Open the host entity flyout directly via URL, no alerts table required. The host
+  // must already exist in the entity store (so it resolves to a canonical entity.id
+  // and the case take-action items render). Mirrors the entity-flyout-anomalies
+  // suite's direct-navigation approach and keeps this test free of detection-rule /
+  // alert-generation dependencies.
+  async navigateToHostFlyout(entityId: string, hostName: string) {
+    const flyout = `(preview:!(),right:(id:host-panel,params:(contextID:host-panel,entityId:${entityId},hostName:${hostName},isPreviewMode:!f,scopeId:alerts-page)))`;
+    await this.page.gotoApp('security/entity_analytics_home_page', { params: { flyout } });
+    await this.takeActionButton.waitFor({ state: 'visible', timeout: 30000 });
   }
 
   async openTakeActionMenu() {
@@ -106,6 +106,11 @@ export class EntityCasesPage {
     await this.createCaseNameInput.fill(name);
   }
 
+  async fillCaseDescription(description: string) {
+    await this.createCaseDescriptionInput.waitFor();
+    await this.createCaseDescriptionInput.fill(description);
+  }
+
   async submitNewCase() {
     await this.createCaseSubmitButton.click();
   }
@@ -114,8 +119,12 @@ export class EntityCasesPage {
     await this.page.gotoApp(`security/cases/${caseId}`);
   }
 
-  async clickEntitiesTab() {
-    await this.entitiesTab.click();
+  // Case view lands on the Activity tab; the Entities accordion lives inside the
+  // consolidated Attachments tab, so open that tab first.
+  async openAttachmentsTab() {
+    await this.attachmentsTab.waitFor();
+    await this.attachmentsTab.click();
+    await this.attachmentsContainer.waitFor();
   }
 
   async clickCaseToastLink() {
