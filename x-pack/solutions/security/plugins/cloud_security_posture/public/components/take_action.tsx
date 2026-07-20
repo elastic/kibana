@@ -206,6 +206,9 @@ export const TakeAction = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
       data-test-subj={TAKE_ACTION_SUBJ}
+      aria-label={kbnI18n.translate('xpack.csp.flyout.actionsPopoverAriaLabel', {
+        defaultMessage: 'Actions',
+      })}
     >
       <EuiContextMenuPanel items={actionsItems} />
     </EuiPopover>
