@@ -11,7 +11,7 @@ import { i18n as kibanaI18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { DeleteConfirmModal } from '../../../../notes/components/delete_confirm_modal';
 import * as i18n from '../translations';
 import type {

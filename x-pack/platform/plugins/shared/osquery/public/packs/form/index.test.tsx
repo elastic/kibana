@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiProvider } from '@elastic/eui';
@@ -742,6 +742,72 @@ describe('PackForm', () => {
       expect(submitted).not.toHaveProperty('schedule_type');
       expect(submitted).not.toHaveProperty('interval');
       expect(submitted).not.toHaveProperty('rrule_schedule');
+    });
+  });
+
+  // Regression for elastic/kibana#277700: the `packHasExplicitSchedule`
+  // computation (`!editMode || defaultValue?.schedule_type !== undefined`) and
+  // its threading through QueriesField → the queries table are only observable
+  // end-to-end. An inverted guard would break production while the hook-level
+  // units stay green, so assert the two branches via the rendered Schedule
+  // column: edit-legacy (not explicit → query own interval) vs edit-explicit
+  // (explicit → inherited pack interval).
+  describe('packHasExplicitSchedule threading to the queries table', () => {
+    beforeEach(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+    });
+
+    afterEach(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+    });
+
+    const packWithQuery = (overrides: Record<string, unknown>) => ({
+      id: 'threaded-pack',
+      saved_object_id: 'threaded-pack-so',
+      name: 'threaded-pack',
+      description: '',
+      enabled: true,
+      queries: {
+        'q-legacy': {
+          query: 'select * from uptime;',
+          interval: 80,
+          ecs_mapping: {},
+        },
+      },
+      created_at: '2024-01-01',
+      created_by: 'test-user',
+      updated_at: '2024-01-01',
+      updated_by: 'test-user',
+      policy_ids: [],
+      references: [],
+      ...overrides,
+    });
+
+    it('shows the query own interval for an edited legacy pack (no schedule_type → not explicit)', () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={packWithQuery({})} />
+      );
+
+      const table = within(getByTestId('packQueriesTable'));
+      expect(table.getByText('80s')).toBeInTheDocument();
+      expect(table.queryByText('3600s')).not.toBeInTheDocument();
+    });
+
+    it('shows the pack interval for a non-override query on an edited explicit pack', () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm
+          editMode={true}
+          defaultValue={packWithQuery({ schedule_type: 'interval', interval: 3600 })}
+        />
+      );
+
+      const table = within(getByTestId('packQueriesTable'));
+      expect(table.getByText('3600s')).toBeInTheDocument();
+      expect(table.queryByText('80s')).not.toBeInTheDocument();
     });
   });
 });
