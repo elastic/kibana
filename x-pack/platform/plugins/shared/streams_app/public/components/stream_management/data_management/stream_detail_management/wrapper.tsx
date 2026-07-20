@@ -353,7 +353,6 @@ export function Wrapper({
         badges={appHeaderBadges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}
-        padding="m"
       />
       {Object.keys(tabs).map((tabName) => {
         const tourStepId = TAB_TO_TOUR_STEP_ID[tabName];

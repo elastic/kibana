@@ -1,5 +1,5 @@
 {
-  "sha1": "c7f939668c406a39db0ac1b156a1bc1fdfa58e29",
+  "sha1": "0f1e3c69a7ea39e2a9afd24e8434a82fd5870f6f",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -4271,8 +4271,8 @@
       }
     },
     {
-      "id": "53f97d0c42b6e9b-287bab24f344d0f",
-      "title": "Traces in Discover - Waterfall flyout usage Open in Discover from child flyout sections navigates to the correct data",
+      "id": "53f97d0c42b6e9b-02f76ae6554917d",
+      "title": "Traces in Discover - Waterfall flyout usage Open in Discover from errors section navigates to the correct data",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -4288,7 +4288,51 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
-        "line": 250,
+        "line": 263,
+        "column": 14
+      }
+    },
+    {
+      "id": "53f97d0c42b6e9b-a4af6525fdd28fb",
+      "title": "Traces in Discover - Waterfall flyout usage Open in Discover from logs section navigates to the correct data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
+        "line": 285,
+        "column": 14
+      }
+    },
+    {
+      "id": "53f97d0c42b6e9b-1f61c1c7fc127c9",
+      "title": "Traces in Discover - Waterfall flyout usage Open in Discover from span links section navigates to the correct data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
+        "line": 313,
         "column": 14
       }
     }
