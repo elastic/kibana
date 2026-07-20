@@ -47,7 +47,14 @@ export const canonicalDiscoveryFromGroundTruth = ({
     severity: discovery.severity ?? '20-low',
     confidence: discovery.confidence ?? 0,
     processed: discovery.processed ?? false,
-    ...(discovery.signals ? { signals: discovery.signals } : {}),
+    // Strip `confirmed` from input signals — per Critical Rule #4 in the judge prompt,
+    // input signals arrive without confirmed stamps; the judge stamps confirmed only
+    // from its own execute_esql results.
+    ...(discovery.signals
+      ? {
+          signals: discovery.signals.map(({ confirmed: _omitted, ...rest }) => rest),
+        }
+      : {}),
     ...(discovery.causal_features ? { causal_features: discovery.causal_features } : {}),
     ...(discovery.blast_radius ? { blast_radius: discovery.blast_radius } : {}),
   };
