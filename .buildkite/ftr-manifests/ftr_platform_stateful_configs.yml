@@ -251,7 +251,6 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/group13/config.ts
   - x-pack/platform/test/functional/apps/lens/group14/config.ts
   - x-pack/platform/test/functional/apps/lens/group15/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based_4/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts
   - x-pack/platform/test/functional/apps/license_management/config.ts
   - x-pack/platform/test/functional/apps/logstash/config.ts
