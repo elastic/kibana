@@ -72,6 +72,11 @@ const MetricsExperienceGridWrapper = (
     recentMetricsStorage.get()
   );
 
+  const onMetricExplored = useCallback(
+    (metricUniqueKey: string) => recentMetricsStorage.add(metricUniqueKey),
+    [recentMetricsStorage]
+  );
+
   const externalServices = useMemo(
     () => ({
       discoverShared,
@@ -95,6 +100,7 @@ const MetricsExperienceGridWrapper = (
       gridSettings={gridSettings}
       onGridSettingsChange={onGridSettingsChange}
       recentlyExploredMetrics={recentlyExploredMetrics}
+      onMetricExplored={onMetricExplored}
     />
   );
 };
