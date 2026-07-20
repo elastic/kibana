@@ -1196,4 +1196,34 @@ describe('normalizeEsqlPreviewQuery (literal \\n hardening)', () => {
     const queryWithRealNewline = 'FROM logs-*\n| LIMIT 10';
     expect(normalizeEsqlPreviewQuery(queryWithRealNewline)).toBe(queryWithRealNewline);
   });
+
+  it('passes a plain single-line query through unchanged (no \\n present)', () => {
+    const plain =
+      'FROM logs-endpoint.events.process-default | WHERE event.outcome == "failure" | LIMIT 100';
+    expect(normalizeEsqlPreviewQuery(plain)).toBe(plain);
+  });
+
+  it('rewrites a standalone literal \\n (no following pipe) to a pipe separator', () => {
+    expect(normalizeEsqlPreviewQuery('FROM foo\\nWHERE bar')).toBe('FROM foo | WHERE bar');
+  });
+
+  it('collapses multiple consecutive literal \\n sequences into pipe separators', () => {
+    // Two literal \n before a pipe yield two pipes; \s{2,} only collapses whitespace, not "| |".
+    expect(normalizeEsqlPreviewQuery('FROM foo\\n\\n| WHERE bar')).toBe('FROM foo | | WHERE bar');
+  });
+
+  it('collapses runs of whitespace left behind after rewriting \\n', () => {
+    expect(normalizeEsqlPreviewQuery('FROM foo   \\n   WHERE bar')).toBe('FROM foo | WHERE bar');
+  });
+
+  it('trims leading/trailing whitespace introduced by the rewrite', () => {
+    expect(normalizeEsqlPreviewQuery('\\nFROM foo\\n')).toBe('| FROM foo |');
+  });
+
+  it('does not mutate a query whose only backslash-n is part of a longer escape', () => {
+    // Runtime input is backslash-backslash-n (source: "\\\\n"). The function's /\\n/g
+    // matches the trailing "\n" within it, leaving a lone backslash before the pipe.
+    // This test pins that contract so a future tightening of the regex is surfaced.
+    expect(normalizeEsqlPreviewQuery('FROM foo \\\\n WHERE bar')).toBe('FROM foo \\ | WHERE bar');
+  });
 });
