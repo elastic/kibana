@@ -23,7 +23,12 @@ export class SpacesPage {
   // ---- generic header / selector ----
 
   async isProjectHeaderVisible() {
-    return await this.page.testSubj.isVisible('chromeNextGlobalHeader');
+    // Accept either the chrome-next global header or the classic project header so this works
+    // regardless of whether chrome-next is enabled.
+    return await this.page.testSubj
+      .locator('chromeNextGlobalHeader')
+      .or(this.page.testSubj.locator('kibanaProjectHeader'))
+      .isVisible();
   }
 
   async navigateToHome() {
