@@ -225,6 +225,9 @@ const migrateTemplates = async (
             fieldCount: parsedDefinition.fields.length,
             fieldDefinitions: toFieldDefinitions(parsedDefinition.fields),
             isEnabled: true,
+            // Preserve the v1 identity so a rule storing this legacy key resolves back to exactly
+            // this migrated template, even when another v1 template shared the same name.
+            legacyKey: legacyTemplate.key,
           } as Template,
           { id, ...(nsOption ? { namespace: nsOption } : {}), refresh: false }
         );
