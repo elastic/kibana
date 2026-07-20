@@ -29,6 +29,7 @@ import { setupDependencies } from './setup_dependencies';
 import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
@@ -102,7 +103,8 @@ describe('runWorkflow', () => {
         workflowsExecutionEngine:
           overrides?.workflowsExecutionEngine ?? mockWorkflowExecutionEngine,
         meteringService: overrides?.meteringService,
-        workflowExecutionRepository: workflowExecutionRepository as any,
+        workflowExecutionRepository:
+          workflowExecutionRepository as unknown as WorkflowExecutionRepository,
         stepExecutionRepository,
       });
 
