@@ -59,8 +59,11 @@ const mappings = {
     },
     // NOTE: deprecated in favor of `fieldDefinitions`, kept for forward-compatibility with
     // documents written before the fieldDefinitions migration (see model_version_2).
+    // `ignore_above` is safe to add in place (an updatable mapping parameter, unlike `type`
+    // or `index`) and keeps this deprecated keyword consistent with every other keyword field.
     fieldNames: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     fieldDefinitions: {
       type: 'nested',
