@@ -162,7 +162,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 
 **{{kib}} platform**:
 * Add a customization modal for reordering and hiding solution navigation items, with personalized preferences preserved across sessions [#270276]({{kib-pull}}270276).
-* Add a technical-preview date range picker in Discover and Dashboards that accepts flexible relative and absolute time ranges in plain text [#260163]({{kib-pull}}260163).
+* Add a new date range picker in Discover and Dashboards that accepts flexible relative and absolute time ranges in plain text [#260163]({{kib-pull}}260163).
 * Add display language selection (Beta) to the profile and user menu [#260835]({{kib-pull}}260835).
 * Use the browser `Accept-Language` header to select the UI language on all deployment types when no profile language or locale cookie is set [#275996]({{kib-pull}}275996).
 * Persist your last selected space in the user profile and restore it on the next visit when **Remember last selected space** is enabled [#268053]({{kib-pull}}268053).
