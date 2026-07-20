@@ -13,7 +13,7 @@ import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
 
 export interface RegisterRouteArgs {
   router: IRouter;
-  usageCounter: UsageCounter;
+  usageCounter: UsageCounter | undefined;
   logger: Logger;
   getStartServices: StartServicesAccessor<DataViewsAsCodeServerPluginStartDependencies, void>;
 }

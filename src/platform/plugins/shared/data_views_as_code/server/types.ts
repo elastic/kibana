@@ -14,7 +14,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export interface DataViewsAsCodeServerPluginSetupDependencies {
   dataViews: DataViewsServerPluginSetup;
-  usageCollection: UsageCollectionSetup;
+  usageCollection: UsageCollectionSetup | undefined;
 }
 
 export interface DataViewsAsCodeServerPluginStartDependencies {

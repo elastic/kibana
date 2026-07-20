@@ -35,7 +35,7 @@ export class DataViewsAsCodeServerPlugin
   ) {
     registerRoutes({
       http: core.http,
-      usageCounter: deps.usageCollection.createUsageCounter('data_views_as_code_api'),
+      usageCounter: deps.usageCollection?.createUsageCounter('data_views_as_code_api'),
       logger: this.logger,
       getStartServices: core.getStartServices,
     });

@@ -16,7 +16,7 @@ export const INITIAL_REST_VERSION = '2023-10-31';
 
 interface RegisterRoutesArgs {
   http: HttpServiceSetup;
-  usageCounter: UsageCounter;
+  usageCounter: UsageCounter | undefined;
   logger: Logger;
   getStartServices: StartServicesAccessor<DataViewsAsCodeServerPluginStartDependencies, void>;
 }
