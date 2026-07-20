@@ -50,6 +50,62 @@ describe('extractDiscoveriesFromToolCall', () => {
     const discoveries = extractDiscoveriesFromToolCall(steps);
     expect(discoveries[0].event_id).toBe('original-slug');
   });
+
+  it('extracts aligned bulk results and omits failed items', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-bulk',
+        params: {
+          items: [
+            { kind: 'discovery', title: 'Persisted discovery' },
+            { kind: 'discovery', title: 'Failed discovery' },
+          ],
+        },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-1',
+                  discovery_id: 'discovery-1',
+                  written: true,
+                },
+                { index: 1, event_id: 'event-2', written: false, reason: 'bulk_error' },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([
+      expect.objectContaining({
+        title: 'Persisted discovery',
+        event_id: 'event-1',
+        discovery_id: 'discovery-1',
+        written: true,
+      }),
+    ]);
+  });
+
+  it('rejects misaligned discovery bulk results', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-misaligned',
+        params: { items: [{ title: 'one' }, { title: 'two' }] },
+        results: [{ data: { results: [] } }],
+      },
+    ];
+
+    expect(() => extractDiscoveriesFromToolCall(steps)).toThrow(
+      'discovery_write input and result arrays are not aligned'
+    );
+  });
 });
 
 describe('extractSignificantEventsFromToolCall', () => {
@@ -108,5 +164,61 @@ describe('extractSignificantEventsFromToolCall', () => {
     expect(events).toHaveLength(2);
     expect(events[0].discovery_id).toBe('d-1');
     expect(events[1].discovery_id).toBe('d-2');
+  });
+
+  it('extracts successful items from a bulk write and its partial-failure retry', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-bulk',
+        params: {
+          items: [
+            { discovery_id: 'd-1', event_id: 'event-1' },
+            { discovery_id: 'd-2', event_id: 'event-2' },
+          ],
+        },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-1',
+                  event_uuid: 'uuid-1',
+                  written: true,
+                },
+                { index: 1, event_id: 'event-2', written: false, reason: 'bulk_error' },
+              ],
+            },
+          },
+        ],
+      },
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-retry',
+        params: { items: [{ discovery_id: 'd-2', event_id: 'event-2' }] },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-2',
+                  event_uuid: 'uuid-2',
+                  written: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractSignificantEventsFromToolCall(steps)).toEqual([
+      expect.objectContaining({ discovery_id: 'd-1', event_uuid: 'uuid-1' }),
+      expect.objectContaining({ discovery_id: 'd-2', event_uuid: 'uuid-2' }),
+    ]);
   });
 });

@@ -57,7 +57,7 @@ Classify each detection as **escalation** or **recovering** from its `change_poi
 <tools>
 
 - `platform_sig_events_event_search` — call once per batch before grouping detection rules. Pass `status: "open"` and `stream_names` (all distinct stream names from the active batch). The returned `events` array is the continuation candidate set.
-- `platform_sig_events_discovery_write` — final output step; call once per group, then stop. For new episodes, omit `event_id` (auto-generated). For a continuation (including a recovering episode), pass the candidate's `event_id` verbatim.
+- `platform_sig_events_discovery_write` — final output step; submit every group in one `items` array. For new episodes, omit `event_id` (auto-generated). For a continuation (including a recovering episode), pass the candidate's `event_id` verbatim. The batch rejects duplicate explicit `event_id` values and duplicate new-discovery stream+rule fingerprints, so consolidate those groups before calling it.
 - `platform_sig_events_ki_search` and `platform_core_execute_esql` — provided and documented by the loaded `significant-events-ki-grounding` skill.
 
 </tools>
@@ -79,34 +79,23 @@ Response: `{ "events": [{ "event_id": "...", "discovery_id": "...", "causal_feat
 Example: platform_sig_events_discovery_write
 ```json
 {
-  "kind": "discovery",
-  "title": "Payment gRPC — checkout connectivity failure",
-  "symptom_hypothesis": "Checkout is blocked because the payment gRPC endpoint refuses connections.",
-  "summary": "...",
-  "severity": "60-high",
-  "confidence": 0.68,
-  "stream_names": ["logs.otel"],
-  "signals": [
+  "items": [
     {
-      "type": "detection",
-      "stream_name": "logs.otel",
-      "description": "Testing: connection refused errors. Expected if true: ECONNREFUSED messages. Found: 1 row — payment gRPC endpoint refused the connection. Why: checkout cannot reach payment because its endpoint refuses connections. Verdict: confirms — checkout is blocked.",
-      "confirmed": true,
-      "collected_at": "2026-07-07T09:00:00Z",
-      "evidence": { "esql_query": "...", "result": "found" },
-      "metadata": {
-        "detection_id": "...",
-        "rule_name": "...", "rule_uuid": "...", "change_point_type": "stationary", "p_value": 0.04
-      }
+      "kind": "discovery",
+      "title": "Payment gRPC — checkout connectivity failure",
+      "symptom_hypothesis": "Checkout is blocked because the payment gRPC endpoint refuses connections.",
+      "summary": "...",
+      "severity": "60-high",
+      "confidence": 0.68,
+      "stream_names": ["logs.otel"],
+      "signals": [{ "type": "detection", "stream_name": "logs.otel", "description": "...", "confirmed": true, "evidence": { "esql_query": "...", "result": "found" }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "stationary", "p_value": 0.04 } }],
+      "blast_radius": [],
+      "causal_features": []
     }
-  ],
-  "blast_radius": [
-    { "type": "dependency", "feature_id": "...", "source": "...", "target": "...", "protocol": "gRPC" },
-    { "type": "infrastructure", "feature_id": "...", "title": "...", "workloads": ["..."] }
-  ],
-  "causal_features": [{ "feature_id": "...", "name": "...", "stream_name": "logs.otel" }]
+  ]
 }
 ```
+Response: `{ "results": [{ "index": 0, "discovery_id": "...", "event_id": "...", "kind": "discovery", "written": true }] }`. An existing duplicate returns `written: false, skipped: true, reason: "duplicate_within_window"`; an ES item failure returns `written: false, reason: "bulk_error"`.
 
 </tool_examples>
 
@@ -302,8 +291,9 @@ Discoveries are re-evaluated every cycle — apply this check even when the cand
 3. `blast_radius` dependency entries: scan query KI `evidence` for `"Dependency: <source> → <target>"` strings. Never populate from continuation-candidate data alone.
 4. `causal_features` ceiling: apply the ceiling from the `confidence` field description in the tool schema.
 
-For each discovery group:
-1. Call `platform_sig_events_discovery_write` with the full discovery document. One call per group.
+Build the complete `items` array, consolidating any duplicate explicit `event_id` or new-discovery fingerprint, then call `platform_sig_events_discovery_write` exactly once. Inspect the aligned `results` array. If and only if individual results have `reason: "bulk_error"`, retry those input items once in a second call; never retry a top-level `outcome_unknown` error automatically.
+
+Set `written_rule_uuids` from the final results only: include rules belonging to `written: true` items and confirmed `duplicate_within_window` items. Exclude unresolved `bulk_error` items so their detections remain in the workflow queue.
 
 Apply field rules from `<field_rules>`.
 

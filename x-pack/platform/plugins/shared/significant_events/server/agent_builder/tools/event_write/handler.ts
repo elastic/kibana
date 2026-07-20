@@ -8,6 +8,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import { type SignificantEvent } from '@kbn/significant-events-schema';
 import type { EventClient } from '../../../lib/significant_events/events';
+import {
+  assertUniqueBulkWriteKeys,
+  assertValidBulkWriteSize,
+  createBulkWriteItemError,
+  createBulkWriteOutcomeUnknownError,
+  type CompactBulkError,
+  toCompactBulkError,
+} from '../bulk_write';
 
 /**
  * Input for writing a significant event document. Derived from the canonical SignificantEvent
@@ -41,11 +49,109 @@ export type EventsWriteInput = Pick<
 };
 
 export interface EventsWriteResult {
+  index: number;
   event_uuid: string;
   event_id: string;
   status: SignificantEvent['status'];
-  written: boolean;
-  reason?: string;
+  written: true;
+}
+
+export interface EventsWriteFailureResult {
+  index: number;
+  event_id: string;
+  status: SignificantEvent['status'];
+  written: false;
+  reason: 'bulk_error';
+  error: CompactBulkError;
+}
+
+export type EventsWriteBulkResult = EventsWriteResult | EventsWriteFailureResult;
+
+export async function eventsWriteBulkHandler({
+  eventClient,
+  inputs,
+}: {
+  eventClient: EventClient;
+  inputs: EventsWriteInput[];
+}): Promise<EventsWriteBulkResult[]> {
+  assertValidBulkWriteSize(inputs);
+  assertUniqueBulkWriteKeys(
+    inputs.flatMap((input, index) =>
+      input.event_id === undefined ? [] : [{ index, key: input.event_id }]
+    ),
+    'event_id'
+  );
+
+  const explicitEventIds = inputs.flatMap((input) =>
+    input.event_id === undefined ? [] : [input.event_id]
+  );
+  const latestEvents =
+    explicitEventIds.length === 0
+      ? new Map<string, SignificantEvent>()
+      : await eventClient.findLatestByEventIds(explicitEventIds);
+  const timestamp = new Date().toISOString();
+  const prepared = inputs.map((input, index) => {
+    const eventId = input.event_id ?? `agent-event-${uuidv4().slice(0, 8)}`;
+    const eventUuid = uuidv4();
+    return {
+      index,
+      eventId,
+      eventUuid,
+      status: input.status,
+      document: {
+        ...input,
+        '@timestamp': timestamp,
+        event_uuid: eventUuid,
+        event_id: eventId,
+        previous_event_uuid: latestEvents.get(eventId)?.event_uuid,
+        severity: input.severity,
+      },
+    };
+  });
+
+  let response;
+  try {
+    response = await eventClient.bulkCreate(
+      prepared.map(({ document }) => document),
+      { throwOnFail: false }
+    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Unknown Elasticsearch transport error';
+    throw createBulkWriteOutcomeUnknownError(`Event bulk write outcome is unknown: ${message}`);
+  }
+
+  if (response.items.length !== prepared.length || response.items.some((item) => !item.create)) {
+    throw createBulkWriteOutcomeUnknownError(
+      `Event bulk response did not align with the ${prepared.length} submitted documents`
+    );
+  }
+
+  return prepared.map(({ index, eventId, eventUuid, status }, responseIndex) => {
+    const detail = response.items[responseIndex].create;
+    if (detail === undefined) {
+      throw createBulkWriteOutcomeUnknownError(
+        `Event bulk response item ${responseIndex} did not contain a create result`
+      );
+    }
+    if (detail.error) {
+      return {
+        index,
+        event_id: eventId,
+        status,
+        written: false,
+        reason: 'bulk_error',
+        error: toCompactBulkError(detail),
+      };
+    }
+    return {
+      index,
+      event_uuid: eventUuid,
+      event_id: eventId,
+      status,
+      written: true,
+    };
+  });
 }
 
 export async function eventsWriteHandler({
@@ -55,36 +161,12 @@ export async function eventsWriteHandler({
   eventClient: EventClient;
   input: EventsWriteInput;
 }): Promise<EventsWriteResult> {
-  // Generate a synthetic event ID when no discovery event is linked.
-  // Synthetic IDs are always new — skip the dedup lookup.
-  const eventId = input.event_id || `agent-event-${uuidv4().slice(0, 8)}`;
-  const isSynthetic = !input.event_id;
-
-  const latestEvent = isSynthetic
-    ? null
-    : (await eventClient.findLatestByEventIds([eventId])).get(eventId);
-
-  const now = new Date().toISOString();
-  const eventUuid = uuidv4();
-
-  await eventClient.bulkCreate(
-    [
-      {
-        ...input,
-        '@timestamp': now,
-        event_uuid: eventUuid,
-        event_id: eventId,
-        previous_event_uuid: latestEvent?.event_uuid,
-        severity: input.severity,
-      },
-    ],
-    { throwOnFail: true }
-  );
-
-  return {
-    event_uuid: eventUuid,
-    event_id: eventId,
-    status: input.status,
-    written: true,
-  };
+  const [result] = await eventsWriteBulkHandler({ eventClient, inputs: [input] });
+  if (result === undefined) {
+    throw createBulkWriteOutcomeUnknownError('Event bulk write did not return a result');
+  }
+  if (!result.written) {
+    throw createBulkWriteItemError(result.error);
+  }
+  return result;
 }

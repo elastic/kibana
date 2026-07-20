@@ -10,6 +10,14 @@ import { v4 as uuidv4 } from 'uuid';
 import dateMath from '@kbn/datemath';
 import { type Discovery, type SignalEntry } from '@kbn/significant-events-schema';
 import type { DiscoveryClient } from '../../../lib/significant_events/discoveries';
+import {
+  assertUniqueBulkWriteKeys,
+  assertValidBulkWriteSize,
+  createBulkWriteItemError,
+  createBulkWriteOutcomeUnknownError,
+  type CompactBulkError,
+  toCompactBulkError,
+} from '../bulk_write';
 
 export type DiscoveryWriteInput = Pick<
   Discovery,
@@ -27,26 +35,45 @@ export type DiscoveryWriteInput = Pick<
   | 'workflow_execution_id'
   | 'conversation_id'
 > & {
-  /** Omit for new events — auto-generated (stream + rule UUIDs + random suffix; dedup uses `makeFingerprint`, not this id). Pass verbatim for continuation. */
+  /** Omit for new events. Pass verbatim for a continuation. */
   event_id?: Discovery['event_id'];
-  /** Deduplication window (ES date math, e.g. `"now-1h"`). Not stored in the document. */
+  /** Deduplication window (ES date math, e.g. `"now-1h"`). Not stored. */
   dedup_window?: string;
 };
 
-export interface DiscoveryWriteResult {
+export interface DiscoveryWriteSuccessResult {
+  index: number;
   discovery_id: string;
   event_id: string;
   kind: Discovery['kind'];
-  written: boolean;
-  skipped?: boolean;
-  reason?: string;
-  existing_discovery_id?: string;
+  written: true;
 }
 
-/**
- * `rule_uuid` from every `type: 'detection'` signal, deduplicated. Detection signals are the only
- * signal type with a `rule_uuid`; other signal types (once added) carry no rule identity to extract.
- */
+export interface DiscoveryWriteDuplicateResult {
+  index: number;
+  discovery_id: string;
+  event_id: string;
+  kind: Discovery['kind'];
+  written: false;
+  skipped: true;
+  reason: 'duplicate_within_window';
+  existing_discovery_id: string;
+}
+
+export interface DiscoveryWriteFailureResult {
+  index: number;
+  discovery_id: string;
+  event_id: string;
+  kind: Discovery['kind'];
+  written: false;
+  reason: 'bulk_error';
+  error: CompactBulkError;
+}
+
+export type DiscoveryWriteResult = DiscoveryWriteSuccessResult | DiscoveryWriteDuplicateResult;
+export type DiscoveryWriteBulkResult = DiscoveryWriteResult | DiscoveryWriteFailureResult;
+
+/** `rule_uuid` from every detection signal, deduplicated. */
 const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
   const uuids = (signals ?? [])
     .filter((signal): signal is Extract<SignalEntry, { type: 'detection' }> =>
@@ -56,12 +83,6 @@ const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
   return [...new Set(uuids)];
 };
 
-/**
- * Per-incident event id: a hash of the primary stream name plus every detection rule's
- * `rule_uuid` and a random UUID8 suffix. The suffix keeps each new incident instance unique so
- * resolved incidents and new ones for the same rules are treated as separate events in the UI.
- * Dedup uses `makeFingerprint` (stream + rules only, no suffix) rather than this id.
- */
 export const generateEventId = (streamNames: string[], ruleUuids: string[]): string => {
   const suffix = uuidv4().replace(/-/g, '').slice(0, 8);
   const primaryStream = [...streamNames].sort()[0] ?? 'unknown';
@@ -74,30 +95,17 @@ export const makeFingerprint = (streamNames: string[], ruleUuids: string[]): str
   return [primaryStream, ...[...ruleUuids].sort()].join('|');
 };
 
-/**
- * Parses past-relative ES date math expressions into a millisecond offset.
- * Returns `undefined` for unrecognised expressions — callers should skip
- * dedup rather than silently falling back to a wrong window.
- */
-const isDateMathExpression = (value: string): boolean => {
-  return value.startsWith('now') || value.includes('||');
-};
+const isDateMathExpression = (value: string): boolean =>
+  value.startsWith('now') || value.includes('||');
 
-const parseDateMathToMs = (expr: string): number | undefined => {
+const parseDateMathToMs = (expr: string, now: Date): number | undefined => {
   if (!isDateMathExpression(expr)) {
     return undefined;
   }
-
-  const now = new Date();
   const parsed = dateMath.parse(expr, { forceNow: now });
   return parsed?.isValid() ? now.getTime() - parsed.valueOf() : undefined;
 };
 
-/**
- * Merges signals from prior discovery documents with the submitted signals, keeping the
- * latest per `metadata.rule_uuid` for detection-type signals. Prior-only rules are carried
- * forward; submitted rules win on equal-timestamp ties.
- */
 export const mergeSignalsLatestPerRule = (
   priorDocs: Array<Pick<Discovery, '@timestamp' | 'signals'>>,
   submitted: SignalEntry[],
@@ -119,66 +127,218 @@ export const mergeSignalsLatestPerRule = (
 
   priorDocs.forEach((doc) => consider(doc['@timestamp'], doc.signals ?? []));
   consider(submittedTimestamp, submitted);
-
   return [...latest.values()].map((entry) => entry.signal);
 };
 
-const findDuplicateDiscovery = async ({
-  discoveryClient,
-  streamNames,
-  signals,
-  dedupWindow,
-  kind,
-  isExplicitEventId,
-}: {
-  discoveryClient: DiscoveryClient;
-  streamNames: string[];
-  signals: SignalEntry[] | undefined;
-  dedupWindow: string | undefined;
-  kind: Discovery['kind'];
+interface PreparedInput {
+  index: number;
+  input: DiscoveryWriteInput;
   isExplicitEventId: boolean;
-}): Promise<Discovery | undefined> => {
-  const windowMs = dedupWindow ? parseDateMathToMs(dedupWindow) : undefined;
-  // Skip dedup for continuations (explicit event_id), handled stamps, clearances, or unrecognised windows.
-  if (isExplicitEventId || kind === 'handled' || kind === 'clearance' || windowMs === undefined) {
+  windowMs?: number;
+  cutoffMs?: number;
+  fingerprint?: string;
+}
+
+const prepareInputs = (inputs: DiscoveryWriteInput[], now: Date): PreparedInput[] => {
+  assertValidBulkWriteSize(inputs);
+  assertUniqueBulkWriteKeys(
+    inputs.flatMap((input, index) =>
+      input.event_id === undefined ? [] : [{ index, key: input.event_id }]
+    ),
+    'event_id'
+  );
+
+  const prepared = inputs.map((input, index) => {
+    const isExplicitEventId = input.event_id !== undefined;
+    const windowMs = input.dedup_window ? parseDateMathToMs(input.dedup_window, now) : undefined;
+    const isDedupEligible =
+      !isExplicitEventId && input.kind === 'discovery' && windowMs !== undefined;
+    return {
+      index,
+      input,
+      isExplicitEventId,
+      windowMs,
+      cutoffMs: isDedupEligible ? now.getTime() - windowMs : undefined,
+      fingerprint: isDedupEligible
+        ? makeFingerprint(input.stream_names, extractRuleUuids(input.signals))
+        : undefined,
+    };
+  });
+
+  assertUniqueBulkWriteKeys(
+    prepared.flatMap(({ index, fingerprint }) =>
+      fingerprint === undefined ? [] : [{ index, key: fingerprint }]
+    ),
+    'discovery fingerprint'
+  );
+  return prepared;
+};
+
+const findExistingDuplicate = (
+  prepared: PreparedInput,
+  recentDiscoveries: Discovery[]
+): Discovery | undefined => {
+  if (prepared.fingerprint === undefined || prepared.cutoffMs === undefined) {
     return undefined;
   }
-
-  const cutoffIso = new Date(Date.now() - windowMs).toISOString();
-  const fingerprint = makeFingerprint(streamNames, extractRuleUuids(signals));
-  // Scan recent active discoveries and match on stream+rules fingerprint in memory. ES|QL `IN`
-  // does not perform membership checks on multivalued keyword fields such as `stream_names`.
-  // Uses findLatest (grouped by event_id, excludes handled) so only the latest doc per incident
-  // is considered — prevents stale resolved incidents from blocking new ones.
-  const { hits } = await discoveryClient.findLatest({ from: cutoffIso });
-  return hits.find(
-    (h) =>
-      h.kind === 'discovery' &&
-      makeFingerprint(h.stream_names ?? [], extractRuleUuids(h.signals)) === fingerprint
+  const { cutoffMs, fingerprint } = prepared;
+  return recentDiscoveries.find(
+    (discovery) =>
+      discovery.kind === 'discovery' &&
+      Date.parse(discovery['@timestamp']) >= cutoffMs &&
+      makeFingerprint(discovery.stream_names ?? [], extractRuleUuids(discovery.signals)) ===
+        fingerprint
   );
 };
 
-const prepareSnapshotSignals = async ({
+export async function discoveryWriteBulkHandler({
   discoveryClient,
-  input,
-  isExplicitEventId,
-  timestamp,
+  inputs,
 }: {
   discoveryClient: DiscoveryClient;
-  input: DiscoveryWriteInput & { event_id: string };
-  isExplicitEventId: boolean;
-  timestamp: string;
-}): Promise<SignalEntry[]> => {
-  if (!isExplicitEventId || input.kind === 'handled') {
-    return input.signals ?? [];
+  inputs: DiscoveryWriteInput[];
+}): Promise<DiscoveryWriteBulkResult[]> {
+  const now = new Date();
+  const preparedInputs = prepareInputs(inputs, now);
+  const eligibleWindows = preparedInputs.flatMap(({ windowMs, fingerprint }) =>
+    windowMs === undefined || fingerprint === undefined ? [] : [windowMs]
+  );
+  const recentDiscoveries =
+    eligibleWindows.length === 0
+      ? []
+      : (
+          await discoveryClient.findLatest({
+            from: new Date(now.getTime() - Math.max(...eligibleWindows)).toISOString(),
+          })
+        ).hits;
+
+  const results: Array<DiscoveryWriteBulkResult | undefined> = new Array(inputs.length);
+  const inputsToCreate: Array<PreparedInput & { eventId: string; discoveryId: string }> = [];
+
+  for (const prepared of preparedInputs) {
+    const duplicate = findExistingDuplicate(prepared, recentDiscoveries);
+    if (duplicate) {
+      const eventId =
+        duplicate.event_id ??
+        generateEventId(prepared.input.stream_names, extractRuleUuids(prepared.input.signals));
+      results[prepared.index] = {
+        index: prepared.index,
+        discovery_id: duplicate.discovery_id,
+        event_id: eventId,
+        kind: prepared.input.kind,
+        written: false,
+        skipped: true,
+        reason: 'duplicate_within_window',
+        existing_discovery_id: duplicate.discovery_id,
+      };
+      continue;
+    }
+
+    inputsToCreate.push({
+      ...prepared,
+      eventId:
+        prepared.input.event_id ??
+        generateEventId(prepared.input.stream_names, extractRuleUuids(prepared.input.signals)),
+      discoveryId: uuidv4(),
+    });
   }
 
-  const { hits: priorDocs } = await discoveryClient.findByEventId(input.event_id);
-  // Exclude handled stamps — the old findStateBySlug path filtered these out so processed
-  // cycles do not carry their detection signals into a fresh continuation write.
-  const stateDocs = priorDocs.filter((doc) => doc.kind !== 'handled');
-  return mergeSignalsLatestPerRule(stateDocs, input.signals ?? [], timestamp);
-};
+  const priorDocsByEventId = new Map<string, Discovery[]>();
+  await Promise.all(
+    inputsToCreate
+      .filter(({ isExplicitEventId, input }) => isExplicitEventId && input.kind !== 'handled')
+      .map(async ({ eventId }) => {
+        const { hits } = await discoveryClient.findByEventId(eventId);
+        priorDocsByEventId.set(
+          eventId,
+          hits.filter((doc) => doc.kind !== 'handled')
+        );
+      })
+  );
+
+  const timestamp = new Date().toISOString();
+  const created = inputsToCreate.map((prepared) => {
+    const { dedup_window: _dedupWindow, event_id: _eventId, ...rest } = prepared.input;
+    const signals = prepared.isExplicitEventId
+      ? mergeSignalsLatestPerRule(
+          priorDocsByEventId.get(prepared.eventId) ?? [],
+          prepared.input.signals ?? [],
+          timestamp
+        )
+      : prepared.input.signals ?? [];
+    return {
+      ...prepared,
+      document: {
+        ...rest,
+        '@timestamp': timestamp,
+        discovered_at: prepared.input.kind === 'discovery' ? timestamp : undefined,
+        event_id: prepared.eventId,
+        discovery_id: prepared.discoveryId,
+        signals,
+        severity: prepared.input.severity,
+      },
+    };
+  });
+
+  if (created.length > 0) {
+    let response;
+    try {
+      response = await discoveryClient.bulkCreate(
+        created.map(({ document }) => document),
+        { throwOnFail: false }
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unknown Elasticsearch transport error';
+      throw createBulkWriteOutcomeUnknownError(
+        `Discovery bulk write outcome is unknown: ${message}`
+      );
+    }
+
+    if (response.items.length !== created.length || response.items.some((item) => !item.create)) {
+      throw createBulkWriteOutcomeUnknownError(
+        `Discovery bulk response did not align with the ${created.length} submitted documents`
+      );
+    }
+
+    created.forEach(({ index, discoveryId, eventId, input }, responseIndex) => {
+      const detail = response.items[responseIndex].create;
+      if (detail === undefined) {
+        throw createBulkWriteOutcomeUnknownError(
+          `Discovery bulk response item ${responseIndex} did not contain a create result`
+        );
+      }
+      results[index] = detail.error
+        ? {
+            index,
+            discovery_id: discoveryId,
+            event_id: eventId,
+            kind: input.kind,
+            written: false,
+            reason: 'bulk_error',
+            error: toCompactBulkError(detail),
+          }
+        : {
+            index,
+            discovery_id: discoveryId,
+            event_id: eventId,
+            kind: input.kind,
+            written: true,
+          };
+    });
+  }
+
+  const alignedResults: DiscoveryWriteBulkResult[] = [];
+  for (const result of results) {
+    if (result === undefined) {
+      throw createBulkWriteOutcomeUnknownError(
+        'Discovery bulk results were not aligned with every input'
+      );
+    }
+    alignedResults.push(result);
+  }
+  return alignedResults;
+}
 
 export async function discoveryWriteHandler({
   discoveryClient,
@@ -187,66 +347,12 @@ export async function discoveryWriteHandler({
   discoveryClient: DiscoveryClient;
   input: DiscoveryWriteInput;
 }): Promise<DiscoveryWriteResult> {
-  const { dedup_window: dedupWindow, event_id, ...rest } = input;
-
-  const resolvedEventId =
-    event_id || generateEventId(rest.stream_names, extractRuleUuids(rest.signals));
-
-  const discoveryInput = {
-    ...rest,
-    event_id: resolvedEventId,
-  };
-
-  const isExplicitEventId = Boolean(event_id);
-
-  const duplicate = await findDuplicateDiscovery({
-    discoveryClient,
-    streamNames: rest.stream_names,
-    signals: rest.signals,
-    dedupWindow,
-    kind: rest.kind,
-    isExplicitEventId,
-  });
-  if (duplicate) {
-    return {
-      discovery_id: duplicate.discovery_id,
-      event_id: duplicate.event_id ?? resolvedEventId,
-      kind: discoveryInput.kind,
-      written: false,
-      skipped: true,
-      reason: 'duplicate_within_window',
-      existing_discovery_id: duplicate.discovery_id,
-    };
+  const [result] = await discoveryWriteBulkHandler({ discoveryClient, inputs: [input] });
+  if (result === undefined) {
+    throw createBulkWriteOutcomeUnknownError('Discovery bulk write did not return a result');
   }
-
-  const discoveryId = uuidv4();
-
-  const timestamp = new Date().toISOString();
-  const signals = await prepareSnapshotSignals({
-    discoveryClient,
-    input: { ...discoveryInput, event_id: resolvedEventId },
-    isExplicitEventId,
-    timestamp,
-  });
-
-  await discoveryClient.bulkCreate(
-    [
-      {
-        ...discoveryInput,
-        '@timestamp': timestamp,
-        discovered_at: discoveryInput.kind === 'discovery' ? timestamp : undefined,
-        signals,
-        discovery_id: discoveryId,
-        severity: discoveryInput.severity,
-      },
-    ],
-    { throwOnFail: true }
-  );
-
-  return {
-    discovery_id: discoveryId,
-    event_id: resolvedEventId,
-    kind: discoveryInput.kind,
-    written: true,
-  };
+  if ('reason' in result && result.reason === 'bulk_error') {
+    throw createBulkWriteItemError(result.error);
+  }
+  return result;
 }

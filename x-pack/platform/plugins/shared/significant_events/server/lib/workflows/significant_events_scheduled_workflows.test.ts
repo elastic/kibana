@@ -173,11 +173,21 @@ describe('scheduled Significant Events managed workflows', () => {
   });
 
   it.each([
-    ['discovery', SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID, 'output_no_detections'],
-    ['triage', SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID, 'output_no_discoveries'],
+    [
+      'discovery',
+      SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
+      'output_no_detections',
+      'compute_confirmed_queue_stats.output',
+    ],
+    [
+      'triage',
+      SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
+      'output_no_discoveries',
+      'variables.confirmed',
+    ],
   ])(
     '%s always completes no-work runs as success and reports queue stats, so the scheduled drain loop can rely on hasRemaining instead of run status',
-    (_label, id, noWorkStepName) => {
+    (_label, id, noWorkStepName, confirmedStatsSource) => {
       const parsed = getParsedStaticWorkflowYaml(id);
 
       const triggerInputs = parsed.triggers[0]?.inputs ?? [];
@@ -193,8 +203,8 @@ describe('scheduled Significant Events managed workflows', () => {
 
       const resultStep = findStep(parsed.steps, 'output_result');
       expect(resultStep?.with).toMatchObject({
-        hasRemaining: expect.stringContaining('compute_queue_stats.output.hasRemaining'),
-        queueEmpty: expect.stringContaining('compute_queue_stats.output.queueEmpty'),
+        hasRemaining: expect.stringContaining(confirmedStatsSource),
+        queueEmpty: expect.stringContaining(confirmedStatsSource),
       });
     }
   );

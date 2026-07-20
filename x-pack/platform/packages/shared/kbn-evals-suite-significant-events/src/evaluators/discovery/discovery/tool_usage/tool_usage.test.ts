@@ -22,6 +22,16 @@ const toolCall = (toolId: string): ConverseStep => ({
   tool_call_id: toolId,
 });
 
+const retryCall = (toolId: string): ConverseStep => ({
+  ...toolCall(toolId),
+  params: { items: [{ event_id: 'failed-event' }] },
+});
+
+const retryableWriteCall = (): ConverseStep => ({
+  ...toolCall(TOOL_ID_DISCOVERY_WRITE),
+  results: [{ data: { results: [{ index: 0, written: false, reason: 'bulk_error' }] } }],
+});
+
 const allExpectedTools: ConverseStep[] = [
   toolCall(TOOL_ID_EVENT_SEARCH),
   toolCall(TOOL_ID_KI_SEARCH),
@@ -64,6 +74,19 @@ describe('scoreToolUsage', () => {
     const result = scoreToolUsage(steps, 1);
     expect(result.score).toBeCloseTo(2 / 3);
     expect(result.label).toBe(`missing-${TOOL_ID_EVENT_SEARCH}`);
+  });
+
+  it('penalizes multiple discovery writes without a partial-failure retry', () => {
+    const result = scoreToolUsage([...allExpectedTools, toolCall(TOOL_ID_DISCOVERY_WRITE)], 1);
+    expect(result).toMatchObject({ score: 0.75, label: 'multiple-discovery-write-calls' });
+  });
+
+  it('allows one retry after a discovery bulk item fails', () => {
+    const steps = allExpectedTools.map((step) =>
+      step.tool_id === TOOL_ID_DISCOVERY_WRITE ? retryableWriteCall() : step
+    );
+    const result = scoreToolUsage([...steps, retryCall(TOOL_ID_DISCOVERY_WRITE)], 1);
+    expect(result).toMatchObject({ score: 1, label: 'correct' });
   });
 });
 

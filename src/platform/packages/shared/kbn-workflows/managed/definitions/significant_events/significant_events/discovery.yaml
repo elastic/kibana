@@ -240,10 +240,10 @@ steps:
             items:
               type: string
             description: >-
-              rule_uuid of every entry across every signals[] array from every
-              discovery_write call made this cycle — including calls skipped by
-              discovery_write's own deduplication (written: false against an
-              existing episode still counts; the rule was accounted for). Used both
+              rule_uuid of every entry across signals[] whose final discovery_write
+              result was either written: true or skipped with
+              reason: duplicate_within_window. Failed or unattempted writes must not
+              be included. Used both
               as a hallucination guardrail (schema validation forces the agent to
               report real activity) and as the per-rule filter for which detections
               get stamped as processed. Full discovery data is written via the
@@ -256,7 +256,20 @@ steps:
     # Normalise the agent's self-reported summary into a plain array for the stamping gate below.
     type: data.set
     with:
-      written_rule_uuids: '${{ steps.run_discovery_agent.output.structured_output.written_rule_uuids | default: [] }}'
+      written_rule_uuids: '${{ steps.run_discovery_agent.output.structured_output.written_rule_uuids | default: [] | uniq }}'
+
+  - name: compute_confirmed_queue_sizes
+    type: data.set
+    with:
+      processedCount: '${{ steps.compute_written_rule_uuids.output.written_rule_uuids | size | default: 0 }}'
+
+  - name: compute_confirmed_queue_stats
+    type: data.set
+    with:
+      processedCount: '${{ steps.compute_confirmed_queue_sizes.output.processedCount }}'
+      remainingCount: '${{ steps.compute_queue_stats.output.candidateCount | minus: steps.compute_confirmed_queue_sizes.output.processedCount | at_least: 0 }}'
+      hasRemaining: '${{ steps.compute_queue_stats.output.candidateCount > steps.compute_confirmed_queue_sizes.output.processedCount }}'
+      queueEmpty: '${{ steps.compute_queue_stats.output.candidateCount <= steps.compute_confirmed_queue_sizes.output.processedCount }}'
 
   # -----------------------------------------------------------------------
   # Step 5: Mark processed detections.
@@ -310,8 +323,8 @@ steps:
     type: workflow.output
     with:
       candidateCount: '${{ steps.compute_queue_stats.output.candidateCount }}'
-      processedCount: '${{ steps.compute_queue_stats.output.processedCount }}'
-      remainingCount: '${{ steps.compute_queue_stats.output.remainingCount }}'
-      hasRemaining: '${{ steps.compute_queue_stats.output.hasRemaining }}'
-      queueEmpty: '${{ steps.compute_queue_stats.output.queueEmpty }}'
+      processedCount: '${{ steps.compute_confirmed_queue_stats.output.processedCount }}'
+      remainingCount: '${{ steps.compute_confirmed_queue_stats.output.remainingCount }}'
+      hasRemaining: '${{ steps.compute_confirmed_queue_stats.output.hasRemaining }}'
+      queueEmpty: '${{ steps.compute_confirmed_queue_stats.output.queueEmpty }}'
       noWork: false
