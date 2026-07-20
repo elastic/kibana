@@ -10,7 +10,7 @@ import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { createSignificantEventsDiscoveryAgent } from './discovery';
 import { createSignificantEventsJudgeAgent } from './judge';
 
-export { SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID } from './discovery';
+export { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from './discovery';
 export { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from './judge';
 
 export const registerSignificantEventsDiscoveryAgents = ({

@@ -38,6 +38,23 @@ export const workflowYamlDeclaresTopLevelEnabled = (yamlString: string): boolean
 };
 
 /**
+ * Reads `name`/`description` straight off the YAML without requiring it to pass
+ * schema validation, so a workflow that fails strict validation still keeps its
+ * author-given title instead of collapsing to the "Untitled workflow" fallback.
+ */
+const extractLooseTitleFields = (yamlString: string): { name?: string; description?: string } => {
+  const parsed = parseYamlToJSONWithoutValidation(yamlString);
+  if (!parsed.success || parsed.json == null || typeof parsed.json !== 'object') {
+    return {};
+  }
+  const json = parsed.json as Record<string, unknown>;
+  return {
+    name: typeof json.name === 'string' && json.name.trim() !== '' ? json.name : undefined,
+    description: typeof json.description === 'string' ? json.description : undefined,
+  };
+};
+
+/**
  * Validates YAML and builds a WorkflowProperties document ready for indexing.
  * Shared by user-created and managed workflow creation paths.
  */
@@ -60,9 +77,10 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     triggerDefinitions,
   } = params;
 
+  const looseTitle = extractLooseTitleFields(yaml);
   let workflowToCreate: EsWorkflowCreate = {
-    name: 'Untitled workflow',
-    description: undefined,
+    name: looseTitle.name ?? 'Untitled workflow',
+    description: looseTitle.description,
     enabled: false,
     tags: [],
     definition: undefined,
@@ -123,22 +141,15 @@ export const applyYamlUpdate = (params: {
   const validation = validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
 
   if (!validation.valid || !validation.parsedWorkflow) {
-    // Schema-invalid YAML never populates `parsedWorkflow`, so extract the name from the raw
-    // YAML to keep the stored `name` in sync with the saved YAML (e.g. renaming an invalid
-    // workflow). Validation errors are still surfaced below.
-    const parsed = parseYamlToJSONWithoutValidation(workflowYaml);
-    const rawName =
-      parsed.success && parsed.json && typeof parsed.json === 'object'
-        ? (parsed.json as { name?: unknown }).name
-        : undefined;
-
+    const looseTitle = extractLooseTitleFields(workflowYaml);
     return {
       updatedDataPatch: {
         definition: null,
         enabled: false,
         valid: false,
         triggerTypes: [],
-        ...(typeof rawName === 'string' ? { name: rawName } : {}),
+        ...(looseTitle.name !== undefined ? { name: looseTitle.name } : {}),
+        ...(looseTitle.description !== undefined ? { description: looseTitle.description } : {}),
       },
       validationErrors: validation.diagnostics
         .filter((d) => d.severity === 'error')

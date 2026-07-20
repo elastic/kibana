@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { Annotation } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt } from '../../default_api_types';
+import { rangeSchema } from '../../default_api_types';
 
 export interface ServiceAnnotationResponse {
   annotations: Annotation[];
@@ -16,8 +16,8 @@ export interface ServiceAnnotationResponse {
 
 export const serviceAnnotationsSearchRoute = defineRoute<ServiceAnnotationResponse>()({
   endpoint: 'GET /api/apm/services/{serviceName}/annotation/search 2023-10-31',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([environmentRt, rangeRt]),
+  params: z.object({
+    path: z.object({ serviceName: z.string() }),
+    query: environmentSchema.merge(rangeSchema),
   }),
 });

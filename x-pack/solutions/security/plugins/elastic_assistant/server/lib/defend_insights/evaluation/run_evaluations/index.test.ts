@@ -12,7 +12,7 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 
 import { runDefendInsightsEvaluations } from '.';
-import type { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights_graph';
+import type { DefaultDefendInsightsGraph } from '@kbn/discoveries';
 import { getLlmType } from '../../../../routes/utils';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 

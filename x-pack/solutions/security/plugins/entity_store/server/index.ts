@@ -25,6 +25,7 @@ export { ENGINE_METADATA_TYPE_FIELD } from './domain/logs_extraction/query_build
 export { getFieldValue } from '../common/domain/euid/commons';
 export { EngineDescriptorTypeName } from './domain/saved_objects/engine_descriptor/types';
 export { EntityStoreGlobalStateTypeName } from './domain/saved_objects/global_state/types';
+export { EntityStorePreferencesTypeName } from './domain/saved_objects/preferences/types';
 export { enterpriseLicenseMiddleware } from './routes/middleware/enterprise_license';
 export { checkEntityStoreIndexPrivileges } from './routes/apis/utils/check_and_format_privileges';
 export { ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES } from './routes/constants';

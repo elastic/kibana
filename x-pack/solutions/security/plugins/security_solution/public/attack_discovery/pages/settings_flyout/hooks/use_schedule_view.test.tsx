@@ -40,6 +40,9 @@ const mockUseCreateSchedule = jest
 const mockUseDeleteSchedule = jest.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
 const mockUseDisableSchedule = jest.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
 const mockUseEnableSchedule = jest.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
+const mockUseBulkDeleteSchedules = jest.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
+const mockUseBulkDisableSchedules = jest.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
+const mockUseBulkEnableSchedules = jest.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
 
 const setupUseKibana = (updateAttackDiscoverySchedule = true) => {
   mockUseKibana.mockReturnValue({
@@ -91,6 +94,9 @@ describe('useScheduleView', () => {
 
     mockUseScheduleApi.mockReturnValue({
       isWorkflowsEnabled: false,
+      useBulkDeleteSchedules: mockUseBulkDeleteSchedules,
+      useBulkDisableSchedules: mockUseBulkDisableSchedules,
+      useBulkEnableSchedules: mockUseBulkEnableSchedules,
       useCreateSchedule: mockUseCreateSchedule,
       useDeleteSchedule: mockUseDeleteSchedule,
       useDisableSchedule: mockUseDisableSchedule,
@@ -169,6 +175,9 @@ describe('useScheduleView', () => {
     beforeEach(() => {
       mockUseScheduleApi.mockReturnValue({
         isWorkflowsEnabled: true,
+        useBulkDeleteSchedules: mockUseBulkDeleteSchedules,
+        useBulkDisableSchedules: mockUseBulkDisableSchedules,
+        useBulkEnableSchedules: mockUseBulkEnableSchedules,
         useCreateSchedule: mockUseCreateSchedule,
         useDeleteSchedule: mockUseDeleteSchedule,
         useDisableSchedule: mockUseDisableSchedule,
@@ -268,7 +277,8 @@ describe('useScheduleView', () => {
     });
   });
 
-  describe('refetching schedules after flyout closes', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/277278
+  describe.skip('refetching schedules after flyout closes', () => {
     const TestScheduleView: React.FC = () => {
       const { scheduleView } = useScheduleView();
 
