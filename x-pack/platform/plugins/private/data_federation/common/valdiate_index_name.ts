@@ -23,7 +23,7 @@ const getByteLength = (value: string): number => new TextEncoder().encode(value)
 
 // Matches any disallowed character anywhere in the name.
 // Disallowed: \ / * ? " < > | whitespace , # : and lone surrogate \uD800
-const ILLEGAL_CHARACTERS_REGEX = /[\\/*?"<>|\s,#:\uD800]+/;
+const ILLEGAL_CHARACTERS_REGEX = /[\\/*?"<>|\s,#:]+/;
 
 // Disallowed start characters: -, _, +
 const ILLEGAL_START_REGEX = /^[-_+]/;

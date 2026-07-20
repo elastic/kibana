@@ -770,6 +770,7 @@ export interface DocLinks {
   readonly cases: {
     readonly casesPermissions: string;
     readonly configureCaseSettings: string;
+    readonly manageCaseTemplates: string;
   };
 }
 
