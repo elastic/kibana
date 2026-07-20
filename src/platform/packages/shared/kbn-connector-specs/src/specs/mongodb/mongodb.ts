@@ -170,6 +170,7 @@ export const MongoDBConnector: ConnectorSpec = {
       uri: z
         .string()
         .min(1)
+        .max(2048)
         .describe('MongoDB connection URI.')
         .meta({
           widget: 'text',

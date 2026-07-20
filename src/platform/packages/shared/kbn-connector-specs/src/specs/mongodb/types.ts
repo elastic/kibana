@@ -18,31 +18,33 @@ export const FindInputSchema = lazySchema(() =>
     collection: z
       .string()
       .min(1)
+      .max(200)
       .describe(
         'Name of the collection to query. Use listCollections to discover available names.'
       ),
     database: z
       .string()
+      .max(200)
       .optional()
       .describe(
         'Database to query. Defaults to the database in the connection URI path if omitted.'
       ),
     filter: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(200), z.unknown())
       .optional()
       .describe(
         'MongoDB query filter (MQL). Omit or pass {} to return all documents. ' +
           'Examples: {"status": "active"}, {"age": {"$gt": 30}}, {"tags": {"$in": ["a","b"]}}.'
       ),
     projection: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(200), z.unknown())
       .optional()
       .describe(
         'Fields to include (1) or exclude (0). Examples: {"name": 1, "email": 1, "_id": 0}. ' +
           'Omit to return all fields.'
       ),
     sort: z
-      .record(z.string(), z.union([z.literal(1), z.literal(-1)]))
+      .record(z.string().max(200), z.union([z.literal(1), z.literal(-1)]))
       .optional()
       .describe(
         'Sort order for results. 1 = ascending, -1 = descending. ' +
@@ -77,17 +79,19 @@ export const AggregateInputSchema = lazySchema(() =>
     collection: z
       .string()
       .min(1)
+      .max(200)
       .describe(
         'Name of the collection to aggregate. Use listCollections to discover available names.'
       ),
     database: z
       .string()
+      .max(200)
       .optional()
       .describe(
         'Database to query. Defaults to the database in the connection URI path if omitted.'
       ),
     pipeline: z
-      .array(z.record(z.string(), z.unknown()))
+      .array(z.record(z.string().max(200), z.unknown()))
       .min(1)
       .describe(
         'MongoDB aggregation pipeline — an ordered array of stage objects. ' +
@@ -115,15 +119,20 @@ export type AggregateInput = z.infer<typeof AggregateInputSchema>;
 
 export const CountInputSchema = lazySchema(() =>
   z.object({
-    collection: z.string().min(1).describe('Name of the collection to count documents in.'),
+    collection: z
+      .string()
+      .min(1)
+      .max(200)
+      .describe('Name of the collection to count documents in.'),
     database: z
       .string()
+      .max(200)
       .optional()
       .describe(
         'Database to query. Defaults to the database in the connection URI path if omitted.'
       ),
     filter: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(200), z.unknown())
       .optional()
       .describe(
         'MongoDB query filter. Omit or pass {} to count all documents in the collection. ' +
@@ -141,12 +150,14 @@ export const ListCollectionsInputSchema = lazySchema(() =>
   z.object({
     database: z
       .string()
+      .max(200)
       .optional()
       .describe(
         'Database to list collections from. Defaults to the database in the connection URI path if omitted.'
       ),
     nameFilter: z
       .string()
+      .max(200)
       .optional()
       .describe(
         'Optional substring to filter collection names (case-sensitive). ' +
@@ -162,15 +173,16 @@ export type ListCollectionsInput = z.infer<typeof ListCollectionsInputSchema>;
 
 export const InsertOneInputSchema = lazySchema(() =>
   z.object({
-    collection: z.string().min(1).describe('Name of the collection to insert into.'),
+    collection: z.string().min(1).max(200).describe('Name of the collection to insert into.'),
     database: z
       .string()
+      .max(200)
       .optional()
       .describe(
         'Database to write to. Defaults to the database in the connection URI path if omitted.'
       ),
     document: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(200), z.unknown())
       .describe(
         'Document to insert. Do not include _id unless you want to set it explicitly. ' +
           'Example: {"name": "Alice", "status": "active"}.'
@@ -185,18 +197,19 @@ export type InsertOneInput = z.infer<typeof InsertOneInputSchema>;
 
 export const UpdateOneInputSchema = lazySchema(() =>
   z.object({
-    collection: z.string().min(1).describe('Name of the collection to update.'),
+    collection: z.string().min(1).max(200).describe('Name of the collection to update.'),
     database: z
       .string()
+      .max(200)
       .optional()
       .describe(
         'Database to write to. Defaults to the database in the connection URI path if omitted.'
       ),
     filter: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(200), z.unknown())
       .describe('Filter to match the document to update. Example: {"_id": "abc"}.'),
     update: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(200), z.unknown())
       .describe(
         'Update operators or replacement document. ' + 'Example: {"$set": {"status": "inactive"}}.'
       ),
@@ -214,15 +227,16 @@ export type UpdateOneInput = z.infer<typeof UpdateOneInputSchema>;
 
 export const DeleteOneInputSchema = lazySchema(() =>
   z.object({
-    collection: z.string().min(1).describe('Name of the collection to delete from.'),
+    collection: z.string().min(1).max(200).describe('Name of the collection to delete from.'),
     database: z
       .string()
+      .max(200)
       .optional()
       .describe(
         'Database to write to. Defaults to the database in the connection URI path if omitted.'
       ),
     filter: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(200), z.unknown())
       .describe('Filter to match the document to delete. Example: {"_id": "abc"}.'),
   })
 );
