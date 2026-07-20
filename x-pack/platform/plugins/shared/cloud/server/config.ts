@@ -27,6 +27,12 @@ const apmConfigSchema = schema.object({
 
 const managedOtlpConfigSchema = schema.object({
   url: schema.maybe(schema.string()),
+  /**
+   * Explicit flag set by cloud infrastructure to confirm the managed OTLP service is deployed and
+   * reachable at the configured URL. Defaults to false so that a misconfigured or placeholder URL
+   * does not silently activate the mOTLP code path.
+   */
+  is_available: schema.boolean({ defaultValue: false }),
 });
 
 /**

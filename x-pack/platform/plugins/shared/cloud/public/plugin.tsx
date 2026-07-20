@@ -46,6 +46,7 @@ export interface CloudConfigType {
   is_elastic_staff_owned?: boolean;
   managed_otlp?: {
     url?: string;
+    is_available?: boolean;
   };
   onboarding?: {
     default_solution?: string;
@@ -110,6 +111,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       isEce,
       managedOtlp: {
         url: this.config.managed_otlp?.url,
+        isAvailable: this.config.managed_otlp?.is_available ?? false,
       },
       onboarding: {
         defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
@@ -183,6 +185,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, coreStart.http),
       managedOtlp: {
         url: this.config.managed_otlp?.url,
+        isAvailable: this.config.managed_otlp?.is_available ?? false,
       },
       ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),

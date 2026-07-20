@@ -112,6 +112,11 @@ export interface CloudStart extends CloudBasicUrls {
      * URL of the managed OTLP endpoint.
      */
     url?: string;
+    /**
+     * True only when cloud infrastructure explicitly confirms the mOTLP service is deployed at
+     * the configured URL. Do not use `url` alone to gate the mOTLP code path.
+     */
+    isAvailable: boolean;
   };
   /**
    * Method to retrieve privileged URLs for the Cloud plugin.
@@ -246,6 +251,11 @@ export interface CloudSetup extends CloudBasicUrls {
      * URL of the managed OTLP endpoint.
      */
     url?: string;
+    /**
+     * True only when cloud infrastructure explicitly confirms the mOTLP service is deployed at
+     * the configured URL. Do not use `url` alone to gate the mOTLP code path.
+     */
+    isAvailable: boolean;
   };
   /**
    * Onboarding configuration

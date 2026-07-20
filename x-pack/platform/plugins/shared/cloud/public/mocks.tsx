@@ -34,6 +34,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     registerCloudService: jest.fn(),
     managedOtlp: {
       url: undefined,
+      isAvailable: false,
     },
     onboarding: {},
     isServerlessEnabled: false,

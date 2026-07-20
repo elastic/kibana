@@ -131,6 +131,11 @@ export interface CloudSetup {
      * URL of the managed OTLP endpoint.
      */
     url?: string;
+    /**
+     * True only when cloud infrastructure explicitly confirms the mOTLP service is deployed at
+     * the configured URL. Do not use `url` alone to gate the mOTLP code path.
+     */
+    isAvailable: boolean;
   };
   /**
    * Onboarding configuration.
@@ -426,9 +431,16 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,
       },
-      managedOtlp: {
-        url: this.config.managed_otlp?.url,
-      },
+      managedOtlp: (() => {
+        const motlpUrl = this.config.managed_otlp?.url;
+        const motlpAvailable = this.config.managed_otlp?.is_available ?? false;
+        this.logger.info(
+          `[managed-otlp] xpack.cloud.managed_otlp.url=${
+            motlpUrl ?? '(not set)'
+          } is_available=${motlpAvailable}`
+        );
+        return { url: motlpUrl, isAvailable: motlpAvailable };
+      })(),
       onboarding: {
         defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
       },

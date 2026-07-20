@@ -30,11 +30,14 @@ export interface UseManagedOtlpResult {
 export function useManagedOtlp(): UseManagedOtlpResult {
   const { cloud, featureFlags, notifications } = useStartServices();
 
-  const isServerless = Boolean(cloud?.isServerlessEnabled);
   const managedOtlpUrl = cloud?.managedOtlp?.url;
-  const isFeatureEnabled =
-    isServerless || featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false);
-  const available = isFeatureEnabled && Boolean(managedOtlpUrl);
+  const managedOtlpIsAvailable = cloud?.managedOtlp?.isAvailable ?? false;
+  const isFeatureEnabled = featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false);
+  // Require cloud infrastructure to explicitly mark the mOTLP service as available. A URL alone
+  // is not sufficient — on some serverless deployments the URL is set to the project ingest
+  // endpoint rather than a dedicated mOTLP service, which would pair the wrong API key type with
+  // the wrong endpoint. See https://github.com/elastic/kibana/issues/277394
+  const available = managedOtlpIsAvailable && Boolean(managedOtlpUrl) && isFeatureEnabled;
   const endpoint = available && managedOtlpUrl ? `${managedOtlpUrl}:443` : undefined;
 
   const [apiKeyEncoded, setApiKeyEncoded] = useState<string | undefined>(undefined);
