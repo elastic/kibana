@@ -1,6 +1,6 @@
 version: "1"
 
-name: Memory Consolidation
+name: Significant Events Memory Consolidation
 description: >
   Curates the memory wiki by merging duplicates, removing stale entries,
   improving categorization, and adding cross-references via the streams-memory-consolidation
@@ -9,13 +9,13 @@ enabled: false
 settings:
   timeout: "30m"
   concurrency:
-    key: "streams-sigevents-memory-consolidation"
+    key: "significant-events-memory-consolidation"
     strategy: drop
     max: 1
 tags:
   - observability
   - streams
-  - sigevents
+  - significant-events
   - memory
   - consolidation
 
