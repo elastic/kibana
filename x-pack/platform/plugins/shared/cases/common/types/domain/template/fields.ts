@@ -239,6 +239,11 @@ export const RadioGroupFieldSchema = BaseFieldSchema.extend({
  * `metadata.default` is an optional per-template override for the resolved field's default
  * value. It must satisfy the resolved field's control type — this is enforced when the
  * override is merged onto the inline field at resolve time.
+ *
+ * An explicit `null` is distinct from an absent override: `null` means "this template clears the
+ * field" (do not inherit the library default; the field stays empty), whereas an absent
+ * `metadata.default` inherits the library field's default. This is what the v1→v2 template
+ * migration emits for a legacy template custom field whose value was explicitly cleared.
  */
 export const RefFieldSchema = z.object({
   name: z.string().optional(),
@@ -246,7 +251,14 @@ export const RefFieldSchema = z.object({
   metadata: z
     .object({
       default: z
-        .union([z.string(), z.number(), z.boolean(), z.array(z.string()), UserPickerDefaultSchema])
+        .union([
+          z.string(),
+          z.number(),
+          z.boolean(),
+          z.array(z.string()),
+          UserPickerDefaultSchema,
+          z.null(),
+        ])
         .optional(),
     })
     .optional(),

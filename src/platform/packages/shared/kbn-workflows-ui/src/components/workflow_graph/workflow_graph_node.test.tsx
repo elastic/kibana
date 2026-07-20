@@ -63,14 +63,14 @@ const renderNode = (
   );
 
 describe('WorkflowGraphNode', () => {
-  it('renders the step label in the accessible name', () => {
+  it('renders the deslugified step label in the accessible name', () => {
     renderNode({ label: 'my-step', stepType: 'http' });
-    expect(screen.getByRole('button', { name: /my-step/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /My Step/ })).toBeInTheDocument();
   });
 
   it('includes the stepType in the accessible name', () => {
     renderNode({ label: 'fetch-data', stepType: 'elasticsearch' });
-    expect(screen.getByRole('button', { name: /fetch-data/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Fetch Data/ })).toBeInTheDocument();
   });
 
   it('shows "Completed successfully" status label on success', () => {
