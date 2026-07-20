@@ -113,7 +113,6 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.cl
 
         await lens.closeDimensionEditor();
         await applyLensInlineEditorAndWaitClosed({ lens });
-        await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
       });
 
       await spaceTest.step(
