@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Container, ServiceIdentifier } from 'inversify';
+import type { Container } from 'inversify';
 import { firstValueFrom, Subject } from 'rxjs';
 import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreStart, CoreSetup } from '@kbn/core-lifecycle-browser';
@@ -73,10 +73,9 @@ export class PluginWrapper<
       this.container.load(createSetupModule(this.initializerContext, setupContext, plugins));
     }
 
-    return [
-      this.instance?.setup(setupContext, plugins),
-      this.container?.get<TSetup>(Setup as ServiceIdentifier<TSetup>),
-    ].find(Boolean)!;
+    return [this.instance?.setup(setupContext, plugins), this.container?.get<TSetup>(Setup)].find(
+      Boolean
+    )!;
   }
 
   /**
@@ -94,7 +93,7 @@ export class PluginWrapper<
     this.container?.load(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
-      this.container?.get<TStart>(Start as ServiceIdentifier<TStart>),
+      this.container?.get<TStart>(Start),
     ].find(Boolean)!;
 
     this.startDependencies$.next([startContext, plugins, contract]);

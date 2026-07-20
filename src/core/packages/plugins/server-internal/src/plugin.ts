@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Container, ContainerModule, ServiceIdentifier } from 'inversify';
+import type { Container, ContainerModule } from 'inversify';
 import { join } from 'path';
 import typeDetect from 'type-detect';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -144,7 +144,7 @@ export class PluginWrapper<
 
     return [
       this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins),
-      this.container?.get<TSetup>(Setup as ServiceIdentifier<TSetup>),
+      this.container?.get<TSetup>(Setup),
     ].find(Boolean)!;
   }
 
@@ -167,7 +167,7 @@ export class PluginWrapper<
     this.container?.load(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
-      this.container?.get<TStart>(Start as ServiceIdentifier<TStart>),
+      this.container?.get<TStart>(Start),
     ].find(Boolean)!;
 
     if (isPromise(contract)) {
