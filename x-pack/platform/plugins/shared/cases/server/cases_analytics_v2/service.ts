@@ -500,7 +500,8 @@ export class CasesAnalyticsV2Service {
       this.logger.warn(
         `cases-analyticsV2: failed to schedule full reset after templates migration: ${
           err instanceof Error ? err.message : String(err)
-        }`
+        }`,
+        { error: err instanceof Error ? err : undefined }
       );
     }
   }

@@ -305,7 +305,8 @@ export class TemplatesMigrationTaskManager {
       this.logger.warn(
         `[${executionId}] onCaseBackfillComplete hook failed (migration is still complete): ${
           err instanceof Error ? err.message : String(err)
-        }`
+        }`,
+        { error: err instanceof Error ? err : undefined }
       );
     }
   }

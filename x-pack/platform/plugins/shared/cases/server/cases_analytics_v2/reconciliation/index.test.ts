@@ -154,16 +154,19 @@ describe('resetReconciliationTask', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('locked'));
   });
 
-  it('does not throw when the scheduling step fails (it now runs inside the try scope)', async () => {
-    // scheduleReconciliationTask was moved inside resetReconciliationTask's try so the "never
-    // throws" contract is local. Pin it: even if scheduling rejects (here via ensureScheduled), the
-    // reset must still resolve rather than propagate — independent of scheduleReconciliationTask's
-    // own internal error handling.
+  it('resolves even when ensureScheduled rejects during scheduling', async () => {
+    // End-to-end resilience: an ensureScheduled failure must not break reset. Note that
+    // scheduleReconciliationTask swallows this internally, so the rejection never actually reaches
+    // resetReconciliationTask's own try — this pins the composed "reset never throws on a scheduling
+    // hiccup" behavior, not the try boundary itself (no current input makes scheduling throw).
+    // bulkUpdateState still runs and resolves.
     const tm = taskManagerMock.createStart();
     (tm.ensureScheduled as jest.Mock).mockRejectedValueOnce(new Error('tm unavailable'));
 
     await expect(
       resetReconciliationTask({ taskManager: tm, logger, intervalMinutes: 30 })
     ).resolves.toBeUndefined();
+    // bulkUpdateState is reached despite the scheduling hiccup.
+    expect(tm.bulkUpdateState).toHaveBeenCalledTimes(1);
   });
 });

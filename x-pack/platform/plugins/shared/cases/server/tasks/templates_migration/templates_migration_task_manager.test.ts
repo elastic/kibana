@@ -1831,7 +1831,8 @@ describe('TemplatesMigrationTaskManager', () => {
       // Task Manager does not retry and re-fire the hook.
       expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('onCaseBackfillComplete hook failed')
+        expect.stringContaining('onCaseBackfillComplete hook failed'),
+        expect.objectContaining({ error: expect.any(Error) })
       );
     });
 
