@@ -18,9 +18,9 @@ const MANAGED_WORKFLOW_IDS = [
   'system-significant-events-discovery',
   'system-significant-events-triage',
   // Memory workflows (installed when the memory feature flag is enabled)
-  'system-streams-memory-synthesis',
-  'system-streams-memory-consolidation',
-  'system-streams-memory-conversation-scraper',
+  'system-significant-events-memory-synthesis',
+  'system-significant-events-memory-consolidation',
+  'system-significant-events-memory-conversation-scraper',
 ];
 
 /**
@@ -33,14 +33,6 @@ apiTest.describe(
   'Managed workflows',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    apiTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.enableMemory();
-    });
-
-    apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.disableMemory();
-    });
-
     for (const workflowId of MANAGED_WORKFLOW_IDS) {
       apiTest(`${workflowId}: is installed and valid`, async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();

@@ -1,10 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/apm-common",
-  "owner": [
-    "@elastic/obs-presentation-team",
-    "@elastic/obs-exploration-team"
-  ],
+  "owner": ["@elastic/obs-signals-traces-team"],
   "group": "platform",
   "visibility": "shared"
 }
