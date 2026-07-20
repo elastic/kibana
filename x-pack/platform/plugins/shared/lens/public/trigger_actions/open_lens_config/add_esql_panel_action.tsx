@@ -13,7 +13,6 @@ import { apiHasAppContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { getAddPanelButton } from '@kbn/presentation-util';
 import type { LensApi } from '@kbn/lens-common-2';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
@@ -50,7 +49,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
     return apiIsPresentationContainer(embeddable) && this.core.uiSettings.get(ENABLE_ESQL);
   }
 
-  public async execute({ embeddable: api }: EmbeddableApiContext) {
+  public async execute({ embeddable: api, returnFocus }: EmbeddableApiContext) {
     if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
     if (!api || !apiHasAppContext(api)) {
       return;
@@ -77,7 +76,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
           closeFlyout,
         });
       },
-      options: { uuid, getReturnFocusTarget: getAddPanelButton },
+      options: { uuid, returnFocus },
     });
   }
 }

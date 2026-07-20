@@ -11,9 +11,7 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { createImageAction } from './create_image_action';
 
-const mockGetAddPanelButton = jest.fn();
 jest.mock('@kbn/presentation-util', () => ({
-  getAddPanelButton: () => mockGetAddPanelButton(),
   openLazyFlyout: jest.fn(),
 }));
 
@@ -23,20 +21,12 @@ jest.mock('../services/kibana_services', () => ({
 
 describe('createImageAction', () => {
   it('returns focus to Add when the image editor closes', async () => {
+    const returnFocus = jest.fn();
     await createImageAction.execute({
       embeddable: { addNewPanel: jest.fn() },
+      returnFocus,
     } as unknown as EmbeddableApiContext);
 
-    const [{ flyoutProps }] = jest.mocked(openLazyFlyout).mock.calls[0];
-    const { getReturnFocusTarget } = flyoutProps as {
-      getReturnFocusTarget?: () => Element | null;
-    };
-    const addButton = document.createElement('button');
-    addButton.id = 'dashboardAddTopNavButton';
-    document.body.appendChild(addButton);
-    mockGetAddPanelButton.mockReturnValue(addButton);
-
-    expect(getReturnFocusTarget?.()).toBe(addButton);
-    addButton.remove();
+    expect(openLazyFlyout).toHaveBeenCalledWith(expect.objectContaining({ returnFocus }));
   });
 });

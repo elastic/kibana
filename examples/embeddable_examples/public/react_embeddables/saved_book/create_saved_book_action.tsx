@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel, initializeStateManager } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { getAddPanelButton, openLazyFlyout } from '@kbn/presentation-util';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { BookState } from '../../../server';
 import { BOOK_EMBEDDABLE_TYPE, type BookEmbeddableState } from '../../../common';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
@@ -26,7 +26,7 @@ export const createSavedBookAction = (core: CoreStart) => {
     isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
       return apiCanAddNewPanel(embeddable);
     },
-    execute: async ({ embeddable }: EmbeddableApiContext) => {
+    execute: async ({ embeddable, returnFocus }: EmbeddableApiContext) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
       const newBookStateManager = initializeStateManager<BookState>(
         defaultBookState,
@@ -35,6 +35,7 @@ export const createSavedBookAction = (core: CoreStart) => {
       openLazyFlyout({
         core,
         parentApi: parent,
+        returnFocus,
         loadContent: async ({ closeFlyout }) => {
           const { getSavedBookEditor } = await import('./saved_book_editor');
           return getSavedBookEditor({
@@ -50,9 +51,6 @@ export const createSavedBookAction = (core: CoreStart) => {
               });
             },
           });
-        },
-        flyoutProps: {
-          getReturnFocusTarget: getAddPanelButton,
         },
       });
     },

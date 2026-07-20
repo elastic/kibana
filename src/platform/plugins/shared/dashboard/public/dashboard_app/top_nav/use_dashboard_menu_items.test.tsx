@@ -8,6 +8,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import type { ReactElement } from 'react';
 
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
@@ -35,6 +36,7 @@ describe('useDashboardMenuItems', () => {
 
   describe('Add panel', () => {
     test('returns focus to the Add button when the flyout closes', () => {
+      const returnFocus = jest.fn();
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
@@ -47,18 +49,51 @@ describe('useDashboardMenuItems', () => {
         }
       );
 
-      result.current.editModeTopNavConfig.items?.find(({ id }) => id === 'add')?.run?.();
+      result.current.editModeTopNavConfig.items
+        ?.find(({ id }) => id === 'add')
+        ?.run?.({
+          triggerElement: document.createElement('button'),
+          returnFocus,
+        });
 
-      const [{ flyoutProps }] = jest.mocked(openLazyFlyout).mock.calls[0];
-      const { getReturnFocusTarget } = flyoutProps as {
-        getReturnFocusTarget?: () => Element | null;
-      };
-      const addButton = document.createElement('button');
-      addButton.id = 'dashboardAddTopNavButton';
-      document.body.appendChild(addButton);
+      const [{ returnFocus: restoreFocus }] = jest.mocked(openLazyFlyout).mock.calls[0];
+      restoreFocus?.();
 
-      expect(getReturnFocusTarget?.()).toBe(addButton);
-      addButton.remove();
+      expect(returnFocus).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not return focus while handing off to a panel editor', async () => {
+      const returnFocus = jest.fn();
+      const { result } = renderHook(
+        () =>
+          useDashboardMenuItems({
+            isLabsShown: false,
+            setIsLabsShown: jest.fn(),
+            maybeRedirect: jest.fn(),
+          }),
+        {
+          wrapper: dashboardContextWrapper({}),
+        }
+      );
+
+      result.current.editModeTopNavConfig.items
+        ?.find(({ id }) => id === 'add')
+        ?.run?.({
+          triggerElement: document.createElement('button'),
+          returnFocus,
+        });
+
+      const [{ loadContent, returnFocus: restoreFocus }] =
+        jest.mocked(openLazyFlyout).mock.calls[0];
+      const content = (await loadContent({
+        closeFlyout: jest.fn(),
+        ariaLabelledBy: 'addPanelTitle',
+      })) as ReactElement<{ onActionExecute?: () => void }>;
+
+      content.props.onActionExecute?.();
+      restoreFocus?.();
+
+      expect(returnFocus).not.toHaveBeenCalled();
     });
   });
 

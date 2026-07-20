@@ -22,7 +22,7 @@ export const mountInlinePanel = async ({
   core,
   api,
   loadContent,
-  options: { dataTestSubj, uuid, container, getReturnFocusTarget } = {},
+  options: { dataTestSubj, uuid, container, returnFocus } = {},
 }: {
   core: CoreStart;
   api?: unknown;
@@ -36,7 +36,7 @@ export const mountInlinePanel = async ({
     dataTestSubj?: string;
     uuid?: string;
     container?: HTMLElement | null;
-    getReturnFocusTarget?: () => Element | null;
+    returnFocus?: () => void;
   };
 }) => {
   if (container) {
@@ -49,12 +49,12 @@ export const mountInlinePanel = async ({
   openLazyFlyout({
     core,
     parentApi: api,
+    returnFocus,
     loadContent,
     flyoutProps: {
       ...lensFlyoutProps,
       'data-test-subj': dataTestSubj ?? 'customizeLens',
       focusedPanelId: uuid,
-      getReturnFocusTarget,
     },
   });
 };

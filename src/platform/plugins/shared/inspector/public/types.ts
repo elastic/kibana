@@ -62,7 +62,6 @@ export interface InspectorOptions {
   title?: string;
   options?: unknown;
   flyoutProps?: Partial<OverlayFlyoutOpenOptions> & {
-    getReturnFocusTarget?: () => Element | null;
     focusedPanelId?: string;
   };
 }

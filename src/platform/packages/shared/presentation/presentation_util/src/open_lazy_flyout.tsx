@@ -17,10 +17,6 @@ import { LoadingFlyout } from './loading_flyout';
 import { tracksOverlays } from './tracks_overlays';
 
 const htmlId = htmlIdGenerator('modalTitleId');
-const ADD_PANEL_BUTTON_ID = 'dashboardAddTopNavButton';
-
-export const getAddPanelButton = (): HTMLElement | null =>
-  document.getElementById(ADD_PANEL_BUTTON_ID);
 
 interface LoadContentArgs {
   closeFlyout: () => void;
@@ -30,9 +26,9 @@ interface LoadContentArgs {
 interface OpenLazyFlyoutParams {
   core: CoreStart;
   parentApi?: unknown;
+  returnFocus?: () => void;
   loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
   flyoutProps?: Partial<OverlayFlyoutOpenOptions> & {
-    getReturnFocusTarget?: () => Element | null;
     focusedPanelId?: string;
   };
 }
@@ -68,8 +64,8 @@ const resolveAttachedElement = (el: HTMLElement | null): HTMLElement | null => {
  * @returns A handle to the opened flyout (`OverlayRef`).
  */
 export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
-  const { core, parentApi, loadContent, flyoutProps: allFlyoutProps } = params;
-  const { focusedPanelId, getReturnFocusTarget, ...flyoutProps } = allFlyoutProps ?? {};
+  const { core, parentApi, returnFocus, loadContent, flyoutProps: allFlyoutProps } = params;
+  const { focusedPanelId, ...flyoutProps } = allFlyoutProps ?? {};
 
   const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
@@ -83,11 +79,9 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
       : null;
 
   const resolveReturnFocusTarget = () => {
-    // Priority: explicit target → the element that had focus (re-queried by id to
-    // survive a re-render) → the panel's "..." toggle (for context-menu actions whose
-    // menu item is gone by the time an async flyout opens).
-    const explicitTarget = getReturnFocusTarget?.();
-    if (explicitTarget) return explicitTarget;
+    // Priority: the element that had focus (re-queried by id to survive a re-render) →
+    // the panel's "..." toggle (for context-menu actions whose menu item is gone by the
+    // time an async flyout opens).
     const byFocusedElement = resolveAttachedElement(previouslyFocusedElement);
     if (byFocusedElement) return byFocusedElement;
     return focusedPanelId
@@ -95,8 +89,12 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
       : null;
   };
 
-  const returnFocus = () => {
+  const restoreFocus = () => {
     window.requestAnimationFrame(() => {
+      if (returnFocus) {
+        setTimeout(returnFocus);
+        return;
+      }
       focusFirstFocusable(resolveReturnFocusTarget);
     });
   };
@@ -106,7 +104,7 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     flyoutRef?.close();
     // Resolve lazily: closing can re-render the panel, so the trigger is looked up after
     // that render (inside focusFirstFocusable's deferred callback).
-    returnFocus();
+    restoreFocus();
   };
 
   const flyoutRef = core.overlays.openFlyout(

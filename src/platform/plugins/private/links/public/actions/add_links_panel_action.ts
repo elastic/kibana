@@ -17,7 +17,7 @@ import {
   apiPublishesSavedObjectId,
   apiIsPresentationContainer,
 } from '@kbn/presentation-publishing';
-import { getAddPanelButton, openLazyFlyout } from '@kbn/presentation-util';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { LinksParentApi } from '../types';
 import type { LinksEmbeddableState } from '../../common';
 import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
@@ -37,12 +37,13 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
   getIconType: () => APP_ICON,
   order: 10,
   isCompatible: async ({ embeddable }) => isParentApiCompatible(embeddable),
-  execute: async ({ embeddable }) => {
+  execute: async ({ embeddable, returnFocus }) => {
     if (!isParentApiCompatible(embeddable)) throw new IncompatibleActionError();
 
     openLazyFlyout({
       core: coreServices,
       parentApi: embeddable,
+      returnFocus,
       loadContent: async ({ closeFlyout }) => {
         return getEditorFlyout({
           parentDashboard: embeddable,
@@ -76,7 +77,6 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
       flyoutProps: {
         'data-test-subj': 'links--panelEditor--flyout',
         isResizable: false,
-        getReturnFocusTarget: getAddPanelButton,
       },
     });
   },
