@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { resolveTimeline } from '../../containers/api';
