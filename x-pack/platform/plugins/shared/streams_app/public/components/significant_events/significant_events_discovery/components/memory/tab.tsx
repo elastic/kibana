@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   EuiTreeView,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
