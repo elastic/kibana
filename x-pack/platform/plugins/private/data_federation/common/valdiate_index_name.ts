@@ -19,8 +19,7 @@ export interface DataSourceNameValidationResult {
   message: string;
 }
 
-const getByteLength = (value: string): number =>
-  encodeURI(value).split(/%(?:u[0-9A-F]{2})?[0-9A-F]{2}|./).length - 1;
+const getByteLength = (value: string): number => new TextEncoder().encode(value).length;
 
 // Matches any disallowed character anywhere in the name.
 // Disallowed: \ / * ? " < > | whitespace , # : and lone surrogate \uD800
