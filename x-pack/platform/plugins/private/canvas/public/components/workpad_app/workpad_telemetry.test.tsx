@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { render } from '@testing-library/react';
 import {
   withUnconnectedElementsLoadedTelemetry,
@@ -16,8 +16,8 @@ import {
 import { METRIC_TYPE } from '../../lib/ui_metric';
 import type { ExpressionContext, ResolvedArgType } from '../../../types';
 
-jest.mock('react-redux', () => {
-  const originalModule = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const originalModule = jest.requireActual('react-redux-v7');
 
   return {
     ...originalModule,
