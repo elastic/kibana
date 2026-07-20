@@ -29,6 +29,7 @@ describe('DefaultSLODefinitionRepository', () => {
           {
             id: 'so-id',
             type: 'slo',
+            score: 0,
             references: [],
             attributes: {
               id: 'test-slo-12345678',

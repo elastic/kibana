@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { assertNever } from '@kbn/std';
 import React, { useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { SLI_OPTIONS } from '../constants';
 import { useUnregisterFields } from '../hooks/use_unregister_fields';
 import type { CreateSLOForm, FormSettings } from '../types';
@@ -29,7 +28,6 @@ interface SloEditFormIndicatorSectionProps {
 
 export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicatorSectionProps) {
   const { isEditMode = false, allowedIndicatorTypes = [] } = formSettings;
-  const { isServerless } = usePluginContext();
   const { control, watch } = useFormContext<CreateSLOForm>();
   useUnregisterFields({ isEditMode });
 
