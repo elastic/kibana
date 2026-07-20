@@ -63,6 +63,9 @@ export class DataViewsService extends FtrService {
 
     await this.testSubjects.click(adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton');
     await this.header.waitUntilLoadingHasFinished();
+    // Wait for the editor flyout (and its overlaying success callout) to be
+    // removed from the DOM before returning, so a subsequent click isn't intercepted.
+    await this.testSubjects.missingOrFail('indexPatternEditorFlyout');
   }
 
   /**
