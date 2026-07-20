@@ -51,6 +51,13 @@ export const listPolicyExecutionHistoryQuerySchema = z.object({
     .max(POLICY_EXECUTION_HISTORY_MAX_PER_PAGE)
     .optional()
     .describe('Number of events per page. Defaults to 100.'),
+  episodeId: z
+    .string()
+    .trim()
+    .min(1)
+    .max(ID_MAX_LENGTH)
+    .optional()
+    .describe('Episode filter. Narrows events to those referencing the given episode id.'),
   ...sharedFilterFields,
 });
 export type ListPolicyExecutionHistoryParams = z.infer<

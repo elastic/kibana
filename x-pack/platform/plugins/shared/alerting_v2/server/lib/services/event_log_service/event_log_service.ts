@@ -40,6 +40,7 @@ export interface FindActionPolicyExecutionEventsParams {
   policyIds?: string[];
   ruleIds?: string[];
   mandatoryRuleIds?: string[];
+  episodeId?: string;
 }
 
 export interface FindActionPolicyExecutionEventsResult {
@@ -96,6 +97,7 @@ export class EventLogService implements EventLogServiceContract {
     policyIds,
     ruleIds,
     mandatoryRuleIds,
+    episodeId,
   }: FindActionPolicyExecutionEventsParams): Promise<FindActionPolicyExecutionEventsResult> {
     const body = buildFindActionPolicyEventsQuery({
       spaceId,
@@ -104,6 +106,7 @@ export class EventLogService implements EventLogServiceContract {
       policyIds,
       ruleIds,
       mandatoryRuleIds,
+      episodeId,
       page,
       perPage,
     });

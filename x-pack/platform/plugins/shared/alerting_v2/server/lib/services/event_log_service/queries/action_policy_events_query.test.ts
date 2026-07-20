@@ -289,6 +289,30 @@ describe('action policy events queries', () => {
       });
     });
 
+    describe('episodeId', () => {
+      it('adds an AND term filter on episode_ids when episodeId is provided', () => {
+        const filters = filtersOf(
+          buildCountActionPolicyEventsQuery({ ...baseParams, episodeId: 'ep-1' })
+        );
+        expect(filters).toEqual(
+          expect.arrayContaining([
+            { term: { 'kibana.alerting_v2.dispatcher.episode_ids': 'ep-1' } },
+          ])
+        );
+      });
+
+      it('omits the episode_ids term filter when episodeId is not provided', () => {
+        const filters = filtersOf(buildCountActionPolicyEventsQuery(baseParams));
+        expect(
+          filters.find((clause) =>
+            Boolean(
+              clause?.term && 'kibana.alerting_v2.dispatcher.episode_ids' in (clause.term as object)
+            )
+          )
+        ).toBeUndefined();
+      });
+    });
+
     it('sorts by @timestamp desc', () => {
       const body = buildCountActionPolicyEventsQuery(baseParams);
       expect(body.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
