@@ -66,6 +66,7 @@ export {
   isFeatureWithFilter,
   mergeFeature,
   normalizeFeatureSlug,
+  normalizeFeatureSlugForMatching,
   toBaseFeature,
 } from './src/feature';
 

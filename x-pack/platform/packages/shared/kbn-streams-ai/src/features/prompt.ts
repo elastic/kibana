@@ -22,7 +22,8 @@ const featuresSchema = {
         properties: {
           id: {
             type: 'string',
-            description: 'Unique identifier for the feature.',
+            description:
+              'Stable identifier for deduplication across runs. Lowercase, hyphenated, name as it appears in logs. MUST NOT contain versions, build hashes, image tags, or instance ids — those belong in properties/meta.',
           },
           type: {
             type: 'string',
@@ -163,12 +164,36 @@ const featuresSchema = {
   required: ['features'],
 } as const;
 
+const searchSimilarFeaturesSchema = {
+  type: 'object',
+  properties: {
+    candidate_id: {
+      type: 'string',
+      description: 'The id you intend to use for the candidate feature.',
+    },
+    title: {
+      type: 'string',
+      description: 'The candidate feature title.',
+    },
+    description: {
+      type: 'string',
+      description: 'The candidate feature description.',
+    },
+    type: {
+      type: 'string',
+      description: 'The candidate feature type.',
+    },
+  },
+  required: ['candidate_id', 'title', 'description', 'type'],
+} as const;
+
 export function createIdentifyFeaturesPrompt({ systemPrompt }: { systemPrompt: string }) {
   return createPrompt({
     name: 'identify_features',
     input: z.object({
       sample_documents: z.string(),
       previously_identified_features: z.string(),
+      known_feature_ids: z.string(),
       excluded_features: z.string(),
     }),
   })
@@ -184,6 +209,11 @@ export function createIdentifyFeaturesPrompt({ systemPrompt }: { systemPrompt: s
         },
       },
       tools: {
+        search_similar_features: {
+          description:
+            'Search known features by meaning before finalizing a candidate-new feature.',
+          schema: searchSimilarFeaturesSchema,
+        },
         finalize_features: {
           description: 'Finalize features identification',
           schema: featuresSchema,

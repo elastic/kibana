@@ -16,6 +16,7 @@ import {
   ignoredFeatureSchema,
 } from '@kbn/significant-events-schema';
 import { withSpan } from '@kbn/apm-utils';
+import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { conditionSchema, isConditionComplete, type Condition } from '@kbn/streamlang';
 import { createIdentifyFeaturesPrompt } from './prompt';
 import { formatRawDocument } from './utils/format_raw_document';
@@ -51,6 +52,20 @@ export interface ExcludedFeatureSummary {
   properties: Record<string, unknown>;
 }
 
+export interface SearchSimilarFeaturesArguments {
+  candidate_id: string;
+  title: string;
+  description: string;
+  type: string;
+}
+
+export interface SimilarFeatureHit {
+  id: string;
+  title: string;
+  description: string;
+  confidence: number;
+}
+
 export interface IdentifyFeaturesOptions {
   streamName: string;
   sampleDocuments: Array<SearchHit<Record<string, unknown>>>;
@@ -60,6 +75,8 @@ export interface IdentifyFeaturesOptions {
   logger: Logger;
   signal: AbortSignal;
   previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
+  knownFeatureIds?: string;
+  searchSimilarFeatures?: (args: SearchSimilarFeaturesArguments) => Promise<SimilarFeatureHit[]>;
 }
 
 export async function identifyFeatures({
@@ -68,8 +85,11 @@ export async function identifyFeatures({
   excludedFeatures,
   systemPrompt,
   inferenceClient,
+  logger,
   signal,
   previouslyIdentifiedFeatures = [],
+  knownFeatureIds = '',
+  searchSimilarFeatures,
 }: IdentifyFeaturesOptions): Promise<{
   features: BaseFeature[];
   ignoredFeatures: IgnoredFeature[];
@@ -89,46 +109,96 @@ export async function identifyFeatures({
   const previousFeaturesContext =
     previouslyIdentifiedFeatures.length > 0 ? JSON.stringify(previouslyIdentifiedFeatures) : '';
 
+  const finalizedFeatures: BaseFeature[] = [];
+  const ignoredFeatures: IgnoredFeature[] = [];
+  let finalizeCallCount = 0;
+
   const response = await withSpan('invoke_prompt', () =>
-    inferenceClient.prompt({
+    executeAsReasoningAgent({
       input: {
         sample_documents: JSON.stringify(formattedDocuments),
         previously_identified_features: previousFeaturesContext,
+        known_feature_ids: knownFeatureIds,
         excluded_features: excludedFeatures?.length ? JSON.stringify(excludedFeatures) : '',
       },
       prompt: createIdentifyFeaturesPrompt({ systemPrompt }),
+      inferenceClient,
+      maxSteps: 4,
+      toolCallbacks: {
+        search_similar_features: async (toolCall) => {
+          if (!searchSimilarFeatures) {
+            return {
+              response: {
+                features: [],
+                count: 0,
+                error: 'Semantic feature search is unavailable.',
+              },
+            };
+          }
+
+          try {
+            const features = await searchSimilarFeatures(toolCall.function.arguments);
+            return {
+              response: {
+                features,
+                count: features.length,
+              },
+            };
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logger.warn(`Failed to search similar features: ${errorMessage}`);
+            return {
+              response: {
+                features: [],
+                count: 0,
+                error: errorMessage,
+              },
+            };
+          }
+        },
+        finalize_features: async (toolCall) => {
+          finalizeCallCount++;
+          const acceptedFeaturesBefore = finalizedFeatures.length;
+          const acceptedIgnoredBefore = ignoredFeatures.length;
+
+          for (const feature of toolCall.function.arguments.features) {
+            const candidate = {
+              ...feature,
+              stream_name: streamName,
+              filter: tryParseFilter(feature.filter),
+            };
+            const result = identifiedFeatureSchema.safeParse(candidate);
+            if (!result.success || Object.keys(result.data.properties).length === 0) {
+              continue;
+            }
+            finalizedFeatures.push(result.data);
+          }
+
+          for (const item of toolCall.function.arguments.ignored_features ?? []) {
+            const result = ignoredFeatureSchema.safeParse(item);
+            if (result.success) {
+              ignoredFeatures.push(result.data);
+            }
+          }
+
+          return {
+            response: {
+              features_accepted: finalizedFeatures.length - acceptedFeaturesBefore,
+              ignored_features_accepted: ignoredFeatures.length - acceptedIgnoredBefore,
+            },
+          };
+        },
+      },
       abortSignal: signal,
     })
   );
 
-  const features = uniqBy(
-    response.toolCalls
-      .flatMap((toolCall) => toolCall.function.arguments.features)
-      .map((feature) => {
-        return {
-          ...feature,
-          stream_name: streamName,
-          filter: tryParseFilter(feature.filter),
-        };
-      })
-      .filter((feature) => {
-        const result = identifiedFeatureSchema.safeParse(feature);
-        if (!result.success) {
-          return false;
-        }
-
-        // ensure that the feature has at least one stable identifying property
-        return Object.keys(feature.properties).length > 0;
-      }),
-    (feature) => feature.id
-  );
-
-  const ignoredFeatures = response.toolCalls
-    .flatMap((toolCall) => toolCall.function.arguments.ignored_features ?? [])
-    .filter((item): item is IgnoredFeature => ignoredFeatureSchema.safeParse(item).success);
+  if (finalizeCallCount === 0) {
+    throw new Error('Feature identification did not call finalize_features');
+  }
 
   return {
-    features,
+    features: uniqBy(finalizedFeatures, (feature) => feature.id),
     ignoredFeatures,
     tokensUsed: sumTokens({ added: response.tokens }),
   };

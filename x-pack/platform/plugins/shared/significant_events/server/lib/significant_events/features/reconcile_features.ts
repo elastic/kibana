@@ -11,10 +11,10 @@ import {
   type Feature,
   type FeatureUpsert,
   type BaseFeature,
-  isDuplicateFeature,
   hasSameFingerprint,
   mergeFeature,
   normalizeFeatureSlug,
+  normalizeFeatureSlugForMatching,
   toBaseFeature,
 } from '@kbn/significant-events-schema';
 import type { IgnoredFeature } from '@kbn/streams-ai';
@@ -56,6 +56,41 @@ export function reconcileComputedFeatures({
     ...metadata,
   }));
 }
+
+type FeatureMatchTier = 'exact' | 'alias' | 'normalized' | 'fingerprint';
+
+interface FeatureMatch {
+  feature: Feature;
+  tier: FeatureMatchTier;
+}
+
+const getFeatureMatchKey = (type: string, id: string): string => `${type}:${id}`;
+
+const getStringArray = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+
+const addFeatureCandidate = (
+  candidatesByKey: Map<string, Feature[]>,
+  key: string,
+  feature: Feature
+): void => {
+  const candidates = candidatesByKey.get(key);
+  if (candidates) {
+    candidates.push(feature);
+  } else {
+    candidatesByKey.set(key, [feature]);
+  }
+};
+
+const pickLatestFeature = (candidates: ReadonlyArray<Feature> | undefined): Feature | undefined => {
+  if (!candidates || candidates.length === 0) {
+    return undefined;
+  }
+
+  return candidates.reduce((latest, candidate) =>
+    (candidate.updated_at ?? '') > (latest.updated_at ?? '') ? candidate : latest
+  );
+};
 
 function filterExcluded(
   rawFeatures: ReadonlyArray<BaseFeature>,
@@ -104,10 +139,16 @@ export function reconcileInferredFeatures({
   excludedFeatures: ReadonlyArray<Feature>;
   runId: string;
   logger: Logger;
-}): { newFeatures: FeatureUpsert[]; updatedFeatures: FeatureUpsert[]; codeIgnoredCount: number } {
+}): {
+  newFeatures: FeatureUpsert[];
+  updatedFeatures: FeatureUpsert[];
+  codeIgnoredCount: number;
+  remappedCount: number;
+} {
   const metadata = createFeatureMetadata({ runId });
   const newFeatures: FeatureUpsert[] = [];
   const updatedFeatures: FeatureUpsert[] = [];
+  let remappedCount = 0;
 
   for (const ignored of ignoredFeatures) {
     logger.debug(
@@ -117,30 +158,81 @@ export function reconcileInferredFeatures({
 
   const { nonExcluded, codeIgnoredCount } = filterExcluded(rawFeatures, excludedFeatures, logger);
 
-  const discoveredSet = new Set(discoveredFeatures.map((f) => f.id));
-  const byLowerId = new Map<string, Feature>();
-  for (const f of allKnownFeatures) {
-    byLowerId.set(normalizeFeatureSlug(f.id), f);
+  const discoveredSet = new Set(
+    discoveredFeatures.map((feature) =>
+      getFeatureMatchKey(feature.type, normalizeFeatureSlug(feature.id))
+    )
+  );
+  const byExactId = new Map<string, Feature[]>();
+  const byAlias = new Map<string, Feature[]>();
+  const byNormalizedId = new Map<string, Feature[]>();
+
+  for (const feature of allKnownFeatures) {
+    addFeatureCandidate(
+      byExactId,
+      getFeatureMatchKey(feature.type, normalizeFeatureSlug(feature.id)),
+      feature
+    );
+    addFeatureCandidate(
+      byNormalizedId,
+      getFeatureMatchKey(feature.type, normalizeFeatureSlugForMatching(feature.id)),
+      feature
+    );
+
+    for (const alias of getStringArray(feature.meta?.aliases)) {
+      const normalizedAlias = normalizeFeatureSlug(alias);
+      if (normalizedAlias.length > 0) {
+        addFeatureCandidate(byAlias, getFeatureMatchKey(feature.type, normalizedAlias), feature);
+      }
+    }
   }
 
   for (const raw of nonExcluded) {
-    const match =
-      byLowerId.get(normalizeFeatureSlug(raw.id)) ??
-      allKnownFeatures.find((f) => isDuplicateFeature(f, raw));
+    const normalizedRawId = normalizeFeatureSlug(raw.id);
+    const typedRawId = getFeatureMatchKey(raw.type, normalizedRawId);
+    const typedMatchingId = getFeatureMatchKey(raw.type, normalizeFeatureSlugForMatching(raw.id));
+    const exactMatch = pickLatestFeature(byExactId.get(typedRawId));
+    const aliasMatch = pickLatestFeature(byAlias.get(typedRawId));
+    const normalizedMatch = pickLatestFeature(byNormalizedId.get(typedMatchingId));
+    let match: FeatureMatch | undefined;
+
+    if (exactMatch) {
+      match = { feature: exactMatch, tier: 'exact' };
+    } else if (aliasMatch) {
+      match = { feature: aliasMatch, tier: 'alias' };
+    } else if (normalizedMatch) {
+      match = { feature: normalizedMatch, tier: 'normalized' };
+    } else {
+      const fingerprintMatch = pickLatestFeature(
+        allKnownFeatures.filter((feature) => hasSameFingerprint(feature, raw))
+      );
+      if (fingerprintMatch) {
+        match = { feature: fingerprintMatch, tier: 'fingerprint' };
+      }
+    }
 
     if (match) {
-      if (!discoveredSet.has(match.id)) {
-        updatedFeatures.push({ ...raw, ...metadata });
-      } else {
-        const merged = mergeFeature(match, raw);
-        if (!isEqual(merged, toBaseFeature(match))) {
-          updatedFeatures.push({ ...merged, ...metadata });
-        }
+      if (match.tier !== 'exact') {
+        remappedCount++;
+      }
+
+      const merged = mergeFeature(match.feature, raw);
+      const matchKey = getFeatureMatchKey(
+        match.feature.type,
+        normalizeFeatureSlug(match.feature.id)
+      );
+      if (!discoveredSet.has(matchKey) || !isEqual(merged, toBaseFeature(match.feature))) {
+        updatedFeatures.push({ ...merged, ...metadata });
       }
     } else {
       newFeatures.push({ ...raw, ...metadata });
     }
   }
 
-  return { newFeatures, updatedFeatures, codeIgnoredCount };
+  return {
+    newFeatures,
+    updatedFeatures,
+    codeIgnoredCount,
+    remappedCount,
+  };
 }
