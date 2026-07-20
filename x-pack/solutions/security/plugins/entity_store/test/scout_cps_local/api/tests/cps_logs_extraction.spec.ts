@@ -203,12 +203,86 @@ apiTest.describe(
 
         const source = hits.hits.hits[0]._source as Record<string, unknown>;
 
+        // Verify the core entity shape is intact.
+        expect(get(source, ['entity', 'name'])).toBe(hostName);
+        expect(get(source, ['entity', 'id'])).toMatch(/^host:/);
+        expect(get(source, ['host', 'name'])).toBe(hostName);
+
         // raw_identifiers must survive the CPS round-trip: remote extraction writes them to the
         // updates data stream, and the main path must promote them into the latest index.
         const rawIdentifierHostIds = normalizeKeywordList(
           get(source, ['entity', 'relationships', 'administers', 'raw_identifiers', 'host', 'id'])
         );
         expect(rawIdentifierHostIds).toContain(adminTargetHostId);
+      }
+    );
+
+    apiTest(
+      'preserves the EUID when the self-identifier field (host.entity.id) is present in the CPS extract result',
+      async ({ apiClient, esClient, linkedProject }) => {
+        const hostName = `cps_euid_host_${Date.now()}`;
+        // Use a value that deliberately does NOT match any valid EUID format.
+        // If the reviewer's EUID-collision bug is still present, transformDocForUpsert remaps
+        // host.entity.id → entity.id and overwrites the real computed EUID with this value.
+        const rawHostEntityId = `raw-collision-sentinel-${Date.now()}`;
+
+        await ingestLogOnLinked(linkedProject.esClient, {
+          '@timestamp': new Date(NOW - 5 * 60_000).toISOString(),
+          host: {
+            name: hostName,
+            entity: {
+              // 'host.entity.id' is a self-identifier field (source === destination) in the
+              // host definition — it must not collide with the computed EUID (entity.id).
+              id: rawHostEntityId,
+            },
+          },
+        });
+
+        // Run 1: CPS remote path writes the entity update into the updates data stream.
+        const firstExtraction = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'host',
+          WINDOW_FROM,
+          WINDOW_TO
+        );
+        expect(firstExtraction.statusCode).toBe(200);
+        expect((firstExtraction.body as { success: boolean }).success).toBe(true);
+        await esClient.indices.refresh({ index: UPDATES_INDEX });
+
+        // Run 2: main local path promotes the update into the latest index.
+        const secondExtraction = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'host',
+          WINDOW_FROM,
+          WINDOW_TO
+        );
+        expect(secondExtraction.statusCode).toBe(200);
+        expect((secondExtraction.body as { success: boolean }).success).toBe(true);
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
+
+        const hits = await esClient.search({
+          index: LATEST_ALIAS,
+          query: { term: { 'host.name': hostName } },
+        });
+        expect(hits.hits.hits).toHaveLength(1);
+
+        const source = hits.hits.hits[0]._source as Record<string, unknown>;
+
+        // The EUID must be the deterministic value computed from host.name, not rawHostEntityId.
+        // Before the fix, the buggy remap would overwrite entity.id with rawHostEntityId,
+        // making the entity unfindable by its expected EUID.
+        const entityId = get(source, ['entity', 'id']) as string;
+        expect(entityId).not.toBe(rawHostEntityId);
+        expect(entityId).toMatch(/^host:/);
+
+        // host.entity.id should still be stored on the entity, but at the host-namespaced path.
+        expect(get(source, ['host', 'entity', 'id'])).toBe(rawHostEntityId);
+
+        // The rest of the entity shape must be coherent.
+        expect(get(source, ['entity', 'name'])).toBe(hostName);
+        expect(get(source, ['host', 'name'])).toBe(hostName);
       }
     );
   }

@@ -715,6 +715,9 @@ export class RemoteLogsExtractionClient {
     for (const field of fields) {
       if (field.retention.operation === 'managed') continue;
       if (!field.source.startsWith(entityPrefix)) continue;
+      // Self-identifier fields (e.g. `host.entity.id`) share source and destination and need no
+      // remap; remapping them to `entity.id` would collide with the EUID (`entity.id`) column.
+      if (field.destination === field.source) continue;
       const entityRelativeSource = `entity.${field.source.slice(entityPrefix.length)}`;
       if (entityRelativeSource !== field.destination) {
         destToEntityRelativeSource.set(field.destination, entityRelativeSource);
