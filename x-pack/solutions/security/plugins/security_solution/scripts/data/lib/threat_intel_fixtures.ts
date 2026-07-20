@@ -267,11 +267,7 @@ const xmlEscape = (value: string): string =>
     .replace(/'/g, '&apos;');
 
 const htmlEscape = (value: string): string =>
-  value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const cdata = (value: string): string =>
   `<![CDATA[${value.replace(/\]\]>/g, ']]]]><![CDATA[>')}]]>`;
