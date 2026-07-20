@@ -115,7 +115,7 @@ const AfterFieldControl = ({
   }
 
   const lowerBound = lowerValue
-    ? { neighbor: { type: 'previousStep' }, value: lowerValue }
+    ? ({ neighbor: { type: 'previousStep' as const }, value: lowerValue } satisfies HelpTextBound)
     : undefined;
   const helpText = getTimingBoundHelpText({ lower: lowerBound, upper });
 
