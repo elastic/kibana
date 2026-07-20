@@ -31,7 +31,7 @@ export type {
   AppHeaderMetadataItems,
   AppHeaderMetadataTextItem,
   AppHeaderMenu,
-  AppHeaderPadding,
+  AppHeaderSpacing,
   AppHeaderTitle,
   AppHeaderTitleSaveResult,
 } from './src';

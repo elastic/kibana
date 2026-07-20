@@ -8,6 +8,7 @@
  */
 
 import {
+  makeMockResource,
   mockBatchLogRecordProcessor,
   mockDetectResources,
   mockEmit,
@@ -104,6 +105,64 @@ describe('OtelAppender', () => {
         attributes: { 'service.name': 'my-kibana' },
       });
       expect(result.attributes).toEqual({ 'service.name': 'my-kibana' });
+    });
+
+    it('accepts fieldRenames with string target', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        fieldRenames: { 'kibana.space_id': 'kibana.space.id' },
+      });
+      expect(result.fieldRenames).toEqual({ 'kibana.space_id': 'kibana.space.id' });
+    });
+
+    it('accepts fieldRenames with array target (fan-out)', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        fieldRenames: { 'client.ip': ['source.address', 'source.ip'] },
+      });
+      expect(result.fieldRenames).toEqual({ 'client.ip': ['source.address', 'source.ip'] });
+    });
+
+    it('is optional and absent by default', () => {
+      const result = OtelAppender.configSchema.validate({
+        type: 'otel',
+        url: 'http://collector:4318/v1/logs',
+      });
+      expect(result.fieldRenames).toBeUndefined();
+    });
+
+    it('fieldDrops, fieldUppercase and fieldDefaults are optional and absent by default', () => {
+      const result = OtelAppender.configSchema.validate({
+        type: 'otel',
+        url: 'http://collector:4318/v1/logs',
+      });
+      expect(result.fieldDrops).toBeUndefined();
+      expect(result.fieldUppercase).toBeUndefined();
+      expect(result.fieldDefaults).toBeUndefined();
+    });
+
+    it('accepts fieldUppercase as an array of strings', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        fieldUppercase: ['http.request.method'],
+      });
+      expect(result.fieldUppercase).toEqual(['http.request.method']);
+    });
+
+    it('accepts fieldDrops as an array of strings', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        fieldDrops: ['service.version', 'host.name'],
+      });
+      expect(result.fieldDrops).toEqual(['service.version', 'host.name']);
+    });
+
+    it('accepts fieldDefaults with string and array values', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        fieldDefaults: { 'event.type': ['access'], 'event.kind': 'event' },
+      });
+      expect(result.fieldDefaults).toEqual({ 'event.type': ['access'], 'event.kind': 'event' });
     });
 
     it('rejects config without url', () => {
@@ -589,6 +648,284 @@ describe('OtelAppender', () => {
         const { attributes } = mockEmit.mock.calls[0][0];
         expect(attributes).not.toHaveProperty('log.meta');
       });
+    });
+
+    describe('fieldRenames', () => {
+      // toHaveProperty('a.b') traverses nested objects; use array form (['a.b']) for flat dotted keys.
+
+      it('renames a meta attribute to the specified target key', () => {
+        const appender = new OtelAppender({
+          ...validConfig,
+          fieldRenames: { 'kibana.space_id': 'kibana.space.id' },
+        });
+        appender.append(makeRecord({ meta: { kibana: { space_id: 'default' } } }));
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        expect(attributes).toHaveProperty(['kibana.space.id'], 'default');
+        expect(attributes).not.toHaveProperty(['kibana.space_id']);
+      });
+
+      it('fans out a single source key to multiple target keys and removes the original', () => {
+        const appender = new OtelAppender({
+          ...validConfig,
+          fieldRenames: { 'client.ip': ['source.address', 'source.ip'] },
+        });
+        appender.append(makeRecord({ meta: { client: { ip: '1.2.3.4' } } }));
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        expect(attributes).toHaveProperty(['source.address'], '1.2.3.4');
+        expect(attributes).toHaveProperty(['source.ip'], '1.2.3.4');
+        expect(attributes).not.toHaveProperty(['client.ip']);
+      });
+
+      it('is a no-op when the source key is absent from the record', () => {
+        const appender = new OtelAppender({
+          ...validConfig,
+          fieldRenames: { 'kibana.space_id': 'kibana.space.id' },
+        });
+        appender.append(makeRecord({ meta: { other: 'value' } }));
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        expect(attributes).not.toHaveProperty(['kibana.space.id']);
+        expect(attributes).not.toHaveProperty(['kibana.space_id']);
+      });
+
+      it('leaves attributes unchanged when fieldRenames is not configured', () => {
+        const appender = new OtelAppender(validConfig);
+        appender.append(makeRecord({ meta: { kibana: { space_id: 'default' } } }));
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        expect(attributes).toHaveProperty(['kibana.space_id'], 'default');
+        expect(attributes).not.toHaveProperty(['kibana.space.id']);
+      });
+
+      it('applies all audit field renames for a representative audit event meta payload', () => {
+        const appender = new OtelAppender({
+          ...validConfig,
+          fieldRenames: {
+            'kibana.space_id': 'kibana.space.id',
+            'kibana.session_id': 'kibana.session.id',
+            'kibana.lookup_realm': 'kibana.lookup.realm',
+            'kibana.authentication_type': 'authentication.type',
+            'client.ip': ['source.address', 'source.ip'],
+            'trace.id': 'request.id',
+            'http.request.headers.x-forwarded-for': 'http.request.header.x-forwarded-for',
+          },
+        });
+        appender.append(
+          makeRecord({
+            meta: {
+              kibana: {
+                space_id: 'default',
+                session_id: 'abc123',
+                lookup_realm: 'native',
+                authentication_type: 'basic',
+              },
+              client: { ip: '1.2.3.4' },
+              trace: { id: 'req-xyz' },
+              http: { request: { headers: { 'x-forwarded-for': '10.0.0.1' } } },
+            },
+          })
+        );
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        // Renamed keys present with correct values
+        expect(attributes).toHaveProperty(['kibana.space.id'], 'default');
+        expect(attributes).toHaveProperty(['kibana.session.id'], 'abc123');
+        expect(attributes).toHaveProperty(['kibana.lookup.realm'], 'native');
+        expect(attributes).toHaveProperty(['authentication.type'], 'basic');
+        expect(attributes).toHaveProperty(['source.address'], '1.2.3.4');
+        expect(attributes).toHaveProperty(['source.ip'], '1.2.3.4');
+        expect(attributes).toHaveProperty(['request.id'], 'req-xyz');
+        expect(attributes).toHaveProperty(['http.request.header.x-forwarded-for'], '10.0.0.1');
+        // Original keys removed
+        expect(attributes).not.toHaveProperty(['kibana.space_id']);
+        expect(attributes).not.toHaveProperty(['kibana.session_id']);
+        expect(attributes).not.toHaveProperty(['kibana.lookup_realm']);
+        expect(attributes).not.toHaveProperty(['kibana.authentication_type']);
+        expect(attributes).not.toHaveProperty(['client.ip']);
+        expect(attributes).not.toHaveProperty(['trace.id']);
+        expect(attributes).not.toHaveProperty(['http.request.headers.x-forwarded-for']);
+      });
+    });
+  });
+
+  describe('fieldDrops', () => {
+    it('removes specified keys from log record attributes', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldDrops: ['service.version', 'kibana.space_id'],
+      });
+      appender.append(
+        makeRecord({ meta: { kibana: { space_id: 'default' }, service: { version: '9.0.0' } } })
+      );
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['service.version']);
+      expect(attributes).not.toHaveProperty(['kibana.space_id']);
+    });
+
+    it('is a no-op when the key is absent from the record', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldDrops: ['nonexistent.key'],
+      });
+      appender.append(makeRecord({ meta: { kibana: { space_id: 'default' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['kibana.space_id'], 'default');
+    });
+
+    it('leaves attributes unchanged when fieldDrops is not configured', () => {
+      const appender = new OtelAppender(validConfig);
+      appender.append(makeRecord({ meta: { service: { version: '9.0.0' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['service.version'], '9.0.0');
+    });
+
+    it('rebuilds the resource via getRawAttributes() when fieldDrops is set, excluding dropped keys and preserving async entries', () => {
+      // Set up a resource with known raw attributes including an async (Promise) entry
+      // to verify the rebuild uses getRawAttributes() — not the synchronous .attributes
+      // snapshot — so async-detected attrs (e.g. host.id from getMachineId) are preserved.
+      const asyncEntry = Promise.resolve('node-id');
+      const resourceWithKnownRaw = makeMockResource('known', {
+        'service.name': 'kibana',
+        'host.name': 'my-host',
+        'service.version': '9.0.0',
+      });
+      (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue([
+        ['service.name', 'kibana'],
+        ['host.name', 'my-host'],
+        ['service.version', '9.0.0'],
+        ['host.id', asyncEntry],
+      ]);
+
+      // Wire the mock chain: mockMergeResource (inside buildOtelResources) returns r1,
+      // whose .merge() (called by the OtelAppender constructor) returns the resource above.
+      const r1 = makeMockResource('r1', {});
+      r1.merge.mockReturnValueOnce(resourceWithKnownRaw);
+      mockMergeResource.mockReturnValueOnce(r1);
+
+      new OtelAppender({ ...validConfig, fieldDrops: ['host.name', 'service.version'] });
+
+      const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+      // Dropped keys must be absent from the rebuilt resource
+      expect(filteredArg).not.toHaveProperty(['host.name']);
+      expect(filteredArg).not.toHaveProperty(['service.version']);
+      // Non-dropped sync key is preserved
+      expect(filteredArg).toHaveProperty(['service.name'], 'kibana');
+      // Async entry is passed through as-is so the SDK can await it at export time
+      expect(filteredArg['host.id']).toBe(asyncEntry);
+    });
+  });
+
+  describe('fieldDefaults', () => {
+    it('fills in a missing key with the default value', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldDefaults: { 'event.type': ['access'] },
+      });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['event.type'], ['access']);
+    });
+
+    it('does not override an existing value', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldDefaults: { 'event.type': ['access'] },
+      });
+      appender.append(
+        makeRecord({ meta: { event: { type: ['creation'], action: 'saved_object_create' } } })
+      );
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['event.type'], ['creation']);
+    });
+
+    it('leaves attributes unchanged when fieldDefaults is not configured', () => {
+      const appender = new OtelAppender(validConfig);
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['event.type']);
+    });
+  });
+
+  describe('fieldUppercase', () => {
+    it('uppercases a string attribute value', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldUppercase: ['http.request.method'],
+      });
+      appender.append(makeRecord({ meta: { http: { request: { method: 'get' } } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['http.request.method'], 'GET');
+    });
+
+    it('silently skips non-string values', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldUppercase: ['event.category'],
+      });
+      appender.append(makeRecord({ meta: { event: { category: ['web'] } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      // Array value is untouched.
+      expect(attributes).toHaveProperty(['event.category'], ['web']);
+    });
+
+    it('silently skips absent keys', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldUppercase: ['http.request.method'],
+      });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['http.request.method']);
+    });
+
+    it('leaves attributes unchanged when fieldUppercase is not configured', () => {
+      const appender = new OtelAppender(validConfig);
+      appender.append(makeRecord({ meta: { http: { request: { method: 'get' } } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['http.request.method'], 'get');
+    });
+  });
+
+  describe('ordering: rename → drop → defaults', () => {
+    it('drop is a no-op when the key was already renamed away', () => {
+      // fieldRenames runs before fieldDrops: the old key is gone before the drop runs.
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldRenames: { 'kibana.space_id': 'kibana.space.id' },
+        fieldDrops: ['kibana.space_id'],
+      });
+      appender.append(makeRecord({ meta: { kibana: { space_id: 'default' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      // Rename succeeded; drop had no target left.
+      expect(attributes).toHaveProperty(['kibana.space.id'], 'default');
+      expect(attributes).not.toHaveProperty(['kibana.space_id']);
+    });
+
+    it('default fills in a key that was dropped', () => {
+      // fieldDrops runs before fieldDefaults: drop removes the key, default re-adds it.
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldDrops: ['event.type'],
+        fieldDefaults: { 'event.type': ['access'] },
+      });
+      appender.append(makeRecord({ meta: { event: { type: ['creation'] } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      // Original value was dropped; default filled in the gap.
+      expect(attributes).toHaveProperty(['event.type'], ['access']);
     });
   });
 
