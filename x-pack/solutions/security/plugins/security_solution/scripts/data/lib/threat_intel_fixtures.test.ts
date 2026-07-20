@@ -55,7 +55,14 @@ describe('PACK_TI_SCENARIOS', () => {
     expect(THREAT_INTEL_SUBSCRIPTION_ID.toLowerCase()).not.toContain('data-generator');
   });
 
-  it('embeds join IOCs and narrative anchors in the RSS data URL payload', () => {
+  it('uses browsable https article URLs for every pack scenario', () => {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+      const { protocol } = new URL(scenario.articleUrl);
+      expect(protocol === 'http:' || protocol === 'https:').toBe(true);
+    }
+  });
+
+  it('embeds join IOCs, narrative anchors, and article URLs in the RSS data URL payload', () => {
     for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
       const url = buildPackRssDataUrl({
         scenario,
@@ -67,6 +74,8 @@ describe('PACK_TI_SCENARIOS', () => {
         expect(xml).toContain(token);
       }
       expect(xml).toContain(scenario.title);
+      expect(xml).toContain(scenario.articleUrl);
+      expect(xml).not.toContain('example.elastic.dev');
       expect(xml.toLowerCase()).not.toContain('data-generator');
       expect(xml.toLowerCase()).not.toContain('data generator');
     }
