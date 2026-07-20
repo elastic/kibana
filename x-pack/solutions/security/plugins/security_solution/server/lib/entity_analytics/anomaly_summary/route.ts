@@ -29,10 +29,10 @@ import { getEntityAnomalies } from './get_anomaly_details';
 import { DEFAULT_OVERVIEW_LOOKBACK_MS, getEntityAnomalyOverview } from './get_anomaly_overview';
 import { _formatPrivileges, hasReadWritePermissions } from '../utils/check_and_format_privileges';
 
-const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
-
 const getStartOfDayOneYearAgo = (): number => {
-  const d = new Date(Date.now() - ONE_YEAR_MS);
+  const d = new Date();
+  d.setUTCFullYear(d.getUTCFullYear() - 1);
+  d.setUTCDate(d.getUTCDate() - 1); // one extra day tolerance for timezone offsets
   d.setUTCHours(0, 0, 0, 0);
   return d.getTime();
 };
