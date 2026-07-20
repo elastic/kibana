@@ -7,6 +7,7 @@
 import type { Dictionary } from 'lodash';
 import { keyBy, keys, merge } from 'lodash';
 import type { RequestHandler } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import pMap from 'p-map';
 import type { IndicesDataStreamsStatsDataStreamsStatsItem } from '@elastic/elasticsearch/lib/api/types';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -136,7 +137,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
     );
     // Ignore dashboards not found
     const allDashboardSavedObjects = allDashboardSavedObjectsResponse.saved_objects.filter((so) => {
-      if (so.error) {
+      if (isSavedObjectErrorResult(so)) {
         if (so.error.statusCode === 404) {
           return false;
         }
@@ -323,7 +324,6 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
         continue;
       }
 
-      // Case 1: Using deprecated policy but @lifecycle doesn't exist → show callout
       if (!lifecyclePolicy) {
         deprecatedILMPolicies.push({
           policyName: deprecatedPolicyName,
@@ -333,14 +333,12 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
         continue;
       }
 
-      // Case 2: Both policies exist
       // Don't show callout if both are unmodified (version 1) - auto-migration will happen
       if (deprecatedPolicy.version === 1 && lifecyclePolicy.version === 1) {
         // Both unmodified, auto-migration will handle this, skip
         continue;
       }
 
-      // Case 3: At least one policy is modified (version > 1) → show callout
       if (deprecatedPolicy.version > 1 || lifecyclePolicy.version > 1) {
         deprecatedILMPolicies.push({
           policyName: deprecatedPolicyName,

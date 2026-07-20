@@ -35,6 +35,11 @@ test.describe(
         await expect(page.getByText(testData.SERVICE_OPBEANS_RUM)).toBeVisible();
       });
 
+      await test.step('shows a list of environments', async () => {
+        const environmentEntrySelector = page.locator(`td:has-text("${PRODUCTION_ENVIRONMENT}")`);
+        await expect(environmentEntrySelector).toHaveCount(9);
+      });
+
       await test.step('table has service rows', async () => {
         const count = await page.getByTestId('apmManagedTableActionsCellButton').count();
         expect(count).toBeGreaterThanOrEqual(3);
@@ -54,10 +59,21 @@ test.describe(
       await page
         .getByRole('option', { name: PRODUCTION_ENVIRONMENT })
         .waitFor({ timeout: EXTENDED_TIMEOUT });
-      await page.getByRole('option', { name: PRODUCTION_ENVIRONMENT }).click();
+      await page
+        .getByRole('option', { name: PRODUCTION_ENVIRONMENT })
+        .click({ timeout: EXTENDED_TIMEOUT });
       await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue(PRODUCTION_ENVIRONMENT, {
         timeout: EXTENDED_TIMEOUT,
       });
+    });
+
+    test('navigates to the next page when clicking the pagination button', async ({ page }) => {
+      await expect(page.getByText(testData.SERVICE_OPBEANS_JAVA)).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
+
+      await page.getByTestId('pagination-button-1').click({ timeout: EXTENDED_TIMEOUT });
+      await expect(page).toHaveURL(/page=1/);
     });
 
     test('shows the filtered services when using the service name fast filter', async ({

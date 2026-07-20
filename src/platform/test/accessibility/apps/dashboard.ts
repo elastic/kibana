@@ -17,6 +17,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const listingTable = getService('listingTable');
 
+  /**
+   * Purpose: Dashboard accessability test
+   *
+   * Migration: Remove test and migrate a11y validation to existing dashboard tests
+   */
   describe('Dashboard', () => {
     const dashboardName = 'Dashboard Listing A11y';
     const clonedDashboardName = 'Dashboard Listing A11y (1)';
@@ -142,7 +147,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.clickDeleteSelected();
       await a11y.testAppSnapshot();
       await common.clickConfirmOnModal();
-      await listingTable.isShowingEmptyPromptCreateNewButton();
+      await dashboard.expectCreateButtonExists();
     });
   });
 }

@@ -27,10 +27,10 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getBaseConnectorType } from '@kbn/workflows-ui';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { stepSchemas } from '../../../../common/step_schemas';
 import { useKibana } from '../../../hooks/use_kibana';
-import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { useWorkflowJsonSchema } from '../../validate_workflow_yaml/model/use_workflow_json_schema';
 import { usesInverseIconColor } from '../lib/get_action_options';
@@ -587,12 +587,12 @@ function PreviewStepRow({
                 defaultMessage: 'View details',
               })}
               data-test-subj="actionsMenuPreviewItemInfo"
-              onClick={(e) => {
+              onClick={(e: React.MouseEvent) => {
                 e.preventDefault();
                 e.stopPropagation();
                 onPinPreview();
               }}
-              onMouseDown={(e) => {
+              onMouseDown={(e: React.MouseEvent) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
@@ -610,12 +610,12 @@ function PreviewStepRow({
                 defaultMessage: 'Add step',
               })}
               data-test-subj="actionsMenuPreviewItemAdd"
-              onClick={(e) => {
+              onClick={(e: React.MouseEvent) => {
                 e.preventDefault();
                 e.stopPropagation();
                 onAdd();
               }}
-              onMouseDown={(e) => {
+              onMouseDown={(e: React.MouseEvent) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}

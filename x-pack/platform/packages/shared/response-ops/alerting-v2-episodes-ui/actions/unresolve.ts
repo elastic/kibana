@@ -25,11 +25,7 @@ export const createUnresolveAction = (deps: UnresolveActionDeps): EpisodeAction 
   iconType: 'cross',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
     episodes.length > 0 &&
-    episodes.some(
-      (ep) =>
-        ep.last_deactivate_action !== 'activate' &&
-        ep['episode.status'] !== ALERT_EPISODE_STATUS.ACTIVE
-    ),
+    episodes.some((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const items = uniqueByGroup(episodes).map((ep) => ({
       group_hash: ep.group_hash,

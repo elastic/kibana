@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
+import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
 import { RedMetricsChartActions } from './red_metrics_chart_actions';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '@kbn/apm-types';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -38,6 +40,7 @@ const defaultProps = {
   },
   timeRange: { from: 'now-15m', to: 'now' },
   ruleTypeId: 'apm.transaction_duration',
+  element: APM_CHART_EBT_ELEMENTS.LATENCY,
 };
 
 const setupMocks = ({
@@ -118,20 +121,45 @@ describe('RedMetricsChartActions', () => {
     expect(getByTestId('apmAlertDetailsTracesOpenInDiscoverAction')).toBeInTheDocument();
   });
 
-  it('includes ruleTypeId in data-source attributes', () => {
+  it('sets the expected data-ebt-* attributes on each action', () => {
     setupMocks();
     const { getByTestId } = render(<RedMetricsChartActions {...defaultProps} />);
 
     fireEvent.click(getByTestId('apmAlertDetailsOpenActionsDropdown'));
 
-    expect(getByTestId('apmAlertDetailsOpenInApmAction')).toHaveAttribute(
-      'data-source',
-      'alertDetails-apm.transaction_duration'
+    const inApmAction = getByTestId('apmAlertDetailsOpenInApmAction');
+    expect(inApmAction).toHaveAttribute('data-ebt-action', 'openInApm');
+    expect(inApmAction).toHaveAttribute('data-ebt-element', 'latencyChart');
+    expect(inApmAction).toHaveAttribute('data-ebt-detail', 'apm.transaction_duration');
+
+    const tracesInDiscoverAction = getByTestId('apmAlertDetailsTracesOpenInDiscoverAction');
+    expect(tracesInDiscoverAction).toHaveAttribute('data-ebt-action', 'openInDiscover');
+    expect(tracesInDiscoverAction).toHaveAttribute('data-ebt-element', 'latencyChart');
+    expect(tracesInDiscoverAction).toHaveAttribute('data-ebt-detail', 'apm.transaction_duration');
+  });
+
+  it('sets the expected data-ebt-* attributes on the errors-in-Discover action', () => {
+    setupMocks();
+    const { getByTestId } = render(
+      <RedMetricsChartActions
+        {...defaultProps}
+        indexType="error"
+        ruleTypeId="apm.error_rate"
+        element={APM_CHART_EBT_ELEMENTS.ERROR_COUNT}
+        queryParams={{
+          serviceName: 'testService',
+          environment: 'testEnvironment',
+          errorGroupId: 'testGroupId',
+        }}
+      />
     );
-    expect(getByTestId('apmAlertDetailsTracesOpenInDiscoverAction')).toHaveAttribute(
-      'data-source',
-      'alertDetails-apm.transaction_duration'
-    );
+
+    fireEvent.click(getByTestId('apmAlertDetailsOpenActionsDropdown'));
+
+    const errorsInDiscoverAction = getByTestId('apmAlertDetailsErrorsOpenInDiscoverAction');
+    expect(errorsInDiscoverAction).toHaveAttribute('data-ebt-action', 'openInDiscover');
+    expect(errorsInDiscoverAction).toHaveAttribute('data-ebt-element', 'errorCountChart');
+    expect(errorsInDiscoverAction).toHaveAttribute('data-ebt-detail', 'apm.error_rate');
   });
 
   describe('In APM action', () => {
@@ -176,12 +204,100 @@ describe('RedMetricsChartActions', () => {
           }}
           timeRange={{ from: 'now-15m', to: 'now' }}
           ruleTypeId="apm.transaction_duration"
+          element={APM_CHART_EBT_ELEMENTS.LATENCY}
         />
       );
 
       expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
           serviceOverviewTab: undefined,
+        })
+      );
+    });
+
+    it('passes anomalyThreshold to the locator when anomaly is provided', () => {
+      setupMocks();
+      render(
+        <RedMetricsChartActions
+          {...defaultProps}
+          anomaly={{ severity: ML_ANOMALY_SEVERITY.WARNING, score: 50 }}
+        />
+      );
+
+      expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({ anomalyThreshold: 'warning' }),
+        })
+      );
+    });
+
+    it('does not set anomalyThreshold on the locator query when anomaly is not provided', () => {
+      setupMocks();
+      render(<RedMetricsChartActions {...defaultProps} />);
+
+      expect(mockApmGetRedirectUrl.mock.calls[0][0].query).not.toHaveProperty('anomalyThreshold');
+    });
+
+    it('does not set anomalyThreshold when anomaly severity is unknown', () => {
+      setupMocks();
+      render(
+        <RedMetricsChartActions
+          {...defaultProps}
+          anomaly={{ severity: ML_ANOMALY_SEVERITY.UNKNOWN, score: 0 }}
+        />
+      );
+
+      expect(mockApmGetRedirectUrl.mock.calls[0][0].query).not.toHaveProperty('anomalyThreshold');
+    });
+
+    it('passes expected bounds comparison params when anomaly is provided', () => {
+      setupMocks();
+      render(
+        <RedMetricsChartActions
+          {...defaultProps}
+          anomaly={{ severity: ML_ANOMALY_SEVERITY.MINOR, score: 40 }}
+        />
+      );
+
+      expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            comparisonEnabled: true,
+            offset: 'expected_bounds',
+          }),
+        })
+      );
+    });
+
+    it('does not set expected bounds comparison params when anomaly is not provided', () => {
+      setupMocks();
+      render(<RedMetricsChartActions {...defaultProps} />);
+
+      const query = mockApmGetRedirectUrl.mock.calls[0][0].query;
+      expect(query).not.toHaveProperty('comparisonEnabled');
+      expect(query).not.toHaveProperty('offset');
+    });
+
+    it('uses the provided timeRange for the APM locator (anomaly timestamp anchoring happens upstream)', () => {
+      setupMocks();
+      render(
+        <RedMetricsChartActions
+          {...defaultProps}
+          timeRange={{ from: '2026-07-16T10:00:00.000Z', to: '2026-07-16T11:00:00.000Z' }}
+          anomaly={{
+            severity: ML_ANOMALY_SEVERITY.MINOR,
+            score: 40,
+            timestamp: new Date('2026-07-16T09:30:00.000Z').getTime(),
+          }}
+        />
+      );
+
+      expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            rangeFrom: '2026-07-16T10:00:00.000Z',
+            rangeTo: '2026-07-16T11:00:00.000Z',
+          }),
         })
       );
     });
@@ -199,6 +315,7 @@ describe('RedMetricsChartActions', () => {
           }}
           timeRange={{ from: 'now-15m', to: 'now' }}
           ruleTypeId="apm.error_rate"
+          element={APM_CHART_EBT_ELEMENTS.ERROR_COUNT}
         />
       );
 
@@ -222,6 +339,7 @@ describe('RedMetricsChartActions', () => {
           }}
           timeRange={{ from: 'now-15m', to: 'now' }}
           ruleTypeId="apm.error_rate"
+          element={APM_CHART_EBT_ELEMENTS.ERROR_COUNT}
         />
       );
 

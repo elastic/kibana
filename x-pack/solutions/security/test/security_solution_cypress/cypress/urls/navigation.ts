@@ -84,6 +84,7 @@ export const MACHINE_LEARNING_DATA_FRAME_ANALYTICS_MAP = 'app/ml/data_frame_anal
 
 // Detection and Response
 export const DETECTION_AND_RESPONSE_URL = '/app/security/detection_response';
+export const ALERT_DETECTIONS_URL = '/app/security/alert_detections';
 export const ALERTS_URL = '/app/security/alerts';
 export const ALERT_SUMMARY_URL = '/app/security/alert_summary';
 export const EXCEPTIONS_URL = '/app/security/exceptions';
@@ -123,6 +124,10 @@ export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
 // Alerting
 export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
+
+// Configurations
+export const CONFIGURATIONS_INTEGRATIONS_URL = '/app/security/configurations/integrations/browse';
+export const CONFIGURATIONS_BASIC_RULES_URL_FRAGMENT = '/configurations/basic_rules';
 
 // Launchpad
 export const GET_STARTED_URL = '/app/security/get_started';

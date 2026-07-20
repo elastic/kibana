@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 import { EuiIcon, useEuiFontSize } from '@elastic/eui';
-import { unit } from '../../../../utils/style';
+import { unit } from '@kbn/apm-common';
 import { tint } from 'polished';
 
 function getIconColor(type, theme) {
@@ -102,7 +102,7 @@ function Suggestion(props) {
       onMouseEnter={props.onMouseEnter}
     >
       <Icon type={props.suggestion.type}>
-        <EuiIcon type={getEuiIconType(props.suggestion.type)} />
+        <EuiIcon type={getEuiIconType(props.suggestion.type)} aria-hidden={true} />
       </Icon>
       <TextValue>{props.suggestion.text}</TextValue>
       <Description>{props.suggestion.description}</Description>

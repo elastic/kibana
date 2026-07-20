@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { RunStepButton } from './run_step_button';
@@ -59,15 +59,22 @@ export const StepActions = React.memo<StepActionsProps>(
 
     const menuButton = useMemo(() => {
       return (
-        <EuiButtonIcon
-          onClick={togglePopover}
-          data-test-subj="toggleConsoleMenu"
-          aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+        <EuiToolTip
+          content={i18n.translate('console.requestOptionsButtonAriaLabel', {
             defaultMessage: 'Request options',
           })}
-          iconType="boxesVertical"
-          iconSize="s"
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={togglePopover}
+            data-test-subj="toggleConsoleMenu"
+            aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+              defaultMessage: 'Request options',
+            })}
+            iconType="boxesVertical"
+            iconSize="s"
+          />
+        </EuiToolTip>
       );
     }, [togglePopover]);
 
@@ -155,6 +162,9 @@ export const StepActions = React.memo<StepActionsProps>(
           <EuiFlexItem grow={false}>
             <EuiPopover
               id="contextMenu"
+              aria-label={i18n.translate('workflows.stepActions.contextMenuAriaLabel', {
+                defaultMessage: 'Step actions',
+              })}
               button={menuButton}
               isOpen={isPopoverOpen}
               closePopover={closePopover}

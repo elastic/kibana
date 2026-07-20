@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createSecureContext } from 'tls';
+import { isNil } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import type { Ecs } from '@elastic/ecs';
 import type { OTLPLogExporter as OTLPLogExporterHTTP } from '@opentelemetry/exporter-logs-otlp-http';
 import type { OTLPLogExporter as OTLPLogExporterGRPC } from '@opentelemetry/exporter-logs-otlp-grpc';
 import type { OTLPLogExporter as OTLPLogExporterPROTO } from '@opentelemetry/exporter-logs-otlp-proto';
@@ -28,6 +32,13 @@ import type { OtelAppenderConfig, LayoutConfigType } from '@kbn/core-logging-ser
 import { buildOtelResources } from '@kbn/telemetry';
 import { getFlattenedObject } from '@kbn/std';
 import { Layouts } from '../../layouts/layouts';
+import { JsonLayout } from '../../layouts/json_layout';
+import {
+  buildGrpcVerifyOptions,
+  buildHttpsAgentTlsOptions,
+  resolveTlsMaterial,
+  toGrpcRootCerts,
+} from './otel_tls';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
 
@@ -74,22 +85,6 @@ const toTraceContext = (record: LogRecord): Context | undefined => {
 };
 
 /**
- * Builds a sanitised copy of a `LogRecord` for use as `body.structured`.
- *
- * The raw record is stripped of:
- * - `level`: a Kibana-internal `LogLevel` object that is redundant given the
- *   top-level `severity_number` / `severity_text` OTLP fields.
- * - Fields with `null` or `undefined` values (e.g. `spanId`/`traceId` when no
- *   trace context is present) to avoid noisy empty entries in Elasticsearch.
- */
-const toStructuredBody = (record: LogRecord): AnyValueMap =>
-  Object.fromEntries(
-    Object.entries(record as unknown as Record<string, unknown>).filter(
-      ([key, v]) => key !== 'level' && v != null
-    )
-  ) as AnyValueMap;
-
-/**
  * Resolves the effective layout config for the OTel appender.
  *
  * Defaults to pattern layout because Elastic's OTel ingest aliases `body.text`
@@ -124,7 +119,14 @@ const resolveLayoutConfig = (config?: LayoutConfigType): LayoutConfigType => {
  * - When using the JSON layout, `meta` is already part of the structured body,
  *   so `log.meta` is omitted from attributes to avoid duplication.
  */
-const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes => {
+const toAttributes = (
+  record: LogRecord,
+  includeLogMeta: boolean,
+  fieldRenames?: Record<string, string | string[]>,
+  fieldDrops?: string[],
+  fieldDefaults?: Record<string, string | string[]>,
+  fieldUppercase?: string[]
+): Attributes => {
   const attrs: Attributes = {
     'log.logger': record.context,
   };
@@ -161,16 +163,51 @@ const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes =>
     if (id !== undefined) attrs['service.id'] = id;
     // Flatten anything that we don't know about into the service object (ideally, nothing).
     Object.entries(getFlattenedObject(serviceRest)).forEach(([key, value]) => {
-      attrs[key] = value;
+      attrs[`service.${key}`] = value;
     });
 
-    // Flatten non-service meta into individual OTel attributes prefixed with
-    // kibana.log.meta. so they are discoverable as flat fields in backends.
+    // Flatten non-service meta into individual OTel attributes so they are
+    // discoverable as flat fields in backends.
     // Only included for pattern layout: with JSON layout the meta is part of
     // the structured body and repeating it here would be redundant.
     Object.entries(getFlattenedObject(metaRest)).forEach(([key, value]) => {
-      attrs[`kibana.log.meta.${key}`] = value as AttributeValue;
+      attrs[key] = value as AttributeValue;
     });
+  }
+
+  if (fieldRenames) {
+    for (const [oldKey, newKeys] of Object.entries(fieldRenames)) {
+      if (oldKey in attrs) {
+        const value = attrs[oldKey];
+        delete attrs[oldKey];
+        const targets = Array.isArray(newKeys) ? newKeys : [newKeys];
+        for (const newKey of targets) {
+          attrs[newKey] = value;
+        }
+      }
+    }
+  }
+
+  if (fieldDrops) {
+    for (const key of fieldDrops) {
+      delete attrs[key];
+    }
+  }
+
+  if (fieldDefaults) {
+    for (const [key, value] of Object.entries(fieldDefaults)) {
+      if (!(key in attrs)) {
+        attrs[key] = value;
+      }
+    }
+  }
+
+  if (fieldUppercase) {
+    for (const key of fieldUppercase) {
+      if (typeof attrs[key] === 'string') {
+        attrs[key] = (attrs[key] as string).toUpperCase();
+      }
+    }
   }
 
   return attrs;
@@ -199,6 +236,59 @@ export class OtelAppender implements DisposableAppender {
     layout: schema.maybe(Layouts.configSchema),
     // Optional: user-provided attributes override the service attributes derived from APM config.
     attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    fieldRenames: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([
+          schema.string(),
+          schema.arrayOf(schema.string(), { minSize: 1, maxSize: 20 }),
+        ])
+      )
+    ),
+    fieldDrops: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    fieldUppercase: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    fieldDefaults: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([
+          schema.string(),
+          schema.arrayOf(schema.string(), { minSize: 1, maxSize: 20 }),
+        ])
+      )
+    ),
+    ssl: schema.maybe(
+      schema.object(
+        {
+          certificateAuthorities: schema.maybe(
+            schema.oneOf([
+              schema.string(),
+              schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+            ])
+          ),
+          certificate: schema.maybe(schema.string()),
+          key: schema.maybe(schema.string()),
+          keyPassphrase: schema.maybe(schema.string()),
+          verificationMode: schema.oneOf(
+            [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+            { defaultValue: 'full' }
+          ),
+          allowPartialTrustChain: schema.boolean({ defaultValue: true }),
+        },
+        {
+          validate: (raw) => {
+            if (raw.certificate && !raw.key) {
+              return 'Must specify [ssl.key] when [ssl.certificate] is set';
+            }
+            if (raw.key && !raw.certificate) {
+              return 'Must specify [ssl.certificate] when [ssl.key] is set';
+            }
+            if (raw.keyPassphrase && !raw.key) {
+              return 'Must specify [ssl.key] when [ssl.keyPassphrase] is set';
+            }
+          },
+        }
+      )
+    ),
   });
 
   private readonly loggerProvider: LoggerProvider;
@@ -206,6 +296,10 @@ export class OtelAppender implements DisposableAppender {
   private readonly layout: Layout;
   /** True when using JSON layout: the full LogRecord is sent as `body.structured`. */
   private readonly useStructuredBody: boolean;
+  private readonly fieldRenames?: Record<string, string | string[]>;
+  private readonly fieldDrops?: string[];
+  private readonly fieldDefaults?: Record<string, string | string[]>;
+  private readonly fieldUppercase?: string[];
 
   constructor(config: OtelAppenderConfig) {
     const exporter = createExporter(config);
@@ -214,9 +308,22 @@ export class OtelAppender implements DisposableAppender {
     //   2. Derived: service.name / service.version / deployment.environment from the
     //      APM config singleton (mirrors how initTelemetry builds trace resources)
     //   3. User overrides: explicit attributes from kibana.yml (optional)
-    const resource = buildOtelResources().merge(
+    const baseResource = buildOtelResources().merge(
       resources.resourceFromAttributes(config.attributes ?? {})
     );
+    // When fieldDrops is configured, rebuild the resource excluding the specified keys
+    // so they are absent from resource.attributes in the OTLP export (not just from
+    // per-record log attributes). getRawAttributes() is used — not resource.attributes —
+    // because it preserves async-resolving entries (e.g. host.id from getMachineId).
+    // resourceFromAttributes() correctly accepts MaybePromise values and the SDK awaits
+    // them at export time, so the rebuilt resource retains all async-detected attributes.
+    const resource = config.fieldDrops?.length
+      ? resources.resourceFromAttributes(
+          Object.fromEntries(
+            baseResource.getRawAttributes().filter(([key]) => !config.fieldDrops!.includes(key))
+          )
+        )
+      : baseResource;
     this.loggerProvider = new LoggerProvider({
       processors: [new BatchLogRecordProcessor(exporter)],
       resource,
@@ -230,6 +337,10 @@ export class OtelAppender implements DisposableAppender {
     // JSON layout → sanitised LogRecord as AnyValueMap → indexed as body.structured.
     // Pattern layout → formatted string → indexed as body.text (aliased to `message`).
     this.useStructuredBody = layoutConfig.type !== 'pattern';
+    this.fieldRenames = config.fieldRenames;
+    this.fieldDrops = config.fieldDrops;
+    this.fieldDefaults = config.fieldDefaults;
+    this.fieldUppercase = config.fieldUppercase;
   }
 
   public append(record: LogRecord): void {
@@ -239,17 +350,26 @@ export class OtelAppender implements DisposableAppender {
       timestamp: record.timestamp,
       severityNumber,
       severityText: record.level.id.toUpperCase(),
-      // JSON layout: send a sanitised LogRecord as a structured object.
-      // Elastic's OTel ingest indexes this as body.structured. Note that the ECS
-      // `message` field will be empty because it aliases body.text, not body.structured.
+      // JSON layout: send a ECS record as a structured object.
+      // Elastic's OTel ingest indexes this as body.structured.
       //
       // Pattern layout (default): format the record to a human-readable string.
       // Elastic indexes this as body.text, aliased to the ECS `message` field.
-      body: this.useStructuredBody ? toStructuredBody(record) : this.layout.format(record),
+      body:
+        this.layout instanceof JsonLayout
+          ? omitDeepNilValues(JsonLayout.ecsRecord(record))
+          : this.layout.format(record),
       context: toTraceContext(record),
       // log.meta is omitted from attributes when using JSON layout because it
       // is already part of the structured body.
-      attributes: toAttributes(record, !this.useStructuredBody),
+      attributes: toAttributes(
+        record,
+        !this.useStructuredBody,
+        this.fieldRenames,
+        this.fieldDrops,
+        this.fieldDefaults,
+        this.fieldUppercase
+      ),
     });
   }
 
@@ -266,26 +386,44 @@ export class OtelAppender implements DisposableAppender {
   }
 }
 
+const omitDeepNilValues = (obj: Ecs) => {
+  const result: AnyValueMap = {};
+  Object.entries(getFlattenedObject(obj))
+    .filter(([_, value]) => !isNil(value))
+    .forEach(([key, value]) => set(result, key, value));
+  return result;
+};
+
 const createExporter = (
   config: OtelAppenderConfig
 ): OTLPLogExporterHTTP | OTLPLogExporterGRPC | OTLPLogExporterPROTO => {
+  const tls = resolveTlsMaterial(config.ssl);
+
   switch (config.protocol) {
     case 'http': {
       // No need to import the module at the top if not used in the switch statement.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
-      return new OTLPLogExporter({ url: config.url, headers: config.headers ?? {} });
+      return new OTLPLogExporter({
+        url: config.url,
+        headers: config.headers ?? {},
+        ...(tls ? { httpAgentOptions: buildHttpsAgentTlsOptions(tls) } : {}),
+      });
     }
     case 'proto': {
       // No need to import the module at the top if not used in the switch statement.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-proto');
-      return new OTLPLogExporter({ url: config.url, headers: config.headers ?? {} });
+      return new OTLPLogExporter({
+        url: config.url,
+        headers: config.headers ?? {},
+        ...(tls ? { httpAgentOptions: buildHttpsAgentTlsOptions(tls) } : {}),
+      });
     }
     case 'grpc': {
       // No need to import the module at the top if not used in the switch statement.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { Metadata } = require('@grpc/grpc-js');
+      const { Metadata, credentials } = require('@grpc/grpc-js');
       const metadata = new Metadata();
       Object.entries(config.headers ?? {}).forEach(([key, value]) => {
         metadata.add(key, value);
@@ -293,7 +431,24 @@ const createExporter = (
       // No need to import the module at the top if not used in the switch statement.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-grpc');
-      return new OTLPLogExporter({ url: config.url, metadata });
+      return new OTLPLogExporter({
+        url: config.url,
+        metadata,
+        ...(tls
+          ? {
+              // Using createFromSecureContext instead of createSsl because createSsl does not support allowPartialTrustChain.
+              credentials: credentials.createFromSecureContext(
+                createSecureContext({
+                  ca: toGrpcRootCerts(tls),
+                  key: tls.key,
+                  cert: tls.cert,
+                  allowPartialTrustChain: tls.allowPartialTrustChain,
+                }),
+                buildGrpcVerifyOptions(tls)
+              ),
+            }
+          : {}),
+      });
     }
   }
 };

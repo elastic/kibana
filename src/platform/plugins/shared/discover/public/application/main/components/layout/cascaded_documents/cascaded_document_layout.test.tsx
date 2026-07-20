@@ -73,6 +73,9 @@ jest.mock('@kbn/esql-language', () => ({
   EsqlQuery: {
     fromSrc: jest.fn().mockReturnValue({}),
   },
+  // @kbn/monaco's Console ES|QL lexer reads this eagerly at module-load time to build its
+  // keyword list, so it needs a stub here even though this suite doesn't exercise highlighting.
+  esqlCommandRegistry: { getAllCommandNames: () => [] },
 }));
 
 const mockGetESQLStatsQueryMeta = jest.requireMock('@kbn/esql-utils').getESQLStatsQueryMeta;
@@ -120,9 +123,11 @@ const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
     availableCascadeGroups: ['category'],
     selectedCascadeGroups: ['category'],
     cascadedDocumentsFetcher: createMockFetcher(),
+    cascadedColumnsMeta: {},
     esqlQuery,
     esqlVariables: undefined,
     timeRange: undefined,
+    isApproximate: false,
     viewModeToggle: undefined,
     expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(undefined),
     expandedDocOwner$: new BehaviorSubject<string | undefined>(undefined),

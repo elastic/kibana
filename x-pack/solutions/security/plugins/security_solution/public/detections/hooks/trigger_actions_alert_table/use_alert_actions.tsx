@@ -90,7 +90,7 @@ export const useBulkAlertActionItems = ({
         case 'acknowledged':
           title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
-      addError(error.message, { title });
+      addError(error, { title });
     },
     [addError]
   );

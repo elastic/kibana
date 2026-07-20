@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/core-execution-context-common'
   - '@kbn/core-http-common'
+  - '@kbn/core-spaces-common'
 tags:
   - shared-browser
   - package

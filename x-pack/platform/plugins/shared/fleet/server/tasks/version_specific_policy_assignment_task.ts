@@ -19,6 +19,7 @@ import type {
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
+import { escapeQuotes } from '@kbn/es-query';
 import { coerce } from 'semver';
 import pMap from 'p-map';
 
@@ -30,7 +31,10 @@ import { getAgentTemplateAssetsMap } from '../services/epm/packages/get';
 import { hasAgentVersionConditionInInputTemplate } from '../services/utils/version_specific_policies';
 import { fetchAllAgentsByKuery, getAgentsByKuery } from '../services/agents';
 import { reassignAgents } from '../services/agents/reassign';
-import { splitVersionSuffixFromPolicyId } from '../../common/services/version_specific_policies_utils';
+import {
+  splitVersionSuffixFromPolicyId,
+  buildVersionVariantsKueryFragment,
+} from '../../common/services/version_specific_policies_utils';
 import { AGENT_POLICY_VERSION_SEPARATOR } from '../../common/constants';
 
 import { throwIfAborted } from './utils';
@@ -295,12 +299,14 @@ export class VersionSpecificPolicyAssignmentTask {
     ).toISOString();
 
     // Query 1: Agents on parent policy (newly enrolled or need initial assignment)
-    const parentPolicyKuery = `policy_id:"${agentPolicyId}"`;
+    const parentPolicyKuery = `policy_id:"${escapeQuotes(agentPolicyId)}"`;
 
     // Query 2: Agents on any versioned policy derived from this parent that:
     //   - Were recently upgraded (version might have changed)
     //   - May need to move to a different versioned policy
-    const versionedPolicyKuery = `policy_id:${agentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}* AND upgraded_at >= "${recentlyUpgradedTime}"`;
+    const versionedPolicyKuery = `${buildVersionVariantsKueryFragment(
+      agentPolicyId
+    )} AND upgraded_at >= "${recentlyUpgradedTime}"`;
 
     // Note: We intentionally do NOT query for agents with outdated policy revisions.
     // Agents already on the correct versioned policy will receive updated revisions

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-plugin",
-  "owner": "@elastic/obs-onboarding-team @elastic/obs-sig-events-team",
+  "owner": "@elastic/streams-ui @elastic/obs-sig-events-team",
   "description": "A manager for Streams",
   "group": "platform",
   "visibility": "shared",
@@ -30,12 +30,15 @@
     ],
     "optionalPlugins": [
       "agentBuilder",
+      "agentBuilderSml",
+      "alertingVTwo",
       "cloud",
       "esql",
       "serverless",
       "globalSearch",
       "searchInferenceEndpoints",
       "spaces",
+      "workflowsExtensions",
       "workflowsManagement"
     ],
     "requiredBundles": [],

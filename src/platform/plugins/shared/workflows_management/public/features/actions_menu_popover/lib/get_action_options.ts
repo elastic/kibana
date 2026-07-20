@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IconType, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import { ParallelIcon } from '@kbn/workflows-ui';
+import { buildBuiltInTriggerOptions, buildRegisteredTriggerOptions } from './build_trigger_options';
 import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
-import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionConnectorGroup, ActionGroup, ActionOptionData, IconVariant } from '../types';
 import { isActionGroup } from '../types';
@@ -28,7 +29,7 @@ export function compareActionLabels(a: string, b: string): number {
  */
 function getExternalConnectorGroupLabel(
   baseType: string,
-  connector: { description?: string }
+  connector: { description?: string | null }
 ): string {
   const description = connector.description?.trim();
   if (description) {
@@ -44,7 +45,7 @@ function getExternalConnectorGroupLabel(
     .join(' ');
 }
 
-function stripHtml(text: string | undefined): string | undefined {
+function stripHtml(text: string | null | undefined): string | undefined {
   if (!text) return undefined;
   const noTags = text.replace(/<[^>]*>/g, ' ');
   const decoded = noTags
@@ -67,56 +68,44 @@ function firstSentence(text: string | undefined): string | undefined {
   return dot !== -1 && dot < 180 ? text.slice(0, dot + 1) : text.slice(0, 180);
 }
 
+function getBuiltInNestedFlowControlStepOptions(
+  euiTheme: UseEuiTheme['euiTheme']
+): ActionOptionData[] {
+  return (['waitForApproval', 'workflow.execute', 'workflow.executeAsync'] as const)
+    .map((stepId) => getBuiltInStepDefinition(stepId))
+    .filter((def): def is NonNullable<typeof def> => def !== undefined)
+    .map((def) => ({
+      id: def.id,
+      label: def.label,
+      description: def.description,
+      iconType: 'nested' as const,
+      iconColor: euiTheme.colors.vis.euiColorVis0,
+      stability: def.stability,
+    }));
+}
+
+function mergeNestedStepGroups(stepGroups: Record<StepCategory, ActionGroup>): void {
+  for (const group of Object.values(stepGroups)) {
+    if (group.nestedGroups) {
+      for (const nestedGroup of group.nestedGroups) {
+        if (nestedGroup.options.length > 0) {
+          group.options.unshift(nestedGroup);
+        }
+      }
+    }
+  }
+}
+
 export function getActionOptions(
   euiTheme: UseEuiTheme['euiTheme'],
   workflowsExtensions: WorkflowsExtensionsPublicPluginStart
 ): ActionOptionData[] {
   const connectors = getAllConnectors();
-  const builtInTriggerOptions: ActionOptionData[] = [
-    {
-      id: 'manual',
-      label: i18n.translate('workflows.actionsMenu.manual', {
-        defaultMessage: 'Manual',
-      }),
-      description: i18n.translate('workflows.actionsMenu.manualDescription', {
-        defaultMessage: 'Trigger - Manually start from the UI',
-      }),
-      iconType: 'play',
-      iconColor: euiTheme.colors.textInverse,
-    },
-    {
-      id: 'alert',
-      label: i18n.translate('workflows.actionsMenu.alert', {
-        defaultMessage: 'Alert',
-      }),
-      description: i18n.translate('workflows.actionsMenu.alertDescription', {
-        defaultMessage: 'Trigger - When an alert from rule is created',
-      }),
-      iconType: 'bell',
-      iconColor: euiTheme.colors.textInverse,
-    },
-    {
-      id: 'scheduled',
-      label: i18n.translate('workflows.actionsMenu.schedule', {
-        defaultMessage: 'Schedule',
-      }),
-      description: i18n.translate('workflows.actionsMenu.scheduleDescription', {
-        defaultMessage: 'Trigger - On a schedule (e.g. every 10 minutes)',
-      }),
-      iconType: 'clock',
-      iconColor: euiTheme.colors.textInverse,
-    },
-  ];
-  const registeredTriggerOptions: ActionOptionData[] = triggerSchemas
-    .getTriggerDefinitions()
-    .map((t) => ({
-      id: t.id,
-      label: t.title ?? t.id,
-      description: t.description ?? t.id,
-      iconType: (t.icon != null ? t.icon : 'bolt') as IconType,
-      iconColor: euiTheme.colors.textInverse,
-      stability: 'tech_preview' as const,
-    }));
+  const builtInTriggerOptions = buildBuiltInTriggerOptions(euiTheme);
+  const registeredTriggerOptions = buildRegisteredTriggerOptions(
+    triggerSchemas.getTriggerDefinitions(),
+    euiTheme
+  );
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
     iconColor: euiTheme.colors.textInverse,
@@ -143,6 +132,30 @@ export function getActionOptions(
     options: [],
   };
 
+  const kibanaEntityStoreGroup: ActionGroup = {
+    iconType: 'securityApp',
+    id: 'kibana.entityStore',
+    label: i18n.translate('workflows.actionsMenu.kibanaEntityStore', {
+      defaultMessage: 'Entity Store',
+    }),
+    description: i18n.translate('workflows.actionsMenu.kibanaEntityStoreDescription', {
+      defaultMessage: 'Work with Entity Store data and features directly from your workflow',
+    }),
+    options: [],
+  };
+
+  const kibanaSecurityGroup: ActionGroup = {
+    iconType: 'securityApp',
+    id: 'kibana.security',
+    label: i18n.translate('workflows.actionsMenu.kibanaSecurity', {
+      defaultMessage: 'Security',
+    }),
+    description: i18n.translate('workflows.actionsMenu.kibanaSecurityDescription', {
+      defaultMessage: 'Work with Security data and features directly from your workflow',
+    }),
+    options: [],
+  };
+
   const kibanaGroup: ActionGroup = {
     iconType: 'logoKibana',
     id: 'kibana',
@@ -153,7 +166,7 @@ export function getActionOptions(
       defaultMessage: 'Work with Kibana data and features directly from your workflow',
     }),
     options: [],
-    nestedGroups: [kibanaCasesGroup],
+    nestedGroups: [kibanaCasesGroup, kibanaEntityStoreGroup, kibanaSecurityGroup],
   };
   const externalGroup: ActionOptionData = {
     iconType: 'plugs',
@@ -259,6 +272,18 @@ export function getActionOptions(
         iconColor: euiTheme.colors.textInverse,
       },
       {
+        id: 'parallel',
+        label: i18n.translate('workflows.actionsMenu.parallel', {
+          defaultMessage: 'Parallel',
+        }),
+        description: i18n.translate('workflows.actionsMenu.parallelDescription', {
+          defaultMessage: 'Run branches concurrently and collect their results',
+        }),
+        iconType: ParallelIcon,
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+        stability: getBuiltInStepDefinition('parallel')?.stability,
+      },
+      {
         id: 'wait',
         label: i18n.translate('workflows.actionsMenu.wait', {
           defaultMessage: 'Wait',
@@ -279,18 +304,9 @@ export function getActionOptions(
         }),
         iconType: 'user',
         iconColor: euiTheme.colors.textInverse,
+        stability: getBuiltInStepDefinition('waitForInput')?.stability,
       },
-      ...(['workflow.execute', 'workflow.executeAsync'] as const)
-        .map((stepId) => getBuiltInStepDefinition(stepId))
-        .filter((def): def is NonNullable<typeof def> => def !== undefined)
-        .map((def) => ({
-          id: def.id,
-          label: def.label,
-          description: def.description,
-          iconType: 'nested' as const,
-          iconColor: euiTheme.colors.textInverse,
-          stability: def.stability,
-        })),
+      ...getBuiltInNestedFlowControlStepOptions(euiTheme),
     ],
   };
   const elasticSearchGroup: ActionOptionData = {
@@ -311,6 +327,8 @@ export function getActionOptions(
     [StepCategory.Ai]: aiGroup,
     [StepCategory.Kibana]: kibanaGroup,
     [StepCategory.KibanaCases]: kibanaCasesGroup,
+    [StepCategory.KibanaEntityStore]: kibanaEntityStoreGroup,
+    [StepCategory.KibanaSecurity]: kibanaSecurityGroup,
     [StepCategory.Data]: dataTransformationGroup,
     [StepCategory.FlowControl]: flowControlGroup,
   };
@@ -346,17 +364,19 @@ export function getActionOptions(
           stability: connector.stability,
         });
       } else if (isDynamicConnector(connector)) {
-        const [baseType, subtype] = connector.type.split('.');
+        const baseType = connector.actionTypeId.replace(/^\./, '');
+        const hasSubAction = connector.type.startsWith(`${baseType}.`);
         let groupOption = externalGroup;
-        if (subtype) {
+        if (hasSubAction) {
           let connectorGroup = externalGroup.options.find((option) => option.id === baseType);
           // create a group for the basetype if not yet exists
           if (!connectorGroup) {
             baseTypeInstancesCount[baseType] = 0;
             const newConnectorGroup: ActionConnectorGroup = {
               id: baseType,
-              label: getExternalConnectorGroupLabel(baseType, connector),
-              connectorType: baseType,
+              label: connector.displayName,
+              description: connector.actionTypeId.replace(/^\./, ''),
+              connectorType: connector.actionTypeId,
               options: [],
             };
             connectorGroup = newConnectorGroup;
@@ -371,7 +391,6 @@ export function getActionOptions(
             groupOption = connectorGroup;
           }
         }
-        const iconType = getStepIconType(connector.type);
         baseTypeInstancesCount[baseType] += connector.instances?.length || 0;
         groupOption.instancesLabel = getInstancesLabel(baseTypeInstancesCount[baseType]);
 
@@ -379,11 +398,10 @@ export function getActionOptions(
         if (isActionGroup(groupOption)) {
           groupOption.options.push({
             id: connector.type,
-            label: connector.summary || connector.description || connector.type,
-            description: firstSentence(stripHtml(connector.description)) || connector.type,
-            connectorType: connector.type,
+            label: connector.summary || connector.displayName,
+            description: connector.type,
+            connectorType: connector.actionTypeId,
             instancesLabel: getInstancesLabel(connector.instances?.length),
-            iconType,
             stability: connector.stability,
           });
         }
@@ -391,15 +409,7 @@ export function getActionOptions(
     }
   }
 
-  for (const group of Object.values(stepGroups)) {
-    if (group.nestedGroups) {
-      for (const nestedGroup of group.nestedGroups) {
-        if (nestedGroup.options.length > 0) {
-          group.options.unshift(nestedGroup);
-        }
-      }
-    }
-  }
+  mergeNestedStepGroups(stepGroups);
 
   triggersGroup.iconVariant = 'trigger';
   // App logos use neutral containers so brand colors stay readable
@@ -414,7 +424,9 @@ export function getActionOptions(
 
   // AI category always uses the sparkles glyph on the platform tile
   for (const opt of isActionGroup(aiGroup) ? aiGroup.options : []) {
-    opt.iconType = 'sparkles';
+    if ('iconType' in opt) {
+      opt.iconType = 'sparkles';
+    }
   }
 
   // Color-grouped: accent (triggers) → neutral tiles → platform blues → flow control
@@ -429,8 +441,17 @@ export function getActionOptions(
   ];
   // Subcategory lists (and nested groups within them) are A–Z by label.
   // Root categories keep the intentional color-grouped order above.
+  // Triggers keep built-ins first (manual/alert/scheduled), then registered groups.
   for (const group of topLevelOptions) {
-    if ('options' in group) {
+    if (!('options' in group)) {
+      // no-op for type narrowing
+    } else if (group.id === 'triggers') {
+      for (const opt of group.options) {
+        if ('options' in opt) {
+          sortOptionsByLabel(opt.options);
+        }
+      }
+    } else {
       sortOptionsByLabel(group.options);
     }
   }

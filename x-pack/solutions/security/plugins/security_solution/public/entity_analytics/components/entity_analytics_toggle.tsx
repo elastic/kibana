@@ -29,7 +29,7 @@ import {
 } from '../test_ids';
 
 export const EntityAnalyticsHealth: React.FC<{ status: EntityAnalyticsStatus }> = ({ status }) => {
-  const isOn = status === 'enabled' || status === 'partially_enabled';
+  const isOn = status === 'enabled';
   return (
     <EuiHealth
       textSize="m"
@@ -90,16 +90,20 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
   onSaveSettings,
   isSavingSettings,
 }) => {
-  const { status, isLoading, toggle, errors } = useToggleEntityAnalytics({
+  const { status, isLoading, isStatusLoading, toggle, errors } = useToggleEntityAnalytics({
     selectedSettingsMatchSavedSettings,
     onSaveSettings,
     isSavingSettings,
   });
 
   const isDisabled =
-    isPrivilegesLoading || !hasAllRequiredPrivileges || status === 'enabling' || status === 'error';
+    isPrivilegesLoading ||
+    !hasAllRequiredPrivileges ||
+    isStatusLoading ||
+    status === 'enabling' ||
+    status === 'error';
 
-  const isChecked = status === 'enabled' || status === 'partially_enabled';
+  const isChecked = status === 'enabled';
 
   return (
     <>
@@ -110,7 +114,7 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
       <EuiSpacer size="m" />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          {isLoading && (
+          {(isLoading || isStatusLoading) && (
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner
                 data-test-subj={ENTITY_ANALYTICS_STATUS_LOADING_TEST_ID}

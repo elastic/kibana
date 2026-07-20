@@ -22,6 +22,7 @@ const createTool = (
     description: '',
     configuration: {},
     readonly: false,
+    experimental: false,
     tags: [],
     getSchema: () => z.object({}),
     execute: jest.fn(),
@@ -42,6 +43,23 @@ describe('toolToLangchain', () => {
     expect(langchainTool.name).toEqual('toolA');
     expect(langchainTool.description).toEqual('desc');
     expect(langchainTool.responseFormat).toEqual('content_and_artifact');
+
+    const toolKeys = Object.keys((langchainTool.schema as any).shape);
+    expect(toolKeys.sort()).toEqual(['foo']);
+  });
+
+  it('adds reasoning param when specified', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ foo: z.string() }),
+    });
+
+    const langchainTool = await toolToLangchain({
+      tool,
+      toolId: tool.id,
+      logger,
+      addReasoningParam: true,
+    });
 
     const toolKeys = Object.keys((langchainTool.schema as any).shape);
     expect(toolKeys.sort()).toEqual(['_reasoning', 'foo']);
@@ -67,6 +85,28 @@ describe('toolToLangchain', () => {
     });
 
     expect(JSON.parse(results).results).toEqual([{ type: ToolResultType.other, data: 'foo' }]);
+  });
+
+  it('uses buildContent to build the LLM-facing content when provided', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ hello: z.string() }),
+      execute: jest
+        .fn()
+        .mockResolvedValue({ results: [{ type: ToolResultType.other, data: 'foo' }] }),
+    });
+
+    const buildContent = jest.fn().mockReturnValue('custom-content');
+
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, buildContent });
+    const results = await langchainTool.invoke({ hello: 'world' });
+
+    expect(buildContent).toHaveBeenCalledWith({
+      results: [{ type: ToolResultType.other, data: 'foo' }],
+      toolId: 'toolA',
+      toolCallId: 'unknown',
+    });
+    expect(results).toEqual('custom-content');
   });
 });
 

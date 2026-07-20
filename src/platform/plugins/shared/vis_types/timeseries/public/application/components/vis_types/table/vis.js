@@ -131,7 +131,7 @@ class TableVis extends Component {
           const trendIcon = item.slope > 0 ? 'sortUp' : 'sortDown';
           trend = (
             <span>
-              &nbsp; <EuiIcon type={trendIcon} color="subdued" />
+              &nbsp; <EuiIcon type={trendIcon} color="subdued" aria-hidden={true} />
             </span>
           );
         }
@@ -188,7 +188,7 @@ class TableVis extends Component {
         } else {
           sortIcon = 'empty';
         }
-        sortComponent = <EuiIcon type={sortIcon} />;
+        sortComponent = <EuiIcon type={sortIcon} aria-hidden={true} />;
       }
       let headerContent = (
         <span>
@@ -223,7 +223,7 @@ class TableVis extends Component {
     } else {
       sortIcon = 'empty';
     }
-    const sortComponent = <EuiIcon type={sortIcon} />;
+    const sortComponent = <EuiIcon type={sortIcon} aria-hidden={true} />;
     const handleSortClick = () => {
       let order;
       if (sort.column === '_default_') {

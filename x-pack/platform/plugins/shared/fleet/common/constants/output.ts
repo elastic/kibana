@@ -37,6 +37,15 @@ export const SERVERLESS_DEFAULT_OUTPUT_ID = 'es-default-output';
 export const ECH_AGENTLESS_OUTPUT_ID = 'es-agentless-output';
 export const SERVERLESS_AGENTLESS_OUTPUT_ID = 'es-default-output-internal';
 
+// Output IDs for the agentless managed outputs that point to the managed bulk endpoint
+export const ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID = 'es-managed-bulk-agentless-output';
+export const SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID =
+  'es-managed-bulk-agentless-output-internal';
+
+// Output ID for the private endpoint (PrivateLink) in serverless.
+// Injected by project-controller/kibana-controller when PrivateLink is enabled.
+export const SERVERLESS_PRIVATE_OUTPUT_ID = 'es-private-output';
+
 export const LICENCE_FOR_PER_POLICY_OUTPUT = 'platinum';
 export const LICENCE_FOR_OUTPUT_PER_INTEGRATION = 'enterprise';
 
@@ -173,6 +182,11 @@ export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
   outputType.RemoteElasticsearch,
 ];
 
+export const OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.RemoteElasticsearch,
+];
+
 export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';
 
 export const LOGSTASH_API_KEY_CLUSTER_PERMISSIONS = ['monitor', 'manage_own_api_key'];
@@ -188,4 +202,5 @@ export const LOGSTASH_API_KEY_INDICES = [
   '.logs-endpoint.action.responses-*',
   'profiling-*',
   '.profiling-*',
+  'profiles-*',
 ];

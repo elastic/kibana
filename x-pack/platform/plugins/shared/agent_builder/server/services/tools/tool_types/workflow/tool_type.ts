@@ -6,23 +6,31 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ToolType, platformCoreTools } from '@kbn/agent-builder-common';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { ToolType, platformCoreTools, createForbiddenError } from '@kbn/agent-builder-common';
 import type { WorkflowToolConfig } from '@kbn/agent-builder-common/tools';
 import { createErrorResult, getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/agent-builder-common/tools/types/workflow';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
+import {
+  executeWorkflow,
+  hasWorkflowReadPrivilege,
+  hasWorkflowExecutePrivilege,
+} from '@kbn/agent-builder-tools-base/workflows';
 import type { AnyToolTypeDefinition } from '../definitions';
-import { executeWorkflow } from '../../../workflow';
 import { generateSchema } from './generate_schema';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateWorkflowId } from './validation';
 
 export const getWorkflowToolType = ({
   workflowsManagement,
+  security,
 }: {
   workflowsManagement?: WorkflowsServerPluginSetup;
+  security: SecurityPluginStart | undefined;
 }): AnyToolTypeDefinition<ToolType.workflow, WorkflowToolConfig, z.ZodObject<any>> => {
   // workflow plugin not present - we disable the workflow tool type
   if (!workflowsManagement) {
@@ -41,6 +49,17 @@ export const getWorkflowToolType = ({
             const { management: workflowApi } = workflowsManagement;
             const workflowId = config.workflow_id;
             const agentId = getAgentFromRunContext(runContext)?.agentId;
+
+            const canExecute = await hasWorkflowExecutePrivilege({ security, request, spaceId });
+            if (!canExecute) {
+              return {
+                results: [
+                  errorResult(
+                    `Unauthorized to execute workflow '${workflowId}'. The 'workflowsManagement' execute and read privileges are required.`
+                  ),
+                ],
+              };
+            }
 
             try {
               const result = await executeWorkflow({
@@ -100,8 +119,8 @@ export const getWorkflowToolType = ({
           - If the workflow wasn't completed, a workflow execution ID will be returned.
           - The ${platformCoreTools.getWorkflowExecutionStatus} tool can be used later to check the status of the workflow execution.
           - If the workflow returns with status "waiting_for_input", it is paused and requires human input to continue.
-            The response will include a "waiting_input" object with a "message" (what the workflow is asking for)
-            and an optional "schema" (JSON Schema describing the expected input fields).
+            The response will include a "waiting_input" object with "step_execution_id" (id of the paused step execution instance),
+            a "message" (what the workflow is asking for), and an optional "schema" (JSON Schema describing the expected input fields).
             Use the ${platformCoreTools.resumeWorkflowExecution} tool to provide the required input and resume the workflow.
 
           `);
@@ -110,7 +129,13 @@ export const getWorkflowToolType = ({
     },
     createSchema: configurationSchema,
     updateSchema: configurationUpdateSchema,
-    validateForCreate: async ({ config, context: { spaceId } }) => {
+    validateForCreate: async ({ config, context: { spaceId, request } }) => {
+      await assertWorkflowReadPrivilege({
+        security,
+        request,
+        spaceId,
+        workflowId: config.workflow_id,
+      });
       await validateWorkflowId({
         workflows: workflowsManagement,
         workflowId: config.workflow_id,
@@ -118,11 +143,17 @@ export const getWorkflowToolType = ({
       });
       return config;
     },
-    validateForUpdate: async ({ update, current, context: { spaceId } }) => {
+    validateForUpdate: async ({ update, current, context: { spaceId, request } }) => {
       const mergedConfig = {
         ...current,
         ...update,
       };
+      await assertWorkflowReadPrivilege({
+        security,
+        request,
+        spaceId,
+        workflowId: mergedConfig.workflow_id,
+      });
       await validateWorkflowId({
         workflows: workflowsManagement,
         workflowId: mergedConfig.workflow_id,
@@ -132,4 +163,23 @@ export const getWorkflowToolType = ({
       return mergedConfig;
     },
   };
+};
+
+const assertWorkflowReadPrivilege = async ({
+  security,
+  request,
+  spaceId,
+  workflowId,
+}: {
+  security: SecurityPluginStart | undefined;
+  request: KibanaRequest;
+  spaceId: string;
+  workflowId: string;
+}): Promise<void> => {
+  const canRead = await hasWorkflowReadPrivilege({ security, request, spaceId });
+  if (!canRead) {
+    throw createForbiddenError(
+      `Unauthorized to reference workflow '${workflowId}'. The 'workflowsManagement' read privilege is required.`
+    );
+  }
 };

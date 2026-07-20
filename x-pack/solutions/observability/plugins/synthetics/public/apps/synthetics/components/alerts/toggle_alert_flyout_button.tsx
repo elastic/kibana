@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiHeaderLink, EuiPopover } from '@elastic/eui';
@@ -148,6 +148,9 @@ export const ToggleAlertFlyoutButton = () => {
         isOpen={isOpen}
         ownFocus
         panelPaddingSize="none"
+        aria-label={i18n.translate('xpack.synthetics.toggleAlertFlyoutButton.popoverAriaLabel', {
+          defaultMessage: 'Alerts and rules menu',
+        })}
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>

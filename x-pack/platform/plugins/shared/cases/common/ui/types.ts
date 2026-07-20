@@ -77,6 +77,9 @@ export interface CasesUiConfigType {
   attachments?: {
     enabled: boolean;
   };
+  chat?: {
+    enabled: boolean;
+  };
   markdownPlugins: {
     lens: boolean;
   };
@@ -92,6 +95,11 @@ export interface CasesUiConfigType {
   };
   templates: {
     enabled: boolean;
+  };
+  casesRedesign: {
+    list: boolean;
+    details: boolean;
+    settings: boolean;
   };
 }
 
@@ -347,8 +355,6 @@ export interface Ecs {
 }
 
 export type CaseActionConnector = ActionConnector;
-
-export type UseFetchAlertData = (alertIds: string[]) => [boolean, Record<string, unknown>];
 
 export interface CasesPermissions {
   all: boolean;

@@ -39,6 +39,7 @@ export const launchPadLinks: LinkItem = {
   id: SecurityPageName.launchpad,
   title: LAUNCHPAD,
   path: ONBOARDING_PATH,
+  globalNavPosition: 12,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.launchpad', {
       defaultMessage: 'Launchpad',
@@ -65,7 +66,7 @@ export const launchPadLinks: LinkItem = {
   sideNavFooter: true,
   skipUrlState: true,
   hideTimeline: true,
-  visibleIn: ['globalSearch', 'sideNav'],
+  visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
 };
 
 /**

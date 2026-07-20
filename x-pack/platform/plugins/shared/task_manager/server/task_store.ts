@@ -26,19 +26,22 @@ import type {
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
-  SavedObjectsUpdateResponse,
   ElasticsearchClient,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
 } from '@kbn/core/server';
 
-import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core/server';
+import {
+  isSavedObjectErrorResult,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
+} from '@kbn/core/server';
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
-import type { IBasePath, ExecutionContextStart } from '@kbn/core/server';
+import type { ExecutionContextStart } from '@kbn/core/server';
 
 import type { RequestTimeoutsConfig } from './config';
 import type { Result } from './lib/result_type';
@@ -86,7 +89,6 @@ export interface StoreOpts {
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
   getIsSecurityEnabled: () => boolean;
-  basePath: IBasePath;
   executionContext: ExecutionContextStart;
   apiKeyStrategy: ApiKeyStrategy;
 }
@@ -162,7 +164,6 @@ export class TaskStore {
   private canEncryptSavedObjects?: boolean;
   private getIsSecurityEnabled: () => boolean;
   private logger: Logger;
-  private basePath: IBasePath;
   private executionContextRunner: ExecutionContextRunner;
   private apiKeyStrategy: ApiKeyStrategy;
 
@@ -204,7 +205,6 @@ export class TaskStore {
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
     this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
     this.logger = opts.logger;
-    this.basePath = opts.basePath;
     this.apiKeyStrategy = opts.apiKeyStrategy;
     this.executionContextRunner = getExecutionContextRunner(opts.executionContext, {
       name: 'taskStore',
@@ -269,7 +269,7 @@ export class TaskStore {
 
       // and create new API keys using the new request
       if (docsWithApiKeys.length) {
-        apiKeySOFieldsMap = await this.grantApiKeysFromRequest(docsWithApiKeys, options.request);
+        apiKeySOFieldsMap = await this.grantApiKeysFromRequest(docsWithApiKeys, options);
       }
     }
 
@@ -305,19 +305,18 @@ export class TaskStore {
 
   private async grantApiKeysFromRequest(
     taskInstances: TaskInstance[],
-    request?: KibanaRequest
+    options?: ApiKeyOptions
   ): Promise<Map<string, ApiKeySOFields> | null> {
+    const request = options?.request;
     if (!this.getIsSecurityEnabled() || !request) {
       return null;
     }
 
     try {
-      return await this.apiKeyStrategy.grantApiKeys(
-        taskInstances,
-        request,
-        this.security,
-        this.basePath
-      );
+      return await this.apiKeyStrategy.grantApiKeys(taskInstances, request, this.security, {
+        ...(options?.onEsKey === true ? { onEsKey: true } : {}),
+        ...(options?.cloneApiKey === true ? { cloneApiKey: true } : {}),
+      });
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -460,7 +459,7 @@ export class TaskStore {
     this.definitions.ensureHas(taskInstance.taskType);
 
     const apiKeySOFieldsMap =
-      (await this.grantApiKeysFromRequest([taskInstance], options?.request)) || new Map();
+      (await this.grantApiKeysFromRequest([taskInstance], options)) || new Map();
     const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id) || {};
 
     const soClient = this.getSoClientForCreate(options || {});
@@ -527,7 +526,7 @@ export class TaskStore {
       throw e;
     }
     const apiKeySOFieldsMap =
-      (await this.grantApiKeysFromRequest(taskInstances, options?.request)) || new Map();
+      (await this.grantApiKeysFromRequest(taskInstances, options)) || new Map();
 
     const soClient = this.getSoClientForCreate(options || {});
 
@@ -588,6 +587,9 @@ export class TaskStore {
     }
 
     return savedObjects.saved_objects.map((so) => {
+      if (isSavedObjectErrorResult(so)) {
+        throw so.error;
+      }
       const taskInstance = savedObjectToConcreteTaskInstance(so);
       return this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
     });
@@ -717,7 +719,9 @@ export class TaskStore {
       new Map()
     );
 
-    let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
+    let updatedSavedObjects: Awaited<
+      ReturnType<typeof soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>>
+    >['saved_objects'];
     try {
       ({ saved_objects: updatedSavedObjects } =
         await soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(
@@ -733,7 +737,7 @@ export class TaskStore {
 
     const allInvalidationTargets: InvalidationTarget[] = [];
     const updates = updatedSavedObjects.map((updatedSavedObject) => {
-      if (updatedSavedObject.error !== undefined) {
+      if (isSavedObjectErrorResult(updatedSavedObject)) {
         return asErr({
           type: 'task',
           id: updatedSavedObject.id,
@@ -986,7 +990,7 @@ export class TaskStore {
 
     const tasks: ConcreteTaskInstance[] = [];
     result.saved_objects.forEach((task) => {
-      if (!task.error) {
+      if (!isSavedObjectErrorResult(task)) {
         tasks.push(savedObjectToConcreteTaskInstance(task));
       }
     });
@@ -996,7 +1000,7 @@ export class TaskStore {
     tasksWithDecryptedApiKeys.forEach((task) => taskMap.set(task.id, task));
 
     return result.saved_objects.map((task) => {
-      if (task.error) {
+      if (isSavedObjectErrorResult(task)) {
         return asErr({ id: task.id, type: task.type, error: task.error });
       }
       return asOk(taskMap.get(task.id));

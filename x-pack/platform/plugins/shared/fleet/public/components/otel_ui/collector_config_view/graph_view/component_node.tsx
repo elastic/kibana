@@ -7,11 +7,20 @@
 
 import React, { memo } from 'react';
 import { Handle, Position, type NodeProps, type Node } from '@xyflow/react';
-import { useEuiTheme, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiText,
+  EuiToolTip,
+  EuiHealth,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { getComponentAccentColor, getHealthStatusColor } from '../utils';
+
 import type { OTelGraphNodeData } from './constants';
-import { COMPONENT_TYPE_VIS_COLORS, COMPONENT_TYPE_LABELS } from './constants';
+import { COMPONENT_TYPE_LABELS } from './constants';
 
 type ComponentNodeType = Node<OTelGraphNodeData, 'component'>;
 
@@ -19,9 +28,7 @@ export const ComponentNode = memo(
   ({ data, selected, sourcePosition, targetPosition }: NodeProps<ComponentNodeType>) => {
     const { euiTheme } = useEuiTheme();
 
-    const accentColor =
-      euiTheme.colors.vis[COMPONENT_TYPE_VIS_COLORS[data.componentType]] ??
-      euiTheme.colors.mediumShade;
+    const accentColor = getComponentAccentColor(data.componentType, euiTheme);
 
     const containerStyles = css`
       background: ${euiTheme.colors.backgroundBasePlain};
@@ -63,9 +70,18 @@ export const ComponentNode = memo(
         <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
         <div css={typeStyles}>{COMPONENT_TYPE_LABELS[data.componentType]}</div>
         <EuiToolTip content={data.label}>
-          <EuiText size="xs" css={labelStyles} tabIndex={0}>
-            {data.label}
-          </EuiText>
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+            {data.healthStatus && (
+              <EuiFlexItem grow={false}>
+                <EuiHealth color={getHealthStatusColor(data.healthStatus, euiTheme)} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>
+              <EuiText size="xs" css={labelStyles} tabIndex={0}>
+                {data.label}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiToolTip>
         <Handle type="source" position={sourcePosition ?? Position.Right} css={handleStyles} />
       </div>

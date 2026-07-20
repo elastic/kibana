@@ -55,15 +55,6 @@ const createMockEditor = (readOnly = false) => {
   };
 };
 
-const defaultHandlers = () => ({
-  openActionsPopover: jest.fn(),
-  save: jest.fn(),
-  run: jest.fn(),
-  saveAndRun: jest.fn(),
-  moveStepUp: jest.fn(),
-  moveStepDown: jest.fn(),
-});
-
 describe('useRegisterKeyboardCommands', () => {
   it('returns registerKeyboardCommands and unregisterKeyboardCommands functions', () => {
     const { result } = renderHook(() => useRegisterKeyboardCommands());

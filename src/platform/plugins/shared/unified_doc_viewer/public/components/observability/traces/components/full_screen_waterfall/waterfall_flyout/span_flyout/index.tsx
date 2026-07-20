@@ -17,8 +17,6 @@ import { useDocViewerExtensionActionsContext } from '../../../../../../../hooks/
 export { useSpanFlyoutData } from './use_span_flyout_data';
 export type { UseSpanFlyoutDataParams, SpanFlyoutData } from './use_span_flyout_data';
 
-export const spanFlyoutId = 'spanDetailFlyout' as const;
-
 export interface SpanFlyoutContentProps {
   hit: DataTableRecord;
   dataView: DocViewRenderProps['dataView'];

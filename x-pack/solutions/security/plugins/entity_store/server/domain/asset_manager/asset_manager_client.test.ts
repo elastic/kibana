@@ -14,6 +14,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AssetManagerClient } from './asset_manager_client';
+import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../saved_objects/global_state/constants';
 import {
   installSharedElasticsearchAssets,
   installIndicesAndDataStreams,
@@ -131,9 +132,9 @@ describe('AssetManagerClient', () => {
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      ccsLogExtractionStateClient: {
+      remoteLogExtractionStateClient: {
         delete: jest.fn().mockResolvedValue(undefined),
-      } as unknown as import('../saved_objects/ccs_log_extraction_state').CcsLogExtractionStateClient,
+      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -165,6 +166,124 @@ describe('AssetManagerClient', () => {
     expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
   });
 
+  describe('getPrivileges', () => {
+    let checkPrivilegesWithRequestMock: jest.Mock;
+    let getLocalIndexPatternsMock: jest.Mock;
+    let getPrivilegesClient: AssetManagerClient;
+
+    beforeEach(() => {
+      checkPrivilegesWithRequestMock = jest.fn().mockResolvedValue({});
+      getLocalIndexPatternsMock = jest.fn();
+
+      getPrivilegesClient = new AssetManagerClient({
+        logger: loggerMock.create(),
+        esClient: {} as jest.Mocked<ElasticsearchClient>,
+        taskManager: {} as jest.Mocked<TaskManagerStartContract>,
+        engineDescriptorClient:
+          mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
+        globalStateClient:
+          mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+        remoteLogExtractionStateClient: {
+          delete: jest.fn().mockResolvedValue(undefined),
+        } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
+        namespace,
+        isServerless: false,
+        logsExtractionClient: {
+          getLocalIndexPatterns: getLocalIndexPatternsMock,
+        } as unknown as import('../logs_extraction').LogsExtractionClient,
+        security: {
+          authz: {
+            checkPrivilegesDynamicallyWithRequest: jest
+              .fn()
+              .mockReturnValue(checkPrivilegesWithRequestMock),
+            actions: {
+              savedObject: {
+                get: jest.fn().mockReturnValue('some-kibana-privilege'),
+              },
+            },
+          },
+        } as unknown as SecurityPluginStart,
+        analytics: {
+          reportEvent: jest.fn(),
+        } as unknown as import('../../telemetry/events').TelemetryReporter,
+        savedObjectsClient: {} as SavedObjectsClientContract,
+      });
+    });
+
+    it('strips negative index patterns before forwarding to _has_privileges', async () => {
+      getLocalIndexPatternsMock.mockResolvedValue([
+        'logs-*',
+        '-logs-cloud_security_posture.*',
+        '.entities.entities-default',
+        '-logs-excluded-*',
+      ]);
+
+      await getPrivilegesClient.getPrivileges({} as KibanaRequest);
+
+      const [calledWith] = checkPrivilegesWithRequestMock.mock.calls[0];
+      const indexKeys = Object.keys(calledWith.elasticsearch.index);
+
+      expect(indexKeys.every((key) => !key.startsWith('-'))).toBe(true);
+      expect(indexKeys).toContain('logs-*');
+      expect(indexKeys).toContain('.entities.entities-default');
+      expect(indexKeys).not.toContain('-logs-cloud_security_posture.*');
+      expect(indexKeys).not.toContain('-logs-excluded-*');
+    });
+  });
+
+  describe('uninstall', () => {
+    // getAll is called twice in uninstall: once via getStatus (before delete) and once
+    // to compute remainingEngines (after delete). Sequence the mock accordingly.
+    it('keeps shared assets when other engines remain (see: https://github.com/elastic/security-team/issues/18143)', async () => {
+      mockEngineDescriptorClient.getAll
+        .mockResolvedValueOnce([
+          { type: 'host', status: 'started' },
+          { type: 'user', status: 'started' },
+        ])
+        .mockResolvedValueOnce([{ type: 'user', status: 'started' }]);
+
+      const result = await client.uninstall('host');
+
+      expect(result).toBe(true);
+      expect(mockEngineDescriptorClient.delete).toHaveBeenCalledWith('host');
+      // Shared, per-namespace / cluster assets must survive.
+      expect(mockUninstallElasticsearchAssets).not.toHaveBeenCalled();
+      expect(mockDeleteEuidStoredScripts).not.toHaveBeenCalled();
+      expect(mockGlobalStateClient.delete).not.toHaveBeenCalled();
+      expect(mockStopStatusReportTask).not.toHaveBeenCalled();
+      expect(mockStopHistorySnapshotTask).not.toHaveBeenCalled();
+    });
+
+    it('deletes shared assets when the last engine is uninstalled', async () => {
+      mockEngineDescriptorClient.getAll
+        .mockResolvedValueOnce([{ type: 'host', status: 'started' }])
+        .mockResolvedValueOnce([]);
+
+      const result = await client.uninstall('host');
+
+      expect(result).toBe(true);
+      expect(mockEngineDescriptorClient.delete).toHaveBeenCalledWith('host');
+      expect(mockUninstallElasticsearchAssets).toHaveBeenCalledTimes(1);
+      expect(mockDeleteEuidStoredScripts).toHaveBeenCalledTimes(1);
+      expect(mockGlobalStateClient.delete).toHaveBeenCalledTimes(1);
+      expect(mockStopStatusReportTask).toHaveBeenCalledTimes(1);
+      expect(mockStopHistorySnapshotTask).toHaveBeenCalledTimes(1);
+    });
+
+    it('is a no-op when the type is not installed', async () => {
+      mockEngineDescriptorClient.getAll.mockResolvedValueOnce([
+        { type: 'user', status: 'started' },
+      ]);
+
+      const result = await client.uninstall('host');
+
+      expect(result).toBe(false);
+      expect(mockEngineDescriptorClient.delete).not.toHaveBeenCalled();
+      expect(mockUninstallElasticsearchAssets).not.toHaveBeenCalled();
+      expect(mockDeleteEuidStoredScripts).not.toHaveBeenCalled();
+    });
+  });
+
   describe('logsExtraction resolution on install', () => {
     const existingLogsExtraction = {
       additionalIndexPatterns: ['existing-*'],
@@ -191,7 +310,7 @@ describe('AssetManagerClient', () => {
             delay: '1m',
             frequency: '1m',
             docsLimit: 10000,
-            maxLogsPerPage: 40000,
+            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
             timeout: '59s',
           }),
         })
@@ -212,7 +331,7 @@ describe('AssetManagerClient', () => {
             fieldHistoryLength: 10,
             additionalIndexPatterns: [],
             docsLimit: 10000,
-            maxLogsPerPage: 40000,
+            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
           }),
         })
       );
@@ -261,7 +380,7 @@ describe('AssetManagerClient', () => {
             fieldHistoryLength: 10,
             additionalIndexPatterns: [],
             docsLimit: 10000,
-            maxLogsPerPage: 40000,
+            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
           }),
         })
       );

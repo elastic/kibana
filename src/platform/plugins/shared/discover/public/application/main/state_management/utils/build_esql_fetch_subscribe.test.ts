@@ -815,4 +815,64 @@ describe('buildEsqlFetchSubscribe', () => {
 
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
+
+  test('should strip removed selected columns when default columns do not change', async () => {
+    const { replaceUrlState, dataState, tabId } = await setupTest({
+      appState: { columns: ['field1', 'field2'] },
+    });
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: makeEsqlCols(['field1', 'field2', 'field3', 'field4', 'field5', 'field6']),
+      query: { esql: 'from the-data-view-title' },
+    });
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+    replaceUrlState.mockClear();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: makeEsqlCols(['field1', 'field3', 'field4', 'field5', 'field6', 'field7']),
+      query: { esql: 'from the-data-view-title | where field1 > 0' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1'] },
+    });
+  });
+
+  test('should not strip selected columns when the current response has no column metadata', async () => {
+    const { toolkit, replaceUrlState, dataState } = await setupTest({
+      appState: { columns: [] },
+    });
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: makeEsqlCols(['field1', 'field3', 'field4', 'field5', 'field6', 'field7']),
+      query: { esql: 'from the-data-view-title' },
+    });
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { columns: ['field1', 'field2'] },
+      })
+    );
+
+    replaceUrlState.mockClear();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      query: { esql: 'from the-data-view-title | where field1 > 0' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+  });
 });

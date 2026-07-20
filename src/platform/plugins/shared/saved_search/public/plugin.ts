@@ -17,18 +17,12 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { once } from 'lodash';
 import { LATEST_VERSION, SavedSearchType } from '../common';
 import { kibanaContext } from '../common/expressions';
-import type {
-  DiscoverSession,
-  SavedSearch,
-  SavedSearchAttributes,
-  SerializableSavedSearch,
-} from '../common/types';
+import type { DiscoverSession, SavedSearch, SerializableSavedSearch } from '../common/types';
 import { getKibanaContext } from './expressions/kibana_context';
 import type { SavedSearchesServiceDeps } from './service/saved_searches_service';
 import type { SaveSavedSearchOptions, saveSavedSearch } from './service/save_saved_searches';
@@ -39,6 +33,7 @@ import type {
 } from './service/save_discover_session';
 import type { SavedSearchUnwrapResult } from './service/to_saved_search';
 import { getNewSavedSearch } from '../common/service/get_new_saved_search';
+import type { DiscoverSessionAttributes } from '../server';
 
 /**
  * Saved search plugin public Setup contract
@@ -56,7 +51,9 @@ export interface SavedSearchPublicPluginStart {
   ) => Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch>;
   getDiscoverSession: (discoverSessionId: string) => Promise<DiscoverSession>;
   getNew: () => ReturnType<typeof getNewSavedSearch>;
-  getAll: () => Promise<Array<SOWithMetadata<SavedSearchAttributes>>>;
+  getAll: () => Promise<
+    Array<SOWithMetadata<Pick<DiscoverSessionAttributes, 'title' | 'description'>>>
+  >;
   save: (
     savedSearch: SavedSearch,
     options?: SaveSavedSearchOptions
@@ -65,9 +62,7 @@ export interface SavedSearchPublicPluginStart {
     discoverSession: SaveDiscoverSessionParams,
     options?: SaveDiscoverSessionOptions
   ) => ReturnType<typeof saveDiscoverSession>;
-  checkForDuplicateTitle: (
-    props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
-  ) => Promise<void>;
+  hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
   byValueToSavedSearch: <Serialized extends boolean = false>(
     result: SavedSearchUnwrapResult,
     serialized?: Serialized
@@ -171,9 +166,9 @@ export class SavedSearchPublicPlugin
         const service = await getSavedSearchesService(deps);
         return service.saveDiscoverSession(discoverSession, options);
       },
-      checkForDuplicateTitle: async (props) => {
+      hasLibraryItemWithTitle: async (props) => {
         const service = await getSavedSearchesService(deps);
-        return service.checkForDuplicateTitle(props);
+        return service.hasLibraryItemWithTitle(props);
       },
       byValueToSavedSearch: async (result, serialized) => {
         const service = await getSavedSearchesService(deps);

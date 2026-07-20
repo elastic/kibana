@@ -913,11 +913,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('adds a file to the case', async () => {
-        // navigate to files tab
-        await testSubjects.click('case-view-tab-title-files');
-        await testSubjects.existOrFail('case-view-tab-content-files');
-
         await cases.casesFilesTable.addFile(require.resolve('./elastic_logo.png'));
+
+        // The files accordion only renders when the case has at least one
+        // file, so confirm it appears after the upload.
+        await testSubjects.existOrFail('case-view-attachment-accordion-file');
 
         // make sure the uploaded file is displayed on the table
         await find.byButtonText('elastic_logo.png');

@@ -10,7 +10,6 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 
 import { CreateButton } from '.';
 import { TestProviders } from '../../../../../common/mock';
-import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
 
@@ -39,6 +38,9 @@ describe('CreateButton', () => {
                 updateAttackDiscoverySchedule: true,
               },
             },
+          },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(false),
           },
         },
       });
@@ -83,6 +85,9 @@ describe('CreateButton', () => {
               },
             },
           },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(false),
+          },
         },
       });
     });
@@ -113,10 +118,54 @@ describe('CreateButton', () => {
 
       const createButton = screen.getByTestId('createSchedule');
       fireEvent.mouseOver(createButton.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');
+    });
+  });
+
+  describe('when the workflows execute privilege is missing', () => {
+    beforeEach(() => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              [ATTACK_DISCOVERY_FEATURE_ID]: {
+                updateAttackDiscoverySchedule: true,
+              },
+              workflowsManagement: {
+                executeWorkflow: false,
+              },
+            },
+          },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(true),
+          },
+        },
+      });
+    });
+
+    it('should disable the create schedule button', async () => {
+      renderCreateButton();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('createSchedule')).toBeDisabled();
+      });
+    });
+
+    it('should not call the create schedule button handler', async () => {
+      const onClickMock = jest.fn();
+      renderCreateButton(onClickMock);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('createSchedule')).toBeDisabled();
+      });
+
+      act(() => {
+        fireEvent.click(screen.getByTestId('createSchedule'));
+      });
+
+      expect(onClickMock).not.toHaveBeenCalled();
     });
   });
 });

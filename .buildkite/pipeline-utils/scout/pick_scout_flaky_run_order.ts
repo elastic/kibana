@@ -97,18 +97,7 @@ const buildSteps = (
       );
     }
 
-    // Dedupe modes in case the manifest contains duplicate (arch, domain) entries, and
-    // log a warning so the upstream issue is visible.
-    const modes = [...new Set(entry.serverRunFlags)];
-    if (modes.length !== entry.serverRunFlags.length) {
-      console.warn(
-        `⚠️ scoutConfig '${normalized}' had duplicate serverRunFlags in the manifest ` +
-          `(${entry.serverRunFlags.length} entries, ${modes.length} unique). ` +
-          `Deduping for step generation; consider fixing the discovery output.`
-      );
-    }
-
-    for (const mode of modes) {
+    for (const mode of entry.serverRunFlags) {
       scoutJobs += req.count;
       if (reservedJobs + scoutJobs > MAX_JOBS) {
         throw new Error(
@@ -152,7 +141,8 @@ const buildSteps = (
  * resulting steps via the Buildkite agent.
  *
  * The manifest must already exist on disk; the caller is responsible for placing it
- * there (e.g. by downloading the artifact uploaded by the discovery step).
+ * there. In the flaky runner it is produced by a scoped
+ * `scout discover-playwright-configs --configs <paths>` run (only the requested configs).
  */
 export async function pickScoutFlakyRunOrder(
   scoutConfigsPath: string,

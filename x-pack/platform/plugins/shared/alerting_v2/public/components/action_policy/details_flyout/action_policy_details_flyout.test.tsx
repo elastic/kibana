@@ -10,7 +10,12 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
+
+const ELASTIC_UID = 'elastic_uid';
+
+const mockBulkGet = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -22,6 +27,14 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'settings') {
       return {
         client: { get: () => 'YYYY-MM-DD HH:mm' },
+      };
+    }
+    if (token === 'userProfile') {
+      return { bulkGet: mockBulkGet };
+    }
+    if (token === 'http') {
+      return {
+        basePath: { prepend: (path: string) => `/base${path}` },
       };
     }
     return {};
@@ -63,17 +76,23 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozedUntil: null,
   auth: { owner: 'elastic', createdByUser: true },
-  createdBy: 'elastic_uid',
-  createdByUsername: 'elastic',
+  createdBy: ELASTIC_UID,
   createdAt: '2026-03-01T10:00:00.000Z',
-  updatedBy: 'elastic_uid',
-  updatedByUsername: 'elastic',
+  updatedBy: ELASTIC_UID,
   updatedAt: '2026-03-02T11:00:00.000Z',
   ...overrides,
 });
 
+const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+
 interface RenderProps {
   policy?: ActionPolicyResponse;
+  canWrite?: boolean;
   onClose?: jest.Mock;
   onEdit?: jest.Mock;
   onClone?: jest.Mock;
@@ -100,15 +119,28 @@ const renderFlyout = (props: RenderProps = {}) => {
   };
 
   render(
-    <I18nProvider>
-      <ActionPolicyDetailsFlyout policy={policy} {...handlers} />
-    </I18nProvider>
+    <QueryClientProvider client={createQueryClient()}>
+      <I18nProvider>
+        <ActionPolicyDetailsFlyout
+          policy={policy}
+          canWrite={props.canWrite ?? true}
+          {...handlers}
+        />
+      </I18nProvider>
+    </QueryClientProvider>
   );
 
   return { policy, handlers };
 };
 
 describe('ActionPolicyDetailsFlyout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockBulkGet.mockResolvedValue([
+      { uid: ELASTIC_UID, user: { username: 'elastic', full_name: 'Elastic User' } },
+    ]);
+  });
+
   describe('header', () => {
     it('renders the policy name and enabled state badge', () => {
       renderFlyout();
@@ -142,6 +174,21 @@ describe('ActionPolicyDetailsFlyout', () => {
 
       expect(screen.getByText('Routes critical alerts to the oncall workflow')).toBeInTheDocument();
       expect(screen.getByText('production')).toBeInTheDocument();
+    });
+
+    it('renders a expandable list of tags when there are more than one', () => {
+      renderFlyout();
+
+      expect(screen.getByText('production')).toBeInTheDocument();
+      expect(screen.getByText('+1')).toBeInTheDocument();
+    });
+
+    it('opens the tags popover when the "+N" button is clicked', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      await user.click(screen.getByText('+1'));
+
       expect(screen.getByText('oncall')).toBeInTheDocument();
     });
 
@@ -171,7 +218,7 @@ describe('ActionPolicyDetailsFlyout', () => {
         policy: createPolicy({
           groupingMode: 'per_episode',
           groupBy: null,
-          throttle: { strategy: 'on_status_change' },
+          throttle: { strategy: 'on_status_change', interval: null },
         }),
       });
 
@@ -185,10 +232,30 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByText('Workflow wf-2')).toBeInTheDocument();
     });
 
-    it('renders creator and updater usernames in the metadata section', () => {
+    it('resolves createdBy / updatedBy UIDs to user full names in the metadata section', async () => {
       renderFlyout();
 
-      expect(screen.getAllByText('elastic').length).toBeGreaterThan(0);
+      const elements = await screen.findAllByText('Elastic User');
+      expect(elements).toHaveLength(2);
+      elements.forEach((element) => expect(element).toBeInTheDocument());
+    });
+
+    it('falls back to the username when a profile has no full name', async () => {
+      mockBulkGet.mockResolvedValueOnce([{ uid: ELASTIC_UID, user: { username: 'elastic' } }]);
+      renderFlyout();
+
+      const elements = await screen.findAllByText('elastic');
+      expect(elements).toHaveLength(2);
+      elements.forEach((element) => expect(element).toBeInTheDocument());
+    });
+
+    it('falls back to the UID when no matching profile is returned', async () => {
+      mockBulkGet.mockResolvedValueOnce([]);
+      renderFlyout();
+
+      const elements = await screen.findAllByText(ELASTIC_UID);
+      expect(elements).toHaveLength(2);
+      elements.forEach((element) => expect(element).toBeInTheDocument());
     });
   });
 
@@ -220,26 +287,26 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByTestId(TEST_SUBJ.actionsMenuButton)).toBeInTheDocument();
     });
 
-    it('calls onClone and closes the flyout when Clone is selected', async () => {
+    it('calls onClone without closing the flyout', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
       await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
       await user.click(screen.getByText('Clone'));
 
-      expect(handlers.onClose).toHaveBeenCalledTimes(1);
       expect(handlers.onClone).toHaveBeenCalledWith(policy);
+      expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
-    it('calls onDelete and closes the flyout when Delete is selected', async () => {
+    it('calls onDelete without closing the flyout', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
       await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
       await user.click(screen.getByText('Delete'));
 
-      expect(handlers.onClose).toHaveBeenCalledTimes(1);
       expect(handlers.onDelete).toHaveBeenCalledWith(policy);
+      expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
     it('calls onDisable without closing the flyout when Disable is selected on an enabled policy', async () => {
@@ -264,15 +331,32 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
-    it('calls onUpdateApiKey and closes the flyout when Update API key is selected', async () => {
+    it('calls onUpdateApiKey without closing the flyout', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
       await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
       await user.click(screen.getByText('Update API key'));
 
-      expect(handlers.onClose).toHaveBeenCalledTimes(1);
       expect(handlers.onUpdateApiKey).toHaveBeenCalledWith(policy.id);
+      expect(handlers.onClose).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when the user only has read privilege', () => {
+    it('hides the actions menu and the Edit footer button but keeps Close', () => {
+      renderFlyout({ canWrite: false });
+
+      expect(screen.queryByTestId(TEST_SUBJ.actionsMenuButton)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_SUBJ.editButton)).not.toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ.closeButton)).toBeInTheDocument();
+    });
+
+    it('still renders the policy details', () => {
+      renderFlyout({ canWrite: false });
+
+      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Critical alerts policy');
+      expect(screen.getByText('data.severity : "critical"')).toBeInTheDocument();
     });
   });
 });

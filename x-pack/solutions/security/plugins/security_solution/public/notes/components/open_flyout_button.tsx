@@ -7,17 +7,17 @@
 
 import React, { memo, useCallback } from 'react';
 import type { IconType } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../data_view_manager/constants';
 import { OPEN_FLYOUT_BUTTON_TEST_ID } from './test_ids';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useKibana } from '../../common/lib/kibana';
+import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
+import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { DocumentEventTypes } from '../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 
 export const OPEN_FLYOUT_BUTTON = i18n.translate(
@@ -48,44 +48,53 @@ export interface OpenFlyoutButtonIconProps {
  */
 export const OpenFlyoutButtonIcon = memo(
   ({ eventId, timelineId, iconType }: OpenFlyoutButtonIconProps) => {
-    const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(PageScope.timeline);
-
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
-
-    const selectedPatterns = newDataViewPickerEnabled
-      ? experimentalSelectedPatterns
-      : oldSelectedPatterns;
+    const selectedPatterns = useSelectedPatterns(PageScope.timeline);
 
     const { telemetry } = useKibana().services;
     const { openFlyout } = useExpandableFlyoutApi();
+    const enableNewFlyout = useIsNewFlyoutEnabled();
+    const { openDocumentFlyoutFromPattern } = useFlyoutApi();
 
     const handleClick = useCallback(() => {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName: selectedPatterns.join(','),
-            scopeId: TableId.alertsOnAlertsPage, // TODO we should update the flyout's code to separate scopeId and preview
+      const indexName = selectedPatterns.join(',');
+      if (enableNewFlyout) {
+        openDocumentFlyoutFromPattern({ documentId: eventId, indexName });
+      } else {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: TableId.alertsOnAlertsPage, // TODO we should update the flyout's code to separate scopeId and preview
+            },
           },
-        },
-      });
+        });
+      }
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: timelineId,
         panel: 'right',
       });
-    }, [eventId, openFlyout, selectedPatterns, telemetry, timelineId]);
+    }, [
+      eventId,
+      openFlyout,
+      selectedPatterns,
+      telemetry,
+      timelineId,
+      enableNewFlyout,
+      openDocumentFlyoutFromPattern,
+    ]);
 
     return (
-      <EuiButtonIcon
-        data-test-subj={OPEN_FLYOUT_BUTTON_TEST_ID}
-        title={OPEN_FLYOUT_BUTTON}
-        aria-label={OPEN_FLYOUT_BUTTON}
-        color="text"
-        iconType={iconType}
-        onClick={handleClick}
-      />
+      <EuiToolTip content={OPEN_FLYOUT_BUTTON} disableScreenReaderOutput>
+        <EuiButtonIcon
+          data-test-subj={OPEN_FLYOUT_BUTTON_TEST_ID}
+          aria-label={OPEN_FLYOUT_BUTTON}
+          color="text"
+          iconType={iconType}
+          onClick={handleClick}
+        />
+      </EuiToolTip>
     );
   }
 );

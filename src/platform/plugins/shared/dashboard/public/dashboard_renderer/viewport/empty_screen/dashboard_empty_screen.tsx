@@ -7,64 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiImage,
   EuiPageTemplate,
+  EuiPanel,
   EuiText,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
-import useMountedState from 'react-use/lib/useMountedState';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { openLazyFlyout } from '@kbn/presentation-util';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
-import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
+import { useFeaturedItems } from '../../../dashboard_app/top_nav/add_panel_button/use_featured_items';
+
+const customTitles: Record<string, string> = {
+  addLensPanelAction: i18n.translate('dashboard.emptyScreen.createVisualizationTitle', {
+    defaultMessage: 'Create visualization',
+  }),
+  ACTION_CREATE_ESQL_CHART: i18n.translate('dashboard.emptyScreen.createEsqlVisualizationTitle', {
+    defaultMessage: 'Create visualization (query)',
+  }),
+};
 
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {
     return getDashboardCapabilities();
   }, []);
 
-  const isMounted = useMountedState();
   const dashboardApi = useDashboardApi();
-  const [isLoading, setIsLoading] = useState(false);
+  const { featuredItems } = useFeaturedItems({ dashboardApi });
   const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = viewMode === 'edit';
-
-  const openAddFromLibrary = useCallback(() => {
-    openLazyFlyout({
-      core: coreServices,
-      parentApi: dashboardApi,
-      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-        const { AddPanelFlyout } = await import(
-          '../../../dashboard_app/top_nav/add_panel_button/components/add_panel_flyout'
-        );
-        return (
-          <AddPanelFlyout
-            dashboardApi={dashboardApi}
-            ariaLabelledBy={ariaLabelledBy}
-            initialTab="library"
-          />
-        );
-      },
-      flyoutProps: {
-        'data-test-subj': 'dashboardAddPanel',
-        triggerId: 'dashboardAddTopNavButton',
-      },
-    });
-  }, [dashboardApi]);
 
   const styles = useMemoCss(emptyScreenStyles);
 
@@ -97,11 +81,8 @@ export function DashboardEmptyScreen() {
   })();
 
   const body = (() => {
-    const bodyString = showEditPrompt
-      ? i18n.translate('dashboard.emptyScreen.editModeSubtitle', {
-          defaultMessage: 'Create a visualization of your data, or add one from the library.',
-        })
-      : showWriteControls
+    if (showEditPrompt) return undefined;
+    const bodyString = showWriteControls
       ? i18n.translate('dashboard.emptyScreen.viewModeSubtitle', {
           defaultMessage: 'Enter edit mode, and then start adding your visualizations.',
         })
@@ -118,31 +99,32 @@ export function DashboardEmptyScreen() {
   const actions = (() => {
     if (showEditPrompt) {
       return (
-        <EuiFlexGroup justifyContent="center" gutterSize="l" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              isLoading={isLoading}
-              iconType="lensApp"
-              onClick={async () => {
-                setIsLoading(true);
-                await executeAddLensPanelAction(dashboardApi);
-                if (isMounted()) {
-                  setIsLoading(false);
-                }
-              }}
-            >
-              {i18n.translate('dashboard.emptyScreen.createVisualization', {
-                defaultMessage: 'Create visualization',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="left" iconType="folderOpen" onClick={openAddFromLibrary}>
-              {i18n.translate('dashboard.emptyScreen.addFromLibrary', {
-                defaultMessage: 'Add from library',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="s" css={styles.actionsWrapper}>
+          {featuredItems.map((item) => (
+            <EuiFlexItem key={item.id} grow={false}>
+              <EuiPanel
+                hasBorder
+                paddingSize="none"
+                onClick={item.onClick}
+                css={styles.actionPanel}
+                data-test-subj={item['data-test-subj']}
+              >
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type={item.icon} size="m" aria-hidden={true} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      <strong>{customTitles[item.id] ?? item.name}</strong>
+                    </EuiText>
+                    <EuiText size="xs" color="subdued">
+                      {item.description}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          ))}
         </EuiFlexGroup>
       );
     }
@@ -190,7 +172,16 @@ const emptyScreenStyles = {
       paddingTop: '0 !important',
       borderRadius: euiTheme.border.radius.medium,
       '.euiEmptyPrompt__icon': {
-        marginBottom: 0,
+        marginBottom: euiTheme.size.l,
+        paddingRight: euiTheme.size.s,
       },
+    }),
+  actionsWrapper: css({
+    width: '100%',
+  }),
+  actionPanel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
+      cursor: 'pointer',
     }),
 };

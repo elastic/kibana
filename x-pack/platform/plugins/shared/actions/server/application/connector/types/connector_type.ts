@@ -23,4 +23,7 @@ export interface ConnectorType {
   subFeature?: ConnectorTypeSchemaType['subFeature'];
   isDeprecated: ConnectorTypeSchemaType['isDeprecated'];
   allowMultipleSystemActions?: ConnectorTypeSchemaType['allowMultipleSystemActions'];
+  description?: ConnectorTypeSchemaType['description'];
+  isExperimental?: ConnectorTypeSchemaType['isExperimental'];
+  isTestable: ConnectorTypeSchemaType['isTestable'];
 }

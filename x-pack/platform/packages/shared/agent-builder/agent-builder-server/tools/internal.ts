@@ -26,6 +26,10 @@ export interface InternalToolDefinition<
   TSchema extends ZodObject<any> = ZodObject<any>
 > extends ToolDefinition<TType, TConfig> {
   /**
+   * When true, this tool is only available when experimental features are enabled.
+   */
+  experimental: boolean;
+  /**
    * Check if the tool is available for the current context.
    */
   isAvailable: InternalToolAvailabilityHandler;
@@ -48,6 +52,12 @@ export interface InternalToolDefinition<
    * to replace large tool results with compact summaries.
    */
   summarizeToolReturn?: ToolReturnSummarizerFn;
+  /**
+   * Per-tool override of the tool-result length guardrail's token budget.
+   * When set, replaces the ToolManager-wide default for this tool specifically.
+   * Set to `Infinity` to fully exempt this tool's results from truncation.
+   */
+  maxResultTokens?: number;
   /**
    * Tool call policy to control tool call confirmation behavior
    */

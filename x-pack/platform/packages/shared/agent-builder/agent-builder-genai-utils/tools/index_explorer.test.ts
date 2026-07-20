@@ -152,30 +152,14 @@ describe('indexExplorer', () => {
     } as unknown as ScopedModel;
 
     listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
       indices: [],
       aliases: [],
       data_streams: [],
     });
   });
 
-  it('passes includeKibanaIndices as false when indexPattern is "*"', async () => {
-    await indexExplorer({
-      nlQuery: 'test query',
-      indexPattern: '*',
-      esClient,
-      model,
-    });
-
-    expect(listSearchSourcesMock).toHaveBeenCalledWith({
-      pattern: '*',
-      excludeIndicesRepresentedAsDatastream: true,
-      excludeIndicesRepresentedAsAlias: false,
-      esClient,
-      includeKibanaIndices: false,
-    });
-  });
-
-  it('passes includeKibanaIndices as true when indexPattern is not "*"', async () => {
+  it('forwards the index pattern to `listSearchSources` for source resolution', async () => {
     await indexExplorer({
       nlQuery: 'test query',
       indexPattern: 'logs-*',
@@ -187,8 +171,8 @@ describe('indexExplorer', () => {
       pattern: 'logs-*',
       excludeIndicesRepresentedAsDatastream: true,
       excludeIndicesRepresentedAsAlias: false,
+      includeDatasets: false,
       esClient,
-      includeKibanaIndices: true,
     });
   });
 });
@@ -201,6 +185,7 @@ describe('gatherResourceDescriptors', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
 
     listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
       indices: [],
       aliases: [],
       data_streams: [],
@@ -209,6 +194,7 @@ describe('gatherResourceDescriptors', () => {
 
   it('returns index descriptors with field path and type', async () => {
     listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
       indices: [{ type: EsResourceType.index, name: 'my-index' }],
       aliases: [],
       data_streams: [],
@@ -240,6 +226,7 @@ describe('gatherResourceDescriptors', () => {
 
   it('returns data stream descriptors with field path and type', async () => {
     listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
       indices: [],
       aliases: [],
       data_streams: [
@@ -280,6 +267,7 @@ describe('gatherResourceDescriptors', () => {
 
   it('returns alias descriptors without fields', async () => {
     listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
       indices: [],
       aliases: [{ type: EsResourceType.alias, name: 'my-alias', indices: ['idx-a', 'idx-b'] }],
       data_streams: [],
@@ -298,6 +286,7 @@ describe('gatherResourceDescriptors', () => {
 
   it('excludes data streams when includeDatastream is false', async () => {
     listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
       indices: [{ type: EsResourceType.index, name: 'my-index' }],
       aliases: [],
       data_streams: [
@@ -327,6 +316,7 @@ describe('gatherResourceDescriptors', () => {
 
   it('excludes aliases when includeAliases is false', async () => {
     listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
       indices: [{ type: EsResourceType.index, name: 'my-index' }],
       aliases: [{ type: EsResourceType.alias, name: 'my-alias', indices: ['my-index'] }],
       data_streams: [],
@@ -348,6 +338,7 @@ describe('gatherResourceDescriptors', () => {
 
   it('returns mixed resource types', async () => {
     listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
       indices: [{ type: EsResourceType.index, name: 'idx-1' }],
       aliases: [{ type: EsResourceType.alias, name: 'alias-1', indices: ['idx-1'] }],
       data_streams: [

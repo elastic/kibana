@@ -16,7 +16,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type { CallToolInput, CrawlInput, ExtractInput, MapInput, SearchInput } from './types';
@@ -41,27 +41,31 @@ export const TavilyConnector: ConnectorSpec = {
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
+    docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/tavily-action-type`,
   },
 
   auth: {
     types: ['bearer'],
   },
 
-  schema: z.object({
-    serverUrl: UISchemas.url()
-      .default(TAVILY_MCP_SERVER_URL)
-      .describe('Tavily MCP Server URL')
-      .meta({
-        widget: 'text',
-        placeholder: 'https://mcp.tavily.com/mcp/',
-        label: i18n.translate('connectorSpecs.tavily.config.serverUrl.label', {
-          defaultMessage: 'MCP Server URL',
+  schema: lazySchema(() =>
+    z.object({
+      serverUrl: UISchemas.url()
+        .default(TAVILY_MCP_SERVER_URL)
+        .describe('Tavily MCP Server URL')
+        .meta({
+          widget: 'text',
+          placeholder: 'https://mcp.tavily.com/mcp/',
+          hidden: true,
+          label: i18n.translate('connectorSpecs.tavily.config.serverUrl.label', {
+            defaultMessage: 'MCP Server URL',
+          }),
+          helpText: i18n.translate('connectorSpecs.tavily.config.serverUrl.helpText', {
+            defaultMessage: 'The URL of the Tavily MCP server.',
+          }),
         }),
-        helpText: i18n.translate('connectorSpecs.tavily.config.serverUrl.helpText', {
-          defaultMessage: 'The URL of the Tavily MCP server.',
-        }),
-      }),
-  }),
+    })
+  ),
 
   validateUrls: {
     fields: ['serverUrl'],

@@ -13,6 +13,7 @@ import type { TagAttributes } from '../../../common/types';
 export interface TagBadgeProps<T> {
   tag: T;
   onClick?: (tag: T) => void;
+  'data-test-subj'?: string;
 }
 
 /**
@@ -21,6 +22,7 @@ export interface TagBadgeProps<T> {
 export const TagBadge: <T extends TagAttributes>(props: TagBadgeProps<T>) => ReactElement = ({
   tag,
   onClick,
+  'data-test-subj': dataTestSubj,
 }) => {
   const onClickProps = onClick
     ? {
@@ -37,7 +39,12 @@ export const TagBadge: <T extends TagAttributes>(props: TagBadgeProps<T>) => Rea
     : {};
 
   return (
-    <EuiBadge color={tag.color} title={tag.description} {...onClickProps}>
+    <EuiBadge
+      color={tag.color}
+      title={tag.description}
+      data-test-subj={dataTestSubj}
+      {...onClickProps}
+    >
       {tag.name}
     </EuiBadge>
   );

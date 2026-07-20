@@ -190,6 +190,21 @@ evaluate.describe(
                   expectedOnlyToolId: 'security.entity_risk_score',
                 },
               },
+              {
+                input: {
+                  question:
+                    'Correlate related alerts for alert id "test-alert-id-123" over the last 24 hours and summarize shared entities I should investigate.',
+                },
+                output: {
+                  expected:
+                    'I will use the get-related-alerts tool for alert test-alert-id-123 and summarize correlated entities from the last 24 hours.',
+                },
+                metadata: {
+                  query_intent: 'Alert Correlation',
+                  expectedSkill: 'alert-analysis',
+                  expectedToolId: 'security.alert-analysis.get-related-alerts',
+                },
+              },
             ],
           },
         });

@@ -29,9 +29,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getBaseConnectorType } from '@kbn/workflows-ui';
 import { ActionsMenuPreviewPanel } from './actions_menu_preview_panel';
 import { useKibana } from '../../../hooks/use_kibana';
-import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { flattenOptions, getActionOptions, usesInverseIconColor } from '../lib/get_action_options';
 import { STEPS_PREFIX, useDisplayOptions } from '../lib/use_display_options';
@@ -478,8 +478,8 @@ export function ActionsMenu({
                   defaultMessage: 'View details',
                 })}
                 data-test-subj="actionsMenuItemInfo"
-                onClick={(e) => handlePinPreview(action, e)}
-                onMouseDown={(e) => {
+                onClick={(e: React.MouseEvent) => handlePinPreview(action, e)}
+                onMouseDown={(e: React.MouseEvent) => {
                   e.preventDefault();
                   e.stopPropagation();
                 }}
@@ -495,8 +495,8 @@ export function ActionsMenu({
                   defaultMessage: 'Add step',
                 })}
                 data-test-subj="actionsMenuItemAdd"
-                onClick={(e) => handleAddFromRow(action, e)}
-                onMouseDown={(e) => {
+                onClick={(e: React.MouseEvent) => handleAddFromRow(action, e)}
+                onMouseDown={(e: React.MouseEvent) => {
                   e.preventDefault();
                   e.stopPropagation();
                 }}
@@ -942,6 +942,9 @@ const componentStyles = {
       // the preceding row already provides a bottom rule.
       '& .euiSelectableList__groupLabel ~ .euiSelectableList__groupLabel': {
         marginTop: '24px',
+      },
+      '& .euiSelectableListItem__content': {
+        gap: 0,
       },
       '& .euiSelectableListItem__text': {
         padding: 0,

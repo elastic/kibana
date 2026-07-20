@@ -72,6 +72,24 @@ export {
 } from './common/yaml/parse_workflow_yaml_to_json';
 export { parseYamlToJSONWithoutValidation } from './common/yaml/parse_workflow_yaml_to_json_without_validation';
 export { parseWorkflowYamlForAutocomplete } from './common/yaml/parse_workflow_yaml_for_autocomplete';
+export {
+  parseLineForCompletion,
+  isVariableLineParseResult,
+} from './common/yaml/parse_line_for_completion';
+export { getStepNodesWithType, isStepLikeMap } from './common/yaml/get_step_nodes_with_type';
+export { getTriggerNodesWithType } from './common/yaml/get_trigger_nodes_with_type';
+export type {
+  LineParseResult,
+  VariableLineParseResult,
+  ForeachVariableLineParseResult,
+  LiquidLineParseResult,
+  LiquidSyntaxLineParseResult,
+  ConnectorIdLineParseResult,
+  WorkflowLineParseResult,
+  WorkflowInputsLineParseResult,
+  TypeLineParseResult,
+  TimezoneLineParseResult,
+} from './common/yaml/parse_line_for_completion';
 
 // Zod helpers
 export { inferZodType } from './common/zod/infer_zod_type';
@@ -88,3 +106,14 @@ export type {
   EnrichmentResult,
   ConnectorParamsSchemaResolver,
 } from './common/zod/enrich_error_message';
+
+// Yaml editing utilities
+export {
+  insertStep,
+  modifyStep,
+  modifyStepProperty,
+  modifyWorkflowProperty,
+  deleteStep,
+  getStepNode,
+} from './lib/yaml_edit';
+export type { StepDefinition, EditResult } from './lib/yaml_edit';

@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { expect } from '../../../../../ui';
 
 const PAGE_URL = 'security/entity_analytics_management';
 const OLD_ENTITY_STORE_URL = 'security/entity_analytics_entity_store';
@@ -127,12 +128,27 @@ export class EntityAnalyticsManagementPage {
   }
 
   async toggleEntityAnalytics() {
-    await this.entityAnalyticsSwitch.waitFor({ state: 'attached' });
+    // `'visible'` (not `'attached'`) — the switch is rendered while the entity
+    // store / risk engine status queries are still loading, but is correctly
+    // disabled in that window. Waiting only for `attached` would let Playwright
+    // proceed to `click()`, which then races the actionability check against
+    // re-renders. Waiting for `visible` and explicitly asserting enabled state
+    // keeps the wait deterministic. See https://github.com/elastic/kibana/issues/259664.
+    await this.entityAnalyticsSwitch.waitFor({ state: 'visible' });
+    await expect(this.entityAnalyticsSwitch).toBeEnabled();
     await this.entityAnalyticsSwitch.click();
   }
 
   async waitForStatusLoaded() {
     await this.statusLoading.waitFor({ state: 'detached', timeout: 30000 });
     await this.entityAnalyticsHealth.waitFor({ state: 'visible', timeout: 30000 });
+  }
+
+  async clearEntityData() {
+    const modal = this.page.testSubj.locator('clear-entity-data-modal');
+    await this.page.testSubj.locator('clear-entity-data-button').click();
+    await modal.waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+    await modal.waitFor({ state: 'detached' });
   }
 }

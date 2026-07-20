@@ -27,7 +27,7 @@ describe('LeftPanel', () => {
       }
     );
 
-    const tabElement = queryByText('Risk contributions');
+    const tabElement = queryByText('Risk score');
 
     expect(tabElement).toBeInTheDocument();
   });

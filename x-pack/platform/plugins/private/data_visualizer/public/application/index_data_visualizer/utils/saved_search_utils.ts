@@ -92,18 +92,25 @@ export function getEsQueryFromSavedSearch({
     !savedSearch &&
     (userQuery || userFilters || (filterManager && filterManager.getGlobalFilters()?.length > 0))
   ) {
-    const combinedQuery = buildEsQuery(
-      dataView,
-      userQuery ?? [],
-      [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
-      uiSettings ? getEsQueryConfig(uiSettings) : undefined
-    );
+    try {
+      // buildEsQuery throws an exception for a fallible operation (anti-pattern).
+      // We MUST always wrap it in a try block to prevent a failed parse from being unhandled &
+      // bubbling up to the error boundary.
+      const combinedQuery = buildEsQuery(
+        dataView,
+        userQuery ?? [],
+        [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      );
 
-    return {
-      searchQuery: combinedQuery,
-      searchString: userQuery?.query ?? '',
-      queryLanguage: (userQuery?.language ?? 'kuery') as SearchQueryLanguage,
-    };
+      return {
+        searchQuery: combinedQuery,
+        searchString: userQuery?.query ?? '',
+        queryLanguage: (userQuery?.language ?? 'kuery') as SearchQueryLanguage,
+      };
+    } catch (e) {
+      return undefined;
+    }
   }
 
   // If saved search available, merge saved search with the latest user query or filters
@@ -116,18 +123,25 @@ export function getEsQueryFromSavedSearch({
         filterManager.addFilters(savedSearchSource.getField('filter') as Filter[]);
       }
     }
-    const combinedQuery = buildEsQuery(
-      dataView,
-      currentQuery,
-      [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
-      uiSettings ? getEsQueryConfig(uiSettings) : undefined
-    );
+    try {
+      // buildEsQuery throws an exception for a fallible operation (anti-pattern).
+      // We MUST always wrap it in a try block to prevent a failed parse from being unhandled &
+      // bubbling up to the error boundary.
+      const combinedQuery = buildEsQuery(
+        dataView,
+        currentQuery,
+        [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      );
 
-    return {
-      searchQuery: combinedQuery,
-      searchString: currentQuery?.query ?? '',
-      queryLanguage: (currentQuery?.language as SearchQueryLanguage) ?? 'kuery',
-      queryOrAggregateQuery: currentQuery,
-    };
+      return {
+        searchQuery: combinedQuery,
+        searchString: currentQuery?.query ?? '',
+        queryLanguage: (currentQuery?.language as SearchQueryLanguage) ?? 'kuery',
+        queryOrAggregateQuery: currentQuery,
+      };
+    } catch (e) {
+      return undefined;
+    }
   }
 }

@@ -7,10 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  HUMAN_READABLE_ID_MAX_LENGTH,
+  HUMAN_READABLE_ID_MIN_LENGTH,
+  HUMAN_READABLE_ID_PATTERN,
+} from '@kbn/human-readable-id';
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
-import type { SerializedError, WorkflowYaml } from '../spec/schema';
+import type {
+  SerializedError,
+  WorkflowStepTokenUsageSchema,
+  WorkflowTokenUsageSchema,
+  WorkflowYaml,
+} from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
 export type { WorkflowYaml } from '../spec/schema';
@@ -20,7 +30,10 @@ export enum ExecutionStatus {
   PENDING = 'pending',
   WAITING = 'waiting',
   WAITING_FOR_INPUT = 'waiting_for_input',
+  WAITING_FOR_CHILD = 'waiting_for_child',
   RUNNING = 'running',
+  /** Persisted concurrency backlog - does not count toward concurrency max until promoted to pending + scheduled */
+  QUEUED = 'queued',
 
   // Done
   COMPLETED = 'completed',
@@ -44,6 +57,17 @@ export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.PENDING,
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
+  ExecutionStatus.RUNNING,
+  ExecutionStatus.QUEUED,
+] as const;
+
+/** Workflow executions occupying a concurrency slot (excludes queued backlog). */
+export const ConcurrencySlotOccupyingExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.PENDING,
+  ExecutionStatus.WAITING,
+  ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
   ExecutionStatus.RUNNING,
 ] as const;
 
@@ -53,6 +77,17 @@ export enum ExecutionType {
 }
 export type ExecutionTypeUnion = `${ExecutionType}`;
 export const ExecutionTypeValues = Object.values(ExecutionType);
+
+export const WorkflowExecutionSortFields = ['createdAt', 'finishedAt'] as const;
+export type WorkflowExecutionSortField = (typeof WorkflowExecutionSortFields)[number];
+export type WorkflowExecutionSortOrder = 'asc' | 'desc';
+export const WorkflowExecutionCollapseFields = [
+  'concurrencyGroupKey',
+  'status',
+  'executedBy',
+  'triggeredBy',
+] as const;
+export type WorkflowExecutionCollapseField = (typeof WorkflowExecutionCollapseFields)[number];
 
 /**
  * An interface representing the state of a step scope during workflow execution.
@@ -86,10 +121,28 @@ export interface QueueMetrics {
   scheduleDelayMs: number | null;
 }
 
+/**
+ * Normalized LLM token usage. Token-consuming steps (today `ai.agent`, and any
+ * future `ai.*` / connector step) emit this shape under `output.metadata.usage`;
+ * the execution engine extracts it, persists it as a top-level `usage` field on
+ * the step execution, and accumulates the per-execution total. Keeping the
+ * persisted field at the top level (rather than nested under `output`) means
+ * UI and queries read a stable, output-independent shape that survives the
+ * `includeOutput: false` fetch path.
+ */
+export type WorkflowTokenUsage = z.infer<typeof WorkflowTokenUsageSchema>;
+
+export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema>;
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
   workflowId: string;
+  managed?: boolean;
+  managedBy?: string | null;
+  billable?: boolean | null;
+  originManagedWorkflowId?: string | null;
+  managedVersion?: number | null;
   isTestRun: boolean;
   status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -132,6 +185,19 @@ export interface EsWorkflowExecution {
   eventChainVisitedWorkflowIds?: string[];
   /** Trigger dispatch id from event-driven scheduling (`context.metadata.eventId`), when set */
   dispatchEventId?: string;
+  /**
+   * Aggregated LLM token usage across all token-consuming steps in this
+   * execution, accumulated incrementally as each step finishes. Absent when no
+   * step reported usage. See {@link WorkflowTokenUsage}.
+   */
+  usage?: WorkflowTokenUsage;
+  /** Per-step counterpart to the summed `usage`, in step-finish order. */
+  stepUsage?: WorkflowStepTokenUsage[];
+  /**
+   * Workflow document version (`_source.version`) captured when the execution was
+   * created.
+   */
+  version?: number;
 }
 
 export interface ProviderInput {
@@ -180,6 +246,24 @@ export interface EsWorkflowStepExecution {
 
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;
+
+  /**
+   * Optional Human-In-The-Loop audit envelope, populated only by
+   * HITL-aware steps (today: `wait_for_input`). Both the wrapper and
+   * every property inside it are optional and MUST be treated as such
+   * by readers — the engine itself remains field-agnostic.
+   */
+  hitl?: {
+    /** Server-resolved username (or API-key principal) that submitted the response. */
+    respondedBy?: string;
+    /** ISO-8601 timestamp the response was recorded server-side. */
+    respondedAt?: string;
+    /** Free-form channel slug identifying the surface that submitted the response. */
+    channel?: string;
+  };
+
+  /** Per-step normalized LLM token usage. See {@link WorkflowTokenUsage}. */
+  usage?: WorkflowTokenUsage;
 }
 
 export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;
@@ -204,6 +288,10 @@ export interface WorkflowExecutionLogModel {
 export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
+  managed?: boolean;
+  managedBy?: string | null;
+  originManagedWorkflowId?: string | null;
+  managedVersion?: number | null;
   status: ExecutionStatus;
   isTestRun: boolean;
   startedAt: string;
@@ -222,6 +310,13 @@ export interface WorkflowExecutionDto {
   context?: Record<string, unknown>;
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
+  concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
+  /** Aggregated LLM token usage across all `ai.*` steps in this execution. */
+  usage?: WorkflowTokenUsage;
+  /** Per-step LLM token usage broken down by step and connector. See {@link WorkflowStepTokenUsage}. */
+  stepUsage?: WorkflowStepTokenUsage[];
+  /** Workflow document version captured at execution start. See {@link EsWorkflowExecution.version}. */
+  version?: number;
 }
 
 export type WorkflowExecutionListItemDto = Omit<
@@ -250,6 +345,11 @@ export const EsWorkflowSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
   enabled: z.boolean(),
+  managed: z.boolean().optional(),
+  managedBy: z.string().nullable().optional(),
+  billable: z.boolean().nullable().optional(),
+  originManagedWorkflowId: z.string().nullable().optional(),
+  managedVersion: z.number().nullable().optional(),
   tags: z.array(z.string()),
   createdAt: z.date(),
   createdBy: z.string(),
@@ -259,6 +359,8 @@ export const EsWorkflowSchema = z.object({
   deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
   valid: z.boolean().readonly(),
+  /** Monotonic workflow document version counter (`_source.version`). */
+  version: z.number().optional(),
 });
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
@@ -270,27 +372,14 @@ export type EsWorkflowCreate = Omit<
 
 export const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
 const MAX_BULK_CREATE_WORKFLOWS = 500;
-// IDs must start and end with a lowercase alphanumeric character, contain only lowercase
-// alphanumeric chars and hyphens in the middle. Length is enforced separately via
-// WORKFLOW_ID_MIN_LENGTH (3) and WORKFLOW_ID_MAX_LENGTH (255).
-// This supports semantic IDs ("security-alert-enrichment"), legacy workflow-{uuid} format,
-// plain UUIDs, while rejecting leading/trailing separators, snake case and
-// special characters like spaces, dots, or '@'.
-//
-// NOTE: The regex intentionally allows 1-2 char IDs (the inner group is optional).
-// The 3-char minimum is enforced by WORKFLOW_ID_MIN_LENGTH at the Zod schema
-// level so that the pattern and length constraints remain independently testable.
-export const WORKFLOW_ID_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
-export const WORKFLOW_ID_MAX_LENGTH = 255;
-export const WORKFLOW_ID_MIN_LENGTH = 3;
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
   id: z
     .string()
-    .min(WORKFLOW_ID_MIN_LENGTH)
-    .max(WORKFLOW_ID_MAX_LENGTH)
-    .regex(WORKFLOW_ID_PATTERN)
+    .min(HUMAN_READABLE_ID_MIN_LENGTH)
+    .max(HUMAN_READABLE_ID_MAX_LENGTH)
+    .regex(HUMAN_READABLE_ID_PATTERN)
     .optional(),
 });
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
@@ -351,6 +440,14 @@ export const TestWorkflowResponseSchema = z.object({
 });
 export type TestWorkflowResponseDto = z.infer<typeof TestWorkflowResponseSchema>;
 
+/** Result of scheduling a resume for a workflow execution that was waiting for human input. */
+export const ResumeWorkflowExecutionResponseSchema = z.object({
+  resumedBy: z.string(),
+});
+export type ResumeWorkflowExecutionResponseDto = z.infer<
+  typeof ResumeWorkflowExecutionResponseSchema
+>;
+
 export interface UpdatedWorkflowResponseDto {
   id: string;
   lastUpdatedAt: string;
@@ -365,6 +462,12 @@ export interface WorkflowDetailDto {
   name: string;
   description?: string;
   enabled: boolean;
+  managed?: boolean;
+  managedBy?: string | null;
+  definitionHash?: string | null;
+  originManagedWorkflowId?: string | null;
+  managedVersion?: number | null;
+  lifecycle?: 'static' | 'dynamic' | null;
   createdAt: string;
   createdBy: string;
   lastUpdatedAt: string;
@@ -372,6 +475,7 @@ export interface WorkflowDetailDto {
   definition: WorkflowYaml | null;
   yaml: string;
   valid: boolean;
+  version?: number;
 }
 
 export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
@@ -384,6 +488,8 @@ export interface WorkflowListItemDto {
   name: string;
   description: string;
   enabled: boolean;
+  managed?: boolean;
+  managedBy?: string | null;
   definition: WorkflowYaml | null;
   createdAt: string;
   history?: WorkflowExecutionHistoryModel[];
@@ -398,8 +504,22 @@ export interface WorkflowListDto {
   results: WorkflowListItemDto[];
 }
 export interface WorkflowExecutionEngineModel
-  extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition' | 'yaml'> {
+  extends Pick<
+    EsWorkflow,
+    | 'id'
+    | 'name'
+    | 'enabled'
+    | 'definition'
+    | 'yaml'
+    | 'managed'
+    | 'managedBy'
+    | 'billable'
+    | 'originManagedWorkflowId'
+    | 'managedVersion'
+    | 'version'
+  > {
   isTestRun?: boolean;
+  isEphemeral?: boolean;
   spaceId?: string;
 }
 
@@ -468,7 +588,7 @@ export type CompletionFn = () => Promise<
   Array<{ label: string; value: string; detail?: string; documentation?: string }>
 >;
 
-export type StepStabilityLevel = 'stable' | 'beta' | 'tech_preview';
+export type StabilityLevel = 'stable' | 'beta' | 'tech_preview';
 
 export interface BaseConnectorContract {
   type: string;
@@ -481,7 +601,7 @@ export interface BaseConnectorContract {
   /** Documentation URL for this API endpoint */
   documentation?: string | null;
   /** API stability level derived from the OpenAPI `x-state` field */
-  stability?: StepStabilityLevel;
+  stability?: StabilityLevel;
   /** Deprecation metadata for this step type. */
   deprecation?: StepDeprecationInfo;
   examples?: ConnectorExamples;
@@ -495,6 +615,8 @@ export interface BaseConnectorContract {
 export interface DynamicConnectorContract extends BaseConnectorContract {
   /** Action type ID from Kibana actions plugin */
   actionTypeId: string;
+  /** User-facing connector type name from the actions plugin */
+  displayName: string;
   /** Available connector instances */
   instances: ConnectorInstance[];
   /** Whether this connector type is enabled */
@@ -729,6 +851,8 @@ export type ConnectorContractUnion =
   | BaseConnectorContract
   | InternalConnectorContract;
 
+export type WorkflowSortField = 'name' | 'enabled';
+
 export interface WorkflowsSearchParams {
   size?: number;
   page?: number;
@@ -736,6 +860,10 @@ export interface WorkflowsSearchParams {
   createdBy?: string[];
   enabled?: boolean[];
   tags?: string[];
+  sortField?: WorkflowSortField;
+  sortOrder?: 'asc' | 'desc';
+  managed?: 'all' | 'managed' | 'unmanaged';
+  visibilityContext?: string[];
 }
 
 export interface RequestOptions {

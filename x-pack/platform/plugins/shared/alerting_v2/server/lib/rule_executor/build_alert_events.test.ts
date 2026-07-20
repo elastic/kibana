@@ -10,6 +10,9 @@ import {
   createAlertEventsBatchBuilder,
   buildRecoveryAlertEvents,
   buildQueryRecoveryAlertEvents,
+  buildContinuedBreachAlertEvents,
+  buildNoDataAlertEvents,
+  resolveAlertEventType,
 } from './build_alert_events';
 import type { BuildAlertEventsBaseOpts } from './build_alert_events';
 
@@ -27,6 +30,25 @@ function buildAlertEventsFromEsqlResponse(
   });
   return buildBatch(rows);
 }
+
+describe('resolveAlertEventType', () => {
+  it('maps rule.kind "alert" to event type "alert" (stateful rules)', () => {
+    expect(resolveAlertEventType({ kind: 'alert' })).toBe('alert');
+  });
+
+  it('maps rule.kind "signal" to event type "signal" (stateless rules)', () => {
+    expect(resolveAlertEventType({ kind: 'signal' })).toBe('signal');
+  });
+
+  it('is exhaustive: throws on an unhandled rule.kind at runtime', () => {
+    const unknownRule = { kind: 'not-a-rule-kind' };
+
+    // @ts-expect-error: unknown rule.kind
+    expect(() => resolveAlertEventType(unknownRule)).toThrow(
+      'Unhandled rule.kind: not-a-rule-kind'
+    );
+  });
+});
 
 describe('createAlertEventsBatchBuilder', () => {
   beforeAll(() => {
@@ -50,6 +72,7 @@ describe('createAlertEventsBatchBuilder', () => {
       spaceId: 'default',
       ruleAttributes: { grouping: { fields: ['host.name', 'region'] } },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     const docs = buildBatch(rows);
@@ -83,12 +106,82 @@ describe('createAlertEventsBatchBuilder', () => {
       spaceId: 'custom-space',
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     const docs = buildBatch([{ 'host.name': 'host-a' }]);
 
     expect(docs).toHaveLength(1);
     expect(docs[0].space_id).toBe('custom-space');
+  });
+
+  describe('severity', () => {
+    const buildBatchOnce = (rows: Array<Record<string, unknown>>) =>
+      createAlertEventsBatchBuilder({
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        ruleAttributes: { grouping: { fields: ['host.name'] } },
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'signal',
+      })(rows);
+
+    it.each(['info', 'low', 'medium', 'high', 'critical'] as const)(
+      'sets severity to %s when the row has a matching severity column',
+      (severity) => {
+        const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity }]);
+
+        expect(doc.severity).toBe(severity);
+      }
+    );
+
+    it('lowercases the severity value before matching', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'CRITICAL' }]);
+
+      expect(doc.severity).toBe('critical');
+    });
+
+    it('lowercases mixed-case severity values', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'HiGh' }]);
+
+      expect(doc.severity).toBe('high');
+    });
+
+    it('does not set severity when the value is not in the supported set', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'SEV1' }]);
+
+      expect(doc.severity).toBeUndefined();
+    });
+
+    it('does not set severity when the value is not a string', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 5 }]);
+
+      expect(doc.severity).toBeUndefined();
+    });
+
+    it('does not set severity when the value is null', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: null }]);
+
+      expect(doc.severity).toBeUndefined();
+    });
+
+    it('does not set severity when the row has no severity column', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a' }]);
+
+      expect(doc.severity).toBeUndefined();
+    });
+
+    it('keeps the original severity value in the data attribute', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'CRITICAL' }]);
+
+      expect(doc.data).toEqual({ 'host.name': 'host-a', severity: 'CRITICAL' });
+    });
+
+    it('keeps the unsupported severity value in the data attribute', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'SEV1' }]);
+
+      expect(doc.data).toEqual({ 'host.name': 'host-a', severity: 'SEV1' });
+    });
   });
 });
 
@@ -110,6 +203,7 @@ describe('buildRecoveryAlertEvents', () => {
       activeGroupHashes: [{ group_hash: 'hash-a' }, { group_hash: 'hash-b' }],
       breachedGroupHashes: new Set(['hash-a']),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     expect(events).toHaveLength(1);
@@ -134,6 +228,7 @@ describe('buildRecoveryAlertEvents', () => {
       activeGroupHashes: [{ group_hash: 'hash-a' }],
       breachedGroupHashes: new Set(['hash-a']),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     expect(events).toEqual([]);
@@ -147,6 +242,7 @@ describe('buildRecoveryAlertEvents', () => {
       activeGroupHashes: [{ group_hash: 'hash-a' }, { group_hash: 'hash-b' }],
       breachedGroupHashes: new Set(),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     expect(events).toHaveLength(2);
@@ -162,6 +258,7 @@ describe('buildRecoveryAlertEvents', () => {
       activeGroupHashes: [],
       breachedGroupHashes: new Set(['hash-a']),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     expect(events).toEqual([]);
@@ -175,6 +272,160 @@ describe('buildRecoveryAlertEvents', () => {
       activeGroupHashes: [{ group_hash: 'hash-a' }],
       breachedGroupHashes: new Set(),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0].space_id).toBe('custom-space');
+  });
+
+  describe('with dataPresentGroupHashes', () => {
+    it('only recovers absent groups that still have data', () => {
+      const events = buildRecoveryAlertEvents({
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        activeGroupHashes: [
+          { group_hash: 'hash-a' },
+          { group_hash: 'hash-b' },
+          { group_hash: 'hash-c' },
+        ],
+        breachedGroupHashes: new Set(['hash-a']),
+        // hash-b has data (recovers); hash-c has no data (left for no-data step).
+        dataPresentGroupHashes: new Set(['hash-b']),
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'signal',
+      });
+
+      expect(events).toHaveLength(1);
+      expect(events[0].group_hash).toBe('hash-b');
+      expect(events[0].status).toBe('recovered');
+    });
+
+    it('recovers all absent groups when dataPresentGroupHashes is undefined (fallback)', () => {
+      const events = buildRecoveryAlertEvents({
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        activeGroupHashes: [{ group_hash: 'hash-a' }, { group_hash: 'hash-b' }],
+        breachedGroupHashes: new Set(['hash-a']),
+        dataPresentGroupHashes: undefined,
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'signal',
+      });
+
+      expect(events).toHaveLength(1);
+      expect(events[0].group_hash).toBe('hash-b');
+    });
+  });
+});
+
+describe('buildContinuedBreachAlertEvents', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('creates breached events with an empty data payload for the supplied group hashes', () => {
+    const events = buildContinuedBreachAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      groupHashes: ['hash-a', 'hash-b'],
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
+    });
+
+    expect(events).toHaveLength(2);
+    expect(events[0]).toEqual({
+      '@timestamp': '2025-01-01T00:00:00.000Z',
+      scheduled_timestamp: '2024-12-31T23:59:00.000Z',
+      rule: { id: 'rule-123', version: 1 },
+      group_hash: 'hash-a',
+      data: {},
+      status: 'breached',
+      source: 'internal',
+      type: 'signal',
+      space_id: 'default',
+    });
+    expect(events.every((e) => e.status === 'breached')).toBe(true);
+  });
+
+  it('returns an empty array when there are no group hashes', () => {
+    const events = buildContinuedBreachAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      groupHashes: [],
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
+    });
+
+    expect(events).toEqual([]);
+  });
+});
+
+describe('buildNoDataAlertEvents', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('creates no_data events with an empty data payload for the supplied group hashes', () => {
+    const events = buildNoDataAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      groupHashes: ['hash-a', 'hash-b'],
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
+    });
+
+    expect(events).toHaveLength(2);
+    expect(events[0]).toEqual({
+      '@timestamp': '2025-01-01T00:00:00.000Z',
+      scheduled_timestamp: '2024-12-31T23:59:00.000Z',
+      rule: { id: 'rule-123', version: 1 },
+      group_hash: 'hash-a',
+      data: {},
+      status: 'no_data',
+      source: 'internal',
+      type: 'signal',
+      space_id: 'default',
+    });
+    expect(events.map((e) => e.group_hash)).toEqual(['hash-a', 'hash-b']);
+    expect(events.every((e) => e.status === 'no_data')).toBe(true);
+  });
+
+  it('returns an empty array when there are no group hashes', () => {
+    const events = buildNoDataAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      groupHashes: [],
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
+    });
+
+    expect(events).toEqual([]);
+  });
+
+  it('sets space_id on no_data alert events from the provided spaceId', () => {
+    const events = buildNoDataAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'custom-space',
+      groupHashes: ['hash-a'],
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     expect(events).toHaveLength(1);
@@ -212,6 +463,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
         values: [['host-a']],
       },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     const activeGroupHash = breachedEvents[0].group_hash;
@@ -222,8 +474,10 @@ describe('buildQueryRecoveryAlertEvents', () => {
       spaceId: 'default',
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       activeGroupHashes: [{ group_hash: activeGroupHash }],
+      breachedGroupHashes: new Set(),
       esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     expect(events).toHaveLength(1);
@@ -247,8 +501,10 @@ describe('buildQueryRecoveryAlertEvents', () => {
       spaceId: 'default',
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       activeGroupHashes: [{ group_hash: 'hash-a' }],
+      breachedGroupHashes: new Set(),
       esqlResponse: { columns: [], values: [] },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     expect(events).toEqual([]);
@@ -266,8 +522,10 @@ describe('buildQueryRecoveryAlertEvents', () => {
       spaceId: 'default',
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       activeGroupHashes: [{ group_hash: 'hash-not-matching' }],
+      breachedGroupHashes: new Set(),
       esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     expect(events).toEqual([]);
@@ -295,6 +553,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
         values: [['host-a']],
       },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     const activeGroupHash = breachedEvents[0].group_hash;
@@ -305,13 +564,49 @@ describe('buildQueryRecoveryAlertEvents', () => {
       spaceId: 'default',
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       activeGroupHashes: [{ group_hash: activeGroupHash }],
+      breachedGroupHashes: new Set(),
       esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     expect(events).toHaveLength(1);
     expect(events[0].group_hash).toBe(activeGroupHash);
     expect(events[0].data).toEqual({ 'host.name': 'host-a', msg: 'recovered-1' });
+  });
+
+  it('excludes groups that are breaching this run even when the recovery query matches them', () => {
+    const esqlResponse: EsqlQueryResponse = {
+      columns: [{ name: 'host.name', type: 'keyword' }],
+      values: [['host-a']],
+    };
+
+    const breachedEvents = buildAlertEventsFromEsqlResponse({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      esqlResponse,
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
+    });
+
+    const activeGroupHash = breachedEvents[0].group_hash;
+
+    const events = buildQueryRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      activeGroupHashes: [{ group_hash: activeGroupHash }],
+      // host-a is breaching this run: breach wins, no recovery event.
+      breachedGroupHashes: new Set([activeGroupHash]),
+      esqlResponse,
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
+    });
+
+    expect(events).toEqual([]);
   });
 
   it('sets space_id on query-recovered alert events from the provided spaceId', () => {
@@ -327,6 +622,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     const events = buildQueryRecoveryAlertEvents({
@@ -335,8 +631,10 @@ describe('buildQueryRecoveryAlertEvents', () => {
       spaceId: 'custom-space',
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       activeGroupHashes: [{ group_hash: breachedEvents[0].group_hash }],
+      breachedGroupHashes: new Set(),
       esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
     });
 
     expect(events).toHaveLength(1);

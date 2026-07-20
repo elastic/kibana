@@ -7,13 +7,28 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
+import type { StreamlangDSL } from '@kbn/streamlang';
+import {
+  definitionToESQLQuery,
+  ensureMetadata,
+  getAncestors,
+  getParentId,
+  isDraftStream,
+  isRecord,
+  mergeSourceIntoDocuments,
+  Streams,
+  stripOtelAliases,
+  withUnmappedFieldsDirective,
+} from '@kbn/streams-schema';
+import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ErrorActorEvent } from 'xstate';
 import { fromObservable } from 'xstate';
 import type { errors as esErrors } from '@elastic/elasticsearch';
 import type { EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { Observable, filter, from, map, of, tap } from 'rxjs';
+import { getESQLResults } from '@kbn/esql-utils';
+import { Observable, catchError, filter, from, map, of, switchMap, tap, throwError } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { pick } from 'lodash';
@@ -21,6 +36,7 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { EnrichmentDataSource } from '../../../../../../../common/url_schema';
 import type { StreamsTelemetryClient } from '../../../../../../telemetry/client';
 import { getFormattedError } from '../../../../../../util/errors';
+import { esqlResultToPlainObjects } from '../../../../../../util/esql_result_to_plain_objects';
 import type { DataSourceMachineDeps } from './types';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
@@ -28,6 +44,7 @@ export interface SamplesFetchInput {
   dataSource: EnrichmentDataSourceWithUIAttributes;
   streamName: string;
   streamType: 'wired' | 'classic' | 'unknown';
+  isDraft?: boolean;
 }
 
 interface SearchParamsOptions {
@@ -53,7 +70,7 @@ type CollectorParams = Pick<
 
 interface FailureStoreCollectorParams {
   streamsRepositoryClient: StreamsRepositoryClient;
-  index: string;
+  streamName: string;
   telemetryClient: StreamsTelemetryClient;
   streamType: 'wired' | 'classic' | 'unknown';
   timeRange?: { from: string; to: string };
@@ -74,10 +91,51 @@ export function createDataCollectorActor({
   'data' | 'telemetryClient' | 'streamsRepositoryClient' | 'uiSettings'
 >) {
   return fromObservable<SampleDocument[], SamplesFetchInput>(({ input }) => {
-    const { dataSource, streamName, streamType } = input;
+    const { dataSource, streamName, streamType, isDraft } = input;
+
+    const isSearchBased = dataSource.type === 'latest-samples' || dataSource.type === 'kql-samples';
+
+    if (isDraft && isSearchBased) {
+      return from(resolveDraftSampleSource(streamsRepositoryClient, streamName)).pipe(
+        switchMap(({ baseQuery }) => {
+          const { root } = Parser.parse(ensureMetadata(baseQuery));
+
+          root.commands.push(
+            Builder.command({
+              name: 'sort',
+              args: [
+                Builder.expression.order(Builder.expression.column('@timestamp'), {
+                  order: 'DESC',
+                  nulls: '',
+                }),
+              ],
+            }),
+            Builder.command({
+              name: 'limit',
+              args: [Builder.expression.literal.integer(100)],
+            })
+          );
+          const esqlQuery = withUnmappedFieldsDirective(
+            BasicPrettyPrinter.multiline(root, { pipeTab: '' })
+          );
+
+          return collectEsqlSamples({
+            data,
+            telemetryClient,
+            streamType,
+            streamName,
+            dataSourceType: dataSource.type,
+            esqlQuery,
+            mergeSource: true,
+          });
+        })
+      );
+    }
+
     return getDataCollectorForDataSource(dataSource)({
       data,
       index: streamName,
+      streamName,
       telemetryClient,
       streamType,
       streamsRepositoryClient,
@@ -86,9 +144,119 @@ export function createDataCollectorActor({
   });
 }
 
+interface DraftSampleSource {
+  baseQuery: string;
+  parentIsDraft: boolean;
+  /** Processing steps from all draft ancestors, ordered root to closest parent. */
+  ancestorProcessing: StreamlangDSL;
+}
+
+/**
+ * Builds an ES|QL query for fetching pre-processing samples for a draft
+ * stream. Uses `definitionToESQLQuery` with `includeProcessing: false` so
+ * the query includes the parent FROM source, routing condition casts, and
+ * WHERE clause — but omits processing steps and field-type casts. This
+ * keeps a single source of truth for the draft query shape.
+ *
+ * Falls back to a simple `FROM <root>` when the parent cannot be resolved.
+ */
+export async function resolveDraftSampleSource(
+  streamsRepositoryClient: StreamsRepositoryClient,
+  streamName: string
+): Promise<DraftSampleSource> {
+  const parentId = getParentId(streamName);
+  if (!parentId) {
+    throw new Error(`Draft stream "${streamName}" must have a parent stream`);
+  }
+
+  const [draftDef, parentDef] = await Promise.all([
+    streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+      signal: null,
+      params: { path: { name: streamName } },
+    }),
+    streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+      signal: null,
+      params: { path: { name: parentId } },
+    }),
+  ]);
+
+  if (
+    !Streams.WiredStream.GetResponse.is(draftDef) ||
+    !Streams.WiredStream.GetResponse.is(parentDef)
+  ) {
+    throw new Error(
+      `Draft stream "${streamName}" and parent "${parentId}" must both be wired streams`
+    );
+  }
+
+  const routingEntry = parentDef.stream.ingest.wired.routing.find(
+    (r) => r.destination === streamName
+  );
+  const routingCondition = routingEntry?.where ?? { always: {} };
+
+  const parentIsDraft = isDraftStream(parentDef.stream);
+
+  const baseQuery = await definitionToESQLQuery({
+    definition: draftDef.stream,
+    routingCondition,
+    inheritedFields: parentIsDraft
+      ? undefined
+      : { ...parentDef.inherited_fields, ...parentDef.stream.ingest.wired.fields },
+    includeProcessing: false,
+  });
+
+  let ancestorProcessing: StreamlangDSL = { steps: [] };
+  if (parentIsDraft) {
+    ancestorProcessing = await collectDraftAncestorProcessing(streamsRepositoryClient, streamName);
+  }
+
+  return { baseQuery, parentIsDraft, ancestorProcessing };
+}
+
+/**
+ * Walks up the stream hierarchy and collects processing steps from all
+ * draft ancestors, ordered from root to closest parent. This mirrors the
+ * server-side `collectAncestorProcessing` in the failure store handler,
+ * but operates client-side and only includes draft ancestors (persisted
+ * ancestor processing is already baked into `_source`).
+ */
+async function collectDraftAncestorProcessing(
+  streamsRepositoryClient: StreamsRepositoryClient,
+  streamName: string
+): Promise<StreamlangDSL> {
+  const ancestorIds = getAncestors(streamName);
+  if (ancestorIds.length === 0) {
+    return { steps: [] };
+  }
+
+  const ancestors = await Promise.all(
+    ancestorIds.map((id) =>
+      streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+        signal: null,
+        params: { path: { name: id } },
+      })
+    )
+  );
+
+  const allSteps: StreamlangDSL['steps'] = [];
+
+  for (const ancestor of ancestors) {
+    if (
+      Streams.WiredStream.GetResponse.is(ancestor) &&
+      isDraftStream(ancestor.stream) &&
+      ancestor.stream.ingest.processing.steps.length > 0
+    ) {
+      allSteps.push(...ancestor.stream.ingest.processing.steps);
+    }
+  }
+
+  return { steps: allSteps };
+}
+
 type AllCollectorParams = CollectorParams & {
   streamsRepositoryClient: StreamsRepositoryClient;
   uiSettings: DataSourceMachineDeps['uiSettings'];
+  streamName: string;
 };
 
 /**
@@ -99,7 +267,7 @@ function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAtt
     return (args: AllCollectorParams) =>
       collectFailureStoreData({
         streamsRepositoryClient: args.streamsRepositoryClient,
-        index: args.index,
+        streamName: args.streamName,
         telemetryClient: args.telemetryClient,
         streamType: args.streamType,
         timeRange: dataSource.timeRange,
@@ -130,7 +298,7 @@ function collectFailureStoreData({
   streamsRepositoryClient,
   telemetryClient,
   streamType,
-  index,
+  streamName,
   timeRange,
 }: FailureStoreCollectorParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
@@ -144,7 +312,7 @@ function collectFailureStoreData({
         {
           signal: abortController.signal,
           params: {
-            path: { name: index },
+            path: { name: streamName },
             query: {
               size: 100,
               ...(timeRange?.from && { start: timeRange.from }),
@@ -158,7 +326,7 @@ function collectFailureStoreData({
         tap({
           subscribe: () => {
             registerFetchLatency = telemetryClient.startTrackingSimulationSamplesFetchLatency({
-              stream_name: index,
+              stream_name: streamName,
               stream_type: streamType,
               data_source_type: 'failure-store',
             });
@@ -181,6 +349,108 @@ function collectFailureStoreData({
 /**
  * Core function to collect data using KQL
  */
+function collectEsqlSamples({
+  data,
+  telemetryClient,
+  streamType,
+  streamName,
+  dataSourceType,
+  esqlQuery,
+  filter: userFilter,
+  timeRange,
+  mergeSource = false,
+}: {
+  data: DataSourceMachineDeps['data'];
+  telemetryClient: StreamsTelemetryClient;
+  streamType: 'wired' | 'classic' | 'unknown';
+  streamName: string;
+  dataSourceType: EnrichmentDataSource['type'];
+  esqlQuery: string;
+  filter?: ReturnType<typeof buildEsQuery>;
+  timeRange?: TimeRange;
+  mergeSource?: boolean;
+}): Observable<SampleDocument[]> {
+  const abortController = new AbortController();
+
+  return new Observable((observer) => {
+    let registerFetchLatency: () => void = () => {};
+
+    const execute = async () => {
+      registerFetchLatency = telemetryClient.startTrackingSimulationSamplesFetchLatency({
+        stream_name: streamName,
+        stream_type: streamType,
+        data_source_type: dataSourceType,
+      });
+
+      const { response } = await getESQLResults({
+        esqlQuery,
+        search: data.search.search,
+        signal: abortController.signal,
+        filter: userFilter,
+        timeRange: timeRange
+          ? { from: timeRange.from, to: timeRange.to, mode: 'absolute' as const }
+          : undefined,
+      });
+
+      let docs = esqlResultToPlainObjects<SampleDocument>(response);
+
+      if (mergeSource) {
+        docs = mergeSourceIntoDocuments(docs);
+      }
+
+      return stripOtelAliases(docs);
+    };
+
+    execute()
+      .then((docs) => {
+        observer.next(docs);
+        observer.complete();
+      })
+      .catch((err) => {
+        if (!abortController.signal.aborted) {
+          observer.error(err);
+        }
+      })
+      .finally(() => {
+        registerFetchLatency();
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  });
+}
+
+const MIN_SAMPLE_SIZE = 1;
+
+/**
+ * Returns true when the Kibana search response carries the ES
+ * "async search response too large" error inside its attributes.
+ * The error arrives as a resolved (non-thrown) response with
+ * attributes.error.reason containing "max_async_search_response_size".
+ */
+function isAsyncSearchResponseTooLargeError(error: unknown): boolean {
+  if (!isRecord(error)) return false;
+  const attributes = (error as { attributes?: unknown }).attributes;
+  if (!isRecord(attributes)) return false;
+  const esError = (attributes as { error?: unknown }).error;
+  if (isRecord(esError)) {
+    const reason: unknown = (esError as { reason?: unknown }).reason;
+    if (typeof reason === 'string' && reason.includes('max_async_search_response_size')) {
+      return true;
+    }
+  }
+  // Also check meta.body path for direct ES client errors
+  const meta = (error as { meta?: unknown }).meta;
+  if (isRecord(meta)) {
+    const bodyError = (meta as { body?: { error?: { reason?: unknown } } }).body?.error?.reason;
+    if (typeof bodyError === 'string' && bodyError.includes('max_async_search_response_size')) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function collectKqlData({
   data,
   telemetryClient,
@@ -191,13 +461,30 @@ function collectKqlData({
 }: CollectKqlDataParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
   const esQueryConfig = getEsQueryConfig(uiSettings);
-  const params = buildSamplesSearchParams(searchParams, dataSourceType, esQueryConfig);
+
+  const fetchWithSize = (size: number): Observable<SampleDocument[]> => {
+    const params = buildSamplesSearchParams(
+      { ...searchParams, size },
+      dataSourceType,
+      esQueryConfig
+    );
+
+    return data.search.search({ params }, { abortSignal: abortController.signal }).pipe(
+      filter(isValidSearchResult),
+      map(extractDocumentsFromResult),
+      catchError((error: unknown) => {
+        if (isAsyncSearchResponseTooLargeError(error) && size > MIN_SAMPLE_SIZE) {
+          return fetchWithSize(Math.max(MIN_SAMPLE_SIZE, Math.floor(size / 2)));
+        }
+        return throwError(() => error);
+      })
+    );
+  };
 
   return new Observable((observer) => {
     let registerFetchLatency: () => void = () => {};
 
-    const subscription = data.search
-      .search({ params }, { abortSignal: abortController.signal })
+    const subscription = fetchWithSize(searchParams.size ?? 100)
       .pipe(
         tap({
           subscribe: () => {
@@ -210,9 +497,7 @@ function collectKqlData({
           finalize: () => {
             registerFetchLatency();
           },
-        }),
-        filter(isValidSearchResult),
-        map(extractDocumentsFromResult)
+        })
       )
       .subscribe(observer);
 
@@ -234,7 +519,10 @@ function isValidSearchResult(result: IEsSearchResponse): boolean {
  * Extracts documents from search result
  */
 function extractDocumentsFromResult(result: IEsSearchResponse): SampleDocument[] {
-  return result.rawResponse.hits.hits.map((doc) => doc._source);
+  return result.rawResponse.hits.hits.map((doc) => ({
+    ...(doc._source as SampleDocument),
+    _id: doc._id,
+  }));
 }
 
 /**
@@ -307,5 +595,26 @@ export function createDataCollectionFailureNotifier({
       }),
       toastMessage: error.message,
     });
+  };
+}
+
+export function notifyFetchMoreError(toasts: DataSourceMachineDeps['toasts'], error: unknown) {
+  const formattedError = getFormattedError(error);
+  toasts.addError(formattedError, {
+    title: i18n.translate('xpack.streams.enrichment.fetchMore.error', {
+      defaultMessage: 'Failed to load more matching samples.',
+    }),
+    toastMessage: formattedError.message,
+  });
+}
+
+export function createFetchMoreFailureNotifier({
+  toasts,
+}: {
+  toasts: DataSourceMachineDeps['toasts'];
+}) {
+  return (params: { event: unknown }) => {
+    const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
+    notifyFetchMoreError(toasts, event.error);
   };
 }

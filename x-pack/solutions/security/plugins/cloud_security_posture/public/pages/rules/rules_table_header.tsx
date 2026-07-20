@@ -370,7 +370,6 @@ const CurrentPageOfTotal = ({
               </EuiText>
             </EuiPopoverTitle>
             <EuiContextMenuPanel
-              size="s"
               items={items}
               css={css`
                 mid-width: 540px;

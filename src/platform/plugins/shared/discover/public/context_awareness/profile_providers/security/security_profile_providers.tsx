@@ -8,17 +8,29 @@
  */
 
 import React from 'react';
+import { getFieldValue } from '@kbn/discover-utils';
 import {
   EnhancedAlertEventOverviewLazy,
   EnhancedAlertFlyoutFooterLazy,
   EnhancedAlertFlyoutHeaderLazy,
+  EnhancedAttackEventOverviewLazy,
+  EnhancedAttackFlyoutFooterLazy,
+  EnhancedAttackFlyoutHeaderLazy,
+  EnhancedIOCFlyoutFooterLazy,
+  EnhancedIOCFlyoutHeaderLazy,
+  EnhancedIOCOverviewLazy,
 } from './components';
-import { SECURITY_PROFILE_ID } from './constants';
+import { SECURITY_PROFILE_ID, SIGNAL_RULE_NAME_FIELD_NAME } from './constants';
 import { extendProfileProvider } from '../extend_profile_provider';
 import { createSecurityDocumentProfileProvider } from './security_document_profile';
 import type { ProfileProviderServices } from '../profile_provider_services';
 import * as i18n from './translations';
-import { isAlertDocument, isEventDocument } from './utils/is_alert_document';
+import {
+  isAlertDocument,
+  isAttackDocument,
+  isEventDocument,
+  isIOCDocument,
+} from './utils/is_alert_document';
 
 export const createSecurityDocumentProfileProviders = (
   providerServices: ProfileProviderServices
@@ -27,49 +39,125 @@ export const createSecurityDocumentProfileProviders = (
   const enhancedProvider = extendProfileProvider(baseProvider, {
     profileId: SECURITY_PROFILE_ID.enhanced_document,
     profile: {
-      getDocViewer: (prev) => (params) => {
-        const prevDocViewer = prev(params);
-        const isAlert = isAlertDocument(params.record);
-        const isEvent = isEventDocument(params.record);
+      getDocViewer:
+        (prev, { toolkit }) =>
+        (params) => {
+          const prevDocViewer = prev(params);
+          const isAlert = isAlertDocument(params.record);
+          const isEvent = isEventDocument(params.record);
+          const isIOC = isIOCDocument(params.record);
+          const isAttack = isAttackDocument(params.record);
 
-        return {
-          ...prevDocViewer,
-          renderHeader:
-            isAlert || isEvent
-              ? (props) => (
-                  <EnhancedAlertFlyoutHeaderLazy
-                    {...props}
-                    providerServices={providerServices}
-                    fallbackRenderHeader={prevDocViewer.renderHeader}
-                  />
-                )
-              : prevDocViewer.renderHeader,
-          docViewsRegistry: (registry) => {
-            if (isAlert || isEvent) {
-              registry.add({
-                id: 'doc_view_alerts_overview',
-                title: i18n.overviewTabTitle(isAlert),
-                order: 0,
-                render: (props) => (
-                  <EnhancedAlertEventOverviewLazy {...props} providerServices={providerServices} />
-                ),
-              });
-            }
+          const ruleName = isAlert
+            ? (getFieldValue(params.record, SIGNAL_RULE_NAME_FIELD_NAME) as string | undefined)
+            : undefined;
+          const title = ruleName ? i18n.alertFlyoutTitle(ruleName) : prevDocViewer.title;
 
-            return prevDocViewer.docViewsRegistry(registry);
-          },
-          renderFooter:
-            isAlert || isEvent
-              ? (props) => (
-                  <EnhancedAlertFlyoutFooterLazy
-                    {...props}
-                    providerServices={providerServices}
-                    fallbackRenderFooter={prevDocViewer.renderFooter}
-                  />
-                )
-              : prevDocViewer.renderFooter,
-        };
-      },
+          let renderFooter = prevDocViewer.renderFooter;
+          if (isIOC) {
+            renderFooter = (props) => (
+              <EnhancedIOCFlyoutFooterLazy
+                {...props}
+                providerServices={providerServices}
+                fallbackRenderFooter={prevDocViewer.renderFooter}
+              />
+            );
+          } else if (isAttack) {
+            renderFooter = (props) => (
+              <EnhancedAttackFlyoutFooterLazy
+                {...props}
+                fallbackRenderFooter={prevDocViewer.renderFooter}
+                providerServices={providerServices}
+                refreshData={toolkit.actions.refreshData}
+              />
+            );
+          } else if (isAlert || isEvent) {
+            renderFooter = (props) => (
+              <EnhancedAlertFlyoutFooterLazy
+                {...props}
+                fallbackRenderFooter={prevDocViewer.renderFooter}
+                providerServices={providerServices}
+                refreshData={toolkit.actions.refreshData}
+              />
+            );
+          }
+
+          let renderHeader = prevDocViewer.renderHeader;
+          if (isIOC) {
+            renderHeader = (props) => (
+              <EnhancedIOCFlyoutHeaderLazy
+                {...props}
+                providerServices={providerServices}
+                fallbackRenderHeader={prevDocViewer.renderHeader}
+              />
+            );
+          } else if (isAttack) {
+            renderHeader = (props) => (
+              <EnhancedAttackFlyoutHeaderLazy
+                {...props}
+                fallbackRenderHeader={prevDocViewer.renderHeader}
+                providerServices={providerServices}
+                refreshData={toolkit.actions.refreshData}
+              />
+            );
+          } else if (isAlert || isEvent) {
+            renderHeader = (props) => (
+              <EnhancedAlertFlyoutHeaderLazy
+                {...props}
+                fallbackRenderHeader={prevDocViewer.renderHeader}
+                providerServices={providerServices}
+                refreshData={toolkit.actions.refreshData}
+              />
+            );
+          }
+
+          return {
+            ...prevDocViewer,
+            title,
+            renderHeader,
+            docViewsRegistry: (registry) => {
+              if (isIOC) {
+                registry.add({
+                  id: 'doc_view_ioc_overview',
+                  title: i18n.iocOverviewTabTitle,
+                  order: 0,
+                  render: (props) => (
+                    <EnhancedIOCOverviewLazy {...props} providerServices={providerServices} />
+                  ),
+                });
+              } else if (isAttack) {
+                registry.add({
+                  id: 'doc_view_attack_overview',
+                  title: i18n.attackOverviewTabTitle,
+                  order: 0,
+                  render: (props) => (
+                    <EnhancedAttackEventOverviewLazy
+                      {...props}
+                      providerServices={providerServices}
+                      refreshData={toolkit.actions.refreshData}
+                    />
+                  ),
+                });
+              } else if (isAlert || isEvent) {
+                registry.add({
+                  id: 'doc_view_alerts_overview',
+                  title: i18n.overviewTabTitle(isAlert),
+                  order: 0,
+                  render: (props) => (
+                    <EnhancedAlertEventOverviewLazy
+                      {...props}
+                      providerServices={providerServices}
+                      refreshData={toolkit.actions.refreshData}
+                    />
+                  ),
+                });
+              }
+
+              return prevDocViewer.docViewsRegistry(registry);
+            },
+            renderFooter,
+          };
+        },
     },
   });
   return [enhancedProvider, baseProvider];

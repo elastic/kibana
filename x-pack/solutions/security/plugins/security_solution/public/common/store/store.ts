@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import thunk from 'redux-thunk';
+import thunk from 'redux-thunk-v2';
 import type {
   Action,
-  Store,
-  Middleware,
-  Dispatch,
-  PreloadedState,
   AnyAction,
+  Dispatch,
+  Middleware,
+  PreloadedState,
   Reducer,
-} from 'redux';
-import { applyMiddleware, createStore as createReduxStore } from 'redux';
+  Store,
+} from 'redux-v4';
+import { applyMiddleware, createStore as createReduxStore } from 'redux-v4';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import type { EnhancerOptions } from 'redux-devtools-extension';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -58,8 +58,7 @@ export const createStoreFactory = async (
   const { kibanaDataViews, defaultDataView, signal } = await createDefaultDataView({
     application: coreStart.application,
     http: coreStart.http,
-    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
-    skip: enableExperimental.newDataViewPickerEnabled,
+    skip: true,
   });
 
   const timelineInitialState = {

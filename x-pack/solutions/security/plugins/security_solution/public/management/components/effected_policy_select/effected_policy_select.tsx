@@ -241,7 +241,6 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               additionalListItems={unAccessiblePolicies}
               onChange={handleOnPolicySelectChange}
               data-test-subj={getTestId('policiesSelector')}
-              useCheckbox={true}
               showPolicyLink={true}
               isDisabled={isGlobal || !isPlatinumPlus || disabled}
             />

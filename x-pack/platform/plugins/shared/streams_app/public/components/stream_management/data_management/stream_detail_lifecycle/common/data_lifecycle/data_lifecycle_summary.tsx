@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiPanel,
@@ -40,10 +39,30 @@ export interface DataLifecycleSummaryCapabilities {
   canManageLifecycle: boolean;
 }
 
+export interface FrozenPhaseCallouts {
+  showEnterpriseCallout?: boolean;
+  onUpgradeEnterprise?: () => void;
+  showDefaultRepositoryCallout?: boolean;
+  /** Navigate directly to the create-repository page instead of opening a modal. */
+  createDefaultRepositoryHref?: string;
+  /**
+   * URL to the Snapshot and Restore repositories list. When the user already has repositories
+   * configured (see `hasExistingRepositories`) the callout directs them here to pick one as the
+   * default instead of creating a new repository.
+   */
+  manageRepositoriesUrl?: string;
+  /** Whether the user already has at least one snapshot repository configured. */
+  hasExistingRepositories?: boolean;
+  onRefreshDefaultRepository?: () => void;
+  isRefreshingDefaultRepository?: boolean;
+}
+
 export interface DataLifecycleSummaryPhaseActions {
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
   onRemovePhase?: (phaseName: string) => void;
   onEditPhase?: (phaseName: string) => void;
+  shouldShowEditPhaseAction?: (phaseName: string) => boolean;
+  shouldShowRemovePhaseAction?: (phaseName: string) => boolean;
   showPhaseActions?: boolean;
 }
 
@@ -56,6 +75,8 @@ export interface DataLifecycleSummaryUiState {
   editedPhaseName?: string;
   editedDownsampleStepIndex?: number;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
   invalidPhases?: PhaseName[];
   invalidStepIndices?: number[];
 }
@@ -64,20 +85,26 @@ interface DataLifecycleSummaryProps {
   model: DataLifecycleSummaryModel;
   showDownsampling: boolean;
   capabilities: DataLifecycleSummaryCapabilities;
+  title: React.ReactNode;
+  titleBadge?: React.ReactNode;
   headerActions?: React.ReactNode;
   phaseActions?: DataLifecycleSummaryPhaseActions;
   downsamplingActions?: DataLifecycleSummaryDownsamplingActions;
   uiState?: DataLifecycleSummaryUiState;
+  frozenPhaseCallouts?: FrozenPhaseCallouts;
 }
 
 export const DataLifecycleSummary = ({
   model,
   showDownsampling,
   capabilities,
+  title,
+  titleBadge,
   headerActions,
   phaseActions,
   downsamplingActions,
   uiState,
+  frozenPhaseCallouts,
 }: DataLifecycleSummaryProps) => {
   const { phases, downsampleSteps, loading = false, testSubjPrefix } = model;
   const { canManageLifecycle } = capabilities;
@@ -85,6 +112,7 @@ export const DataLifecycleSummary = ({
     editedPhaseName,
     editedDownsampleStepIndex,
     isEditLifecycleFlyoutOpen = false,
+    disableInteractions = false,
     invalidPhases,
     invalidStepIndices,
   } = uiState ?? {};
@@ -119,11 +147,12 @@ export const DataLifecycleSummary = ({
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText>
-                <h5 data-test-subj="dataLifecycleSummary-title">
-                  {i18n.translate('xpack.streams.streamDetailLifecycle.dataLifecycle', {
-                    defaultMessage: 'Data lifecycle',
-                  })}
-                </h5>
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <h5 data-test-subj="dataLifecycleSummary-title">{title}</h5>
+                  </EuiFlexItem>
+                  {titleBadge && <EuiFlexItem grow={false}>{titleBadge}</EuiFlexItem>}
+                </EuiFlexGroup>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>
@@ -155,21 +184,28 @@ export const DataLifecycleSummary = ({
                   showPhaseActions={showPhaseActions}
                   onRemovePhase={phaseActions?.onRemovePhase}
                   onEditPhase={phaseActions?.onEditPhase}
+                  shouldShowEditPhaseAction={phaseActions?.shouldShowEditPhaseAction}
+                  shouldShowRemovePhaseAction={phaseActions?.shouldShowRemovePhaseAction}
                   editedPhaseName={editedPhaseName}
                   testSubjPrefix={testSubjPrefix}
                   canManageLifecycle={canManageLifecycle}
                   isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                  disableInteractions={disableInteractions}
+                  frozenPhaseCallouts={frozenPhaseCallouts}
                 />
-                <DownsamplingBar
-                  segments={downsamplingSegments}
-                  gridTemplateColumns={gridTemplateColumns}
-                  onRemoveStep={downsamplingActions?.onRemoveDownsampleStep}
-                  onEditStep={downsamplingActions?.onEditDownsampleStep}
-                  editedPhaseName={editedPhaseName}
-                  editedDownsampleStepIndex={editedDownsampleStepIndex}
-                  canManageLifecycle={canManageLifecycle}
-                  isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
-                />
+                {showDownsampling && downsamplingSegments && (
+                  <DownsamplingBar
+                    segments={downsamplingSegments}
+                    gridTemplateColumns={gridTemplateColumns}
+                    onRemoveStep={downsamplingActions?.onRemoveDownsampleStep}
+                    onEditStep={downsamplingActions?.onEditDownsampleStep}
+                    editedPhaseName={editedPhaseName}
+                    editedDownsampleStepIndex={editedDownsampleStepIndex}
+                    canManageLifecycle={canManageLifecycle}
+                    isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                    disableInteractions={disableInteractions}
+                  />
+                )}
                 <EuiSpacer size="xs" />
                 <DataLifecycleTimeline
                   phases={phases}

@@ -33,3 +33,14 @@ export type {
   AgentAvailabilityResult,
   AgentAvailabilityConfig,
 } from './builtin_definition';
+export type { AgentTypeDefinition, AgentTypeRegistry } from './type_definition';
+export {
+  mergeAgentConfiguration,
+  ADMIN_INSTRUCTIONS_HEADER,
+  type AgentBaseConfiguration,
+} from './merge_configuration';
+export type {
+  InternalAgentDefinition,
+  InternalAgentDefinitionAvailabilityHandler,
+  AgentRegistry,
+} from './registry';

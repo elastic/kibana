@@ -19,15 +19,34 @@ describe('action policy form utils', () => {
     throttleStrategy: 'on_status_change' as const,
     throttleInterval: '',
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
+    inlineActions: [],
   };
 
   describe('toCreatePayload', () => {
+    it('ignores inlineActions when building the payload', () => {
+      const payload = toCreatePayload({
+        ...state,
+        inlineActions: [
+          {
+            id: 'draft-1',
+            source: 'inline',
+            stepType: 'slack2.sendMessage',
+            connectorId: 'c1',
+            params: 'm: x',
+          },
+        ],
+      });
+
+      expect(payload).not.toHaveProperty('inlineActions');
+      expect(payload.destinations).toEqual([{ type: 'workflow', id: 'workflow-1' }]);
+    });
+
     it('includes groupingMode and throttle strategy, omits empty nullable fields', () => {
       expect(toCreatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
         groupingMode: 'per_episode',
-        throttle: { strategy: 'on_status_change' },
+        throttle: { strategy: 'on_status_change', interval: null },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
     });
@@ -51,13 +70,23 @@ describe('action policy form utils', () => {
       });
     });
 
-    it('omits throttle interval for strategies that do not require it', () => {
+    it('emits interval: null for strategies that do not require it', () => {
       const payload = toCreatePayload({
         ...state,
         throttleStrategy: 'every_time',
       });
 
-      expect(payload.throttle).toEqual({ strategy: 'every_time' });
+      expect(payload.throttle).toEqual({ strategy: 'every_time', interval: null });
+    });
+
+    it('emits interval: null when strategy does not need interval, even if state holds a stale value', () => {
+      const payload = toCreatePayload({
+        ...state,
+        throttleStrategy: 'on_status_change',
+        throttleInterval: '5m',
+      });
+
+      expect(payload.throttle).toEqual({ strategy: 'on_status_change', interval: null });
     });
   });
 
@@ -71,7 +100,7 @@ describe('action policy form utils', () => {
         tags: null,
         matcher: null,
         groupBy: null,
-        throttle: { strategy: 'on_status_change' },
+        throttle: { strategy: 'on_status_change', interval: null },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
     });
@@ -119,10 +148,8 @@ describe('action policy form utils', () => {
       snoozedUntil: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
       createdBy: 'elastic',
-      createdByUsername: 'elastic',
       createdAt: '2026-03-01T10:00:00.000Z',
       updatedBy: 'elastic',
-      updatedByUsername: 'elastic',
       updatedAt: '2026-03-01T10:00:00.000Z',
       auth: { owner: 'elastic', createdByUser: true },
     };
@@ -138,6 +165,7 @@ describe('action policy form utils', () => {
         throttleStrategy: 'time_interval',
         throttleInterval: '5m',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        inlineActions: [],
       });
     });
 
@@ -160,6 +188,7 @@ describe('action policy form utils', () => {
         throttleStrategy: 'on_status_change',
         throttleInterval: '',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        inlineActions: [],
       });
     });
   });

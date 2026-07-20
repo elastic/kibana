@@ -274,9 +274,14 @@ export function buildDisplayOptions({
     result.push({ label: opt.label, data: { menuItem: { kind: 'action', action: opt } } });
   }
 
-  const filteredCmds = (commands ?? []).filter(
-    (cmd) => !term || cmd.label.toLowerCase().includes(term)
-  );
+  const filteredCmds = (commands ?? []).filter((cmd) => {
+    if (!term) {
+      return true;
+    }
+    const label = cmd.label.toLowerCase();
+    const description = cmd.description?.toLowerCase() ?? '';
+    return label.includes(term) || description.includes(term);
+  });
   if (filteredCmds.length > 0) {
     result.push({
       label: i18n.translate('workflows.actionsMenu.commandsGroupLabel', {

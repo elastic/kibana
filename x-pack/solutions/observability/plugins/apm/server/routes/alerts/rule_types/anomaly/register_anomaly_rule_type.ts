@@ -34,13 +34,14 @@ import {
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { asyncForEach } from '@kbn/std';
 import { compact } from 'lodash';
 import { anomalyParamsSchema } from '@kbn/response-ops-rule-params/apm_anomaly';
 import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
   ANOMALY_DETECTOR_TYPE,
+  ANOMALY_TIMESTAMP,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -330,6 +331,7 @@ export function registerAnomalyRuleType({
 
         const payload = {
           [ANOMALY_DETECTOR_TYPE]: detectorType,
+          [ANOMALY_TIMESTAMP]: timestamp,
           [SERVICE_NAME]: serviceName,
           ...getEnvironmentEsField(environment),
           [TRANSACTION_TYPE]: transactionType,

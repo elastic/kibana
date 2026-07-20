@@ -6,7 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPopover,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -214,15 +220,23 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
     <EuiPopover
       id={contextMenuPopoverId}
       button={
-        <EuiButtonIcon
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTriggerButton',
             { defaultMessage: 'Open actions menu' }
           )}
-          data-test-subj="streamsAppActionsButton"
-          iconType="boxesVertical"
-          onClick={toggle}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            aria-label={i18n.translate(
+              'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTriggerButton',
+              { defaultMessage: 'Open actions menu' }
+            )}
+            data-test-subj="streamsAppActionsButton"
+            iconType="boxesVertical"
+            onClick={toggle}
+          />
+        </EuiToolTip>
       }
       isOpen={popoverIsOpen}
       closePopover={closePopover}

@@ -31,6 +31,7 @@ jest.mock('../hooks/use_toggle_entity_analytics', () => ({
 let mockUseToggleReturn: {
   status: EntityAnalyticsStatus;
   isLoading: boolean;
+  isStatusLoading: boolean;
   toggle: jest.Mock;
   errors: { riskEngine: string[]; entityStore: string[] };
 };
@@ -42,11 +43,6 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 describe('EntityAnalyticsHealth', () => {
   it('shows On when status is enabled', () => {
     render(<EntityAnalyticsHealth status="enabled" />);
-    expect(screen.getByTestId(ENTITY_ANALYTICS_HEALTH_TEST_ID)).toHaveTextContent('On');
-  });
-
-  it('shows On when status is partially_enabled', () => {
-    render(<EntityAnalyticsHealth status="partially_enabled" />);
     expect(screen.getByTestId(ENTITY_ANALYTICS_HEALTH_TEST_ID)).toHaveTextContent('On');
   });
 
@@ -106,6 +102,7 @@ describe('EntityAnalyticsToggle', () => {
     mockUseToggleReturn = {
       status: 'not_installed',
       isLoading: false,
+      isStatusLoading: false,
       toggle: mockToggle,
       errors: { riskEngine: [], entityStore: [] },
     };
@@ -119,13 +116,6 @@ describe('EntityAnalyticsToggle', () => {
 
   it('renders a checked switch when status is enabled', () => {
     mockUseToggleReturn.status = 'enabled';
-    render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
-    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
-    expect(toggle).toBeChecked();
-  });
-
-  it('renders a checked switch when status is partially_enabled', () => {
-    mockUseToggleReturn.status = 'partially_enabled';
     render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
     const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).toBeChecked();
@@ -194,6 +184,13 @@ describe('EntityAnalyticsToggle', () => {
     render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
     const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).not.toBeChecked();
+    expect(toggle).toBeDisabled();
+  });
+
+  it('disables the switch while initial status queries are still loading', () => {
+    mockUseToggleReturn.isStatusLoading = true;
+    render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).toBeDisabled();
   });
 });

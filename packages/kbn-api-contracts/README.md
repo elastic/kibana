@@ -55,12 +55,51 @@ oasdiff detects these as breaking:
 | **Required property added**   | `new-required-request-property`                                               | New required `email` field on request body          |
 | **Optional made required**    | `request-parameter-became-required`                                           | `filter` query param becomes required               |
 | **Type changed**              | `response-property-type-changed`                                              | `id` changed from string to number                  |
+| **Request body tightened**    | `kbn:request-additional-properties-tightened`                                 | Request body schema gains `additionalProperties: false` (clients sending unknown keys now receive 400) |
 
 ⚠️ oasdiff classifies these as warnings, but they are promoted to blocking here because Terraform provider configurations depend on these fields.
 
 ## Allowlist
 
-For approved breaking changes, add entries to `allowlist.json`:
+For approved breaking changes, add entries to `allowlist.json`. **Always prefer the granular form below** — it scopes suppression to one specific breaking change instead of muting everything on the endpoint.
+
+### Granular form (recommended)
+
+Use `oasdiffId` together with `source` to suppress exactly one breaking change. These fields are AND'd with `path` and `method`: the entry only matches changes for which all four fields agree.
+
+- `oasdiffId` — matches the oasdiff rule ID (e.g. `request-property-removed`, `kbn:request-additional-properties-tightened`). See the [Breaking Change Rules](#breaking-change-rules) table for known IDs.
+- `source` — matches the JSON pointer / source location reported by oasdiff (e.g. `/components/schemas/Output/properties/name`).
+
+```json
+{
+  "path": "/api/fleet/outputs",
+  "method": "post",
+  "reason": "Approved removal of deprecated 'name' field from request body",
+  "approvedBy": "@elastic/terraform-provider",
+  "oasdiffId": "request-property-removed",
+  "source": "/components/schemas/Output/properties/name"
+}
+```
+
+Example targeting the new request-body tightening rule:
+
+```json
+{
+  "path": "/api/data_views/data_view",
+  "method": "post",
+  "reason": "Intentional tightening — coordinated with @elastic/terraform-provider",
+  "approvedBy": "@elastic/kibana-data-discovery",
+  "oasdiffId": "kbn:request-additional-properties-tightened",
+  "source": "/components/schemas/Data_views_create_data_view_request_object"
+}
+```
+
+**Required fields:** `path`, `method`, `reason`, `approvedBy`, `oasdiffId`, `source` (the last two only required for granular suppression).
+**Optional fields:** `prUrl`, `expiresAt`.
+
+### Coarse form (⚠️ avoid unless absolutely necessary — this masks all future breaks on the endpoint)
+
+Omitting `oasdiffId` and `source` makes the entry suppress **every** breaking change for that `(path, method)`. This is dangerous: a coarse entry approved today silently swallows any unrelated tightening, removal, or type change that lands on the same endpoint in the future. Reach for it only when several distinct, approved changes ship together and a single granular entry per change is impractical.
 
 ```json
 {
@@ -76,31 +115,6 @@ For approved breaking changes, add entries to `allowlist.json`:
   ]
 }
 ```
-
-**Required fields:** `path`, `method`, `reason`, `approvedBy`
-**Optional fields:** `prUrl`, `expiresAt`, `oasdiffId`, `source`
-
-### Granular suppression
-
-By default, an allowlist entry suppresses **all** breaking changes for a given `(path, method)`. To scope suppression to a specific breaking change, use `oasdiffId` and/or `source`:
-
-- `oasdiffId` — matches the oasdiff rule ID (e.g. `request-property-removed`). See the [Breaking Change Rules](#breaking-change-rules) table for known IDs.
-- `source` — matches the JSON pointer / source location reported by oasdiff (e.g. `/components/schemas/Output/properties/name`).
-
-When present, these fields are AND'd: the entry only suppresses changes that match **all** specified fields. Omitted fields are not checked (legacy behavior).
-
-```json
-{
-  "path": "/api/fleet/outputs",
-  "method": "post",
-  "reason": "Approved removal of deprecated 'name' field from request body",
-  "approvedBy": "@elastic/terraform-provider",
-  "oasdiffId": "request-property-removed",
-  "source": "/components/schemas/Output/properties/name"
-}
-```
-
-This entry only suppresses `request-property-removed` at that specific schema location — other breaking changes on the same endpoint will still be flagged.
 
 ## API Ownership
 

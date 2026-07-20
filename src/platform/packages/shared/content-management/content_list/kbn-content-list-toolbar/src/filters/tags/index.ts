@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Only re-export the declarative `TagFilter`. The heavy `TagFilterRenderer`
+// is loaded lazily by `TagFilter` (see `./tag_filter.tsx`); tests and any
+// direct consumers import it from `./tag_filter_renderer` directly so the
+// declarative barrel does not statically pull the renderer into consumer
+// bundles.
 export { TagFilter, type TagFilterProps } from './tag_filter';
-export { TagFilterRenderer, type TagFilterRendererProps } from './tag_filter_renderer';

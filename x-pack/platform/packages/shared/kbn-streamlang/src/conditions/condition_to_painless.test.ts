@@ -15,9 +15,11 @@ const operatorConditionAndResults = [
       "($('log.logger', null) !== null && (($('log.logger', null) instanceof Number && $('log.logger', null).toString() == \"nginx_proxy\") || $('log.logger', null) == \"nginx_proxy\"))",
   },
   {
+    // `neq` uses a disjunctive null-guard so a missing field counts as a match,
+    // mirroring ES|QL's `COALESCE(field != value, TRUE)` and Query DSL semantics.
     condition: { field: 'log.logger', neq: 'nginx_proxy' },
     result:
-      "($('log.logger', null) !== null && (($('log.logger', null) instanceof Number && $('log.logger', null).toString() != \"nginx_proxy\") || $('log.logger', null) != \"nginx_proxy\"))",
+      "($('log.logger', null) === null || (($('log.logger', null) instanceof Number && $('log.logger', null).toString() != \"nginx_proxy\") || $('log.logger', null) != \"nginx_proxy\"))",
   },
   {
     condition: { field: 'http.response.status_code', lt: 500 },
@@ -205,9 +207,8 @@ describe('conditionToPainless', () => {
           neq: false,
         };
 
-        // This test expects the field to be compared against boolean literal `false`
         expect(conditionToStatement(condition)).toEqual(
-          "($('is_active', null) !== null && (($('is_active', null) instanceof Number && $('is_active', null).toString() != \"false\") || $('is_active', null) != false))"
+          "($('is_active', null) === null || (($('is_active', null) instanceof Number && $('is_active', null).toString() != \"false\") || $('is_active', null) != false))"
         );
       });
 
@@ -229,10 +230,14 @@ describe('conditionToPainless', () => {
           neq: true,
         };
 
-        // This test expects the field to be compared against boolean literal `true`
         expect(conditionToStatement(condition)).toEqual(
-          "($('should_skip', null) !== null && (($('should_skip', null) instanceof Number && $('should_skip', null).toString() != \"true\") || $('should_skip', null) != true))"
+          "($('should_skip', null) === null || (($('should_skip', null) instanceof Number && $('should_skip', null).toString() != \"true\") || $('should_skip', null) != true))"
         );
+      });
+
+      test('neq uses `=== null ||` so missing fields satisfy "not equals"', () => {
+        const condition = { field: 'status', neq: 'inactive' };
+        expect(conditionToStatement(condition)).toMatch(/^\(\$\('status', null\) === null \|\|/);
       });
     });
 

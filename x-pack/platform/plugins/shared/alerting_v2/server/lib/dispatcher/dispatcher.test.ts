@@ -104,13 +104,14 @@ function buildDispatcherService(deps: {
   workflowsManagement: WorkflowsServerPluginSetup['management'];
 }): DispatcherService {
   const { loggerService } = createLoggerService();
+
   const pipeline = new DispatcherPipeline(loggerService, [
     new FetchEpisodesStep(deps.queryService),
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
     new FetchRulesStep(deps.rulesSoService),
     new FetchPoliciesStep(deps.npSoService),
-    new EvaluateMatchersStep(),
+    new EvaluateMatchersStep(loggerService),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService, loggerService),
     new DispatchStep(loggerService, deps.workflowsManagement),
@@ -220,7 +221,7 @@ describe('DispatcherService', () => {
       expect(queryEsClient.esql.query).toHaveBeenCalledWith(
         {
           query: getDispatchableAlertEventsQuery().query,
-          drop_null_columns: false,
+          drop_null_columns: true,
           filter: {
             range: {
               '@timestamp': {

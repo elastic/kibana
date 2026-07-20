@@ -42,7 +42,7 @@ import {
   mockTagsService,
   mockContentListUserProfilesServices,
   toJsx,
-  useInspectFlyout,
+  useContentEditorFlyout,
 } from '../stories_helpers';
 import { BuilderPanel } from './builder_panel';
 import type { PlaygroundState } from './playground_state';
@@ -112,7 +112,10 @@ const { Filters } = ContentListToolbar;
  * - `consumerJsx` — a lightweight element tree (without EUI layout wrappers)
  *   used solely for JSX serialization via {@link toJsx}.
  */
-const usePreview = (state: PlaygroundState, onInspect?: (item: ContentListItem) => void) => {
+const usePreview = (
+  state: PlaygroundState,
+  openContentEditor?: (item: ContentListItem) => void
+) => {
   const { provider, features, item: itemConfig, table, toolbar, data } = state;
 
   const labels = useMemo(
@@ -169,41 +172,68 @@ const usePreview = (state: PlaygroundState, onInspect?: (item: ContentListItem) 
       userProfiles: hasUserProfiles
         ? createMockUserProfileFacetProvider(mockItems)
         : (false as const),
+      // Mirrors how `ContentListClientProvider` wires `useContentEditorOpen()`.
+      ...(features.contentEditor && openContentEditor
+        ? { contentEditor: { open: openContentEditor } }
+        : {}),
     }),
     [
       features.sorting,
       features.pagination,
       features.initialPageSize,
       features.search,
+      features.contentEditor,
       sortFields,
       hasTags,
       hasStarred,
       hasUserProfiles,
       mockItems,
+      openContentEditor,
     ]
+  );
+
+  // Whether the user added a custom `<Action id="export">` to any
+  // `Column.Actions`. The provider should only advertise an `export`
+  // handler when the JSX actually declares the action — otherwise the
+  // playground would always emit a non-empty `actions` map even with
+  // every toggle off.
+  const hasExportAction = useMemo(
+    () =>
+      table.columns.some(
+        (col) => col.type === 'actions' && col.actions.some((act) => act.type === 'export')
+      ),
+    [table.columns]
   );
 
   const providerItemConfig = useMemo(() => {
     const config: Record<string, unknown> = {};
+    const actions: Record<string, unknown> = {};
+
     if (itemConfig.getHref) {
       config.getHref = (i: ContentListItem) => `#/${provider.entity}/${i.id}`;
     }
-    if (itemConfig.getEditUrl) {
-      config.getEditUrl = (i: ContentListItem) => `#/${provider.entity}/${i.id}/edit`;
-    }
     if (itemConfig.onEdit) {
-      config.onEdit = (i: ContentListItem) => alert(`Edit: ${i.title}`);
+      actions.edit = { onItemAction: (i: ContentListItem) => alert(`Edit: ${i.title}`) };
     }
     if (itemConfig.onDelete) {
-      config.onDelete = async () => {
-        await new Promise((resolve) => setTimeout(resolve, 300));
+      actions.delete = {
+        onBulkAction: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        },
       };
     }
-    if (itemConfig.onInspect && onInspect) {
-      config.onInspect = onInspect;
+    if (hasExportAction) {
+      actions.export = {
+        onItemAction: (item: ContentListItem) => alert(`Export: ${item.title}`),
+      };
     }
+
+    if (Object.keys(actions).length > 0) {
+      config.actions = actions;
+    }
+
     return Object.keys(config).length > 0 ? config : undefined;
-  }, [itemConfig, provider.entity, onInspect]);
+  }, [itemConfig, provider.entity, hasExportAction]);
 
   const columns = useMemo(
     () =>
@@ -242,8 +272,8 @@ const usePreview = (state: PlaygroundState, onInspect?: (item: ContentListItem) 
                   switch (act.type) {
                     case 'edit':
                       return <Action.Edit key={act.instanceId} />;
-                    case 'inspect':
-                      return <Action.Inspect key={act.instanceId} />;
+                    case 'contentEditor':
+                      return <Action.ContentEditor key={act.instanceId} />;
                     case 'delete':
                       return <Action.Delete key={act.instanceId} />;
                     case 'export':
@@ -253,7 +283,6 @@ const usePreview = (state: PlaygroundState, onInspect?: (item: ContentListItem) 
                           id="export"
                           name="Export"
                           icon="exportAction"
-                          onClick={(item) => alert(`Export: ${item.title}`)}
                         />
                       );
                     default:
@@ -376,10 +405,10 @@ const usePreview = (state: PlaygroundState, onInspect?: (item: ContentListItem) 
  */
 export const PlaygroundBuilder = () => {
   const [state, dispatch] = useReducer(playgroundReducer, INITIAL_STATE);
-  const { onInspect, flyout } = useInspectFlyout();
+  const { open: openContentEditor, flyout } = useContentEditorFlyout();
   const { providerProps, toolbarElement, columns, tableTitle, consumerJsx } = usePreview(
     state,
-    onInspect
+    openContentEditor
   );
 
   const stateKey = JSON.stringify(state);

@@ -594,6 +594,16 @@ function getPatternFiringAlertsAsDataRuleType() {
       schema.string(),
       schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
     ),
+    // Per-instance severity values indexed by run number (patternIndex).
+    // When provided, the value at position [patternIndex] is emitted as
+    // `kibana.alert.severity` in the alert payload for that run.
+    severityPattern: schema.maybe(
+      schema.recordOf(schema.string(), schema.arrayOf(schema.maybe(schema.string())))
+    ),
+    // Tests that need an empty `cleanedPayload` on the run that recovers an
+    // alert (e.g. to assert the alert builder falls back to the predecessor
+    // doc) can opt out of the default recovery payload.
+    setRecoveryPayload: schema.maybe(schema.boolean()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State extends RuleTypeState {
@@ -607,7 +617,7 @@ function getPatternFiringAlertsAsDataRuleType() {
     {},
     'default',
     'recovered',
-    { patternIndex: number; instancePattern: boolean[] }
+    { patternIndex: number; instancePattern: boolean[]; 'kibana.alert.severity'?: string }
   > = {
     id: 'test.patternFiringAad',
     name: 'Test: Firing on a Pattern and writing Alerts as Data',
@@ -648,29 +658,38 @@ function getPatternFiringAlertsAsDataRuleType() {
       // fire if pattern says to
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         const scheduleByPattern = instancePattern[patternIndex];
+        const severity = params.severityPattern?.[instanceId]?.[patternIndex];
+        const severityField: { 'kibana.alert.severity'?: string } =
+          severity !== undefined && severity !== null ? { 'kibana.alert.severity': severity } : {};
         if (scheduleByPattern === true) {
           alertsClient.report({
             id: instanceId,
             actionGroup: 'default',
             state: { patternIndex },
-            payload: { patternIndex, instancePattern: instancePattern as boolean[] },
+            payload: {
+              patternIndex,
+              instancePattern: instancePattern as boolean[],
+              ...severityField,
+            },
           });
         } else if (typeof scheduleByPattern === 'string') {
           alertsClient.report({
             id: instanceId,
             actionGroup: 'default',
             state: { patternIndex },
-            payload: { patternIndex, instancePattern: [true] },
+            payload: { patternIndex, instancePattern: [true], ...severityField },
           });
         }
       }
 
       // set recovery payload
-      for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
-        alertsClient.setAlertData({
-          id: recoveredAlert.alert.getId(),
-          payload: { patternIndex: -1, instancePattern: [] },
-        });
+      if (params.setRecoveryPayload !== false) {
+        for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
+          alertsClient.setAlertData({
+            id: recoveredAlert.alert.getId(),
+            payload: { patternIndex: -1, instancePattern: [] },
+          });
+        }
       }
 
       return {

@@ -9,8 +9,8 @@
 
 import { type Document, isScalar, isSeq, visit, type YAMLMap, type YAMLSeq } from 'yaml';
 import { monaco } from '@kbn/monaco';
+import { getStepNode, isStepLikeMap } from '@kbn/workflows-yaml';
 import type { InsertedLineRange } from './get_line_range_for_edit';
-import { getStepNode, isStepLikeMap } from '../../../../../common/lib/yaml';
 import { getMonacoRangeFromYamlNode } from '../utils';
 
 export type StepMoveDirection = 'up' | 'down';

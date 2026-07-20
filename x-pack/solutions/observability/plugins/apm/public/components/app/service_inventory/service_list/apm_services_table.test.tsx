@@ -77,6 +77,7 @@ jest.mock('../../../alerting/ui_components/alerting_flyout', () => ({
 }));
 
 jest.mock('../../../shared/slo_overview_flyout', () => ({
+  ...jest.requireActual('../../../shared/slo_overview_flyout'),
   SloOverviewFlyout: ({ serviceName }: { serviceName: string }) => (
     <div data-test-subj="sloOverviewFlyout">SLO Overview Flyout for {serviceName}</div>
   ),

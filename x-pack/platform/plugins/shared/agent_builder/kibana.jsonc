@@ -17,6 +17,7 @@
       "aiAssistantManagementSelection",
       "data",
       "dataViews",
+      "embeddable",
       "uiActions",
       "esql",
       "features",
@@ -25,23 +26,27 @@
       "lens",
       "licensing",
       "management",
-      "agentContextLayer",
+      "presentationUtil",
+      "agentBuilderSml",
       "share",
       "spaces",
       "stackConnectors",
       "taskManager",
       "licensing",
       "triggersActionsUi",
+      "unifiedSearch",
       "esUiShared",
       "workflowsExtensions",
       "searchInferenceEndpoints"
     ],
     "requiredBundles": [
       "kibanaReact",
-      "usageCollection"
+      "usageCollection",
+      "security"
     ],
     "optionalPlugins": [
       "cloud",
+      "cps",
       "evals",
       "licenseManagement",
       "security",

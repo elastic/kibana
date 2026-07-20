@@ -55,12 +55,18 @@ function convertJsonSchemaToZodSimple(schema: JSONSchema7): z.ZodTypeAny {
 }
 
 export const generateSchema = ({ workflow }: { workflow: WorkflowDetailDto }): z.ZodObject<any> => {
-  if (!workflow.definition || !workflow.definition.inputs) {
+  if (!workflow.definition) {
+    return z.object({});
+  }
+
+  const manualTrigger = workflow.definition.triggers?.find((trigger) => trigger.type === 'manual');
+
+  if (!manualTrigger) {
     return z.object({});
   }
 
   // Normalize inputs to the new JSON Schema format (handles backward compatibility)
-  const normalizedInputs = normalizeInputsToJsonSchema(workflow.definition.inputs);
+  const normalizedInputs = normalizeInputsToJsonSchema(manualTrigger.inputs);
 
   if (!normalizedInputs?.properties) {
     return z.object({});

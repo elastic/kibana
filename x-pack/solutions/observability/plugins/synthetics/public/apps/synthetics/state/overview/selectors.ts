@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 
 import type { SyntheticsAppState } from '../root_reducer';
 
@@ -13,6 +13,7 @@ export const selectOverviewState = (state: SyntheticsAppState) => state.overview
 export const selectOverviewPageState = (state: SyntheticsAppState) => state.overview.pageState;
 export const selectOverviewGroupBy = (state: SyntheticsAppState) => state.overview.groupBy;
 export const selectOverviewView = (state: SyntheticsAppState) => state.overview.view;
+export const selectOverviewShowLastRun = (state: SyntheticsAppState) => state.overview.showLastRun;
 export const selectOverviewFlyoutConfig = (state: SyntheticsAppState) =>
   state.overview.flyoutConfig;
 export const selectErrorPopoverState = createSelector(

@@ -1,5 +1,5 @@
 {
-  "sha1": "151d9c512fd0103509dd6e0ba595814f4d5ba7a8",
+  "sha1": "ab09fc4db7cfb2da258e3430dbdc728014bb9470",
   "tests": [
     {
       "id": "1927b5fbbdf0acf-9f84f21350dbcbe",
@@ -19,7 +19,9 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access_token_errors.spec.ts",
@@ -45,7 +47,9 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access_token_errors.spec.ts",
@@ -71,11 +75,13 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 56,
+        "line": 55,
         "column": 12
       }
     },
@@ -97,11 +103,13 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 105,
+        "line": 104,
         "column": 12
       }
     },
@@ -123,11 +131,13 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 150,
+        "line": 149,
         "column": 12
       }
     },
@@ -149,11 +159,13 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 167,
+        "line": 166,
         "column": 12
       }
     },
@@ -175,7 +187,9 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
@@ -201,7 +215,9 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
@@ -227,7 +243,9 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
@@ -253,7 +271,9 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
@@ -279,7 +299,9 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_create_session.spec.ts",
@@ -305,82 +327,14 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_invalidate_session.spec.ts",
-        "line": 68,
+        "line": 67,
         "column": 10
-      }
-    },
-    {
-      "id": "37e997b21783acc-69d13b6081ecc3b",
-      "title": "[NON-MKI] UIAM OAuth token exchange on MCP endpoint should exchange OAuth token and authenticate successfully on MCP endpoint",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
-        "line": 35,
-        "column": 12
-      }
-    },
-    {
-      "id": "37e997b21783acc-ad644497d28964d",
-      "title": "[NON-MKI] UIAM OAuth token exchange on MCP endpoint should reject OAuth token on a non-MCP endpoint",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
-        "line": 63,
-        "column": 12
-      }
-    },
-    {
-      "id": "37e997b21783acc-45cdf235fdeb05e",
-      "title": "[NON-MKI] UIAM OAuth token exchange on MCP endpoint should reject an invalid OAuth token on MCP endpoint",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
-        "line": 77,
-        "column": 12
-      }
-    },
-    {
-      "id": "37e997b21783acc-d4652af3f04a55c",
-      "title": "[NON-MKI] UIAM OAuth token exchange on MCP endpoint should reject OAuth token with wrong audience on MCP endpoint",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
-        "line": 103,
-        "column": 12
-      }
-    },
-    {
-      "id": "37e997b21783acc-765e699b78a50b5",
-      "title": "[NON-MKI] UIAM OAuth token exchange on MCP endpoint should reject a non-essu_ Bearer token on MCP endpoint (falls through to ES)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
-        "line": 137,
-        "column": 12
       }
     },
     {
@@ -401,11 +355,13 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
-        "line": 48,
+        "line": 47,
         "column": 10
       }
     },
@@ -427,11 +383,13 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
-        "line": 74,
+        "line": 73,
         "column": 10
       }
     },
@@ -453,11 +411,13 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
-        "line": 106,
+        "line": 105,
         "column": 10
       }
     },
@@ -479,11 +439,13 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 64,
+        "line": 63,
         "column": 12
       }
     },
@@ -505,11 +467,13 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 88,
+        "line": 87,
         "column": 12
       }
     },
@@ -531,11 +495,13 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 140,
+        "line": 139,
         "column": 12
       }
     },
@@ -557,11 +523,13 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 157,
+        "line": 156,
         "column": 12
       }
     },
@@ -583,11 +551,13 @@
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 178,
+        "line": 177,
         "column": 12
       }
     }

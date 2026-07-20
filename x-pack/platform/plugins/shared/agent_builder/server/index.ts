@@ -23,23 +23,7 @@ export type {
   ReadOnlyConversationClient,
 } from './types';
 
-export type { ConversationListOptions } from './services/conversation/client/types';
-
-export type {
-  SmlTypeDefinition,
-  SmlChunk,
-  SmlData,
-  SmlContext,
-  SmlToAttachmentContext,
-  SmlListItem,
-  SmlSearchResult,
-  SmlIndexAttachmentParams,
-} from '@kbn/agent-context-layer-plugin/server';
-
-export {
-  smlElasticsearchIndexMappings,
-  smlIndexName,
-} from '@kbn/agent-context-layer-plugin/server';
+export type { ConversationListOptions } from '@kbn/agent-builder-common';
 
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,

@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { AgentBuilderConfig } from './config';
+import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
 import type {
   AgentBuilderPluginSetup,
@@ -53,6 +54,7 @@ export class AgentBuilderPlugin
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
+  private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
@@ -93,6 +95,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       cloud: setupDeps.cloud,
       usageApi: setupDeps.usageApi,
+      actions: setupDeps.actions,
     });
 
     registerTaskDefinitions({
@@ -161,11 +164,11 @@ export class AgentBuilderPlugin
     });
 
     const smlTools = createSmlTools({
-      getAgentContextLayer: () => {
+      getAgentBuilderSml: () => {
         if (!this.startDeps) {
-          throw new Error('Agent Context Layer not available — plugin has not started');
+          throw new Error('Agent Builder SML not available — plugin has not started');
         }
-        return this.startDeps.agentContextLayer;
+        return this.startDeps.agentBuilderSml;
       },
     });
     smlTools.forEach((tool) => {
@@ -188,9 +191,13 @@ export class AgentBuilderPlugin
       },
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
+        registerType: serviceSetups.agents.registerType.bind(serviceSetups.agents),
       },
       attachments: {
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
+      },
+      renderers: {
+        register: serviceSetups.renderers.register.bind(serviceSetups.renderers),
       },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
@@ -207,7 +214,21 @@ export class AgentBuilderPlugin
 
   start(coreStart: CoreStart, startDeps: AgentBuilderStartDependencies): AgentBuilderPluginStart {
     this.startDeps = startDeps;
-    const { inference, spaces, actions, taskManager, searchInferenceEndpoints } = startDeps;
+    void registerTracingExporter({
+      core: coreStart,
+      tracingConfig: this.config.tracing,
+      logger: this.logger.get('tracing'),
+    }).then((teardownTracing) => {
+      this.teardownTracing = teardownTracing;
+    });
+    const {
+      inference,
+      spaces,
+      actions,
+      taskManager,
+      searchInferenceEndpoints,
+      security: securityPlugin,
+    } = startDeps;
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
 
@@ -218,6 +239,7 @@ export class AgentBuilderPlugin
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
+      securityPlugin,
       elasticsearch,
       inference,
       spaces,
@@ -252,6 +274,7 @@ export class AgentBuilderPlugin
     return {
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),
+        ensure: agents.ensure,
         runAgent: runner.runAgent.bind(runner),
       },
       tools: {
@@ -285,6 +308,9 @@ export class AgentBuilderPlugin
     };
   }
 
+  async stop() {
+    await this.teardownTracing?.();
+  }
   /**
    * Remove orphaned SML crawler task instances from older scheduled-task id prefixes.
    * Safe on every start — uses a single `bulkRemove` for the known legacy instance ids.
@@ -303,6 +329,4 @@ export class AgentBuilderPlugin
       logger.warn(`Failed to remove legacy SML crawler tasks: ${(error as Error).message}`);
     }
   }
-
-  stop() {}
 }

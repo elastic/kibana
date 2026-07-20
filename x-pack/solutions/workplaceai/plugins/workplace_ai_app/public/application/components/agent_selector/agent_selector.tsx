@@ -132,6 +132,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ selectedAgentId, o
         options={options}
         onChange={handleAgentChange}
         singleSelection
+        listProps={{ paddingSize: 's' }}
       >
         {(list) => (
           <>

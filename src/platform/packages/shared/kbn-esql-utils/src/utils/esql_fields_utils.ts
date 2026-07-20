@@ -14,6 +14,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const SPATIAL_FIELDS = ['geo_point', 'geo_shape', 'point', 'shape'];
 const SOURCE_FIELD = '_source';
+const FLATTENED_FIELD = 'flattened';
 const TSDB_COUNTER_FIELDS_PREFIX = 'counter_';
 const UNKNOWN_FIELD = 'unknown';
 const HISTOGRAM_FIELDS = ['exponential_histogram', 'tdigest'];
@@ -33,6 +34,11 @@ export const isESQLColumnSortable = (column: DatatableColumn): boolean => {
 
   // we don't allow sorting on the _source field
   if (column.meta?.type === SOURCE_FIELD) {
+    return false;
+  }
+
+  // we don't allow sorting on flattened fields (rendered as JSON)
+  if (column.meta?.type === FLATTENED_FIELD) {
     return false;
   }
 
@@ -56,6 +62,10 @@ const isGroupable = (type: string | undefined, esType: string | undefined): bool
   }
   // we don't allow grouping on histogram fields (pre-aggregated data)
   if (type && HISTOGRAM_FIELDS.includes(type)) {
+    return false;
+  }
+  // we don't allow grouping on flattened fields (rendered as JSON)
+  if (type === FLATTENED_FIELD) {
     return false;
   }
   return true;

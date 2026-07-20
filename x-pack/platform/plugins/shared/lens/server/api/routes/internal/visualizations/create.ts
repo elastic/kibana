@@ -14,11 +14,7 @@ import {
 } from '../../../../../common/constants';
 import type { LensCreateIn, LensSavedObject } from '../../../../content_management';
 import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../../types';
-import {
-  lensCreateRequestBodySchema,
-  lensCreateRequestQuerySchema,
-  lensCreateResponseBodySchema,
-} from './schema';
+import { lensCreateRequestBodySchema, lensCreateResponseBodySchema } from './schema';
 import { getLensInternalRequestConfig, getLensInternalResponseItem } from './utils';
 
 export const registerLensInternalVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
@@ -50,7 +46,6 @@ export const registerLensInternalVisualizationsCreateAPIRoute: RegisterAPIRouteF
       version: LENS_INTERNAL_API_VERSION,
       validate: {
         request: {
-          query: lensCreateRequestQuerySchema,
           body: lensCreateRequestBodySchema,
         },
         response: {
@@ -87,7 +82,7 @@ export const registerLensInternalVisualizationsCreateAPIRoute: RegisterAPIRouteF
       try {
         // Note: these types are to enforce loose param typings of client methods
         const { references, ...data } = getLensInternalRequestConfig(builder, req.body);
-        const options: LensCreateIn['options'] = { ...req.query, references };
+        const options: LensCreateIn['options'] = { references };
         const { result } = await client.create(data, options);
 
         if (result.item.error) {

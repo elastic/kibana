@@ -16,19 +16,16 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/chrome/layout/core-chrome-layout-constants
-dependsOn: []
+dependsOn:
+  - '@kbn/ui-chrome-layout-constants'
 tags:
   - shared-common
   - package
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
-    - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

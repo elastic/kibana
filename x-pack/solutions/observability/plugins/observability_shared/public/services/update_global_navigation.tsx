@@ -34,6 +34,7 @@ export function updateGlobalNavigation({
    * It is not a nav link but still exists as a
    * Kibana feature privilege with attached rule types */
   const logs = capabilities.logs?.show;
+  const observabilityAlerts = capabilities.observabilityAlerts?.show;
   const someVisible =
     Object.values({
       apm,
@@ -42,6 +43,7 @@ export function updateGlobalNavigation({
       uptime,
       synthetics,
       slo,
+      observabilityAlerts,
     }).some((visible) => visible) || !isCompleteOverviewEnabled;
 
   const updatedDeepLinks = deepLinks
@@ -51,7 +53,7 @@ export function updateGlobalNavigation({
           if (capabilities[casesFeatureId].read_cases) {
             return {
               ...link,
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             };
           }
           return null;
@@ -59,7 +61,7 @@ export function updateGlobalNavigation({
           if (someVisible) {
             return {
               ...link,
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             };
           }
           return null;
@@ -67,7 +69,7 @@ export function updateGlobalNavigation({
           if (someVisible) {
             return {
               ...link,
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             };
           }
           return null;
@@ -79,7 +81,7 @@ export function updateGlobalNavigation({
 
   updater$.next(() => {
     const visibleIn: AppDeepLinkLocations[] = someVisible
-      ? ['sideNav', 'home', 'kibanaOverview']
+      ? ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview']
       : [];
 
     if (isCompleteOverviewEnabled && someVisible) {

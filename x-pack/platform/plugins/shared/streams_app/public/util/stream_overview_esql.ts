@@ -24,10 +24,46 @@ export function buildDataQualityIgnoredFieldsCountEsql(source: string): string {
     .pipe`STATS ignored_fields_count = COUNT_DISTINCT(_ignored)`.print('basic');
 }
 
-/** Ingest histogram: doc_count by @timestamp bucket (`minIntervalMs` from time range / bucket count). */
-export function buildStreamIngestHistogramEsql(source: string, minIntervalMs: number): string {
+/**
+ * Top failure reasons: count of failure-store documents grouped by `error.type`,
+ * sorted descending, capped at `limit` rows.
+ */
+export function buildTopFailureReasonsEsql(streamName: string, limit = 5): string {
+  // Plain string query — the backtick-quoted `error.type` field and LIMIT clause
+  // are not easily expressed via the typed builder.
+  return `FROM ${streamName}::failures | STATS count = COUNT(*) BY error_type = \`error.type\` | SORT count DESC | LIMIT ${limit}`;
+}
+
+const MINUTE_MS = 60 * 1000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
+
+/**
+ * Returns a human-meaningful histogram bucket interval in milliseconds.
+ *
+ * Uses fixed breakpoints so chart buckets align to intuitive time units:
+ *   < 15 min   → automatic (rangeMs / numDataPoints)
+ *   15 min–1 h → 1 min
+ *   1 h–6 h    → 5 min
+ *   6 h–24 h   → 15 min
+ *   24 h–3 d   → 1 h
+ *   3 d–10 d   → 6 h
+ *   > 10 d     → 1 d
+ */
+export function getMeaningfulBucketMs(rangeMs: number, numDataPoints: number): number {
+  if (rangeMs < 15 * MINUTE_MS) return Math.floor(rangeMs / numDataPoints);
+  if (rangeMs <= HOUR_MS) return MINUTE_MS;
+  if (rangeMs <= 6 * HOUR_MS) return 5 * MINUTE_MS;
+  if (rangeMs <= DAY_MS) return 15 * MINUTE_MS;
+  if (rangeMs <= 3 * DAY_MS) return HOUR_MS;
+  if (rangeMs <= 10 * DAY_MS) return 6 * HOUR_MS;
+  return DAY_MS;
+}
+
+/** Ingest histogram: doc_count by @timestamp bucket (`intervalMs` snapped to a meaningful interval). */
+export function buildStreamIngestHistogramEsql(source: string, intervalMs: number): string {
   return esql.from(source)
-    .pipe`STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minIntervalMs} ms)`.print(
+    .pipe`STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${intervalMs} ms)`.print(
     'basic'
   );
 }

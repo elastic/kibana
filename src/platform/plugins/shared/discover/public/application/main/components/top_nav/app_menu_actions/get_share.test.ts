@@ -16,6 +16,7 @@ import {
 } from '../../../../../__mocks__/discover_state.mock';
 import { FetchStatus } from '../../../../types';
 import { internalStateActions } from '../../../state_management/redux';
+import { ESQLVariableType } from '@kbn/esql-types';
 
 const mockDiscoverService = createDiscoverServicesMock();
 
@@ -47,9 +48,6 @@ describe('getShare', () => {
         isEsqlMode: false,
         adHocDataViews: [],
         authorizedRuleTypeIds: [],
-        actions: {
-          updateAdHocDataViews: jest.fn(),
-        },
       },
       currentTab: toolkit.getCurrentTab(),
       persistedDiscoverSession: undefined,
@@ -86,6 +84,45 @@ describe('getShare', () => {
     );
   });
 
+  it('should include esqlVariables in locator params when in ES|QL mode with active controls', async () => {
+    const esqlVariables = [{ key: 'crew_id', value: '123', type: ESQLVariableType.VALUES }];
+
+    toolkit.internalState.dispatch(
+      internalStateActions.setEsqlVariables({
+        tabId: toolkit.getCurrentTab().id,
+        esqlVariables,
+      })
+    );
+
+    const shareOptions = await buildShareOptions({
+      services: mockDiscoverService,
+      discoverParams: {
+        dataView: dataViewMock,
+        isEsqlMode: true,
+        adHocDataViews: [],
+        authorizedRuleTypeIds: [],
+      },
+      currentTab: toolkit.getCurrentTab(),
+      persistedDiscoverSession: undefined,
+      totalHitsState: { result: 0, fetchStatus: FetchStatus.COMPLETE },
+      hasUnsavedChanges: false,
+    });
+
+    expect(shareOptions.sharingData.locatorParams[0].params).toEqual(
+      expect.objectContaining({
+        esqlVariables,
+      })
+    );
+
+    // clean up so subsequent tests start with no variables
+    toolkit.internalState.dispatch(
+      internalStateActions.setEsqlVariables({
+        tabId: toolkit.getCurrentTab().id,
+        esqlVariables: undefined,
+      })
+    );
+  });
+
   it('should return the correct share options, with absolute time range set when in ES|QL mode', async () => {
     const shareOptions = await buildShareOptions({
       services: mockDiscoverService,
@@ -94,9 +131,6 @@ describe('getShare', () => {
         isEsqlMode: true,
         adHocDataViews: [],
         authorizedRuleTypeIds: [],
-        actions: {
-          updateAdHocDataViews: jest.fn(),
-        },
       },
       currentTab: toolkit.getCurrentTab(),
       persistedDiscoverSession: undefined,

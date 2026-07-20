@@ -27,11 +27,13 @@ import type { FleetStartServices } from '../../../../../../../plugin';
 import type { PackageInfo, PackageMetadata, RegistryPolicyTemplate } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
+  useBulkGetAgentPoliciesQuery,
   useGetPackagePoliciesQuery,
   useGetPackageInstallStatus,
   useLink,
   useStartServices,
   useUpgradePackagePolicyDryRunQuery,
+  useUpgradeAgentlessPoliciesDryRunQuery,
   useUpdatePackageMutation,
   useAuthz,
 } from '../../../../../hooks';
@@ -43,10 +45,12 @@ import {
 } from '../../../../../constants';
 import { SideBarColumn } from '../../../components/side_bar_column';
 import { BulkActionContextProvider } from '../../installed_integrations/hooks/use_bulk_actions_context';
-import { KeepPoliciesUpToDateSwitch } from '../components';
+import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
+
+import { KeepPoliciesUpToDateSwitch, NamespaceCustomizationSection } from '../components';
 import { useChangelog } from '../hooks';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
+import { ExperimentalFeaturesService, isAgentlessPoliciesUIEnabled } from '../../../../../services';
 
 import { DeprecationCallout, DeprecatedFeaturesCallout } from '../overview/deprecation_callout';
 
@@ -141,27 +145,151 @@ export const SettingsPage: React.FC<Props> = memo(
       error: changelogError,
     } = useChangelog(name, latestVersion, version);
 
-    const packagePolicyIds = useMemo(
-      () => packagePoliciesData?.items.map(({ id }) => id),
-      [packagePoliciesData]
-    );
+    // Agentless package policies must upgrade through the agentless API, not the
+    // (deprecated-for-agentless) package-policy API. Partition by whether each policy is
+    // effectively agentless so each set goes to its own upgrade + dry-run endpoint. When the
+    // agentless policies UI kill switch is off, everything stays on the legacy package-policy
+    // upgrade path (the agentless partition is empty, so its dry-run and upgrade calls never fire).
+    const agentlessUIEnabled = isAgentlessPoliciesUIEnabled();
 
     const agentPolicyIds = useMemo(
       () => packagePoliciesData?.items.flatMap((packagePolicy) => packagePolicy.policy_ids) ?? [],
       [packagePoliciesData]
     );
 
+    // The server's legacy-API block treats a policy as agentless if its own `supports_agentless`
+    // flag is set OR its parent agent policy is agentless (older policies predate the per-policy
+    // flag). Mirror that fallback so such a policy is routed to the agentless upgrade path instead
+    // of poisoning the legacy batch — otherwise, with `disableAgentlessLegacyAPI` on, the whole
+    // legacy dry-run/upgrade 400s and takes the user's regular policies down with it. Only needed
+    // when the agentless UI is enabled; the query stays disabled otherwise.
+    const { data: agentPoliciesData, isLoading: isAgentPoliciesLoading } =
+      useBulkGetAgentPoliciesQuery(agentPolicyIds, {
+        ignoreMissing: true,
+        enabled: agentlessUIEnabled && agentPolicyIds.length > 0,
+      });
+    const agentlessParentPolicyIds = useMemo(
+      () =>
+        new Set(
+          (agentPoliciesData?.items ?? [])
+            .filter((agentPolicy) => agentPolicy.supports_agentless)
+            .map(({ id }) => id)
+        ),
+      [agentPoliciesData]
+    );
+    const isEffectivelyAgentless = useCallback(
+      (packagePolicy: { supports_agentless?: boolean | null; policy_ids?: string[] }) =>
+        packagePolicy.supports_agentless === true ||
+        (packagePolicy.policy_ids ?? []).some((id) => agentlessParentPolicyIds.has(id)),
+      [agentlessParentPolicyIds]
+    );
+    // While the parent lookup is still resolving, an older (parent-only) agentless policy would be
+    // mis-classified as legacy; hold the legacy dry-run until it settles so we never fire it with a
+    // still-hidden agentless policy in the batch. The guard short-circuits before reading the
+    // loading state when the query is disabled (a disabled react-query reports `isLoading` forever).
+    const isAgentlessDetectionPending =
+      agentlessUIEnabled && agentPolicyIds.length > 0 && isAgentPoliciesLoading;
+
+    const agentlessPolicyIds = useMemo(
+      () =>
+        agentlessUIEnabled
+          ? packagePoliciesData?.items
+              .filter((packagePolicy) => isEffectivelyAgentless(packagePolicy))
+              .map(({ id }) => id) ?? []
+          : [],
+      [packagePoliciesData, agentlessUIEnabled, isEffectivelyAgentless]
+    );
+
+    const packagePolicyIds = useMemo(
+      () =>
+        packagePoliciesData?.items
+          .filter((packagePolicy) => !agentlessUIEnabled || !isEffectivelyAgentless(packagePolicy))
+          .map(({ id }) => id) ?? [],
+      [packagePoliciesData, agentlessUIEnabled, isEffectivelyAgentless]
+    );
+
     const { data: dryRunData } = useUpgradePackagePolicyDryRunQuery(
-      packagePolicyIds ?? [],
+      packagePolicyIds,
       latestVersion,
       {
-        enabled: packagePolicyIds && packagePolicyIds.length > 0,
+        enabled: packagePolicyIds.length > 0 && !isAgentlessDetectionPending,
+      }
+    );
+
+    const { data: agentlessDryRunData } = useUpgradeAgentlessPoliciesDryRunQuery(
+      agentlessPolicyIds,
+      latestVersion,
+      {
+        enabled: agentlessPolicyIds.length > 0,
       }
     );
 
     const updatePackageMutation = useUpdatePackageMutation();
+    const updateNamespaceCustomizationMutation = useUpdatePackageMutation();
 
     const { notifications } = useStartServices();
+    const { allowedNamespacePrefixes } = useSpaceSettingsContext();
+
+    const installationInfo =
+      'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+
+    const namespaceCustomizationEnabledFor = useMemo(
+      () => installationInfo?.namespace_customization_enabled_for ?? [],
+      [installationInfo?.namespace_customization_enabled_for]
+    );
+
+    const namespaceCustomizationSettings = installationInfo?.namespace_customization_settings;
+
+    const handleNamespaceCustomizationChange = useCallback(
+      (next: string[]) => {
+        updateNamespaceCustomizationMutation.mutate(
+          {
+            pkgName: packageInfo.name,
+            pkgVersion: packageInfo.version,
+            body: {
+              namespace_customization_enabled_for: next,
+            },
+          },
+          {
+            onSuccess: () => {
+              notifications.toasts.addSuccess({
+                title: i18n.translate('xpack.fleet.integrations.integrationSaved', {
+                  defaultMessage: 'Integration settings saved',
+                }),
+                text: i18n.translate(
+                  'xpack.fleet.integrations.namespaceCustomizationSavedSuccess',
+                  {
+                    defaultMessage: 'Applying changes to namespace index templates for {title}.',
+                    values: { title },
+                  }
+                ),
+              });
+            },
+            onError: (error) => {
+              notifications.toasts.addError(error, {
+                title: i18n.translate('xpack.fleet.integrations.integrationSavedError', {
+                  defaultMessage: 'Error saving integration settings',
+                }),
+                toastMessage: i18n.translate(
+                  'xpack.fleet.integrations.namespaceCustomizationError',
+                  {
+                    defaultMessage: 'Error updating namespace index templates for {title}',
+                    values: { title },
+                  }
+                ),
+              });
+            },
+          }
+        );
+      },
+      [
+        notifications.toasts,
+        packageInfo.name,
+        packageInfo.version,
+        title,
+        updateNamespaceCustomizationMutation,
+      ]
+    );
 
     const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
       return KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name);
@@ -322,6 +450,20 @@ export const SettingsPage: React.FC<Props> = memo(
                     </>
                   )}
 
+                  {installationInfo && (
+                    <>
+                      <NamespaceCustomizationSection
+                        savedNamespaces={namespaceCustomizationEnabledFor}
+                        allowedNamespacePrefixes={allowedNamespacePrefixes}
+                        namespaceCustomizationSettings={namespaceCustomizationSettings}
+                        disabled={!authz.integrations.writePackageSettings}
+                        isSubmitting={updateNamespaceCustomizationMutation.isLoading}
+                        onSave={handleNamespaceCustomizationChange}
+                      />
+                      <EuiSpacer size="l" />
+                    </>
+                  )}
+
                   {(updateAvailable || isUpgradingPackagePolicies) && (
                     <>
                       <UpdateAvailableCallout
@@ -348,7 +490,9 @@ export const SettingsPage: React.FC<Props> = memo(
                           version={latestVersion}
                           agentPolicyIds={agentPolicyIds}
                           packagePolicyIds={packagePolicyIds}
+                          agentlessPolicyIds={agentlessPolicyIds}
                           dryRunData={dryRunData}
+                          agentlessDryRunData={agentlessDryRunData}
                           isUpgradingPackagePolicies={isUpgradingPackagePolicies}
                           setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
                           startServices={startServices}

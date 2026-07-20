@@ -59,6 +59,36 @@ describe('getWorkflowJsonSchema / elasticsearch connectors', () => {
     expect(JSON.stringify(jsonSchema).length).toBeGreaterThan(20);
   });
 
+  it('should allow elasticsearch.search body-style sort objects in Monaco / YAML LSP', async () => {
+    const diagnostics = await validateWithYamlLsp(
+      'test-elasticsearch-search-body-sort.yaml',
+      yaml.stringify({
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [
+          {
+            name: 'search-sorted-docs',
+            type: 'elasticsearch.search',
+            with: {
+              index: 'test-index',
+              query: { match_all: {} },
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      })
+    );
+
+    expect(diagnostics).toEqual([]);
+  });
+
   ES_VALID_SAMPLE_STEPS.forEach((step) => {
     it(`${step.type}`, async () => {
       const diagnostics = await validateWithYamlLsp(

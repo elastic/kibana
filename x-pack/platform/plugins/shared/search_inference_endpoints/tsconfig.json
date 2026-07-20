@@ -49,7 +49,10 @@
     "@kbn/scout",
     "@kbn/search-api-panels",
     "@kbn/usage-collection-plugin",
-    "@kbn/analytics"
+    "@kbn/analytics",
+    "@kbn/datemath",
+    "@kbn/core-http-browser",
+    "@kbn/es-errors"
   ],
   "exclude": [
     "target/**/*"

@@ -89,6 +89,30 @@ describe('filterPreconfiguredEndpoints', () => {
     expect(filterPreconfiguredEndpoints([])).toEqual([]);
   });
 
+  it('filters out endpoints with inference IDs starting with .gp-llm-v2', () => {
+    const endpoint = makeEndpoint({ inference_id: '.gp-llm-v2-chat_completion' });
+    expect(filterPreconfiguredEndpoints([endpoint])).toEqual([]);
+  });
+
+  it('filters out all .gp-llm-v2 variant inference IDs', () => {
+    const endpoint1 = makeEndpoint({ inference_id: '.gp-llm-v2' });
+    const endpoint2 = makeEndpoint({ inference_id: '.gp-llm-v2-chat_completion' });
+    const endpoint3 = makeEndpoint({ inference_id: '.gp-llm-v2-completion' });
+    expect(filterPreconfiguredEndpoints([endpoint1, endpoint2, endpoint3])).toEqual([]);
+  });
+
+  it('filters out endpoints with inference IDs starting with .rainbow-sprinkles', () => {
+    const endpoint = makeEndpoint({ inference_id: '.rainbow-sprinkles-elastic' });
+    expect(filterPreconfiguredEndpoints([endpoint])).toEqual([]);
+  });
+
+  it('does not filter out non-blocked endpoints that otherwise qualify', () => {
+    const valid = makeEndpoint();
+    const gp = makeEndpoint({ inference_id: '.gp-llm-v2-chat_completion' });
+    const rainbow = makeEndpoint({ inference_id: '.rainbow-sprinkles-elastic' });
+    expect(filterPreconfiguredEndpoints([valid, gp, rainbow])).toEqual([valid]);
+  });
+
   it('filters the EIS mock endpoints to only chat_completion endpoints with kibana-connector property', () => {
     const results = filterPreconfiguredEndpoints(mockEISPreconfiguredEndpoints);
     expect(results.length).toBeGreaterThan(0);
@@ -97,6 +121,13 @@ describe('filterPreconfiguredEndpoints', () => {
       expect(ep.metadata?.heuristics?.properties).toContain('kibana-connector');
       expect(endpoint.task_type).toBe('chat_completion');
     });
+  });
+
+  it('excludes .gp-llm-v2 and .rainbow-sprinkles endpoints from the EIS mock list', () => {
+    const results = filterPreconfiguredEndpoints(mockEISPreconfiguredEndpoints);
+    const resultIds = results.map((ep) => ep.inference_id);
+    expect(resultIds.every((id) => !id.startsWith('.gp-llm-v2'))).toBe(true);
+    expect(resultIds.every((id) => !id.startsWith('.rainbow-sprinkles'))).toBe(true);
   });
 });
 

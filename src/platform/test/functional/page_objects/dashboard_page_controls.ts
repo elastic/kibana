@@ -470,10 +470,16 @@ export class DashboardPageControls extends FtrService {
     const suggestions: { [key: string]: number } = {};
     while (Object.keys(suggestions).length < optionsCount) {
       await selectableListItems._webElement.sendKeys(this.browser.keys.ARROW_DOWN);
-      const currentOption = await selectableListItems.findByCssSelector('[aria-selected="true"]');
-      const [suggestion, docCount] = (await currentOption.getVisibleText()).split('\n');
-      if (suggestion !== 'Exists') {
-        suggestions[suggestion] = Number(docCount);
+
+      const list = await selectableListItems.findByCssSelector(`ul[role="listbox"]`);
+      const activeDescendantId = await list.getAttribute('aria-activedescendant');
+
+      if (activeDescendantId) {
+        const currentOption = await selectableListItems.findByCssSelector(`#${activeDescendantId}`);
+        const [suggestion, docCount] = (await currentOption.getVisibleText()).split('\n');
+        if (suggestion !== 'Exists') {
+          suggestions[suggestion] = Number(docCount);
+        }
       }
     }
 

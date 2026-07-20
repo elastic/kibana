@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-// currentTags starts as [] for bulk selection, matching BulkTagsModal which always starts empty
-// (the user is replacing tags across multiple episodes, so no single "current" set exists).
+// For a single episode, seed the flyout from `last_tags`. For multiple selections, start empty
+// (no single "current" set when replacing tags across groups).
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
@@ -27,6 +28,7 @@ export interface EditTagsActionDeps {
   notifications: NotificationsStart;
   rendering: CoreStart['rendering'];
   expressions: ExpressionsStart;
+  spaces: SpacesPluginStart;
   queryClient: QueryClient;
 }
 
@@ -37,9 +39,10 @@ export const createEditTagsAction = (deps: EditTagsActionDeps): EpisodeAction =>
   iconType: 'tag',
   isCompatible: ({ episodes }: EpisodeActionContext) => episodes.length > 0,
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const tags = await openTagsFlyout(deps.overlays, deps.rendering, [], {
-      http: deps.http,
+    const currentTags = episodes.length === 1 ? episodes[0].last_tags ?? [] : [];
+    const tags = await openTagsFlyout(deps.overlays, deps.rendering, currentTags, {
       expressions: deps.expressions,
+      spaces: deps.spaces,
       queryClient: deps.queryClient,
     });
     if (tags == null) return;

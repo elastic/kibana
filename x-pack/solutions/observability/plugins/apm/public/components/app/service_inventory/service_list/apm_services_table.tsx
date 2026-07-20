@@ -17,6 +17,7 @@ import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
@@ -35,7 +36,6 @@ import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isFailure, isPending } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
@@ -58,7 +58,7 @@ import {
   APM_SLO_INDICATOR_TYPES,
   type ApmIndicatorType,
 } from '../../../../../common/slo_indicator_types';
-import { SloOverviewFlyout } from '../../../shared/slo_overview_flyout';
+import { SloOverviewFlyout, useSloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { listMetricColumnPreset } from '../../../../utils/column_presets';
@@ -124,12 +124,11 @@ export function getServiceColumns({
               return (
                 <EuiToolTip
                   position="bottom"
-                  content={i18n.translate(
-                    'xpack.apm.home.servicesTable.tooltip.activeAlertsExplanation',
-                    {
-                      defaultMessage: 'Active alerts',
-                    }
-                  )}
+                  content={i18n.translate('xpack.apm.serviceHeader.alertsBadge.countLabel', {
+                    defaultMessage:
+                      '{count, plural, one {# active alert} other {# active alerts}}. Click to view more.',
+                    values: { count: alertsCount },
+                  })}
                 >
                   <EuiBadge
                     data-test-subj="serviceInventoryAlertsBadgeLink"
@@ -204,8 +203,33 @@ export function getServiceColumns({
             width: '6.5em',
             minWidth: '6.5em',
             sortable: true,
-            render: (_, { anomalyScore }) => {
-              return <AnomaliesBadge score={anomalyScore} />;
+            render: (
+              _,
+              {
+                serviceName,
+                transactionType,
+                anomalyScore,
+                detectorType,
+                agentName,
+                anomalyEnvironment,
+              }
+            ) => {
+              return (
+                <AnomaliesBadge
+                  score={anomalyScore}
+                  detectorType={detectorType}
+                  navigationProps={
+                    agentName && anomalyEnvironment
+                      ? {
+                          serviceName,
+                          agentName,
+                          anomalyEnvironment,
+                          query: { ...query, transactionType },
+                        }
+                      : undefined
+                  }
+                />
+              );
             },
           } as ITableColumn<ServiceListItem>,
         ]
@@ -440,18 +464,8 @@ export function ApmServicesTable({
     });
   }, []);
 
-  const [sloOverviewFlyout, setSloOverviewFlyout] = useState<{
-    serviceName: string;
-    agentName?: AgentName;
-  } | null>(null);
-
-  const openSloOverviewFlyout = useCallback((serviceName: string, agentName?: AgentName) => {
-    setSloOverviewFlyout({ serviceName, agentName });
-  }, []);
-
-  const closeSloOverviewFlyout = useCallback(() => {
-    setSloOverviewFlyout(null);
-  }, []);
+  const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
+    useSloOverviewFlyout();
 
   const CreateSloFlyout =
     sloFlyoutState.isOpen && sloFlyoutState.indicatorType && sloFlyoutState.serviceName

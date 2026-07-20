@@ -45,5 +45,6 @@
     "@kbn/restorable-state",
     "@kbn/react-hooks",
     "@kbn/css-utils",
+    "@kbn/code-editor-mock",
   ]
 }

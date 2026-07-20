@@ -7,25 +7,6 @@
 
 export type ExportFormat = 'ndjson' | 'json' | 'csv';
 
-/** Supported values for `format` query param; use with `parseExportFormat`. */
-export const SUPPORTED_EXPORT_FORMATS: readonly ExportFormat[] = ['ndjson', 'json', 'csv'] as const;
-
-/**
- * Parses a request `format` string into a typed export format.
- * Returns `undefined` when missing or not supported (caller should return 400).
- */
-export function parseExportFormat(value: string | undefined): ExportFormat | undefined {
-  if (value === undefined || value === '') {
-    return undefined;
-  }
-
-  if ((SUPPORTED_EXPORT_FORMATS as readonly string[]).includes(value)) {
-    return value as ExportFormat;
-  }
-
-  return undefined;
-}
-
 export interface ExportMetadata {
   action_id: string;
   query?: string;
@@ -98,15 +79,29 @@ export function createJsonFormatter(): ResultFormatter {
 
 // --- CSV ---
 
+const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
+
 function escapeCsvField(value: unknown): string {
   if (value === null || value === undefined) {
     return '';
   }
 
-  const str = typeof value === 'object' ? JSON.stringify(value) : String(value);
+  let str = typeof value === 'object' ? JSON.stringify(value) : String(value);
 
-  // Quote if the field contains comma, double-quote, newline, or carriage return
-  if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+  // Prefix cells that start with formula-trigger characters to prevent
+  // spreadsheet applications from interpreting them as formulas.
+  if (FORMULA_TRIGGERS.test(str)) {
+    str = `'${str}`;
+  }
+
+  // Quote if the field contains comma, double-quote, newline, carriage return, or tab
+  if (
+    str.includes(',') ||
+    str.includes('"') ||
+    str.includes('\n') ||
+    str.includes('\r') ||
+    str.includes('\t')
+  ) {
     return '"' + str.replace(/"/g, '""') + '"';
   }
 

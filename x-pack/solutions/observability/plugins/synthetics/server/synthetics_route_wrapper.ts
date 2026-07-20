@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isEmpty } from 'lodash';
 import { isKibanaResponse } from '@kbn/core-http-server';
 import { MonitorConfigRepository } from './services/monitor_config_repository';
@@ -14,9 +14,9 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
-import { getSyntheticsDynamicSettings } from './saved_objects/synthetics_settings';
 import { getSyntheticsIndices } from './services/get_synthetics_indices';
 import { isCCSEnabled } from './lib/remote_result_utils';
+import { DefaultSyntheticsMultiSpaceSettingsRepository } from './services/synthetics_multi_space_settings_repository';
 import type { SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
@@ -52,10 +52,13 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       let heartbeatIndices = SYNTHETICS_INDEX_PATTERN;
       if (isCCSEnabled(server)) {
         try {
-          const dynamicSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
+          const multiSpaceSettingsRepository = new DefaultSyntheticsMultiSpaceSettingsRepository(
+            savedObjectsClient
+          );
+          const settings = await multiSpaceSettingsRepository.get();
           const ccsSettings = {
-            useAllRemoteClusters: dynamicSettings.useAllRemoteClusters ?? false,
-            selectedRemoteClusters: dynamicSettings.selectedRemoteClusters ?? [],
+            useAllRemoteClusters: settings.useAllRemoteClusters ?? false,
+            selectedRemoteClusters: settings.selectedRemoteClusters ?? [],
           };
           const { indices } = await getSyntheticsIndices(esClient.asCurrentUser, ccsSettings);
           heartbeatIndices = indices;

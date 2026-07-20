@@ -16,6 +16,7 @@
       "cloud",
       "data",
       "dataViewEditor",
+      "dataViewFieldEditor",
       "dataViews",
       "dataVisualizer",
       "discover",

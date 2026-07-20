@@ -31,7 +31,11 @@ export interface RulesListTableContainerProps {
   sortField?: RulesListTableSortField;
   sortDirection?: 'asc' | 'desc';
   isLoading: boolean;
+  /** When false, write affordances (create/edit/clone/delete/enable/bulk) are hidden. */
+  canWrite: boolean;
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
+  onEditInFlyout: (rule: RuleApiResponse) => void;
+  onCloneInFlyout: (rule: RuleApiResponse) => void;
 }
 
 export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = ({
@@ -45,7 +49,10 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   sortField,
   sortDirection,
   isLoading,
+  canWrite,
   onTableChange,
+  onEditInFlyout,
+  onCloneInFlyout,
 }) => {
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
@@ -107,12 +114,15 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     if (!ruleToDelete) {
       return;
     }
-    deleteRuleMutation.mutate(ruleToDelete.id, {
-      onSettled: () => {
-        setRuleToDelete(null);
-        setExpandedRuleId(null);
-      },
-    });
+    deleteRuleMutation.mutate(
+      { id: ruleToDelete.id, name: ruleToDelete.metadata.name },
+      {
+        onSettled: () => {
+          setRuleToDelete(null);
+          setExpandedRuleId(null);
+        },
+      }
+    );
   };
 
   return (
@@ -127,6 +137,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         sortField={sortField}
         sortDirection={sortDirection}
         isLoading={isLoading}
+        canWrite={canWrite}
         selectedCount={selectedCount}
         isAllSelected={isAllSelected}
         isPageSelected={isPageSelected}
@@ -140,26 +151,34 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkDelete={handleBulkDelete}
         onNavigateToDetails={(r) => navigateToUrl(basePath.prepend(paths.ruleDetails(r.id)))}
         onExpand={(r) => setExpandedRuleId(r.id)}
-        onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
-        onClone={(r) =>
-          navigateToUrl(
-            basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(r.id)}`)
-          )
-        }
+        onQuickEdit={(r) => onEditInFlyout(r)}
+        onEdit={(r) => onEditInFlyout(r)}
+        onClone={(r) => onCloneInFlyout(r)}
         onDelete={(r) => setRuleToDelete(r)}
         onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+        togglingRuleId={
+          toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
+        }
+        isBulkTogglingEnabled={bulkEnableMutation.isLoading || bulkDisableMutation.isLoading}
         onTableChange={onTableChange}
       />
       {expandedRule ? (
         <RuleSummaryFlyout
           rule={expandedRule}
+          canWrite={canWrite}
           onClose={() => setExpandedRuleId(null)}
-          onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
-          onClone={(r) =>
-            navigateToUrl(
-              basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(r.id)}`)
-            )
-          }
+          onQuickEdit={(r) => {
+            setExpandedRuleId(null);
+            onEditInFlyout(r);
+          }}
+          onEdit={(r) => {
+            setExpandedRuleId(null);
+            onEditInFlyout(r);
+          }}
+          onClone={(r) => {
+            setExpandedRuleId(null);
+            onCloneInFlyout(r);
+          }}
           onDelete={(r) => setRuleToDelete(r)}
           onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
         />

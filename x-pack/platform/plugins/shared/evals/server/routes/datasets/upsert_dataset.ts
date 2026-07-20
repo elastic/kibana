@@ -12,7 +12,7 @@ import {
   UpsertEvaluationDatasetRequestBody,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { PLUGIN_ID } from '../../../common';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
   RemoteDecryptionError,
@@ -20,6 +20,7 @@ import {
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
 import type { RouteDependencies } from '../register_routes';
+import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 export const registerUpsertDatasetRoute = ({
   router,
@@ -32,7 +33,7 @@ export const registerUpsertDatasetRoute = ({
       path: EVALS_DATASET_UPSERT_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
       summary: 'Upsert evaluation dataset',
     })
@@ -75,10 +76,8 @@ export const registerUpsertDatasetRoute = ({
           }
 
           const { name, description, examples } = request.body;
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient();
           const upsertResult = await datasetClient.upsert(name, description, examples);
 
           return response.ok({
@@ -92,6 +91,14 @@ export const registerUpsertDatasetRoute = ({
               body: { message: error.message },
             });
           }
+
+          const tooLarge = handleMaximumResponseSizeExceededError({
+            error,
+            response,
+            logger,
+            context: 'Upsert evaluation dataset',
+          });
+          if (tooLarge) return tooLarge;
 
           logger.error(`Failed to upsert evaluation dataset: ${error}`);
           return response.customError({

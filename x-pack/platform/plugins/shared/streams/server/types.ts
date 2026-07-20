@@ -6,12 +6,17 @@
  */
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type {
-  AgentBuilderPluginSetup,
-  AgentBuilderPluginStart,
-} from '@kbn/agent-builder-plugin/server';
+  PluginStartContract as ActionsPluginStart,
+  RelayClientContract,
+} from '@kbn/actions-plugin/server';
+import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type {
+  AgentBuilderSmlPluginSetup,
+  AgentBuilderSmlPluginStart,
+} from '@kbn/agent-builder-sml-plugin/server';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
@@ -39,11 +44,14 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
+import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
 import type { StreamsConfig } from '../common/config';
-import type { MemoryTriggerRegistry } from './lib/memory/triggers';
 
 export interface StreamsServer {
   core: CoreStart;
@@ -56,10 +64,22 @@ export interface StreamsServer {
   licensing: LicensingPluginStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
-  memoryTriggerRegistry?: MemoryTriggerRegistry;
-  ensureMemorySkillRegistered?: () => void;
-  ensureMemoryTasksScheduled?: () => Promise<void>;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  agentBuilder?: AgentBuilderPluginStart;
+  spaces?: SpacesPluginStart;
+  cloud?: CloudSetup;
+  /**
+   * The running Kibana's version, e.g. `9.2.0`. Populated by the
+   * significant_events plugin, which needs it to identify the connecting
+   * deployment to the Relay service.
+   */
+  kibanaVersion: string;
+  /**
+   * Singleton client for the Relay service, owned by the Actions plugin.
+   */
+  relayClient?: RelayClientContract;
 }
 
 export interface ElasticsearchAccessorOptions {
@@ -68,6 +88,7 @@ export interface ElasticsearchAccessorOptions {
 
 export interface StreamsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
+  agentBuilderSml?: AgentBuilderSmlPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
@@ -77,6 +98,7 @@ export interface StreamsPluginSetupDependencies {
   fieldsMetadata: FieldsMetadataServerSetup;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
@@ -88,11 +110,14 @@ export interface StreamsPluginStartDependencies {
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
   alerting: AlertingServerStart;
+  alertingVTwo?: AlertingV2ServerStart;
   inference: InferenceServerStart;
   ruleRegistry: RuleRegistryPluginStart;
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
   agentBuilder?: AgentBuilderPluginStart;
+  agentBuilderSml?: AgentBuilderSmlPluginStart;
   spaces?: SpacesPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }

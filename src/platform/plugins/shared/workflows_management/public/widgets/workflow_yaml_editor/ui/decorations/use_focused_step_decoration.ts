@@ -8,10 +8,13 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { monaco } from '@kbn/monaco';
 import { useStepHighlightBlockClass } from './use_step_highlight_block_class';
-import { selectEditorFocusedStepInfo } from '../../../../entities/workflows/store';
+import {
+  selectEditorFocusedStepInfo,
+  selectEditorFocusedTriggerInfo,
+} from '../../../../entities/workflows/store';
 
 export interface StepLineRange {
   lineStart: number;
@@ -28,6 +31,8 @@ export const useFocusedStepDecoration = (
   overrideRange?: StepLineRange | null
 ) => {
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
+  const focusedTriggerInfo = useSelector(selectEditorFocusedTriggerInfo);
+  const focusedInfo = focusedStepInfo ?? focusedTriggerInfo;
   const blockClassName = useStepHighlightBlockClass();
 
   const decorationsCollection = useMemo(() => {
@@ -44,8 +49,8 @@ export const useFocusedStepDecoration = (
 
     const range = overrideRange
       ? overrideRange
-      : focusedStepInfo
-      ? { lineStart: focusedStepInfo.lineStart, lineEnd: focusedStepInfo.lineEnd }
+      : focusedInfo
+      ? { lineStart: focusedInfo.lineStart, lineEnd: focusedInfo.lineEnd }
       : null;
 
     if (!range) {
@@ -63,7 +68,7 @@ export const useFocusedStepDecoration = (
         },
       },
     ]);
-  }, [editor, focusedStepInfo, overrideRange, blockClassName, decorationsCollection]);
+  }, [editor, focusedInfo, overrideRange, blockClassName, decorationsCollection]);
 
   // Cleanup effect: only clears decorations on unmount or when
   // editor/decorationsCollection changes, avoiding unnecessary clears
