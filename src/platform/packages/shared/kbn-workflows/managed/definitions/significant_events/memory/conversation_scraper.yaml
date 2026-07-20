@@ -1,6 +1,6 @@
 version: "1"
 
-name: Conversation Scraper
+name: Significant Events Conversation Scraper
 description: >
   Extracts durable knowledge from recent AI chat conversations and persists it as
   memory wiki pages in .significant_events-memories. Runs on a 4h schedule.
@@ -8,13 +8,13 @@ enabled: false
 settings:
   timeout: "30m"
   concurrency:
-    key: "streams-sigevents-memory-scraper"
+    key: "significant-events-memory-conversation-scraper"
     strategy: drop
     max: 1
 tags:
   - observability
   - streams
-  - sigevents
+  - significant-events
   - memory
   - conversation-scraper
 
