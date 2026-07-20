@@ -33,7 +33,7 @@ describe('config validation', () => {
             "settings": false,
           },
           "chat": Object {
-            "enabled": false,
+            "enabled": true,
           },
           "enabled": true,
           "files": Object {
@@ -161,14 +161,14 @@ describe('config validation', () => {
       expect(config.attachments.enabled).toBe(false);
     });
 
-    it('sets chat.enabled default to false', () => {
+    it('sets chat.enabled default to true', () => {
       const config = ConfigSchema.validate({});
-      expect(config.chat.enabled).toBe(false);
+      expect(config.chat.enabled).toBe(true);
     });
 
-    it('allows chat.enabled to be set to true', () => {
-      const config = ConfigSchema.validate({ chat: { enabled: true } });
-      expect(config.chat.enabled).toBe(true);
+    it('allows chat.enabled to be set to false', () => {
+      const config = ConfigSchema.validate({ chat: { enabled: false } });
+      expect(config.chat.enabled).toBe(false);
     });
   });
 });
