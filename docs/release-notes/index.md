@@ -46,9 +46,9 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Alerting and cases**:
 * Snooze and unsnooze individual alerts with optional expiry or auto-unsnooze conditions [#264090]({{kib-pull}}264090).
 * Search, summarize, and update cases from Agent Builder chat with a cases skill, tools, and case attachments [#271438]({{kib-pull}}271438).
-* Add **Add to chat** and **Summarize case** actions to the case details page when `xpack.cases.chat.enabled` is true [#276635]({{kib-pull}}276635).
-* Attach **Lens** visualizations to cases from **Attach saved object** when case attachments are enabled [#274959]({{kib-pull}}274959).
-* Attach Discover sessions, dashboards, and maps to cases when `xpack.cases.attachments.enabled` is true [#272423]({{kib-pull}}272423).
+* Add **Add to chat** and **Summarize case** actions to the case details page [#276635]({{kib-pull}}276635) [#279105]({{kib-pull}}279105).
+* Attach **Lens** visualizations to cases from **Attach saved object** [#274959]({{kib-pull}}274959) [#277040]({{kib-pull}}277040).
+* Attach Discover sessions, dashboards, and maps to cases [#272423]({{kib-pull}}272423).
 * Add an **Attach** button to the case **Activity** and **Attachments** tabs, including **Upload file** [#269560]({{kib-pull}}269560).
 * Add **Type** and **Author** filters on the case **Attachments** tab [#272759]({{kib-pull}}272759).
 * Redesign the case **Attachments** tab so each attachment type appears only when data exists, and add a **Refresh** control [#270518]({{kib-pull}}270518).
@@ -163,6 +163,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 **{{kib}} platform**:
 * Add a customization modal for reordering and hiding solution navigation items, with personalized preferences preserved across sessions [#270276]({{kib-pull}}270276).
 * Add a new date range picker in Discover and Dashboards that accepts flexible relative and absolute time ranges in plain text [#260163]({{kib-pull}}260163).
+* Add nine commonly used presets to the time picker, including **Yesterday**, **Last 3 hours**, and **This week until now** [#270254]({{kib-pull}}270254).
 * Add display language selection (Beta) to the profile and user menu [#260835]({{kib-pull}}260835).
 * Use the browser `Accept-Language` header to select the UI language on all deployment types when no profile language or locale cookie is set [#275996]({{kib-pull}}275996).
 * Persist your last selected space in the user profile and restore it on the next visit when **Remember last selected space** is enabled [#268053]({{kib-pull}}268053).
@@ -225,6 +226,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 
 **Alerting and cases**:
 * Fix case viewing and saving after the applied template is deleted, and stop the **Apply template** modal from loading indefinitely [#278716]({{kib-pull}}278716).
+* Fix applying a case template failing when its required fields need values by validating them in the confirmation modal before saving [#278499]({{kib-pull}}278499).
 * Fix template resolution from the wrong case owner in `cases.createCaseFromTemplate` [#268719]({{kib-pull}}268719).
 * Fix the case file upload modal showing byte-based size limits and unclear unsupported-file errors [#277567]({{kib-pull}}277567).
 * Fix attachment removal activity titles always showing "removed comment" instead of the attachment type [#277037]({{kib-pull}}277037).
@@ -240,6 +242,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix alert and rule mute, unmute, snooze, and unsnooze actions requiring connector execution privileges [#273392]({{kib-pull}}273392).
 * Fix delayed alerts graduating to active without expected fields such as `kibana.alert.reason` [#266012]({{kib-pull}}266012).
 * Fix rule updates leaving a stale API key on the saved rule when the key should be cleared [#263887]({{kib-pull}}263887).
+* Fix **{{rules-ui}}** appearing in global search when you have alerts access but not rules access [#278895]({{kib-pull}}278895).
 * Fix alerts-as-data index template updates failing when system-managed template metadata is present [#262534]({{kib-pull}}262534).
 * Fix the public **Find rules** and **Get rule** APIs so documented response fields are returned as specified in the OpenAPI spec [#247279]({{kib-pull}}247279).
 
@@ -321,6 +324,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix a crash in the **Integrations** view when a package has no icon [#273191]({{kib-pull}}273191).
 * Fix input packages being hidden from the signal type filter in the **Integrations** list by deriving signal types from policy templates when `data_streams` are absent [#272585]({{kib-pull}}272585).
 * Fix the agent logging level dropdown on the **Settings** tab not updating after **Reset to policy** is applied, so the displayed level stays in sync with {{fleet}}-polled agent metadata [#271964]({{kib-pull}}271964).
+* Fix generated agent policy YAML becoming invalid when an integration policy value contains a double quote (`"`) [#279391]({{kib-pull}}279391).
 * Fix multiline configuration values, such as CEL programs, being corrupted in generated agent policy YAML [#271922]({{kib-pull}}271922).
 * Fix integration upgrades and reinstalls dropping storage-related package settings [#269080]({{kib-pull}}269080).
 * Fix the agent enrollment **Confirm incoming data** step timing out for integrations that ingest backdated data by checking `event.ingested` instead of `@timestamp` [#268224]({{kib-pull}}268224).
@@ -372,6 +376,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix **Save as** replacing an existing Discover panel when returning to a dashboard [#266406]({{kib-pull}}266406).
 * Fix tab URL state leaking to other apps when you leave Discover during save-to-dashboard navigation [#262929]({{kib-pull}}262929).
 * Fix control rendering regressions in Discover [#267886]({{kib-pull}}267886).
+* Fix CSV reports from Discover and dashboard saved-search panels failing when {{esql}} queries use control variables [#277916]({{kib-pull}}277916).
 * Fix Discover CSV exports to use the session absolute time range so exported data matches what you see on screen [#255005]({{kib-pull}}255005).
 
 **{{product.observability}} solution**:
@@ -389,6 +394,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the Search Applications document explorer rendering HTML markup from field snippets [#265319]({{kib-pull}}265319).
 
 **{{esql}} editor**:
+* Fix inline documentation rendering in the {{esql}} editor [#279135]({{kib-pull}}279135).
 * Fix {{esql}} validation errors appearing after you cancel a query in the {{esql}} visualization editor [#277975]({{kib-pull}}277975).
 * Fix {{esql}} editor crashes after you cancel a query and select a footer error [#270603]({{kib-pull}}270603).
 * Fix save failures when a **text** field in the **Lookup Index** editor contains JSON-like strings such as `{}` [#276693]({{kib-pull}}276693).
@@ -442,6 +448,8 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 
 **Workflows**:
 * Fix Elastic Workflows version history failing to record changes on newly provisioned clusters when {{es}} is temporarily unavailable [#278387]({{kib-pull}}278387).
+* Fix workflow graph nodes and their detail flyouts displaying machine-readable step names [#277550]({{kib-pull}}277550).
+* Fix workflow exports dropping comments, commented-out steps, or the workflow's enabled state [#277041]({{kib-pull}}277041).
 * Fix `foreach` steps failing when a large guarded step output leaves memory between the `if:` guard and loop entry [#278188]({{kib-pull}}278188).
 * Fix `foreach` steps failing to restore earlier step output used by their source expressions [#270089]({{kib-pull}}270089).
 * Fix blank items in `foreach` loops when source step output is no longer in memory [#273515]({{kib-pull}}273515).
