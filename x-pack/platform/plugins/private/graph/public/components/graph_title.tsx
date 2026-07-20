@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import React from 'react';
 
