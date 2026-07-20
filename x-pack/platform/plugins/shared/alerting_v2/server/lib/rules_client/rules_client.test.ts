@@ -2530,7 +2530,7 @@ describe('RulesClient', () => {
     });
 
     describe('updateRule', () => {
-      it('emits ruleUpdated only after a content update', async () => {
+      it('emits ruleUpdated after a content update', async () => {
         const client = createClient();
         mockGetExistingRule('rule-id-wf-2');
 
@@ -2544,6 +2544,24 @@ describe('RulesClient', () => {
         ]);
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
+      });
+
+      it('emits ruleUpdated for an empty PATCH so revision and change history stay aligned', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-empty', { ...workflowSoAttrs, revision: 4 });
+
+        await client.updateRule({ id: 'rule-id-wf-empty', data: {} });
+
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          expect.objectContaining({
+            ruleId: 'rule-id-wf-empty',
+            spaceId: 'space-1',
+            rule: expect.objectContaining({ revision: 5 }),
+          }),
+        ]);
+        const savedAttrs = mockSavedObjectsClient.update.mock
+          .calls[0][2] as RuleSavedObjectAttributes;
+        expect(savedAttrs.revision).toBe(5);
       });
 
       it('emits only ruleUpdated for an enable-only PATCH (no lifecycle event via the update path)', async () => {

@@ -400,14 +400,13 @@ export class RulesClient {
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
 
-    // The update path always emits `ruleUpdated` and never distinguishes
-    // enable/disable — lifecycle transitions are owned by the dedicated
-    // enableRule/disableRule endpoints.
-    if (Object.keys(parsed).length > 0) {
-      this.ruleEventPublisher.emitRuleUpdated(this.request, [
-        { ruleId: rule.id, spaceId: this.spaceId, rule },
-      ]);
-    }
+    // Always emit `ruleUpdated` after a successful write — including empty
+    // PATCHes — so `revision` / change-history `object.sequence` stay in
+    // lockstep. Lifecycle enable/disable events are owned by the dedicated
+    // enableRule/disableRule endpoints, not this path.
+    this.ruleEventPublisher.emitRuleUpdated(this.request, [
+      { ruleId: rule.id, spaceId: this.spaceId, rule },
+    ]);
 
     return rule;
   }
