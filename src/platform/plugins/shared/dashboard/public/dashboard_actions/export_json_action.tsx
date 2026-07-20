@@ -87,9 +87,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
       loadContent: async ({ closeFlyout }) => {
         const [{ ExportJsonFlyout }, isByReference] = await Promise.all([
           import('../share/export_json/flyout/export_json_flyout'),
-          supportsByReference
-            ? await embeddable.canUnlinkFromLibrary()
-            : await new Promise<boolean>((resolve) => resolve(false)),
+          supportsByReference ? await embeddable.canUnlinkFromLibrary() : false,
         ]);
 
         return (
@@ -125,7 +123,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
         );
       },
       flyoutProps: {
-        'data-test-subj': 'create_esql_control_flyout',
+        'data-test-subj': 'export_json_flyout',
         focusedPanelId: embeddable.uuid,
         triggerId: `presentationPanelContextMenu-${embeddable.uuid}`,
       },

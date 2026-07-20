@@ -9,8 +9,10 @@
 
 import React from 'react';
 
+import '@kbn/code-editor-mock/jest_helper';
 import { render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
+
 import { ExportJsonPanel } from './export_json_panel';
 import type { ExportJsonSanitizedState } from './types';
 
