@@ -87,7 +87,6 @@ export const DashboardsCard: OnboardingCardComponent = ({
               <EuiSpacer size="m" />
               <CardCallOut
                 color="primary"
-                icon="info"
                 text={i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_TEXT}
                 action={
                   <EuiLink
