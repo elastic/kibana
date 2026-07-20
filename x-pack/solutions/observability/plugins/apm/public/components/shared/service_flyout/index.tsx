@@ -55,7 +55,7 @@ interface ServiceFlyoutProps {
 }
 
 export function ServiceFlyout({ deps, service, filters, onView, onClose }: ServiceFlyoutProps) {
-  const { core, share, lens, dataViews } = deps;
+  const { core, share, lens, dataViews, alerting } = deps;
   const { environment, rangeFrom, rangeTo, transactionType } = filters;
   const title = service.name;
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
@@ -89,7 +89,7 @@ export function ServiceFlyout({ deps, service, filters, onView, onClose }: Servi
     <EuiPortal>
       <ServiceFlyoutContextProvider
         value={{
-          deps: { core, share, lens, dataViews },
+          deps: { core, share, lens, dataViews, alerting },
           service,
           filters: {
             environment: flyoutEnvironment,

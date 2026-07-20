@@ -10,6 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { PluginSetupContract as AlertingPluginPublicSetup } from '@kbn/alerting-plugin/public';
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceFlyoutService } from './types';
 
@@ -20,6 +21,7 @@ export interface ServiceFlyoutContextValue {
     share: SharePluginSetup;
     lens: LensPublicStart;
     dataViews: DataViewsPublicPluginStart;
+    alerting?: AlertingPluginPublicSetup;
   };
   // The service this flyout is showing
   service: ServiceFlyoutService;

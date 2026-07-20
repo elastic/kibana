@@ -121,7 +121,7 @@ function ContextualGraphInner({
 }: ContextualServiceMapGraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
-  const { core, share, lens, dataViews } = useApmPluginContext();
+  const { core, share, lens, dataViews, plugins } = useApmPluginContext();
   const makeAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
   const { euiTheme } = useEuiTheme();
   const { fitView, zoomIn, zoomOut } = useReactFlow();
@@ -424,7 +424,7 @@ function ContextualGraphInner({
                   sloStatus: selectedServiceNodeForFlyout.data.sloStatus,
                   sloCount: selectedServiceNodeForFlyout.data.sloCount,
                 }}
-                deps={{ core, share, lens, dataViews }}
+                deps={{ core, share, lens, dataViews, alerting: plugins.alerting }}
                 filters={{
                   environment,
                   rangeFrom: flyoutOptions?.rangeFrom ?? start,

@@ -6,10 +6,10 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import type { ApmPluginSetupDeps } from '../../../plugin';
+import type { PluginSetupContract as AlertingPluginPublicSetup } from '@kbn/alerting-plugin/public';
 
 export const getAlertingCapabilities = (
-  plugins: ApmPluginSetupDeps,
+  plugins: { alerting?: AlertingPluginPublicSetup },
   capabilities: Capabilities
 ) => {
   const canReadAlerts = !!capabilities.apm['alerting:show'];

@@ -14,17 +14,17 @@ import {
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../../../common/environment_filter_values';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../../../common/es_fields/apm';
-import { getAlertingCapabilities } from '../../hooks/get_alerting_capabilities';
+import { getAlertingCapabilities } from '../../../../alerting/utils/get_alerting_capabilities';
 import { useServiceFlyoutContext } from '../../service_flyout_context';
 
 export function useAlertsHref(): string | undefined {
   const {
-    deps: { core },
+    deps: { core, alerting },
     service,
     filters: { environment, rangeFrom, rangeTo },
   } = useServiceFlyoutContext();
 
-  const { canReadAlerts } = getAlertingCapabilities(core.application.capabilities);
+  const { canReadAlerts } = getAlertingCapabilities({ alerting }, core.application.capabilities);
 
   return useMemo(() => {
     if (!canReadAlerts) return undefined;

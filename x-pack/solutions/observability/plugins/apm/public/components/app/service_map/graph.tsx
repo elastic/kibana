@@ -181,7 +181,7 @@ function GraphInner({
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
-  const { core, share, lens, dataViews } = useApmPluginContext();
+  const { core, share, lens, dataViews, plugins } = useApmPluginContext();
   const { euiTheme } = useEuiTheme();
   const { fitView, zoomIn, zoomOut, setCenter, getNodes, getNodesBounds } =
     useReactFlow<ServiceMapNode>();
@@ -931,7 +931,7 @@ function GraphInner({
                 sloStatus: selectedServiceNodeForFlyout.data.sloStatus,
                 sloCount: selectedServiceNodeForFlyout.data.sloCount,
               }}
-              deps={{ core, share, lens, dataViews }}
+              deps={{ core, share, lens, dataViews, alerting: plugins.alerting }}
               filters={{
                 environment,
                 rangeFrom: flyoutOptions?.rangeFrom ?? start,
