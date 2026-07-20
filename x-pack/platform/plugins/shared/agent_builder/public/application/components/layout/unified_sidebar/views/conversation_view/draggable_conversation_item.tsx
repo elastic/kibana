@@ -48,6 +48,7 @@ export const DraggableConversationItem: React.FC<DraggableConversationItemProps>
         onItemClick={onItemClick}
         status={status}
         read={conversation.read}
+        isPinned={conversation.pinned}
       />
     </EuiDraggable>
   );

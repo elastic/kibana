@@ -53,6 +53,12 @@ const labels = {
   markAsUnread: i18n.translate('xpack.agentBuilder.sidebar.conversationList.markAsUnread', {
     defaultMessage: 'Mark as unread',
   }),
+  pin: i18n.translate('xpack.agentBuilder.sidebar.conversationList.pin', {
+    defaultMessage: 'Pin',
+  }),
+  unpin: i18n.translate('xpack.agentBuilder.sidebar.conversationList.unpin', {
+    defaultMessage: 'Unpin',
+  }),
   openMenu: i18n.translate('xpack.agentBuilder.sidebar.conversationList.openMenu', {
     defaultMessage: 'Open conversation menu',
   }),
@@ -71,6 +77,7 @@ export interface ConversationListItemRowProps {
   onItemClick?: () => void;
   status?: ConversationDisplayStatus;
   read?: boolean;
+  isPinned?: boolean;
 }
 
 export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = ({
@@ -83,14 +90,21 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   onItemClick,
   status,
   read,
+  isPinned = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const { deleteConversation, renameConversation, markAsRead, markAsUnread } =
-    useConversationListMutations({ routeConversationId, agentId });
+  const {
+    deleteConversation,
+    renameConversation,
+    markAsRead,
+    markAsUnread,
+    markAsPinned,
+    markAsUnpinned,
+  } = useConversationListMutations({ routeConversationId, agentId });
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
@@ -204,6 +218,26 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         {isUnread ? labels.markAsRead : labels.markAsUnread}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
+        key="pin"
+        icon="pin"
+        onClick={() => {
+          closePopover();
+          if (isPinned) {
+            markAsUnpinned(conversationId);
+          } else {
+            markAsPinned(conversationId);
+          }
+        }}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          action: isPinned
+            ? AGENT_BUILDER_UI_EBT.action.conversationList.UNPIN_CONVERSATION
+            : AGENT_BUILDER_UI_EBT.action.conversationList.PIN_CONVERSATION,
+        })}
+      >
+        {isPinned ? labels.unpin : labels.pin}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
         key="delete"
         icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
         data-test-subj={`agentBuilderSidebarConversationDelete-${conversationId}`}
@@ -222,7 +256,17 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         {labels.delete}
       </EuiContextMenuItem>,
     ],
-    [closePopover, conversationId, euiTheme.colors.danger, isUnread, markAsRead, markAsUnread]
+    [
+      closePopover,
+      conversationId,
+      euiTheme.colors.danger,
+      isPinned,
+      isUnread,
+      markAsPinned,
+      markAsRead,
+      markAsUnpinned,
+      markAsUnread,
+    ]
   );
 
   const menuButton = (

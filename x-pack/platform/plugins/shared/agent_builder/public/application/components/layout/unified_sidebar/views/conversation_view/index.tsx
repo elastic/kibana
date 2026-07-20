@@ -24,7 +24,11 @@ import {
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
-import { agentBuilderDefaultAgentId, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  AGENT_BUILDER_EVENT_TYPES,
+  AGENT_BUILDER_UI_EBT,
+} from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { appPaths } from '../../../../../utils/app_paths';
 import {
@@ -32,6 +36,7 @@ import {
   getAgentSettingsNavItems,
   getConversationIdFromPath,
 } from '../../../../../route_config';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { useRouteAccessConfig } from '../../../../../hooks/use_route_access_config';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useValidateAgentId } from '../../../../../hooks/agents/use_validate_agent_id';
@@ -84,6 +89,9 @@ export const ConversationSidebarView: React.FC = () => {
   const agentId = getAgentIdFromPath(pathname) ?? agentBuilderDefaultAgentId;
   const conversationId = getConversationIdFromPath(pathname);
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { analytics },
+  } = useKibana();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const validateAgentId = useValidateAgentId();
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
@@ -110,17 +118,12 @@ export const ConversationSidebarView: React.FC = () => {
     setHoveredDroppableId(destination?.droppableId ?? null);
   }, []);
 
-  const sortedConversations = useMemo(
-    () =>
-      [...conversations].sort(
-        (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-      ),
-    [conversations]
-  );
-
   const pinnedConversations = useMemo(
-    () => sortedConversations.filter((c) => c.pinned),
-    [sortedConversations]
+    () =>
+      [...conversations]
+        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+        .filter((c) => c.pinned),
+    [conversations]
   );
 
   const pinnedConversationIds = useMemo(
@@ -153,14 +156,24 @@ export const ConversationSidebarView: React.FC = () => {
         destination.droppableId === DROPPABLE_IDS.PINNED
       ) {
         markAsPinned(draggableId);
+        analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+          ebt_element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          ebt_action: AGENT_BUILDER_UI_EBT.action.conversationList.PIN_CONVERSATION,
+          element_kind: 'other',
+        });
       } else if (
         source.droppableId === DROPPABLE_IDS.PINNED &&
         destination.droppableId === DROPPABLE_IDS.CHATS
       ) {
         markAsUnpinned(draggableId);
+        analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+          ebt_element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          ebt_action: AGENT_BUILDER_UI_EBT.action.conversationList.UNPIN_CONVERSATION,
+          element_kind: 'other',
+        });
       }
     },
-    [markAsPinned, markAsUnpinned]
+    [analytics, markAsPinned, markAsUnpinned]
   );
 
   const isNewConversationRoute =
