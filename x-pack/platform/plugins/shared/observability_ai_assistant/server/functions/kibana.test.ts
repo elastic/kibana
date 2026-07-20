@@ -87,7 +87,7 @@ const createFetchError = ({
   const error = Object.assign(new Error(message), {
     name: 'HttpSelfFetchError',
     ...(errorCode ? { code: errorCode } : {}),
-    request: { url: 'https://target.example/api/private-target/private-id?secret=value' },
+    request: { url: 'https://target.example/api/private-target/private-id?sensitive=value' },
     response: { status },
     body: {
       statusCode: status,
@@ -113,7 +113,7 @@ describe('kibana tool', () => {
           method: 'POST',
           pathname: '/api/apm/agent_keys/private-target-id',
           query: { type: 'private-query-value' },
-          body: { secret: 'private-body-value' },
+          body: { sensitive: 'private-body-value' },
         },
       },
       signal
@@ -123,7 +123,7 @@ describe('kibana tool', () => {
     expect(fetch).toHaveBeenCalledWith('/api/apm/agent_keys/private-target-id', {
       method: 'POST',
       query: { type: 'private-query-value' },
-      body: { secret: 'private-body-value' },
+      body: { sensitive: 'private-body-value' },
       signal,
       forwardRequestHeaders: true,
       asResponse: true,
@@ -146,7 +146,7 @@ describe('kibana tool', () => {
         arguments: {
           method: 'GET',
           pathname: '/api/private-target/private-id',
-          query: { secret: 'private-query-value' },
+          query: { sensitive: 'private-query-value' },
         },
       })
     ).rejects.toBe(error);
