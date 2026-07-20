@@ -712,10 +712,7 @@ export class DiscoverApp {
   }
 
   async openEsqlQuickReferenceFlyout() {
-    if (!(await this.esqlMenuPopover.isVisible())) {
-      await this.page.testSubj.click('esql-help-popover-button');
-    }
-
+    await this.page.testSubj.click('esql-help-popover-button');
     await this.esqlMenuPopover.waitFor({ state: 'visible' });
     await this.page.testSubj.click('esql-quick-reference');
     await this.getEsqlQuickReferenceFlyout().waitFor({ state: 'visible' });

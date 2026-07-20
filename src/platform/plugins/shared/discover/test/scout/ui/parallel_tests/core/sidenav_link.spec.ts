@@ -10,8 +10,6 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../fixtures/common';
 
-const createSessionName = (prefix: string, spaceId: string) => `${prefix}-${spaceId}-${Date.now()}`;
-
 const navigateAwayAndBackToDiscover = async (pageObjects: {
   collapsibleNav: { clickItem: (itemName: 'Discover' | 'Dashboards') => Promise<void> };
   discover: { waitUntilTabIsLoaded: () => Promise<void> };
@@ -73,7 +71,7 @@ spaceTest.describe('Discover side nav link', { tag: '@local-stateful-classic' },
 
   spaceTest('saves the last URL if the session was saved', async ({ pageObjects, scoutSpace }) => {
     const { discover, queryBar } = pageObjects;
-    const savedSession = createSessionName('side-nav-session', scoutSpace.id);
+    const savedSession = `side-nav-session-${scoutSpace.id}-${Date.now()}`;
 
     await discover.createDataViewFromSearchBar({ name: 'logs', adHoc: true });
     await discover.writeAndSubmitKqlQuery('response:404');
