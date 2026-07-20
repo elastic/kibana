@@ -140,7 +140,7 @@ export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator
 
 export type {
   RelayBinding,
-  RelayChannel,
+  RelaySlackChannel as RelayChannel,
   RelayClaimResponse,
   RelayClientContract,
   RelayInstallRequest,

@@ -10,7 +10,7 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
-import { useRelayAppBindings } from './use_relay_app_bindings';
+import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_relay_app_bindings';
 
 // Mock the hooks that depend on Kibana context — keep the component under test
 // isolated so we can drive its UI purely through controlled bindings.
@@ -31,6 +31,8 @@ jest.mock('./use_relay_app_connection', () => ({
 const mockUseRelayAppBindings = useRelayAppBindings as jest.MockedFunction<
   typeof useRelayAppBindings
 >;
+const mockUseBindChannel = useBindChannel as jest.MockedFunction<typeof useBindChannel>;
+const mockUseUnbindChannel = useUnbindChannel as jest.MockedFunction<typeof useUnbindChannel>;
 
 // AppsSection pulls the whole card + bindings together.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -40,13 +42,9 @@ const bindChannel = jest.fn().mockResolvedValue(undefined);
 const unbindChannel = jest.fn().mockResolvedValue(undefined);
 
 function makeBindings(bindings: SlackChannelBinding[]) {
-  mockUseRelayAppBindings.mockReturnValue({
-    bindings,
-    isLoading: false,
-    isMutating: false,
-    bindChannel,
-    unbindChannel,
-  });
+  mockUseRelayAppBindings.mockReturnValue({ bindings, isLoading: false });
+  mockUseBindChannel.mockReturnValue({ bind: bindChannel, isLoading: false });
+  mockUseUnbindChannel.mockReturnValue({ unbind: unbindChannel, isLoading: false });
 }
 
 function setup(canEdit = true) {
@@ -72,7 +70,7 @@ describe('SlackConnectionBindings', () => {
     jest.clearAllMocks();
   });
 
-  it('shows a Bind button for a not_bound channel and calls bindChannel on click', async () => {
+  it('shows a Bind button for a not_bound channel and calls bind on click', async () => {
     makeBindings([{ channel: 'C789', displayName: 'alerts', status: 'not_bound' }]);
     setup();
     await openChannels();
@@ -98,13 +96,13 @@ describe('SlackConnectionBindings', () => {
     const modal = await screen.findByTestId('streamsSlackAppUnbindConfirmModal');
     expect(modal).toBeInTheDocument();
 
-    // Confirming calls unbindChannel — scope to the modal to avoid matching the list button
-    const confirmBtn = within(modal).getByRole('button', { name: /^unbind$/i });
+    // Confirming calls unbind — scope to the modal to avoid matching the list button
+    const confirmBtn = within(modal).getByRole('button', { name: /^disconnect$/i });
     fireEvent.click(confirmBtn);
     await waitFor(() => expect(unbindChannel).toHaveBeenCalledWith('C123'));
   });
 
-  it('cancel on the unbind confirm modal does not call unbindChannel', async () => {
+  it('cancel on the unbind confirm modal does not call unbind', async () => {
     makeBindings([{ channel: 'C123', displayName: 'general', status: 'bound_to_self' }]);
     setup();
     await openChannels();
@@ -135,19 +133,6 @@ describe('SlackConnectionBindings', () => {
     expect(screen.queryByTestId('streamsSlackAppUnbindChannelButton')).not.toBeInTheDocument();
   });
 
-  it('shows no action for the default (* all channels) binding', async () => {
-    makeBindings([{ isDefault: true, status: 'bound_to_self' }]);
-    setup();
-    await openChannels();
-
-    expect(
-      await screen.findByText('Default (all not bound channels are routed here)')
-    ).toBeInTheDocument();
-    expect(screen.queryByTestId('streamsSlackAppBindChannelButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('streamsSlackAppUnbindChannelButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('streamsSlackAppChannelUnavailableBadge')).not.toBeInTheDocument();
-  });
-
   it('disables Bind and Unbind buttons when canEdit is false', async () => {
     makeBindings([
       { channel: 'C789', displayName: 'alerts', status: 'not_bound' },
@@ -161,5 +146,74 @@ describe('SlackConnectionBindings', () => {
 
     expect(bindBtn).toBeDisabled();
     expect(unbindBtn).toBeDisabled();
+  });
+
+  it('renders the correct Connected / Connectable counts', async () => {
+    makeBindings([
+      { channel: 'C001', displayName: 'general', status: 'bound_to_self' },
+      { channel: 'C002', displayName: 'alerts', status: 'not_bound' },
+      { channel: 'C003', displayName: 'random', status: 'not_bound' },
+      { channel: 'C004', displayName: 'other', status: 'bound_to_other_target' },
+    ]);
+    setup();
+    await openChannels();
+
+    const counts = await screen.findByTestId('streamsSlackAppChannelCounts');
+    expect(counts).toHaveTextContent('4 channels');
+    expect(counts).toHaveTextContent('2 connectable');
+  });
+
+  it('filters the table rows by search text while keeping counts stable', async () => {
+    makeBindings([
+      { channel: 'C001', displayName: 'general', status: 'bound_to_self' },
+      { channel: 'C002', displayName: 'alerts', status: 'not_bound' },
+      { channel: 'C003', displayName: 'random', status: 'not_bound' },
+    ]);
+    setup();
+    await openChannels();
+
+    // All three channels visible initially
+    expect(await screen.findByText('#general')).toBeInTheDocument();
+    expect(screen.getByText('#alerts')).toBeInTheDocument();
+    expect(screen.getByText('#random')).toBeInTheDocument();
+
+    // Type a search term that matches only one channel
+    const search = screen.getByTestId('streamsSlackAppChannelSearch');
+    fireEvent.change(search, { target: { value: 'alert' } });
+
+    await waitFor(() => {
+      expect(screen.getByText('#alerts')).toBeInTheDocument();
+      expect(screen.queryByText('#general')).not.toBeInTheDocument();
+      expect(screen.queryByText('#random')).not.toBeInTheDocument();
+    });
+
+    // Counts remain unchanged (3 total, 2 connectable across all bindings)
+    const counts = screen.getByTestId('streamsSlackAppChannelCounts');
+    expect(counts).toHaveTextContent('3 channels');
+    expect(counts).toHaveTextContent('2 connectable');
+  });
+
+  it('restores all rows when the search box is cleared', async () => {
+    makeBindings([
+      { channel: 'C001', displayName: 'general', status: 'bound_to_self' },
+      { channel: 'C002', displayName: 'alerts', status: 'not_bound' },
+    ]);
+    setup();
+    await openChannels();
+
+    const search = await screen.findByTestId('streamsSlackAppChannelSearch');
+    fireEvent.change(search, { target: { value: 'general' } });
+
+    await waitFor(() => {
+      expect(screen.queryByText('#alerts')).not.toBeInTheDocument();
+    });
+
+    // Clear the search
+    fireEvent.change(search, { target: { value: '' } });
+
+    await waitFor(() => {
+      expect(screen.getByText('#general')).toBeInTheDocument();
+      expect(screen.getByText('#alerts')).toBeInTheDocument();
+    });
   });
 });

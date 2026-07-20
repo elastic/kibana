@@ -59,7 +59,7 @@ export interface RelayBinding {
  * A single entry from the Relay channels list (`GET /v1/slack/tenants/:tenantKey/channels`).
  * Returns all Slack channels the bot is currently a member of (no binding data).
  */
-export interface RelayChannel {
+export interface RelaySlackChannel {
   id: string;
   name: string;
 }
@@ -89,7 +89,7 @@ export interface RelayClientContract {
    * List all Slack channels the bot is currently a member of for a given tenant.
    * Use alongside `listBindings` to derive channels available to bind (`not_bound`).
    */
-  listChannels(tenantKey: string): Promise<RelayChannel[]>;
+  listChannels(tenantKey: string): Promise<RelaySlackChannel[]>;
   /** Claim an unclaimed channel for this deployment (put-if-absent; 409 if already claimed). */
   bind(tenantKey: string, channelId: string): Promise<void>;
   /** Release a channel binding owned by this deployment (404 if none; 403 if owned by another). */
