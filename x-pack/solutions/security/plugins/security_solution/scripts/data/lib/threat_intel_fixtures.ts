@@ -52,12 +52,6 @@ export interface PackTiScenario {
   title: string;
   body: string;
   /**
-   * Browsable https article URL written into RSS `<channel>/<item><link>`.
-   * Becomes report `source.url` after mustard ingestion; must be http(s) so
-   * Intelligence Hub's `isBrowsableReportUrl` renders the external link.
-   */
-  articleUrl: string;
-  /**
    * Environment join keys. Must appear in the RSS body (value + optional
    * defanged) AND on pack docs after `ensureEcsSourceIp` + `enrichDocForGraph`
    * in the ECS fields mustard hunt searches.
@@ -164,7 +158,6 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario> = {
       'Admin to finance and IT accounts including cfo@corp.example and it-admin@corp.example. ' +
       'Follow-on activity includes system.api_token.create and privileged app group membership. ' +
       'Hunt ATT&CK T1078.004, T1556, T1098, and T1136.003 across okta.system telemetry.',
-    articleUrl: 'https://www.elastic.co/security-labs/okta-and-lapsus-what-you-need-to-know',
     joinIocs: [
       { type: 'ip', value: '192.0.2.50', defanged: '192[.]0[.]2[.]50' },
       { type: 'email', value: 'cfo@corp.example' },
@@ -186,7 +179,6 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario> = {
       'activity from 192[.]0[.]2[.]31 (192.0.2.31) includes GetSecretValue on prod/db-credentials ' +
       'plus StopLogging and DeleteTrail for defense evasion. Hunt ATT&CK T1098.001, T1078.004, ' +
       'and T1562.008 in aws.cloudtrail logs.',
-    articleUrl: 'https://www.elastic.co/security-labs/exploring-aws-sts-assumeroot',
     joinIocs: [
       { type: 'ip', value: '192.0.2.30', defanged: '192[.]0[.]2[.]30' },
       { type: 'ip', value: '192.0.2.31', defanged: '192[.]0[.]2[.]31' },
@@ -217,7 +209,6 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario> = {
       'clusterrolebindings/escalation-binding to cluster-admin. Activity from 192[.]0[.]2[.]60 ' +
       '(192.0.2.60) also includes pod exec against exec-pod, kube-system ConfigMap tampering, ' +
       'and audit cleanup. Hunt ATT&CK T1552.007, T1078, and T1610 in kubernetes.audit logs.',
-    articleUrl: 'https://www.elastic.co/security-labs/teampcp-container-attack-scenario',
     joinIocs: [
       { type: 'ip', value: '192.0.2.60', defanged: '192[.]0[.]2[.]60' },
       // Full SA principal — short "compromised-sa" alone is narrative only (not term-matchable).
@@ -248,8 +239,6 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario> = {
       'admin. The same actor dismisses secret scanning alerts, bypasses branch protection, and ' +
       'completes fork-triggered workflows while minting fine-grained PATs. Hunt ATT&CK T1567, ' +
       'T1098, and T1195 in github.audit telemetry.',
-    articleUrl:
-      'https://www.elastic.co/security-labs/axios-supply-chain-compromise-detections',
     joinIocs: [
       { type: 'ip', value: '192.0.2.70', defanged: '192[.]0[.]2[.]70' },
       { type: 'email', value: 'dev-contractor-42@corp.example' },
@@ -277,11 +266,50 @@ const xmlEscape = (value: string): string =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
 
+const htmlEscape = (value: string): string =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
 const cdata = (value: string): string =>
   `<![CDATA[${value.replace(/\]\]>/g, ']]]]><![CDATA[>')}]]>`;
 
 const timestampAt = (startMs: number, endMs: number, ratio: number): string =>
   new Date(Math.round(startMs + (endMs - startMs) * ratio)).toISOString();
+
+/**
+ * Offline mock "upstream article" for Intelligence Hub's external link.
+ * Becomes report `source.url` after mustard RSS ingestion. Requires mustard
+ * `isBrowsableReportUrl` to allow `data:` (http/https alone hides the link).
+ */
+export const buildPackArticleDataUrl = (scenario: PackTiScenario): string => {
+  const mitreLine = scenario.mitre.length
+    ? `<p><strong>Techniques:</strong> ${htmlEscape(scenario.mitre.join(', '))}</p>`
+    : '';
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>${htmlEscape(scenario.title)}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 42rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #1a1a1a; }
+    .feed { color: #666; font-size: 0.875rem; margin-bottom: 0.5rem; }
+    h1 { font-size: 1.5rem; margin: 0 0 1rem; }
+    p { margin: 0 0 1rem; }
+  </style>
+</head>
+<body>
+  <p class="feed">${htmlEscape(scenario.name)}</p>
+  <h1>${htmlEscape(scenario.title)}</h1>
+  <p>${htmlEscape(scenario.body)}</p>
+  ${mitreLine}
+</body>
+</html>`;
+
+  return `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
+};
 
 export const buildPackRssDataUrl = ({
   scenario,
@@ -293,7 +321,7 @@ export const buildPackRssDataUrl = ({
   const guid = `ti-report-${scenario.packId}`;
   const mitreLine = scenario.mitre.length ? ` Techniques: ${scenario.mitre.join(', ')}.` : '';
   const description = `${scenario.body}${mitreLine}`;
-  const articleLink = xmlEscape(scenario.articleUrl);
+  const articleLink = xmlEscape(buildPackArticleDataUrl(scenario));
   const feedBody = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
