@@ -50,6 +50,23 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
       await testSubjects.click('create-case-submit');
 
+      await cases.common.waitForCaseViewToLoad();
+
+      if (await cases.common.isRedesignEnabled()) {
+        // Redesign moves the title to the app header and the attributes into the sidebar; tags and
+        // categories render as in-place editors rather than the legacy viewers.
+        const redesignTitle = await testSubjects.find('appHeaderTitle');
+        expect(await redesignTitle.getVisibleText()).to.contain(caseTitle);
+
+        const redesignDescription = await testSubjects.find('description');
+        expect(await redesignDescription.getVisibleText()).to.contain('test description');
+
+        await testSubjects.existOrFail('case-tags');
+        await testSubjects.existOrFail('cases-categories');
+        await testSubjects.existOrFail('case-view-sidebar-connectors');
+        return;
+      }
+
       await testSubjects.existOrFail('case-view-title', {
         timeout: config.get('timeouts.waitFor'),
       });
@@ -74,7 +91,13 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     });
 
     describe('customFields', () => {
-      it('creates a case with custom fields', async () => {
+      it('creates a case with custom fields', async function () {
+        // The redesigned case view only renders custom-field viewers inside the templates-v2 sidebar
+        // section, which is off by default, so there is nothing to assert there.
+        if (await cases.common.isRedesignEnabled()) {
+          return this.skip();
+        }
+
         const customFields = [
           {
             key: 'valid_key_1',

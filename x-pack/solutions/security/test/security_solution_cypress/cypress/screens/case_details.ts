@@ -14,9 +14,13 @@ export const CASE_DELETE = '[data-test-subj="property-actions-trash"]';
 export const CASE_DETAILS_DESCRIPTION =
   '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]';
 
-export const CASE_DETAILS_PAGE_TITLE = '[data-test-subj="editable-title-header-value"]';
+// Legacy renders the editable title header; the redesign renders the app header title.
+export const CASE_DETAILS_PAGE_TITLE =
+  '[data-test-subj="editable-title-header-value"],[data-test-subj="appHeaderTitle"]';
 
-export const CASE_DETAILS_STATUS = '[data-test-subj="case-view-status-dropdown"]';
+// Legacy uses a status dropdown; the redesign shows a status badge in the app header.
+export const CASE_DETAILS_STATUS =
+  '[data-test-subj="case-view-status-dropdown"],[data-test-subj="case-view-status-badge"]';
 
 export const CASE_DETAILS_TAGS = '[data-test-subj="case-tags"]';
 
@@ -27,6 +31,12 @@ export const CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT =
   '[data-test-subj="description"] [data-test-subj="description-title"]';
 
 export const CASE_DETAILS_USERNAMES = '[data-test-subj="user-profile-username"]';
+
+// Redesign renders the reporter in the app header metadata and participants as avatars in the sidebar.
+export const CASE_DETAILS_REPORTER = '[data-test-subj="case-view-reported-by"]';
+
+export const CASE_DETAILS_PARTICIPANTS_PANEL =
+  '[data-test-subj="case-view-participants-field-panel"]';
 
 export const CONNECTOR_CARD_DETAILS = '[data-test-subj="connector-card-details"]';
 

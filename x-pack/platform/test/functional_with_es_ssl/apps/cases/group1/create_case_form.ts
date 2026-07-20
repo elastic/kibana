@@ -20,7 +20,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     const find = getService('find');
     const cases = getService('cases');
     const testSubjects = getService('testSubjects');
-    const config = getService('config');
     const comboBox = getService('comboBox');
     const header = getPageObject('header');
 
@@ -43,9 +42,21 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         category: 'new',
       });
 
-      await testSubjects.existOrFail('case-view-title', {
-        timeout: config.get('timeouts.waitFor'),
-      });
+      await cases.common.waitForCaseViewToLoad();
+
+      if (await cases.common.isRedesignEnabled()) {
+        // Redesign moves the title to the app header and the attributes into the sidebar.
+        const redesignTitle = await testSubjects.find('appHeaderTitle');
+        expect(await redesignTitle.getVisibleText()).to.contain(caseTitle);
+
+        const redesignDescription = await testSubjects.find('description');
+        expect(await redesignDescription.getVisibleText()).to.contain('test description');
+
+        await testSubjects.existOrFail('case-tags');
+        await testSubjects.existOrFail('cases-categories');
+        await testSubjects.existOrFail('case-view-sidebar-connectors');
+        return;
+      }
 
       // validate title
       const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
@@ -121,6 +132,19 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await cases.create.submitCase();
 
         await header.waitUntilLoadingHasFinished();
+        await cases.common.waitForCaseViewToLoad();
+
+        if (await cases.common.isRedesignEnabled()) {
+          // Redesign moves the title to the app header and assignees into the sidebar panel.
+          const redesignTitle = await testSubjects.find('appHeaderTitle');
+          expect(await redesignTitle.getVisibleText()).to.contain(caseTitle);
+
+          await testSubjects.existOrFail('case-view-assignees-field-panel');
+          await testSubjects.existOrFail('case-user-profile-avatar-cases_all_user');
+          await testSubjects.existOrFail('case-user-profile-avatar-cases_all_user2');
+          return;
+        }
+
         await testSubjects.existOrFail('case-view-title');
         await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
         await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user2-remove-group');
@@ -128,7 +152,13 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     });
 
     describe('customFields', () => {
-      it('creates a case with custom fields', async () => {
+      it('creates a case with custom fields', async function () {
+        // The redesigned case view only renders custom-field viewers inside the templates-v2
+        // sidebar section, which is off by default, so there is nothing to assert there.
+        if (await cases.common.isRedesignEnabled()) {
+          return this.skip();
+        }
+
         const customFields = [
           {
             key: 'valid_key_1',
@@ -183,7 +213,13 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         expect(await sync.getAttribute('aria-checked')).equal('true');
       });
 
-      it('creates a case with custom fields that have default values', async () => {
+      it('creates a case with custom fields that have default values', async function () {
+        // The redesigned case view only renders custom-field viewers inside the templates-v2
+        // sidebar section, which is off by default, so there is nothing to assert there.
+        if (await cases.common.isRedesignEnabled()) {
+          return this.skip();
+        }
+
         const customFields = [
           {
             key: 'valid_key_3',

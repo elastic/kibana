@@ -29,15 +29,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
       await header.waitUntilLoadingHasFinished();
 
-      await retry.waitFor('configure-case-button exist', async () => {
-        return await testSubjects.exists('configure-case-button');
-      });
-
-      await common.clickAndValidate('configure-case-button', 'case-configure-title');
+      await cases.navigation.clickHeaderMenuItem('configure-case-button');
       await header.waitUntilLoadingHasFinished();
 
-      await retry.waitFor('case-configure-title exist', async () => {
-        return await testSubjects.exists('case-configure-title');
+      await retry.waitFor('the configuration page to load', async () => {
+        return (
+          (await testSubjects.exists('case-configure-title')) ||
+          (await testSubjects.exists('cases-redesign-settings-panel'))
+        );
       });
     });
 
@@ -47,11 +46,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Closure options', function () {
       it('defaults the closure option correctly', async () => {
-        await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
+        await cases.common.assertClosureOption('close-by-user');
       });
 
       it('change closure option successfully', async () => {
-        await cases.common.selectRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
+        await cases.common.selectClosureOption('close-by-pushing');
         const toast = await toasts.getElementByIndex(1);
         expect(await toast.getVisibleText()).to.be('Settings successfully updated');
         await toasts.dismissAll();
@@ -73,6 +72,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Custom fields', function () {
+      before(async function () {
+        // The redesign settings page does not manage custom fields (moved to the templates v2 UI).
+        if (await cases.common.isRedesignEnabled()) {
+          this.skip();
+        }
+      });
+
       it('adds a custom field', async () => {
         await testSubjects.existOrFail('custom-fields-form-group');
         await common.clickAndValidate('add-custom-field', 'common-flyout');
@@ -122,6 +128,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Templates', function () {
+      before(async function () {
+        // The redesign settings page does not manage templates (moved to the templates v2 UI).
+        if (await cases.common.isRedesignEnabled()) {
+          this.skip();
+        }
+      });
+
       it('adds a template', async () => {
         await testSubjects.existOrFail('templates-form-group');
         await common.clickAndValidate('add-template', 'common-flyout');
