@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import type { ExceptionListItem } from '@kbn/securitysolution-exceptions-common/api';
 import { createExceptionListItemStepCommonDefinition } from '../../../../common/workflows/step_types/create_exception_list_item_step/create_exception_list_item_step_common';
-import { toCreateExceptionItemBody, toExceptionItemOutput } from '../../utils/exception_item';
+import {
+  createExceptionItemInList,
+  ExceptionItemStepAction,
+  findExceptionItemByItemId,
+  toExceptionItemOutput,
+  updateExceptionItemByItemId,
+} from '../../utils/exception_item';
 import { toApiExecutionError } from '../../utils/to_api_execution_error';
+
+const ACTION = ExceptionItemStepAction.CreateExceptionListItem;
 
 export const createExceptionListItemStepDefinition = createServerStepDefinition({
   ...createExceptionListItemStepCommonDefinition,
@@ -19,24 +26,48 @@ export const createExceptionListItemStepDefinition = createServerStepDefinition(
       list_id: listId,
       namespace_type: namespaceType,
       item_id: itemId,
+      overwrite,
       ...item
     } = context.input;
 
     try {
-      const { body } = await context.contextManager.callKibanaApi<ExceptionListItemSchema>({
-        method: 'POST',
-        path: EXCEPTION_LIST_ITEM_URL,
-        body: {
-          list_id: listId,
-          namespace_type: namespaceType,
-          ...(itemId !== undefined ? { item_id: itemId } : {}),
-          ...toCreateExceptionItemBody(item),
-        },
-      });
+      let existingItem: ExceptionListItem | undefined;
+      if (itemId !== undefined) {
+        existingItem = await findExceptionItemByItemId(
+          context.contextManager,
+          ACTION,
+          itemId,
+          namespaceType
+        );
+      }
 
-      return toExceptionItemOutput(body, 'create exception list item');
+      if (existingItem && !overwrite) {
+        return toExceptionItemOutput(existingItem, 'skipped');
+      }
+
+      if (existingItem) {
+        const updated = await updateExceptionItemByItemId(
+          context.contextManager,
+          ACTION,
+          existingItem.item_id,
+          namespaceType,
+          item
+        );
+        return toExceptionItemOutput(updated, 'overwritten');
+      }
+
+      const created = await createExceptionItemInList(
+        context.contextManager,
+        ACTION,
+        listId,
+        namespaceType,
+        itemId,
+        item
+      );
+
+      return toExceptionItemOutput(created, 'created');
     } catch (error) {
-      throw toApiExecutionError(error, 'create exception list item');
+      throw toApiExecutionError(error, ACTION);
     }
   },
 });

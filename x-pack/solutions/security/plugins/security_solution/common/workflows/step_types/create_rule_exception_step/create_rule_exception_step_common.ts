@@ -6,20 +6,34 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { ExceptionListItemHumanId } from '@kbn/securitysolution-exceptions-common/api';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 import {
   exceptionItemBaseSchema,
   exceptionItemOutputSchema,
+  OVERWRITE_REQUIRES_ITEM_ID_MESSAGE,
 } from '../common/exception_item_schemas';
 
 export const CreateRuleExceptionStepId = 'security.createRuleException' as const;
 
-export const createRuleExceptionInputSchema = z.object({
-  rule_id: z.string().min(1),
-  ...exceptionItemBaseSchema.shape,
-});
+export const createRuleExceptionInputSchema = z
+  .object({
+    rule_id: z.string().min(1),
+    item_id: ExceptionListItemHumanId.optional(),
+    overwrite: z.boolean().optional().default(false),
+    ...exceptionItemBaseSchema.shape,
+  })
+  .superRefine((input, ctx) => {
+    if (input.overwrite && input.item_id === undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['overwrite'],
+        message: OVERWRITE_REQUIRES_ITEM_ID_MESSAGE,
+      });
+    }
+  });
 
 export const createRuleExceptionOutputSchema = exceptionItemOutputSchema;
 
@@ -46,7 +60,7 @@ export const createRuleExceptionStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.createRuleException.documentation.details',
       {
         defaultMessage:
-          "Creates an exception item on the rule identified by `rule_id` (the rule's UUID, e.g. `kibana.alert.rule.uuid` on an alert). All `entries` of the item must match for the exception to apply; create separate items for alternative conditions. Each entry combines a `field` with an `operator`: `is`, `is_not`, `matches` and `does_not_match` take a single `value` (the match operators support `*` and `?` wildcards), `is_one_of` and `is_not_one_of` take a `values` array, `exists` and `does_not_exist` take no operand, and `is_in_list` and `is_not_in_list` reference a value list via `list.id` and `list.type`. Nested conditions (for fields mapped as nested in Elasticsearch) are not supported; manage those exceptions in the Security UI. An optional `expire_time` (ISO 8601) makes the exception temporary. To add items to a shared exception list instead, use the create exception list item step.",
+          "Creates an exception item on the rule identified by `rule_id` (the rule's UUID, e.g. `kibana.alert.rule.uuid` on an alert). All `entries` of the item must match for the exception to apply; create separate items for alternative conditions. Each entry combines a `field` with an `operator`: `is`, `is_not`, `matches` and `does_not_match` take a single `value` (the match operators support `*` and `?` wildcards), `is_one_of` and `is_not_one_of` take a `values` array, `exists` and `does_not_exist` take no operand, and `is_in_list` and `is_not_in_list` reference a value list via `list.id` and `list.type` (a value-list condition cannot be combined with other conditions in the same item). Nested conditions (for fields mapped as nested in Elasticsearch) are not supported; manage those exceptions in the Security UI. An optional `expire_time` (ISO 8601) makes the exception temporary. An optional `item_id` gives the item a stable identifier (unique per space, across lists) and makes the step idempotent: when an item with that `item_id` already exists the step skips creation and returns the existing item, or updates it when `overwrite: true` (existing comments are preserved). The output's `outcome` reports what happened: `created`, `skipped` or `overwritten`. To add items to a shared exception list instead, use the create exception list item step.",
       }
     ),
     examples: [
@@ -57,6 +71,7 @@ export const createRuleExceptionStepCommonDefinition: BaseStepDefinition<
   with:
     rule_id: "{{ variables.rule_id }}"
     name: "Exclude maintenance host"
+    description: "Host is under maintenance"
     entries:
       - field: host.name
         operator: is

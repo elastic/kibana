@@ -6,18 +6,33 @@
  */
 
 import { ExecutionError } from '@kbn/workflows/server';
+import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { ExceptionListItem } from '@kbn/securitysolution-exceptions-common/api';
 import type {
   CreateExceptionListItemSchema,
   EntriesArray,
+  NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { CREATE_RULE_EXCEPTIONS_URL } from '../../../common/api/detection_engine/rule_exceptions';
 import { assertUnreachable } from '../../../common/utility_types';
 import type {
   ExceptionEntryInput,
   ExceptionItemBaseInput,
+  ExceptionItemOutcome,
   ExceptionItemOutput,
 } from '../../../common/workflows/step_types/common/exception_item_schemas';
-import { exceptionItemOutputSchema } from '../../../common/workflows/step_types/common/exception_item_schemas';
+
+/**
+ * The step action on whose behalf a util call runs; used as the verb phrase
+ * of error messages (`Failed to <action>: ...`).
+ */
+export enum ExceptionItemStepAction {
+  CreateRuleException = 'create rule exception',
+  CreateExceptionListItem = 'create exception list item',
+}
 
 /**
  * The exception item fields both creation APIs accept, i.e. a create-item
@@ -113,9 +128,7 @@ export const toCreateExceptionItemBody = (
 
   return {
     name,
-    // `description` is required by the APIs but rarely adds anything beyond
-    // `name` in a workflow, so the step input keeps it optional.
-    description: description ?? '',
+    description,
     type: 'simple',
     entries: toApiEntries(entries),
     ...(osTypes && osTypes.length > 0 ? { os_types: osTypes } : {}),
@@ -126,27 +139,156 @@ export const toCreateExceptionItemBody = (
 };
 
 /**
- * Builds the step output from a created exception item response body by
- * parsing it with `exceptionItemOutputSchema` (a non-strict object), which
- * both validates the fields the step promises and strips everything else.
+ * Validates an exception item response body against the API's
+ * `ExceptionListItem` response schema.
  *
- * @param body   The created item (for the rule exceptions API, one element of
- *               the response array).
- * @param action Short verb phrase for the failure message, e.g. `create rule exception`.
+ * @param body   The item as returned by an exceptions API.
+ * @param action The step action, used as the failure message's verb phrase.
  */
-export const toExceptionItemOutput = (
+export const validateExceptionItemResponse = (
   body: unknown,
-  action: string
-): { output: ExceptionItemOutput } => {
-  const parsed = exceptionItemOutputSchema.safeParse(body);
+  action: ExceptionItemStepAction
+): ExceptionListItem => {
+  const parsed = ExceptionListItem.safeParse(body);
   if (!parsed.success) {
-    // Surfaced in the execution detail's Error tab: `path: message` per issue
-    // (safe scalars only; the response body itself is never persisted).
     throw new ExecutionError({
       type: 'ApiError',
       message: `Failed to ${action}: unexpected exception item response shape`,
       details: { issues: stringifyZodError(parsed.error) },
     });
   }
-  return { output: parsed.data };
+  return parsed.data;
+};
+
+/**
+ * Builds the step output (the summary slice promised by
+ * `exceptionItemOutputSchema`) from a validated exception item.
+ *
+ * @param item    The validated item.
+ * @param outcome What the step did with the item; forwarded to the output.
+ */
+export const toExceptionItemOutput = (
+  item: ExceptionListItem,
+  outcome: ExceptionItemOutcome
+): { output: ExceptionItemOutput } => ({
+  output: {
+    id: item.id,
+    item_id: item.item_id,
+    list_id: item.list_id,
+    namespace_type: item.namespace_type,
+    name: item.name,
+    created_at: item.created_at,
+    created_by: item.created_by,
+    ...(item.expire_time !== undefined ? { expire_time: item.expire_time } : {}),
+    outcome,
+  },
+});
+
+/**
+ * Looks up an exception item by its human-readable `item_id` (unique per
+ * namespace, across lists). Returns `undefined` when no item exists.
+ */
+export const findExceptionItemByItemId = async (
+  contextManager: StepHandlerContext['contextManager'],
+  action: ExceptionItemStepAction,
+  itemId: string,
+  namespaceType: NamespaceType
+): Promise<ExceptionListItem | undefined> => {
+  try {
+    const { body } = await contextManager.callKibanaApi<unknown>({
+      method: 'GET',
+      path: `${EXCEPTION_LIST_ITEM_URL}?item_id=${encodeURIComponent(
+        itemId
+      )}&namespace_type=${namespaceType}`,
+    });
+    return validateExceptionItemResponse(body, action);
+  } catch (error) {
+    if (error instanceof KibanaApiCallError && error.status === 404) {
+      return undefined;
+    }
+    throw error;
+  }
+};
+
+/**
+ * Creates an exception item on the rule identified by `ruleId` via the rule
+ * exceptions API, which places it on the rule's default exception list
+ * (creating that list if the rule has none). When `itemId` is undefined the
+ * API assigns one.
+ */
+export const createExceptionItemForRule = async (
+  contextManager: StepHandlerContext['contextManager'],
+  action: ExceptionItemStepAction,
+  ruleId: string,
+  itemId: string | undefined,
+  item: ExceptionItemBaseInput
+): Promise<ExceptionListItem> => {
+  const { body } = await contextManager.callKibanaApi<unknown[]>({
+    method: 'POST',
+    path: CREATE_RULE_EXCEPTIONS_URL.replace('{id}', encodeURIComponent(ruleId)),
+    body: {
+      items: [
+        {
+          ...(itemId !== undefined ? { item_id: itemId } : {}),
+          ...toCreateExceptionItemBody(item),
+        },
+      ],
+    },
+  });
+  // The API creates one item per submitted item; we always submit exactly one.
+  return validateExceptionItemResponse(body?.[0], action);
+};
+
+/**
+ * Creates an exception item in the list identified by `list_id` /
+ * `namespace_type` via the exception list items API. The list must already
+ * exist. When `itemId` is undefined the API assigns one.
+ */
+export const createExceptionItemInList = async (
+  contextManager: StepHandlerContext['contextManager'],
+  action: ExceptionItemStepAction,
+  listId: string,
+  namespaceType: NamespaceType,
+  itemId: string | undefined,
+  item: ExceptionItemBaseInput
+): Promise<ExceptionListItem> => {
+  const { body } = await contextManager.callKibanaApi<unknown>({
+    method: 'POST',
+    path: EXCEPTION_LIST_ITEM_URL,
+    body: {
+      list_id: listId,
+      namespace_type: namespaceType,
+      ...(itemId !== undefined ? { item_id: itemId } : {}),
+      ...toCreateExceptionItemBody(item),
+    },
+  });
+  return validateExceptionItemResponse(body, action);
+};
+
+/**
+ * Updates the exception item identified by `item_id` with the step's item
+ * fields. Comments are intentionally not sent: the update API appends any
+ * id-less comment to the existing ones (editing/deleting is not possible; see
+ * `transformUpdateCommentsToComments` in the lists plugin), so sending them
+ * would append a duplicate comment on every overwrite. Existing comments are
+ * always preserved by the API regardless.
+ */
+export const updateExceptionItemByItemId = async (
+  contextManager: StepHandlerContext['contextManager'],
+  action: ExceptionItemStepAction,
+  itemId: string,
+  namespaceType: NamespaceType,
+  item: ExceptionItemBaseInput
+): Promise<ExceptionListItem> => {
+  const { comments, ...updateBody } = toCreateExceptionItemBody(item);
+  const { body } = await contextManager.callKibanaApi<unknown>({
+    method: 'PUT',
+    path: EXCEPTION_LIST_ITEM_URL,
+    body: {
+      item_id: itemId,
+      namespace_type: namespaceType,
+      ...updateBody,
+    },
+  });
+  return validateExceptionItemResponse(body, action);
 };

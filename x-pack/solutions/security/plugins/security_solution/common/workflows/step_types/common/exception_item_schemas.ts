@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { i18n } from '@kbn/i18n';
 import {
   ExceptionListItem,
   ExceptionListItemDescription,
@@ -97,14 +98,26 @@ export const exceptionEntrySchema = z
         ctx.addIssue({
           code: 'custom',
           path: [key],
-          message: `\`${key}\` is required for \`${entry.operator}\` entries`,
+          message: i18n.translate(
+            'xpack.securitySolution.workflows.steps.exceptionItem.entryOperandRequired',
+            {
+              defaultMessage: '`{operandKey}` is required for `{operator}` entries',
+              values: { operandKey: key, operator: entry.operator },
+            }
+          ),
         });
       }
       if (key !== operandKey && entry[key] !== undefined) {
         ctx.addIssue({
           code: 'custom',
           path: [key],
-          message: `\`${key}\` is not allowed for \`${entry.operator}\` entries`,
+          message: i18n.translate(
+            'xpack.securitySolution.workflows.steps.exceptionItem.entryOperandNotAllowed',
+            {
+              defaultMessage: '`{operandKey}` is not allowed for `{operator}` entries',
+              values: { operandKey: key, operator: entry.operator },
+            }
+          ),
         });
       }
     }
@@ -116,10 +129,53 @@ export const exceptionEntrySchema = z
  * entries of an item must match for the exception to apply (logical AND);
  * separate items in the same list are alternatives (logical OR).
  */
+const LIST_OPERATORS: ReadonlyArray<z.infer<typeof exceptionEntryOperatorSchema>> = [
+  'is_in_list',
+  'is_not_in_list',
+];
+
+/**
+ * Mirrors the API's `nonEmptyEntriesArray` constraint ("Cannot have entry of
+ * type list and other" in kbn-securitysolution-io-ts-list-types
+ * `non_empty_entries_array`): value-list conditions cannot be combined with
+ * other condition types within one item. That constraint only exists in the
+ * io-ts request schema (the generated Zod `ExceptionListItemEntryArray` does
+ * not carry it), so it is re-expressed here for the step's flat entry shape,
+ * giving workflow authors the error at validation time instead of a runtime
+ * 400.
+ */
+const entriesArraySchema = z
+  .array(exceptionEntrySchema)
+  .min(1)
+  .superRefine((entries, ctx) => {
+    const hasListEntry = entries.some((entry) => LIST_OPERATORS.includes(entry.operator));
+    const hasNonListEntry = entries.some((entry) => !LIST_OPERATORS.includes(entry.operator));
+    if (hasListEntry && hasNonListEntry) {
+      ctx.addIssue({
+        code: 'custom',
+        message: i18n.translate(
+          'xpack.securitySolution.workflows.steps.exceptionItem.valueListEntryMixed',
+          {
+            defaultMessage:
+              'Value-list conditions (`is_in_list` / `is_not_in_list`) cannot be combined with other conditions in the same exception item',
+          }
+        ),
+      });
+    }
+  });
+
+/**
+ * Shared refine message for the `overwrite` inputs of both exception steps.
+ */
+export const OVERWRITE_REQUIRES_ITEM_ID_MESSAGE = i18n.translate(
+  'xpack.securitySolution.workflows.steps.exceptionItem.overwriteRequiresItemId',
+  { defaultMessage: '`overwrite` requires `item_id`' }
+);
+
 export const exceptionItemBaseSchema = z.object({
   name: ExceptionListItemName,
-  description: ExceptionListItemDescription.optional(),
-  entries: z.array(exceptionEntrySchema).min(1),
+  description: ExceptionListItemDescription,
+  entries: entriesArraySchema,
   os_types: ExceptionListItemOsTypeArray.optional(),
   tags: ExceptionListItemTags.optional(),
   // ISO 8601 datetime after which the exception no longer applies. Kept a
@@ -130,12 +186,12 @@ export const exceptionItemBaseSchema = z.object({
 });
 
 /**
- * Summary of the created exception item returned as the step output: the
+ * Summary of an exception item as returned by the exceptions APIs: the
  * identifying slice of the API's `ExceptionListItem`. Unlike the input
  * schemas, this can use the generated schemas verbatim (datetime formats
  * included) since outputs never contain template expressions.
  */
-export const exceptionItemOutputSchema = ExceptionListItem.pick({
+export const exceptionItemSummarySchema = ExceptionListItem.pick({
   id: true,
   item_id: true,
   list_id: true,
@@ -146,7 +202,20 @@ export const exceptionItemOutputSchema = ExceptionListItem.pick({
   expire_time: true,
 });
 
+/**
+ * What the step did: created a new item, skipped because an item with the
+ * given `item_id` already exists, or overwrote that existing item
+ * (`overwrite: true`).
+ */
+export const exceptionItemOutcomeSchema = z.enum(['created', 'skipped', 'overwritten']);
+
+export const exceptionItemOutputSchema = exceptionItemSummarySchema.extend({
+  outcome: exceptionItemOutcomeSchema,
+});
+
 export type ExceptionEntryOperator = z.infer<typeof exceptionEntryOperatorSchema>;
+export type ExceptionItemSummary = z.infer<typeof exceptionItemSummarySchema>;
 export type ExceptionEntryInput = z.infer<typeof exceptionEntrySchema>;
 export type ExceptionItemBaseInput = z.infer<typeof exceptionItemBaseSchema>;
+export type ExceptionItemOutcome = z.infer<typeof exceptionItemOutcomeSchema>;
 export type ExceptionItemOutput = z.infer<typeof exceptionItemOutputSchema>;

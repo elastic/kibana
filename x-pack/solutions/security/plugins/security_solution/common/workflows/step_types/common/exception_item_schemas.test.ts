@@ -5,7 +5,42 @@
  * 2.0.
  */
 
-import { exceptionEntrySchema } from './exception_item_schemas';
+import { exceptionEntrySchema, exceptionItemBaseSchema } from './exception_item_schemas';
+
+describe('exceptionItemBaseSchema entries', () => {
+  const item = (entries: unknown[]) => ({ name: 'Item', description: '', entries });
+
+  it('rejects an item without a description (required by the API)', () => {
+    expect(
+      exceptionItemBaseSchema.safeParse({
+        name: 'Item',
+        entries: [{ field: 'host.name', operator: 'is', value: 'a' }],
+      }).success
+    ).toBe(false);
+  });
+
+  it('accepts a lone value-list entry and multiple value-list entries', () => {
+    const single = item([
+      { field: 'source.ip', operator: 'is_in_list', list: { id: 'ips', type: 'ip' } },
+    ]);
+    const multiple = item([
+      { field: 'source.ip', operator: 'is_in_list', list: { id: 'ips', type: 'ip' } },
+      { field: 'destination.ip', operator: 'is_not_in_list', list: { id: 'ips', type: 'ip' } },
+    ]);
+
+    expect(exceptionItemBaseSchema.safeParse(single).success).toBe(true);
+    expect(exceptionItemBaseSchema.safeParse(multiple).success).toBe(true);
+  });
+
+  it('rejects mixing a value-list entry with other condition types (API constraint)', () => {
+    const mixed = item([
+      { field: 'user.name', operator: 'is', value: 'svc-scanner' },
+      { field: 'source.ip', operator: 'is_in_list', list: { id: 'ips', type: 'ip' } },
+    ]);
+
+    expect(exceptionItemBaseSchema.safeParse(mixed).success).toBe(false);
+  });
+});
 
 describe('exceptionEntrySchema', () => {
   it.each([
