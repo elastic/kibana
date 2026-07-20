@@ -9,8 +9,53 @@
 
 import { schema } from '@kbn/config-schema';
 import type { RouteValidator } from '@kbn/core-http-server';
-import { injectResponseHeaders, prepareResponseValidation } from './util';
+import {
+  injectResponseHeaders,
+  prepareResponseValidation,
+  prepareRouteConfigValidation,
+} from './util';
 import { kibanaResponseFactory } from './response';
+
+describe('prepareRouteConfigValidation', () => {
+  it('preserves static getter options from DI route classes', () => {
+    class BaseRoute {
+      static get options() {
+        return { access: 'public' as const, tags: ['oas-tag:test'] };
+      }
+      static get validate() {
+        return {
+          request: { body: schema.object({ name: schema.string() }) },
+          response: {
+            200: { body: () => schema.object({ ok: schema.boolean() }) },
+          },
+        };
+      }
+    }
+    class DiRoute extends BaseRoute {
+      static method = 'post' as const;
+      static path = '/api/example';
+      static security = {
+        authz: { enabled: false as const, reason: 'test' },
+      };
+    }
+
+    // Object spread alone drops prototype getters — the bug this guards against.
+    expect(
+      Object.prototype.hasOwnProperty.call({ ...DiRoute }, 'options')
+    ).toBe(false);
+
+    const prepared = prepareRouteConfigValidation(DiRoute);
+
+    expect(prepared.options).toEqual({ access: 'public', tags: ['oas-tag:test'] });
+    expect(prepared.path).toBe('/api/example');
+    expect(prepared.validate).toEqual(
+      expect.objectContaining({
+        request: expect.any(Object),
+        response: expect.any(Object),
+      })
+    );
+  });
+});
 
 describe('prepareResponseValidation', () => {
   it('wraps only expected values in "once"', () => {

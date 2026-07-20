@@ -40,7 +40,20 @@ export function loadHttp({ bind, onActivation }: ContainerModuleLoadOptions): vo
       handler = router.handleLegacyErrors(handler);
     }
 
-    register(route, handler);
+    // Materialize class-based route definitions into a plain config object.
+    // Static getters (e.g. `options` with `access: 'public'`) are not enumerable
+    // own properties, so passing the class through to the router would drop them
+    // during `prepareRouteConfigValidation`'s object spread and omit the route
+    // from public OAS generation.
+    register(
+      {
+        path: route.path,
+        validate: route.validate,
+        security: route.security,
+        options: route.options,
+      },
+      handler
+    );
 
     return route;
   });
