@@ -70,6 +70,16 @@ describe('ContextLandingPage', () => {
     await waitFor(() => expect(core.http.get).toHaveBeenCalled());
   });
 
+  it('renders skeleton cards while the list API is loading', () => {
+    const core = createCore();
+    core.http.get.mockReturnValue(new Promise(() => {}));
+
+    renderWithProviders(core);
+
+    expect(screen.getAllByTestId('contextAiIndexCardSkeleton')).toHaveLength(3);
+    expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
+  });
+
   it('renders a card per AI index returned by the list API and links to its detail page', async () => {
     const core = createCore();
     core.http.get.mockResolvedValue({
