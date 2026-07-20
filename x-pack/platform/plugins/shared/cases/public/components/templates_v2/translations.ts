@@ -96,12 +96,19 @@ export const TEMPLATE_FIELDS_LABEL = i18n.translate('xpack.cases.templates.templ
 });
 
 export const CASE_DEFAULT_TITLE = i18n.translate('xpack.cases.templates.caseDefaultTitle', {
-  defaultMessage: 'Case title',
+  defaultMessage: 'Name',
 });
 
 export const CASE_DEFAULT_ASSIGNEES = i18n.translate('xpack.cases.templates.caseDefaultAssignees', {
   defaultMessage: 'Assignees',
 });
+
+export const CASE_DEFAULT_DESCRIPTION_ARIA_LABEL = i18n.translate(
+  'xpack.cases.templates.caseDefaultDescriptionAriaLabel',
+  {
+    defaultMessage: 'Default case description markdown editor',
+  }
+);
 
 export const CASE_DEFAULTS_SECTION_TITLE = i18n.translate(
   'xpack.cases.templates.caseDefaultsSectionTitle',
@@ -901,6 +908,11 @@ export const CONFIGURATION_CONNECTOR_GROUP_DESCRIPTION = i18n.translate(
 export const CONFIGURATION_TAB_NAME_REQUIRED = i18n.translate(
   'xpack.cases.templates.configuration.nameRequiredIndicator',
   { defaultMessage: 'A template name is required — set it on the Configuration tab.' }
+);
+
+export const FIELDS_TAB_HAS_ERRORS = i18n.translate(
+  'xpack.cases.templates.fields.hasErrorsIndicator',
+  { defaultMessage: 'The Fields definition has validation errors — fix them on the Fields tab.' }
 );
 
 export const SETTINGS_SECTION_TITLE = i18n.translate(
