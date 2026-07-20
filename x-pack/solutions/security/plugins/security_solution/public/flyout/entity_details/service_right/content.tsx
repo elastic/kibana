@@ -15,7 +15,6 @@ import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_sum
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { EntityRiskScoresState } from '../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { ObservedEntity } from '../../../flyout_v2/entity/shared/components/observed_entity';
 import type { ObservedEntityData } from '../../../flyout_v2/entity/shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
@@ -51,6 +50,11 @@ interface ServicePanelContentProps {
     entityId: string;
     entityName: string | undefined;
   }) => void;
+  /**
+   * Inspect query id for {@link FlyoutRiskSummary}. Callers must pass a stable id that matches
+   * their `useQueryInspector` registration
+   */
+  riskScoreQueryId: string;
 }
 
 export const ServicePanelContent = ({
@@ -69,6 +73,7 @@ export const ServicePanelContent = ({
   entityStoreEntityId,
   prefetchedResolutionRisk,
   onShowEntity,
+  riskScoreQueryId,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
@@ -87,7 +92,7 @@ export const ServicePanelContent = ({
             riskScoreData={riskScoreState}
             entityRiskScores={entityRiskScores}
             recalculatingScore={recalculatingScore}
-            queryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
+            queryId={riskScoreQueryId}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
             entityType={EntityType.service}
