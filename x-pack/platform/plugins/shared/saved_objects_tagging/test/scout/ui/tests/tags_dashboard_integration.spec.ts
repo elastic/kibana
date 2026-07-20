@@ -15,16 +15,15 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
     await esArchiver.loadIfNeeded(ES_ARCHIVES.LOGSTASH_FUNCTIONAL);
   });
 
-  test.beforeEach(async ({ kbnClient, browserAuth, page, pageObjects }) => {
-    await kbnClient.savedObjects.cleanStandardList();
+  test.beforeEach(async ({ browserAuth, pageObjects, kbnClient }) => {
     await kbnClient.importExport.load(KBN_ARCHIVES.DASHBOARD);
-
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.dashboard.goto();
     await pageObjects.savedObjectsListing.waitForLoaded();
   });
 
   test.afterAll(async ({ kbnClient }) => {
+    await kbnClient.importExport.unload(KBN_ARCHIVES.DASHBOARD);
     await kbnClient.savedObjects.cleanStandardList();
   });
 
@@ -111,7 +110,7 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
     expect(itemNames).toContain('dashboard-with-new-tag');
   });
 
-  test('allows to select tags for an existing dashboard', async ({ page, pageObjects }) => {
+  test('allows to select tags for an existing dashboard', async ({ pageObjects }) => {
     const listingPage = pageObjects.savedObjectsListing;
     await listingPage.clickItemLink('dashboard', 'dashboard 4 with real data (tag-1)');
 
@@ -128,7 +127,7 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
     expect(itemNames).toContain('dashboard 4 with real data (tag-1)');
   });
 
-  test('retains dashboard saved object tags after quicksave', async ({ page, pageObjects }) => {
+  test('retains dashboard saved object tags after quicksave', async ({ pageObjects }) => {
     const listingPage = pageObjects.savedObjectsListing;
     await listingPage.clickItemLink('dashboard', 'dashboard 4 with real data (tag-1)');
 
