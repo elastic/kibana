@@ -69,7 +69,6 @@ export const getNavigationTreeDefinition = ({
         const navTree: NavigationTreeDefinition = {
           body: [
             {
-              breadcrumbStatus: 'hidden',
               icon,
               link: SEARCH_HOMEPAGE,
               renderAs: 'home',
@@ -211,7 +210,6 @@ export const getNavigationTreeDefinition = ({
           ],
           footer: [
             {
-              breadcrumbStatus: 'hidden',
               icon: 'rocket',
               id: 'search_getting_started',
               link: 'searchGettingStarted',
