@@ -227,6 +227,8 @@ export const MetricsGrid = ({
             const { rowIndex, colIndex } = getRowColFromIndex(index);
             const isFocused =
               focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
+            const isSelected =
+              isTabSelected && flyoutState?.metricUniqueKey === getMetricUniqueKey(metricItem);
 
             return (
               <EuiFlexItem key={id}>
@@ -245,6 +247,7 @@ export const MetricsGrid = ({
                   rowIndex={rowIndex}
                   colIndex={colIndex}
                   isFocused={isFocused}
+                  isSelected={isSelected}
                   onFocusCell={handleFocusCell}
                   onViewDetails={handleViewDetails}
                   searchTerm={searchTerm}
@@ -283,6 +286,7 @@ interface ChartItemProps
   rowIndex: number;
   colIndex: number;
   isFocused: boolean;
+  isSelected: boolean;
   searchTerm?: string;
   onFocusCell: (rowIndex: number, colIndex: number) => void;
   onViewDetails: (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => void;
@@ -308,6 +312,7 @@ const ChartItem = React.memo(
     rowIndex,
     colIndex,
     isFocused,
+    isSelected,
     searchTerm,
     whereStatements,
     userSource,
@@ -316,7 +321,7 @@ const ChartItem = React.memo(
     onViewDetails,
     userMessages,
   }: ChartItemProps) => {
-    const { profileId } = useMetricsExperienceState();
+    const { profileId, gridSettings } = useMetricsExperienceState();
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
@@ -337,12 +342,18 @@ const ChartItem = React.memo(
             splitAccessors: applicableDimensions.map((dim) => dim.name),
             whereStatements,
             originalSource: userSource,
+            gridSettings,
           })
         : '';
-    }, [metricItem, applicableDimensions, whereStatements, userSource]);
+    }, [metricItem, applicableDimensions, whereStatements, userSource, gridSettings]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
-    const chartLayers = useChartLayers({ dimensions: applicableDimensions, metricItem, color });
+    const chartLayers = useChartLayers({
+      dimensions: applicableDimensions,
+      metricItem,
+      color,
+      gridSettings,
+    });
     const handleViewDetailsCallback = useCallback(
       () => onViewDetails(index, esqlQuery, metricItem),
       [index, esqlQuery, metricItem, onViewDetails]
@@ -362,10 +373,12 @@ const ChartItem = React.memo(
         colIndex={colIndex}
         index={index}
         isFocused={isFocused}
+        isSelected={isSelected}
         onFocus={onFocusCell}
       >
         <Chart
           id={metricItem.metricName}
+          isSelected={isSelected}
           esqlQuery={esqlQuery}
           size={size}
           discoverFetch$={discoverFetch$}
@@ -439,6 +452,7 @@ const A11yGridCell = React.forwardRef(
       colIndex,
       index,
       isFocused,
+      isSelected,
       onFocus,
     }: React.PropsWithChildren<{
       id: string;
@@ -446,6 +460,7 @@ const A11yGridCell = React.forwardRef(
       colIndex: number;
       index: number;
       isFocused: boolean;
+      isSelected: boolean;
       onFocus: (rowIndex: number, colIndex: number) => void;
     }>,
     ref: React.Ref<HTMLDivElement>
@@ -464,6 +479,7 @@ const A11yGridCell = React.forwardRef(
         role="gridcell"
         aria-rowindex={rowIndex + 1}
         aria-colindex={colIndex + 1}
+        aria-selected={isSelected}
         data-grid-cell={`${rowIndex}-${colIndex}`}
         data-chart-index={index}
         tabIndex={isFocused ? 0 : -1}

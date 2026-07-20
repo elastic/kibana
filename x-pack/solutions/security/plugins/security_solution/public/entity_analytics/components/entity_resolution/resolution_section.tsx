@@ -30,7 +30,19 @@ interface ResolutionSectionProps {
   entityId: string;
   entityType: EntityType;
   scopeId: string;
-  openDetailsPanel: (path: EntityDetailsPath) => void;
+  /** When omitted, the header renders as plain, non-clickable text (no link, no arrow). */
+  openDetailsPanel?: (path: EntityDetailsPath) => void;
+  /**
+   * When provided, clicking a related entity name is delegated to this callback (used by the
+   * new EUI system flyout). When omitted, the legacy expandable-flyout `openFlyout` is used.
+   */
+  onShowEntity?: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
+  /** When true, hides the chevron icon in the resolution group header. Used by the v2 flyout. */
+  hideHeaderIcons?: boolean;
 }
 
 export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
@@ -38,6 +50,8 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
   entityType,
   scopeId,
   openDetailsPanel,
+  onShowEntity,
+  hideHeaderIcons = false,
 }) => {
   const {
     data: group,
@@ -51,13 +65,23 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
   const { openFlyout } = useExpandableFlyoutApi();
 
   const handleOpenResolutionTab = useCallback(() => {
-    openDetailsPanel({ tab: EntityDetailsLeftPanelTab.RESOLUTION_GROUP });
+    openDetailsPanel?.({ tab: EntityDetailsLeftPanelTab.RESOLUTION_GROUP });
   }, [openDetailsPanel]);
 
   const handleEntityNameClick = useCallback(
     (entity: Record<string, unknown>) => {
       const clickedEntityId = getEntityId(entity);
       const clickedEntityName = getEntityName(entity);
+
+      if (onShowEntity) {
+        onShowEntity({
+          engineType: entityType as string,
+          entityId: clickedEntityId,
+          entityName: clickedEntityName,
+        });
+        return;
+      }
+
       const panelKey = EntityPanelKeyByType[entityType];
       const panelParam = EntityPanelParamByType[entityType];
 
@@ -75,7 +99,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
         },
       });
     },
-    [openFlyout, entityType, scopeId]
+    [onShowEntity, openFlyout, entityType, scopeId]
   );
 
   const targetEntityId = group?.target ? getEntityId(group.target) : undefined;
@@ -95,11 +119,14 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
       <ExpandablePanel
         header={{
           title: RESOLUTION_GROUP_LINK_TITLE,
-          link: {
-            callback: handleOpenResolutionTab,
-            tooltip: RESOLUTION_GROUP_LINK_TOOLTIP,
-          },
-          iconType: 'arrowStart',
+          // link only when navigation is wired up; arrow icon hidden for the v2 flyout
+          ...(openDetailsPanel && {
+            link: {
+              callback: handleOpenResolutionTab,
+              tooltip: RESOLUTION_GROUP_LINK_TOOLTIP,
+            },
+            iconType: hideHeaderIcons ? undefined : 'arrowStart',
+          }),
         }}
         expand={{ expandable: false }}
         data-test-subj={RESOLUTION_GROUP_LINK_TEST_ID}

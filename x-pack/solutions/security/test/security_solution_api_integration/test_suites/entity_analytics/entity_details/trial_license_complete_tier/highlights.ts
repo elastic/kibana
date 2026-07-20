@@ -227,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
         assetCriticality: [
           {
             '@timestamp': [expect.any(String)],
-            'asset.criticality': ['high_impact'],
+            'asset.criticality': ['High Impact'],
             'host.name': [expect.any(String)],
           },
         ],
@@ -238,12 +238,12 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 contribution_score: [expect.any(String)],
                 description: [expect.any(String)],
-                risk_score: ['21'],
+                risk_score: ['21.00'],
                 timestamp: [expect.any(String)],
               },
             ],
             asset_criticality_contribution_score: expect.any(String),
-            score: [expect.any(Number)],
+            score: [expect.any(String)],
           },
         ],
         vulnerabilities: [
@@ -279,7 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(body.replacements).toEqual(expect.any(Object));
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
 
       // check if anonymization fields are working
@@ -313,7 +313,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(Object.values(body.replacements)).toEqual(['un-existent-host']);
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
     });
 

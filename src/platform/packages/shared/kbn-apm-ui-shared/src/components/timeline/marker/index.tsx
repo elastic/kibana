@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import styled from '@emotion/styled';
+import type { AgentMark } from './agent_marker';
+import { AgentMarker } from './agent_marker';
+import type { ErrorMark } from './error_marker';
+import { ErrorMarker } from './error_marker';
+
+export interface Mark {
+  type: string;
+  offset: number;
+  verticalLine: boolean;
+  id: string;
+}
+
+interface Props {
+  mark: ErrorMark | AgentMark;
+  x: number;
+}
+
+const MarkerContainer = styled.div`
+  position: absolute;
+  bottom: 0;
+`;
+
+export function Marker({ mark, x }: Props) {
+  const legendWidth = 11;
+  return (
+    <MarkerContainer style={{ left: x - legendWidth / 2 }}>
+      {mark.type === 'errorMark' ? <ErrorMarker mark={mark} /> : <AgentMarker mark={mark} />}
+    </MarkerContainer>
+  );
+}

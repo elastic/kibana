@@ -26,6 +26,7 @@ import {
 } from '../../../../tasks/expandable_flyout/alert_details_preview_panel_rule_preview';
 import { clickRuleSummaryButton } from '../../../../tasks/expandable_flyout/alert_details_right_panel_overview_tab';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { disableNewFlyout } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -40,11 +41,17 @@ describe(
     const rule = getNewRule();
 
     beforeEach(() => {
+      disableNewFlyout();
       deleteAlertsAndRules();
       login();
       createRule(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
+      // Wait for any in-flight alerts search that may have been triggered by a
+      // background rule evaluation immediately after waitForAlertsToPopulate's
+      // 500 ms idle window closed. A second idle check here ensures the spinner
+      // is gone before we try to expand the alert row (fixes #257389).
+      cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
       expandAlertAtIndexExpandableFlyout();
       clickRuleSummaryButton();
     });

@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema } from '../../default_api_types';
 
 export interface DurationFieldCandidatesResponse {
   fieldCandidates: string[];
@@ -15,16 +15,15 @@ export interface DurationFieldCandidatesResponse {
 
 export const fieldCandidatesTransactionsRoute = defineRoute<DurationFieldCandidatesResponse>()({
   endpoint: 'GET /internal/apm/correlations/field_candidates/transactions',
-  params: t.type({
-    query: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        transactionName: t.string,
-        transactionType: t.string,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
+  params: z.object({
+    query: z
+      .object({
+        serviceName: z.string().optional(),
+        transactionName: z.string().optional(),
+        transactionType: z.string().optional(),
+      })
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(rangeSchema),
   }),
 });

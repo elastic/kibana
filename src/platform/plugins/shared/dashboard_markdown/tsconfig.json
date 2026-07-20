@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*","test/scout/**/*"],
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/css-utils",
     "@kbn/core",
@@ -26,6 +26,9 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/visualizations-common",
     "@kbn/react-kibana-context-render",
+    "@kbn/as-code-utils",
+    "@kbn/usage-collection-plugin",
+    "@kbn/as-code-shared-telemetry"
   ],
   "exclude": ["target/**/*"]
 }

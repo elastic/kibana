@@ -21,19 +21,21 @@ const _allowedExperimentalValues = {
   installIntegrationsKnowledge: true,
   enableFleetPolicyRevisionsCleanupTask: true,
   enableAgentRollback: true, // When enabled, agent upgrade rollback will be available in the API and UI.
-  disableAgentlessLegacyAPI: false, // When enabled, it will disable creating agentless policies via agent or package policies API.
+  disableAgentlessLegacyAPI: false, // When enabled, the legacy agent/package policy APIs reject agentless create, update, upgrade, and copy. Forces enableAgentlessPoliciesUI on (see below).
+  enableAgentlessPoliciesUI: true, // When enabled, the UI reads/writes agentless integration policies through the managed integrations API. Disable as a kill switch to fall back to the legacy APIs — but disableAgentlessLegacyAPI overrides it (the fallback would 400).
   enableEsqlViewInstall: false,
   enableSloTemplates: true,
   newBrowseIntegrationUx: true, // When enabled integrations, browse integrations page will use the new UX.
   enableVersionSpecificPolicies: true, // When enabled, version specific policies will be created when packages use agent version conditions
-  enableVarGroups: false, // When enabled, var_groups from the package spec drive conditional variable visibility and input filtering.
+  enableVarGroups: true, // When enabled, var_groups from the package spec drive conditional variable visibility and input filtering.
   enableIntegrationInactivityAlerting: true, // When enabled, an inactivity monitoring alerting rule template is created on fresh integration package install.
   enableSimplifiedAgentlessUX: true, // When enabled, the agentless deployment mode will be simplified for single input/datastreams integrations.
   enableOpAMP: true, // When enabled, OpAMP features will be available in the API and UI.
   enableOTelVerifier: true, // When enabled, OTel-based cloud connector permission verification is active.
   enableResolveDependencies: true, // When enabled, the resolve dependencies step will be available during package installation.
-  enableOtelUI: false, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
+  enableOtelUI: true, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
   enableCloudOnboardingDeployments: false, // When enabled, the cloud-onboarding-deployment CRUD API is registered and available.
+  enableIncludeTagsInEvents: false, // When enabled, the include_tags_in_events agent policy advanced setting is available in the UI.
 };
 
 /**

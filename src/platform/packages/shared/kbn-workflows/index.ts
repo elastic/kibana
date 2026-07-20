@@ -52,7 +52,25 @@ export type { WorkflowExecutionEventDispatchMetadata } from './common/workflow_e
 export * from './common/privileges';
 export * from './common/utils';
 export * from './common/step_types';
+export * from './common/hitl';
+export * from './common/wait_for_approval';
+export {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+  getManagedWorkflowVisibilityContexts,
+  MANAGED_WORKFLOW_SELECTORS,
+  MANAGED_WORKFLOW_SOLUTIONS,
+} from './managed/types';
+export type {
+  ManagedWorkflowSelector,
+  ManagedWorkflowSelectorVisibilityContext,
+  ManagedWorkflowSolution,
+  ManagedWorkflowSolutionVisibilityContext,
+  ManagedWorkflowVisibility,
+  ManagedWorkflowVisibilityContext,
+} from './managed/types';
 export * from './definition';
+export * from './graph_layout';
 export * from './common/elasticsearch_request_builder';
 export * from './common/kibana_request_builder';
 export * from './server/constants';

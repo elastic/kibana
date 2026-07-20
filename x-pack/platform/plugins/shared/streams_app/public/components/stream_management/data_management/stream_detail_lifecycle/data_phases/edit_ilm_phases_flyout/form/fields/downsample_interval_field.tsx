@@ -10,9 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { useController, useFormContext, useWatch, type FieldPath } from 'react-hook-form';
 
+import { getIntervalBoundHelpText, type HelpTextBound } from '@kbn/data-lifecycle-phases';
 import type { DownsamplePhase, PreservedTimeUnit, TimeUnit } from '../types';
 import { DOWNSAMPLE_PHASES } from '../types';
-import { getBoundsHelpTextValues, getUnitSelectOptions } from '../../../shared';
+import { formatDuration, getMultipleStepAttributes, getUnitSelectOptions } from '../../../shared';
 import { getRelativeBoundsInMs } from '../utils';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';
 import type { IlmPhasesFlyoutFormInternal } from '../types';
@@ -77,51 +78,38 @@ const DownsampleIntervalFieldControl = ({
       extraEnabledPathSuffix: 'downsampleEnabled',
     });
 
-  const { lowerBoundMs, upperBoundMs } = getRelativeBoundsInMs(
+  // Only the previous phase acts as a boundary here, so the hot phase (no earlier downsample phase)
+  // shows no help text.
+  const { lowerBoundMs, lowerBoundPhase } = getRelativeBoundsInMs(
     DOWNSAMPLE_PHASES,
     phaseName as DownsamplePhase,
     getPhaseDownsampleIntervalMs
   );
-  const { min, max } = getBoundsHelpTextValues({
-    lowerBoundMs,
-    upperBoundMs,
-    unit: currentUnit,
+
+  const toPhaseBound = (phase: DownsamplePhase | undefined): HelpTextBound | undefined => {
+    if (!phase) return undefined;
+    const value = formatDuration(
+      getValues(`_meta.${phase}.downsample.fixedIntervalValue`),
+      getValues(`_meta.${phase}.downsample.fixedIntervalUnit`),
+      { integerOnly: true, minExclusive: 0 }
+    );
+    if (!value) return undefined;
+    return { neighbor: { type: 'phase', phase }, value };
+  };
+
+  const helpText = getIntervalBoundHelpText({
+    multipleOf: toPhaseBound(lowerBoundPhase),
   });
 
-  const showMultipleOfPreviousPhase = lowerBoundMs > 0;
-  const helpText =
-    upperBoundMs === undefined
-      ? showMultipleOfPreviousPhase
-        ? i18n.translate(
-            'xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpLowerBoundMultiple',
-            {
-              defaultMessage:
-                'Must be larger than {min} and a multiple of {multipleOf} based on current configuration.',
-              values: { min, multipleOf: min },
-            }
-          )
-        : i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpLowerBound', {
-            defaultMessage: 'Must be larger than {min} based on current configuration.',
-            values: { min },
-          })
-      : showMultipleOfPreviousPhase
-      ? i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpRangeMultiple', {
-          defaultMessage:
-            'Must be larger than {min}, smaller than {max}, and a multiple of {multipleOf} based on current configuration.',
-          values: {
-            min,
-            max,
-            multipleOf: min,
-          },
-        })
-      : i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpRange', {
-          defaultMessage:
-            'Must be larger than {min} and smaller than {max} based on current configuration.',
-          values: {
-            min,
-            max,
-          },
-        });
+  // The interval must be a multiple of the previous phase's interval, so step the
+  // increment/decrement buttons by that multiple (expressed in the current unit) whenever the
+  // current value already sits on a valid multiple; otherwise fall back to stepping by 1.
+  const { min, step } = getMultipleStepAttributes({
+    currentValue: draftValue,
+    unit: currentUnit,
+    multipleOfMs: lowerBoundMs,
+    baseMin: 0,
+  });
 
   return (
     <EuiFormRow
@@ -136,7 +124,8 @@ const DownsampleIntervalFieldControl = ({
         <EuiFlexItem>
           <EuiFieldNumber
             compressed
-            min={0}
+            min={min}
+            step={step}
             fullWidth
             aria-label={i18n.translate(
               'xpack.streams.editIlmPhasesFlyout.downsamplingIntervalAriaLabel',

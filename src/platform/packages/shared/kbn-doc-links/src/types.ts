@@ -67,6 +67,7 @@ export interface DocLinks {
   };
   readonly console: {
     readonly guide: string;
+    readonly kibanaApiReference: string;
   };
   readonly dashboard: {
     readonly guide: string;
@@ -321,6 +322,8 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
     readonly ingestDataToSecurity: string;
     readonly automaticImport: string;
+    readonly attacksPage: string;
+    readonly mitreCoverage: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -396,6 +399,7 @@ export interface DocLinks {
     readonly queryDsl: string;
     readonly queryESQL: string;
     readonly queryESQLExamples: string;
+    readonly queryESQLApproximateResults: string;
     readonly queryESQLMultiValueControls: string;
     readonly queryESQLMvIntersects: string;
   };
@@ -422,6 +426,7 @@ export interface DocLinks {
     createApiKeyMetadata: string;
     createApiKeyRoleDescriptors: string;
     createCrossClusterApiKey: string;
+    crossClusterApiKeyStrongVerification: string;
     createPipeline: string;
     createTransformRequest: string;
     cronExpressions: string;
@@ -502,6 +507,7 @@ export interface DocLinks {
     teamsAction: string;
     casesWebhookAction: string;
     connectors: string;
+    agentBuilderConnectors: string;
   }>;
   readonly taskManager: Readonly<{
     healthMonitoring: string;
@@ -753,6 +759,9 @@ export interface DocLinks {
     readonly limitationsKnownIssues: string;
     readonly learnMore: string;
   };
+  readonly applicationConnections: {
+    readonly oauthClients: string;
+  };
   readonly indexManagement: {
     readonly componentTemplate: string;
     readonly indexAlias: string;
@@ -761,6 +770,7 @@ export interface DocLinks {
   readonly cases: {
     readonly casesPermissions: string;
     readonly configureCaseSettings: string;
+    readonly manageCaseTemplates: string;
   };
 }
 

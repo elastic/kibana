@@ -11,13 +11,10 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { Provider } from 'react-redux';
-import { createStore } from 'redux';
-import {
-  VISUALIZATION_SECTION_TEST_ID,
-  VISUALIZATION_SECTION_TITLE,
-  VisualizationsSection,
-} from './visualizations_section';
+import { Provider } from 'react-redux-v7';
+import { createStore } from 'redux-v4';
+import { VISUALIZATION_SECTION_TEST_ID, VisualizationsSection } from './visualizations_section';
+import { VISUALIZATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
@@ -63,7 +60,15 @@ jest.mock('./session_preview_container', () => ({
 }));
 
 jest.mock('./graph_preview_container', () => ({
-  GraphPreviewContainer: () => <div data-test-subj="graphPreviewContainerMock" />,
+  GraphPreviewContainer: ({ onShowGraph }: { onShowGraph: () => void }) => (
+    <button type="button" data-test-subj="graphPreviewContainerMock" onClick={onShowGraph}>
+      {'GraphPreview'}
+    </button>
+  ),
+}));
+
+jest.mock('../../tools/graph', () => ({
+  GraphDetails: () => <div data-test-subj="graphDetailsMock" />,
 }));
 
 jest.mock('../hooks/use_graph_preview', () => ({
@@ -184,6 +189,38 @@ describe('VisualizationsSection', () => {
 
     const { getByTestId } = renderVisualizationsSection();
     act(() => getByTestId('sessionPreviewContainerMock').click());
+
+    expect(openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
+        session: 'start',
+      })
+    );
+  });
+
+  it('uses Security history key when opening graph flyout in Security app', () => {
+    mockUseExpandSection.mockReturnValue(true);
+    mockUseIsInSecurityApp.mockReturnValue(true);
+
+    const { getByTestId } = renderVisualizationsSection();
+    act(() => getByTestId('graphPreviewContainerMock').click());
+
+    expect(openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
+  });
+
+  it('uses Discover history key when opening graph flyout outside Security app', () => {
+    mockUseExpandSection.mockReturnValue(true);
+    mockUseIsInSecurityApp.mockReturnValue(false);
+
+    const { getByTestId } = renderVisualizationsSection();
+    act(() => getByTestId('graphPreviewContainerMock').click());
 
     expect(openSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),

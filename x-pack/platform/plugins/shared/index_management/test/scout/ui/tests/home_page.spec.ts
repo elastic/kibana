@@ -145,11 +145,7 @@ test.describe('Home page', { tag: tags.stateful.classic }, () => {
     await pageObjects.indexManagement.changeTabs('data_streamsTab');
     const dataStreamTable = page.testSubj.locator('dataStreamTable');
     await expect(dataStreamTable).toBeVisible();
-    await page
-      .getByRole('searchbox', {
-        name: 'This is a search bar. As you type, the results lower in the page will automatically filter.',
-      })
-      .fill(byteUnitsDataStreamName);
+    await page.testSubj.locator('dataStreamSearch').fill(byteUnitsDataStreamName);
     await page.testSubj.locator('includeStatsSwitch').click();
 
     const dataStreamRow = dataStreamTable.getByRole('row', {

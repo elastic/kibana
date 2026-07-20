@@ -1,0 +1,239 @@
+{
+  "sha1": "1dde17f53cf39b1883a2036917bdbad48a385c04",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "145dd70ebc9c35e-9f78923f57eb20e",
+      "title": "Teardown environment for Significant Events API tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.teardown.ts",
+        "line": 11,
+        "column": 19
+      }
+    },
+    {
+      "id": "aba317166d7aac7-81c41da1351e0a5",
+      "title": "Setup environment for Significant Events API tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.setup.ts",
+        "line": 11,
+        "column": 16
+      }
+    },
+    {
+      "id": "0637965b8273f93-ea3faff2f10da6c",
+      "title": "Memory CRUD API smoke: create, read, search, categories, soft-delete, and restore by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
+        "line": 38,
+        "column": 12
+      }
+    },
+    {
+      "id": "0637965b8273f93-597176718a618d6",
+      "title": "Memory CRUD API a freshly written page is immediately readable without polling",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
+        "line": 209,
+        "column": 12
+      }
+    },
+    {
+      "id": "0637965b8273f93-24f17689411c1be",
+      "title": "Memory CRUD API removing a category does not return the stale older version",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
+        "line": 298,
+        "column": 12
+      }
+    },
+    {
+      "id": "0637965b8273f93-0f36a39d57a31b9",
+      "title": "Memory CRUD API search does not return a page whose latest version no longer matches the filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
+        "line": 372,
+        "column": 12
+      }
+    },
+    {
+      "id": "0637965b8273f93-695cc6450b8de2c",
+      "title": "Memory CRUD API search does not return a soft-deleted page even if its latest version matches the filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
+        "line": 435,
+        "column": 12
+      }
+    },
+    {
+      "id": "3b914c845b72751-1d8b985de6fcd2d",
+      "title": "Onboarding bulk status API returns not_started for every requested stream that has never been onboarded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
+        "line": 23,
+        "column": 12
+      }
+    },
+    {
+      "id": "3b914c845b72751-6eae18e8b4c773e",
+      "title": "Onboarding bulk status API rejects an empty streamNames array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
+        "line": 49,
+        "column": 12
+      }
+    },
+    {
+      "id": "3b914c845b72751-4d182347c2af93f",
+      "title": "Onboarding bulk status API returns 403 when significant events is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
+        "line": 61,
+        "column": 12
+      }
+    },
+    {
+      "id": "0d69f0f4d0e3e1c-365722779727e4f",
+      "title": "Managed workflows system-significant-events-discovery: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
+        "line": 37,
+        "column": 14
+      }
+    },
+    {
+      "id": "0d69f0f4d0e3e1c-ce49965b1da3194",
+      "title": "Managed workflows system-significant-events-triage: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
+        "line": 37,
+        "column": 14
+      }
+    },
+    {
+      "id": "0d69f0f4d0e3e1c-bd7a1e3fc467957",
+      "title": "Managed workflows system-significant-events-memory-synthesis: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
+        "line": 37,
+        "column": 14
+      }
+    },
+    {
+      "id": "0d69f0f4d0e3e1c-95274bd98778fe9",
+      "title": "Managed workflows system-significant-events-memory-consolidation: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
+        "line": 37,
+        "column": 14
+      }
+    },
+    {
+      "id": "0d69f0f4d0e3e1c-2bf3bba1a03f16b",
+      "title": "Managed workflows system-significant-events-memory-conversation-scraper: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
+        "line": 37,
+        "column": 14
+      }
+    }
+  ]
+}

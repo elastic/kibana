@@ -33,6 +33,8 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   UsedByWarningProceeded: `${TELEMETRY_PREFIX}_used_by_warning_proceeded`,
   InappChatOpen: `${TELEMETRY_PREFIX}_inapp_chat_open`,
   FullscreenEntryPoint: `${TELEMETRY_PREFIX}_fullscreen_entry_point`,
+  HitlPromptShown: `${TELEMETRY_PREFIX}_hitl_prompt_shown`,
+  HitlQuestionAnswered: `${TELEMETRY_PREFIX}_hitl_question_answered`,
 } as const;
 
 export type OptInSource =
@@ -89,6 +91,7 @@ export interface ReportRoundCompleteParams {
   conversation_id?: string;
   execution_id?: string;
   input_tokens: number;
+  cached_input_tokens?: number;
   llm_calls: number;
   message_length: number;
   model?: string;
@@ -279,6 +282,26 @@ export interface ReportFullscreenEntryPointParams {
   source: FullscreenEntryPointSource;
 }
 
+export interface ReportHitlPromptShownParams {
+  prompt_id: string;
+  total_questions: number;
+  conversation_id?: string;
+  agent_id?: string;
+}
+
+export type HitlQuestionAnsweredOutcome = 'answered' | 'skipped';
+
+export interface ReportHitlQuestionAnsweredParams {
+  prompt_id: string;
+  conversation_id?: string;
+  agent_id?: string;
+  question_index: number;
+  is_multi_select: boolean;
+  outcome: HitlQuestionAnsweredOutcome;
+  used_custom_text: boolean;
+  selected_option_count: number;
+}
+
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
@@ -306,6 +329,8 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded]: ReportUsedByWarningProceededParams;
   [AGENT_BUILDER_EVENT_TYPES.InappChatOpen]: ReportInappChatOpenParams;
   [AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint]: ReportFullscreenEntryPointParams;
+  [AGENT_BUILDER_EVENT_TYPES.HitlPromptShown]: ReportHitlPromptShownParams;
+  [AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered]: ReportHitlQuestionAnsweredParams;
 }
 
 export type AgentBuilderTelemetryEvent =
@@ -329,7 +354,9 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportUsedByWarningShownParams>
   | EventTypeOpts<ReportUsedByWarningProceededParams>
   | EventTypeOpts<ReportInappChatOpenParams>
-  | EventTypeOpts<ReportFullscreenEntryPointParams>;
+  | EventTypeOpts<ReportFullscreenEntryPointParams>
+  | EventTypeOpts<ReportHitlPromptShownParams>
+  | EventTypeOpts<ReportHitlQuestionAnsweredParams>;
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
@@ -352,7 +379,9 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown
   | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded
   | typeof AGENT_BUILDER_EVENT_TYPES.InappChatOpen
-  | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint;
+  | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint
+  | typeof AGENT_BUILDER_EVENT_TYPES.HitlPromptShown
+  | typeof AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered;
 
 const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
@@ -799,6 +828,14 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
+    cached_input_tokens: {
+      type: 'integer',
+      _meta: {
+        description:
+          'Number of input tokens served from cache during this round (subset of input_tokens), when reported by the provider',
+        optional: true,
+      },
+    },
     llm_calls: {
       type: 'integer',
       _meta: {
@@ -1133,7 +1170,7 @@ const MANAGE_ENTITY_LIST_VIEW_EVENT: AgentBuilderTelemetryEvent = {
     entity_type: {
       type: 'keyword',
       _meta: {
-        description: 'Type of entity on the list page (tool|plugin|skill)',
+        description: 'Type of entity on the list page (tool|plugin|skill|mcp_client)',
         optional: false,
       },
     },
@@ -1235,6 +1272,72 @@ const FULLSCREEN_ENTRY_POINT_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const HITL_PROMPT_SHOWN_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.HitlPromptShown,
+  schema: {
+    prompt_id: {
+      type: 'keyword',
+      _meta: { description: 'Unique ID of the ask_user_question prompt', optional: false },
+    },
+    total_questions: {
+      type: 'integer',
+      _meta: { description: 'Number of questions in this prompt', optional: false },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: { description: 'Conversation ID', optional: true },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'Agent ID', optional: true },
+    },
+  },
+};
+
+const HITL_QUESTION_ANSWERED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered,
+  schema: {
+    prompt_id: {
+      type: 'keyword',
+      _meta: { description: 'Unique ID of the ask_user_question prompt', optional: false },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: { description: 'Conversation ID', optional: true },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'Agent ID', optional: true },
+    },
+    question_index: {
+      type: 'integer',
+      _meta: {
+        description: '0-based index of the question being answered/skipped',
+        optional: false,
+      },
+    },
+    is_multi_select: {
+      type: 'boolean',
+      _meta: { description: 'Whether the question allows multiple selections', optional: false },
+    },
+    outcome: {
+      type: 'keyword',
+      _meta: {
+        description: 'How the user responded (answered|skipped)',
+        optional: false,
+      },
+    },
+    used_custom_text: {
+      type: 'boolean',
+      _meta: { description: 'Whether the user filled in the free-text field', optional: false },
+    },
+    selected_option_count: {
+      type: 'integer',
+      _meta: { description: 'Number of options selected (0 when skipped)', optional: false },
+    },
+  },
+};
+
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
@@ -1245,6 +1348,8 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
   USED_BY_WARNING_PROCEEDED_EVENT,
   INAPP_CHAT_OPEN_EVENT,
   FULLSCREEN_ENTRY_POINT_EVENT,
+  HITL_PROMPT_SHOWN_EVENT,
+  HITL_QUESTION_ANSWERED_EVENT,
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [

@@ -9,6 +9,7 @@
 
 import { orderBy } from 'lodash';
 
+import { LEGACY_COMPLIMENTARY_PALETTE, COMPLEMENTARY_PALETTE } from '@kbn/coloring';
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
@@ -127,8 +128,13 @@ function normalizeESQLAdHocDataViews(
       const timeFieldName = esqlQuery
         ? getTimeFieldFromESQLQuery(esqlQuery)
         : adHocDataView.timeFieldName ?? layer.timeField ?? undefined;
+      // The transform re-derives the index pattern (and the data view title/name) from the ES|QL
+      // query, so a stale persisted name (e.g. a broader multi-index pattern) is normalized away.
+      const indexPattern = esqlQuery
+        ? getIndexPatternFromESQLQuery(esqlQuery)
+        : adHocDataView.name ?? '';
       const newId = generateAdHocDataViewId({
-        index: adHocDataView.name ?? '',
+        index: indexPattern,
         dataSourceType: 'esql',
         esqlQuery,
         timeFieldName,
@@ -136,6 +142,8 @@ function normalizeESQLAdHocDataViews(
 
       layer.index = newId;
       adHocDataView.id = newId;
+      adHocDataView.name = indexPattern;
+      adHocDataView.title = indexPattern;
       // Transform always sets type: 'esql' on ESQL adHocDataViews (via getAdHocDataViewSpec)
       adHocDataView.type = 'esql';
       attributes.state.adHocDataViews[newId] = adHocDataView;
@@ -292,12 +300,9 @@ function normalizeESQLQuery(attributes: LensAttributes) {
   const textBasedLayers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
   if (textBasedLayers.length > 0) {
     const layerQuery = textBasedLayers[0].query;
-    if (
-      layerQuery?.esql &&
-      attributes.state.query &&
-      'esql' in attributes.state.query &&
-      attributes.state.query.esql !== layerQuery.esql
-    ) {
+    // For ES|QL panels the layer query is authoritative; the transform always promotes it to the
+    // top-level state query, replacing any stale legacy query (even a different language).
+    if (layerQuery?.esql && attributes.state.query) {
       attributes.state.query = layerQuery;
     }
   }
@@ -600,15 +605,38 @@ export const getCommonNormalizer = <T extends LensAttributes>(
 });
 
 /**
+ * A named (non-`custom`) palette renders from `palette id + continuity + steps` alone. The stored
+ * stop positions, `colorStops`, and numeric bounds (`rangeMin`/`rangeMax`) are throwaway snapshots
+ * that the transform does not reproduce (it emits empty `stops` and lets the palette service
+ * resupply colors at render time). Drop those.
+ *
+ * `rangeType` is deliberately NOT dropped: it is deterministic per chart (`percent` everywhere
+ * except `legacy_metric` and single-value `metric`, which reconstruct as `number` via
+ * `useNumericRange`). Keeping it in the comparison enforces that each chart passes the correct
+ * `useNumericRange`; the `original` side defaults a missing `rangeType` to `'percent'` so legacy
+ * SOs that omit it still line up.
+ */
+function clearUnusedNamedPaletteParams(palette: PaletteOutput<CustomPaletteParams>) {
+  if (!palette.params) return;
+  delete palette.params.stops;
+  delete palette.params.colorStops;
+  delete palette.params.rangeMin;
+  delete palette.params.rangeMax;
+}
+
+/**
  * Normalized the palette params provided a string path to the palette(s) in the attributes
  *
  * This need to address:
- * - account for bad last color stop including shifting palettes :(
- * - defaulting missing rangeType
- * - defaulting missing continuity
+ * - named palettes: `palette id`, `continuity`, and `rangeType` are compared strictly (see
+ *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped.
+ * - custom palettes: account for the last color stop always becoming `rangeMax`, re-derive
+ *   `colorStops` from the normalized `stops`, and default the missing `rangeType`/`continuity`/bounds
+ *   the transform always derives.
  */
 export function getPaletteNormalizer<T extends LensAttributes>(
-  palettePath: string
+  palettePath: string,
+  isSingleValuePalette?: (attributes: T) => boolean
 ): NormalizerConfig<T> {
   return {
     original: (attributes: T) => {
@@ -617,62 +645,58 @@ export function getPaletteNormalizer<T extends LensAttributes>(
         palettePath
       ).filter(Boolean);
 
-      palettes.forEach((palette) => {
-        const rangeMin = getRangeValue(palette.params?.rangeMin);
-        const rangeMax = getRangeValue(palette.params?.rangeMax);
-
-        if (palette.params) {
-          // The SO→API transform always uses rangeMax as the last step's upper bound (lte),
-          // replacing the original stop value. The API→SO step then reconstructs the stop from lte,
-          // so the last stop always becomes rangeMax after the round-trip.
-          if (palette.params.stops) {
-            const isLegacy = palette.name !== 'custom';
-            const needsPaletteShift =
-              isLegacy &&
-              ((rangeMin !== null && rangeMin === palette.params.stops.at(0)?.stop) ||
-                (rangeMax !== null && rangeMax !== palette.params.stops.at(-1)?.stop));
-            const lastStop = palette.params.stops.at(-1);
-            if (lastStop && !needsPaletteShift) lastStop.stop = rangeMax as unknown as number; // can be null
-          }
-
-          if (!palette.params?.rangeType) {
-            palette.params.rangeType = 'percent';
-          }
-
-          if (!palette.params?.continuity) {
-            palette.params.continuity = getContinuity(rangeMin, rangeMax);
-          }
-
-          if (palette.name !== 'custom') {
-            delete palette.params.colorStops;
-          }
-
-          // Legacy SOs may omit params.name, but the transform always sets it from the root name
-          if (palette.params.name === undefined && palette.name) {
-            palette.params.name = palette.name;
-          }
-
-          // Legacy SOs may omit rangeMin/rangeMax, but the transform always derives them (can be null)
-          if (!('rangeMin' in palette.params)) {
-            palette.params.rangeMin = null as unknown as number;
-          }
-          if (!('rangeMax' in palette.params)) {
-            palette.params.rangeMax = null as unknown as number;
-          }
-        }
-      });
-
-      return attributes;
-    },
-    transformed: (attributes: T) => {
-      const palettes = getValues<PaletteOutput<CustomPaletteParams>>(
-        attributes,
-        palettePath
-      ).filter(Boolean);
+      const useNumericRange =
+        typeof isSingleValuePalette === 'function' ? isSingleValuePalette(attributes) : false;
 
       palettes.forEach((palette) => {
+        if (!palette.params) return;
+
+        const rangeMin = getRangeValue(palette.params.rangeMin);
+        const rangeMax = getRangeValue(palette.params.rangeMax);
+
         if (palette.name !== 'custom') {
-          delete palette.params?.colorStops;
+          // Continuity has no meaning for a distributed palette and is always set to 'none'
+          palette.params.continuity = 'none';
+
+          // The transform canonicalizes the legacy `complimentary` spelling to the GA palette id
+          // (`complementary`), matching runtime. Canonicalize the original side too so the
+          // round-trip identity holds.
+          const canonicalName =
+            palette.name === LEGACY_COMPLIMENTARY_PALETTE ? COMPLEMENTARY_PALETTE : palette.name;
+          palette.name = canonicalName;
+          palette.params.name = canonicalName;
+          palette.params.rangeType = useNumericRange ? 'number' : 'percent';
+          clearUnusedNamedPaletteParams(palette);
+          return;
+        }
+
+        // The SO→API transform always uses rangeMax as the last step's upper bound (lte),
+        // replacing the original stop value. The API→SO step then reconstructs the stop from lte,
+        // so the last stop always becomes rangeMax after the round-trip.
+        if (palette.params.stops) {
+          const lastStop = palette.params.stops.at(-1);
+          if (lastStop) lastStop.stop = rangeMax as unknown as number; // can be null
+        }
+
+        if (!palette.params.rangeType) {
+          palette.params.rangeType = 'percent';
+        }
+
+        if (!palette.params.continuity) {
+          palette.params.continuity = getContinuity(rangeMin, rangeMax);
+        }
+
+        // Legacy SOs may omit params.name, but the transform always sets it from the root name
+        if (palette.params.name === undefined && palette.name) {
+          palette.params.name = palette.name;
+        }
+
+        // Legacy SOs may omit rangeMin/rangeMax, but the transform always derives them (can be null)
+        if (!('rangeMin' in palette.params)) {
+          palette.params.rangeMin = null as unknown as number;
+        }
+        if (!('rangeMax' in palette.params)) {
+          palette.params.rangeMax = null as unknown as number;
         }
       });
 

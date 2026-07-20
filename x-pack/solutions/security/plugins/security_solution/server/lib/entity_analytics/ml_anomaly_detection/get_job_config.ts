@@ -23,6 +23,7 @@ export interface JobConfig {
   jobName: string | null;
   threatTactics: string[];
   threatTechniques: string[];
+  hasThreatTactics: boolean;
 }
 
 interface JobCustomSettings {
@@ -35,6 +36,7 @@ interface GetJobConfigOpts {
   jobIds: string[];
   logger: Logger;
   ml: MlPluginSetup;
+  request: KibanaRequest;
   soClient: SavedObjectsClientContract;
 }
 
@@ -43,10 +45,48 @@ const techniqueNameById = new Map(
   [...mitreTechniques, ...mitreSubtechniques].map(({ id, name }) => [id, name])
 );
 
+/**
+ * Live jobs keep whatever custom_settings they were created with, since job setup
+ * only ever creates (never updates) a job that already exists. For jobs whose live
+ * custom_settings has no threat_tactics, fall back to the module definitions shipped
+ * with the ML plugin, which always reflect the current package version.
+ */
+const getModuleCustomSettingsByJobId = async ({
+  jobIds,
+  ml,
+  logger,
+  request,
+  soClient,
+}: Pick<GetJobConfigOpts, 'ml' | 'logger' | 'request' | 'soClient'> & {
+  jobIds: string[];
+}): Promise<Map<string, JobCustomSettings>> => {
+  const result = new Map<string, JobCustomSettings>();
+  if (!jobIds.length) return result;
+
+  try {
+    const modules = await ml.modulesProvider(request, soClient).listModules();
+    const jobIdsToFind = new Set(jobIds);
+    for (const module of modules ?? []) {
+      for (const job of module.jobs) {
+        if (jobIdsToFind.has(job.id) && job.config.custom_settings) {
+          result.set(job.id, job.config.custom_settings as JobCustomSettings);
+        }
+      }
+    }
+  } catch (err) {
+    logger.debug(
+      `Failed to fetch module custom_settings: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+
+  return result;
+};
+
 export const getJobConfig = async ({
   jobIds,
   logger,
   ml,
+  request,
   soClient,
 }: GetJobConfigOpts): Promise<Map<string, JobConfig>> => {
   const result = new Map<string, JobConfig>();
@@ -56,7 +96,7 @@ export const getJobConfig = async ({
     const jobsSettled = await Promise.allSettled(
       jobIds.map((jobId) =>
         ml
-          .anomalyDetectorsProvider({} as KibanaRequest, soClient)
+          .anomalyDetectorsProvider(request, soClient)
           .jobs(jobId)
           .then((resp) => resp.jobs ?? [])
       )
@@ -74,6 +114,17 @@ export const getJobConfig = async ({
       return r.value;
     });
 
+    const jobIdsMissingThreatTactics = jobs
+      .filter((job) => !Array.isArray((job.custom_settings as JobCustomSettings)?.threat_tactics))
+      .map((job) => job.job_id);
+    const moduleCustomSettingsByJobId = await getModuleCustomSettingsByJobId({
+      jobIds: jobIdsMissingThreatTactics,
+      ml,
+      logger,
+      request,
+      soClient,
+    });
+
     for (const job of jobs) {
       const bucketSpanStr = job.analysis_config?.bucket_span;
       let bucketSpanMs = 60 * 60 * 1000; // default to 1h
@@ -85,7 +136,12 @@ export const getJobConfig = async ({
         }
       }
 
-      const customSettings = (job.custom_settings ?? {}) as JobCustomSettings;
+      const customSettings = (moduleCustomSettingsByJobId.get(job.job_id) ??
+        job.custom_settings ??
+        {}) as JobCustomSettings;
+      const threatTactics = Array.isArray(customSettings.threat_tactics)
+        ? customSettings.threat_tactics
+        : [];
 
       result.set(job.job_id, {
         sourceIndex: (job.datafeed_config?.indices ?? []) as string[],
@@ -93,12 +149,11 @@ export const getJobConfig = async ({
         detectors: job.analysis_config?.detectors ?? [],
         bucketSpanMs,
         jobName: customSettings.security_app_display_name ?? null,
-        threatTactics: (customSettings.threat_tactics ?? []).map(
-          (id) => tacticNameById.get(id) ?? id
-        ),
+        threatTactics: threatTactics.map((id) => tacticNameById.get(id) ?? id),
         threatTechniques: (customSettings.threat_techniques ?? []).map(
           (id) => techniqueNameById.get(id) ?? id
         ),
+        hasThreatTactics: Array.isArray(customSettings.threat_tactics),
       });
     }
   } catch (err) {

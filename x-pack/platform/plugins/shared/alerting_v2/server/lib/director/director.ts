@@ -7,7 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { inject, injectable } from 'inversify';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE, type RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { LoggerServiceToken } from '../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../services/query_service/query_service';
@@ -41,6 +41,20 @@ interface ResolveEpisodeIdParams {
   nextStatus: AlertEpisodeStatus;
 }
 
+interface ResolveEpisodeIdResult {
+  readonly episodeId: string;
+  readonly isNew: boolean;
+}
+
+export interface DirectorRunStats {
+  readonly newEpisodeIds: readonly string[];
+}
+
+export interface DirectorRunResult {
+  readonly alertEvents: AlertEvent[];
+  readonly stats: DirectorRunStats;
+}
+
 @injectable()
 export class DirectorService {
   constructor(
@@ -50,9 +64,13 @@ export class DirectorService {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  async run({ rule, alertEvents, executionContext }: RunDirectorParams): Promise<AlertEvent[]> {
+  async run({
+    rule,
+    alertEvents,
+    executionContext,
+  }: RunDirectorParams): Promise<DirectorRunResult> {
     if (alertEvents.length === 0) {
-      return [];
+      return { alertEvents: [], stats: { newEpisodeIds: [] } };
     }
 
     const strategy = this.strategyFactory.getStrategy(rule);
@@ -65,7 +83,7 @@ export class DirectorService {
     alertEvents: readonly AlertEvent[],
     strategy: ITransitionStrategy,
     executionContext: ExecutionContext
-  ): Promise<AlertEvent[]> {
+  ): Promise<DirectorRunResult> {
     const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
     const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
@@ -79,14 +97,23 @@ export class DirectorService {
     try {
       executionContext.throwIfAborted();
 
-      return alertEvents.map((currentAlertEvent) =>
-        this.getAlertEventWithNextEpisode({
+      const newEpisodeIds: string[] = [];
+      const processed = alertEvents.map((currentAlertEvent) => {
+        const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
           rule,
           currentAlertEvent,
           previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
           strategy,
-        })
-      );
+        });
+
+        if (isNewEpisode && alertEvent.episode) {
+          newEpisodeIds.push(alertEvent.episode.id);
+        }
+
+        return alertEvent;
+      });
+
+      return { alertEvents: processed, stats: { newEpisodeIds } };
     } finally {
       await scope.disposeAll();
     }
@@ -115,7 +142,29 @@ export class DirectorService {
     currentAlertEvent,
     previousAlertEvent,
     strategy,
-  }: CalculateNextStateParams): AlertEvent {
+  }: CalculateNextStateParams): { alertEvent: AlertEvent; isNewEpisode: boolean } {
+    // User lock: once a user hits `activate` on a group, the episode
+    // stays `active` regardless of what the strategy computes, until
+    // the user hits `deactivate` (which flips the lifecycle marker
+    // back and lets the strategy own transitions again). We preserve
+    // the incoming event's `status` (e.g. `recovered`) so downstream
+    // analytics keep the raw engine signal. Only `episode.status` is
+    // forced. `episode.status_count` is dropped to mirror how the
+    // strategies emit any → active transitions.
+    if (this.isUserLocked(previousAlertEvent)) {
+      return {
+        alertEvent: {
+          ...currentAlertEvent,
+          type: alertEventType.alert,
+          episode: {
+            id: previousAlertEvent!.last_episode_id!,
+            status: alertEpisodeStatus.active,
+          },
+        },
+        isNewEpisode: false,
+      };
+    }
+
     const currentStatus = previousAlertEvent?.last_episode_status;
 
     const result: StateTransitionResult = strategy.getNextState({
@@ -124,7 +173,7 @@ export class DirectorService {
       previousEpisode: previousAlertEvent,
     });
 
-    const episodeId = this.resolveEpisodeId({
+    const { episodeId, isNew } = this.resolveEpisodeId({
       previousAlertEvent,
       nextStatus: result.status,
     });
@@ -138,26 +187,68 @@ export class DirectorService {
     }
 
     return {
-      ...currentAlertEvent,
-      type: alertEventType.alert,
-      episode: {
-        id: episodeId,
-        status: result.status,
-        ...(result.statusCount != null ? { status_count: result.statusCount } : {}),
+      alertEvent: {
+        ...currentAlertEvent,
+        episode: {
+          id: episodeId,
+          status: result.status,
+          ...(result.statusCount != null ? { status_count: result.statusCount } : {}),
+        },
       },
+      isNewEpisode: isNew,
     };
   }
 
-  private resolveEpisodeId({ previousAlertEvent, nextStatus }: ResolveEpisodeIdParams): string {
+  /**
+   * The audit stream is the source of truth for whether a group is
+   * user-owned: if the most recent lifecycle action (`activate` or
+   * `deactivate`) for this group is `activate`, the director must
+   * hold the episode in `active`. `deactivate` or the absence of
+   * any lifecycle action releases the strategy to decide.
+   *
+   * Episode correlation is enforced upstream in
+   * `getLatestAlertEventStateQuery`: `last_lifecycle_action_type` is
+   * only populated when the latest audit doc's `episode_id` matches
+   * `last_episode_id`. When they diverge (concurrent bulk actions on
+   * different episodes of the same group, or a partial `_bulk` write
+   * where only one of the audit / synthetic rule-event docs landed),
+   * the query returns `null` here — which we treat as "no lock" and
+   * hand control back to the strategy. That query-level guard is why
+   * this method can safely trust `last_lifecycle_action_type` to
+   * describe the same episode as `last_episode_id`.
+   *
+   * We still require `last_episode_id` to be present so the
+   * forced-active emit has an episode to pin to; in practice this is
+   * always true when `last_lifecycle_action_type === 'activate'` (the
+   * action client refuses to create an activate audit doc without a
+   * pre-existing `.rule-events` row), but the guard keeps the
+   * director defensive against an edge where the rule-events stream
+   * has been pruned but the audit stream has not.
+   */
+  private isUserLocked(previousAlertEvent?: LatestAlertEventState): boolean {
     if (!previousAlertEvent) {
-      return uuidV4();
+      return false;
+    }
+
+    return (
+      previousAlertEvent.last_lifecycle_action_type === ALERT_EPISODE_ACTION_TYPE.ACTIVATE &&
+      previousAlertEvent.last_episode_id !== null
+    );
+  }
+
+  private resolveEpisodeId({
+    previousAlertEvent,
+    nextStatus,
+  }: ResolveEpisodeIdParams): ResolveEpisodeIdResult {
+    if (!previousAlertEvent) {
+      return { episodeId: uuidV4(), isNew: true };
     }
 
     const currentEpisodeStatus = previousAlertEvent.last_episode_status;
     const currentEpisodeId = previousAlertEvent.last_episode_id;
 
     if (currentEpisodeStatus == null) {
-      return uuidV4();
+      return { episodeId: uuidV4(), isNew: true };
     }
 
     const isNewLifecycle =
@@ -165,9 +256,13 @@ export class DirectorService {
       nextStatus !== alertEpisodeStatus.inactive;
 
     if (isNewLifecycle) {
-      return uuidV4();
+      return { episodeId: uuidV4(), isNew: true };
     }
 
-    return currentEpisodeId ?? uuidV4();
+    if (currentEpisodeId == null) {
+      return { episodeId: uuidV4(), isNew: true };
+    }
+
+    return { episodeId: currentEpisodeId, isNew: false };
   }
 }

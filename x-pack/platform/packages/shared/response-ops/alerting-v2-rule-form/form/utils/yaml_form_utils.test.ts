@@ -179,6 +179,35 @@ describe('yaml_form_utils', () => {
 
       expect(result).toHaveProperty('recovery_strategy', 'query');
     });
+
+    it('includes no_data_strategy when set', () => {
+      const formValues: FormValues = {
+        ...defaultTestFormValues,
+        noDataStrategy: 'recover',
+      };
+
+      const result = formValuesToYamlObject(formValues);
+
+      expect(result).toHaveProperty('no_data_strategy', 'recover');
+    });
+
+    it('excludes no_data_strategy when undefined', () => {
+      const result = formValuesToYamlObject(defaultTestFormValues);
+
+      expect(result).not.toHaveProperty('no_data_strategy');
+    });
+
+    it('excludes no_data_strategy for signal rules even when set', () => {
+      const formValues: FormValues = {
+        ...defaultTestFormValues,
+        kind: 'signal',
+        noDataStrategy: 'recover',
+      };
+
+      const result = formValuesToYamlObject(formValues);
+
+      expect(result).not.toHaveProperty('no_data_strategy');
+    });
   });
 
   describe('parseYamlToFormValues', () => {
@@ -211,34 +240,37 @@ describe('yaml_form_utils', () => {
       const result = parseYamlToFormValues(yaml);
 
       expect(result.error).toBeNull();
-      expect(result.values).toEqual({
-        kind: 'alert',
-        metadata: {
-          name: 'Test Rule',
-          enabled: true,
-          description: 'A description',
-          owner: undefined,
-          tags: undefined,
-        },
-        timeField: '@timestamp',
-        schedule: {
-          every: '5m',
-          lookback: '1m',
-        },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM logs-*' },
-        },
-        grouping: {
-          fields: ['host.name'],
-        },
-        artifacts: [
-          { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'artifact-2', type: 'service', value: 'service-a' },
-        ],
-        stateTransitionAlertDelayMode: 'immediate',
-        stateTransitionRecoveryDelayMode: 'immediate',
-      });
+      expect(result.values).toEqual(
+        expect.objectContaining({
+          kind: 'alert',
+          metadata: {
+            name: 'Test Rule',
+            enabled: true,
+            description: 'A description',
+            owner: undefined,
+            tags: undefined,
+          },
+          timeField: '@timestamp',
+          schedule: {
+            every: '5m',
+            lookback: '1m',
+          },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-*' },
+          },
+          noDataStrategy: 'none',
+          grouping: {
+            fields: ['host.name'],
+          },
+          artifacts: [
+            { id: 'artifact-1', type: 'host', value: 'host-a' },
+            { id: 'artifact-2', type: 'service', value: 'service-a' },
+          ],
+          stateTransitionAlertDelayMode: 'immediate',
+          stateTransitionRecoveryDelayMode: 'immediate',
+        })
+      );
     });
 
     it('parses composed query YAML to FormValues', () => {
@@ -282,6 +314,60 @@ describe('yaml_form_utils', () => {
         breach: { query: 'FROM logs-*' },
         recovery: { query: 'FROM logs-* | WHERE ok' },
       });
+    });
+
+    it('parses no_data_strategy from YAML', () => {
+      const yaml = dump({
+        kind: 'alert',
+        metadata: { name: 'No data rule' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+        no_data_strategy: 'recover',
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.noDataStrategy).toBe('recover');
+    });
+
+    it('defaults invalid no_data_strategy to none for alert rules', () => {
+      const yaml = dump({
+        kind: 'alert',
+        metadata: { name: 'Invalid strategy' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+        no_data_strategy: 'invalid_value',
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.noDataStrategy).toBe('none');
+    });
+
+    it('defaults noDataStrategy to none for alert rules when absent from YAML', () => {
+      const yaml = dump({
+        kind: 'alert',
+        metadata: { name: 'No strategy' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.noDataStrategy).toBe('none');
+    });
+
+    it('defaults noDataStrategy to undefined for signal rules when absent from YAML', () => {
+      const yaml = dump({
+        kind: 'signal',
+        metadata: { name: 'Signal rule' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.noDataStrategy).toBeUndefined();
     });
 
     it('ignores invalid artifacts entries', () => {
@@ -588,6 +674,79 @@ describe('yaml_form_utils', () => {
 
       expect(result.error).toBeNull();
       expect(result.values?.query).toEqual(original.query);
+    });
+
+    it('parse(serialize(values)) preserves recovery_strategy: no_breach', () => {
+      const original: FormValues = {
+        kind: 'alert',
+        metadata: { name: 'No-breach recovery', enabled: true },
+        timeField: '@timestamp',
+        schedule: { every: '5m', lookback: '1m' },
+        query: {
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: 'WHERE c > 100' },
+        },
+        recoveryStrategy: 'no_breach',
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
+      };
+
+      const yaml = serializeFormToYaml(original);
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.recoveryStrategy).toBe('no_breach');
+    });
+
+    it('parse(serialize(values)) preserves no_data_strategy', () => {
+      const original: FormValues = {
+        kind: 'alert',
+        metadata: { name: 'No-data recover', enabled: true },
+        timeField: '@timestamp',
+        schedule: { every: '5m', lookback: '1m' },
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE level == "error"' },
+          recovery: { query: 'FROM logs-* | WHERE level != "error"' },
+          no_data: { query: 'FROM logs-* | STATS c = COUNT(*)' },
+        },
+        recoveryStrategy: 'query',
+        noDataStrategy: 'recover',
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
+      };
+
+      const yaml = serializeFormToYaml(original);
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.noDataStrategy).toBe('recover');
+      expect(result.values?.recoveryStrategy).toBe('query');
+      expect(result.values?.query).toEqual(original.query);
+    });
+
+    it('parse(serialize(values)) preserves recovery_strategy: none', () => {
+      const original: FormValues = {
+        kind: 'alert',
+        metadata: { name: 'Recovery none', enabled: true },
+        timeField: '@timestamp',
+        schedule: { every: '5m', lookback: '1m' },
+        query: {
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: 'WHERE c > 100' },
+        },
+        recoveryStrategy: 'none',
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
+      };
+
+      const yaml = serializeFormToYaml(original);
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.recoveryStrategy).toBe('none');
     });
   });
 });

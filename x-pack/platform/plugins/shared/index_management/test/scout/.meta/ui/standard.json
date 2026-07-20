@@ -1,5 +1,9 @@
 {
-  "sha1": "9d58493d56d08ec156b9dca742f157c04c1bab6a",
+  "sha1": "9265cce4cb809914ce58b9071ae6fea5805500b8",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "e7ca8c886a58426-d57f60fe1d6db3b",
@@ -81,7 +85,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 170,
+        "line": 166,
         "column": 7
       }
     },
@@ -95,7 +99,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 181,
+        "line": 177,
         "column": 7
       }
     },
@@ -109,7 +113,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 196,
+        "line": 192,
         "column": 7
       }
     },
@@ -151,7 +155,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 62,
+        "line": 59,
         "column": 7
       }
     },
@@ -165,7 +169,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 81,
+        "line": 75,
         "column": 7
       }
     },
@@ -179,7 +183,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 100,
+        "line": 94,
         "column": 7
       }
     },

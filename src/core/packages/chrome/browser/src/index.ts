@@ -23,7 +23,12 @@ export type {
   AppHeaderMetadataItem,
   AppHeaderMetadataItems,
   AppHeaderMetadataTextItem,
+  AppHeaderSpacing,
   AppHeaderTab,
+  AppHeaderTabAction,
+  AppHeaderTabActions,
+  AppHeaderTabBadge,
+  AppHeaderTabIconBadge,
   AppHeaderTitle,
   AppHeaderTitleSaveResult,
   ChromeNext,
@@ -49,6 +54,10 @@ export type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeUserBanner, ChromeStyle
 
 export type {
   ChromeProjectNavigationNode,
+  RootNodePanelOpenerDefinition,
+  PanelOpenerChildDefinition,
+  StandardNodeDefinition,
+  RootNodeDefinition,
   AppDeepLinkId,
   AppId,
   SolutionId,
@@ -64,6 +73,8 @@ export type {
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  NavigationCustomization,
+  NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';

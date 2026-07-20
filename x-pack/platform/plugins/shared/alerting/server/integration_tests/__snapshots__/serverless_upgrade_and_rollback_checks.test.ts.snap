@@ -6,6 +6,7 @@ Object {
     "default": Object {
       "special": "deep",
     },
+    "description": "The parameters for the ES query rule. These parameters are appropriate when \`rule_type_id\` is \`.es-query\`.",
     "error": [Function],
     "presence": "optional",
   },
@@ -821,6 +822,11 @@ Object {
       "type": "string",
     },
   },
+  "metas": Array [
+    Object {
+      "title": "ES Query Rule Params",
+    },
+  ],
   "rules": Array [
     Object {
       "args": Object {
@@ -839,6 +845,7 @@ Object {
     "default": Object {
       "special": "deep",
     },
+    "description": "The parameters for the geo containment rule. These parameters are appropriate when \`rule_type_id\` is \`.geo-containment\`.",
     "error": [Function],
     "presence": "optional",
   },
@@ -1131,6 +1138,11 @@ Object {
       "type": "any",
     },
   },
+  "metas": Array [
+    Object {
+      "title": "Geo Containment Rule Params",
+    },
+  ],
   "type": "object",
 }
 `;
@@ -1141,6 +1153,7 @@ Object {
     "default": Object {
       "special": "deep",
     },
+    "description": "The parameters for the index threshold rule. These parameters are appropriate when \`rule_type_id\` is \`.index-threshold\`.",
     "error": [Function],
     "presence": "optional",
   },
@@ -1564,6 +1577,11 @@ Object {
       "type": "string",
     },
   },
+  "metas": Array [
+    Object {
+      "title": "Index Threshold Rule Params",
+    },
+  ],
   "rules": Array [
     Object {
       "args": Object {
@@ -1582,6 +1600,7 @@ Object {
     "default": Object {
       "special": "deep",
     },
+    "description": "The parameters for the APM anomaly rule. These parameters are appropriate when \`rule_type_id\` is \`apm.anomaly\\"\`.",
     "error": [Function],
     "presence": "optional",
   },
@@ -1794,6 +1813,11 @@ Object {
       "type": "string",
     },
   },
+  "metas": Array [
+    Object {
+      "title": "APM Anomaly Rule Params",
+    },
+  ],
   "type": "object",
 }
 `;
@@ -1804,6 +1828,7 @@ Object {
     "default": Object {
       "special": "deep",
     },
+    "description": "The parameters for the error count rule. These parameters are appropriate when \`rule_type_id\` is \`apm.error_rate\`.",
     "error": [Function],
     "presence": "optional",
   },
@@ -2052,6 +2077,11 @@ Object {
       "type": "string",
     },
   },
+  "metas": Array [
+    Object {
+      "title": "Error Count Rule Params",
+    },
+  ],
   "type": "object",
 }
 `;
@@ -2062,6 +2092,7 @@ Object {
     "default": Object {
       "special": "deep",
     },
+    "description": "The parameters for the transaction duration rule. These parameters are appropriate when \`rule_type_id\` is \`apm.transaction_duration\`.",
     "error": [Function],
     "presence": "optional",
   },
@@ -2377,6 +2408,11 @@ Object {
       "type": "string",
     },
   },
+  "metas": Array [
+    Object {
+      "title": "Transaction Duration Rule Params",
+    },
+  ],
   "type": "object",
 }
 `;
@@ -2387,6 +2423,7 @@ Object {
     "default": Object {
       "special": "deep",
     },
+    "description": "The parameters for the transaction error rate rule. These parameters are appropriate when \`rule_type_id\` is \`apm.transaction_error_rate\`.",
     "error": [Function],
     "presence": "optional",
   },
@@ -2648,6 +2685,11 @@ Object {
       "type": "string",
     },
   },
+  "metas": Array [
+    Object {
+      "title": "Transaction Error Rate Rule Params",
+    },
+  ],
   "type": "object",
 }
 `;
@@ -2658,6 +2700,7 @@ Object {
     "default": Object {
       "special": "deep",
     },
+    "description": "The parameters for the metric inventory threshold rule. These parameters are appropriate when \`rule_type_id\` is \`metrics.alert.inventory.threshold\`.",
     "error": [Function],
     "presence": "optional",
     "unknown": true,
@@ -2997,6 +3040,11 @@ Object {
       "type": "string",
     },
   },
+  "metas": Array [
+    Object {
+      "title": "Metric Inventory Threshold Rule Params",
+    },
+  ],
   "preferences": Object {
     "stripUnknown": Object {
       "objects": false,
@@ -3012,6 +3060,7 @@ Object {
     "default": Object {
       "special": "deep",
     },
+    "description": "The parameters for the custom threshold rule. These parameters are appropriate when \`rule_type_id\` is \`observability.rules.custom_threshold\`.",
     "error": [Function],
     "presence": "optional",
     "unknown": true,
@@ -3355,6 +3404,64 @@ Object {
                 },
               ],
               "type": "string",
+            },
+            "warningComparator": Object {
+              "flags": Object {
+                "default": [Function],
+                "error": [Function],
+                "presence": "optional",
+              },
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+              ],
+              "type": "string",
+            },
+            "warningThreshold": Object {
+              "flags": Object {
+                "default": [Function],
+                "error": [Function],
+                "presence": "optional",
+              },
+              "items": Array [
+                Object {
+                  "flags": Object {
+                    "description": "The threshold value that is used with the \`warningComparator\`. If the \`warningComparator\` is \`between\`, you must specify the boundary values.",
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "type": "number",
+                },
+              ],
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "limit": 2,
+                  },
+                  "name": "max",
+                },
+              ],
+              "type": "array",
             },
           },
           "type": "object",
@@ -5813,6 +5920,11 @@ Object {
       "type": "object",
     },
   },
+  "metas": Array [
+    Object {
+      "title": "Custom Threshold Rule Params",
+    },
+  ],
   "preferences": Object {
     "stripUnknown": Object {
       "objects": false,
@@ -6059,7 +6171,7 @@ Object {
         },
         "responseActions": Object {
           "items": Object {
-            "anyOf": Array [
+            "oneOf": Array [
               Object {
                 "properties": Object {
                   "actionTypeId": Object {
@@ -6835,7 +6947,7 @@ Object {
         },
         "responseActions": Object {
           "items": Object {
-            "anyOf": Array [
+            "oneOf": Array [
               Object {
                 "properties": Object {
                   "actionTypeId": Object {
@@ -7596,7 +7708,7 @@ Object {
         },
         "responseActions": Object {
           "items": Object {
-            "anyOf": Array [
+            "oneOf": Array [
               Object {
                 "properties": Object {
                   "actionTypeId": Object {
@@ -8312,7 +8424,7 @@ Object {
         },
         "responseActions": Object {
           "items": Object {
-            "anyOf": Array [
+            "oneOf": Array [
               Object {
                 "properties": Object {
                   "actionTypeId": Object {
@@ -9151,7 +9263,7 @@ Object {
         },
         "responseActions": Object {
           "items": Object {
-            "anyOf": Array [
+            "oneOf": Array [
               Object {
                 "properties": Object {
                   "actionTypeId": Object {
@@ -9939,7 +10051,7 @@ Object {
         },
         "responseActions": Object {
           "items": Object {
-            "anyOf": Array [
+            "oneOf": Array [
               Object {
                 "properties": Object {
                   "actionTypeId": Object {
@@ -10653,7 +10765,7 @@ Object {
         },
         "responseActions": Object {
           "items": Object {
-            "anyOf": Array [
+            "oneOf": Array [
               Object {
                 "properties": Object {
                   "actionTypeId": Object {
@@ -11176,6 +11288,7 @@ Object {
     "default": Object {
       "special": "deep",
     },
+    "description": "The parameters for the slo burn rate rule. These parameters are appropriate when \`rule_type_id\` is \`slo.rules.burnRate\`.",
     "error": [Function],
     "presence": "optional",
   },
@@ -11407,6 +11520,11 @@ Object {
       "type": "array",
     },
   },
+  "metas": Array [
+    Object {
+      "title": "SLO Burn Rate Rule Params",
+    },
+  ],
   "type": "object",
 }
 `;
@@ -11417,6 +11535,7 @@ Object {
     "default": Object {
       "special": "deep",
     },
+    "description": "The parameters for the transform health rule. These parameters are appropriate when \`rule_type_id\` is \`transform_health\`.",
     "error": [Function],
     "presence": "optional",
   },
@@ -11662,6 +11781,11 @@ Object {
       "type": "alternatives",
     },
   },
+  "metas": Array [
+    Object {
+      "title": "Transform Health Rule Params",
+    },
+  ],
   "type": "object",
 }
 `;
@@ -11672,6 +11796,7 @@ Object {
     "default": Object {
       "special": "deep",
     },
+    "description": "The parameters for the anomaly detection rule. These parameters are appropriate when \`rule_type_id\` is \`xpack.ml.anomaly_detection_alert\\"\`.",
     "error": [Function],
     "presence": "optional",
   },
@@ -11933,6 +12058,11 @@ Object {
       "type": "alternatives",
     },
   },
+  "metas": Array [
+    Object {
+      "title": "Anomaly Detection Rule Params",
+    },
+  ],
   "rules": Array [
     Object {
       "args": Object {
@@ -11951,6 +12081,7 @@ Object {
     "default": Object {
       "special": "deep",
     },
+    "description": "The parameters for the anomaly detection jobs health rule. These parameters are appropriate when \`rule_type_id\` is \`xpack.ml.anomaly_detection_jobs_health\\"\`.",
     "error": [Function],
     "presence": "optional",
   },
@@ -12490,6 +12621,11 @@ Object {
       "type": "alternatives",
     },
   },
+  "metas": Array [
+    Object {
+      "title": "Anomaly Detection Jobs Health Rule Params",
+    },
+  ],
   "type": "object",
 }
 `;

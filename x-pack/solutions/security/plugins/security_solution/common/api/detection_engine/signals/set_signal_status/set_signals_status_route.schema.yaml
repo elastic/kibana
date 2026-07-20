@@ -141,25 +141,18 @@ paths:
 
 components:
   schemas:
-    ReasonEnum:
+    RuntimeFieldType:
       type: string
       enum:
-        - false_positive
-        - duplicate
-        - true_positive
-        - benign_positive
-        - automated_closure
-        - other
-
-    Reason:
-      oneOf:
-        - $ref: '#/components/schemas/ReasonEnum'
-        - type: string
+        - keyword
+        - long
+        - double
+        - date
+        - ip
+        - boolean
+        - geo_point
       description: >-
-        The reason for closing the alerts. Can be one of following predefined reasons:
-        [false_positive, duplicate, true_positive, benign_positive, automated_closure, other]
-        or a custom reason provided by the user through the advanced settings.
-
+        The data type for the runtime field type. Determines how the field value is indexed and queried.
     SetAlertsStatusByIdsBase:
       type: object
       properties:
@@ -190,7 +183,7 @@ components:
           type: string
           enum: [closed]
         reason:
-          $ref: '#/components/schemas/Reason'
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/Reason'
       required: [signal_ids, status]
 
     SetAlertsStatusByIds:
@@ -216,6 +209,18 @@ components:
             - abort
             - proceed
           default: abort
+        runtime_fields:
+          type: object
+          maxProperties: 100
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldType'
+          description: >-
+            Optional map of field name to runtime field type. For each
+            entry, a runtime field of the specified type
+            is created reading its value from `_source[fieldName]` and included in
+            the query as `runtime_mappings`. Use this to reference fields stored on the
+            alert `_source` that are not part of the Elastic Common Schema (ECS) of the alerts index mapping,
+            for example, custom fields that the rule's source index defined when the alerts were created.
       required: [query, status]
 
     CloseAlertsByQuery:
@@ -234,7 +239,22 @@ components:
             - proceed
           default: abort
         reason:
-          $ref: '#/components/schemas/Reason'
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/Reason'
+        runtime_fields:
+          type: object
+          maxProperties: 100
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldType'
+          description: >-
+            Optional map of field name to runtime field type. For each
+            entry, the server defines a runtime field of the given type
+            that reads its value from `_source[fieldName]` and attaches it
+            to the underlying `_update_by_query` as `runtime_mappings`.
+            Allows the `query` to reference non-ECS fields stored on the
+            alert `_source` but not in the alerts index mapping — for
+            example, runtime fields the rule's source index defined at the
+            time the alerts were created. Limited to 100 entries per
+            request; larger maps are rejected.
       required: [query, status]
 
     SetAlertsStatusByQuery:

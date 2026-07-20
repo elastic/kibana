@@ -615,6 +615,57 @@ describe('MetricsGrid', () => {
       expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
     });
 
+    it('marks the originating chart as selected when its flyout is open', () => {
+      const { getAllByRole } = renderMetricsGrid();
+
+      const firstChartProps = (Chart as jest.Mock).mock.calls[0][0];
+
+      act(() => {
+        firstChartProps.onViewDetails();
+      });
+
+      const cells = getAllByRole('gridcell');
+      expect(cells[0]).toHaveAttribute('aria-selected', 'true');
+      expect(cells[1]).toHaveAttribute('aria-selected', 'false');
+    });
+
+    it('marks the restored metric chart as selected', () => {
+      const { getAllByRole } = renderMetricsGridWithInitialFlyoutState({
+        gridPosition: 1,
+        metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
+        esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
+        selectedTabId: 'overview',
+      });
+
+      const cells = getAllByRole('gridcell');
+      expect(cells[0]).toHaveAttribute('aria-selected', 'false');
+      expect(cells[1]).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('does not mark any chart as selected when no flyout is open', () => {
+      const { getAllByRole } = renderMetricsGrid();
+
+      getAllByRole('gridcell').forEach((cell) => {
+        expect(cell).toHaveAttribute('aria-selected', 'false');
+      });
+    });
+
+    it('does not mark any chart as selected when the owning tab is not active', () => {
+      const { getAllByRole } = renderMetricsGridWithInitialFlyoutState(
+        {
+          gridPosition: 1,
+          metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
+          esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
+          selectedTabId: 'overview',
+        },
+        { isTabSelected: false }
+      );
+
+      getAllByRole('gridcell').forEach((cell) => {
+        expect(cell).toHaveAttribute('aria-selected', 'false');
+      });
+    });
+
     it('renders the flyout when initial restorable flyoutState references an existing metric', () => {
       const { queryByTestId } = renderMetricsGridWithInitialFlyoutState({
         gridPosition: 1,
@@ -988,6 +1039,33 @@ describe('MetricsGrid', () => {
       // no prop change. After the fix (pass profileId as a prop from MetricsGrid
       // instead of reading it inside ChartItem), this count should be 0.
       expect(Chart).toHaveBeenCalledTimes(metricItems.length);
+    });
+  });
+
+  describe('gridSettings', () => {
+    it('forwards gridSettings from context into createESQLQuery for each metric', () => {
+      render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          gridSettings={{
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p90',
+          }}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          gridSettings: {
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p90',
+          },
+        })
+      );
     });
   });
 });
