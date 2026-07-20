@@ -398,7 +398,6 @@ export const ActionPoliciesTable = () => {
               width="80px"
               render={(item) => {
                 const policy = toPolicy(item);
-                if (!canWrite) return null;
                 const isLoading =
                   (isEnabling && enableVariables === policy.id) ||
                   (isDisabling && disableVariables === policy.id);
@@ -406,7 +405,11 @@ export const ActionPoliciesTable = () => {
                   <EuiSwitch
                     compressed
                     checked={policy.enabled}
-                    disabled={isLoading || isBulkActionInProgress}
+                    disabled={!canWrite || isLoading || isBulkActionInProgress}
+                    title={!canWrite ? i18n.translate(
+                      'xpack.alertingV2.actionPoliciesList.column.enabled.disabledTooltip',
+                      { defaultMessage: 'You do not have permission to enable/disable this policy' }
+                    ) : undefined}
                     onChange={() => {
                       if (policy.enabled) {
                         disablePolicy(policy.id);
