@@ -60,11 +60,11 @@ All dashboard actions include the [common log fields](#logs-schema) and populate
 
 ### Dashboard view
 
-`dashboard_view` sets `event.type` to `access`. `event.start`, `event.end`, and `event.duration` record each continuous period that the dashboard is visible. A period ends when the user navigates away, closes or reloads the tab, or switches browser tabs.
+`dashboard_view` sets `event.type` to `access`. `event.start`, `event.end`, and `event.duration`, measured in nanoseconds, record each continuous period that the dashboard is visible. A period ends when the user navigates away, closes or reloads the tab, or switches browser tabs.
 
 ### Dashboard refresh
 
-`dashboard_refresh` sets `event.type` to `access`. `event.start`, `event.end`, and `event.duration` cover the refresh from the start of the query until the dashboard data finishes loading. `event.outcome` is `success` when no panels return blocking errors and `failure` otherwise.
+`dashboard_refresh` sets `event.type` to `access`. `event.start`, `event.end`, and `event.duration`, measured in nanoseconds, cover the refresh from the start of the query until the dashboard data finishes loading. `event.outcome` is `success` when no panels return blocking errors and `failure` otherwise.
 
 Each automatic refresh produces a separate `dashboard_refresh` event. Short refresh intervals can therefore increase the volume of user activity logs.
 
@@ -79,7 +79,9 @@ The action also populates the following metadata fields:
 | `metadata.panel_count` | Number of panels on the dashboard. |
 | `metadata.errors` | List of panels with blocking errors. Each item contains the panel ID in `panel_id` and the error message in `error`. The list is empty when no panels return blocking errors. |
 
-Because `metadata.query` and `metadata.filters` can contain sensitive values, restrict access to user activity logs and apply an appropriate retention policy.
+:::::{note}
+Dashboard query expressions and filter values are recorded without redaction. Manage access to and retention of user activity logs according to your organization's data-handling requirements.
+:::::
 
 When `metadata.errors` is not empty, `error.type` is `panel_errors` and `error.message` contains the error list as JSON.
 
