@@ -608,6 +608,53 @@ describe('getEARSSSLSettings', () => {
   });
 });
 
+describe('getRelaySSLSettings', () => {
+  beforeEach(() => {
+    mockReadFileSync.mockReset();
+  });
+
+  test('reads and caches Relay certificate, key, and CA files', () => {
+    mockReadFileSync.mockImplementation((filePath) => Buffer.from(String(filePath)));
+    const configUtils = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      relay: {
+        url: 'https://relay.test',
+        ssl: {
+          verificationMode: 'full',
+          certificate: '/path/to/cert.pem',
+          key: '/path/to/key.pem',
+          certificateAuthorities: ['/path/to/ca-1.pem', '/path/to/ca-2.pem'],
+        },
+      },
+    });
+
+    const first = configUtils.getRelaySSLSettings();
+    const second = configUtils.getRelaySSLSettings();
+
+    expect(first).toBe(second);
+    expect(first).toMatchObject({
+      verificationMode: 'full',
+      cert: Buffer.from('/path/to/cert.pem'),
+      key: Buffer.from('/path/to/key.pem'),
+      allowPartialTrustChain: true,
+    });
+    expect(first.ca).toEqual(expect.any(Buffer));
+    expect(first.ca?.includes(Buffer.from('/path/to/ca-1.pem'))).toBe(true);
+    expect(first.ca?.includes(Buffer.from('/path/to/ca-2.pem'))).toBe(true);
+    expect(mockReadFileSync).toHaveBeenCalledTimes(4);
+  });
+
+  test('does not enable partial trust chains without Relay SSL configuration', () => {
+    const sslSettings = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      relay: { url: 'https://relay.test' },
+    }).getRelaySSLSettings();
+
+    expect(sslSettings).not.toHaveProperty('allowPartialTrustChain');
+    expect(mockReadFileSync).not.toHaveBeenCalled();
+  });
+});
+
 const testEmailsOk = ['bob@elastic.co', 'jim@elastic.co'];
 const testEmailsNotAllowed = ['hal@bad.com', 'lou@notgood.org'];
 const testEmailsInvalid = ['invalid-email-address', '(garbage)'];
