@@ -104,7 +104,6 @@ spaceTest.describe(
             });
 
             await discover.loadSavedSearch(sessionName);
-            await discover.waitUntilTabIsLoaded();
             expect(await discover.getCurrentQueryName()).toBe(sessionName);
           }
         );

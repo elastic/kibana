@@ -80,7 +80,6 @@ spaceTest.describe(
             await unifiedTabs.createNewTab();
             await discover.waitUntilTabIsLoaded();
             await discover.createDataViewFromSearchBar({ name: 'logs', adHoc: true });
-            await discover.waitUntilTabIsLoaded();
           }
         );
 

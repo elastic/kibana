@@ -59,7 +59,6 @@ spaceTest.describe(
 
         await spaceTest.step('load the legacy session', async () => {
           await discover.loadSavedSearch(testData.SAVED_SEARCH_TITLE);
-          await discover.waitUntilTabIsLoaded();
 
           expect(await discover.getCurrentQueryName()).toBe(testData.SAVED_SEARCH_TITLE);
           expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled']);
@@ -72,7 +71,6 @@ spaceTest.describe(
           expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled', 'Untitled 2']);
 
           await discover.saveSearchAsNew(updatedSessionName);
-          await discover.waitUntilTabIsLoaded();
 
           expect(await discover.getCurrentQueryName()).toBe(updatedSessionName);
           expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled', 'Untitled 2']);
@@ -80,7 +78,6 @@ spaceTest.describe(
 
         await spaceTest.step('keep the legacy session single-tab', async () => {
           await discover.loadSavedSearch(testData.SAVED_SEARCH_TITLE);
-          await discover.waitUntilTabIsLoaded();
 
           expect(await discover.getCurrentQueryName()).toBe(testData.SAVED_SEARCH_TITLE);
           expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled']);
@@ -88,7 +85,6 @@ spaceTest.describe(
 
         await spaceTest.step('load the new multi-tab session', async () => {
           await discover.loadSavedSearch(updatedSessionName);
-          await discover.waitUntilTabIsLoaded();
 
           expect(await discover.getCurrentQueryName()).toBe(updatedSessionName);
           expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled', 'Untitled 2']);
@@ -163,7 +159,6 @@ spaceTest.describe(
 
         await spaceTest.step('load and save the seeded session through the UI', async () => {
           await discover.loadSavedSearch(sessionName);
-          await discover.waitUntilTabIsLoaded();
 
           expect(await discover.getCurrentQueryName()).toBe(sessionName);
           expect(await unifiedTabs.getTabLabels()).toStrictEqual([
@@ -182,7 +177,6 @@ spaceTest.describe(
           await unifiedTabs.selectTab(0);
           await discover.waitUntilTabIsLoaded();
           await discover.saveSearch(sessionName, { storeTimeRange: true });
-          await discover.waitUntilTabIsLoaded();
           expect(await discover.getCurrentQueryName()).toBe(sessionName);
           await expect(discover.unsavedChangesIndicator()).toBeHidden();
         });
@@ -190,7 +184,6 @@ spaceTest.describe(
         await spaceTest.step('reload and verify each tab state', async () => {
           await discover.clickNewSearch();
           await discover.loadSavedSearch(sessionName);
-          await discover.waitUntilTabIsLoaded();
 
           expect(await discover.getCurrentQueryName()).toBe(sessionName);
           expect(await unifiedTabs.getTabLabels()).toStrictEqual([

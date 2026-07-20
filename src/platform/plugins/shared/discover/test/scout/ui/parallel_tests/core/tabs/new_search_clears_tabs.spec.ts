@@ -62,7 +62,6 @@ spaceTest.describe(
           });
 
           await discover.loadSavedSearch(sessionName);
-          await discover.waitUntilTabIsLoaded();
 
           expect(await unifiedTabs.getTabLabels()).toStrictEqual([
             FIRST_TAB_LABEL,

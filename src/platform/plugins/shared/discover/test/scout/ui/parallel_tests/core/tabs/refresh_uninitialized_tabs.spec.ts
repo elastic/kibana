@@ -81,7 +81,6 @@ spaceTest.describe(
           });
 
           await discover.loadSavedSearch(sessionName);
-          await discover.waitUntilTabIsLoaded();
           await unifiedTabs.selectTab(3);
           await discover.waitUntilTabIsLoaded();
           expect(await discover.getEsqlQueryValue()).toBe(esqlQuery);
@@ -96,14 +95,12 @@ spaceTest.describe(
           await discover.waitUntilTabIsLoaded();
 
           await discover.saveSearch(sessionName);
-          await discover.waitUntilTabIsLoaded();
           expect(await discover.getCurrentQueryName()).toBe(sessionName);
         });
 
         await spaceTest.step('load the session and restore each tab type', async () => {
           await discover.clickNewSearch();
           await discover.loadSavedSearch(sessionName);
-          await discover.waitUntilTabIsLoaded();
 
           await expect(unifiedTabs.getTabs()).toHaveCount(4);
 
