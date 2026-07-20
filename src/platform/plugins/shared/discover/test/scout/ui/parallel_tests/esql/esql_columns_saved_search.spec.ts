@@ -15,7 +15,6 @@
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../fixtures';
-import { testData } from '../../fixtures/common';
 
 const SAVED_SEARCH_NON_TRANSFORMATIONAL_INITIAL_COLUMNS = 'nonTransformationalInitialColumns';
 const SAVED_SEARCH_NON_TRANSFORMATIONAL_CUSTOM_COLUMNS = 'nonTransformationalCustomColumns';
@@ -26,10 +25,8 @@ spaceTest.describe(
   'Discover ES|QL columns - saved searches / discover sessions',
   { tag: '@local-stateful-classic' },
   () => {
-    spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
-      await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
-      await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+    spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
+      await discoverScoutSpace.setupDiscoverDefaults();
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -38,13 +35,12 @@ spaceTest.describe(
       await pageObjects.discover.waitUntilTabIsLoaded();
     });
 
-    spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await scoutSpace.savedObjects.cleanStandardList();
+    spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+      discoverScoutSpace.teardownDiscoverDefaults();
     });
 
     spaceTest(
-      'persists columns in saved searches and restores them on reload and re-selection',
+      'persists columns in saved search/discover session and restores them on reload and re-selection',
       async ({ page, pageObjects }) => {
         spaceTest.setTimeout(180_000);
         const { discover, unifiedFieldList } = pageObjects;
