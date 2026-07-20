@@ -130,7 +130,7 @@ export type LensApi = Simplify<
     LensApiCallbacks &
     LensHasEditPanel &
     LegacyLensStateApi &
-    SupportsJsonExport<LensWireAPIConfig>
+    SupportsJsonExport
 >;
 
 /**

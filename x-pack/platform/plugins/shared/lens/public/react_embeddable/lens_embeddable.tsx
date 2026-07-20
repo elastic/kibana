@@ -201,7 +201,6 @@ export const createLensEmbeddableFactory = (
           ...stateConfig.api,
           ...dashboardConfig.api,
           supportsJsonExport: true,
-          apiPath: LENS_VIS_API_PATH,
         }
       );
 

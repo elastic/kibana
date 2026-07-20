@@ -31,4 +31,4 @@ export type MarkdownEditorApi = HasType<typeof MARKDOWN_EMBEDDABLE_TYPE> &
   HasEditCapabilities &
   CanOverrideHoverActions &
   HasLibraryTransforms<MarkdownByReferenceState, MarkdownByValueState> &
-  SupportsJsonExport<MarkdownEmbeddableState>;
+  SupportsJsonExport;

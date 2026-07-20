@@ -94,7 +94,6 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
 
         return (
           <ExportJsonFlyout
-            apiPath={embeddable.apiPath}
             title={embeddable.title$.value ?? `${embeddable.type}-${embeddable.uuid}`}
             objectType={embeddable.getTypeDisplayName?.() ?? embeddable.type}
             closeFlyout={closeFlyout}

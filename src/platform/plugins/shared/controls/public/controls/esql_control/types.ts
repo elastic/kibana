@@ -44,7 +44,7 @@ export type ESQLControlApi<State> = DefaultEmbeddableApi<
   PublishesTooltipLabel &
   CanIndicateRelatedSiblings &
   ReturnType<typeof initializeLabelManager>['api'] &
-  SupportsJsonExport<SerializableRecord & State>;
+  SupportsJsonExport;
 
 export type ESQLOptionsListRuntimeState = Omit<OptionsListESQLControlState, 'available_options'> &
   Pick<StaticESQLControl, 'available_options'>; // both types have `available_options` during runtime

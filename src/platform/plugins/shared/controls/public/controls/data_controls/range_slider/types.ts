@@ -23,4 +23,4 @@ export type RangeSliderControlApi = DefaultEmbeddableApi<RangeSliderControlState
   PublishesRelatedPanels & {
     clearSelections: () => void;
     hasSelections$: PublishingSubject<boolean | undefined>;
-  } & SupportsJsonExport<RangeSliderControlState>;
+  } & SupportsJsonExport;

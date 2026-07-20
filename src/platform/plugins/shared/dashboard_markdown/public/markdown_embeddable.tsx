@@ -177,7 +177,6 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
       canUnlinkFromLibrary: async () => isByReference,
       hasLibraryItemWithTitle,
       supportsJsonExport: true,
-      apiPath: MARKDOWN_API_PATH,
     });
 
     return {

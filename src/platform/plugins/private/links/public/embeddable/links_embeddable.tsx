@@ -210,7 +210,6 @@ export const getLinksEmbeddableFactory = () => {
           });
         },
         supportsJsonExport: true,
-        apiPath: LINKS_API_PATH,
       });
 
       const Component = () => {

@@ -39,7 +39,7 @@ export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListDSLControlSt
     setSelectedOptions: (options: OptionsListSelection[]) => void;
     clearSelections: () => void;
     hasSelections$: PublishingSubject<boolean | undefined>;
-  } & SupportsJsonExport<OptionsListDSLControlState>;
+  } & SupportsJsonExport;
 
 /**
  * A type consisting of only the properties that the options list control puts into state managers

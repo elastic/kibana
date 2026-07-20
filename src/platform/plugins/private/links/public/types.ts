@@ -48,7 +48,7 @@ export type LinksApi = HasType<typeof LINKS_EMBEDDABLE_TYPE> &
   PublishesWritableTitle &
   HasEditCapabilities &
   HasLibraryTransforms<LinksByReferenceState, LinksByValueState> &
-  SupportsJsonExport<LinksApiState>;
+  SupportsJsonExport;
 
 export type ResolvedLink = Link & {
   id: string;
