@@ -98,7 +98,7 @@ describe('AnomaliesBadge', () => {
   it('shows the none tooltip when the anomaly score is zero', async () => {
     renderBadge(<AnomaliesBadge score={0} detectorType={AnomalyDetectorType.txLatency} />);
 
-    expect(await getTooltipText()).toBe('No anomalies detected for the selected time range.');
+    expect(await getTooltipText()).toBe('No anomalies detected.');
   });
 
   it('renders as non-interactive when the anomaly score is zero', () => {
@@ -113,7 +113,7 @@ describe('AnomaliesBadge', () => {
     expect(screen.getByTestId('apmAnomaliesBadge').closest('a')).toBeNull();
   });
 
-  it('links to the regular service overview with proper params', () => {
+  it('links to the regular service overview from outside with proper params', () => {
     renderBadge(
       <AnomaliesBadge
         score={CRITICAL_SEVERITY}
@@ -133,10 +133,12 @@ describe('AnomaliesBadge', () => {
       kuery: '',
       anomalyThreshold: 'critical',
       environment: 'production',
+      comparisonEnabled: 'true',
+      offset: 'expected_bounds',
     });
   });
 
-  it('links to the mobile service overview for a mobile agent with proper params', () => {
+  it('links to the mobile service overview for a mobile agent from outside with proper params', () => {
     renderBadge(
       <AnomaliesBadge
         score={MAJOR_SEVERITY}
@@ -153,6 +155,8 @@ describe('AnomaliesBadge', () => {
       kuery: '',
       anomalyThreshold: 'major',
       environment: 'mobile',
+      comparisonEnabled: 'true',
+      offset: 'expected_bounds',
     });
   });
 
@@ -160,5 +164,51 @@ describe('AnomaliesBadge', () => {
     renderBadge(<AnomaliesBadge score={CRITICAL_SEVERITY} detectorType={undefined} />);
 
     expect(screen.getByTestId('apmAnomaliesBadge').closest('a')).toBeNull();
+  });
+
+  it('links to service overview without expected bounds when rendered in service overview and comparisonEnabled is false', () => {
+    renderBadge(
+      <AnomaliesBadge
+        score={CRITICAL_SEVERITY}
+        detectorType={AnomalyDetectorType.txLatency}
+        navigationProps={{
+          ...regularClickProps,
+          isInServiceOverview: true,
+          comparisonEnabled: false,
+        }}
+      />
+    );
+
+    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
+    const [pathname, search] = href!.split('?');
+
+    expect(pathname).toContain('/services/opbeans-java/overview');
+    expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
+      comparisonEnabled: 'false',
+      offset: 'expected_bounds',
+    });
+  });
+
+  it('links to service overview with expected bounds when rendered in service overview and comparisonEnabled is true', () => {
+    renderBadge(
+      <AnomaliesBadge
+        score={CRITICAL_SEVERITY}
+        detectorType={AnomalyDetectorType.txLatency}
+        navigationProps={{
+          ...regularClickProps,
+          isInServiceOverview: true,
+          comparisonEnabled: true,
+        }}
+      />
+    );
+
+    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
+    const [pathname, search] = href!.split('?');
+
+    expect(pathname).toContain('/services/opbeans-java/overview');
+    expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
+      comparisonEnabled: 'true',
+      offset: 'expected_bounds',
+    });
   });
 });
