@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { take } from 'rxjs';
+import { filter, lastValueFrom, take } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { SortDirection } from '@kbn/data-plugin/public';
+import { isRunningResponse, SortDirection } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -135,7 +135,12 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
           );
           searchSource.setField('trackTotalHits', true);
 
-          const response = await searchSource.fetch$().pipe(take(1)).toPromise();
+          const response = await lastValueFrom(
+            searchSource.fetch$().pipe(
+              filter((searchResponse) => !isRunningResponse(searchResponse)),
+              take(1)
+            )
+          );
 
           if (cancelled) {
             return;

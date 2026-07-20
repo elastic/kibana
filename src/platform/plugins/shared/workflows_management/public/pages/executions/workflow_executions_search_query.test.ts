@@ -59,7 +59,15 @@ describe('workflow_executions_search_query', () => {
   });
 
   describe('isWorkflowExecutionsIndexNotFoundError', () => {
-    it('returns true for index_not_found_exception', () => {
+    it('returns true for an EsError-shaped index_not_found_exception', () => {
+      const error = {
+        attributes: { error: { type: 'index_not_found_exception', reason: 'missing' } },
+      };
+
+      expect(isWorkflowExecutionsIndexNotFoundError(error)).toBe(true);
+    });
+
+    it('returns true for a response error-shaped index_not_found_exception', () => {
       const error = {
         body: { error: { type: 'index_not_found_exception', reason: 'missing' } },
       };

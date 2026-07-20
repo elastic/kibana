@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { errors } from '@elastic/elasticsearch';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { of, throwError } from 'rxjs';
@@ -96,13 +95,66 @@ describe('WorkflowExecutionsTable', () => {
     );
   });
 
+  it('waits for the completed search response', async () => {
+    const services = createStartServicesMock();
+    const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
+
+    jest.mocked(searchSourceInstanceMock.fetch$).mockReturnValue(
+      of(
+        {
+          isPartial: true,
+          isRunning: true,
+          rawResponse: {
+            hits: {
+              hits: [],
+              total: { value: 0, relation: 'eq' },
+            },
+          },
+        },
+        {
+          isPartial: false,
+          isRunning: false,
+          rawResponse: {
+            hits: {
+              hits: [
+                {
+                  _id: 'execution-1',
+                  _index: '.workflows-executions',
+                  _source: { id: 'execution-1' },
+                },
+              ],
+              total: { value: 1, relation: 'eq' },
+            },
+          },
+        }
+      ) as unknown as ReturnType<typeof searchSourceInstanceMock.fetch$>
+    );
+
+    render(
+      <WorkflowExecutionsTable
+        dataView={dataView}
+        filters={[]}
+        query={defaultQuery}
+        spaceId="default"
+        timeRange={defaultTimeRange}
+      />,
+      { wrapper: getTestProvider({ services }) }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('workflowExecutionsTable')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('workflowExecutionsTableEmpty')).not.toBeInTheDocument();
+  });
+
   it('shows empty state when the executions index does not exist', async () => {
     const services = createStartServicesMock();
     const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
-    const indexNotFoundError = new errors.ResponseError({
-      statusCode: 404,
-      body: { error: { type: 'index_not_found_exception', reason: 'missing' } },
-    } as ConstructorParameters<typeof errors.ResponseError>[0]);
+    const indexNotFoundError = {
+      attributes: {
+        error: { type: 'index_not_found_exception', reason: 'missing' },
+      },
+    };
 
     jest
       .mocked(searchSourceInstanceMock.fetch$)
