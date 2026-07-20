@@ -31,6 +31,7 @@
     "@kbn/autoops-promotion-callout",
     "@kbn/cps",
     "@kbn/cps-utils",
+    "@kbn/core-application-browser-mocks",
   ],
   "exclude": [
     "target/**/*"

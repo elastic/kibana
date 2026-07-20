@@ -72,7 +72,7 @@ export const ProjectPicker = ({
       disableScreenReaderOutput
     >
       <EuiButtonEmpty
-        aria-label={strings.getProjectPickerButtonAriaLabel()}
+        aria-label={strings.projectPickerButtonAriaLabel}
         data-test-subj="project-picker-button"
         size="s"
         iconType="crossProjectSearch"
@@ -80,7 +80,7 @@ export const ProjectPicker = ({
         color="text"
       >
         {activeProjectsCount === totalProjectCount
-          ? strings.allButtonLabel()
+          ? strings.allButtonLabel
           : `${activeProjectsCount}/${totalProjectCount}`}
       </EuiButtonEmpty>
     </EuiToolTip>
@@ -170,10 +170,11 @@ export const DisabledProjectPicker = ({
   if (totalProjectCount <= 1) {
     return null;
   }
+
   const buttonIcon = (
     <EuiButtonIcon
       css={styles.disabledButton}
-      aria-label={strings.getProjectPickerButtonAriaLabel()}
+      aria-label={strings.projectPickerButtonAriaLabel}
       data-test-subj="project-picker-button-disabled"
       size="xs"
       isDisabled

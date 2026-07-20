@@ -56,6 +56,7 @@ interface GetSampleDocumentsEsqlParams {
    * internal date-range filter.
    */
   dslFilter?: QueryDslQueryContainer | QueryDslQueryContainer[];
+  requestTimeout: number;
 }
 
 interface GetSampleDocumentsEsqlResponse {
@@ -165,12 +166,20 @@ export async function getSampleDocumentsEsql({
   whereCondition,
   unmappedFields,
   dslFilter,
+  requestTimeout,
 }: GetSampleDocumentsEsqlParams): Promise<GetSampleDocumentsEsqlResponse> {
   const indices = Array.isArray(index) ? index : [index];
   const extraDslClauses = dslFilter ? castArray(dslFilter) : [];
   const filter = {
     bool: { filter: [...dateRangeQuery(start, end), ...extraDslClauses] },
   };
+
+  // One deadline for every request this call makes (count + sample can be two
+  // sequential requests), so `requestTimeout` bounds the whole call rather than
+  // resetting on each individual request.
+  const signal = AbortSignal.timeout(requestTimeout);
+  const runQuery = (params: { query: string; filter: typeof filter; drop_null_columns: true }) =>
+    esClient.esql.query(params, { signal }) as unknown as Promise<ESQLSearchResponse>;
 
   const whereExpression = buildWhereExpression({ kql, whereCondition });
   const printQuery = (query: ComposerQuery) => {
@@ -215,11 +224,11 @@ export async function getSampleDocumentsEsql({
       return { hits: [], total: 0 };
     }
 
-    const countResponse = (await esClient.esql.query({
+    const countResponse = await runQuery({
       query: buildCountQuery(),
       filter,
       drop_null_columns: true,
-    })) as unknown as ESQLSearchResponse;
+    });
 
     const total = getCount(countResponse);
     if (total === 0) {
@@ -228,22 +237,22 @@ export async function getSampleDocumentsEsql({
 
     const sampleProbability = Math.min(1, (SAMPLE_PROBABILITY_FACTOR * sampleSize) / total);
     const sampleLimit = SAMPLE_LIMIT_FACTOR * sampleSize;
-    const sampleResponse = (await esClient.esql.query({
+    const sampleResponse = await runQuery({
       query: buildQuery({ sampleProbability, limit: sampleLimit }),
       filter,
       drop_null_columns: true,
-    })) as unknown as ESQLSearchResponse;
+    });
 
     const hits = parseHits(sampleResponse);
     shuffleInPlace(hits); // This is very important, read the function jsdoc for more information
     return { hits: hits.slice(0, sampleSize), total: hits.length };
   }
 
-  const response = (await esClient.esql.query({
+  const response = await runQuery({
     query: buildQuery({ limit: size }),
     filter,
     drop_null_columns: true,
-  })) as unknown as ESQLSearchResponse;
+  });
   const hits = parseHits(response);
   return { hits, total: hits.length };
 }
