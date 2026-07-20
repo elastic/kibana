@@ -589,6 +589,7 @@ export const GetDataStreamsResponse: estypes.IndicesGetDataStreamResponse = {
       prefer_ilm: false,
       rollover_on_write: true,
       next_generation_managed_by: 'Index Lifecycle Management',
+      settings: {},
     },
   ],
 };

@@ -135,9 +135,11 @@ export function getMlClient(
     }
   }
 
-  function switchDeploymentId(
-    p: Parameters<MlClient['stopTrainedModelDeployment']>
-  ): Parameters<MlClient['stopTrainedModelDeployment']> {
+  function switchDeploymentId<
+    T extends
+      | Parameters<MlClient['stopTrainedModelDeployment']>
+      | Parameters<MlClient['inferTrainedModel']>
+  >(p: T): T {
     const [params] = p;
     if (params.deployment_id !== undefined) {
       params.model_id = params.deployment_id;

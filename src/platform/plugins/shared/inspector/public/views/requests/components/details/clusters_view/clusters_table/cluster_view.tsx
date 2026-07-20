@@ -20,10 +20,10 @@ interface Props {
 
 export function ClusterView({ clusterDetails }: Props) {
   const clusterFailure = (clusterDetails.failures ?? []).find((failure) => {
-    return failure.shard < 0;
+    return typeof failure.shard !== 'undefined' && failure.shard < 0;
   });
   const shardFailures = (clusterDetails.failures ?? []).filter((failure) => {
-    return failure.shard >= 0;
+    return typeof failure.shard !== 'undefined' && failure.shard >= 0;
   });
 
   return (
