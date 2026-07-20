@@ -530,6 +530,44 @@ Always raise `resetTaskTimeoutMinutes` first if you raise `resetPageDelayMs` —
 | `/state.active_reset.status: "running"` for hours | Backfill task is mid-walk on a large tenant | Wait. Raise `resetTaskTimeoutMinutes` in `kibana.yml` if it exceeds your tolerance window (see "Tuning /reset at scale") |
 | `Event loop utilization exceeded threshold` from `/internal/cases/_analyticsV2/reset` | A runner page is slower than expected on this hardware | Raise `resetPageDelayMs` to 50–100 to throttle further |
 | `Case Analytics` data view missing in Discover / Lens after `/reset` | Lazy recreation hasn't fired in that space yet — `/reset` deletes every per-space data view, and they recreate on the next cases request per space | Open the Cases UI in the affected space, or run `curl /s/<spaceId>/api/cases/_find?perPage=1` to pre-warm. See "Per-space data views after /reset" above. |
+| `extended_fields` missing from `.cases` after a templates migration, no case edits since | The migration backfill wrote `extended_fields` via a raw SO update, which never bumped the case-domain `attributes.updated_at` incremental reconciliation filters on | Handled automatically — see "Templates migration coupling" below. Manual fallback: POST /reset. |
+
+### Templates migration coupling
+
+The cases templates v2 migration (`server/tasks/templates_migration`)
+backfills `extended_fields` onto existing cases. That backfill writes
+through a raw saved-objects `bulkUpdate`, which stamps the
+**SO-framework** top-level `updated_at` but **not** the **case-domain**
+`attributes.updated_at`. Incremental reconciliation filters on
+`attributes.updated_at` (see `reconciliation/runner.ts`), so it would
+**never** re-emit backfilled cases on its own — the miss would be
+permanent, not a transient window, until the case's next real edit.
+
+To close this, the migration fires a one-shot hook when its case
+backfill reaches a terminal state (fully complete **or** gives up after
+the failure cap). The hook calls
+`CasesAnalyticsV2Service.triggerBackfillReconciliation()`, which clears
+the reconciliation cursor so the **next tick runs a single full
+backfill walk** (no `updated_at` filter) and mirrors the freshly
+backfilled `extended_fields` into `.cases`. The walk persists a fresh
+cursor on success, so subsequent ticks return to cheap incremental mode.
+
+Safety properties (all covered by tests):
+
+- **Restart-safe / no re-index storms.** The hook is gated on
+  `hasPendingCaseBackfill(configures)`, derived from the restart-durable
+  `legacyCasesMigrated` per-space flags — **not** a per-run write count.
+  A no-op restart of an already-migrated cluster sees no pending work
+  and triggers **no** re-index. This also closes the boundary case where
+  the migration's final run writes zero cases (e.g. a restart wiped the
+  in-progress cursor and the last run only re-scans already-written
+  cases) yet still needs to nudge analytics.
+- **No feedback loop.** Reconciliation reads case SOs and writes only to
+  `.cases`; it never writes case SOs, so it cannot re-trigger the
+  migration task. The full walk runs once, then reverts to incremental.
+- **Decoupled + non-fatal.** The callback is dependency-injected from
+  `plugin.ts`; it no-ops when analytics v2 is disabled and swallows its
+  own errors, so it can never fail or retry the migration task.
 
 ## Activity surface
 

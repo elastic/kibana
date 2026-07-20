@@ -19,6 +19,7 @@ import {
 } from './writer/attachments';
 import { ensureCaseIndex } from './ensure_indices/case';
 import { ensureActivityIndex } from './ensure_indices/activity';
+import { RECONCILIATION_TASK_ID } from './reconciliation';
 import { makeCase, makeUserAction } from './__test_helpers__';
 
 jest.mock('./ensure_indices/case');
@@ -200,6 +201,71 @@ describe('CasesAnalyticsV2Service', () => {
 
       expect(esClient.index).toHaveBeenCalledTimes(1);
       expect((esClient.index as unknown as jest.Mock).mock.calls[0][0].id).toBe('c-1');
+    });
+  });
+
+  describe('triggerBackfillReconciliation', () => {
+    const build = (enabled: boolean) =>
+      new CasesAnalyticsV2Service({
+        logger: loggerMock.create(),
+        enabled,
+        reconciliationIntervalMinutes: 30,
+        enableAdminRoutes: false,
+        resetTaskTimeoutMinutes: 60,
+        resetPageDelayMs: 0,
+      });
+
+    const startWithTaskManager = async (service: CasesAnalyticsV2Service) => {
+      (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
+      (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
+      const taskManager = taskManagerMock.createStart();
+      await service.start({
+        esClient: elasticsearchServiceMock.createElasticsearchClient(),
+        taskManager,
+        internalSavedObjectsClient: savedObjectsClientMock.create(),
+        dataViewsService: {} as unknown as DataViewsServerPluginStart,
+      });
+      return taskManager;
+    };
+
+    afterEach(() => jest.clearAllMocks());
+
+    it('no-ops when v2 is disabled', async () => {
+      const service = build(false);
+      await expect(service.triggerBackfillReconciliation()).resolves.toBeUndefined();
+    });
+
+    it('no-ops when the service has not started (no task manager captured yet)', async () => {
+      const service = build(true); // enabled but start() never called
+      await expect(service.triggerBackfillReconciliation()).resolves.toBeUndefined();
+    });
+
+    it('clears the reconciliation cursor so the next tick runs a full backfill', async () => {
+      const service = build(true);
+      const taskManager = await startWithTaskManager(service);
+
+      await service.triggerBackfillReconciliation();
+
+      // Ensures the singleton task exists, then rewrites its state to empty — the empty cursor is
+      // what forces the next periodic tick to walk every case rather than an incremental delta.
+      expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({ id: RECONCILIATION_TASK_ID })
+      );
+      expect(taskManager.bulkUpdateState).toHaveBeenCalledWith(
+        [RECONCILIATION_TASK_ID],
+        expect.any(Function)
+      );
+      const stateUpdater = (taskManager.bulkUpdateState as jest.Mock).mock.calls[0][1];
+      expect(stateUpdater()).toEqual({});
+    });
+
+    it('never throws when the underlying task-manager calls fail', async () => {
+      const service = build(true);
+      const taskManager = await startWithTaskManager(service);
+      (taskManager.ensureScheduled as jest.Mock).mockRejectedValue(new Error('tm down'));
+      (taskManager.bulkUpdateState as jest.Mock).mockRejectedValue(new Error('tm down'));
+
+      await expect(service.triggerBackfillReconciliation()).resolves.toBeUndefined();
     });
   });
 });
