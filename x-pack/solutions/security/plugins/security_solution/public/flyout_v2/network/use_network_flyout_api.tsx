@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy/security_solution/network';
@@ -15,7 +15,9 @@ import { useKibana } from '../../common/lib/kibana';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context'; // Lazy-loaded so consumers of this hook don't statically pull the network flyout graph into their
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
+import { formatFlyoutTitle, NETWORK_TITLE } from '../shared/constants/flyout_titles';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the network flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
@@ -66,11 +68,16 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
   // here so callers never have to reason about it: they pick `openNetworkFlyout` (main) or
   // `openNetworkFlyoutAsChild` (child) and this helper maps that to the right session.
   const open = useCallback(
-    (children: ReactNode, session: OverlaySystemFlyoutOpenOptions['session']) => {
+    (
+      children: ReactNode,
+      session: OverlaySystemFlyoutOpenOptions['session'],
+      title: OverlaySystemFlyoutOpenOptions['title']
+    ) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
+        title,
       };
       overlays.openSystemFlyout(
         flyoutProviders({
@@ -96,14 +103,22 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
 
   const openNetworkFlyout = useCallback(
     ({ ip, flowTarget }: OpenNetworkFlyoutParams) => {
-      open(<Network ip={ip} flowTarget={flowTarget} />, sessionMode);
+      open(
+        <Network ip={ip} flowTarget={flowTarget} />,
+        sessionMode,
+        formatFlyoutTitle(NETWORK_TITLE, ip)
+      );
     },
     [open, sessionMode]
   );
 
   const openNetworkFlyoutAsChild = useCallback(
     ({ ip, flowTarget }: OpenNetworkFlyoutParams) => {
-      open(<Network ip={ip} flowTarget={flowTarget} />, 'inherit');
+      open(
+        <Network ip={ip} flowTarget={flowTarget} />,
+        'inherit',
+        buildFlyoutNavTitle(formatFlyoutTitle(NETWORK_TITLE, ip))
+      );
     },
     [open]
   );

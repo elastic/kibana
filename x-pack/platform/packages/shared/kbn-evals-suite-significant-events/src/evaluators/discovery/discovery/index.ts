@@ -12,7 +12,7 @@ import type { DiscoveryEvaluator } from '../types';
 import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grounding';
 import { createDiscoveryToolUsageEvaluator } from './tool_usage/tool_usage';
 import {
-  createCriticalityCalibrationEvaluator,
+  createSeverityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
 } from '../common/scores_calibration';
 import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
@@ -49,7 +49,7 @@ export const createDiscoveryEvaluators = (
     ...base,
     createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
     createEvidenceDescriptionEvaluator({ criteriaFn }),
-    createCriticalityCalibrationEvaluator({ criteriaFn }),
+    createSeverityCalibrationEvaluator({ criteriaFn }),
     createConfidenceCalibrationEvaluator({ criteriaFn }),
   ];
 };

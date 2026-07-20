@@ -21,7 +21,11 @@ const contextId = 'FieldMarkdownRenderer';
 
 const inlineFieldWrapperCss = css`
   display: inline-block;
-  vertical-align: top;
+  vertical-align: middle;
+
+  .euiBadge {
+    vertical-align: middle;
+  }
 `;
 
 export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
@@ -101,11 +105,13 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
 
   if (disableActions) {
     return (
-      <EuiToolTip content={name} data-test-subj="fieldMarkdownRendererToolTip" position="top">
-        <EuiBadge color="hollow" data-test-subj="disabledActionsBadge" iconType={icon}>
-          {value}
-        </EuiBadge>
-      </EuiToolTip>
+      <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
+        <EuiToolTip content={name} data-test-subj="fieldMarkdownRendererToolTip" position="top">
+          <EuiBadge color="hollow" data-test-subj="disabledActionsBadge" iconType={icon}>
+            {value}
+          </EuiBadge>
+        </EuiToolTip>
+      </span>
     );
   }
 
