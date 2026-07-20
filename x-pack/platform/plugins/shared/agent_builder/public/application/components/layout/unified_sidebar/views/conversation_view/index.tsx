@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { useLocation } from 'react-router-dom';
-import type { DragStart, DropResult } from '@hello-pangea/dnd';
+import type { DragStart, DragUpdate, DropResult } from '@hello-pangea/dnd';
 
 import {
   EuiButton,
@@ -99,9 +99,14 @@ export const ConversationSidebarView: React.FC = () => {
   });
 
   const [draggingFromId, setDraggingFromId] = useState<string | null>(null);
+  const [hoveredDroppableId, setHoveredDroppableId] = useState<string | null>(null);
 
   const onDragStart = useCallback(({ source }: DragStart) => {
     flushSync(() => setDraggingFromId(source.droppableId));
+  }, []);
+
+  const onDragUpdate = useCallback(({ destination }: DragUpdate) => {
+    setHoveredDroppableId(destination?.droppableId ?? null);
   }, []);
 
   const sortedConversations = useMemo(
@@ -122,9 +127,19 @@ export const ConversationSidebarView: React.FC = () => {
     [pinnedConversations]
   );
 
+  const dropBg = useCallback(
+    (droppableId: string) => {
+      if (hoveredDroppableId === droppableId) return euiTheme.colors.backgroundLightPrimary;
+      if (draggingFromId !== null) return euiTheme.colors.backgroundBasePrimary;
+      return 'transparent';
+    },
+    [hoveredDroppableId, draggingFromId, euiTheme]
+  );
+
   const onDragEnd = useCallback(
     ({ draggableId, source, destination }: DropResult) => {
       setDraggingFromId(null);
+      setHoveredDroppableId(null);
       if (!destination) return;
       if (source.droppableId === destination.droppableId) return;
 
@@ -235,7 +250,11 @@ export const ConversationSidebarView: React.FC = () => {
                 </EuiFlexItem>
 
                 <EuiFlexItem grow className="eui-fullHeight">
-                  <EuiDragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
+                  <EuiDragDropContext
+                    onDragEnd={onDragEnd}
+                    onDragStart={onDragStart}
+                    onDragUpdate={onDragUpdate}
+                  >
                     <EuiFlexGroup
                       direction="column"
                       gutterSize="none"
@@ -252,6 +271,7 @@ export const ConversationSidebarView: React.FC = () => {
                           currentConversationId={conversationId}
                           pinnedConversations={pinnedConversations}
                           isDropDisabled={draggingFromId === 'PINNED'}
+                          backgroundColor={dropBg('PINNED')}
                         />
                       </EuiFlexItem>
 
@@ -325,6 +345,7 @@ export const ConversationSidebarView: React.FC = () => {
                           onItemClick={handleConversationItemClick}
                           pinnedConversationIds={pinnedConversationIds}
                           isDropDisabled={draggingFromId === 'CHATS'}
+                          backgroundColor={dropBg('CHATS')}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

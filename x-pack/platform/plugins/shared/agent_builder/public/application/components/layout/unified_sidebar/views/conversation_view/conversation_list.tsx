@@ -41,6 +41,7 @@ interface ConversationListProps {
   onItemClick?: (conversationId: string) => void;
   pinnedConversationIds?: Set<string>;
   isDropDisabled?: boolean;
+  backgroundColor?: string;
 }
 
 export const ConversationList: React.FC<ConversationListProps> = ({
@@ -50,6 +51,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   onItemClick,
   pinnedConversationIds,
   isDropDisabled,
+  backgroundColor = 'transparent',
 }) => {
   const { euiTheme } = useEuiTheme();
   const { conversations = [], isLoading } = useConversationList({ agentId });
@@ -86,7 +88,13 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   // If there are no conversations, show 1 mock conversation item that links to the new conversation route
   if (sortedConversations.length === 0) {
     return (
-      <EuiDroppable droppableId="CHATS" spacing="none" grow={false} isDropDisabled={isDropDisabled}>
+      <EuiDroppable
+        droppableId="CHATS"
+        spacing="none"
+        grow={false}
+        isDropDisabled={isDropDisabled}
+        style={{ backgroundColor: 'transparent' }}
+      >
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <Link
@@ -108,7 +116,13 @@ export const ConversationList: React.FC<ConversationListProps> = ({
       spacing="none"
       grow={false}
       isDropDisabled={isDropDisabled}
-      style={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xs }}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: euiTheme.size.xs,
+        borderRadius: euiTheme.border.radius.small,
+        backgroundColor,
+      }}
     >
       {sortedConversations.map((conversation, index) => {
         const isActive = currentConversationId === conversation.id;

@@ -25,6 +25,7 @@ interface PinnedConversationListProps {
   currentConversationId: string | undefined;
   pinnedConversations: ConversationWithoutRounds[];
   isDropDisabled?: boolean;
+  backgroundColor?: string;
   onItemClick?: () => void;
 }
 
@@ -33,21 +34,11 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
   currentConversationId,
   pinnedConversations,
   isDropDisabled,
+  backgroundColor = 'transparent',
   onItemClick,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { activeStreams, byConversationId } = useStreamingContext();
-
-  const emptyDropTargetStyles = css`
-    border: 1px dashed ${euiTheme.colors.borderBasePlain};
-    border-radius: ${euiTheme.border.radius.small};
-    padding: ${euiTheme.size.s};
-    text-align: center;
-    min-height: ${euiTheme.size.xxl};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  `;
 
   if (pinnedConversations.length === 0) {
     return (
@@ -56,8 +47,25 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
         spacing="none"
         grow={false}
         isDropDisabled={isDropDisabled}
+        style={{ backgroundColor: 'transparent' }}
       >
-        <div css={emptyDropTargetStyles}>
+        <div
+          css={css`
+            border: 1px dashed
+              ${backgroundColor !== 'transparent'
+                ? euiTheme.colors.borderBasePrimary
+                : euiTheme.colors.borderBasePlain};
+            border-radius: ${euiTheme.border.radius.small};
+            padding: ${euiTheme.size.s};
+            text-align: center;
+            min-height: ${euiTheme.size.xxl};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: ${backgroundColor};
+            transition: background-color 0.15s, border-color 0.15s;
+          `}
+        >
           <EuiText size="xs" color="subdued">
             {dragToPinLabel}
           </EuiText>
@@ -72,7 +80,14 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
       spacing="none"
       grow={false}
       isDropDisabled={isDropDisabled}
-      style={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xs }}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: euiTheme.size.xs,
+        borderRadius: euiTheme.border.radius.small,
+        backgroundColor,
+        transition: 'background-color 0.15s',
+      }}
     >
       {pinnedConversations.map((conversation, index) => {
         const isActive = currentConversationId === conversation.id;
