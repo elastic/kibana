@@ -54,6 +54,12 @@ async function getTooltipText(): Promise<string | null | undefined> {
   return document.querySelector('.euiToolTipPopover')?.textContent;
 }
 
+function getBadgeHrefParts(): [string, string] {
+  const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
+  const [pathname, search] = href!.split('?');
+  return [pathname, search];
+}
+
 describe('AnomaliesBadge', () => {
   it('names the anomalous detector in the tooltip when a detectorType is provided', async () => {
     renderBadge(
@@ -113,7 +119,7 @@ describe('AnomaliesBadge', () => {
     expect(screen.getByTestId('apmAnomaliesBadge').closest('a')).toBeNull();
   });
 
-  it('links to the regular service overview from outside with proper params', () => {
+  it('links to the regular service overview from outside with proper params', async () => {
     renderBadge(
       <AnomaliesBadge
         score={CRITICAL_SEVERITY}
@@ -125,8 +131,7 @@ describe('AnomaliesBadge', () => {
       />
     );
 
-    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
-    const [pathname, search] = href!.split('?');
+    const [pathname, search] = getBadgeHrefParts();
 
     expect(pathname).toContain('/services/opbeans-java/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
@@ -136,9 +141,10 @@ describe('AnomaliesBadge', () => {
       comparisonEnabled: 'true',
       offset: 'expected_bounds',
     });
+    expect(await getTooltipText()).toContain('Click to view more.');
   });
 
-  it('links to the mobile service overview for a mobile agent from outside with proper params', () => {
+  it('links to the mobile service overview for a mobile agent from outside with proper params', async () => {
     renderBadge(
       <AnomaliesBadge
         score={MAJOR_SEVERITY}
@@ -147,8 +153,7 @@ describe('AnomaliesBadge', () => {
       />
     );
 
-    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
-    const [pathname, search] = href!.split('?');
+    const [pathname, search] = getBadgeHrefParts();
 
     expect(pathname).toContain('/mobile-services/opbeans-android/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
@@ -158,6 +163,7 @@ describe('AnomaliesBadge', () => {
       comparisonEnabled: 'true',
       offset: 'expected_bounds',
     });
+    expect(await getTooltipText()).toContain('Click to view more.');
   });
 
   it('renders as non-interactive when interactionProps is not provided', () => {
@@ -166,7 +172,7 @@ describe('AnomaliesBadge', () => {
     expect(screen.getByTestId('apmAnomaliesBadge').closest('a')).toBeNull();
   });
 
-  it('links to service overview without expected bounds when rendered in service overview and comparisonEnabled is false', () => {
+  it('links to service overview without expected bounds when rendered in service overview and comparisonEnabled is false', async () => {
     renderBadge(
       <AnomaliesBadge
         score={CRITICAL_SEVERITY}
@@ -179,17 +185,17 @@ describe('AnomaliesBadge', () => {
       />
     );
 
-    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
-    const [pathname, search] = href!.split('?');
+    const [pathname, search] = getBadgeHrefParts();
 
     expect(pathname).toContain('/services/opbeans-java/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
       comparisonEnabled: 'false',
       offset: 'expected_bounds',
     });
+    expect(await getTooltipText()).toContain('Click to hide expected bounds.');
   });
 
-  it('links to service overview with expected bounds when rendered in service overview and comparisonEnabled is true', () => {
+  it('links to service overview with expected bounds when rendered in service overview and comparisonEnabled is true', async () => {
     renderBadge(
       <AnomaliesBadge
         score={CRITICAL_SEVERITY}
@@ -202,13 +208,13 @@ describe('AnomaliesBadge', () => {
       />
     );
 
-    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
-    const [pathname, search] = href!.split('?');
+    const [pathname, search] = getBadgeHrefParts();
 
     expect(pathname).toContain('/services/opbeans-java/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
       comparisonEnabled: 'true',
       offset: 'expected_bounds',
     });
+    expect(await getTooltipText()).toContain('Click to view expected bounds.');
   });
 });
