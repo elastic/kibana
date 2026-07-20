@@ -77,6 +77,7 @@ describe('useAttacksListData', () => {
       query: mockQuery,
       aggs: { some: 'agg' },
       queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
+      uniqueQueryId: 'attacks-kpi-attacks-list',
     });
   });
 
