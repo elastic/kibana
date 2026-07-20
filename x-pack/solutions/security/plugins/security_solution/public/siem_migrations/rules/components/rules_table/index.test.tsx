@@ -170,7 +170,18 @@ describe('MigrationRulesTable', () => {
       isLoading: false,
     });
     (useMigrationRulesTableColumns as jest.Mock).mockReturnValue([false, []]);
-    (useMigrationRuleDetailsFlyout as jest.Mock).mockReturnValue([jest.fn()]);
+    (useMigrationRuleDetailsFlyout as jest.Mock).mockReturnValue({
+      migrationRuleDetailsFlyout: null,
+      openMigrationRuleDetails: jest.fn(),
+      closeMigrationRuleDetails: jest.fn(),
+      openedMigrationRuleId: undefined,
+      navigation: {
+        hasPrevious: false,
+        hasNext: false,
+        goToPrevious: jest.fn(),
+        goToNext: jest.fn(),
+      },
+    });
     (useInstallMigrationRule as jest.Mock).mockReturnValue({ mutateAsync: jest.fn() });
     (useInstallMigrationRules as jest.Mock).mockReturnValue({ mutateAsync: jest.fn() });
     (useUpdateIndexPattern as jest.Mock).mockReturnValue({ mutateAsync: jest.fn() });

@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiBasicTable,
   EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -360,12 +361,27 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const {
       migrationRuleDetailsFlyout: rulePreviewFlyout,
       openMigrationRuleDetails: openRulePreview,
+      openedMigrationRuleId,
     } = useMigrationRuleDetailsFlyout({
       isLoading: isRulesLoading,
       migrationRules,
       getMigrationRuleData,
       ruleActionsFactory,
     });
+
+    const { euiTheme } = useEuiTheme();
+    const rowProps = useCallback(
+      (rule: RuleMigrationRule) => {
+        if (rule.id !== openedMigrationRuleId) {
+          return {};
+        }
+        return {
+          style: { backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect },
+          'data-test-subj': `openedMigrationRuleRow-${rule.id}`,
+        };
+      },
+      [openedMigrationRuleId, euiTheme.colors.backgroundBaseInteractiveSelect]
+    );
 
     const rulesColumns = useMigrationRulesTableColumns({
       disableActions: isTableLoading,
@@ -451,6 +467,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   onChange={onTableChange}
                   selection={tableSelection}
                   itemId={'id'}
+                  rowProps={rowProps}
                   data-test-subj={'rules-translation-table'}
                   columns={rulesColumns}
                   tableCaption={i18n.RULES_MIGRATION_TABLE_CAPTION}
