@@ -83,10 +83,10 @@ export function createDiscoveryWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getDiscoveryClient, licensing, uiSettingsClient } = await getScopedClients({
+        const { getDiscoveryClient, licensing } = await getScopedClients({
           request,
         });
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        await assertSignificantEventsAccess({ server, licensing });
 
         const data = await discoveryWriteHandler({
           discoveryClient: getDiscoveryClient(),

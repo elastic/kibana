@@ -22,7 +22,7 @@ import type {
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { ROUNDED_BORDER_RADIUS_LARGE } from '../../../../common.styles';
+import { AB_PANEL_RADIUS } from '../../../../common.styles';
 import { RoundResponseActions } from './round_response/round_response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { CommandBadgeText } from './command_badge_text';
@@ -55,7 +55,7 @@ export const RoundInput = ({
     background: ${euiTheme.colors.backgroundLightPrimary};
     ${euiTextBreakWord()}
     white-space: pre-wrap;
-    border-radius: ${`${ROUNDED_BORDER_RADIUS_LARGE} ${ROUNDED_BORDER_RADIUS_LARGE} 0 ${ROUNDED_BORDER_RADIUS_LARGE}`};
+    border-radius: ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px 0 ${AB_PANEL_RADIUS}px;
   `;
 
   return (
