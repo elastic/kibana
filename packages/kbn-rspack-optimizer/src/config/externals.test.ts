@@ -8,7 +8,7 @@
  */
 
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
-import { getExternals } from './externals';
+import { getExternals, isKeaReactReduxImport } from './externals';
 
 /**
  * Rspack-specific externals that are NOT in UiSharedDepsSrc.externals.
@@ -43,6 +43,34 @@ describe('externals configuration', () => {
       );
 
       expect(rspackOnly.sort()).toEqual(RSPACK_ONLY_EXTERNALS.sort());
+    });
+  });
+
+  describe('isKeaReactReduxImport', () => {
+    it('returns true for react-redux imported from kea', () => {
+      expect(isKeaReactReduxImport('/path/to/node_modules/kea/lib', 'react-redux')).toBe(true);
+    });
+
+    it('returns true with backslash separators (Windows)', () => {
+      expect(isKeaReactReduxImport('C:\\project\\node_modules\\kea\\lib', 'react-redux')).toBe(
+        true
+      );
+    });
+
+    it('returns false for react-redux from non-kea context', () => {
+      expect(isKeaReactReduxImport('/path/to/node_modules/other-pkg', 'react-redux')).toBe(false);
+    });
+
+    it('returns false for non-react-redux request from kea context', () => {
+      expect(isKeaReactReduxImport('/path/to/node_modules/kea/lib', 'redux')).toBe(false);
+    });
+
+    it('returns false when context is undefined', () => {
+      expect(isKeaReactReduxImport(undefined, 'react-redux')).toBe(false);
+    });
+
+    it('returns false when request is undefined', () => {
+      expect(isKeaReactReduxImport('/path/to/node_modules/kea/lib', undefined)).toBe(false);
     });
   });
 
