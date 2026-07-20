@@ -338,7 +338,7 @@ export class LensApp {
 
   /** Clears the dimension field combo box (removes the currently selected field). */
   async clearDimensionField() {
-    await this.dimensionFieldComboBox.clear();
+    await this.page.components.comboBox('indexPattern-dimension-field').clear();
   }
 
   private async openChartSwitchPopover() {
