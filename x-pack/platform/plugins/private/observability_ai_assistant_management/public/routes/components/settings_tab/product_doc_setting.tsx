@@ -190,7 +190,12 @@ export function ProductDocSetting({
           data-test-subj="productDocRetryLink"
           css={linkCss}
         >
-          <EuiIcon type="refresh" size="s" data-test-subj="productDocRetryIcon" aria-hidden={true} />
+          <EuiIcon
+            type="refresh"
+            size="s"
+            data-test-subj="productDocRetryIcon"
+            aria-hidden={true}
+          />
           <span>
             {i18n.translate(
               'xpack.observabilityAiAssistantManagement.settingsPage.retryLinkLabel',

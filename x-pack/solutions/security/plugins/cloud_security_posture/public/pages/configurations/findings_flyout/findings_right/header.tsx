@@ -58,10 +58,9 @@ export const TruncatedCopyableText = ({ textToCopy }: { textToCopy: string }) =>
             `}
             onClick={copy}
             type="copy"
-            aria-label={i18n.translate(
-              'xpack.csp.findings.findingsFlyout.header.copyToClipboard',
-              { defaultMessage: 'Copy to clipboard' }
-            )}
+            aria-label={i18n.translate('xpack.csp.findings.findingsFlyout.header.copyToClipboard', {
+              defaultMessage: 'Copy to clipboard',
+            })}
           />
         )}
       </EuiCopy>

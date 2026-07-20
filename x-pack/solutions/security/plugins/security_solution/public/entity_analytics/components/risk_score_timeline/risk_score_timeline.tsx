@@ -358,7 +358,13 @@ const TimelineChart: React.FC<TimelineChartProps> = ({
           id="riskScoreTimelineSelection"
           domainType={AnnotationDomainType.XDomain}
           dataValues={[{ dataValue: selectedMs, details: selectedTimestamp }]}
-          marker={<EuiIcon type="dot" data-test-subj="riskScoreTimeline-SelectedPoint" aria-hidden={true} />}
+          marker={
+            <EuiIcon
+              type="dot"
+              data-test-subj="riskScoreTimeline-SelectedPoint"
+              aria-hidden={true}
+            />
+          }
           markerPosition={Position.Top}
           style={{ line: { strokeWidth: 2, stroke: euiTheme.colors.primary } }}
         />
