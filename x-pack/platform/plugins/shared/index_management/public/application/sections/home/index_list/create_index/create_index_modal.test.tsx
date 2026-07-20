@@ -31,7 +31,10 @@ jest.mock('./utils', () => ({
   },
 }));
 
-const renderModal = (props: Partial<React.ComponentProps<typeof CreateIndexModal>> = {}) => {
+const renderModal = (
+  props: Partial<React.ComponentProps<typeof CreateIndexModal>> = {},
+  { projectType }: { projectType?: string } = {}
+) => {
   const defaultProps = {
     closeModal: jest.fn(),
     loadIndices: jest.fn(),
@@ -40,6 +43,9 @@ const renderModal = (props: Partial<React.ComponentProps<typeof CreateIndexModal
   const ctx = {
     services: {
       notificationService,
+    },
+    plugins: {
+      cloud: projectType ? { serverless: { projectType } } : undefined,
     },
   } as unknown as AppDependencies;
 
@@ -189,5 +195,33 @@ describe('CreateIndexModal', () => {
     fireEvent.click(screen.getByTestId('createIndexSaveButton'));
 
     expect(mockCreateIndex).not.toHaveBeenCalled();
+  });
+
+  describe('in a vectordb project', () => {
+    it('hides the index mode field', () => {
+      renderModal({}, { projectType: 'vectordb' });
+      expect(screen.getByTestId('createIndexNameFieldText')).toBeInTheDocument();
+      expect(screen.queryByTestId('indexModeField')).not.toBeInTheDocument();
+    });
+
+    it('creates the index with the vectordb_document index mode', async () => {
+      const closeModal = jest.fn();
+      const loadIndices = jest.fn();
+      mockCreateIndex.mockResolvedValue({ error: undefined });
+
+      renderModal({ closeModal, loadIndices }, { projectType: 'vectordb' });
+      fireEvent.click(screen.getByTestId('createIndexSaveButton'));
+
+      await waitFor(() => {
+        expect(mockCreateIndex).toHaveBeenCalledWith('search-abcd', 'vectordb_document');
+      });
+    });
+
+    it('reflects the vectordb_document index mode in the API code block', () => {
+      renderModal({}, { projectType: 'vectordb' });
+      fireEvent.click(screen.getByTestId('createIndexShowApiButton'));
+
+      expect(screen.getByText(/\"mode\":\"vectordb_document\"/)).toBeInTheDocument();
+    });
   });
 });

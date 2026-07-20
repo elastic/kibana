@@ -33,10 +33,14 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 
-import { LOOKUP_INDEX_MODE, STANDARD_INDEX_MODE } from '../../../../../../common/constants';
+import {
+  LOOKUP_INDEX_MODE,
+  STANDARD_INDEX_MODE,
+  VECTORDB_DOCUMENT_INDEX_MODE,
+} from '../../../../../../common/constants';
 import { indexModeDescriptions, indexModeLabels } from '../../../../lib/index_mode_labels';
 import { createIndex } from '../../../../services';
-import { useServices } from '../../../../app_context';
+import { useAppContext, useServices } from '../../../../app_context';
 
 import { generateRandomIndexName, isValidIndexName } from './utils';
 
@@ -58,12 +62,19 @@ export interface CreateIndexModalProps {
 
 export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalProps) => {
   const { notificationService } = useServices();
+  const { plugins } = useAppContext();
   const modalTitleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
 
+  // In vectordb projects only the vectordb_document index mode is supported, so the
+  // index mode selector is hidden and indices are always created with that mode.
+  const isVectorDbProject = plugins?.cloud?.serverless?.projectType === 'vectordb';
+
   const [indexName, setIndexName] = useState<string>(generateRandomIndexName);
 
-  const [indexMode, setIndexMode] = useState<string>(STANDARD_INDEX_MODE);
+  const [indexMode, setIndexMode] = useState<string>(
+    isVectorDbProject ? VECTORDB_DOCUMENT_INDEX_MODE : STANDARD_INDEX_MODE
+  );
   const [indexNameError, setIndexNameError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [createError, setCreateError] = useState<string | undefined>();
@@ -193,54 +204,56 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
                 />
               </EuiFormRow>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate('xpack.idxMgmt.createIndex.modal.indexMode.label', {
-                  defaultMessage: 'Index mode',
-                })}
-                isDisabled={isSaving}
-                css={css`
-                  width: calc(${euiTheme.size.xxxl} * 4);
-                `}
-              >
-                <EuiSuperSelect
+            {!isVectorDbProject && (
+              <EuiFlexItem grow={false}>
+                <EuiFormRow
                   fullWidth
-                  name="indexMode"
-                  valueOfSelected={indexMode}
-                  onChange={(mode) => setIndexMode(mode)}
-                  data-test-subj="indexModeField"
-                  options={[
-                    {
-                      value: STANDARD_INDEX_MODE,
-                      inputDisplay: indexModeLabels[STANDARD_INDEX_MODE],
-                      'data-test-subj': 'indexModeStandardOption',
-                      dropdownDisplay: (
-                        <Fragment>
-                          <strong>{indexModeLabels[STANDARD_INDEX_MODE]}</strong>
-                          <EuiText size="s" color="subdued">
-                            <p>{indexModeDescriptions[STANDARD_INDEX_MODE]}</p>
-                          </EuiText>
-                        </Fragment>
-                      ),
-                    },
-                    {
-                      value: LOOKUP_INDEX_MODE,
-                      inputDisplay: indexModeLabels[LOOKUP_INDEX_MODE],
-                      'data-test-subj': 'indexModeLookupOption',
-                      dropdownDisplay: (
-                        <Fragment>
-                          <strong>{indexModeLabels[LOOKUP_INDEX_MODE]}</strong>
-                          <EuiText size="s" color="subdued">
-                            <p>{indexModeDescriptions[LOOKUP_INDEX_MODE]}</p>
-                          </EuiText>
-                        </Fragment>
-                      ),
-                    },
-                  ]}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
+                  label={i18n.translate('xpack.idxMgmt.createIndex.modal.indexMode.label', {
+                    defaultMessage: 'Index mode',
+                  })}
+                  isDisabled={isSaving}
+                  css={css`
+                    width: calc(${euiTheme.size.xxxl} * 4);
+                  `}
+                >
+                  <EuiSuperSelect
+                    fullWidth
+                    name="indexMode"
+                    valueOfSelected={indexMode}
+                    onChange={(mode) => setIndexMode(mode)}
+                    data-test-subj="indexModeField"
+                    options={[
+                      {
+                        value: STANDARD_INDEX_MODE,
+                        inputDisplay: indexModeLabels[STANDARD_INDEX_MODE],
+                        'data-test-subj': 'indexModeStandardOption',
+                        dropdownDisplay: (
+                          <Fragment>
+                            <strong>{indexModeLabels[STANDARD_INDEX_MODE]}</strong>
+                            <EuiText size="s" color="subdued">
+                              <p>{indexModeDescriptions[STANDARD_INDEX_MODE]}</p>
+                            </EuiText>
+                          </Fragment>
+                        ),
+                      },
+                      {
+                        value: LOOKUP_INDEX_MODE,
+                        inputDisplay: indexModeLabels[LOOKUP_INDEX_MODE],
+                        'data-test-subj': 'indexModeLookupOption',
+                        dropdownDisplay: (
+                          <Fragment>
+                            <strong>{indexModeLabels[LOOKUP_INDEX_MODE]}</strong>
+                            <EuiText size="s" color="subdued">
+                              <p>{indexModeDescriptions[LOOKUP_INDEX_MODE]}</p>
+                            </EuiText>
+                          </Fragment>
+                        ),
+                      },
+                    ]}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           <EuiSpacer size="l" />
           <EuiHorizontalRule margin="none" />
