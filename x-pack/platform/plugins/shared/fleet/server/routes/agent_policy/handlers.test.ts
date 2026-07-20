@@ -307,10 +307,16 @@ describe('Agent policy API handlers', () => {
 
         expect(response.ok).toHaveBeenCalled();
         const body = (response.ok as jest.Mock).mock.calls[0][0].body;
+        // proxy-derived fields are redacted on the proxied output
         expect(body.item.outputs.default).not.toHaveProperty('proxy_headers');
         expect(body.item.outputs.default.ssl).not.toHaveProperty('key');
         expect(body.item.outputs.default.ssl?.certificate).toBe('my-cert');
         expect(body.item.outputs.default.proxy_url).toBe('https://proxy.fr');
+        // fleet has proxy_url — its ssl.key (proxy-derived) must also be redacted
+        expect(body.item.fleet).not.toHaveProperty('proxy_headers');
+        expect(body.item.fleet.ssl).not.toHaveProperty('key');
+        // agent.download has no proxy_url — its own ssl.key must NOT be redacted
+        expect(body.item.agent.download.ssl?.key).toBe('PRIVATE_KEY');
       });
 
       it('returns full secrets in the response when caller has fleet-settings-read', async () => {
@@ -345,9 +351,12 @@ describe('Agent policy API handlers', () => {
 
         expect(response.ok).toHaveBeenCalled();
         const yaml: string = (response.ok as jest.Mock).mock.calls[0][0].body;
-        expect(yaml).not.toContain('PRIVATE_KEY');
+        // proxy_headers (bearer tokens) must be gone
         expect(yaml).not.toContain('Bearer SECRET');
+        // proxy_url (non-secret) must remain
         expect(yaml).toContain('https://proxy.fr');
+        // agent.download has no proxy_url — its own ssl.key is not proxy-derived and must remain
+        expect(yaml).toContain('PRIVATE_KEY');
       });
     });
 

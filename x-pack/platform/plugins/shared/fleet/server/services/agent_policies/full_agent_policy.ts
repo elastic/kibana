@@ -986,20 +986,23 @@ export function redactProxySecretsFromPolicy(policy: FullAgentPolicy): FullAgent
   if (policy.outputs) {
     for (const output of Object.values(policy.outputs)) {
       delete output.proxy_headers;
-      if (output.ssl) {
+      // ssl.key is proxy-derived only when a proxy_url is present; leave own output TLS keys intact
+      if (output.proxy_url && output.ssl) {
         delete output.ssl.key;
       }
     }
   }
   if (policy.fleet && 'hosts' in policy.fleet) {
     delete policy.fleet.proxy_headers;
-    if (policy.fleet.ssl) {
+    // ssl.key is proxy-derived only when a proxy_url is present; leave fleet host mTLS keys intact
+    if (policy.fleet.proxy_url && policy.fleet.ssl) {
       delete policy.fleet.ssl.key;
     }
   }
   if (policy.agent?.download) {
     delete policy.agent.download.proxy_headers;
-    if (policy.agent.download.ssl) {
+    // ssl.key is proxy-derived only when a proxy_url is present
+    if (policy.agent.download.proxy_url && policy.agent.download.ssl) {
       delete (policy.agent.download.ssl as Record<string, unknown>).key;
     }
   }
