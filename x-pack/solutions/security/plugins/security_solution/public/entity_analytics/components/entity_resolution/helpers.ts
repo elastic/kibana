@@ -49,11 +49,54 @@ export interface TableEntityRow {
   entity: Record<string, unknown>;
 }
 
+/**
+ * Truncates cell content with an ellipsis within the table column bounds.
+ * Apply to the text-bearing element (`EuiText` / `EuiLink`).
+ *
+ * For `EuiToolTip` + `EuiLink`: the tooltip defaults to inline-block and
+ * shrink-wraps to the full string, so `width: 100%` on the link alone is
+ * useless. Constrain the anchor with `fullWidthCellCss` (size only), and put
+ * this helper on the link (ellipsis on the text).
+ */
 export const truncatedCellCss = css`
-  max-width: 150px;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+`;
+
+/**
+ * Makes a wrapper (e.g. tooltip anchor) fill the table cell width so a child
+ * with truncatedCellCss has a definite containing block. No ellipsis here —
+ * that belongs on the text-bearing child.
+ */
+export const fullWidthCellCss = css`
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+`;
+
+/**
+ * Primary name + icon row: the flex container's default min-width is the
+ * content size, so it overflows the cell unless it is forced to the cell
+ * width. Apply to the EuiFlexGroup.
+ */
+export const truncatedFlexGroupCss = css`
+  width: 100%;
+  min-width: 0;
+`;
+
+/**
+ * Primary name + icon row: flex items default to min-width: auto and will not
+ * shrink below the text width. Apply to the name EuiFlexItem so truncatedCellCss
+ * on the child can ellipsize.
+ */
+export const truncatedFlexItemCss = css`
+  min-width: 0;
 `;
 
 export const getEntityLastSeen = (entity: Record<string, unknown>): string | undefined => {

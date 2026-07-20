@@ -25,6 +25,9 @@ import {
   getEntitySource,
   getEntityRiskScore,
   truncatedCellCss,
+  fullWidthCellCss,
+  truncatedFlexGroupCss,
+  truncatedFlexItemCss,
   type TableEntityRow,
 } from './helpers';
 import {
@@ -143,10 +146,10 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
 
           const nameContent =
             onEntityNameClick && !isCurrentEntity && !showActions ? (
-              <EuiToolTip content={name}>
-                <EuiText size="xs" css={truncatedCellCss}>
-                  <EuiLink onClick={() => onEntityNameClick(entity)}>{name}</EuiLink>
-                </EuiText>
+              <EuiToolTip content={name} anchorProps={{ css: fullWidthCellCss }}>
+                <EuiLink css={truncatedCellCss} onClick={() => onEntityNameClick(entity)}>
+                  {name}
+                </EuiLink>
               </EuiToolTip>
             ) : (
               <EuiText size="xs" css={truncatedCellCss}>
@@ -160,11 +163,9 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
                 gutterSize="xs"
                 alignItems="center"
                 responsive={false}
-                css={truncatedCellCss}
+                css={truncatedFlexGroupCss}
               >
-                <EuiFlexItem grow={false} css={truncatedCellCss}>
-                  {nameContent}
-                </EuiFlexItem>
+                <EuiFlexItem css={truncatedFlexItemCss}>{nameContent}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
                     content={TARGET_ENTITY_TOOLTIP}
