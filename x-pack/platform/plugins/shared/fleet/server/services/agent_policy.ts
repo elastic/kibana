@@ -507,8 +507,7 @@ class AgentPolicyService {
     this.checkAgentless(agentPolicy);
 
     if (agentPolicy.supports_agentless && !agentPolicy.fleet_server_host_id) {
-      const { fleetServerId } = agentlessAgentService.getDefaultSettings();
-      agentPolicy.fleet_server_host_id = fleetServerId;
+      agentPolicy.fleet_server_host_id = agentlessAgentService.getDefaultFleetServerId();
     }
 
     await this.requireUniqueName(soClient, agentPolicy);
