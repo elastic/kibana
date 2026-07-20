@@ -27,3 +27,17 @@ export const TRANSLATION_TAB_LABEL = i18n.translate(
     defaultMessage: 'Translation',
   }
 );
+
+export const PREVIOUS_RULE_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.previousRuleButtonLabel',
+  {
+    defaultMessage: 'Previous rule',
+  }
+);
+
+export const NEXT_RULE_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.nextRuleButtonLabel',
+  {
+    defaultMessage: 'Next rule',
+  }
+);

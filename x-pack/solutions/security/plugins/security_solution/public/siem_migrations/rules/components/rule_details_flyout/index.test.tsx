@@ -26,6 +26,12 @@ const getMockUser = () => ({
 
 describe('MigrationRuleDetailsFlyout', () => {
   const closeFlyout = jest.fn();
+  const defaultNavigation = {
+    hasPrevious: false,
+    hasNext: false,
+    goToPrevious: jest.fn(),
+    goToNext: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,6 +47,7 @@ describe('MigrationRuleDetailsFlyout', () => {
         <MigrationRuleDetailsFlyout
           migrationRule={getRuleMigrationRuleMock()}
           closeFlyout={closeFlyout}
+          navigation={defaultNavigation}
         />
       </TestProviders>
     );
@@ -56,6 +63,7 @@ describe('MigrationRuleDetailsFlyout', () => {
         <MigrationRuleDetailsFlyout
           migrationRule={getRuleMigrationRuleMock()}
           closeFlyout={closeFlyout}
+          navigation={defaultNavigation}
         />
       </TestProviders>
     );
@@ -71,6 +79,7 @@ describe('MigrationRuleDetailsFlyout', () => {
         <MigrationRuleDetailsFlyout
           migrationRule={getRuleMigrationRuleMock()}
           closeFlyout={closeFlyout}
+          navigation={defaultNavigation}
         />
       </TestProviders>
     );
@@ -84,6 +93,7 @@ describe('MigrationRuleDetailsFlyout', () => {
         <MigrationRuleDetailsFlyout
           migrationRule={getRuleMigrationRuleMock()}
           closeFlyout={closeFlyout}
+          navigation={defaultNavigation}
         />
       </TestProviders>
     );
@@ -97,6 +107,7 @@ describe('MigrationRuleDetailsFlyout', () => {
         <MigrationRuleDetailsFlyout
           migrationRule={getRuleMigrationRuleMock()}
           closeFlyout={closeFlyout}
+          navigation={defaultNavigation}
         />
       </TestProviders>
     );
@@ -131,7 +142,11 @@ describe('MigrationRuleDetailsFlyout', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <MigrationRuleDetailsFlyout migrationRule={customRule} closeFlyout={closeFlyout} />
+        <MigrationRuleDetailsFlyout
+          migrationRule={customRule}
+          closeFlyout={closeFlyout}
+          navigation={defaultNavigation}
+        />
       </TestProviders>
     );
 
@@ -151,6 +166,7 @@ describe('MigrationRuleDetailsFlyout', () => {
         <MigrationRuleDetailsFlyout
           migrationRule={getRuleMigrationRuleMock()}
           closeFlyout={closeFlyout}
+          navigation={defaultNavigation}
         />
       </TestProviders>
     );
@@ -164,6 +180,7 @@ describe('MigrationRuleDetailsFlyout', () => {
         <MigrationRuleDetailsFlyout
           migrationRule={getRuleMigrationRuleMock()}
           closeFlyout={closeFlyout}
+          navigation={defaultNavigation}
         />
       </TestProviders>
     );
@@ -204,7 +221,11 @@ describe('MigrationRuleDetailsFlyout', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <MigrationRuleDetailsFlyout migrationRule={ruleWithThreat} closeFlyout={closeFlyout} />
+        <MigrationRuleDetailsFlyout
+          migrationRule={ruleWithThreat}
+          closeFlyout={closeFlyout}
+          navigation={defaultNavigation}
+        />
       </TestProviders>
     );
 
@@ -218,6 +239,186 @@ describe('MigrationRuleDetailsFlyout', () => {
     });
     await waitFor(() => {
       expect(getByTestId('threatTechniqueLink')).toHaveTextContent(/Valid Accounts/);
+    });
+  });
+
+  describe('rule navigation', () => {
+    const getNavigation = (overrides = {}) => ({
+      hasPrevious: true,
+      hasNext: true,
+      goToPrevious: jest.fn(),
+      goToNext: jest.fn(),
+      ...overrides,
+    });
+
+    it('should let the user move to the previous rule', () => {
+      const navigation = getNavigation();
+      const { getByTestId } = render(
+        <TestProviders>
+          <MigrationRuleDetailsFlyout
+            migrationRule={getRuleMigrationRuleMock()}
+            closeFlyout={closeFlyout}
+            navigation={navigation}
+          />
+        </TestProviders>
+      );
+      fireEvent.click(getByTestId('migrationRuleFlyoutPreviousRuleButton'));
+      expect(navigation.goToPrevious).toHaveBeenCalled();
+    });
+
+    it('should let the user move to the next rule', () => {
+      const navigation = getNavigation();
+      const { getByTestId } = render(
+        <TestProviders>
+          <MigrationRuleDetailsFlyout
+            migrationRule={getRuleMigrationRuleMock()}
+            closeFlyout={closeFlyout}
+            navigation={navigation}
+          />
+        </TestProviders>
+      );
+      fireEvent.click(getByTestId('migrationRuleFlyoutNextRuleButton'));
+      expect(navigation.goToNext).toHaveBeenCalled();
+    });
+
+    it('should prevent moving backward from the first rule of the page', () => {
+      const navigation = getNavigation({ hasPrevious: false });
+      const { getByTestId } = render(
+        <TestProviders>
+          <MigrationRuleDetailsFlyout
+            migrationRule={getRuleMigrationRuleMock()}
+            closeFlyout={closeFlyout}
+            navigation={navigation}
+          />
+        </TestProviders>
+      );
+      expect(getByTestId('migrationRuleFlyoutPreviousRuleButton')).toBeDisabled();
+    });
+
+    it('should prevent moving forward from the last rule of the page', () => {
+      const navigation = getNavigation({ hasNext: false });
+      const { getByTestId } = render(
+        <TestProviders>
+          <MigrationRuleDetailsFlyout
+            migrationRule={getRuleMigrationRuleMock()}
+            closeFlyout={closeFlyout}
+            navigation={navigation}
+          />
+        </TestProviders>
+      );
+      expect(getByTestId('migrationRuleFlyoutNextRuleButton')).toBeDisabled();
+    });
+
+    it('should disable both arrows when the page has a single rule', () => {
+      const navigation = getNavigation({ hasPrevious: false, hasNext: false });
+      const { getByTestId } = render(
+        <TestProviders>
+          <MigrationRuleDetailsFlyout
+            migrationRule={getRuleMigrationRuleMock()}
+            closeFlyout={closeFlyout}
+            navigation={navigation}
+          />
+        </TestProviders>
+      );
+      expect(getByTestId('migrationRuleFlyoutPreviousRuleButton')).toBeDisabled();
+      expect(getByTestId('migrationRuleFlyoutNextRuleButton')).toBeDisabled();
+    });
+  });
+
+  describe('fresh-load behavior on rule change', () => {
+    const bothWaysNavigation = {
+      hasPrevious: true,
+      hasNext: true,
+      goToPrevious: jest.fn(),
+      goToNext: jest.fn(),
+    };
+
+    it('should focus the first enabled tab when a different rule is shown', () => {
+      const { getByTestId, rerender } = render(
+        <TestProviders>
+          <MigrationRuleDetailsFlyout
+            migrationRule={getRuleMigrationRuleMock()}
+            closeFlyout={closeFlyout}
+            navigation={bothWaysNavigation}
+          />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByTestId('tabSummary'));
+      expect(getByTestId('tabSummary')).toHaveAttribute('aria-selected', 'true');
+
+      rerender(
+        <TestProviders>
+          <MigrationRuleDetailsFlyout
+            migrationRule={getRuleMigrationRuleMock({ id: 'other-rule-id' })}
+            closeFlyout={closeFlyout}
+            navigation={bothWaysNavigation}
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId('tabTranslation')).toHaveAttribute('aria-selected', 'true');
+      expect(getByTestId('tabSummary')).toHaveAttribute('aria-selected', 'false');
+    });
+
+    it('should not leave a disabled tab selected when the shown rule cannot display it', () => {
+      const { getByTestId, rerender } = render(
+        <TestProviders>
+          <MigrationRuleDetailsFlyout
+            migrationRule={getRuleMigrationRuleMock()}
+            closeFlyout={closeFlyout}
+            navigation={bothWaysNavigation}
+          />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByTestId('tabOverview'));
+      expect(getByTestId('tabOverview')).toHaveAttribute('aria-selected', 'true');
+
+      rerender(
+        <TestProviders>
+          <MigrationRuleDetailsFlyout
+            migrationRule={getRuleMigrationRuleMock({
+              id: 'other-rule-id',
+              translation_result: 'untranslatable',
+              elastic_rule: undefined,
+            })}
+            closeFlyout={closeFlyout}
+            navigation={bothWaysNavigation}
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId('tabOverview')).toBeDisabled();
+      expect(getByTestId('tabOverview')).toHaveAttribute('aria-selected', 'false');
+      expect(getByTestId('tabTranslation')).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('should keep the selected tab when the same rule re-renders', () => {
+      const { getByTestId, rerender } = render(
+        <TestProviders>
+          <MigrationRuleDetailsFlyout
+            migrationRule={getRuleMigrationRuleMock()}
+            closeFlyout={closeFlyout}
+            navigation={bothWaysNavigation}
+          />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByTestId('tabSummary'));
+      expect(getByTestId('tabSummary')).toHaveAttribute('aria-selected', 'true');
+
+      rerender(
+        <TestProviders>
+          <MigrationRuleDetailsFlyout
+            migrationRule={getRuleMigrationRuleMock()}
+            closeFlyout={closeFlyout}
+            navigation={bothWaysNavigation}
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId('tabSummary')).toHaveAttribute('aria-selected', 'true');
     });
   });
 });
