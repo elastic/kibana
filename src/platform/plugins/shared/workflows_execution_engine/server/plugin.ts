@@ -24,6 +24,7 @@ import {
 import type {
   BulkScheduleWorkflowResult,
   EsWorkflowExecution,
+  EsWorkflowStepExecution,
   WorkflowExecutionEngineModel,
   WorkflowSettings,
 } from '@kbn/workflows';
@@ -31,8 +32,7 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
-import type { ExecutionsDataAccessBundle } from '@kbn/workflows/server/data_access_layer';
-import { createExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import { createExecutionsDataAccess, type ExecutionsDataAccessBundle } from '@kbn/workflows/server/data_access_layer';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import { maybeDrainConcurrencyQueueBeforeEnqueue } from './concurrency/concurrency_queue_drainer';
 import { handleConcurrencyBlockedExecution } from './concurrency/maybe_schedule_dormant_queued_run';
@@ -56,6 +56,7 @@ import {
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
+import { DeferredExecutionsDataAccess } from './repositories/deferred_executions_data_access';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -97,6 +98,7 @@ import {
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
+import { createIndexes } from '../common';
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -134,27 +136,29 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
-  private concurrencyManagerPromise!: Promise<ConcurrencyManager>;
+  private concurrencyManager!: ConcurrencyManager;
   private setupDependencies?: SetupDependencies;
   private coreSetup?: CoreSetup<
     WorkflowsExecutionEnginePluginStartDeps,
     WorkflowsExecutionEnginePluginStart
   >;
   private meteringService?: WorkflowsMeteringService;
-
+  private initializePromise?: Promise<void>;
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
 
   private executionsDataAccessBundle!: ExecutionsDataAccessBundle;
 
-  private async createScopedRepositories(): Promise<{
+  private createScopedRepositories(): {
     workflowExecutionRepository: WorkflowExecutionRepository;
     stepExecutionRepository: StepExecutionRepository;
-  }> {
-    const workflowExecutionsDataAccess =
-      await this.executionsDataAccessBundle.createWorkflowExecutionsDataAccess();
-    const stepExecutionsDataAccess =
-      await this.executionsDataAccessBundle.createStepExecutionsDataAccess();
+  } {
+    const workflowExecutionsDataAccess = new DeferredExecutionsDataAccess<EsWorkflowExecution>(() =>
+      this.executionsDataAccessBundle.createWorkflowExecutionsDataAccess()
+    );
+    const stepExecutionsDataAccess = new DeferredExecutionsDataAccess<EsWorkflowStepExecution>(() =>
+      this.executionsDataAccessBundle.createStepExecutionsDataAccess()
+    );
     return {
       workflowExecutionRepository: new WorkflowExecutionRepository(workflowExecutionsDataAccess),
       stepExecutionRepository: new StepExecutionRepository(stepExecutionsDataAccess),
@@ -182,6 +186,7 @@ export class WorkflowsExecutionEnginePlugin
 
     initializeLogsRepositoryDataStream(core.dataStreams);
     initializeTriggerEventsDataStream(core.dataStreams);
+
     this.executionsDataAccessBundle = createExecutionsDataAccess({
       source: 'system_index',
       coreSetup: core,
@@ -250,6 +255,7 @@ export class WorkflowsExecutionEnginePlugin
                 await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
+              await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
                 coreStart,
@@ -260,7 +266,7 @@ export class WorkflowsExecutionEnginePlugin
               };
 
               const { workflowExecutionRepository, stepExecutionRepository } =
-                await this.createScopedRepositories();
+                this.createScopedRepositories();
 
               const interruptedOutcome = await resolveInterruptedWorkflowRunTask({
                 workflowExecutionRepository,
@@ -288,6 +294,8 @@ export class WorkflowsExecutionEnginePlugin
 
               try {
                 const runResult = await runWorkflow({
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
                   workflowRunId,
                   spaceId,
                   taskAbortController,
@@ -298,8 +306,6 @@ export class WorkflowsExecutionEnginePlugin
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-                  workflowExecutionRepository,
-                  stepExecutionRepository,
                 });
                 if (runResult?.shouldDeleteTask) {
                   return {
@@ -378,6 +384,7 @@ export class WorkflowsExecutionEnginePlugin
                 await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
+              await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
                 coreStart,
@@ -388,7 +395,7 @@ export class WorkflowsExecutionEnginePlugin
               };
 
               const { workflowExecutionRepository, stepExecutionRepository } =
-                await this.createScopedRepositories();
+                this.createScopedRepositories();
 
               const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
                 workflowExecutionRepository,
@@ -416,6 +423,8 @@ export class WorkflowsExecutionEnginePlugin
 
               try {
                 const { idleTimeoutResumeAt } = await resumeWorkflow({
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
                   workflowRunId,
                   spaceId,
                   taskAbortController,
@@ -426,8 +435,6 @@ export class WorkflowsExecutionEnginePlugin
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-                  workflowExecutionRepository,
-                  stepExecutionRepository,
                 });
 
                 if (
@@ -518,6 +525,7 @@ export class WorkflowsExecutionEnginePlugin
               const [coreStart, pluginsStart] = await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
+              await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
                 coreStart,
@@ -530,7 +538,7 @@ export class WorkflowsExecutionEnginePlugin
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
               const { workflowExecutionRepository, stepExecutionRepository } =
-                await this.createScopedRepositories();
+                this.createScopedRepositories();
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId, {
                 includeGlobal: true,
@@ -597,7 +605,7 @@ export class WorkflowsExecutionEnginePlugin
                 coreStart.elasticsearch.client
               );
               span?.end();
-              const concurrencyManager = await this.concurrencyManagerPromise;
+
               const workflowExecution = buildWorkflowExecutionDocument({
                 workflow: toWorkflowExecutionEngineModel(workflow),
                 context: executionContext,
@@ -607,7 +615,6 @@ export class WorkflowsExecutionEnginePlugin
                 maxEventChainDepth: this.config.eventDriven.maxChainDepth,
                 getConcurrencyGroupKey: (execution) =>
                   this.getConcurrencyGroupKey(
-                    concurrencyManager,
                     execution,
                     workflow.definition?.settings,
                     coreStart,
@@ -641,10 +648,7 @@ export class WorkflowsExecutionEnginePlugin
               });
 
               // Check concurrency limits and apply collision strategy if needed
-              const canProceed = await this.checkConcurrencyIfNeeded(
-                concurrencyManager,
-                workflowExecution
-              );
+              const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
               if (!canProceed) {
                 if (workflowExecution.id && workflowExecution.spaceId) {
                   await handleConcurrencyBlockedExecution({
@@ -667,6 +671,8 @@ export class WorkflowsExecutionEnginePlugin
               const [, , workflowsExecutionEngine] = await core.getStartServices();
 
               await runWorkflow({
+                workflowExecutionRepository,
+                stepExecutionRepository,
                 workflowRunId: workflowExecution.id,
                 spaceId: workflowExecution.spaceId,
                 taskAbortController,
@@ -677,8 +683,6 @@ export class WorkflowsExecutionEnginePlugin
                 workflowsExecutionEngine,
                 meteringService: this.meteringService,
                 internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-                workflowExecutionRepository,
-                stepExecutionRepository,
               });
 
               const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
@@ -711,11 +715,12 @@ export class WorkflowsExecutionEnginePlugin
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const scopedRepositoriesPromise = this.createScopedRepositories();
+    const { workflowExecutionRepository, stepExecutionRepository } =
+      this.createScopedRepositories();
     const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
-    this.concurrencyManagerPromise = scopedRepositoriesPromise.then(
-      ({ workflowExecutionRepository }) =>
-        new ConcurrencyManager(workflowTaskManager, workflowExecutionRepository)
+    this.concurrencyManager = new ConcurrencyManager(
+      workflowTaskManager,
+      workflowExecutionRepository
     );
 
     const dependencies: ContextDependencies = {
@@ -753,13 +758,11 @@ export class WorkflowsExecutionEnginePlugin
       authenticatedUser: string;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
-      const concurrencyManager = await this.concurrencyManagerPromise;
       return buildWorkflowExecutionDocument({
         ...args,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
         getConcurrencyGroupKey: (execution) =>
           this.getConcurrencyGroupKey(
-            concurrencyManager,
             execution,
             args.workflow.definition?.settings,
             coreStart,
@@ -778,7 +781,7 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
     }> => {
-      const { workflowExecutionRepository } = await this.createScopedRepositories();
+      await this.initialize(coreStart);
 
       await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
 
@@ -840,8 +843,6 @@ export class WorkflowsExecutionEnginePlugin
 
     const executeWorkflow: ExecuteWorkflow = async (workflow, context, request) => {
       await checkLicense(plugins.licensing);
-      const { workflowExecutionRepository, stepExecutionRepository } =
-        await this.createScopedRepositories();
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
       const isRunningInTaskManager =
@@ -891,8 +892,7 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       // Check concurrency limits and apply collision strategy if needed
-      const concurrencyManager = await this.concurrencyManagerPromise;
-      const canProceed = await this.checkConcurrencyIfNeeded(concurrencyManager, workflowExecution);
+      const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
       if (!canProceed) {
         if (workflowExecution.id && workflowExecution.spaceId) {
           await handleConcurrencyBlockedExecution({
@@ -920,8 +920,12 @@ export class WorkflowsExecutionEnginePlugin
           throw new Error('Core setup not available');
         }
         const [, , workflowsExecutionEngine] = await this.coreSetup.getStartServices();
+        // const { workflowExecutionRepository, stepExecutionRepository } =
+        //   this.createScopedRepositories();
 
         await runWorkflow({
+          workflowExecutionRepository,
+          stepExecutionRepository,
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
           taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
@@ -932,8 +936,6 @@ export class WorkflowsExecutionEnginePlugin
           workflowsExecutionEngine,
           meteringService: this.meteringService,
           internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-          workflowExecutionRepository,
-          stepExecutionRepository,
         });
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
@@ -954,7 +956,6 @@ export class WorkflowsExecutionEnginePlugin
     const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, request) => {
       await checkLicense(plugins.licensing);
 
-      const { workflowExecutionRepository } = await this.createScopedRepositories();
       const { workflowExecution } = await createAndPersistWorkflowExecution(
         workflow,
         context,
@@ -964,8 +965,7 @@ export class WorkflowsExecutionEnginePlugin
       );
 
       // Check concurrency limits and apply collision strategy if needed
-      const concurrencyManager = await this.concurrencyManagerPromise;
-      const canProceed = await this.checkConcurrencyIfNeeded(concurrencyManager, workflowExecution);
+      const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
       if (!canProceed) {
         if (workflowExecution.id && workflowExecution.spaceId) {
           await handleConcurrencyBlockedExecution({
@@ -1008,7 +1008,7 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       await checkLicense(plugins.licensing);
-      const { workflowExecutionRepository } = await this.createScopedRepositories();
+      await this.initialize(coreStart);
 
       const authenticatedUser = await getAuthenticatedUser(
         request,
@@ -1129,10 +1129,10 @@ export class WorkflowsExecutionEnginePlugin
           }
         }
       }
-      const concurrencyManager = await this.concurrencyManagerPromise;
+
       const passingIdx = new Set<number>();
       const runCheck = async (p: PreparedItem) => {
-        if (await this.checkConcurrencyIfNeeded(concurrencyManager, p.workflowExecution)) {
+        if (await this.checkConcurrencyIfNeeded(p.workflowExecution)) {
           passingIdx.add(p.idx);
           return;
         }
@@ -1189,8 +1189,8 @@ export class WorkflowsExecutionEnginePlugin
       request
     ) => {
       await checkLicense(plugins.licensing);
-      const { workflowExecutionRepository } = await this.createScopedRepositories();
 
+      await this.initialize(coreStart);
       await ensureWorkflowEnabled(workflow, workflow.spaceId || 'default');
 
       const spaceId = workflow.spaceId || 'default';
@@ -1251,7 +1251,7 @@ export class WorkflowsExecutionEnginePlugin
       schedulingRequest
     ) => {
       await checkLicense(plugins.licensing);
-      const { workflowExecutionRepository } = await this.createScopedRepositories();
+      await this.initialize(coreStart);
 
       await cancelWorkflow({
         workflowExecutionId,
@@ -1269,7 +1269,7 @@ export class WorkflowsExecutionEnginePlugin
       schedulingRequest,
     }) => {
       await checkLicense(plugins.licensing);
-      const { workflowExecutionRepository } = await this.createScopedRepositories();
+      await this.initialize(coreStart);
 
       let searchAfter: estypes.SortResults | undefined;
 
@@ -1312,7 +1312,8 @@ export class WorkflowsExecutionEnginePlugin
       options
     ) => {
       await checkLicense(plugins.licensing);
-      const { workflowExecutionRepository } = await this.createScopedRepositories();
+
+      await this.initialize(coreStart);
       const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
         executionId,
         spaceId
@@ -1369,7 +1370,6 @@ export class WorkflowsExecutionEnginePlugin
       context,
       request
     ) => {
-      const { workflowExecutionRepository } = await this.createScopedRepositories();
       if (context) {
         await workflowExecutionRepository.updateWorkflowExecution({
           id: executionId,
@@ -1415,26 +1415,20 @@ export class WorkflowsExecutionEnginePlugin
 
     const triggerEventsClientPromise = initializeTriggerEventsClient(coreStart.dataStreams);
 
-    const triggerEventHandlerPromise = this.createScopedRepositories().then(
-      ({ workflowExecutionRepository }) =>
-        new TriggerEventHandler({
-          coreStart,
-          workflowRepository,
-          workflowExecutionRepository,
-          workflowsExtensions: plugins.workflowsExtensions,
-          spaces: plugins.spaces?.spacesService,
-          scheduleWorkflow,
-          logger: this.logger,
-          config: this.config.eventDriven,
-          triggerEventsClientPromise,
-        })
-    );
+    const triggerEventHandler = new TriggerEventHandler({
+      workflowExecutionRepository,
+      coreStart,
+      workflowRepository,
+      workflowsExtensions: plugins.workflowsExtensions,
+      spaces: plugins.spaces?.spacesService,
+      scheduleWorkflow,
+      logger: this.logger,
+      config: this.config.eventDriven,
+      triggerEventsClientPromise,
+    });
 
     const triggerEvents: TriggerEventsContract = {
-      emitEvent: (params) =>
-        triggerEventHandlerPromise.then((triggerEventHandler) =>
-          triggerEventHandler.handleEvent(params)
-        ),
+      emitEvent: (params) => triggerEventHandler.handleEvent(params),
       isEnabled: this.config.eventDriven.enabled,
       isLogEventsEnabled: this.config.eventDriven.logEvents,
       maxEventChainDepth: this.config.eventDriven.maxChainDepth,
@@ -1454,10 +1448,38 @@ export class WorkflowsExecutionEnginePlugin
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
       triggerEvents,
+      __internalStorage: {
+        workflowExecutionsDataAccess: new DeferredExecutionsDataAccess<EsWorkflowExecution>(() =>
+          this.executionsDataAccessBundle.createWorkflowExecutionsDataAccess()
+        ),
+        stepExecutionsDataAccess: new DeferredExecutionsDataAccess<EsWorkflowStepExecution>(() =>
+          this.executionsDataAccessBundle.createStepExecutionsDataAccess()
+        ),
+      },
     };
   }
 
   public stop() {}
+
+  private async initialize(coreStart: CoreStart): Promise<void> {
+    if (!this.initializePromise) {
+      // Clear the cached promise on rejection so a transient failure (e.g. an ES
+      // circuit_breaking_exception) doesn't poison every subsequent call. In-flight
+      // callers still share the same attempt; only the *next* call after rejection
+      // gets a fresh `createIndexes` invocation.
+      const attempt = createIndexes({
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      });
+      this.initializePromise = attempt;
+      attempt.catch(() => {
+        if (this.initializePromise === attempt) {
+          this.initializePromise = undefined;
+        }
+      });
+    }
+    await this.initializePromise;
+  }
 
   /**
    * Reused local wrapper for evaluating the concurrency group key for a workflow execution.
@@ -1470,7 +1492,6 @@ export class WorkflowsExecutionEnginePlugin
    * @returns The evaluated concurrency group key, or null if not applicable
    */
   private getConcurrencyGroupKey(
-    concurrencyManager: ConcurrencyManager,
     workflowExecution: Partial<EsWorkflowExecution>,
     workflowSettings: WorkflowSettings | undefined,
     coreStart: CoreStart,
@@ -1482,7 +1503,7 @@ export class WorkflowsExecutionEnginePlugin
 
     // Guard check: ConcurrencyManager may not be initialized if task executes before start().
     // This should not occur in normal operation.
-    if (!concurrencyManager) {
+    if (!this.concurrencyManager) {
       this.logger.warn('ConcurrencyManager not initialized, skipping concurrency key evaluation.');
       return null;
     }
@@ -1499,7 +1520,7 @@ export class WorkflowsExecutionEnginePlugin
 
     // Concurrency keys are evaluated before validateWorkflowInputs renders and persists inputs.
     // Liquid-rendered input defaults or templated input values are not supported here.
-    return concurrencyManager.evaluateConcurrencyKey(
+    return this.concurrencyManager.evaluateConcurrencyKey(
       workflowSettings.concurrency,
       buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies),
       workflowSettings.liquid
@@ -1517,13 +1538,12 @@ export class WorkflowsExecutionEnginePlugin
    * @returns Promise<boolean> - true if execution can proceed, false if it should be dropped
    */
   private async checkConcurrencyIfNeeded(
-    concurrencyManager: ConcurrencyManager,
     workflowExecution: Partial<EsWorkflowExecution>
   ): Promise<boolean> {
     // Guard check: ConcurrencyManager not initialized if task executes before start().
     // This should not occur in normal operation.
     // Execution will proceed without concurrency enforcement.
-    if (!concurrencyManager) {
+    if (!this.concurrencyManager) {
       this.logger.warn(
         `ConcurrencyManager not initialized, skipping concurrency check for execution ${workflowExecution.id}.`
       );
@@ -1540,7 +1560,7 @@ export class WorkflowsExecutionEnginePlugin
     }
 
     try {
-      const canProceed = await concurrencyManager.checkConcurrency(
+      const canProceed = await this.concurrencyManager.checkConcurrency(
         workflowExecution.workflowDefinition.settings.concurrency,
         workflowExecution.concurrencyGroupKey,
         workflowExecution.id,

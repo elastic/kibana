@@ -19,6 +19,10 @@ import type {
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { BulkScheduleWorkflowResult, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type {
+  StepExecutionsDataAccess,
+  WorkflowExecutionsDataAccess,
+} from '@kbn/workflows/server/data_access_layer';
+import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
@@ -58,6 +62,10 @@ export interface TriggerEventsContract {
 }
 
 export interface WorkflowsExecutionEnginePluginStart {
+  __internalStorage: {
+    workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
+    stepExecutionsDataAccess: StepExecutionsDataAccess;
+  };
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;

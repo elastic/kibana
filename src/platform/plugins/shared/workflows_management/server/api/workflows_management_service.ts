@@ -37,10 +37,7 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
-import {
-  createExecutionsDataAccess,
-  type WorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
+import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
@@ -205,15 +202,9 @@ export class WorkflowsService {
       getActionsClientWithRequest: this.getActionsClientWithRequest,
     });
 
-    const executionsDataAccessBundle = createExecutionsDataAccess({
-      source: 'system_index',
-      coreSetup: core,
-      logger: this.logger,
-    });
-    this.workflowExecutionsDataAccess =
-      await executionsDataAccessBundle.createWorkflowExecutionsDataAccess();
-    const stepExecutionsDataAccess =
-      await executionsDataAccessBundle.createStepExecutionsDataAccess();
+    const { workflowExecutionsDataAccess, stepExecutionsDataAccess } =
+      this.workflowsExecutionEngine.__internalStorage;
+    this.workflowExecutionsDataAccess = workflowExecutionsDataAccess;
 
     this.executionQueryService = new WorkflowExecutionQueryService({
       logger: this.logger,

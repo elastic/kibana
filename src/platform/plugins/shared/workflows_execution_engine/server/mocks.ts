@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  createMockStepExecutionsDataAccess,
+  createMockWorkflowExecutionsDataAccess,
+} from '@kbn/workflows/server/data_access_layer';
 import type {
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
@@ -16,6 +20,10 @@ import { createMockWorkflowEventLoggerService } from './workflow_event_logger/mo
 export const workflowsExecutionEngineMock = {
   createSetup: jest.fn().mockReturnValue({} as jest.Mocked<WorkflowsExecutionEnginePluginSetup>),
   createStart: jest.fn().mockReturnValue({
+    __internalStorage: {
+      workflowExecutionsDataAccess: createMockWorkflowExecutionsDataAccess(),
+      stepExecutionsDataAccess: createMockStepExecutionsDataAccess(),
+    },
     workflowEventLoggerService: createMockWorkflowEventLoggerService(),
     executeWorkflow: jest.fn(),
     executeWorkflowStep: jest.fn(),

@@ -56,7 +56,7 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
     expect(mockExecutionsDataAccessInitStart).not.toHaveBeenCalled();
   });
 
-  it('calls initStart during start', () => {
+  it('calls initStart and exposes the execution data access during start', () => {
     const plugin = createPlugin();
     plugin.setup(coreMock.createSetup() as any, {
       taskManager: taskManagerMock.createSetup(),
@@ -64,7 +64,7 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
     });
 
-    plugin.start(coreMock.createStart(), {
+    const startContract = plugin.start(coreMock.createStart(), {
       taskManager: taskManagerMock.createStart(),
       actions: {} as any,
       cloud: {} as any,
@@ -73,5 +73,7 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
     });
 
     expect(mockExecutionsDataAccessInitStart).toHaveBeenCalledTimes(1);
+    expect(startContract.__internalStorage.workflowExecutionsDataAccess).toBeDefined();
+    expect(startContract.__internalStorage.stepExecutionsDataAccess).toBeDefined();
   });
 });

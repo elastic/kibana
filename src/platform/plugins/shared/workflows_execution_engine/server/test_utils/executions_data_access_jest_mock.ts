@@ -17,9 +17,7 @@ export const createExecutionsDataAccessJestMock = () => {
   return {
     initSetup: mockExecutionsDataAccessInitSetup,
     initStart: mockExecutionsDataAccessInitStart,
-    createWorkflowExecutionsDataAccess: jest.fn(async () =>
-      createMockWorkflowExecutionsDataAccess()
-    ),
-    createStepExecutionsDataAccess: jest.fn(async () => createMockStepExecutionsDataAccess()),
+    createWorkflowExecutionsDataAccess: jest.fn(() => createMockWorkflowExecutionsDataAccess()),
+    createStepExecutionsDataAccess: jest.fn(() => createMockStepExecutionsDataAccess()),
   };
 };
