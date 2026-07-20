@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useRef } from 'react';
+import type { Alert } from '@kbn/alerting-types';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useFlyoutPagination } from '../../common/utils/flyout_pagination/use_flyout_pagination';
