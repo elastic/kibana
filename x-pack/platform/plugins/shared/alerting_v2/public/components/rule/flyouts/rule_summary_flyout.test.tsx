@@ -40,7 +40,7 @@ jest.mock('../../../pages/rules_list_page/rule_actions_menu', () => ({
   ),
 }));
 
-jest.mock('../../rule_details/rule_header_description', () => ({
+jest.mock('../../rule_details/rule_summary_header', () => ({
   RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
   RuleTitleWithBadges: ({ variant }: { variant?: string }) => (
     <span data-test-subj="mockRuleTitleWithBadges" data-variant={variant}>
@@ -152,6 +152,16 @@ describe('RuleSummaryFlyout', () => {
     fireEvent.click(screen.getByTestId('ruleSummaryFlyoutQuickEditButton'));
 
     expect(props.onQuickEdit).toHaveBeenCalledWith(baseRule);
+  });
+
+  it('hides the quick edit and actions menu when canWrite is false', () => {
+    renderFlyout({ canWrite: false });
+
+    expect(screen.queryByTestId('ruleSummaryFlyoutQuickEditButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleActionsMenu-rule-1')).not.toBeInTheDocument();
+    // Read-only affordances remain available.
+    expect(screen.getByTestId('ruleSummaryFlyoutOpenDetailsButton')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutCloseButton')).toBeInTheDocument();
   });
 
   it('forwards action callbacks to the RuleActionsMenu with the rule', () => {

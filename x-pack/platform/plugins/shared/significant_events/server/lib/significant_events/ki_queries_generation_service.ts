@@ -1,0 +1,184 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  ElasticsearchClient,
+  FeatureFlagsStart,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ToolsStart } from '@kbn/agent-builder-server';
+import type { InferenceClient } from '@kbn/inference-common';
+import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
+import {
+  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  type SignificantEventsQueriesGenerationResult,
+} from '@kbn/significant-events-schema';
+import { isInferenceProviderError } from '@kbn/inference-common';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
+import type { StreamsClient } from '@kbn/streams-plugin/server';
+import { PromptsConfigService } from '@kbn/streams-plugin/server';
+import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
+import { isSignificantEventsAvailable } from '../feature_flags/is_significant_events_available';
+import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
+import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
+import type { EbtTelemetryClient } from '../telemetry';
+import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
+import { formatInferenceProviderError } from '../../routes/utils/create_connector_sse_error';
+import { identifyKIQueries } from './identify_ki_queries';
+import { MemoryServiceImpl } from '../../memory_and_investigation/lib/memory';
+import { createMemoryDiscoveryTools } from './memory_discovery_tools';
+
+export interface GenerateKIQueriesParams {
+  streamName: string;
+  connectorId?: string;
+  maxExistingQueriesForContext?: number;
+  queryValidationTimeoutMs?: number;
+}
+
+export interface GenerateKIQueriesDependencies {
+  streamsClient: StreamsClient;
+  inferenceClient: InferenceClient;
+  soClient: SavedObjectsClientContract;
+  kiClient: KnowledgeIndicatorClient;
+  esClient: ElasticsearchClient;
+  featureFlags: FeatureFlagsStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
+  request: KibanaRequest;
+  logger: Logger;
+  signal: AbortSignal;
+  telemetry: EbtTelemetryClient;
+  agentBuilderTools?: ToolsStart;
+}
+
+export async function generateKIQueries(
+  params: GenerateKIQueriesParams,
+  deps: GenerateKIQueriesDependencies
+): Promise<
+  SignificantEventsQueriesGenerationResult & {
+    toolUsage: SignificantEventsToolUsage;
+    connectorId: string;
+  }
+> {
+  const {
+    streamName,
+    connectorId: connectorIdOverride,
+    maxExistingQueriesForContext,
+    queryValidationTimeoutMs,
+  } = params;
+  const {
+    streamsClient,
+    inferenceClient,
+    soClient,
+    kiClient,
+    esClient,
+    featureFlags,
+    searchInferenceEndpoints,
+    request,
+    logger,
+    signal,
+    telemetry,
+    agentBuilderTools,
+  } = deps;
+
+  const connectorId =
+    connectorIdOverride ??
+    (await resolveConnectorForFeature({
+      searchInferenceEndpoints,
+      featureId: SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+      featureName: 'query generation',
+      request,
+    }));
+
+  logger.debug(`Using connector ${connectorId} for query generation`);
+
+  const [
+    definition,
+    { significantEventsPromptOverride },
+    significantEventsAvailable,
+    useSemanticCodeSearchGrounding,
+  ] = await Promise.all([
+    streamsClient.getStream(streamName),
+    new PromptsConfigService({ soClient, logger }).getPrompt(),
+    isSignificantEventsAvailable(featureFlags),
+    isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags),
+  ]);
+
+  const memoryTools = significantEventsAvailable
+    ? createMemoryDiscoveryTools({
+        memoryService: new MemoryServiceImpl({
+          logger: logger.get('memory'),
+          esClient,
+        }),
+      })
+    : undefined;
+
+  const semanticCodeSearchLogger = logger.get('semantic_code_search_grounding');
+
+  const isCodeGroundingActive = useSemanticCodeSearchGrounding && Boolean(agentBuilderTools);
+
+  const semanticCodeSearchTools =
+    isCodeGroundingActive && agentBuilderTools
+      ? await createSemanticCodeSearchTools({
+          agentBuilderTools,
+          request,
+          esClient,
+          logger: semanticCodeSearchLogger,
+        })
+      : undefined;
+
+  if (useSemanticCodeSearchGrounding && !semanticCodeSearchTools) {
+    semanticCodeSearchLogger.debug(
+      `Semantic code search grounding enabled but inactive for stream "${streamName}" (agentBuilder unavailable or SCS tools not installed).`
+    );
+  }
+
+  const startedAt = Date.now();
+  const result = await identifyKIQueries(
+    {
+      definition,
+      connectorId,
+      systemPrompt: significantEventsPromptOverride,
+      maxExistingQueriesForContext,
+      queryValidationTimeoutMs,
+    },
+    {
+      inferenceClient,
+      esClient,
+      kiClient,
+      logger: logger.get('significant_events_generation'),
+      signal,
+      memoryTools,
+      semanticCodeSearchTools,
+    }
+  ).catch(async (error) => {
+    if (isInferenceProviderError(error)) {
+      const connector = await inferenceClient.getConnectorById(connectorId).catch(() => undefined);
+      if (connector) {
+        throw new Error(formatInferenceProviderError(error, connector), { cause: error });
+      }
+    }
+    throw error;
+  });
+  const durationMs = Date.now() - startedAt;
+
+  telemetry.trackSignificantEventsQueriesGenerated({
+    count: result.queries.length,
+    connector_id: connectorId,
+    stream_name: definition.name,
+    stream_type: getStreamTypeFromDefinition(definition),
+    input_tokens_used: result.tokensUsed.prompt,
+    output_tokens_used: result.tokensUsed.completion,
+    cached_tokens_used: result.tokensUsed.cached ?? 0,
+    duration_ms: durationMs,
+    tool_usage: result.toolUsage,
+  });
+
+  return { ...result, connectorId };
+}

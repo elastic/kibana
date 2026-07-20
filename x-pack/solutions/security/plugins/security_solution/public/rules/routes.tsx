@@ -17,10 +17,12 @@ import {
 } from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
 import {
+  ALERT_ANALYSIS_WORKFLOW_PATH,
   COVERAGE_OVERVIEW_PATH,
   DE_RULE_HEALTH_PATH,
   DE_SPACE_RULES_HEALTH_PATH,
   ENABLE_DE_HEALTH_UI_SETTING,
+  ENABLE_RULE_CHANGES_HISTORY_SETTING,
   RULES_LANDING_PATH,
   RULES_PATH,
   SecurityPageName,
@@ -44,6 +46,7 @@ import {
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
 import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
+import { AlertAnalysisWorkflowPage } from '../detection_engine/rule_management_ui/pages/alert_analysis_workflow';
 import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { hasCapabilities } from '../common/lib/capabilities';
@@ -132,6 +135,15 @@ const getRulesSubRoutes = (
           }),
           exact: true,
         },
+        {
+          path: ALERT_ANALYSIS_WORKFLOW_PATH,
+          main: withSecurityRoutePageWrapper(
+            AlertAnalysisWorkflowPage,
+            SecurityPageName.alertAnalysisWorkflow,
+            { omitSpyRoute: true }
+          ),
+          exact: true,
+        },
         // Detection Engine Health UI Routes
         ...(deHealthUIEnabled
           ? [
@@ -190,7 +202,12 @@ const RulesContainerComponent: React.FC = () => {
   const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
-  const isRuleChangesHistoryEnabled = useIsExperimentalFeatureEnabled('ruleChangesHistoryEnabled');
+  const ruleChangesHistoryFFEnabled = useIsExperimentalFeatureEnabled('ruleChangesHistoryEnabled');
+  const [ruleChangesHistoryAdvancedSetting] = useUiSetting$<boolean>(
+    ENABLE_RULE_CHANGES_HISTORY_SETTING
+  );
+  const isRuleChangesHistoryEnabled =
+    ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
 
   const subRoutes = useMemo(() => {
     return getRulesSubRoutes(capabilities, {

@@ -12,6 +12,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OBSERVABILITY_ONBOARDING_APP_ID } from '@kbn/deeplinks-observability';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
+import {
+  reportAwsOnboardingFlowEntered,
+  AWS_ONBOARDING_TELEMETRY_STORAGE_KEY,
+} from '@kbn/fleet-plugin/common';
 import type { ObservabilityOnboardingAppServices } from '..';
 
 const AWS_CLOUDWATCH_OTEL_PACKAGE = 'aws_cloudwatch_input_otel';
@@ -20,7 +24,7 @@ const RESOLVE_TIMEOUT_MS = 30_000;
 
 export const CloudwatchIntegrationRedirect: React.FC = () => {
   const {
-    services: { http, application },
+    services: { http, application, analytics },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const [hasError, setHasError] = useState(false);
@@ -65,10 +69,19 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
         const routeState: CreatePackagePolicyRouteState = {
           onCancelNavigateTo: [OBSERVABILITY_ONBOARDING_APP_ID, { path: BACK_LINK_PATH }],
           onCancelUrl,
+          telemetrySource: 'aws_quickstart',
         };
         const [, addIntegrationPath] = pagePathGetters.add_integration_to_policy({
           pkgkey: `${AWS_CLOUDWATCH_OTEL_PACKAGE}-${version}`,
         });
+
+        // Stamp flowEnteredAt and emit flow_entered before navigating — this captures the true
+        // top-of-funnel moment (survives even if the Fleet page fails to load).
+        // sessionStorage is cleared here so re-entries don't inherit stale duration timestamps.
+        if (analytics) {
+          sessionStorage.removeItem(AWS_ONBOARDING_TELEMETRY_STORAGE_KEY);
+          reportAwsOnboardingFlowEntered(analytics, sessionStorage, version);
+        }
 
         application.navigateToApp('fleet', {
           path: addIntegrationPath,
@@ -90,7 +103,7 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [http, application, attempt]);
+  }, [http, application, attempt, analytics]);
 
   if (hasError) {
     return (

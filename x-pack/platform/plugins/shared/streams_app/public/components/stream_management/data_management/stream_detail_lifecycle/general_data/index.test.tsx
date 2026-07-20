@@ -11,6 +11,13 @@ import { StreamDetailGeneralData } from '.';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import type { Streams } from '@kbn/streams-schema';
 import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
+import type { StreamLifecycleFlyoutId } from '../common/hooks/lifecycle_flyout_coordination';
+import {
+  LifecycleFlyoutCoordinationProvider,
+  STREAM_LIFECYCLE_FLYOUT_IDS,
+  useLifecycleFlyoutCoordination,
+  useRegisterLifecycleFlyoutOpen,
+} from '../common/hooks/lifecycle_flyout_coordination';
 
 let mockFlyoutOpen = false;
 let mockFlyoutHasUnsavedChanges = false;
@@ -18,6 +25,7 @@ let mockFlyoutHasUnsavedChanges = false;
 interface MockLifecycleSummaryProps {
   onFlyoutOpenChange?: (isOpen: boolean) => void;
   onFlyoutUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void;
+  onAddDeletePhase?: () => void;
 }
 
 let mockLifecycleSummaryProps: MockLifecycleSummaryProps | undefined;
@@ -133,7 +141,7 @@ jest.mock('./ingestion_rate', () => ({
 }));
 
 jest.mock('./lifecycle_summary', () => ({
-  LifecycleSummary: () => {
+  LifecycleSummary: ({ onAddDeletePhase }: { onAddDeletePhase?: () => void }) => {
     // Keep this unit test focused on StreamDetailGeneralData + unsaved prompt wiring.
     // We emulate the lifecycle flyout updating the shared preview state.
     const { useLifecyclePreview } = jest.requireActual(
@@ -151,6 +159,7 @@ jest.mock('./lifecycle_summary', () => ({
       onFlyoutUnsavedChangesChange: (hasUnsavedChanges: boolean) => {
         preview.setHasUnsavedChanges(hasUnsavedChanges);
       },
+      onAddDeletePhase,
     };
 
     return <div data-test-subj="mockLifecycleSummary" />;
@@ -190,13 +199,25 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
     timeSeriesCountError: undefined,
   };
 
+  // StreamDetailGeneralData is normally rendered under stream_detail_lifecycle/index.tsx's
+  // LifecycleFlyoutCoordinationProvider; render it standalone here with the same wrapper.
+  const renderComponent = (extraSiblings?: React.ReactNode) =>
+    render(
+      <LifecycleFlyoutCoordinationProvider>
+        <StreamDetailGeneralData
+          definition={definition}
+          refreshDefinition={jest.fn()}
+          data={data}
+        />
+        {extraSiblings}
+      </LifecycleFlyoutCoordinationProvider>
+    );
+
   it('does not mark unsaved changes just because flyout is open', async () => {
     mockFlyoutOpen = true;
     mockFlyoutHasUnsavedChanges = false;
 
-    render(
-      <StreamDetailGeneralData definition={definition} refreshDefinition={jest.fn()} data={data} />
-    );
+    renderComponent();
 
     act(() => {
       mockLifecycleSummaryProps?.onFlyoutOpenChange?.(mockFlyoutOpen);
@@ -212,9 +233,7 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
     mockFlyoutOpen = true;
     mockFlyoutHasUnsavedChanges = true;
 
-    render(
-      <StreamDetailGeneralData definition={definition} refreshDefinition={jest.fn()} data={data} />
-    );
+    renderComponent();
 
     act(() => {
       mockLifecycleSummaryProps?.onFlyoutOpenChange?.(mockFlyoutOpen);
@@ -223,6 +242,66 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
 
     await waitFor(() => {
       expect(getPromptHasUnsavedChanges()).toBe(true);
+    });
+  });
+
+  describe('delete phase flyout coordination', () => {
+    // Registers an arbitrary flyout as open in the shared registry, the way a sibling lifecycle
+    // flyout owner (e.g. the successful-lifecycle-method flyout) would.
+    const FlyoutRegistrant = ({ id, isOpen }: { id: StreamLifecycleFlyoutId; isOpen: boolean }) => {
+      useRegisterLifecycleFlyoutOpen(id, isOpen);
+      return null;
+    };
+
+    // Checks blocking from a *different* flyout's perspective (e.g. the data-phases flyout,
+    // which would need to stay closed while the delete-phase flyout is open).
+    const OtherFlyoutBlockedProbe = () => {
+      const { isAnyOtherFlyoutOpen } = useLifecycleFlyoutCoordination();
+      return (
+        <div data-test-subj="isBlockedBySuccessfulDeletePhase">
+          {String(isAnyOtherFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.dataPhases))}
+        </div>
+      );
+    };
+
+    it('opens the delete-phase flyout when nothing else is open', async () => {
+      const { queryByTestId, getByTestId } = renderComponent();
+
+      expect(queryByTestId('streamsEditSuccessfulDeletePhaseFlyout')).not.toBeInTheDocument();
+
+      act(() => {
+        mockLifecycleSummaryProps?.onAddDeletePhase?.();
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('streamsEditSuccessfulDeletePhaseFlyout')).toBeInTheDocument();
+      });
+    });
+
+    it('does not open the delete-phase flyout while another lifecycle flyout is already open', () => {
+      const { queryByTestId } = renderComponent(
+        <FlyoutRegistrant id={STREAM_LIFECYCLE_FLYOUT_IDS.successfulLifecycle} isOpen />
+      );
+
+      act(() => {
+        mockLifecycleSummaryProps?.onAddDeletePhase?.();
+      });
+
+      expect(queryByTestId('streamsEditSuccessfulDeletePhaseFlyout')).not.toBeInTheDocument();
+    });
+
+    it('registers itself as open once opened, blocking other lifecycle flyouts', async () => {
+      const { getByTestId } = renderComponent(<OtherFlyoutBlockedProbe />);
+
+      expect(getByTestId('isBlockedBySuccessfulDeletePhase')).toHaveTextContent('false');
+
+      act(() => {
+        mockLifecycleSummaryProps?.onAddDeletePhase?.();
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('isBlockedBySuccessfulDeletePhase')).toHaveTextContent('true');
+      });
     });
   });
 });

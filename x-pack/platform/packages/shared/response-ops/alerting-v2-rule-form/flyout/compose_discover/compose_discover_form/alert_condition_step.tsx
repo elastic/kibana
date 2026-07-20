@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useFormState } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
@@ -46,6 +46,9 @@ export function AlertConditionStep({
   onManualSplit,
 }: AlertConditionStepProps) {
   const { setValue, watch } = useFormContext<FormValues>();
+  // Rules are registered by always-mounted QueryFieldRules in ComposeDiscoverForm.
+  const { errors } = useFormState<FormValues>({ name: 'query' });
+  const queryError = errors.query;
   const isAlert = watch('kind') === 'alert';
   const timeField = watch('timeField') ?? '@timestamp';
   const grouping = watch('grouping');
@@ -165,7 +168,8 @@ export function AlertConditionStep({
           <EuiSpacer size="s" />
           <EuiButton
             size="s"
-            iconType="editorCodeBlock"
+            color="text"
+            iconType="chevronLimitLeft"
             isDisabled={state.childOpen}
             onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
             data-test-subj="composeDiscoverEditQuery"
@@ -177,6 +181,20 @@ export function AlertConditionStep({
           </EuiButton>
         </>
       )}
+
+      {queryError?.message ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText
+            size="s"
+            color="danger"
+            role="alert"
+            data-test-subj="composeDiscoverQueryFieldError"
+          >
+            {queryError.message}
+          </EuiText>
+        </>
+      ) : null}
 
       <EuiSpacer size="m" />
       <EuiFormRow

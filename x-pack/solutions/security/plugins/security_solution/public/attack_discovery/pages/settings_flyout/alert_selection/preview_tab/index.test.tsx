@@ -24,35 +24,44 @@ jest.mock('react-router-dom', () => ({
   }),
   withRouter: jest.fn(),
 }));
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: () => mockDispatch,
 }));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSignalIndex = useSignalIndex as jest.MockedFunction<typeof useSignalIndex>;
 
+/** Captures the most recent props passed to the Lens EmbeddableComponent */
+let lastEmbeddableProps: Record<string, unknown> = {};
+
+const MockEmbeddableComponent = (props: Record<string, unknown>) => {
+  lastEmbeddableProps = props;
+  return <div data-test-subj="mockEmbeddableComponent" />;
+};
+
 describe('PreviewTab', () => {
   const defaultProps = {
     embeddableId: 'test-embeddable-id',
     end: '2024-09-01T00:00:00.000Z',
     filters: [],
-    getLensAttributes: jest.fn(),
-    getPreviewEsqlQuery: jest.fn(),
+    getLensAttributes: jest.fn().mockReturnValue({ visualizationType: 'lnsDatatable' }),
+    getPreviewEsqlQuery: jest.fn().mockReturnValue('mock esql query'),
     maxAlerts: 100,
     query: { query: '', language: 'kuery' },
     setTableStackBy0: jest.fn(),
     start: '2024-08-01T00:00:00.000Z',
-    tableStackBy0: '',
+    tableStackBy0: 'kibana.alert.rule.name',
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    lastEmbeddableProps = {};
 
     mockUseKibana.mockReturnValue({
       services: {
         lens: {
-          EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
+          EmbeddableComponent: MockEmbeddableComponent,
         },
         unifiedSearch: {
           ui: {
@@ -94,7 +103,7 @@ describe('PreviewTab', () => {
   it('renders the reset button', () => {
     render(
       <TestProviders>
-        <PreviewTab {...defaultProps} />
+        <PreviewTab {...defaultProps} tableStackBy0="" />
       </TestProviders>
     );
 
@@ -104,7 +113,7 @@ describe('PreviewTab', () => {
   it('calls setTableStackBy0 with the RESET_FIELD when the reset button is clicked', () => {
     render(
       <TestProviders>
-        <PreviewTab {...defaultProps} />
+        <PreviewTab {...defaultProps} tableStackBy0="" />
       </TestProviders>
     );
 
@@ -116,7 +125,7 @@ describe('PreviewTab', () => {
   it('renders the empty prompt when tableStackBy0 is empty', () => {
     render(
       <TestProviders>
-        <PreviewTab {...defaultProps} />
+        <PreviewTab {...defaultProps} tableStackBy0="" />
       </TestProviders>
     );
 
@@ -126,7 +135,7 @@ describe('PreviewTab', () => {
   it('does NOT render the empty prompt when tableStackBy0 is NOT empty', () => {
     render(
       <TestProviders>
-        <PreviewTab {...defaultProps} tableStackBy0="test" />
+        <PreviewTab {...defaultProps} />
       </TestProviders>
     );
 
@@ -166,6 +175,139 @@ describe('PreviewTab', () => {
         shouldValidateSelectedPatterns: false,
       },
       type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
+    });
+  });
+
+  it('passes esqlQuery to getPreviewEsqlQuery when provided', () => {
+    const userEsqlQuery =
+      'FROM .alerts-security.alerts-default | WHERE kibana.alert.severity == "critical" | LIMIT 50';
+
+    render(
+      <TestProviders>
+        <PreviewTab {...defaultProps} esqlQuery={userEsqlQuery} />
+      </TestProviders>
+    );
+
+    expect(defaultProps.getPreviewEsqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlQuery: userEsqlQuery,
+      })
+    );
+  });
+
+  it('passes undefined esqlQuery to getPreviewEsqlQuery when not provided', () => {
+    render(
+      <TestProviders>
+        <PreviewTab {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(defaultProps.getPreviewEsqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlQuery: undefined,
+      })
+    );
+  });
+
+  describe('effectiveTimeRange', () => {
+    it('passes timeRange to the Lens EmbeddableComponent when no esqlQuery is provided (DSL mode)', () => {
+      render(
+        <TestProviders>
+          <PreviewTab {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(lastEmbeddableProps.timeRange).toEqual({
+        from: defaultProps.start,
+        to: defaultProps.end,
+      });
+    });
+
+    it('passes timeRange to the Lens EmbeddableComponent when esqlQuery uses ?_tstart', () => {
+      render(
+        <TestProviders>
+          <PreviewTab
+            {...defaultProps}
+            esqlQuery="FROM .alerts | WHERE @timestamp >= ?_tstart | LIMIT 100"
+          />
+        </TestProviders>
+      );
+
+      expect(lastEmbeddableProps.timeRange).toEqual({
+        from: defaultProps.start,
+        to: defaultProps.end,
+      });
+    });
+
+    it('passes timeRange to the Lens EmbeddableComponent when esqlQuery uses ?_tend', () => {
+      render(
+        <TestProviders>
+          <PreviewTab
+            {...defaultProps}
+            esqlQuery="FROM .alerts | WHERE @timestamp <= ?_tend | LIMIT 100"
+          />
+        </TestProviders>
+      );
+
+      expect(lastEmbeddableProps.timeRange).toEqual({
+        from: defaultProps.start,
+        to: defaultProps.end,
+      });
+    });
+
+    it('passes timeRange to the Lens EmbeddableComponent when esqlQuery uses both ?_tstart and ?_tend', () => {
+      render(
+        <TestProviders>
+          <PreviewTab
+            {...defaultProps}
+            esqlQuery="FROM .alerts | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | LIMIT 100"
+          />
+        </TestProviders>
+      );
+
+      expect(lastEmbeddableProps.timeRange).toEqual({
+        from: defaultProps.start,
+        to: defaultProps.end,
+      });
+    });
+
+    it('passes undefined timeRange to the Lens EmbeddableComponent when esqlQuery uses NOW() instead of named params', () => {
+      render(
+        <TestProviders>
+          <PreviewTab
+            {...defaultProps}
+            esqlQuery="FROM .alerts | WHERE @timestamp >= NOW() - 30 days | LIMIT 1500"
+          />
+        </TestProviders>
+      );
+
+      expect(lastEmbeddableProps.timeRange).toBeUndefined();
+    });
+
+    it('passes undefined timeRange to the Lens EmbeddableComponent when esqlQuery has no time filter at all', () => {
+      render(
+        <TestProviders>
+          <PreviewTab
+            {...defaultProps}
+            esqlQuery={'FROM .alerts | WHERE kibana.alert.severity == "critical" | LIMIT 50'}
+          />
+        </TestProviders>
+      );
+
+      expect(lastEmbeddableProps.timeRange).toBeUndefined();
+    });
+
+    it('passes undefined timeRange when esqlQuery uses a date literal instead of named params', () => {
+      render(
+        <TestProviders>
+          <PreviewTab
+            {...defaultProps}
+            esqlQuery={'FROM .alerts | WHERE @timestamp >= "2024-01-01T00:00:00Z" | LIMIT 100'}
+          />
+        </TestProviders>
+      );
+
+      expect(lastEmbeddableProps.timeRange).toBeUndefined();
     });
   });
 });

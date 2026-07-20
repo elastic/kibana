@@ -8,17 +8,13 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { basicCase } from '../../containers/mock';
+import type { Field } from '../../../common/types/domain/template/fields';
 import { computeNewExtendedFields, useChangeAppliedTemplate } from './use_change_applied_template';
 
 const mockPatchCase = jest.fn();
 jest.mock('../../containers/api', () => ({
   ...jest.requireActual('../../containers/api'),
   patchCase: (...args: unknown[]) => mockPatchCase(...args),
-}));
-
-const mockRefresh = jest.fn();
-jest.mock('./use_on_refresh_case_view_page', () => ({
-  useRefreshCaseViewPage: () => mockRefresh,
 }));
 
 const mockShowSuccessToast = jest.fn();
@@ -29,6 +25,19 @@ jest.mock('../../common/use_cases_toast', () => ({
     showErrorToast: mockShowErrorToast,
   }),
 }));
+
+// The hook reloads the page on success; jsdom doesn't implement reload, so stub it.
+const originalLocation = window.location;
+const mockReload = jest.fn();
+beforeAll(() => {
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: { ...originalLocation, reload: mockReload },
+  });
+});
+afterAll(() => {
+  Object.defineProperty(window, 'location', { configurable: true, value: originalLocation });
+});
 
 const caseWithTemplate = {
   ...basicCase,
@@ -95,6 +104,60 @@ describe('computeNewExtendedFields', () => {
 
     expect(result).toEqual({});
   });
+
+  it('omits fields that resolve to an empty value instead of writing "" (required-field regression)', () => {
+    // A required field with no default and no existing value must NOT be sent as '' — that trips
+    // the server's partial-update "Field X is required" validation on template apply/change.
+    const fields: Field[] = [
+      { name: 'required_no_default', type: 'keyword', control: 'INPUT_TEXT' },
+      { name: 'empty_default', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: '' } },
+    ];
+
+    const result = computeNewExtendedFields(fields, {});
+
+    expect(result).not.toHaveProperty('required_no_default_as_keyword');
+    expect(result).not.toHaveProperty('empty_default_as_keyword');
+  });
+
+  it('omits empty-array defaults ("[]") which also count as empty for required validation', () => {
+    const fields: Field[] = [
+      {
+        name: 'labels',
+        type: 'keyword',
+        control: 'CHECKBOX_GROUP',
+        metadata: { default: [], options: [] },
+      },
+    ];
+
+    const result = computeNewExtendedFields(fields, {});
+
+    expect(result).not.toHaveProperty('labels_as_keyword');
+  });
+
+  it('skips $ref fields (no inline definition to derive a value from)', () => {
+    const fields: Field[] = [{ $ref: 'library_field' }];
+
+    const result = computeNewExtendedFields(fields, {});
+
+    expect(result).toEqual({});
+  });
+
+  it('skips display-only (MARKDOWN) fields (they hold no value)', () => {
+    const fields: Field[] = [
+      {
+        name: 'instructions',
+        type: 'keyword',
+        control: 'MARKDOWN',
+        metadata: { content: 'Follow these steps.' },
+      },
+      { name: 'priority', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: 'low' } },
+    ];
+
+    const result = computeNewExtendedFields(fields, {});
+
+    expect(result).not.toHaveProperty('instructions_as_keyword');
+    expect(result.priority_as_keyword).toBe('low');
+  });
 });
 
 describe('useChangeAppliedTemplate', () => {
@@ -136,9 +199,68 @@ describe('useChangeAppliedTemplate', () => {
         })
       );
     });
+
+    // Applying a template must never reassign an existing case's connector.
+    expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
   });
 
-  it('calls patchCase with template: null and empty extended_fields when removing a template', async () => {
+  it('applies the template settings without touching the connector', async () => {
+    const { result } = renderHook(() => useChangeAppliedTemplate(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({
+        caseData: caseWithTemplate,
+        newTemplate: {
+          id: 'tmpl-2',
+          version: 5,
+          fields: templateFields,
+          settings: { syncAlerts: true },
+        },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockPatchCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedCase: expect.objectContaining({
+            // declared syncAlerts kept, omitted extractObservables defaults to off
+            settings: { syncAlerts: true, extractObservables: false },
+          }),
+        })
+      );
+    });
+
+    expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
+  });
+
+  it('turns settings off when the template declares none', async () => {
+    const { result } = renderHook(() => useChangeAppliedTemplate(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({
+        caseData: caseWithTemplate,
+        newTemplate: { id: 'tmpl-2', version: 5, fields: templateFields },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockPatchCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedCase: expect.objectContaining({
+            settings: { syncAlerts: false, extractObservables: false },
+          }),
+        })
+      );
+    });
+
+    expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
+  });
+
+  it('calls patchCase with template: null, empty extended_fields, and reset settings when removing a template', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,
     });
@@ -153,13 +275,16 @@ describe('useChangeAppliedTemplate', () => {
           updatedCase: expect.objectContaining({
             template: null,
             extended_fields: {},
+            settings: { syncAlerts: false, extractObservables: false },
           }),
         })
       );
     });
+
+    expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
   });
 
-  it('calls refreshCaseViewPage and shows success toast on success', async () => {
+  it('reloads the page on success so all components reflect the applied template', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,
     });
@@ -169,12 +294,11 @@ describe('useChangeAppliedTemplate', () => {
     });
 
     await waitFor(() => {
-      expect(mockRefresh).toHaveBeenCalled();
-      expect(mockShowSuccessToast).toHaveBeenCalled();
+      expect(mockReload).toHaveBeenCalled();
     });
   });
 
-  it('shows error toast on failure', async () => {
+  it('shows error toast on failure and does not reload', async () => {
     mockPatchCase.mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
@@ -189,6 +313,6 @@ describe('useChangeAppliedTemplate', () => {
       expect(mockShowErrorToast).toHaveBeenCalled();
     });
 
-    expect(mockRefresh).not.toHaveBeenCalled();
+    expect(mockReload).not.toHaveBeenCalled();
   });
 });
