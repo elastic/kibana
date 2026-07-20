@@ -13,9 +13,11 @@ import { startTrackingHistory } from '@kbn/rxjs-history';
 
 import type { DashboardState } from '../../common';
 import type { initializeDataLoadingManager } from './data_loading_manager';
+import type { initializeTrackOverlay } from './track_overlay';
 
 export function initializeHistoryManager({
   anyStateChange$,
+  hasOverlays$,
   initialState,
   setState,
   getState,
@@ -24,6 +26,7 @@ export function initializeHistoryManager({
   },
 }: {
   anyStateChange$: Observable<void>;
+  hasOverlays$: ReturnType<typeof initializeTrackOverlay>['hasOverlays$'];
   initialState: DashboardState;
   getState: () => DashboardState;
   setState: (state: DashboardState) => void;
@@ -35,6 +38,7 @@ export function initializeHistoryManager({
   const dashboardCurrentState$ = new BehaviorSubject<DashboardState>(initialState);
   const { api: historyApi, cleanup: cleanupHistoryTracking } = startTrackingHistory<DashboardState>(
     {
+      disableUndoRedo$: hasOverlays$,
       state$: dashboardCurrentState$,
       mapState: (state) => {
         const sortById = (

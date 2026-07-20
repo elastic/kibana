@@ -177,6 +177,8 @@ export function getDashboardApi({
     } satisfies DashboardState;
   }
 
+  const trackOverlayApi = initializeTrackOverlay(trackPanel.api);
+
   const lastSavedState = getLastSavedState(readResult);
   const anyStateChange$ = merge(
     settingsManager.internalApi.anyStateChange$,
@@ -188,6 +190,7 @@ export function getDashboardApi({
 
   const historyManager = initializeHistoryManager({
     anyStateChange$,
+    hasOverlays$: trackOverlayApi.hasOverlays$,
     initialState,
     setState,
     getState,
@@ -207,8 +210,6 @@ export function getDashboardApi({
     setState,
     onSave$: onSave$.asObservable(),
   });
-
-  const trackOverlayApi = initializeTrackOverlay(trackPanel.api);
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
 

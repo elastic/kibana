@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -34,6 +34,7 @@ import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
 import { useShareOptions } from './share/use_share_options';
+import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -53,6 +54,7 @@ export const useDashboardMenuItems = ({
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
   const dashboardApi = useDashboardApi();
+  const dashboardInternalApi = useDashboardInternalApi();
 
   const [hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
     useBatchedPublishingSubjects(
@@ -249,6 +251,32 @@ export const useDashboardMenuItems = ({
     hasUnsavedChanges,
     isResetting,
   ]);
+
+  const [undoDisabled, setUndoDisabled] = useState<boolean>(false);
+  const [redoDisabled, setRedoDisabled] = useState<boolean>(false);
+  useEffect(() => {
+    dashboardInternalApi.disabledActions$.subscribe(({ undo, redo }) => {
+      setUndoDisabled(undo);
+      setRedoDisabled(redo);
+    });
+  }, [dashboardInternalApi.disabledActions$]);
+
+  const historyConfig = useMemo(() => {
+    return {
+      undo: {
+        disabled: disableTopNav || undoDisabled,
+        onClick: () => {
+          dashboardInternalApi.undo();
+        },
+      },
+      redo: {
+        disabled: disableTopNav || redoDisabled,
+        onClick: () => {
+          dashboardInternalApi.redo();
+        },
+      },
+    };
+  }, [disableTopNav, undoDisabled, redoDisabled, dashboardInternalApi]);
 
   /**
    * Register all of the top nav configs that can be used by dashboard.
@@ -481,7 +509,7 @@ export const useDashboardMenuItems = ({
       viewModeConfig.primaryActionItem = menuItems.edit;
     }
 
-    return viewModeConfig;
+    return { ...viewModeConfig, historyConfig };
   }, [
     menuItems.fullScreen,
     menuItems.duplicate,
@@ -495,6 +523,7 @@ export const useDashboardMenuItems = ({
     showResetChange,
     isLabsEnabled,
     hasExportMenuItems,
+    historyConfig,
   ]);
 
   const editModeTopNavConfig = useMemo(() => {
@@ -527,7 +556,7 @@ export const useDashboardMenuItems = ({
       primaryActionItem: menuItems.save,
     };
 
-    return editModeConfig;
+    return { ...editModeConfig, historyConfig };
   }, [
     menuItems.switchToViewMode,
     menuItems.export,
@@ -539,6 +568,7 @@ export const useDashboardMenuItems = ({
     menuItems.add,
     hasExportMenuItems,
     isLabsEnabled,
+    historyConfig,
   ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };

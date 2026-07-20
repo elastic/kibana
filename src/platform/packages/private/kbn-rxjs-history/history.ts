@@ -15,10 +15,12 @@ export function startTrackingHistory<T extends object = {}>({
   state$,
   mapState,
   maxSize,
+  disableUndoRedo$ = new BehaviorSubject<boolean>(true),
 }: {
   state$: BehaviorSubject<T>;
   mapState: (state: T) => T;
   maxSize: number;
+  disableUndoRedo$?: BehaviorSubject<boolean>;
 }) {
   const history: jsondiffpatch.Delta[] = [];
   const pointer$: BehaviorSubject<number> = new BehaviorSubject<number>(-1);
@@ -62,6 +64,7 @@ export function startTrackingHistory<T extends object = {}>({
   });
 
   const undoPatch = () => {
+    if (disableUndoRedo$.getValue()) return;
     const pointer = pointer$.getValue();
     if (pointer <= -1) return; // cannot undo - already at the bottom of the stack
 
@@ -72,6 +75,7 @@ export function startTrackingHistory<T extends object = {}>({
   };
 
   const redoPatch = () => {
+    if (disableUndoRedo$.getValue()) return;
     const pointer = pointer$.getValue();
     if (pointer + 1 >= history.length) return; // cannot redo - already at the top of the stack
 

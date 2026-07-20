@@ -410,32 +410,6 @@ export function InternalDashboardTopNav({
     [badges]
   );
 
-  const [undoDisabled, setUndoDisabled] = useState<boolean>(false);
-  const [redoDisabled, setRedoDisabled] = useState<boolean>(false);
-  useEffect(() => {
-    dashboardInternalApi.disabledActions$.subscribe(({ undo, redo }) => {
-      setUndoDisabled(undo);
-      setRedoDisabled(redo);
-    });
-  }, [dashboardInternalApi.disabledActions$]);
-
-  const historyConfig = useMemo(() => {
-    return {
-      undo: {
-        disabled: undoDisabled,
-        onClick: () => {
-          dashboardInternalApi.undo();
-        },
-      },
-      redo: {
-        disabled: redoDisabled,
-        onClick: () => {
-          dashboardInternalApi.redo();
-        },
-      },
-    };
-  }, [undoDisabled, redoDisabled, dashboardInternalApi]);
-
   const appMenuConfig = useMemo(() => {
     if (!visibilityProps.showTopNavMenu) {
       return undefined;
@@ -472,7 +446,7 @@ export function InternalDashboardTopNav({
         <AppHeader
           title={dashboardTitle}
           back={backToListing}
-          menu={{ ...appMenuConfig, historyConfig }}
+          menu={appMenuConfig}
           badges={appHeaderBadges}
           favorite={favoriteButton}
           spacing="compact"
@@ -481,18 +455,14 @@ export function InternalDashboardTopNav({
       {headerMode === 'registered' && (
         <ChromeAppHeaderRegistration
           title={dashboardTitle}
-          menu={{ ...appMenuConfig, historyConfig }}
+          menu={appMenuConfig}
           badges={appHeaderBadges}
           favorite={favoriteButton}
           spacing="compact"
         />
       )}
       {headerMode === 'legacy' && (
-        <LegacyDashboardHeader
-          badges={badges}
-          config={{ ...appMenuConfig, historyConfig }}
-          lastSavedId={lastSavedId}
-        />
+        <LegacyDashboardHeader badges={badges} config={appMenuConfig} lastSavedId={lastSavedId} />
       )}
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
