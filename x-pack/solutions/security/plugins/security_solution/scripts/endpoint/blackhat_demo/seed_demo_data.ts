@@ -26,14 +26,16 @@ async function resolveAgentIds(
   if ('apiKey' in auth) {
     headers.Authorization = `ApiKey ${auth.apiKey}`;
   }
-  const fetchOpts: RequestInit = { headers };
-  const basicAuth =
+  const basicAuth: Record<string, string> =
     'username' in auth
-      ? { Authorization: `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString('base64')}` }
+      ? {
+          Authorization: `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString(
+            'base64'
+          )}`,
+        }
       : {};
 
   const response = await fetch(`${kibanaUrl}/api/fleet/agents?perPage=200`, {
-    ...fetchOpts,
     headers: { ...headers, ...basicAuth },
   });
   if (!response.ok) {
@@ -119,7 +121,9 @@ run(
       ].filter((h) => !agentIdOverrides[h]);
       if (missing.length > 0) {
         log.warning(
-          `No enrolled agent found for: ${missing.join(', ')} — those hosts will seed with fabricated agent ids and won't answer live osquery dispatches.`
+          `No enrolled agent found for: ${missing.join(
+            ', '
+          )} — those hosts will seed with fabricated agent ids and won't answer live osquery dispatches.`
         );
       } else {
         log.info(`Resolved agent ids: ${JSON.stringify(agentIdOverrides)}`);
