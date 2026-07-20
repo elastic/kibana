@@ -40,6 +40,7 @@ export async function switchDataPanelIndexPattern(page: ScoutPage, title: string
   await switcher.waitFor({ state: 'visible' });
   await page.testSubj.fill('indexPattern-switcher--input', title);
   await switcher.locator(`[data-test-subj="dataView-${title}"]`).click();
+  // justified: field list reload after DV switch can be slow under parallel CI load
   await page.testSubj.locator('fieldListLoading').waitFor({ state: 'hidden', timeout: 30_000 });
 }
 
@@ -80,6 +81,57 @@ export async function createRuntimeFieldFromEditor(
 
   await fieldEditor.getByRole('button', { name: 'Save' }).click();
   await fieldEditor.waitFor({ state: 'hidden' });
+}
+
+/**
+ * Triggers Lens CSV export after the export button has been clicked.
+ * Share may auto-download when CSV is the only integration, or show a popover when
+ * reporting is also registered — handles either without racing waiters.
+ * Kept out of the spec to satisfy `playwright/no-conditional-in-test`.
+ */
+export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
+  const csvMenuItem = page.testSubj.locator('exportMenuItem-CSV');
+  type CsvExportReady = 'menu' | 'content';
+  let csvExportReady: CsvExportReady | undefined;
+
+  await expect
+    .poll(async () => {
+      const hasContent = await page.evaluate(() => {
+        const content = (
+          window as Window & {
+            ELASTIC_LENS_CSV_CONTENT?: Record<string, { content: string; type: string }>;
+          }
+        ).ELASTIC_LENS_CSV_CONTENT;
+        return Boolean(content && Object.keys(content).length > 0);
+      });
+      if (hasContent) {
+        csvExportReady = 'content';
+        return csvExportReady;
+      }
+      if (await csvMenuItem.isVisible()) {
+        csvExportReady = 'menu';
+        return csvExportReady;
+      }
+      return null;
+    })
+    .toBeTruthy();
+
+  if (csvExportReady === 'menu') {
+    await csvMenuItem.click();
+  }
+
+  await expect
+    .poll(async () => {
+      const content = await page.evaluate(() => {
+        return (
+          window as Window & {
+            ELASTIC_LENS_CSV_CONTENT?: Record<string, { content: string; type: string }>;
+          }
+        ).ELASTIC_LENS_CSV_CONTENT;
+      });
+      return content && Object.keys(content).length > 0 ? content : undefined;
+    })
+    .toBeTruthy();
 }
 
 type DashboardAndLens = Pick<PageObjects, 'dashboard' | 'lens'>;

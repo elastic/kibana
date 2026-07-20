@@ -9,6 +9,7 @@ import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { enableElasticChartDebug, getChartDebugData } from '../fixtures/open_in_lens_helpers';
 import {
+  completeLensCsvExport,
   createAdHocDataViewFromLens,
   createRuntimeFieldFromEditor,
   switchDataPanelIndexPattern,
@@ -317,29 +318,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
 
       await expect(page.testSubj.locator('lnsApp_exportButton')).toBeEnabled();
       await page.testSubj.click('lnsApp_exportButton');
-
-      // Share may auto-download CSV when it is the only integration, or show a popover when
-      // reporting is also registered. Race those outcomes; do not branch on UI state.
-      const csvMenuItem = page.testSubj.locator('exportMenuItem-CSV');
-      await Promise.race([
-        (async () => {
-          await csvMenuItem.waitFor({ state: 'visible' });
-          await csvMenuItem.click();
-        })(),
-        (async () => {
-          await page.waitForFunction(() => {
-            const content = window.ELASTIC_LENS_CSV_CONTENT;
-            return Boolean(content && Object.keys(content).length > 0);
-          });
-        })(),
-      ]);
-
-      await expect
-        .poll(async () => {
-          const content = await page.evaluate(() => window.ELASTIC_LENS_CSV_CONTENT);
-          return content && Object.keys(content).length > 0 ? content : undefined;
-        })
-        .toBeTruthy();
+      await completeLensCsvExport(page);
 
       const csvContent = await page.evaluate(
         () =>

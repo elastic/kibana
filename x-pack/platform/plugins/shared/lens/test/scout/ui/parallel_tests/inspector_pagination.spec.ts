@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
-import { testData } from '../fixtures';
+import { spaceTest, testData } from '../fixtures';
 
 const INSPECTOR_PAGE_SIZE = 10;
 
@@ -39,8 +38,7 @@ spaceTest.describe('Lens inspector pagination', { tag: tags.stateful.classic }, 
   spaceTest(
     'should allow switching between inspector table pages',
     async ({ browserAuth, page, pageObjects }) => {
-      const { lens, visualize } = pageObjects;
-      const inspector = new Inspector(page);
+      const { lens, visualize, inspector } = pageObjects;
 
       await browserAuth.loginAsPrivilegedUser();
       await visualize.goto();
@@ -57,7 +55,7 @@ spaceTest.describe('Lens inspector pagination', { tag: tags.stateful.classic }, 
 
       // Bar charts default "Include empty rows" off; keep the empty buckets so this
       // pagination check still has two full pages of rows to page through.
-      const includeEmptyRows = page.getByTestId('indexPattern-include-empty-rows');
+      const includeEmptyRows = page.testSubj.locator('indexPattern-include-empty-rows');
       await expect(includeEmptyRows).toHaveAttribute('aria-checked', 'false');
       await includeEmptyRows.click();
       await lens.closeDimensionEditor();
