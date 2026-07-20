@@ -226,6 +226,12 @@ test.describe(
           .getByTestId('errorDistribution')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
       });
+
+      await test.step('Verify navigated to error detail page', async () => {
+        await expect(page.getByRole('heading', { name: /Error group/ })).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+      });
     });
 
     test('EDOT service error detail page shows error distribution chart', async ({

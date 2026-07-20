@@ -25,21 +25,9 @@ export class PageNavigation {
     return this.page.testSubj.locator('~breadcrumb').filter({ hasText: text });
   }
 
-  async expectBreadcrumbTexts(
-    expectedTexts: string[],
-    options?: { isServerless?: boolean }
-  ): Promise<void> {
-    // The project/solution header renders the app header instead of breadcrumbs.
-    if (await this.page.testSubj.locator('chromeNextGlobalHeader').isVisible()) {
-      return;
-    }
+  async expectBreadcrumbTexts(expectedTexts: string[]): Promise<void> {
     await expect(this.breadcrumbsContainer).toBeVisible();
     const allTexts = await this.allBreadcrumbs.allTextContents();
-    if (options?.isServerless) {
-      // Remove the first breadcrumb (project name)
-      expect(allTexts.slice(1)).toStrictEqual(expectedTexts);
-    } else {
-      expect(allTexts).toStrictEqual(expectedTexts);
-    }
+    expect(allTexts).toStrictEqual(expectedTexts);
   }
 }

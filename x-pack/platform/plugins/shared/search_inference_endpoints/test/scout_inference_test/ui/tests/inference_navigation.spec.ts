@@ -38,20 +38,6 @@ test.describe('Inference Navigation', () => {
   );
 
   test(
-    'EIS Models Page: displays correct breadcrumbs in serverless search navigation',
-    { tag: [...tags.serverless.search] },
-    async ({ page, pageObjects }) => {
-      await mockInferenceEndpoints(page, eisEndpointsMockData);
-      await pageObjects.eisModels.goto();
-
-      await pageObjects.navigation.expectBreadcrumbTexts(
-        [...BREADCRUMBS.serverless.search, 'Elastic Inference'],
-        { isServerless: true }
-      );
-    }
-  );
-
-  test(
     'External Inference Page: displays correct breadcrumbs in classic navigation',
     { tag: [...tags.stateful.classic] },
     async ({ page, pageObjects }) => {
@@ -67,20 +53,6 @@ test.describe('Inference Navigation', () => {
   );
 
   test(
-    'External Inference Page: displays correct breadcrumbs in serverless search navigation',
-    { tag: [...tags.serverless.search] },
-    async ({ page, pageObjects }) => {
-      await mockInferenceEndpoints(page, externalInferenceEndpointsMockData);
-      await pageObjects.externalInference.goto();
-
-      await pageObjects.navigation.expectBreadcrumbTexts(
-        [...BREADCRUMBS.serverless.search, 'External Inference'],
-        { isServerless: true }
-      );
-    }
-  );
-
-  test(
     'Feature Settings Page: displays correct breadcrumbs in classic navigation',
     { tag: [...tags.stateful.classic] },
     async ({ page, pageObjects }) => {
@@ -92,20 +64,6 @@ test.describe('Inference Navigation', () => {
         ...BREADCRUMBS.stateful.classic,
         'Feature Settings',
       ]);
-    }
-  );
-
-  test(
-    'Feature Settings Page: displays correct breadcrumbs in serverless search navigation',
-    { tag: [...tags.serverless.search] },
-    async ({ page, pageObjects }) => {
-      await mockInferenceEndpoints(page, eisEndpointsMockData);
-      await pageObjects.featureSettings.goto();
-
-      await pageObjects.navigation.expectBreadcrumbTexts(
-        [...BREADCRUMBS.serverless.search, 'Feature Settings'],
-        { isServerless: true }
-      );
     }
   );
 });

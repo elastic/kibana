@@ -61,8 +61,8 @@ test.describe(
       await pageObjects.spaces.searchSpacesInNav(`nomatch-${RUN_ID}`);
 
       await expect.poll(async () => await pageObjects.spaces.getNavSpaceResultCount()).toBe(0);
-      expect((await pageObjects.spaces.getNavNoResultsMessage()).toLowerCase()).toMatch(
-        /no (spaces|matches) found/
+      expect((await pageObjects.spaces.getNavNoResultsMessage()).toLowerCase()).toContain(
+        'no spaces found'
       );
     });
   }

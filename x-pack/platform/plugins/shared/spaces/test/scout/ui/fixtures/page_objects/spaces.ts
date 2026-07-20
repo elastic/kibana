@@ -73,12 +73,9 @@ export class SpacesPage {
     await this.page.testSubj.locator('manageSpaces').waitFor({ state: 'visible' });
   }
 
-  /** Reads the current space name from the header space selector. */
+  /** Reads the `title` attribute of the header space selector (current space name). */
   async getCurrentSpaceTitle() {
-    const selector = this.spacesSelectorLocator();
-    const label = ((await selector.getAttribute('title')) ?? (await selector.innerText())).trim();
-    const separatorIndex = label.lastIndexOf(':');
-    return separatorIndex === -1 ? label : label.slice(separatorIndex + 1).trim();
+    return (await this.spacesSelectorLocator().getAttribute('title'))?.trim() ?? null;
   }
 
   getCurrentUrl() {
