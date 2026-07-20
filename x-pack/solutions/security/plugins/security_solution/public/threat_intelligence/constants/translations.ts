@@ -47,7 +47,7 @@ export const INTELLIGENCE_HUB_DESCRIPTION = i18n.translate(
 export const CORRELATION_REPORT = i18n.translate(
   'xpack.securitySolution.threatIntelligence.navigation.correlationReportNavItemLabel',
   {
-    defaultMessage: 'Correlation Report',
+    defaultMessage: 'Correlation Reports',
   }
 );
 

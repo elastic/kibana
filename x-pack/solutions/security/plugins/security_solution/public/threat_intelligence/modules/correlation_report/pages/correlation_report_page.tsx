@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
@@ -38,6 +39,10 @@ import {
 import type { EuiBasicTableColumn, EuiRadioGroupOption } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
+import {
+  CORRELATION_AUTO_RUN_PARAM,
+  CORRELATION_REPORT_ID_PARAM,
+} from '../../../lib/navigate_to_correlation_reports';
 import { CorrelationReport, DiamondSvg } from '../components/correlation_report';
 import { useCorrelationRuns } from '../hooks/use_correlation_findings';
 import type { StartRunInput } from '../hooks/use_correlation_findings';
@@ -181,30 +186,6 @@ const toVertexSignal = (
   infrastructure: normalizeSignal(diamond.infrastructure.signal),
   victim: normalizeSignal(diamond.victim.signal),
 });
-
-// ---------------------------------------------------------------------------
-// ColMustardPawnIcon — brand mark; decorative (aria-hidden)
-// Inline SVG: sphere head atop a flared rounded base, fixed mustard yellow
-// so it reads as a brand colour in both light and dark themes.
-// ---------------------------------------------------------------------------
-
-const ColMustardPawnIcon: FC = () => (
-  <svg
-    width="26"
-    height="29"
-    viewBox="0 0 24 27"
-    aria-hidden="true"
-    focusable="false"
-    style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: '8px' }}
-  >
-    <circle cx="12" cy="5.2" r="3.9" fill="#D8A200" />
-    <path
-      d="M10.6 8.8 C10.4 11 10.1 12.6 9.6 14.4 C9 16.6 8 18.2 6.4 19.6 C5.4 20.4 4.4 20.9 4.4 21.8 C4.4 23.4 5.6 24 8 24 L16 24 C18.4 24 19.6 23.4 19.6 21.8 C19.6 20.9 18.6 20.4 17.6 19.6 C16 18.2 15 16.6 14.4 14.4 C13.9 12.6 13.6 11 13.4 8.8 Z"
-      fill="#D8A200"
-    />
-    <ellipse cx="12" cy="24" rx="8" ry="1.5" fill="#B5870A" />
-  </svg>
-);
 
 // ---------------------------------------------------------------------------
 // ExtractResultView
@@ -906,6 +887,9 @@ const RecentsPanel: FC<{
 export const CorrelationReportPage: FC = () => {
   const skillEnabled = useIsExperimentalFeatureEnabled('threatIntelligenceSkillEnabled');
   const { http } = useKibana().services;
+  const location = useLocation();
+  const history = useHistory();
+  const autoStartedFromUrlRef = useRef(false);
 
   const [inputText, setInputText] = useState('');
   const [depth, setDepth] = useState<CorrelationDepth>('full');
@@ -960,6 +944,33 @@ export const CorrelationReportPage: FC = () => {
     },
     [startRun]
   );
+
+  // Prefill (and optionally auto-run) when navigated from Hub report feed / hunt findings.
+  useEffect(() => {
+    if (!skillEnabled || autoStartedFromUrlRef.current) {
+      return;
+    }
+    const params = new URLSearchParams(location.search);
+    const reportId = params.get(CORRELATION_REPORT_ID_PARAM)?.trim();
+    if (!reportId) {
+      return;
+    }
+
+    setInputText(reportId);
+
+    if (params.get(CORRELATION_AUTO_RUN_PARAM) !== '1') {
+      return;
+    }
+
+    autoStartedFromUrlRef.current = true;
+    runWithInput({ input_type: 'report_id', report_id: reportId, depth: 'full' });
+    params.delete(CORRELATION_AUTO_RUN_PARAM);
+    const nextSearch = params.toString();
+    history.replace({
+      pathname: location.pathname,
+      search: nextSearch ? `?${nextSearch}` : '',
+    });
+  }, [skillEnabled, location.pathname, location.search, history, runWithInput]);
 
   const handleRun = useCallback(() => {
     const text = inputText.trim();
@@ -1047,15 +1058,10 @@ export const CorrelationReportPage: FC = () => {
     return (
       <EuiPageTemplate restrictWidth={false} grow>
         <EuiPageTemplate.Header
-          pageTitle={
-            <>
-              {i18n.translate(
-                'xpack.securitySolution.threatIntelligence.correlationReport.pageTitle',
-                { defaultMessage: 'Col Mustard — Threat Correlation' }
-              )}
-              <ColMustardPawnIcon />
-            </>
-          }
+          pageTitle={i18n.translate(
+            'xpack.securitySolution.threatIntelligence.correlationReport.pageTitle',
+            { defaultMessage: 'Correlation Reports' }
+          )}
         />
         <EuiPageTemplate.Section>
           <EuiCallOut
@@ -1085,15 +1091,10 @@ export const CorrelationReportPage: FC = () => {
   return (
     <EuiPageTemplate restrictWidth={false} grow>
       <EuiPageTemplate.Header
-        pageTitle={
-          <>
-            {i18n.translate(
-              'xpack.securitySolution.threatIntelligence.correlationReport.pageTitle',
-              { defaultMessage: 'Col Mustard — Threat Correlation' }
-            )}
-            <ColMustardPawnIcon />
-          </>
-        }
+        pageTitle={i18n.translate(
+          'xpack.securitySolution.threatIntelligence.correlationReport.pageTitle',
+          { defaultMessage: 'Correlation Reports' }
+        )}
         description={i18n.translate(
           'xpack.securitySolution.threatIntelligence.correlationReport.pageDescription',
           {

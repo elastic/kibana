@@ -11,7 +11,7 @@ const ns = 'xpack.securitySolution.threatIntelligence.correlationReport';
 
 export const i18nText = {
   defaultTitle: () =>
-    i18n.translate(`${ns}.defaultTitle`, { defaultMessage: 'Correlation Report' }),
+    i18n.translate(`${ns}.defaultTitle`, { defaultMessage: 'Correlation Reports' }),
 
   runIdLabel: () => i18n.translate(`${ns}.runIdLabel`, { defaultMessage: 'Run' }),
 

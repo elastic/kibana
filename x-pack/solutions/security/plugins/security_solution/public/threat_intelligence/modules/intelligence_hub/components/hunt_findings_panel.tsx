@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '../../../../common/lib/kibana';
+import { navigateToCorrelateReport } from '../../../lib/navigate_to_correlation_reports';
 import { deployEsqlRule } from '../lib/deploy_esql_rule';
 import { getEsqlDiscoverUrl } from '../lib/open_esql_in_discover';
 
@@ -142,6 +143,13 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
     [notifications.toasts, share]
   );
 
+  const handleCorrelateReport = useCallback(
+    (reportId: string) => {
+      void navigateToCorrelateReport(application, reportId);
+    },
+    [application]
+  );
+
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="threatIntelHuntFindingsPanel">
       <EuiTitle size="s">
@@ -239,6 +247,19 @@ const HuntFindingsPanelComponent: React.FC<Props> = ({
                         {i18n.translate(
                           'xpack.securitySolution.threatIntelligence.app.huntFindingsCreateRule',
                           { defaultMessage: 'Create rule' }
+                        )}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="xs"
+                        iconType="inspect"
+                        onClick={() => handleCorrelateReport(finding.report_id)}
+                        data-test-subj={`threatIntelHuntFindingCorrelate-${finding.id}`}
+                      >
+                        {i18n.translate(
+                          'xpack.securitySolution.threatIntelligence.app.huntFindingsCorrelateReport',
+                          { defaultMessage: 'Correlate report' }
                         )}
                       </EuiButtonEmpty>
                     </EuiFlexItem>

@@ -498,7 +498,7 @@ export const IntelligenceHubPage: FC = () => {
             data-test-subj="intelligenceHubCorrelationBtn"
           >
             {i18n.translate('xpack.securitySolution.threatIntelligence.app.correlationReportBtn', {
-              defaultMessage: 'Correlation Report',
+              defaultMessage: 'Correlation Reports',
             })}
           </SecuritySolutionLinkButton>,
           <EuiFlexGroup

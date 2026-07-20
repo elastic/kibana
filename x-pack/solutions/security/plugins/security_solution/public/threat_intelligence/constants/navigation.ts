@@ -38,9 +38,9 @@ export const THREAT_INTELLIGENCE_INDICATORS_PATH = `${THREAT_INTELLIGENCE_BASE_P
 export const THREAT_INTELLIGENCE_HUB_PATH = `${THREAT_INTELLIGENCE_BASE_PATH}/hub`;
 
 /**
- * Path for the Correlation Report page. Accepts a report_id via the input
- * form and renders structured correlation findings from the correlate_threat
- * pipeline.
+ * Path for Correlation Reports. Accepts a report id via the input form
+ * (or `?reportId=` / `?run=1` deep link) and renders findings from the
+ * correlate_threat pipeline.
  */
 export const THREAT_INTELLIGENCE_CORRELATION_REPORT_PATH = `${THREAT_INTELLIGENCE_BASE_PATH}/correlation`;
 

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +21,8 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { useKibana } from '../../../common/lib/kibana';
+import { navigateToCorrelateReport } from '../../lib/navigate_to_correlation_reports';
 import type { ThreatReportFeedItem } from './types';
 import { SEVERITY_HEX } from './constants';
 import { getSeverityColor, getSeverityLabel } from './severity_labels';
@@ -41,6 +44,7 @@ export const ReportFeedCard: React.FC<{
   item: ThreatReportFeedItem;
   isHighlighted?: boolean;
 }> = ({ item, isHighlighted = false }) => {
+  const { application } = useKibana().services;
   const cardRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const articleUrl = isBrowsableReportUrl(item.sourceUrl) ? item.sourceUrl : undefined;
@@ -52,6 +56,10 @@ export const ReportFeedCard: React.FC<{
     (item.iocCount ?? 0) > 0 ||
     (item.relatedReportCount ?? 0) > 0;
   const severityColor = getSeverityColor(item.severity);
+
+  const handleCorrelate = useCallback(() => {
+    void navigateToCorrelateReport(application, item.reportId);
+  }, [application, item.reportId]);
 
   useEffect(() => {
     if (isHighlighted && cardRef.current) {
@@ -154,6 +162,19 @@ export const ReportFeedCard: React.FC<{
             </EuiFlexItem>
           </>
         ) : null}
+        <EuiFlexItem grow style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType="inspect"
+            onClick={handleCorrelate}
+            data-test-subj={`threatIntelReportCardCorrelate-${item.reportId}`}
+          >
+            {i18n.translate(
+              'xpack.securitySolution.threatIntelligence.reportFeed.correlateAction',
+              { defaultMessage: 'Correlate' }
+            )}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       </EuiFlexGroup>
       {item.categories.length > 0 ? (
         <>
