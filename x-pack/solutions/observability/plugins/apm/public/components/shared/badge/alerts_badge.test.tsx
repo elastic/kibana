@@ -91,7 +91,7 @@ describe('AlertsBadge', () => {
           environment: 'production' as const,
           rangeFrom: 'now-15m',
           rangeTo: 'now',
-          locators: { get: jest.fn().mockReturnValue({ getRedirectUrl }) },
+          locators: { get: jest.fn().mockReturnValue({ getRedirectUrl }) } as any,
         },
         getRedirectUrl,
       };
