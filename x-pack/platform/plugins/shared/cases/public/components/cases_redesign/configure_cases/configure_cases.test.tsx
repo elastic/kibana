@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
@@ -203,6 +203,89 @@ describe('ConfigureCasesRedesign', () => {
     expect(screen.getByTestId('add-template')).toBeInTheDocument();
     expect(screen.getByTestId('empty-custom-fields')).toBeInTheDocument();
     expect(screen.getByTestId('empty-templates')).toBeInTheDocument();
+  });
+
+  it('opens add custom field flyout with add header when switch is on', async () => {
+    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    useCasesConfig.mockReturnValue({
+      attachmentsEnabled: false,
+      chatEnabled: false,
+      templatesEnabled: true,
+      detailsRedesignEnabled: false,
+      casesRedesign: { list: false, details: false, settings: true },
+    });
+
+    renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+    await userEvent.click(await screen.findByTestId('show-legacy-custom-fields-switch'));
+    await userEvent.click(await screen.findByTestId('add-custom-field'));
+
+    expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+    expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+      configureCasesI18n.ADD_CUSTOM_FIELD
+    );
+  });
+
+  it('opens add flyout after edit without keeping the previous field', async () => {
+    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    useCasesConfig.mockReturnValue({
+      attachmentsEnabled: false,
+      chatEnabled: false,
+      templatesEnabled: true,
+      detailsRedesignEnabled: false,
+      casesRedesign: { list: false, details: false, settings: true },
+    });
+
+    renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+    await userEvent.click(await screen.findByTestId('show-legacy-custom-fields-switch'));
+
+    const list = await screen.findByTestId('custom-fields-list');
+    await userEvent.click(
+      within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
+    );
+
+    expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+      configureCasesI18n.EDIT_CUSTOM_FIELD
+    );
+
+    await userEvent.click(screen.getByTestId('common-flyout-cancel'));
+    await userEvent.click(await screen.findByTestId('add-custom-field'));
+
+    expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+      configureCasesI18n.ADD_CUSTOM_FIELD
+    );
+  });
+
+  it('persists custom field deletion when switch is on', async () => {
+    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    useCasesConfig.mockReturnValue({
+      attachmentsEnabled: false,
+      chatEnabled: false,
+      templatesEnabled: true,
+      detailsRedesignEnabled: false,
+      casesRedesign: { list: false, details: false, settings: true },
+    });
+
+    renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+    await userEvent.click(await screen.findByTestId('show-legacy-custom-fields-switch'));
+
+    const list = await screen.findByTestId('custom-fields-list');
+    await userEvent.click(
+      within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+    );
+
+    expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+    await userEvent.click(screen.getByText('Delete'));
+
+    expect(persistCaseConfigure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        customFields: expect.not.arrayContaining([
+          expect.objectContaining({ key: customFieldsConfigurationMock[0].key }),
+        ]),
+      })
+    );
   });
 
   it('renders connector and closure controls', async () => {

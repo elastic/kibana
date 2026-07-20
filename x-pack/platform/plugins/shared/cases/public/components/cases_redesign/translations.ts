@@ -168,7 +168,7 @@ export const LEGACY_CUSTOM_FIELDS_DISCLAIMER = i18n.translate(
   'xpack.cases.casesRedesign.details.legacyCustomFieldsDisclaimer',
   {
     defaultMessage:
-      'These custom fields are from the previous system and have been migrated to the new custom fields system.',
+      'These fields are from the previous custom fields system and have already been migrated. You may see the same fields again in other sections — that is expected while both systems are shown.',
   }
 );
 

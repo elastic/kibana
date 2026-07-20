@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Title } from './title';
 import { Tags } from './tags';
 import { Category } from './category';
@@ -42,11 +43,20 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
   const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
   const { showLegacyCustomFields } = useShowLegacyCustomFields();
   const { getCasesFieldLibraryUrl } = useCasesFieldLibraryNavigation();
+  const { setFieldValue } = useFormContext();
 
   // When templates v2 is off, always show legacy custom fields (they are the only system).
   // When templates v2 is on, gate visibility behind the settings local-storage switch.
   const showLegacyCustomFieldsInputs =
     configurationCustomFields.length > 0 && (!isTemplatesV2Enabled || showLegacyCustomFields);
+
+  // Drop stale create-form values when the legacy section is gated off so they cannot linger
+  // in form state. Edit mode keeps case custom fields intact.
+  useEffect(() => {
+    if (!isEditMode && !showLegacyCustomFieldsInputs) {
+      setFieldValue('customFields', {});
+    }
+  }, [isEditMode, showLegacyCustomFieldsInputs, setFieldValue]);
 
   const deprecationNotice = isTemplatesV2Enabled ? (
     <EuiCallOut

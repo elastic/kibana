@@ -163,6 +163,11 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
         ]
       );
 
+      const onAddCustomField = useCallback(() => {
+        setCustomFieldToEdit(null);
+        setFlyOutVisibility({ type: 'customField', visible: true });
+      }, [setFlyOutVisibility]);
+
       const onEditCustomField = useCallback(
         (key: string) => {
           const selectedCustomField = customFields.find((item) => item.key === key);
@@ -235,6 +240,11 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
           persistCaseConfigure,
         ]
       );
+
+      const onAddTemplate = useCallback(() => {
+        setTemplateToEdit(null);
+        setFlyOutVisibility({ type: 'template', visible: true });
+      }, [setFlyOutVisibility]);
 
       const onEditTemplate = useCallback(
         (key: string) => {
@@ -384,9 +394,7 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
                   disabled={isLoadingCaseConfiguration}
                   hideTitle
                   useLineSeparators
-                  handleAddCustomField={() =>
-                    setFlyOutVisibility({ type: 'customField', visible: true })
-                  }
+                  handleAddCustomField={onAddCustomField}
                   handleDeleteCustomField={onDeleteCustomField}
                   handleEditCustomField={onEditCustomField}
                 />
@@ -412,7 +420,7 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
                   disabled={isLoadingCaseConfiguration}
                   hideTitle
                   useLineSeparators
-                  onAddTemplate={() => setFlyOutVisibility({ type: 'template', visible: true })}
+                  onAddTemplate={onAddTemplate}
                   onEditTemplate={onEditTemplate}
                   onDeleteTemplate={onDeleteTemplate}
                 />
