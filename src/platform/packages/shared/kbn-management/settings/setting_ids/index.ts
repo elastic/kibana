@@ -189,8 +189,6 @@ export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE
   'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES =
   'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses';
-export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2 =
-  'observability:streamsEnableSignificantEventsAlertingV2';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings

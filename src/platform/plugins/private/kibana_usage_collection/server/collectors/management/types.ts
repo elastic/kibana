@@ -199,7 +199,6 @@ export interface UsageStats {
   'cases:incrementalIdDisplay:enabled': boolean;
   'cases:maxOpenCasesPerRuleRun': number;
   'observability:enableDiagnosticMode': boolean;
-  'observability:streamsEnableSignificantEventsAlertingV2': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'agentBuilder:prePromptWorkflowIds': string[];
