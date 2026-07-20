@@ -18,6 +18,7 @@ import {
 
 test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnostic }, () => {
   let downsampledTargetIndex = '';
+  let downsampledDataViewId = '';
   const downsampledDataViewTitle = `${TSDB_INDEX},${TSDB_INDEX}_downsampled`;
   const createdDataViewIds: string[] = [];
 
@@ -46,6 +47,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
       timeFieldName: '@timestamp',
       override: true,
     });
+    downsampledDataViewId = downsampleDataView.id;
     createdDataViewIds.push(downsampleDataView.id);
   });
 
@@ -90,7 +92,10 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     pageObjects,
   }) => {
     await pageObjects.lens.openFullEditor();
-    await pageObjects.lens.switchDataPanelDataView(downsampledDataViewTitle);
+    await pageObjects.lens.switchDataPanelDataView({
+      id: downsampledDataViewId,
+      title: downsampledDataViewTitle,
+    });
     const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
     // field list may be slow to render after data view switch
     await fieldLocator.waitFor({ state: 'visible', timeout: 10_000 });

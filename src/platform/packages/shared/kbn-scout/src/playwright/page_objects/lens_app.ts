@@ -59,31 +59,26 @@ export class LensApp {
     await this.waitForLensApp();
   }
 
-  async switchDataPanelDataView(dataViewTitle: string) {
+  async switchDataPanelDataView({ id, title }: { id: string; title: string }) {
     const dataViewSwitch = this.page.testSubj.locator('lns-dataView-switch-link');
-    await dataViewSwitch.click();
-    await this.page.testSubj.locator('indexPattern-switcher').waitFor({ state: 'visible' });
-    const searchInput = this.page.testSubj.locator('indexPattern-switcher--input');
-    await searchInput.clear();
-    await searchInput.pressSequentially(dataViewTitle);
+    const layerDataViewSwitch = this.page.testSubj.locator('lns_layerIndexPatternLabel');
 
-    // Primary selector targets the data-test-subj injected by the switcher list item.
-    // The title-based fallback handles composite data view titles (e.g. "idx,idx_downsampled")
-    // where special characters would produce an invalid test-subj value.
-    const dataViewOption = this.page.testSubj
-      .locator('indexPattern-switcher')
-      .locator(`[data-test-subj="dataView-${dataViewTitle}"]`)
-      .or(
-        this.page
-          .locator('[data-test-subj="indexPattern-switcher"]')
-          .locator(`[title="${dataViewTitle}"]`)
-      );
-    // Playwright's .click() auto-retries until actionable — handles the debounce wait
-    await dataViewOption.click({ timeout: 10_000 });
-    await this.page.testSubj.locator('indexPattern-switcher').waitFor({ state: 'hidden' });
-    await this.page.testSubj
-      .locator('fieldListLoading')
-      .waitFor({ state: 'hidden', timeout: 30_000 });
+    await dataViewSwitch.click();
+
+    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    await switcher.waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('indexPattern-switcher--input').fill(title);
+
+    // Display titles are not unique, so select by the data view ID exposed as the option value.
+    const dataViewOption = switcher
+      .getByRole('option')
+      .and(this.page.locator(`[value=${JSON.stringify(id)}]`));
+    await dataViewOption.click();
+
+    // The picker closes before Lens finishes switching data sources, and the field-list loader can
+    // briefly be absent before its request starts. Wait for the layer's datasource state instead.
+    await expect(layerDataViewSwitch).toHaveAttribute('title', title);
+    await switcher.waitFor({ state: 'hidden' });
   }
 
   /**
