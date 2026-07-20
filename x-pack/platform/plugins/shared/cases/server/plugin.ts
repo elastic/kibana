@@ -25,6 +25,7 @@ import {
   APP_ID,
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -157,11 +158,6 @@ export class CasePlugin
       // backfill within budget. See the config schema.
       resetTaskTimeoutMinutes: this.caseConfig.analyticsV2.resetTaskTimeoutMinutes,
       resetPageDelayMs: this.caseConfig.analyticsV2.resetPageDelayMs,
-      // When templates is off, `cases-templates` isn't registered with core,
-      // so reading it would throw "Missing mappings for saved objects types".
-      // The flag lets the data view sub-service short-circuit to an empty
-      // runtime field map (base data view still bootstrapped, no overlays).
-      templatesEnabled: this.caseConfig.templates?.enabled === true,
     });
     this.casesAnalyticsV2Service.setup({ core, taskManager: plugins.taskManager });
 
@@ -359,11 +355,7 @@ export class CasePlugin
     // config error, so log and skip rather than crash.
     if (this.casesAnalyticsV2Service) {
       if (!this.caseConfig.analyticsV2.enabled) {
-        // Disabled: skip building the internal repo entirely. With templates
-        // also off, naming `cases-templates` below would throw "Missing
-        // mappings for saved objects types" (it's registered only when
-        // `templates.enabled`), breaking stripped configs (OAS capture, some
-        // test harnesses).
+        // Disabled: skip building the internal repo entirely — no v2 work to do.
       } else if (plugins.dataViews == null) {
         this.logger.error(
           'cases-analyticsV2 is enabled but the `dataViews` plugin is not installed. ' +
@@ -382,16 +374,14 @@ export class CasePlugin
         //    works regardless of where in the in-flight SO migration
         //    (security-team#15066) a tenant sits — see
         //    `reconciliation/attachments_runner.ts`.
-        //  - The data view sub-service reads `cases-templates` SOs per-space
-        //    to derive runtime fields. Only included when templates is on
-        //    — `cases-templates` is registered with core only when
-        //    `xpack.cases.templates.enabled` is true (see
-        //    `saved_object_types/index.ts`), and naming it here when the
-        //    mapping isn't registered throws "Missing mappings for saved
-        //    objects types: 'cases-templates'" from
-        //    `createInternalRepository`. With templates off, the data view
-        //    sub-service short-circuits its template read and bootstraps
-        //    per-space data views with an empty runtime field overlay.
+        //  - The data view sub-service reads `cases-templates` AND
+        //    `cases-field-definitions` SOs per-space to derive runtime
+        //    fields (template fields plus global `isGlobal` field-library
+        //    fields). Both types are always registered with core (see
+        //    `saved_object_types/index.ts`), so they're always opted in
+        //    here; when the templates feature is off there simply are no
+        //    template/field-definition documents to walk and the runtime
+        //    field overlay comes back empty.
         //  - The `/reset` admin route deletes per-space `index-pattern` SOs
         //    across namespaces. A request-scoped SO client can't do this:
         //    the spaces extension scopes `delete` to the request's namespace,
@@ -412,7 +402,8 @@ export class CasePlugin
           CASE_USER_ACTION_SAVED_OBJECT,
           CASE_COMMENT_SAVED_OBJECT,
           CASE_ATTACHMENT_SAVED_OBJECT,
-          ...(this.caseConfig.templates?.enabled ? [CASE_TEMPLATE_SAVED_OBJECT] : []),
+          CASE_TEMPLATE_SAVED_OBJECT,
+          CASE_FIELD_DEFINITION_SAVED_OBJECT,
           'index-pattern',
         ]);
         const v2InternalSavedObjectsClient = new SavedObjectsClient(v2InternalRepository);
