@@ -37,7 +37,26 @@ const callTool = (
     },
   });
 
-const reasoningResponse = {
+const createReasoningResponse = (arguments_: Record<string, unknown>) =>
+  ({
+    content: '',
+    toolCalls: [
+      {
+        toolCallId: 'call-finalize_features',
+        function: {
+          name: 'finalize_features',
+          arguments: arguments_,
+        },
+      },
+    ],
+    tokens: { prompt: 10, completion: 5, total: 15 },
+  } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
+
+const emptyReasoningResponse = createReasoningResponse({
+  features: [],
+  ignored_features: [],
+});
+const responseWithoutFinalTool = {
   content: '',
   toolCalls: [],
   tokens: { prompt: 10, completion: 5, total: 15 },
@@ -72,7 +91,7 @@ describe('identifyFeatures', () => {
           type: 'technology',
         }
       );
-      await callTool(capturedOptions.toolCallbacks.finalize_features, 'finalize_features', {
+      return createReasoningResponse({
         features: [
           {
             id: 'okta',
@@ -120,7 +139,6 @@ describe('identifyFeatures', () => {
           { feature_id: 42 },
         ],
       });
-      return reasoningResponse;
     });
 
     const result = await identifyFeatures({
@@ -144,6 +162,10 @@ describe('identifyFeatures', () => {
     expect(capturedOptions).toEqual(
       expect.objectContaining({
         maxSteps: 4,
+        finalToolChoice: {
+          type: 'function',
+          function: 'finalize_features',
+        },
         input: {
           sample_documents: '[]',
           previously_identified_features: JSON.stringify([
@@ -211,11 +233,7 @@ describe('identifyFeatures', () => {
           type: 'technology',
         }
       );
-      await callTool(callbacks.finalize_features, 'finalize_features', {
-        features: [],
-        ignored_features: [],
-      });
-      return reasoningResponse;
+      return emptyReasoningResponse;
     });
 
     const result = await identifyFeatures({
@@ -256,11 +274,7 @@ describe('identifyFeatures', () => {
           type: 'technology',
         }
       );
-      await callTool(callbacks.finalize_features, 'finalize_features', {
-        features: [],
-        ignored_features: [],
-      });
-      return reasoningResponse;
+      return emptyReasoningResponse;
     });
 
     await identifyFeatures({
@@ -282,7 +296,7 @@ describe('identifyFeatures', () => {
   });
 
   it('fails the iteration when the reasoning agent does not finalize', async () => {
-    executeAsReasoningAgentMock.mockResolvedValue(reasoningResponse);
+    executeAsReasoningAgentMock.mockResolvedValue(responseWithoutFinalTool);
 
     await expect(
       identifyFeatures({
@@ -294,5 +308,22 @@ describe('identifyFeatures', () => {
         signal,
       })
     ).rejects.toThrow('Feature identification did not call finalize_features');
+  });
+
+  it('fails the iteration when final tool output is malformed', async () => {
+    executeAsReasoningAgentMock.mockResolvedValue(
+      createReasoningResponse({ ignored_features: [] })
+    );
+
+    await expect(
+      identifyFeatures({
+        streamName: 'logs.test',
+        sampleDocuments: [],
+        inferenceClient,
+        systemPrompt: 'system prompt',
+        logger,
+        signal,
+      })
+    ).rejects.toThrow('Feature identification returned invalid finalize_features output');
   });
 });

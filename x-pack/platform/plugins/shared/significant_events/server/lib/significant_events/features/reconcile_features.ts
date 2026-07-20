@@ -60,36 +60,102 @@ export function reconcileComputedFeatures({
 type FeatureMatchTier = 'exact' | 'alias' | 'normalized' | 'fingerprint';
 
 interface FeatureMatch {
-  feature: Feature;
+  candidate: FeatureCandidate;
   tier: FeatureMatchTier;
 }
 
-const getFeatureMatchKey = (type: string, id: string): string => `${type}:${id}`;
+interface FeatureCandidate {
+  feature: BaseFeature;
+  origin: 'known' | 'new';
+  updatedAt?: string;
+}
+
+interface FeatureCandidateIndexes {
+  byExactId: Map<string, FeatureCandidate[]>;
+  byAlias: Map<string, FeatureCandidate[]>;
+  byNormalizedId: Map<string, FeatureCandidate[]>;
+}
+
+const getTypedFeatureKey = (type: string, id: string): string => `${type}:${id}`;
 
 const getStringArray = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
 
 const addFeatureCandidate = (
-  candidatesByKey: Map<string, Feature[]>,
+  candidatesByKey: Map<string, FeatureCandidate[]>,
   key: string,
-  feature: Feature
+  candidate: FeatureCandidate
 ): void => {
   const candidates = candidatesByKey.get(key);
-  if (candidates) {
-    candidates.push(feature);
-  } else {
-    candidatesByKey.set(key, [feature]);
+  if (!candidates) {
+    candidatesByKey.set(key, [candidate]);
+  } else if (!candidates.includes(candidate)) {
+    candidates.push(candidate);
   }
 };
 
-const pickLatestFeature = (candidates: ReadonlyArray<Feature> | undefined): Feature | undefined => {
+const indexFeatureCandidate = (
+  candidate: FeatureCandidate,
+  { byExactId, byAlias, byNormalizedId }: FeatureCandidateIndexes
+): void => {
+  const { feature } = candidate;
+  addFeatureCandidate(byExactId, normalizeFeatureSlug(feature.id), candidate);
+  addFeatureCandidate(
+    byNormalizedId,
+    getTypedFeatureKey(feature.type, normalizeFeatureSlugForMatching(feature.id)),
+    candidate
+  );
+
+  for (const alias of getStringArray(feature.meta?.aliases)) {
+    const normalizedAlias = normalizeFeatureSlug(alias);
+    if (normalizedAlias.length > 0) {
+      addFeatureCandidate(byAlias, getTypedFeatureKey(feature.type, normalizedAlias), candidate);
+    }
+  }
+};
+
+const pickLatestCandidate = (
+  candidates: ReadonlyArray<FeatureCandidate> | undefined
+): FeatureCandidate | undefined => {
   if (!candidates || candidates.length === 0) {
     return undefined;
   }
 
   return candidates.reduce((latest, candidate) =>
-    (candidate.updated_at ?? '') > (latest.updated_at ?? '') ? candidate : latest
+    (candidate.updatedAt ?? '') > (latest.updatedAt ?? '') ? candidate : latest
   );
+};
+
+const findFeatureMatch = (
+  raw: BaseFeature,
+  candidates: ReadonlyArray<FeatureCandidate>,
+  { byExactId, byAlias, byNormalizedId }: FeatureCandidateIndexes
+): FeatureMatch | undefined => {
+  const normalizedRawId = normalizeFeatureSlug(raw.id);
+  const exactMatch = pickLatestCandidate(byExactId.get(normalizedRawId));
+  if (exactMatch) {
+    return { candidate: exactMatch, tier: 'exact' };
+  }
+
+  const aliasMatch = pickLatestCandidate(
+    byAlias.get(getTypedFeatureKey(raw.type, normalizedRawId))
+  );
+  if (aliasMatch) {
+    return { candidate: aliasMatch, tier: 'alias' };
+  }
+
+  const matchingRawId = normalizeFeatureSlugForMatching(raw.id);
+  const normalizedMatch = pickLatestCandidate(
+    byNormalizedId.get(getTypedFeatureKey(raw.type, matchingRawId))
+  );
+  if (normalizedMatch) {
+    return { candidate: normalizedMatch, tier: 'normalized' };
+  }
+
+  const fingerprintMatch = pickLatestCandidate(
+    candidates.filter(({ feature }) => hasSameFingerprint(feature, raw))
+  );
+  return fingerprintMatch ? { candidate: fingerprintMatch, tier: 'fingerprint' } : undefined;
 };
 
 function filterExcluded(
@@ -146,8 +212,8 @@ export function reconcileInferredFeatures({
   remappedCount: number;
 } {
   const metadata = createFeatureMetadata({ runId });
-  const newFeatures: FeatureUpsert[] = [];
-  const updatedFeatures: FeatureUpsert[] = [];
+  const newFeaturesById = new Map<string, FeatureUpsert>();
+  const updatedFeaturesById = new Map<string, FeatureUpsert>();
   let remappedCount = 0;
 
   for (const ignored of ignoredFeatures) {
@@ -160,78 +226,57 @@ export function reconcileInferredFeatures({
 
   const discoveredSet = new Set(
     discoveredFeatures.map((feature) =>
-      getFeatureMatchKey(feature.type, normalizeFeatureSlug(feature.id))
+      getTypedFeatureKey(feature.type, normalizeFeatureSlug(feature.id))
     )
   );
-  const byExactId = new Map<string, Feature[]>();
-  const byAlias = new Map<string, Feature[]>();
-  const byNormalizedId = new Map<string, Feature[]>();
-
-  for (const feature of allKnownFeatures) {
-    addFeatureCandidate(
-      byExactId,
-      getFeatureMatchKey(feature.type, normalizeFeatureSlug(feature.id)),
-      feature
-    );
-    addFeatureCandidate(
-      byNormalizedId,
-      getFeatureMatchKey(feature.type, normalizeFeatureSlugForMatching(feature.id)),
-      feature
-    );
-
-    for (const alias of getStringArray(feature.meta?.aliases)) {
-      const normalizedAlias = normalizeFeatureSlug(alias);
-      if (normalizedAlias.length > 0) {
-        addFeatureCandidate(byAlias, getFeatureMatchKey(feature.type, normalizedAlias), feature);
-      }
-    }
+  const candidates: FeatureCandidate[] = allKnownFeatures.map((feature) => ({
+    feature: toBaseFeature(feature),
+    origin: 'known',
+    updatedAt: feature.updated_at,
+  }));
+  const indexes: FeatureCandidateIndexes = {
+    byExactId: new Map(),
+    byAlias: new Map(),
+    byNormalizedId: new Map(),
+  };
+  for (const candidate of candidates) {
+    indexFeatureCandidate(candidate, indexes);
   }
 
   for (const raw of nonExcluded) {
-    const normalizedRawId = normalizeFeatureSlug(raw.id);
-    const typedRawId = getFeatureMatchKey(raw.type, normalizedRawId);
-    const typedMatchingId = getFeatureMatchKey(raw.type, normalizeFeatureSlugForMatching(raw.id));
-    const exactMatch = pickLatestFeature(byExactId.get(typedRawId));
-    const aliasMatch = pickLatestFeature(byAlias.get(typedRawId));
-    const normalizedMatch = pickLatestFeature(byNormalizedId.get(typedMatchingId));
-    let match: FeatureMatch | undefined;
-
-    if (exactMatch) {
-      match = { feature: exactMatch, tier: 'exact' };
-    } else if (aliasMatch) {
-      match = { feature: aliasMatch, tier: 'alias' };
-    } else if (normalizedMatch) {
-      match = { feature: normalizedMatch, tier: 'normalized' };
-    } else {
-      const fingerprintMatch = pickLatestFeature(
-        allKnownFeatures.filter((feature) => hasSameFingerprint(feature, raw))
-      );
-      if (fingerprintMatch) {
-        match = { feature: fingerprintMatch, tier: 'fingerprint' };
-      }
-    }
+    const match = findFeatureMatch(raw, candidates, indexes);
 
     if (match) {
       if (match.tier !== 'exact') {
         remappedCount++;
       }
 
-      const merged = mergeFeature(match.feature, raw);
-      const matchKey = getFeatureMatchKey(
-        match.feature.type,
-        normalizeFeatureSlug(match.feature.id)
-      );
-      if (!discoveredSet.has(matchKey) || !isEqual(merged, toBaseFeature(match.feature))) {
-        updatedFeatures.push({ ...merged, ...metadata });
+      const previous = match.candidate.feature;
+      const merged = mergeFeature(previous, raw);
+      const featureId = normalizeFeatureSlug(merged.id);
+      match.candidate.feature = merged;
+      indexFeatureCandidate(match.candidate, indexes);
+
+      if (match.candidate.origin === 'new') {
+        newFeaturesById.set(featureId, { ...merged, ...metadata });
+      } else {
+        const matchKey = getTypedFeatureKey(previous.type, normalizeFeatureSlug(previous.id));
+        if (!discoveredSet.has(matchKey) || !isEqual(merged, previous)) {
+          updatedFeaturesById.set(featureId, { ...merged, ...metadata });
+        }
       }
     } else {
-      newFeatures.push({ ...raw, ...metadata });
+      const featureId = normalizeFeatureSlug(raw.id);
+      const candidate: FeatureCandidate = { feature: raw, origin: 'new' };
+      candidates.push(candidate);
+      indexFeatureCandidate(candidate, indexes);
+      newFeaturesById.set(featureId, { ...raw, ...metadata });
     }
   }
 
   return {
-    newFeatures,
-    updatedFeatures,
+    newFeatures: Array.from(newFeaturesById.values()),
+    updatedFeatures: Array.from(updatedFeaturesById.values()),
     codeIgnoredCount,
     remappedCount,
   };

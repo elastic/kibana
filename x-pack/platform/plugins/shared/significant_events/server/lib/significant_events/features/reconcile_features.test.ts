@@ -206,26 +206,14 @@ describe('reconcileInferredFeatures', () => {
     expect(result.remappedCount).toBe(1);
   });
 
-  it('does not merge exact or normalized ids across feature types', () => {
-    const entity = createStoredFeature({
-      id: 'gcp',
-      type: 'entity',
-      subtype: 'cloud_service',
-      properties: { name: 'gcp' },
-    });
-    const infrastructure = createStoredFeature({
+  it('treats an exact slug as the same stored identity across feature types', () => {
+    const existing = createStoredFeature({
       id: 'gcp',
       type: 'infrastructure',
       subtype: 'cloud_deployment',
       properties: { provider: 'gcp' },
     });
-    const rawInfrastructure = createRawFeature({
-      id: 'gcp-1.2.3',
-      type: 'infrastructure',
-      subtype: 'cloud_deployment',
-      properties: { provider: 'gcp', version: '1.2.3' },
-    });
-    const rawTechnology = createRawFeature({
+    const raw = createRawFeature({
       id: 'gcp',
       type: 'technology',
       subtype: 'sdk',
@@ -233,17 +221,104 @@ describe('reconcileInferredFeatures', () => {
     });
 
     const result = reconcile({
-      rawFeatures: [rawInfrastructure, rawTechnology],
-      allKnownFeatures: [entity, infrastructure],
+      rawFeatures: [raw],
+      allKnownFeatures: [existing],
     });
 
+    expect(result.newFeatures).toEqual([]);
     expect(result.updatedFeatures).toHaveLength(1);
     expect(result.updatedFeatures[0]).toEqual(
       expect.objectContaining({ id: 'gcp', type: 'infrastructure' })
     );
+    expect(result.remappedCount).toBe(0);
+  });
+
+  it('does not normalize ids across feature types', () => {
+    const existing = createStoredFeature({
+      id: 'gcp',
+      type: 'infrastructure',
+      subtype: 'cloud_deployment',
+      properties: { provider: 'gcp' },
+    });
+    const raw = createRawFeature({
+      id: 'gcp-1.2.3',
+      type: 'technology',
+      subtype: 'sdk',
+      properties: { name: 'gcp', version: '1.2.3' },
+    });
+
+    const result = reconcile({
+      rawFeatures: [raw],
+      allKnownFeatures: [existing],
+    });
+
+    expect(result.updatedFeatures).toEqual([]);
     expect(result.newFeatures).toEqual([
-      expect.objectContaining({ id: 'gcp', type: 'technology' }),
+      expect.objectContaining({ id: 'gcp-1.2.3', type: 'technology' }),
     ]);
+    expect(result.remappedCount).toBe(0);
+  });
+
+  it('folds multiple raw matches into one existing feature update', () => {
+    const existing = createStoredFeature({
+      id: 'okta',
+      properties: { name: 'okta', version: '3.14.1' },
+      evidence: ['existing evidence'],
+    });
+    const rawFeatures = [
+      createRawFeature({
+        id: 'okta-3.15.0',
+        properties: { name: 'okta', version: '3.15.0' },
+        evidence: ['3.15 evidence'],
+      }),
+      createRawFeature({
+        id: 'okta-3.16.0',
+        properties: { name: 'okta', version: '3.16.0' },
+        evidence: ['3.16 evidence'],
+      }),
+    ];
+
+    const result = reconcile({
+      rawFeatures,
+      allKnownFeatures: [existing],
+    });
+
+    expect(result.newFeatures).toEqual([]);
+    expect(result.updatedFeatures).toEqual([
+      expect.objectContaining({
+        id: 'okta',
+        properties: { name: 'okta', version: '3.16.0' },
+        evidence: ['existing evidence', '3.15 evidence', '3.16 evidence'],
+        meta: { version_history: ['3.14.1', '3.15.0'] },
+      }),
+    ]);
+    expect(result.remappedCount).toBe(2);
+  });
+
+  it('folds duplicate new features before writing', () => {
+    const rawFeatures = [
+      createRawFeature({
+        id: 'java-runtime',
+        properties: { language: 'java' },
+        evidence: ['runtime evidence'],
+      }),
+      createRawFeature({
+        id: 'jvm',
+        properties: { language: 'java' },
+        evidence: ['jvm evidence'],
+      }),
+    ];
+
+    const result = reconcile({ rawFeatures });
+
+    expect(result.updatedFeatures).toEqual([]);
+    expect(result.newFeatures).toEqual([
+      expect.objectContaining({
+        id: 'java-runtime',
+        evidence: ['runtime evidence', 'jvm evidence'],
+      }),
+    ]);
+    expect(result.remappedCount).toBe(1);
   });
 
   it('does not strip or merge short numeric infrastructure suffixes', () => {

@@ -109,10 +109,6 @@ export async function identifyFeatures({
   const previousFeaturesContext =
     previouslyIdentifiedFeatures.length > 0 ? JSON.stringify(previouslyIdentifiedFeatures) : '';
 
-  const finalizedFeatures: BaseFeature[] = [];
-  const ignoredFeatures: IgnoredFeature[] = [];
-  let finalizeCallCount = 0;
-
   const response = await withSpan('invoke_prompt', () =>
     executeAsReasoningAgent({
       input: {
@@ -156,45 +152,47 @@ export async function identifyFeatures({
             };
           }
         },
-        finalize_features: async (toolCall) => {
-          finalizeCallCount++;
-          const acceptedFeaturesBefore = finalizedFeatures.length;
-          const acceptedIgnoredBefore = ignoredFeatures.length;
-
-          for (const feature of toolCall.function.arguments.features) {
-            const candidate = {
-              ...feature,
-              stream_name: streamName,
-              filter: tryParseFilter(feature.filter),
-            };
-            const result = identifiedFeatureSchema.safeParse(candidate);
-            if (!result.success || Object.keys(result.data.properties).length === 0) {
-              continue;
-            }
-            finalizedFeatures.push(result.data);
-          }
-
-          for (const item of toolCall.function.arguments.ignored_features ?? []) {
-            const result = ignoredFeatureSchema.safeParse(item);
-            if (result.success) {
-              ignoredFeatures.push(result.data);
-            }
-          }
-
-          return {
-            response: {
-              features_accepted: finalizedFeatures.length - acceptedFeaturesBefore,
-              ignored_features_accepted: ignoredFeatures.length - acceptedIgnoredBefore,
-            },
-          };
-        },
+        finalize_features: async () => ({ response: { finalized: true } }),
+      },
+      finalToolChoice: {
+        type: 'function',
+        function: 'finalize_features',
       },
       abortSignal: signal,
     })
   );
 
-  if (finalizeCallCount === 0) {
+  if (response.toolCalls.length === 0) {
     throw new Error('Feature identification did not call finalize_features');
+  }
+
+  const finalizedFeatures: BaseFeature[] = [];
+  const ignoredFeatures: IgnoredFeature[] = [];
+  for (const toolCall of response.toolCalls) {
+    const { features, ignored_features: ignored = [] } = toolCall.function.arguments;
+    if (!Array.isArray(features)) {
+      throw new Error('Feature identification returned invalid finalize_features output');
+    }
+
+    for (const feature of features) {
+      const candidate = {
+        ...feature,
+        stream_name: streamName,
+        filter: tryParseFilter(feature.filter),
+      };
+      const result = identifiedFeatureSchema.safeParse(candidate);
+      if (!result.success || Object.keys(result.data.properties).length === 0) {
+        continue;
+      }
+      finalizedFeatures.push(result.data);
+    }
+
+    for (const item of Array.isArray(ignored) ? ignored : []) {
+      const result = ignoredFeatureSchema.safeParse(item);
+      if (result.success) {
+        ignoredFeatures.push(result.data);
+      }
+    }
   }
 
   return {
