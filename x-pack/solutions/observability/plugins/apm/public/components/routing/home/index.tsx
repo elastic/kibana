@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { offsetRt } from '../../../../common/comparison_rt';
+import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
+import { offsetSchema } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { environmentRt } from '../../../../common/environment_rt';
+import { environmentSchema } from '../../../../common/environment_rt';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { RedirectTo } from '../redirect_to';
 import { SearchBar } from '../../shared/search_bar/search_bar';
@@ -41,6 +41,10 @@ const TraceOverview = dynamic(() =>
   import('../../app/trace_overview').then((mod) => ({ default: mod.TraceOverview }))
 );
 
+const serviceGroupPageParamsSchema = z.object({
+  query: z.object({ serviceGroup: z.string() }),
+});
+
 function serviceGroupPage<TPath extends string>({
   path,
   element,
@@ -59,7 +63,7 @@ function serviceGroupPage<TPath extends string>({
   TPath,
   {
     element: React.ReactElement<any, any>;
-    params: t.TypeC<{ query: t.TypeC<{ serviceGroup: t.StringC }> }>;
+    params: typeof serviceGroupPageParamsSchema;
     defaults: { query: { serviceGroup: string } };
   }
 > {
@@ -76,16 +80,14 @@ function serviceGroupPage<TPath extends string>({
   return {
     [path]: {
       element: ContextWrapper ? <ContextWrapper>{template}</ContextWrapper> : template,
-      params: t.type({
-        query: t.type({ serviceGroup: t.string }),
-      }),
+      params: serviceGroupPageParamsSchema,
       defaults: { query: { serviceGroup: '' } },
     },
   } as Record<
     TPath,
     {
       element: React.ReactElement<any, any>;
-      params: t.TypeC<{ query: t.TypeC<{ serviceGroup: t.StringC }> }>;
+      params: typeof serviceGroupPageParamsSchema;
       defaults: { query: { serviceGroup: string } };
     }
   >;
@@ -112,25 +114,27 @@ export const homeRoute = {
         <Outlet />
       </ApmTimeRangeMetadataContextProvider>
     ),
-    params: t.type({
-      query: t.intersection([
-        environmentRt,
-        t.type({
-          rangeFrom: t.string,
-          rangeTo: t.string,
-          kuery: t.string,
-          comparisonEnabled: toBooleanRt,
-        }),
-        t.partial({
-          refreshPaused: t.union([t.literal('true'), t.literal('false')]),
-          refreshInterval: t.string,
-          page: toNumberRt,
-          pageSize: toNumberRt,
-          sortField: t.string,
-          sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-        }),
-        offsetRt,
-      ]),
+    params: z.object({
+      query: environmentSchema
+        .merge(
+          z.object({
+            rangeFrom: z.string(),
+            rangeTo: z.string(),
+            kuery: z.string(),
+            comparisonEnabled: toBooleanFromString,
+          })
+        )
+        .merge(
+          z.object({
+            refreshPaused: z.union([z.literal('true'), z.literal('false')]).optional(),
+            refreshInterval: z.string().optional(),
+            page: z.coerce.number().optional(),
+            pageSize: z.coerce.number().optional(),
+            sortField: z.string().optional(),
+            sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+          })
+        )
+        .merge(offsetSchema),
     }),
     defaults: {
       query: {

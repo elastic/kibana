@@ -36,12 +36,10 @@ describe('buildUserDetailsQuery', () => {
     expect(filters).not.toContainEqual({ term: { 'user.name': mockOptions.userName } });
   });
 
-  test('includes EUID runtime mapping and documents filter when entityStoreV2 is enabled', () => {
+  test('includes documents filter and no EUID runtime mapping when entityStoreV2 is enabled', () => {
     const result = buildObservedUserDetailsQuery({ ...mockOptions, entityStoreV2: true });
 
-    expect(result.runtime_mappings).toEqual({
-      entity_id: euid.painless.getEuidRuntimeMapping('user'),
-    });
+    expect(result.runtime_mappings).toBeUndefined();
 
     const filters = (result.query as { bool: { filter: unknown[] } }).bool.filter;
     expect(filters[0]).toEqual(euid.dsl.getEuidDocumentsContainsIdFilter('user'));

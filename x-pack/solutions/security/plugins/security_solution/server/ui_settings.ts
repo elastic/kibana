@@ -55,6 +55,7 @@ import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
+  ENABLE_SIEM_READINESS_SETTING,
   ENABLE_DE_HEALTH_UI_SETTING,
   ENABLE_NEW_FLYOUT_SETTING,
   ENABLE_NEWS_FEED_SETTING,
@@ -233,12 +234,11 @@ export const initUiSettings = (
           }
         ),
         type: 'boolean',
-        value: false,
+        value: true,
         category: [APP_ID],
         requiresPageReload: true,
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
-        technicalPreview: true,
       },
     }),
     [ENABLE_ASSET_INVENTORY_SETTING]: {
@@ -249,6 +249,25 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
         {
           defaultMessage: `Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
+        }
+      ),
+      type: 'boolean',
+      value: false,
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+      solutionViews: ['classic', 'security'],
+      technicalPreview: true,
+    },
+    [ENABLE_SIEM_READINESS_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableSiemReadinessLabel', {
+        defaultMessage: 'Enable SIEM Readiness',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableSiemReadinessDescription',
+        {
+          defaultMessage:
+            'Enable the SIEM Readiness experience within the Security Solution. When enabled, you can access SIEM Readiness from the Launchpad menu.',
         }
       ),
       type: 'boolean',
@@ -322,7 +341,7 @@ export const initUiSettings = (
         technicalPreview: true,
       },
     }),
-    ...(experimentalFeatures.newFlyoutSystemEnabled && {
+    ...(!experimentalFeatures.newFlyoutSystemDisabled && {
       [ENABLE_NEW_FLYOUT_SETTING]: {
         name: i18n.translate('xpack.securitySolution.uiSettings.enableNewFlyoutLabel', {
           defaultMessage: 'Enable new flyout',
@@ -336,7 +355,7 @@ export const initUiSettings = (
           }
         ),
         type: 'boolean',
-        value: false,
+        value: true,
         category: [APP_ID],
         requiresPageReload: true,
         schema: schema.boolean(),
@@ -358,12 +377,11 @@ export const initUiSettings = (
           }
         ),
         type: 'boolean',
-        value: false,
+        value: true,
         category: [APP_ID],
         requiresPageReload: true,
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
-        technicalPreview: true,
       },
     }),
     [NEWS_FEED_URL_SETTING]: {

@@ -6,16 +6,18 @@
  */
 
 import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryLink } from '@kbn/significant-events-schema';
-import { SignificantEventsAlertsReaderV1 } from './v1_alerts_reader';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { SignificantEventsAlertsReaderV2 } from './v2_alerts_reader';
 
 export interface ChangePointScanParams {
   lookback: string;
   bucketInterval: string;
   spaceId: string;
+  ruleIds?: string[];
 }
+
+export type ChangePointTypeMap = Record<string, { p_value: number }>;
 
 export interface ChangePointRuleBucket {
   key: string;
@@ -27,13 +29,7 @@ export interface ChangePointRuleBucket {
     buckets: Array<{ key: string }>;
   };
   change_points: {
-    type: Record<string, { p_value: number }>;
-  };
-  last_5m: {
-    doc_count: number;
-  };
-  last_floor_window: {
-    doc_count: number;
+    type: ChangePointTypeMap;
   };
 }
 
@@ -58,48 +54,20 @@ export interface OccurrencesEsqlParams {
 
 export interface ISignificantEventsAlertsReader {
   readonly index: string;
-  readonly ruleIdColumn: 'rule_uuid' | 'rule_id';
+  readonly ruleIdColumn: 'rule_id';
 
   buildOccurrencesEsqlRequest(params: OccurrencesEsqlParams): EsqlQueryRequest;
 
-  countAlerts(esClient: ElasticsearchClient, params: CountDetectionAlertsParams): Promise<number>;
+  countAlerts(
+    esClient: TracedElasticsearchClient,
+    params: CountDetectionAlertsParams
+  ): Promise<number>;
 
   runChangePointScan(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     params: ChangePointScanParams,
     queryLinks: QueryLink[]
   ): Promise<{ took?: number; by_rule: { buckets: ChangePointRuleBucket[] } }>;
-
-  runRuleChangePoint(
-    esClient: ElasticsearchClient,
-    params: {
-      ruleUuid: string;
-      lookback: string;
-      bucketInterval: string;
-      spaceId: string;
-    }
-  ): Promise<{ aggregations: Record<string, unknown> }>;
-
-  runRuleActivity(
-    esClient: ElasticsearchClient,
-    params: {
-      ruleUuid: string;
-      lookback: string;
-      windowInterval: string;
-      spaceId: string;
-    }
-  ): Promise<{ aggregations: Record<string, unknown> }>;
-
-  runRuleAlertWindows(
-    esClient: ElasticsearchClient,
-    params: {
-      ruleUuid: string;
-      currentLookback: string;
-      referenceLookbackGte: string;
-      referenceLookbackLt: string;
-      spaceId: string;
-    }
-  ): Promise<{ aggregations: Record<string, unknown> }>;
 }
 
 export function buildRuleMetadataMap(queryLinks: QueryLink[]): Map<string, RuleMetadata> {
@@ -113,11 +81,5 @@ export function buildRuleMetadataMap(queryLinks: QueryLink[]): Map<string, RuleM
   return map;
 }
 
-export const ALERTS_READER_V1: ISignificantEventsAlertsReader =
-  new SignificantEventsAlertsReaderV1();
 export const ALERTS_READER_V2: ISignificantEventsAlertsReader =
   new SignificantEventsAlertsReaderV2();
-
-export function createAlertsReader(alertingV2Active: boolean): ISignificantEventsAlertsReader {
-  return alertingV2Active ? ALERTS_READER_V2 : ALERTS_READER_V1;
-}

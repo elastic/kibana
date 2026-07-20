@@ -8,15 +8,10 @@
 import type { DebugState } from '@elastic/charts';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { spaceTest } from '@kbn/scout';
+import type { ApiServicesFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { testData } from '../fixtures';
-
-const DASHBOARD_API_PATH = 'api/dashboards';
-const DASHBOARD_API_HEADERS = {
-  'Content-Type': 'application/json',
-  'elastic-api-version': '2023-10-31',
-} as const;
 
 const LOGSTASH_ABSOLUTE_RANGE = {
   from: '2015-09-19T06:31:44.000Z',
@@ -76,16 +71,13 @@ function buildLensLineTimeseriesPanel(esql: EsqlTimeseriesCase) {
 }
 
 async function createDashboardWithLensPanel(
-  kbnClient: import('@kbn/scout').KbnClient,
+  apiServices: ApiServicesFixture,
   spaceId: string,
   title: string,
   esql: EsqlTimeseriesCase
 ): Promise<string> {
-  const response = await kbnClient.request<{ id: string }>({
-    method: 'POST',
-    path: `s/${spaceId}/${DASHBOARD_API_PATH}`,
-    headers: DASHBOARD_API_HEADERS,
-    body: {
+  return apiServices.dashboard.create(
+    {
       title,
       time_range: {
         from: LOGSTASH_ABSOLUTE_RANGE.from,
@@ -94,22 +86,19 @@ async function createDashboardWithLensPanel(
       },
       panels: [buildLensLineTimeseriesPanel(esql)],
     },
-  });
-
-  expect([200, 201]).toContain(response.status);
-  expect(response.data.id).toBeTruthy();
-  return response.data.id;
+    spaceId
+  );
 }
 
 async function getChartDebugState(
   esqlCase: EsqlTimeseriesCase,
-  kbnClient: import('@kbn/scout').KbnClient,
+  apiServices: ApiServicesFixture,
   spaceId: string,
   page: import('@kbn/scout').ScoutPage,
   pageObjects: import('@kbn/scout').PageObjects
 ): Promise<DebugState> {
   const title = `Scout ES|QL timeseries API ${esqlCase.description} ${Date.now()}`;
-  const dashboardId = await createDashboardWithLensPanel(kbnClient, spaceId, title, esqlCase);
+  const dashboardId = await createDashboardWithLensPanel(apiServices, spaceId, title, esqlCase);
 
   const { dashboard } = pageObjects;
   await dashboard.openDashboardWithId(dashboardId);
@@ -156,10 +145,10 @@ spaceTest.describe(
 
     spaceTest(
       'renders a time-scaled x-axis for TBUCKET',
-      async ({ kbnClient, scoutSpace, page, pageObjects }) => {
+      async ({ apiServices, scoutSpace, page, pageObjects }) => {
         const debug = await getChartDebugState(
           TIMESERIES_CASES[0],
-          kbnClient,
+          apiServices,
           scoutSpace.id,
           page,
           pageObjects
@@ -177,10 +166,10 @@ spaceTest.describe(
 
     spaceTest(
       'renders a time-scaled x-axis for BUCKET on timestamp',
-      async ({ kbnClient, scoutSpace, page, pageObjects }) => {
+      async ({ apiServices, scoutSpace, page, pageObjects }) => {
         const debug = await getChartDebugState(
           TIMESERIES_CASES[1],
-          kbnClient,
+          apiServices,
           scoutSpace.id,
           page,
           pageObjects
@@ -198,10 +187,10 @@ spaceTest.describe(
 
     spaceTest(
       'renders a time-scaled x-axis for DATE_TRUNC on timestamp',
-      async ({ kbnClient, scoutSpace, page, pageObjects }) => {
+      async ({ apiServices, scoutSpace, page, pageObjects }) => {
         const debug = await getChartDebugState(
           TIMESERIES_CASES[2],
-          kbnClient,
+          apiServices,
           scoutSpace.id,
           page,
           pageObjects
