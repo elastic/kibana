@@ -124,6 +124,7 @@ export const SelectBasicFieldSchema = BaseFieldSchema.extend({
   metadata: z
     .object({
       options: z.array(z.string()),
+      default: z.string().optional(),
     })
     .catchall(z.unknown()),
 });
@@ -144,6 +145,10 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
   type: z.literal('date'),
   metadata: z
     .object({
+      // A default is honored at runtime for a date picker (a UTC-ISO string flows through
+      // getYamlDefaultAsString and the renderer reads it), so it must be a declared property —
+      // otherwise the editor's strict metadata schema would false-flag a `default` that works.
+      default: z.string().optional(),
       show_time: z.boolean().optional(),
       timezone: z.enum(['utc', 'local']).optional(),
     })
@@ -153,6 +158,11 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
 
 export const ToggleFieldSchema = BaseFieldSchema.extend({
   control: z.literal(FieldType.TOGGLE),
+  // A toggle stores a boolean value, so its extended-field storage key is `<name>_as_boolean` and
+  // it publishes as a native `boolean` runtime field (see cases_analytics_v2 runtime_fields.ts).
+  // Overriding BaseFieldSchema's `keyword` here is what makes the analytics layer's boolean branch
+  // reachable — without it a toggle would surface as a keyword string ('true'/'false') in Lens/Discover.
+  type: z.literal('boolean'),
   metadata: z
     .object({
       default: z.boolean().optional(),

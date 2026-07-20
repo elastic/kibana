@@ -8975,42 +8975,80 @@
                 "all": {
                   "properties": {
                     "totalAttached": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of all cases with any connector attached"
+                      }
                     }
                   }
                 },
                 "itsm": {
                   "properties": {
                     "totalAttached": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of cases with ServiceNow ITSM connector attached"
+                      }
                     }
                   }
                 },
                 "sir": {
                   "properties": {
                     "totalAttached": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of cases with ServiceNow SIR connector attached"
+                      }
                     }
                   }
                 },
                 "jira": {
                   "properties": {
                     "totalAttached": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of cases with Jira connector attached"
+                      }
                     }
                   }
                 },
                 "resilient": {
                   "properties": {
                     "totalAttached": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of cases with Resilient connector attached"
+                      }
                     }
                   }
                 },
                 "swimlane": {
                   "properties": {
                     "totalAttached": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of cases with Swimlane connector attached"
+                      }
+                    }
+                  }
+                },
+                "thehive": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of cases with The Hive connector attached"
+                      }
+                    }
+                  }
+                },
+                "caseswebhook": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of cases with Cases Webhook connector attached"
+                      }
                     }
                   }
                 },
