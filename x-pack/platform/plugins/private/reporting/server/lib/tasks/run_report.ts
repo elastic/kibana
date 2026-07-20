@@ -620,8 +620,10 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                   // could reject later; swallow that so it doesn't surface as an unhandled rejection.
                   performJobPromise.catch(() => {});
                   // Swallow any further error from the abandoned stream (e.g. a pending _write
-                  // callback firing after destroy()) so it doesn't crash the process.
-                  stream.once('error', () => {});
+                  // callback firing after destroy()) so it doesn't crash the process. Use `on`
+                  // (not `once`) so we keep swallowing regardless of how many times the abandoned
+                  // stream errors; an unhandled 'error' event would crash the process.
+                  stream.on('error', () => {});
                   // Stop the abandoned stream so it can't keep writing to (and advancing the
                   // seq_no of) the report doc concurrently with the next retry attempt.
                   stream.destroy();

@@ -42,6 +42,7 @@ interface StreamMock {
   end: () => void;
   destroy: jest.Mock;
   transform: Transform;
+  on: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
   once: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
   removeListener: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
 }
@@ -69,6 +70,10 @@ function createStreamMock({
       transform.end();
     },
     destroy: jest.fn(),
+    on: (event: string, listener: (...args: unknown[]) => void) => {
+      transform.on(event, listener);
+      return mock;
+    },
     once: (event: string, listener: (...args: unknown[]) => void) => {
       transform.once(event, listener);
       return mock;
