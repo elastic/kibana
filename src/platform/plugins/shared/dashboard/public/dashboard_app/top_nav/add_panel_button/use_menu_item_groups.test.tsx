@@ -31,6 +31,8 @@ jest.mock('../../../services/kibana_services', () => {
 describe('useMenuItemGroups', () => {
   test('opens the selected panel editor without waiting for Add to be enabled', async () => {
     const execute = jest.fn();
+    const returnFocus = jest.fn();
+    const onActionExecute = jest.fn();
     mockGetTriggerCompatibleActions.mockResolvedValueOnce([
       {
         id: 'mockAddPanelAction',
@@ -54,14 +56,17 @@ describe('useMenuItemGroups', () => {
       openOverlay: () => {},
       clearOverlays: jest.fn(),
     };
-    const { result } = renderHook(() => useMenuItemGroups({ dashboardApi: api }));
+    const { result } = renderHook(() =>
+      useMenuItemGroups({ dashboardApi: api, returnFocus, onActionExecute })
+    );
     await waitFor(() => expect(result.current.groups).toBeDefined());
 
     result.current.groups?.[0].items[0].onClick({
       currentTarget: document.createElement('button'),
     } as unknown as React.MouseEvent);
 
-    expect(execute).toHaveBeenCalled();
+    expect(onActionExecute).toHaveBeenCalledTimes(1);
+    expect(execute).toHaveBeenCalledWith(expect.objectContaining({ returnFocus }));
   });
 
   test('gets sorted groups + items from ADD_PANEL_TRIGGER actions', async () => {

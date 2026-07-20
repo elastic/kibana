@@ -15,11 +15,12 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import useObservable from 'react-use/lib/useObservable';
-import { getAddPanelButton, openLazyFlyout } from '@kbn/presentation-util';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type {
   AppMenuConfig,
   AppMenuItemType,
   AppMenuPrimaryActionItem,
+  AppMenuRunActionParams,
 } from '@kbn/core-chrome-app-menu-components';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
@@ -158,21 +159,38 @@ export const useDashboardMenuItems = ({
     }
   }, [quickSaveDashboard, dashboardInteractiveSave, lastSavedId]);
 
-  const openAddPanelFlyout = useCallback(() => {
-    openLazyFlyout({
-      core: coreServices,
-      parentApi: dashboardApi,
-      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-        const { AddPanelFlyout } = await import('./add_panel_button/components/add_panel_flyout');
+  const openAddPanelFlyout = useCallback(
+    (params?: AppMenuRunActionParams) => {
+      let shouldReturnFocus = true;
+      openLazyFlyout({
+        core: coreServices,
+        parentApi: dashboardApi,
+        returnFocus: params?.returnFocus
+          ? () => {
+              if (shouldReturnFocus) params.returnFocus();
+            }
+          : undefined,
+        loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+          const { AddPanelFlyout } = await import('./add_panel_button/components/add_panel_flyout');
 
-        return <AddPanelFlyout dashboardApi={dashboardApi} ariaLabelledBy={ariaLabelledBy} />;
-      },
-      flyoutProps: {
-        'data-test-subj': 'dashboardAddPanel',
-        getReturnFocusTarget: getAddPanelButton,
-      },
-    });
-  }, [dashboardApi]);
+          return (
+            <AddPanelFlyout
+              dashboardApi={dashboardApi}
+              ariaLabelledBy={ariaLabelledBy}
+              returnFocus={params?.returnFocus}
+              onActionExecute={() => {
+                shouldReturnFocus = false;
+              }}
+            />
+          );
+        },
+        flyoutProps: {
+          'data-test-subj': 'dashboardAddPanel',
+        },
+      });
+    },
+    [dashboardApi]
+  );
 
   const shareOptions = useShareOptions();
 
@@ -357,7 +375,7 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardSettingsButton',
         disableButton: disableTopNav,
         htmlId: 'dashboardSettingsButton',
-        run: () => openSettingsFlyout(dashboardApi),
+        run: (params) => openSettingsFlyout(dashboardApi, params?.returnFocus),
       } as AppMenuItemType,
 
       // Action items

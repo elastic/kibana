@@ -177,17 +177,14 @@ describe('openLazyFlyout', () => {
       }).not.toThrow();
     });
 
-    it('returns focus to the lazily resolved target when provided', () => {
+    it('uses the provided return focus callback', () => {
       const trigger = document.createElement('button');
-      trigger.id = 'myTrigger';
       document.body.appendChild(trigger);
 
       openLazyFlyout({
         core,
         loadContent,
-        flyoutProps: {
-          getReturnFocusTarget: () => document.getElementById('myTrigger'),
-        },
+        returnFocus: () => trigger.focus(),
       });
 
       getOnClose()();
@@ -205,9 +202,7 @@ describe('openLazyFlyout', () => {
       openLazyFlyout({
         core,
         loadContent,
-        flyoutProps: {
-          getReturnFocusTarget: () => document.getElementById('myTrigger'),
-        },
+        returnFocus: () => trigger.focus(),
       });
 
       getOnClose()();

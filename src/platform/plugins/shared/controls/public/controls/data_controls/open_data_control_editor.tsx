@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
-import { getAddPanelButton, openLazyFlyout } from '@kbn/presentation-util';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import React from 'react';
 import deepEqual from 'react-fast-compare';
 import type { DataControlState } from '@kbn/controls-schemas';
@@ -19,6 +19,7 @@ import { coreServices } from '../../services/kibana_services';
 export interface OpenDataControlEditorParams<State extends DataControlState = DataControlState> {
   initialState: Partial<State>;
   parentApi: unknown;
+  returnFocus?: () => void;
   setLastUsedDataViewId?: (dataViewId: string) => void;
   // these props are only provided when the control already exists and is being edited
   controlId?: string;
@@ -41,6 +42,7 @@ export const openDataControlEditor = <State extends DataControlState = DataContr
   const {
     initialState,
     parentApi,
+    returnFocus,
     setLastUsedDataViewId,
     controlId,
     controlType,
@@ -92,6 +94,7 @@ export const openDataControlEditor = <State extends DataControlState = DataContr
   openLazyFlyout({
     core: coreServices,
     parentApi,
+    returnFocus,
     loadContent: async ({ closeFlyout }) => {
       const { DataControlEditor } = await import('./editor/data_control_editor');
       return (
@@ -115,9 +118,6 @@ export const openDataControlEditor = <State extends DataControlState = DataContr
       );
     },
     flyoutProps: {
-      getReturnFocusTarget: controlId
-        ? () => document.getElementById('dashboard-controls-menu-button')
-        : getAddPanelButton,
       focusedPanelId: controlId,
     },
   });

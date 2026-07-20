@@ -22,15 +22,20 @@ import type { MenuItemGroup } from './types';
 
 export const useMenuItemGroups = ({
   dashboardApi,
+  returnFocus,
+  onActionExecute,
 }: {
   dashboardApi: DashboardApi;
+  returnFocus?: () => void;
+  onActionExecute?: () => void;
 }): { groups: MenuItemGroup[] | undefined; loading: boolean; error: Error | undefined } => {
   const context = useMemo(
     () => ({
       embeddable: dashboardApi,
       trigger: triggers[ADD_PANEL_TRIGGER],
+      returnFocus,
     }),
-    [dashboardApi]
+    [dashboardApi, returnFocus]
   );
 
   const [groups, setGroups] = useState<MenuItemGroup[] | undefined>();
@@ -45,12 +50,12 @@ export const useMenuItemGroups = ({
   useEffect(() => {
     if (!result) return;
     const generateListSubscription = result?.generateMenuItemGroups$.subscribe(() => {
-      setGroups(generateMenuItemGroups(result.groups, dashboardApi, context));
+      setGroups(generateMenuItemGroups(result.groups, dashboardApi, context, onActionExecute));
     });
     return () => {
       generateListSubscription?.unsubscribe();
     };
-  }, [result, dashboardApi, context]);
+  }, [result, dashboardApi, context, onActionExecute]);
 
   return { loading, error, groups };
 };
@@ -65,23 +70,25 @@ async function getActionGroups(
   const groups: Record<string, { group: PresentableGroup; actions: Action[] }> = {};
   const disabledStateChangesSubjects: Array<Observable<void> | undefined> = [];
 
-  (
-    await uiActionsService.getTriggerCompatibleActions(ADD_PANEL_TRIGGER, { embeddable: api })
-  ).forEach((action) => {
-    const actionGroups = Array.isArray(action.grouping) ? action.grouping : [ADD_PANEL_OTHER_GROUP];
-    if (action.getDisabledStateChangesSubject) {
-      disabledStateChangesSubjects.push(action.getDisabledStateChangesSubject(context));
-    }
-    actionGroups.forEach((group) => {
-      if (!groups[group.id]) {
-        groups[group.id] = {
-          group,
-          actions: [],
-        };
+  (await uiActionsService.getTriggerCompatibleActions(ADD_PANEL_TRIGGER, context)).forEach(
+    (action) => {
+      const actionGroups = Array.isArray(action.grouping)
+        ? action.grouping
+        : [ADD_PANEL_OTHER_GROUP];
+      if (action.getDisabledStateChangesSubject) {
+        disabledStateChangesSubjects.push(action.getDisabledStateChangesSubject(context));
       }
-      groups[group.id].actions.push(action);
-    });
-  });
+      actionGroups.forEach((group) => {
+        if (!groups[group.id]) {
+          groups[group.id] = {
+            group,
+            actions: [],
+          };
+        }
+        groups[group.id].actions.push(action);
+      });
+    }
+  );
 
   return {
     groups,
@@ -92,7 +99,8 @@ async function getActionGroups(
 export function getMenuItems(
   actions: Action[],
   dashboardApi: DashboardApi,
-  context: ActionExecutionContext
+  context: ActionExecutionContext,
+  onActionExecute?: () => void
 ) {
   return actions
     .map((action) => {
@@ -112,6 +120,7 @@ export function getMenuItems(
               event.preventDefault();
             }
           }
+          onActionExecute?.();
           dashboardApi.clearOverlays();
           action.execute(context);
         },
@@ -132,7 +141,8 @@ export function getMenuItems(
 function generateMenuItemGroups(
   groups: Record<string, { group: PresentableGroup; actions: Action[] }>,
   dashboardApi: DashboardApi,
-  context: ActionExecutionContext
+  context: ActionExecutionContext,
+  onActionExecute?: () => void
 ): MenuItemGroup[] {
   return Object.entries(groups ?? {})
     .map(([groupId, { group, actions }]) => {
@@ -141,7 +151,7 @@ function generateMenuItemGroups(
         title: group.getDisplayName?.(context) ?? '',
         'data-test-subj': `dashboardEditorMenu-${group.id}Group`,
         order: group.order ?? 0,
-        items: getMenuItems(actions, dashboardApi, context),
+        items: getMenuItems(actions, dashboardApi, context, onActionExecute),
       };
     })
     .sort((groupA, groupB) => groupB.order - groupA.order);

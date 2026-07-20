@@ -43,13 +43,25 @@ const TAB_NEW_ID = 'new' as const;
 const TAB_LIBRARY_ID = 'library' as const;
 type FlyoutTab = typeof TAB_NEW_ID | typeof TAB_LIBRARY_ID;
 
-function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
+function NewPanelContent({
+  dashboardApi,
+  returnFocus,
+  onActionExecute,
+}: {
+  dashboardApi: DashboardApi;
+  returnFocus?: () => void;
+  onActionExecute?: () => void;
+}) {
   const {
     groups,
     loading: isLoadingGroups,
     error: loadGroupsError,
-  } = useMenuItemGroups({ dashboardApi });
-  const { featuredItems, loading: isLoadingFeaturedItems } = useFeaturedItems({ dashboardApi });
+  } = useMenuItemGroups({ dashboardApi, returnFocus, onActionExecute });
+  const { featuredItems, loading: isLoadingFeaturedItems } = useFeaturedItems({
+    dashboardApi,
+    returnFocus,
+    onActionExecute,
+  });
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredGroups, setFilteredGroups] = useState<MenuItemGroup[]>([]);
@@ -208,10 +220,14 @@ function LibraryContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
 export function AddPanelFlyout({
   dashboardApi,
   ariaLabelledBy,
+  returnFocus,
+  onActionExecute,
   initialTab = TAB_NEW_ID,
 }: {
   dashboardApi: DashboardApi;
   ariaLabelledBy: string;
+  returnFocus?: () => void;
+  onActionExecute?: () => void;
   initialTab?: FlyoutTab;
 }) {
   const [selectedTab, setSelectedTab] = useState<FlyoutTab>(initialTab);
@@ -253,7 +269,11 @@ export function AddPanelFlyout({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {selectedTab === TAB_NEW_ID ? (
-          <NewPanelContent dashboardApi={dashboardApi} />
+          <NewPanelContent
+            dashboardApi={dashboardApi}
+            returnFocus={returnFocus}
+            onActionExecute={onActionExecute}
+          />
         ) : (
           <LibraryContent dashboardApi={dashboardApi} />
         )}
