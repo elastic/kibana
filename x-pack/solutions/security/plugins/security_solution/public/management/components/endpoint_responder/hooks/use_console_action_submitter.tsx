@@ -121,6 +121,7 @@ export const useConsoleActionSubmitter = <
   const isMounted = useIsMounted();
   const getTestId = useTestIdGenerator(dataTestSubj);
   const isPending = status === 'pending';
+  const isCreating = status === 'creating';
 
   const currentActionState = useMemo<
     Immutable<
@@ -233,18 +234,18 @@ export const useConsoleActionSubmitter = <
   // This status inconsistency can happen if the user closes the console while the action request is
   // still being created
   useEffect(() => {
-    if (actionId && status === 'creating') {
+    if (actionId && isCreating) {
       setStatus('pending');
     }
-  }, [actionId, isPending, setStatus, status]);
+  }, [actionId, isCreating, setStatus]);
 
   // If an error was returned while attempting to create the action request,
   // then set command status to error
   useEffect(() => {
-    if (actionRequestError && isPending) {
+    if (actionRequestError && (isPending || isCreating)) {
       setStatus('error');
     }
-  }, [actionRequestError, isPending, setStatus]);
+  }, [actionRequestError, isPending, isCreating, setStatus]);
 
   // If an error was return by the Action Details API, then store it and set the status to error
   useEffect(() => {
@@ -285,7 +286,7 @@ export const useConsoleActionSubmitter = <
   const result = useMemo(() => {
     // If we don't yet have an Action ID and no API error, then show message indicating that
     // action request is still being created
-    if (status === 'creating') {
+    if (isCreating) {
       return (
         <ResultComponent showAs="pending" data-test-subj={getTestId('creating')}>
           <FormattedMessage
@@ -353,8 +354,8 @@ export const useConsoleActionSubmitter = <
 
     return <></>;
   }, [
-    status,
     isPending,
+    isCreating,
     actionRequestError,
     actionDetailsError,
     actionDetails,
