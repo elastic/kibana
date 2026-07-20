@@ -21,8 +21,8 @@ type AiButtonTextSize = 'xs' | 's' | 'm';
 /** Event handler prop names from DOMAttributes (onClick, onKeyDown, …). */
 type ButtonDomHandlerKeys = Extract<keyof React.DOMAttributes<HTMLButtonElement>, `on${string}`>;
 
-/** Keys to relax: event handlers and ref, so they accept both button and anchor elements. */
-type RelaxKeys = ButtonDomHandlerKeys | 'buttonRef';
+/** Keys to relax: event handlers, ref, and `type` (button vs anchor MIME type clash). */
+type RelaxKeys = ButtonDomHandlerKeys | 'buttonRef' | 'type';
 
 /** Relaxed replacements: handlers and ref that accept both element types. */
 type RelaxedOverrides = Pick<
@@ -30,6 +30,11 @@ type RelaxedOverrides = Pick<
   ButtonDomHandlerKeys
 > & {
   buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement>;
+  /**
+   * HTML button `type`. Kept as the button literal union so spreading `AiButtonProps`
+   * does not widen to `string` via the anchor MIME `type` from EUI's button|anchor props.
+   */
+  type?: 'submit' | 'reset' | 'button';
 };
 
 /** Makes P accept handlers/ref that work for both button and anchor. */
