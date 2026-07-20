@@ -110,7 +110,6 @@ dependsOn:
   - '@kbn/as-code-filters-schema'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/scout'
-  - '@kbn/test'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/test-jest-helpers'
@@ -131,6 +130,7 @@ dependsOn:
   - '@kbn/core-user-activity-server'
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/app-header'
+  - '@kbn/core-chrome-browser-hooks'
 tags:
   - plugin
   - prod

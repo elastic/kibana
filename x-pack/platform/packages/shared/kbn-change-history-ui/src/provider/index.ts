@@ -19,3 +19,4 @@ export {
   type ChangeHistoryModalContextValue,
 } from './change_history_modal_context';
 export { resolveChangeHistorySupports } from './resolve_change_history_supports';
+export type { ResolveChangeHistorySupportsOptions } from './resolve_change_history_supports';

@@ -8,8 +8,8 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
-import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
@@ -46,7 +46,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
       [Symbol.asyncIterator]: () => ({ next: async () => ({ done: true as const, value: [] }) }),
     }),
 
-    getSmlData: async (originId, context) => {
+    getSmlEntry: async (originId, context) => {
       try {
         const so = await context.savedObjectsClient.get('action', originId);
         const attrs = so.attributes as { name?: string; actionTypeId?: string };
@@ -69,13 +69,10 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         ];
 
         return {
-          chunks: [
-            {
-              type: CONNECTOR_SML_TYPE,
-              title: name,
-              content: contentParts.join('\n'),
-            },
-          ],
+          type: CONNECTOR_SML_TYPE,
+          title: name,
+          content: contentParts.join('\n'),
+          discovery_labels: [{ kind: 'shortcut', value: `${CONNECTOR_SML_TYPE}/${name}` }],
         };
       } catch (error) {
         context.logger.warn(

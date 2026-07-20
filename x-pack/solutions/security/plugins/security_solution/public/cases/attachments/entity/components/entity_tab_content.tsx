@@ -43,8 +43,7 @@ export const EntityTabContent: React.FC<CommonAttachmentTabViewProps> = ({
   const entityIds = useMemo<string[]>(
     () =>
       caseData.comments.flatMap((comment) =>
-        isEntityAttachment(comment) &&
-        (!searchTerm || matchesSearchTerm(comment.metadata, searchTerm))
+        isEntityAttachment(comment) && (!searchTerm || matchesSearchTerm(comment, searchTerm))
           ? [comment.attachmentId]
           : []
       ),

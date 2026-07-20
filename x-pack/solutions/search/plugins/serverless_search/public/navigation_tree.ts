@@ -13,6 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
 function isEditingFromDashboard(
   location: Location,
@@ -93,9 +94,7 @@ export function createNavigationTree({
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
-      {
-        link: 'workflows',
-      },
+      ...getWorkflowsNavPanel(core),
       {
         children: [
           {

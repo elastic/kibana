@@ -8,17 +8,36 @@
 import { renderHook } from '@testing-library/react';
 import { useAttackTimestamps } from './use_attack_timestamps';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
+import {
+  fetchQueryAttacks,
+  fetchQueryUnifiedAlerts,
+} from '../../../../containers/detection_engine/alerts/api';
+import { useAttacksPageFetchMethod } from '../../../../hooks/attacks/use_attacks_page_fetch_method';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { useInspectButton } from '../../../alerts_kpis/common/hooks';
 
 jest.mock('../../../../containers/detection_engine/alerts/use_query', () => ({
   useQueryAlerts: jest.fn(),
 }));
+jest.mock('../../../../hooks/attacks/use_attacks_page_fetch_method');
+jest.mock('../../../../../common/containers/use_global_time');
+jest.mock('../../../alerts_kpis/common/hooks');
+
+const mockUseAttacksPageFetchMethod = useAttacksPageFetchMethod as jest.Mock;
 
 describe('useAttackTimestamps', () => {
   const mockSetQuery = jest.fn();
+  const mockDeleteQuery = jest.fn();
+  const mockSetGlobalQuery = jest.fn();
   const mockRefetch = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryUnifiedAlerts);
+    (useGlobalTime as jest.Mock).mockReturnValue({
+      deleteQuery: mockDeleteQuery,
+      setQuery: mockSetGlobalQuery,
+    });
   });
 
   it('skips query when no attack IDs provided', () => {
@@ -26,6 +45,8 @@ describe('useAttackTimestamps', () => {
       data: undefined,
       loading: false,
       refetch: mockRefetch,
+      request: 'request',
+      response: 'response',
       setQuery: mockSetQuery,
     });
 
@@ -64,6 +85,7 @@ describe('useAttackTimestamps', () => {
     });
     expect(useQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
+        fetchMethod: fetchQueryUnifiedAlerts,
         skip: false,
         query: expect.objectContaining({
           query: { ids: { values: ['attack-1', 'attack-2'] } },
@@ -77,11 +99,45 @@ describe('useAttackTimestamps', () => {
       data: undefined,
       loading: false,
       refetch: mockRefetch,
+      request: 'request',
+      response: 'response',
       setQuery: mockSetQuery,
     });
 
     renderHook(() => useAttackTimestamps({ attackIds: ['attack-1'] }));
 
     expect(mockSetQuery).toHaveBeenCalled();
+  });
+
+  it('uses fetchQueryAttacks when publicAttacksApiEnabled is on', () => {
+    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryAttacks);
+    (useQueryAlerts as jest.Mock).mockReturnValue({
+      data: undefined,
+      loading: false,
+      refetch: mockRefetch,
+      request: 'request',
+      response: 'response',
+      setQuery: mockSetQuery,
+    });
+
+    renderHook(() => useAttackTimestamps({ attackIds: ['attack-1'] }));
+
+    expect(useQueryAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fetchMethod: fetchQueryAttacks,
+      })
+    );
+  });
+
+  it('registers the query for global refetch after mutations', () => {
+    renderHook(() => useAttackTimestamps({ attackIds: ['attack-1'] }));
+
+    expect(useInspectButton).toHaveBeenCalledWith(
+      expect.objectContaining({
+        deleteQuery: mockDeleteQuery,
+        setQuery: mockSetGlobalQuery,
+        uniqueQueryId: 'attacks-kpi-attack-timestamps',
+      })
+    );
   });
 });

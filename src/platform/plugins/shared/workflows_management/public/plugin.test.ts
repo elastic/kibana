@@ -107,7 +107,7 @@ describe('WorkflowsPlugin', () => {
           // Library is registered by default at bootstrap; the executions link is gated by the
           // global uiSetting (off by default). Both are refined reactively at start().
           deepLinks: [
-            expect.objectContaining({ id: 'workflowsList', path: '/' }),
+            expect.objectContaining({ id: 'workflows', path: '/' }),
             expect.objectContaining({ id: 'library', path: '/library' }),
           ],
         })

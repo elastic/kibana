@@ -7,7 +7,7 @@
 
 import type { ComponentProps } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import {
   dataTableActions,

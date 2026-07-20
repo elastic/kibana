@@ -1689,6 +1689,37 @@ describe('WorkflowPipelineMonitor', () => {
       }),
     ];
 
+    it('does NOT render the gate as a separate pipeline phase (exactly 3 phases)', () => {
+      render(
+        <TestProviders>
+          <WorkflowPipelineMonitor {...defaultProps} stepExecutions={stepsWithGate} />
+        </TestProviders>
+      );
+
+      const stepTitles = document.querySelectorAll('.euiStep__title');
+
+      expect(stepTitles).toHaveLength(3);
+      expect(stepTitles[0]).toHaveTextContent('Alert retrieval');
+      expect(stepTitles[1]).toHaveTextContent('Generation');
+      expect(stepTitles[2]).toHaveTextContent('Validation');
+    });
+
+    it('renders the gate workflow name as a sub-step under the Generation phase', () => {
+      render(
+        <TestProviders>
+          <WorkflowPipelineMonitor {...defaultProps} stepExecutions={stepsWithGate} />
+        </TestProviders>
+      );
+
+      const names = screen.getAllByTestId('stepWorkflowName');
+
+      // The gate appears before the generation workflow, both under "Generation"
+      expect(names).toHaveLength(3);
+      expect(names[0]).toHaveTextContent('Default Alert Retrieval');
+      expect(names[1]).toHaveTextContent('Security - Attack discovery - Skill');
+      expect(names[2]).toHaveTextContent('Attack discovery generation');
+    });
+
     it('does NOT render the gate under the Alert retrieval phase', () => {
       render(
         <TestProviders>
@@ -2469,6 +2500,53 @@ describe('WorkflowPipelineMonitor', () => {
       // Each workflow group gets its own inspect button, keyed by workflowRunId
       expect(screen.getByTestId('inspectAlertRetrieval-run-legacy')).toBeInTheDocument();
       expect(screen.getByTestId('inspectAlertRetrieval-run-custom')).toBeInTheDocument();
+    });
+
+    it('renders a missing-_id warning for a custom workflow whose alerts lack a backing _id (C2)', () => {
+      const missingIdPipelineData: PipelineDataResponse = {
+        ...mockPipelineData,
+        alert_retrieval: [
+          {
+            alerts: ['alert-without-id'],
+            alerts_context_count: 1,
+            alerts_missing_id_count: 2,
+            extraction_strategy: 'custom_workflow',
+            workflow_run_id: 'run-custom',
+          },
+        ],
+      };
+
+      const groupedSteps: StepExecutionWithLink[] = [
+        createMockStep({
+          id: 'step-custom',
+          pipelinePhase: 'retrieve_alerts',
+          status: ExecutionStatus.COMPLETED,
+          stepId: 'query_alerts',
+          topologicalIndex: 0,
+          workflowId: 'workflow-custom',
+          workflowRunId: 'run-custom',
+        }),
+        createMockStep({
+          id: 'step-gen',
+          startedAt: '2024-01-01T00:00:01Z',
+          status: ExecutionStatus.RUNNING,
+          stepId: 'generate_discoveries',
+          topologicalIndex: 1,
+        }),
+      ];
+
+      render(
+        <TestProviders>
+          <WorkflowPipelineMonitor
+            {...defaultProps}
+            onViewData={jest.fn()}
+            pipelineData={missingIdPipelineData}
+            stepExecutions={groupedSteps}
+          />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('missingAlertIdWarning-run-custom')).toBeInTheDocument();
     });
 
     it('does NOT render a missing-_id warning when every alert embeds an _id', () => {

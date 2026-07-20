@@ -40,6 +40,12 @@ export function getSmvContextLoadErrorMessages(selectedForecastId: string | unde
   };
 }
 
+export function getSmvFocusLoadErrorMessage(): string {
+  return i18n.translate('xpack.ml.timeSeriesExplorer.focusChartDataErrorMessage', {
+    defaultMessage: 'Error getting focus chart data',
+  });
+}
+
 export interface ConsumeSmvContextLoadResultOptions {
   result: LoadSingleMetricContextDataSuccess | null;
   isUnmounted: () => boolean;
@@ -50,8 +56,11 @@ export interface ConsumeSmvContextLoadResultOptions {
   /** Invoked when `zoomSelection` is returned (hosts typically forward to `contextChartSelected`). */
   applyZoomSelection?: (range: { from: Date; to: Date }) => void;
   applyStatePatch: (patch: Record<string, unknown>) => void;
-  /** e.g. embeddable `onRenderComplete` when chartable */
-  afterStatePatch?: (patch: Record<string, unknown>) => void;
+  /**
+   * Called after state is applied. `hasPendingFocus` is true when a zoom/focus load will follow
+   * (hosts should defer reporting `onRenderComplete` until that focus pipeline settles).
+   */
+  afterStatePatch?: (patch: Record<string, unknown>, meta: { hasPendingFocus: boolean }) => void;
 }
 
 /**
@@ -87,7 +96,7 @@ export function consumeSmvContextLoadResult(options: ConsumeSmvContextLoadResult
     applyZoomSelection?.(zoomSelection);
   }
   applyStatePatch(statePatch);
-  afterStatePatch?.(statePatch);
+  afterStatePatch?.(statePatch, { hasPendingFocus: zoomSelection !== undefined });
 }
 
 export interface SmvBrushToFocusZoomHost {
@@ -108,6 +117,29 @@ export interface SmvBrushToFocusZoomHost {
   readModelPlotEnabled: () => boolean;
   readSelectedForecastId: () => string | undefined;
   applyFocusPipelinePatch: (patch: Record<string, unknown>) => void;
+  /** Focus produced no result; hosts should clear loading / complete reporting without error UI. */
+  onFocusPipelineEmpty?: (selection: ContextChartSelection) => void;
+  /** Focus load failed; hosts should surface error and complete reporting. */
+  onFocusPipelineError?: (error: unknown) => void;
+}
+
+/**
+ * Clears stale focus-only state and records the empty selection so retries are not re-triggered.
+ * Context-chart fields are intentionally left untouched.
+ */
+export function buildSmvEmptyFocusStatePatch(
+  selection: ContextChartSelection
+): Record<string, unknown> {
+  return {
+    loading: false,
+    focusChartData: undefined,
+    focusForecastData: undefined,
+    focusAnnotationData: [],
+    showModelBoundsCheckbox: false,
+    showForecastCheckbox: false,
+    zoomFromFocusLoaded: selection.from,
+    zoomToFocusLoaded: selection.to,
+  };
 }
 
 function buildSmvFocusPipelineStatePatch(args: {
@@ -189,5 +221,7 @@ export function subscribeSmvBrushToFocusZoom(
         })
       );
     },
+    onFocusPipelineEmpty: host.onFocusPipelineEmpty,
+    onFocusPipelineError: host.onFocusPipelineError,
   });
 }

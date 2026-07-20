@@ -1,5 +1,9 @@
 {
-  "sha1": "13481005cebd05b87d3571b0e6abe57c1f61bb8c",
+  "sha1": "2cacec50aea4fd49d36881af2373713d35f4b00a",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "db4898614990d08-c129e7cf5767d21",
@@ -95,7 +99,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/alerting_default.spec.ts",
-        "line": 26,
+        "line": 30,
         "column": 7
       }
     },
@@ -109,7 +113,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/alerting_default.spec.ts",
-        "line": 39,
+        "line": 43,
         "column": 7
       }
     },
@@ -130,42 +134,42 @@
     {
       "id": "ca66767fd9fda95-74afbfcf9ca5efd",
       "title": "Creates a custom TLS alert rule can filter monitors by KQL",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/custom_tls_alert.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 7
       }
     },
     {
       "id": "ca66767fd9fda95-41c3eabe24bb637",
       "title": "Creates a custom TLS alert rule can filter monitors by type",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/custom_tls_alert.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 7
       }
     },
     {
       "id": "ca66767fd9fda95-761cf21fcc31efc",
       "title": "Creates a custom TLS alert rule can create rule and fire alert",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/custom_tls_alert.spec.ts",
-        "line": 77,
+        "line": 78,
         "column": 7
       }
     },
