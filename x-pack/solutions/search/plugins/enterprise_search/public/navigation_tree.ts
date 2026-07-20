@@ -69,6 +69,7 @@ export const getNavigationTreeDefinition = ({
         const navTree: NavigationTreeDefinition = {
           body: [
             {
+              breadcrumbStatus: 'hidden',
               icon,
               link: SEARCH_HOMEPAGE,
               renderAs: 'home',

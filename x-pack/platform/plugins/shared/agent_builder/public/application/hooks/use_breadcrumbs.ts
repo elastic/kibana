@@ -28,20 +28,15 @@ export const useBreadcrumb = (breadcrumbs: AgentBuilderBreadcrumb[]) => {
     [application]
   );
 
-  const appUrl = useMemo(() => {
-    return getUrl('');
-  }, [getUrl]);
-
   const baseCrumbs: ChromeBreadcrumb[] = useMemo(() => {
     return [
       {
         text: i18n.translate('xpack.agentBuilder.breadcrumb.agentBuilder', {
           defaultMessage: 'Agent Builder',
         }),
-        href: appUrl,
       },
     ];
-  }, [appUrl]);
+  }, []);
 
   useEffect(() => {
     const additionalCrumbs = breadcrumbs.map<ChromeBreadcrumb>((crumb) => {
