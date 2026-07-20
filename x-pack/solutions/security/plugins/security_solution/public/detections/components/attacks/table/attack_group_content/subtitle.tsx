@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   replaceAnonymizedValuesWithOriginalValues,
   type AttackDiscoveryAlert,
@@ -42,6 +43,33 @@ export const UNKNOWN_USER_LABEL = i18n.translate(
   }
 );
 
+/**
+ * Converts attack discovery field markdown (`{{ field.value }}`) to plain text for tooltips.
+ */
+export const getSummaryPlainText = (markdown: string): string =>
+  markdown.replace(/\{\{\s*\S+\s+(.*?)\s*\}\}/g, '$1');
+
+const truncatedSummaryCss = css`
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  .euiMarkdownFormat {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    > * {
+      display: inline;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+`;
+
 export interface SubtitleProps {
   /**
    * The attack discovery alert object containing details about the attack.
@@ -71,6 +99,11 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
       : null;
   }, [attack.entitySummaryMarkdown, attack.replacements, showAnonymized]);
 
+  const summaryPlainText = useMemo(
+    () => (summary != null ? getSummaryPlainText(summary) : null),
+    [summary]
+  );
+
   const formattedTimestamp = useMemo(() => {
     return getFormattedDate({
       date: attack.timestamp,
@@ -96,7 +129,7 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
       alignItems="center"
       gutterSize="s"
       responsive={false}
-      wrap={true}
+      wrap={false}
       data-test-subj="attack-subtitle"
     >
       {formattedTimestamp && (
@@ -140,7 +173,7 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
         </>
       )}
 
-      {summary && (
+      {summary && summaryPlainText && (
         <>
           {(formattedTimestamp || isManual) && (
             <EuiFlexItem grow={false}>
@@ -149,13 +182,23 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
               </EuiText>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <AttackDiscoveryMarkdownFormatter
-              scopeId={TableId.alertsOnAttacksPage}
-              disableActions={showAnonymized}
-              markdown={summary}
-              alertIds={originalAlertIds}
-            />
+          <EuiFlexItem
+            grow
+            css={css`
+              min-width: 0;
+            `}
+            data-test-subj="attack-subtitle-summary"
+          >
+            <EuiToolTip content={summaryPlainText} display="block" anchorClassName="eui-fullWidth">
+              <div css={truncatedSummaryCss}>
+                <AttackDiscoveryMarkdownFormatter
+                  scopeId={TableId.alertsOnAttacksPage}
+                  disableActions={showAnonymized}
+                  markdown={summary}
+                  alertIds={originalAlertIds}
+                />
+              </div>
+            </EuiToolTip>
           </EuiFlexItem>
         </>
       )}
