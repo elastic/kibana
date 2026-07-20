@@ -22,11 +22,13 @@ const AppHeaderViewLazy = React.lazy(async () => {
   return { default: AppHeaderView };
 });
 
-// Reserve the app-header's single-row height while the lazy chunk loads so the layout reserves the
-// space from the first paint and content doesn't jump down (0 → 48px) once the header renders.
-// Must stay in sync with the single-row bar height in @kbn/app-header (kept local to avoid eagerly
-// bundling that package and defeating the lazy import above).
-const RESERVED_APP_HEADER_MIN_HEIGHT_PX = 48;
+// Reserve the app-header's height while the lazy chunk loads so the layout holds the space from the
+// first paint and content doesn't jump down once the header renders. Values approximate the rendered
+// single-row height in @kbn/app-header per spacing mode (kept local to avoid eagerly bundling that
+// package and defeating the lazy import above): the shorter compact height for titleless headers, the
+// standard height (with room for a control) otherwise.
+const RESERVED_COMPACT_MIN_HEIGHT_PX = 48;
+const RESERVED_STANDARD_MIN_HEIGHT_PX = 64;
 
 function getBreadcrumbText(crumb: ChromeBreadcrumb): string | undefined {
   if (typeof crumb.text === 'string') return crumb.text;
@@ -136,11 +138,25 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
 
   if (!hasContent) return null;
 
+  // Predict the height AppHeaderView will settle on so the reserved space matches: an explicit compact
+  // request or a titleless header (only back/overflow) renders at the shorter compact floor,
+  // everything else at the standard floor.
+  const isSparse =
+    config?.title === undefined &&
+    !config?.tabs?.length &&
+    !config?.metadata?.length &&
+    !config?.badges?.length &&
+    !config?.favorite;
+  const reservedMinHeight =
+    config?.spacing === 'compact' || isSparse
+      ? RESERVED_COMPACT_MIN_HEIGHT_PX
+      : RESERVED_STANDARD_MIN_HEIGHT_PX;
+
   return (
     <div
       ref={measureRef}
       css={css`
-        min-height: ${RESERVED_APP_HEADER_MIN_HEIGHT_PX}px;
+        min-height: ${reservedMinHeight}px;
       `}
     >
       <Suspense fallback={null}>
@@ -153,7 +169,7 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
           favorite={config?.favorite}
           metadata={config?.metadata}
           sticky={false}
-          padding="m"
+          spacing={config?.spacing}
         />
       </Suspense>
     </div>
