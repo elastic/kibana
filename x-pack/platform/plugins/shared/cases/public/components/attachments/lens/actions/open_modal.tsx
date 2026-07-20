@@ -7,9 +7,13 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
-import type { LensApi } from '@kbn/lens-plugin/public';
+import type { LensApi, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { apiPublishesTimeRange, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiPublishesTimeRange,
+  apiPublishesUnifiedSearch,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { ActionWrapper } from './action_wrapper';
 import type { CasesActionContextProps, Services } from './types';
@@ -22,9 +26,53 @@ interface Props {
   lensApi: LensApi;
   onSuccess: () => void;
   onClose: (theCase?: CaseUI) => void;
+  services: Services;
 }
 
-const AddExistingCaseModalWrapper: React.FC<Props> = ({ lensApi, onClose, onSuccess }) => {
+// The Lens attributes only carry the filters/query set inside the Lens
+// editor's own filter bar. A filter added by clicking a chart element (or a
+// query typed into the surrounding page's search bar) lives on the parent's
+// unified search context instead, so we merge it in here -- mirroring how
+// Lens itself merges the dashboard's search context with its own at render
+// time -- otherwise it would be silently dropped from the case attachment.
+const getAttributesWithParentSearchContext = (
+  lensApi: LensApi,
+  services: Services
+): LensSavedObjectAttributes | undefined => {
+  const attributes = lensApi.getFullAttributes();
+  if (!attributes || !apiPublishesUnifiedSearch(lensApi.parentApi)) {
+    return attributes;
+  }
+
+  const parentFilters =
+    lensApi.parentApi.filters$.getValue()?.filter(({ meta }) => !meta?.disabled) ?? [];
+  const parentQuery = lensApi.parentApi.query$.getValue();
+
+  if (!parentFilters.length && !parentQuery) {
+    return attributes;
+  }
+
+  const { state: extractedFilters, references: filterReferences } = parentFilters.length
+    ? services.plugins.data.query.filterManager.extract(parentFilters)
+    : { state: [], references: [] };
+
+  return {
+    ...attributes,
+    references: [...attributes.references, ...filterReferences],
+    state: {
+      ...attributes.state,
+      ...(parentQuery ? { query: parentQuery } : {}),
+      filters: [...extractedFilters, ...attributes.state.filters],
+    },
+  };
+};
+
+const AddExistingCaseModalWrapper: React.FC<Props> = ({
+  lensApi,
+  onClose,
+  onSuccess,
+  services,
+}) => {
   const modal = useCasesAddToExistingCaseModal({
     onClose,
     onSuccess,
@@ -41,7 +89,8 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({ lensApi, onClose, onSucc
 
   const attachments = useMemo(() => {
     const appliedTimeRange = absoluteTimeRange ?? absoluteParentTimeRange;
-    const attributes = lensApi.getFullAttributes();
+    const attributes = getAttributesWithParentSearchContext(lensApi, services);
+
     return !attributes || !appliedTimeRange
       ? []
       : [
@@ -53,7 +102,7 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({ lensApi, onClose, onSucc
             metadata: attributes.description ? { description: attributes.description } : undefined,
           }),
         ];
-  }, [lensApi, absoluteTimeRange, absoluteParentTimeRange]);
+  }, [lensApi, services, absoluteTimeRange, absoluteParentTimeRange]);
 
   useEffect(() => {
     modal.open({ getAttachments: () => attachments });
@@ -97,7 +146,12 @@ export function openModal(
       currentAppId={currentAppId}
       services={services}
     >
-      <AddExistingCaseModalWrapper lensApi={lensApi} onClose={onClose} onSuccess={onSuccess} />
+      <AddExistingCaseModalWrapper
+        lensApi={lensApi}
+        onClose={onClose}
+        onSuccess={onSuccess}
+        services={services}
+      />
     </ActionWrapper>,
     services.core
   );
