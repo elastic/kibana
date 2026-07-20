@@ -37,3 +37,4 @@ export {
 export { canonicalKIFeaturesFromExpectedGroundTruth } from './canonical_ki_features';
 export { canonicalDetectionsFromGroundTruth } from './canonical_detections';
 export { canonicalDiscoveryFromGroundTruth } from './canonical_discoveries';
+export { canonicalSignificantEventFromGroundTruth } from './canonical_significant_event';
