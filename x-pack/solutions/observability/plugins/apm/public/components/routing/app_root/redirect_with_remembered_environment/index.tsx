@@ -12,7 +12,7 @@ import React from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useDefaultEnvironment } from '../../../../hooks/use_default_environment';
 
-// Environment to restore when a bare `/services` visit immediately follows a
+// Environment to restore when an inventory entry point immediately follows a
 // service-detail page (the side-nav jump drops the query string).
 function getRestorableEnvironment(location: Location | undefined): string | undefined {
   if (!location) {
@@ -33,13 +33,15 @@ export function RedirectWithRememberedEnvironment({ children }: { children: Reac
 
   const query = qs.parse(location.search);
   const normalizedPathname = location.pathname.replace(/\/$/, '');
-  const isServiceInventory = normalizedPathname === '/services';
+  // `/app/apm` maps to `/`, which then redirects to `/services` while preserving
+  // the query string.
+  const isServiceInventoryEntry = normalizedPathname === '' || normalizedPathname === '/services';
 
   if ('environment' in query) {
     return children;
   }
 
-  if (isServiceInventory) {
+  if (isServiceInventoryEntry) {
     const rememberedEnvironment = getRestorableEnvironment(previousLocation);
     return (
       <Redirect

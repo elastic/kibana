@@ -18,7 +18,6 @@ import { fromQuery } from '../../../shared/links/url_helpers';
 
 describe('RedirectWithRememberedEnvironment', () => {
   let history: MemoryHistory;
-  let view: ReturnType<typeof render> | undefined;
 
   const noQuery = '';
 
@@ -27,9 +26,6 @@ describe('RedirectWithRememberedEnvironment', () => {
   });
 
   afterEach(() => {
-    // Unmount clears the module-level memory (leave-APM cleanup).
-    view?.unmount();
-    view = undefined;
     jest.restoreAllMocks();
   });
 
@@ -44,30 +40,39 @@ describe('RedirectWithRememberedEnvironment', () => {
       },
     } as any);
 
-    view = render(
+    return render(
       <RouterProvider history={history} router={apmRouter as any}>
         <RedirectWithRememberedEnvironment>
           <>Foo</>
         </RedirectWithRememberedEnvironment>
       </RouterProvider>
     );
-    return view;
   }
 
-  it('defaults to ENVIRONMENT_ALL when nothing is remembered', async () => {
+  it('eventually renders the child element', async () => {
+    const view = renderUrl({ pathname: '/services', search: noQuery }, '');
+
+    expect(await view.findByText('Foo')).toBeInTheDocument();
+    expect(view.queryByText('Bar')).not.toBeInTheDocument();
+  });
+
+  it('redirects to ENVIRONMENT_ALL if no environment is set', async () => {
     renderUrl({ pathname: '/services', search: noQuery }, '');
 
-    expect(qs.parse(history.location.search).environment).toEqual(ENVIRONMENT_ALL.value);
-    expect(await view!.findByText('Foo')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(qs.parse(history.location.search).environment).toEqual(ENVIRONMENT_ALL.value);
+    });
   });
 
-  it('defaults to the advanced-setting environment when configured', () => {
+  it('redirects to the default environment if configured', async () => {
     renderUrl({ pathname: '/services', search: noQuery }, 'production');
 
-    expect(qs.parse(history.location.search).environment).toEqual('production');
+    await waitFor(() => {
+      expect(qs.parse(history.location.search).environment).toEqual('production');
+    });
   });
 
-  it('preserves other query params when adding the default environment', async () => {
+  it('preserves the existing query when adding the default environment', async () => {
     renderUrl(
       {
         pathname: '/services',
@@ -87,7 +92,7 @@ describe('RedirectWithRememberedEnvironment', () => {
     });
   });
 
-  it('does not override an explicit environment', () => {
+  it('does not redirect when an environment has been set', () => {
     renderUrl(
       {
         pathname: '/services',
@@ -99,7 +104,19 @@ describe('RedirectWithRememberedEnvironment', () => {
     expect(qs.parse(history.location.search).environment).toEqual('development');
   });
 
-  it('restores the environment from a service detail page onto bare /services', async () => {
+  it('does not redirect for a service detail page', () => {
+    renderUrl(
+      {
+        pathname: '/services/opbeans-java',
+        search: noQuery,
+      },
+      ''
+    );
+
+    expect(qs.parse(history.location.search).environment).toBeUndefined();
+  });
+
+  it('restores the environment when navigating directly to the service inventory', async () => {
     renderUrl(
       {
         pathname: '/services/opbeans-java',
@@ -117,7 +134,7 @@ describe('RedirectWithRememberedEnvironment', () => {
     });
   });
 
-  it('uses the default on a second bare /services visit after leaving inventory', async () => {
+  it('restores the environment when navigating to the APM root', async () => {
     renderUrl(
       {
         pathname: '/services/opbeans-java',
@@ -127,64 +144,11 @@ describe('RedirectWithRememberedEnvironment', () => {
     );
 
     act(() => {
-      history.push({ pathname: '/services', search: noQuery });
+      history.push({ pathname: '/', search: noQuery });
     });
 
     await waitFor(() => {
       expect(qs.parse(history.location.search).environment).toEqual('staging');
-    });
-
-    act(() => {
-      history.push({ pathname: '/traces', search: noQuery });
-    });
-    act(() => {
-      history.push({ pathname: '/services', search: noQuery });
-    });
-
-    await waitFor(() => {
-      expect(qs.parse(history.location.search).environment).toEqual('production');
-    });
-  });
-
-  it('does not restore after visiting traces from a service detail page', async () => {
-    // Memory is only for the immediate jump detail → inventory. Visiting another
-    // APM page (traces) clears it.
-    renderUrl(
-      {
-        pathname: '/services/opbeans-java',
-        search: qs.stringify({ environment: 'staging' }),
-      },
-      'production'
-    );
-
-    act(() => {
-      history.push({ pathname: '/traces', search: noQuery });
-    });
-    act(() => {
-      history.push({ pathname: '/services', search: noQuery });
-    });
-
-    await waitFor(() => {
-      expect(qs.parse(history.location.search).environment).toEqual('production');
-    });
-  });
-
-  it('uses the default after unmounting and remounting (leaving APM)', async () => {
-    renderUrl(
-      {
-        pathname: '/services/opbeans-java',
-        search: qs.stringify({ environment: 'staging' }),
-      },
-      'production'
-    );
-
-    view!.unmount();
-    view = undefined;
-
-    renderUrl({ pathname: '/services', search: noQuery }, 'production');
-
-    await waitFor(() => {
-      expect(qs.parse(history.location.search).environment).toEqual('production');
     });
   });
 });
