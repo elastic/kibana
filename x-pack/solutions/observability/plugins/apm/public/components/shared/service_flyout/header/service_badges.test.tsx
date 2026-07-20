@@ -106,21 +106,21 @@ describe('ServiceBadges', () => {
   });
 
   describe('alerts badge', () => {
-    it('shows the alerts count and navigates to the alerts tab on click', () => {
-      setupContext();
+    it('shows the alerts count and renders a link to the alerts tab', () => {
+      const mockGetRedirectUrl = jest.fn().mockReturnValue('/app/apm/services/opbeans-java/alerts');
+      setupContext({
+        locators: { get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }) },
+      });
       setupBadgesData({ alertsCount: 3 });
       renderBadges();
 
       const badge = screen.getByTestId('serviceFlyoutAlertsBadge');
       expect(badge).toHaveTextContent('3');
-
       expect(badge).toHaveAttribute('data-ebt-action', 'viewAlerts');
       expect(badge).toHaveAttribute('data-ebt-element', 'serviceFlyoutAlertsBadge');
-
-      fireEvent.click(badge);
-      expect(mockNavigateToUrl).toHaveBeenCalled();
-      const href = mockNavigateToUrl.mock.calls[0][0] as string;
-      expect(href).toContain('/services/opbeans-java/alerts');
+      expect(mockGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({ serviceOverviewTab: 'alerts' })
+      );
     });
 
     it('hides the alerts badge when the hook returns no count', () => {

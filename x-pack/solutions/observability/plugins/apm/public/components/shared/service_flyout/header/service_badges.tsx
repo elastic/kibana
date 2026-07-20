@@ -34,13 +34,12 @@ export function ServiceBadges() {
   const { capabilities, navigateToUrl } = core.application;
   const canReadSlos = !!capabilities.slo?.read;
 
-  const { apm, slos: slosHref } = useServiceFlyoutLinks({
+  const { slos: slosHref } = useServiceFlyoutLinks({
     serviceName: service.name,
     rangeFrom,
     rangeTo,
     environment,
   });
-  const alertsTabHref = apm.alertsTab;
 
   const { alertsCount, anomalyData } = useServiceBadgesData({
     serviceName: service.name,
@@ -67,18 +66,22 @@ export function ServiceBadges() {
             count={alertsCount}
             serviceName={service.name}
             data-test-subj="serviceFlyoutAlertsBadge"
-            {...(alertsTabHref
-              ? {
-                  ebt: {
-                    action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
-                    element: SERVICE_FLYOUT_EBT_ELEMENTS.ALERTS_BADGE,
-                  },
-                  onClick: (event) => {
-                    event.preventDefault();
-                    navigateToUrl(alertsTabHref);
-                  },
-                }
-              : {})}
+            ebt={{
+              action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
+              element: SERVICE_FLYOUT_EBT_ELEMENTS.ALERTS_BADGE,
+            }}
+            navigationProps={
+              service.agentName && share?.url?.locators
+                ? {
+                    serviceName: service.name,
+                    agentName: service.agentName,
+                    environment,
+                    rangeFrom,
+                    rangeTo,
+                    locators: share.url.locators,
+                  }
+                : undefined
+            }
           />
         </EuiFlexItem>
       )}
