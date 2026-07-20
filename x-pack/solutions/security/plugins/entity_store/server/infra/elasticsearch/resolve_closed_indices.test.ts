@@ -226,7 +226,10 @@ describe('resolveClosedIndexAdjustments', () => {
       (_, i) => `.ds-logs-merge-${String(i).padStart(6, '0')}`
     );
     // Mark the first and last index as closed so they are guaranteed to be in different batches
-    const closedSet = new Set([allBackingIndices[0], allBackingIndices[allBackingIndices.length - 1]]);
+    const closedSet = new Set([
+      allBackingIndices[0],
+      allBackingIndices[allBackingIndices.length - 1],
+    ]);
 
     const resolveIndex = jest
       .fn()
