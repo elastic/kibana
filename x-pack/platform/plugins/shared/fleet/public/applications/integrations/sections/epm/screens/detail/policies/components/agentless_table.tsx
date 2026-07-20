@@ -4,9 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
-import { EuiBadge, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
@@ -18,9 +27,24 @@ import type {
   InMemoryPackagePolicy,
   PackagePolicy,
 } from '../../../../../../types';
-import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../../../../../../../common/constants';
+import type { AgentlessPolicyThroughput } from '../../../../../../../../../common/types/rest_spec/agentless_policy';
+import {
+  AGENTS_PREFIX,
+  FLEET_CONNECTORS_PACKAGE,
+  IS_AGENTLESS_QUERY_PARAM,
+  SO_SEARCH_LIMIT,
+} from '../../../../../../../../../common/constants';
 import type { usePagination } from '../../../../../../hooks';
-import { useLink, sendGetAgents, useAuthz, useStartServices } from '../../../../../../hooks';
+import {
+  useLink,
+  sendGetAgents,
+  useAuthz,
+  useStartServices,
+  useBulkGetAgentlessPolicyThroughput,
+  useDiscoverLocator,
+} from '../../../../../../hooks';
+import { getAgentlessThroughputIndexPatterns } from '../../../../../../../../../common/services';
+import { isAgentlessPoliciesUIEnabled } from '../../../../../../services';
 import {
   Loading,
   PackagePolicyActionsMenu,
@@ -31,11 +55,17 @@ import { Persona } from '../persona';
 import { AgentHealth } from '../../../../../../../fleet/sections/agents/components';
 
 import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
+import { ThroughputCell } from './throughput_cell';
+import { getConnectorsFromPackagePolicy, getSelectedInput } from './agentless_table_adapters';
 
 const REFRESH_INTERVAL_MS = 30000;
 
+const isConnectorPolicy = (packagePolicy: InMemoryPackagePolicy) =>
+  packagePolicy.package?.name === FLEET_CONNECTORS_PACKAGE;
+
 export const AgentlessPackagePoliciesTable = ({
   isLoading,
+  error,
   packagePolicies,
   packagePoliciesTotal,
   refreshPackagePolicies,
@@ -43,6 +73,7 @@ export const AgentlessPackagePoliciesTable = ({
   from,
 }: {
   isLoading: boolean;
+  error?: Error | null;
   packagePolicies: Array<{
     agentPolicies: AgentPolicy[];
     packagePolicy: InMemoryPackagePolicy;
@@ -61,6 +92,57 @@ export const AgentlessPackagePoliciesTable = ({
   const [agentsByPolicyId, setAgentsByPolicyId] = useState<Record<string, Agent>>({});
   const canReadAgents = authz.fleet.readAgents;
 
+  // Collect ids for non-connector policies only; connectors don't ingest via agents
+  const throughputPolicyIds = useMemo(
+    () =>
+      packagePolicies
+        .filter(({ packagePolicy }) => !isConnectorPolicy(packagePolicy))
+        .map(({ packagePolicy }) => packagePolicy.id),
+    [packagePolicies]
+  );
+  const { data: throughputData, isLoading: isThroughputLoading } =
+    useBulkGetAgentlessPolicyThroughput(throughputPolicyIds);
+  const throughputByPolicyId = useMemo(
+    () =>
+      (throughputData?.items ?? []).reduce<Record<string, AgentlessPolicyThroughput>>(
+        (acc, item) => {
+          acc[item.policyId] = item;
+          return acc;
+        },
+        {}
+      ),
+    [throughputData]
+  );
+
+  const hasNonConnectorPolicies = useMemo(
+    () => packagePolicies.some(({ packagePolicy }) => !isConnectorPolicy(packagePolicy)),
+    [packagePolicies]
+  );
+
+  const discoverLocator = useDiscoverLocator();
+  const getThroughputDiscoverParams = useCallback(
+    (packagePolicy: InMemoryPackagePolicy) => {
+      const indexPatterns = getAgentlessThroughputIndexPatterns(packagePolicy);
+      if (!discoverLocator || indexPatterns.length === 0) return undefined;
+      const title = indexPatterns.join(',');
+      const params = {
+        dataViewSpec: {
+          id: `fleet-agentless-throughput-${packagePolicy.id}`,
+          name: title,
+          title,
+          timeFieldName: 'event.ingested',
+        },
+        timeRange: { from: 'now-24h', to: 'now' },
+        query: { language: 'kuery', query: `agent.name: *${packagePolicy.id}*` },
+      };
+      return {
+        href: discoverLocator.getRedirectUrl(params),
+        navigate: () => discoverLocator.navigate(params),
+      };
+    },
+    [discoverLocator]
+  );
+
   // Kuery for all agents enrolled into the agent policies associated with the package policies
   // We use the first agent policy as agentless package policies have a 1:1 relationship with agent policies
   // Maximum # of agent policies is 50, based on the max page size in UI
@@ -77,7 +159,7 @@ export const AgentlessPackagePoliciesTable = ({
   // Polls every 30 seconds
   useEffect(() => {
     const fetchAgents = async () => {
-      const { data: agentsData, error } = await sendGetAgents({
+      const { data: agentsData, error: agentsError } = await sendGetAgents({
         perPage: SO_SEARCH_LIMIT,
         kuery: agentsKuery,
       });
@@ -91,12 +173,12 @@ export const AgentlessPackagePoliciesTable = ({
         }, {} as Record<string, Agent>)
       );
 
-      if (error) {
-        notifications.toasts.addError(error, {
+      if (agentsError) {
+        notifications.toasts.addError(agentsError, {
           title: i18n.translate(
             'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusError',
             {
-              defaultMessage: 'Error fetching agentless status information',
+              defaultMessage: 'Error fetching managed integration status information',
             }
           ),
         });
@@ -123,9 +205,9 @@ export const AgentlessPackagePoliciesTable = ({
   useEffect(() => {
     // The agentless save flow sets openEnrollmentFlyout=<packagePolicyId> via
     // appendOnSaveQueryParamsToPath (AgentlessPolicy has no policy_ids, so
-    // policy.id is used). Match on packagePolicy.id accordingly.
-    // TODO: decouple this flyout from PackagePolicy — see follow-up issue for
-    // refactoring AgentlessEnrollmentFlyout to accept AgentlessPolicy directly.
+    // policy.id is used). Match on packagePolicy.id accordingly. Rows are sourced from the
+    // managed integrations API (see `useAgentlessPolicies`) and mapped to this table's shape;
+    // `packagePolicy.id` / `policy_ids[0]` both equal the agentless policy id.
     const flyoutPolicyIdFromQuery = queryParams.get('openEnrollmentFlyout');
     if (flyoutPolicyIdFromQuery) {
       const pp = packagePolicies.find((p) => p.packagePolicy.id === flyoutPolicyIdFromQuery);
@@ -155,11 +237,23 @@ export const AgentlessPackagePoliciesTable = ({
               const editHref = getHref('integration_policy_edit', {
                 packagePolicyId: packagePolicy.id,
               });
+              const editParams = new URLSearchParams();
+              if (from) {
+                editParams.set('from', from);
+              }
+              // Hint that this is an agentless policy so the edit page reads/writes through the
+              // agentless API rather than the package-policy API (detect-before-read). Suppressed
+              // when the agentless policies UI kill switch is off: rows then come from the legacy
+              // list source and edits must route through the legacy APIs too.
+              if (isAgentlessPoliciesUIEnabled()) {
+                editParams.set(IS_AGENTLESS_QUERY_PARAM, 'true');
+              }
+              const editQueryString = editParams.toString();
               return (
                 <EuiLink
                   className="eui-textTruncate"
                   data-test-subj="agentlessIntegrationNameLink"
-                  href={from ? `${editHref}?from=${from}` : editHref}
+                  href={`${editHref}${editQueryString ? `?${editQueryString}` : ''}`}
                 >
                   {packagePolicy.name}
                 </EuiLink>
@@ -192,6 +286,7 @@ export const AgentlessPackagePoliciesTable = ({
                     packagePolicy={packagePolicy}
                     agentPolicies={agentPolicies}
                     from={from || 'integrations-policy-list'}
+                    onUpgraded={refreshPackagePolicies}
                   />
                 </EuiFlexGroup>
               );
@@ -221,6 +316,28 @@ export const AgentlessPackagePoliciesTable = ({
               );
             },
           },
+          ...(hasNonConnectorPolicies
+            ? [
+                {
+                  field: '',
+                  name: i18n.translate(
+                    'xpack.fleet.epm.packageDetails.integrationList.throughput24h',
+                    { defaultMessage: 'Throughput last 24h' }
+                  ),
+                  width: '190px',
+                  align: 'left' as HorizontalAlignment,
+                  render({ packagePolicy }: { packagePolicy: InMemoryPackagePolicy }) {
+                    return (
+                      <ThroughputCell
+                        data={throughputByPolicyId[packagePolicy.id]}
+                        isLoading={isThroughputLoading}
+                        discover={getThroughputDiscoverParams(packagePolicy)}
+                      />
+                    );
+                  },
+                },
+              ]
+            : []),
           ...(canReadAgents
             ? [
                 {
@@ -308,6 +425,7 @@ export const AgentlessPackagePoliciesTable = ({
                         })}?from=${upgradeFrom}`
                       : undefined
                   }
+                  onUpgraded={refreshPackagePolicies}
                   from={from}
                 />
               );
@@ -317,7 +435,7 @@ export const AgentlessPackagePoliciesTable = ({
         tableCaption={i18n.translate(
           'xpack.fleet.epm.packageDetails.integrationList.agentlessPoliciesTableCaption',
           {
-            defaultMessage: 'Agentless integration policies',
+            defaultMessage: 'Managed integrations',
           }
         )}
         loading={isLoading}
@@ -340,10 +458,38 @@ export const AgentlessPackagePoliciesTable = ({
               id="xpack.fleet.epm.packageDetails.integrationList.loadingPoliciesMessage"
               defaultMessage="Loading integration policies…"
             />
+          ) : error ? (
+            <EuiEmptyPrompt
+              color="danger"
+              iconType="error"
+              data-test-subj="agentlessPoliciesLoadError"
+              title={
+                <h3>
+                  <FormattedMessage
+                    id="xpack.fleet.epm.packageDetails.integrationList.agentlessLoadErrorTitle"
+                    defaultMessage="Unable to load managed integrations"
+                  />
+                </h3>
+              }
+              body={<p>{error.message}</p>}
+              actions={
+                <EuiButton
+                  color="danger"
+                  iconType="refresh"
+                  onClick={refreshPackagePolicies}
+                  data-test-subj="agentlessPoliciesLoadErrorRetryButton"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.epm.packageDetails.integrationList.agentlessLoadErrorRetry"
+                    defaultMessage="Retry"
+                  />
+                </EuiButton>
+              }
+            />
           ) : (
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.integrationList.noAgentlessPoliciesMessage"
-              defaultMessage="No agentless integration policies"
+              defaultMessage="No managed integrations"
             />
           )
         }
@@ -355,8 +501,17 @@ export const AgentlessPackagePoliciesTable = ({
             setFlyoutPackagePolicy(undefined);
             setFlyoutAgentPolicy(undefined);
           }}
-          packagePolicy={flyoutPackagePolicy}
+          policyId={flyoutPackagePolicy.policy_ids[0]}
+          policyName={flyoutPackagePolicy.name}
+          // package is always set for agentless policies (createAgentlessPolicy);
+          // optional only on the general PackagePolicy type.
+          packageInfo={{
+            name: flyoutPackagePolicy.package!.name,
+            version: flyoutPackagePolicy.package!.version,
+          }}
+          selectedInput={getSelectedInput(flyoutPackagePolicy)}
           agentPolicy={flyoutAgentPolicy}
+          connectors={getConnectorsFromPackagePolicy(flyoutPackagePolicy)}
         />
       )}
     </>

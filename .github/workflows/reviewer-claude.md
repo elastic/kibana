@@ -2,7 +2,7 @@
 name: Claude Reviewer
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -11,6 +11,10 @@ on:
         type: string
       comment_id:
         description: Triggering comment id for dispatched follow-up runs
+        required: false
+        type: string
+      comment_type:
+        description: Triggering comment event type for dispatched follow-up runs
         required: false
         type: string
   bots:
@@ -22,13 +26,12 @@ imports:
   - .github/agents/code-reviewer.md
 engine:
   id: claude
-  version: "2.1.165"
+  version: "2.1.206"
   model: opus
   max-turns: 120
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
-    ENABLE_PROMPT_CACHING_1H: "1"
     # Route Claude Code's 1M Opus alias through LiteLLM.
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
@@ -37,7 +40,10 @@ engine:
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 # Activation rules:
 # - Manual runs always activate.
-# - Opened/synchronize/reopened PR events activate unless reviewer:skip-ai is present.
+# - Non-draft PR events (opened/synchronize/reopened) activate unless reviewer:skip-ai is present.
+# - Draft PR events activate only when the ci:draft-checks label is present.
+# - ready_for_review activates the first review when a draft is marked ready.
+# - Adding the ci:draft-checks label activates a review; other label events are ignored.
 # - Comment follow-up runs are dispatched by Reviewer Comment Dispatcher after fork-safe validation.
 if: >-
   !github.event.repository.fork &&
@@ -46,13 +52,35 @@ if: >-
     (
       github.event.sender.type != 'Bot' &&
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
-      github.event_name == 'pull_request_target'
+      github.event_name == 'pull_request_target' &&
+      (
+        (
+          github.event.action == 'labeled' &&
+          github.event.label.name == 'ci:draft-checks'
+        ) ||
+        (
+          github.event.action != 'labeled' &&
+          (
+            !github.event.pull_request.draft ||
+            contains(github.event.pull_request.labels.*.name, 'ci:draft-checks')
+          )
+        )
+      )
     )
   )
 concurrency:
-  # Keep one review lane per PR/comment.
+  # Keep one review lane per PR/comment. Unrelated label events get their own group suffix so they can skip without canceling an in-flight review.
   group: >-
-    gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}-${{ github.event.inputs.comment_id || 'pr-review' }}
+    gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}-${{
+      github.event.inputs.comment_id ||
+      (
+        github.event.action == 'labeled' &&
+        github.event.label.name != 'ci:draft-checks' &&
+        github.event.label.name != 'reviewer:skip-ai' &&
+        github.event.label.name
+      ) ||
+      'pr-review'
+    }}
   cancel-in-progress: true
   job-discriminator: ${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}
 permissions:
@@ -63,6 +91,7 @@ env:
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   REVIEWER_COMMENT_ID: ${{ github.event.inputs.comment_id }}
+  REVIEWER_COMMENT_TYPE: ${{ github.event.inputs.comment_type }}
 tools:
   github:
     toolsets: [default]
@@ -111,11 +140,12 @@ safe-outputs:
     target: ${{ env.PR_NUMBER }}
   resolve-pull-request-review-thread:
     max: 10
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
 ---
 
 # Claude PR Reviewer
 
 Using the imported reviewer instructions:
 - Run in review mode for `pull_request_target` and manual `workflow_dispatch` events without a comment id.
-- Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Comment Dispatcher.
+- Run in follow-up response mode when `workflow_dispatch` includes a comment id and event type from the Reviewer Comment Dispatcher.
 - This reviewer's own gh-aw workflow id is `reviewer-claude`. Use it as "this reviewer's own workflow id" when matching review threads to resolve.

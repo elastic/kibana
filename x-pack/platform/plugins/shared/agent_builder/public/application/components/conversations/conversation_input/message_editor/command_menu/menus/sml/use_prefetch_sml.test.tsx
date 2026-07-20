@@ -6,7 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { SmlSearchFilterType } from '@kbn/agent-context-layer-plugin/public';
+import { SmlSearchFilterType } from '@kbn/agent-builder-sml-plugin/public';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/sml/constants';
 import { queryKeys } from '../../../../../../../query_keys';
 import { usePrefetchSml } from './use_prefetch_sml';

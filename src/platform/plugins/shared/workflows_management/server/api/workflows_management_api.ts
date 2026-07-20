@@ -13,7 +13,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   SmlIndexAction,
   SmlIndexAttachmentParams,
-} from '@kbn/agent-context-layer-plugin/server';
+} from '@kbn/agent-builder-sml-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -40,7 +40,10 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
-import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import {
+  WorkflowExecutionInvalidStatusError,
+  WorkflowNotFoundError,
+} from '@kbn/workflows/common/errors';
 import type {
   ChildWorkflowExecutionItem,
   WorkflowPartialDetailDto,
@@ -55,10 +58,19 @@ import type {
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import {
   parseWorkflowYamlToJSON,
+  parseYamlToJSONWithoutValidation,
   stringifyWorkflowDefinition,
   WorkflowValidationError,
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
+import {
+  type ExternalResumeFormPageParams,
+  type ExternalResumeViaGetParams,
+  type ExternalResumeWorkflowExecutionWithInputParams,
+  getExternalResumeFormPage,
+  resumeWorkflowExecutionExternallyViaGet,
+  resumeWorkflowExecutionExternallyWithInput,
+} from './external_resume/external_resume_service';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
@@ -68,7 +80,18 @@ import type {
   WorkflowsService,
 } from './workflows_management_service';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
-import type { WorkflowChangesHistoryResponse } from '../../common/lib/workflow_change_history/types';
+import { formatWorkflowDiagnostic } from '../../common/lib/format_workflow_diagnostic';
+import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
+import type {
+  RestoreWorkflowVersionResponseDto,
+  WorkflowChangesHistoryResponse,
+} from '../../common/lib/workflow_change_history/types';
+import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
+import type {
+  ProcessedWaitForInputFacets,
+  ProcessedWaitForInputFilters,
+  WaitForInputListResult,
+} from '../services/workflow_execution_query_service';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
 
@@ -86,6 +109,7 @@ export interface GetWorkflowsParams {
   tags?: string[];
   query?: string;
   managedFilter?: 'all' | 'managed' | 'unmanaged';
+  visibilityContext?: string[];
   _full?: boolean;
   sortField?: WorkflowSortField;
   sortOrder?: 'asc' | 'desc';
@@ -322,10 +346,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest,
     options?: { overwrite?: boolean }
-  ): Promise<{
-    created: WorkflowDetailDto[];
-    failed: Array<{ index: number; id: string; error: string }>;
-  }> {
+  ): Promise<BulkCreateWorkflowsResult> {
     const result = await this.workflowsService.bulkCreateWorkflows(
       workflows,
       spaceId,
@@ -333,7 +354,13 @@ export class WorkflowsManagementApi {
       options
     );
     for (const created of result.created) {
-      this.notifySml(created.id, options?.overwrite ? 'update' : 'create', request);
+      const historyAction =
+        result.historyActionsById[created.id] ?? WorkflowChangeHistoryAction.workflowCreate;
+      this.notifySml(
+        created.id,
+        historyAction === WorkflowChangeHistoryAction.workflowUpdate ? 'update' : 'create',
+        request
+      );
     }
     return result;
   }
@@ -398,6 +425,31 @@ export class WorkflowsManagementApi {
     return result;
   }
 
+  public async restoreWorkflowVersion(
+    id: string,
+    eventId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<RestoreWorkflowVersionResponseDto> {
+    const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
+    if (!originalWorkflow) {
+      throw new WorkflowNotFoundError(id);
+    }
+
+    if (originalWorkflow.managed === true) {
+      throw new ManagedWorkflowUpdateForbiddenError();
+    }
+
+    const result = await this.workflowsService.restoreWorkflowVersion(
+      id,
+      eventId,
+      spaceId,
+      request
+    );
+    this.notifySml(id, 'update', request);
+    return result;
+  }
+
   public async deleteWorkflows(
     workflowIds: string[],
     spaceId: string,
@@ -418,12 +470,15 @@ export class WorkflowsManagementApi {
     return result;
   }
 
-  public async disableAllWorkflows(spaceId?: string): Promise<{
+  public async disableAllWorkflows(
+    spaceId?: string,
+    request?: KibanaRequest
+  ): Promise<{
     total: number;
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
-    return this.workflowsService.disableAllWorkflows(spaceId);
+    return this.workflowsService.disableAllWorkflows(spaceId, request);
   }
 
   public async runWorkflow(
@@ -500,10 +555,7 @@ export class WorkflowsManagementApi {
       params.request
     );
     if (!validation.valid || !validation.parsedWorkflow) {
-      const errorMessages = validation.diagnostics
-        .filter((d) => d.severity === 'error')
-        .map((d) => d.message);
-      throw new WorkflowValidationError('Workflow validation failed', errorMessages);
+      throw buildWorkflowValidationError(validation, params.yaml);
     }
 
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
@@ -663,10 +715,7 @@ export class WorkflowsManagementApi {
 
     const validation = await this.workflowsService.validateWorkflow(resolvedYaml, spaceId, request);
     if (!validation.valid || !validation.parsedWorkflow) {
-      const errorMessages = validation.diagnostics
-        .filter((d) => d.severity === 'error')
-        .map((d) => d.message);
-      throw new WorkflowValidationError('Workflow validation failed', errorMessages);
+      throw buildWorkflowValidationError(validation, resolvedYaml);
     }
 
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
@@ -710,10 +759,7 @@ export class WorkflowsManagementApi {
   ): Promise<string> {
     const validation = await this.workflowsService.validateWorkflow(workflowYaml, spaceId, request);
     if (!validation.valid || !validation.parsedWorkflow) {
-      const errorMessages = validation.diagnostics
-        .filter((d) => d.severity === 'error')
-        .map((d) => d.message);
-      throw new WorkflowValidationError('Workflow validation failed', errorMessages);
+      throw buildWorkflowValidationError(validation, workflowYaml);
     }
 
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
@@ -834,7 +880,7 @@ export class WorkflowsManagementApi {
   public async cancelWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    request?: KibanaRequest
+    request: KibanaRequest
   ): Promise<void> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
@@ -842,35 +888,108 @@ export class WorkflowsManagementApi {
 
   public async cancelAllActiveWorkflowExecutions(
     workflowId: string,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<void> {
     const workflow = await this.getWorkflow(workflowId, spaceId);
     if (!workflow) {
       throw new WorkflowNotFoundError(workflowId);
     }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({ spaceId, workflowId });
+    return workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({
+      spaceId,
+      workflowId,
+      schedulingRequest: request,
+    });
   }
 
+  /**
+   * Claims the waiting HITL step before scheduling the resume so every resume
+   * channel shares the same audit stamp and first-writer-wins guard.
+   */
   public async resumeWorkflowExecution(
     executionId: string,
     spaceId: string,
     input: Record<string, unknown>,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { channel?: string; stepExecutionId?: string }
   ): Promise<ResumeWorkflowExecutionResponseDto> {
+    const stepExecutionId =
+      options?.stepExecutionId ??
+      (await this.workflowsService.getWaitingStepExecutionId(executionId, spaceId));
+
+    if (stepExecutionId) {
+      const claimed = await this.workflowsService.markStepAsResponded(
+        stepExecutionId,
+        request,
+        options?.channel ?? 'inbox',
+        spaceId
+      );
+      if (!claimed) {
+        throw new WorkflowExecutionInvalidStatusError(
+          executionId,
+          'already responded to or no longer waiting for input',
+          'waiting_for_input'
+        );
+      }
+    }
+
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
   }
 
-  /**
-   * Cross-workflow listing of step executions currently blocked on
-   * `waitForInput`. Consumed by the Inbox plugin's workflows provider.
-   */
+  /** Cross-workflow listing of active `waitForInput` step executions. */
   public async listWaitingForInputSteps(
     spaceId: string,
-    params: { page?: number; perPage?: number } = {}
-  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    params: { page?: number; perPage?: number; includeReasoning?: boolean } = {}
+  ): Promise<WaitForInputListResult> {
     return this.workflowsService.listWaitingForInputSteps(spaceId, params);
+  }
+
+  public async resumeWorkflowExecutionExternallyViaGet(
+    params: ExternalResumeViaGetParams
+  ): Promise<ResumeWorkflowExecutionResponseDto> {
+    return resumeWorkflowExecutionExternallyViaGet(this.workflowsService, params);
+  }
+
+  public async resumeWorkflowExecutionExternallyWithInput(
+    params: ExternalResumeWorkflowExecutionWithInputParams
+  ): Promise<ResumeWorkflowExecutionResponseDto> {
+    return resumeWorkflowExecutionExternallyWithInput(this.workflowsService, params);
+  }
+
+  public async getExternalResumeFormPage(params: ExternalResumeFormPageParams): Promise<string> {
+    return getExternalResumeFormPage(this.workflowsService, params);
+  }
+
+  /** Cross-workflow listing of processed `waitForInput` step executions. */
+  public async listProcessedWaitForInputSteps(
+    spaceId: string,
+    params: {
+      page?: number;
+      perPage?: number;
+      includeReasoning?: boolean;
+    } & ProcessedWaitForInputFilters = {}
+  ): Promise<WaitForInputListResult> {
+    return this.workflowsService.listProcessedWaitForInputSteps(spaceId, params);
+  }
+
+  /** Facet buckets for processed `waitForInput` step executions. */
+  public async listProcessedWaitForInputFacets(
+    spaceId: string,
+    options: { maxBuckets?: number } = {}
+  ): Promise<ProcessedWaitForInputFacets> {
+    return this.workflowsService.listProcessedWaitForInputFacets(spaceId, options);
+  }
+
+  /** Claims a `waitForInput` step by writing server-derived HITL audit metadata. */
+  public async markStepAsResponded(
+    stepExecutionId: string,
+    request: KibanaRequest,
+    channel: string,
+    spaceId: string
+  ): Promise<boolean> {
+    return this.workflowsService.markStepAsResponded(stepExecutionId, request, channel, spaceId);
   }
 
   public async getWorkflowStats(
@@ -929,3 +1048,32 @@ export class WorkflowsManagementApi {
 
 const waitMs = (durationMs: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, durationMs));
+
+/**
+ * Builds a `WorkflowValidationError` from a failed validation result, formatting
+ * each error diagnostic into a location-annotated message.
+ *
+ * When the workflow fails *schema* validation, `validation.parsedWorkflow` is
+ * absent (nothing typed to resolve step names against), so we fall back to an
+ * unvalidated raw-YAML parse purely to recover the step/branch `name`s. This is
+ * best-effort: if even the raw parse fails, the formatter degrades to numbered
+ * labels (`step #1 › step #2`).
+ */
+function buildWorkflowValidationError(
+  validation: ValidateWorkflowResponseDto,
+  yaml: string
+): WorkflowValidationError {
+  let stepsForNaming: Pick<WorkflowYaml, 'steps'> | undefined = validation.parsedWorkflow;
+  if (!stepsForNaming) {
+    const rawParse = parseYamlToJSONWithoutValidation(yaml);
+    if (rawParse.success) {
+      stepsForNaming = rawParse.json as Pick<WorkflowYaml, 'steps'>;
+    }
+  }
+
+  const errorMessages = validation.diagnostics
+    .filter((d) => d.severity === 'error')
+    .map((d) => formatWorkflowDiagnostic(d, stepsForNaming));
+
+  return new WorkflowValidationError('Workflow validation failed', errorMessages);
+}

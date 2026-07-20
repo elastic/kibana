@@ -8,7 +8,6 @@
 import type { UseMutationResult, UseQueryResult } from '@kbn/react-query';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type {
@@ -20,6 +19,7 @@ import { useHasSecurityCapability } from '../../../helper_hooks';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
 import type { AssetCriticality, DeleteAssetCriticalityResponse } from '../../api/api';
 import { useEntityAnalyticsRoutes } from '../../api/api';
+import { ENTITY_STORE_ENTITIES_LIST } from '../entity_store/hooks/use_entities_list_query';
 
 const ASSET_CRITICALITY_KEY = 'ASSET_CRITICALITY';
 const ASSET_CRITICALITY_LIST_KEY = 'ASSET_CRITICALITY_LIST';
@@ -37,17 +37,13 @@ const nonAuthorizedResponse: Promise<EntityAnalyticsPrivileges> = Promise.resolv
 export const useAssetCriticalityPrivileges = (
   queryKey: string
 ): UseQueryResult<EntityAnalyticsPrivileges, SecurityAppError> => {
-  const [entityStoreV2Enabled] = useUiSetting$<boolean>('securitySolution:entityStoreEnableV2');
-  const { fetchEntityStoreV2Privileges, fetchAssetCriticalityPrivileges } =
-    useEntityAnalyticsRoutes();
+  const { fetchEntityStoreV2Privileges } = useEntityAnalyticsRoutes();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
 
   return useQuery({
     queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, queryKey, hasEntityAnalyticsCapability],
     queryFn: hasEntityAnalyticsCapability
-      ? entityStoreV2Enabled
-        ? fetchEntityStoreV2Privileges
-        : fetchAssetCriticalityPrivileges
+      ? fetchEntityStoreV2Privileges
       : () => nonAuthorizedResponse,
   });
 };
@@ -120,6 +116,11 @@ export const useAssetCriticalityData = ({
     onSuccess: (data) => {
       const queryData = 'deleted' in data ? null : data;
       QC.setQueryData(QUERY_KEY, queryData);
+      // The updated criticality can change the entity's calculated risk score
+      // (e.g. via the risk score maintainer), so any UI reading live risk from
+      // the Entity Store — such as the threat hunting leads cards — needs a
+      // refetch rather than relying on its own cache TTL.
+      QC.invalidateQueries({ queryKey: [ENTITY_STORE_ENTITIES_LIST] });
       onChange?.();
     },
   });

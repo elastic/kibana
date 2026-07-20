@@ -41,6 +41,7 @@ export const bulkOperationParamsSchema = z
       .optional()
       .describe('When true, targets all rules. Cannot be combined with ids.'),
   })
+  .strict()
   .refine(
     (data) =>
       data.ids != null || data.filter != null || data.search != null || data.match_all === true,

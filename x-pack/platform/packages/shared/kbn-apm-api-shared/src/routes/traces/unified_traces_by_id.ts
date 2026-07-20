@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toBooleanRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { Error as ApmError, TraceItem, Transaction } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt } from '../../default_api_types';
+import { rangeSchema } from '../../default_api_types';
 
 export interface UnifiedTracesByIdResponse {
   traceItems: TraceItem[];
@@ -21,17 +21,16 @@ export interface UnifiedTracesByIdResponse {
 
 export const unifiedTracesByIdRoute = defineRoute<UnifiedTracesByIdResponse>()({
   endpoint: 'GET /internal/apm/unified_traces/{traceId}',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
+  params: z.object({
+    path: z.object({
+      traceId: z.string(),
     }),
-    query: t.intersection([
-      rangeRt,
-      t.partial({
-        serviceName: t.string,
-        entryTransactionId: t.string,
-        ecsOnly: toBooleanRt,
-      }),
-    ]),
+    query: rangeSchema.merge(
+      z.object({
+        serviceName: z.string().optional(),
+        entryTransactionId: z.string().optional(),
+        ecsOnly: BooleanFromString.optional(),
+      })
+    ),
   }),
 });

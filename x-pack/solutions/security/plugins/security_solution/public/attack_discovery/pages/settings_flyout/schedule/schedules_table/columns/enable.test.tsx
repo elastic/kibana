@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 
@@ -46,6 +46,9 @@ describe('Enable Column', () => {
               updateAttackDiscoverySchedule: true,
             },
           },
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(false),
         },
       },
     });
@@ -95,6 +98,9 @@ describe('Enable Column', () => {
               },
             },
           },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(false),
+          },
         },
       });
     });
@@ -121,6 +127,36 @@ describe('Enable Column', () => {
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');
+    });
+  });
+
+  describe('when the workflows execute privilege is missing', () => {
+    beforeEach(() => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              [ATTACK_DISCOVERY_FEATURE_ID]: {
+                updateAttackDiscoverySchedule: true,
+              },
+              workflowsManagement: {
+                executeWorkflow: false,
+              },
+            },
+          },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(true),
+          },
+        },
+      });
+    });
+
+    it('should disable the enable switch', async () => {
+      renderEnabledSchedule();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('scheduleSwitch')).toBeDisabled();
+      });
     });
   });
 });
