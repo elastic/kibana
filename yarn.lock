@@ -28244,7 +28244,7 @@ monaco-yaml@5.1.0:
     vscode-uri "^3.0.0"
     yaml "^2.0.0"
 
-mongodb-connection-string-url@^3.0.2:
+mongodb-connection-string-url@3.0.2, mongodb-connection-string-url@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/mongodb-connection-string-url/-/mongodb-connection-string-url-3.0.2.tgz#e223089dfa0a5fa9bf505f8aedcbc67b077b33e7"
   integrity sha512-rMO7CGo/9BFwyZABcKAWL8UJwH/Kc2x0g72uhDWzG48URRax5TCIcJ7Rc3RZqffZzO/Gwff/jyKwCU9TN8gehA==
