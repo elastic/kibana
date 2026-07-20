@@ -40,9 +40,7 @@ describe('prepareRouteConfigValidation', () => {
     }
 
     // Object spread alone drops prototype getters — the bug this guards against.
-    expect(
-      Object.prototype.hasOwnProperty.call({ ...DiRoute }, 'options')
-    ).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call({ ...DiRoute }, 'options')).toBe(false);
 
     const prepared = prepareRouteConfigValidation(DiRoute);
 
