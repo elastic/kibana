@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonEmpty, EuiToolTip, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-
 import { DraggableBadge } from '../../../../../common/components/draggables';
-import { getFlyoutPanelProps, ENTITY_TYPE_BY_FIELD } from './helpers';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { ENTITY_TYPE_BY_FIELD, getFlyoutPanelProps } from './helpers';
 import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
 import { useMarkdownFormatterContext } from '../context';
 import type { ParsedField } from '../types';
@@ -20,13 +21,19 @@ const contextId = 'FieldMarkdownRenderer';
 
 const inlineFieldWrapperCss = css`
   display: inline-block;
-  vertical-align: top;
+  vertical-align: middle;
+
+  .euiBadge {
+    vertical-align: middle;
+  }
 `;
 
 export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
   const { disableActions, scopeId, alertIds } = useMarkdownFormatterContext();
   const { openRightPanel } = useExpandableFlyoutApi();
+  const { openHostFlyout, openUserFlyout } = useFlyoutApi();
   const { euiTheme } = useEuiTheme();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
 
   const isEntityField = name in ENTITY_TYPE_BY_FIELD && typeof value === 'string';
 
@@ -43,10 +50,30 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
   );
 
   const onEntityClick = useCallback(() => {
-    if (flyoutPanelProps != null) {
+    if (flyoutPanelProps == null) {
+      return;
+    }
+
+    if (enableNewFlyout) {
+      if (ENTITY_TYPE_BY_FIELD[name] === 'host') {
+        openHostFlyout({ hostName: value as string, entityId: euid, scopeId });
+      } else {
+        openUserFlyout({ userName: value as string, entityId: euid, scopeId });
+      }
+    } else {
       openRightPanel(flyoutPanelProps);
     }
-  }, [flyoutPanelProps, openRightPanel]);
+  }, [
+    flyoutPanelProps,
+    openRightPanel,
+    openHostFlyout,
+    openUserFlyout,
+    enableNewFlyout,
+    name,
+    value,
+    euid,
+    scopeId,
+  ]);
 
   const entityButton: React.ReactElement | null = useMemo(
     () =>
@@ -78,11 +105,13 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
 
   if (disableActions) {
     return (
-      <EuiToolTip content={name} data-test-subj="fieldMarkdownRendererToolTip" position="top">
-        <EuiBadge color="hollow" data-test-subj="disabledActionsBadge" iconType={icon}>
-          {value}
-        </EuiBadge>
-      </EuiToolTip>
+      <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
+        <EuiToolTip content={name} data-test-subj="fieldMarkdownRendererToolTip" position="top">
+          <EuiBadge color="hollow" data-test-subj="disabledActionsBadge" iconType={icon}>
+            {value}
+          </EuiBadge>
+        </EuiToolTip>
+      </span>
     );
   }
 
