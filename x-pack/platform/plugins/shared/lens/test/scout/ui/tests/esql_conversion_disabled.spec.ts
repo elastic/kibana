@@ -7,7 +7,7 @@
 
 import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { openDashboardInEditMode, openInlineEditorAndWaitVisible, testData } from '../fixtures';
+import { openInlineEditorAndWaitVisible, testData } from '../fixtures';
 
 test.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
@@ -27,19 +27,14 @@ test.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-classic' }
 
   test('should not display button for inline visualizations when feature flag is set to false', async ({
     browserAuth,
-    page,
     pageObjects,
   }) => {
     await browserAuth.loginAsPrivilegedUser();
 
-    const { lens } = pageObjects;
+    const { dashboard, lens } = pageObjects;
 
-    await openDashboardInEditMode(
-      pageObjects,
-      page,
-      testData.DATA_TEST_SUBJECTS.ESQL_CONVERSION_DASHBOARD_TITLE_LINK,
-      2
-    );
+    await dashboard.openDashboardWithIdInEditMode(testData.ESQL_CONVERSION_DASHBOARD_ID);
+    await dashboard.waitForPanelsToLoad(2);
 
     await openInlineEditorAndWaitVisible(
       pageObjects,
