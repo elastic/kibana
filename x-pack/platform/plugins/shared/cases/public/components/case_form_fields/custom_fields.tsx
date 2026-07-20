@@ -6,8 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { sortBy } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiFormRow } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiFormRow } from '@elastic/eui';
 
 import type { CasesConfigurationUI } from '../../../common/ui';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
@@ -18,6 +19,10 @@ interface Props {
   configurationCustomFields: CasesConfigurationUI['customFields'];
   setCustomFieldsOptional?: boolean;
   isEditMode?: boolean;
+  /** Renders a Deprecated badge next to the "Custom fields" heading. */
+  showDeprecatedBadge?: boolean;
+  /** Rendered below the "Custom fields" heading (e.g. deprecation callout). */
+  notice?: ReactNode;
 }
 
 const CustomFieldsComponent: React.FC<Props> = ({
@@ -25,6 +30,8 @@ const CustomFieldsComponent: React.FC<Props> = ({
   setCustomFieldsOptional = false,
   configurationCustomFields,
   isEditMode,
+  showDeprecatedBadge = false,
+  notice,
 }) => {
   const sortedCustomFields = useMemo(
     () => sortCustomFieldsByLabel(configurationCustomFields),
@@ -57,9 +64,26 @@ const CustomFieldsComponent: React.FC<Props> = ({
   return (
     <EuiFormRow fullWidth>
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiText size="m">
-          <h3>{i18n.CUSTOM_FIELDS}</h3>
-        </EuiText>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText size="m">
+              <h3>{i18n.CUSTOM_FIELDS}</h3>
+            </EuiText>
+          </EuiFlexItem>
+          {showDeprecatedBadge ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning" data-test-subj="legacy-custom-fields-deprecated-badge">
+                {i18n.DEPRECATED_BADGE}
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+        {notice ? (
+          <>
+            <EuiSpacer size="s" />
+            {notice}
+          </>
+        ) : null}
         <EuiSpacer size="xs" />
         <EuiFlexItem data-test-subj="caseCustomFields">{customFieldsComponents}</EuiFlexItem>
       </EuiFlexGroup>

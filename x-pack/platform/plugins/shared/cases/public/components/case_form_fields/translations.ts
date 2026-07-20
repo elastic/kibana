@@ -12,3 +12,22 @@ export * from '../../common/translations';
 export const CUSTOM_FIELDS = i18n.translate('xpack.cases.customFields', {
   defaultMessage: 'Custom fields',
 });
+
+export const LEGACY_CUSTOM_FIELDS_DEPRECATION_MESSAGE = i18n.translate(
+  'xpack.cases.caseFormFields.legacyCustomFieldsDeprecationMessage',
+  {
+    defaultMessage:
+      'These fields are from the previous custom fields system and have already been migrated. You may see the same fields again below — that is expected while both systems are shown.',
+  }
+);
+
+export const LEGACY_CUSTOM_FIELDS_VIEW_NEW = i18n.translate(
+  'xpack.cases.caseFormFields.legacyCustomFieldsViewNew',
+  {
+    defaultMessage: 'View new custom fields',
+  }
+);
+
+export const DEPRECATED_BADGE = i18n.translate('xpack.cases.caseFormFields.deprecatedBadge', {
+  defaultMessage: 'Deprecated',
+});

@@ -68,6 +68,7 @@ describe('ConfigureCasesRedesign', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
 
     useGetActionTypesMock.mockImplementation(() => useActionTypesResponse);
     useGetCaseConfigurationMock.mockImplementation(() => ({
@@ -90,6 +91,15 @@ describe('ConfigureCasesRedesign', () => {
       isAtLeastGold: () => true,
       isAtLeastPlatinum: () => true,
     });
+
+    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    useCasesConfig.mockReturnValue({
+      attachmentsEnabled: false,
+      chatEnabled: false,
+      templatesEnabled: false,
+      detailsRedesignEnabled: false,
+      casesRedesign: { list: false, details: false, settings: true },
+    });
   });
 
   it('renders the redesigned settings page with the app header title', async () => {
@@ -111,13 +121,88 @@ describe('ConfigureCasesRedesign', () => {
     expect(screen.getByTestId('cases-redesign-observable-types-section')).toBeInTheDocument();
   });
 
-  it('does not render legacy custom fields or templates sections', async () => {
+  it('does not render legacy custom fields or templates sections when templates v2 is disabled', async () => {
     renderWithTestingProviders(<ConfigureCasesRedesign />);
 
     await screen.findByTestId('cases-redesign-settings-panel');
 
+    expect(
+      screen.queryByTestId('cases-redesign-legacy-custom-fields-section')
+    ).not.toBeInTheDocument();
     expect(screen.queryByTestId('custom-fields-form-group')).not.toBeInTheDocument();
     expect(screen.queryByTestId('templates-form-group')).not.toBeInTheDocument();
+  });
+
+  it('renders the legacy section with switch off by default when templates v2 is enabled', async () => {
+    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    useCasesConfig.mockReturnValue({
+      attachmentsEnabled: false,
+      chatEnabled: false,
+      templatesEnabled: true,
+      detailsRedesignEnabled: false,
+      casesRedesign: { list: false, details: false, settings: true },
+    });
+
+    renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+    expect(
+      await screen.findByTestId('cases-redesign-legacy-custom-fields-section')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('show-legacy-custom-fields-switch')).not.toBeChecked();
+    expect(screen.queryByTestId('custom-fields-list')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('templates-list')).not.toBeInTheDocument();
+  });
+
+  it('shows legacy custom fields and templates lists when the switch is turned on', async () => {
+    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    useCasesConfig.mockReturnValue({
+      attachmentsEnabled: false,
+      chatEnabled: false,
+      templatesEnabled: true,
+      detailsRedesignEnabled: false,
+      casesRedesign: { list: false, details: false, settings: true },
+    });
+
+    renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+    await userEvent.click(await screen.findByTestId('show-legacy-custom-fields-switch'));
+
+    expect(await screen.findByTestId('custom-fields-list')).toBeInTheDocument();
+    expect(screen.getByTestId('templates-list')).toBeInTheDocument();
+    expect(screen.getByTestId('legacy-custom-fields-view-new-link')).toBeInTheDocument();
+    expect(screen.getByTestId('legacy-templates-view-new-link')).toBeInTheDocument();
+  });
+
+  it('shows add buttons for empty legacy custom fields and templates when the switch is on', async () => {
+    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    useCasesConfig.mockReturnValue({
+      attachmentsEnabled: false,
+      chatEnabled: false,
+      templatesEnabled: true,
+      detailsRedesignEnabled: false,
+      casesRedesign: { list: false, details: false, settings: true },
+    });
+    useGetCaseConfigurationMock.mockImplementation(() => ({
+      ...useCaseConfigureResponse,
+      data: {
+        ...useCaseConfigureResponse.data,
+        customFields: [],
+        templates: [],
+      },
+    }));
+
+    renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+    expect(
+      await screen.findByTestId('cases-redesign-legacy-custom-fields-section')
+    ).toBeInTheDocument();
+
+    await userEvent.click(await screen.findByTestId('show-legacy-custom-fields-switch'));
+
+    expect(await screen.findByTestId('add-custom-field')).toBeInTheDocument();
+    expect(screen.getByTestId('add-template')).toBeInTheDocument();
+    expect(screen.getByTestId('empty-custom-fields')).toBeInTheDocument();
+    expect(screen.getByTestId('empty-templates')).toBeInTheDocument();
   });
 
   it('renders connector and closure controls', async () => {

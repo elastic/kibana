@@ -31,12 +31,15 @@ import { TemplateFieldsValidationContext } from './template_fields_validation_co
 type FormShape = Record<string, Record<string, unknown>>;
 
 interface CreateCaseTemplateFieldsProps {
-  /** When true, adds top spacing so global/template fields don't sit flush against legacy custom fields. */
-  hasLegacyCustomFields?: boolean;
+  /**
+   * When true, adds top spacing so fields don't sit flush against Description.
+   * Omit (or false) when a divider already separates this block from content above.
+   */
+  addTopSpacing?: boolean;
 }
 
 export const CreateCaseTemplateFields: React.FC<CreateCaseTemplateFieldsProps> = ({
-  hasLegacyCustomFields = false,
+  addTopSpacing = false,
 }) => {
   const parentForm = useParentFormContext();
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
@@ -168,8 +171,8 @@ export const CreateCaseTemplateFields: React.FC<CreateCaseTemplateFieldsProps> =
     <>
       <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />
       <FormProvider {...innerForm}>
-        {/* Parent CaseFormFields uses gutterSize="none"; only pad when legacy fields sit above. */}
-        {hasLegacyCustomFields && <EuiSpacer size="m" />}
+        {/* Parent CaseFormFields uses gutterSize="none"; pad when nothing separates us from Description. */}
+        {addTopSpacing ? <EuiSpacer size="m" /> : null}
         {globalFieldsFragment}
         {globalFieldsFragment && templateFieldsFragment && <EuiSpacer />}
         {templateFieldsFragment}

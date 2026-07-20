@@ -6,7 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiHorizontalRule, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Title } from './title';
 import { Tags } from './tags';
 import { Category } from './category';
@@ -18,6 +19,9 @@ import { CustomFields } from './custom_fields';
 import type { CasesConfigurationUI } from '../../containers/types';
 import { KibanaServices } from '../../common/lib/kibana';
 import { CreateCaseTemplateFields } from '../create/template_fields';
+import { useShowLegacyCustomFields } from '../../common/use_show_old_custom_fields';
+import { useCasesFieldLibraryNavigation } from '../../common/navigation';
+import * as i18n from './translations';
 
 interface Props {
   isLoading: boolean;
@@ -35,8 +39,40 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
   draftStorageKey,
 }) => {
   const { caseAssignmentAuthorized } = useCasesFeatures();
-  const config = KibanaServices.getConfig();
-  const isTemplatesV2Enabled = config?.templates?.enabled ?? false;
+  const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
+  const { showLegacyCustomFields } = useShowLegacyCustomFields();
+  const { getCasesFieldLibraryUrl } = useCasesFieldLibraryNavigation();
+
+  // When templates v2 is off, always show legacy custom fields (they are the only system).
+  // When templates v2 is on, gate visibility behind the settings local-storage switch.
+  const showLegacyCustomFieldsInputs =
+    configurationCustomFields.length > 0 && (!isTemplatesV2Enabled || showLegacyCustomFields);
+
+  const deprecationNotice = isTemplatesV2Enabled ? (
+    <EuiCallOut
+      announceOnMount
+      color="warning"
+      iconType="warning"
+      size="s"
+      data-test-subj="legacy-custom-fields-deprecation-callout"
+    >
+      <FormattedMessage
+        id="xpack.cases.caseFormFields.legacyCustomFieldsDeprecationBody"
+        defaultMessage="{message} {link}"
+        values={{
+          message: i18n.LEGACY_CUSTOM_FIELDS_DEPRECATION_MESSAGE,
+          link: (
+            <EuiLink
+              href={getCasesFieldLibraryUrl()}
+              data-test-subj="legacy-custom-fields-view-new-link"
+            >
+              {i18n.LEGACY_CUSTOM_FIELDS_VIEW_NEW}
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiCallOut>
+  ) : undefined;
 
   return (
     <EuiFlexGroup data-test-subj="case-form-fields" direction="column" gutterSize="none">
@@ -46,14 +82,21 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
       <Category isLoading={isLoading} />
       <Severity isLoading={isLoading} />
       <Description isLoading={isLoading} draftStorageKey={draftStorageKey} />
-      <CustomFields
-        isLoading={isLoading}
-        setCustomFieldsOptional={setCustomFieldsOptional}
-        configurationCustomFields={configurationCustomFields}
-        isEditMode={isEditMode}
-      />
+      {showLegacyCustomFieldsInputs ? (
+        <>
+          <CustomFields
+            isLoading={isLoading}
+            setCustomFieldsOptional={setCustomFieldsOptional}
+            configurationCustomFields={configurationCustomFields}
+            isEditMode={isEditMode}
+            showDeprecatedBadge={isTemplatesV2Enabled}
+            notice={deprecationNotice}
+          />
+          <EuiHorizontalRule margin="l" data-test-subj="legacy-custom-fields-divider" />
+        </>
+      ) : null}
       {isTemplatesV2Enabled && (
-        <CreateCaseTemplateFields hasLegacyCustomFields={configurationCustomFields.length > 0} />
+        <CreateCaseTemplateFields addTopSpacing={!showLegacyCustomFieldsInputs} />
       )}
     </EuiFlexGroup>
   );

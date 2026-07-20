@@ -214,3 +214,46 @@ export const SHOW_ALL_TEMPLATES = i18n.translate(
     defaultMessage: 'Show all templates',
   }
 );
+
+export const LEGACY_CUSTOM_FIELDS_AND_TEMPLATES_TITLE = i18n.translate(
+  'xpack.cases.configureCases.legacyCustomFieldsAndTemplatesTitle',
+  {
+    defaultMessage: 'Old custom fields and templates',
+  }
+);
+
+export const SHOW_LEGACY_CUSTOM_FIELDS_AND_TEMPLATES = i18n.translate(
+  'xpack.cases.configureCases.showLegacyCustomFieldsAndTemplates',
+  {
+    defaultMessage: 'Show old custom fields and templates',
+  }
+);
+
+export const VIEW_NEW_CUSTOM_FIELDS = i18n.translate(
+  'xpack.cases.configureCases.viewNewCustomFields',
+  {
+    defaultMessage: 'View new custom fields',
+  }
+);
+
+export const VIEW_NEW_TEMPLATES = i18n.translate('xpack.cases.configureCases.viewNewTemplates', {
+  defaultMessage: 'View new templates',
+});
+
+export const LEGACY_CUSTOM_FIELDS_LIST_TITLE = i18n.translate(
+  'xpack.cases.configureCases.legacyCustomFieldsListTitle',
+  {
+    defaultMessage: 'Custom fields',
+  }
+);
+
+export const LEGACY_TEMPLATES_LIST_TITLE = i18n.translate(
+  'xpack.cases.configureCases.legacyTemplatesListTitle',
+  {
+    defaultMessage: 'Templates',
+  }
+);
+
+export const DEPRECATED_BADGE = i18n.translate('xpack.cases.configureCases.deprecatedBadge', {
+  defaultMessage: 'Deprecated',
+});
