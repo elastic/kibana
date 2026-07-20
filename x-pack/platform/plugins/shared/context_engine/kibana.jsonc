@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/context-engine-plugin",
+  "owner": "@elastic/context-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "contextEngine",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": ["features"]
+  }
+}

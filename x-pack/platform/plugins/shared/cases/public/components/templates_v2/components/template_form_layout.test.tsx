@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
 import { parse as yamlParse } from 'yaml';
 import type { YamlEditorFormValues } from './template_form';
-import { TemplateFormLayout } from './template_form_layout';
+import { TemplateFormLayout, getTemplateEditorBodyOffset } from './template_form_layout';
 import type { TemplateMetadata } from '../utils/template_metadata';
 import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -130,6 +130,19 @@ const TestWrapper = ({
     />
   );
 };
+
+describe('getTemplateEditorBodyOffset', () => {
+  it('reserves the timeline bottom-bar space only for the Security Solution owner', () => {
+    expect(getTemplateEditorBodyOffset(['securitySolution'])).toBe('57px');
+    expect(getTemplateEditorBodyOffset(['securitySolution', 'cases'])).toBe('57px');
+  });
+
+  it('reserves no space for other solutions (no dead space below the editor)', () => {
+    expect(getTemplateEditorBodyOffset(['observability'])).toBe('0px');
+    expect(getTemplateEditorBodyOffset(['cases'])).toBe('0px');
+    expect(getTemplateEditorBodyOffset([])).toBe('0px');
+  });
+});
 
 describe('TemplateFormLayout', () => {
   const mockOnCreate = jest.fn();
