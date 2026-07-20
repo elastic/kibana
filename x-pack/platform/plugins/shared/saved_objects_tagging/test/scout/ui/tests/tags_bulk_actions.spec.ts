@@ -22,7 +22,6 @@ test.describe('Tags management bulk actions', { tag: tags.stateful.classic }, ()
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.unload(KBN_ARCHIVES.FUNCTIONAL_BASE);
     await kbnClient.savedObjects.cleanStandardList();
   });
 

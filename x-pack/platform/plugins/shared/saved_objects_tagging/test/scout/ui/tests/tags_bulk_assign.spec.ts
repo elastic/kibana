@@ -20,7 +20,6 @@ test.describe('Tags management bulk assign', { tag: tags.stateful.classic }, () 
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.unload(KBN_ARCHIVES.BULK_ASSIGN);
     await kbnClient.savedObjects.cleanStandardList();
   });
 

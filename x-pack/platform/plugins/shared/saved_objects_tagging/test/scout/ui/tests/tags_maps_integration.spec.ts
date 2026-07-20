@@ -23,7 +23,6 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.unload(KBN_ARCHIVES.MAPS);
     await kbnClient.savedObjects.cleanStandardList();
   });
 

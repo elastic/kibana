@@ -23,7 +23,6 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.unload(KBN_ARCHIVES.DASHBOARD);
     await kbnClient.savedObjects.cleanStandardList();
   });
 

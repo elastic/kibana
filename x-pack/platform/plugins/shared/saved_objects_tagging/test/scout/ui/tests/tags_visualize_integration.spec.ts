@@ -22,7 +22,6 @@ test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.unload(KBN_ARCHIVES.VISUALIZE);
     await kbnClient.savedObjects.cleanStandardList();
   });
 
