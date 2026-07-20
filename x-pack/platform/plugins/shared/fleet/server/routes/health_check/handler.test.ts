@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import fetch from 'node-fetch';
-
 import { fleetServerHostService } from '../../services/fleet_server_host';
 
 import { PostHealthCheckResponseSchema } from '../../types';
 
 import { postHealthCheckHandler } from './handler';
 
-jest.mock('node-fetch');
+const mockedFetch = jest.spyOn(global, 'fetch');
 
 describe('Fleet server health_check handler', () => {
   const mockContext = {
@@ -23,7 +21,6 @@ describe('Fleet server health_check handler', () => {
       },
     }),
   } as any;
-  const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
   const mockResponse = {
     customError: jest.fn().mockImplementation((options) => options),
     ok: jest.fn().mockImplementation((options) => {

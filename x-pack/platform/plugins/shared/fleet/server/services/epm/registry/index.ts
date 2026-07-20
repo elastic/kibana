@@ -10,7 +10,6 @@ import { URL } from 'url';
 import mime from 'mime-types';
 import semverGte from 'semver/functions/gte';
 
-import type { Response } from 'node-fetch';
 import type { Logger } from '@kbn/logging';
 
 import type { ExtractedIntegrationFields } from '@kbn/fields-metadata-plugin/server';

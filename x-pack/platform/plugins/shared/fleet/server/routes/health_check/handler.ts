@@ -6,7 +6,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import fetch from 'node-fetch';
 
 import { fleetServerHostService } from '../../services/fleet_server_host';
 
