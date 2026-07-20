@@ -39,8 +39,8 @@ jest.mock('../../../shared/ui/use_formatted_date', () => ({
 }));
 
 const mockUseSelector = jest.fn();
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useSelector: (selector: unknown) => mockUseSelector(selector),
 }));
 
