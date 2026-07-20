@@ -588,7 +588,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
 
                 results.push(runResult);
 
-                if (!(runResult as CypressCommandLine.CypressRunResult)?.totalFailed) {
+                if ('totalFailed' in runResult && runResult.totalFailed === 0) {
                   _.pull(failedSpecFilePaths, filePath);
                   if (!isOpen && isInBuildkite()) {
                     markSpecCompleted(filePath).catch(() => {});
