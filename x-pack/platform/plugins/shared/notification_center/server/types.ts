@@ -5,24 +5,47 @@
  * 2.0.
  */
 
-import type { NotificationInput } from '../common/types';
+import type {
+  NotificationNamespace,
+  NotificationTypeName,
+} from '../common/notification_registry_utils';
+import type { NotificationSubmitInput } from '../common/types';
 
 /**
- * Outcome of a `submitNotification` call. `skipped_disabled` means the draft was
- * valid but its notification type's feature flag is off, so nothing was written.
+ * Outcome of a `submit` call. `skipped_disabled` means the notification was valid
+ * but its type's feature flag is off, so nothing was written.
  */
 export interface SubmitNotificationResult {
   status: 'submitted' | 'skipped_disabled';
 }
 
+/**
+ * A submitter bound to one registered `(namespace, type)`, returned by
+ * {@link NotificationCenterPluginSetup.forType}.
+ */
+export interface NotificationSubmitter<
+  N extends NotificationNamespace,
+  T extends NotificationTypeName<N>
+> {
+  /**
+   * Validate the content, check the type's feature flag, build the `notification_id` from the
+   * type's id strategy, stamp `@timestamp`, and append one document to the
+   * `.kibana-notification-center` data stream.
+   */
+  submit: (input: NotificationSubmitInput<N, T>) => Promise<SubmitNotificationResult>;
+}
+
 /** Public server-side setup contract. */
 export interface NotificationCenterPluginSetup {
   /**
-   * Validate a draft, check its notification type's feature flag,
-   * stamp `@timestamp` and append it to the `.kibana-notification-center`
-   * data stream.
+   * Bind a submitter to a registered notification type, passing a registry ref such as
+   * `NOTIFICATION_TYPES.inference.modelStatus`. The returned `submit` takes only the
+   * notification content and the type's id parts (`namespace`, `type`, and the id come from NC).
    */
-  submitNotification: (draft: NotificationInput) => Promise<SubmitNotificationResult>;
+  forType: <N extends NotificationNamespace, T extends NotificationTypeName<N>>(ref: {
+    namespace: N;
+    type: T;
+  }) => NotificationSubmitter<N, T>;
 }
 
 export type NotificationCenterPluginStart = Record<string, never>;

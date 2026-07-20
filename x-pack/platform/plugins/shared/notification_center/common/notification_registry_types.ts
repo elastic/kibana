@@ -13,6 +13,13 @@ export interface NotificationDisplayMetadata {
   description: string;
 }
 
+/**
+ * The nature of a notification type. `state` (default) represents the current state of an
+ * entity and collapses on re-emit (id parts `{ entity, state }`); `timeseries` is a stream of
+ * discrete, timestamped occurrences that are each kept (id parts `{ event, epochMs }`).
+ */
+export type NotificationKind = 'state' | 'timeseries';
+
 /** UI-facing definition of one notification type within a namespace. */
 export interface NotificationTypeDefinition extends NotificationDisplayMetadata {
   /**
@@ -22,6 +29,8 @@ export interface NotificationTypeDefinition extends NotificationDisplayMetadata 
    * Omit to send this notification type immediately without a feature flag gate.
    */
   feature_flag?: string;
+  /** Notification nature; defaults to `state` when omitted. */
+  kind?: NotificationKind;
 }
 
 /** UI-facing definition of a namespace and the types it owns. */

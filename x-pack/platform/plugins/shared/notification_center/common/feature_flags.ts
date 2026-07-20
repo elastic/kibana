@@ -10,7 +10,7 @@
  */
 
 import { NOTIFICATION_REGISTRY } from './notification_registry';
-import { notificationTypeId, type NotificationTypeId } from './notification_registry_utils';
+import { joinNotificationTypeId } from './notification_registry_utils';
 
 /**
  * Master gate for everything user-visible in the Notification Center UI. Off
@@ -33,13 +33,20 @@ export const NOTIFICATION_CENTER_UI_ENABLED_DEFAULT = false;
  *  2. add the matching flag definition as a YAML file in the external
  *    `elastic/kibana-feature-flags` repository
  */
-export const NOTIFICATION_TYPE_FLAGS = Object.fromEntries(
-  Object.entries(NOTIFICATION_REGISTRY).flatMap(([namespace, definition]) =>
-    Object.entries(definition.types)
-      .filter(([, type]) => type.feature_flag !== undefined)
-      .map(([typeId, type]) => [notificationTypeId(namespace, typeId), type.feature_flag])
-  )
-) as Partial<Record<NotificationTypeId, string>>;
+const buildNotificationTypeFlags = (): Record<string, string> => {
+  const entries: Array<[string, string]> = [];
+  for (const [namespace, definition] of Object.entries(NOTIFICATION_REGISTRY)) {
+    for (const [typeId, { feature_flag: featureFlag }] of Object.entries(definition.types)) {
+      if (featureFlag !== undefined) {
+        entries.push([joinNotificationTypeId(namespace, typeId), featureFlag]);
+      }
+    }
+  }
+  return Object.fromEntries(entries);
+};
+
+export const NOTIFICATION_TYPE_FLAGS: Partial<Record<string, string>> =
+  buildNotificationTypeFlags();
 
 /**
  * Per-type flags are off by default if no value is found in LaunchDarkly

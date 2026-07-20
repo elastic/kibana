@@ -19,31 +19,36 @@ export {
   notificationWriteSchema,
   notificationReadSchema,
   ctaSchema,
+  SEVERITY,
   SEVERITIES,
 } from './notification_schema';
 
 export { NOTIFICATION_REGISTRY } from './notification_registry';
 export {
   NOTIFICATION_NAMESPACES,
+  NOTIFICATION_TYPES,
   isRegisteredNotificationRef,
-  notificationTypeId,
 } from './notification_registry_utils';
 export type {
   NotificationNamespace,
+  NotificationTypeName,
   NotificationTypeRef,
-  NotificationTypeId,
 } from './notification_registry_utils';
 export type {
   NotificationDisplayMetadata,
   NotificationNamespaceDefinition,
   NotificationTypeDefinition,
+  NotificationKind,
 } from './notification_registry_types';
 
-export {
-  NOTIFICATION_ID_SEPARATOR,
-  buildStaticStateNotificationId,
-  buildEventNotificationId,
-} from './notification_id';
-export type { StaticStateNotificationIdParts, EventNotificationIdParts } from './notification_id';
-
-export type { Notification, NotificationInput, NotificationDocument, Severity, Cta } from './types';
+export type {
+  Notification,
+  NotificationInput,
+  NotificationDocument,
+  NotificationContent,
+  NotificationSubmitInput,
+  StateSubmitIdParts,
+  TimeseriesSubmitIdParts,
+  Severity,
+  Cta,
+} from './types';

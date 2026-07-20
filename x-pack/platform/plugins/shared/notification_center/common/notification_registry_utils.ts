@@ -6,10 +6,27 @@
  */
 
 import { NOTIFICATION_REGISTRY } from './notification_registry';
-import type { NotificationNamespaceDefinition } from './notification_registry_types';
+import type {
+  NotificationKind,
+  NotificationNamespaceDefinition,
+} from './notification_registry_types';
 
 /** A registered namespace id, e.g. `inference`. */
 export type NotificationNamespace = keyof typeof NOTIFICATION_REGISTRY;
+
+/** A registered type id within namespace `N`, e.g. `modelStatus` under `inference`. */
+export type NotificationTypeName<N extends NotificationNamespace> =
+  keyof (typeof NOTIFICATION_REGISTRY)[N]['types'] & string;
+
+/** The declared {@link NotificationKind} for a `(namespace, type)`, defaulting to `state`. */
+export type NotificationKindOf<
+  N extends NotificationNamespace,
+  T extends NotificationTypeName<N>
+> = (typeof NOTIFICATION_REGISTRY)[N]['types'][T] extends {
+  kind: infer K extends NotificationKind;
+}
+  ? K
+  : 'state';
 
 /**
  * A valid `(namespace, type)` pair. The mapped type binds each namespace to only
@@ -23,15 +40,6 @@ export type NotificationTypeRef = {
   };
 }[NotificationNamespace];
 
-/**
- * Serialized string representation of a notification type, `<namespace>.<typeId>`.
- * The string form of a {@link NotificationTypeRef}.
- */
-export type NotificationTypeId = {
-  [N in NotificationNamespace]: `${N & string}.${keyof (typeof NOTIFICATION_REGISTRY)[N]['types'] &
-    string}`;
-}[NotificationNamespace];
-
 /** All registered namespace ids, as a non-empty tuple for `z.enum`. */
 export const NOTIFICATION_NAMESPACES = Object.keys(NOTIFICATION_REGISTRY) as [
   NotificationNamespace,
@@ -39,17 +47,36 @@ export const NOTIFICATION_NAMESPACES = Object.keys(NOTIFICATION_REGISTRY) as [
 ];
 
 /**
- * Flatten a namespace/type pair to its serialized string `<namespace>.<typeId>`.
- * Callers must pass a pair that's been added to the {@link NOTIFICATION_REGISTRY}.
+ * Syntactic sugar for plugins to submit specific notification types without worrying about the
+ * literal strings already set in the registry.
+ * Reachable as: `NOTIFICATION_TYPES.<namespace>.<type>`.
+ * Plugins pass this leaf format to `forType` to submit specific notification types.
  */
-export const notificationTypeId = (namespace: string, type: string): NotificationTypeId =>
-  `${namespace}.${type}` as NotificationTypeId;
+export const NOTIFICATION_TYPES = Object.fromEntries(
+  Object.entries(NOTIFICATION_REGISTRY).map(([namespace, definition]) => [
+    namespace,
+    Object.fromEntries(Object.keys(definition.types).map((type) => [type, { namespace, type }])),
+  ])
+) as {
+  readonly [N in NotificationNamespace]: {
+    readonly [T in NotificationTypeName<N>]: { readonly namespace: N; readonly type: T };
+  };
+};
+
+/**
+ * Join a namespace/type already known valid — registry-derived or post-schema-validation —
+ * into its `<namespace>.<typeId>` id. Plugin-internal: producers never build type ids by hand,
+ * they submit through `forType`, so this is deliberately not re-exported from the common entry.
+ */
+export const joinNotificationTypeId = (namespace: string, type: string): string =>
+  `${namespace}.${type}`;
 
 /** True when `type` is registered under `namespace`.*/
 export const isRegisteredNotificationRef = (namespace: string, type: string): boolean => {
   if (!Object.hasOwn(NOTIFICATION_REGISTRY, namespace)) {
     return false;
   }
+  // Dynamic string index into the typed const registry; guarded by the hasOwn check above.
   const { types } = (NOTIFICATION_REGISTRY as Record<string, NotificationNamespaceDefinition>)[
     namespace
   ];

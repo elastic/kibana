@@ -2,9 +2,9 @@
 
 The **Notification Center** is the in-product surface for notifications within search solution,
 such as inference model status updates.
-It is a **presentation + ingestion layer**, consumers evaluate their own state and push notifications to
-the center using a structured idempotency key; this plugin stores and queries notifications for users
-and renders them.
+It is a **presentation + ingestion layer**: consumers evaluate their own state and push notifications
+to the center through a type-bound submitter; this plugin builds the idempotency key, stores and
+queries notifications for users, and renders them.
 
 ## Feature flags
 
@@ -90,7 +90,7 @@ touch the Feature Flags service themselves.
      evaluation-rules: {}
    ```
 
-`submitNotification` performs the gate check itself, reading the derived flag off by default;
+`submit` performs the gate check itself, reading the derived flag off by default;
 producers never call the Feature Flags service directly. Notifications of a type are shown only
 when the plugin is visible (`notificationCenter.uiEnabled`) and the type's own
 `notificationCenter.types.<namespace>.<typeId>` flag is on.
@@ -115,88 +115,64 @@ defaults to `info`**. Severity drives the per-document retention TTL applied by 
 (starts with `/`), validated with `isInternalURL` from `@kbn/std` — external,
 protocol-relative (`//host`), and backslash (`/\host`) URLs are rejected.
 
-## Notification id conventions
+## Notification kind and id
 
-A notification's `notification_id` is a deterministic idempotency key.
-This ensures duplicate notifications can be collapsed at query time from the datastream.
-Producers control de-duplication by how they construct the id. Notification state does
-not need to be tracked by any other plugin.
-Two conventions are provided in [`notification_id.ts`](./common/notification_id.ts):
+A notification's `notification_id` is a deterministic idempotency key so duplicates can be
+collapsed at query time. **The Notification Center builds it** from the type's registry `kind`;
+producers never construct the id and never track notification state themselves.
 
-- **Static-state** — `<producer>:<entity>:<state>`. Use when a notification
-  represents the _current state_ of an entity; a new state produces a new id.
+- **`state`** (default) — id `<namespace>:<type>:<entity>:<state>`. The notification represents
+  the _current state_ of an entity; re-emitting the same state collapses to one entry, and a new
+  `state` produces a new id. `submit` takes `{ entity, state }`.
+  - e.g. `inference:modelStatus:my-endpoint:deprecated`
+- **`timeseries`** — id `<namespace>:<type>:<event>:<epochMs>`. Each occurrence is distinct and
+  kept; the epoch-milliseconds segment makes every push unique without colon collisions from ISO
+  8601 timestamps. `submit` takes `{ event, epochMs }`.
+  - e.g. `inference:modelStatus:memoryLimit:1750118400000`
 
-  ```ts
-  buildStaticStateNotificationId({
-    producer: 'inference',
-    entity: 'my-endpoint',
-    state: 'deprecated',
-  });
-  // => 'inference:my-endpoint:deprecated'  (re-push while still deprecated collapses to one entry)
-  ```
+A type declares its nature with `kind` in the registry (`kind: 'timeseries'`); omit it for `state`.
 
-- **Per-event** — `<producer>:<event>:<epochMs>`. Use when each occurrence is
-  distinct; the epoch milliseconds segment makes every push unique without
-  introducing colon collisions from ISO 8601 timestamps.
+## Submitting notifications (`forType`)
 
-  ```ts
-  buildEventNotificationId({
-    producer: 'autoOps',
-    event: 'memoryLimit',
-    epochMs: Date.now(),
-  });
-  // => 'autoOps:memoryLimit:1750118400000'  (each occurrence is its own entry)
-  ```
+The server **setup** contract exposes `forType(ref)`, which binds a submitter to a registered
+notification type. Pass a registry ref (`NOTIFICATION_TYPES.<namespace>.<type>`); the returned
+`submit` takes only the notification content and the type's id parts — NC supplies `namespace`,
+`type`, the `notification_id` (built from the type's `kind`), and `@timestamp`. There is no HTTP
+creation path — plugins call `submit` in-process.
 
-## Submitting notifications (`submitNotification`)
+Re-pushing a `state` notification with the same parts appends another document; at query time
+duplicates are collapsed and a separate cleanup-task keeps the index size under control. Invalid
+content throws `NotificationValidationError` and nothing is written.
 
-The server **setup** contract exposes `submitNotification(draft)`. It validates the draft
-against `notificationWriteSchema`, stamps `@timestamp`, and appends one document to the
-data stream. There is no HTTP creation path — plugins call `submitNotification` in-process.
-
-Re-pushing the same `notification_id` appends another document; at display/query time,
-duplicates are collapsed and a separate cleanup-task keeps the index size under control.
-Invalid drafts throw `NotificationValidationError` and nothing is written.
-
-`submitNotification` resolves to `{ status: 'submitted' | 'skipped_disabled' }`. A type whose
-`feature_flag` is off (including when the LaunchDarkly value is unreachable — flags default to
-`false`) is **not an error**: nothing is written and the call resolves with `skipped_disabled`.
-Producers that need delivery guaranteed must ensure the type's flag is enabled.
+`submit` resolves to `{ status: 'submitted' | 'skipped_disabled' }`. A type whose `feature_flag`
+is off (including when the LaunchDarkly value is unreachable — flags default to `false`) is **not
+an error**: nothing is written and the call resolves with `skipped_disabled`. Producers that need
+delivery guaranteed must ensure the type's flag is enabled.
 
 ### Example usage
 
-A plugin declares `notificationCenter` in `requiredPlugins` and calls `submitNotification`
-wherever its own logic lives.
+A plugin declares `notificationCenter` in `optionalPlugins` (or `requiredPlugins`) and calls
+`forType` wherever its own logic lives.
 
 ```jsonc
 // kibana.jsonc
-{ "plugin": { "requiredPlugins": ["notificationCenter"] } }
-```
-
-```ts
-// plugin.ts
-class InferencePlugin {
-  setup(core, { notificationCenter }) {
-    registerDeprecationCheck(notificationCenter);
-  }
-}
+{ "plugin": { "optionalPlugins": ["notificationCenter"] } }
 ```
 
 ```ts
 // deprecation_check.ts
-export async function registerDeprecationCheck(notificationCenter: NotificationCenterPluginSetup) {
+import { NOTIFICATION_TYPES, SEVERITY } from '@kbn/notification-center-plugin/common';
+import type { NotificationCenterPluginSetup } from '@kbn/notification-center-plugin/server';
+
+export async function reportDeprecatedEndpoint(notificationCenter: NotificationCenterPluginSetup) {
   const endpoint = await findDeprecatedEndpoint();
-  await notificationCenter.submitNotification({
-    notification_id: buildStaticStateNotificationId({
-      producer: 'inference',
-      entity: endpoint.id,
-      state: 'deprecated',
-    }),
-    namespace: 'inference',
-    type: 'modelStatus',
+  await notificationCenter.forType(NOTIFICATION_TYPES.inference.modelStatus).submit({
+    entity: endpoint.id,
+    state: 'deprecated',
+    severity: SEVERITY.warning,
     title: `${endpoint.name} is deprecated`,
-    // ...plus `description`, `severity`, `cta` — see common/notification_schema.ts
-    // namespace/type must be a registered pair — see common/notification_registry.ts
+    description: `${endpoint.name} is deprecated and will be removed in a future release.`,
+    // cta is optional — see common/notification_schema.ts
   });
 }
 ```

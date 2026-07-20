@@ -10,7 +10,7 @@ import type { Notification, NotificationInput, NotificationDocument } from './ty
 
 /** A producer submission — no `@timestamp` (NC stamps it on ingest). */
 const validInput = {
-  notification_id: 'inference:my-endpoint:deprecated',
+  notification_id: 'inference:modelStatus:my-endpoint:deprecated',
   event_timestamp: '2026-06-17T00:00:00.000Z',
   namespace: 'inference',
   type: 'modelStatus',

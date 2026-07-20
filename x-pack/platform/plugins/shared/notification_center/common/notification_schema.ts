@@ -12,8 +12,21 @@ import {
   isRegisteredNotificationRef,
 } from './notification_registry_utils';
 
+/** Severity members, exported so producers reference `SEVERITY.warning` rather than a raw string. */
+export const SEVERITY = {
+  info: 'info',
+  warning: 'warning',
+  error: 'error',
+  critical: 'critical',
+} as const;
+
 /** Severity tiers, low→high; array order is load-bearing for retention. */
-export const SEVERITIES = ['info', 'warning', 'error', 'critical'] as const;
+export const SEVERITIES = [
+  SEVERITY.info,
+  SEVERITY.warning,
+  SEVERITY.error,
+  SEVERITY.critical,
+] as const;
 
 /** Call-to-action: an internal link and its display text. */
 export const ctaSchema = z
@@ -77,8 +90,10 @@ export const notificationReadSchema = notificationObject
   .extend({
     /** Ingest time, stamped on write by NC — never producer-supplied. */
     '@timestamp': z.iso.datetime(),
-    namespace: z.string(),
-    type: z.string(),
+    // Reads relax registry/enum membership for forward-compat but keep the same non-empty,
+    // bounded invariants as the write side so consumers can trust the identifiers.
+    namespace: z.string().min(1).max(64),
+    type: z.string().min(1).max(64),
     // Catch unknown severity tiers that may be added in the future
     severity: z.enum(SEVERITIES).default('info').catch('info'),
   })

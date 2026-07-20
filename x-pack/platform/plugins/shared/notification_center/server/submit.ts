@@ -11,16 +11,28 @@ import {
   NOTIFICATION_TYPE_FLAGS,
   NOTIFICATION_TYPE_ENABLED_DEFAULT,
 } from '../common/feature_flags';
-import { notificationTypeId } from '../common/notification_registry_utils';
-import type { NotificationDocument } from '../common/types';
+import { joinNotificationTypeId } from '../common/notification_registry_utils';
+import { buildStateNotificationId, buildTimeseriesNotificationId } from '../common/notification_id';
+import type {
+  NotificationDocument,
+  NotificationDraft,
+  StateSubmitIdParts,
+  TimeseriesSubmitIdParts,
+} from '../common/types';
 import { getNotificationDataStreamClient } from './data_stream/notification_data_stream';
 import type {
   NotificationCenterPluginSetup,
   NotificationCenterPluginStart,
   NotificationCenterStartDependencies,
+  SubmitNotificationResult,
 } from './types';
 
-/** Thrown when a submitted draft fails schema validation; nothing is written. */
+type NotificationCenterCore = CoreSetup<
+  NotificationCenterStartDependencies,
+  NotificationCenterPluginStart
+>;
+
+/** Thrown when a submission fails schema validation; nothing is written. */
 export class NotificationValidationError extends Error {
   constructor(message: string) {
     super(message);
@@ -28,45 +40,87 @@ export class NotificationValidationError extends Error {
   }
 }
 
-/**
- * Builds the `submit` producer API: validate the draft, stamp `@timestamp`, and
- * append one document.
- */
-export const buildSubmitNotification =
-  (
-    core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>
-  ): NotificationCenterPluginSetup['submitNotification'] =>
-  async (draft) => {
-    const parsed = notificationWriteSchema.safeParse(draft);
-    if (!parsed.success) {
-      throw new NotificationValidationError(parsed.error.message);
-    }
+/** Validate a draft, gate on its type's feature flag, stamp `@timestamp`, and append one document. */
+const writeNotification = async (
+  core: NotificationCenterCore,
+  draft: NotificationDraft
+): Promise<SubmitNotificationResult> => {
+  const parsed = notificationWriteSchema.safeParse(draft);
+  if (!parsed.success) {
+    throw new NotificationValidationError(parsed.error.message);
+  }
 
-    const { namespace, type } = parsed.data;
-    const [{ dataStreams, featureFlags }] = await core.getStartServices();
+  const { namespace, type } = parsed.data;
+  const [{ dataStreams, featureFlags }] = await core.getStartServices();
 
-    // A notification type without a flag defined in the registry will pass through.
-    const flagKey = NOTIFICATION_TYPE_FLAGS[notificationTypeId(namespace, type)];
-    const enabled = flagKey
-      ? await featureFlags.getBooleanValue(flagKey, NOTIFICATION_TYPE_ENABLED_DEFAULT)
-      : true;
-    if (!enabled) {
-      return { status: 'skipped_disabled' };
-    }
+  // A notification type without a flag defined in the registry passes through.
+  const flagKey = NOTIFICATION_TYPE_FLAGS[joinNotificationTypeId(namespace, type)];
+  const enabled = flagKey
+    ? await featureFlags.getBooleanValue(flagKey, NOTIFICATION_TYPE_ENABLED_DEFAULT)
+    : true;
+  if (!enabled) {
+    return { status: 'skipped_disabled' };
+  }
 
-    const document: NotificationDocument = {
-      ...parsed.data,
-      '@timestamp': new Date().toISOString(),
-    };
-
-    // Core caches one client per data stream name, so resolve it at the write site.
-    const client = await getNotificationDataStreamClient(dataStreams);
-
-    const response = await client.create({ documents: [document] });
-    if (response.errors) {
-      const reason = response.items[0]?.create?.error?.reason ?? 'unknown error';
-      throw new Error(`Failed to append notification: ${reason}`);
-    }
-
-    return { status: 'submitted' };
+  const document: NotificationDocument = {
+    ...parsed.data,
+    '@timestamp': new Date().toISOString(),
   };
+
+  // Core caches one client per data stream name, so resolve it at the write site.
+  const client = await getNotificationDataStreamClient(dataStreams);
+
+  const response = await client.create({ documents: [document] });
+  if (response.errors) {
+    const reason = response.items[0]?.create?.error?.reason ?? 'unknown error';
+    throw new Error(`Failed to append notification: ${reason}`);
+  }
+
+  return { status: 'submitted' };
+};
+
+/**
+ * Build the `forType` producer API: bind a submitter to a registered `(namespace, type)` that
+ * builds the `notification_id` from the type's kind, then delegates to the write path.
+ */
+export const buildForType =
+  (core: NotificationCenterCore): NotificationCenterPluginSetup['forType'] =>
+  ({ namespace, type }) => ({
+    submit: (input) => {
+      const { title, description, severity, cta } = input;
+      // The type's kind fixes which id parts the input carries, so field presence
+      // discriminates the two builders.
+      const idParts: StateSubmitIdParts | TimeseriesSubmitIdParts = input;
+      const { notification_id, event_timestamp } =
+        'epochMs' in idParts
+          ? {
+              notification_id: buildTimeseriesNotificationId({
+                namespace,
+                type,
+                event: idParts.event,
+                epochMs: idParts.epochMs,
+              }),
+              event_timestamp: new Date(idParts.epochMs).toISOString(),
+            }
+          : {
+              notification_id: buildStateNotificationId({
+                namespace,
+                type,
+                entity: idParts.entity,
+                state: idParts.state,
+              }),
+              event_timestamp: new Date().toISOString(),
+            };
+
+      return writeNotification(core, {
+        notification_id,
+        event_timestamp,
+        namespace,
+        type,
+        title,
+        description,
+        severity,
+        cta,
+      });
+    },
+  });
