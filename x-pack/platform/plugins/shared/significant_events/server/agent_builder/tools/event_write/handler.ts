@@ -104,6 +104,9 @@ export async function eventsWriteBulkHandler({
         event_uuid: eventUuid,
         event_id: eventId,
         previous_event_uuid: latestEvents.get(eventId)?.event_uuid,
+        // Carry forward investigation lineage when creating a new version of an event.
+        // Triage uses this to avoid re-investigating an episode that has already run.
+        investigations: latestEvents.get(eventId)?.investigations,
         severity: input.severity,
       },
     };
@@ -113,7 +116,8 @@ export async function eventsWriteBulkHandler({
   try {
     response = await eventClient.bulkCreate(
       prepared.map(({ document }) => document),
-      { throwOnFail: false }
+      // The triage workflow reads the freshly written event immediately after this call.
+      { throwOnFail: false, refresh: 'wait_for' }
     );
   } catch (error) {
     const message =
