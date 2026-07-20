@@ -68,10 +68,49 @@ export const getYamlDefaultAsString = (rawDefault: unknown): string => {
 };
 
 /**
+ * Applies a `$ref` entry's overrides onto its resolved library (inline) field:
+ * - `name` acts as a local alias replacing the library field's name.
+ * - `metadata.default` overrides the library default. Three cases:
+ *     - absent (`undefined`): inherit the library field's default,
+ *     - explicit `null`: clear the inherited default so the field stays empty (this is what the
+ *       v1→v2 migration emits for a legacy template field whose value was explicitly cleared),
+ *     - any other value: use it as the field's default.
+ *
+ * Shared by `resolveTemplateFields` (server / case-creation) and `useResolvedFields` (editor) so
+ * both paths resolve `$ref` overrides identically.
+ */
+export const applyRefFieldOverride = (
+  inlineField: InlineField,
+  refField: RefField
+): InlineField => {
+  let resolved: InlineField =
+    refField.name && refField.name !== inlineField.name
+      ? { ...inlineField, name: refField.name }
+      : inlineField;
+
+  const overrideDefault = refField.metadata?.default;
+  if (overrideDefault === null) {
+    const { default: _omitted, ...restMetadata } = (resolved.metadata ?? {}) as Record<
+      string,
+      unknown
+    >;
+    resolved = { ...resolved, metadata: restMetadata } as InlineField;
+  } else if (overrideDefault !== undefined) {
+    resolved = {
+      ...resolved,
+      metadata: { ...(resolved.metadata ?? {}), default: overrideDefault },
+    } as InlineField;
+  }
+
+  return resolved;
+};
+
+/**
  * Resolves a template `fields` array into a flat list of inline fields by:
  * - passing inline fields through as-is,
  * - looking up `$ref` fields by name in `libraryDefs`, parsing their YAML definition,
- *   and applying any `name` override from the ref entry.
+ *   and applying the ref entry's `name` alias and `metadata.default` override (see
+ *   {@link applyRefFieldOverride}).
  *
  * Fields that cannot be resolved or that produce another ref are silently dropped.
  */
@@ -88,12 +127,7 @@ export const resolveTemplateFields = (
       const parsed = parseYaml(fd.definition);
       const result = FieldSchema.safeParse(parsed);
       if (!result.success || isRefField(result.data)) return [];
-      const inlineField = result.data as InlineField;
-      return [
-        refField.name && refField.name !== inlineField.name
-          ? { ...inlineField, name: refField.name }
-          : inlineField,
-      ];
+      return [applyRefFieldOverride(result.data as InlineField, refField)];
     } catch {
       return [];
     }
