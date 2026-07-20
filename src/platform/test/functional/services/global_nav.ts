@@ -42,8 +42,7 @@ export class GlobalNavService extends FtrService {
    * flip mid-session (e.g. entering a solution view), so this is probed per call.
    *
    * The active header can be briefly absent while navigating, so we wait for one of the known headers
-   * to settle before deciding. This keeps consecutive probes consistent instead of racing an
-   * unpainted header. If no header renders (e.g. a chromeless page) we fall back to an immediate check.
+   * to settle before deciding.
    */
   public async isNextProjectChrome(): Promise<boolean> {
     const detectHeader = async (): Promise<boolean | undefined> => {
@@ -59,17 +58,13 @@ export class GlobalNavService extends FtrService {
       return undefined;
     };
 
-    try {
-      return await this.retry.tryForTime(2000, async () => {
-        const result = await detectHeader();
-        if (result === undefined) {
-          throw new Error('no chrome header has rendered yet');
-        }
-        return result;
-      });
-    } catch {
-      return (await detectHeader()) ?? false;
-    }
+    return await this.retry.tryForTime(2000, async () => {
+      const result = await detectHeader();
+      if (result === undefined) {
+        throw new Error('no chrome header has rendered yet');
+      }
+      return result;
+    });
   }
 
   public async moveMouseToLogo(): Promise<void> {

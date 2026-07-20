@@ -110,8 +110,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
   return {
     // check that chrome ui is in project/solution mode
     async expectExists() {
-      // Accept either the chrome-next global header or the classic project header so this works
-      // regardless of whether chrome-next is enabled.
       await retry.try(async () => {
         const exists =
           (await testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 })) ||

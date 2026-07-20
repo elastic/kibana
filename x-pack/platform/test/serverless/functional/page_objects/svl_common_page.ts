@@ -177,8 +177,6 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async assertProjectHeaderExists() {
-      // Accept either the chrome-next global header or the classic project header so this works
-      // regardless of whether chrome-next is enabled.
       await retry.try(async () => {
         const exists =
           (await testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 })) ||

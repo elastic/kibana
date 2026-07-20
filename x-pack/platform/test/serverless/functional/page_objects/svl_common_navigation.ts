@@ -35,7 +35,18 @@ class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
 
   async showSearch() {
     const testSubjects = this.ctx.getService('testSubjects');
-    if (await testSubjects.exists(CHROME_NEXT_SEARCH_BUTTON, { timeout: 0 })) {
+    const retry = this.ctx.getService('retry');
+    const isChromeNext = await retry.try(async () => {
+      if (await testSubjects.exists(CHROME_NEXT_SEARCH_BUTTON, { timeout: 0 })) {
+        return true;
+      }
+      if (await testSubjects.exists(CLASSIC_SEARCH_REVEAL, { timeout: 0 })) {
+        return false;
+      }
+      throw new Error('No global search trigger is present');
+    });
+
+    if (isChromeNext) {
       if (await testSubjects.exists(CHROME_NEXT_SEARCH_MODAL, { timeout: 0 })) return;
       await testSubjects.click(CHROME_NEXT_SEARCH_BUTTON);
       await testSubjects.existOrFail(CHROME_NEXT_SEARCH_MODAL);

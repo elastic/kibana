@@ -125,8 +125,11 @@ export class ContextPage {
 
   async goBackToDiscover() {
     const backButton = this.page.testSubj.locator('appHeaderBack');
-    const breadcrumb = this.page.testSubj.locator('~breadcrumb-deepLinkId-discover');
-    await backButton.or(breadcrumb).click();
+    if (await backButton.isVisible()) {
+      await backButton.click();
+    } else {
+      await this.page.testSubj.locator('~breadcrumb-deepLinkId-discover').click();
+    }
     await this.page.testSubj
       .locator('dscPage')
       .waitFor({ state: 'visible', timeout: CONTEXT_LOAD_TIMEOUT });

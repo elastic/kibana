@@ -12,8 +12,6 @@ import { KibanaPage } from './kibana_page';
 
 export class ProjectPage extends KibanaPage {
   async waitForHeader() {
-    // Accept either the chrome-next global header or the classic project header so this works
-    // regardless of whether chrome-next is enabled.
     return this.page.waitForSelector(
       `${subj('chromeNextGlobalHeader')}, ${subj('kibanaProjectHeader')}`,
       {

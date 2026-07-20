@@ -142,7 +142,7 @@ test.describe(
       });
     });
 
-    test('footer-panel children navigate and update breadcrumbs', async ({ pageObjects, page }) => {
+    test('footer-panel children navigate to the expected pages', async ({ pageObjects, page }) => {
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('data_management → Integrations', async () => {

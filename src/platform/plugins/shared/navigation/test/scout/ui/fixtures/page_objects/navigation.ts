@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 
 export class Navigation {
   constructor(private readonly page: ScoutPage) {}
@@ -30,12 +30,6 @@ export class Navigation {
 
   getBreadcrumbByText(text: string) {
     return this.page.locator('.euiBreadcrumb', { hasText: text });
-  }
-
-  pageTitle(): Locator {
-    return this.page.testSubj
-      .locator('appHeaderTitle')
-      .or(this.page.locator('.euiPageHeader h1.euiTitle'));
   }
 
   async openUserMenu() {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 
 export type SpaceSolution = 'es' | 'oblt' | 'security' | 'classic';
 
@@ -20,11 +20,11 @@ export type SpaceSolution = 'es' | 'oblt' | 'security' | 'classic';
 export class SpacesPage {
   constructor(private readonly page: ScoutPage) {}
 
-  // ---- generic header / selector ----
+  private async getVisibleVariant(preferred: Locator, fallback: Locator): Promise<Locator> {
+    return (await preferred.isVisible()) ? preferred : fallback;
+  }
 
   async isProjectHeaderVisible() {
-    // Accept either the chrome-next global header or the classic project header so this works
-    // regardless of whether chrome-next is enabled.
     return await this.page.testSubj
       .locator('chromeNextGlobalHeader')
       .or(this.page.testSubj.locator('kibanaProjectHeader'))
@@ -78,9 +78,12 @@ export class SpacesPage {
     await this.page.testSubj.locator('manageSpaces').waitFor({ state: 'visible' });
   }
 
-  /** Reads the `title` attribute of the header space selector (current space name). */
   async getCurrentSpaceTitle() {
-    return (await this.spacesSelectorLocator().getAttribute('title'))?.trim() ?? null;
+    const selector = await this.getVisibleVariant(
+      this.page.testSubj.locator('contextSwitcherTriggerButton'),
+      this.page.testSubj.locator('spacesNavSelector')
+    );
+    return (await selector.getAttribute('title'))?.trim() ?? null;
   }
 
   getCurrentUrl() {
@@ -307,10 +310,11 @@ export class SpacesPage {
   }
 
   async switchToSpaceFromNav(spaceId: string) {
-    await this.page.testSubj
-      .locator(`space-${spaceId}`)
-      .or(this.page.testSubj.locator(`${spaceId}-selectableSpaceItem`))
-      .click();
+    const spaceItem = await this.getVisibleVariant(
+      this.page.testSubj.locator(`space-${spaceId}`),
+      this.page.testSubj.locator(`${spaceId}-selectableSpaceItem`)
+    );
+    await spaceItem.click();
   }
 
   navSearchInputLocator() {
@@ -324,20 +328,26 @@ export class SpacesPage {
   }
 
   async searchSpacesInNav(searchText: string) {
-    const input = this.navSearchInputLocator();
+    const input = await this.getVisibleVariant(
+      this.page.testSubj.locator('contextSwitcherSpacesSearchInput'),
+      this.page.testSubj.locator('spacesMenuSearchInput')
+    );
     await input.fill(searchText);
   }
 
-  /** Counts the selectable space options currently shown in the nav popover. */
   async getNavSpaceResultCount() {
-    return await this.spacesMenuPanelLocator().locator('li[role="option"]').count();
+    const panel = await this.getVisibleVariant(
+      this.page.testSubj.locator('contextSwitcherPopoverPanel'),
+      this.page.testSubj.locator('spaceMenuPopoverPanel')
+    );
+    return await panel.locator('li[role="option"]').count();
   }
 
   async getNavNoResultsMessage() {
-    return (
-      await this.spacesMenuPanelLocator()
-        .locator('[data-test-subj="euiSelectableMessage"]')
-        .innerText()
-    ).trim();
+    const panel = await this.getVisibleVariant(
+      this.page.testSubj.locator('contextSwitcherPopoverPanel'),
+      this.page.testSubj.locator('spaceMenuPopoverPanel')
+    );
+    return (await panel.locator('[data-test-subj="euiSelectableMessage"]').innerText()).trim();
   }
 }
