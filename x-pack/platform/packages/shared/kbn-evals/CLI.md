@@ -200,6 +200,11 @@ node scripts/evals doctor --fix
 node scripts/evals compare <run-id-a> <run-id-b>
 ```
 
+> **`matrix` moved.** The LLM performance matrix generator now lives in
+> `@kbn/evals-extensions` and runs via `node scripts/evals ext matrix`. See
+> [`@kbn/evals-extensions`](../kbn-evals-extensions/README.md#llm-performance-matrix)
+> for flags and config structure.
+
 ### `env` -- List environment variables
 
 ```bash

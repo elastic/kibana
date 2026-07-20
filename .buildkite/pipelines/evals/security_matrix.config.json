@@ -1,0 +1,125 @@
+{
+  "title": "Agent Builder LLM performance matrix for Elastic Security",
+  "branch": "main",
+  "lookbackDays": 14,
+  "defaultScale": 10,
+  "decimals": 2,
+  "notRecommendedBelow": 0,
+  "notRecommendedLabel": "Not recommended",
+  "notRecommendedCountsAsZeroInOverall": true,
+  "showOverall": false,
+  "overall": {
+    "label": "Overall Score",
+    "mode": "mean"
+  },
+  "columns": [
+    {
+      "id": "alert_triage",
+      "label": "Alert Triage",
+      "group": "Agent Builder",
+      "suites": ["security-alert-triage", "security-alerts-rag-regression"],
+      "weight": 1
+    },
+    {
+      "id": "detection_engineering",
+      "label": "Detection Engineering",
+      "group": "Agent Builder",
+      "suites": ["security-ai-rules", "security-esql-generation-regression"],
+      "weight": 1
+    },
+    {
+      "id": "investigation",
+      "label": "Investigation",
+      "group": "Agent Builder",
+      "suites": ["entity-analytics-v2", "agent-builder"],
+      "weight": 1
+    },
+    {
+      "id": "workflow_execution",
+      "label": "Workflow Execution",
+      "group": "Agent Builder",
+      "suites": ["workflows", "lead-generation"],
+      "weight": 1
+    },
+    {
+      "id": "multi_step_execution",
+      "label": "Multi-step execution",
+      "group": "Agent Builder",
+      "suites": ["agent-builder"],
+      "weight": 1
+    },
+    {
+      "id": "attack_discovery",
+      "label": "Attack Discovery",
+      "suites": ["attack-discovery"],
+      "weight": 1
+    },
+    {
+      "id": "automatic_migration",
+      "label": "Automatic Migration",
+      "suites": ["security-automatic-migrations"],
+      "weight": 1
+    }
+  ],
+  "composites": [
+    {
+      "id": "agent_builder_score",
+      "label": "Agent Builder Score",
+      "from": [
+        "alert_triage",
+        "detection_engineering",
+        "investigation",
+        "workflow_execution",
+        "multi_step_execution"
+      ]
+    },
+    {
+      "id": "overall_score",
+      "label": "Overall Score",
+      "from": ["agent_builder_score", "attack_discovery", "automatic_migration"]
+    }
+  ],
+  "layout": [
+    "alert_triage",
+    "detection_engineering",
+    "investigation",
+    "workflow_execution",
+    "multi_step_execution",
+    "agent_builder_score",
+    "attack_discovery",
+    "automatic_migration",
+    "overall_score"
+  ],
+  "models": [
+    {
+      "id": "anthropic-claude-4.6-opus",
+      "label": "Claude Opus 4.6",
+      "openSource": false
+    },
+    {
+      "id": "anthropic-claude-4.6-sonnet",
+      "label": "Claude Sonnet 4.6",
+      "openSource": false
+    },
+    {
+      "id": "openai-gpt-5.4",
+      "label": "GPT-5.4",
+      "openSource": false
+    },
+    {
+      "id": "google-gemini-3.1-pro",
+      "label": "Gemini 3.1 Pro",
+      "openSource": false
+    },
+    {
+      "id": "google-gemini-3.0-flash",
+      "label": "Gemini 3.0 Flash",
+      "openSource": false
+    },
+    {
+      "id": "openai-gpt-oss-120b",
+      "label": "GPT OSS 120B",
+      "openSource": true
+    }
+  ]
+}

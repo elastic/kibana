@@ -23,3 +23,24 @@ export type { EvaluationScoreDocument } from '@kbn/evals-common';
 export * as cli from './src/cli';
 export { runRedTeam, RED_TEAM_MODULE_IDS } from './src/red_team';
 export type { RedTeamConfig, RedTeamReport, RedTeamModuleId } from './src/red_team';
+
+// LLM performance matrix engine (invoked as a workflow via `node scripts/evals ext matrix`).
+export { loadMatrixConfig, parseMatrixConfig } from './src/matrix/load_matrix_config';
+export type {
+  MatrixConfig,
+  MatrixColumnConfig,
+  MatrixCompositeConfig,
+  MatrixModelConfig,
+} from './src/matrix/load_matrix_config';
+export { buildMatrix, OVERALL_COLUMN_ID } from './src/matrix/build_matrix';
+export type { Matrix, MatrixRow, MatrixCell, MatrixDisplayColumn } from './src/matrix/build_matrix';
+export { renderMatrix } from './src/matrix/render_matrix';
+export type { RenderedMatrix } from './src/matrix/render_matrix';
+export { queryMatrixScores } from './src/matrix/query_matrix_scores';
+export type {
+  AggregatedModelScores,
+  AggregatedSuiteScores,
+  AggregatedDatasetScores,
+  AggregatedEvaluatorScore,
+  QueryMatrixScoresOptions,
+} from './src/matrix/query_matrix_scores';

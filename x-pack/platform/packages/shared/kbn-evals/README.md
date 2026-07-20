@@ -256,6 +256,12 @@ EVAL_INCLUDE_EIS_MODELS=1
 EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 ```
 
+> **Generating the LLM performance matrix.** The `matrix` command that turns
+> exported evaluation results into the publishable **LLM performance matrix** now
+> lives in `@kbn/evals-extensions` and is invoked via `node scripts/evals ext matrix`.
+> See [`@kbn/evals-extensions`](../kbn-evals-extensions/README.md#llm-performance-matrix)
+> for usage, config structure, and CI/publishing details.
+
 ---
 
 ## 2. Creating a new evaluation suite

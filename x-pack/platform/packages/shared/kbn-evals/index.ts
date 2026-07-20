@@ -128,6 +128,12 @@ export {
   type UpsertDatasetInput,
   type DatasetWithId,
 } from './src/utils/evals_client';
+export {
+  createEvaluationsEvalsClient,
+  DEFAULT_EVALUATIONS_KBN_URL,
+  type CreateEvaluationsEvalsClientParams,
+} from './src/utils/evaluations_kbn_client';
+export { envFromDatasetsProfile } from './src/cli/profiles';
 export { EvaluatorApiClient, type MapContextFn } from './src/utils/evaluator_api_client';
 export { getBuildkiteCiMetadataFromEnv, type BuildkiteCiMetadata } from './src/utils/ci_metadata';
 export { buildIngestRequest } from './src/utils/build_ingest_request';
