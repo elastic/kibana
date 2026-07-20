@@ -24,6 +24,17 @@ export type ViewByMode = 'entity' | 'jobId';
  */
 const BASE_RECORD_FILTER = `| WHERE result_type == "record" AND is_interim == false AND record_score >= 1`;
 
+/**
+ * Time-range filter applied inside the query text via ?_tstart/?_tend named
+ * params (populated by getESQLResults when given a timeRange) instead of the
+ * request-level `filter` DSL. A request-level filter that matches no data
+ * makes the FROM pattern resolve to zero indices, which trips an
+ * Elasticsearch bug in LOOKUP JOIN lookup-index resolution and fails the
+ * query with a misleading "Lookup Join requires a single lookup mode index"
+ * error instead of returning an empty result (elastic/kibana#277613).
+ */
+const TIME_RANGE_FILTER = `| WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend`;
+
 const ANOMALY_ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
 /** The entity name field (e.g. user.name) used as the display name for each entity type. */
@@ -132,6 +143,7 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
     return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
     ${BASE_RECORD_FILTER}
+    ${TIME_RANGE_FILTER}
     ${getJobIdsFilter(jobIds)}
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
@@ -148,6 +160,7 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
   return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
     ${BASE_RECORD_FILTER}
+    ${TIME_RANGE_FILTER}
     ${getJobIdsFilter(jobIds)}
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
@@ -181,6 +194,7 @@ export const useRecentAnomaliesDataEsqlSource = ({
     return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
     ${BASE_RECORD_FILTER} AND job_id IN (${formattedLabels})
+    ${TIME_RANGE_FILTER}
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
     ${getEntityIdsFilter(entityIds)}
@@ -201,6 +215,7 @@ export const useRecentAnomaliesDataEsqlSource = ({
   return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
     ${BASE_RECORD_FILTER}
+    ${TIME_RANGE_FILTER}
     ${getJobIdsFilter(jobIds)}
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IN (${formattedLabels})

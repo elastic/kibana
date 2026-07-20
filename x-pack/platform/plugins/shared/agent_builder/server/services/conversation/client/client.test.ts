@@ -6,11 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  createAgentNotFoundError,
-  createAgentUnavailableError,
-  ConversationSourceType,
-} from '@kbn/agent-builder-common';
+import { createAgentNotFoundError, createAgentUnavailableError } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createClient, type ConversationClient } from './client';
@@ -94,13 +90,24 @@ describe('ConversationClient', () => {
   });
 
   describe('list', () => {
-    it('requests access_control and preserves it in listed conversations', async () => {
+    it('requests access_control and origin, and preserves them in listed conversations', async () => {
+      const origin = {
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      };
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [
-            createConversationDocument({
-              accessMode: ConversationAccessControlMode.Public,
-            }),
+            {
+              ...createConversationDocument({
+                accessMode: ConversationAccessControlMode.Public,
+              }),
+              _source: {
+                ...createConversationDocument({
+                  accessMode: ConversationAccessControlMode.Public,
+                })._source!,
+                origin,
+              },
+            },
           ],
         },
       });
@@ -109,7 +116,7 @@ describe('ConversationClient', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          _source: expect.arrayContaining(['access_control']),
+          _source: expect.arrayContaining(['access_control', 'origin']),
         })
       );
       expect(result[0]).toEqual(
@@ -117,6 +124,7 @@ describe('ConversationClient', () => {
           access_control: {
             access_mode: ConversationAccessControlMode.Public,
           },
+          origin,
         })
       );
     });
@@ -338,8 +346,8 @@ describe('ConversationClient', () => {
     });
   });
 
-  describe('getBySource', () => {
-    it('finds a conversation by first-class source in the current space', async () => {
+  describe('getByOrigin', () => {
+    it('finds a conversation by first-class origin in the current space', async () => {
       const document = createConversationDocument();
       mockEsClient.search
         .mockResolvedValueOnce({
@@ -353,8 +361,7 @@ describe('ConversationClient', () => {
           },
         });
 
-      const result = await client.getBySource({
-        type: ConversationSourceType.Slack,
+      const result = await client.getByOrigin({
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       });
 
@@ -366,10 +373,9 @@ describe('ConversationClient', () => {
             bool: {
               filter: [
                 expect.any(Object),
-                { term: { 'source.type': 'slack' } },
                 {
                   term: {
-                    'source.external_conversation_id':
+                    'origin.external_conversation_id':
                       'team:T123/channel:C123/thread:1712345678.000100',
                   },
                 },

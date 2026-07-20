@@ -34,6 +34,7 @@ import {
   UIAM_LOGS_GRANT_TAGS,
   UIAM_LOGS_USAGE_TAGS,
 } from '../constants';
+import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
 
 interface UiamApiKeyResult {
   apiKey: string;
@@ -240,23 +241,23 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       }
 
       // No UIAM key available even though the strategy is configured to use UIAM.
-      // Fall back to the ES API key so the task can still run, but emit
-      // observability so we can detect UIAM regressions in production:
-      //   - If the task was scheduled with a user-supplied ES API key
-      //     (`apiKeyCreatedByUser: true`), it is *expected* not to have a UIAM
-      //     key attached. Emit a debug-level message.
-      //   - Otherwise, the task should have had a UIAM key. Emit a warn-level
-      //     message so the fallback is actioned.
+      // Fall back to the ES API key so the task can still run. Some deployments
+      // legitimately cannot mint UIAM keys, so this fallback is expected in the
+      // wild and is logged at debug level to avoid noise. Volume and reason are
+      // tracked via the `kibana.task_manager.task_run.uiam_api_key_fallback.count`
+      // OTel counter instead, which is broken down per project.
       // Mirrors the alerting rule loader behavior (see PR #264434).
       const { userScope, apiKey } = taskInstance;
       if (apiKey) {
         if (userScope?.apiKeyCreatedByUser) {
+          taskManagerUiamTelemetry.recordUiamApiKeyFallback('user_created_key');
           this.logger.debug(
             'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
             { tags: UIAM_LOGS_USAGE_TAGS }
           );
         } else {
-          this.logger.warn(
+          taskManagerUiamTelemetry.recordUiamApiKeyFallback('unexpected');
+          this.logger.debug(
             'UIAM API key is not provided to create a fake request, falling back to regular API key.',
             { tags: UIAM_LOGS_USAGE_TAGS }
           );

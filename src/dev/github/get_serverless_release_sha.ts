@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { run } from '@kbn/dev-cli-runner';
 import { Octokit } from '@octokit/rest';
 import pRetry, { type FailedAttemptError } from 'p-retry';
 
@@ -85,5 +84,3 @@ export async function getServerlessReleaseSha(): Promise<string> {
 
   return withTransientHttpRetry(() => fetchServerlessReleaseShaFromGitHub(octokit));
 }
-
-run(async ({ log }) => log.write(await getServerlessReleaseSha()));

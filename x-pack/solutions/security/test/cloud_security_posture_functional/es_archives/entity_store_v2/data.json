@@ -1999,3 +1999,43 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "administers-target-server-admin",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "user:administers-target-server-admin",
+        "name": "Administers Target Server Admin",
+        "source": "manual",
+        "sub_type": "AWS IAM User",
+        "type": "User",
+        "relationships": {
+          "administers": {
+            "ids": [
+              "host:relationship-target-server"
+            ]
+          }
+        },
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score": 33.0,
+          "calculated_score_norm": 33.0
+        }
+      },
+      "user": {
+        "name": "administers-target-server-admin",
+        "id": "administers-target-server-admin"
+      },
+      "event": {
+        "ingested": "2024-09-01T12:00:00.000Z"
+      }
+    }
+  }
+}

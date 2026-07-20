@@ -209,7 +209,9 @@ export async function loadDetectionsFromSnapshot(
   log: ToolingLog,
   snapshotName: string,
   gcs: GcsConfig,
-  options: { kinds?: Array<Detection['kind']> } = {}
+  // `kind` is a legacy snapshot-doc field (pre-detection-remodel captures); filter on the raw
+  // ES field by string.
+  options: { kinds?: string[] } = {}
 ): Promise<Detection[]> {
   return loadDocsFromSnapshot<Detection>({
     esClient,
