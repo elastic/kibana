@@ -160,6 +160,11 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
         buildCreateRuleData({
           kind: 'signal',
           state_transition: undefined,
+          recovery_strategy: undefined,
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+          },
           metadata: { name: 'signal-rule' },
         })
       );
@@ -232,6 +237,20 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
       const response = await apiClient.post(BULK_ENABLE_URL, {
         headers: writerHeaders,
         body: { ids },
+      });
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
+    'validation: should reject unknown top-level body fields (strict)',
+    async ({ apiClient, apiServices }) => {
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'bulk-strict-top-level' } })
+      );
+      const response = await apiClient.post(BULK_ENABLE_URL, {
+        headers: writerHeaders,
+        body: { ids: [rule.id], unknownField: 'x' },
       });
       expect(response).toHaveStatusCode(400);
     }

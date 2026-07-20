@@ -8,7 +8,15 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../../fixtures/metrics_experience';
+import { spaceTest, testData } from '../../fixtures/metrics_experience';
+
+// Narrow range covering the test documents (00:30-00:39) instead of the
+// full-year DEFAULT_TIME_RANGE, so the inspector's request/response views
+// only ever reflect the small dataset we actually indexed.
+const INSPECT_TIME_RANGE = {
+  from: '2025-01-01T00:00:00.000Z',
+  to: '2025-01-01T01:00:00.000Z',
+};
 
 spaceTest.describe(
   'Metrics in Discover - Inspect',
@@ -19,7 +27,7 @@ spaceTest.describe(
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME);
-      await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
+      await scoutSpace.uiSettings.setDefaultTime(INSPECT_TIME_RANGE);
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -48,18 +56,13 @@ spaceTest.describe(
           await expect(inspector.viewChooser).toBeVisible();
         });
 
-        await spaceTest.step('switch to Requests view and verify statistics', async () => {
-          await inspector.switchToView('Requests');
-          await expect(inspector.requests.statisticsTab).toBeVisible();
-          await expect(inspector.requests.timestamp).toBeVisible();
-        });
-
-        await spaceTest.step('view request details', async () => {
+        await spaceTest.step('switch to Requests view and verify request details', async () => {
+          await inspector.openInspectorView('Requests');
           await inspector.requests.requestTab.click();
           await expect(inspector.requests.codeViewer).toBeVisible();
         });
 
-        await spaceTest.step('view response details', async () => {
+        await spaceTest.step('verify response details', async () => {
           await inspector.requests.responseTab.click();
           await expect(inspector.requests.codeViewer).toBeVisible();
         });

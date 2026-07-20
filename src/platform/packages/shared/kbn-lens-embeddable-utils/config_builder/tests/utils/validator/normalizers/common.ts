@@ -9,9 +9,11 @@
 
 import { orderBy } from 'lodash';
 
-import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { LEGACY_COMPLIMENTARY_PALETTE, COMPLEMENTARY_PALETTE } from '@kbn/coloring';
+import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
+  DataType,
   FormBasedPersistedState,
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
@@ -61,6 +63,13 @@ const COMMON_STATE_IGNORE_PATHS = [
   'state.adHocDataViews.*.allowHidden', // hardcoded to false by transform; if original was true, hidden indices would no longer be queried
   'state.adHocDataViews.*.fieldFormats', // custom field formats (e.g. url formatters) will be lost
   'state.adHocDataViews.*.runtimeFieldMap', // runtime field definitions will be lost
+  // TODO: check missing/different properties on colorMapping
+  'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
+  'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',
+  'state.visualization.layers.*.colorMapping.assignments.*.touched',
+  'state.visualization.layers.*.colorMapping.specialAssignments.*.touched',
+  'state.visualization.layers.*.colorMapping.colorMode.steps.*.touched',
+  'state.visualization.colorMapping.colorMode.steps.*.touched',
 ];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -94,8 +103,10 @@ function normalizeESQLAdHocDataViews(
     delete attributes.state.datasourceStates.textBased.indexPatternRefs;
   }
 
-  const textBasedLayers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
-  if (textBasedLayers.length === 0) return internalReferences;
+  const textBasedLayerEntries = Object.entries(
+    attributes.state.datasourceStates.textBased?.layers ?? {}
+  );
+  if (textBasedLayerEntries.length === 0) return internalReferences;
 
   // Remove 'textBasedLanguages-datasource-layer-*' references — they are rebuilt below
   const refs = internalReferences.filter(
@@ -106,7 +117,7 @@ function normalizeESQLAdHocDataViews(
     attributes.state.adHocDataViews = {};
   }
 
-  for (const layer of textBasedLayers) {
+  for (const [layerId, layer] of textBasedLayerEntries) {
     const esqlQuery = layer.query?.esql;
     const oldIndex = layer.index;
 
@@ -117,8 +128,13 @@ function normalizeESQLAdHocDataViews(
       const timeFieldName = esqlQuery
         ? getTimeFieldFromESQLQuery(esqlQuery)
         : adHocDataView.timeFieldName ?? layer.timeField ?? undefined;
+      // The transform re-derives the index pattern (and the data view title/name) from the ES|QL
+      // query, so a stale persisted name (e.g. a broader multi-index pattern) is normalized away.
+      const indexPattern = esqlQuery
+        ? getIndexPatternFromESQLQuery(esqlQuery)
+        : adHocDataView.name ?? '';
       const newId = generateAdHocDataViewId({
-        index: adHocDataView.name ?? '',
+        index: indexPattern,
         dataSourceType: 'esql',
         esqlQuery,
         timeFieldName,
@@ -126,8 +142,14 @@ function normalizeESQLAdHocDataViews(
 
       layer.index = newId;
       adHocDataView.id = newId;
+      adHocDataView.name = indexPattern;
+      adHocDataView.title = indexPattern;
+      // Transform always sets type: 'esql' on ESQL adHocDataViews (via getAdHocDataViewSpec)
+      adHocDataView.type = 'esql';
       attributes.state.adHocDataViews[newId] = adHocDataView;
-      delete attributes.state.adHocDataViews[oldIndex];
+      if (newId !== oldIndex) {
+        delete attributes.state.adHocDataViews[oldIndex];
+      }
     } else if (esqlQuery) {
       // No adHocDataView exists: create one from the ES|QL query (matches what the transform produces)
       const indexPattern = getIndexPatternFromESQLQuery(esqlQuery);
@@ -144,11 +166,19 @@ function normalizeESQLAdHocDataViews(
     }
 
     if (layer.index) {
-      refs.push({
-        id: layer.index,
-        name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
-        type: 'index-pattern',
-      });
+      // Mutate the existing layer ref in place to keep references; fall back to pushing if no existing ref is found.
+      const layerRefName = `indexpattern-datasource-layer-${layerId}`;
+      const existingRef = refs.find((r) => r.name === layerRefName);
+      if (existingRef) {
+        existingRef.id = layer.index;
+        existingRef.name = `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`;
+      } else {
+        refs.push({
+          id: layer.index,
+          name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
+          type: 'index-pattern',
+        });
+      }
     }
   }
 
@@ -223,6 +253,22 @@ function removeOrphanedAdHocDataViews(attributes: LensAttributes, internalRefere
   }
 }
 
+/**
+ * Switching between chart types in ES|QL mode leaves behind empty-column layers
+ * from previously selected charts (Check https://github.com/elastic/kibana/issues/243084).
+ * Only the active layer (in layerRemapping) survives the round-trip.
+ */
+function pruneEmptyColumnTextBasedLayers(attributes: LensAttributes) {
+  const textBasedLayers = attributes.state.datasourceStates.textBased?.layers;
+  if (!textBasedLayers) return;
+
+  for (const [layerId, layer] of Object.entries(textBasedLayers)) {
+    if (layer.columns.length === 0) {
+      delete textBasedLayers[layerId];
+    }
+  }
+}
+
 function normalizeAdHocDataViews(attributes: LensAttributes) {
   // Clear empty typeMeta objects
   for (const dv of Object.values(attributes.state.adHocDataViews ?? {})) {
@@ -254,12 +300,9 @@ function normalizeESQLQuery(attributes: LensAttributes) {
   const textBasedLayers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
   if (textBasedLayers.length > 0) {
     const layerQuery = textBasedLayers[0].query;
-    if (
-      layerQuery?.esql &&
-      attributes.state.query &&
-      'esql' in attributes.state.query &&
-      attributes.state.query.esql !== layerQuery.esql
-    ) {
+    // For ES|QL panels the layer query is authoritative; the transform always promotes it to the
+    // top-level state query, replacing any stale legacy query (even a different language).
+    if (layerQuery?.esql && attributes.state.query) {
       attributes.state.query = layerQuery;
     }
   }
@@ -286,10 +329,18 @@ function normalizeDescription(attributes: LensAttributes) {
 }
 
 /**
- * dataType cannot be preserved through transforms — it falls back to the
+ * dataType cannot always be preserved through transforms — it usually falls back to the
  * actual field type at runtime. These are the known remappings the transform applies.
+ *
+ * Some charts (e.g. datatable) can derive a more accurate dataType from extra context
+ * (color config, etc.) and provide it via `inferred`. When supplied, it overrides the
+ * generic fallback rules below; otherwise the default coercions are applied.
  */
-function normalizeDataTypes(col: GenericIndexPatternColumn) {
+function normalizeDataTypes(col: GenericIndexPatternColumn, inferred?: DataType) {
+  if (inferred !== undefined) {
+    col.dataType = inferred;
+    return;
+  }
   const { dataType, isBucketed, operationType } = col;
   if (operationType === 'terms' && dataType === 'number') {
     col.dataType = 'string';
@@ -374,14 +425,25 @@ function normalizeColumnReferences(
   }
 }
 
+export interface CommonNormalizerArgs {
+  layerRemapping: IdRemapping;
+  columnRemapping: IdRemapping;
+  /**
+   * Optional per-chart dataType inference. When provided and returns a value,
+   * it overrides the generic blanket coercions in `normalizeDataTypes`.
+   */
+  inferColumnDataType?: (newColumnId: string) => DataType | undefined;
+}
+
 export const getCommonNormalizer = <T extends LensAttributes>(
-  getArgs: (attributes: T) => { layerRemapping: IdRemapping; columnRemapping: IdRemapping }
+  getArgs: (attributes: T) => CommonNormalizerArgs
 ): NormalizerConfig<T> => ({
   order: -1,
   ignore: COMMON_STATE_IGNORE_PATHS,
   original: (attributes: T) => {
-    const { layerRemapping, columnRemapping } = getArgs(attributes);
+    const { layerRemapping, columnRemapping, inferColumnDataType } = getArgs(attributes);
 
+    pruneEmptyColumnTextBasedLayers(attributes);
     normalizeAdHocDataViews(attributes);
     normalizeESQLQuery(attributes);
     normalizeEmptyQuery(attributes);
@@ -408,8 +470,11 @@ export const getCommonNormalizer = <T extends LensAttributes>(
 
         if (layerIdMap.has(id)) {
           const newId = layerIdMap.get(id)!;
-          dsState.layers[newId] = layer;
-          delete dsState.layers[id];
+          // Avoid deleting the layer when the canonical id matches the current id
+          if (newId !== id) {
+            dsState.layers[newId] = layer;
+            delete dsState.layers[id];
+          }
         }
       }
 
@@ -425,6 +490,15 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               columnId: columnIdMap.get(column.columnId) ?? column.columnId,
             };
           });
+
+          // Datatable's ESQL output order is driven by `layer.columns` array order
+          // and uses its own canonical (rows → splits → metrics) sort in
+          // the datatable normalizer. For every other chart, alphabetical
+          // canonicalization is fine because column order does not drive
+          // rendering.
+          if (attributes.visualizationType !== 'lnsDatatable') {
+            layer.columns.sort((a, b) => a.columnId.localeCompare(b.columnId));
+          }
 
           if (layer.timeField) {
             layer.timeField = undefined; // not saved in API re-derived at runtime
@@ -472,9 +546,14 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               layer.linkToLayers = layer.linkToLayers?.map((l) => layerIdMap.get(l) ?? l);
             }
 
-            for (const col of Object.values(layer.columns)) {
+            for (const [columnId, col] of Object.entries(layer.columns)) {
               // scale is not preserved through transforms
               delete col.scale;
+
+              // Empty-string timeShift is semantically "no shift" and is dropped by the transform
+              if (col.timeShift === '') {
+                delete col.timeShift;
+              }
 
               // remap inner column references (e.g. orderBy.columnId in terms columns)
               const orderByCol = (col as any).params?.orderBy?.columnId;
@@ -483,7 +562,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               }
 
               normalizeColumnReferences(col, columnIdMap);
-              normalizeDataTypes(col);
+              normalizeDataTypes(col, inferColumnDataType?.(columnId));
             }
           }
           return ds;
@@ -516,6 +595,9 @@ export const getCommonNormalizer = <T extends LensAttributes>(
       Object.values(attributes.state.datasourceStates.formBased?.layers ?? {}).forEach((layer) => {
         layer.columnOrder.sort();
       });
+      Object.values(attributes.state.datasourceStates.textBased?.layers ?? {}).forEach((layer) => {
+        layer.columns.sort((a, b) => a.columnId.localeCompare(b.columnId));
+      });
     }
 
     return attributes;
@@ -523,15 +605,38 @@ export const getCommonNormalizer = <T extends LensAttributes>(
 });
 
 /**
+ * A named (non-`custom`) palette renders from `palette id + continuity + steps` alone. The stored
+ * stop positions, `colorStops`, and numeric bounds (`rangeMin`/`rangeMax`) are throwaway snapshots
+ * that the transform does not reproduce (it emits empty `stops` and lets the palette service
+ * resupply colors at render time). Drop those.
+ *
+ * `rangeType` is deliberately NOT dropped: it is deterministic per chart (`percent` everywhere
+ * except `legacy_metric` and single-value `metric`, which reconstruct as `number` via
+ * `useNumericRange`). Keeping it in the comparison enforces that each chart passes the correct
+ * `useNumericRange`; the `original` side defaults a missing `rangeType` to `'percent'` so legacy
+ * SOs that omit it still line up.
+ */
+function clearUnusedNamedPaletteParams(palette: PaletteOutput<CustomPaletteParams>) {
+  if (!palette.params) return;
+  delete palette.params.stops;
+  delete palette.params.colorStops;
+  delete palette.params.rangeMin;
+  delete palette.params.rangeMax;
+}
+
+/**
  * Normalized the palette params provided a string path to the palette(s) in the attributes
  *
  * This need to address:
- * - account for bad last color stop including shifting palettes :(
- * - defaulting missing rangeType
- * - defaulting missing continuity
+ * - named palettes: `palette id`, `continuity`, and `rangeType` are compared strictly (see
+ *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped.
+ * - custom palettes: account for the last color stop always becoming `rangeMax`, re-derive
+ *   `colorStops` from the normalized `stops`, and default the missing `rangeType`/`continuity`/bounds
+ *   the transform always derives.
  */
 export function getPaletteNormalizer<T extends LensAttributes>(
-  palettePath: string
+  palettePath: string,
+  isSingleValuePalette?: (attributes: T) => boolean
 ): NormalizerConfig<T> {
   return {
     original: (attributes: T) => {
@@ -540,62 +645,58 @@ export function getPaletteNormalizer<T extends LensAttributes>(
         palettePath
       ).filter(Boolean);
 
-      palettes.forEach((palette) => {
-        const rangeMin = getRangeValue(palette.params?.rangeMin);
-        const rangeMax = getRangeValue(palette.params?.rangeMax);
-
-        if (palette.params) {
-          // The SO→API transform always uses rangeMax as the last step's upper bound (lte),
-          // replacing the original stop value. The API→SO step then reconstructs the stop from lte,
-          // so the last stop always becomes rangeMax after the round-trip.
-          if (palette.params.stops) {
-            const isLegacy = palette.name !== 'custom';
-            const needsPaletteShift =
-              isLegacy &&
-              ((rangeMin !== null && rangeMin === palette.params.stops.at(0)?.stop) ||
-                (rangeMax !== null && rangeMax !== palette.params.stops.at(-1)?.stop));
-            const lastStop = palette.params.stops.at(-1);
-            if (lastStop && !needsPaletteShift) lastStop.stop = rangeMax as unknown as number; // can be null
-          }
-
-          if (!palette.params?.rangeType) {
-            palette.params.rangeType = 'percent';
-          }
-
-          if (!palette.params?.continuity) {
-            palette.params.continuity = getContinuity(rangeMin, rangeMax);
-          }
-
-          if (palette.name !== 'custom') {
-            delete palette.params.colorStops;
-          }
-
-          // Legacy SOs may omit params.name, but the transform always sets it from the root name
-          if (palette.params.name === undefined && palette.name) {
-            palette.params.name = palette.name;
-          }
-
-          // Legacy SOs may omit rangeMin/rangeMax, but the transform always derives them (can be null)
-          if (!('rangeMin' in palette.params)) {
-            palette.params.rangeMin = null as unknown as number;
-          }
-          if (!('rangeMax' in palette.params)) {
-            palette.params.rangeMax = null as unknown as number;
-          }
-        }
-      });
-
-      return attributes;
-    },
-    transformed: (attributes: T) => {
-      const palettes = getValues<PaletteOutput<CustomPaletteParams>>(
-        attributes,
-        palettePath
-      ).filter(Boolean);
+      const useNumericRange =
+        typeof isSingleValuePalette === 'function' ? isSingleValuePalette(attributes) : false;
 
       palettes.forEach((palette) => {
+        if (!palette.params) return;
+
+        const rangeMin = getRangeValue(palette.params.rangeMin);
+        const rangeMax = getRangeValue(palette.params.rangeMax);
+
         if (palette.name !== 'custom') {
-          delete palette.params?.colorStops;
+          // Continuity has no meaning for a distributed palette and is always set to 'none'
+          palette.params.continuity = 'none';
+
+          // The transform canonicalizes the legacy `complimentary` spelling to the GA palette id
+          // (`complementary`), matching runtime. Canonicalize the original side too so the
+          // round-trip identity holds.
+          const canonicalName =
+            palette.name === LEGACY_COMPLIMENTARY_PALETTE ? COMPLEMENTARY_PALETTE : palette.name;
+          palette.name = canonicalName;
+          palette.params.name = canonicalName;
+          palette.params.rangeType = useNumericRange ? 'number' : 'percent';
+          clearUnusedNamedPaletteParams(palette);
+          return;
+        }
+
+        // The SO→API transform always uses rangeMax as the last step's upper bound (lte),
+        // replacing the original stop value. The API→SO step then reconstructs the stop from lte,
+        // so the last stop always becomes rangeMax after the round-trip.
+        if (palette.params.stops) {
+          const lastStop = palette.params.stops.at(-1);
+          if (lastStop) lastStop.stop = rangeMax as unknown as number; // can be null
+        }
+
+        if (!palette.params.rangeType) {
+          palette.params.rangeType = 'percent';
+        }
+
+        if (!palette.params.continuity) {
+          palette.params.continuity = getContinuity(rangeMin, rangeMax);
+        }
+
+        // Legacy SOs may omit params.name, but the transform always sets it from the root name
+        if (palette.params.name === undefined && palette.name) {
+          palette.params.name = palette.name;
+        }
+
+        // Legacy SOs may omit rangeMin/rangeMax, but the transform always derives them (can be null)
+        if (!('rangeMin' in palette.params)) {
+          palette.params.rangeMin = null as unknown as number;
+        }
+        if (!('rangeMax' in palette.params)) {
+          palette.params.rangeMax = null as unknown as number;
         }
       });
 
@@ -607,5 +708,38 @@ export function getPaletteNormalizer<T extends LensAttributes>(
       'reverse', // typically unused or omitted
       'steps', // count of steps in original is not right
     ].map((param) => `${palettePath}.params.${param}`),
+  };
+}
+
+/**
+ * Returns a normalizer that pre-applies the lossy state -> API collapse that
+ * `fromRulesLensStateToAPI` performs on color-mapping rules.
+ *
+ * - `match` with `matchEntireWord: true` becomes a `raw` rule.
+ * - `match` with `matchEntireWord: false`, `regex`, and `range` rules are
+ *   runtime-dead (`getKey` returns `null`) and are stripped.
+ */
+export function getColorMappingNormalizer<T extends LensAttributes>(
+  colorMappingPath: string
+): NormalizerConfig<T> {
+  return {
+    original: (attributes: T) => {
+      const configs = getValues<ColorMapping.Config>(attributes, colorMappingPath).filter(Boolean);
+
+      configs.forEach((config) => {
+        for (const assignment of config.assignments) {
+          assignment.rules = assignment.rules.flatMap((rule): ColorMapping.ColorRule[] => {
+            if (rule.type === 'raw') return [rule];
+            if (rule.type === 'match' && rule.matchEntireWord === true) {
+              const value = rule.matchCase ? rule.pattern : rule.pattern.toLowerCase();
+              return [{ type: 'raw', value }];
+            }
+            return [];
+          });
+        }
+      });
+
+      return attributes;
+    },
   };
 }

@@ -12,6 +12,7 @@ import {
   EuiContextMenuPanel,
   EuiIcon,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleApiResponse } from '../../services/rules_api';
@@ -21,7 +22,7 @@ export interface RuleActionsMenuProps {
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
-  onToggleEnabled: (rule: RuleApiResponse) => void;
+  onToggleEnabled?: (rule: RuleApiResponse) => void;
 }
 
 export const RuleActionsMenu = ({
@@ -56,23 +57,29 @@ export const RuleActionsMenu = ({
     >
       {i18n.translate('xpack.alertingV2.rulesList.action.clone', { defaultMessage: 'Clone' })}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="toggleEnabled"
-      icon={<EuiIcon type={rule.enabled ? 'bellSlash' : 'bell'} size="m" aria-hidden={true} />}
-      onClick={() => {
-        setIsOpen(false);
-        onToggleEnabled(rule);
-      }}
-      data-test-subj={`toggleEnabledRule-${rule.id}`}
-    >
-      {rule.enabled
-        ? i18n.translate('xpack.alertingV2.rulesList.action.disable', {
-            defaultMessage: 'Disable',
-          })
-        : i18n.translate('xpack.alertingV2.rulesList.action.enable', {
-            defaultMessage: 'Enable',
-          })}
-    </EuiContextMenuItem>,
+    ...(onToggleEnabled
+      ? [
+          <EuiContextMenuItem
+            key="toggleEnabled"
+            icon={
+              <EuiIcon type={rule.enabled ? 'bellSlash' : 'bell'} size="m" aria-hidden={true} />
+            }
+            onClick={() => {
+              setIsOpen(false);
+              onToggleEnabled(rule);
+            }}
+            data-test-subj={`toggleEnabledRule-${rule.id}`}
+          >
+            {rule.enabled
+              ? i18n.translate('xpack.alertingV2.rulesList.action.disable', {
+                  defaultMessage: 'Disable',
+                })
+              : i18n.translate('xpack.alertingV2.rulesList.action.enable', {
+                  defaultMessage: 'Enable',
+                })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     <EuiContextMenuItem
       key="delete"
       icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
@@ -91,15 +98,22 @@ export const RuleActionsMenu = ({
   return (
     <EuiPopover
       button={
-        <EuiButtonIcon
-          iconType="boxesHorizontal"
-          aria-label={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
+        <EuiToolTip
+          content={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
             defaultMessage: 'More actions',
           })}
-          color="text"
-          onClick={() => setIsOpen((open) => !open)}
-          data-test-subj={`ruleActionsButton-${rule.id}`}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            aria-label={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
+              defaultMessage: 'More actions',
+            })}
+            color="text"
+            onClick={() => setIsOpen((open) => !open)}
+            data-test-subj={`ruleActionsButton-${rule.id}`}
+          />
+        </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}

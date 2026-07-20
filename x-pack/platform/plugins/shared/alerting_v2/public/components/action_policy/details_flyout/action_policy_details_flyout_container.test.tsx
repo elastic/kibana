@@ -25,14 +25,24 @@ const mockUnsnoozePolicy = jest.fn();
 const mockUpdateApiKey = jest.fn();
 const mockOnClose = jest.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') return { navigateToUrl: mockNavigateToUrl };
-    if (token === 'http') return { basePath: { prepend: mockBasePathPrepend } };
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+jest.mock('@kbn/core-di-browser', () => {
+  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
+    '../../../services/user_capabilities'
+  );
+  return {
+    useService: (token: unknown) => {
+      if (token === ActualUserCapabilities) {
+        return new ActualUserCapabilities({
+          capabilities: { alerting_v2_action_policies: { read: true, all: true } },
+        });
+      }
+      if (token === 'application') return { navigateToUrl: mockNavigateToUrl };
+      if (token === 'http') return { basePath: { prepend: mockBasePathPrepend } };
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
 
 jest.mock('../../../hooks/use_fetch_action_policy', () => ({
   useFetchActionPolicy: (...args: unknown[]) => mockUseFetchActionPolicy(...args),
@@ -187,8 +197,6 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     groupingMode: 'per_episode',
     enabled: true,
     tags: ['t1'],
-    type: 'global',
-    ruleId: undefined,
     matcher: undefined,
     groupBy: undefined,
     throttle: undefined,
@@ -266,9 +274,9 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
-  it('clones a single_rule policy carrying over the ruleId', async () => {
+  it('clones a rule-scoped policy carrying over the matcher', async () => {
     mockUseFetchActionPolicy.mockReturnValue({
-      data: buildPolicy({ type: 'single_rule', ruleId: 'rule-1' }),
+      data: buildPolicy({ matcher: 'rule.id: "rule-1"' }),
     });
     renderContainer();
 
@@ -277,8 +285,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
     expect(mockCreateActionPolicy).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'My Policy [clone]',
-        type: 'single_rule',
-        ruleId: 'rule-1',
+        matcher: 'rule.id: "rule-1"',
       })
     );
     expect(mockOnClose).toHaveBeenCalledTimes(1);

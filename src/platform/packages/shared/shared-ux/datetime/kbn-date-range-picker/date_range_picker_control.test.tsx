@@ -78,6 +78,111 @@ describe('DateRangePickerControl', () => {
       await waitForPopoverClose();
     });
 
+    it.each([
+      ['Next', '+'],
+      ['days', 'd'],
+    ])(
+      'selects the clicked future relative "%s" display part in the input',
+      async (text, selected) => {
+        renderWithEuiTheme(
+          <DateRangePicker {...defaultProps} defaultValue="+4d" onChange={() => {}} />
+        );
+
+        const displayPart = screen.getByText(text);
+        fireEvent.mouseDown(displayPart);
+        fireEvent.click(displayPart);
+
+        const input = (await screen.findByTestId('dateRangePickerInput')) as HTMLInputElement;
+        await waitFor(() => {
+          expect(input).toHaveFocus();
+          expect(input.value.slice(input.selectionStart ?? 0, input.selectionEnd ?? 0)).toBe(
+            selected
+          );
+        });
+
+        fireEvent.keyDown(input, { key: 'Escape' });
+        await waitForPopoverClose();
+      }
+    );
+
+    it('saves a relative range with its human-readable display label, not the raw input', async () => {
+      const onPresetSave = jest.fn();
+
+      renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} defaultValue="-2m" onPresetSave={onPresetSave} />
+      );
+
+      openEditing();
+      fireEvent.click(screen.getByTestId('dateRangePickerSavePresetButton'));
+
+      expect(onPresetSave).toHaveBeenCalledWith({
+        start: 'now-2m',
+        end: 'now',
+        label: 'Last 2 minutes',
+      });
+
+      await waitForPopoverClose();
+    });
+
+    it('derives readable input from bounds when selecting a preset with a display-only label', async () => {
+      const expectedInputText = 'May 1, 2026, 00:00:00.000 to May 2, 2026, 23:59:00.000';
+
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          defaultValue="last 20 minutes"
+          settings={{ roundRelativeTime: false, timePrecision: 'none' }}
+          presets={[
+            {
+              start: '2026-05-01T00:00:00.000Z',
+              end: '2026-05-02T23:59:00.000Z',
+              label: 'May 1, 00:00 → May 2, 23:59',
+            },
+          ]}
+        />
+      );
+
+      const input = openEditing();
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+      fireEvent.click(screen.getByText('May 1, 00:00 → May 2, 23:59'));
+
+      const selectedInput = openEditing() as HTMLInputElement;
+
+      expect(selectedInput.value).toBe(expectedInputText);
+      fireEvent.keyDown(selectedInput, { key: 'Escape' });
+      await waitForPopoverClose();
+    });
+
+    it('selects clicked no-year absolute display parts in the input', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-06-04T12:00:00.000Z'));
+
+      try {
+        renderWithEuiTheme(
+          <DateRangePicker
+            {...defaultProps}
+            defaultValue="-4d to Jun 4, 2026, 00:00"
+            onChange={() => {}}
+          />
+        );
+        jest.useRealTimers();
+
+        const displayPart = screen.getAllByText('00')[0];
+        fireEvent.mouseDown(displayPart);
+        fireEvent.click(displayPart);
+
+        const input = (await screen.findByTestId('dateRangePickerInput')) as HTMLInputElement;
+        await waitFor(() => {
+          expect(input).toHaveFocus();
+          expect(input.value.slice(input.selectionStart ?? 0, input.selectionEnd ?? 0)).toBe('00');
+        });
+
+        fireEvent.keyDown(input, { key: 'Escape' });
+        await waitForPopoverClose();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
     it('keeps the clicked display part visible when the input is scrolled', async () => {
       const animationFrameCallbacks: FrameRequestCallback[] = [];
       const requestAnimationFrameSpy = jest
@@ -354,6 +459,25 @@ describe('DateRangePickerControl', () => {
 
     it('does not enter editing mode when disabled', () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} disabled />);
+
+      fireEvent.click(screen.getByTestId('dateRangePickerControlButton'));
+      expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('readOnly prop', () => {
+    it('disables the control button but keeps the tooltip available', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} readOnly />);
+
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).toBeDisabled();
+
+      fireEvent.mouseOver(button);
+      expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    });
+
+    it('does not enter editing mode when readOnly', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} readOnly />);
 
       fireEvent.click(screen.getByTestId('dateRangePickerControlButton'));
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
@@ -702,6 +826,30 @@ describe('DateRangePickerControl', () => {
       fireEvent.keyDown(screen.getByTestId('dateRangePickerInput'), { key: 'Escape' });
 
       await waitForPopoverClose();
+    });
+
+    it('remains interactive when readOnly is true, unlike the control button', () => {
+      const onSettingsChange = jest.fn();
+
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          onRefresh={onRefresh}
+          settings={{ ...autoRefreshSettings }}
+          onSettingsChange={onSettingsChange}
+          readOnly
+        />
+      );
+
+      expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
+
+      fireEvent.click(screen.getByTestId('dateRangePickerAutoRefreshButton'));
+
+      expect(onSettingsChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          autoRefresh: expect.objectContaining({ isPaused: true }),
+        })
+      );
     });
 
     it('calls `onRefresh` on each interval while `settings.autoRefresh` is active', () => {

@@ -16,15 +16,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
+import { isActivePlatinumLicense } from '../../../../../common/license_check';
 import { ApmEmbeddableContext } from '../../../../embeddable/embeddable_context';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
+import { SERVICE_FLYOUT_SOURCES } from '../../../shared/service_flyout/constants';
 import { useApmEmbeddableDeps } from '../../context/apm_embeddable_deps_context';
 import type { AlertDetailsAppSectionProps } from '../alert_details_app_section/types';
 import { getServiceMapTimeRange } from './get_service_map_time_range';
@@ -43,6 +48,9 @@ const EMBEDDABLE_HEIGHT = 400;
 
 export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionProps) {
   const embeddableDeps = useApmEmbeddableDeps();
+  const license = useObservable(
+    embeddableDeps ? embeddableDeps.pluginsStart.licensing.license$ : EMPTY
+  );
 
   const serviceName =
     alert.fields[SERVICE_NAME] != null ? String(alert.fields[SERVICE_NAME]) : undefined;
@@ -79,9 +87,34 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
     return pills;
   }, [alert]);
 
+  const flyoutOptions = useMemo(() => {
+    const transactionTypeField = alert.fields[TRANSACTION_TYPE];
+
+    const rawTransactionType = Array.isArray(transactionTypeField)
+      ? transactionTypeField[0]
+      : transactionTypeField;
+
+    const paddedRange = alertStart
+      ? getPaddedAlertTimeRange(String(alertStart), alertEnd != null ? String(alertEnd) : undefined)
+      : undefined;
+
+    return {
+      kuery: '',
+      initialTransactionType: rawTransactionType != null ? String(rawTransactionType) : undefined,
+      rangeFrom: paddedRange?.from,
+      rangeTo: paddedRange?.to,
+      source: SERVICE_FLYOUT_SOURCES.alertDetails,
+    };
+  }, [alert, alertStart, alertEnd]);
+
   const [hasNoServices, setHasNoServices] = useState(false);
 
   if (!embeddableDeps || !serviceName || !timeRanges || hasNoServices) {
+    return null;
+  }
+
+  // hide service map section without Platinum license or service map enabled.
+  if (!license || !isActivePlatinumLicense(license) || !embeddableDeps.config.serviceMapEnabled) {
     return null;
   }
 
@@ -165,6 +198,7 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
                 core={embeddableDeps.coreStart}
                 onEmptyStateChange={setHasNoServices}
                 filterPills={filterPills}
+                flyoutOptions={flyoutOptions}
               />
             </ApmEmbeddableContext>
           </EuiPanel>

@@ -22,7 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { partition } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -217,7 +217,7 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
         </EuiFlexGroup>
       }
       arrowDisplay={allValidationErrors?.length > 0 ? 'left' : 'none'}
-      initialIsOpen={allValidationErrors?.length > 0}
+      initialIsOpen={false}
       isDisabled={allValidationErrors?.length === 0}
       css={styles.accordion}
       extraAction={extraAction}

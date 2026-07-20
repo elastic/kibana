@@ -24,10 +24,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
-  AgentVisibility,
+  AgentAccessControlMode,
   AGENT_BUILDER_UI_EBT,
-  VISIBILITY_BADGE_COLOR,
-  VISIBILITY_ICON,
+  ACCESS_CONTROL_MODE_BADGE_COLOR,
+  ACCESS_CONTROL_MODE_ICON,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -50,14 +50,14 @@ const { editDetails: flyoutLabels } = labels.agentOverview;
 interface EditDetailsFlyoutProps {
   agent: AgentDefinition;
   onClose: () => void;
-  canChangeVisibility: boolean;
+  canChangeAccessControlMode: boolean;
   showWorkflowSection: boolean;
 }
 
 export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
   agent,
   onClose,
-  canChangeVisibility,
+  canChangeAccessControlMode,
   showWorkflowSection,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -73,7 +73,9 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       avatar_symbol: agent.avatar_symbol ?? '',
       avatar_color: agent.avatar_color ?? '',
       labels: agent.labels ?? [],
-      visibility: agent.visibility ?? AgentVisibility.Private,
+      access_control: {
+        access_mode: agent.access_control?.access_mode ?? AgentAccessControlMode.Private,
+      },
       configuration: {
         enable_elastic_capabilities: agent.configuration?.enable_elastic_capabilities ?? false,
         workflow_ids: agent.configuration?.workflow_ids ?? [],
@@ -93,7 +95,9 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         avatar_symbol: data.avatar_symbol || undefined,
         avatar_color: data.avatar_color || undefined,
         labels: data.labels,
-        visibility: data.visibility,
+        // Send only the access mode; the update endpoint's schema rejects `entries`, which
+        // are managed via the dedicated access-control endpoint.
+        access_control: { access_mode: data.access_control.access_mode },
         configuration: {
           enable_elastic_capabilities: data.configuration.enable_elastic_capabilities,
           workflow_ids: data.configuration.workflow_ids,
@@ -111,7 +115,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
     },
   });
 
-  const isShared = (agent.visibility as AgentVisibility) === AgentVisibility.Shared;
+  const isShared = agent.access_control?.access_mode === AgentAccessControlMode.Shared;
 
   const contentPadding = css`
     padding: ${euiTheme.size.s};
@@ -142,8 +146,8 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
                   <span>
                     {flyoutLabels.sharedWarningPrefix}
                     <EuiBadge
-                      iconType={VISIBILITY_ICON[AgentVisibility.Shared]}
-                      color={VISIBILITY_BADGE_COLOR[AgentVisibility.Shared]}
+                      iconType={ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Shared]}
+                      color={ACCESS_CONTROL_MODE_BADGE_COLOR[AgentAccessControlMode.Shared]}
                     >
                       {flyoutLabels.sharedWarningBadge}
                     </EuiBadge>
@@ -159,7 +163,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
             <IdentificationSection />
 
             <EuiHorizontalRule margin="xl" />
-            <AccessSection canChangeVisibility={canChangeVisibility} />
+            <AccessSection canChangeAccessControlMode={canChangeAccessControlMode} />
 
             <EuiHorizontalRule margin="xl" />
             <CustomizationSection showWorkflowSection={showWorkflowSection} />

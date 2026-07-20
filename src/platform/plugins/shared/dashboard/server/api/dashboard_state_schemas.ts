@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
+import { asCodeQuerySchema, getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
 import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
-import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
 import { getControlsGroupSchema } from '@kbn/controls-schemas';
+import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
-import { embeddableService } from '../kibana_services';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
+import { isDashboardSection } from '../../common';
 import {
+  DEFAULT_DASHBOARD_OPTIONS,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
-  DEFAULT_DASHBOARD_OPTIONS,
 } from '../../common/constants';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
+import { embeddableService } from '../kibana_services';
+import type { DashboardPanel, DashboardSection } from './types';
 
-const MAX_PANELS = 100;
+const MAX_PANELS = 1000;
 
 export const panelGridSchema = schema.object(
   {
@@ -237,7 +239,9 @@ export function getDashboardStateSchema(
     {
       pinned_panels: getPinnedPanelsSchema(isDashboardAppRequest, isReadRequest),
       description: schema.maybe(
-        schema.string({ meta: { description: 'A short description of the dashboard.' } })
+        schema.string({
+          meta: { description: 'A short description of the dashboard.' },
+        })
       ),
       filters: schema.maybe(
         schema.arrayOf(asCodeFilterSchema, {
@@ -274,13 +278,21 @@ export function getDashboardStateSchema(
           },
         })
       ),
+      esql_approximation: schema.maybe(
+        schema.boolean({
+          meta: {
+            description:
+              'When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.',
+          },
+        })
+      ),
       query: schema.maybe(asCodeQuerySchema),
       refresh_interval: schema.maybe(refreshIntervalSchema),
       tags: schema.maybe(
-        schema.arrayOf(schema.string(), {
-          maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : 100,
-          meta: { description: 'Tag IDs to associate with this dashboard.' },
-        })
+        getAsCodeTagsSchema(
+          'Tag IDs to associate with this dashboard.',
+          isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : undefined
+        )
       ),
       time_range: schema.maybe(timeRangeSchema),
       title: schema.string({
@@ -293,6 +305,27 @@ export function getDashboardStateSchema(
       meta: {
         id: isDashboardAppRequest ? 'kbn-dashboard-app-data' : 'kbn-dashboard-data',
       },
+      validate: (dashboardState) => {
+        if (isDashboardAppRequest) return;
+        const panelCount = countPanels(dashboardState.panels);
+        const allPanelCount = panelCount + (dashboardState.pinned_panels?.length ?? 0);
+        return allPanelCount > MAX_PANELS
+          ? `Dashboard contains ${allPanelCount} panels, pinned panels, and sections, which exceeds the maximum of ${MAX_PANELS}.`
+          : undefined;
+      },
     }
   );
+}
+
+function countPanels(panels: Array<DashboardPanel | DashboardSection>): number {
+  let count = 0;
+  for (const panel of panels) {
+    if (isDashboardSection(panel)) {
+      count++; // count the section itself as a panel
+      count += countPanels(panel.panels);
+    } else {
+      count++;
+    }
+  }
+  return count;
 }

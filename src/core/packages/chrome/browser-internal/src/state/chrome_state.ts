@@ -72,6 +72,7 @@ export interface ChromeState {
   contextSwitcher: State<ReactNode>;
   inlineAppHeader: State<boolean>;
   appHeader: State<AppHeaderConfig | undefined>;
+  userMenu: State<ReactNode>;
 
   /** Help system */
   help: {
@@ -127,6 +128,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const contextSwitcher = createState<ReactNode>(null);
   const inlineAppHeader = createState<boolean>(false);
   const appHeader = createState<AppHeaderConfig | undefined>(undefined);
+  const userMenu = createState<ReactNode>(null);
 
   // Help System
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
@@ -169,6 +171,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       globalMenuLinks: globalHelpMenuLinks,
     },
     contextSwitcher,
+    userMenu,
     feedbackHandler,
     newsfeedHandler,
   };

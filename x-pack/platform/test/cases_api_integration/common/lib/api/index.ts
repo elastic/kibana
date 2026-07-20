@@ -52,7 +52,7 @@ import type {
   GetRelatedCasesByAlertResponse,
   SimilarCasesSearchRequest,
   UpdateObservableRequest,
-  UserActionFindRequest,
+  UserActionInternalFindRequest,
   UserActionInternalFindResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import {
@@ -74,7 +74,6 @@ export * from './omit';
 export * from './configuration';
 export * from './files';
 export * from './telemetry';
-export * from './observables';
 
 export { getSpaceUrlPrefix } from './helpers';
 
@@ -148,7 +147,6 @@ export const deleteAllCaseItems = async (es: Client) => {
     deleteCasesByESQuery(es),
     deleteCasesUserActions(es),
     deleteComments(es),
-    deleteUnifiedAttachments(es),
     deleteConfiguration(es),
     deleteMappings(es),
     deleteTemplates(es),
@@ -187,6 +185,9 @@ export const deleteComments = async (es: Client): Promise<void> => {
     body: {},
     conflicts: 'proceed',
   });
+  // Attachments live in either the legacy `cases-comments` or the unified
+  // `cases-attachments` SO (feature-flag dependent), so clear both.
+  await deleteUnifiedAttachments(es);
 };
 
 export const deleteUnifiedAttachments = async (es: Client): Promise<void> => {
@@ -935,7 +936,7 @@ export const findInternalCaseUserActions = async ({
 }: {
   supertest: SuperTest.Agent;
   caseID: string;
-  options?: UserActionFindRequest;
+  options?: UserActionInternalFindRequest;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<UserActionInternalFindResponse> => {

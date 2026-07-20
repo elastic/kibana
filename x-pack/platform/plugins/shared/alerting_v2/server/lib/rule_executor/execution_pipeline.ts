@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable, multiInject } from 'inversify';
 import type {
   RuleExecutionInput,
@@ -20,9 +19,17 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
-import { EsServiceInternalToken } from '../services/es_service/tokens';
-import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
 import { createExecutionContext } from '../execution_context';
+import type {
+  MetricCollector,
+  MetricCollectorFactoryContract,
+  RuleExecutionMetricsSnapshot,
+} from './metrics/types';
+import { MetricCollectorFactoryToken } from './metrics/tokens';
+import {
+  RuleExecutorEventPublisher,
+  type RuleExecutorEventPublisherContract,
+} from '../events/rule_executor_event_publisher/rule_executor_event_publisher';
 
 /**
  * Raw input from the task runner.
@@ -39,6 +46,7 @@ export interface RuleExecutionPipelineResult {
   readonly completed: boolean;
   readonly haltReason?: HaltReason;
   readonly finalState: RulePipelineState;
+  readonly metrics: RuleExecutionMetricsSnapshot;
 }
 
 export interface RuleExecutionPipelineContract {
@@ -49,14 +57,19 @@ export interface RuleExecutionPipelineContract {
 export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
     @multiInject(RuleExecutionStepsToken) private readonly steps: RuleExecutionStep[],
     @multiInject(RuleExecutionMiddlewaresToken)
-    private readonly middlewares: RuleExecutionMiddleware[]
+    private readonly middlewares: RuleExecutionMiddleware[],
+    @inject(MetricCollectorFactoryToken)
+    private readonly metricCollectorFactory: MetricCollectorFactoryContract,
+    @inject(RuleExecutorEventPublisher)
+    private readonly eventPublisher: RuleExecutorEventPublisherContract
   ) {}
 
   public async execute(rawInput: RuleExecutionPipelineInput): Promise<RuleExecutionPipelineResult> {
     const executionContext = createExecutionContext(rawInput.abortSignal);
+    const collector = this.metricCollectorFactory.create();
+
     const input: RuleExecutionInput = {
       ruleId: rawInput.ruleId,
       spaceId: rawInput.spaceId,
@@ -71,48 +84,40 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
     })();
 
     for (const step of this.steps) {
-      this.logger.debug({ message: `RuleExecutor: Executing step: ${step.name}` });
-      stream = this.runMiddlewareChain({ step }, stream);
+      stream = this.runMiddlewareChain({ step, collector }, stream);
     }
 
-    for await (const result of stream) {
-      pipelineState = result.state;
-
-      if (result.type === 'halt') {
-        this.logger.debug({
-          message: `RuleExecutor: Pipeline halted at step: ${result.reason}`,
-        });
-
-        return {
-          completed: false,
-          haltReason: result.reason,
-          finalState: pipelineState,
-        };
-      }
-    }
-
-    await this.refreshIndices();
-
-    return {
-      completed: true,
-      finalState: pipelineState,
-    };
-  }
-
-  /**
-   * Refreshes write indices once after the entire stream has been consumed,
-   * so documents written with `refresh: false` become searchable.
-   * Failures are logged but never propagate — the data is already persisted.
-   */
-  private async refreshIndices(): Promise<void> {
+    let snapshot: RuleExecutionMetricsSnapshot | undefined;
     try {
-      await this.esClient.indices.refresh({ index: ALERT_EVENTS_DATA_STREAM });
-    } catch (error) {
-      this.logger.error({
-        error,
-        code: 'INDEX_REFRESH_ERROR',
-        type: 'RuleExecutionPipelineError',
-      });
+      for await (const result of stream) {
+        pipelineState = result.state;
+
+        if (result.type === 'halt') {
+          this.logger.debug({
+            message: `RuleExecutor: Pipeline halted at step: ${result.reason}`,
+          });
+
+          snapshot = collector.finalize();
+          return {
+            completed: false,
+            haltReason: result.reason,
+            finalState: pipelineState,
+            metrics: snapshot,
+          };
+        }
+      }
+
+      snapshot = collector.finalize();
+      return {
+        completed: true,
+        finalState: pipelineState,
+        metrics: snapshot,
+      };
+    } finally {
+      if (!snapshot) {
+        snapshot = collector.finalize();
+      }
+      this.publishExecutionCompleted(rawInput, collector, snapshot);
     }
   }
 
@@ -136,5 +141,30 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
     );
 
     return chain(input);
+  }
+
+  private publishExecutionCompleted(
+    rawInput: RuleExecutionPipelineInput,
+    collector: MetricCollector,
+    snapshot: RuleExecutionMetricsSnapshot
+  ): void {
+    try {
+      this.eventPublisher.publishExecutionCompleted({
+        executionId: collector.executionId,
+        ruleId: rawInput.ruleId,
+        spaceId: rawInput.spaceId,
+        scheduledAt: rawInput.scheduledAt,
+        startedAt: snapshot.startedAt,
+        endedAt: snapshot.endedAt,
+        durationMs: snapshot.durationMs,
+        counters: snapshot.counters,
+      });
+    } catch (error) {
+      this.logger.warn({
+        message: `[rule_executor] Failed to publish rule.execution.completed event: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      });
+    }
   }
 }

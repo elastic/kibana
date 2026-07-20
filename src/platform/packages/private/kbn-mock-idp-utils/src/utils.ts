@@ -275,7 +275,7 @@ export async function ensureSAMLRoleMapping(client: Client) {
 }
 
 export function generateCosmosDBApiRequestHeaders(
-  httpVerb: 'POST' | 'PUT',
+  httpVerb: 'POST' | 'PUT' | 'DELETE',
   resourceType: 'dbs' | 'colls' | 'docs',
   resourceId: string
 ) {

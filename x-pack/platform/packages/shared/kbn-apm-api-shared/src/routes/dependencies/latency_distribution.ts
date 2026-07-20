@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
 import type { OverallLatencyDistributionResponse } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt, kueryRt } from '../../default_api_types';
+import { rangeSchema, kuerySchema } from '../../default_api_types';
 
 export interface DependencyLatencyDistributionResponse {
   allSpansDistribution: OverallLatencyDistributionResponse;
@@ -19,16 +18,15 @@ export interface DependencyLatencyDistributionResponse {
 export const dependencyLatencyDistributionRoute =
   defineRoute<DependencyLatencyDistributionResponse>()({
     endpoint: 'GET /internal/apm/dependencies/charts/distribution',
-    params: t.type({
-      query: t.intersection([
-        t.type({
-          dependencyName: t.string,
-          spanName: t.string,
-          percentileThreshold: toNumberRt,
-        }),
-        rangeRt,
-        kueryRt,
-        environmentRt,
-      ]),
+    params: z.object({
+      query: z
+        .object({
+          dependencyName: z.string(),
+          spanName: z.string(),
+          percentileThreshold: z.coerce.number(),
+        })
+        .merge(rangeSchema)
+        .merge(kuerySchema)
+        .merge(environmentSchema),
     }),
   });

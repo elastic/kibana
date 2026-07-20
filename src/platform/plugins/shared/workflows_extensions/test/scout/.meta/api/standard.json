@@ -1,5 +1,5 @@
 {
-  "sha1": "c75754f929880582f2fe2c5f76f73c71429a91cb",
+  "sha1": "8f8235b7125a37876e584766f3e40add4ed74498",
   "tests": [
     {
       "id": "2e9661be655a029-bbe4bc87d5491d8",
@@ -21,8 +21,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/step_definitions_approval.spec.ts",
-        "line": 36,
-        "column": 12
+        "line": 68,
+        "column": 20
       }
     },
     {
