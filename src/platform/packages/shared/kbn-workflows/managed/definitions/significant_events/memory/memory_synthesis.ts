@@ -10,12 +10,13 @@
 import MEMORY_SYNTHESIS_YAML from './memory_synthesis.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID = 'system-streams-memory-synthesis';
+export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID =
+  'system-significant-events-memory-synthesis';
 
 export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   pluginId: 'significant_events',
-  version: 2,
+  version: 3,
   billable: false,
   yaml: MEMORY_SYNTHESIS_YAML,
   management: {

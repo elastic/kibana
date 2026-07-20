@@ -63,8 +63,11 @@ export const createContextAwarenessToolkit = ({
       ): ProfileStateAdapter<TState> => {
         const getState = () => {
           const tabState = selectTab(internalState.getState(), tabId);
+          const profileState = tabState.profileState[definition.key];
 
-          return (tabState.profileState[definition.key] ?? definition.defaultState) as TState;
+          return profileState
+            ? { ...definition.defaultState, ...profileState }
+            : definition.defaultState;
         };
 
         const state$ = from(internalState).pipe(
@@ -76,21 +79,23 @@ export const createContextAwarenessToolkit = ({
         return {
           getState,
           getState$: () => state$,
-          setState: (profileState) => {
+          setState: (profileState, options) => {
             internalState.dispatch(
               internalStateActions.setProfileState({
                 tabId,
-                key: definition.key,
+                profileStateDefinition: definition,
                 profileState,
+                historyMethod: options?.historyMethod,
               })
             );
           },
-          updateState: (stateUpdate) => {
+          updateState: (stateUpdate, options) => {
             internalState.dispatch(
               internalStateActions.setProfileState({
                 tabId,
-                key: definition.key,
+                profileStateDefinition: definition,
                 profileState: { ...getState(), ...stateUpdate },
+                historyMethod: options?.historyMethod,
               })
             );
           },
