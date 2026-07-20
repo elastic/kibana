@@ -15,6 +15,7 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { disableNewFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import { expandAlertAtIndexExpandableFlyout } from '../../../tasks/expandable_flyout/common';
 import {
   clickAnalyzerPreviewTitle,
@@ -52,6 +53,7 @@ describe(
   },
   () => {
     beforeEach(() => {
+      disableNewFlyout();
       deleteAlertsAndRules();
       createRule(getNewRule());
       login();
