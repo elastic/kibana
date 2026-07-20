@@ -135,7 +135,7 @@ export function createTaskRunnerFactory({
 
         const injection = await waitForInjection(
           injectionPromise,
-          abortController.signal,
+          signal,
           taskType,
           taskInstance.id
         );
