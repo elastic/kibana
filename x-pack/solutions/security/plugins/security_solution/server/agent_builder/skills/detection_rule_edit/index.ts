@@ -103,8 +103,8 @@ ${
 After creating a new rule or modifying its query or schedule, call \`security.run_rule_preview\` with a **CLI-style \`command\` string** (not a rule object).
 
 **Index discovery (before create and preview):**
-- If the user did not name an index, call \`generate_esql\` or \`list_indices\` to find indices with matching data **before** \`security.create_detection_rule\`.
-- Do not guess an index (for example \`logs-aws.cloudtrail-default\`) and do not stop with "could not find a suitable index" without running those tools first.
+- If the user did not name an index, call \`list_indices\` first to enumerate available indices. \`list_indices\` is cheap (metadata only) — prefer it for discovery. Only call \`generate_esql\` if you additionally need to probe field names or sample values.
+- Do not guess an index (for example \`logs-aws.cloudtrail-default\`) and do not stop with "could not find a suitable index" without running \`list_indices\` first.
 
 **Build the preview command:**
 1. \`attachment_read\` the rule attachment and parse the \`text\` JSON.
@@ -126,7 +126,7 @@ esql --query "FROM logs-endpoint.events.process-default\\n| WHERE event.outcome 
 \`\`\`
 
 - The tool stores results as a rule preview attachment. Render it inline after the call.
-- **Zero alerts is not success.** If preview returns zero alerts, run \`generate_esql\` to verify index, fields, and data in the timeframe, fix the query or index, then preview again before concluding the rule is correct.
+- **Zero alerts is not success.** First re-preview with a wider timeframe (e.g. \`--timeframe-start now-24h\`). If still zero, run \`generate_esql\` against the rule's index to verify the fields and data exist in the timeframe, fix the query or index, then preview again before concluding the rule is correct.
 `
     : ''
 }

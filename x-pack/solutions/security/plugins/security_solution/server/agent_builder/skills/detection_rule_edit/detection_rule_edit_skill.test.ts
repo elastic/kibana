@@ -126,14 +126,20 @@ describe('getDetectionRuleEditSkill', () => {
       expect(content).toMatch(/Do \*\*not\*\*.*embed newline characters/i);
     });
 
-    it('forbids guessing an index and requires discovery tools first', () => {
-      expect(content).toMatch(/generate_esql|list_indices/);
+    it('forbids guessing an index and prefers lightweight list_indices for discovery', () => {
+      // generate_esql is a heavy NL->ES|QL LLM tool; list_indices is metadata-only.
+      // Discovery should lead with list_indices, with generate_esql reserved for
+      // probing fields/sample values.
+      expect(content).toMatch(/list_indices/i);
       expect(content).toMatch(/Do not guess an index/i);
     });
 
     it('treats zero-preview-alerts as not-success and requires re-verification', () => {
       expect(content).toMatch(/Zero alerts is not success/i);
       expect(content).toMatch(/generate_esql/);
+      // Escalation should first try a wider timeframe (cheap) before the heavy
+      // generate_esql probe.
+      expect(content).toMatch(/wider timeframe/i);
     });
 
     it('adds the preview checklist item only on this branch', () => {
