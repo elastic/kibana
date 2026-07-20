@@ -72,6 +72,7 @@ import { stopAndRemoveV1, stopAndRemoveV1SharedTasks } from '../../infra/remove_
 interface AssetManagerDependencies {
   logger: Logger;
   esClient: ElasticsearchClient;
+  internalEsClient: ElasticsearchClient;
   taskManager: TaskManagerStartContract;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
@@ -87,6 +88,7 @@ interface AssetManagerDependencies {
 export class AssetManagerClient {
   private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
+  private readonly internalEsClient: ElasticsearchClient;
   private readonly taskManager: TaskManagerStartContract;
   private readonly engineDescriptorClient: EngineDescriptorClient;
   private readonly globalStateClient: EntityStoreGlobalStateClient;
@@ -101,6 +103,7 @@ export class AssetManagerClient {
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
     this.esClient = deps.esClient;
+    this.internalEsClient = deps.internalEsClient;
     this.taskManager = deps.taskManager;
     this.engineDescriptorClient = deps.engineDescriptorClient;
     this.globalStateClient = deps.globalStateClient;
@@ -137,6 +140,7 @@ export class AssetManagerClient {
             namespace: this.namespace,
             logger: this.logger,
             esClient: this.esClient,
+            internalEsClient: this.internalEsClient,
             taskManager: this.taskManager,
             savedObjectsClient: this.savedObjectsClient,
           })

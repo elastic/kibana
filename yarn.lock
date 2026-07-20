@@ -6832,19 +6832,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/entities-schema@link:x-pack/platform/packages/shared/kbn-entities-schema":
-  version "0.0.0"
-  uid ""
-
-"@kbn/entity-manager-fixture-plugin@link:x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin":
-  version "0.0.0"
-  uid ""
-
 "@kbn/entity-store@link:x-pack/solutions/security/plugins/entity_store":
-  version "0.0.0"
-  uid ""
-
-"@kbn/entityManager-plugin@link:x-pack/platform/plugins/shared/entity_manager":
   version "0.0.0"
   uid ""
 

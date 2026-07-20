@@ -121,6 +121,7 @@ export async function createAssetManagerClient({
     assetManagerClient: new AssetManagerClient({
       logger,
       esClient,
+      internalEsClient: coreStart.elasticsearch.client.asInternalUser,
       taskManager: pluginsStart.taskManager,
       engineDescriptorClient,
       globalStateClient,

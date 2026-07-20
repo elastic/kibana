@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EntityType } from '../../common';
@@ -16,9 +16,19 @@ interface StopAndRemoveV1Params {
   namespace: string;
   logger: Logger;
   esClient: ElasticsearchClient;
+  internalEsClient: ElasticsearchClient;
   taskManager: TaskManagerStartContract;
   savedObjectsClient: SavedObjectsClientContract;
 }
+
+/**
+ * Returns the raw Elasticsearch document id for a legacy v1 `entity-definition`
+ * saved object. The `entity-definition` SO type is no longer registered, so we
+ * cannot use `savedObjectsClient.delete` for it — instead we delete the
+ * underlying document directly via the internal ES client.
+ */
+const getV1EntityDefinitionSoId = (namespace: string, definitionId: string): string =>
+  SavedObjectsUtils.getConvertedObjectId(namespace, 'entity-definition', definitionId);
 
 interface StopAndRemoveV1SharedTasksParams {
   namespace: string;
@@ -33,6 +43,7 @@ export async function stopAndRemoveV1({
   namespace,
   logger,
   esClient,
+  internalEsClient,
   taskManager,
   savedObjectsClient,
 }: StopAndRemoveV1Params) {
@@ -44,6 +55,7 @@ export async function stopAndRemoveV1({
         namespace,
         logger,
         esClient,
+        internalEsClient,
         taskManager,
         savedObjectsClient,
       });
@@ -65,6 +77,7 @@ async function stopAndRemoveV1Once({
   namespace,
   logger,
   esClient,
+  internalEsClient,
   taskManager,
   savedObjectsClient,
 }: StopAndRemoveV1Params) {
@@ -138,15 +151,10 @@ async function stopAndRemoveV1Once({
     tryAsBoolean(esClient.indices.delete({ index: resetIndex }, { ignore: [404] })),
     tryAsBoolean(esClient.indices.deleteDataStream({ name: updatesDataStream }, { ignore: [404] })),
     tryAsBoolean(
-      savedObjectsClient.delete('entity-definition', definitionId).catch((error) => {
-        if (
-          SavedObjectsErrorHelpers.isNotFoundError(error) ||
-          SavedObjectsErrorHelpers.isForbiddenError(error)
-        ) {
-          return;
-        }
-        throw error;
-      })
+      internalEsClient.delete(
+        { index: '.kibana', id: getV1EntityDefinitionSoId(namespace, definitionId) },
+        { ignore: [404] }
+      )
     ),
     tryAsBoolean(
       savedObjectsClient.delete('entity-engine-status', v1EngineDescriptorId).catch((error) => {
