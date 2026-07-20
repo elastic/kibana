@@ -30,6 +30,9 @@ jest.mock('../components/flyout_provider', () => ({
 jest.mock('../../document/main', () => ({
   DocumentFlyout: () => <div data-test-subj="documentFlyoutMock" />,
 }));
+jest.mock('../../attack/main/attack_flyout_wrapper', () => ({
+  AttackFlyoutWrapper: () => <div data-test-subj="attackFlyoutWrapperMock" />,
+}));
 jest.mock('../../document/main/components/severity', () => ({
   DocumentSeverity: () => <div data-test-subj="documentSeverityMock" />,
 }));
@@ -54,6 +57,12 @@ const eventHit = createHit({
   'event.kind': 'event',
   'event.category': 'host',
   'host.name': 'host-1',
+});
+
+const attackHit = createHit({
+  'event.kind': 'signal',
+  'kibana.alert.rule.rule_type_id': 'attack-discovery',
+  'kibana.alert.attack_discovery.title': 'My Attack',
 });
 
 describe('useDocumentFlyoutTitle', () => {
@@ -83,6 +92,31 @@ describe('useDocumentFlyoutTitle', () => {
 
     expect(result.current.label).toBe('host-1');
     expect(result.current.iconType).toBe('analyzeEvent');
+  });
+
+  it('derives the attack name and bolt icon for attack documents', () => {
+    const { result } = renderHook(() => useDocumentFlyoutTitle({ hit: attackHit }));
+
+    expect(result.current.label).toBe('My Attack');
+    expect(result.current.iconType).toBe('bolt');
+  });
+
+  it('opens the attack flyout with an "Attack" title for attack documents', () => {
+    const { result } = renderHook(() => useDocumentFlyoutTitle({ hit: attackHit }));
+
+    act(() => {
+      result.current.onTitleClick();
+    });
+
+    expect(openSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'inherit',
+        title: 'Attack: My Attack',
+      })
+    );
   });
 
   it('opens the document flyout with documentFlyoutHistoryKey and session inherit when in the Security app', () => {
