@@ -36,6 +36,10 @@ export interface OpencodeTimelineItem {
   filePath?: string;
   fileContent?: string;
   fileLanguage?: string;
+  /** Optional EUI icon override for this specific activity item. */
+  iconType?: string;
+  /** Optional product badge treatment for credential/infrastructure rows. */
+  credentialIconVariant?: 'secured' | 'compute';
   /** Connector instance id for `kibana` connector calls (renders its icon). */
   connectorId?: string;
 }
@@ -62,12 +66,16 @@ const topMargin = css`
 const StatusIcon: React.FC<{
   status?: OpencodeTimelineItem['status'];
   phase: string;
+  iconType?: string;
+  credentialIconVariant?: OpencodeTimelineItem['credentialIconVariant'];
   /** Resolved action type for a connector call, so we can show its own icon. */
   actionTypeId?: string;
-}> = ({ status, phase, actionTypeId }) => {
+}> = ({ status, phase, iconType, credentialIconVariant, actionTypeId }) => {
   const { euiTheme } = useEuiTheme();
   if (status === 'failed') {
-    return <EuiIcon type="errorFilled" size="s" color="danger" css={topMargin} />;
+    return (
+      <EuiIcon type="errorFilled" size="s" color="danger" css={topMargin} aria-hidden={true} />
+    );
   }
   if (status === 'in_progress' && phase !== 'done') {
     return <EuiLoadingSpinner size="s" css={topMargin} />;
@@ -81,7 +89,40 @@ const StatusIcon: React.FC<{
       </span>
     );
   }
-  const icon = PHASE_ICON[phase] ?? 'wrench';
+  if (phase === 'credential' && iconType && credentialIconVariant) {
+    const badgeIcon = credentialIconVariant === 'secured' ? 'lock' : 'compute';
+    return (
+      <span
+        css={css`
+          ${topMargin};
+          position: relative;
+          display: inline-flex;
+          width: ${euiTheme.size.base};
+          height: ${euiTheme.size.base};
+          align-items: center;
+          justify-content: center;
+        `}
+      >
+        <EuiIcon type={iconType} size="s" color={euiTheme.colors.textSuccess} aria-hidden={true} />
+        <EuiIcon
+          type={badgeIcon}
+          size="m"
+          color={euiTheme.colors.textSuccess}
+          aria-hidden={true}
+          css={css`
+            position: absolute;
+            right: -${euiTheme.size.xs};
+            bottom: -${euiTheme.size.xs};
+            padding: 0;
+            border-radius: 50%;
+            background: ${euiTheme.colors.backgroundBasePlain};
+            transform: scale(0.78);
+          `}
+        />
+      </span>
+    );
+  }
+  const icon = iconType ?? PHASE_ICON[phase] ?? 'wrench';
   // Highlight security-relevant steps: connector calls (accent) and credential
   // minting (success/green, to read as "a scoped, short-lived grant happened").
   const color =
@@ -90,7 +131,7 @@ const StatusIcon: React.FC<{
       : phase === 'credential'
       ? euiTheme.colors.textSuccess
       : 'subdued';
-  return <EuiIcon type={icon} size="s" color={color} css={topMargin} />;
+  return <EuiIcon type={icon} size="s" color={color} css={topMargin} aria-hidden={true} />;
 };
 
 const TODO_ICON: Record<string, string> = {
@@ -116,6 +157,7 @@ const TodoList: React.FC<{ todos: OpencodeTodo[] }> = ({ todos }) => {
               type={TODO_ICON[todo.status] ?? 'empty'}
               size="s"
               color={todo.status === 'completed' ? 'success' : 'subdued'}
+              aria-hidden={true}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -174,6 +216,8 @@ const TimelineRow: React.FC<{
           <StatusIcon
             status={item.status}
             phase={item.phase}
+            iconType={item.iconType}
+            credentialIconVariant={item.credentialIconVariant}
             actionTypeId={item.connectorId ? connectorTypeById.get(item.connectorId) : undefined}
           />
         </EuiFlexItem>
@@ -187,7 +231,12 @@ const TimelineRow: React.FC<{
         </EuiFlexItem>
         {hasDetail && (
           <EuiFlexItem grow={false}>
-            <EuiIcon type={expanded ? 'arrowUp' : 'arrowDown'} size="s" color="subdued" />
+            <EuiIcon
+              type={expanded ? 'arrowUp' : 'arrowDown'}
+              size="s"
+              color="subdued"
+              aria-hidden={true}
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

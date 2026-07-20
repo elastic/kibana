@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiAvatar,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -38,6 +39,12 @@ const labels = {
   }),
   inspect: i18n.translate('xpack.agentBuilder.opencodeSubagent.inspect', {
     defaultMessage: 'Inspect sandbox execution (cluster, pod, logs, run a command)',
+  }),
+  expand: i18n.translate('xpack.agentBuilder.opencodeSubagent.expand', {
+    defaultMessage: 'Expand OpenCode details',
+  }),
+  collapse: i18n.translate('xpack.agentBuilder.opencodeSubagent.collapse', {
+    defaultMessage: 'Collapse OpenCode details',
   }),
 };
 
@@ -81,7 +88,10 @@ const stripLeakedNarration = (response: string): string => {
     const looksLikeNarration =
       preamble.length > 120 && /[a-z]:[A-Z]/.test(preamble.replace(/\s+/g, ''));
     if (looksLikeNarration) {
-      return trimmed.slice(structureMatch.index).replace(/^\s*---\s*\n?/, '').trim();
+      return trimmed
+        .slice(structureMatch.index)
+        .replace(/^\s*---\s*\n?/, '')
+        .trim();
     }
   }
   return trimmed;
@@ -155,6 +165,12 @@ export const OpencodeSubagentStep: React.FC<{ step: ToolCallStepData }> = ({ ste
   }, [result?.response]);
   const conversationId = useConversationId();
   const [inspectOpen, setInspectOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(isRunning);
+  const hasDetails = timeline.length > 0 || Boolean(responseProse);
+
+  useEffect(() => {
+    setDetailsOpen(isRunning);
+  }, [isRunning]);
 
   const cardStyles = css`
     border: ${euiTheme.border.thin};
@@ -206,6 +222,21 @@ export const OpencodeSubagentStep: React.FC<{ step: ToolCallStepData }> = ({ ste
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={detailsOpen ? labels.collapse : labels.expand}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              size="s"
+              iconType={detailsOpen ? 'arrowDown' : 'arrowRight'}
+              aria-label={detailsOpen ? labels.collapse : labels.expand}
+              onClick={() => setDetailsOpen((open) => !open)}
+              isDisabled={!hasDetails}
+              data-test-subj="agentBuilderOpencodeDetailsToggle"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiToolTip content={labels.inspect} disableScreenReaderOutput>
             <button
               type="button"
@@ -246,24 +277,28 @@ export const OpencodeSubagentStep: React.FC<{ step: ToolCallStepData }> = ({ ste
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {/* Activity timeline */}
-      {timeline.length > 0 && (
+      {detailsOpen && (
         <>
-          <EuiSpacer size="s" />
-          <OpencodeTimeline timeline={timeline} autoExpand={isRunning} />
-        </>
-      )}
+          {/* Activity timeline */}
+          {timeline.length > 0 && (
+            <>
+              <EuiSpacer size="s" />
+              <OpencodeTimeline timeline={timeline} autoExpand={isRunning} />
+            </>
+          )}
 
-      {/* Final response — only the prose that adds meaning beyond the timeline.
-          The timeline is the single source of truth for the edited file, the
-          command, and its output, so those echoes are stripped to avoid the
-          "shows twice" duplication the user reported. */}
-      {responseProse && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued" css={responseStyles}>
-            <ChatMessageText content={responseProse} steps={[]} />
-          </EuiText>
+          {/* Final response — only the prose that adds meaning beyond the timeline.
+              The timeline is the single source of truth for the edited file, the
+              command, and its output, so those echoes are stripped to avoid the
+              "shows twice" duplication the user reported. */}
+          {responseProse && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued" css={responseStyles}>
+                <ChatMessageText content={responseProse} steps={[]} />
+              </EuiText>
+            </>
+          )}
         </>
       )}
 
