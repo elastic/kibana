@@ -35,12 +35,23 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { Db, CollectionInfo } from 'mongodb';
 import { ConnectionString } from 'mongodb-connection-string-url';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import type { FindInput, AggregateInput, CountInput, ListCollectionsInput } from './types';
+import type {
+  FindInput,
+  AggregateInput,
+  CountInput,
+  ListCollectionsInput,
+  InsertOneInput,
+  UpdateOneInput,
+  DeleteOneInput,
+} from './types';
 import {
   FindInputSchema,
   AggregateInputSchema,
   CountInputSchema,
   ListCollectionsInputSchema,
+  InsertOneInputSchema,
+  UpdateOneInputSchema,
+  DeleteOneInputSchema,
 } from './types';
 
 // Stages that mutate data or execute arbitrary code — block these in aggregate
@@ -137,7 +148,8 @@ export const MongoDBConnector: ConnectorSpec = {
     displayName: 'MongoDB',
     description: i18n.translate('core.kibanaConnectorSpecs.mongodb.metadata.description', {
       defaultMessage:
-        'Query documents in MongoDB collections using find, aggregate, count, and listCollections',
+        'Query and write to MongoDB collections using find, aggregate, count, and listCollections, ' +
+        'plus insertOne, updateOne, and deleteOne for workflows.',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -275,6 +287,57 @@ export const MongoDBConnector: ConnectorSpec = {
         });
       },
     },
+
+    // ---- Workflow-only actions (write ops, not exposed to agents) ----
+
+    insertOne: {
+      isTool: false,
+      description: 'Insert a single document into a MongoDB collection.',
+      input: InsertOneInputSchema,
+      handler: async (ctx, input: InsertOneInput) => {
+        const { uri } = ctx.config as { uri: string };
+        const database = resolveDb(input.database, uri);
+        return withClient(ctx, database, async (db) => {
+          const result = await db.collection(input.collection).insertOne(input.document);
+          return { insertedId: String(result.insertedId), acknowledged: result.acknowledged };
+        });
+      },
+    },
+
+    updateOne: {
+      isTool: false,
+      description: 'Update a single document in a MongoDB collection.',
+      input: UpdateOneInputSchema,
+      handler: async (ctx, input: UpdateOneInput) => {
+        const { uri } = ctx.config as { uri: string };
+        const database = resolveDb(input.database, uri);
+        return withClient(ctx, database, async (db) => {
+          const result = await db
+            .collection(input.collection)
+            .updateOne(input.filter, input.update, { upsert: input.upsert ?? false });
+          return {
+            matchedCount: result.matchedCount,
+            modifiedCount: result.modifiedCount,
+            upsertedId: result.upsertedId != null ? String(result.upsertedId) : null,
+            acknowledged: result.acknowledged,
+          };
+        });
+      },
+    },
+
+    deleteOne: {
+      isTool: false,
+      description: 'Delete a single document from a MongoDB collection.',
+      input: DeleteOneInputSchema,
+      handler: async (ctx, input: DeleteOneInput) => {
+        const { uri } = ctx.config as { uri: string };
+        const database = resolveDb(input.database, uri);
+        return withClient(ctx, database, async (db) => {
+          const result = await db.collection(input.collection).deleteOne(input.filter);
+          return { deletedCount: result.deletedCount, acknowledged: result.acknowledged };
+        });
+      },
+    },
   },
 
   test: {
@@ -300,7 +363,7 @@ export const MongoDBConnector: ConnectorSpec = {
   skill: [
     '## MongoDB Connector',
     '',
-    'Provides read-only access to MongoDB collections. Supports Atlas clusters',
+    'Provides access to MongoDB collections. Supports Atlas clusters',
     '(mongodb+srv://), self-hosted replica sets, and standalone instances.',
     '',
     '### Discovery pattern',
@@ -320,8 +383,14 @@ export const MongoDBConnector: ConnectorSpec = {
     '- Group and count: `[{"$group": {"_id": "$status", "count": {"$sum": 1}}}]`',
     '- Filter then group: `[{"$match": {"region": "US"}}, {"$group": {"_id": "$product", "total": {"$sum": "$revenue"}}}]`',
     '',
+    '### Write actions (workflows only — not available to agents)',
+    '- Insert: `insertOne({ collection: "orders", document: {"status": "pending"} })`',
+    '- Update: `updateOne({ collection: "orders", filter: {"_id": "abc"}, update: {"$set": {"status": "shipped"}} })`',
+    '- Delete: `deleteOne({ collection: "orders", filter: {"_id": "abc"} })`',
+    '',
     '### Important constraints',
-    '- Read-only: find, aggregate, count, and listCollections only.',
+    '- Agent-facing tool actions (find, aggregate, count, listCollections) are read-only.',
+    '- insertOne, updateOne, and deleteOne are workflow-only and never exposed to agents.',
     '- Maximum 1000 documents per call. Use skip + limit for pagination.',
     '- Aggregate stages $out, $merge, $function, and $accumulator are rejected.',
     '- Large result sets slow responses; prefer projections and tight filters.',

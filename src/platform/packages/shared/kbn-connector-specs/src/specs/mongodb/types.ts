@@ -155,3 +155,75 @@ export const ListCollectionsInputSchema = lazySchema(() =>
   })
 );
 export type ListCollectionsInput = z.infer<typeof ListCollectionsInputSchema>;
+
+// =============================================================================
+// insertOne — insert a single document into a collection
+// =============================================================================
+
+export const InsertOneInputSchema = lazySchema(() =>
+  z.object({
+    collection: z.string().min(1).describe('Name of the collection to insert into.'),
+    database: z
+      .string()
+      .optional()
+      .describe(
+        'Database to write to. Defaults to the database in the connection URI path if omitted.'
+      ),
+    document: z
+      .record(z.string(), z.unknown())
+      .describe(
+        'Document to insert. Do not include _id unless you want to set it explicitly. ' +
+          'Example: {"name": "Alice", "status": "active"}.'
+      ),
+  })
+);
+export type InsertOneInput = z.infer<typeof InsertOneInputSchema>;
+
+// =============================================================================
+// updateOne — update a single document matching a filter
+// =============================================================================
+
+export const UpdateOneInputSchema = lazySchema(() =>
+  z.object({
+    collection: z.string().min(1).describe('Name of the collection to update.'),
+    database: z
+      .string()
+      .optional()
+      .describe(
+        'Database to write to. Defaults to the database in the connection URI path if omitted.'
+      ),
+    filter: z
+      .record(z.string(), z.unknown())
+      .describe('Filter to match the document to update. Example: {"_id": "abc"}.'),
+    update: z
+      .record(z.string(), z.unknown())
+      .describe(
+        'Update operators or replacement document. ' + 'Example: {"$set": {"status": "inactive"}}.'
+      ),
+    upsert: z
+      .boolean()
+      .optional()
+      .describe('If true, insert a new document when no document matches the filter.'),
+  })
+);
+export type UpdateOneInput = z.infer<typeof UpdateOneInputSchema>;
+
+// =============================================================================
+// deleteOne — delete a single document matching a filter
+// =============================================================================
+
+export const DeleteOneInputSchema = lazySchema(() =>
+  z.object({
+    collection: z.string().min(1).describe('Name of the collection to delete from.'),
+    database: z
+      .string()
+      .optional()
+      .describe(
+        'Database to write to. Defaults to the database in the connection URI path if omitted.'
+      ),
+    filter: z
+      .record(z.string(), z.unknown())
+      .describe('Filter to match the document to delete. Example: {"_id": "abc"}.'),
+  })
+);
+export type DeleteOneInput = z.infer<typeof DeleteOneInputSchema>;
