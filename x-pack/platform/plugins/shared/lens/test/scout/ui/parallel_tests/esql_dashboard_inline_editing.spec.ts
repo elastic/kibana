@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags, KibanaCodeEditorWrapper, EuiComboBoxWrapper } from '@kbn/scout';
+import { spaceTest, tags, KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { applyLensInlineEditorAndWaitClosed, testData } from '../fixtures';
@@ -52,7 +52,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.cl
 
       await spaceTest.step('set ESQL query and validate the chart type is table', async () => {
         await setEsqlQueryAndRun(dashboard, page, codeEditor, 'from logstash-*');
-        await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Table');
+        expect(await lens.getChartSwitchType()).toBe('Table');
       });
 
       await spaceTest.step('remove all auto-loaded columns and add bytes', async () => {
@@ -66,8 +66,8 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.cl
           page.testSubj.locator('lns-indexPattern-dimensionContainerClose')
         ).toBeVisible();
 
-        const fieldCombo = new EuiComboBoxWrapper(page, 'text-based-dimension-field');
-        await fieldCombo.selectSingleOption('bytes');
+        const fieldCombo = page.components.comboBox('text-based-dimension-field');
+        await fieldCombo.setSelectedOptions(['bytes']);
         await lens.closeDimensionEditor();
       });
 
