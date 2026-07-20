@@ -79,12 +79,9 @@ const getRelativeValue = (part: RangePart, parts: RangePart[]): number | undefin
 
 /**
  * True when `part` is the unit of a shorthand datemath expression ("-7d",
- * "now-7d/d") rather than of a natural-language phrase. Shorthand always
- * carries a bare `+`/`-` sign as its direction part; phrases either use a
- * direction WORD ("last", "最近") or no direction part at all (instants like
- * "7 days ago" / glued "3日前", whose marker is a non-navigable literal) — so
- * adjacency of the value and unit parts is NOT a reliable signal (glued CJK
- * phrases abut too).
+ * "now-7d/d") rather than of a natural-language phrase. Checking for `+`/`-`
+ * is needed because Japanese/Chinese can have adjacent (touching)
+ * count and unit in natural text.
  */
 const isShorthandUnit = (part: RangePart, parts: RangePart[]): boolean =>
   parts.some(
@@ -108,10 +105,8 @@ const modifyRelativeValue = (
 
 /**
  * The leading direction word of a `"{word}{count}{unit}"`-shaped duration
- * template — everything before the first placeholder. Splitting on the
- * placeholder (not whitespace) keeps this correct for glued CJK templates
- * ("過去{count}{unit}" → "過去"), where the direction word and the
- * placeholders share no separating space.
+ * template. Splitting on the placeholder e.g. `{count}` and not whitespace keeps this
+ * correct for glued CJK templates ("過去{count}{unit}" → "過去").
  */
 const extractLeadingWord = (template: string): string | undefined =>
   template.split(/\{count}|\{unit}/)[0].trim() || undefined;

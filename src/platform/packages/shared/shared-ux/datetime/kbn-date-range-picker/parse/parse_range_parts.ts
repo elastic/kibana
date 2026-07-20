@@ -54,7 +54,7 @@ interface DelimiterSplit {
 /**
  * Shorthand datemath (`now-7d/d`) is locale-invariant technical syntax, not
  * natural language — it stays a standalone regex, untouched by localization.
- * The unit group is lenient (any word, like `LENIENT_UNIT_PATTERN`) so that
+ * The `unit` group is permissive (any word, like in `LENIENT_UNIT_PATTERN`) so that
  * localized unit aliases after a sign ("-7天") still decompose into parts.
  */
 const SHORTHAND_RELATIVE_RE = /^(now)?([+-])(\d+)([\p{L}\p{M}]+)(\/[smhdwMy])?$/u;

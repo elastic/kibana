@@ -57,22 +57,15 @@ export interface LocaleGrammar {
   /** `{count} {unit}`-shaped templates for "N units ago/from now". */
   instantTemplates: { past: string[]; future: string[] };
   /**
-   * Words that mark a fragment as date-language the parser must REJECT rather
-   * than parse — fed to the failed-phrase vocabulary only, never the unit
-   * alternation. Lets a locale drop an ambiguous duration alias (e.g. Chinese
-   * "月": "1月" means January, not "1 month ago") while still keeping fragments
-   * containing it away from the forgiving absolute-date fallback, so they fail
-   * deterministically (localized absolute-date parsing is deferred — see plan).
+   * Words that look date-related but should make parsing fail instead of
+   * falling back to absolute-date parsing. Mainly for ambiguous CJK cases
+   * like `月`, where `1月` likely means “January”, not “1 month”.
    */
   guardWords?: string[];
   /**
-   * Unit aliases whose SHORTHAND form requires an explicit `now` or sign
-   * prefix. A bare count+unit in these units reads as a calendar date, not a
-   * duration ("22日" is the 22nd, "2025年" is the year 2025 — native-review
-   * verdict on the CJK grammars), so it must reject. Prefixed shorthand
-   * ("-22日", "now-22日") stays unambiguous and parses, and natural-language
-   * phrases ("3日前", "過去3日") are unaffected — templates resolve units
-   * independently of the shorthand path.
+   * Unit forms that are only allowed in shorthand relative syntax when
+   * there is an explicit `now`, `+`, or `-`. Example: bare `22日` should
+   * not mean “22 days”; but `-22日` or `now-22日` is clearly relative.
    */
   shorthandPrefixRequired?: string[];
   /**
@@ -93,8 +86,7 @@ export interface LocaleGrammar {
   nowAliases?: string[];
   /**
    * Suffix words stripped from the END side of a delimited range before that
-   * side is parsed — the Japanese circumfix "から…まで": "3日前から今まで"
-   * splits on the から delimiter, then まで is stripped from "今まで".
+   * side is parsed.
    */
   rangeEndSuffixes?: string[];
   // TODO: rename — bare `generation` reads like a version counter rather than an
@@ -310,7 +302,7 @@ const FULLWIDTH_DIGIT_RE = /[０-９]/g;
  * full-width mode) with their ASCII equivalents. The replacement is
  * 1:1 in UTF-16 code units, so character offsets into the normalized string
  * are valid in the original (see `parse_range_parts.ts`'s `RangePart` spans).
- * CJK numerals (`七`, `二十`) are out of scope — see plan decision D3.
+ * CJK numerals (`七`, `二十`) are out of scope.
  */
 export const normalizeDigits = (text: string): string =>
   text.replace(FULLWIDTH_DIGIT_RE, (digit) => String.fromCharCode(digit.charCodeAt(0) - 0xfee0));
