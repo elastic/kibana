@@ -549,6 +549,7 @@ export class UserConnectorTokenClient {
     credentialType,
     authType,
     provider,
+    skipRevocation = false,
   }: {
     profileUid: string;
     connectorId: string;
@@ -556,10 +557,13 @@ export class UserConnectorTokenClient {
     credentialType?: string;
     authType?: string;
     provider?: string;
+    skipRevocation?: boolean;
   }): Promise<void> {
     const context = this.getContextString(profileUid, connectorId);
 
-    await this.revokeOAuthTokens({ connectorId, profileUid, authType, provider });
+    if (!skipRevocation) {
+      await this.revokeOAuthTokens({ connectorId, profileUid, authType, provider });
+    }
 
     const credentialTypeFilter = credentialType
       ? ` AND ${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.credentialType: "${credentialType}"`

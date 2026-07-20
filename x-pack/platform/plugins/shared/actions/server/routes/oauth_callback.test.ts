@@ -359,11 +359,12 @@ describe('oauthCallbackRoute', () => {
       undefined
     );
 
-    // Verify token storage
+    // Verify token storage (skipRevocation: true — new token shares the same grant)
     expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalledWith({
       connectorId: 'connector-1',
       tokenType: 'access_token',
       profileUid: 'test-profile-uid',
+      skipRevocation: true,
     });
     expect(mockConnectorTokenClientInstance.createWithRefreshToken).toHaveBeenCalledWith({
       connectorId: 'connector-1',
@@ -437,6 +438,11 @@ describe('oauthCallbackRoute', () => {
         ),
       },
     });
+    // On re-auth the old saved object is removed without revoking the provider
+    // grant (the new token shares the same grant).
+    expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalledWith(
+      expect.objectContaining({ skipRevocation: true })
+    );
   });
 
   it('redirects with error surfacing the underlying message on token exchange failure', async () => {

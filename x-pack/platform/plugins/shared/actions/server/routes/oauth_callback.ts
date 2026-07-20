@@ -653,12 +653,14 @@ export const oauthCallbackRoute = (
             configurationUtilities,
           });
 
+          // skipRevocation: we just minted a fresh token above; the new token
+          // shares the same provider grant, so revoking it here would
+          // invalidate the token we are about to store.
           await userConnectorTokenClient.deleteConnectorTokens({
             connectorId: stateConnectorId,
             tokenType: 'access_token',
             profileUid,
-            authType,
-            provider,
+            skipRevocation: true,
           });
           const formattedToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
           await userConnectorTokenClient.createWithRefreshToken({
