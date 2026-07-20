@@ -150,7 +150,7 @@ describe('buildFieldDefinitionYaml', () => {
   });
 
   describe('TOGGLE custom field', () => {
-    it('maps to keyword / TOGGLE', () => {
+    it('maps to boolean / TOGGLE', () => {
       const { yaml } = buildFieldDefinitionYaml({
         key: 'cf_toggle',
         label: 'Toggle Field',
@@ -158,7 +158,7 @@ describe('buildFieldDefinitionYaml', () => {
         required: false,
       });
       const parsed = parse(yaml);
-      expect(parsed.type).toBe('keyword');
+      expect(parsed.type).toBe('boolean');
       expect(parsed.control).toBe(FieldType.TOGGLE);
       expect(parsed.metadata).toBeUndefined();
     });
