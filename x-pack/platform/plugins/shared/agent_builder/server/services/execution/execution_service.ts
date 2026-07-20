@@ -78,13 +78,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const executionClient = this.createExecutionClient();
 
-    if (providedExecutionId) {
-      const existing = await executionClient.peek(providedExecutionId);
-      if (existing) {
-        throw createBadRequestError(`Execution with id ${providedExecutionId} already exists`);
-      }
-    }
-
     const validatedAttachments = await this.validateAttachmentsIfProvided(
       params.nextInput.attachments,
       request
@@ -93,15 +86,37 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       ? { ...params, nextInput: { ...params.nextInput, attachments: validatedAttachments } }
       : params;
 
-    const execution = await executionClient.create({
-      executionMode: mode,
-      executionId,
-      agentId,
-      spaceId,
-      agentParams: validatedParams,
-      parentExecutionId: params.parentExecutionId,
-      metadata,
-    });
+    let execution: AgentExecution;
+    try {
+      execution = await executionClient.create({
+        executionMode: mode,
+        executionId,
+        agentId,
+        spaceId,
+        agentParams: validatedParams,
+        parentExecutionId: params.parentExecutionId,
+        metadata,
+      });
+    } catch (err) {
+      if (err?.meta?.statusCode === 409) {
+        if (metadata?.idempotency_key) {
+          // Replay of an already-accepted idempotency key: return the existing
+          // execution instead of scheduling a new one.
+          this.logger.debug(
+            `Duplicate idempotency key detected, returning existing execution ${executionId}`
+          );
+
+          return {
+            executionId,
+            events$: this.followExecution(executionId),
+          };
+        }
+
+        throw createBadRequestError(`Execution with id ${executionId} already exists`);
+      }
+
+      throw err;
+    }
 
     // Wire up external abort signal to execution abort
     if (abortSignal) {

@@ -31,6 +31,11 @@ jest.mock('./persistence', () => ({
   createAgentExecutionClient: () => mockExecutionClient,
 }));
 
+const conflictError = () =>
+  Object.assign(new Error('version conflict'), {
+    meta: { statusCode: 409 },
+  });
+
 // Mock execution_runner module
 const mockHandleAgentExecution = jest.fn();
 const mockCollectAndWriteEvents = jest.fn();
@@ -157,10 +162,7 @@ describe('AgentExecutionService', () => {
 
   describe('executeAgent with a caller-provided executionId', () => {
     it('throws when an execution with the same id already exists, regardless of its status', async () => {
-      mockExecutionClient.peek.mockResolvedValueOnce({
-        status: ExecutionStatus.failed,
-        eventCount: 3,
-      });
+      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
       const request = httpServerMock.createKibanaRequest();
 
       await expect(
@@ -175,7 +177,7 @@ describe('AgentExecutionService', () => {
           useTaskManager: true,
         })
       ).rejects.toThrow('Execution with id exec-1 already exists');
-      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
   });
 
@@ -488,6 +490,35 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.create).toHaveBeenCalledWith(
         expect.objectContaining({ metadata: undefined })
       );
+    });
+  });
+
+  describe('executeAgent with an idempotency key', () => {
+    const executeWithKey = (idempotencyKey: string) =>
+      service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        executionId: 'exec-1',
+        metadata: { idempotency_key: idempotencyKey },
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: true,
+      });
+
+    it('returns the existing execution without scheduling a task on replay', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+
+      const result = await executeWithKey('Ev123');
+
+      expect(result.executionId).toBe('exec-1');
+      expect(result.events$).toBeDefined();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+    });
+
+    it('rethrows create errors that are not duplicate-execution errors', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(executeWithKey('Ev123')).rejects.toThrow('boom');
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
   });
 

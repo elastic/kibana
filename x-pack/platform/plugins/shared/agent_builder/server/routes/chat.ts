@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { validate as uuidValidate } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
@@ -309,6 +310,16 @@ export const callbackConversePayloadSchema = conversePayloadSchema.extends({
           handle: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
         })
       ),
+      idempotency_key: schema.maybe(
+        schema.string({
+          minLength: 1,
+          maxLength: 256,
+          meta: {
+            description:
+              'Opaque key that deduplicates repeated deliveries of the same surface event (e.g. a Slack event_id). A request replaying an already-accepted key returns the existing execution instead of starting a new one. Mutually exclusive with execution_id.',
+          },
+        })
+      ),
     })
   ),
   callback: schema.object({
@@ -390,12 +401,30 @@ export function registerChatRoutes({
     useTaskManager: boolean | undefined;
     origin: ExecutionConversationOrigin | undefined;
     callback: { url: string } | undefined;
+    executionId: string | undefined;
+    metadata: Record<string, string> | undefined;
   } => {
     if (isChatCallbackRequestBodyPayload(payload)) {
+      let origin: ExecutionConversationOrigin | undefined;
+      let idempotencyKey: string | undefined;
+
+      if (payload.origin) {
+        const { idempotency_key: key, ...originRest } = payload.origin;
+
+        idempotencyKey = key;
+        origin = originRest;
+      }
+
       return {
         useTaskManager: true,
-        origin: payload.origin,
+        origin,
         callback: payload.callback,
+        // The idempotency key deterministically owns the execution id, so a replayed
+        // delivery of the same surface event maps to the same execution document.
+        executionId: idempotencyKey
+          ? createHash('sha256').update(idempotencyKey).digest('hex')
+          : payload.execution_id,
+        metadata: idempotencyKey ? { idempotency_key: idempotencyKey } : undefined,
       };
     }
 
@@ -406,6 +435,8 @@ export function registerChatRoutes({
         executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined,
       origin: undefined,
       callback: undefined,
+      executionId: payload.execution_id,
+      metadata: undefined,
     };
   };
 
@@ -421,7 +452,6 @@ export function registerChatRoutes({
     const {
       agent_id: agentId,
       conversation_id: conversationId,
-      execution_id: executionId,
       input,
       prompts,
       attachments,
@@ -433,12 +463,14 @@ export function registerChatRoutes({
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
-    const { useTaskManager, origin, callback } = resolveExecutionOptions(payload);
+    const { useTaskManager, origin, callback, executionId, metadata } =
+      resolveExecutionOptions(payload);
 
     return executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
       request,
       executionId,
+      metadata,
       useTaskManager,
       params: {
         agentId,
@@ -604,6 +636,10 @@ export function registerChatRoutes({
           callbackDeliveryService.validateCallbackUrl(payload.callback.url);
         } catch (error) {
           throw createBadRequestError(error instanceof Error ? error.message : String(error));
+        }
+
+        if (payload.origin?.idempotency_key && payload.execution_id) {
+          throw createBadRequestError('idempotency_key and execution_id are mutually exclusive');
         }
 
         await validateConfigurationOverrides({ payload, request });

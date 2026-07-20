@@ -18,6 +18,7 @@ export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
   origin?: ConversationOrigin & {
     type: ConversationOriginType;
     author?: ConversationOriginAuthor;
+    idempotency_key?: string;
   };
   callback: {
     url: string;

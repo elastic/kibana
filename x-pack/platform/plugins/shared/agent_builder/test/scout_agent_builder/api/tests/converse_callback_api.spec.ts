@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -333,6 +334,172 @@ apiTest.describe(
       expect(typeof callbackPayload.error?.message).toBe('string');
       expect(callbackPayload.error?.message.length).toBeGreaterThan(0);
     });
+
+    apiTest(
+      'returns the existing execution for a replayed idempotency key',
+      async ({ apiClient }) => {
+        const idempotencyKey = 'Ev-callback-replay';
+        const requestBody = {
+          input: 'Hello idempotent callback',
+          connector_id: connectorId,
+          origin: {
+            type: ConversationOriginType.Slack,
+            external_conversation_id: 'team:T123/channel:C123/thread:callback-idempotency',
+            idempotency_key: idempotencyKey,
+          },
+          callback: {
+            url: `${callbackServerUrl}/callback?token=idempotency`,
+          },
+        };
+        let conversationId: string;
+        let executionId: string;
+
+        await apiTest.step('first delivery schedules an execution', async () => {
+          await setupAgentDirectAnswer({
+            proxy: llmProxy,
+            title: 'Callback Idempotency Title',
+            response: 'Idempotent callback response',
+          });
+
+          const first = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
+            headers: internalHeaders(),
+            body: requestBody,
+            responseType: 'json',
+          });
+
+          expect(first).toHaveStatusCode(202);
+
+          const firstAccepted = first.body as ChatCallbackAcceptedResponse;
+          executionId = firstAccepted.execution_id;
+          expect(executionId).toBe(createHash('sha256').update(idempotencyKey).digest('hex'));
+          expect(firstAccepted.status).toBe(ExecutionStatus.scheduled);
+
+          const firstCallback = (await callbackServer.waitForRequest())
+            .body as ChatCallbackSuccessPayload;
+
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+          expect(firstCallback.execution_id).toBe(executionId);
+          expect(firstCallback.status).toBe(ExecutionStatus.completed);
+
+          conversationId = firstCallback.response.conversation_id;
+          conversationIds.add(conversationId);
+        });
+
+        await apiTest.step(
+          'replayed delivery is a no-op returning the existing execution',
+          async () => {
+            const replay = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
+              headers: internalHeaders(),
+              body: requestBody,
+              responseType: 'json',
+            });
+
+            expect(replay).toHaveStatusCode(202);
+
+            const replayAccepted = replay.body as ChatCallbackAcceptedResponse;
+            expect(replayAccepted.execution_id).toBe(executionId);
+
+            // No new execution ran: no LLM call was made (no interceptor was re-armed and the
+            // proxy would reject an unexpected request) and the conversation kept a single round.
+            const conversation = await getConversation(
+              apiClient,
+              adminCredentials.apiKeyHeader,
+              conversationId
+            );
+            expect(conversation.rounds).toHaveLength(1);
+            expect(conversation.rounds[0].response.message).toBe('Idempotent callback response');
+          }
+        );
+      }
+    );
+
+    apiTest(
+      'schedules a single execution for concurrent duplicate deliveries',
+      async ({ apiClient }) => {
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          title: 'Callback Concurrent Idempotency Title',
+          response: 'Concurrent idempotent callback response',
+        });
+
+        const requestBody = {
+          input: 'Hello concurrent idempotent callback',
+          connector_id: connectorId,
+          origin: {
+            type: ConversationOriginType.Slack,
+            external_conversation_id: 'team:T123/channel:C123/thread:callback-concurrency',
+            idempotency_key: 'Ev-callback-concurrent',
+          },
+          callback: {
+            url: `${callbackServerUrl}/callback?token=concurrency`,
+          },
+        };
+
+        const [first, second] = await Promise.all([
+          apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
+            headers: internalHeaders(),
+            body: requestBody,
+            responseType: 'json',
+          }),
+          apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
+            headers: internalHeaders(),
+            body: requestBody,
+            responseType: 'json',
+          }),
+        ]);
+
+        expect(first).toHaveStatusCode(202);
+        expect(second).toHaveStatusCode(202);
+
+        const firstAccepted = first.body as ChatCallbackAcceptedResponse;
+        const secondAccepted = second.body as ChatCallbackAcceptedResponse;
+        expect(firstAccepted.execution_id).toBe(secondAccepted.execution_id);
+
+        const callbackPayload = (await callbackServer.waitForRequest())
+          .body as ChatCallbackSuccessPayload;
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        expect(callbackPayload.execution_id).toBe(firstAccepted.execution_id);
+        expect(callbackPayload.status).toBe(ExecutionStatus.completed);
+
+        const { conversation_id: conversationId } = callbackPayload.response;
+        conversationIds.add(conversationId);
+
+        const conversation = await getConversation(
+          apiClient,
+          adminCredentials.apiKeyHeader,
+          conversationId
+        );
+        expect(conversation.rounds).toHaveLength(1);
+      }
+    );
+
+    apiTest(
+      'rejects requests providing both an idempotency key and an execution id',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
+          headers: internalHeaders(),
+          body: {
+            input: 'Hello invalid idempotent callback',
+            connector_id: connectorId,
+            execution_id: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+            origin: {
+              type: ConversationOriginType.Slack,
+              external_conversation_id: 'team:T123/channel:C123/thread:callback-invalid',
+              idempotency_key: 'Ev-callback-invalid',
+            },
+            callback: {
+              url: `${callbackServerUrl}/callback?token=invalid`,
+            },
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(400);
+      }
+    );
 
     apiTest('continues conversation for repeated Slack origin', async ({ apiClient }) => {
       const origin = {
