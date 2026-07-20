@@ -16,6 +16,14 @@ export const MAX_DURATION = '365d';
 /** Minimum allowed interval for schedule.every */
 export const MIN_SCHEDULE_INTERVAL = '5s';
 
+/**
+ * Default value of `xpack.alerting_v2.rules.minimumScheduleInterval`. Shared
+ * between the server config (as its `defaultValue`) and the rule form UI so the
+ * client validates `schedule.every` against the same minimum the server enforces
+ * on a default deployment.
+ */
+export const DEFAULT_MINIMUM_SCHEDULE_INTERVAL = '1m';
+
 /** Maximum rules processed in one filter-based bulk operation (select-all). */
 export const BULK_FILTER_MAX_RULES = 10_000;
 
