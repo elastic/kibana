@@ -64,7 +64,7 @@ All dashboard actions include the [common log fields](#logs-schema) and populate
 
 ### Dashboard refresh
 
-`dashboard_refresh` sets `event.type` to `access`. `event.start` and `event.end` are ISO8601 timestamps, and `event.duration`, measured in nanoseconds, covers the refresh from the start of the query until the dashboard data finishes loading. `event.outcome` is `success` when no panels return blocking errors and `failure` otherwise.
+`dashboard_refresh` sets `event.type` to `access`. `event.start` and `event.end` are ISO8601 timestamps, and `event.duration` is measured in nanoseconds. `event.outcome` is `success` when no panels return blocking errors and `failure` otherwise.
 
 Each automatic refresh produces a separate `dashboard_refresh` event. Short refresh intervals can therefore increase the volume of user activity logs.
 
