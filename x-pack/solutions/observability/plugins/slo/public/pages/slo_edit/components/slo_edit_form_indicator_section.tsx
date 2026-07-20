@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { assertNever } from '@kbn/std';
 import React, { useMemo } from 'react';

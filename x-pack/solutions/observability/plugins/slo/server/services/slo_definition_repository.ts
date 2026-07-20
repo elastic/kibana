@@ -170,7 +170,12 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       // settings.preventInitialBackfill was added in 8.15.0
       // settings.preventCrossProjectSearch was added in 9.1.0
       settings: merge(
-        { preventInitialBackfill: false, preventCrossProjectSearch: false, syncDelay: '1m', frequency: '1m' },
+        {
+          preventInitialBackfill: false,
+          preventCrossProjectSearch: false,
+          syncDelay: '1m',
+          frequency: '1m',
+        },
         storedSLO.settings
       ),
       createdBy: storedSLO.createdBy ?? storedSLOObject.created_by,

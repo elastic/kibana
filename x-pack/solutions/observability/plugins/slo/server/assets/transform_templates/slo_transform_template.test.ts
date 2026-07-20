@@ -263,7 +263,12 @@ describe('slo transform template', () => {
     const slo = createSLO({
       id: 'irrelevant',
       indicator: createKQLCustomIndicator(),
-      settings: { syncDelay: oneMinute(), frequency: oneMinute(), preventInitialBackfill: false, preventCrossProjectSearch: true },
+      settings: {
+        syncDelay: oneMinute(),
+        frequency: oneMinute(),
+        preventInitialBackfill: false,
+        preventCrossProjectSearch: true,
+      },
     });
 
     const result = getSLOTransformTemplate(
@@ -285,7 +290,12 @@ describe('slo transform template', () => {
     const slo = createSLO({
       id: 'irrelevant',
       indicator: createKQLCustomIndicator(),
-      settings: { syncDelay: oneMinute(), frequency: oneMinute(), preventInitialBackfill: false, preventCrossProjectSearch: false },
+      settings: {
+        syncDelay: oneMinute(),
+        frequency: oneMinute(),
+        preventInitialBackfill: false,
+        preventCrossProjectSearch: false,
+      },
     });
 
     const result = getSLOTransformTemplate(
@@ -307,7 +317,12 @@ describe('slo transform template', () => {
     const slo = createSLO({
       id: 'irrelevant',
       indicator: createKQLCustomIndicator(),
-      settings: { syncDelay: oneMinute(), frequency: oneMinute(), preventInitialBackfill: false, preventCrossProjectSearch: true },
+      settings: {
+        syncDelay: oneMinute(),
+        frequency: oneMinute(),
+        preventInitialBackfill: false,
+        preventCrossProjectSearch: true,
+      },
     });
 
     const result = getSLOTransformTemplate(
