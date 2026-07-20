@@ -32,5 +32,6 @@ export function createRuleExecutorEventPublisher(): {
 
 export const createMockRuleExecutorEventPublisher =
   (): jest.Mocked<RuleExecutorEventPublisherContract> => ({
-    publishExecutionCompleted: jest.fn(),
+    publishExecutionSucceeded: jest.fn(),
+    publishExecutionFailed: jest.fn(),
   });

@@ -256,13 +256,13 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the find-security-rules Agent Builder skill.
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
-  dexAiSkillFindRules: false,
+  dexAiSkillFindRules: true,
 
   /**
    * Enables the recommend-prebuilt-rules Agent Builder skill.
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
-  dexAiSkillRecommendPrebuiltRules: false,
+  dexAiSkillRecommendPrebuiltRules: true,
 
   /**
    * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the

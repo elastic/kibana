@@ -7,8 +7,8 @@
 
 import React from 'react';
 import {
+  DEFAULT_MINIMUM_SCHEDULE_INTERVAL,
   MAX_DURATION,
-  MIN_SCHEDULE_INTERVAL,
   validateMaxDuration,
   validateMinDuration,
 } from '@kbn/alerting-v2-schemas';
@@ -17,13 +17,15 @@ import { EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { RuleSchedule } from './rule_schedule';
-import { useRuleFormMeta } from '../contexts';
+import { useRuleFormMeta, useRuleFormServices } from '../contexts';
 
 const SCHEDULE_ROW_ID = 'ruleV2FormScheduleField';
 
 export const ScheduleField = () => {
   const { control } = useFormContext<FormValues>();
   const { layout } = useRuleFormMeta();
+  const { minimumScheduleInterval } = useRuleFormServices();
+  const minInterval = minimumScheduleInterval ?? DEFAULT_MINIMUM_SCHEDULE_INTERVAL;
 
   return (
     <Controller
@@ -32,11 +34,11 @@ export const ScheduleField = () => {
       rules={{
         validate: (value) => {
           if (!value) return true;
-          const minError = validateMinDuration(value, MIN_SCHEDULE_INTERVAL);
+          const minError = validateMinDuration(value, minInterval);
           if (minError) {
             return i18n.translate('xpack.alertingV2.ruleForm.schedule.everyMinError', {
               defaultMessage: 'Schedule cannot be less than {min}.',
-              values: { min: MIN_SCHEDULE_INTERVAL },
+              values: { min: minInterval },
             });
           }
           const maxError = validateMaxDuration(value, MAX_DURATION);
@@ -74,7 +76,12 @@ export const ScheduleField = () => {
           }
           isInvalid={!!error}
         >
-          <RuleSchedule {...field} errors={error?.message} compressed={layout === 'flyout'} />
+          <RuleSchedule
+            {...field}
+            errors={error?.message}
+            compressed={layout === 'flyout'}
+            minimumInterval={minInterval}
+          />
         </EuiFormRow>
       )}
     />
