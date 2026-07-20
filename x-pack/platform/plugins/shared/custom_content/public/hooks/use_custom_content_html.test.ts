@@ -114,6 +114,26 @@ describe('useCustomContentHtml', () => {
       await waitFor(() => expect(result.current.isAiUnavailable).toBe(true));
       expect(result.current.isLoading).toBe(false);
     });
+
+    it('clears isAiUnavailable when a subsequent generation succeeds', async () => {
+      const noConnectorErr = Object.assign(new Error('No inference connector configured'), {
+        code: 'no_connector',
+      });
+      (streamGenerate as jest.Mock).mockRejectedValueOnce(noConnectorErr);
+
+      const { result, rerender } = renderHook(
+        ({ version }: { version: number }) =>
+          useCustomContentHtml({ ...baseParams, generationVersion: version }),
+        { initialProps: { version: 0 } }
+      );
+
+      await waitFor(() => expect(result.current.isAiUnavailable).toBe(true));
+
+      (streamGenerate as jest.Mock).mockResolvedValueOnce(undefined);
+      rerender({ version: 1 });
+
+      await waitFor(() => expect(result.current.isAiUnavailable).toBe(false));
+    });
   });
 
   describe('abort on unmount', () => {

@@ -106,7 +106,7 @@ describe('registerGenerateRoute', () => {
     expect(response.ok).not.toHaveBeenCalled();
   });
 
-  it('returns 400 and never calls the LLM when no connector is configured', async () => {
+  it('streams a no_connector error event and never calls the LLM when no connector is configured', async () => {
     const {
       router,
       handler,
@@ -122,9 +122,10 @@ describe('registerGenerateRoute', () => {
 
     await handler({}, request, response);
 
-    expect(response.badRequest).toHaveBeenCalledWith({
-      body: 'No inference connector configured',
-    });
+    expect(response.ok).toHaveBeenCalled();
+    expect(response.badRequest).not.toHaveBeenCalled();
+    const events = await readNdjson(response.ok.mock.results[0].value.body);
+    expect(events).toEqual([{ error: 'No inference connector configured', code: 'no_connector' }]);
     expect(chatComplete).not.toHaveBeenCalled();
   });
 

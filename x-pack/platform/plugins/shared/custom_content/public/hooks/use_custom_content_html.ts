@@ -85,6 +85,7 @@ export function useCustomContentHtml({
 
     setIsLoading(true);
     setError(undefined);
+    setIsAiUnavailable(false);
 
     const { core } = getServices();
 
