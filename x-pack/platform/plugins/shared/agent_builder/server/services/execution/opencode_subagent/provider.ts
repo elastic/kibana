@@ -58,11 +58,7 @@ export const initOpencodeSubagentExecutor = ({
     encryptedSavedObjects,
     logger.get('gitToken')
   );
-  const gcpCliCredentialResolver = new GcpCliCredentialResolver(
-    getActions,
-    encryptedSavedObjects,
-    logger.get('gcpCli')
-  );
+  const gcpCliCredentialResolver = new GcpCliCredentialResolver(getActions, logger.get('gcpCli'));
   // The GitHub App credential source is built per-profile inside the executor
   // (from each profile's own githubApp config + private-key secret), not from
   // global config — a profile brings its own git credential story.

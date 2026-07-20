@@ -195,7 +195,7 @@ const buildGcpCliGuidance = (credentials?: {
     `Access level requested: ${credentials.gcp.access ?? 'read'}.`,
     serviceLine,
     regionLine,
-    '`CLOUDSDK_CONFIG`, `GOOGLE_APPLICATION_CREDENTIALS`, and `CLOUDSDK_CORE_PROJECT`',
+    '`CLOUDSDK_CONFIG`, `CLOUDSDK_AUTH_ACCESS_TOKEN_FILE`, and `CLOUDSDK_CORE_PROJECT`',
     'are configured for this run. Use the `gcloud` command directly.',
   ]
     .filter(Boolean)

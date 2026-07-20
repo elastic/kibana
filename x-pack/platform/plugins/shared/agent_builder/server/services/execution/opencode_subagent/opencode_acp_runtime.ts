@@ -345,7 +345,7 @@ const ELASTIC_CLI_PREFIX = `${WORKSPACE}/.elastic-cli-npm`;
 const ELASTIC_CLI_BIN_DIR = `${ELASTIC_CLI_PREFIX}/bin`;
 const GCP_CLI_CONFIG_DIR = `${WORKSPACE}/.gcloud`;
 const GCP_CLI_CREDENTIAL_DIR = `${WORKSPACE}/.gcp`;
-const GCP_CLI_CREDENTIAL_PATH = `${GCP_CLI_CREDENTIAL_DIR}/service-account.json`;
+const GCP_CLI_ACCESS_TOKEN_PATH = `${GCP_CLI_CREDENTIAL_DIR}/access-token`;
 const GCP_CLI_ENV_PATH = `${WORKSPACE}/.gcp-cli-env`;
 const GCP_CLI_BIN_DIR = `${WORKSPACE}/google-cloud-sdk/bin`;
 const GCP_CLI_BUNDLED_PYTHON = `${WORKSPACE}/google-cloud-sdk/platform/bundledpythonunix/bin/python3`;
@@ -808,12 +808,12 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
       timeoutMs: 10_000,
     });
     await sandbox.putFiles([
-      { path: GCP_CLI_CREDENTIAL_PATH, contents: creds.serviceAccountJson },
+      { path: GCP_CLI_ACCESS_TOKEN_PATH, contents: creds.accessToken },
       {
         path: GCP_CLI_ENV_PATH,
         contents: [
           `export CLOUDSDK_CONFIG=${shSingleQuote(GCP_CLI_CONFIG_DIR)}`,
-          `export GOOGLE_APPLICATION_CREDENTIALS=${shSingleQuote(GCP_CLI_CREDENTIAL_PATH)}`,
+          `export CLOUDSDK_AUTH_ACCESS_TOKEN_FILE=${shSingleQuote(GCP_CLI_ACCESS_TOKEN_PATH)}`,
           `export CLOUDSDK_CORE_PROJECT=${shSingleQuote(creds.projectId)}`,
           `if [ -x ${shSingleQuote(
             GCP_CLI_BUNDLED_PYTHON
@@ -830,10 +830,10 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
       [
         `. ${GCP_CLI_ENV_PATH}`,
         `chmod 700 ${GCP_CLI_CONFIG_DIR} ${GCP_CLI_CREDENTIAL_DIR}`,
-        `chmod 600 ${GCP_CLI_CREDENTIAL_PATH} ${GCP_CLI_ENV_PATH}`,
-        `gcloud auth activate-service-account --key-file=${shSingleQuote(
-          GCP_CLI_CREDENTIAL_PATH
-        )} --project=${shSingleQuote(creds.projectId)} --quiet`,
+        `chmod 600 ${GCP_CLI_ACCESS_TOKEN_PATH} ${GCP_CLI_ENV_PATH}`,
+        `gcloud config set auth/access_token_file ${shSingleQuote(
+          GCP_CLI_ACCESS_TOKEN_PATH
+        )} --quiet`,
         `gcloud config set project ${shSingleQuote(creds.projectId)} --quiet`,
       ].join(' && '),
       { timeoutMs: 60_000 }

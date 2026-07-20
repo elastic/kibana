@@ -10,7 +10,10 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-import { parseServiceAccountKey } from '../../auth_types/gcp_jwt_helpers';
+import { getGcpAccessToken, parseServiceAccountKey } from '../../auth_types/gcp_jwt_helpers';
+
+const GCP_CLOUD_PLATFORM_SCOPE = 'https://www.googleapis.com/auth/cloud-platform';
+const IAM_CREDENTIALS_BASE_URL = 'https://iamcredentials.googleapis.com/v1';
 
 const parseCsv = (value: unknown): string[] => {
   if (Array.isArray(value)) {
@@ -23,6 +26,74 @@ const parseCsv = (value: unknown): string[] => {
     .split(/[,\s]+/)
     .map((v) => v.trim())
     .filter(Boolean);
+};
+
+const normalizeList = (values?: string[]): string[] => [
+  ...new Set((values ?? []).map((value) => value.trim().toLowerCase()).filter(Boolean)),
+];
+
+const missingAllowedValues = (requested: string[] | undefined, allowed: string[]): string[] => {
+  if (!requested?.length || allowed.length === 0) {
+    return [];
+  }
+  const normalizedAllowed = new Set(allowed.map((value) => value.toLowerCase()));
+  return normalizeList(requested).filter((value) => !normalizedAllowed.has(value));
+};
+
+const mintSandboxTokenInputSchema = lazySchema(() =>
+  z.object({
+    projectId: z.string().optional(),
+    access: z.enum(['read', 'write']).optional(),
+    services: z.array(z.string()).optional(),
+    regions: z.array(z.string()).optional(),
+  })
+);
+
+interface MintSandboxTokenInput {
+  projectId?: string;
+  access?: 'read' | 'write';
+  services?: string[];
+  regions?: string[];
+}
+
+const generateAccessToken = async ({
+  bootstrapAccessToken,
+  targetServiceAccount,
+}: {
+  bootstrapAccessToken: string;
+  targetServiceAccount: string;
+}): Promise<{ accessToken: string; expiresAt: number }> => {
+  const response = await fetch(
+    `${IAM_CREDENTIALS_BASE_URL}/projects/-/serviceAccounts/${encodeURIComponent(
+      targetServiceAccount
+    )}:generateAccessToken`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${bootstrapAccessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        scope: [GCP_CLOUD_PLATFORM_SCOPE],
+        lifetime: '3600s',
+      }),
+    }
+  );
+  if (!response.ok) {
+    throw new Error(
+      `GCP IAM Credentials generateAccessToken failed (${
+        response.status
+      }): ${await response.text()}`
+    );
+  }
+  const data = (await response.json()) as { accessToken?: string; expireTime?: string };
+  if (!data.accessToken) {
+    throw new Error('GCP IAM Credentials generateAccessToken did not return an accessToken');
+  }
+  return {
+    accessToken: data.accessToken,
+    expiresAt: data.expireTime ? Date.parse(data.expireTime) : Date.now() + 3600_000,
+  };
 };
 
 export const GcpCliConnector: ConnectorSpec = {
@@ -58,6 +129,21 @@ export const GcpCliConnector: ConnectorSpec = {
             defaultMessage: 'GCP project ID',
           }),
           placeholder: 'my-gcp-project',
+        }),
+      targetServiceAccount: z
+        .string()
+        .optional()
+        .describe('Optional service account to impersonate for short-lived sandbox tokens')
+        .meta({
+          widget: 'text',
+          label: i18n.translate('connectorSpecs.gcpCli.config.targetServiceAccount.label', {
+            defaultMessage: 'Target service account',
+          }),
+          placeholder: 'agent-reader@my-gcp-project.iam.gserviceaccount.com',
+          helpText: i18n.translate('connectorSpecs.gcpCli.config.targetServiceAccount.helpText', {
+            defaultMessage:
+              'The service account Kibana should impersonate with IAM Credentials. The configured service account key must be allowed to generate access tokens for it.',
+          }),
         }),
       allowedServices: z
         .string()
@@ -101,13 +187,83 @@ export const GcpCliConnector: ConnectorSpec = {
       handler: async (ctx) => {
         const config = ctx.config as {
           projectId?: string;
+          targetServiceAccount?: string;
           allowedServices?: string;
           allowedRegions?: string;
         };
         return {
           projectId: config.projectId,
+          targetServiceAccount: config.targetServiceAccount,
           allowedServices: parseCsv(config.allowedServices),
           allowedRegions: parseCsv(config.allowedRegions),
+        };
+      },
+    },
+    mintSandboxToken: {
+      isTool: false,
+      description:
+        'Mint a short-lived Google Cloud access token for sandboxed gcloud use. Internal Agent Builder action; not exposed to LLM tools.',
+      input: mintSandboxTokenInputSchema,
+      handler: async (ctx, input: MintSandboxTokenInput) => {
+        const config = ctx.config as {
+          projectId?: string;
+          targetServiceAccount?: string;
+          allowedServices?: string;
+          allowedRegions?: string;
+        };
+        const serviceAccountJson = ctx.secrets?.serviceAccountJson;
+        if (typeof serviceAccountJson !== 'string') {
+          throw new Error('Missing service account JSON');
+        }
+
+        const serviceAccount = parseServiceAccountKey(serviceAccountJson);
+        const projectId = input.projectId ?? config.projectId ?? serviceAccount.project_id;
+        if (!projectId) {
+          throw new Error('Google Cloud CLI connector requires a projectId');
+        }
+        if (config.projectId && input.projectId && input.projectId !== config.projectId) {
+          throw new Error(
+            `Google Cloud CLI connector targets ${config.projectId}, not ${input.projectId}`
+          );
+        }
+
+        const deniedServices = missingAllowedValues(
+          input.services,
+          parseCsv(config.allowedServices)
+        );
+        if (deniedServices.length > 0) {
+          throw new Error(
+            `Google Cloud CLI connector does not allow services: ${deniedServices.join(', ')}`
+          );
+        }
+
+        const deniedRegions = missingAllowedValues(input.regions, parseCsv(config.allowedRegions));
+        if (deniedRegions.length > 0) {
+          throw new Error(
+            `Google Cloud CLI connector does not allow regions: ${deniedRegions.join(', ')}`
+          );
+        }
+
+        const targetServiceAccount =
+          typeof config.targetServiceAccount === 'string' && config.targetServiceAccount.trim()
+            ? config.targetServiceAccount.trim()
+            : serviceAccount.client_email;
+        const bootstrapToken = await getGcpAccessToken(
+          serviceAccount.client_email,
+          serviceAccount.private_key,
+          GCP_CLOUD_PLATFORM_SCOPE
+        );
+        const minted = await generateAccessToken({
+          bootstrapAccessToken: bootstrapToken.accessToken,
+          targetServiceAccount,
+        });
+
+        return {
+          accessToken: minted.accessToken,
+          expiresAt: minted.expiresAt,
+          projectId,
+          targetServiceAccount,
+          source: 'gcp_cli_connector_token',
         };
       },
     },

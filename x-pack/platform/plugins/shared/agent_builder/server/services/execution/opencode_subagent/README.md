@@ -263,20 +263,21 @@ Related files:
 
 Google Cloud CLI access is requested through `credentials.gcp`.
 
-The first implementation is connector-backed and intentionally POC-shaped:
+The implementation is connector-backed:
 
 - A `.gcp_cli` connector stores the target project and optional service/region allowlists.
-- The connector uses the existing `gcp_service_account` auth type.
+- The connector uses the existing `gcp_service_account` auth type as a server-side bootstrap
+  credential.
+- The connector can optionally name a target service account to impersonate. The bootstrap
+  service account must be allowed to call IAM Credentials `generateAccessToken` for that target.
 - `GcpCliCredentialResolver` reads the connector server-side, validates the requested project,
-  services, and regions, and returns run-scoped sandbox setup material.
+  services, and regions, and calls IAM Credentials to mint a short-lived access token.
 - `OpenCodeAcpRuntime` installs or finds `gcloud`, writes `CLOUDSDK_CONFIG`,
-  `GOOGLE_APPLICATION_CREDENTIALS`, and `CLOUDSDK_CORE_PROJECT`, activates the service account,
-  and scrubs the files after the run.
+  `CLOUDSDK_AUTH_ACCESS_TOKEN_FILE`, and `CLOUDSDK_CORE_PROJECT`, configures
+  `auth/access_token_file`, and scrubs the token/config files after the run.
 
-This is useful for proving the generic CLI pattern. It is not as strong as a future Google OAuth
-or service-account-impersonation flow because the sandbox temporarily receives a service account
-JSON key. The stronger production path should mint an impersonated short-lived access token from
-Kibana and inject only that token/config.
+The connector's service account JSON never enters the sandbox. The sandbox receives only the
+generated access token, which expires automatically.
 
 Related files:
 

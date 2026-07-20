@@ -102,8 +102,10 @@ export interface ElasticCliCredentials {
 }
 
 export interface GcpCliCredentials {
-  /** Service account JSON used by the POC gcloud setup path. */
-  serviceAccountJson: string;
+  /** Short-lived IAM Credentials access token for gcloud. */
+  accessToken: string;
+  /** Epoch millis when the token expires. */
+  expiresAt: number;
   /** GCP project configured as the default gcloud project. */
   projectId: string;
   /** Human-readable source for logging/timeline diagnostics. */

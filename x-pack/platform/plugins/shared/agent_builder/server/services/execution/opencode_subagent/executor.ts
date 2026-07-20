@@ -622,6 +622,9 @@ export class OpencodeSubagentExecutor {
       }
 
       if (shouldResolveElasticCliCredentials) {
+        const elasticCredentialFailure = !elasticCliCredentials
+          ? 'Unable to mint or reuse an API key for Elastic CLI'
+          : undefined;
         recordProgress({
           id: 'elastic-cli-credentials',
           phase: 'credential',
@@ -637,6 +640,11 @@ export class OpencodeSubagentExecutor {
               }; elasticsearch: ${elasticAccess?.elasticsearch ?? 'none'}`
             : 'Unable to mint or reuse an API key for Elastic CLI',
         });
+        if (elasticCredentialFailure) {
+          throw new Error(
+            `Elastic CLI credentials are required for this sandbox run, but could not be prepared: ${elasticCredentialFailure}`
+          );
+        }
       }
 
       if (shouldResolveGcpCliCredentials && this.gcpCliCredentialResolver && gcpAccess) {
@@ -650,6 +658,11 @@ export class OpencodeSubagentExecutor {
       }
 
       if (shouldResolveGcpCliCredentials) {
+        const gcpCredentialFailure = !gcpCliCredentials
+          ? gcpCredentialDiagnostics.length > 0
+            ? gcpCredentialDiagnostics.join('; ')
+            : 'Unable to resolve a Google Cloud CLI connector for this run'
+          : undefined;
         recordProgress({
           id: 'gcp-cli-credentials',
           phase: 'credential',
@@ -660,11 +673,18 @@ export class OpencodeSubagentExecutor {
           iconType: 'logoGCP',
           credentialIconVariant: 'secured',
           detail: gcpCliCredentials
-            ? `source: ${gcpCliCredentials.source}; project: ${gcpCliCredentials.projectId}`
+            ? `source: ${gcpCliCredentials.source}; project: ${
+                gcpCliCredentials.projectId
+              }; expires: ${new Date(gcpCliCredentials.expiresAt).toISOString()}`
             : gcpCredentialDiagnostics.length > 0
             ? gcpCredentialDiagnostics.join('; ')
             : 'Unable to resolve a Google Cloud CLI connector for this run',
         });
+        if (gcpCredentialFailure) {
+          throw new Error(
+            `Google Cloud CLI credentials are required for this sandbox run, but could not be prepared: ${gcpCredentialFailure}`
+          );
+        }
       }
 
       if (shouldResolveGitCredentials && this.gitTokenResolver) {

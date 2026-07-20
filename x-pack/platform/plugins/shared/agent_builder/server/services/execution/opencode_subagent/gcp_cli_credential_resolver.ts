@@ -7,24 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { InMemoryConnector } from '@kbn/actions-plugin/server';
 
 const GCP_CLI_ACTION_TYPE_ID = '.gcp_cli';
-const ACTION_SAVED_OBJECT_TYPE = 'action';
-const GCP_SERVICE_ACCOUNT_AUTH_TYPE = 'gcp_service_account';
-
-interface RawActionAttributes {
-  actionTypeId: string;
-  config: Record<string, unknown>;
-  secrets: Record<string, unknown>;
-}
-
-interface ConnectorMaterial {
-  config?: Record<string, unknown>;
-  secrets?: Record<string, unknown>;
-}
+const MINT_SANDBOX_TOKEN_SUB_ACTION = 'mintSandboxToken';
 
 type ScopedActionsClient = Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>;
 
@@ -39,58 +25,37 @@ export interface GcpCliCredentialRequest {
 }
 
 export interface GcpCliCredentials {
-  serviceAccountJson: string;
+  accessToken: string;
+  expiresAt: number;
   projectId: string;
   connectorId: string;
-  source: 'gcp_cli_connector';
+  targetServiceAccount: string;
+  source: 'gcp_cli_connector_token';
 }
 
-const parseCsv = (value: unknown): string[] => {
-  if (Array.isArray(value)) {
-    return value.filter((v): v is string => typeof v === 'string').map((v) => v.trim());
+const isGcpCliCredentials = (value: unknown): value is GcpCliCredentials => {
+  if (!value || typeof value !== 'object') {
+    return false;
   }
-  if (typeof value !== 'string') {
-    return [];
-  }
-  return value
-    .split(/[,\s]+/)
-    .map((v) => v.trim())
-    .filter(Boolean);
-};
-
-const normalizeList = (values?: string[]): string[] => [
-  ...new Set((values ?? []).map((value) => value.trim().toLowerCase()).filter(Boolean)),
-];
-
-const missingAllowedValues = (requested: string[] | undefined, allowed: string[]): string[] => {
-  if (!requested?.length || allowed.length === 0) {
-    return [];
-  }
-  const normalizedAllowed = new Set(allowed.map((value) => value.toLowerCase()));
-  return normalizeList(requested).filter((value) => !normalizedAllowed.has(value));
-};
-
-const parseServiceAccountProject = (serviceAccountJson: string): string | undefined => {
-  try {
-    const parsed = JSON.parse(serviceAccountJson) as { project_id?: unknown };
-    return typeof parsed.project_id === 'string' ? parsed.project_id : undefined;
-  } catch {
-    return undefined;
-  }
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record.accessToken === 'string' &&
+    typeof record.expiresAt === 'number' &&
+    typeof record.projectId === 'string' &&
+    typeof record.targetServiceAccount === 'string' &&
+    record.source === 'gcp_cli_connector_token'
+  );
 };
 
 /**
- * Resolves a generic Google Cloud CLI connector into run-scoped sandbox config.
- *
- * POC note: this path injects the service account JSON into the sandbox and
- * scrubs it after the run. That matches how `gcloud` expects service account
- * auth, but it is not as strong as a future impersonation-based short-lived
- * token flow.
+ * Resolves a generic Google Cloud CLI connector into a short-lived, run-scoped sandbox access
+ * token by invoking the connector-owned mint action. Provider-specific GCP IAM logic stays in
+ * the connector; this class only selects an allowed connector and adapts the result for the
+ * OpenCode runtime.
  */
 export class GcpCliCredentialResolver {
   constructor(
     private readonly getActions: () => Promise<ActionsPluginStart>,
-    private readonly encryptedSavedObjects: EncryptedSavedObjectsPluginStart,
     private readonly logger: Logger
   ) {}
 
@@ -124,21 +89,29 @@ export class GcpCliCredentialResolver {
           continue;
         }
 
-        const material = await this.readConnectorMaterial({
-          connectorId,
-          isPreconfigured: actionsClient.isPreconfigured(connectorId),
-          actions,
-          spaceId,
+        const executeResult = await actionsClient.execute({
+          actionId: connectorId,
+          params: {
+            subAction: MINT_SANDBOX_TOKEN_SUB_ACTION,
+            subActionParams: requested,
+          },
         });
-        const credential = this.resolveFromConnector({
-          connectorId,
-          material,
-          requested,
-          onDiagnostic,
-        });
-        if (credential) {
-          return credential;
+        if (executeResult.status === 'error') {
+          onDiagnostic?.(
+            `Google Cloud CLI connector ${connectorId} failed to mint a token: ${
+              executeResult.message ?? 'unknown error'
+            }`
+          );
+          continue;
         }
+
+        if (!isGcpCliCredentials(executeResult.data)) {
+          onDiagnostic?.(
+            `Google Cloud CLI connector ${connectorId} returned an invalid sandbox token response`
+          );
+          continue;
+        }
+        return { ...executeResult.data, connectorId };
       }
     } catch (error) {
       this.logger.warn(
@@ -174,116 +147,5 @@ export class GcpCliCredentialResolver {
     return connectors
       .filter((connector) => connector.actionTypeId === GCP_CLI_ACTION_TYPE_ID)
       .map((connector) => connector.id);
-  }
-
-  private async readConnectorMaterial({
-    connectorId,
-    isPreconfigured,
-    actions,
-    spaceId,
-  }: {
-    connectorId: string;
-    isPreconfigured: boolean;
-    actions: ActionsPluginStart;
-    spaceId?: string;
-  }): Promise<ConnectorMaterial> {
-    let config: Record<string, unknown> | undefined;
-    let secrets: Record<string, unknown> | undefined;
-
-    if (isPreconfigured) {
-      const inMemory = actions.inMemoryConnectors.find(
-        (c: InMemoryConnector) => c.id === connectorId
-      );
-      config = inMemory?.config as Record<string, unknown> | undefined;
-      secrets = inMemory?.secrets as Record<string, unknown> | undefined;
-    } else {
-      const esoClient = this.encryptedSavedObjects.getClient({
-        includedHiddenTypes: [ACTION_SAVED_OBJECT_TYPE],
-      });
-      const namespace = spaceId && spaceId !== 'default' ? spaceId : undefined;
-      const raw = await esoClient.getDecryptedAsInternalUser<RawActionAttributes>(
-        ACTION_SAVED_OBJECT_TYPE,
-        connectorId,
-        namespace ? { namespace } : {}
-      );
-      config = raw.attributes.config;
-      secrets = raw.attributes.secrets;
-    }
-
-    return { config, secrets };
-  }
-
-  private resolveFromConnector({
-    connectorId,
-    material,
-    requested,
-    onDiagnostic,
-  }: {
-    connectorId: string;
-    material: ConnectorMaterial;
-    requested: GcpCliCredentialRequest;
-    onDiagnostic?: (message: string) => void;
-  }): GcpCliCredentials | undefined {
-    const { config, secrets } = material;
-    if (!config || !secrets) {
-      return undefined;
-    }
-
-    if (secrets.authType !== GCP_SERVICE_ACCOUNT_AUTH_TYPE) {
-      onDiagnostic?.(`Google Cloud CLI connector ${connectorId} does not use service account auth`);
-      return undefined;
-    }
-
-    const serviceAccountJson =
-      typeof secrets.serviceAccountJson === 'string' ? secrets.serviceAccountJson : undefined;
-    if (!serviceAccountJson) {
-      onDiagnostic?.(`Google Cloud CLI connector ${connectorId} is missing service account JSON`);
-      return undefined;
-    }
-
-    const configuredProject = typeof config.projectId === 'string' ? config.projectId : undefined;
-    const serviceAccountProject = parseServiceAccountProject(serviceAccountJson);
-    const projectId = requested.projectId ?? configuredProject ?? serviceAccountProject;
-    if (!projectId) {
-      onDiagnostic?.(`Google Cloud CLI connector ${connectorId} requires a projectId`);
-      return undefined;
-    }
-
-    if (configuredProject && requested.projectId && requested.projectId !== configuredProject) {
-      onDiagnostic?.(
-        `Google Cloud CLI connector ${connectorId} targets ${configuredProject}, not ${requested.projectId}`
-      );
-      return undefined;
-    }
-
-    const deniedServices = missingAllowedValues(
-      requested.services,
-      parseCsv(config.allowedServices)
-    );
-    if (deniedServices.length > 0) {
-      onDiagnostic?.(
-        `Google Cloud CLI connector ${connectorId} does not allow services: ${deniedServices.join(
-          ', '
-        )}`
-      );
-      return undefined;
-    }
-
-    const deniedRegions = missingAllowedValues(requested.regions, parseCsv(config.allowedRegions));
-    if (deniedRegions.length > 0) {
-      onDiagnostic?.(
-        `Google Cloud CLI connector ${connectorId} does not allow regions: ${deniedRegions.join(
-          ', '
-        )}`
-      );
-      return undefined;
-    }
-
-    return {
-      serviceAccountJson,
-      projectId,
-      connectorId,
-      source: 'gcp_cli_connector',
-    };
   }
 }
