@@ -162,15 +162,22 @@ apiTest.describe('GET /api/discover_sessions', { tag: tags.deploymentAgnostic },
     expect(response).toHaveStatusCode(400);
   });
 
-  apiTest('returns 403 when the user cannot read Discover sessions', async ({ apiClient }) => {
-    const response = await apiClient.get(buildUrl({ query: 'ESQL' }), {
-      headers: {
-        ...COMMON_HEADERS,
-        ...devToolsReaderCredentials.apiKeyHeader,
-      },
-      responseType: 'json',
-    });
+  apiTest(
+    'returns an empty result set when the user cannot read Discover sessions',
+    async ({ apiClient }) => {
+      // Unlike GET /{id}, find does not 403 for under-privileged users: it filters out
+      // unauthorized types and returns an empty response.
+      const response = await apiClient.get(buildUrl({ query: 'ESQL' }), {
+        headers: {
+          ...COMMON_HEADERS,
+          ...devToolsReaderCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
 
-    expect(response).toHaveStatusCode(403);
-  });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.meta.total).toBe(0);
+      expect(response.body.data).toHaveLength(0);
+    }
+  );
 });

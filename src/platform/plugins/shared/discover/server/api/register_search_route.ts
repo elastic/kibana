@@ -44,7 +44,6 @@ export const registerSearchRoute = (
               description: 'Success',
             },
             400: { description: 'Invalid request' },
-            403: { description: 'Forbidden' },
             500: { description: 'Internal server error' },
           },
         },
