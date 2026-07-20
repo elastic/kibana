@@ -1,0 +1,19 @@
+title: Snapshot SLO response
+description: >
+  The snapshot SLO response returns the point in time and the per-instance results.
+  Each result contains either a summary (success) or an error (per-instance failure).
+type: object
+required:
+  - at
+  - results
+properties:
+  at:
+    type: string
+    format: date-time
+    description: The point in time at which the summaries were computed
+    example: '2025-01-12T10:00:00.000Z'
+  results:
+    type: array
+    description: The per-instance computation results
+    items:
+      $ref: 'snapshot_result.yaml'
