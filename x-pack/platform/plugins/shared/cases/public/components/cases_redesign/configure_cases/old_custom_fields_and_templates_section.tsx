@@ -340,7 +340,7 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
             description={
               <FormattedMessage
                 id="xpack.cases.configureCases.legacyCustomFieldsAndTemplatesDescription"
-                defaultMessage="Your custom fields and templates have been migrated to a new YAML-based template system. Manage them in the {templatesLink}. To view your migrated custom fields, visit the {customFieldsLink}. Your legacy configuration is kept here for reference during the transition."
+                defaultMessage="Custom fields and templates you've created have been migrated to the new YAML-based template system. Manage them in the {templatesLink}. To view your migrated custom fields, visit the {customFieldsLink}. Your legacy configuration is kept here for reference during the transition."
                 values={{
                   templatesLink: (
                     <EuiLink
