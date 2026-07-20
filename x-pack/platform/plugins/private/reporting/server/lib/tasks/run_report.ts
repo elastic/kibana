@@ -23,6 +23,7 @@ import type {
   ExecutionError,
   ReportDocument,
   ReportOutput,
+  ReportSource,
   TaskInstanceFields,
   TaskRunResult,
 } from '@kbn/reporting-common/types';
@@ -220,6 +221,35 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   protected getQueueTimeoutAsInterval() {
     // round up from ms to the nearest second
     return Math.ceil(this.getQueueTimeout().asSeconds()) + 's';
+  }
+
+  /**
+   * Re-fetches the report doc's current `_seq_no`/`_primary_term` from Elasticsearch and updates
+   * `report` in place. A prior attempt may have partially written to the report doc (e.g.
+   * `ContentStream#writeHead`) before failing, advancing the doc's `seq_no` beyond what we're
+   * still holding in memory. Without refreshing, the next write (a retry, or the final failed/error
+   * status update) reuses the stale value and is rejected by Elasticsearch with a
+   * `version_conflict_engine_exception` (see #255230, #234877).
+   */
+  private async refreshReportSeqNo(report: SavedReport): Promise<void> {
+    try {
+      const { asInternalUser: client } = await this.opts.reporting.getEsClient();
+      const document = await client.get<ReportSource>({
+        index: report._index,
+        id: report._id,
+      });
+      if (document._seq_no == null || document._primary_term == null) {
+        throw new Error(`Report doc ${report._id} is missing _seq_no/_primary_term!`);
+      }
+      report._seq_no = document._seq_no;
+      report._primary_term = document._primary_term;
+    } catch (err) {
+      // Not fatal: fall back to the in-memory values. The subsequent write may still conflict,
+      // but that's no worse than before this refresh was attempted.
+      errorLogger(this.logger, `Error refreshing report doc state for ${report._id}`, err, [
+        report._id,
+      ]);
+    }
   }
 
   private async saveExecutionError(
@@ -538,6 +568,15 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               operation: async (rep: SavedReport) => {
                 // keep track of the number of times we try within the task
                 atmpts = isNumber(atmpts) ? atmpts + 1 : undefined;
+
+                // On retry attempts, a previous attempt may have already partially written to
+                // the report doc (e.g. ContentStream#writeHead) before failing, advancing its
+                // seq_no beyond what we're holding in memory. Refresh before creating a new
+                // content stream so this attempt's writes don't hit a stale-OCC version conflict.
+                if (isNumber(atmpts) && atmpts > 1) {
+                  await this.refreshReportSeqNo(rep);
+                }
+
                 const jobContentEncoding = this.getJobContentEncoding(jobType);
                 const stream = await getContentStream(
                   this.opts.reporting,
@@ -560,17 +599,34 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                   stream.once('error', reject);
                 });
 
-                const output = await Promise.race<TaskRunResult>([
-                  this.performJob({
-                    task,
-                    fakeRequest,
-                    taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
-                    cancellationToken,
-                    stream,
-                  }),
-                  this.throwIfKibanaShutsDown(),
-                  rejectIfStreamError,
-                ]);
+                const performJobPromise = this.performJob({
+                  task,
+                  fakeRequest,
+                  taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
+                  cancellationToken,
+                  stream,
+                });
+
+                let output: TaskRunResult;
+                try {
+                  output = await Promise.race<TaskRunResult>([
+                    performJobPromise,
+                    this.throwIfKibanaShutsDown(),
+                    rejectIfStreamError,
+                  ]);
+                } catch (raceErr) {
+                  stream.removeListener('error', streamErrorReject!);
+                  // performJob may still be running (e.g. it lost the race to a stream error) and
+                  // could reject later; swallow that so it doesn't surface as an unhandled rejection.
+                  performJobPromise.catch(() => {});
+                  // Swallow any further error from the abandoned stream (e.g. a pending _write
+                  // callback firing after destroy()) so it doesn't crash the process.
+                  stream.once('error', () => {});
+                  // Stop the abandoned stream so it can't keep writing to (and advancing the
+                  // seq_no of) the report doc concurrently with the next retry attempt.
+                  stream.destroy();
+                  throw raceErr;
+                }
 
                 // Removing so errors in _final are handled only by finishedWithNoPendingCallbacks
                 // and don't cause unhandled rejections
@@ -617,6 +673,14 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           } catch (failedToExecuteErr) {
             const isLastAttempt = taskAttempts ? taskAttempts >= maxAttempts.maxTaskAttempts : true;
             eventLog.logError(failedToExecuteErr);
+
+            // A prior (retried or not) attempt may have already advanced the report doc's
+            // seq_no (e.g. via ContentStream#writeHead) before failing. Refresh before writing
+            // the failed/error status so this write doesn't also hit a stale-OCC version
+            // conflict (see #234877).
+            if (report) {
+              await this.refreshReportSeqNo(report);
+            }
 
             await this.saveExecutionError(report, failedToExecuteErr, isLastAttempt).catch(
               (failedToSaveError) => {
