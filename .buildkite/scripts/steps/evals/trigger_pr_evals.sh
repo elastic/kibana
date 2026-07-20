@@ -36,9 +36,6 @@ echo "--- Triggering LLM Evals pipeline (kibana-evals-pr-llm-evals)"
 # (getForwardablePrLabels in eval_pipeline.ts), so it forwards safely alongside the scalar
 # PR-context vars. trigger_pipeline.ts splits its extra-env arg on spaces, so every forwarded
 # value must be whitespace-free — we defensively skip any that isn't.
-# GITHUB_PR_BASE_OWNER/REPO are required by set_git_merge_base() (util.sh) in the child: its
-# sparse checkout can't resolve merge-base via git, so it hits the GitHub compare-API fallback,
-# which dereferences them under `set -u`. Omitting them aborts the child's pre-command hook.
 GITHUB_ENV_VARS=()
 for var in \
   GITHUB_PR_NUMBER \
