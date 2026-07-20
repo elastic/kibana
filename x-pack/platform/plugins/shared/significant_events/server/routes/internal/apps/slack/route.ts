@@ -128,7 +128,7 @@ const bindChannelSlackAppRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ channelId: z.string() }),
+    path: z.object({ channelId: z.string().max(32) }),
   }),
   handler: async ({ params, request, server }): Promise<SlackAppBindChannelResponse> => {
     try {
@@ -155,7 +155,7 @@ const unbindChannelSlackAppRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ channelId: z.string() }),
+    path: z.object({ channelId: z.string().max(32) }),
   }),
   handler: async ({ params, request, server }): Promise<SlackAppUnbindChannelResponse> => {
     try {
