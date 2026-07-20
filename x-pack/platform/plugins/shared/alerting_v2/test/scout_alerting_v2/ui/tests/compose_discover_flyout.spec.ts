@@ -33,6 +33,11 @@ const NO_TIME_FIELD_QUERY = 'FROM logs-* | LIMIT 10';
  */
 const TIMESTAMP_ONLY_INDEX = 'test-compose-discover-timestamp-only';
 const TIMESTAMP_ONLY_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | STATS count = COUNT(*) BY Carrier | WHERE count > 100`;
+/**
+ * STATS with no WHERE — heuristic cannot isolate an alert condition, so Apply
+ * commits alert + standalone (no_alert_condition). 
+ */
+const NO_ALERT_CONDITION_TIMESTAMP_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | STATS count = COUNT(*) BY Carrier`;
 const CREATE_SIGNAL_TIMESTAMP_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | WHERE Carrier == "ES-Air" | LIMIT 10`;
 const BROKEN_TIME_FIELD_RULE_NAME = 'scout-compose-discover-broken-time-field';
 const CREATE_SIGNAL_TIMESTAMP_RULE_NAME = 'scout-compose-discover-standalone-time-field';
@@ -303,7 +308,7 @@ test.describe(
       });
     });
 
-    test('edit flow: broken standalone alert can select timestamp and save', async ({
+    test('edit flow (sad path): broken standalone alert can select timestamp and save', async ({
       pageObjects,
       apiServices,
     }) => {
@@ -361,6 +366,45 @@ test.describe(
       });
     });
 
+    test('create flow (sad path): time field populates when base and alert condition cannot be determined', async ({
+      pageObjects,
+    }) => {
+      await test.step('open create flyout in alert mode and apply a no-alert-condition query', async () => {
+        await pageObjects.composeDiscover.openCreateFlyout();
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+
+        // Create starts as composed + empty base. Typing fills base until Apply;
+        // a STATS-only pipeline then commits as alert + standalone.
+        await pageObjects.composeDiscover.setSandboxQuery(NO_ALERT_CONDITION_TIMESTAMP_QUERY);
+        await pageObjects.composeDiscover.clickApply();
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
+      });
+
+      await test.step('summary shows no alert condition (standalone breach query)', async () => {
+        await expect(
+          pageObjects.composeDiscover.summarySection('no_alert_condition')
+        ).toBeVisible();
+        await expect(pageObjects.composeDiscover.noAlertConditionCallout).toBeVisible();
+        await expect(pageObjects.composeDiscover.nextButton).toBeDisabled();
+      });
+
+      await test.step('form Time field still resolves from the standalone breach query', async () => {
+        // Regression: alert mode used to resolve only from composed `base`, so
+        // options stayed empty after Apply left format: standalone.
+        await pageObjects.composeDiscover.waitForTimeFieldOption(
+          pageObjects.composeDiscover.timeFieldSelector,
+          'timestamp'
+        );
+        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('timestamp');
+        await expect(pageObjects.composeDiscover.timeFieldSelector).not.toHaveAttribute(
+          'aria-invalid',
+          'true'
+        );
+        await expect(pageObjects.composeDiscover.timeFieldError).toBeHidden();
+      });
+    });
+
     test('create flow: signal (standalone) mode can select timestamp and create', async ({
       pageObjects,
       apiServices,
@@ -370,8 +414,9 @@ test.describe(
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
 
-        // ModeSelect stays disabled until a query is committed (and while the
-        // sandbox is open). Apply first, then switch to Signal (standalone).
+        // Signal mode always resolves time fields from breach.query (not the
+        // alert-standalone bug). Kept as coverage for timestamp-only create +
+        // mode switch. ModeSelect stays disabled until a query is committed.
         await pageObjects.composeDiscover.setSandboxQuery(CREATE_SIGNAL_TIMESTAMP_QUERY);
         await pageObjects.composeDiscover.selectSandboxTimeField('timestamp');
         await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue(
