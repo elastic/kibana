@@ -312,10 +312,11 @@ describe('Agent policy API handlers', () => {
         expect(body.item.outputs.default.ssl).not.toHaveProperty('key');
         expect(body.item.outputs.default.ssl?.certificate).toBe('my-cert');
         expect(body.item.outputs.default.proxy_url).toBe('https://proxy.fr');
-        // fleet has proxy_url — its ssl.key (proxy-derived) must also be redacted
+        // fleet proxy_headers are redacted; ssl.key is left intact (may be own agent_key)
         expect(body.item.fleet).not.toHaveProperty('proxy_headers');
-        expect(body.item.fleet.ssl).not.toHaveProperty('key');
-        // agent.download has no proxy_url — its own ssl.key must NOT be redacted
+        expect(body.item.fleet.ssl?.key).toBe('PRIVATE_KEY');
+        // agent.download proxy_headers are redacted; ssl.key is left intact (may be own key)
+        expect(body.item.agent.download).not.toHaveProperty('proxy_headers');
         expect(body.item.agent.download.ssl?.key).toBe('PRIVATE_KEY');
       });
 

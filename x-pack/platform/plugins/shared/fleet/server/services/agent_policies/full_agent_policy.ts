@@ -978,15 +978,23 @@ export function getBinarySourceSettings(
 }
 
 /**
- * Strip proxy_headers and ssl.key from a FullAgentPolicy that was already composed
- * (e.g. retrieved verbatim from the .fleet-policies index via ?revision=N).
+ * Strip proxy_headers and proxy-derived ssl.key from a FullAgentPolicy that was already
+ * composed (e.g. retrieved verbatim from the .fleet-policies index via ?revision=N).
  * Mutates in place and returns the policy for convenience.
+ *
+ * Note on ssl.key: the stored doc does not preserve whether a key was sourced from a
+ * proxy's certificate_key or from the entity's own TLS config. For outputs, ssl.key is
+ * always proxy-derived (outputs have no own-key concept), so it is safe to redact whenever
+ * proxy_url is present. For fleet and agent.download, the entity may have its own ssl.key
+ * (fleet host agent_key, download source key) independent of any proxy — we leave those
+ * untouched to avoid over-redaction, accepting that proxy.certificate_key on those sections
+ * is not redacted on the revision path.
  */
 export function redactProxySecretsFromPolicy(policy: FullAgentPolicy): FullAgentPolicy {
   if (policy.outputs) {
     for (const output of Object.values(policy.outputs)) {
       delete output.proxy_headers;
-      // ssl.key is proxy-derived only when a proxy_url is present; leave own output TLS keys intact
+      // Output ssl.key is always proxy-derived; only present when proxy_url is set
       if (output.proxy_url && output.ssl) {
         delete output.ssl.key;
       }
@@ -994,17 +1002,11 @@ export function redactProxySecretsFromPolicy(policy: FullAgentPolicy): FullAgent
   }
   if (policy.fleet && 'hosts' in policy.fleet) {
     delete policy.fleet.proxy_headers;
-    // ssl.key is proxy-derived only when a proxy_url is present; leave fleet host mTLS keys intact
-    if (policy.fleet.proxy_url && policy.fleet.ssl) {
-      delete policy.fleet.ssl.key;
-    }
+    // fleet ssl.key may be the host's own agent_key — leave it to avoid over-redaction
   }
   if (policy.agent?.download) {
     delete policy.agent.download.proxy_headers;
-    // ssl.key is proxy-derived only when a proxy_url is present
-    if (policy.agent.download.proxy_url && policy.agent.download.ssl) {
-      delete (policy.agent.download.ssl as Record<string, unknown>).key;
-    }
+    // agent.download ssl.key may be the source's own key — leave it to avoid over-redaction
   }
   return policy;
 }
