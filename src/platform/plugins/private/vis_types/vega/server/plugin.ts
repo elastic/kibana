@@ -13,11 +13,17 @@ import type {
   VisTypeVegaPluginSetup,
   VisTypeVegaPluginStart,
 } from './types';
+import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import { getVegaByValueSchema } from './embeddable/schema';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { home, usageCollection }: VisTypeVegaPluginSetupDependencies) {
+  public setup(core: CoreSetup, { embeddable }: VisTypeVegaPluginSetupDependencies) {
+    embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
+      title: 'Vega',
+      getSchema: getVegaByValueSchema,
+    });
     return {};
   }
 

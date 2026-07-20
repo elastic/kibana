@@ -12,6 +12,8 @@ import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core
 import type { ConfigSchema } from './config';
 import { configSchema } from './config';
 
+export type { VegaByValueState } from './embeddable/schema';
+
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enableExternalUrls: true,

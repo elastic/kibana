@@ -12,11 +12,14 @@ import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import type { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
+import type {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '@kbn/inspector-plugin/public';
 
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
@@ -40,6 +43,7 @@ import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
+import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -52,6 +56,7 @@ export interface VegaVisualizationDependencies {
 
 /** @internal */
 export interface VegaPluginSetupDependencies {
+  embeddable: EmbeddableSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   inspector: InspectorSetup;
@@ -67,6 +72,7 @@ export interface VegaPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
   usageCollection: UsageCollectionStart;
+  inspector: InspectorStart;
 }
 
 /** @internal */
@@ -79,7 +85,7 @@ export class VegaPlugin implements Plugin<void, void> {
 
   public setup(
     core: CoreSetup<VegaPluginStartDependencies>,
-    { inspector, data, expressions, visualizations }: VegaPluginSetupDependencies
+    { embeddable, inspector, data, expressions, visualizations }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
@@ -95,14 +101,36 @@ export class VegaPlugin implements Plugin<void, void> {
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
-    visualizations.createBaseVisualizationAsync('vega', async () => {
-      const [[, startPlugins], { vegaVisType, createVegaFn, getVegaVisRenderer }] =
-        await Promise.all([core.getStartServices(), import('./async_module')]);
-      if (!startPlugins.expressions.getFunction('vega')) {
-        expressions.registerFunction(() => createVegaFn(visualizationDependencies));
-        expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
+    let runtimePromise:
+      | Promise<{ vegaVisType: typeof import('./vega_type').vegaVisType }>
+      | undefined;
+    const loadVegaRuntime = async () => {
+      if (runtimePromise) {
+        return runtimePromise;
       }
+
+      runtimePromise = Promise.all([core.getStartServices(), import('./async_module')]).then(
+        ([[, startDeps], runtime]) => {
+          if (!startDeps.expressions.getFunction('vega')) {
+            expressions.registerFunction(() => runtime.createVegaFn(visualizationDependencies));
+            expressions.registerRenderer(runtime.getVegaVisRenderer(visualizationDependencies));
+          }
+          return runtime;
+        }
+      );
+      return runtimePromise;
+    };
+
+    visualizations.createBaseVisualizationAsync('vega', async () => {
+      const { vegaVisType } = await loadVegaRuntime();
       return vegaVisType;
+    });
+
+    embeddable.registerEmbeddablePublicDefinition(VEGA_EMBEDDABLE_TYPE, async () => {
+      await loadVegaRuntime();
+      const [startCore, startDeps] = await core.getStartServices();
+      const { vegaEmbeddableFactory } = await import('./embeddable/vega_embeddable');
+      return vegaEmbeddableFactory(startCore, startDeps);
     });
   }
 
@@ -120,8 +148,14 @@ export class VegaPlugin implements Plugin<void, void> {
       const { getAddVegaPanelAction } = await import('./add_vega_panel_action');
       return getAddVegaPanelAction(deps);
     });
-    deps.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addVegaPanelAction');
-
     deps.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, 'addVegaPanelAction');
+
+    deps.uiActions.registerActionAsync('addVegaEmbeddableAction', async () => {
+      const { getAddVegaEmbeddableAction } = await import(
+        './embeddable/add_vega_embeddable_action'
+      );
+      return getAddVegaEmbeddableAction();
+    });
+    deps.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addVegaEmbeddableAction');
   }
 }
