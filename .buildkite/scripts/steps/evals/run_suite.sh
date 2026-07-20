@@ -277,13 +277,13 @@ EOF
 EOF
       fi
 
-      # Add a post-comparison step on PR builds. It runs after all model steps
-      # complete (same fanout_step_keys dependency as notify) and posts a
-      # per-suite regression comment to the PR. Lives here in the fanout so it
-      # starts only after execution IDs have been written by evaluate.ts —
-      # unlike a static step in eval_pipeline.ts which would fire the moment
-      # run_suite.sh exits (before any model step completes).
+      # PR-only steps: post-comparison comment + refresh baseline block/trigger.
+      # Both live here in the fanout so they start only after all model steps
+      # complete and execution IDs are written by evaluate.ts.
       if [[ -n "${BUILDKITE_PULL_REQUEST:-}" && "${BUILDKITE_PULL_REQUEST}" != "false" ]]; then
+        suite_display_name="${EVAL_SUITE_NAME:-$EVAL_SUITE_ID}"
+
+        # Post-comparison step (inside the fanout group — 6-space indent).
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "LLM Evals: ${EVAL_SUITE_ID} (post comparison)"
         key: "kbn-evals-${group_key_safe}-post-comparison"
@@ -306,6 +306,36 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+
+        # Refresh baseline block + trigger (top-level — 2-space indent).
+        # blocked_state: passed keeps the build green while the block is pending.
+        # The trigger fires a fresh main eval run so the PR comment is updated
+        # with a same-day baseline when the auto-discovered one is stale.
+EOF
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+  - block: "LLM Evals: Refresh ${suite_display_name}"
+    key: "kbn-evals-${group_key_safe}-refresh-block"
+    blocked_state: passed
+    depends_on:
+      - "kbn-evals-${group_key_safe}-post-comparison"
+    allow_dependency_failure: true
+  - trigger: kibana-evals-on-demand
+    label: "LLM Evals: Refresh ${suite_display_name}"
+    key: "kbn-evals-${group_key_safe}-refresh-trigger"
+    depends_on:
+      - "kbn-evals-${group_key_safe}-refresh-block"
+    build:
+      branch: main
+      message: "Fresh baseline for PR #${BUILDKITE_PULL_REQUEST}: ${EVAL_SUITE_ID}"
+      env:
+        EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+        EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
+        FRESH_BASELINE_PR_EXPERIMENT_ID: "bk-${BUILDKITE_BUILD_ID}"
+        GITHUB_PR_NUMBER: "${BUILDKITE_PULL_REQUEST}"
+        EVALUATION_CONNECTOR_ID: "${EVALUATION_CONNECTOR_ID:-}"
+        EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
+        EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
+        EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
 EOF
       fi
 
