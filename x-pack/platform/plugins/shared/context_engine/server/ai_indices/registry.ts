@@ -65,7 +65,9 @@ export class AiIndexRegistry {
     } catch (err) {
       if (!(err instanceof AiIndexNotFoundError)) {
         logger.warn(
-          `Failed to check AI index '${id}' registration status: ${err instanceof Error ? err.message : String(err)}`
+          `Failed to check AI index '${id}' registration status: ${
+            err instanceof Error ? err.message : String(err)
+          }`
         );
         return;
       }
