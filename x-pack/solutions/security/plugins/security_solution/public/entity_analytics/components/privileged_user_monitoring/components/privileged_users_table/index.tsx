@@ -20,12 +20,14 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { UserPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 
 import { buildPrivilegedUsersTableColumns } from './columns';
@@ -44,15 +46,26 @@ const TITLE = i18n.translate(
 const PRIVILEGED_USERS_TABLE_ID = 'PrivilegedUsers-table';
 
 const useOpenUserFlyout = () => {
+  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openUserFlyout } = useFlyoutApi();
 
   return (userName: string) => {
+    if (enableNewFlyout) {
+      openUserFlyout({
+        userName,
+        scopeId: PRIVILEGED_USERS_TABLE_ID,
+        contextID: PRIVILEGED_USERS_TABLE_ID,
+      });
+      return;
+    }
+
     openFlyout({
       right: {
         id: UserPanelKey,
         params: {
-          contextID: PRIVILEGED_USERS_TABLE_ID,
           userName,
+          contextID: PRIVILEGED_USERS_TABLE_ID,
           scopeId: PRIVILEGED_USERS_TABLE_ID,
         },
       },

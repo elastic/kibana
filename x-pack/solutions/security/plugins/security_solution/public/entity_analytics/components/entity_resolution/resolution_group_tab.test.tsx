@@ -25,6 +25,20 @@ jest.mock('../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(),
 }));
 jest.mock('../../../common/hooks/use_app_toasts');
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({ openFlyout: jest.fn(), closeFlyout: jest.fn() }),
+}));
+jest.mock('../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => false,
+}));
+jest.mock('../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openUserFlyout: jest.fn(),
+    openHostFlyout: jest.fn(),
+    openServiceFlyout: jest.fn(),
+    openGenericEntityFlyout: jest.fn(),
+  }),
+}));
 
 const mockUseResolutionGroup = useResolutionGroup as jest.Mock;
 const mockUseLinkEntities = useLinkEntities as jest.Mock;

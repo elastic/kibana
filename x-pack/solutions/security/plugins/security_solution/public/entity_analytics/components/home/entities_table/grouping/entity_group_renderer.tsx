@@ -24,8 +24,11 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../../../flyout/entity_details/shared/constants';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
 import { RISK_SCORE_NOT_AVAILABLE } from '../../../entity_resolution/translations';
+import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { getRiskLevel } from '../../../../../../common/entity_analytics/risk_engine';
 import { formatRiskScore } from '../../../../common/utils';
 import { getRiskScoreColors } from '../risk_score_cell';
@@ -56,7 +59,9 @@ const ResolutionGroupPanel = ({
   targetMetadata: TargetMetadataMap;
   tableId: string;
 }) => {
+  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openUserFlyout, openHostFlyout, openServiceFlyout } = useFlyoutApi();
 
   const entityId = String(bucket.key_as_string ?? bucket.key);
   const metadata = targetMetadata.get(entityId);
@@ -72,23 +77,40 @@ const ResolutionGroupPanel = ({
       e.stopPropagation();
       if (!targetEntityName || !entityType) return;
 
-      const panelKey = EntityPanelKeyByType[entityType];
-      const panelParam = EntityPanelParamByType[entityType];
-      if (!panelKey || !panelParam) return;
+      if (!EntityPanelKeyByType[entityType]) return;
 
-      openFlyout({
-        right: {
-          id: panelKey,
-          params: {
-            [panelParam]: targetEntityName,
-            entityId,
-            contextID: tableId,
-            scopeId: tableId,
-          },
-        },
-      });
+      const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
+
+      if (enableNewFlyout) {
+        if (entityType === EntityType.user) {
+          openUserFlyout({ userName: targetEntityName, ...sharedParams });
+        } else if (entityType === EntityType.host) {
+          openHostFlyout({ hostName: targetEntityName, ...sharedParams });
+        } else if (entityType === EntityType.service) {
+          openServiceFlyout({ serviceName: targetEntityName, ...sharedParams });
+        }
+        return;
+      }
+
+      const panelKey = EntityPanelKeyByType[entityType];
+      const paramName = EntityPanelParamByType[entityType];
+      if (panelKey && paramName) {
+        openFlyout({
+          right: { id: panelKey, params: { [paramName]: targetEntityName, ...sharedParams } },
+        });
+      }
     },
-    [openFlyout, targetEntityName, entityType, entityId, tableId]
+    [
+      enableNewFlyout,
+      openFlyout,
+      openUserFlyout,
+      openHostFlyout,
+      openServiceFlyout,
+      targetEntityName,
+      entityType,
+      entityId,
+      tableId,
+    ]
   );
 
   return (

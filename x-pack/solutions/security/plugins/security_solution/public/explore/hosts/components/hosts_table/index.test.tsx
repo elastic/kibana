@@ -13,7 +13,6 @@ import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
 import { HostsTable } from '.';
 import { mockData } from './mock';
-import { HostPanelKey } from '../../../../flyout/entity_details/shared/constants';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -45,9 +44,21 @@ jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
 
+const mockOpenHostFlyout = jest.fn();
 const mockOpenFlyout = jest.fn();
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({ openFlyout: mockOpenFlyout })),
+  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: jest.fn() }),
+}));
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => true,
+}));
+jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openHostFlyout: mockOpenHostFlyout,
+    openUserFlyout: jest.fn(),
+    openServiceFlyout: jest.fn(),
+    openGenericEntityFlyout: jest.fn(),
+  }),
 }));
 
 const mockUseUiSetting = jest.fn().mockReturnValue([false]);
@@ -65,6 +76,7 @@ describe('Hosts Table', () => {
   const store = createMockStore();
 
   beforeEach(() => {
+    mockOpenHostFlyout.mockClear();
     mockOpenFlyout.mockClear();
   });
 
@@ -220,17 +232,11 @@ describe('Hosts Table', () => {
 
       fireEvent.click(screen.getByTestId('host-details-button'));
 
-      expect(mockOpenFlyout).toHaveBeenCalledWith({
-        right: {
-          id: HostPanelKey,
-          params: {
-            hostName,
-            entityId,
-            contextID: 'allHosts',
-            scopeId: 'allHosts',
-            isPreviewMode: false,
-          },
-        },
+      expect(mockOpenHostFlyout).toHaveBeenCalledWith({
+        hostName,
+        entityId,
+        contextID: 'allHosts',
+        scopeId: 'allHosts',
       });
     });
 
@@ -254,6 +260,7 @@ describe('Hosts Table', () => {
 
       fireEvent.click(screen.getByTestId('host-details-button'));
 
+      expect(mockOpenHostFlyout).not.toHaveBeenCalled();
       expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
 

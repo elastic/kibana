@@ -54,6 +54,9 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../../flyout/entity_details/shared/constants';
+import { EntityType } from '../../../../../common/entity_analytics/types';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import {
   EntitySourceValue,
   toEntitySourceArray,
@@ -194,7 +197,9 @@ export const EntitiesDataTable = ({
     setUrlQuery,
   } = state;
 
-  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
+  const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openUserFlyout, openHostFlyout, openServiceFlyout } = useFlyoutApi();
   const {
     timelinePrivileges: { read: canUseTimeline },
     alertsPrivileges: {
@@ -214,23 +219,39 @@ export const EntitiesDataTable = ({
       const { entityType, entityName, entityId } = getEntityFields(doc);
       if (!entityType || !entityName) return;
 
-      const panelKey = EntityPanelKeyByType[entityType];
-      const panelParam = EntityPanelParamByType[entityType];
-      if (!panelKey || !panelParam) return;
+      // Generic entities have no dedicated panel in this table.
+      if (!EntityPanelKeyByType[entityType]) return;
 
-      openFlyout({
-        right: {
-          id: panelKey,
-          params: {
-            [panelParam]: entityName,
-            entityId,
-            contextID: tableId,
-            scopeId: tableId,
-          },
-        },
-      });
+      const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
+
+      if (enableNewFlyout) {
+        if (entityType === EntityType.user) {
+          openUserFlyout({ userName: entityName, ...sharedParams });
+        } else if (entityType === EntityType.host) {
+          openHostFlyout({ hostName: entityName, ...sharedParams });
+        } else if (entityType === EntityType.service) {
+          openServiceFlyout({ serviceName: entityName, ...sharedParams });
+        }
+        return;
+      }
+
+      const panelKey = EntityPanelKeyByType[entityType];
+      const paramName = EntityPanelParamByType[entityType];
+      if (panelKey && paramName) {
+        openFlyout({
+          right: { id: panelKey, params: { [paramName]: entityName, ...sharedParams } },
+        });
+      }
     },
-    [openFlyout, closeFlyout, tableId]
+    [
+      enableNewFlyout,
+      openFlyout,
+      openUserFlyout,
+      openHostFlyout,
+      openServiceFlyout,
+      closeFlyout,
+      tableId,
+    ]
   );
 
   const {
