@@ -37,7 +37,6 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
-import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
@@ -52,6 +51,7 @@ import type {
 } from '@kbn/workflows/types/v1';
 import type {
   LogSearchResult,
+  WorkflowExecutionsDataAccess,
   WorkflowsExecutionEnginePluginStart,
 } from '@kbn/workflows-execution-engine/server';
 import type {

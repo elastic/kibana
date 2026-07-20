@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import type { StepExecutionsDataAccess } from './data_access_layer';
 import {
   createMockGetExecutionsByIdsResponse,
   createMockStepExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
+} from './data_access_layer/mocks';
 import { StepExecutionRepository } from './step_execution_repository';
 
 describe('StepExecutionRepository', () => {

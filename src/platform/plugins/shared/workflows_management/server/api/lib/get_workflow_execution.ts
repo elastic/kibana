@@ -18,8 +18,8 @@ import type {
   GetStepExecutionsByIdsOptions,
   StepExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
-import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server/data_access_layer';
+} from '@kbn/workflows-execution-engine/server';
+import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows-execution-engine/server';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 
 interface GetWorkflowExecutionParams {

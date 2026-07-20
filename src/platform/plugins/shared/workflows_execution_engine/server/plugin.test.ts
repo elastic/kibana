@@ -17,12 +17,12 @@ import {
   NonTerminalExecutionStatuses,
   TerminalExecutionStatuses,
 } from '@kbn/workflows';
+import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
+import type { WorkflowExecutionsDataAccess } from './repositories/data_access_layer';
 import {
   createMockStepExecutionsDataAccess,
   createMockWorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
-import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
-import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
+} from './repositories/data_access_layer/mocks';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { WORKFLOW_SCHEDULED_TASK_TYPE } from './workflow_task_manager/types';

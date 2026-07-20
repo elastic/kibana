@@ -10,7 +10,7 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { createMockWorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import { createMockWorkflowExecutionsDataAccess } from '@kbn/workflows-execution-engine/server/mocks';
 
 import type { WorkflowSearchDeps } from './types';
 import { WorkflowSearchService } from './workflow_search_service';

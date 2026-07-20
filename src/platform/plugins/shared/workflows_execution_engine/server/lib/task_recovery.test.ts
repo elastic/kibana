@@ -11,13 +11,6 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
-  createMockGetExecutionsByIdsResponse,
-  createMockStepExecutionsDataAccess,
-  createMockWorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
-import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
-
-import {
   buildTaskAttemptsExhaustedMessage,
   resolveExhaustedWorkflowRunTask,
   resolveInterruptedWorkflowResumeTask,
@@ -26,6 +19,13 @@ import {
   TASK_RECOVERY_ERROR_TYPE,
   taskRecoveryMessages,
 } from './task_recovery';
+import type { WorkflowExecutionsDataAccess } from '../repositories/data_access_layer';
+import {
+  createMockGetExecutionsByIdsResponse,
+  createMockStepExecutionsDataAccess,
+  createMockWorkflowExecutionsDataAccess,
+} from '../repositories/data_access_layer/mocks';
+
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 

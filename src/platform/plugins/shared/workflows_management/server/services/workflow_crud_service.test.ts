@@ -14,7 +14,7 @@ import type { EsWorkflow } from '@kbn/workflows';
 import type {
   StepExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
+} from '@kbn/workflows-execution-engine/server';
 
 import type { WorkflowCrudDeps } from './types';
 import { WorkflowCrudService } from './workflow_crud_service';

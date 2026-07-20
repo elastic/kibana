@@ -9,8 +9,8 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
-import { createMockWorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import type { WorkflowExecutionsDataAccess } from '@kbn/workflows-execution-engine/server';
+import { createMockWorkflowExecutionsDataAccess } from '@kbn/workflows-execution-engine/server/mocks';
 import {
   searchWorkflowExecutions,
   WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES,

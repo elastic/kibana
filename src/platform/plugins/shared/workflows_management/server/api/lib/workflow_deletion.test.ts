@@ -11,7 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type {
   StepExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
+} from '@kbn/workflows-execution-engine/server';
 
 import { deleteWorkflows } from './workflow_deletion';
 

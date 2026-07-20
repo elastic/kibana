@@ -14,7 +14,7 @@ import {
   ExecutionStatus,
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
-import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import type { WorkflowExecutionsDataAccess } from './data_access_layer';
 
 export class WorkflowExecutionRepository {
   constructor(private workflowExecutionsDataAccess: WorkflowExecutionsDataAccess) {}

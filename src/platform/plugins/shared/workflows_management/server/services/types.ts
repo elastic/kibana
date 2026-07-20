@@ -17,10 +17,10 @@ import type {
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
+  IWorkflowEventLoggerService,
   StepExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
-import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
+} from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 import type { IWorkflowChangeHistoryService } from './workflow_change_history_types';

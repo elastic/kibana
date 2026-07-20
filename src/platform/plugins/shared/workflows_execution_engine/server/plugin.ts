@@ -32,10 +32,6 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
-import {
-  createExecutionsDataAccess,
-  type ExecutionsDataAccessBundle,
-} from '@kbn/workflows/server/data_access_layer';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import { maybeDrainConcurrencyQueueBeforeEnqueue } from './concurrency/concurrency_queue_drainer';
 import { handleConcurrencyBlockedExecution } from './concurrency/maybe_schedule_dormant_queued_run';
@@ -59,6 +55,10 @@ import {
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
+import {
+  createExecutionsDataAccess,
+  type ExecutionsDataAccessBundle,
+} from './repositories/data_access_layer';
 import { DeferredExecutionsDataAccess } from './repositories/deferred_executions_data_access';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';

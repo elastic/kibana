@@ -11,13 +11,14 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
+import { WorkflowsExecutionEnginePlugin } from './plugin';
 import {
   mockExecutionsDataAccessInitSetup,
   mockExecutionsDataAccessInitStart,
 } from './test_utils/executions_data_access_jest_mock';
 
-jest.mock('@kbn/workflows/server/data_access_layer', () => {
-  const actual = jest.requireActual('@kbn/workflows/server/data_access_layer');
+jest.mock('./repositories/data_access_layer', () => {
+  const actual = jest.requireActual('./repositories/data_access_layer');
   const { createExecutionsDataAccessJestMock: createDataAccessMock } = jest.requireActual(
     './test_utils/executions_data_access_jest_mock'
   );
@@ -26,8 +27,6 @@ jest.mock('@kbn/workflows/server/data_access_layer', () => {
     createExecutionsDataAccess: jest.fn(() => createDataAccessMock()),
   };
 });
-
-import { WorkflowsExecutionEnginePlugin } from './plugin';
 
 const createPlugin = (): WorkflowsExecutionEnginePlugin => {
   const initializerContext = coreMock.createPluginInitializerContext({

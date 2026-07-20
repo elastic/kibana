@@ -12,7 +12,7 @@ export const mockExecutionsDataAccessInitStart = jest.fn().mockResolvedValue(und
 
 export const createExecutionsDataAccessJestMock = () => {
   const { createMockStepExecutionsDataAccess, createMockWorkflowExecutionsDataAccess } =
-    jest.requireActual('@kbn/workflows/server/data_access_layer');
+    jest.requireActual('../repositories/data_access_layer/mocks');
 
   return {
     initSetup: mockExecutionsDataAccessInitSetup,

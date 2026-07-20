@@ -14,7 +14,7 @@ import { buildWorkflowFilters } from '@kbn/workflows/server';
 import type {
   StepExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
+} from '@kbn/workflows-execution-engine/server';
 
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { partitionBulkResults } from './bulk_response_helpers';

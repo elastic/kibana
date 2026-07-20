@@ -12,14 +12,14 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionType } from '@kbn/workflows';
 import type {
+  IWorkflowEventLoggerService,
   StepExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
+} from '@kbn/workflows-execution-engine/server';
 import {
   createMockStepExecutionsDataAccess,
   createMockWorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
-import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
+} from '@kbn/workflows-execution-engine/server/mocks';
 
 import { WorkflowExecutionQueryService } from './workflow_execution_query_service';
 import {

@@ -9,8 +9,8 @@
 
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import type { StepExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
-import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server/data_access_layer';
+import type { StepExecutionsDataAccess } from './data_access_layer';
+import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from './data_access_layer/lib/get_step_executions_by_workflow_execution';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
 

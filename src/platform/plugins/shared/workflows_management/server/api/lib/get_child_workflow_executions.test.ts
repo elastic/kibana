@@ -10,14 +10,14 @@
 import type {
   StepExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
+} from '@kbn/workflows-execution-engine/server';
 import {
   createMockGetExecutionsByIdsResponse,
   createMockStepExecutionsDataAccess,
   createMockWorkflowExecutionsDataAccess,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '@kbn/workflows/server/data_access_layer';
+} from '@kbn/workflows-execution-engine/server/mocks';
 import { getChildWorkflowExecutions } from './get_child_workflow_executions';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 
 describe('getChildWorkflowExecutions', () => {
   let mockWorkflowExecutionsDataAccess: jest.Mocked<WorkflowExecutionsDataAccess>;

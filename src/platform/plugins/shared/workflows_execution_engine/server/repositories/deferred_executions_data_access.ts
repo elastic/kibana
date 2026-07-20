@@ -24,7 +24,7 @@ import type {
   GetExecutionsByIdsResponse,
   ScriptUpdateRequest,
   ScriptUpdateResponse,
-} from '@kbn/workflows/server/data_access_layer';
+} from './data_access_layer';
 
 export class DeferredExecutionsDataAccess<TExecution extends { id: string }>
   implements ExecutionsDataAccess<TExecution>

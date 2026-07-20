@@ -8,14 +8,21 @@
  */
 
 import {
+  createMockGetExecutionsByIdsResponse,
   createMockStepExecutionsDataAccess,
   createMockWorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
+} from './repositories/data_access_layer/mocks';
 import type {
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
 } from './types';
 import { createMockWorkflowEventLoggerService } from './workflow_event_logger/mocks';
+
+export {
+  createMockGetExecutionsByIdsResponse,
+  createMockStepExecutionsDataAccess,
+  createMockWorkflowExecutionsDataAccess,
+};
 
 export const workflowsExecutionEngineMock = {
   createSetup: jest.fn().mockReturnValue({} as jest.Mocked<WorkflowsExecutionEnginePluginSetup>),

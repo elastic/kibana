@@ -10,7 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '../../types/v1';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 
 /** Backing store for execution documents. */
 export type ExecutionStorageSource = 'system_index' | 'data_stream';

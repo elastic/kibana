@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import type { StepExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import type { StepExecutionsDataAccess } from '@kbn/workflows-execution-engine/server';
 
 import { buildTimeRangeFilter } from './build_time_range_filter';
 

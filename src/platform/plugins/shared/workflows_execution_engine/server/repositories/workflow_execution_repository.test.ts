@@ -12,11 +12,11 @@ import {
   ExecutionStatus,
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
-import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import type { WorkflowExecutionsDataAccess } from './data_access_layer';
 import {
   createMockGetExecutionsByIdsResponse,
   createMockWorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
+} from './data_access_layer/mocks';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 
 const asBulkResponse = (value: unknown) =>

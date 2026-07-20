@@ -19,19 +19,27 @@ import type {
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { BulkScheduleWorkflowResult, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type {
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
-import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type {
+  StepExecutionsDataAccess,
+  WorkflowExecutionsDataAccess,
+} from './repositories/data_access_layer';
 import type {
   SearchTriggerEventLogParams,
   SearchTriggerEventLogResult,
 } from './trigger_events/event_logs/trigger_event_log_query';
 import type { EmitEvent } from './trigger_events/trigger_event_handler';
 import type { IWorkflowEventLoggerService } from './workflow_event_logger';
+
+export type {
+  ExecutionsDataAccess,
+  GetStepExecutionsByIdsOptions,
+  GetWorkflowExecutionsByIdsOptions,
+  StepExecutionsDataAccess,
+  WorkflowExecutionsDataAccess,
+} from './repositories/data_access_layer';
 
 export interface ExecuteWorkflowResponse {
   workflowExecutionId: string;

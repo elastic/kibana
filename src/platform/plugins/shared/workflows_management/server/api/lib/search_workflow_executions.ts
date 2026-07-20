@@ -16,7 +16,7 @@ import type { Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { EsWorkflowExecution, WorkflowExecutionListDto } from '@kbn/workflows';
 import { pickWorkflowDocumentVersion } from '@kbn/workflows';
-import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import type { WorkflowExecutionsDataAccess } from '@kbn/workflows-execution-engine/server';
 
 interface SearchWorkflowExecutionsParams {
   workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;

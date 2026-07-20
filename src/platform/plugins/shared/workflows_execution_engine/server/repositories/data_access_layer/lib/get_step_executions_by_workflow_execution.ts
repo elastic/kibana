@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowStepExecution } from '../../../types/v1';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { GetStepExecutionsByIdsOptions, StepExecutionsDataAccess } from '../types';
 
 export interface GetStepExecutionsByWorkflowExecutionParams {

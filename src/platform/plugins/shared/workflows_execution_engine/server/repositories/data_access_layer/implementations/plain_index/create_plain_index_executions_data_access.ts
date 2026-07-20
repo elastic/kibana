@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { createOrUpdateIndex } from './helpers';
 import { PlainIndexExecutionsDataAccess } from './plain_index_executions_data_access';
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '../../../../types/v1';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,

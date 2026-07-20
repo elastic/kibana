@@ -8,8 +8,8 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { StepExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
-import { createMockStepExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import type { StepExecutionsDataAccess } from '@kbn/workflows-execution-engine/server';
+import { createMockStepExecutionsDataAccess } from '@kbn/workflows-execution-engine/server/mocks';
 import { searchStepExecutions } from './search_step_executions';
 
 describe('searchStepExecutions', () => {

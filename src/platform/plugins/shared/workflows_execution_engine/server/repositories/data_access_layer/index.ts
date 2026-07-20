@@ -30,11 +30,6 @@ export type {
 export type { PlainIndexExecutionsDataAccessDeps } from './implementations/plain_index/plain_index_executions_data_access';
 export { PlainIndexExecutionsDataAccess } from './implementations/plain_index/plain_index_executions_data_access';
 export { createExecutionsDataAccess } from './implementations/create_executions_data_access';
-export {
-  createMockGetExecutionsByIdsResponse,
-  createMockStepExecutionsDataAccess,
-  createMockWorkflowExecutionsDataAccess,
-} from './mocks';
 
 export type {
   BulkItem,

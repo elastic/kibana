@@ -14,8 +14,8 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { ConcreteTaskInstance, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-jest.mock('@kbn/workflows/server/data_access_layer', () => {
-  const actual = jest.requireActual('@kbn/workflows/server/data_access_layer');
+jest.mock('./repositories/data_access_layer', () => {
+  const actual = jest.requireActual('./repositories/data_access_layer');
   const { createExecutionsDataAccessJestMock } = jest.requireActual(
     './test_utils/executions_data_access_jest_mock'
   );
