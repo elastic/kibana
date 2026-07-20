@@ -1,0 +1,68 @@
+openapi: 3.0.0
+info:
+  title: Post Generate Workflow Internal API endpoint
+  version: '2023-10-31'
+paths:
+  /internal/attack_discovery/_generate_workflow:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: PostGenerateWorkflow
+      x-state: Technical Preview
+      summary: Generate an alert retrieval workflow from a natural language description
+      description: >-
+        Internal API that uses an LLM to generate an alert retrieval workflow
+        from a natural language description. Returns the generated workflow ID
+        and name.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - connector_id
+                - description
+              properties:
+                connector_id:
+                  type: string
+                  description: The connector ID for the LLM to use for workflow generation
+                description:
+                  type: string
+                  description: A natural language description of the alert retrieval workflow to generate
+      responses:
+        '200':
+          description: Workflow generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - workflow_id
+                  - workflow_name
+                properties:
+                  workflow_id:
+                    type: string
+                    description: The unique identifier of the generated workflow
+                  workflow_name:
+                    type: string
+                    description: The human-readable name of the generated workflow
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_code:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - status_code
+                  - error
+                  - message
+components:
+  x-codegen-enabled: true

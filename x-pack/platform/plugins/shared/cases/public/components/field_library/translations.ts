@@ -50,10 +50,6 @@ export const FIELD_LIBRARY_DESCRIPTION = i18n.translate('xpack.cases.fieldLibrar
   defaultMessage: 'Manage reusable field definitions that can be inserted into case templates.',
 });
 
-export const BACK_TO_TEMPLATES = i18n.translate('xpack.cases.fieldLibrary.backToTemplates', {
-  defaultMessage: 'Back to templates',
-});
-
 export const CREATE_FIELD_DEFINITION = i18n.translate(
   'xpack.cases.fieldLibrary.createFieldDefinition',
   { defaultMessage: 'Create field definition' }
@@ -107,6 +103,10 @@ export const FIELD_ALREADY_EXISTS_ERROR = (fieldName: string) =>
 
 export const NAME_COLUMN = i18n.translate('xpack.cases.fieldLibrary.nameColumn', {
   defaultMessage: 'Name',
+});
+
+export const LABEL_COLUMN = i18n.translate('xpack.cases.fieldLibrary.labelColumn', {
+  defaultMessage: 'Label',
 });
 
 export const DESCRIPTION_COLUMN = i18n.translate('xpack.cases.fieldLibrary.descriptionColumn', {

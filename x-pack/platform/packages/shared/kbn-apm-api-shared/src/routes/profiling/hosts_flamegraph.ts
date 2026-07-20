@@ -4,11 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt, kueryRt, serviceTransactionDataSourceRt } from '../../default_api_types';
+import {
+  rangeSchema,
+  kuerySchema,
+  serviceTransactionDataSourceSchema,
+} from '../../default_api_types';
 
 export interface ProfilingHostsFlamegraphResponse {
   flamegraph: BaseFlameGraph;
@@ -18,8 +22,11 @@ export interface ProfilingHostsFlamegraphResponse {
 
 export const profilingHostsFlamegraphRoute = defineRoute<ProfilingHostsFlamegraphResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/profiling/hosts/flamegraph',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([rangeRt, environmentRt, serviceTransactionDataSourceRt, kueryRt]),
+  params: z.object({
+    path: z.object({ serviceName: z.string() }),
+    query: rangeSchema
+      .merge(environmentSchema)
+      .merge(serviceTransactionDataSourceSchema)
+      .merge(kuerySchema),
   }),
 });

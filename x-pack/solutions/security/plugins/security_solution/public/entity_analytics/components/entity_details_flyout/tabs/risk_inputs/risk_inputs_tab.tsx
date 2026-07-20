@@ -295,7 +295,7 @@ const RiskInputsTabContent = <T extends EntityType>({
   const euidApi = useEntityStoreEuidApi();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
   const [userSelectedView, setUserSelectedView] = useState(subTab);
-  const [historyFrom, setHistoryFrom] = useState(DEFAULT_HISTORY_FROM);
+  const [historyRange, setHistoryRange] = useState(DEFAULT_HISTORY_RANGE);
   const [selectedTimestamp, setSelectedTimestamp] = useState<string | undefined>(undefined);
   const isRiskScoreHistoryEnabled = useIsExperimentalFeatureEnabled('riskScoreHistoryEnabled');
   const isAssistantToolDisabled = useIsExperimentalFeatureEnabled('riskScoreAssistantToolDisabled');
@@ -311,33 +311,48 @@ const RiskInputsTabContent = <T extends EntityType>({
   const isResolutionView =
     selectedView === RiskScoreLeftPanelSubTab.RESOLUTION && hasResolutionScore;
 
-  const showTimeline = isRiskScoreHistoryEnabled && entityId !== undefined && !isResolutionView;
+  // The resolution-group history lives in the same time-series stream as the
+  // entity history, keyed by the resolution target's id with `score_type=resolution`.
+  // Switch the timeline's identity and score type by the active sub-tab so the
+  // chart and point-in-time contributions follow the view.
+  const resolutionTargetEntityId = resolutionGroup?.target
+    ? getEntityId(resolutionGroup.target)
+    : undefined;
+  const historyEntityId = isResolutionView ? resolutionTargetEntityId : entityId;
+  const historyScoreType: RiskScoreHistoryEntry['score_type'] = isResolutionView
+    ? 'resolution'
+    : 'base';
+  const historyEntityName =
+    isResolutionView && resolutionGroup?.target
+      ? getEntityName(resolutionGroup.target) || entityName
+      : entityName;
+
+  const showTimeline = isRiskScoreHistoryEnabled && historyEntityId !== undefined;
   const pitSelectionActive = showTimeline && selectedTimestamp !== undefined;
 
   const { data: pitHistoryData, isFetching: pitFetching } = useRiskScoreHistory({
     entityType,
-    entityId,
+    entityId: historyEntityId,
     from: selectedTimestamp,
     to: selectedTimestamp,
-    scoreType: 'base',
+    scoreType: historyScoreType,
     includeContributions: true,
-    pageSize: 1,
     skip: !pitSelectionActive,
   });
 
   const pitEntry = pitSelectionActive ? pitHistoryData?.entries[0] : undefined;
   const pitRiskScore = useMemo(
     () =>
-      pitEntry !== undefined && entityId !== undefined
-        ? mkEntityRiskScore(entityType, entityName, entityId, pitEntry)
+      pitEntry !== undefined && historyEntityId !== undefined
+        ? mkEntityRiskScore(entityType, historyEntityName, historyEntityId, pitEntry)
         : undefined,
-    [pitEntry, entityId, entityType, entityName]
+    [pitEntry, historyEntityId, entityType, historyEntityName]
   );
 
-  const onHistoryRangeChange = useCallback((from: string) => {
-    setHistoryFrom(from);
+  const onHistoryRangeChange = useCallback((range: { from: string; to: string }) => {
+    setHistoryRange(range);
     setSelectedTimestamp((current) =>
-      isTimestampWithinRange(current, from) ? current : undefined
+      isTimestampWithinRange(current, range) ? current : undefined
     );
   }, []);
 
@@ -349,9 +364,9 @@ const RiskInputsTabContent = <T extends EntityType>({
   const latestRiskScore = isResolutionView ? resolutionRiskScore : entityRiskScore;
   const activeRiskScore = pitRiskScore ?? latestRiskScore;
   const activeInspectRiskScore = isResolutionView ? inspectResolutionRiskScore : inspectRiskScore;
-  const activeRiskScoreLoading = isResolutionView
-    ? loadingResolutionRiskScore
-    : loadingRiskScore || (pitSelectionActive && pitFetching);
+  const activeRiskScoreLoading =
+    (isResolutionView ? loadingResolutionRiskScore : loadingRiskScore) ||
+    (pitSelectionActive && pitFetching);
   const activeRiskScoreRefetch = isResolutionView ? refetchResolutionRiskScore : refetch;
 
   useQueryInspector({
@@ -565,19 +580,21 @@ const RiskInputsTabContent = <T extends EntityType>({
         </>
       )}
 
-      {showTimeline && entityId !== undefined && (
-        <RiskScoreTimeline
-          entityType={entityType}
-          entityId={entityId}
-          from={historyFrom}
-          to={HISTORY_RANGE_TO}
-          scoreType="base"
-          selectedTimestamp={selectedTimestamp}
-          onPointSelect={setSelectedTimestamp}
-          onRangeChange={onHistoryRangeChange}
-        />
+      {showTimeline && historyEntityId !== undefined && (
+        <>
+          <RiskScoreTimeline
+            entityType={entityType}
+            entityId={historyEntityId}
+            from={historyRange.from}
+            to={historyRange.to}
+            scoreType={historyScoreType}
+            selectedTimestamp={selectedTimestamp}
+            onPointSelect={setSelectedTimestamp}
+            onRangeChange={onHistoryRangeChange}
+          />
+          <EuiSpacer size="m" />
+        </>
       )}
-      <EuiSpacer size="m" />
       {pitSelectionActive && (
         <>
           <EuiCallOut
@@ -730,10 +747,21 @@ const ContextsSection = <T extends EntityType>({
       return undefined;
     }
 
+    const criticalityMetadata = criticality?.metadata as
+      | {
+          criticality_level?: CriticalityLevel;
+          contributor_euid?: string;
+        }
+      | undefined;
+
     return {
       criticality: {
-        level: (criticality?.metadata?.criticality_level as CriticalityLevel) ?? null,
+        level: criticalityMetadata?.criticality_level ?? null,
         contribution: criticality?.contribution,
+        contributorEUID:
+          typeof criticalityMetadata?.contributor_euid === 'string'
+            ? criticalityMetadata.contributor_euid
+            : undefined,
       },
       watchlists,
     };
@@ -747,8 +775,19 @@ const ContextsSection = <T extends EntityType>({
   const items: ContextRow[] = [];
 
   if (criticality.level != null && criticality.contribution != null) {
+    // Prefer the attribution persisted on the score document: the current-state
+    // join below is wrong for historical scores once a member's criticality
+    // changes. Scores written before attribution existed fall back to the join.
+    const contributorMember =
+      criticality.contributorEUID !== undefined
+        ? memberEntities.find((member) => getEntityId(member) === criticality.contributorEUID)
+        : undefined;
+    const contributorName =
+      criticality.contributorEUID !== undefined
+        ? (contributorMember && getEntityName(contributorMember)) || criticality.contributorEUID
+        : undefined;
     const relatedEntities = isResolutionView
-      ? criticalityEntityNames.get(criticality.level)?.join(', ') ?? '-'
+      ? contributorName ?? criticalityEntityNames.get(criticality.level)?.join(', ') ?? '-'
       : '';
     items.push({
       field: (
@@ -971,16 +1010,20 @@ const formatContribution = (value: number): string => {
   return fixedValue;
 };
 
-const DEFAULT_HISTORY_FROM = 'now-90d';
-const HISTORY_RANGE_TO = 'now';
+const DEFAULT_HISTORY_RANGE = { from: 'now-90d', to: 'now' };
 
-const isTimestampWithinRange = (timestamp: string | undefined, from: string): boolean => {
+const isTimestampWithinRange = (
+  timestamp: string | undefined,
+  range: { from: string; to: string }
+): boolean => {
   if (timestamp === undefined) {
     return false;
   }
 
-  const min = dateMath.parse(from)?.valueOf();
-  return min === undefined || new Date(timestamp).getTime() >= min;
+  const ms = new Date(timestamp).getTime();
+  const min = dateMath.parse(range.from)?.valueOf();
+  const max = dateMath.parse(range.to, { roundUp: true })?.valueOf();
+  return (min === undefined || ms >= min) && (max === undefined || ms <= max);
 };
 
 /**

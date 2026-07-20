@@ -44,7 +44,6 @@ export const NotificationsStep = () => {
         <p>{notificationsSubtext}</p>
       </EuiText>
       <EuiSpacer size="m" />
-
       <div
         onBlur={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget as Node)) setTouched(true);
