@@ -14,7 +14,7 @@ import {
   TSDB_INDEX,
   TSDB_TIME_RANGE,
   test,
-} from '../fixtures';
+} from '../../fixtures';
 
 test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnostic }, () => {
   let downsampledTargetIndex = '';
