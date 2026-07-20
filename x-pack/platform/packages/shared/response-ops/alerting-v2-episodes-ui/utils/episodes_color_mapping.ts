@@ -95,13 +95,15 @@ export const buildModifiedVisAttributes = (
     });
   }
 
-  // When no breakdown is selected but a single status is filtered, colour the whole
-  // series to match the status — so the chart stays visually consistent with the filter.
-  // Fall back to danger (red) when no status filter is active so the no-breakdown,
-  // no-filter state still has a meaningful colour rather than the Lens palette default.
+  // When no breakdown is selected but exactly one status is filtered, colour the whole
+  // series to match that status — so the chart stays visually consistent with the filter.
+  // Fall back to danger (red) when zero or multiple statuses are selected so the
+  // no-breakdown state still has a meaningful colour rather than the Lens palette default.
   const statusColorMap = getStatusColorMap(colors);
+  const selectedStatuses = filterState.status ?? [];
   const statusColor =
-    (filterState.status ? statusColorMap[filterState.status] : undefined) ?? colors.danger;
+    (selectedStatuses.length === 1 ? statusColorMap[selectedStatuses[0]] : undefined) ??
+    colors.danger;
 
   if (!breakdownField) {
     return {

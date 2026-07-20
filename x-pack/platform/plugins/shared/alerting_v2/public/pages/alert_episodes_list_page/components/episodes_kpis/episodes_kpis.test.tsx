@@ -110,7 +110,7 @@ describe('EpisodesKpis', () => {
     });
 
     const specificTimeRange: TimeRange = { from: 'now-7d', to: 'now' };
-    const specificFilterState: EpisodesFilterState = { status: 'active' };
+    const specificFilterState: EpisodesFilterState = { status: ['active'] };
 
     render(
       <EpisodesKpis
