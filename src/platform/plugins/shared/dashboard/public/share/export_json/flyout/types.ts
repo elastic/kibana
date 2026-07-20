@@ -11,7 +11,6 @@ export type ExportJsonStatus = 'loading' | 'success' | 'error';
 
 export interface ExportJsonSharingData<State extends object> {
   title: string;
-  isByReference?: boolean;
   getExportJson: (byReference?: boolean) => State;
 }
 

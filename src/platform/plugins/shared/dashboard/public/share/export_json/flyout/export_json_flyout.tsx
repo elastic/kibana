@@ -61,6 +61,7 @@ export const ExportJsonFlyout = <
   apiPath,
   sanitizeState,
 }: ExportJsonSharingData<State> & {
+  isByReference?: boolean;
   objectType: string;
   closeFlyout: () => void;
   apiPath?: string; // if provided, the "Open in Console" button is shown
