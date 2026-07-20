@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom-v5-compat';
 
 import {
-  EuiDraggable,
   EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,8 +25,8 @@ import {
   createConversationListItemStyles,
   createActiveConversationListItemStyles,
 } from '../../../../conversations/conversation_list_item_styles';
-import { ConversationListItemRow } from './conversation_list_item_row';
-import { deriveDisplayStatus } from './derive_display_status';
+import { DROPPABLE_IDS } from './droppable_ids';
+import { DraggableConversationItem } from './draggable_conversation_item';
 
 const newConversationLabel = i18n.translate(
   'xpack.agentBuilder.sidebar.conversation.newConversation',
@@ -55,7 +54,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { conversations = [], isLoading } = useConversationList({ agentId });
-  const { activeStreams, byConversationId } = useStreamingContext();
+  const { activeStreams } = useStreamingContext();
 
   const sortedConversations = useMemo(
     () =>
@@ -89,7 +88,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   if (sortedConversations.length === 0) {
     return (
       <EuiDroppable
-        droppableId="CHATS"
+        droppableId={DROPPABLE_IDS.CHATS}
         spacing="none"
         grow={false}
         isDropDisabled={isDropDisabled}
@@ -112,7 +111,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
   return (
     <EuiDroppable
-      droppableId="CHATS"
+      droppableId={DROPPABLE_IDS.CHATS}
       spacing="none"
       grow={false}
       isDropDisabled={isDropDisabled}
@@ -124,32 +123,17 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         backgroundColor,
       }}
     >
-      {sortedConversations.map((conversation, index) => {
-        const isActive = currentConversationId === conversation.id;
-        const isStreaming = activeStreams.has(conversation.id);
-        const hasError = Boolean(byConversationId[conversation.id]?.error);
-        const status = deriveDisplayStatus(conversation, isStreaming, hasError, isActive);
-        return (
-          <EuiDraggable
-            key={conversation.id}
-            draggableId={conversation.id}
-            index={index}
-            spacing="none"
-          >
-            <ConversationListItemRow
-              agentId={agentId}
-              conversationId={conversation.id}
-              title={conversation.title || conversation.id}
-              isActive={isActive}
-              routeConversationId={currentConversationId}
-              showActionsMenu={!isStreaming}
-              onItemClick={onItemClick ? () => onItemClick(conversation.id) : undefined}
-              status={status}
-              read={conversation.read}
-            />
-          </EuiDraggable>
-        );
-      })}
+      {sortedConversations.map((conversation, index) => (
+        <DraggableConversationItem
+          key={conversation.id}
+          agentId={agentId}
+          conversation={conversation}
+          index={index}
+          isActive={currentConversationId === conversation.id}
+          routeConversationId={currentConversationId}
+          onItemClick={onItemClick ? () => onItemClick(conversation.id) : undefined}
+        />
+      ))}
     </EuiDroppable>
   );
 };

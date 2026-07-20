@@ -7,14 +7,13 @@
 
 import React from 'react';
 
-import { EuiDraggable, EuiDroppable, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiDroppable, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
 
-import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
-import { ConversationListItemRow } from './conversation_list_item_row';
-import { deriveDisplayStatus } from './derive_display_status';
+import { DROPPABLE_IDS } from './droppable_ids';
+import { DraggableConversationItem } from './draggable_conversation_item';
 
 const dragToPinLabel = i18n.translate('xpack.agentBuilder.sidebar.pinned.dragToPin', {
   defaultMessage: 'Drag a chat here to pin it',
@@ -38,12 +37,12 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
   onItemClick,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { activeStreams, byConversationId } = useStreamingContext();
+  const isDragActive = backgroundColor !== 'transparent';
 
   if (pinnedConversations.length === 0) {
     return (
       <EuiDroppable
-        droppableId="PINNED"
+        droppableId={DROPPABLE_IDS.PINNED}
         spacing="none"
         grow={false}
         isDropDisabled={isDropDisabled}
@@ -52,9 +51,7 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
         <div
           css={css`
             border: 1px dashed
-              ${backgroundColor !== 'transparent'
-                ? euiTheme.colors.borderBasePrimary
-                : euiTheme.colors.borderBasePlain};
+              ${isDragActive ? euiTheme.colors.borderBasePrimary : euiTheme.colors.borderBasePlain};
             border-radius: ${euiTheme.border.radius.small};
             padding: ${euiTheme.size.s};
             text-align: center;
@@ -76,7 +73,7 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
 
   return (
     <EuiDroppable
-      droppableId="PINNED"
+      droppableId={DROPPABLE_IDS.PINNED}
       spacing="none"
       grow={false}
       isDropDisabled={isDropDisabled}
@@ -89,32 +86,17 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
         transition: 'background-color 0.15s',
       }}
     >
-      {pinnedConversations.map((conversation, index) => {
-        const isActive = currentConversationId === conversation.id;
-        const isStreaming = activeStreams.has(conversation.id);
-        const hasError = Boolean(byConversationId[conversation.id]?.error);
-        const status = deriveDisplayStatus(conversation, isStreaming, hasError, isActive);
-        return (
-          <EuiDraggable
-            key={conversation.id}
-            draggableId={conversation.id}
-            index={index}
-            spacing="none"
-          >
-            <ConversationListItemRow
-              agentId={agentId}
-              conversationId={conversation.id}
-              title={conversation.title || conversation.id}
-              isActive={isActive}
-              routeConversationId={currentConversationId}
-              showActionsMenu={!isStreaming}
-              onItemClick={onItemClick}
-              status={status}
-              read={conversation.read}
-            />
-          </EuiDraggable>
-        );
-      })}
+      {pinnedConversations.map((conversation, index) => (
+        <DraggableConversationItem
+          key={conversation.id}
+          agentId={agentId}
+          conversation={conversation}
+          index={index}
+          isActive={currentConversationId === conversation.id}
+          routeConversationId={currentConversationId}
+          onItemClick={onItemClick}
+        />
+      ))}
     </EuiDroppable>
   );
 };

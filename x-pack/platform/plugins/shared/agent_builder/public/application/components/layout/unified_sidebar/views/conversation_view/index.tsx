@@ -46,6 +46,7 @@ import { ConversationFooter } from './conversation_footer';
 import { ConversationList } from './conversation_list';
 import { PinnedConversationList } from './pinned_conversation_list';
 import { ConversationSearchModal } from '../../../../conversations/conversation_search_modal';
+import { DROPPABLE_IDS } from './droppable_ids';
 
 const customizeLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.customize', {
   defaultMessage: 'Customize',
@@ -127,14 +128,18 @@ export const ConversationSidebarView: React.FC = () => {
     [pinnedConversations]
   );
 
-  const dropBg = useCallback(
-    (droppableId: string) => {
-      if (hoveredDroppableId === droppableId) return euiTheme.colors.backgroundLightPrimary;
-      if (draggingFromId !== null) return euiTheme.colors.backgroundBasePrimary;
-      return 'transparent';
-    },
-    [hoveredDroppableId, draggingFromId, euiTheme]
-  );
+  const dropBackgrounds = useMemo(() => {
+    const bg = (id: string) =>
+      hoveredDroppableId === id
+        ? euiTheme.colors.backgroundLightPrimary
+        : draggingFromId !== null
+        ? euiTheme.colors.backgroundBasePrimary
+        : 'transparent';
+    return {
+      [DROPPABLE_IDS.PINNED]: bg(DROPPABLE_IDS.PINNED),
+      [DROPPABLE_IDS.CHATS]: bg(DROPPABLE_IDS.CHATS),
+    };
+  }, [hoveredDroppableId, draggingFromId, euiTheme]);
 
   const onDragEnd = useCallback(
     ({ draggableId, source, destination }: DropResult) => {
@@ -143,9 +148,15 @@ export const ConversationSidebarView: React.FC = () => {
       if (!destination) return;
       if (source.droppableId === destination.droppableId) return;
 
-      if (source.droppableId === 'CHATS' && destination.droppableId === 'PINNED') {
+      if (
+        source.droppableId === DROPPABLE_IDS.CHATS &&
+        destination.droppableId === DROPPABLE_IDS.PINNED
+      ) {
         markAsPinned(draggableId);
-      } else if (source.droppableId === 'PINNED' && destination.droppableId === 'CHATS') {
+      } else if (
+        source.droppableId === DROPPABLE_IDS.PINNED &&
+        destination.droppableId === DROPPABLE_IDS.CHATS
+      ) {
         markAsUnpinned(draggableId);
       }
     },
@@ -270,8 +281,8 @@ export const ConversationSidebarView: React.FC = () => {
                           agentId={agentId}
                           currentConversationId={conversationId}
                           pinnedConversations={pinnedConversations}
-                          isDropDisabled={draggingFromId === 'PINNED'}
-                          backgroundColor={dropBg('PINNED')}
+                          isDropDisabled={draggingFromId === DROPPABLE_IDS.PINNED}
+                          backgroundColor={dropBackgrounds[DROPPABLE_IDS.PINNED]}
                         />
                       </EuiFlexItem>
 
@@ -344,8 +355,8 @@ export const ConversationSidebarView: React.FC = () => {
                           isNewConversationRoute={isNewConversationRoute}
                           onItemClick={handleConversationItemClick}
                           pinnedConversationIds={pinnedConversationIds}
-                          isDropDisabled={draggingFromId === 'CHATS'}
-                          backgroundColor={dropBg('CHATS')}
+                          isDropDisabled={draggingFromId === DROPPABLE_IDS.CHATS}
+                          backgroundColor={dropBackgrounds[DROPPABLE_IDS.CHATS]}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
