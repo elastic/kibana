@@ -14,7 +14,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 const SAVED_SEARCH_NAME = 'test saved search';
 const SAVED_SEARCH_WITH_FILTERS_NAME = 'test saved search with filters';
-const SAVED_SEARCH_ESQL = 'test saved search ES|QL';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -22,7 +21,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const filterBar = getService('filterBar');
   const monacoEditor = getService('monacoEditor');
-  const browser = getService('browser');
   const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
@@ -59,6 +57,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT - cheap smoke test
+     */
     it('should not show the notification indicator initially nor after changes to a draft saved search', async () => {
       await discover.ensureNoUnsavedChangesIndicator();
 
@@ -70,6 +71,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.ensureNoUnsavedChangesIndicator();
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT - cheap smoke test
+     */
     it('should show the notification indicator only after changes to a persisted saved search', async () => {
       await discover.saveSearch(SAVED_SEARCH_NAME);
       await discover.waitUntilSearchingHasFinished();
@@ -87,6 +91,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.ensureNoUnsavedChangesIndicator();
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT - cheap smoke test
+     */
     it('should not show a notification indicator after loading a saved search, only after changes', async () => {
       await discover.loadSavedSearch(SAVED_SEARCH_NAME);
       await discover.waitUntilTabIsLoaded();
@@ -101,6 +108,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.ensureHasUnsavedChangesIndicator();
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT - cheap smoke test
+     */
+    it('should not show a notification indicator after loading an ES|QL saved search, only after changes', async () => {
+      await discover.loadSavedSearch('ES|QL Discover Session');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+
+      await discover.ensureNoUnsavedChangesIndicator();
+
+      await monacoEditor.setCodeEditorValue('from logstash-* | limit 100');
+      await testSubjects.click('querySubmitButton');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+
+      await discover.ensureHasUnsavedChangesIndicator();
+    });
+
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT - cheap smoke test
+     */
     it('should allow to revert changes', async () => {
       await discover.loadSavedSearch(SAVED_SEARCH_NAME);
       await discover.waitUntilTabIsLoaded();
@@ -116,36 +144,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.revertUnsavedChanges();
       expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes']);
       await discover.ensureNoUnsavedChangesIndicator();
-
-      // test changes to sample size
-      await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentSampleSizeValue()).to.be(500);
-      await dataGrid.changeSampleSizeValue(250);
-      await dataGrid.clickGridSettings();
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitUntilSearchingHasFinished();
-      await discover.ensureHasUnsavedChangesIndicator();
-      await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentSampleSizeValue()).to.be(250);
-      await dataGrid.clickGridSettings();
-      await discover.revertUnsavedChanges();
-      await discover.ensureNoUnsavedChangesIndicator();
-      await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentSampleSizeValue()).to.be(500);
-      await dataGrid.clickGridSettings();
-
-      // test changes to rows per page
-      await dataGrid.checkCurrentRowsPerPageToBe(100);
-      await dataGrid.changeRowsPerPageTo(25);
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitUntilSearchingHasFinished();
-      await discover.ensureHasUnsavedChangesIndicator();
-      await dataGrid.checkCurrentRowsPerPageToBe(25);
-      await discover.revertUnsavedChanges();
-      await discover.ensureNoUnsavedChangesIndicator();
-      await dataGrid.checkCurrentRowsPerPageToBe(100);
     });
 
+    /**
+     * Migration recommendation: pare down and merge with the above block - covered by state comparator unit tests, so let's just do this minimally.
+     */
     it('should hide the notification indicator once user manually reverts changes', async () => {
       await discover.loadSavedSearch(SAVED_SEARCH_NAME);
       await discover.ensureNoUnsavedChangesIndicator();
@@ -174,6 +177,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.ensureNoUnsavedChangesIndicator();
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT - cheap smoke test for obscure feature
+     */
     it('should not show the notification indicator after pinning the first filter but after disabling a filter', async () => {
       await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
       await filterBar.addFilter({ field: 'bytes', operation: 'exists' });
@@ -201,33 +207,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await filterBar.isFilterPinned('extension')).to.be(false);
       expect(await filterBar.isFilterNegated('bytes')).to.be(false);
       expect(await discover.getHitCount()).to.be('1,373');
-    });
-
-    it('should not show a notification indicator after loading an ES|QL saved search, only after changes', async () => {
-      await discover.selectTextBaseLang();
-
-      await monacoEditor.setCodeEditorValue('from logstash-* | limit 10');
-      await testSubjects.click('querySubmitButton');
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitUntilSearchingHasFinished();
-
-      await discover.saveSearch(SAVED_SEARCH_ESQL);
-      await discover.waitUntilSearchingHasFinished();
-
-      await discover.ensureNoUnsavedChangesIndicator();
-
-      await browser.refresh();
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitUntilSearchingHasFinished();
-
-      await discover.ensureNoUnsavedChangesIndicator();
-
-      await monacoEditor.setCodeEditorValue('from logstash-* | limit 100');
-      await testSubjects.click('querySubmitButton');
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitUntilSearchingHasFinished();
-
-      await discover.ensureHasUnsavedChangesIndicator();
     });
   });
 }

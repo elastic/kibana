@@ -176,6 +176,7 @@ export const Content = ({
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
             openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
+            hideHeaderIcons={hideHeaderIcons}
           />
           <EuiHorizontalRule margin="m" />
         </>
@@ -188,6 +189,7 @@ export const Content = ({
             scopeId={scopeId}
             openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
             onShowEntity={onShowEntity}
+            hideHeaderIcons={hideHeaderIcons}
           />
           <EuiHorizontalRule />
         </>
@@ -205,6 +207,7 @@ export const Content = ({
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.user}
         hideHeaderIcons={hideHeaderIcons}
+        scopeId={scopeId}
       />
       <ObservedDataSection
         entityType={EntityType.user}

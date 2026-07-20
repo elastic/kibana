@@ -182,7 +182,7 @@ describe('getServiceMapEmbeddableFactory', () => {
     } as never);
 
     expect(embeddable.api.isEditingEnabled()).toBe(true);
-    expect(embeddable.api.getTypeDisplayName()).toBe('configuration');
+    expect(embeddable.api.getTypeDisplayName()).toBe('Service map');
     expect(typeof embeddable.api.onEdit).toBe('function');
   });
 

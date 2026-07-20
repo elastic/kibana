@@ -7,7 +7,6 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
-import { getStreamsLocation } from '@kbn/streams-plugin/common/get_streams_location/get_streams_location';
 import type {
   SignificantEventsKIsOnboardingClient,
   SignificantEventsKIsOnboardingInputs,
@@ -57,12 +56,9 @@ export async function startKiIdentificationToolHandler({
 
   await streamsKIsOnboardingClient.run({ inputs, request });
 
-  const location = getStreamsLocation({
-    name: streamName,
-    managementTab: 'significantEvents',
-  });
-
   return {
-    kibanaPath: `/app/${location.app}${location.path}`,
+    kibanaPath: `/app/streams/_discovery/knowledge_indicators?stream=${encodeURIComponent(
+      streamName
+    )}`,
   };
 }

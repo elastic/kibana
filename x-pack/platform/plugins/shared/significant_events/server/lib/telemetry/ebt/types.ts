@@ -73,14 +73,14 @@ interface AgentToolEventCreateProps {
 
 interface AgentToolEventStatusUpdateProps {
   success: boolean;
-  event_id: string;
+  event_uuid: string;
   status: SignificantEventStatus;
   error_message?: string;
 }
 
 interface AgentToolEventInvestigationAttachProps {
   success: boolean;
-  event_id: string;
+  event_uuid: string;
   workflow_execution_id: string;
   error_message?: string;
 }
@@ -137,12 +137,42 @@ interface KnowledgeIndicatorOnboardingScheduledProps {
   skip_queries: boolean;
 }
 
+interface AgentToolEventWriteProps {
+  success: boolean;
+  event_id: string;
+  status: SignificantEventStatus;
+  written: boolean;
+  stream_names: string[];
+  error_message?: string;
+}
+
+interface AgentToolDiscoveryWriteProps {
+  success: boolean;
+  kind: 'discovery' | 'clearance' | 'handled';
+  event_id: string;
+  stream_names: string[];
+  written: boolean;
+  error_message?: string;
+}
+
+interface AgentToolEventSearchProps {
+  success: boolean;
+  result_count: number;
+  has_query: boolean;
+  has_stream_filter: boolean;
+  status_filter?: SignificantEventStatus;
+  error_message?: string;
+}
+
 export {
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
+  type AgentToolDiscoveryWriteProps,
   type AgentToolEventCreateProps,
   type AgentToolEventInvestigationAttachProps,
+  type AgentToolEventSearchProps,
   type AgentToolEventStatusUpdateProps,
+  type AgentToolEventWriteProps,
   type CodeAnalysisGroundingProps,
   type DetectionScanProps,
   type DiscoveryTriggeredProps,

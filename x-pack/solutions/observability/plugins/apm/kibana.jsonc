@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-plugin",
-  "owner": ["@elastic/obs-presentation-team", "@elastic/obs-exploration-team"],
+  "owner": ["@elastic/obs-signals-traces"],
   "group": "observability",
   "visibility": "private",
   "description": "The user interface for Elastic APM",
@@ -39,7 +39,8 @@
       "logsDataAccess",
       "savedSearch",
       "fieldsMetadata",
-      "discoverShared"
+      "discoverShared",
+      "apmShared"
     ],
     "optionalPlugins": [
       "actions",

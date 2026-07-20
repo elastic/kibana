@@ -250,6 +250,22 @@ spaceTest.describe(
             body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
           });
         });
+        // Backs the table's detector-description lookup (useGetInstalledJob). Without it the
+        // call 404s and raises the "Security job fetch failure" toast, which overlays and
+        // blocks the row-actions button click.
+        await page.route('**/internal/ml/jobs/jobs', async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify([
+              {
+                job_id: 'auth_high_count_logon_events_ea',
+                analysis_config: { detectors: [] },
+                datafeed_config: { query: { match_all: {} }, indices: ['logs-*'] },
+              },
+            ]),
+          });
+        });
 
         await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
         await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();

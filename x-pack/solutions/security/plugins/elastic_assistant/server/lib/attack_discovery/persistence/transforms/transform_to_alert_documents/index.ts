@@ -96,6 +96,7 @@ export const transformToAlertDocuments = ({
       attackDiscovery,
       alertsParams: restParams,
       spaceId,
+      timestamp: now.toISOString(),
     });
 
     return {
