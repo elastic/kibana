@@ -18,7 +18,7 @@ import { WorkflowExecutionService } from './workflow_execution_service';
 export interface SignificantEventsDiscoveryRunParams {
   request: KibanaRequest;
   spaceId: string;
-  /** When present, ensures discovery/judge agent profiles exist in `spaceId` before running. */
+  /** Ensures discovery/judge agent profiles exist in `spaceId` before a new run. */
   agentBuilder?: AgentBuilderPluginStart;
 }
 
@@ -49,9 +49,10 @@ export class SignificantEventsDiscoveryClient {
 
     // Just-in-time install for manual runs and any space that never went through
     // scheduled-discovery enablement. Idempotent — does not overwrite user edits.
-    if (agentBuilder) {
-      await installDiscoveryAgents({ agentBuilder, spaceId });
+    if (!agentBuilder) {
+      throw new Error('Agent Builder is required to run significant events discovery');
     }
+    await installDiscoveryAgents({ agentBuilder, spaceId });
 
     const executionId = await this.workflowExecutionService.execute({
       executionSpaceId: spaceId,

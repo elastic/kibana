@@ -116,16 +116,18 @@ describe('SignificantEventsDiscoveryClient', () => {
       expect(managementApi.runWorkflow).not.toHaveBeenCalled();
     });
 
-    it('skips agent install when agentBuilder is omitted', async () => {
+    it('throws when agentBuilder is omitted instead of starting without agents', async () => {
       const { client, managementApi } = createClient();
 
-      await client.run({
-        request: httpServerMock.createKibanaRequest(),
-        spaceId: 'space-a',
-      });
+      await expect(
+        client.run({
+          request: httpServerMock.createKibanaRequest(),
+          spaceId: 'space-a',
+        })
+      ).rejects.toThrow('Agent Builder is required to run significant events discovery');
 
       expect(installDiscoveryAgentsMock).not.toHaveBeenCalled();
-      expect(managementApi.runWorkflow).toHaveBeenCalled();
+      expect(managementApi.runWorkflow).not.toHaveBeenCalled();
     });
   });
 
