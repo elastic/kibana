@@ -10,6 +10,7 @@ import { EuiButtonEmpty, EuiCode, EuiContextMenu, EuiPopover, useEuiTheme } from
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
+import { isMac } from '@kbn/shared-ux-utility';
 import { useToasts } from '../../../common/lib/kibana';
 import { FIELD_DEFAULT_SNIPPETS } from '../utils/template_field_snippets';
 import {
@@ -51,7 +52,7 @@ const PANEL_IDS = {
   conditional: 'conditional',
 } as const;
 
-const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
+// Platform detection comes from the shared util (uses the modern userAgentData API with fallbacks).
 const SHORTCUT_HINT = isMac ? '⌘K' : 'Ctrl+K';
 
 // Shared width for the popover panels + the field-library selectable, so the menu never resize-jumps
@@ -127,8 +128,10 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
     setIsOpen(true);
   }, [editor]);
 
-  // Cmd/Ctrl+K opens the menu from within the editor. Registered as an editor action so it is scoped
-  // to the editor (not global) and disposed with it.
+  // Cmd/Ctrl+K opens the menu from within the editor. Registered as a Monaco editor action (scoped to
+  // the editor and disposed with it) rather than the shared `useKeyboardShortcut` hook: that hook
+  // deliberately ignores keydowns on editable targets, but this shortcut must fire while the author is
+  // typing in the editor (a textarea) — exactly where it would be suppressed.
   useEffect(() => {
     if (!editor) {
       return;
