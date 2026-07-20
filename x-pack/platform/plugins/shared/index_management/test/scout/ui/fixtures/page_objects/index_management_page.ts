@@ -95,24 +95,6 @@ export class IndexManagement extends AbstractPageObject {
     await this.page.testSubj.locator('nextButton').click();
   }
 
-  /**
-   * Custom combobox interaction for non-clearable comboboxes.
-   * Note: Cannot use EuiComboBoxWrapper here because the fieldType combobox
-   * has isClearable={false} (in type_parameter.tsx), and EuiComboBoxWrapper.selectSingleOption()
-   * attempts to clear() first, which fails when trying to click the non-existent comboBoxClearButton.
-   */
-  async setComboBox(testSubject: string, value: string) {
-    const comboBox = this.page.testSubj.locator(testSubject);
-    await comboBox.click();
-
-    // Type the value
-    const input = comboBox.locator('input');
-    await input.fill(value);
-
-    // Wait for and click the option
-    await this.page.locator(`[role="option"]`).filter({ hasText: value }).click();
-  }
-
   async changeMappingsEditorTab(tab: 'fields' | 'advancedOptions' | 'templates') {
     const tabMap = {
       fields: 'fieldsTab',

@@ -329,6 +329,7 @@ export const UserPanel = memo(function UserPanel({
             refetchEntityRecord={entityFromStoreResult.refetch}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>
