@@ -18,11 +18,11 @@ export {
 } from './datasource_types';
 
 export {
-  isValidDataSourceName,
+  isValidIndexName,
   validateIndexNameRules,
   type DataSourceNameValidationError,
   type DataSourceNameValidationResult,
-} from './validate_data_source_name';
+} from './valdiate_index_name';
 
 export const PLUGIN_ID = 'data_federation';
 
