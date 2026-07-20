@@ -39,13 +39,12 @@ export interface CorrelationsDetailsViewProps {
   /**
    * Callback to open an alert preview when clicking the preview button in the correlations table
    */
-  onShowAlert: (id: string, indexName: string) => void;
+  onShowAlert: (id: string, indexName: string, title?: string) => void;
   /**
    * Callback to open an attack preview when clicking the expand button in the related attacks table.
    * When not provided, the expand button column is hidden.
-   * // TODO make required once we have an attack flyout in the new flyout system
    */
-  onShowAttack?: (id: string, indexName: string) => void;
+  onShowAttack?: (id: string, indexName: string, title?: string) => void;
   /**
    * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of OpenFlyoutLink (new flyout system)
    */

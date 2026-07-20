@@ -8,19 +8,18 @@
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { FocusedSignificantEventService } from './focused_significant_event_service';
 
-const createEvent = (discoverySlug: string): SignificantEvent => ({
+const createEvent = (eventId: string): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  created_at: '2026-01-01T00:00:00.000Z',
-  event_id: `event-${discoverySlug}`,
-  discovery_slug: discoverySlug,
+  event_uuid: `event-${eventId}`,
+  event_id: eventId,
+  discovery_id: `discovery-${eventId}`,
   stream_names: ['logs.payment'],
-  title: `Event ${discoverySlug}`,
+  title: `Event ${eventId}`,
   summary: 'Summary',
-  root_cause: 'Root cause',
-  criticality: 90,
+  symptom_hypothesis: 'Root cause',
+  severity: '60-high',
   confidence: 0.8,
-  recommendations: [],
-  status: 'promoted',
+  status: 'open',
 });
 
 describe('FocusedSignificantEventService', () => {
@@ -37,7 +36,7 @@ describe('FocusedSignificantEventService', () => {
     expect(service.getFocusedEvent()).toBeUndefined();
   });
 
-  it('does not clear a newer focused event with an older discovery slug', () => {
+  it('does not clear a newer focused event with an older event id', () => {
     const service = new FocusedSignificantEventService();
     const firstEvent = createEvent('first-event');
     const secondEvent = createEvent('second-event');
