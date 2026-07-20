@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/synthtrace-client",
   "owner": [
-    "@elastic/obs-presentation-team",
+    "@elastic/obs-signals-traces-team",
     "@elastic/streams-ui",
     "@elastic/obs-exploration-team"
   ],
