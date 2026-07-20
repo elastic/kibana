@@ -9,37 +9,6 @@ import type { HttpSelfFetchQuery, KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
 
-const SAFE_ERROR_CODE = /^(?:UND_ERR_[A-Z0-9_]+|E[A-Z0-9_]+|ABORT_ERR)$/;
-const SAFE_ERROR_TYPES = new Set(['AbortError', 'Error', 'HttpSelfFetchError', 'TypeError']);
-
-interface ErrorDiagnostics {
-  readonly type: string;
-  readonly code?: string;
-  readonly statusCode?: number;
-}
-
-const getErrorDiagnostics = (error: unknown): ErrorDiagnostics => {
-  if (!(error instanceof Error)) {
-    return { type: 'UnknownError' };
-  }
-
-  const errorWithDetails = error as Error & {
-    code?: unknown;
-    response?: { status?: unknown };
-    body?: { statusCode?: unknown };
-  };
-  const rawCode = errorWithDetails.code;
-  const code = typeof rawCode === 'string' && SAFE_ERROR_CODE.test(rawCode) ? rawCode : undefined;
-  const rawStatusCode = errorWithDetails.response?.status ?? errorWithDetails.body?.statusCode;
-  const statusCode =
-    typeof rawStatusCode === 'number' && rawStatusCode >= 100 && rawStatusCode <= 599
-      ? rawStatusCode
-      : undefined;
-  const type = SAFE_ERROR_TYPES.has(error.name) ? error.name : 'UnknownError';
-
-  return { type, code, statusCode };
-};
-
 export function registerKibanaFunction({
   functions,
   resources,
@@ -77,7 +46,7 @@ export function registerKibanaFunction({
       },
     },
     async ({ arguments: { method, pathname, body, query } }, signal) => {
-      const { request, logger } = resources;
+      const { request } = resources;
       const core = await resources.plugins.core.start();
       const fetchOptions = {
         method,
@@ -85,28 +54,12 @@ export function registerKibanaFunction({
         body,
         signal,
         forwardRequestHeaders: true,
+        access: 'internal',
         asResponse: true,
       } as const;
 
-      try {
-        const response = await core.http.selfClient.asScoped(request).fetch(pathname, fetchOptions);
-        return { content: response.body };
-      } catch (error) {
-        const diagnostics = getErrorDiagnostics(error);
-        logger.error('Kibana self HTTP API call failed', {
-          labels: {
-            self_http_source_route_template: request.route.path,
-            self_http_target_method: method,
-            self_http_error_type: diagnostics.type,
-            ...(diagnostics.code ? { self_http_error_code: diagnostics.code } : {}),
-          },
-          ...(diagnostics.statusCode
-            ? { http: { response: { status_code: diagnostics.statusCode } } }
-            : {}),
-        });
-
-        throw error;
-      }
+      const response = await core.http.selfClient.asScoped(request).fetch(pathname, fetchOptions);
+      return { content: response.body };
     }
   );
 }
