@@ -69,6 +69,8 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
+    env:
+      CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -87,6 +89,8 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
+    env:
+      CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod

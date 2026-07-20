@@ -1,0 +1,128 @@
+{
+  "properties": {
+    "@timestamp": { "type": "date" },
+    "tags": { "type": "keyword" },
+    "message": { "type": "text" },
+    "ecs": {
+      "properties": {
+        "version": { "type": "keyword" }
+      }
+    },
+    "data_stream": {
+      "properties": {
+        "type": { "type": "keyword" },
+        "dataset": { "type": "keyword" },
+        "namespace": { "type": "keyword" }
+      }
+    },
+    "event": {
+      "properties": {
+        "action": { "type": "keyword" },
+        "category": { "type": "keyword" },
+        "type": { "type": "keyword" },
+        "outcome": { "type": "keyword" },
+        "kind": { "type": "keyword" },
+        "dataset": { "type": "keyword" },
+        "module": { "type": "keyword" }
+      }
+    },
+    "related": {
+      "properties": {
+        "user": { "type": "keyword" },
+        "hosts": { "type": "keyword" },
+        "ip": { "type": "keyword" }
+      }
+    },
+    "source": {
+      "properties": {
+        "ip": { "type": "ip" }
+      }
+    },
+    "cloud": {
+      "properties": {
+        "provider": { "type": "keyword" },
+        "region": { "type": "keyword" },
+        "account": {
+          "properties": {
+            "id": { "type": "keyword" }
+          }
+        }
+      }
+    },
+    "organization": {
+      "properties": {
+        "name": { "type": "keyword" }
+      }
+    },
+    "orchestrator": {
+      "properties": {
+        "type": { "type": "keyword" },
+        "namespace": { "type": "keyword" },
+        "cluster": {
+          "properties": {
+            "name": { "type": "keyword" }
+          }
+        }
+      }
+    },
+    "host": {
+      "properties": {
+        "name": { "type": "keyword" },
+        "hostname": { "type": "keyword" },
+        "id": { "type": "keyword" },
+        "ip": { "type": "ip" },
+        "asset": {
+          "properties": {
+            "criticality": { "type": "keyword" },
+            "environment": { "type": "keyword" },
+            "business_unit": { "type": "keyword" },
+            "owner": { "type": "keyword" }
+          }
+        }
+      }
+    },
+    "user": {
+      "properties": {
+        "name": { "type": "keyword" },
+        "email": { "type": "keyword" },
+        "full_name": { "type": "keyword" },
+        "id": { "type": "keyword" },
+        "roles": { "type": "keyword" },
+        "asset": {
+          "properties": {
+            "criticality": { "type": "keyword" },
+            "business_unit": { "type": "keyword" }
+          }
+        },
+        "target": {
+          "properties": {
+            "name": { "type": "keyword" },
+            "email": { "type": "keyword" },
+            "full_name": { "type": "keyword" },
+            "id": { "type": "keyword" }
+          }
+        }
+      }
+    },
+    "host.target": {
+      "properties": {
+        "name": { "type": "keyword" },
+        "hostname": { "type": "keyword" },
+        "id": { "type": "keyword" },
+        "ip": { "type": "ip" }
+      }
+    },
+    "user.target": {
+      "properties": {
+        "name": { "type": "keyword" },
+        "email": { "type": "keyword" },
+        "full_name": { "type": "keyword" },
+        "id": { "type": "keyword" }
+      }
+    },
+    "okta": { "type": "object", "enabled": true },
+    "aws": { "type": "object", "enabled": true },
+    "kubernetes": { "type": "object", "enabled": true },
+    "github": { "type": "object", "enabled": true }
+  }
+}
