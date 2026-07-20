@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { asCodeResponseSchema, savedDataViewSpecSchemaWithoutId } from './schema';
-import { getDataViewsAsCodeService, handleErrors } from './utils';
+import { getDataViewsAsCodeService, requestHandler } from './utils';
 import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
-import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
+import type { RegisterRouteArgs } from './types';
 
 const CREATE_DATA_VIEW_AS_CODE_PATH = BASE_PATH;
 
-export const registerPostDataViewAsCodeRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<DataViewsAsCodeServerPluginStartDependencies, void>
-) =>
+export const registerPostDataViewAsCodeRoute = ({
+  router,
+  getStartServices,
+  ...args
+}: RegisterRouteArgs) =>
   router.versioned
     .post({
       path: CREATE_DATA_VIEW_AS_CODE_PATH,
@@ -62,7 +62,7 @@ export const registerPostDataViewAsCodeRoute = (
           },
         },
       },
-      handleErrors(async (ctx, req, res) => {
+      requestHandler(args, async (ctx, req, res) => {
         const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
         const storedDataView = await dataViewsAsCodeService.create(req.body);
 

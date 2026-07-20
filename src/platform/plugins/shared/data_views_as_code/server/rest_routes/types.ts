@@ -6,17 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type {
-  DataViewsServerPluginSetup,
-  DataViewsServerPluginStart,
-} from '@kbn/data-views-plugin/server';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-export interface DataViewsAsCodeServerPluginSetupDependencies {
-  dataViews: DataViewsServerPluginSetup;
-  usageCollection: UsageCollectionSetup;
-}
+import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
 
-export interface DataViewsAsCodeServerPluginStartDependencies {
-  dataViews: DataViewsServerPluginStart;
+export interface RegisterRouteArgs {
+  router: IRouter;
+  usageCounter: UsageCounter;
+  logger: Logger;
+  getStartServices: StartServicesAccessor<DataViewsAsCodeServerPluginStartDependencies, void>;
 }
