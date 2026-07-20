@@ -77,6 +77,7 @@ export const useDataFrameAnalyticsJobsMenu = ({
                 run: onOpenExportFlyout,
                 testId: 'mlJobsExportButton',
                 overflow: true,
+                disableButton: !canCreateDataFrameAnalytics,
               },
               {
                 id: 'importJobs',
@@ -88,6 +89,7 @@ export const useDataFrameAnalyticsJobsMenu = ({
                 run: onOpenImportFlyout,
                 testId: 'mlJobsImportButton',
                 overflow: true,
+                disableButton: !canCreateDataFrameAnalytics,
               },
             ]
           : []),

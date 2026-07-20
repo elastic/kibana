@@ -98,6 +98,7 @@ export const useAnomalyDetectionJobsMenu = ({
                 iconType: 'exportAction' as const,
                 run: onOpenExportFlyout,
                 testId: 'mlJobsExportButton',
+                disableButton: !canCreateJob,
               },
               {
                 id: 'importJobs',
@@ -108,6 +109,7 @@ export const useAnomalyDetectionJobsMenu = ({
                 iconType: 'importAction' as const,
                 run: onOpenImportFlyout,
                 testId: 'mlJobsImportButton',
+                disableButton: !canCreateJob,
               },
             ]
           : []),
@@ -125,6 +127,7 @@ export const useAnomalyDetectionJobsMenu = ({
     }),
     [
       canCreate,
+      canCreateJob,
       canSync,
       navigateToCreateJob,
       onOpenExportFlyout,
