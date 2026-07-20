@@ -16,12 +16,13 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import {
@@ -33,15 +34,20 @@ import type { SignificantEventsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
+  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
+  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+  MAX_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+  MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
+  MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
 } from '../common/constants';
@@ -70,8 +76,7 @@ const sigEventsTuningConfigSchema = schema.object(
 
 export function registerFeatureFlags(
   core: CoreSetup<SignificantEventsPluginStartDependencies>,
-  logger: Logger,
-  { isAlertingV2PluginAvailable }: { isAlertingV2PluginAvailable: boolean }
+  logger: Logger
 ) {
   core.pricing
     .isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
@@ -141,6 +146,58 @@ export function registerFeatureFlags(
               ),
               type: 'number',
               schema: schema.number({ min: MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES }),
+              solutionViews: ['classic', 'oblt'],
+              technicalPreview: true,
+              readonly: true,
+              readonlyMode: 'ui',
+            },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES]:
+            {
+              category: ['observability'],
+              name: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionBucketIntervalMinutesName',
+                {
+                  defaultMessage:
+                    'Scheduled Significant Events detection bucket interval (minutes)',
+                }
+              ) as string,
+              value: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
+              description: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionBucketIntervalMinutesDescription',
+                {
+                  defaultMessage:
+                    'Date-histogram bucket width used by the scheduled Significant Events change-point detection in this Kibana space. Wider buckets smooth out short-term burst noise.',
+                }
+              ),
+              type: 'number',
+              schema: schema.number({
+                min: MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
+                max: MAX_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
+              }),
+              solutionViews: ['classic', 'oblt'],
+              technicalPreview: true,
+              readonly: true,
+              readonlyMode: 'ui',
+            },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES]:
+            {
+              category: ['observability'],
+              name: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionLookbackMinutesName',
+                {
+                  defaultMessage: 'Scheduled Significant Events detection lookback (minutes)',
+                }
+              ) as string,
+              value: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
+              description: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionLookbackMinutesDescription',
+                {
+                  defaultMessage:
+                    'Time window analysed by the scheduled Significant Events change-point detection in this Kibana space. Must be a multiple of the detection bucket interval yielding between 22 and 1000 buckets.',
+                }
+              ),
+              type: 'number',
+              schema: schema.number({ min: MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES }),
               solutionViews: ['classic', 'oblt'],
               technicalPreview: true,
               readonly: true,
@@ -271,44 +328,6 @@ export function registerFeatureFlags(
             readonlyMode: 'ui',
           },
         });
-
-        if (isAlertingV2PluginAvailable) {
-          core.uiSettings.register({
-            [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2]: {
-              category: ['observability'],
-              name: i18n.translate(
-                'xpack.significantEvents.significantEventsAlertingV2SettingsName',
-                {
-                  defaultMessage: 'Streams significant events — Alerting v2',
-                }
-              ) as string,
-              value: false,
-              description: i18n.translate(
-                'xpack.significantEvents.significantEventsAlertingV2SettingsDescription',
-                {
-                  defaultMessage:
-                    'Back significant event queries with Alerting v2 (kind: signal) instead of the custom streams.rules.esql rule type. ' +
-                    'Requires the alertingVTwo plugin and the write-alerting-v2-rules privilege. ' +
-                    'SigEvents rules are stored in the default Kibana space regardless of the current space. ' +
-                    'When disabled, rules are created via Alerting v1 (default). ' +
-                    'Turning this ON does not migrate existing v1-backed queries — promote or change queries to create v2 rules. ' +
-                    'Reads and writes both require the plugin; flag-on without alertingVTwo keeps v1 rules and v1 alert indices. ' +
-                    'Under v2, the discovery histogram buckets on rule evaluation time, not source log time. ' +
-                    'Switching this flag causes user-visible data gaps: the discovery view reads from a single index (.alerts-streams.* for v1 or .rule-events for v2) and does not union both, so events generated by the previous engine become invisible until the flag is restored. ' +
-                    'Cleanup of orphaned rules on the previous engine relies on a write operation against a SignificantEvent query (promote, update, delete) — this triggers dual cleanup which removes the legacy rule. ' +
-                    'If alertingVTwo is uninstalled while v2 rules exist, in-product cleanup becomes a no-op; to clean up, reinstall the plugin and trigger a write on each affected query, or delete the rules directly via the alerting v2 bulk_delete API.',
-                }
-              ),
-              type: 'boolean',
-              schema: schema.boolean(),
-              requiresPageReload: false,
-              solutionViews: ['classic', 'oblt'],
-              technicalPreview: true,
-              readonly: true,
-              readonlyMode: 'ui',
-            },
-          });
-        }
 
         core.uiSettings.registerGlobal({
           [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED]: {
