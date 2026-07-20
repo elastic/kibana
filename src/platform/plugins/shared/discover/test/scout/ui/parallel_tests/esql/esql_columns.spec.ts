@@ -103,4 +103,27 @@ spaceTest.describe('Discover ES|QL columns', { tag: '@local-stateful-classic' },
       await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', '@timestamp']);
     }
   );
+
+  spaceTest(
+    'formats a column using columnsMeta when its type differs from the data-view field',
+    async ({ page, pageObjects }) => {
+      const { discover } = pageObjects;
+      // This query preserves the original numeric DistanceMiles field in
+      // DistanceMilesOriginal, then replaces DistanceMiles with a string array.
+      // Although the data view defines DistanceMiles as numeric, ES|QL returns a
+      // string array for the renamed column, so formatting must follow the ES|QL
+      // result type rather than the data-view field type.
+      const query =
+        'FROM logstash* | LIMIT 1 | EVAL ipORIG = ip | EVAL ip = ["a", "b"] | KEEP ip, ipORIG';
+      await discover.codeEditor.setCodeEditorValue(query);
+      await discover.submitQuery();
+      await discover.waitUntilTabIsLoaded();
+      await expect(
+        page.testSubj.locator('dataGridHeaderCell-ipORIG').locator('[aria-label="IP address"]')
+      ).toBeVisible();
+      await expect(
+        page.testSubj.locator('dataGridHeaderCell-ip').locator('[aria-label="Keyword"]')
+      ).toBeVisible();
+    }
+  );
 });
