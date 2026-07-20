@@ -33,6 +33,12 @@ with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 Use `chrome.next.appHeader.set` only when a React adapter is not practical. It is the imperative
 primitive behind the React APIs.
 
+## Discover tabs
+
+Discover uses `DiscoverAppHeader` from `@kbn/app-header/discover` to place its UnifiedTabs bar beside
+the title. This is a Discover-specific layout exception; other apps should use the structured
+`tabs` or `badges` props on `AppHeader`.
+
 ## Editable titles
 
 Pass a title object when the page title can be renamed from the header:
