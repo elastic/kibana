@@ -63,7 +63,9 @@ export interface ESQLControlVariable extends SerializableRecord {
   value: string | number | (string | number)[];
   type: ESQLVariableType;
   meta?: SerializableRecord & {
+    // `controlledBy` is the ID of the control that publishes the variable
     controlledBy?: string;
+    // `group` allows grouping of variables
     group?: string;
   };
 }
