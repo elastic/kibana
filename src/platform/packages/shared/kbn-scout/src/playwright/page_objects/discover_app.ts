@@ -330,13 +330,7 @@ export class DiscoverApp {
     }
   }
 
-  async closeSaveSearchModal() {
-    const saveModal = this.page.testSubj.locator('savedObjectSaveModal');
-    await saveModal.getByRole('button', { name: 'Cancel' }).click();
-    await saveModal.waitFor({ state: 'hidden' });
-  }
-
-  getStoreTimeWithSearchSwitch(): Locator {
+  private getStoreTimeWithSearchSwitch() {
     return this.page.testSubj.locator('storeTimeWithSearch');
   }
 
