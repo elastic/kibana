@@ -58,7 +58,7 @@ const createHandlerParams = ({
       ),
   };
   const maintenanceService = {
-    getStatus: jest.fn().mockResolvedValue({ state: maintenanceState }),
+    getState: jest.fn().mockResolvedValue(maintenanceState),
   };
 
   const handlerParams = {

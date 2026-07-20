@@ -19,7 +19,7 @@ const RECONCILE_MAX_STREAMS = 10;
 type HandlerParams = Parameters<typeof route.handler>[0];
 
 const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enabled') => ({
-  getStatus: jest.fn().mockResolvedValue({ state }),
+  getState: jest.fn().mockResolvedValue(state),
 });
 
 const makeQueryLink = (id: string, severityScore: number): QueryLink => ({
