@@ -103,6 +103,16 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const isRruleSchedulingEnabled = ExperimentalFeaturesService.get().rruleScheduling;
 
+  // Whether the pack SO actually persisted a pack-level schedule (`schedule_type`
+  // set), vs. a legacy pack (pre-9.5, no pack-level schedule fields at all) for
+  // which the client synthesizes an interval-mode default purely so the form has
+  // something to render. Only a real pack-level schedule is a legitimate
+  // inheritance target for a non-override query — see elastic/kibana#277700.
+  // A brand-new pack has no legacy baggage, so it's treated as explicit too:
+  // its first save always writes a real `schedule_type`.
+  const packHasExplicitSchedule =
+    isRruleSchedulingEnabled && (!editMode || defaultValue?.schedule_type !== undefined);
+
   // Computed once and reused for both `defaultValues.schedule` and
   // `originalStartDate` so they can't diverge on independent `new Date()` calls.
   const deserializedSchedule = useMemo(
@@ -472,7 +482,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
         <EuiHorizontalRule />
 
-        <QueriesField euiFieldProps={euiFieldProps} />
+        <QueriesField
+          euiFieldProps={euiFieldProps}
+          packHasExplicitSchedule={packHasExplicitSchedule}
+        />
       </FormProvider>
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />
