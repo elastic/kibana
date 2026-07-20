@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React, { useEffect, useMemo, useRef } from 'react';
 import type { ActionPolicyBulkAction, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import type { Query } from '@elastic/eui';
@@ -12,7 +19,12 @@ import {
   StandardFilterOption,
 } from '@kbn/content-list';
 import type { ContentListItem } from '@kbn/content-list';
-import { TAG_FILTER_ID, useContentListItems, useContentListSelection, useContentListState } from '@kbn/content-list-provider';
+import {
+  TAG_FILTER_ID,
+  useContentListItems,
+  useContentListSelection,
+  useContentListState,
+} from '@kbn/content-list-provider';
 import { filter } from '@kbn/content-list-toolbar';
 import { ActionPolicySnoozePopover } from '../../../components/action_policy/action_policy_snooze_popover';
 import type { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
@@ -34,27 +46,27 @@ interface ConnectedBulkActionsProps {
 }
 
 interface Props {
-    canWrite: boolean;
-    isEnabling: boolean;
-    enableVariables: string | undefined;
-    isDisabling: boolean;
-    disableVariables: string | undefined;
-    isSnoozing: boolean;
-    snoozeVariables: { id: string } | undefined;
-    isUnsnoozing: boolean;
-    unsnoozeVariables: string | undefined;
-    isBulkActionInProgress: boolean;
-    bulkAction: BulkActionMutate;
-    onRefetchReady: (refetch: () => void) => void;
-    onViewDetails: (policy: ActionPolicyResponse) => void;
-    onEdit: (id: string) => void;
-    onClone: (policy: ActionPolicyResponse) => void;
-    onDelete: (policy: ActionPolicyResponse) => void;
-    onSnooze: (id: string, snoozedUntil: string) => void;
-    onCancelSnooze: (id: string) => void;
-    onUpdateApiKey: (id: string) => void;
-    enablePolicy: (id: string) => void;
-    disablePolicy: (id: string) => void;
+  canWrite: boolean;
+  isEnabling: boolean;
+  enableVariables: string | undefined;
+  isDisabling: boolean;
+  disableVariables: string | undefined;
+  isSnoozing: boolean;
+  snoozeVariables: { id: string } | undefined;
+  isUnsnoozing: boolean;
+  unsnoozeVariables: string | undefined;
+  isBulkActionInProgress: boolean;
+  bulkAction: BulkActionMutate;
+  onRefetchReady: (refetch: () => void) => void;
+  onViewDetails: (policy: ActionPolicyResponse) => void;
+  onEdit: (id: string) => void;
+  onClone: (policy: ActionPolicyResponse) => void;
+  onDelete: (policy: ActionPolicyResponse) => void;
+  onSnooze: (id: string, snoozedUntil: string) => void;
+  onCancelSnooze: (id: string) => void;
+  onUpdateApiKey: (id: string) => void;
+  enablePolicy: (id: string) => void;
+  disablePolicy: (id: string) => void;
 }
 
 const TAGS_FILTER_TITLE = i18n.translate('xpack.alertingV2.actionPoliciesList.filter.tags.title', {
@@ -92,187 +104,187 @@ const UPDATED_BY_COLUMN_NAME = i18n.translate(
 );
 
 export const ActionPoliciesTableContent = ({
-    canWrite,
-    isEnabling,
-    enableVariables,
-    isDisabling,
-    disableVariables,
-    isSnoozing,
-    snoozeVariables,
-    isUnsnoozing,
-    unsnoozeVariables,
-    isBulkActionInProgress,
-    bulkAction,
-    onRefetchReady,
-    onViewDetails,
-    onEdit,
-    onClone,
-    onDelete,
-    onSnooze,
-    onCancelSnooze,
-    onUpdateApiKey,
-    enablePolicy,
-    disablePolicy,
+  canWrite,
+  isEnabling,
+  enableVariables,
+  isDisabling,
+  disableVariables,
+  isSnoozing,
+  snoozeVariables,
+  isUnsnoozing,
+  unsnoozeVariables,
+  isBulkActionInProgress,
+  bulkAction,
+  onRefetchReady,
+  onViewDetails,
+  onEdit,
+  onClone,
+  onDelete,
+  onSnooze,
+  onCancelSnooze,
+  onUpdateApiKey,
+  enablePolicy,
+  disablePolicy,
 }: Props) => {
-    const { items } = useContentListItems();
-    const updatedByUids = useMemo(
-        () =>
-            items
-                .map((item) => toPolicy(item).updatedBy)
-                .filter((uid): uid is string => Boolean(uid)),
-        [items]
-    );
-    const { data: updatedByProfileByUid } = useBulkGetUserProfiles({ uids: updatedByUids });
-    const updatedByProfileByUidRef = useRef(updatedByProfileByUid);
-    updatedByProfileByUidRef.current = updatedByProfileByUid;
+  const { items } = useContentListItems();
+  const updatedByUids = useMemo(
+    () =>
+      items.map((item) => toPolicy(item).updatedBy).filter((uid): uid is string => Boolean(uid)),
+    [items]
+  );
+  const { data: updatedByProfileByUid } = useBulkGetUserProfiles({ uids: updatedByUids });
+  const updatedByProfileByUidRef = useRef(updatedByProfileByUid);
+  updatedByProfileByUidRef.current = updatedByProfileByUid;
 
-    return (
-        <>
-            <RefetchConnector onReady={onRefetchReady} />
-            <ContentListToolbar>
-                <ContentListToolbar.Filters>
-                    <TagsFilter />
-                    <EnabledFilter />
-                </ContentListToolbar.Filters>
-            </ContentListToolbar>
-            <ConnectedBulkActions bulkAction={bulkAction} isLoading={isBulkActionInProgress} />
-            <ContentListTable
-                title={ACTION_POLICIES_LIST_PAGE_TITLE}
-                scrollableInline
-                responsiveBreakpoint={false}
-            >
-                <Column.Name showDescription onClick={(item) => onViewDetails(toPolicy(item))} />
-                <DestinationsColumn />
-                <Column
-                    id="tags"
-                    name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.tags', {
-                        defaultMessage: 'Tags',
-                    })}
-                    render={(item) => {
-                        const { tags } = toPolicy(item);
-                        if (!tags?.length) return null;
-                        return (
-                            <EuiFlexGroup gutterSize="xs" wrap>
-                                {tags.map((tag) => (
-                                    <EuiFlexItem grow={false} key={tag}>
-                                        <EuiBadge color="hollow">{tag}</EuiBadge>
-                                    </EuiFlexItem>
-                                ))}
-                            </EuiFlexGroup>
-                        );
-                    }}
-                />
-                <Column.UpdatedAt />
-                <Column
-                    id="updatedBy"
-                    name={UPDATED_BY_COLUMN_NAME}
-                    width="150px"
-                    render={(item) => {
-                        const { updatedBy } = toPolicy(item);
-                        if (!updatedBy) return null;
-                        return <>{resolveDisplayName(updatedBy, updatedByProfileByUidRef.current, updatedBy)}</>;
-                    }}
-                />
-                <Column
-                    id="enabled"
-                    name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.enabled', {
-                        defaultMessage: 'Enabled',
-                    })}
-                    width="80px"
-                    render={(item) => {
-                        const policy = toPolicy(item);
-                        const isLoading =
-                            (isEnabling && enableVariables === policy.id) ||
-                            (isDisabling && disableVariables === policy.id);
-                        return (
-                            <EuiSwitch
-                                compressed
-                                checked={policy.enabled}
-                                disabled={!canWrite || isLoading || isBulkActionInProgress}
-                                onChange={() => {
-                                    if (policy.enabled) {
-                                        disablePolicy(policy.id);
-                                    } else {
-                                        enablePolicy(policy.id);
-                                    }
-                                }}
-                                label=""
-                                aria-label={i18n.translate(
-                                    'xpack.alertingV2.actionPoliciesList.column.enabled.ariaLabel',
-                                    { defaultMessage: '{name} enabled', values: { name: policy.name } }
-                                )}
-                            />
-                        );
-                    }}
-                />
-                <Column
-                    id="notify"
-                    name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.notify', {
-                        defaultMessage: 'Notify',
-                    })}
-                    width="50px"
-                    render={(item) => {
-                        const policy = toPolicy(item);
-                        if (!policy.enabled || !canWrite) return null;
-                        return (
-                            <ActionPolicySnoozePopover
-                                policy={policy}
-                                onSnooze={onSnooze}
-                                onCancelSnooze={onCancelSnooze}
-                                isLoading={
-                                    (isSnoozing && snoozeVariables?.id === policy.id) ||
-                                    (isUnsnoozing && unsnoozeVariables === policy.id)
-                                }
-                            />
-                        );
-                    }}
-                />
-                <Column
-                    id="actions"
-                    name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.actions', {
-                        defaultMessage: 'Actions',
-                    })}
-                    render={(item) => {
-                        const policy = toPolicy(item);
-                        return (
-                            <ActionPolicyActionsCell
-                                policy={policy}
-                                canWrite={canWrite}
-                                onViewDetails={onViewDetails}
-                                onEdit={onEdit}
-                                onClone={onClone}
-                                onDelete={onDelete}
-                                onSnooze={onSnooze}
-                                onCancelSnooze={onCancelSnooze}
-                                onUpdateApiKey={onUpdateApiKey}
-                                isDisabled={isBulkActionInProgress}
-                            />
-                        );
-                    }}
-                />
-            </ContentListTable>
-            <ContentListFooter />
-        </>
-    );
+  return (
+    <>
+      <RefetchConnector onReady={onRefetchReady} />
+      <ContentListToolbar>
+        <ContentListToolbar.Filters>
+          <TagsFilter />
+          <EnabledFilter />
+        </ContentListToolbar.Filters>
+      </ContentListToolbar>
+      <ConnectedBulkActions bulkAction={bulkAction} isLoading={isBulkActionInProgress} />
+      <ContentListTable
+        title={ACTION_POLICIES_LIST_PAGE_TITLE}
+        scrollableInline
+        responsiveBreakpoint={false}
+      >
+        <Column.Name showDescription onClick={(item) => onViewDetails(toPolicy(item))} />
+        <DestinationsColumn />
+        <Column
+          id="tags"
+          name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.tags', {
+            defaultMessage: 'Tags',
+          })}
+          render={(item) => {
+            const { tags } = toPolicy(item);
+            if (!tags?.length) return null;
+            return (
+              <EuiFlexGroup gutterSize="xs" wrap>
+                {tags.map((tag) => (
+                  <EuiFlexItem grow={false} key={tag}>
+                    <EuiBadge color="hollow">{tag}</EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            );
+          }}
+        />
+        <Column.UpdatedAt />
+        <Column
+          id="updatedBy"
+          name={UPDATED_BY_COLUMN_NAME}
+          width="150px"
+          render={(item) => {
+            const { updatedBy } = toPolicy(item);
+            if (!updatedBy) return null;
+            return (
+              <>{resolveDisplayName(updatedBy, updatedByProfileByUidRef.current, updatedBy)}</>
+            );
+          }}
+        />
+        <Column
+          id="enabled"
+          name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.enabled', {
+            defaultMessage: 'Enabled',
+          })}
+          width="80px"
+          render={(item) => {
+            const policy = toPolicy(item);
+            const isLoading =
+              (isEnabling && enableVariables === policy.id) ||
+              (isDisabling && disableVariables === policy.id);
+            return (
+              <EuiSwitch
+                compressed
+                checked={policy.enabled}
+                disabled={!canWrite || isLoading || isBulkActionInProgress}
+                onChange={() => {
+                  if (policy.enabled) {
+                    disablePolicy(policy.id);
+                  } else {
+                    enablePolicy(policy.id);
+                  }
+                }}
+                label=""
+                aria-label={i18n.translate(
+                  'xpack.alertingV2.actionPoliciesList.column.enabled.ariaLabel',
+                  { defaultMessage: '{name} enabled', values: { name: policy.name } }
+                )}
+              />
+            );
+          }}
+        />
+        <Column
+          id="notify"
+          name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.notify', {
+            defaultMessage: 'Notify',
+          })}
+          width="50px"
+          render={(item) => {
+            const policy = toPolicy(item);
+            if (!policy.enabled || !canWrite) return null;
+            return (
+              <ActionPolicySnoozePopover
+                policy={policy}
+                onSnooze={onSnooze}
+                onCancelSnooze={onCancelSnooze}
+                isLoading={
+                  (isSnoozing && snoozeVariables?.id === policy.id) ||
+                  (isUnsnoozing && unsnoozeVariables === policy.id)
+                }
+              />
+            );
+          }}
+        />
+        <Column
+          id="actions"
+          name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.actions', {
+            defaultMessage: 'Actions',
+          })}
+          render={(item) => {
+            const policy = toPolicy(item);
+            return (
+              <ActionPolicyActionsCell
+                policy={policy}
+                canWrite={canWrite}
+                onViewDetails={onViewDetails}
+                onEdit={onEdit}
+                onClone={onClone}
+                onDelete={onDelete}
+                onSnooze={onSnooze}
+                onCancelSnooze={onCancelSnooze}
+                onUpdateApiKey={onUpdateApiKey}
+                isDisabled={isBulkActionInProgress}
+              />
+            );
+          }}
+        />
+      </ContentListTable>
+      <ContentListFooter />
+    </>
+  );
 };
 
 const toPolicy = (item: ContentListItem): ActionPolicyResponse =>
-    (item as ActionPolicyContentListItem).policy;
+  (item as ActionPolicyContentListItem).policy;
 
 const DestinationsColumn = createColumn({
-    id: 'destinations',
-    name: i18n.translate('xpack.alertingV2.actionPoliciesList.column.destinations', {
-        defaultMessage: 'Destinations',
-    }),
-    render: (item) => <ActionPolicyDestinationsSummary destinations={toPolicy(item).destinations} />,
+  id: 'destinations',
+  name: i18n.translate('xpack.alertingV2.actionPoliciesList.column.destinations', {
+    defaultMessage: 'Destinations',
+  }),
+  render: (item) => <ActionPolicyDestinationsSummary destinations={toPolicy(item).destinations} />,
 });
 
 const RefetchConnector = ({ onReady }: { onReady: (refetch: () => void) => void }) => {
-    const { refetch } = useContentListState();
-    useEffect(() => {
-        onReady(refetch);
-    }, [onReady, refetch]);
-    return null;
+  const { refetch } = useContentListState();
+  useEffect(() => {
+    onReady(refetch);
+  }, [onReady, refetch]);
+  return null;
 };
 
 const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsProps) => {
