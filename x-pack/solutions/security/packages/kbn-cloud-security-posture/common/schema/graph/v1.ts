@@ -31,7 +31,7 @@ const ESQL_DEFAULT_ROW_LIMIT = 1_000;
 // Entity IDs accepted for relationship/enrichment lookups. Enrichment is chunked
 // at 1,000 IDs per ES|QL query (`fetch_entity_enrichment.ts`); 5,000 caps the
 // request at five chunks.
-const ENTITY_IDS_MAX_SIZE = 5_000;
+export const ENTITY_IDS_MAX_SIZE = 5_000;
 
 // Origin event IDs that seed graph traversal — bounded by the number of events a
 // single graph can display (the events query `LIMIT 1000`).
@@ -70,6 +70,30 @@ const GRAPH_MESSAGES_MAX_SIZE = 100;
 // at most this many records (matches the `page.size` ceiling).
 export const DETAIL_PAGE_SIZE_MAX = 100;
 
+// ---------------------------------------------------------------------------
+// String length ceilings (`maxLength`) for `schema.string` — DoS protection.
+// ---------------------------------------------------------------------------
+
+// Node/entity identifiers used in graph relationship queries (pinnedIds,
+// originEventIds, entityIdSchema.id). Structured strings produced by the graph
+// service; all forms are well under 256 chars.
+export const GRAPH_ID_MAX_LENGTH = 256;
+
+// Individual index-pattern strings (e.g. "logs-*",
+// ".alerts-security.alerts-*"). ES index/data-stream names are capped at
+// 255 bytes; 256 covers patterns with a trailing wildcard.
+export const INDEX_PATTERN_MAX_LENGTH = 256;
+
+// ISO 8601 / epoch-ms timestamp strings used as range bounds (`start`, `end`).
+// Millisecond-precision ISO is 24 chars; epoch-ms as a string is 13 digits;
+// 100 covers all valid forms with generous headroom.
+export const TIMESTAMP_STRING_MAX_LENGTH = 100;
+
+// Full entity EUIDs passed to entity-detail endpoints. EUIDs are compound
+// strings (e.g. "user~name~domain~host") and can exceed typical ID lengths;
+// 1024 is a conservative ceiling.
+export const ENTITY_EUID_MAX_LENGTH = 1024;
+
 /**
  * CPS project routing expressions accepted by the Graph API.
  * Values mirror `@kbn/cps-server-utils` (server-only package); declared here so the
@@ -86,7 +110,7 @@ export type ProjectRouting = typeof PROJECT_ROUTING_ORIGIN | typeof PROJECT_ROUT
  * (relevant when opening graph from entity flyout).
  */
 export const entityIdSchema = schema.object({
-  id: schema.string({ maxLength: 256 }),
+  id: schema.string({ maxLength: GRAPH_ID_MAX_LENGTH }),
   isOrigin: schema.boolean(),
 });
 
@@ -95,25 +119,30 @@ export const graphRequestSchema = schema.object({
   showUnknownTarget: schema.maybe(schema.boolean()),
   query: schema.object({
     pinnedIds: schema.maybe(
-      schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: PINNED_IDS_MAX_SIZE })
+      schema.arrayOf(schema.string({ maxLength: GRAPH_ID_MAX_LENGTH }), {
+        maxSize: PINNED_IDS_MAX_SIZE,
+      })
     ),
     // Origin event IDs - optional, may be empty when opening from entity flyout
     originEventIds: schema.maybe(
       schema.arrayOf(
-        schema.object({ id: schema.string({ maxLength: 256 }), isAlert: schema.boolean() }),
+        schema.object({
+          id: schema.string({ maxLength: GRAPH_ID_MAX_LENGTH }),
+          isAlert: schema.boolean(),
+        }),
         {
           maxSize: ORIGIN_EVENT_IDS_MAX_SIZE,
         }
       )
     ),
     // TODO: use zod for range validation instead of config schema
-    start: schema.oneOf([schema.number(), schema.string({ maxLength: 100 })]),
-    end: schema.oneOf([schema.number(), schema.string({ maxLength: 100 })]),
+    start: schema.oneOf([schema.number(), schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH })]),
+    end: schema.oneOf([schema.number(), schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH })]),
     indexPatterns: schema.maybe(
       schema.arrayOf(
         schema.string({
           minLength: 1,
-          maxLength: 256,
+          maxLength: INDEX_PATTERN_MAX_LENGTH,
           validate: (value) => {
             if (!INDEX_PATTERN_REGEX.test(value)) {
               return `Invalid index pattern: ${value}. Contains illegal characters.`;

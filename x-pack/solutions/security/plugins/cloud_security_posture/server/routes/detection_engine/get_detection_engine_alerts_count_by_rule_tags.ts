@@ -17,6 +17,13 @@ import type { CspRouter } from '../../types';
 
 const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts-default' as const;
 
+// Rule tags are user-defined strings on Kibana detection rules.
+// 256 covers the longest realistic tag with generous headroom.
+const RULE_TAG_MAX_LENGTH = 256;
+// maxSize mirrors the cspBenchmarkRuleMetadataSchema tags ceiling: rules
+// are not expected to carry more than 100 tags.
+const RULE_TAGS_MAX_SIZE = 100;
+
 export const getDetectionEngineAlertsCountByRuleTags = async (
   esClient: ElasticsearchClient,
   tags: string[]
@@ -66,7 +73,9 @@ export const defineGetDetectionEngineAlertsStatus = (router: CspRouter) =>
           request: {
             query: schema.object({
               // maxSize is set to 100 as it's not expected to have more than 100 tags
-              tags: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 }),
+              tags: schema.arrayOf(schema.string({ maxLength: RULE_TAG_MAX_LENGTH }), {
+                maxSize: RULE_TAGS_MAX_SIZE,
+              }),
             }),
           },
         },

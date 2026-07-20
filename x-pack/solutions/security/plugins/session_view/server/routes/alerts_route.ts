@@ -27,6 +27,22 @@ import {
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
 
+// Session entity IDs are compound identifiers (process.entry_leader.entity_id
+// format). All observed values are under 128 chars; 1024 is a safe ceiling.
+const SESSION_ENTITY_ID_MAX_LENGTH = 1024;
+
+// ISO 8601 timestamp strings for session start time.
+// Millisecond-precision ISO is 24 chars; 100 covers all valid forms.
+const SESSION_TIMESTAMP_MAX_LENGTH = 100;
+
+// Alert UUIDs are Kibana-generated UUID v4 (36 chars). 64 covers all UUID
+// variants with headroom.
+const ALERT_UUID_MAX_LENGTH = 64;
+
+// Pagination cursor: an opaque Base64-encoded sort value from ES search_after.
+// 1024 is a conservative ceiling for encoded sort keys.
+const CURSOR_MAX_LENGTH = 1024;
+
 export const registerAlertsRoute = (
   router: IRouter,
   logger: Logger,
@@ -48,10 +64,12 @@ export const registerAlertsRoute = (
         validate: {
           request: {
             query: schema.object({
-              sessionEntityId: schema.string({ maxLength: 1024 }),
-              sessionStartTime: schema.string({ maxLength: 100 }),
-              investigatedAlertId: schema.maybe(schema.string({ maxLength: 64 })),
-              cursor: schema.maybe(schema.string({ maxLength: 1024 })),
+              sessionEntityId: schema.string({ maxLength: SESSION_ENTITY_ID_MAX_LENGTH }),
+              sessionStartTime: schema.string({ maxLength: SESSION_TIMESTAMP_MAX_LENGTH }),
+              investigatedAlertId: schema.maybe(
+                schema.string({ maxLength: ALERT_UUID_MAX_LENGTH })
+              ),
+              cursor: schema.maybe(schema.string({ maxLength: CURSOR_MAX_LENGTH })),
             }),
           },
         },

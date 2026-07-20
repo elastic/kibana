@@ -19,6 +19,10 @@ import {
 } from '../../common/constants';
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 
+// Alert UUIDs are Kibana-generated UUID v4 (36 chars). 64 covers all UUID
+// variants with headroom.
+const ALERT_UUID_MAX_LENGTH = 64;
+
 export const registerAlertStatusRoute = (
   router: IRouter,
   logger: Logger,
@@ -40,7 +44,7 @@ export const registerAlertStatusRoute = (
         validate: {
           request: {
             query: schema.object({
-              alertUuid: schema.string({ maxLength: 64 }),
+              alertUuid: schema.string({ maxLength: ALERT_UUID_MAX_LENGTH }),
             }),
           },
         },
