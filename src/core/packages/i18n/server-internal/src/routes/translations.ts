@@ -50,8 +50,8 @@ export const registerTranslationsRoute = ({
           },
           validate: {
             params: schema.object({
-              locale: schema.string(),
-              translationHash: schema.maybe(schema.string()),
+              locale: schema.string({ maxLength: 1024 }),
+              translationHash: schema.maybe(schema.string({ maxLength: 1024 })),
             }),
           },
           options: {
