@@ -177,7 +177,16 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async assertProjectHeaderExists() {
-      await testSubjects.existOrFail('kibanaProjectHeader');
+      // Accept either the chrome-next global header or the classic project header so this works
+      // regardless of whether chrome-next is enabled.
+      await retry.try(async () => {
+        const exists =
+          (await testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 })) ||
+          (await testSubjects.exists('kibanaProjectHeader', { timeout: 0 }));
+        if (!exists) {
+          throw new Error('Neither chromeNextGlobalHeader nor kibanaProjectHeader is present');
+        }
+      });
     },
 
     async clickUserAvatar() {

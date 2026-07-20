@@ -23,7 +23,12 @@ export class SpacesPage {
   // ---- generic header / selector ----
 
   async isProjectHeaderVisible() {
-    return await this.page.testSubj.isVisible('kibanaProjectHeader');
+    // Accept either the chrome-next global header or the classic project header so this works
+    // regardless of whether chrome-next is enabled.
+    return await this.page.testSubj
+      .locator('chromeNextGlobalHeader')
+      .or(this.page.testSubj.locator('kibanaProjectHeader'))
+      .isVisible();
   }
 
   async navigateToHome() {
@@ -42,11 +47,27 @@ export class SpacesPage {
   }
 
   spacesSelectorLocator() {
-    return this.page.testSubj.locator('spacesNavSelector');
+    return this.page.testSubj
+      .locator('contextSwitcherTriggerButton')
+      .or(this.page.testSubj.locator('spacesNavSelector'));
   }
 
   async openSpacesSelector() {
-    await this.page.testSubj.click('spacesNavSelector');
+    const contextTrigger = this.page.testSubj.locator('contextSwitcherTriggerButton');
+    const classicTrigger = this.page.testSubj.locator('spacesNavSelector');
+    await contextTrigger.or(classicTrigger).waitFor({ state: 'visible' });
+
+    if (await contextTrigger.isVisible()) {
+      await contextTrigger.click();
+      await this.page.testSubj.locator('contextSwitcherPopoverPanel').waitFor({ state: 'visible' });
+      const spacesRow = this.page.testSubj.locator('contextSwitcherSpacesRow');
+      if (await spacesRow.isVisible()) {
+        await spacesRow.click();
+      }
+    } else {
+      await classicTrigger.click();
+      await this.page.testSubj.locator('spaceMenuPopoverPanel').waitFor({ state: 'visible' });
+    }
   }
 
   async isManageButtonVisible() {
@@ -59,7 +80,7 @@ export class SpacesPage {
 
   /** Reads the `title` attribute of the header space selector (current space name). */
   async getCurrentSpaceTitle() {
-    return await this.spacesSelectorLocator().getAttribute('title');
+    return (await this.spacesSelectorLocator().getAttribute('title'))?.trim() ?? null;
   }
 
   getCurrentUrl() {
@@ -275,7 +296,9 @@ export class SpacesPage {
   // ---- header spaces navigation menu ----
 
   spacesMenuPanelLocator() {
-    return this.page.testSubj.locator('spaceMenuPopoverPanel');
+    return this.page.testSubj
+      .locator('contextSwitcherPopoverPanel')
+      .or(this.page.testSubj.locator('spaceMenuPopoverPanel'));
   }
 
   async openSpacesNav() {
@@ -284,11 +307,16 @@ export class SpacesPage {
   }
 
   async switchToSpaceFromNav(spaceId: string) {
-    await this.page.testSubj.click(`${spaceId}-selectableSpaceItem`);
+    await this.page.testSubj
+      .locator(`space-${spaceId}`)
+      .or(this.page.testSubj.locator(`${spaceId}-selectableSpaceItem`))
+      .click();
   }
 
   navSearchInputLocator() {
-    return this.page.testSubj.locator('spacesMenuSearchInput');
+    return this.page.testSubj
+      .locator('contextSwitcherSpacesSearchInput')
+      .or(this.page.testSubj.locator('spacesMenuSearchInput'));
   }
 
   async isNavSearchInputVisible() {

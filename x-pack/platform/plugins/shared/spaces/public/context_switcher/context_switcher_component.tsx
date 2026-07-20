@@ -23,7 +23,7 @@ import {
   useManagementActions,
   useSpaceItems,
 } from './hooks';
-import { ENTER_SPACE_PATH } from '../../common';
+import { ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../common';
 import { SPACES_QUERY_KEY, useSpaces } from '../nav_control/hooks/use_spaces';
 import type { SpacesManager } from '../spaces_manager';
 
@@ -104,6 +104,7 @@ const ContextSwitcherInner = ({
       items: spaceItems,
       onSelect: handleSpaceSelect,
       ...managementActions,
+      search: { threshold: SPACE_SEARCH_COUNT_THRESHOLD },
       isLoading,
     };
   }, [activeSpaceItem, handleSpaceSelect, isLoading, managementActions, spaceItems]);

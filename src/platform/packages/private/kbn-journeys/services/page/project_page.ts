@@ -12,9 +12,14 @@ import { KibanaPage } from './kibana_page';
 
 export class ProjectPage extends KibanaPage {
   async waitForHeader() {
-    return this.page.waitForSelector(subj('kibanaProjectHeader'), {
-      state: 'attached',
-    });
+    // Accept either the chrome-next global header or the classic project header so this works
+    // regardless of whether chrome-next is enabled.
+    return this.page.waitForSelector(
+      `${subj('chromeNextGlobalHeader')}, ${subj('kibanaProjectHeader')}`,
+      {
+        state: 'attached',
+      }
+    );
   }
 
   async backToDashboardListing() {
