@@ -55,6 +55,9 @@ export function useRelayAppConnection(): UseRelayAppConnection {
       if (stillInProgress && !pollDeadlineRef.current) {
         pollDeadlineRef.current = Date.now() + POLL_TIMEOUT_MS;
       }
+      if (!stillInProgress) {
+        pollDeadlineRef.current = 0;
+      }
       return stillInProgress && Date.now() < pollDeadlineRef.current ? POLL_INTERVAL_MS : false;
     },
   });

@@ -6,13 +6,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { badGateway } from '@hapi/boom';
+import { badGateway, conflict, forbidden, notFound } from '@hapi/boom';
 import { createServerRoute } from '../../../create_server_route';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type {
+  SlackAppBindChannelResponse,
+  SlackAppBindingsResponse,
   SlackAppConnectResponse,
   SlackAppDisconnectResponse,
   SlackAppStatusResponse,
+  SlackAppUnbindChannelResponse,
 } from '../../../../../common/slack_app/types';
 import { SlackAppService } from '../../../../lib/slack_app/service';
 import { RelayRequestError } from '../../../../lib/slack_app/relay_error';
@@ -84,8 +87,92 @@ const disconnectSlackAppRoute = createServerRoute({
   },
 });
 
+const bindingsSlackAppRoute = createServerRoute({
+  endpoint: 'GET /internal/significant_events/apps/slack/bindings',
+  options: {
+    access: 'internal',
+    summary: 'List bound Slack channels',
+    description:
+      'Returns the Slack channel bindings for the connected workspace, as reported by the Relay.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({}),
+  handler: async ({ request, server }): Promise<SlackAppBindingsResponse> => {
+    return new SlackAppService(server).listBindings(request);
+  },
+});
+
+function throwRelayError(error: RelayRequestError): never {
+  const msg = error.relayMessage ?? error.message;
+  if (error.statusCode === 409) throw conflict(msg);
+  if (error.statusCode === 403) throw forbidden(msg);
+  if (error.statusCode === 404) throw notFound(msg);
+  throw badGateway(msg);
+}
+
+const bindChannelSlackAppRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/apps/slack/bindings/{channelId}/bind',
+  options: {
+    access: 'internal',
+    summary: 'Bind a Slack channel to this deployment',
+    description:
+      'Claims an unclaimed channel for this deployment (put-if-absent). Returns 409 if the channel is already claimed by another deployment.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ channelId: z.string() }),
+  }),
+  handler: async ({ params, request, server }): Promise<SlackAppBindChannelResponse> => {
+    try {
+      await new SlackAppService(server).bindChannel(request, params.path.channelId);
+    } catch (error) {
+      if (error instanceof RelayRequestError) throwRelayError(error);
+      throw error;
+    }
+    return { status: 'bound' };
+  },
+});
+
+const unbindChannelSlackAppRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/apps/slack/bindings/{channelId}/unbind',
+  options: {
+    access: 'internal',
+    summary: 'Unbind a Slack channel from this deployment',
+    description:
+      'Releases a channel binding owned by this deployment. Returns 404 if no explicit binding exists; 403 if owned by a different deployment.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ channelId: z.string() }),
+  }),
+  handler: async ({ params, request, server }): Promise<SlackAppUnbindChannelResponse> => {
+    try {
+      await new SlackAppService(server).unbindChannel(request, params.path.channelId);
+    } catch (error) {
+      if (error instanceof RelayRequestError) throwRelayError(error);
+      throw error;
+    }
+    return { status: 'unbound' };
+  },
+});
+
 export const internalSlackAppRoutes = {
   ...connectSlackAppRoute,
   ...statusSlackAppRoute,
   ...disconnectSlackAppRoute,
+  ...bindingsSlackAppRoute,
+  ...bindChannelSlackAppRoute,
+  ...unbindChannelSlackAppRoute,
 };

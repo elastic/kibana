@@ -139,6 +139,8 @@ export {
 export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
 
 export type {
+  RelayBinding,
+  RelayChannel,
   RelayClaimResponse,
   RelayClientContract,
   RelayInstallRequest,

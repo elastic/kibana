@@ -79,7 +79,7 @@ describe('RelayClient', () => {
     expect(JSON.parse(options.body)).toEqual({ claim_id: 'claim-1' });
   });
 
-  it('maps a 200 claim response to complete', async () => {
+  it('maps a 200 claim response to complete with tenant_key', async () => {
     fetchMock.mockResolvedValue({
       ok: true,
       status: 200,
@@ -90,6 +90,223 @@ describe('RelayClient', () => {
     await expect(client.fetchClaim('claim-1')).resolves.toEqual({
       status: 'complete',
       tenant_key: 'tenant-1',
+    });
+  });
+
+  it('maps a 200 claim response to complete when tenant_key is absent', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    });
+
+    const client = createClient();
+    await expect(client.fetchClaim('claim-1')).resolves.toEqual({
+      status: 'complete',
+      tenant_key: undefined,
+    });
+  });
+
+  it('unbind POSTs the tenant_key to the uninstall endpoint', async () => {
+    fetchMock.mockResolvedValue({ ok: true, status: 200, json: async () => ({}) });
+
+    const client = createClient();
+    await client.unbind('tenant-1');
+
+    const [url, options] = fetchMock.mock.calls[0];
+    expect(url.toString()).toBe('https://relay.test/v1/slack/uninstall');
+    expect(JSON.parse(options.body)).toEqual({ tenant_key: 'tenant-1' });
+  });
+
+  describe('listBindings', () => {
+    it('GETs the per-tenant bindings endpoint and maps display_name to displayName', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          bindings: [
+            { scope_type: 'DEFAULT', status: 'bound_to_self' },
+            {
+              scope_type: 'SUB',
+              scope_id: 'C123',
+              display_name: 'general',
+              status: 'bound_to_self',
+            },
+            {
+              scope_type: 'SUB',
+              scope_id: 'C456',
+              status: 'bound_to_other_target',
+            },
+          ],
+        }),
+      });
+
+      const client = createClient();
+      const result = await client.listBindings('team-A');
+
+      const [url, options] = fetchMock.mock.calls[0];
+      expect(url.toString()).toBe('https://relay.test/v1/slack/tenants/team-A/bindings');
+      expect(options.method).toBe('GET');
+      expect(result).toEqual([
+        { scope_type: 'DEFAULT', status: 'bound_to_self' },
+        {
+          scope_type: 'SUB',
+          scope_id: 'C123',
+          displayName: 'general',
+          status: 'bound_to_self',
+        },
+        { scope_type: 'SUB', scope_id: 'C456', status: 'bound_to_other_target' },
+      ]);
+    });
+
+    it('encodes special characters in the tenantKey path segment', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ bindings: [] }),
+      });
+
+      const client = createClient();
+      await client.listBindings('team/with spaces');
+
+      const [url] = fetchMock.mock.calls[0];
+      expect(url.toString()).toBe(
+        'https://relay.test/v1/slack/tenants/team%2Fwith%20spaces/bindings'
+      );
+    });
+
+    it('returns an empty array when the response bindings field is missing', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+      });
+
+      const client = createClient();
+      await expect(client.listBindings('team-A')).resolves.toEqual([]);
+    });
+  });
+
+  describe('listChannels', () => {
+    it('GETs the per-tenant channels endpoint and returns id/name entries', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          channels: [
+            { id: 'C111', name: 'general' },
+            { id: 'C222', name: 'alerts' },
+          ],
+        }),
+      });
+
+      const client = createClient();
+      const result = await client.listChannels('team-A');
+
+      const [url, options] = fetchMock.mock.calls[0];
+      expect(url.toString()).toBe('https://relay.test/v1/slack/tenants/team-A/channels');
+      expect(options.method).toBe('GET');
+      expect(result).toEqual([
+        { id: 'C111', name: 'general' },
+        { id: 'C222', name: 'alerts' },
+      ]);
+    });
+
+    it('encodes special characters in the tenantKey path segment', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ channels: [] }),
+      });
+
+      const client = createClient();
+      await client.listChannels('team/with spaces');
+
+      const [url] = fetchMock.mock.calls[0];
+      expect(url.toString()).toBe(
+        'https://relay.test/v1/slack/tenants/team%2Fwith%20spaces/channels'
+      );
+    });
+
+    it('returns an empty array when the response channels field is missing', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+      });
+
+      const client = createClient();
+      await expect(client.listChannels('team-A')).resolves.toEqual([]);
+    });
+
+    it('skips entries missing id or name', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          channels: [
+            { id: 'C111', name: 'general' },
+            { id: 'C222' }, // missing name
+            { name: 'no-id' }, // missing id
+          ],
+        }),
+      });
+
+      const client = createClient();
+      const result = await client.listChannels('team-A');
+      expect(result).toEqual([{ id: 'C111', name: 'general' }]);
+    });
+  });
+
+  describe('bind', () => {
+    it('POSTs to the per-channel bind endpoint', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ status: 'bound', scope_id: 'C123', target_ref: 'deployment:d1' }),
+      });
+
+      const client = createClient();
+      await client.bind('team-A', 'C123');
+
+      const [url, options] = fetchMock.mock.calls[0];
+      expect(url.toString()).toBe('https://relay.test/v1/slack/tenants/team-A/bindings/C123/bind');
+      expect(options.method).toBe('POST');
+    });
+
+    it('encodes special characters in tenantKey and channelId', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ status: 'bound', scope_id: 'C 1', target_ref: 'deployment:d1' }),
+      });
+
+      const client = createClient();
+      await client.bind('team/A', 'C 1');
+
+      const [url] = fetchMock.mock.calls[0];
+      expect(url.toString()).toBe(
+        'https://relay.test/v1/slack/tenants/team%2FA/bindings/C%201/bind'
+      );
+    });
+  });
+
+  describe('unbindChannel', () => {
+    it('POSTs to the per-channel unbind endpoint', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ status: 'unbound', scope_id: 'C123' }),
+      });
+
+      const client = createClient();
+      await client.unbindChannel('team-A', 'C123');
+
+      const [url, options] = fetchMock.mock.calls[0];
+      expect(url.toString()).toBe(
+        'https://relay.test/v1/slack/tenants/team-A/bindings/C123/unbind'
+      );
+      expect(options.method).toBe('POST');
     });
   });
 

@@ -35,7 +35,34 @@ export interface RelayInstallResponse {
   claim_id: string;
 }
 
-export type RelayClaimResponse = { status: 'pending' } | { status: 'complete'; tenant_key: string };
+export type RelayClaimResponse =
+  | { status: 'pending' }
+  | { status: 'complete'; tenant_key: string | undefined };
+
+/** A single entry from the Relay bindings list (`GET /v1/slack/tenants/:tenantKey/bindings`). */
+export interface RelayBinding {
+  /** Binding scope type from the Relay: `"DEFAULT"` for workspace-wide or `"SUB"` for channel-specific. */
+  scope_type?: string;
+  /** Channel id — present for `SUB`-scope entries. */
+  scope_id?: string;
+  /** Human-readable channel name — present when the Relay's channel enrichment is wired in. */
+  displayName?: string;
+  /**
+   * Caller-relative binding status from the Relay wire contract.
+   * `not_bound` is NOT emitted by this endpoint — that status is derived on the
+   * Kibana side by joining the channels list against the bindings list.
+   */
+  status: 'bound_to_self' | 'bound_to_other_target';
+}
+
+/**
+ * A single entry from the Relay channels list (`GET /v1/slack/tenants/:tenantKey/channels`).
+ * Returns all Slack channels the bot is currently a member of (no binding data).
+ */
+export interface RelayChannel {
+  id: string;
+  name: string;
+}
 
 /**
  * The subset of the Relay client that streams-core depends on structurally, via
@@ -49,5 +76,22 @@ export type RelayClaimResponse = { status: 'pending' } | { status: 'complete'; t
 export interface RelayClientContract {
   startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse>;
   fetchClaim(claimId: string): Promise<RelayClaimResponse>;
-  unbind(): Promise<void>;
+  /** Unbind a single workspace binding identified by its tenant key. */
+  unbind(tenantKey: string): Promise<void>;
+  /**
+   * List the bindings for a given Slack workspace (tenant), as seen from this deployment's
+   * perspective. Filters to DEFAULT + SUB scopes; status is caller-relative (`bound_to_self`
+   * or `bound_to_other_target`). `not_bound` entries are NOT in this list — derive them by
+   * joining against `listChannels`.
+   */
+  listBindings(tenantKey: string): Promise<RelayBinding[]>;
+  /**
+   * List all Slack channels the bot is currently a member of for a given tenant.
+   * Use alongside `listBindings` to derive channels available to bind (`not_bound`).
+   */
+  listChannels(tenantKey: string): Promise<RelayChannel[]>;
+  /** Claim an unclaimed channel for this deployment (put-if-absent; 409 if already claimed). */
+  bind(tenantKey: string, channelId: string): Promise<void>;
+  /** Release a channel binding owned by this deployment (404 if none; 403 if owned by another). */
+  unbindChannel(tenantKey: string, channelId: string): Promise<void>;
 }

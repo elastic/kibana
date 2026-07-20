@@ -10,6 +10,8 @@ import { Agent } from 'undici';
 import type { Logger } from '@kbn/core/server';
 import { getNodeSSLOptions } from '@kbn/actions-utils';
 import type {
+  RelayBinding,
+  RelayChannel,
   RelayClaimResponse,
   RelayInstallRequest,
   RelayInstallResponse,
@@ -105,30 +107,103 @@ export class RelayClient {
       return { status: 'pending' };
     }
 
-    const claim = (await response.json()) as { tenant_key: string };
+    const claim = (await response.json()) as { tenant_key?: string };
     return { status: 'complete', tenant_key: claim.tenant_key };
   }
 
-  /** Unbind on disconnect. Not yet implemented Relay-side; tracked as a follow-up. */
-  async unbind(): Promise<void> {
-    await this.post('/v1/slack/uninstall', {});
+  /** Unbind a single workspace binding identified by its tenant key. */
+  async unbind(tenantKey: string): Promise<void> {
+    await this.post('/v1/slack/uninstall', { tenant_key: tenantKey });
+  }
+
+  /**
+   * List the bindings for a given Slack workspace tenant, as seen from this deployment.
+   * Returns DEFAULT + SUB scopes only (SECONDARY / USER are filtered by the Relay).
+   */
+  async listBindings(tenantKey: string): Promise<RelayBinding[]> {
+    const path = `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/bindings`;
+    const response = await this.get(path);
+    const body = (await response.json()) as { bindings?: unknown[] };
+    if (!Array.isArray(body.bindings)) {
+      return [];
+    }
+    return body.bindings.map((entry) => {
+      const e = entry as {
+        scope_type?: string;
+        scope_id?: string;
+        display_name?: string;
+        status: RelayBinding['status'];
+      };
+      return {
+        scope_type: e.scope_type,
+        scope_id: e.scope_id,
+        displayName: e.display_name,
+        status: e.status,
+      };
+    });
+  }
+
+  /**
+   * List all Slack channels the bot is currently a member of for the given tenant workspace.
+   * Returns `{ id, name }[]`. Use alongside `listBindings` to derive `not_bound` channels.
+   */
+  async listChannels(tenantKey: string): Promise<RelayChannel[]> {
+    const path = `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/channels`;
+    const response = await this.get(path);
+    const body = (await response.json()) as { channels?: unknown[] };
+    if (!Array.isArray(body.channels)) {
+      return [];
+    }
+    return (body.channels as Array<{ id?: string; name?: string }>)
+      .filter((e): e is { id: string; name: string } => e.id != null && e.name != null)
+      .map((e) => ({ id: e.id, name: e.name }));
+  }
+
+  /** Claim an unclaimed channel (put-if-absent). The caller must hold a DEFAULT or SECONDARY binding for the tenant. */
+  async bind(tenantKey: string, channelId: string): Promise<void> {
+    await this.post(
+      `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/bindings/${encodeURIComponent(
+        channelId
+      )}/bind`,
+      {}
+    );
+  }
+
+  /** Release a channel binding owned by this deployment. */
+  async unbindChannel(tenantKey: string, channelId: string): Promise<void> {
+    await this.post(
+      `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/bindings/${encodeURIComponent(
+        channelId
+      )}/unbind`,
+      {}
+    );
   }
 
   private async post(path: string, body: unknown): Promise<Response> {
+    return this.request(path, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  }
+
+  private async get(path: string): Promise<Response> {
+    return this.request(path, { method: 'GET' });
+  }
+
+  private async request(path: string, init: FetchInit): Promise<Response> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
       // Undici's `fetch` supports a non-standard `dispatcher` option (not part of the
       // DOM `RequestInit` type) to route the request through a custom TLS connection,
       // see https://github.com/nodejs/undici/pull/1411.
-      const init: FetchInit = {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
+      const fetchInit: FetchInit = {
+        ...init,
         signal: controller.signal,
         dispatcher: this.dispatcher,
       };
-      const response = await fetch(new URL(path, this.baseUrl), init);
+      const response = await fetch(new URL(path, this.baseUrl), fetchInit);
       if (!response.ok) {
         // Relay error bodies carry `{ message }` (e.g. "workspace already bound");
         // preserve it so callers can surface the actual reason.
