@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { createMemoryHistory } from 'history';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
