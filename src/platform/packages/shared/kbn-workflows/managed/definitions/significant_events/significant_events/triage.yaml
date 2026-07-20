@@ -239,24 +239,6 @@ steps:
                 | compact
                 | uniq }}
 
-      - name: compute_confirmed_queue_sizes
-        type: data.set
-        with:
-          confirmedProcessedCount: >-
-            ${{ steps.store_significant_events.output.significant_events
-              | default: []
-              | reject: 'written', false
-              | size
-              | default: 0 }}
-
-      - name: compute_confirmed_queue_stats
-        type: data.set
-        with:
-          confirmedProcessedCount: '${{ steps.compute_confirmed_queue_sizes.output.confirmedProcessedCount }}'
-          confirmedRemainingCount: '${{ steps.compute_queue_stats.output.candidateCount | minus: steps.compute_confirmed_queue_sizes.output.confirmedProcessedCount | at_least: 0 }}'
-          confirmedHasRemaining: '${{ steps.compute_queue_stats.output.candidateCount > steps.compute_confirmed_queue_sizes.output.confirmedProcessedCount }}'
-          confirmedQueueEmpty: '${{ steps.compute_queue_stats.output.candidateCount <= steps.compute_confirmed_queue_sizes.output.confirmedProcessedCount }}'
-
       - name: foreach_stamp_handled
         type: foreach
         foreach: '${{ steps.collect_discoveries.output.findings }}'
@@ -404,12 +386,33 @@ steps:
                           event_id: '{{ foreach.item.event_id }}'
                           status: '{{ foreach.item.status }}'
 
+  # Keep queue outputs deterministic even if the defensive judge-output guard
+  # above skips its body. An empty result means no candidates were confirmed as
+  # processed, so the full candidate count remains queued for the next pass.
+  - name: compute_confirmed_queue_sizes
+    type: data.set
+    with:
+      processedCount: >-
+        ${{ variables.significant_events
+          | default: []
+          | reject: 'written', false
+          | size
+          | default: 0 }}
+
+  - name: compute_confirmed_queue_stats
+    type: data.set
+    with:
+      processedCount: '${{ steps.compute_confirmed_queue_sizes.output.processedCount }}'
+      remainingCount: '${{ steps.compute_queue_stats.output.candidateCount | minus: steps.compute_confirmed_queue_sizes.output.processedCount | at_least: 0 }}'
+      hasRemaining: '${{ steps.compute_queue_stats.output.candidateCount > steps.compute_confirmed_queue_sizes.output.processedCount }}'
+      queueEmpty: '${{ steps.compute_queue_stats.output.candidateCount <= steps.compute_confirmed_queue_sizes.output.processedCount }}'
+
   - name: output_result
     type: workflow.output
     with:
       candidateCount: '${{ steps.compute_queue_stats.output.candidateCount }}'
-      processedCount: '${{ variables.confirmedProcessedCount | default: 0 }}'
-      remainingCount: '${{ variables.confirmedRemainingCount | default: steps.compute_queue_stats.output.candidateCount }}'
-      hasRemaining: '${{ variables.confirmedHasRemaining }}'
-      queueEmpty: '${{ variables.confirmedQueueEmpty }}'
+      processedCount: '${{ steps.compute_confirmed_queue_stats.output.processedCount }}'
+      remainingCount: '${{ steps.compute_confirmed_queue_stats.output.remainingCount }}'
+      hasRemaining: '${{ steps.compute_confirmed_queue_stats.output.hasRemaining }}'
+      queueEmpty: '${{ steps.compute_confirmed_queue_stats.output.queueEmpty }}'
       noWork: false

@@ -41,7 +41,7 @@ const triage = parse(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW.yaml) as ParsedWorkflow;
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
     expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(11);
-    expect(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW.version).toBe(12);
+    expect(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW.version).toBe(13);
   });
 
   it('advances discovery queues only from confirmed write outcomes', () => {
@@ -69,12 +69,17 @@ describe('significant events persistence workflow contracts', () => {
     expect(requireStep(triage, 'gate_investigatable_severity').condition).toContain(
       'foreach.item.event_uuid != null'
     );
+    expect(requireStep(triage, 'compute_confirmed_queue_sizes').with?.processedCount).toContain(
+      'variables.significant_events'
+    );
+    expect(requireStep(triage, 'compute_confirmed_queue_sizes').with?.processedCount).toContain(
+      '| default: []'
+    );
     expect(requireStep(triage, 'output_result').with).toMatchObject({
-      processedCount: '${{ variables.confirmedProcessedCount | default: 0 }}',
-      remainingCount:
-        '${{ variables.confirmedRemainingCount | default: steps.compute_queue_stats.output.candidateCount }}',
-      hasRemaining: '${{ variables.confirmedHasRemaining }}',
-      queueEmpty: '${{ variables.confirmedQueueEmpty }}',
+      processedCount: '${{ steps.compute_confirmed_queue_stats.output.processedCount }}',
+      remainingCount: '${{ steps.compute_confirmed_queue_stats.output.remainingCount }}',
+      hasRemaining: '${{ steps.compute_confirmed_queue_stats.output.hasRemaining }}',
+      queueEmpty: '${{ steps.compute_confirmed_queue_stats.output.queueEmpty }}',
     });
   });
 });

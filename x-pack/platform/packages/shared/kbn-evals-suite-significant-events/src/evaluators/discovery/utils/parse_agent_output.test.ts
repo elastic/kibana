@@ -106,6 +106,67 @@ describe('extractDiscoveriesFromToolCall', () => {
       'discovery_write input and result arrays are not aligned'
     );
   });
+
+  it('aligns reordered discovery bulk results by their explicit index', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-reordered',
+        params: { items: [{ title: 'first' }, { title: 'second' }] },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 1,
+                  event_id: 'event-2',
+                  discovery_id: 'discovery-2',
+                  written: true,
+                },
+                {
+                  index: 0,
+                  event_id: 'event-1',
+                  discovery_id: 'discovery-1',
+                  written: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([
+      expect.objectContaining({ title: 'first', event_id: 'event-1' }),
+      expect.objectContaining({ title: 'second', event_id: 'event-2' }),
+    ]);
+  });
+
+  it('rejects duplicate discovery bulk result indices', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-duplicate-index',
+        params: { items: [{ title: 'one' }, { title: 'two' }] },
+        results: [
+          {
+            data: {
+              results: [
+                { index: 0, event_id: 'event-1', written: true },
+                { index: 0, event_id: 'event-2', written: true },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(() => extractDiscoveriesFromToolCall(steps)).toThrow(
+      'discovery_write input and result arrays are not aligned'
+    );
+  });
 });
 
 describe('extractSignificantEventsFromToolCall', () => {
@@ -220,5 +281,68 @@ describe('extractSignificantEventsFromToolCall', () => {
       expect.objectContaining({ discovery_id: 'd-1', event_uuid: 'uuid-1' }),
       expect.objectContaining({ discovery_id: 'd-2', event_uuid: 'uuid-2' }),
     ]);
+  });
+
+  it('aligns reordered event bulk results by their explicit index', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-reordered',
+        params: {
+          items: [
+            { discovery_id: 'd-1', event_id: 'event-1' },
+            { discovery_id: 'd-2', event_id: 'event-2' },
+          ],
+        },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 1,
+                  event_id: 'event-2',
+                  event_uuid: 'uuid-2',
+                  written: true,
+                },
+                {
+                  index: 0,
+                  event_id: 'event-1',
+                  event_uuid: 'uuid-1',
+                  written: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractSignificantEventsFromToolCall(steps)).toEqual([
+      expect.objectContaining({ discovery_id: 'd-1', event_uuid: 'uuid-1' }),
+      expect.objectContaining({ discovery_id: 'd-2', event_uuid: 'uuid-2' }),
+    ]);
+  });
+
+  it('rejects out-of-range event bulk result indices', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-invalid-index',
+        params: { items: [{ discovery_id: 'd-1' }] },
+        results: [
+          {
+            data: {
+              results: [{ index: 1, event_id: 'event-1', written: true }],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(() => extractSignificantEventsFromToolCall(steps)).toThrow(
+      'events_write input and result arrays are not aligned'
+    );
   });
 });

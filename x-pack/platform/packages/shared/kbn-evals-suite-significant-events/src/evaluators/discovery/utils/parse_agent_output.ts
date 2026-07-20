@@ -40,8 +40,44 @@ interface BulkToolParams {
   items?: Array<Record<string, unknown>>;
 }
 
+interface IndexedResult {
+  index: number;
+}
+
 const toolCallSteps = (steps: ConverseStep[], toolId: string) =>
   steps.filter((step) => step.type === 'tool_call' && step.tool_id === toolId && step.params);
+
+const alignBulkResults = <T extends IndexedResult>(
+  results: T[],
+  itemCount: number,
+  toolId: string
+): T[] => {
+  const misaligned = () => new Error(`${toolId} input and result arrays are not aligned`);
+  if (results.length !== itemCount) {
+    throw misaligned();
+  }
+
+  const resultsByIndex = new Map<number, T>();
+  for (const result of results) {
+    if (
+      !Number.isInteger(result.index) ||
+      result.index < 0 ||
+      result.index >= itemCount ||
+      resultsByIndex.has(result.index)
+    ) {
+      throw misaligned();
+    }
+    resultsByIndex.set(result.index, result);
+  }
+
+  return Array.from({ length: itemCount }, (_, index) => {
+    const result = resultsByIndex.get(index);
+    if (result === undefined) {
+      throw misaligned();
+    }
+    return result;
+  });
+};
 
 /**
  * Extract discoveries from `discovery_write` tool call steps.
@@ -59,11 +95,12 @@ export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Discovery
       ];
     }
     const results = toolResult?.results;
-    if (!Array.isArray(results) || results.length !== params.items.length) {
+    if (!Array.isArray(results)) {
       throw new Error('discovery_write input and result arrays are not aligned');
     }
+    const alignedResults = alignBulkResults(results, params.items.length, 'discovery_write');
     return params.items.flatMap((item, index) => {
-      const result = results[index];
+      const result = alignedResults[index];
       if (result.reason === 'bulk_error') return [];
       return [
         {
@@ -94,11 +131,12 @@ export const extractSignificantEventsFromToolCall = (steps: ConverseStep[]): Sig
       ];
     }
     const results = toolResult?.results;
-    if (!Array.isArray(results) || results.length !== params.items.length) {
+    if (!Array.isArray(results)) {
       throw new Error('events_write input and result arrays are not aligned');
     }
+    const alignedResults = alignBulkResults(results, params.items.length, 'events_write');
     return params.items.flatMap((item, index) => {
-      const result = results[index];
+      const result = alignedResults[index];
       if (!result.written) return [];
       return [
         {
