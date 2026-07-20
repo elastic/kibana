@@ -458,9 +458,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
   }
 
   async function deleteAnnotation(id: string) {
-    const { index, annotation } = await getAnnotationById(id);
-
-    await checkJobAccess(annotation.job_id);
+    const { index } = await getAnnotationById(id);
 
     const deleteParams: DeleteParams = {
       index,
