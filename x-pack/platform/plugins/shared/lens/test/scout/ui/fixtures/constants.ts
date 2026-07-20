@@ -69,8 +69,9 @@ export const DASHBOARD_TITLES = {
 
 export const DATA_TEST_SUBJECTS = {
   OPEN_IN_LENS_ACTION: 'embeddablePanelAction-ACTION_EDIT_IN_LENS',
-  ESQL_CONVERSION_DASHBOARD_TITLE_LINK: 'dashboardListingTitleLink-ES|QL-Conversion-Dashboard',
 } as const;
+
+export const ESQL_CONVERSION_DASHBOARD_ID = '3cda479c-8797-4492-99f4-2259e1377f85';
 
 export const ESQL_CONVERSION_PANEL_IDS = {
   INLINE_METRIC: 'fb4626b8-d8ce-42d3-913a-081af94cfb51',
