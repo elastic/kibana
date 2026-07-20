@@ -22,10 +22,14 @@ interface LegacyCustomField {
  * extended-fields backfill so the storage key it computes (`<name>_as_<type>`) always matches the
  * type this migration writes into the field definition.
  * - number → `integer` (v1 numbers are integer-only; matches v2's own number fields)
- * - text / toggle / unknown → `keyword`
+ * - toggle → `boolean` (matches the native v2 TOGGLE field's `type`)
+ * - text / unknown → `keyword`
  */
-export const getV2FieldType = (legacyType: string): 'integer' | 'keyword' =>
-  legacyType === CustomFieldTypes.NUMBER ? 'integer' : 'keyword';
+export const getV2FieldType = (legacyType: string): 'integer' | 'boolean' | 'keyword' => {
+  if (legacyType === CustomFieldTypes.NUMBER) return 'integer';
+  if (legacyType === CustomFieldTypes.TOGGLE) return 'boolean';
+  return 'keyword';
+};
 
 /**
  * Strictly coerces a legacy toggle default to a boolean. Legacy toggle values are booleans in
