@@ -155,22 +155,27 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
           projectTags={getProjectTags(activeProject)}
         />
       ) : null}
-      {visibleProjects.map((project) => (
-        <EuiFlexItem key={project._id} css={styles.listItemContainer}>
-          <ProjectPickerListItem
-            isSelected={state.selectedProjects.includes(project._id)}
-            isToggleDisabled={
-              state.selectedProjects.includes(project._id) && includedVisibleProjectIds.length === 1
-            }
-            toggleDisabledMessage={toggleDisabledMessage}
-            project={project}
-            onContextMenu={onContextMenu}
-            onToggle={onToggle}
-            onLabelClick={onLabelClick}
-            isReadOnly={state.isReadOnly}
-          />
-        </EuiFlexItem>
-      ))}
+      <EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="projectPickerList">
+          {visibleProjects.map((project) => (
+            <EuiFlexItem key={project._id} css={styles.listItemContainer}>
+              <ProjectPickerListItem
+                isSelected={state.selectedProjects.includes(project._id)}
+                isToggleDisabled={
+                  state.selectedProjects.includes(project._id) &&
+                  includedVisibleProjectIds.length === 1
+                }
+                isOriginProject={state.originProjectId === project._id}
+                toggleDisabledMessage={toggleDisabledMessage}
+                project={project}
+                onContextMenu={onContextMenu}
+                onToggle={onToggle}
+                onLabelClick={onLabelClick}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

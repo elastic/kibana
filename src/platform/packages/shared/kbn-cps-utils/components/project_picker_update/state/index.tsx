@@ -37,7 +37,7 @@ export interface ProjectPickerStateProviderProps extends Pick<ProjectPickerState
   availableProjects: CPSProject[];
   defaultProjectRouting?: ProjectRouting;
   initialProjectRouting?: ProjectRouting;
-  originProjectId?: string;
+  originProjectId: string;
 }
 
 export const createProjectPickerContext = once(() =>

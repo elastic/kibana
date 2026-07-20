@@ -28,6 +28,7 @@ export interface ProjectPickerListItemProps {
   isReadOnly?: boolean;
   isSelected: boolean;
   isToggleDisabled?: boolean;
+  isOriginProject: boolean;
   toggleDisabledMessage: string;
   project: CPSProject;
   onContextMenu: (project: CPSProject, evt: React.MouseEvent<HTMLAnchorElement>) => void;
@@ -39,6 +40,7 @@ export function ProjectPickerListItem({
   isReadOnly,
   isSelected,
   isToggleDisabled = false,
+  isOriginProject,
   toggleDisabledMessage,
   project,
   onContextMenu,
@@ -84,6 +86,15 @@ export function ProjectPickerListItem({
                   <p>{project._alias}</p>
                 </EuiText>
               </EuiFlexItem>
+              {isOriginProject && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge>
+                    {i18n.translate('cpsUtils.projectPicker.listItem.originProject', {
+                      defaultMessage: 'This Project',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
               {Boolean(projectTags.length) && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge
@@ -106,13 +117,15 @@ export function ProjectPickerListItem({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="xs" color="subdued">
-              {i18n.translate('cpsUtils.projectPicker.listItem.region', {
-                defaultMessage: '{provider}, {region}',
-                values: {
-                  provider: project._csp,
-                  region: project._region,
-                },
-              })}
+              {project._region && project._csp
+                ? i18n.translate('cpsUtils.projectPicker.listItem.region', {
+                    defaultMessage: '{provider}, {region}',
+                    values: {
+                      provider: project._csp,
+                      region: project._region,
+                    },
+                  })
+                : null}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState } from 'react';
 import { isUsingProjectRouting, type ProjectPickerState } from '../../../../state/reducers';
 import { useProjectPickerActions, useProjectPickerState } from '../../../../state';
+import { strings } from '../../../../../strings';
 
 interface HeaderContextMenuClickActionContext {
   state: ProjectPickerState;
@@ -178,7 +179,65 @@ export function ProjectPickerFrameHeader() {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ProjectPickerFrameHeaderActions />
+        <EuiFlexGroup responsive={false}>
+          {isUsingSpaceDefaults && (
+            <EuiFlexItem>
+              <EuiToolTip content={strings.getProjectPickerReadonlyCallout()}>
+                <EuiBadge tabIndex={0} color="primary">
+                  {i18n.translate('cpsUtils.projectPicker.frameHeader.usingSpaceDefaultsBadge', {
+                    defaultMessage: 'Using space defaults',
+                  })}
+                </EuiBadge>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem>
+            <EuiPopover
+              panelPaddingSize="none"
+              aria-labelledby={contextMenuTooltipId}
+              button={
+                <EuiToolTip
+                  id={contextMenuTooltipId}
+                  content={i18n.translate('cpsUtils.projectPicker.frameHeader.addProjectTooltip', {
+                    defaultMessage: 'Global actions',
+                  })}
+                >
+                  <EuiButtonIcon
+                    aria-labelledby={contextMenuTooltipId}
+                    iconType="ellipsis"
+                    onClick={() => setIsOpen(true)}
+                    color="text"
+                  />
+                </EuiToolTip>
+              }
+              isOpen={isOpen}
+              closePopover={closePopover}
+            >
+              <EuiContextMenuPanel
+                items={contextMenuConfig.reduce((acc, section, index) => {
+                  acc = acc.concat(
+                    section.map((item) => (
+                      <EuiContextMenuItem
+                        key={item.label}
+                        icon={item.icon}
+                        onClick={item.onClick}
+                        disabled={item.isDisabled?.({ state }) ?? false}
+                      >
+                        {item.label}
+                      </EuiContextMenuItem>
+                    ))
+                  );
+
+                  if (index < contextMenuConfig.length - 1) {
+                    acc.push(<EuiHorizontalRule key={`separator-${index}`} margin="xs" />);
+                  }
+
+                  return acc;
+                }, [] as React.ReactElement[])}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
