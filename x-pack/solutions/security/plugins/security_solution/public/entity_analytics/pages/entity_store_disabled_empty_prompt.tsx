@@ -31,7 +31,7 @@ export const EntityStoreDisabledEmptyPromptBody = React.memo(() => (
     color="plain"
     css={css`
       .euiEmptyPrompt__icon {
-        min-inline-size: 160px;
+        min-inline-size: 224px;
         text-align: center;
       }
       .euiEmptyPrompt__content {
@@ -39,7 +39,7 @@ export const EntityStoreDisabledEmptyPromptBody = React.memo(() => (
       }
     `}
     data-test-subj="entityStoreDisabledEmptyPrompt"
-    icon={<EuiImage size={128} alt="" url={illustrationSearchAnalytics} />}
+    icon={<EuiImage size={192} alt="" url={illustrationSearchAnalytics} />}
     layout="horizontal"
     style={{ maxWidth: 800 }}
     title={
