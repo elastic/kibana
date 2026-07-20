@@ -246,16 +246,13 @@ describe('KibanaEvalsClient', () => {
     expect(exp.evaluationRuns.length).toBeGreaterThan(0);
   });
 
-  it('prefers a task-provided traceId over the client task-span id for evaluator output', async () => {
+  it('prefers a task-provided traceId over the client task-span id for the stored run and evaluator output', async () => {
     const client = createClient();
     const dataset: EvaluationDataset = {
       name: 'ds',
       description: 'desc',
       examples: [{ input: { q: 1 }, output: { expected: 1 } }],
     };
-    // The task surfaces its own trace id (e.g. the agent-builder converse response body
-    // `trace_id`, which points at the server-side inference trace where the token / latency /
-    // tool spans live). It must win over the eval's client task-span trace id. (#276308)
     const task = async () => ({ value: 1, traceId: 'task-response-trace' });
 
     let seenOutputTraceId: string | undefined;
@@ -278,8 +275,6 @@ describe('KibanaEvalsClient', () => {
 
     expect(seenOutputTraceId).toBe('task-response-trace');
 
-    // The stored run (what the Evals UI trace link reads) must resolve to the same trace id
-    // as the evaluator input, not the raw client task-span id. (#276308)
     const [firstRun] = Object.values(exp.runs);
     expect(firstRun.traceId).toBe('task-response-trace');
   });
@@ -321,9 +316,6 @@ describe('KibanaEvalsClient', () => {
       description: 'desc',
       examples: [{ input: { q: 1 }, output: { expected: 1 } }],
     };
-    // A task-provided empty string is not a usable trace id — it must NOT win over the
-    // client task-span trace id (a plain `??` would let it through since '' is not
-    // null/undefined). (#276308)
     const task = async () => ({ value: 1, traceId: '' });
 
     let seenOutputTraceId: string | undefined;

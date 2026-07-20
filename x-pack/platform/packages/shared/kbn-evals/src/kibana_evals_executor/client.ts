@@ -207,18 +207,9 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 }
               );
 
-              // Prefer the traceId the task itself produced (e.g. the agent-builder converse
-              // RESPONSE body `trace_id`, which points at the server-side inference trace where
-              // ChatComplete / gen_ai.usage.* token + duration spans live). Fall back to the
-              // eval's client task-span trace id only when the task did not surface its own.
-              // Used both for the stored run (Evals UI trace link) and for evaluator input, so
-              // both point at the same, correct trace. Previously `traceId` (the client
-              // task-span id) always won for evaluator input, and the stored run never resolved
-              // it at all, so both queried the eval client trace (no inference spans) → null /
-              // wrong trace link. A truthy check (not `??`) ensures an empty-string traceId also
-              // falls back instead of being queried as a literal `trace.id == ""`.
-              // (elastic/kibana#276308)
-              const resolvedTraceId = (taskOutput as { traceId?: string })?.traceId || traceId;
+              // Prefer the trace id the task itself surfaced (e.g. converse's response
+              // trace_id) over the eval client's own task-span trace id. See #276308.
+              const taskOrClientTraceId = (taskOutput as { traceId?: string })?.traceId || traceId;
 
               runs[runKey] = {
                 exampleIndex,
@@ -227,7 +218,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 expected: example.output ?? null,
                 metadata: example.metadata ?? {},
                 output: taskOutput,
-                traceId: resolvedTraceId,
+                traceId: taskOrClientTraceId,
               };
 
               this.options.log.info(
@@ -248,7 +239,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                         input: example.input,
                         output: {
                           ...taskOutput,
-                          traceId: resolvedTraceId,
+                          traceId: taskOrClientTraceId,
                         },
                         expected: example.output ?? null,
                         metadata: example.metadata ?? {},
