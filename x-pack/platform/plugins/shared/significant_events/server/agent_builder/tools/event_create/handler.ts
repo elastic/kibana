@@ -9,22 +9,16 @@ import type { EventClient } from '../../../lib/significant_events/events';
 import { eventsWriteHandler, type EventsWriteInput } from '../event_write/handler';
 
 /**
- * Chat-initiated event input — a subset of EventsWriteInput without workflow-specific fields.
- * `discovery_slug` is absent: eventsWriteHandler generates a synthetic one automatically.
- * `status` is optional (defaults to 'promoted' when omitted).
+ * Chat-initiated event input — a minimal subset of EventsWriteInput.
+ *
+ * `event_id` is absent: eventsWriteHandler generates a synthetic one automatically.
+ * `status` is optional: defaults to 'open' when omitted.
  */
-export type EventCreateInput = Omit<
+export type EventCreateInput = Pick<
   EventsWriteInput,
-  | 'discovery_slug'
-  | 'discovery_id'
-  | 'assessment_note'
-  | 'evidences'
-  | 'workflow_execution_id'
-  | 'status'
-  | 'recommendations'
+  'title' | 'symptom_hypothesis' | 'summary' | 'stream_names' | 'severity' | 'confidence'
 > & {
   status?: EventsWriteInput['status'];
-  recommendations?: EventsWriteInput['recommendations'];
 };
 
 export async function createEventToolHandler({
@@ -33,14 +27,13 @@ export async function createEventToolHandler({
 }: {
   eventClient: EventClient;
   eventInput: EventCreateInput;
-}): Promise<{ event_id: string; acknowledged: true }> {
+}): Promise<{ event_uuid: string; acknowledged: true }> {
   const result = await eventsWriteHandler({
     eventClient,
     input: {
       ...eventInput,
-      status: eventInput.status ?? 'promoted',
-      recommendations: eventInput.recommendations ?? [],
+      status: eventInput.status ?? 'open',
     },
   });
-  return { event_id: result.event_id, acknowledged: true };
+  return { event_uuid: result.event_uuid, acknowledged: true };
 }
