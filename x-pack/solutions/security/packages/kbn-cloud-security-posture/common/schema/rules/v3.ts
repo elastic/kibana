@@ -102,7 +102,9 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
    *  Fields to retrieve from CspBenchmarkRule saved object
    */
   // maxSize is set to 50 to cover all available fields with room for future additions
-  fields: schema.maybe(schema.arrayOf(schema.string({ maxLength: RULE_FIELD_NAME_MAX_LENGTH }), { maxSize: 50 })),
+  fields: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: RULE_FIELD_NAME_MAX_LENGTH }), { maxSize: 50 })
+  ),
 
   /**
    *  The fields to perform the parsed query against.

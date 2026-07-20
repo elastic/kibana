@@ -136,7 +136,10 @@ export const graphRequestSchema = schema.object({
       )
     ),
     // TODO: use zod for range validation instead of config schema
-    start: schema.oneOf([schema.number(), schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH })]),
+    start: schema.oneOf([
+      schema.number(),
+      schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH }),
+    ]),
     end: schema.oneOf([schema.number(), schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH })]),
     indexPatterns: schema.maybe(
       schema.arrayOf(
