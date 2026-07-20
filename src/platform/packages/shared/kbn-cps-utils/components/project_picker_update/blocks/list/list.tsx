@@ -32,8 +32,8 @@ interface ProjectPickerListClickActionContext {
 interface ProjectPickerListContextMenuItemProps
   extends Pick<EuiContextMenuItemProps, 'icon' | 'external'> {
   label: string;
-  onClick?: (props: Pick<ProjectPickerListClickActionContext, 'activeProject'>) => void;
-  isDisabled?: (props: ProjectPickerListClickActionContext) => boolean;
+  onClick: (props: Pick<ProjectPickerListClickActionContext, 'activeProject'>) => void;
+  isDisabled: (props: ProjectPickerListClickActionContext) => boolean;
 }
 
 export const getProjectPickerListContextMenuConfig = (
@@ -64,9 +64,8 @@ export const getProjectPickerListContextMenuConfig = (
       },
       isDisabled: (props) => {
         return (
-          (props.state.excludedOverrides.length === 1 &&
-            props.state.excludedOverrides.includes(props.activeProject._id)) ||
-          props.state.selectedProjects.length === 1
+          props.state.excludedOverrides.includes(props.activeProject._id) ||
+          getIncludedVisibleProjectIds(props.state).length === 1
         );
       },
     },
@@ -122,7 +121,7 @@ export function ProjectPickerList() {
       }
 
       if (checked) {
-        actions.setSelectedProjects({ projects: [project._id] });
+        actions.undoProjectExclusion({ projects: [project._id] });
       } else {
         actions.excludeSelectedProjects({
           projects: [project._id],
@@ -155,13 +154,11 @@ export function ProjectPickerList() {
             items={projectPickerListContextMenuConfig.map((item) => (
               <EuiContextMenuItem
                 key={item.label}
-                onClick={item.onClick?.bind(null, { activeProject })}
-                disabled={
-                  item.isDisabled?.({
-                    activeProject,
-                    state,
-                  }) ?? false
-                }
+                onClick={item.onClick.bind(null, { activeProject })}
+                disabled={item.isDisabled({
+                  activeProject,
+                  state,
+                })}
               >
                 {item.label}
               </EuiContextMenuItem>

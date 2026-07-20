@@ -111,11 +111,11 @@ describe('getProjectPickerListContextMenuConfig', () => {
   const [includeItem, excludeItem] = getProjectPickerListContextMenuConfig(actions);
   const anchor = createProject('p1');
 
-  const getIncludeDisabled = (state: ProjectPickerState) =>
-    includeItem.isDisabled?.({ activeProject: anchor, state }) ?? false;
+  const getIncludeDisabled = (state: ProjectPickerState, activeProject: CPSProject = anchor) =>
+    includeItem.isDisabled({ activeProject, state });
 
-  const getExcludeDisabled = (state: ProjectPickerState) =>
-    excludeItem.isDisabled?.({ activeProject: anchor, state }) ?? false;
+  const getExcludeDisabled = (state: ProjectPickerState, activeProject: CPSProject = anchor) =>
+    excludeItem.isDisabled({ activeProject, state });
 
   describe('Include all other visible projects', () => {
     it('is disabled when nothing is excluded', () => {
@@ -175,6 +175,18 @@ describe('getProjectPickerListContextMenuConfig', () => {
             excludedOverrides: ['p1'],
             selectedProjects: ['p2'],
           })
+        )
+      ).toBe(true);
+    });
+
+    it('is disabled when the anchor is excluded and there other projects excluded', () => {
+      expect(
+        getExcludeDisabled(
+          createMenuState({
+            excludedOverrides: ['p1', 'p3'],
+            selectedProjects: ['p2'],
+          }),
+          createProject('p3')
         )
       ).toBe(true);
     });

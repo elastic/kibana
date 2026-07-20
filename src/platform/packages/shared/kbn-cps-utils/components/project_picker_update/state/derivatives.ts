@@ -111,6 +111,9 @@ export const hasActiveFilterExpressions = (
   return false;
 };
 
+/**
+ * Computes the list of project IDs that are currently displayed in the list based on the available projects and filter expressions provided by the user.
+ */
 export const computeVisibleProjectIds = (
   state: Pick<ProjectPickerState, 'availableProjects' | 'filterExpressions' | 'filteredProjectIds'>
 ): string[] => {
@@ -127,13 +130,17 @@ export const getIncludedVisibleProjectIds = (
   return state.visibleProjectIds.filter((id) => selected.has(id));
 };
 
+/**
+ * Computes the list of project ids that are currently enabled from the visible list.
+ * It factors in the user defined exclusion overrides.
+ */
 export const computeSelectedProjects = (
-  state: Pick<ProjectPickerState, 'filteredProjectIds' | 'availableProjects' | 'excludedOverrides'>
+  state: Pick<
+    ProjectPickerState,
+    'filteredProjectIds' | 'availableProjects' | 'excludedOverrides' | 'filterExpressions'
+  >
 ): string[] => {
-  const base =
-    state.filteredProjectIds.length > 0
-      ? state.filteredProjectIds
-      : Array.from(state.availableProjects.keys());
+  const base = computeVisibleProjectIds(state);
 
   return base.filter((id) => !state.excludedOverrides.includes(id));
 };
@@ -159,7 +166,13 @@ export const projectPickerDerivatives = [
   {
     key: 'filteringDimensions',
     compute: (state: ProjectPickerState) => {
-      return Object.keys(state.availableProjects.values().next().value ?? {});
+      const dimensions = new Set<string>();
+      for (const project of state.availableProjects.values()) {
+        for (const key of Object.keys(project)) {
+          dimensions.add(key);
+        }
+      }
+      return Array.from(dimensions);
     },
   },
 ] as const satisfies Array<StoreDerivative<ProjectPickerState, keyof ProjectPickerState>>;

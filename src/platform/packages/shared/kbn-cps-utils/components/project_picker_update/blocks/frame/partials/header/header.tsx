@@ -67,13 +67,13 @@ const getContextMenuItems = (
   [
     {
       icon: 'controls',
-      label: i18n.translate('cpsUtils.projectPicker.frameHeader.addProject', {
+      label: i18n.translate('cpsUtils.projectPicker.frameHeader.adjustSpaceDefaultsAction', {
         defaultMessage: 'Adjust space defaults',
       }),
     },
     {
       icon: 'gear',
-      label: i18n.translate('cpsUtils.projectPicker.frameHeader.adjustSpaceDefaults', {
+      label: i18n.translate('cpsUtils.projectPicker.frameHeader.manageCrossProjectSearch', {
         defaultMessage: 'Manage cross-project search',
       }),
       external: true,
@@ -113,7 +113,7 @@ export function ProjectPickerFrameHeader() {
           {isUsingSpaceDefaults && (
             <EuiFlexItem>
               <EuiBadge color="primary">
-                {i18n.translate('cpsUtils.projectPicker.frameHeader.addProject', {
+                {i18n.translate('cpsUtils.projectPicker.frameHeader.usingSpaceDefaultsBadge', {
                   defaultMessage: 'Using space defaults',
                 })}
               </EuiBadge>

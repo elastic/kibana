@@ -191,6 +191,7 @@ describe('computeSelectedProjects', () => {
       computeSelectedProjects(
         createState({
           availableProjects,
+          filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
           filteredProjectIds: ['p2'],
         })
       )
@@ -208,6 +209,7 @@ describe('computeSelectedProjects', () => {
       computeSelectedProjects(
         createState({
           availableProjects,
+          filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
           filteredProjectIds: ['p1', 'p2'],
           excludedOverrides: ['p2'],
         })
@@ -226,11 +228,29 @@ describe('computeSelectedProjects', () => {
       computeSelectedProjects(
         createState({
           availableProjects,
+          filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
           filteredProjectIds: ['p1'],
           excludedOverrides: [],
         })
       )
     ).toEqual(['p1']);
+  });
+
+  it('selects no projects when active filters match no projects, even though filteredProjectIds is empty', () => {
+    const availableProjects = new Map([
+      ['p1', createProject({ _id: 'p1', _type: 'security' })],
+      ['p2', createProject({ _id: 'p2', _type: 'observability' })],
+    ]);
+
+    expect(
+      computeSelectedProjects(
+        createState({
+          availableProjects,
+          filterExpressions: createFilterExpressions([['f1', 'is:_type:missing']]),
+          filteredProjectIds: [],
+        })
+      )
+    ).toEqual([]);
   });
 });
 

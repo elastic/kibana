@@ -30,14 +30,14 @@ export interface ProjectPickerState extends ProjectPickerStoredState {
    */
   filteredProjectIds: string[];
   /**
+   * This is the list of projects that qualify to be displayed considering the filter expressions the user has applied.
+   */
+  selectedProjects: string[];
+  /**
    * This is the list of projects that currently displayed in the list, it is a subset of {@link ProjectPickerState.selectedProjects},
    * considering if the user has made any overrides to exclude certain projects from the list.
    */
   visibleProjectIds: string[];
-  /**
-   * This is the list of projects that qualify to be displayed considering the filter expressions the user has applied.
-   */
-  selectedProjects: string[];
 }
 
 const addOverrides = (overrides: string[], projectIds: string[]): string[] => {
@@ -51,12 +51,109 @@ const removeOverrides = (overrides: string[], projectIds: string[]): string[] =>
 export function createStoreReducers() {
   return {
     /**
-     * Includes the provided project ids in the selected projects list.
+     * Adds a new filter expression.
      */
-    setSelectedProjects: (state: ProjectPickerState, payload: { projects: string[] }) => ({
-      ...state,
-      excludedOverrides: removeOverrides(state.excludedOverrides, payload.projects),
-    }),
+    addFilterExpression: (state: ProjectPickerState, payload: { expression: string }) => {
+      const id = window.crypto.randomUUID();
+      const filterExpressions = new Map(state.filterExpressions);
+      filterExpressions.set(id, { expression: payload.expression, enabled: true });
+
+      return {
+        ...state,
+        filterExpressions,
+      };
+    },
+    /**
+     * Updates the definition of an existing filter expression in-place.
+     */
+    updateFilterExpression: (
+      state: ProjectPickerState,
+      payload: { id: string; expression: string }
+    ) => {
+      const existing = state.filterExpressions.get(payload.id);
+      if (!existing) {
+        return state;
+      }
+
+      const filterExpressions = new Map(state.filterExpressions);
+      filterExpressions.set(payload.id, { ...existing, expression: payload.expression });
+
+      return {
+        ...state,
+        filterExpressions,
+      };
+    },
+    /**
+     * Removes the filter expression.
+     */
+    removeFilterExpression: (state: ProjectPickerState, payload: { filterId: string }) => {
+      const filterExpressions = new Map(state.filterExpressions);
+      filterExpressions.delete(payload.filterId);
+
+      return {
+        ...state,
+        filterExpressions,
+      };
+    },
+    /**
+     * Toggles the enabled state of the filter expression.
+     */
+    toggleFilterExpression: (state: ProjectPickerState, payload: { filterId: string }) => {
+      const filterExpressions = new Map(state.filterExpressions);
+      const existing = filterExpressions.get(payload.filterId);
+
+      if (!existing) {
+        return state;
+      }
+
+      filterExpressions.set(payload.filterId, { ...existing, enabled: !existing.enabled });
+
+      return {
+        ...state,
+        filterExpressions,
+      };
+    },
+    /**
+     * Inverts the operator of the filter expression.
+     */
+    invertFilterExpressionOperator: (state: ProjectPickerState, payload: { filterId: string }) => {
+      const filterExpressions = new Map(state.filterExpressions);
+      const existing = filterExpressions.get(payload.filterId);
+
+      if (!existing) {
+        return state;
+      }
+
+      const { operator, ...rest } = filterExpressionCodec.decode(existing.expression);
+
+      filterExpressions.set(payload.filterId, {
+        ...existing,
+        expression: filterExpressionCodec.encode({
+          ...rest,
+          operator:
+            operator === FilterOperator.EQUALS ? FilterOperator.NOT_EQUALS : FilterOperator.EQUALS,
+        })!,
+      });
+
+      return {
+        ...state,
+        filterExpressions,
+      };
+    },
+    /**
+     * Clears all filter expressions.
+     */
+    clearProjectFilters: (state: ProjectPickerState) => {
+      if (state.filterExpressions.size === 0) {
+        return state;
+      }
+
+      return {
+        ...state,
+        filterExpressions: new Map(),
+        excludedOverrides: [],
+      };
+    },
     /**
      * Excludes the provided project ids from the selected projects list.
      */
@@ -73,6 +170,13 @@ export function createStoreReducers() {
       };
     },
     /**
+     * Undo the exclusion of the provided project ids from the selected projects list.
+     */
+    undoProjectExclusion: (state: ProjectPickerState, payload: { projects: string[] }) => ({
+      ...state,
+      excludedOverrides: removeOverrides(state.excludedOverrides, payload.projects),
+    }),
+    /**
      * Sets the available projects map.
      */
     setAvailableProjects: (state: ProjectPickerState, payload: { projects: CPSProject[] }) => ({
@@ -84,17 +188,6 @@ export function createStoreReducers() {
       filterExpressions: new Map(),
       excludedOverrides: [],
     }),
-    clearProjectFilters: (state: ProjectPickerState) => {
-      if (state.filterExpressions.size === 0) {
-        return state;
-      }
-
-      return {
-        ...state,
-        filterExpressions: new Map(),
-        excludedOverrides: [],
-      };
-    },
     /**
      * Includes all visible projects.
      */
@@ -148,96 +241,6 @@ export function createStoreReducers() {
       }
 
       return { ...state, excludedOverrides: nextExcludedOverrides };
-    },
-    /**
-     * Adds a new filter expression.
-     */
-    addFilterExpression: (state: ProjectPickerState, payload: { expression: string }) => {
-      const id = window.crypto.randomUUID();
-      const filterExpressions = new Map(state.filterExpressions);
-      filterExpressions.set(id, { expression: payload.expression, enabled: true });
-
-      return {
-        ...state,
-        filterExpressions,
-      };
-    },
-    /**
-     * Updates the definition of an existing filter expression in-place.
-     */
-    updateFilterExpression: (
-      state: ProjectPickerState,
-      payload: { id: string; expression: string }
-    ) => {
-      const existing = state.filterExpressions.get(payload.id);
-      if (!existing) {
-        return state;
-      }
-
-      const filterExpressions = new Map(state.filterExpressions);
-      filterExpressions.set(payload.id, { ...existing, expression: payload.expression });
-
-      return {
-        ...state,
-        filterExpressions,
-      };
-    },
-    /**
-     * Removes the filter expression.
-     */
-    removeFilterExpression: (state: ProjectPickerState, payload: { id: string }) => {
-      const filterExpressions = new Map(state.filterExpressions);
-      filterExpressions.delete(payload.id);
-
-      return {
-        ...state,
-        filterExpressions,
-      };
-    },
-    /**
-     * Toggles the enabled state of the filter expression.
-     */
-    toggleFilterExpression: (state: ProjectPickerState, payload: { id: string }) => {
-      const filterExpressions = new Map(state.filterExpressions);
-      const existing = filterExpressions.get(payload.id);
-
-      if (!existing) {
-        return state;
-      }
-
-      filterExpressions.set(payload.id, { ...existing, enabled: !existing.enabled });
-
-      return {
-        ...state,
-        filterExpressions,
-      };
-    },
-    /**
-     * Inverts the operator of the filter expression.
-     */
-    invertFilterExpressionOperator: (state: ProjectPickerState, payload: { id: string }) => {
-      const filterExpressions = new Map(state.filterExpressions);
-      const existing = filterExpressions.get(payload.id);
-
-      if (!existing) {
-        return state;
-      }
-
-      const { operator, ...rest } = filterExpressionCodec.decode(existing.expression);
-
-      filterExpressions.set(payload.id, {
-        ...existing,
-        expression: filterExpressionCodec.encode({
-          ...rest,
-          operator:
-            operator === FilterOperator.EQUALS ? FilterOperator.NOT_EQUALS : FilterOperator.EQUALS,
-        })!,
-      });
-
-      return {
-        ...state,
-        filterExpressions,
-      };
     },
   } as const;
 }

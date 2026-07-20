@@ -55,7 +55,7 @@ describe('createStoreReducers', () => {
       excludedOverrides: ['p1'],
     });
 
-    const nextState = reducers.setSelectedProjects(state, { projects: ['p1'] });
+    const nextState = reducers.undoProjectExclusion(state, { projects: ['p1'] });
 
     expect(nextState.excludedOverrides).toEqual([]);
   });
@@ -142,7 +142,7 @@ describe('createStoreReducers', () => {
       ]),
     });
 
-    const nextState = reducers.removeFilterExpression(state, { id: 'f1' });
+    const nextState = reducers.removeFilterExpression(state, { filterId: 'f1' });
 
     expect(nextState.filterExpressions).toEqual(
       createFilterExpressions([['f2', 'is:_region:us-east-1']])

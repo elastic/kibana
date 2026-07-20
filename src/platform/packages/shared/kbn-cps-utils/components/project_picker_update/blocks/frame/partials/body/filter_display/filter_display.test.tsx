@@ -121,6 +121,7 @@ describe('ProjectPickerFilterDisplay', () => {
       filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
       visibleProjectIds: ['p1'],
       filteredProjectIds: ['p1'],
+      selectedProjects: ['p1'],
     });
 
     expect(

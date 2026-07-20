@@ -11,7 +11,7 @@ import React from 'react';
 import { ProjectPickerFrame, ProjectPickerList } from './blocks';
 import { ProjectPickerProvider, type ProjectPickerProviderProps } from './state';
 
-export function ProjectPicker({ availableProjects }: ProjectPickerProviderProps) {
+export function ProjectPicker({ availableProjects }: Omit<ProjectPickerProviderProps, 'children'>) {
   return (
     <ProjectPickerProvider availableProjects={availableProjects}>
       <ProjectPickerFrame>

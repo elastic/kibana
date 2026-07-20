@@ -24,8 +24,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FilterOperator } from '../../../../../utils/codec';
 import type { ProjectPickerState } from '../../../../../state/reducers';
+import { getIncludedVisibleProjectIds } from '../../../../../state/derivatives';
 import { useProjectPickerState, useProjectPickerActions } from '../../../../../state';
 import { filterDisplayStyles } from './filter_display.styles';
+import { filterExpressionCodec } from '../../../../../utils/codec';
 
 /**
  * Describes a filter that is being edited in the filter form.
@@ -64,7 +66,7 @@ const getFilterBadgeContextMenuItems = ({
   return [
     {
       icon: 'pencil',
-      label: i18n.translate('cpsUtils.projectPicker.filterDisplay.removeFilter', {
+      label: i18n.translate('cpsUtils.projectPicker.filterDisplay.editFilter', {
         defaultMessage: 'Edit',
       }),
       isDisabled: ({ enabled }) => {
@@ -82,7 +84,7 @@ const getFilterBadgeContextMenuItems = ({
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
         e.preventDefault();
-        actions.invertFilterExpressionOperator({ id: this.id });
+        actions.invertFilterExpressionOperator({ filterId: this.id });
         closePopover();
       },
       isDisabled: ({ enabled }) => {
@@ -94,7 +96,9 @@ const getFilterBadgeContextMenuItems = ({
           return false;
         }
 
-        return filterExpression.expression.includes(FilterOperator.EQUALS);
+        const { operator } = filterExpressionCodec.decode(filterExpression.expression);
+
+        return operator === FilterOperator.EQUALS;
       },
     },
     {
@@ -104,7 +108,7 @@ const getFilterBadgeContextMenuItems = ({
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
         e.preventDefault();
-        actions.invertFilterExpressionOperator({ id: this.id });
+        actions.invertFilterExpressionOperator({ filterId: this.id });
         closePopover();
       },
       isDisabled: ({ enabled }) => {
@@ -116,7 +120,9 @@ const getFilterBadgeContextMenuItems = ({
           return false;
         }
 
-        return filterExpression.expression.includes(FilterOperator.NOT_EQUALS);
+        const { operator } = filterExpressionCodec.decode(filterExpression.expression);
+
+        return operator === FilterOperator.NOT_EQUALS;
       },
     },
     {
@@ -126,7 +132,7 @@ const getFilterBadgeContextMenuItems = ({
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
         e.preventDefault();
-        actions.toggleFilterExpression({ id: this.id });
+        actions.toggleFilterExpression({ filterId: this.id });
         closePopover();
       },
       isDisplayed: ({ projectPickerState, id }) => {
@@ -140,7 +146,7 @@ const getFilterBadgeContextMenuItems = ({
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
         e.preventDefault();
-        actions.toggleFilterExpression({ id: this.id });
+        actions.toggleFilterExpression({ filterId: this.id });
         closePopover();
       },
       isDisplayed: ({ projectPickerState, id }) => {
@@ -154,7 +160,7 @@ const getFilterBadgeContextMenuItems = ({
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
         e.preventDefault();
-        actions.removeFilterExpression({ id: this.id });
+        actions.removeFilterExpression({ filterId: this.id });
         closePopover();
       },
     },
@@ -180,6 +186,8 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
     () => Array.from(state.filterExpressions.entries()),
     [state.filterExpressions]
   );
+
+  const hasNoIncludedProjects = getIncludedVisibleProjectIds(state).length === 0;
 
   const selectedFilter = useMemo(() => {
     if (!selectedFilterId) {
@@ -257,7 +265,7 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      {!Boolean(state.visibleProjectIds.length) && Boolean(filterEntries.length) && (
+      {hasNoIncludedProjects && Boolean(filterEntries.length) && (
         <EuiFlexItem>
           <EuiCallOut
             announceOnMount

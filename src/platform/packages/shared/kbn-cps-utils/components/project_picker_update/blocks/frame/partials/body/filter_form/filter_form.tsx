@@ -279,7 +279,7 @@ export function ProjectPickerFilterForm({
                     options={filterValues}
                     control={form.control}
                     name="tagValue"
-                    disabled={!anchoringFilteringTagName && !filteringOperator}
+                    disabled={!anchoringFilteringTagName || !filteringOperator}
                   />
                 </EuiFilterGroup>
               </EuiFlexItem>
@@ -287,6 +287,7 @@ export function ProjectPickerFilterForm({
                 <EuiFlexGroup responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
+                      id="createFilterTooltip"
                       content={i18n.translate('cpsUtils.projectPicker.filterBox.clearFilter', {
                         defaultMessage: 'Create filter',
                       })}
@@ -297,7 +298,7 @@ export function ProjectPickerFilterForm({
                         iconType="check"
                         display="base"
                         color="success"
-                        aria-labelledby=""
+                        aria-labelledby="createFilterTooltip"
                         onClick={handleCreateFilter}
                         disabled={shouldDisableCreateFilter}
                       />
