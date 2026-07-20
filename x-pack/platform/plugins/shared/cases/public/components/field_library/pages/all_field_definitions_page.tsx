@@ -231,10 +231,6 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
         title={i18n.FIELD_LIBRARY_TITLE}
         back={fieldLibraryBack}
         menu={fieldLibraryMenu}
-        // This route can render under the legacy layout (templates enabled, settings redesign
-        // off), where CasesAppHeader doesn't force padding; pin it to the pre-existing 'none' so
-        // making the header sticky doesn't also change its padding there.
-        padding="none"
       />
       <CasesPageBody>
         <EuiText size="s" color="subdued">

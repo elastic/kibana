@@ -250,7 +250,7 @@ export function StreamListView() {
 
   return (
     <>
-      <StreamsAppHeader title={pageTitle} menu={menu} docLink={streamsDocsLink} padding="m" />
+      <StreamsAppHeader title={pageTitle} menu={menu} docLink={streamsDocsLink} />
       <StreamsAppPageTemplate.Body grow paddingSize="m">
         {streamsListFetch.loading && streamsListFetch.value === undefined ? (
           <EuiEmptyPrompt

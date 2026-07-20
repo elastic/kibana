@@ -28,7 +28,7 @@ describe('getDetectionRuleEditSkill', () => {
         expect(skill.id).toBe('detection-rule-edit');
         expect(skill.name).toBe('detection-rule-edit');
         expect(skill.basePath).toBe('skills/security/rules');
-        expect(skill.description).toContain('create, edit, modify, or update a detection rule');
+        expect(skill.description).toContain('Creates and edits ES|QL security detection rules');
       }
     });
 
@@ -71,8 +71,8 @@ describe('getDetectionRuleEditSkill', () => {
     it('restricts to ES|QL rules', () => {
       for (const rulePreviewEnabled of [true, false]) {
         const content = getContent(rulePreviewEnabled);
-        expect(content).toMatch(/Only create ES\|QL rules/);
-        expect(content).toMatch(/rule type ES\|QL/);
+        expect(content).toMatch(/only supports the \*\*ES\|QL\*\* rule type/i);
+        expect(content).toMatch(/only supports creating \*\*ES\|QL\*\* detection rules/i);
       }
     });
 
@@ -158,7 +158,9 @@ describe('getDetectionRuleEditSkill', () => {
 
     it('still has the non-preview checklist intact', () => {
       expect(content).toMatch(/Checklist before finishing the answer/);
-      expect(content).toMatch(/Did I call the tool read attachment first/);
+      expect(content).toMatch(
+        /Did I call `attachment_list`.*and then `attachment_read` before modifying/
+      );
       expect(content).toMatch(/Did I render inline the latest version of the attachment/);
     });
   });
