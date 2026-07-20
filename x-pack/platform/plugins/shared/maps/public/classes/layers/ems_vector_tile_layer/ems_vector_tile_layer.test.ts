@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { SOURCE_TYPES } from '../../../../common/constants';
+import { TMSService } from '@elastic/ems-client';
+import type { LayerSpecification, Map as MbMap } from '@kbn/mapbox-gl';
+import { SOURCE_DATA_REQUEST_ID, SOURCE_TYPES } from '../../../../common/constants';
 import type {
   DataFilters,
   EMSVectorTileLayerDescriptor,
@@ -53,6 +55,72 @@ describe('EmsVectorTileLayer', () => {
 
     expect(actualMeta).toStrictEqual({ tileLayerId: 'myTileLayerId' });
     expect(actualErrorMessage).toStrictEqual('network error');
+  });
+
+  // When the color mode changes, the source's live 'getTileLayerId()' flips synchronously while
+  // the matching light/dark style is still being fetched asynchronously. The mb source prefix and
+  // color filter must be derived from the tileLayerId stored on the loaded data, otherwise the mb
+  // source gets namespaced with the new theme while it still holds the previous theme's layers,
+  // leaving the EMS basemap stuck on the old theme until the next re-sync.
+  describe('deriving the tileLayerId from the loaded data', () => {
+    const createLayer = (dataTileLayerId?: string) => {
+      return new EmsVectorTileLayer({
+        source: {
+          getTileLayerId: () => 'newTheme',
+        } as unknown as EMSTMSSource,
+        layerDescriptor: {
+          id: 'layerid',
+          sourceDescriptor: {
+            type: SOURCE_TYPES.EMS_XYZ,
+            urlTemplate: 'https://example.com/{x}/{y}/{z}.png',
+            id: 'mockSourceId',
+          } as XYZTMSSourceDescriptor,
+          __dataRequests:
+            dataTileLayerId === undefined
+              ? []
+              : [{ dataId: SOURCE_DATA_REQUEST_ID, data: { tileLayerId: dataTileLayerId } }],
+        } as unknown as EMSVectorTileLayerDescriptor,
+      });
+    };
+
+    test('_generateMbSourceIdPrefix should use the loaded tileLayerId over the live source value', () => {
+      const layer = createLayer('oldTheme') as unknown as {
+        _generateMbSourceIdPrefix: () => string;
+      };
+      expect(layer._generateMbSourceIdPrefix()).toBe('layerid___oldTheme___');
+    });
+
+    test('_generateMbSourceIdPrefix should fall back to the live source value when no source data request exists', () => {
+      const layer = createLayer() as unknown as { _generateMbSourceIdPrefix: () => string };
+      expect(layer._generateMbSourceIdPrefix()).toBe('layerid___newTheme___');
+    });
+
+    test('_setColorFilter should look up the color operation for the loaded tileLayerId', () => {
+      const replacedColorOperationDefaults = jest.replaceProperty(
+        TMSService,
+        'colorOperationDefaults',
+        [
+          { style: 'oldTheme', operation: 'oldOperation', percentage: 0.1 },
+          { style: 'newTheme', operation: 'newOperation', percentage: 0.2 },
+        ] as unknown as typeof TMSService.colorOperationDefaults
+      );
+      const transformColorPropertiesSpy = jest
+        .spyOn(TMSService, 'transformColorProperties')
+        .mockReturnValue([]);
+
+      const layer = createLayer('oldTheme') as unknown as {
+        _setColorFilter: (mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) => void;
+      };
+      const mbLayer = { id: 'mbLayerId', type: 'symbol' } as unknown as LayerSpecification;
+      const mbMap = { setPaintProperty: jest.fn() } as unknown as MbMap;
+
+      layer._setColorFilter(mbMap, mbLayer, 'mbLayerId');
+
+      expect(transformColorPropertiesSpy).toHaveBeenCalledWith(mbLayer, '', 'oldOperation', 0.1);
+
+      replacedColorOperationDefaults.restore();
+      transformColorPropertiesSpy.mockRestore();
+    });
   });
 
   describe('getLocale', () => {
