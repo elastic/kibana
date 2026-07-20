@@ -385,9 +385,12 @@ describe(
         // cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_SUPPRESSED_ALERTS)
         //   .should('be.visible')
         //   .and('have.text', '1'); // TODO populate rule with alert suppression
+        // this section is bound by a read-only, persisted time range (defaulting to the last 24
+        // hours) with no way to change it from the Overview tab, so the count reflects that
+        // default window rather than the full data set
         cy.get(
           DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_ANCESTRY
-        ).should('have.text', '1');
+        ).should('have.text', '0');
         cy.get(
           DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_SAME_SOURCE_EVENT
         ).should('have.text', '1');
