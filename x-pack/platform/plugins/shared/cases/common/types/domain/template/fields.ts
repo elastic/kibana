@@ -69,6 +69,8 @@ export type Validation = z.infer<typeof ValidationSchema>;
  */
 export interface ConditionRenderProps {
   isRequired?: boolean;
+  /** Field must be filled before the case can be closed (not required now). Drives the field label. */
+  isRequiredOnClose?: boolean;
   patternValidation?: { regex: string; message?: string };
   min?: number;
   max?: number;

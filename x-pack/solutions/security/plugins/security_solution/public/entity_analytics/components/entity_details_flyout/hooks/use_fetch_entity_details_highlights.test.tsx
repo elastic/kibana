@@ -51,6 +51,7 @@ const mockProps = {
   ] as AnonymizationFieldResponse[],
   entityType: 'user',
   entityIdentifier: 'test-user',
+  persistSummary: true,
 };
 
 const mockEntityDetailsResponse = {
@@ -303,6 +304,34 @@ describe('useFetchEntityDetailsHighlights', () => {
           recommendedActions: 2,
         },
       });
+    });
+
+    it('skips persistence when the user lacks metadata read access (canRead: false)', async () => {
+      mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
+      mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
+      const refetchEntityRecord = jest.fn();
+      const refetchPersistedSummary = jest.fn();
+
+      const { result } = renderHook(() =>
+        useFetchEntityDetailsHighlights({
+          ...mockProps,
+          entitySnapshot: mockEntitySnapshot,
+          persistSummary: false,
+          refetchEntityRecord,
+          refetchPersistedSummary,
+        })
+      );
+
+      await act(async () => {
+        await result.current.fetchEntityHighlights();
+      });
+
+      // In-session result is still set — generation is on-demand only.
+      expect(result.current.result?.response).toEqual(mockSuccessfulInferenceOutput.output);
+      expect(mockSaveEntityAiSummary).not.toHaveBeenCalled();
+      expect(refetchEntityRecord).not.toHaveBeenCalled();
+      expect(refetchPersistedSummary).not.toHaveBeenCalled();
+      expect(mockAddError).not.toHaveBeenCalled();
     });
 
     it('refreshes the entity record and persisted summary after a successful save', async () => {
