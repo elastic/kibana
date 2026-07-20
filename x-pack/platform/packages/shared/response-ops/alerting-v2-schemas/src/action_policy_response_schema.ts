@@ -13,50 +13,55 @@ import {
   throttleStrategySchema,
 } from './action_policy_data_schema';
 
-export const actionPolicyResponseSchema = z.object({
-  id: z.string().describe('The unique identifier for the action policy.'),
-  version: z.string().optional().describe('The version, used for optimistic concurrency control.'),
-  name: z.string().describe('The name of the action policy.'),
-  description: z.string().describe('A description of the action policy.'),
-  enabled: z.boolean().describe('Whether the action policy is enabled.'),
-  destinations: z.array(actionPolicyDestinationSchema).describe('The list of destinations.'),
-  matcher: z.string().nullable().describe('A KQL query to match alerts, or null to match all.'),
-  groupBy: z
-    .array(z.string())
-    .nullable()
-    .describe('The fields used to group alerts, or null for no grouping.'),
-  tags: z.array(z.string()).nullable().describe('Tags associated with the action policy.'),
-  groupingMode: groupingModeSchema
-    .nullable()
-    .describe('The grouping mode for alert notifications.'),
-  throttle: z
-    .object({
-      strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
-      interval: durationSchema
-        .nullable()
-        .describe(
-          'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'
-        ),
-    })
-    .nullable()
-    .describe('The throttle configuration for notifications.'),
-  snoozedUntil: z
-    .string()
-    .nullable()
-    .describe('The ISO datetime until which the policy is snoozed, or null if not snoozed.'),
-  auth: z
-    .object({
-      owner: z.string().describe('The owner of the action policy.'),
-      createdByUser: z
-        .boolean()
-        .describe('Whether this policy was created by a user (vs system-generated).'),
-    })
-    .describe('Authentication and ownership information.'),
-  createdBy: z.string().nullable().describe('The user ID who created the action policy.'),
-  createdAt: z.string().describe('The ISO datetime when the action policy was created.'),
-  updatedBy: z.string().nullable().describe('The user ID who last updated the action policy.'),
-  updatedAt: z.string().describe('The ISO datetime when the action policy was last updated.'),
-});
+export const actionPolicyResponseSchema = z
+  .object({
+    id: z.string().describe('The unique identifier for the action policy.'),
+    version: z
+      .string()
+      .optional()
+      .describe('The version, used for optimistic concurrency control.'),
+    name: z.string().describe('The name of the action policy.'),
+    description: z.string().describe('A description of the action policy.'),
+    enabled: z.boolean().describe('Whether the action policy is enabled.'),
+    destinations: z.array(actionPolicyDestinationSchema).describe('The list of destinations.'),
+    matcher: z.string().nullable().describe('A KQL query to match alerts, or null to match all.'),
+    groupBy: z
+      .array(z.string())
+      .nullable()
+      .describe('The fields used to group alerts, or null for no grouping.'),
+    tags: z.array(z.string()).nullable().describe('Tags associated with the action policy.'),
+    groupingMode: groupingModeSchema
+      .nullable()
+      .describe('The grouping mode for alert notifications.'),
+    throttle: z
+      .object({
+        strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
+        interval: durationSchema
+          .nullable()
+          .describe(
+            'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'
+          ),
+      })
+      .nullable()
+      .describe('The throttle configuration for notifications.'),
+    snoozedUntil: z
+      .string()
+      .nullable()
+      .describe('The ISO datetime until which the policy is snoozed, or null if not snoozed.'),
+    auth: z
+      .object({
+        owner: z.string().describe('The owner of the action policy.'),
+        createdByUser: z
+          .boolean()
+          .describe('Whether this policy was created by a user (vs system-generated).'),
+      })
+      .describe('Authentication and ownership information.'),
+    createdBy: z.string().nullable().describe('The user ID who created the action policy.'),
+    createdAt: z.string().describe('The ISO datetime when the action policy was created.'),
+    updatedBy: z.string().nullable().describe('The user ID who last updated the action policy.'),
+    updatedAt: z.string().describe('The ISO datetime when the action policy was last updated.'),
+  })
+  .meta({ id: 'alerting_v2_action_policy_response' });
 
 export type ActionPolicyResponse = z.infer<typeof actionPolicyResponseSchema>;
 
@@ -67,7 +72,8 @@ export const findActionPoliciesResponseSchema = z
     page: z.number().describe('The current page number.'),
     perPage: z.number().describe('The number of action policies per page.'),
   })
-  .describe('Paginated list of action policies.');
+  .describe('Paginated list of action policies.')
+  .meta({ id: 'alerting_v2_action_policy_list_response' });
 
 export type FindActionPoliciesResponse = z.infer<typeof findActionPoliciesResponseSchema>;
 
@@ -84,7 +90,8 @@ export const bulkActionActionPoliciesResponseSchema = z
       )
       .describe('Errors encountered during the bulk operation.'),
   })
-  .describe('Result of a bulk action policy operation.');
+  .describe('Result of a bulk action policy operation.')
+  .meta({ id: 'alerting_v2_bulk_action_policies_response' });
 
 export type BulkActionActionPoliciesResponse = z.infer<
   typeof bulkActionActionPoliciesResponseSchema

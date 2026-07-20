@@ -63,15 +63,17 @@ const namedRefSchema = z.object({
 // Defensive upper bound to keep response payloads sane.
 const MAX_WORKFLOWS_PER_ITEM = 100;
 
-export const policyExecutionHistoryItemSchema = z.object({
-  '@timestamp': z.string(),
-  policy: namedRefSchema,
-  rule: namedRefSchema,
-  outcome: policyExecutionOutcomeSchema,
-  episode_count: z.number(),
-  action_group_count: z.number(),
-  workflows: z.array(namedRefSchema).max(MAX_WORKFLOWS_PER_ITEM),
-});
+export const policyExecutionHistoryItemSchema = z
+  .object({
+    '@timestamp': z.string(),
+    policy: namedRefSchema,
+    rule: namedRefSchema,
+    outcome: policyExecutionOutcomeSchema,
+    episode_count: z.number(),
+    action_group_count: z.number(),
+    workflows: z.array(namedRefSchema).max(MAX_WORKFLOWS_PER_ITEM),
+  })
+  .meta({ id: 'alerting_v2_policy_execution_history_item' });
 export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryItemSchema>;
 
 export const searchMatchCountsSchema = z.object({
@@ -81,24 +83,28 @@ export const searchMatchCountsSchema = z.object({
 });
 export type SearchMatchCounts = z.infer<typeof searchMatchCountsSchema>;
 
-export const listPolicyExecutionHistoryResponseSchema = z.object({
-  items: z.array(policyExecutionHistoryItemSchema),
-  page: z.number(),
-  perPage: z.number(),
-  totalEvents: z.number(),
-  searchMatches: searchMatchCountsSchema
-    .nullable()
-    .describe(
-      'Per-type match counts for the active search, plus the cap used as filter. Null when no search was provided. When policies > cap or rules > cap the result is truncated.'
-    ),
-});
+export const listPolicyExecutionHistoryResponseSchema = z
+  .object({
+    items: z.array(policyExecutionHistoryItemSchema),
+    page: z.number(),
+    perPage: z.number(),
+    totalEvents: z.number(),
+    searchMatches: searchMatchCountsSchema
+      .nullable()
+      .describe(
+        'Per-type match counts for the active search, plus the cap used as filter. Null when no search was provided. When policies > cap or rules > cap the result is truncated.'
+      ),
+  })
+  .meta({ id: 'alerting_v2_policy_execution_history_response' });
 export type ListPolicyExecutionHistoryResponse = z.infer<
   typeof listPolicyExecutionHistoryResponseSchema
 >;
 
-export const countPolicyExecutionEventsResponseSchema = z.object({
-  count: z.number(),
-});
+export const countPolicyExecutionEventsResponseSchema = z
+  .object({
+    count: z.number(),
+  })
+  .meta({ id: 'alerting_v2_policy_execution_events_count_response' });
 export type CountPolicyExecutionEventsResponse = z.infer<
   typeof countPolicyExecutionEventsResponseSchema
 >;

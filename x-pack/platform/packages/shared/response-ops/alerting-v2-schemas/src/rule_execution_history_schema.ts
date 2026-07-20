@@ -93,36 +93,40 @@ export const getRuleExecutionsQuerySchema = z
   });
 export type GetRuleExecutionsQuery = z.infer<typeof getRuleExecutionsQuerySchema>;
 
-export const ruleExecutionViewSchema = z.object({
-  id: z.string(),
-  rule: z.object({
+export const ruleExecutionViewSchema = z
+  .object({
     id: z.string(),
-    version: z.number().int().nullable(),
-  }),
-  spaceId: z.string(),
-  startedAt: z.string(),
-  endedAt: z.string(),
-  timings: z.object({
-    duration: z.number().int().nonnegative(),
-    scheduledDelay: z.number().int(),
-  }),
-  outcome: ruleExecutionOutcomeSchema,
-  reason: z.string().nullable(),
-  error: z
-    .object({
-      message: z.string(),
-      stackTrace: z.string().nullable(),
-    })
-    .nullable(),
-});
+    rule: z.object({
+      id: z.string(),
+      version: z.number().int().nullable(),
+    }),
+    spaceId: z.string(),
+    startedAt: z.string(),
+    endedAt: z.string(),
+    timings: z.object({
+      duration: z.number().int().nonnegative(),
+      scheduledDelay: z.number().int(),
+    }),
+    outcome: ruleExecutionOutcomeSchema,
+    reason: z.string().nullable(),
+    error: z
+      .object({
+        message: z.string(),
+        stackTrace: z.string().nullable(),
+      })
+      .nullable(),
+  })
+  .meta({ id: 'alerting_v2_rule_execution' });
 
 export type RuleExecutionView = z.infer<typeof ruleExecutionViewSchema>;
 
-export const getRuleExecutionsResponseSchema = z.object({
-  items: z.array(ruleExecutionViewSchema),
-  total: z.number().int().nonnegative(),
-  page: z.number().int().min(1),
-  perPage: z.number().int().min(1),
-});
+export const getRuleExecutionsResponseSchema = z
+  .object({
+    items: z.array(ruleExecutionViewSchema),
+    total: z.number().int().nonnegative(),
+    page: z.number().int().min(1),
+    perPage: z.number().int().min(1),
+  })
+  .meta({ id: 'alerting_v2_rule_executions_response' });
 
 export type GetRuleExecutionsResponse = z.infer<typeof getRuleExecutionsResponseSchema>;

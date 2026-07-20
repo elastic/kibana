@@ -53,6 +53,7 @@ export const bulkOperationParamsSchema = z
     (data) =>
       data.match_all == null || (data.ids == null && data.filter == null && data.search == null),
     { message: 'match_all cannot be combined with ids, filter, or search.' }
-  );
+  )
+  .meta({ id: 'alerting_v2_bulk_operation_request' });
 
 export type BulkOperationParams = z.infer<typeof bulkOperationParamsSchema>;
