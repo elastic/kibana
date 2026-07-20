@@ -10,6 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
+import { resolveTimeField } from '@kbn/alerting-v2-utils';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import { ruleFormKeys } from '../../form/hooks/query_key_factory';
 import { extractFromSourceQuery } from './extract_from_source_query';
@@ -68,7 +69,19 @@ export const useResolveTimeField = ({
     retry: false,
   });
 
-  const resolvedTimeField = dateFields[0] ?? apiTimeField;
+  // Candidate date fields: field caps when available, otherwise the single
+  // field the ES|QL API inferred from the query.
+  const candidateDateFields = useMemo(
+    () => (dateFields.length > 0 ? dateFields : apiTimeField ? [apiTimeField] : []),
+    [dateFields, apiTimeField]
+  );
+
+  const resolvedTimeField = useMemo(
+    () => resolveTimeField({ dateFields: candidateDateFields, currentTimeField: timeField }),
+    [candidateDateFields, timeField]
+  );
+
+  const isLoadingResolution = isLoadingFields || (needsApiTimeField && isLoadingApiTimeField);
 
   const timeFieldOptions = useMemo(() => {
     if (dateFields.length > 0) {
@@ -77,42 +90,41 @@ export const useResolveTimeField = ({
     if (apiTimeField) {
       return [{ value: apiTimeField, text: apiTimeField }];
     }
-    return [{ value: '@timestamp', text: '@timestamp' }];
+    // No date field on the index: don't fabricate `@timestamp`. Callers show a
+    // placeholder/invalid state so the user must select (or fix the query).
+    return [];
   }, [dateFields, apiTimeField]);
 
   const isTimeFieldResolved = useMemo(() => {
     if (!enabled || !fromSourceQuery) {
       return true;
     }
-    if (isLoadingFields || (needsApiTimeField && isLoadingApiTimeField)) {
+    if (isLoadingResolution) {
       return false;
     }
-    if (resolvedTimeField) {
-      return timeField === resolvedTimeField;
+    return timeField === resolvedTimeField;
+  }, [enabled, fromSourceQuery, isLoadingResolution, resolvedTimeField, timeField]);
+
+  useEffect(() => {
+    if (!enabled || !onTimeFieldChange || !fromSourceQuery || isLoadingResolution) {
+      return;
     }
-    return true;
+    // Sync the form value to the resolved field. `null` (no resolvable date field
+    // on the index, or the current selection isn't valid) clears the value —
+    // never fabricate `@timestamp` — so the user is forced to pick and the empty
+    // value can be flagged downstream.
+    const nextTimeField = resolvedTimeField ?? '';
+    if (nextTimeField !== timeField) {
+      onTimeFieldChange(nextTimeField);
+    }
   }, [
     enabled,
     fromSourceQuery,
-    isLoadingFields,
-    needsApiTimeField,
-    isLoadingApiTimeField,
+    isLoadingResolution,
     resolvedTimeField,
     timeField,
+    onTimeFieldChange,
   ]);
-
-  useEffect(() => {
-    if (!enabled || !onTimeFieldChange || !fromSourceQuery) {
-      return;
-    }
-    if (dateFields.length > 0 && !dateFields.includes(timeField)) {
-      onTimeFieldChange(dateFields[0]);
-    } else if (apiTimeField && timeField !== apiTimeField) {
-      onTimeFieldChange(apiTimeField);
-    } else if (dateFields.length === 0 && !apiTimeField && timeField !== '@timestamp') {
-      onTimeFieldChange('@timestamp');
-    }
-  }, [enabled, fromSourceQuery, dateFields, apiTimeField, timeField, onTimeFieldChange]);
 
   return {
     timeFieldOptions,

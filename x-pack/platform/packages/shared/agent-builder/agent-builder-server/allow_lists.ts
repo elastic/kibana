@@ -186,6 +186,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'significant-events-onboarding',
   'streams-gap-detection',
 
+  // Platform – Context Engine
+  'ki-automation-generation',
+
   // Platform – Workflows
   'workflow-authoring',
 
