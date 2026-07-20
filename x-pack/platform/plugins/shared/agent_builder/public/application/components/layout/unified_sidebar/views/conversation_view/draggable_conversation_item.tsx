@@ -37,7 +37,12 @@ export const DraggableConversationItem: React.FC<DraggableConversationItemProps>
   const status = deriveDisplayStatus(conversation, isStreaming, hasError, isActive);
 
   return (
-    <EuiDraggable draggableId={conversation.id} index={index} spacing="none">
+    <EuiDraggable
+      draggableId={conversation.id}
+      index={index}
+      spacing="none"
+      isDragDisabled={isStreaming && conversation.status === undefined}
+    >
       <ConversationListItemRow
         agentId={agentId}
         conversationId={conversation.id}
