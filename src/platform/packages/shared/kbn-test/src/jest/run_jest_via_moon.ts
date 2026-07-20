@@ -73,15 +73,8 @@ export interface MoonJestParseResult {
 
 const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
 
-/**
- * REPO_ROOT-relative path where the complete Moon/Jest output is written when a run fails.
- * Lives under the gitignored `target/` dir. Structured parsing can miss output (e.g. a project
- * whose task doesn't emit `--json`), so this file is the durable, complete record — CI uploads it
- * as a Buildkite artifact so the actual failing tests and stack traces are always recoverable.
- */
-export const MOON_JEST_LOG_PATH = 'target/check_jest_output.log';
+export const MOON_JEST_LOG_PATH = 'target/kibana-check-jest_output.log';
 
-/** Best-effort: write the full captured output to MOON_JEST_LOG_PATH, returning the relative path. */
 const writeMoonJestLog = (output: string): string | undefined => {
   try {
     const absPath = Path.resolve(REPO_ROOT, MOON_JEST_LOG_PATH);
