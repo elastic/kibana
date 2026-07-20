@@ -24,6 +24,7 @@ interface ParsedWorkflowStep {
   status?: string;
   if?: string;
   condition?: string;
+  foreach?: string;
   'max-iterations'?: number;
   'iteration-timeout'?: string;
   with?: Record<string, unknown>;
@@ -197,6 +198,58 @@ describe('scheduled Significant Events managed workflows', () => {
       });
     }
   );
+
+  it('stamps successfully written triage discoveries as handled in the workflow', () => {
+    const parsed = getParsedStaticWorkflowYaml(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID);
+    const checkJudgeOutput = findStep(parsed.steps, 'check_judge_agent_output');
+    const stampHandled = findStep(checkJudgeOutput?.steps ?? [], 'foreach_stamp_handled');
+
+    expect(stampHandled?.type).toBe('foreach');
+    expect(stampHandled?.foreach).toBe('${{ steps.collect_discoveries.output.findings }}');
+
+    const checkEventWritten = findStep(stampHandled?.steps ?? [], 'check_event_written');
+    expect(checkEventWritten?.condition).toBe(
+      '${{ variables.written_event_ids contains foreach.item.event_id }}'
+    );
+
+    const checkHandledExists = findStep(checkEventWritten?.steps ?? [], 'check_handled_exists');
+    expect(checkHandledExists?.with).toMatchObject({
+      method: 'POST',
+      path: '/{{ consts.DISCOVERIES_INDEX }}/_count?ignore_unavailable=true',
+      body: {
+        query: {
+          bool: {
+            filter: expect.arrayContaining([
+              { term: { event_id: '{{ foreach.item.event_id }}' } },
+              { term: { kind: '{{ consts.KIND_HANDLED }}' } },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '{{ foreach.item["@timestamp"] }}',
+                  },
+                },
+              },
+            ]),
+          },
+        },
+      },
+    });
+
+    const writeHandledMarker = findStep(checkEventWritten?.steps ?? [], 'write_handled_marker');
+    expect(writeHandledMarker?.with).toEqual({
+      method: 'POST',
+      path: '/{{ consts.DISCOVERIES_INDEX }}/_doc',
+      body: {
+        '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}',
+        kibana: {
+          space_ids: ['{{ variables.spaceId }}'],
+        },
+        kind: '{{ consts.KIND_HANDLED }}',
+        event_id: '{{ foreach.item.event_id }}',
+        previous_discovery_id: '{{ foreach.item.discovery_id }}',
+      },
+    });
+  });
 });
 
 describe('SignificantEventsScheduledWorkflowsService', () => {
