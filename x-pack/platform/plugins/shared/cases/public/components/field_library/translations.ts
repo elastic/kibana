@@ -105,6 +105,10 @@ export const NAME_COLUMN = i18n.translate('xpack.cases.fieldLibrary.nameColumn',
   defaultMessage: 'Name',
 });
 
+export const LABEL_COLUMN = i18n.translate('xpack.cases.fieldLibrary.labelColumn', {
+  defaultMessage: 'Label',
+});
+
 export const DESCRIPTION_COLUMN = i18n.translate('xpack.cases.fieldLibrary.descriptionColumn', {
   defaultMessage: 'Description',
 });
