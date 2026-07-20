@@ -16,7 +16,8 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { from, map, switchMap } from 'rxjs';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { combineLatest, from, map, switchMap } from 'rxjs';
 import {
   CONTEXT_ENGINE_APP_ID,
   CONTEXT_ENGINE_APP_PATH,
@@ -59,15 +60,18 @@ export class ContextEnginePlugin
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       title: APP_TITLE,
       euiIconType: 'logoElasticsearch',
-      // Hidden by default; visibility is toggled by the feature flag via updater$.
+      // Hidden by default; visible only when both the feature flag and the advanced setting are on.
       visibleIn: [],
       keywords: ['context', 'ai index', 'context engine'],
       updater$: from(startServices).pipe(
         switchMap(([coreStart]) =>
-          coreStart.featureFlags.getBooleanValue$(CONTEXT_ENGINE_ENABLED_FLAG, false).pipe(
+          combineLatest([
+            coreStart.featureFlags.getBooleanValue$(CONTEXT_ENGINE_ENABLED_FLAG, false),
+            coreStart.uiSettings.get$<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false),
+          ]).pipe(
             map(
-              (enabled): AppUpdater =>
-                () => ({ visibleIn: enabled ? [...VISIBLE_LOCATIONS] : [] })
+              ([flagEnabled, settingEnabled]): AppUpdater =>
+                () => ({ visibleIn: flagEnabled && settingEnabled ? [...VISIBLE_LOCATIONS] : [] })
             )
           )
         )
