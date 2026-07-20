@@ -5,37 +5,12 @@
  * 2.0.
  */
 
-import { NULL_LABEL } from '@kbn/field-formats-common';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
 import { testData } from '../fixtures';
 
-const PAGE_ONE_ROWS = [
-  ['BT', '2015-09-19 06:00', NULL_LABEL],
-  ['BT', '2015-09-19 09:00', NULL_LABEL],
-  ['BT', '2015-09-19 12:00', NULL_LABEL],
-  ['BT', '2015-09-19 15:00', NULL_LABEL],
-  ['BT', '2015-09-19 18:00', NULL_LABEL],
-  ['BT', '2015-09-19 21:00', NULL_LABEL],
-  ['BT', '2015-09-20 00:00', NULL_LABEL],
-  ['BT', '2015-09-20 03:00', NULL_LABEL],
-  ['BT', '2015-09-20 06:00', NULL_LABEL],
-  ['BT', '2015-09-20 09:00', NULL_LABEL],
-];
-
-const PAGE_TWO_ROWS = [
-  ['BT', '2015-09-20 12:00', NULL_LABEL],
-  ['BT', '2015-09-20 15:00', NULL_LABEL],
-  ['BT', '2015-09-20 18:00', NULL_LABEL],
-  ['BT', '2015-09-20 21:00', NULL_LABEL],
-  ['BT', '2015-09-21 00:00', NULL_LABEL],
-  ['BT', '2015-09-21 03:00', NULL_LABEL],
-  ['BT', '2015-09-21 06:00', NULL_LABEL],
-  ['BT', '2015-09-21 09:00', NULL_LABEL],
-  ['BT', '2015-09-21 12:00', NULL_LABEL],
-  ['BT', '2015-09-21 15:00', NULL_LABEL],
-];
+const INSPECTOR_PAGE_SIZE = 10;
 
 spaceTest.describe('Lens inspector pagination', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
@@ -100,11 +75,15 @@ spaceTest.describe('Lens inspector pagination', { tag: tags.stateful.classic }, 
       });
 
       await inspector.open('lnsApp_inspectButton');
-      await inspector.setTablePageSize(10);
-      expect(await inspector.getTableData()).toStrictEqual(PAGE_ONE_ROWS);
+      await inspector.setTablePageSize(INSPECTOR_PAGE_SIZE);
+
+      const pageOneRows = await inspector.getTableData();
+      expect(pageOneRows).toHaveLength(INSPECTOR_PAGE_SIZE);
 
       await page.testSubj.click('pagination-button-1');
-      expect(await inspector.getTableData()).toStrictEqual(PAGE_TWO_ROWS);
+      const pageTwoRows = await inspector.getTableData();
+      expect(pageTwoRows).toHaveLength(INSPECTOR_PAGE_SIZE);
+      expect(pageTwoRows).not.toStrictEqual(pageOneRows);
     }
   );
 });

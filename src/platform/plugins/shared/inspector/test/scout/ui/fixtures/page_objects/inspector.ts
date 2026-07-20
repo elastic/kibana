@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator } from '@kbn/scout';
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 
 export type InspectorView = 'Requests' | 'Data';
 
@@ -22,6 +21,7 @@ export class Inspector {
   public readonly closeButton: Locator;
   public readonly viewChooser: Locator;
   public readonly tablePaginationPopoverButton: Locator;
+  public readonly appMenuOverflowButton: Locator;
 
   public readonly requests: {
     readonly requestChooser: Locator;
@@ -38,6 +38,7 @@ export class Inspector {
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
     this.tablePaginationPopoverButton = page.testSubj.locator('tablePaginationPopoverButton');
+    this.appMenuOverflowButton = page.testSubj.locator('app-menu-overflow-button');
 
     this.requests = {
       requestChooser: page.testSubj.locator('inspectorRequestChooser'),
@@ -50,16 +51,17 @@ export class Inspector {
     };
   }
 
+  /**
+   * Opens the inspector when the trigger lives in the app menu overflow
+   * (Discover and similar apps). Prefer {@link open} when the button is in the top nav.
+   */
+  async openViaAppMenu(openButtonTestSubj: string = 'openInspectorButton') {
+    await this.appMenuOverflowButton.click();
+    await this.page.testSubj.click(openButtonTestSubj);
+    await this.panel.waitFor({ state: 'visible' });
+  }
+
   async open(openButtonTestSubj: string = 'openInspectorButton') {
-    if (await this.panel.isVisible()) {
-      return;
-    }
-
-    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
-    if (await overflowButton.isVisible()) {
-      await overflowButton.click();
-    }
-
     await this.page.testSubj.click(openButtonTestSubj);
     await this.panel.waitFor({ state: 'visible' });
   }
@@ -81,22 +83,11 @@ export class Inspector {
 
   async openInspectorView(view: InspectorView) {
     await this.panel.waitFor({ state: 'visible' });
-    const viewChooserOption = this.page.testSubj.locator(VIEW_CHOOSER_TEST_SUBJECTS[view]);
-
-    if (!(await viewChooserOption.isVisible())) {
-      await this.viewChooser.click();
-    }
-
-    await viewChooserOption.click();
+    await this.viewChooser.click();
+    await this.page.testSubj.click(VIEW_CHOOSER_TEST_SUBJECTS[view]);
   }
 
   async openInspectorRequestsView() {
-    await this.panel.waitFor({ state: 'visible' });
-
-    if (!(await this.viewChooser.isVisible())) {
-      return;
-    }
-
     await this.openInspectorView('Requests');
   }
 

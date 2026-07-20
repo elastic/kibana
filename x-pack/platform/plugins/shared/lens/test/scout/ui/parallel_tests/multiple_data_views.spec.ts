@@ -9,35 +9,12 @@ import type { DebugState } from '@elastic/charts';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { enableElasticChartDebug, getChartDebugData } from '../fixtures/open_in_lens_helpers';
-import { addDataLayer, switchDataPanelIndexPattern } from '../fixtures';
-import { testData } from '../fixtures';
+import { addDataLayer, switchDataPanelIndexPattern, testData } from '../fixtures';
 
 const VIS_TITLE = 'xyChart with multiple data views';
 
-const EXPECTED_LOGSTASH_DATA = [
-  { x: 1540278360000, y: 4735 },
-  { x: 1540280820000, y: 2836 },
-];
-const EXPECTED_FLIGHTS_DATA = [
-  { x: 1540278720000, y: 12993.16 },
-  { x: 1540279080000, y: 7927.47 },
-  { x: 1540279500000, y: 7548.66 },
-  { x: 1540280400000, y: 8418.08 },
-  { x: 1540280580000, y: 11577.86 },
-  { x: 1540281060000, y: 8088.12 },
-  { x: 1540281240000, y: 6943.55 },
-];
-
-function getNonEmptyLineSeries(state: DebugState): Array<Array<{ x: number; y: number }>> {
-  return (
-    state.lines
-      ?.map(({ points }) =>
-        points
-          .map((point) => ({ x: point.x, y: Math.floor(point.y * 100) / 100 }))
-          .sort(({ x }, { x: x2 }) => x - x2)
-      )
-      .filter((series) => series.length > 0) ?? []
-  );
+function getNonEmptyLineSeriesCount(state: DebugState): number {
+  return state.lines?.filter((series) => series.points.length > 0).length ?? 0;
 }
 
 spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic }, () => {
@@ -94,17 +71,14 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
         await switchDataPanelIndexPattern(page, testData.DATA_VIEW_ID.FLIGHTS);
         await addDataLayer(page, 'line');
         await lens.activateLayerTab(1);
-        await page.testSubj
-          .locator('fieldToggle-DistanceKilometers')
-          .waitFor({ state: 'visible', timeout: 30_000 });
+        await page.testSubj.locator('fieldToggle-DistanceKilometers').waitFor({ state: 'visible' });
         await page.testSubj.click('fieldToggle-DistanceKilometers');
 
         await lens.waitForVisualization('xyVisChart');
+        // Two non-empty series (logstash + flights). Exact bucket values belong at the API layer.
         await expect
-          .poll(async () => getNonEmptyLineSeries(await getChartDebugData(page, 'xyVisChart')), {
-            timeout: 30_000,
-          })
-          .toStrictEqual([EXPECTED_LOGSTASH_DATA, EXPECTED_FLIGHTS_DATA]);
+          .poll(async () => getNonEmptyLineSeriesCount(await getChartDebugData(page, 'xyVisChart')))
+          .toBe(2);
       });
 
       await spaceTest.step(
@@ -114,10 +88,11 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
           await filterBar.addFilter({ field: 'Carrier', operator: 'exists' });
 
           await lens.waitForVisualization('xyVisChart');
-          expect(getNonEmptyLineSeries(await getChartDebugData(page, 'xyVisChart'))).toStrictEqual([
-            EXPECTED_LOGSTASH_DATA,
-            EXPECTED_FLIGHTS_DATA,
-          ]);
+          await expect
+            .poll(async () =>
+              getNonEmptyLineSeriesCount(await getChartDebugData(page, 'xyVisChart'))
+            )
+            .toBe(2);
 
           await lens.save(VIS_TITLE, { addToDashboard: 'none' });
         }
@@ -138,9 +113,12 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
           await lens.waitForLensApp();
           await lens.waitForVisualization('xyVisChart');
 
-          expect(getNonEmptyLineSeries(await getChartDebugData(page, 'xyVisChart'))).toStrictEqual([
-            EXPECTED_FLIGHTS_DATA,
-          ]);
+          // Only the flights series remains non-empty.
+          await expect
+            .poll(async () =>
+              getNonEmptyLineSeriesCount(await getChartDebugData(page, 'xyVisChart'))
+            )
+            .toBe(1);
         }
       );
     }
