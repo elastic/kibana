@@ -174,7 +174,13 @@ export interface FakeEntitiesDataset {
   readonly totalGroups: number;
 }
 
-const HEALTH_RANK: Record<EntityHealth, number> = {
+/**
+ * Severity ordering for health, most-anomalous first. Exported so
+ * surfaces like the list view can sort rows red → yellow → green
+ * ("show me what's broken first") instead of alphabetically by the
+ * raw health string.
+ */
+export const HEALTH_RANK: Record<EntityHealth, number> = {
   unhealthy: 0,
   atRisk: 1,
   healthy: 2,

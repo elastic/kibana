@@ -27,7 +27,7 @@ import {
   useEntityDisplayName,
 } from '@kbn/entity-centric-lab-flyout';
 import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
-import { ENTITY_CATEGORIES, getCategoryDescriptor } from './fake_entities';
+import { ENTITY_CATEGORIES, HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
 import {
   KUBERNETES_CLUSTER_FILTER_ALL,
   KUBERNETES_SUB_TYPE_ORDER,
@@ -82,7 +82,11 @@ const useColumns = (
           defaultMessage: 'Health',
         }),
         width: '120px',
-        sortable: true,
+        // Sort by severity (unhealthy → atRisk → healthy), not the raw
+        // health string (which alphabetizes to atRisk → healthy →
+        // unhealthy). Ascending now surfaces the most anomalous rows
+        // first, matching the default sort applied below.
+        sortable: (row: Entity) => HEALTH_RANK[row.health],
         render: (health: EntityHealth) => (
           <EuiBadge color={HEALTH_BADGE_COLOR[health]}>{HEALTH_LABEL[health]}</EuiBadge>
         ),
