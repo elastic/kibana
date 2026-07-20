@@ -64,9 +64,7 @@ For the Elastic Observability 9.4.4 release information, refer to [Elastic Obser
 * Fixes horizontal padding in the Lens dimension editor [#275993]({{kib-pull}}275993).
 * Fixes the filter popover so that closing the context menu when saving a dashboard doesn't discard changes [#275987]({{kib-pull}}275987).
 * Fixes invisible field names in the Lens field picker when in dark mode [#275785]({{kib-pull}}275785).
-* Deactivates the `deferBelowFold` dashboard setting because it causes some dashboards to fail to load [#275632]({{kib-pull}}275632).
 * Fixes incorrect color rendering for non-custom palettes in Lens metric charts [#275203]({{kib-pull}}275203).
-* Fixes **Save and return** for Maps visualizations opened from the Visualize library [#274002]({{kib-pull}}274002).
 * Fixes color rendering in Lens gauge charts so a color band no longer extends past the configured range, and palette continuity is preserved on save [#272123]({{kib-pull}}272123).
 
 **Data ingestion and Fleet**:
