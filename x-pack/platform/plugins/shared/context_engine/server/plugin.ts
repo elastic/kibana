@@ -64,11 +64,11 @@ export class ContextEnginePlugin
       logger: this.logger.get('ai_indices'),
     });
 
-    const internalSoClient = coreStart.savedObjects.createInternalRepository();
-    // globalAsScopedToClient reads from the global SO (config-global), not space-scoped SOs.
-    // To enable startup registration via YAML, use uiSettings.globalOverrides, not uiSettings.overrides.
-    const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(internalSoClient);
-    const isEnabled = await globalUiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
+    // asScopedToClient with the unsafe internal client reads from the default space's config SO,
+    // matching what route handlers see — so uiSettings.overrides in kibana.yml works as expected.
+    const internalSoClient = coreStart.savedObjects.getUnsafeInternalClient();
+    const uiSettings = coreStart.uiSettings.asScopedToClient(internalSoClient);
+    const isEnabled = await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
 
     await this.aiIndexRegistry.startupRegister({
       aiIndexService: this.aiIndexService,
