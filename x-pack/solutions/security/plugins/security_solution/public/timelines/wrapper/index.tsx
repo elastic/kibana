@@ -8,7 +8,7 @@
 import { EuiFocusTrap, EuiWindowEvent, getFlyoutManagerStore, keys } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 import type { AppLeaveHandler } from '@kbn/core/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TimelineModal } from '../components/modal';
 import type { TimelineId } from '../../../common/types';
