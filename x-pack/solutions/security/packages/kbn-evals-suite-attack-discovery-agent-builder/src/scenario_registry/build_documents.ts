@@ -47,7 +47,7 @@ export const buildAlertDocument = (
 
   const doc: Record<string, unknown> = {
     '@timestamp': isoTimestamp(timestamp),
-    ecs: { version: '8.11.0' },
+    ecs: { version: '9.0.0' },
     event: {
       kind: 'signal',
       category: ['intrusion_detection'],
@@ -143,7 +143,7 @@ export const buildRawEventDocuments = (
   const host = hostDocument(scenario.host, scenario.os);
   const base = {
     '@timestamp': isoTimestamp(new Date(timestamp.getTime() - 3_000)),
-    ecs: { version: '8.11.0' },
+    ecs: { version: '9.0.0' },
     labels: { ad_portable_seed: AD2_SCENARIO_SEED_LABEL, ad_test_scenario: scenarioKey },
     agent: {
       id: `${AD2_SCENARIO_ID_PREFIX}agent-${scenario.host}`,
