@@ -85,7 +85,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Highlight related dashboard panels when you select an {{esql}} control label [#264426]({{kib-pull}}264426).
 * Add feedback when filters or drilldowns cannot apply to computed values on {{esql}} XY, heatmap, and partition charts [#269722]({{kib-pull}}269722).
 * Show unavailable filter and drilldown actions with an explanation when a {{esql}} data table column is not filterable [#269635]({{kib-pull}}269635).
-* Apply the same **Fast mode** approximation setting from {{esql}} dashboard panels to **Vega** visualizations that use the same query [#276999]({{kib-pull}}276999).
+* Make the **Fast mode** approximation option applicable to **Vega** visualizations that use an {{esql}} query [#276999]({{kib-pull}}276999).
 * Add a **Use global filters** layer setting to {{esql}} visualizations in **Lens** [#264613]({{kib-pull}}264613).
 * Add a **Density** option to **Lens** Metric charts, with **Default** used for new charts and **Compact** preserved for existing ones [#265526]({{kib-pull}}265526).
 * Add **Style template** presets (**Top**, **Middle**, **Bottom**, **Custom**) to **Lens** Metric charts [#265304]({{kib-pull}}265304).
