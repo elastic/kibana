@@ -35,6 +35,7 @@ export {
   type EsqlColumnSchema,
   type GetEsqlColumnSchemaParams,
 } from './src/utils/get_esql_column_schema';
+export { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from './src/utils/default_esql_query_timeout';
 export {
   parseEsqlSourceDocuments,
   getEsqlDocumentId,

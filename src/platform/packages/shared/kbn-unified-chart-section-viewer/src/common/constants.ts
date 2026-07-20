@@ -64,3 +64,33 @@ export const DIMENSION_TYPES = [
 
 // Metric instrument types allowed in the Metrics experience.
 export const ALLOWED_METRIC_TYPES = ['gauge', 'counter', 'histogram'];
+
+export const FEATURE_FLAGS = {
+  IS_EDIT_GRID_SETTINGS_ENABLED: 'discover.metricsExperienceEditGridSettingsEnabled',
+  IS_SORTING_ENABLED: 'discover.metricsExperienceSortEnabled',
+} as const;
+
+export type FeatureFlag = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
+
+// Fallback values used when a feature flag is not configured externally
+export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
+  [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: false,
+  [FEATURE_FLAGS.IS_SORTING_ENABLED]: false,
+};
+
+// Metrics grid sort options
+export const METRICS_SORT_BY = {
+  alphabetically: 'alphabetically',
+} as const;
+
+// Metrics grid sort directions
+export const METRICS_SORT_DIRECTION = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
+
+// Default metrics grid sort
+export const DEFAULT_METRICS_SORT = [
+  METRICS_SORT_BY.alphabetically,
+  METRICS_SORT_DIRECTION.asc,
+] as const;

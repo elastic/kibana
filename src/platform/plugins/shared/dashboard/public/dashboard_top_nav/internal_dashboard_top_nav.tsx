@@ -25,16 +25,15 @@ import {
 import { css } from '@emotion/react';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import {
-  apiPublishesUnifiedSearch,
+  apiPublishesEsqlUsage,
   combineCompatibleChildrenApis,
-  type PublishesUnifiedSearch,
+  type PublishesEsqlUsage,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
@@ -155,12 +154,14 @@ export function InternalDashboardTopNav({
 
   const [hasEsqlPanel, setHasEsqlPanel] = useState(false);
   useEffect(() => {
-    const subscription = combineCompatibleChildrenApis<
-      PublishesUnifiedSearch,
-      (Query | AggregateQuery | undefined)[]
-    >(dashboardApi, 'query$', apiPublishesUnifiedSearch, [])
+    const subscription = combineCompatibleChildrenApis<PublishesEsqlUsage, boolean[]>(
+      dashboardApi,
+      'usesEsql$',
+      apiPublishesEsqlUsage,
+      []
+    )
       .pipe(
-        map((queries) => queries.some((q) => isOfAggregateQueryType(q))),
+        map((usesEsqlValues) => usesEsqlValues.some(Boolean)),
         distinctUntilChanged()
       )
       .subscribe(setHasEsqlPanel);
@@ -448,6 +449,7 @@ export function InternalDashboardTopNav({
           menu={appMenuConfig}
           badges={appHeaderBadges}
           favorite={favoriteButton}
+          spacing="compact"
         />
       )}
       {headerMode === 'registered' && (
@@ -456,6 +458,7 @@ export function InternalDashboardTopNav({
           menu={appMenuConfig}
           badges={appHeaderBadges}
           favorite={favoriteButton}
+          spacing="compact"
         />
       )}
       {headerMode === 'legacy' && (
