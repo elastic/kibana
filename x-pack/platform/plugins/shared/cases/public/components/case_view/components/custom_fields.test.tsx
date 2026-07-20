@@ -100,6 +100,7 @@ describe('Case View Page files tab', () => {
         customFields={customFieldsMock}
         customFieldsConfiguration={customFieldsConfigurationMock}
         onSubmit={onSubmit}
+        editVariant="inline"
       />,
       { wrapperProps: { permissions: readCasesPermissions() } }
     );
@@ -179,6 +180,7 @@ describe('Case View Page files tab', () => {
         customFields={customFieldsMock}
         customFieldsConfiguration={customFieldsConfigurationMock}
         onSubmit={onSubmit}
+        editVariant="inline"
       />
     );
 
@@ -206,6 +208,7 @@ describe('Case View Page files tab', () => {
         customFields={[]}
         customFieldsConfiguration={customFieldsConfigurationMock}
         onSubmit={onSubmit}
+        editVariant="inline"
       />
     );
 

@@ -311,7 +311,7 @@ const InlineEdit: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
 
   return (
     <EuiFlexGroup
-      gutterSize="m"
+      gutterSize="xs"
       data-test-subj={`case-text-custom-field-${customFieldConfiguration.key}`}
       direction="column"
     >
@@ -346,10 +346,10 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
   ...props
 }) => {
   if (editVariant === 'inline') {
-    return <InlineEdit {...props} editVariant={editVariant} />;
+    return <InlineEdit {...props} />;
   }
 
-  return <ClassicEdit {...props} editVariant={editVariant} />;
+  return <ClassicEdit {...props} />;
 };
 
 EditComponent.displayName = 'Edit';

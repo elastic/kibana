@@ -139,10 +139,10 @@ const EditComponent: CustomFieldType<CaseCustomFieldToggle>['Edit'] = ({
   ...props
 }) => {
   if (editVariant === 'inline') {
-    return <InlineEdit {...props} editVariant={editVariant} />;
+    return <InlineEdit {...props} />;
   }
 
-  return <ClassicEdit {...props} editVariant={editVariant} />;
+  return <ClassicEdit {...props} />;
 };
 
 EditComponent.displayName = 'Edit';

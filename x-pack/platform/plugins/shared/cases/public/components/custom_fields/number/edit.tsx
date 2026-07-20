@@ -45,6 +45,13 @@ const isEmpty = (value: number | null | undefined) => {
   return value == null;
 };
 
+const normalizeNumber = (value: number | null | undefined) => {
+  if (value == null || (value as unknown) === '') {
+    return null;
+  }
+  return Number(value);
+};
+
 interface FormState {
   value: number | null;
   isValid?: boolean;
@@ -305,12 +312,6 @@ const InlineEdit: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
     }
   }, [customField, customFieldConfiguration.key, formState, onSubmit]);
 
-  const normalizeNumber = (value: number | null | undefined) => {
-    if (value == null || (value as unknown) === '') {
-      return null;
-    }
-    return Number(value);
-  };
   const hasPendingChange =
     normalizeNumber(formState.value) !== normalizeNumber(effectiveInitialValue);
 
@@ -320,7 +321,7 @@ const InlineEdit: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
 
   return (
     <EuiFlexGroup
-      gutterSize="m"
+      gutterSize="xs"
       data-test-subj={`case-number-custom-field-${customFieldConfiguration.key}`}
       direction="column"
     >
@@ -355,10 +356,10 @@ const EditComponent: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
   ...props
 }) => {
   if (editVariant === 'inline') {
-    return <InlineEdit {...props} editVariant={editVariant} />;
+    return <InlineEdit {...props} />;
   }
 
-  return <ClassicEdit {...props} editVariant={editVariant} />;
+  return <ClassicEdit {...props} />;
 };
 
 EditComponent.displayName = 'Edit';
