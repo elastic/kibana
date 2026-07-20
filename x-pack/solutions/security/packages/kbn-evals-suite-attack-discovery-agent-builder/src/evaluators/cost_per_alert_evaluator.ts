@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Evaluator } from '@kbn/evals';
+import { getToolCallSteps, type Evaluator } from '@kbn/evals';
 import type {
   AttackDiscoveryAgentBuilderExample,
   AttackDiscoveryAgentBuilderTaskOutput,
@@ -21,9 +21,7 @@ export const createCostPerAlertEvaluator = (): Evaluator<
     name: COST_PER_ALERT_EVALUATOR_NAME,
     kind: 'CODE',
     evaluate: async ({ output }) => {
-      const toolCalls = (output?.steps ?? []).filter(
-        (step) => step.tool_id && step.type !== 'reasoning'
-      ).length;
+      const toolCalls = getToolCallSteps(output).length;
       const passedAlertCount = output?.workflow?.passedAlertCount ?? null;
 
       if (passedAlertCount == null || passedAlertCount === 0) {

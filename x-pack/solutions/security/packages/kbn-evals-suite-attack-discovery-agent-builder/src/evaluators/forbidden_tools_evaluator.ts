@@ -42,7 +42,7 @@ export const createForbiddenToolsEvaluator = (): Evaluator<
     kind: 'CODE',
     evaluate: async ({ output, input }) => {
       const toolCalls = (output?.steps ?? []).filter(
-        (step) => step.tool_id && step.type !== 'reasoning'
+        (step) => (step as { type?: string }).type === 'tool_call' && step.tool_id
       );
       const violations = toolCalls
         .map((step) => {

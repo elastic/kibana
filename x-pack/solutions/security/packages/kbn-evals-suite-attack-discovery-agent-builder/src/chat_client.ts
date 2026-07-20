@@ -52,6 +52,13 @@ export class AttackDiscoveryAgentBuilderChatClient {
     attachments: Array<{ type: 'security.alerts'; data: { alertIds: string[] } }> = [],
     _expectedSkills?: string[]
   ): Promise<AgentBuilderConverseResponse> {
+    // pRetry wraps the entire converse call. Attack Discovery executions are
+    // not idempotent — a retried call that already succeeded server-side will
+    // produce a second execution. This is acceptable in the eval fixture
+    // context because afterAll cleanup removes all test data, and evaluator
+    // metadata reflects only the final (successful) response. If this client
+    // is ever reused outside isolated fixtures, replace pRetry with a
+    // connection-level retry that does not re-POST the request body.
     return pRetry(
       async () => {
         const body: Record<string, unknown> = {

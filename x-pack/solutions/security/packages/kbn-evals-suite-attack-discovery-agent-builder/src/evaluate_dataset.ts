@@ -24,6 +24,7 @@ import { createAttackDiscoveryCriteriaEvaluator } from './evaluators/attack_disc
 import { createAttackDiscoveryRubricEvaluator } from './evaluators/attack_discovery_rubric_evaluator';
 import { createCostPerAlertEvaluator } from './evaluators/cost_per_alert_evaluator';
 import { createForbiddenToolsEvaluator } from './evaluators/forbidden_tools_evaluator';
+import { redactExecutionIds } from './redact';
 
 type AdToolResult = NonNullable<AttackDiscoveryAgentBuilderTaskOutput['adToolResult']>;
 
@@ -121,17 +122,29 @@ const buildTask =
     );
     const adToolResult = findAdToolResult(response.steps);
     const executionId = adToolResult?.executionUuid;
+    const workflow = executionId
+      ? await inspectWorkflow({ fetch, executionId, adToolResult })
+      : {
+          stages: [],
+          retrievedAlertCount: adToolResult?.alertsContextCount ?? null,
+          passedAlertCount: adToolResult?.alertsContextCount ?? null,
+          validatedDiscoveryCount: adToolResult?.discoveryCount ?? null,
+        };
     return {
       ...response,
-      adToolResult,
-      workflow: executionId
-        ? await inspectWorkflow({ fetch, executionId, adToolResult })
-        : {
-            stages: [],
-            retrievedAlertCount: adToolResult?.alertsContextCount ?? null,
-            passedAlertCount: adToolResult?.alertsContextCount ?? null,
-            validatedDiscoveryCount: adToolResult?.discoveryCount ?? null,
-          },
+      // Redact transient execution UUIDs from steps and adToolResult before
+      // they reach evaluators — these are per-run values that would pollute
+      // score reports and make diff comparisons noisy.
+      steps: redactExecutionIds(response.steps) as typeof response.steps,
+      adToolResult: adToolResult
+        ? {
+            status: adToolResult.status,
+            executionUuid: undefined,
+            alertsContextCount: adToolResult.alertsContextCount,
+            discoveryCount: adToolResult.discoveryCount,
+          }
+        : undefined,
+      workflow,
     };
   };
 
