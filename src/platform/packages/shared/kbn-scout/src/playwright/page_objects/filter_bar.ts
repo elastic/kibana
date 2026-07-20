@@ -152,10 +152,10 @@ export class FilterBar {
   }
 
   async closeFieldEditorModal() {
-    const popover = this.page.testSubj.locator('addFilterPopover');
-    await popover.waitFor({ state: 'visible' });
+    const filterEditor = this.page.getByRole('dialog').filter({ hasText: 'Edit filter' });
+    await filterEditor.waitFor({ state: 'visible' });
     await this.page.keyboard.press('Escape');
-    await popover.waitFor({ state: 'hidden' });
+    await filterEditor.waitFor({ state: 'hidden' });
   }
 
   async toggleFilterNegated(field: string) {
