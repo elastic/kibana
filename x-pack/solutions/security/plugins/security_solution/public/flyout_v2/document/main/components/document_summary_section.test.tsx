@@ -67,10 +67,10 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 describe('DocumentSummarySection', () => {
-  it('should render the AI summary section with title, sparkles icon, options menu, and trailing rule', () => {
+  it('should render the AI summary section with title, sparkles icon, and options menu', () => {
     const getPromptContext = jest.fn();
 
-    const { getByTestId, container } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <DocumentSummarySection documentId="test-document-id" getPromptContext={getPromptContext} />
       </TestProviders>
@@ -80,7 +80,6 @@ describe('DocumentSummarySection', () => {
     expect(header).toHaveTextContent('AI summary');
     expect(header.querySelector('[data-euiicon-type="sparkles"]')).toBeInTheDocument();
     expect(getByTestId(DOCUMENT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(container.querySelector('hr')).toBeInTheDocument();
   });
 
   it('should render with custom data-test-subj', () => {

@@ -66,6 +66,10 @@ export interface UseDocumentSummaryResult {
    */
   fetchAISummary: () => void;
   /**
+   * Error message from the last failed generation attempt, or null if no error.
+   */
+  fetchError: string | null;
+  /**
    * Returns true if no connector has been setup
    */
   isConnectorMissing: boolean;
@@ -100,6 +104,7 @@ export const useDocumentSummary = ({
     useFetchAnonymizationFields();
 
   const [isConnectorMissing, setIsConnectorMissing] = useState<boolean>(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [summary, setSummary] = useState<string>(NO_SUMMARY_AVAILABLE);
   const [recommendedActions, setRecommendedActions] = useState<string | undefined>();
   const [messageAndReplacements, setMessageAndReplacements] = useState<{
@@ -183,6 +188,7 @@ export const useDocumentSummary = ({
   const fetchAISummary = useCallback(() => {
     const generateSummary = async (content: { message: string; replacements: Replacements }) => {
       setIsConnectorMissing(false);
+      setFetchError(null);
       setIsGenerating(true);
       setHasSummary(true);
 
@@ -193,6 +199,7 @@ export const useDocumentSummary = ({
           content_references_disabled: true,
         },
       });
+
       let responseSummary;
       let responseRecommendedActions;
       try {
@@ -238,17 +245,12 @@ export const useDocumentSummary = ({
         }
         await refetchSummary();
       } else {
+        setHasSummary(false);
         if (responseSummary.includes('Failed to load action')) {
           setIsConnectorMissing(true);
+        } else {
+          setFetchError(rawResponse.response);
         }
-        setSummary(
-          showAnonymizedValues
-            ? responseSummary
-            : replaceAnonymizedValuesWithOriginalValues({
-                messageContent: responseSummary,
-                replacements: content.replacements,
-              })
-        );
       }
       setIsGenerating(false);
     };
@@ -282,6 +284,7 @@ export const useDocumentSummary = ({
     generatedAt,
     hasSummary,
     fetchAISummary,
+    fetchError,
     isConnectorMissing,
     isLoading: isGenerating,
     messageAndReplacements,

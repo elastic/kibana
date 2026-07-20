@@ -41,7 +41,7 @@ export const useFetchDocumentSummary = ({
   const QUERY = {
     page: 1,
     per_page: 1, // only fetching one alert summary
-    filter: `alert_id:${documentId}`,
+    filter: `alert_id:"${documentId}"`,
     connector_id: connectorId,
   };
 

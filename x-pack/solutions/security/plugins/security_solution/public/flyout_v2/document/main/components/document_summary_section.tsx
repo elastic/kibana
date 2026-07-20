@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo, useState } from 'react';
-import { EuiHorizontalRule, EuiIcon, EuiSkeletonText } from '@elastic/eui';
+import { EuiIcon, EuiSkeletonText } from '@elastic/eui';
 import { type PromptContext } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
 import { DocumentSummary } from './document_summary';
@@ -23,7 +23,7 @@ export const DOCUMENT_SUMMARY_SECTION_TEST_ID = 'document-flyout-ai-summary-sect
 const AI_SUMMARY = i18n.translate('xpack.securitySolution.alertSummary.aiSummarySection.title', {
   defaultMessage: 'AI summary',
 });
-const LOCAL_STORAGE_SECTION_KEY = 'aiSummary';
+const LOCAL_STORAGE_SECTION_KEY = 'aisummary';
 
 export interface DocumentSummarySectionProps {
   /**
@@ -112,24 +112,21 @@ export const DocumentSummarySection = memo(
     );
 
     return (
-      <>
-        <ExpandableSection
-          data-test-subj={dataTestSubj}
-          expanded={expanded}
-          gutterSize="none"
-          localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
-          sectionId={LOCAL_STORAGE_SECTION_KEY}
-          title={
-            <>
-              {AI_SUMMARY} <EuiIcon type="sparkles" aria-hidden={true} />
-            </>
-          }
-          extraAction={optionsMenu}
-        >
-          {body}
-        </ExpandableSection>
-        <EuiHorizontalRule />
-      </>
+      <ExpandableSection
+        data-test-subj={dataTestSubj}
+        expanded={expanded}
+        gutterSize="none"
+        localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+        sectionId={LOCAL_STORAGE_SECTION_KEY}
+        title={
+          <>
+            {AI_SUMMARY} <EuiIcon type="sparkles" aria-hidden={true} />
+          </>
+        }
+        extraAction={optionsMenu}
+      >
+        {body}
+      </ExpandableSection>
     );
   }
 );

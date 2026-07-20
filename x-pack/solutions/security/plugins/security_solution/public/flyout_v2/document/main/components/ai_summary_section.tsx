@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import { EuiHorizontalRule } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
@@ -61,11 +62,14 @@ export const AISummarySection = memo(({ hit }: AISummarySectionProps) => {
   const documentId = hit.raw._id ?? '';
 
   return (
-    <DocumentSummarySection
-      documentId={documentId}
-      getPromptContext={getPromptContext}
-      data-test-subj={AI_SUMMARY_SECTION_TEST_ID}
-    />
+    <>
+      <DocumentSummarySection
+        documentId={documentId}
+        getPromptContext={getPromptContext}
+        data-test-subj={AI_SUMMARY_SECTION_TEST_ID}
+      />
+      <EuiHorizontalRule margin="m" />
+    </>
   );
 });
 

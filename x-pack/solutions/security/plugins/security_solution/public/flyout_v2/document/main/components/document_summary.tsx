@@ -8,6 +8,7 @@
 import React, { memo, useEffect, useMemo } from 'react';
 import {
   EuiButtonIcon,
+  EuiCallOut,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -53,6 +54,10 @@ const GENERATE_DESCRIPTION = i18n.translate(
     defaultMessage:
       'Create AI summary of the alert to better understand its key characteristics and see recommended actions.',
   }
+);
+const GENERATION_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.alertSummary.generationErrorTitle',
+  { defaultMessage: 'Failed to generate summary' }
 );
 const REGENERATE_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.alertSummary.regenerateAriaLabel',
@@ -144,6 +149,7 @@ export const DocumentSummary = memo(
       recommendedActions,
       hasSummary,
       fetchAISummary,
+      fetchError,
       isConnectorMissing,
       isLoading,
       messageAndReplacements,
@@ -169,26 +175,36 @@ export const DocumentSummary = memo(
 
     if (!hasSummary) {
       return (
-        <EuiPanel hasBorder={true}>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={4}>
-              <EuiText size="xs" textAlign="left">
-                {GENERATE_DESCRIPTION}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AiButton
-                onClick={fetchAISummary}
-                size="m"
-                iconType="aiAssistantLogo"
-                data-test-subj={GENERATE_INSIGHTS_BUTTON_TEST_ID}
-                isLoading={messageAndReplacements == null}
-              >
-                {GENERATE}
-              </AiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        <>
+          {fetchError && (
+            <>
+              <EuiCallOut title={GENERATION_ERROR_TITLE} color="danger" iconType="error" size="s">
+                <EuiText size="xs">{fetchError}</EuiText>
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+            </>
+          )}
+          <EuiPanel hasBorder={true}>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={4}>
+                <EuiText size="xs" textAlign="left">
+                  {GENERATE_DESCRIPTION}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AiButton
+                  onClick={fetchAISummary}
+                  size="m"
+                  iconType="aiAssistantLogo"
+                  data-test-subj={GENERATE_INSIGHTS_BUTTON_TEST_ID}
+                  isDisabled={messageAndReplacements == null}
+                >
+                  {GENERATE}
+                </AiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </>
       );
     }
 
