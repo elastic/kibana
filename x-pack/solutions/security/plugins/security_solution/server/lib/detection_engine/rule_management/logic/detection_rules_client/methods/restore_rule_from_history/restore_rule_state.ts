@@ -35,7 +35,7 @@ export async function restoreRuleState({
   return withSecuritySpan(
     {
       name: 'DetectionRulesClient.restoreRuleFromHistory.restoreRuleState',
-      labels: { solution: 'security', action: 'restore' },
+      labels: { solution: 'security' },
     },
     async () => {
       await validateMlAuth(mlAuthz, existingRule.type);

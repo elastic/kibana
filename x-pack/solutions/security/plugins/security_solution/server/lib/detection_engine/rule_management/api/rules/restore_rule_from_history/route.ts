@@ -52,7 +52,7 @@ export const restoreRuleFromHistoryRoute = (router: SecuritySolutionPluginRouter
         return withSecuritySpan(
           {
             name: 'restoreRuleFromHistoryRoute',
-            labels: { solution: 'security', action: 'restore' },
+            labels: { solution: 'security' },
           },
           async () => {
             try {

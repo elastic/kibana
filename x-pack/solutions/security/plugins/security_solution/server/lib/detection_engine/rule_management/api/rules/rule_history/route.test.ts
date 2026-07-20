@@ -22,7 +22,7 @@ const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
 
 const RULE_HISTORY_ROUTE_SPAN = expect.objectContaining({
   name: 'getRuleHistoryRoute',
-  labels: { solution: 'security', action: 'read' },
+  labels: { solution: 'security' },
 });
 
 const buildHistoryRequest = ({

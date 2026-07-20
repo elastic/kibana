@@ -31,7 +31,7 @@ export async function fetchRuleWithHistory({
   return withSecuritySpan(
     {
       name: 'DetectionRulesClient.restoreRuleFromHistory.fetchHistory',
-      labels: { solution: 'security', action: 'restore' },
+      labels: { solution: 'security' },
     },
     async () => {
       const existingRule = await getRuleById({ rulesClient, id: ruleId });

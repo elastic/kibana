@@ -24,7 +24,7 @@ const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
 
 const RESTORE_ROUTE_SPAN = expect.objectContaining({
   name: 'restoreRuleFromHistoryRoute',
-  labels: { solution: 'security', action: 'restore' },
+  labels: { solution: 'security' },
 });
 
 const buildRestoreRequest = ({ params = {} }: { params: Record<string, string> }) =>

@@ -35,17 +35,17 @@ const CHANGE_ID = 'change-abc-123';
 
 const FETCH_HISTORY_SPAN = expect.objectContaining({
   name: 'DetectionRulesClient.restoreRuleFromHistory.fetchHistory',
-  labels: { solution: 'security', action: 'restore' },
+  labels: { solution: 'security' },
 });
 
 const RESTORE_RULE_STATE_SPAN = expect.objectContaining({
   name: 'DetectionRulesClient.restoreRuleFromHistory.restoreRuleState',
-  labels: { solution: 'security', action: 'restore' },
+  labels: { solution: 'security' },
 });
 
 const RESTORE_DELETED_RULE_SPAN = expect.objectContaining({
   name: 'DetectionRulesClient.restoreRuleFromHistory.restoreDeletedRule',
-  labels: { solution: 'security', action: 'restore' },
+  labels: { solution: 'security' },
 });
 
 describe('restoreRuleFromHistory', () => {

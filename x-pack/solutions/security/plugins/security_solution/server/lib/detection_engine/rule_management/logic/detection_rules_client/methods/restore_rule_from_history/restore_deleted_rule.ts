@@ -44,7 +44,7 @@ export async function restoreDeletedRule({
   return withSecuritySpan(
     {
       name: 'DetectionRulesClient.restoreRuleFromHistory.restoreDeletedRule',
-      labels: { solution: 'security', action: 'restore' },
+      labels: { solution: 'security' },
     },
     async () => {
       await validateMlAuth(mlAuthz, snapshotRule.type);

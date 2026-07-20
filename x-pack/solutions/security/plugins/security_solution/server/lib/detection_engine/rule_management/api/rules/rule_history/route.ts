@@ -45,7 +45,7 @@ export const ruleHistoryRoute = (router: SecuritySolutionPluginRouter) => {
         const siemResponse = buildSiemResponse(response);
 
         return withSecuritySpan(
-          { name: 'getRuleHistoryRoute', labels: { solution: 'security', action: 'read' } },
+          { name: 'getRuleHistoryRoute', labels: { solution: 'security' } },
           async () => {
             try {
               const { ruleId } = request.params;
