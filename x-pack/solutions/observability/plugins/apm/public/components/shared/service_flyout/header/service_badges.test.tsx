@@ -56,6 +56,7 @@ function setupContext({
       share: { url: { locators } },
     },
     service,
+    ingestionType: 'classicApm' as const,
     filters: {
       environment: 'production',
       rangeFrom: 'now-15m',

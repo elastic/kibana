@@ -45,6 +45,7 @@ function buildContext(
       },
     },
     service: { name: serviceName },
+    ingestionType: 'classicApm' as const,
     filters: { environment, rangeFrom, rangeTo },
   };
 }

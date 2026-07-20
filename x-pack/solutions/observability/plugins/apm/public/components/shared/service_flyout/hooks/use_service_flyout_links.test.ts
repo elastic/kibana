@@ -42,6 +42,7 @@ function makeContext(sloRead = true) {
       core: { application: { capabilities: { slo: { read: sloRead } } } },
       share: { url: { locators: { get: mockLocatorsGet } } },
     },
+    ingestionType: 'classicApm' as const,
   };
 }
 

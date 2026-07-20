@@ -43,6 +43,7 @@ function setupContext({ transactionType = 'request' }: { transactionType?: strin
   mockUseServiceFlyoutContext.mockReturnValue({
     deps: { core: mockCore, share: mockShare, lens: undefined, dataViews: undefined },
     service: { name: 'opbeans-java' },
+    ingestionType: 'classicApm' as const,
     filters: {
       environment: 'production',
       setEnvironment: jest.fn(),

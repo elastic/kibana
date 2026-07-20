@@ -91,6 +91,7 @@ export function ServiceFlyout({ deps, service, filters, onView, onClose }: Servi
         value={{
           deps: { core, share, lens, dataViews, alerting },
           service,
+          ingestionType: 'classicApm', // TODO hardcoded for now, it will require a request to the server to determine
           filters: {
             environment: flyoutEnvironment,
             setEnvironment: setFlyoutEnvironment,

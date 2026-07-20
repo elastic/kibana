@@ -76,6 +76,7 @@ describe('ServiceFlyoutHeader', () => {
     mockUseServiceFlyoutContext.mockReturnValue({
       deps: { core: mockCore, share: mockShare, lens: undefined, dataViews: undefined },
       service: baseNodeData,
+      ingestionType: 'classicApm' as const,
       filters: {
         environment: 'production',
         setEnvironment: jest.fn(),

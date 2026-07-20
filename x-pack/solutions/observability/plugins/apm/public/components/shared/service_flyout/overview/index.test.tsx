@@ -66,6 +66,7 @@ function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {})
       dataViews: undefined as any,
     },
     service,
+    ingestionType: 'classicApm' as const,
     filters: {
       environment: 'production' as const,
       setEnvironment: jest.fn(),
