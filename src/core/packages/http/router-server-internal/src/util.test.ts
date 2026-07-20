@@ -18,11 +18,16 @@ import { kibanaResponseFactory } from './response';
 
 describe('prepareRouteConfigValidation', () => {
   it('preserves static getter options from DI route classes', () => {
-    class BaseRoute {
-      static get options() {
+    class DiRoute {
+      public static method = 'post' as const;
+      public static path = '/api/example';
+      public static security = {
+        authz: { enabled: false as const, reason: 'test' },
+      };
+      public static get options() {
         return { access: 'public' as const, tags: ['oas-tag:test'] };
       }
-      static get validate() {
+      public static get validate() {
         return {
           request: { body: schema.object({ name: schema.string() }) },
           response: {
@@ -31,18 +36,9 @@ describe('prepareRouteConfigValidation', () => {
         };
       }
     }
-    class DiRoute extends BaseRoute {
-      static method = 'post' as const;
-      static path = '/api/example';
-      static security = {
-        authz: { enabled: false as const, reason: 'test' },
-      };
-    }
 
-    // Object spread alone drops prototype getters — the bug this guards against.
-    expect(
-      Object.prototype.hasOwnProperty.call({ ...DiRoute }, 'options')
-    ).toBe(false);
+    // Object spread alone drops non-enumerable static getters — the bug this guards against.
+    expect(Object.prototype.hasOwnProperty.call({ ...DiRoute }, 'options')).toBe(false);
 
     const prepared = prepareRouteConfigValidation(DiRoute);
 

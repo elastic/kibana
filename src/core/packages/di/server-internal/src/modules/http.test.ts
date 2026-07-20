@@ -30,7 +30,7 @@ class TestRoute {
   static validate = {};
   // Getter mirrors DI plugins (e.g. alerting_v2) that expose route options via
   // a static getter rather than an own enumerable property.
-  static get options() {
+  public static get options() {
     return { access: 'public' as const, tags: ['oas-tag:test'] };
   }
 
