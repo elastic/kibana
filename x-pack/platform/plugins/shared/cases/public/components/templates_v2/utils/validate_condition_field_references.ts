@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Scalar, YAMLMap } from 'yaml';
+import type { Document, Scalar, YAMLMap } from 'yaml';
 import { isMap, isSeq, isScalar } from 'yaml';
 import type { EditorMarker } from './template_yaml_ast';
 import {
@@ -51,8 +51,13 @@ const collectFieldReferenceScalars = (conditionNode: unknown): Scalar[] => {
  * required (see `evaluateCondition`). Surfacing it as a warning lets an author catch the typo in
  * the editor instead of discovering the misbehavior on a live case.
  */
-export const getMissingConditionFieldMarkers = (yamlContent: string): EditorMarker[] => {
-  const doc = parseTemplateDocument(yamlContent);
+export const getMissingConditionFieldMarkers = (
+  yamlContent: string,
+  // The semantic-validation hook parses the buffer once and shares the Document across both
+  // validators to avoid re-parsing per keystroke; callers that pass only the string re-parse here.
+  preparsedDoc?: Document.Parsed
+): EditorMarker[] => {
+  const doc = preparsedDoc ?? parseTemplateDocument(yamlContent);
   if (!doc) {
     return [];
   }

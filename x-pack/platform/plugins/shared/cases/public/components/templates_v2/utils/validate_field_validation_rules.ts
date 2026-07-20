@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Document } from 'yaml';
 import { isMap, isScalar } from 'yaml';
 import { FieldType } from '../../../../common/types/domain/template/fields';
 import type { EditorMarker } from './template_yaml_ast';
@@ -66,8 +67,13 @@ const isKnownControl = (control: unknown): control is string =>
  * author can believe a constraint is enforced when it is not. We surface each as a warning on the
  * offending rule key so the mistake is visible in the editor.
  */
-export const getInapplicableValidationRuleMarkers = (yamlContent: string): EditorMarker[] => {
-  const doc = parseTemplateDocument(yamlContent);
+export const getInapplicableValidationRuleMarkers = (
+  yamlContent: string,
+  // Shares the semantic-validation hook's single parsed Document to avoid re-parsing per keystroke;
+  // callers that pass only the string re-parse here.
+  preparsedDoc?: Document.Parsed
+): EditorMarker[] => {
+  const doc = preparsedDoc ?? parseTemplateDocument(yamlContent);
   if (!doc) {
     return [];
   }

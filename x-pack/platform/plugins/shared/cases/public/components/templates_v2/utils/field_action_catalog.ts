@@ -45,8 +45,11 @@ const ALWAYS_APPLICABLE_VALIDATION: FieldRuleAction[] = [
     id: 'pattern',
     label: i18n.VALIDATION_RULE_PATTERN,
     blockKey: 'validation',
+    // Placeholder scaffold values the author replaces (like `field_name`/`value` below) — not
+    // finished, user-facing copy, so they are intentionally not translated. `error_message` reads
+    // as an obvious "edit me" token rather than a shippable default.
     ruleKey: 'pattern',
-    value: { regex: '.*', message: 'Invalid value' },
+    value: { regex: '.*', message: 'error_message' },
   },
 ];
 

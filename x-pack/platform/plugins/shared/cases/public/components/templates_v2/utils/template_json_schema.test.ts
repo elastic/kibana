@@ -396,8 +396,9 @@ describe('getTemplateDefinitionJsonSchema', () => {
         return Object.keys((metadata?.properties as JsonSchemaObject | undefined) ?? {});
       };
 
+      // `default` is honored at runtime for a date picker, so it must be an allowed key.
       expect(metadataKeysFor('DATE_PICKER')).toEqual(
-        expect.arrayContaining(['show_time', 'timezone'])
+        expect.arrayContaining(['show_time', 'timezone', 'default'])
       );
       expect(metadataKeysFor('USER_PICKER')).toEqual(expect.arrayContaining(['multiple']));
       expect(metadataKeysFor('TEXTAREA')).toEqual(expect.arrayContaining(['markdown']));

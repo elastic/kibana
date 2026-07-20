@@ -145,6 +145,10 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
   type: z.literal('date'),
   metadata: z
     .object({
+      // A default is honored at runtime for a date picker (a UTC-ISO string flows through
+      // getYamlDefaultAsString and the renderer reads it), so it must be a declared property —
+      // otherwise the editor's strict metadata schema would false-flag a `default` that works.
+      default: z.string().optional(),
       show_time: z.boolean().optional(),
       timezone: z.enum(['utc', 'local']).optional(),
     })

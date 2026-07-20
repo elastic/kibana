@@ -8,6 +8,7 @@
 import { useEffect, useRef } from 'react';
 import { monaco } from '@kbn/monaco';
 import type { EditorMarker } from '../utils/template_yaml_ast';
+import { parseTemplateDocument } from '../utils/template_yaml_ast';
 import { getMissingConditionFieldMarkers } from '../utils/validate_condition_field_references';
 import { getInapplicableValidationRuleMarkers } from '../utils/validate_field_validation_rules';
 
@@ -48,10 +49,14 @@ export const useSemanticValidation = (
         return;
       }
       try {
-        const markers: EditorMarker[] = [
-          ...getMissingConditionFieldMarkers(value),
-          ...getInapplicableValidationRuleMarkers(value),
-        ];
+        // Parse once and share the Document across both validators (each would otherwise re-parse).
+        const doc = parseTemplateDocument(value);
+        const markers: EditorMarker[] = doc
+          ? [
+              ...getMissingConditionFieldMarkers(value, doc),
+              ...getInapplicableValidationRuleMarkers(value, doc),
+            ]
+          : [];
         monaco.editor.setModelMarkers(
           model,
           SEMANTIC_VALIDATION_OWNER,
