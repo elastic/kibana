@@ -18,13 +18,13 @@ export const significantEventFeatureAttachmentDefinition: AttachmentUIDefinition
     getLabel: (attachment) =>
       attachment.data.title ??
       attachment.data.id ??
-      i18n.translate('xpack.observability.featureAttachment.fallbackLabel', {
+      i18n.translate('xpack.observability.nightshift.featureAttachment.fallbackLabel', {
         defaultMessage: 'Entity',
       }),
     getIcon: () => 'node',
     getHeader: () => ({
       icon: 'node',
-      subtitle: i18n.translate('xpack.observability.featureAttachment.subtitle', {
+      subtitle: i18n.translate('xpack.observability.nightshift.featureAttachment.subtitle', {
         defaultMessage: 'Knowledge indicator feature',
       }),
     }),
