@@ -170,21 +170,27 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
       const wiredStreamIndices = ['logs.otel*', 'logs.ecs*', 'metrics.otel*', 'metrics.ecs*'];
 
       // Check if data was already flowing into wired stream indices before
-      // the user started onboarding. If so, time-range detection on those
-      // indices would produce false positives, so we skip it.
+      // the user started onboarding. The result is included in the response
+      // so UI components that use respectPreExistingData=true can surface
+      // the pre-existing-data state to users.
       const hasPreExistingData = start
         ? await checkPreExistingData(elasticsearch.client.asCurrentUser, wiredStreamIndices, start)
         : false;
 
       // Wired streams (logs.otel*, logs.ecs*) use passthrough mapping where
       // onboarding.id is not indexed, so we cannot filter by it without a
-      // runtime mapping (which times out on large clusters). Instead, fall
-      // back to a time-range-only query when a start time is provided and
-      // no pre-existing data would cause false positives.
-      const wiredStreamQuery: estypes.QueryDslQueryContainer | undefined =
-        start && !hasPreExistingData
-          ? { bool: { filter: [{ range: { '@timestamp': { gte: start } } }] } }
-          : undefined;
+      // runtime mapping (which times out on large clusters). Fall back to a
+      // time-range-only query when a start time is provided.
+      //
+      // We run this query even when hasPreExistingData is true: the OTel
+      // kubernetes flow uses respectPreExistingData=false, so the component
+      // ignores the pre-existing-data flag and must see hasData=true to show
+      // the CTA. Skipping the query when hasPreExistingData=true would cause
+      // a deadlock where the component polls forever but the server never
+      // returns hasData=true.
+      const wiredStreamQuery: estypes.QueryDslQueryContainer | undefined = start
+        ? { bool: { filter: [{ range: { '@timestamp': { gte: start } } }] } }
+        : undefined;
 
       const searches: Array<Promise<estypes.SearchResponse>> = [
         elasticsearch.client.asCurrentUser.search({
