@@ -32,29 +32,46 @@ export type CellActionRenderer = (props: CellActionRendererProps) => React.React
 export const noopCellActionRenderer: CellActionRenderer = ({ children }) => <>{children}</>;
 
 /**
+ * Creates a default Security Solution cell action renderer bound to a specific scope.
+ *
+ * `boundScopeId` takes precedence over the per-render `scopeId` when non-empty. This lets callers
+ * that know the scope up front (e.g. Timeline, which opens the flyout from `timeline-1`) ensure every
+ * cell action inside the flyout reports the correct scope, so Filter In/Out route to the Timeline's
+ * own filter manager instead of the page's global one. When `boundScopeId` is empty, it falls back to
+ * the per-render `scopeId`, preserving the default behavior.
+ */
+export const createCellActionRenderer = (boundScopeId: string): CellActionRenderer => {
+  const boundCellActionRenderer: CellActionRenderer = ({
+    field,
+    value,
+    children,
+    scopeId,
+  }: CellActionRendererProps) => {
+    const effectiveScopeId = boundScopeId || scopeId;
+    return (
+      <SecurityCellActions
+        data={{
+          field,
+          value: value ?? [],
+        }}
+        triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
+        mode={CellActionsMode.HOVER_DOWN}
+        visibleCellActions={5}
+        sourcererScopeId={getSourcererScopeId(effectiveScopeId)}
+        metadata={{ scopeId: effectiveScopeId }}
+      >
+        {children}
+      </SecurityCellActions>
+    );
+  };
+  return boundCellActionRenderer;
+};
+
+/**
  * Default cell action renderer for Security Solution. This component is used to render cell actions for fields in Security Solution.
  * This is used in the expandable flyout and in the new flyout (though only when used in Security Solution).
  */
-export const cellActionRenderer: CellActionRenderer = ({
-  field,
-  value,
-  children,
-  scopeId,
-}: CellActionRendererProps) => (
-  <SecurityCellActions
-    data={{
-      field,
-      value: value ?? [],
-    }}
-    triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
-    mode={CellActionsMode.HOVER_DOWN}
-    visibleCellActions={5}
-    sourcererScopeId={getSourcererScopeId(scopeId)}
-    metadata={{ scopeId }}
-  >
-    {children}
-  </SecurityCellActions>
-);
+export const cellActionRenderer: CellActionRenderer = createCellActionRenderer('');
 
 /**
  * Cell action renderer for Cases.
