@@ -16,7 +16,7 @@ export interface AiIndexDest {
   value: string;
 }
 
-export type AiIndexSourceType = 'esql';
+export type AiIndexSourceType = 'esql' | 'kbn_api';
 
 export interface AiIndexSource {
   type: AiIndexSourceType;
