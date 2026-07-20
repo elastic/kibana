@@ -36,6 +36,7 @@ export const MAX_TAB_LABEL_LENGTH = 120;
 export const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
 export const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
 export const MAX_DISCOVER_SESSION_CONTROL_PANELS = 100;
+export const MAX_SEARCH_QUERY_LENGTH = 1000;
 
 const validateUniqueIds = (ids: string[], message: string): string | undefined => {
   if (new Set(ids).size !== ids.length) {
@@ -253,9 +254,10 @@ export const discoverSessionApiResponseSchema = schema.object({
 export const discoverSessionSearchParamsSchema = asCodePaginationParamsSchema.extends({
   query: schema.maybe(
     schema.string({
+      maxLength: MAX_SEARCH_QUERY_LENGTH,
       meta: {
         description:
-          'Full-text search (`simple_query_string`) over `search_fields` (defaults to `title` and `description`). All terms must match.',
+          'Full-text search (`simple_query_string`) over `title` and `description`. All terms must match.',
       },
     })
   ),
@@ -283,8 +285,7 @@ export const discoverSessionSearchResponseSchema = schema.object({
     // Mirror the request's production-enforced `per_page` maximum in OAS and dev response validation.
     maxSize: PAGINATION_MAX_SIZE,
     meta: {
-      description:
-        'List of Discover sessions matching the query. Each entry includes summary fields but not the full session state.',
+      description: 'List of matching Discover sessions (summaries, not the full session state).',
     },
   }),
   meta: asCodePaginationResponseMetaSchema,
