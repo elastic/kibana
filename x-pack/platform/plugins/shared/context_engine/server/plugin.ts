@@ -69,25 +69,21 @@ export class ContextEnginePlugin
     const aiIndexService = this.aiIndexService;
     const registry = this.aiIndexRegistry;
 
-    // Fire-and-forget: getUnsafeInternalClient() requires spaces to be fully initialized,
-    // which may not be the case when other plugins' start() runs. Deferring to a microtask
-    // lets the startup sequence complete before we read uiSettings.
-    Promise.resolve()
-      .then(async () => {
-        const internalSoClient = coreStart.savedObjects.getUnsafeInternalClient();
-        const uiSettings = coreStart.uiSettings.asScopedToClient(internalSoClient);
-        const isEnabled = await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
-        await registry.startupRegister({
+    const soClient = coreStart.savedObjects.createInternalRepository();
+    const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
+
+    uiSettings
+      .get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)
+      .then((isEnabled) =>
+        registry.startupRegister({
           aiIndexService,
           isEnabled: isEnabled ?? false,
           logger: aiIndexLogger,
-        });
-      })
+        })
+      )
       .catch((err) => {
         aiIndexLogger.warn(
-          `AI index startup registration failed: ${
-            err instanceof Error ? err.message : String(err)
-          }`
+          `AI index startup registration failed: ${err instanceof Error ? err.message : String(err)}`
         );
       });
 
