@@ -18,7 +18,6 @@ export * from './auth_types/oauth';
 export { OAuthAuthorizationCode } from './auth_types/oauth_authorization_code';
 export { OAuthClientCredentialsPrivateKeyJwt } from './auth_types/oauth_client_credentials_private_key_jwt';
 export { Ears } from './auth_types/ears';
-export { MongoDBConnectionStringAuth } from './auth_types/mongodb_connection_string';
 
 // Skipping PFX and CRT exports for now as they will require updates to
 // the formbuilder to support file upload fields.
