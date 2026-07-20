@@ -45,7 +45,9 @@ export const infraCustomDashboardsSavedObjectType: SavedObjectsType = {
       changes: [],
       schemas: {
         create: schema.object({
-          dashboardIdList: schema.arrayOf(schema.string({ maxLength: 256 })),
+          dashboardIdList: schema.arrayOf(schema.string({ maxLength: 256 }), {
+            maxSize: 100,
+          }),
           assetType: schema.string({ maxLength: 64 }),
           kuery: schema.maybe(schema.string({ maxLength: 2048 })),
         }),
