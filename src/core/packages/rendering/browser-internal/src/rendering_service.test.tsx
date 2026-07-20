@@ -12,6 +12,7 @@ import { render, screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 jest.mock('@kbn/react-kibana-context-render', () => ({
   KibanaRenderContextProvider: jest.fn(({ children }) => (
     <div data-test-subj="kibana-render-context">{children}</div>
@@ -46,6 +47,7 @@ describe('RenderingService', () => {
   let i18n: ReturnType<typeof i18nServiceMock.createStartContract>;
   let theme: ReturnType<typeof themeServiceMock.createStartContract>;
   let userProfile: ReturnType<typeof userProfileServiceMock.createStart>;
+  let authc: ReturnType<typeof securityServiceMock.createStart>['authc'];
   let featureFlags: ReturnType<typeof coreFeatureFlagsMock.createStart>;
   let targetDomElement: HTMLDivElement;
   let rendering: RenderingService;
@@ -69,6 +71,7 @@ describe('RenderingService', () => {
     i18n = i18nServiceMock.createStartContract();
     featureFlags = coreFeatureFlagsMock.createStart();
     coreEnv = coreContextMock.create().env;
+    authc = securityServiceMock.createStart().authc;
 
     targetDomElement = document.createElement('div');
     rendering = new RenderingService();
@@ -83,6 +86,7 @@ describe('RenderingService', () => {
         theme,
         userProfile,
         coreEnv,
+        authc,
       });
     };
 
@@ -155,7 +159,7 @@ describe('RenderingService', () => {
     });
 
     it('renders the React element when dependencies are provided', () => {
-      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv };
+      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv, authc };
       rendering.start(deps);
 
       const TestComponent = rendering.addContext(<div>Test Element</div>);
@@ -167,7 +171,7 @@ describe('RenderingService', () => {
     });
 
     it('maintains component identity across multiple calls to prevent remounting', () => {
-      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv };
+      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv, authc };
       rendering.start(deps);
 
       // Create a stateful component to test remounting behavior
@@ -210,7 +214,7 @@ describe('RenderingService', () => {
     });
 
     it('preserves component state and focus during re-renders', () => {
-      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv };
+      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv, authc };
       rendering.start(deps);
 
       // Create a component with an input to test focus preservation

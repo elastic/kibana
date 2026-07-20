@@ -31,6 +31,8 @@ dependsOn:
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-base-browser-internal'
   - '@kbn/react-kibana-context-env'
+  - '@kbn/core-security-browser'
+  - '@kbn/core-user-profile-browser-context'
 tags:
   - shared-common
   - package
