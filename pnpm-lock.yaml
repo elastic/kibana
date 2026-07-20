@@ -754,6 +754,9 @@ importers:
       '@kbn/content-packs-schema':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-content-packs-schema
+      '@kbn/context-engine-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/context_engine
       '@kbn/context-switcher-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/context-switcher-components
@@ -5057,6 +5060,9 @@ importers:
       '@kbn/eslint-plugin-imports':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-imports
+      '@kbn/eslint-plugin-kbn-ui':
+        specifier: workspace:*
+        version: link:packages/kbn-eslint-plugin-kbn-ui
       '@kbn/eslint-plugin-telemetry':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-telemetry
@@ -6604,6 +6610,8 @@ importers:
   packages/kbn-eslint-plugin-i18n: {}
 
   packages/kbn-eslint-plugin-imports: {}
+
+  packages/kbn-eslint-plugin-kbn-ui: {}
 
   packages/kbn-eslint-plugin-telemetry: {}
 
@@ -8892,6 +8900,8 @@ importers:
   x-pack/platform/plugins/shared/cloud_connect: {}
 
   x-pack/platform/plugins/shared/content_connectors: {}
+
+  x-pack/platform/plugins/shared/context_engine: {}
 
   x-pack/platform/plugins/shared/data_quality: {}
 

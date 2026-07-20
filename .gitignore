@@ -423,6 +423,7 @@ src/platform/plugins/shared/console/packaging/react/translations
 /x-pack/platform/plugins/shared/cloud/package.json
 /x-pack/platform/plugins/shared/cloud_connect/package.json
 /x-pack/platform/plugins/shared/content_connectors/package.json
+/x-pack/platform/plugins/shared/context_engine/package.json
 /x-pack/platform/plugins/shared/data_quality/package.json
 /x-pack/platform/plugins/shared/dataset_quality/package.json
 /x-pack/platform/plugins/shared/elastic_console/package.json
