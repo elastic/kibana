@@ -255,7 +255,7 @@ export const discoverSessionSearchParamsSchema = asCodePaginationParamsSchema.ex
     schema.string({
       meta: {
         description:
-          'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
+          'Full-text search (`simple_query_string`) over `search_fields` (defaults to `title` and `description`). All terms must match.',
       },
     })
   ),
