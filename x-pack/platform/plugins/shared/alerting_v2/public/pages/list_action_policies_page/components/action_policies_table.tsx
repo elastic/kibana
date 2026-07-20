@@ -6,16 +6,10 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type {  
-  ActionPolicyResponse,
-  CreateActionPolicyData,
-} from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import {
-  ContentList,  
-  ContentListProvider,
-} from '@kbn/content-list';
+import { ContentList, ContentListProvider } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
 import { TAG_FILTER_ID } from '@kbn/content-list-provider';
 import { DeleteActionPolicyConfirmModal } from '../../../components/action_policy/delete_confirmation_modal';
@@ -32,7 +26,10 @@ import { useUpdateActionPolicyApiKey } from '../../../hooks/use_update_action_po
 import { UserCapabilities } from '../../../services/user_capabilities';
 import { UpdateApiKeyConfirmationModal } from './update_api_key_confirmation_modal';
 import { ENABLED_FILTER_ID, useActionPoliciesDataSource } from '../action_policies_data_source';
-import { ActionPoliciesTableContent, ENABLED_FILTER_OPTIONS } from './action_policies_table_content';
+import {
+  ActionPoliciesTableContent,
+  ENABLED_FILTER_OPTIONS,
+} from './action_policies_table_content';
 
 const enabledFieldDefinition: FieldDefinition = {
   fieldName: ENABLED_FILTER_ID,
