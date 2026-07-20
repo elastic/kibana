@@ -21,8 +21,12 @@ import type { CasesConfigurationUI } from '../../containers/types';
 import { KibanaServices } from '../../common/lib/kibana';
 import { CreateCaseTemplateFields } from '../create/template_fields';
 import { useShowLegacyCustomFields } from '../../common/use_show_old_custom_fields';
-import { useCasesFieldLibraryNavigation } from '../../common/navigation';
+import {
+  useCasesFieldLibraryNavigation,
+  useConfigureCasesNavigation,
+} from '../../common/navigation';
 import * as i18n from './translations';
+import * as configureCasesI18n from '../configure_cases/translations';
 
 interface Props {
   isLoading: boolean;
@@ -41,12 +45,14 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
 }) => {
   const { caseAssignmentAuthorized } = useCasesFeatures();
   const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
-  const { showLegacyCustomFields } = useShowLegacyCustomFields();
+  const { showLegacyCustomFields } = useShowLegacyCustomFields(configurationCustomFields);
   const { getCasesFieldLibraryUrl } = useCasesFieldLibraryNavigation();
+  const { getConfigureCasesUrl } = useConfigureCasesNavigation();
   const { setFieldValue } = useFormContext();
 
   // When templates v2 is off, always show legacy custom fields (they are the only system).
-  // When templates v2 is on, gate visibility behind the settings local-storage switch.
+  // When templates v2 is on, gate visibility behind the settings local-storage switch
+  // (forced on when required fields lack defaults).
   const showLegacyCustomFieldsInputs =
     configurationCustomFields.length > 0 && (!isTemplatesV2Enabled || showLegacyCustomFields);
 
@@ -61,6 +67,7 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
   const deprecationNotice = isTemplatesV2Enabled ? (
     <EuiCallOut
       announceOnMount
+      title={i18n.LEGACY_CUSTOM_FIELDS_CALLOUT_TITLE}
       color="warning"
       iconType="warning"
       size="s"
@@ -68,15 +75,23 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
     >
       <FormattedMessage
         id="xpack.cases.caseFormFields.legacyCustomFieldsDeprecationBody"
-        defaultMessage="{message} {link}"
+        defaultMessage='These custom fields are deprecated and have already been migrated to the new system, so you may see the same fields in both places. Manage them in {customFieldsLink}. To stop showing them here, disable "{switchLabel}" in {settingsLink}.'
         values={{
-          message: i18n.LEGACY_CUSTOM_FIELDS_DEPRECATION_MESSAGE,
-          link: (
+          customFieldsLink: (
             <EuiLink
               href={getCasesFieldLibraryUrl()}
               data-test-subj="legacy-custom-fields-view-new-link"
             >
-              {i18n.LEGACY_CUSTOM_FIELDS_VIEW_NEW}
+              {i18n.LEGACY_CUSTOM_FIELDS_VIEW_CUSTOM_FIELDS}
+            </EuiLink>
+          ),
+          switchLabel: configureCasesI18n.SHOW_LEGACY_CUSTOM_FIELDS_AND_TEMPLATES,
+          settingsLink: (
+            <EuiLink
+              href={getConfigureCasesUrl()}
+              data-test-subj="legacy-custom-fields-view-settings-link"
+            >
+              {i18n.LEGACY_CUSTOM_FIELDS_VIEW_SETTINGS}
             </EuiLink>
           ),
         }}

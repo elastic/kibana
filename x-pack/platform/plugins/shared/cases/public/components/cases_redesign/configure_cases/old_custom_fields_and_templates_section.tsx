@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
@@ -116,7 +117,8 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
       setFlyOutVisibility,
     }) => {
       const { permissions } = useCasesContext();
-      const { showLegacyCustomFields, setShowLegacyCustomFields } = useShowLegacyCustomFields();
+      const { showLegacyCustomFields, setShowLegacyCustomFields, canDisableSwitch } =
+        useShowLegacyCustomFields(customFields);
       const { getCasesFieldLibraryUrl } = useCasesFieldLibraryNavigation();
       const { getCasesTemplatesUrl } = useCasesTemplatesNavigation();
       const { data: currentConfiguration } = useGetCaseConfiguration();
@@ -362,12 +364,19 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
               />
             }
           >
-            <EuiSwitch
-              label={i18n.SHOW_LEGACY_CUSTOM_FIELDS_AND_TEMPLATES}
-              checked={showLegacyCustomFields}
-              onChange={(e) => setShowLegacyCustomFields(e.target.checked)}
-              data-test-subj="show-legacy-custom-fields-switch"
-            />
+            <EuiToolTip
+              content={
+                canDisableSwitch ? undefined : i18n.SHOW_LEGACY_CUSTOM_FIELDS_SWITCH_DISABLED_HELP
+              }
+            >
+              <EuiSwitch
+                label={i18n.SHOW_LEGACY_CUSTOM_FIELDS_AND_TEMPLATES}
+                checked={showLegacyCustomFields}
+                disabled={!canDisableSwitch}
+                onChange={(e) => setShowLegacyCustomFields(e.target.checked)}
+                data-test-subj="show-legacy-custom-fields-switch"
+              />
+            </EuiToolTip>
 
             {showLegacyCustomFields ? (
               <>
@@ -394,6 +403,8 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
                   disabled={isLoadingCaseConfiguration}
                   hideTitle
                   useLineSeparators
+                  emptyStateMessage={null}
+                  addButtonLabel={i18n.ADD_LEGACY_CUSTOM_FIELD}
                   handleAddCustomField={onAddCustomField}
                   handleDeleteCustomField={onDeleteCustomField}
                   handleEditCustomField={onEditCustomField}
@@ -420,6 +431,8 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
                   disabled={isLoadingCaseConfiguration}
                   hideTitle
                   useLineSeparators
+                  emptyStateMessage={null}
+                  addButtonLabel={i18n.ADD_LEGACY_TEMPLATE}
                   onAddTemplate={onAddTemplate}
                   onEditTemplate={onEditTemplate}
                   onDeleteTemplate={onDeleteTemplate}

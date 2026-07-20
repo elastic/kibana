@@ -38,6 +38,10 @@ export interface Props {
    * rows. Only used by the cases redesign settings page.
    */
   useLineSeparators?: boolean;
+  /** Overrides the default empty-state copy. Pass `null` to hide it. */
+  emptyStateMessage?: string | null;
+  /** Overrides the add-button label. */
+  addButtonLabel?: string;
 }
 const CustomFieldsComponent: React.FC<Props> = ({
   disabled,
@@ -48,6 +52,8 @@ const CustomFieldsComponent: React.FC<Props> = ({
   customFields,
   hideTitle = false,
   useLineSeparators = false,
+  emptyStateMessage,
+  addButtonLabel,
 }) => {
   const [error, setError] = useState<boolean>(false);
 
@@ -84,10 +90,10 @@ const CustomFieldsComponent: React.FC<Props> = ({
         />
       ) : null}
       <EuiSpacer size="s" />
-      {!customFields.length ? (
+      {!customFields.length && emptyStateMessage !== null ? (
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false} data-test-subj="empty-custom-fields">
-            {i18n.NO_CUSTOM_FIELDS}
+            {emptyStateMessage ?? i18n.NO_CUSTOM_FIELDS}
             <EuiSpacer size="m" />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -103,7 +109,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
               iconType="plusCircle"
               data-test-subj="add-custom-field"
             >
-              {i18n.ADD_CUSTOM_FIELD}
+              {addButtonLabel ?? i18n.ADD_CUSTOM_FIELD}
             </EuiButtonEmpty>
           ) : (
             <EuiFlexGroup justifyContent="center">

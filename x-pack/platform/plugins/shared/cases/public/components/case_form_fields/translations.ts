@@ -13,18 +13,24 @@ export const CUSTOM_FIELDS = i18n.translate('xpack.cases.customFields', {
   defaultMessage: 'Custom fields',
 });
 
-export const LEGACY_CUSTOM_FIELDS_DEPRECATION_MESSAGE = i18n.translate(
-  'xpack.cases.caseFormFields.legacyCustomFieldsDeprecationMessage',
+export const LEGACY_CUSTOM_FIELDS_CALLOUT_TITLE = i18n.translate(
+  'xpack.cases.caseFormFields.legacyCustomFieldsCalloutTitle',
   {
-    defaultMessage:
-      'These fields are from the previous custom fields system and have already been migrated. You may see the same fields again below — that is expected while both systems are shown.',
+    defaultMessage: 'Legacy custom fields',
   }
 );
 
-export const LEGACY_CUSTOM_FIELDS_VIEW_NEW = i18n.translate(
-  'xpack.cases.caseFormFields.legacyCustomFieldsViewNew',
+export const LEGACY_CUSTOM_FIELDS_VIEW_CUSTOM_FIELDS = i18n.translate(
+  'xpack.cases.caseFormFields.legacyCustomFieldsViewCustomFields',
   {
-    defaultMessage: 'View new custom fields',
+    defaultMessage: 'custom fields',
+  }
+);
+
+export const LEGACY_CUSTOM_FIELDS_VIEW_SETTINGS = i18n.translate(
+  'xpack.cases.caseFormFields.legacyCustomFieldsViewSettings',
+  {
+    defaultMessage: 'settings',
   }
 );
 

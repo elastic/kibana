@@ -433,7 +433,36 @@ describe('CaseFormFields', () => {
         await screen.findByTestId('legacy-custom-fields-deprecation-callout')
       ).toBeInTheDocument();
       expect(screen.getByTestId('legacy-custom-fields-view-new-link')).toBeInTheDocument();
+      expect(screen.getByTestId('legacy-custom-fields-view-settings-link')).toBeInTheDocument();
       expect(screen.getByTestId('legacy-custom-fields-divider')).toBeInTheDocument();
+    });
+
+    it('forces legacy custom fields visible when required fields lack defaults', async () => {
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+      renderWithTestingProviders(
+        <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+          <CaseFormFields
+            isLoading={false}
+            configurationCustomFields={[
+              {
+                ...customFieldsConfigurationMock[0],
+                required: true,
+                defaultValue: undefined,
+              },
+            ]}
+          />
+        </FormTestComponent>
+      );
+
+      expect(await screen.findByTestId('caseCustomFields')).toBeInTheDocument();
+      expect(
+        await screen.findByTestId('legacy-custom-fields-deprecation-callout')
+      ).toBeInTheDocument();
     });
   });
 });

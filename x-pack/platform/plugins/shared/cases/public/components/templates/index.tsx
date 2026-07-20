@@ -37,6 +37,10 @@ interface Props {
    * rows. Only used by the cases redesign settings page.
    */
   useLineSeparators?: boolean;
+  /** Overrides the default empty-state copy. Pass `null` to hide it. */
+  emptyStateMessage?: string | null;
+  /** Overrides the add-button label. */
+  addButtonLabel?: string;
 }
 
 const TemplatesComponent: React.FC<Props> = ({
@@ -48,6 +52,8 @@ const TemplatesComponent: React.FC<Props> = ({
   onDeleteTemplate,
   hideTitle = false,
   useLineSeparators = false,
+  emptyStateMessage,
+  addButtonLabel,
 }) => {
   const [error, setError] = useState<boolean>(false);
 
@@ -88,10 +94,10 @@ const TemplatesComponent: React.FC<Props> = ({
         />
       ) : null}
       <EuiSpacer size="s" />
-      {!templates.length ? (
+      {!templates.length && emptyStateMessage !== null ? (
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false} data-test-subj="empty-templates">
-            {i18n.NO_TEMPLATES}
+            {emptyStateMessage ?? i18n.NO_TEMPLATES}
             <EuiSpacer size="m" />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -107,7 +113,7 @@ const TemplatesComponent: React.FC<Props> = ({
               iconType="plusCircle"
               data-test-subj="add-template"
             >
-              {i18n.ADD_TEMPLATE}
+              {addButtonLabel ?? i18n.ADD_TEMPLATE}
             </EuiButtonEmpty>
           ) : (
             <EuiFlexGroup justifyContent="center">

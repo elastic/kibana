@@ -36,7 +36,9 @@ export const FormContext: React.FC<FormContextProps> = ({
 }) => {
   const { data: connectors = [] } = useGetSupportedActionConnectors();
   const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
-  const { showLegacyCustomFields } = useShowLegacyCustomFields();
+  const { showLegacyCustomFields } = useShowLegacyCustomFields(
+    currentConfiguration.customFields ?? []
+  );
   const includeLegacyCustomFields = !isTemplatesV2Enabled || showLegacyCustomFields;
 
   const serializer = useCallback(

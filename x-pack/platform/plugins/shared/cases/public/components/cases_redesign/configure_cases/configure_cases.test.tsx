@@ -173,6 +173,38 @@ describe('ConfigureCasesRedesign', () => {
     expect(screen.getByTestId('legacy-templates-view-new-link')).toBeInTheDocument();
   });
 
+  it('forces the show-legacy switch on when required fields lack defaults', async () => {
+    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    useCasesConfig.mockReturnValue({
+      attachmentsEnabled: false,
+      chatEnabled: false,
+      templatesEnabled: true,
+      detailsRedesignEnabled: false,
+      casesRedesign: { list: false, details: false, settings: true },
+    });
+    useGetCaseConfigurationMock.mockImplementation(() => ({
+      ...useCaseConfigureResponse,
+      data: {
+        ...useCaseConfigureResponse.data,
+        customFields: [
+          {
+            ...customFieldsConfigurationMock[0],
+            required: true,
+            defaultValue: undefined,
+          },
+        ],
+        templates: templatesConfigurationMock,
+      },
+    }));
+
+    renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+    const toggle = await screen.findByTestId('show-legacy-custom-fields-switch');
+    expect(toggle).toBeChecked();
+    expect(toggle).toBeDisabled();
+    expect(await screen.findByTestId('custom-fields-list')).toBeInTheDocument();
+  });
+
   it('shows add buttons for empty legacy custom fields and templates when the switch is on', async () => {
     const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
@@ -199,10 +231,14 @@ describe('ConfigureCasesRedesign', () => {
 
     await userEvent.click(await screen.findByTestId('show-legacy-custom-fields-switch'));
 
-    expect(await screen.findByTestId('add-custom-field')).toBeInTheDocument();
-    expect(screen.getByTestId('add-template')).toBeInTheDocument();
-    expect(screen.getByTestId('empty-custom-fields')).toBeInTheDocument();
-    expect(screen.getByTestId('empty-templates')).toBeInTheDocument();
+    expect(await screen.findByTestId('add-custom-field')).toHaveTextContent(
+      configureCasesI18n.ADD_LEGACY_CUSTOM_FIELD
+    );
+    expect(screen.getByTestId('add-template')).toHaveTextContent(
+      configureCasesI18n.ADD_LEGACY_TEMPLATE
+    );
+    expect(screen.queryByTestId('empty-custom-fields')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('empty-templates')).not.toBeInTheDocument();
   });
 
   it('opens add custom field flyout with add header when switch is on', async () => {

@@ -160,21 +160,20 @@ export const ADD_CONNECTOR = i18n.translate('xpack.cases.casesRedesign.details.a
 export const LEGACY_CUSTOM_FIELDS_TITLE = i18n.translate(
   'xpack.cases.casesRedesign.details.legacyCustomFieldsTitle',
   {
-    defaultMessage: 'Custom fields',
+    defaultMessage: 'Legacy custom fields',
   }
 );
 
-export const LEGACY_CUSTOM_FIELDS_DISCLAIMER = i18n.translate(
-  'xpack.cases.casesRedesign.details.legacyCustomFieldsDisclaimer',
+export const LEGACY_CUSTOM_FIELDS_VIEW_CUSTOM_FIELDS = i18n.translate(
+  'xpack.cases.casesRedesign.details.legacyCustomFieldsViewCustomFields',
   {
-    defaultMessage:
-      'These fields are from the previous custom fields system and have already been migrated. You may see the same fields again in other sections — that is expected while both systems are shown.',
+    defaultMessage: 'custom fields',
   }
 );
 
-export const LEGACY_CUSTOM_FIELDS_VIEW_NEW = i18n.translate(
-  'xpack.cases.casesRedesign.details.legacyCustomFieldsViewNew',
+export const LEGACY_CUSTOM_FIELDS_VIEW_SETTINGS = i18n.translate(
+  'xpack.cases.casesRedesign.details.legacyCustomFieldsViewSettings',
   {
-    defaultMessage: 'View new custom fields',
+    defaultMessage: 'settings',
   }
 );

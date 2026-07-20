@@ -44,7 +44,10 @@ import { useGetSupportedActionConnectors } from '../../../../../containers/confi
 import { useGetTemplate } from '../../../../templates_v2/hooks/use_get_template';
 import { KibanaServices } from '../../../../../common/lib/kibana';
 import { useShowLegacyCustomFields } from '../../../../../common/use_show_old_custom_fields';
-import { useCasesFieldLibraryNavigation } from '../../../../../common/navigation';
+import {
+  useCasesFieldLibraryNavigation,
+  useConfigureCasesNavigation,
+} from '../../../../../common/navigation';
 import * as configureCasesI18n from '../../../../configure_cases/translations';
 
 export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
@@ -60,8 +63,11 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
   const { isLoading: isLoadingAllAvailableConnectors, data: supportedActionConnectors } =
     useGetSupportedActionConnectors();
   const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
-  const { showLegacyCustomFields } = useShowLegacyCustomFields();
+  const { showLegacyCustomFields } = useShowLegacyCustomFields(
+    casesConfiguration?.customFields ?? []
+  );
   const { getCasesFieldLibraryUrl } = useCasesFieldLibraryNavigation();
+  const { getConfigureCasesUrl } = useConfigureCasesNavigation();
 
   const { data: templateData } = useGetTemplate(caseData.template?.id, caseData.template?.version, {
     includeDeleted: true,
@@ -159,15 +165,23 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
                   >
                     <FormattedMessage
                       id="xpack.cases.casesRedesign.details.legacyCustomFieldsDisclaimerBody"
-                      defaultMessage="{message} {link}"
+                      defaultMessage='These custom fields are deprecated and have already been migrated to the new system, so you may see the same fields in both places. Manage them in {customFieldsLink}. To stop showing them here, disable "{switchLabel}" in {settingsLink}.'
                       values={{
-                        message: redesignI18n.LEGACY_CUSTOM_FIELDS_DISCLAIMER,
-                        link: (
+                        customFieldsLink: (
                           <EuiLink
                             href={getCasesFieldLibraryUrl()}
                             data-test-subj="legacy-custom-fields-view-new-link"
                           >
-                            {redesignI18n.LEGACY_CUSTOM_FIELDS_VIEW_NEW}
+                            {redesignI18n.LEGACY_CUSTOM_FIELDS_VIEW_CUSTOM_FIELDS}
+                          </EuiLink>
+                        ),
+                        switchLabel: configureCasesI18n.SHOW_LEGACY_CUSTOM_FIELDS_AND_TEMPLATES,
+                        settingsLink: (
+                          <EuiLink
+                            href={getConfigureCasesUrl()}
+                            data-test-subj="legacy-custom-fields-view-settings-link"
+                          >
+                            {redesignI18n.LEGACY_CUSTOM_FIELDS_VIEW_SETTINGS}
                           </EuiLink>
                         ),
                       }}
