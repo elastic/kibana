@@ -13,11 +13,7 @@ import {
   toStoredDataView,
 } from '@kbn/as-code-data-views-transforms';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
-import {
-  isSavedObjectErrorResult,
-  SavedObjectsErrorHelpers,
-  type SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, type SavedObjectsClientContract } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, type DataViewLazy } from '@kbn/data-views-plugin/common';
 import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { omit } from 'lodash';
@@ -138,22 +134,20 @@ export class DataViewsAsCodeService {
      * `search` reads directly from Saved Objects (instead of DataViewsService) to return a lightweight list view and map results to the as-code shape.
      * This enabled the use `getMeta` because these utils operate on saved-object fields.
      */
-    const dataViews = result.saved_objects
-      .filter((so) => !isSavedObjectErrorResult(so))
-      .map((so) => {
-        return {
-          id: so.id,
-          data: {
-            name: so.attributes.name,
-            index_pattern: so.attributes.title,
-            time_field: so.attributes.timeFieldName,
-          },
-          meta: {
-            ...getMeta(so),
-            namespaces: so.namespaces,
-          },
-        };
-      });
+    const dataViews = result.saved_objects.map((so) => {
+      return {
+        id: so.id,
+        data: {
+          name: so.attributes.name,
+          index_pattern: so.attributes.title,
+          time_field: so.attributes.timeFieldName,
+        },
+        meta: {
+          ...getMeta(so),
+          namespaces: so.namespaces,
+        },
+      };
+    });
 
     return {
       data: dataViews,
