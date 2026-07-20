@@ -7,7 +7,7 @@
 import { v5 as uuidv5 } from 'uuid';
 import { escapeQuotes } from '@kbn/es-query';
 import { omit } from 'lodash';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import deepEqual from 'fast-deep-equal';
 import { indexBy } from 'lodash/fp';
 
@@ -554,7 +554,7 @@ class OutputService {
     if (outputTypeSupportPresets(data.type)) {
       if (
         data.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', load)
+        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', parse)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -631,11 +631,11 @@ class OutputService {
     }
 
     if (!data.preset && outputTypeSupportPresets(data.type)) {
-      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
+      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
     }
 
     if (output.config_yaml) {
-      const configJs = load(output.config_yaml);
+      const configJs = parse(output.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && output.shipper) {
@@ -915,7 +915,7 @@ class OutputService {
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
         updateData.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', load)
+        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', parse)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -1103,7 +1103,7 @@ class OutputService {
     }
 
     if (!data.preset && data.type && outputTypeSupportPresets(data.type)) {
-      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
+      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
     }
 
     // Remove the shipper data if the shipper is not enabled from the yaml config
@@ -1111,7 +1111,7 @@ class OutputService {
       updateData.shipper = null;
     }
     if (data.config_yaml) {
-      const configJs = load(data.config_yaml);
+      const configJs = parse(data.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && data.shipper) {
@@ -1210,7 +1210,7 @@ class OutputService {
     await pMap(
       outputsWithoutPreset.saved_objects.map<Output>(outputSavedObjectToOutput),
       async (output) => {
-        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', load);
+        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', parse);
 
         await outputService.update(
           soClient,

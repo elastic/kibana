@@ -832,6 +832,7 @@
     "reportedClusterUuids"
   ],
   "observability-onboarding-state": [
+    "createdBy",
     "progress",
     "state",
     "type"

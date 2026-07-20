@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useEsSearch, useTheme } from '@kbn/observability-shared-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
+import { useSyntheticsEsSearch } from './use_synthetics_es_search';
 import { useLocations } from './use_locations';
 import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
 import {
@@ -31,7 +32,7 @@ export function useStatusByLocation({
 
   const { locations: allLocations } = useLocations();
 
-  const { data, loading } = useEsSearch(
+  const { data, loading } = useSyntheticsEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       body: {

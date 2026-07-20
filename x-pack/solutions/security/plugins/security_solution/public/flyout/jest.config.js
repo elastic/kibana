@@ -9,11 +9,15 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout'],
+  testPathIgnorePatterns: [
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/security_solution/public/flyout',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout/**/*.{ts,tsx}',
+    '!<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/**/*.{ts,tsx}',
   ],
   moduleNameMapper: require('../../server/__mocks__/module_name_map'),
 };

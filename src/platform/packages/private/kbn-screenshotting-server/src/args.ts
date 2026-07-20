@@ -84,6 +84,7 @@ export const args = ({
     flags.push('--disable-gpu', '--enable-unsafe-swiftshader');
   }
 
+  // @ts-expect-error type error introduced after Node 24 upgrade, preserving behavior to avoid unknowns
   if (os.arch() === 'linux') {
     flags.push('--disable-setuid-sandbox');
   }

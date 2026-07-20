@@ -37,6 +37,7 @@ import {
   convertMapboxVectorTileToJson,
 } from './utils';
 import { useEditorReadContext, useRequestReadContext, useServicesContext } from '../../contexts';
+import { copyTextToClipboard } from '../../lib/copy_text_to_clipboard';
 import { MonacoEditorOutputActionsProvider } from './monaco_editor_output_actions_provider';
 import { useResizeCheckerUtils } from './hooks';
 
@@ -116,14 +117,12 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   }, [readOnlySettings, data, value]);
 
   const copyOutputCallback = useCallback(async () => {
-    const selectedText = (await actionsProvider.current?.getParsedOutput()) as string;
-
     try {
-      if (!window.navigator?.clipboard) {
+      const selectedText = await actionsProvider.current?.getParsedOutput();
+
+      if (selectedText === undefined || !(await copyTextToClipboard(selectedText))) {
         throw new Error('Could not copy to clipboard!');
       }
-
-      await window.navigator.clipboard.writeText(selectedText);
 
       notifications.toasts.addSuccess({
         title: i18n.translate('console.outputPanel.copyOutputToast', {
@@ -136,6 +135,11 @@ export const MonacoEditorOutput: FunctionComponent = () => {
           defaultMessage: 'Could not copy selected output to clipboard',
         }),
       });
+    } finally {
+      // Clear the highlight and hide the actions once the copy attempt completes,
+      // mirroring the pre-existing visual feedback (the selection used to disappear
+      // via the editor blur that the mousedown handler above now prevents).
+      actionsProvider.current?.resetOutputActions();
     }
   }, [notifications.toasts]);
 
@@ -153,6 +157,12 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         style={editorActionsCss}
         justifyContent="center"
         alignItems="center"
+        // Keep the output editor focused while the actions are clicked. Without this,
+        // pressing the copy button blurs the editor, whose blur handler hides the
+        // actions 100ms later -- faster than a typical human click is released -- so
+        // the mouseup lands on a hidden element and the click never fires.
+        // See https://github.com/elastic/kibana/issues/266698.
+        onMouseDown={(e) => e.preventDefault()}
       >
         <EuiFlexItem grow={false}>
           <EuiToolTip

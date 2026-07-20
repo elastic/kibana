@@ -32,7 +32,8 @@ import {
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
-import { EsClusterExecOptions } from '../cluster_exec_options';
+import { shouldPreferCachedSnapshot } from './find_local_cached_snapshot';
+import type { EsClusterExecOptions } from '../cluster_exec_options';
 import {
   SERVERLESS_RESOURCES_PATHS,
   SERVERLESS_SECRETS_PATH,
@@ -202,6 +203,12 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
   ],
 
   ['xpack.security.operator_privileges.enabled', 'true'],
+
+  // Serverless ES throttles indexing when free disk drops below this reserve (defaults to 20% of total
+  // disk). CI agents share an overlay filesystem that can already sit above 80% full at ES startup, which
+  // trips the throttle immediately and stalls Kibana startup/migrations. Pin to an absolute 1gb for tests.
+  // Note: this must stay above the Lucene indexing buffer (~161mb here) or ES refuses to start; 1gb is safe.
+  ['stateless.indices.disk.reserved_bytes', '1gb'],
 
   ['xpack.security.transport.ssl.enabled', 'true'],
 
@@ -392,8 +399,25 @@ const RETRYABLE_DOCKER_PULL_ERROR_MESSAGES = [
  * Stops serverless from pulling the same image in each node's promise and
  * gives better control of log output, instead of falling back to docker run.
  */
+export async function isDockerImageAvailableLocally(image: string) {
+  try {
+    const { stdout } = await execa('docker', ['images', '-q', image]);
+    return stdout.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export async function maybePullDockerImage(log: ToolingLog, image: string) {
   log.info(chalk.bold(`Checking for image: ${image}`));
+
+  if (shouldPreferCachedSnapshot() && (await isDockerImageAvailableLocally(image))) {
+    log.info(
+      'prefer-cached enabled, skipping pull of locally available image %s',
+      chalk.bold(image)
+    );
+    return;
+  }
 
   await pRetry(
     async () => {
