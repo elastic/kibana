@@ -37,8 +37,7 @@ Apply these when deciding what KIs to generate and what each one should contain.
    wrong answers. For those, provide an access pattern that reads live data.
 
 3. **Access patterns must be grounded and validated.** Build every query from the index's real
-   mapping and sample documents — never invented field names. Dry-run each example before writing
-   the KI; a broken query in the KI is worse than none.
+   mapping and sample documents — never invented field names. 
 
 4. **The Context Engine is more like a cache than a database.** Avoid generating KIs for the entire corpus
    eagerly. Prefer data views. Best practice is to apply a filter before starting: a time window (e.g. last 90 days), a status
