@@ -87,6 +87,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Show unavailable filter and drilldown actions with an explanation when a {{esql}} data table column is not filterable [#269635]({{kib-pull}}269635).
 * Make the **Fast mode** approximation option applicable to **Vega** visualizations that use an {{esql}} query [#276999]({{kib-pull}}276999).
 * Add a **Use global filters** layer setting to {{esql}} visualizations in **Lens** [#264613]({{kib-pull}}264613).
+* Add background trendlines to {{esql}} metric visualizations [#272499]({{kib-pull}}272499).
 * Add a **Density** option to **Lens** Metric charts, with **Default** used for new charts and **Compact** preserved for existing ones [#265526]({{kib-pull}}265526).
 * Add **Style template** presets (**Top**, **Middle**, **Bottom**, **Custom**) to **Lens** Metric charts [#265304]({{kib-pull}}265304).
 * Place unpinned controls above the top dashboard section instead of below it [#273089]({{kib-pull}}273089).
