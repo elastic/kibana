@@ -65,6 +65,13 @@ describe('PACK_TI_SCENARIOS', () => {
     }
   });
 
+  it('uses browsable https article URLs for every pack scenario', () => {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+      const { protocol } = new URL(scenario.articleUrl);
+      expect(protocol === 'http:' || protocol === 'https:').toBe(true);
+    }
+  });
+
   it('declares Hub categories and regions for historic report seeding', () => {
     for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
       expect(scenario.categories.length).toBeGreaterThan(0);
@@ -116,6 +123,10 @@ describe('PACK_TI_SCENARIOS', () => {
       expect(xml).toContain('-current-');
       expect(xml).not.toContain('-historic-');
       expect(xml).not.toMatch(/\(20\d{2}-\d{2}-\d{2}\)/);
+      expect(xml).toContain(scenario.articleUrl);
+      expect(xml).not.toContain('example.elastic.dev');
+      expect(xml.toLowerCase()).not.toContain('data-generator');
+      expect(xml.toLowerCase()).not.toContain('data generator');
     }
   });
 
