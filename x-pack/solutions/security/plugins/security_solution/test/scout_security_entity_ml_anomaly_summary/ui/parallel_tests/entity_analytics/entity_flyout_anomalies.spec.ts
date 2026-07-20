@@ -73,6 +73,34 @@ spaceTest.describe(
           ]),
         });
       });
+      // The entity risk contributions section (above the anomalies section in the right panel)
+      // calls the security solution search strategy for risk scores. Without this mock the call
+      // takes several seconds, keeping the section in a loading state that continuously shifts
+      // the anomalies section's Y position — preventing Playwright's stability check from
+      // passing before the test timeout.
+      await page.route('**/internal/search/securitySolutionSearchStrategy', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            isRunning: false,
+            isPartial: false,
+            totalCount: 0,
+            data: [],
+            rawResponse: {
+              took: 0,
+              timed_out: false,
+              _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+              hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+            },
+          }),
+        });
+      });
+      // The entity resolution group check triggers a second risk score search strategy call if
+      // a group is found. Return 404 (the expected "no group" response) to prevent that.
+      await page.route('**/api/security/entity_store/resolution/group**', async (route) => {
+        await route.fulfill({ status: 404 });
+      });
     });
 
     spaceTest.afterAll(async ({ apiServices }) => {
