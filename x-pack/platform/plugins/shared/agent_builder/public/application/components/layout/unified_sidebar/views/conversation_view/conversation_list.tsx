@@ -121,6 +121,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         gap: euiTheme.size.xs,
         borderRadius: euiTheme.border.radius.small,
         backgroundColor,
+        transition: 'background-color 0.15s',
       }}
     >
       {sortedConversations.map((conversation, index) => (
