@@ -76,24 +76,28 @@ export function extractErrorMessage(failureText: string): string {
   return message || failureText.trim();
 }
 
+interface ErrorMessageForComment {
+  /** redacted, truncated message to post; only set when the message is truly new */
+  newErrorMessage?: string;
+  /** true when the message is already present on the issue (body or a previous comment) */
+  alreadyReported: boolean;
+}
+
 /**
  * Decide whether the current error message should be posted in the follow-up
  * comment. It is included only when it is truly new: not already contained in
- * any code block of the issue body or of any previous comment. Returns the
- * redacted, truncated message when new, `undefined` otherwise.
+ * any code block of the issue body or of any previous comment. When the
+ * message is a known one, `alreadyReported` lets the comment say so instead of
+ * silently omitting it.
  */
-function getNewErrorMessageForComment(
+function getErrorMessageForComment(
   issueBody: string,
   comments: GithubIssueComment[],
   errorMessage: string | undefined
-): string | undefined {
-  if (!errorMessage) {
-    return undefined;
-  }
-
-  const currentErrorMsg = truncateFailureBody(errorMessage).trim();
+): ErrorMessageForComment {
+  const currentErrorMsg = errorMessage ? truncateFailureBody(errorMessage).trim() : '';
   if (!currentErrorMsg) {
-    return undefined;
+    return { alreadyReported: false };
   }
 
   const redactedCurrent = redactSensitiveGithubFailureText(currentErrorMsg);
@@ -104,7 +108,29 @@ function getNewErrorMessageForComment(
     .flatMap(getCodeBlocksFromText)
     .some((block) => redactSensitiveGithubFailureText(block).includes(redactedCurrent));
 
-  return alreadyReported ? undefined : redactedCurrent;
+  return alreadyReported
+    ? { alreadyReported }
+    : { newErrorMessage: redactedCurrent, alreadyReported };
+}
+
+const ALREADY_REPORTED_NOTE = 'Error message matches a failure already reported on this issue.';
+
+/**
+ * Render the part of a follow-up comment below the build link: the error
+ * message when it is new to this issue, a short note when it is a repeat of a
+ * known one, or nothing when no message was available to compare.
+ */
+function renderErrorMessageSection({
+  newErrorMessage,
+  alreadyReported,
+}: ErrorMessageForComment): string {
+  if (newErrorMessage) {
+    return `\n\nNew error message:\n\`\`\`\n${newErrorMessage}\n\`\`\``;
+  }
+  if (alreadyReported) {
+    return `\n\n${ALREADY_REPORTED_NOTE}`;
+  }
+  return '';
 }
 
 const NOT_AVAILABLE = 'N/A';
@@ -325,19 +351,16 @@ function createFTRComment(
   buildUrl: string,
   branch: string,
   pipeline: string,
-  newErrorMessage?: string
+  errorMessage: ErrorMessageForComment
 ): string {
-  const base = `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
-  if (!newErrorMessage) {
-    return base;
-  }
-
   /*
    * The error message is only included when it has not been reported on the
-   * issue before (see getNewErrorMessageForComment), so repeat failures with a
-   * known error stay link-only while genuinely new errors surface immediately.
+   * issue before (see getErrorMessageForComment), so repeat failures with a
+   * known error stay compact while genuinely new errors surface immediately.
    */
-  return `${base}\n\nNew error message:\n\`\`\`\n${newErrorMessage}\n\`\`\``;
+  return `New failure: [${
+    pipeline || 'CI Build'
+  } - ${branch}](${buildUrl})${renderErrorMessageSection(errorMessage)}`;
 }
 
 function createScoutComment(
@@ -345,28 +368,12 @@ function createScoutComment(
   buildUrl: string,
   branch: string,
   pipeline: string,
-  newErrorMessage?: string
+  errorMessage: ErrorMessageForComment
 ): string {
-  const base = `New failure for "${failure.target}" target: [${
-    pipeline || 'CI Build'
-  } - ${branch}](${buildUrl})`;
-  if (!newErrorMessage) {
-    /*
-     * If the error message was already reported on this issue (body or any
-     * previous comment), just post a comment with pipeline link and failure target.
-     *
-     * Example:
-     *
-     * New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/123456)
-     */
-    return base;
-  }
-
   /*
-   * If there's a new error message, include it in the comment. This provides more
-   * context on how the failure has changed since the issue was opened or last updated.
-   *
-   * Example:
+   * When there's a new error message, include it in the comment. This provides
+   * more context on how the failure has changed since the issue was opened or
+   * last updated. Example:
    *
    * New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/123456)
    *
@@ -383,9 +390,14 @@ function createScoutComment(
    *   - Expect "toBeEnabled" with timeout 10000ms
    *   - waiting for locator('notExist')
    * ```
+   *
+   * When the error message was already reported on this issue (body or any
+   * previous comment), a short note replaces the code block. When no message
+   * was available to compare, only the link line is posted.
    */
-
-  return `${base}\n\nNew error message:\n\`\`\`\n${newErrorMessage}\n\`\`\``;
+  return `New failure for "${failure.target}" target: [${
+    pipeline || 'CI Build'
+  } - ${branch}](${buildUrl})${renderErrorMessageSection(errorMessage)}`;
 }
 
 async function updateFTRFailureIssue(
@@ -403,17 +415,17 @@ async function updateFTRFailureIssue(
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
-  let newErrorMessage: string | undefined;
+  let errorMessage: ErrorMessageForComment = { alreadyReported: false };
   if (failure) {
     const comments = await api.getIssueComments(issue.github.number);
-    newErrorMessage = getNewErrorMessageForComment(
+    errorMessage = getErrorMessageForComment(
       issue.github.body,
       comments,
       extractErrorMessage(failure.failure)
     );
   }
 
-  const commentText = createFTRComment(buildUrl, branch, pipeline, newErrorMessage);
+  const commentText = createFTRComment(buildUrl, branch, pipeline, errorMessage);
   await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };
@@ -435,13 +447,9 @@ async function updateScoutFailureIssue(
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
   const comments = await api.getIssueComments(issue.github.number);
-  const newErrorMessage = getNewErrorMessageForComment(
-    issue.github.body,
-    comments,
-    failure.errorMessage
-  );
+  const errorMessage = getErrorMessageForComment(issue.github.body, comments, failure.errorMessage);
 
-  const commentText = createScoutComment(failure, buildUrl, branch, pipeline, newErrorMessage);
+  const commentText = createScoutComment(failure, buildUrl, branch, pipeline, errorMessage);
   await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };

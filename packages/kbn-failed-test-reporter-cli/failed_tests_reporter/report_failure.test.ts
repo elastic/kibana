@@ -369,7 +369,7 @@ describe('updateFailureIssue()', () => {
     expect(comment).not.toContain('at Test._assertStatus');
   });
 
-  it('keeps FTR comment link-only when the error message matches the issue body', async () => {
+  it('notes an already reported error message when it matches the issue body', async () => {
     const api = createGithubApi();
 
     await updateFailureIssue(
@@ -407,11 +407,12 @@ describe('updateFailureIssue()', () => {
     );
 
     expect(api.addIssueComment.mock.calls[0][1]).toBe(
-      'New failure: [kibana-on-merge - main](https://build-url)'
+      'New failure: [kibana-on-merge - main](https://build-url)\n\n' +
+        'Error message matches a failure already reported on this issue.'
     );
   });
 
-  it('keeps FTR comment link-only when the error message was reported in a previous comment', async () => {
+  it('notes an already reported error message when it was posted in a previous comment', async () => {
     const api = createGithubApi([
       { body: 'New failure: [kibana-on-merge - main](https://old-build-url)' },
       {
@@ -460,7 +461,8 @@ describe('updateFailureIssue()', () => {
     );
 
     expect(api.addIssueComment.mock.calls[0][1]).toBe(
-      'New failure: [kibana-on-merge - main](https://build-url)'
+      'New failure: [kibana-on-merge - main](https://build-url)\n\n' +
+        'Error message matches a failure already reported on this issue.'
     );
   });
 
@@ -562,9 +564,11 @@ describe('updateFailureIssue()', () => {
     const comment = api.addIssueComment.mock.calls[0][1] as string;
     expect(comment).toContain('New failure for "local-serverless-observability_complete" target');
     expect(comment).not.toContain('New error message');
+    // no message was available to compare, so no repeat note either
+    expect(comment).not.toContain('already reported on this issue');
   });
 
-  it('does not include new error message when error.message matches issue body', async () => {
+  it('notes an already reported error message when error.message matches issue body', async () => {
     const api = createGithubApi();
 
     await updateFailureIssue(
@@ -611,6 +615,7 @@ describe('updateFailureIssue()', () => {
     const comment = api.addIssueComment.mock.calls[0][1] as string;
     expect(comment).toContain('New failure for "local-serverless-observability_complete" target');
     expect(comment).not.toContain('New error message');
+    expect(comment).toContain('Error message matches a failure already reported on this issue.');
   });
 
   it('includes new error message when error.message changed', async () => {
@@ -660,7 +665,7 @@ describe('updateFailureIssue()', () => {
     expect(comment).toContain('TimeoutError: locator.click: Timeout 10000ms exceeded.');
   });
 
-  it('does not include new error message when it was already reported in a previous comment', async () => {
+  it('notes an already reported error message when it was posted in a previous Scout comment', async () => {
     const api = createGithubApi([
       {
         body: dedent`
@@ -715,6 +720,7 @@ describe('updateFailureIssue()', () => {
     const comment = api.addIssueComment.mock.calls[0][1] as string;
     expect(comment).toContain('New failure for "local-serverless-observability_complete" target');
     expect(comment).not.toContain('New error message');
+    expect(comment).toContain('Error message matches a failure already reported on this issue.');
   });
 });
 
