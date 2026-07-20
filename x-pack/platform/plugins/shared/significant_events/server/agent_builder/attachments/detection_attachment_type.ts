@@ -111,7 +111,7 @@ export const createSignificantEventDetectionAttachmentType = ({
             error
           )}`
         );
-        return true;
+        return false;
       }
     },
     format: (attachment) => ({

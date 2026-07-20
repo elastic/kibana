@@ -99,6 +99,11 @@ function DetectionCard({
               : euiTheme.colors.backgroundBaseSubdued
           };
         }
+
+        &:focus-visible {
+          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+          outline-offset: ${euiTheme.border.width.thin};
+        }
         `
           : ''}
       `}

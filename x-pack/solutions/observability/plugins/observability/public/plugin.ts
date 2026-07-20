@@ -560,12 +560,17 @@ export class Plugin
       );
     });
 
-    if (pluginsStart.agentBuilder) {
-      void import('./pages/nightshift/agent_builder/register_attachments').then(
-        ({ registerNightshiftAgentBuilderAttachments }) => {
-          registerNightshiftAgentBuilderAttachments({ agentBuilder: pluginsStart.agentBuilder! });
-        }
-      );
+    const agentBuilder = pluginsStart.agentBuilder;
+    if (agentBuilder) {
+      void import('./pages/nightshift/agent_builder/register_attachments')
+        .then(({ registerNightshiftAgentBuilderAttachments }) => {
+          registerNightshiftAgentBuilderAttachments({ agentBuilder });
+        })
+        .catch((error) => {
+          this.initContext.logger
+            .get('nightshiftAgentBuilderAttachments')
+            .error(`Failed to register agent builder attachments: ${error}`);
+        });
     }
 
     return {

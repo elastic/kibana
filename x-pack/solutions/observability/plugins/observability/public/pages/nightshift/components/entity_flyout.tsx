@@ -32,19 +32,12 @@ import {
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { getConfidenceColor } from '../get_confidence_color';
 import { useKibana } from '../../../utils/kibana_react';
+import { FlyoutSectionTitle } from './flyout_section_title';
 
 export interface EntityFlyoutProps {
   feature: Feature;
   onClose: () => void;
   enableChatAttachment?: boolean;
-}
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <EuiTitle size="xs">
-      <h3>{children}</h3>
-    </EuiTitle>
-  );
 }
 
 const confidenceDotColor = (
@@ -223,11 +216,11 @@ export function EntityFlyout({
       <EuiFlyoutBody>
         {feature.description && (
           <>
-            <SectionTitle>
+            <FlyoutSectionTitle>
               {i18n.translate('xpack.observability.nightshift.entityFlyout.summaryTitle', {
                 defaultMessage: 'Summary',
               })}
-            </SectionTitle>
+            </FlyoutSectionTitle>
             <EuiSpacer size="s" />
             <EuiText size="s" data-test-subj="nightshiftEntityFlyoutSummary">
               <p>{feature.description}</p>
@@ -236,11 +229,11 @@ export function EntityFlyout({
           </>
         )}
 
-        <SectionTitle>
+        <FlyoutSectionTitle>
           {i18n.translate('xpack.observability.nightshift.entityFlyout.evidenceTitle', {
             defaultMessage: 'Evidence',
           })}
-        </SectionTitle>
+        </FlyoutSectionTitle>
         <EuiSpacer size="s" />
         {evidence.length > 0 ? (
           <EvidenceList evidence={evidence} />
@@ -254,11 +247,11 @@ export function EntityFlyout({
 
         <EuiSpacer size="l" />
 
-        <SectionTitle>
+        <FlyoutSectionTitle>
           {i18n.translate('xpack.observability.nightshift.entityFlyout.rawDocumentTitle', {
             defaultMessage: 'Raw document',
           })}
-        </SectionTitle>
+        </FlyoutSectionTitle>
         <EuiSpacer size="s" />
         <EuiCodeBlock
           language="json"

@@ -118,7 +118,8 @@ fi
 
 echo "Using Kibana at ${KIBANA_URL} ..."
 echo "Ensuring Streams is enabled via Kibana ..."
-STREAMS_STATUS=$(curl -s -o /tmp/seed_nightshift_streams.json -w "%{http_code}" -u "$ES_AUTH" \
+STREAMS_RESPONSE_FILE=$(mktemp "${TMPDIR:-/tmp}/seed_nightshift_streams.XXXXXX")
+STREAMS_STATUS=$(curl -s -o "$STREAMS_RESPONSE_FILE" -w "%{http_code}" -u "$ES_AUTH" \
   -X POST "${KIBANA_URL}/api/streams/_enable" \
   -H "Content-Type: application/json" \
   -H "kbn-xsrf: true" \
@@ -126,17 +127,18 @@ STREAMS_STATUS=$(curl -s -o /tmp/seed_nightshift_streams.json -w "%{http_code}" 
 if [[ "$STREAMS_STATUS" == "200" ]]; then
   echo "  Streams enabled."
 elif [[ "$STREAMS_STATUS" == "400" ]]; then
-  if grep -q "already enabled\|Cannot change stream types" /tmp/seed_nightshift_streams.json 2>/dev/null; then
+  if grep -q "already enabled\|Cannot change stream types" "$STREAMS_RESPONSE_FILE" 2>/dev/null; then
     echo "  Streams already enabled."
   else
     echo "WARNING: Streams enable returned 400:" >&2
-    cat /tmp/seed_nightshift_streams.json >&2
+    cat "$STREAMS_RESPONSE_FILE" >&2
   fi
 elif [[ "$STREAMS_STATUS" == "404" ]]; then
   echo "WARNING: Streams API not found — KI feature seeding may fail." >&2
 else
   echo "WARNING: Unexpected Streams enable status ${STREAMS_STATUS} — continuing." >&2
 fi
+rm -f "$STREAMS_RESPONSE_FILE"
 
 # ---------------------------------------------------------------------------
 # Events (.significant_events-events)
