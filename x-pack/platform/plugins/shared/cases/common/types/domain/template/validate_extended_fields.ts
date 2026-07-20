@@ -6,7 +6,7 @@
  */
 
 import type { InlineField, RefField } from './fields';
-import { FieldType, isInlineField } from './fields';
+import { FieldType, isInlineField, isDisplayOnlyField } from './fields';
 import { evaluateCondition } from './evaluate_conditions';
 import { getFieldSnakeKey } from '../../../utils';
 
@@ -89,6 +89,12 @@ const validateCheckboxGroupOptions = (
   }
 };
 
+const validateToggleValue = (label: string, value: string, errors: string[]): void => {
+  if (value !== 'true' && value !== 'false') {
+    errors.push(`Field "${label}" must be either true or false`);
+  }
+};
+
 const validateField = (field: InlineField, value: string, errors: string[]): void => {
   const label = field.label ?? field.name;
 
@@ -112,16 +118,21 @@ const validateField = (field: InlineField, value: string, errors: string[]): voi
       (field.metadata as { options?: string[] })?.options ?? [],
       errors
     );
+  } else if (field.control === FieldType.TOGGLE) {
+    validateToggleValue(label, value, errors);
   }
 };
 
 export const validateExtendedFields = (
   extendedFields: Record<string, string>,
   fields: Array<RefField | InlineField>,
-  { partial = false }: { partial?: boolean } = {}
+  { partial = false, onClose = false }: { partial?: boolean; onClose?: boolean } = {}
 ): string[] => {
   const errors: string[] = [];
-  const inlineFields = fields.filter(isInlineField);
+  // Display-only fields (e.g. MARKDOWN) hold no value and are excluded from a case's stored
+  // `extended_fields`, so they take no part in value/required validation. Dropping them here also
+  // ensures their snake key is treated as an unknown key if it is ever submitted.
+  const inlineFields = fields.filter(isInlineField).filter((f) => !isDisplayOnlyField(f));
 
   // 1. Build valid key set
   const validKeys = new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
@@ -160,12 +171,8 @@ export const validateExtendedFields = (
         field.validation?.required === true ||
         (field.validation?.required_when
           ? evaluateCondition(field.validation.required_when, fieldValues, fieldTypeMap)
-          : false);
-
-      // `required_on_close` is intentionally NOT enforced here.
-      // Close-time enforcement will be added in a follow-up: when transitioning
-      // a case to `closed`, this validator should be called with a `{ onClose: true }`
-      // context flag and treat `required_on_close === true` as requiring a non-empty value.
+          : false) ||
+        (onClose && field.validation?.required_on_close === true);
 
       if (isRequired && isEmpty) {
         errors.push(`Field "${field.label ?? field.name}" is required`);

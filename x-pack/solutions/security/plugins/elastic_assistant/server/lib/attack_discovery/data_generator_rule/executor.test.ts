@@ -25,6 +25,7 @@ describe('attackDiscoveryDataGeneratorExecutor', () => {
         rule: { id: 'rule-1' },
         services: { alertsClient },
         spaceId: 'default',
+        startedAt: new Date('2023-01-01T00:00:00.000Z'),
       } as unknown as Parameters<typeof attackDiscoveryDataGeneratorExecutor>[0]['options'],
     };
   };

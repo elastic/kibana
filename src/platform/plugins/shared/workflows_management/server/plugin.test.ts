@@ -38,6 +38,7 @@ describe('WorkflowsPlugin', () => {
       enabled: true,
       logging: { console: false },
       available: true,
+      library: { ttlMs: 600_000 },
     });
 
     const plugin = new WorkflowsPlugin(initializerContext);

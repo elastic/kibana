@@ -15,7 +15,6 @@ import { useWorkflowExecutionsPageFilters } from './use_workflow_executions_page
 import { WorkflowExecutionDetailFlyout } from './workflow_execution_detail_flyout';
 import { createWorkflowExecutionsDataView } from './workflow_executions_data_view';
 import { WorkflowExecutionsFilters } from './workflow_executions_filters';
-import { useWorkflowExecutionsHttpInterceptor } from './workflow_executions_http_interceptor';
 import { WorkflowExecutionsSearchBar } from './workflow_executions_search_bar';
 import { WorkflowExecutionsTable } from './workflow_executions_table';
 import { useKibana } from '../../hooks/use_kibana';
@@ -48,7 +47,6 @@ const clearSelectedExecutionIfChanged = (
 export const WorkflowExecutionsPageContent = React.memo(() => {
   const { fieldFormats } = useKibana().services;
   const spaceId = useSpaceId();
-  useWorkflowExecutionsHttpInterceptor();
   const dataView = useMemo(() => createWorkflowExecutionsDataView(fieldFormats), [fieldFormats]);
 
   const [query, setQuery] = useState<Query>(DEFAULT_QUERY);

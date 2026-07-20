@@ -12,13 +12,15 @@ import { schema } from '@kbn/config-schema';
 import type { SearchExecutionsViewParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import {
-  API_VERSION,
-  AVAILABILITY,
+  INTERNAL_API_VERSION,
   MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH,
-  OAS_TAG,
 } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
+import {
+  canReadManagedWorkflowExecutions,
+  hasWorkflowExecutionReadPrivilege,
+  WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
+} from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const MAX_EXECUTIONS_SEARCH_QUERY_JSON_LENGTH = MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH * 4;
@@ -65,20 +67,13 @@ const parseJsonParam = <T>(value: string | undefined, paramName: string): T | un
 export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .get({
-      path: '/api/workflows/executions',
-      access: 'public',
-      security: WORKFLOW_EXECUTION_READ_SECURITY,
-      summary: 'Search workflow executions',
-      description:
-        'Search workflow-level executions across all workflows in the current space with server-side space and step filters enforced.',
-      options: {
-        tags: [OAS_TAG],
-        availability: AVAILABILITY,
-      },
+      path: '/internal/workflows/executions',
+      access: 'internal',
+      security: WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
     })
     .addVersion(
       {
-        version: API_VERSION,
+        version: INTERNAL_API_VERSION,
         options: {
           oasOperationObject: () => path.join(__dirname, '../examples/search_executions.yaml'),
         },
@@ -90,6 +85,9 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
       },
       withAvailabilityCheck(async (_context, request, response) => {
         try {
+          if (!hasWorkflowExecutionReadPrivilege(request)) {
+            return response.forbidden();
+          }
           const spaceId = spaces.getSpaceId(request);
           const params: SearchExecutionsViewParams = {
             query: parseJsonParam(request.query.query, 'query'),
@@ -97,6 +95,7 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
             from: request.query.from,
             size: request.query.size,
             trackTotalHits: request.query.trackTotalHits,
+            includeManagedExecutions: canReadManagedWorkflowExecutions(request),
           };
 
           return response.ok({

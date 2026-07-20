@@ -17,29 +17,30 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { filter, lastValueFrom, take } from 'rxjs';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import { isRunningResponse, SortDirection } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { ESSearchResponse, SearchHit } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
-import { useWorkflowExecutionsGridSelection } from './use_workflow_executions_grid_selection';
-import { useWorkflowExecutionsSearch } from './use_workflow_executions_search';
-import { WorkflowExecutionsDataGrid } from './workflow_executions_data_grid';
 import {
-  EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
-  EXECUTION_TABLE_DEFAULT_SORT,
-  EXECUTION_TABLE_PAGE_SIZE_OPTIONS,
-  type ExecutionTableSortOrder,
-} from './workflow_executions_page_constants';
-import { getWorkflowExecutionsFetchErrorMessage } from './workflow_executions_search_query';
+  DataLoadingState,
+  type SortOrder,
+  UnifiedDataTable,
+  type UnifiedDataTableSettings,
+} from '@kbn/unified-data-table';
+import type { EsWorkflowExecution } from '@kbn/workflows';
+import { WorkflowExecutionDetailFlyout } from './workflow_execution_detail_flyout';
 import {
-  DEFAULT_WORKFLOW_EXECUTIONS_TABLE_COLUMNS,
-  WORKFLOW_EXECUTIONS_TABLE_GRID_SETTINGS,
-} from './workflow_executions_table_config';
-import { getWorkflowExecutionsTableGridWrapperCss } from './workflow_executions_table_styles';
-import { WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW } from '../../../common';
-import { useSerialPolling } from '../../hooks/use_serial_polling';
-import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
+  buildWorkflowExecutionsSearchFilters,
+  getWorkflowExecutionsFetchErrorMessage,
+  isWorkflowExecutionsIndexNotFoundError,
+} from './workflow_executions_search_query';
+import { buildWorkflowExecutionsTableRecords } from './workflow_executions_table_records';
+import { useKibana } from '../../hooks/use_kibana';
 
 const PAGE_SIZE_OPTIONS = [...EXECUTION_TABLE_PAGE_SIZE_OPTIONS];
 
@@ -67,86 +68,162 @@ export interface WorkflowExecutionsTableProps {
 }
 
 export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
-  ({
-    dataView,
-    filters,
-    liveUpdateIntervalMs,
-    onReRunExecution,
-    onViewAllExecutionsForWorkflow,
-    query,
-    spaceId,
-    timeRange,
-  }) => {
-    const [visibleColumns, setVisibleColumns] = useState<string[]>([
-      ...DEFAULT_WORKFLOW_EXECUTIONS_TABLE_COLUMNS,
-    ]);
-    const [columnWidths, setColumnWidths] = useState<Partial<Record<string, number>>>(() =>
-      Object.fromEntries(
-        Object.entries(WORKFLOW_EXECUTIONS_TABLE_GRID_SETTINGS.columns)
-          .filter(([, settings]) => settings.width != null)
-          .map(([columnId, settings]) => [columnId, settings.width as number])
-      )
-    );
-    const [sort, setSort] = useState<ExecutionTableSortOrder>(EXECUTION_TABLE_DEFAULT_SORT);
-    const [pageSize, setPageSize] = useState(EXECUTION_TABLE_DEFAULT_PAGE_SIZE);
-    const [pageIndex, setPageIndex] = useState(0);
-    const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
-
-    const handleOpenExecution = useCallback(
-      (execution: { id: string }) => {
-        setSelectedExecution(execution.id);
-      },
-      [setSelectedExecution]
-    );
-
-    const maxPageIndex = useMemo(() => getMaxPageIndex(pageSize), [pageSize]);
-
-    const searchCriteriaKey = useMemo(
-      () => JSON.stringify({ query, filters, spaceId, timeRange }),
-      [query, filters, spaceId, timeRange]
-    );
-
+  ({ dataView, query, filters, timeRange, spaceId }) => {
     const {
-      data: searchResponse,
-      error,
-      isLoading,
-      refetch,
-    } = useWorkflowExecutionsSearch({
+      data: dataService,
+      fieldFormats,
+      notifications: { toasts },
+      storage,
+      theme,
+      uiActions,
+      uiSettings,
+    } = useKibana().services;
+
+    const [hits, setHits] = useState<EsHitRecord[]>([]);
+    const [total, setTotal] = useState(0);
+    const [loadingState, setLoadingState] = useState<DataLoadingState>(DataLoadingState.loading);
+    const [error, setError] = useState<string | null>(null);
+
+    const [pageIndex, setPageIndex] = useState(0);
+    const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+    const [sort, setSort] = useState<SortOrder[]>(DEFAULT_SORT);
+    const [visibleColumns, setVisibleColumns] = useState<string[]>(Array.from(DEFAULT_COLUMNS));
+    const [gridSettings, setGridSettings] = useState<UnifiedDataTableSettings>({});
+    const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
+    const [retryToken, setRetryToken] = useState(0);
+    const timeFrom = timeRange.from;
+    const timeTo = timeRange.to;
+
+    useEffect(() => {
+      let cancelled = false;
+
+      const fetchExecutions = async () => {
+        setLoadingState(DataLoadingState.loading);
+        setError(null);
+
+        try {
+          const searchSource = await dataService.search.searchSource.create();
+          const timeField = dataView.timeFieldName ?? 'startedAt';
+          const searchFilters = buildWorkflowExecutionsSearchFilters({
+            spaceId,
+            timeRange: { from: timeFrom, to: timeTo },
+            timeField,
+            userFilters: filters,
+          });
+
+          searchSource.setField('index', dataView);
+
+          if (query?.query) {
+            searchSource.setField('query', query);
+          }
+
+          searchSource.setField('filter', searchFilters);
+          searchSource.setField('from', pageIndex * pageSize);
+          searchSource.setField('size', pageSize);
+          searchSource.setField(
+            'sort',
+            sort.map(([field, direction]) => ({
+              [field]: {
+                order: direction === 'asc' ? SortDirection.asc : SortDirection.desc,
+              },
+            }))
+          );
+          searchSource.setField('trackTotalHits', true);
+
+          const response = await lastValueFrom(
+            searchSource.fetch$().pipe(
+              filter((searchResponse) => !isRunningResponse(searchResponse)),
+              take(1)
+            )
+          );
+
+          if (cancelled) {
+            return;
+          }
+
+          const rawResponse = response?.rawResponse as
+            | ESSearchResponse<EsWorkflowExecution>
+            | undefined;
+          const responseHits = (rawResponse?.hits?.hits ?? []).filter(
+            (hit: SearchHit<EsWorkflowExecution>): hit is SearchHit<EsWorkflowExecution> =>
+              hit._source != null
+          ) as unknown as EsHitRecord[];
+          const totalHits = rawResponse?.hits?.total;
+          const totalCount =
+            typeof totalHits === 'number' ? totalHits : totalHits?.value ?? responseHits.length;
+
+          setHits(responseHits);
+          setTotal(totalCount);
+          setLoadingState(DataLoadingState.loaded);
+        } catch (err) {
+          if (cancelled) {
+            return;
+          }
+
+          if (isWorkflowExecutionsIndexNotFoundError(err)) {
+            setHits([]);
+            setTotal(0);
+            setError(null);
+            setLoadingState(DataLoadingState.loaded);
+            return;
+          }
+
+          setError(getWorkflowExecutionsFetchErrorMessage());
+          setHits([]);
+          setTotal(0);
+          setLoadingState(DataLoadingState.loaded);
+        }
+      };
+
+      fetchExecutions();
+
+      return () => {
+        cancelled = true;
+      };
+    }, [
+      dataService.search.searchSource,
       dataView,
-      query,
       filters,
-      timeRange,
-      spaceId,
       pageIndex,
       pageSize,
+      query,
+      retryToken,
       sort,
-    });
-
-    const executions = useMemo(() => searchResponse?.results ?? [], [searchResponse?.results]);
-    const total = searchResponse?.total ?? 0;
-    const visibleExecutionIds = useMemo(
-      () => executions.map((execution) => execution.id),
-      [executions]
-    );
-    const selectionState = useWorkflowExecutionsGridSelection(visibleExecutionIds);
-
-    const errorMessage = error ? getWorkflowExecutionsFetchErrorMessage() : null;
-
-    useSerialPolling({
-      poll: () => refetch(),
-      enabled: liveUpdateIntervalMs != null,
-      immediate: false,
-      intervalMs: liveUpdateIntervalMs ?? 0,
-      pollKey: `${searchCriteriaKey}:${pageIndex}:${pageSize}:${JSON.stringify(sort)}`,
-    });
+      spaceId,
+      timeFrom,
+      timeTo,
+    ]);
 
     useEffect(() => {
       setPageIndex(0);
-    }, [searchCriteriaKey]);
+      setExpandedDoc(undefined);
+    }, [query, filters, spaceId, timeFrom, timeTo]);
 
     const handleRetry = useCallback(() => {
-      void refetch();
-    }, [refetch]);
+      setRetryToken((n) => n + 1);
+    }, []);
+
+    const rows = useMemo<DataTableRecord[]>(
+      () => buildWorkflowExecutionsTableRecords({ records: hits, dataView }),
+      [hits, dataView]
+    );
+
+    const services = useMemo(
+      () => ({
+        theme,
+        fieldFormats,
+        uiSettings,
+        toastNotifications: toasts,
+        storage,
+        data: dataService,
+      }),
+      [dataService, fieldFormats, storage, theme, toasts, uiSettings]
+    );
+
+    const handleSort = useCallback((nextSort: string[][]) => {
+      setSort(nextSort.length === 0 ? DEFAULT_SORT : (nextSort as SortOrder[]));
+      setPageIndex(0);
+    }, []);
 
     const handleSetColumns = useCallback((nextColumns: string[]) => {
       setVisibleColumns(nextColumns);
@@ -169,11 +246,15 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       setPageIndex(0);
     }, []);
 
-    const handlePageChange = useCallback(
-      (nextPageIndex: number) => {
-        setPageIndex(Math.min(nextPageIndex, maxPageIndex));
-      },
-      [maxPageIndex]
+    const handleCloseFlyout = useCallback(() => {
+      setExpandedDoc(undefined);
+    }, []);
+
+    const renderDocumentView = useCallback(
+      (hit: DataTableRecord) => (
+        <WorkflowExecutionDetailFlyout hit={hit} onClose={handleCloseFlyout} />
+      ),
+      [handleCloseFlyout]
     );
 
     const totalPages = useMemo(
@@ -186,7 +267,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     );
     const isPaginationLimited = total > WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW;
 
-    if (errorMessage) {
+    if (error) {
       return (
         <EuiEmptyPrompt
           color="danger"
@@ -200,7 +281,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
               />
             </h3>
           }
-          body={<p>{errorMessage}</p>}
+          body={<p>{error}</p>}
           actions={
             <EuiButtonEmpty onClick={handleRetry} data-test-subj="workflowExecutionsTableRetry">
               <FormattedMessage

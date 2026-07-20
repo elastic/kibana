@@ -43,6 +43,7 @@ import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildPendingRoundActions } from './utils/build_pending_round_actions';
 import { computeContextBudget } from './utils/context_budget';
+import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
 import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
@@ -76,6 +77,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   {
     nextInput,
     conversation,
+    origin,
     agentConfiguration,
     capabilities,
     runId = uuidv4(),
@@ -101,14 +103,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     stateManager,
     events,
     promptManager,
-    filestore,
-    filesystemService,
-    bashService,
     skills,
     skillsStore,
     toolManager,
     experimentalFeatures,
     todoStateManager,
+    renderers,
   } = context;
 
   ensureValidInput({ input: nextInput, conversation, action });
@@ -152,6 +152,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     manualEvents$.next(event);
   };
   toolManager.setEventEmitter(eventEmitter);
+  toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
 
   // Pass action so regenerate uses the last round's original input instead of request input
   let processedConversation = await prepareConversation({
@@ -177,13 +178,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
-    filesystemService,
-    bashService,
     request,
-    experimentalFeatures,
     spaceId: context.spaceId,
     runner: context.runner,
-    todoStateManager,
   });
 
   // First add static tools
@@ -232,8 +229,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resultTransformer = createResultTransformer({
     toolRegistry,
     toolManager,
-    filestore,
-    filestoreEnabled: experimentalFeatures.filestore,
+    resultStore: context.resultStore,
     conversationTokenEstimate,
   });
 
@@ -260,13 +256,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
-    filestore,
+    skills: filteredSkills,
     processedConversation,
     toolManager,
     resultTransformer,
     outputSchema,
     conversationTimestamp,
     experimentalFeatures,
+    renderers: renderers?.getRegisteredRenderers() ?? [],
   });
 
   const agentGraph = createAgentGraph({
@@ -292,7 +289,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
       cycleLimit: CYCLE_LIMIT,
       promptManager,
-      eventEmitter: events.emit,
+      eventEmitter,
     }),
     {
       version: 'v2',
@@ -337,6 +334,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
+      origin,
       getConversationState: () =>
         getConversationState({
           promptManager,

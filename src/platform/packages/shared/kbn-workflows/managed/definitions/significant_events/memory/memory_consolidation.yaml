@@ -1,0 +1,63 @@
+version: "1"
+
+name: Memory Consolidation
+description: >
+  Curates the memory wiki by merging duplicates, removing stale entries,
+  improving categorization, and adding cross-references via the streams-memory-consolidation
+  skill. Runs on a 24h schedule.
+enabled: false
+settings:
+  timeout: "30m"
+  concurrency:
+    key: "streams-sigevents-memory-consolidation"
+    strategy: drop
+    max: 1
+tags:
+  - observability
+  - streams
+  - sigevents
+  - memory
+  - consolidation
+
+triggers:
+  - type: scheduled
+    with:
+      every: "24h"
+  - type: manual
+
+steps:
+  - name: consolidate_memory
+    type: ai.agent
+    # Keep in sync with @kbn/significant-events-schema inference_feature_ids.ts
+    # (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
+    connector-id-by-feature: "significant_events_memory"
+    create-conversation: true
+    timeout: 1800s
+    with:
+      message: |
+        First, call the load_skill tool with skill path skills/platform/streams/streams-memory-consolidation.
+        Wait for the skill to load before calling any other tools.
+
+        Then review the current state of the memory wiki. Start by listing all pages, then work through them methodically. Not every page needs changes — focus on the highest-impact improvements.
+      schema:
+        type: object
+        properties:
+          pages_written:
+            type: array
+            description: page_name values of pages written or updated.
+            items:
+              type: string
+          pages_deleted:
+            type: array
+            description: page_name values of pages soft-deleted.
+            items:
+              type: string
+          summary:
+            type: string
+            description: Brief summary of what was changed and why.
+        required:
+          - pages_written
+          - pages_deleted
+          - summary
+    on-failure:
+      continue: false

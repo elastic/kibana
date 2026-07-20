@@ -12,7 +12,7 @@ import TestRenderer, { act } from 'react-test-renderer';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { AlertFlyoutOverviewTab } from '.';
 import type { StartServices } from '../../types';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
@@ -42,6 +42,9 @@ jest.mock('../../cases/components/provider/provider', () => ({
 
 jest.mock('../../assistant/provider', () => ({
   AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+jest.mock('../../common/components/ml/permissions/ml_capabilities_provider', () => ({
+  MlCapabilitiesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 const mockUseInitDataViewManager = jest.fn();
@@ -73,6 +76,21 @@ describe('AlertFlyoutOverviewTab', () => {
       },
     },
     upselling: {},
+    data: {
+      query: {
+        timefilter: {
+          timefilter: {
+            getAbsoluteTime: jest.fn().mockReturnValue({
+              from: '2023-01-01T00:00:00.000Z',
+              to: '2023-12-31T23:59:59.999Z',
+            }),
+          },
+        },
+      },
+    },
+    notifications: {
+      toasts: { addError: jest.fn(), addDanger: jest.fn(), addSuccess: jest.fn() },
+    },
   } as unknown as StartServices;
 
   beforeEach(() => {

@@ -9,8 +9,8 @@ import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 import { DataLoadingState } from '@kbn/unified-data-table';
@@ -43,6 +43,8 @@ import { EqlTabHeader } from './header';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 import { TimelineRefetch } from '../../refetch_timeline';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
@@ -77,6 +79,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
    */
   const [pageIndex, setPageIndex] = useState(0);
   const { telemetry } = useKibana().services;
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openNotes } = useFlyoutApi();
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
   const { portalNode: eqlEventsCountPortalNode } = useEqlEventsCountPortal();
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
@@ -164,7 +168,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       const isAttackRow = eventData != null && isAttackDiscoveryRow(eventData);
       const indexName = selectedPatterns.join(',');
 
-      if (isAttackRow) {
+      if (enableNewFlyout && eventData) {
+        openNotes({ hit: eventData });
+      } else if (isAttackRow) {
         openFlyout({
           right: {
             id: AttackDetailsRightPanelKey,
@@ -215,7 +221,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         panel: 'left',
       });
     },
-    [openFlyout, selectedPatterns, telemetry, timelineId]
+    [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
   const leadingControlColumns = useTimelineControlColumn({

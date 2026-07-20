@@ -191,7 +191,7 @@ spaceTest.describe(
         // Set up ALL mocks BEFORE navigation (order preserved)
         await Promise.all([
           // 1. Intercept agentless (should NOT be called)
-          page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+          page.route(/\/api\/fleet\/managed_integrations/, async (route, request) => {
             if (request.method() === 'POST') agentlessPolicyRequestCaptured = true;
             await route.continue();
           }),
@@ -269,7 +269,7 @@ spaceTest.describe(
         // Set up ALL mocks BEFORE navigation (order preserved)
         await Promise.all([
           // 1. Intercept agentless (should NOT be called)
-          page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+          page.route(/\/api\/fleet\/managed_integrations/, async (route, request) => {
             if (request.method() === 'POST') agentlessPolicyRequestCaptured = true;
             await route.continue();
           }),

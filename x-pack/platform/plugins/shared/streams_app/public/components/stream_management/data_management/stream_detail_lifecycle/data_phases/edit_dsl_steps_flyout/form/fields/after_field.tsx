@@ -17,15 +17,16 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
+import { getTimingBoundHelpText, type HelpTextBound } from '@kbn/data-lifecycle-phases';
 import type { PreservedTimeUnit, TimeUnit } from '../types';
-import { getBoundsHelpTextValues, getUnitSelectOptions } from '../../../shared';
+import { formatDuration, getUnitSelectOptions } from '../../../shared';
 import { getStepIndexFromArrayItemPath, toMilliseconds } from '../utils';
 import { MAX_DOWNSAMPLE_STEPS } from '../constants';
 import {
+  afterBeforeExitBoundary,
   afterGreaterThanPreviousStep,
   afterMustBeInteger,
   afterMustBeNonNegative,
-  afterSmallerThanDataRetention,
   requiredAfterValue,
 } from '../validations';
 import { useOnStepFieldErrorsChange } from '../error_tracking';
@@ -34,8 +35,13 @@ export interface AfterFieldProps {
   item: ArrayItem;
   dataTestSubj: string;
   timeUnitOptions: ReadonlyArray<{ value: TimeUnit; text: string }>;
+  /** Delete phase (data retention) — the upper bound used when no frozen phase is configured. */
   dataRetentionMs?: number;
   dataRetentionEsFormat?: string;
+  /** Frozen phase transition, when configured. When present it takes over as the upper bound
+   * (downsampling must finish before the data is frozen) for both help text and validation. */
+  frozenAfterMs?: number;
+  frozenAfterEsFormat?: string;
 }
 
 const getAfterFieldsToValidateOnChange = (stepIndex: number, includeCurrent = true) => {
@@ -55,6 +61,8 @@ const AfterFieldControl = ({
   valueField,
   unitField,
   millisField,
+  dataRetentionEsFormat,
+  frozenAfterEsFormat,
 }: {
   stepIndex: number;
   dataTestSubj: string;
@@ -62,6 +70,8 @@ const AfterFieldControl = ({
   valueField: FieldHook<string>;
   unitField: FieldHook<PreservedTimeUnit>;
   millisField: FieldHook<number>;
+  dataRetentionEsFormat?: string;
+  frozenAfterEsFormat?: string;
 }) => {
   const form = useFormContext();
 
@@ -77,46 +87,38 @@ const AfterFieldControl = ({
     setDraftValue(committedValue);
   }, [committedValue]);
 
-  const getAfterMsAt = (index: number): number | undefined => {
+  const getAfterDurationAt = (index: number): string | undefined => {
     const value = String(
       form.getFields()[`_meta.downsampleSteps[${index}].afterValue`]?.value ?? ''
     ).trim();
     const unit = String(
       form.getFields()[`_meta.downsampleSteps[${index}].afterUnit`]?.value ?? 'd'
-    ) as PreservedTimeUnit;
-    if (value === '') return;
-    const ms = toMilliseconds(value, unit);
-    return Number.isFinite(ms) && ms >= 0 ? ms : undefined;
+    );
+    // "after" must be a non-negative integer; skip the label for invalid values so a half-typed
+    // previous step doesn't render "NaNd" or "-1d".
+    return formatDuration(value, unit, { integerOnly: true, minInclusive: 0 });
   };
 
-  const lowerBoundMs = stepIndex > 0 ? getAfterMsAt(stepIndex - 1) ?? 0 : 0;
-  const upperBoundMs =
-    stepIndex < MAX_DOWNSAMPLE_STEPS - 1 ? getAfterMsAt(stepIndex + 1) : undefined;
-  const { min, max } = getBoundsHelpTextValues({
-    lowerBoundMs,
-    upperBoundMs,
-    unit: currentUnit,
-  });
+  const lowerValue = stepIndex > 0 ? getAfterDurationAt(stepIndex - 1) : undefined;
 
-  const helpText =
-    upperBoundMs === undefined
-      ? i18n.translate('xpack.streams.editDslStepsFlyout.afterHelpLowerBound', {
-          defaultMessage: 'Must be larger than {min} based on current configuration.',
-          values: { min },
-        })
-      : i18n.translate('xpack.streams.editDslStepsFlyout.afterHelpRange', {
-          defaultMessage:
-            'Must be larger than {min} and smaller than {max} based on current configuration.',
-          values: {
-            min,
-            max,
-          },
-        });
+  // The step should occur before the data reaches the frozen phase if one is configured, otherwise
+  // before the delete phase (data retention).
+  let upper: HelpTextBound | undefined;
+  if (frozenAfterEsFormat) {
+    upper = { neighbor: { type: 'phase', phase: 'frozen' }, value: frozenAfterEsFormat };
+  } else if (dataRetentionEsFormat) {
+    upper = { neighbor: { type: 'phase', phase: 'delete' }, value: dataRetentionEsFormat };
+  }
+
+  const helpText = getTimingBoundHelpText({
+    lower: lowerValue ? { neighbor: { type: 'previousStep' }, value: lowerValue } : undefined,
+    upper,
+  });
 
   return (
     <EuiFormRow
       label={i18n.translate('xpack.streams.editDslStepsFlyout.afterLabel', {
-        defaultMessage: 'Downsample data after',
+        defaultMessage: 'Downsample after',
       })}
       helpText={helpText}
       isInvalid={isInvalid}
@@ -129,7 +131,7 @@ const AfterFieldControl = ({
             fullWidth
             min={0}
             aria-label={i18n.translate('xpack.streams.editDslStepsFlyout.afterAriaLabel', {
-              defaultMessage: 'Downsample data after value',
+              defaultMessage: 'Downsample after value',
             })}
             value={draftValue}
             isInvalid={isInvalid}
@@ -185,6 +187,8 @@ export const AfterField = ({
   timeUnitOptions,
   dataRetentionMs,
   dataRetentionEsFormat,
+  frozenAfterMs,
+  frozenAfterEsFormat,
 }: AfterFieldProps) => {
   const form = useFormContext();
   const stepIndex = getStepIndexFromArrayItemPath(item.path);
@@ -219,25 +223,32 @@ export const AfterField = ({
     [stepIndex]
   );
 
-  const afterValueValidations = useMemo(
-    () => [
+  const afterValueValidations = useMemo(() => {
+    // Downsampling must finish before the data is frozen if a frozen phase is configured; otherwise
+    // before it is deleted (data retention).
+    const exitBoundary =
+      frozenAfterMs !== undefined && frozenAfterEsFormat
+        ? {
+            boundaryMs: frozenAfterMs,
+            boundaryEsFormat: frozenAfterEsFormat,
+            phase: 'frozen' as const,
+          }
+        : dataRetentionMs !== undefined && dataRetentionEsFormat
+        ? {
+            boundaryMs: dataRetentionMs,
+            boundaryEsFormat: dataRetentionEsFormat,
+            phase: 'delete' as const,
+          }
+        : undefined;
+
+    return [
       { validator: requiredAfterValue },
       { validator: afterMustBeNonNegative },
       { validator: afterMustBeInteger },
       ...(stepIndex <= 0 ? [] : [{ validator: afterGreaterThanPreviousStep }]),
-      ...(dataRetentionMs !== undefined && dataRetentionEsFormat
-        ? [
-            {
-              validator: afterSmallerThanDataRetention({
-                retentionMs: dataRetentionMs,
-                retentionEsFormat: dataRetentionEsFormat,
-              }),
-            },
-          ]
-        : []),
-    ],
-    [dataRetentionEsFormat, dataRetentionMs, stepIndex]
-  );
+      ...(exitBoundary ? [{ validator: afterBeforeExitBoundary(exitBoundary) }] : []),
+    ];
+  }, [dataRetentionEsFormat, dataRetentionMs, frozenAfterEsFormat, frozenAfterMs, stepIndex]);
 
   const afterValueConfig = useMemo(
     () => ({
@@ -287,6 +298,8 @@ export const AfterField = ({
                   valueField={valueField as FieldHook<string>}
                   unitField={unitField as FieldHook<PreservedTimeUnit>}
                   millisField={millisField as FieldHook<number>}
+                  dataRetentionEsFormat={dataRetentionEsFormat}
+                  frozenAfterEsFormat={frozenAfterEsFormat}
                 />
               )}
             </UseField>

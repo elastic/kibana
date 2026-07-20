@@ -6,7 +6,6 @@
  */
 import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
-import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import pMap from 'p-map';
@@ -23,7 +22,7 @@ import type {
   Logger,
   KibanaRequest,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, isSavedObjectErrorResult } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -77,7 +76,6 @@ import type { AgentPolicyAgentVersionCondition } from '../../common/types/models
 import {
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
   AGENT_POLICY_INDEX,
-  AGENT_POLICY_VERSION_SEPARATOR,
   agentPolicyStatuses,
   FLEET_ELASTIC_AGENT_PACKAGE,
   UUID_V5_NAMESPACE,
@@ -130,6 +128,8 @@ import {
 import {
   hasVersionSuffix,
   removeVersionSuffixFromPolicyId,
+  buildPolicyIdOrVariantsKuery,
+  buildPolicyIdOrVariantsEsFilter,
 } from '../../common/services/version_specific_policies_utils';
 
 import { VERIFY_PERMISSIONS_TASK } from '../tasks/agentless/verify_permissions_task';
@@ -507,8 +507,7 @@ class AgentPolicyService {
     this.checkAgentless(agentPolicy);
 
     if (agentPolicy.supports_agentless && !agentPolicy.fleet_server_host_id) {
-      const { fleetServerId } = agentlessAgentService.getDefaultSettings();
-      agentPolicy.fleet_server_host_id = fleetServerId;
+      agentPolicy.fleet_server_host_id = agentlessAgentService.getDefaultFleetServerId();
     }
 
     await this.requireUniqueName(soClient, agentPolicy);
@@ -838,7 +837,7 @@ class AgentPolicyService {
     const agentPolicies = await pMap(
       bulkGetResponse.saved_objects,
       async (agentPolicySO) => {
-        if (agentPolicySO.error) {
+        if (isSavedObjectErrorResult(agentPolicySO)) {
           if (options.ignoreMissing && agentPolicySO.error.statusCode === 404) {
             logger.debug(
               `Agent policy [${agentPolicySO.id}] was not found, but 'options.ignoreMissing' is 'true'`
@@ -973,11 +972,10 @@ class AgentPolicyService {
               (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
           }
           if (options.withAgentCount) {
-            const policyKuery = `(${AGENTS_PREFIX}.policy_id:"${escapeQuotes(
-              agentPolicy.id
-            )}" or ${AGENTS_PREFIX}.policy_id:${escapeKuery(
-              agentPolicy.id
-            )}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
+            const policyKuery = buildPolicyIdOrVariantsKuery(
+              agentPolicy.id,
+              `${AGENTS_PREFIX}.policy_id`
+            );
             await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
               showInactive: true,
               perPage: 0,
@@ -1651,7 +1649,7 @@ class AgentPolicyService {
       [
         ...agentPoliciesUsingOutput.saved_objects,
         ...agentPoliciesOfPackagePoliciesUsingOutput.saved_objects,
-      ],
+      ].filter((so): so is SavedObject<AgentPolicySOAttributes> => !isSavedObjectErrorResult(so)),
       options
     );
   }
@@ -1681,12 +1679,14 @@ class AgentPolicyService {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
 
-    // Prevent deleting policy when assigned agents are inactive
+    // Prevent deleting policy when assigned agents are inactive. Also matches agents on
+    // version-specific variants of this policy (e.g. `id#9.2`), which would otherwise be
+    // missed since their policy_id is not an exact match.
     const { total } = await getAgentsByKuery(esClient, soClient, {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(id)}"`,
+      kuery: buildPolicyIdOrVariantsKuery(id, `${AGENTS_PREFIX}.policy_id`),
     });
 
     if (total > 0 && !agentPolicy?.supports_agentless) {
@@ -2119,11 +2119,7 @@ class AgentPolicyService {
         ignore_unavailable: true,
         scroll_size: SO_SEARCH_LIMIT,
         refresh: true,
-        query: {
-          term: {
-            policy_id: agentPolicyId,
-          },
-        },
+        query: buildPolicyIdOrVariantsEsFilter(agentPolicyId),
       });
       hasMore = (res.deleted ?? 0) === SO_SEARCH_LIMIT;
     }
@@ -2383,7 +2379,9 @@ class AgentPolicyService {
 
     return this._bumpPolicies(
       internalSoClientWithoutSpaceExtension,
-      bulkGetResponse.saved_objects,
+      bulkGetResponse.saved_objects.filter(
+        (so): so is SavedObject<AgentPolicySOAttributes> => !isSavedObjectErrorResult(so)
+      ),
       options
     );
   }
@@ -2455,7 +2453,7 @@ class AgentPolicyService {
     }> = [];
 
     updatedAgentPolicies.forEach((policy) => {
-      if (policy.error) {
+      if (isSavedObjectErrorResult(policy)) {
         failedPolicies.push({
           id: policy.id,
           error: policy.error,
@@ -2463,7 +2461,9 @@ class AgentPolicyService {
       }
     });
 
-    const updatedPoliciesSuccess = updatedAgentPolicies.filter((policy) => !policy.error);
+    const updatedPoliciesSuccess = updatedAgentPolicies.filter(
+      (policy): policy is SavedObject<AgentPolicySOAttributes> => !isSavedObjectErrorResult(policy)
+    );
 
     await scheduleDeployAgentPoliciesTask(
       appContextService.getTaskManagerStart()!,

@@ -247,6 +247,10 @@ export interface ActionTypeCoreFields<
    */
   description?: string;
   /**
+   * When true, the connector type supports testing.
+   */
+  isTestable?: boolean;
+  /**
    * When true, the connector type is shown as technical preview in the UI.
    */
   isExperimental?: boolean;

@@ -16,6 +16,20 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+export const AnomalyScoreRange = lazySchema(() =>
+  z.object({
+    /**
+     * Minimum record_score (inclusive)
+     */
+    min_score: z.number().min(0).max(100),
+    /**
+     * Maximum record_score (exclusive); omit for an unbounded upper end
+     */
+    max_score: z.number().min(0).max(100).optional(),
+  })
+);
+export type AnomalyScoreRange = z.infer<typeof AnomalyScoreRange>;
+
 export const AnomalySummaryRequestBody = lazySchema(() =>
   z.object({
     /**
@@ -34,6 +48,10 @@ export const AnomalySummaryRequestBody = lazySchema(() =>
      * End time as epoch milliseconds; only anomalies at or before this timestamp are returned
      */
     to: z.number().int().min(0).optional(),
+    /**
+     * Filter to anomalies whose record_score falls within any one of the given ranges; omit to use the default threshold of 1 and include all scores up to 100
+     */
+    score_ranges: z.array(AnomalyScoreRange).max(10).optional(),
     /**
      * Filter results to the specified ML job IDs; returns all jobs when omitted
      */
@@ -59,6 +77,10 @@ export type AnomalySummaryRequestBody = z.infer<typeof AnomalySummaryRequestBody
 
 export const AnomalySummaryEntry = lazySchema(() =>
   z.object({
+    /**
+     * Elasticsearch document ID of the ML anomaly record
+     */
+    recordId: z.string().max(200),
     jobId: z.string().max(150),
     /**
      * Human-readable display name for the ML job (from custom_settings.security_app_display_name)
@@ -121,6 +143,125 @@ export const AnomalySummaryResponse = lazySchema(() =>
   })
 );
 export type AnomalySummaryResponse = z.infer<typeof AnomalySummaryResponse>;
+
+export const AnomalyOverviewRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Start time as epoch milliseconds; defaults to now-30d when omitted
+     */
+    from: z.number().int().min(0).optional(),
+    /**
+     * End time as epoch milliseconds; defaults to now when omitted
+     */
+    to: z.number().int().min(0).optional(),
+    /**
+     * Filter to anomalies whose record_score falls within any one of the given ranges; omit to use the default threshold of 1 and include all scores up to 100
+     */
+    score_ranges: z.array(AnomalyScoreRange).max(10).optional(),
+    /**
+     * Filter results to jobs associated with the specified MITRE ATT&CK tactic names; returns all tactics when omitted
+     */
+    threat_tactics: z.array(z.string().max(150)).max(100).optional(),
+  })
+);
+export type AnomalyOverviewRequestBody = z.infer<typeof AnomalyOverviewRequestBody>;
+
+export const AnomalyOverviewEntry = lazySchema(() =>
+  z.object({
+    /**
+     * ISO-8601 start of the time bucket
+     */
+    timestamp: z.string().max(100),
+    /**
+     * Highest anomaly record_score within this time bucket
+     */
+    maxScore: z.number(),
+    /**
+     * MITRE ATT&CK tactic names for all jobs that fired in this bucket
+     */
+    threatTactics: z.array(z.string().max(150)).max(100),
+    /**
+     * Number of anomaly records per MITRE ATT&CK tactic within this time bucket; a job's doc_count is attributed to each tactic it is configured for
+     */
+    tacticCounts: z.object({}).catchall(z.number().int()).optional(),
+  })
+);
+export type AnomalyOverviewEntry = z.infer<typeof AnomalyOverviewEntry>;
+
+export const AnomalyOverviewHit = lazySchema(() =>
+  z.object({
+    /**
+     * Elasticsearch document ID of the ML anomaly record
+     */
+    recordId: z.string().max(200),
+    jobId: z.string().max(150),
+    /**
+     * Human-readable display name for the ML job
+     */
+    jobName: z.string().max(1000).nullable(),
+    /**
+     * ISO-8601 timestamp of the anomaly record
+     */
+    timestamp: z.string().max(100),
+    /**
+     * The anomalous value observed by the detector
+     */
+    anomalousValue: z.string().max(200).nullable(),
+  })
+);
+export type AnomalyOverviewHit = z.infer<typeof AnomalyOverviewHit>;
+
+export const AnomalyOverviewResponse = lazySchema(() =>
+  z.object({
+    entityId: z.string().max(200),
+    entityType: z.string().max(100).optional(),
+    anomalyByTimeBucket: z.array(AnomalyOverviewEntry),
+    /**
+     * Up to 3 most recent individual anomaly records, sorted by timestamp then score descending
+     */
+    recentAnomalies: z.array(AnomalyOverviewHit).max(3),
+    /**
+     * Number of anomaly records associated with each MITRE ATT&CK tactic
+     */
+    tacticCounts: z.object({}).catchall(z.number().int()),
+    /**
+     * Total number of anomaly records returned
+     */
+    totalAnomaliesCount: z.number().int(),
+    /**
+     * Effective start of the query time range as epoch milliseconds
+     */
+    from: z.number().int(),
+    /**
+     * Effective end of the query time range as epoch milliseconds
+     */
+    to: z.number().int(),
+    /**
+     * True when at least one ML job contributing to this overview has no `custom_settings.threat_tactics` configured, meaning tactic counts may be incomplete
+     */
+    hasJobsMissingThreatTactics: z.boolean(),
+  })
+);
+export type AnomalyOverviewResponse = z.infer<typeof AnomalyOverviewResponse>;
+
+export const GetAnomalyOverviewRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * Entity type — determines which EUID runtime mapping is used when searching the anomalies index
+     */
+    entity_type: z.enum(['user', 'host']),
+    entity_id: z.string().min(1).max(1000),
+  })
+);
+export type GetAnomalyOverviewRequestParams = z.infer<typeof GetAnomalyOverviewRequestParams>;
+export type GetAnomalyOverviewRequestParamsInput = z.input<typeof GetAnomalyOverviewRequestParams>;
+
+export const GetAnomalyOverviewRequestBody = lazySchema(() => AnomalyOverviewRequestBody);
+export type GetAnomalyOverviewRequestBody = z.infer<typeof GetAnomalyOverviewRequestBody>;
+export type GetAnomalyOverviewRequestBodyInput = z.input<typeof GetAnomalyOverviewRequestBody>;
+
+export const GetAnomalyOverviewResponse = lazySchema(() => AnomalyOverviewResponse);
+export type GetAnomalyOverviewResponse = z.infer<typeof GetAnomalyOverviewResponse>;
 
 export const GetAnomalySummaryRequestParams = lazySchema(() =>
   z.object({

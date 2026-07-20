@@ -10,11 +10,17 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { of } from 'rxjs';
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MemoryRouter, Route, Routes } from '@kbn/shared-ux-router';
 import { WorkflowExecutionsRouteGate } from './workflow_executions_route_gate';
-import { createStartServicesMock } from '../mocks';
+import { createStartServicesMock, type StartServicesMock } from '../mocks';
+
+const setExecutionsViewEnabled = (services: StartServicesMock, enabled: boolean) => {
+  services.settings.globalClient.get.mockReturnValue(enabled);
+  services.settings.globalClient.get$.mockReturnValue(of(enabled));
+};
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -48,6 +54,7 @@ describe('WorkflowExecutionsRouteGate', () => {
   it('redirects to workflows home when experimental features are off', () => {
     mockUseUiSetting.mockReturnValue(false);
     const services = createStartServicesMock();
+    setExecutionsViewEnabled(services, false);
 
     renderGate(services);
 
@@ -58,6 +65,7 @@ describe('WorkflowExecutionsRouteGate', () => {
   it('renders the executions page when experimental features are on', () => {
     mockUseUiSetting.mockReturnValue(true);
     const services = createStartServicesMock();
+    setExecutionsViewEnabled(services, true);
 
     renderGate(services);
 

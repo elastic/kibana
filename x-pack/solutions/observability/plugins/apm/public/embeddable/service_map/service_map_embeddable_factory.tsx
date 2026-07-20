@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type {
+  CanExpandPanels,
   HasEditCapabilities,
   PublishesBlockingError,
   PublishesUnifiedSearch,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import {
+  apiCanExpandPanels,
+  apiHasParentApi,
+  getViewModeSubject,
   initializeStateManager,
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -120,6 +125,9 @@ function buildQueryFromKuery(kuery: string | undefined): Query | undefined {
   return { query: trimmed, language: 'kuery' };
 }
 
+const NO_EXPANDED_PANEL$ = new BehaviorSubject<string | undefined>(undefined);
+const DEFAULT_VIEW_MODE$ = new BehaviorSubject<ViewMode>('view');
+
 export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: EmbeddablePublicDefinition<ServiceMapEmbeddableState, ServiceMapEmbeddableApi> = {
     type: APM_SERVICE_MAP_EMBEDDABLE,
@@ -191,7 +199,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         canEditUnifiedSearch: () => true,
         getTypeDisplayName: () =>
           i18n.translate('xpack.apm.serviceMap.embeddable.typeDisplayName', {
-            defaultMessage: 'configuration',
+            defaultMessage: 'Service map',
           }),
         isEditingEnabled: () => true,
         onEdit: async () => {
@@ -242,6 +250,13 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         },
       });
 
+      // Precompute stable subject references for panel-maximized and view-mode detection.
+      const expandedPanelIdSubject =
+        apiHasParentApi(api) && apiCanExpandPanels(api.parentApi)
+          ? (api.parentApi as CanExpandPanels).expandedPanelId$
+          : NO_EXPANDED_PANEL$;
+      const viewModeSubject = getViewModeSubject(api.parentApi) ?? DEFAULT_VIEW_MODE$;
+
       return {
         api,
         Component: () => {
@@ -284,6 +299,20 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             customStateManager.api.connectionFilter$,
             customStateManager.api.anomalySeverityFilter$
           );
+
+          const [showEmbeddedControls, setShowEmbeddedControls] = useState(
+            () =>
+              expandedPanelIdSubject.getValue() === uuid && viewModeSubject.getValue() !== 'edit'
+          );
+
+          useEffect(() => {
+            const sub = combineLatest([expandedPanelIdSubject, viewModeSubject]).subscribe(
+              ([expandedId, vm]) => {
+                setShowEmbeddedControls(expandedId === uuid && vm !== 'edit');
+              }
+            );
+            return () => sub.unsubscribe();
+          }, []);
 
           const viewFilters = useMemo(
             () =>
@@ -356,6 +385,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                   parentQuery={parentQuery}
                   viewFilters={viewFilters}
                   onViewFiltersChange={onViewFiltersChange}
+                  showEmbeddedControls={showEmbeddedControls}
                 />
               </ApmEmbeddableContext>
             </div>

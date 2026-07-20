@@ -68,7 +68,18 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
     targetEntityType: 'host',
     bucketTargetByThreshold: ACCESSES_BUCKETING,
     requireTargetEntityIdExists: true,
-    esqlWhereClause: `event.category IN ("authentication", "session")
+    // SSH auth events use local-namespace EUID: `user.name@host.id@local`.
+    // `user.id` is not part of the EUID for local entities — including it in
+    // the composite agg sources causes bucket explosion (the same username
+    // appears with dozens of distinct Unix UIDs / Windows SIDs across hosts),
+    // multiplying Step 1 pages and Step 2 ES|QL queries for zero benefit.
+    customActor: { fields: ['user.email', 'user.name'] },
+    // `event.category` is multivalued in ECS (Elastic Agent's syslog SSH events
+    // emit `["authentication", "session"]`). ES|QL `IN` returns NULL for a
+    // multivalued left-hand side, so `event.category IN (...)` silently drops
+    // those events. Use MV_CONTAINS (same idiom as communicates_with/system_auth)
+    // so multivalued categories match.
+    esqlWhereClause: `(MV_CONTAINS(TO_STRING(event.category), "authentication") OR MV_CONTAINS(TO_STRING(event.category), "session"))
     AND event.action == "ssh_login"
     AND event.outcome == "success"`,
     compositeAggAdditionalFilters: [

@@ -158,6 +158,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "anomaly.timestamp": Object {
+      "required": false,
+      "type": "date",
+    },
     "container.id": Object {
       "required": false,
       "type": "keyword",
@@ -276,6 +280,10 @@ Object {
     "anomaly.detector_type": Object {
       "required": false,
       "type": "keyword",
+    },
+    "anomaly.timestamp": Object {
+      "required": false,
+      "type": "date",
     },
     "container.id": Object {
       "required": false,
@@ -396,6 +404,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "anomaly.timestamp": Object {
+      "required": false,
+      "type": "date",
+    },
     "container.id": Object {
       "required": false,
       "type": "keyword",
@@ -492,7 +504,9 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: apm.transaction_error_rate 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: apm.transaction_error_rate 1`
+] = `
 Object {
   "dynamicTemplates": Array [
     Object {
@@ -514,6 +528,10 @@ Object {
     "anomaly.detector_type": Object {
       "required": false,
       "type": "keyword",
+    },
+    "anomaly.timestamp": Object {
+      "required": false,
+      "type": "date",
     },
     "container.id": Object {
       "required": false,
@@ -964,6 +982,11 @@ Object {
       "required": false,
       "type": "boolean",
     },
+    "kibana.alert.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.start": Object {
       "array": false,
       "required": false,
@@ -1062,7 +1085,9 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: datasetQuality.degradedDocs 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: datasetQuality.degradedDocs 1`
+] = `
 Object {
   "dynamicTemplates": Array [
     Object {
@@ -1102,7 +1127,9 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: logs.alert.document.count 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: logs.alert.document.count 1`
+] = `
 Object {
   "dynamicTemplates": Array [
     Object {
@@ -1168,7 +1195,9 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: metrics.alert.inventory.threshold 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: metrics.alert.inventory.threshold 1`
+] = `
 Object {
   "dynamicTemplates": Array [
     Object {
@@ -1300,79 +1329,105 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_cluster_health 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: monitoring_alert_cluster_health 1`
+] = `
 Object {
   "fieldMap": Object {},
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_cpu_usage 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: monitoring_alert_cpu_usage 1`
+] = `
 Object {
   "fieldMap": Object {},
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_disk_usage 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: monitoring_alert_disk_usage 1`
+] = `
 Object {
   "fieldMap": Object {},
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_elasticsearch_version_mismatch 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: monitoring_alert_elasticsearch_version_mismatch 1`
+] = `
 Object {
   "fieldMap": Object {},
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_jvm_memory_usage 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: monitoring_alert_jvm_memory_usage 1`
+] = `
 Object {
   "fieldMap": Object {},
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_kibana_version_mismatch 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: monitoring_alert_kibana_version_mismatch 1`
+] = `
 Object {
   "fieldMap": Object {},
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_license_expiration 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: monitoring_alert_license_expiration 1`
+] = `
 Object {
   "fieldMap": Object {},
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_logstash_version_mismatch 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: monitoring_alert_logstash_version_mismatch 1`
+] = `
 Object {
   "fieldMap": Object {},
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_missing_monitoring_data 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: monitoring_alert_missing_monitoring_data 1`
+] = `
 Object {
   "fieldMap": Object {},
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_nodes_changed 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: monitoring_alert_nodes_changed 1`
+] = `
 Object {
   "fieldMap": Object {},
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_thread_pool_search_rejections 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: monitoring_alert_thread_pool_search_rejections 1`
+] = `
 Object {
   "fieldMap": Object {},
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_thread_pool_write_rejections 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: monitoring_alert_thread_pool_write_rejections 1`
+] = `
 Object {
   "fieldMap": Object {},
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_ccr_read_exceptions 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: monitoring_ccr_read_exceptions 1`
+] = `
 Object {
   "fieldMap": Object {},
 }
@@ -1384,7 +1439,9 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: observability.rules.custom_threshold 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: observability.rules.custom_threshold 1`
+] = `
 Object {
   "dynamicTemplates": Array [
     Object {
@@ -2082,6 +2139,11 @@ Object {
       "type": "keyword",
     },
     "kibana.alert.severity_improving": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
+    "kibana.alert.snoozed": Object {
       "array": false,
       "required": false,
       "type": "boolean",
@@ -3386,6 +3448,11 @@ Object {
       "required": false,
       "type": "boolean",
     },
+    "kibana.alert.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.start": Object {
       "array": false,
       "required": false,
@@ -4682,6 +4749,11 @@ Object {
       "type": "keyword",
     },
     "kibana.alert.severity_improving": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
+    "kibana.alert.snoozed": Object {
       "array": false,
       "required": false,
       "type": "boolean",
@@ -5986,6 +6058,11 @@ Object {
       "required": false,
       "type": "boolean",
     },
+    "kibana.alert.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.start": Object {
       "array": false,
       "required": false,
@@ -7282,6 +7359,11 @@ Object {
       "type": "keyword",
     },
     "kibana.alert.severity_improving": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
+    "kibana.alert.snoozed": Object {
       "array": false,
       "required": false,
       "type": "boolean",
@@ -8592,6 +8674,11 @@ Object {
       "required": false,
       "type": "boolean",
     },
+    "kibana.alert.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.start": Object {
       "array": false,
       "required": false,
@@ -9888,6 +9975,11 @@ Object {
       "type": "keyword",
     },
     "kibana.alert.severity_improving": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
+    "kibana.alert.snoozed": Object {
       "array": false,
       "required": false,
       "type": "boolean",
@@ -11192,6 +11284,11 @@ Object {
       "required": false,
       "type": "boolean",
     },
+    "kibana.alert.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.start": Object {
       "array": false,
       "required": false,
@@ -12161,6 +12258,11 @@ Object {
       "required": false,
       "type": "boolean",
     },
+    "kibana.alert.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.start": Object {
       "array": false,
       "required": false,
@@ -12287,7 +12389,9 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: xpack.ml.anomaly_detection_alert 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: xpack.ml.anomaly_detection_alert 1`
+] = `
 Object {
   "fieldMap": Object {
     "kibana.alert.anomaly_score": Object {
@@ -12399,7 +12503,9 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: xpack.ml.anomaly_detection_jobs_health 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: xpack.ml.anomaly_detection_jobs_health 1`
+] = `
 Object {
   "fieldMap": Object {
     "kibana.alert.datafeed_results": Object {
@@ -12489,7 +12595,9 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: xpack.synthetics.alerts.monitorStatus 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: xpack.synthetics.alerts.monitorStatus 1`
+] = `
 Object {
   "dynamicTemplates": Array [
     Object {
@@ -12660,7 +12768,9 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: xpack.synthetics.alerts.tls 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: xpack.synthetics.alerts.tls 1`
+] = `
 Object {
   "dynamicTemplates": Array [
     Object {
@@ -12831,7 +12941,9 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.durationAnomaly 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.durationAnomaly 1`
+] = `
 Object {
   "dynamicTemplates": Array [
     Object {
@@ -13002,7 +13114,9 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.monitorStatus 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.monitorStatus 1`
+] = `
 Object {
   "dynamicTemplates": Array [
     Object {
@@ -13179,7 +13293,9 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.tlsCertificate 1`] = `
+exports[
+  `Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.tlsCertificate 1`
+] = `
 Object {
   "dynamicTemplates": Array [
     Object {
