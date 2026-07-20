@@ -609,7 +609,7 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
               {categoryDescriptor
                 ? categoryDescriptor.label
                 : i18n.translate('xpack.streams.entityCentricLab.entities.title', {
-                    defaultMessage: 'Hello World',
+                    defaultMessage: 'All entities',
                   })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

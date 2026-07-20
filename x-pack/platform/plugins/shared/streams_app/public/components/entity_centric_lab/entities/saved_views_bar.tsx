@@ -55,6 +55,66 @@ const ROW_CSS = css`
   flex-grow: 0;
 `;
 
+/**
+ * Hard cap on a saved-view name. Enforced on the Save and Rename inputs
+ * (via `maxLength`) and defensively when building the default copy name
+ * so a single view can never blow out the dropdown / loaded-view button
+ * layout. Long names are additionally ellipsis-truncated on display.
+ */
+const MAX_VIEW_NAME_LENGTH = 50;
+
+// Matches a trailing " (copy)" or " (copy 3)" marker, case-insensitive.
+const COPY_SUFFIX_RE = /\s*\(copy(?:\s+\d+)?\)$/i;
+
+/**
+ * Strip every trailing "(copy)" / "(copy N)" marker to recover the
+ * original root name. Repeated so an already-mangled
+ * `Nico (copy) (copy) (copy)` collapses back to `Nico` instead of
+ * growing another suffix each time it's duplicated.
+ */
+const stripCopySuffix = (name: string): string => {
+  let result = name.trim();
+  while (COPY_SUFFIX_RE.test(result)) {
+    result = result.replace(COPY_SUFFIX_RE, '').trim();
+  }
+  return result;
+};
+
+/**
+ * Build the default name for "Save as new view": `root (copy)`, then
+ * `root (copy 2)`, `root (copy 3)`, … picking the first that doesn't
+ * collide with an existing name (case-insensitive). The numeric suffix
+ * is always preserved within {@link MAX_VIEW_NAME_LENGTH} — we trim the
+ * root, not the marker — so copies stay bounded and readable instead of
+ * stacking " (copy) (copy) (copy)".
+ */
+const buildCopyName = (baseName: string, existingNames: readonly string[]): string => {
+  const root = stripCopySuffix(baseName) || baseName.trim();
+  const taken = new Set(existingNames.map((name) => name.toLowerCase()));
+  const candidate = (n: number): string => {
+    const suffix = n === 1 ? ' (copy)' : ` (copy ${n})`;
+    const room = Math.max(0, MAX_VIEW_NAME_LENGTH - suffix.length);
+    const trimmedRoot = root.length > room ? root.slice(0, room).trimEnd() : root;
+    return `${trimmedRoot}${suffix}`;
+  };
+  let n = 1;
+  let name = candidate(n);
+  while (taken.has(name.toLowerCase())) {
+    n += 1;
+    name = candidate(n);
+  }
+  return name;
+};
+
+/**
+ * Ellipsis-truncate a view name for inline display (e.g. the
+ * `Update "<name>"` button) so pre-existing long names — saved before
+ * {@link MAX_VIEW_NAME_LENGTH} was enforced — can't overflow the
+ * toolbar row. Purely visual; the stored name is untouched.
+ */
+const truncateName = (name: string, max = 24): string =>
+  name.length > max ? `${name.slice(0, max - 1).trimEnd()}…` : name;
+
 interface Props {
   /**
    * Snapshot of the *current* on-page state, used to (a) power the
@@ -96,16 +156,24 @@ export const SavedViewsBar = ({ currentState, onApplyView, savedViews }: Props) 
   const renameModalTitleId = useGeneratedHtmlId({ prefix: 'entityCentricLabRenameViewTitle' });
 
   const openSaveModal = useCallback(() => {
-    // Seed with the loaded view's name so "Save as" reads naturally
-    // ("payments-team hosts (2)"). Empty when nothing is loaded.
-    setSaveName(currentView ? `${currentView.name} (copy)` : '');
+    // Seed with a de-duplicated copy name ("Nico (copy)", "Nico (copy 2)")
+    // built off the *root* of the loaded view, so repeated "Save as"
+    // never stacks " (copy) (copy) (copy)". Empty when nothing is loaded.
+    setSaveName(
+      currentView
+        ? buildCopyName(
+            currentView.name,
+            views.map((view) => view.name)
+          )
+        : ''
+    );
     setSaveOpen(true);
-  }, [currentView]);
+  }, [currentView, views]);
 
   const closeSaveModal = useCallback(() => setSaveOpen(false), []);
 
   const handleSave = useCallback(() => {
-    const name = saveName.trim();
+    const name = saveName.trim().slice(0, MAX_VIEW_NAME_LENGTH);
     if (!name) return;
     saveView(name, currentState);
     setSaveOpen(false);
@@ -126,7 +194,7 @@ export const SavedViewsBar = ({ currentState, onApplyView, savedViews }: Props) 
 
   const handleRename = useCallback(() => {
     if (!renameTarget) return;
-    const name = renameValue.trim();
+    const name = renameValue.trim().slice(0, MAX_VIEW_NAME_LENGTH);
     if (!name) return;
     renameView(renameTarget.id, name);
     setRenameTarget(null);
@@ -192,6 +260,7 @@ export const SavedViewsBar = ({ currentState, onApplyView, savedViews }: Props) 
                 iconSide="right"
                 size="s"
                 onClick={() => setLoadOpen((open) => !open)}
+                css={loadedButtonCss}
                 data-test-subj="entityCentricLabSavedViewsLoad"
               >
                 {loadedLabel}
@@ -292,7 +361,7 @@ export const SavedViewsBar = ({ currentState, onApplyView, savedViews }: Props) 
             >
               {i18n.translate('xpack.streams.entityCentricLab.savedViews.updateButton', {
                 defaultMessage: 'Update "{name}"',
-                values: { name: currentView.name },
+                values: { name: truncateName(currentView.name) },
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -349,6 +418,7 @@ export const SavedViewsBar = ({ currentState, onApplyView, savedViews }: Props) 
               <EuiFieldText
                 fullWidth
                 autoFocus
+                maxLength={MAX_VIEW_NAME_LENGTH}
                 value={saveName}
                 onChange={(event) => setSaveName(event.target.value)}
                 onKeyDown={(event) => {
@@ -407,6 +477,7 @@ export const SavedViewsBar = ({ currentState, onApplyView, savedViews }: Props) 
               <EuiFieldText
                 fullWidth
                 autoFocus
+                maxLength={MAX_VIEW_NAME_LENGTH}
                 value={renameValue}
                 onChange={(event) => setRenameValue(event.target.value)}
                 onKeyDown={(event) => {
@@ -497,12 +568,13 @@ const SavedViewRow = ({
       css={rowCss}
       data-test-subj={`entityCentricLabSavedViewRow-${view.id}`}
     >
-      <EuiFlexItem>
+      <EuiFlexItem css={rowLabelCss}>
         <EuiListGroupItem
           label={view.name}
           onClick={onLoad}
           size="s"
           iconType={isActive ? 'check' : 'empty'}
+          showToolTip
           data-test-subj={`entityCentricLabSavedViewLoad-${view.id}`}
         />
       </EuiFlexItem>
@@ -583,6 +655,24 @@ const SavedViewRow = ({
 
 const listGroupCss = css`
   min-width: 320px;
+`;
+
+// Cap the loaded-view button and ellipsis-truncate its label so a long
+// view name can't stretch the toolbar row.
+const loadedButtonCss = css`
+  max-width: 220px;
+  & .euiButtonEmpty__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
+
+// `min-width: 0` lets the flex child shrink below its content width so
+// the list item's own ellipsis truncation kicks in instead of the long
+// name forcing the whole popover panel wider.
+const rowLabelCss = css`
+  min-width: 0;
 `;
 
 const rowCss = css`
