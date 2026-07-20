@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { State } from '../../common/store/types';
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
 
