@@ -211,6 +211,7 @@ export const getNavigationTreeDefinition = ({
           ],
           footer: [
             {
+              breadcrumbStatus: 'hidden',
               icon: 'rocket',
               id: 'search_getting_started',
               link: 'searchGettingStarted',
