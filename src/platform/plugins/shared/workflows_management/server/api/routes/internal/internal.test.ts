@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { errors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
