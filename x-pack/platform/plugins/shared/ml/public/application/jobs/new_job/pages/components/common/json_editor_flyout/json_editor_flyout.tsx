@@ -153,9 +153,12 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
         originalIndices.every((value, index) => value === datafeed.indices[index]);
       setShowChangedIndicesWarning(valid === false);
 
-      const projectRouting = datafeed.project_routing?.replace(/^_alias:/, '');
+      const scope = datafeed.project_routing?.replace(/^_alias:/, '');
+      const requestedProjects = scope ? scope.split(',').filter((p) => p.length > 0) : [];
       const hasInvalidProjectRouting =
-        !!projectRouting && !allowedProjects.includes(projectRouting);
+        requestedProjects.length === 0 ||
+        !requestedProjects.every((p) => allowedProjects.includes(p));
+
       setShowProjectRoutingWarning(hasInvalidProjectRouting);
       if (hasInvalidProjectRouting) {
         valid = false;
