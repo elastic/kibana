@@ -153,11 +153,14 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario> = {
     name: 'Okta identity takeover feed',
     title: 'Okta identity takeover via stolen sessions from Russian IP space',
     body:
-      'Threat actors are abusing stolen Okta sessions from Russian IP 192[.]0[.]2[.]50 ' +
-      '(192.0.2.50) to reset passwords, strip MFA (user.mfa.factor.deactivate), and grant Super ' +
-      'Admin to finance and IT accounts including cfo@corp.example and it-admin@corp.example. ' +
-      'Follow-on activity includes system.api_token.create and privileged app group membership. ' +
-      'Hunt ATT&CK T1078.004, T1556, T1098, and T1136.003 across okta.system telemetry.',
+      // Keep campaign/actor language explicit so enrich_taxonomy marks diamond_suitable
+      // true (generic "threat actors" alone has been gated false and skipped extract_diamond).
+      'LAPSUS$-style identity campaign: operators abusing stolen Okta sessions from Russian IP ' +
+      '192[.]0[.]2[.]50 (192.0.2.50) to reset passwords, strip MFA (user.mfa.factor.deactivate), and ' +
+      'grant Super Admin to finance and IT accounts including cfo@corp.example and ' +
+      'it-admin@corp.example. Follow-on activity includes system.api_token.create and privileged ' +
+      'app group membership. Hunt ATT&CK T1078.004, T1556, T1098, and T1136.003 across ' +
+      'okta.system telemetry.',
     joinIocs: [
       { type: 'ip', value: '192.0.2.50', defanged: '192[.]0[.]2[.]50' },
       { type: 'email', value: 'cfo@corp.example' },
