@@ -471,7 +471,7 @@ module.exports = {
     '@elastic/eui/consistent-is-invalid-props': 'error',
     '@elastic/eui/tooltip-no-interactive-content': 'error',
     '@elastic/eui/accessible-interactive-element': 'error',
-    '@elastic/eui/eui/no-unnamed-radio-group': 'error',
+    '@elastic/eui/no-unnamed-radio-group': 'error',
   },
 
   overrides: [
