@@ -29,7 +29,6 @@ import type {
 import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
 
 import { stripInheritedContext } from '../../../common/transforms/helpers';
-import { flattenAPIConfig } from '../../../common/transforms/utils';
 import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
@@ -126,7 +125,7 @@ export function initializeDashboardServices(
       },
       getSerializedStateByValue: () => {
         const { ref_id: refId, ...byValueRuntimeState } = stripInheritedContext(getLatestState());
-        return flattenAPIConfig(transformToApiConfig(byValueRuntimeState));
+        return transformToApiConfig(byValueRuntimeState);
       },
     },
     anyStateChange$: merge(

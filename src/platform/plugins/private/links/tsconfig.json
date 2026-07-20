@@ -32,6 +32,7 @@
     "@kbn/presentation-publishing",
     "@kbn/presentation-publishing-schemas",
     "@kbn/react-kibana-context-render",
+    "@kbn/share-plugin",
     "@kbn/es-query",
     "@kbn/presentation-util",
     "@kbn/kibana-utils-plugin",
@@ -44,8 +45,7 @@
     "@kbn/as-code-utils",
     "@kbn/as-code-shared-transforms",
     "@kbn/as-code-shared-telemetry",
-    "@kbn/scout",
-    "@kbn/share-plugin"
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }

@@ -16,7 +16,6 @@ export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 export const EXPORT_ACTION_GROUP = {
   id: 'export_actions',
   order: 9,
-  // asContextMenu: true,
   getIconType: () => 'upload',
   getDisplayName: () =>
     i18n.translate('embeddableApi.actions.exportDisplayName', {

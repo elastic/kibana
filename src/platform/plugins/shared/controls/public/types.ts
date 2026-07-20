@@ -12,7 +12,6 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export interface CanClearSelections {
@@ -33,12 +32,10 @@ export const isClearableControl = (control: unknown): control is CanClearSelecti
 export interface ControlsPluginSetupDeps {
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
-  share?: SharePluginSetup;
 }
 export interface ControlsPluginStartDeps {
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
-  share?: SharePluginStart;
 }
