@@ -111,4 +111,82 @@ describe('getSourceRuleToNaturalLanguageNode', () => {
       expect(hasUnsupportedFunctions).toHaveBeenCalled();
     });
   });
+
+  describe('lookup resources context', () => {
+    it('should pass formatted lookup resources XML to the model', async () => {
+      hasUnsupportedFunctions.mockReturnValue(false);
+      mockInvoke.mockResolvedValue({ text: 'NL description', tool_calls: undefined });
+
+      const stateWithLookups = {
+        original_rule: {
+          title: 'Test Rule',
+          description: 'Test description',
+          query: 'SELECT * FROM events',
+          vendor: 'qradar',
+        },
+        messages: [],
+        resources: {
+          lookup: [
+            {
+              type: 'lookup',
+              name: 'threat_intel_ip',
+              content: 'lookup_default_threat_intel_ip',
+              fields: [{ path: 'ip', type: 'ip' }],
+            },
+          ],
+        },
+      } as unknown as MigrateRuleState;
+
+      await node(stateWithLookups, mockConfig);
+
+      expect(mockInvoke).toHaveBeenCalledTimes(1);
+      const messages = mockInvoke.mock.calls[0][0] as Array<{ content: unknown }>;
+      const humanMessageContent = messages
+        .map((message) => (typeof message.content === 'string' ? message.content : ''))
+        .join('\n');
+
+      expect(humanMessageContent).toContain('<lookup_resources>');
+      expect(humanMessageContent).toContain(
+        '<lookup_resource source_name="threat_intel_ip" index="lookup_default_threat_intel_ip">'
+      );
+      expect(humanMessageContent).toContain('<field name="ip" type="ip" />');
+    });
+
+    it('should pass lookup resource names and indices when field metadata is unavailable', async () => {
+      hasUnsupportedFunctions.mockReturnValue(false);
+      mockInvoke.mockResolvedValue({ text: 'NL description', tool_calls: undefined });
+
+      const stateWithLookups = {
+        original_rule: {
+          title: 'Test Rule',
+          description: 'Test description',
+          query: 'SELECT * FROM events',
+          vendor: 'qradar',
+        },
+        messages: [],
+        resources: {
+          lookup: [
+            {
+              type: 'lookup',
+              name: 'threat_intel_ip',
+              content: 'lookup_default_threat_intel_ip',
+            },
+          ],
+        },
+      } as unknown as MigrateRuleState;
+
+      await node(stateWithLookups, mockConfig);
+
+      const messages = mockInvoke.mock.calls[0][0] as Array<{ content: unknown }>;
+      const humanMessageContent = messages
+        .map((message) => (typeof message.content === 'string' ? message.content : ''))
+        .join('\n');
+
+      expect(humanMessageContent).toContain('<lookup_resources>');
+      expect(humanMessageContent).toContain(
+        '<lookup_resource source_name="threat_intel_ip" index="lookup_default_threat_intel_ip">'
+      );
+      expect(humanMessageContent).not.toContain('<fields>');
+    });
+  });
 });

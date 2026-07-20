@@ -1041,4 +1041,31 @@ describe('MetricsGrid', () => {
       expect(Chart).toHaveBeenCalledTimes(metricItems.length);
     });
   });
+
+  describe('gridSettings', () => {
+    it('forwards gridSettings from context into createESQLQuery for each metric', () => {
+      render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          gridSettings={{
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p90',
+          }}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          gridSettings: {
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p90',
+          },
+        })
+      );
+    });
+  });
 });

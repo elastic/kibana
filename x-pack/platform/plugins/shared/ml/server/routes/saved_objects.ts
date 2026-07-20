@@ -544,9 +544,9 @@ export function savedObjectsRoutes(
           requiredPrivileges: [
             {
               anyRequired: [
-                'ml:canCreateJob',
-                'ml:canCreateDataFrameAnalytics',
-                'ml:canCreateTrainedModels',
+                'ml:canGetJobs',
+                'ml:canGetDataFrameAnalytics',
+                'ml:canGetTrainedModels',
               ],
             },
           ],
@@ -599,9 +599,9 @@ export function savedObjectsRoutes(
           requiredPrivileges: [
             {
               anyRequired: [
-                'ml:canCreateJob',
-                'ml:canCreateDataFrameAnalytics',
-                'ml:canCreateTrainedModels',
+                'ml:canGetJobs',
+                'ml:canGetDataFrameAnalytics',
+                'ml:canGetTrainedModels',
               ],
             },
           ],

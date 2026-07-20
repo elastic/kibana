@@ -243,6 +243,13 @@ export const METADATA_LIST_GROUPING_LABEL = i18n.translate(
   }
 );
 
+export const METADATA_LIST_GROUPING_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.groupingError',
+  {
+    defaultMessage: 'Could not load grouping.',
+  }
+);
+
 export const METADATA_LIST_TRIGGERED_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.triggeredLabel',
   {

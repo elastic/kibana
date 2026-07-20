@@ -40,6 +40,10 @@ jest.mock(
 const mockReportEvent = jest.fn();
 jest.mock('../../../common/lib/kibana', () => ({
   useDateFormat: jest.fn(() => jest.fn()),
+  useToasts: jest.fn(() => ({
+    addDanger: jest.fn(),
+    addSuccess: jest.fn(),
+  })),
   useKibana: () => ({
     services: {
       telemetry: {
@@ -47,6 +51,10 @@ jest.mock('../../../common/lib/kibana', () => ({
       },
     },
   }),
+}));
+
+jest.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles', () => ({
+  useBulkGetUserProfiles: jest.fn(() => ({ data: [] })),
 }));
 
 const mockAttacks = getMockAttackDiscoveryAlerts();
