@@ -14,8 +14,8 @@ import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useStore: jest.fn(() => ({})),
 }));
 jest.mock('react-router-dom', () => ({
@@ -112,7 +112,10 @@ describe('useDocumentFlyoutApi', () => {
       expect.objectContaining({ size: 'm', session: 'start' })
     );
     const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
-    expect(children.props.value).toBe('inherit');
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
   });
 
   it('openDocumentCorrelations opens a tools flyout as a new session and propagates inherit context to its content', () => {
@@ -129,7 +132,10 @@ describe('useDocumentFlyoutApi', () => {
       expect.objectContaining({ size: 'm', session: 'start' })
     );
     const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
-    expect(children.props.value).toBe('inherit');
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
   });
 
   it('openDocumentPrevalence opens a tools flyout as a new session and propagates inherit context to its content', () => {
@@ -146,7 +152,10 @@ describe('useDocumentFlyoutApi', () => {
       expect.objectContaining({ size: 'm', session: 'start' })
     );
     const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
-    expect(children.props.value).toBe('inherit');
+    expect(children.props.value).toEqual({
+      session: 'inherit',
+      historyKey: documentFlyoutHistoryKey,
+    });
   });
 
   it.each([

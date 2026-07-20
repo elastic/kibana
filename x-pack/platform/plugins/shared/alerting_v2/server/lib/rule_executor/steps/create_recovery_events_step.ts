@@ -11,7 +11,11 @@ import { stableStringify } from '@kbn/std';
 import { getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { isEsqlUserError } from '../../errors/esql_user_error';
 import type { PipelineStateStream, RuleExecutionStep, RulePipelineState } from '../types';
-import { buildRecoveryAlertEvents, buildQueryRecoveryAlertEvents } from '../build_alert_events';
+import {
+  buildRecoveryAlertEvents,
+  buildQueryRecoveryAlertEvents,
+  resolveAlertEventType,
+} from '../build_alert_events';
 import { getQueryPayload } from '../get_query_payload';
 import { fetchActiveAlertGroupHashes } from '../fetch_active_alert_group_hashes';
 import {
@@ -95,6 +99,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
             breachedGroupHashes,
             dataPresentGroupHashes: state.dataPresentGroupHashes,
             scheduledTimestamp: input.scheduledAt,
+            type: resolveAlertEventType(rule),
           });
 
       step.logger.debug({
@@ -158,6 +163,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         breachedGroupHashes,
         esqlResponse,
         scheduledTimestamp: input.scheduledAt,
+        type: resolveAlertEventType(rule),
       });
     } catch (error) {
       if (isEsqlUserError(error)) {

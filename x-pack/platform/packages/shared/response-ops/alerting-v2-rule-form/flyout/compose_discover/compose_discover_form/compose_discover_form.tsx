@@ -7,8 +7,9 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
@@ -19,11 +20,8 @@ import type {
 import { isAlertConditionStepId } from '../types';
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { FormValues } from '../../../form/types';
-import { getBreachQuery } from '../../../form/utils/query_helpers';
-import { getEsqlSummaryState } from './esql_query_summary_section';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
-import { isActionValid } from '../../../actions_form';
 import { ModeSelect } from '../../../form/fields/mode_select';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
 import { NoDataStrategySelect } from '../../../form/fields/no_data_strategy_select';
@@ -36,6 +34,7 @@ import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
 import { NotificationsStep } from './notifications_step';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
 import { CentralizedActionPoliciesPanel } from './centralized_action_policies_panel';
+import { QueryFieldRules } from './query_field_rules';
 
 interface Props {
   state: ComposeDiscoverState;
@@ -64,21 +63,8 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         onManualSplit={props.onManualSplit}
       />
     ),
-    validate: (methods, s) => {
-      if (!s.queryCommitted) {
-        return false;
-      }
-      const query = methods.getValues('query');
-      /*
-       * Alert rules require a valid alert condition to advance (#621/#623): the
-       * heuristic split must succeed (composed base + alert segment). no_where,
-       * split-failed and empty all block Next.
-       */
-      if (methods.getValues('kind') === 'alert') {
-        return getEsqlSummaryState(s.queryCommitted, query) === 'success';
-      }
-      return getBreachQuery(query).trim().length > 0;
-    },
+    fields: ['query'],
+    meetsPrecondition: (s) => s.queryCommitted,
   },
   builderCondition: {
     id: 'builderCondition',
@@ -86,7 +72,6 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       defaultMessage: 'Alert Condition',
     }),
     render: () => null,
-    validate: (_methods, s) => s.queryCommitted,
   },
   recoveryCondition: {
     id: 'recoveryCondition',
@@ -108,7 +93,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       defaultMessage: 'Details & Artifacts',
     }),
     render: () => <DetailsAndArtifactsStep />,
-    validate: async (methods) => methods.trigger(['metadata.name']),
+    fields: ['metadata.name'],
   },
   notifications: {
     id: 'notifications',
@@ -121,14 +106,10 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         <EuiSpacer size="m" />
         <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
         <EuiHorizontalRule margin="m" />
-        <NotificationsStep http={props.services.http} ruleId={props.ruleId} />
+        <NotificationsStep />
       </>
     ),
-    validate: (methods) => {
-      const notifs = methods.getValues('notifications');
-      if (!notifs) return true;
-      return notifs.workflows.every(isActionValid);
-    },
+    fields: ['notifications'],
   },
 };
 
@@ -144,8 +125,16 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
   const steps = ids.map((id) => {
     const base = STEP_REGISTRY[id];
     if (id === 'builderCondition' && definition) {
-      const step: StepDefinition = {
-        ...base,
+      // Discard any ES|QL registry keys if the stub ever gains them.
+      const {
+        meetsPrecondition: _meetsPrecondition,
+        validate: _validate,
+        fields: _fields,
+        ...builderBase
+      } = base;
+      const builderValidate = definition.validate;
+      const builderStep: StepDefinition = {
+        ...builderBase,
         title: definition.stepTitle,
         render: (props) =>
           definition.renderStep({
@@ -153,11 +142,13 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
             dispatch: props.dispatch,
             services: props.services,
           }),
-        validate: definition.validate
-          ? (_methods, s, _services, bs) => definition.validate!(s, bs)
-          : base.validate,
+        ...(builderValidate
+          ? {
+              validate: (_methods, s, _services, bs) => builderValidate(s, bs),
+            }
+          : {}),
       };
-      return step;
+      return builderStep;
     }
     return base;
   });
@@ -199,38 +190,60 @@ export const ComposeDiscoverForm = ({
     onManualSplit,
   });
 
-  if (!isAlertConditionStep) {
-    return stepContent;
-  }
-
   return (
     <>
-      <ModeSelect
-        value={isAlert ? 'alert' : 'signal'}
-        onChange={onKindChange}
-        disabled={(!builderType && !state.queryCommitted) || isEditing || state.childOpen}
-        compressed
-        data-test-subj="composeDiscoverModeSelect"
-      />
-      <EuiSpacer size="m" />
-      {stepContent}
-      {isAlert && (
+      {/* Keep query rules mounted across steps so trigger(['query']) cannot no-op. */}
+      {!builderType && <QueryFieldRules queryCommitted={state.queryCommitted} />}
+      {!isAlertConditionStep ? (
+        stepContent
+      ) : (
         <>
-          <EuiSpacer size="m" />
-          <AlertDelayField />
-          <EuiSpacer size="m" />
-          <NoDataStrategySelect
-            value={noDataStrategy ?? 'none'}
-            onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
+          <ModeSelect
+            value={isAlert ? 'alert' : 'signal'}
+            onChange={onKindChange}
+            disabled={(!builderType && !state.queryCommitted) || isEditing || state.childOpen}
             compressed
-            data-test-subj="composeDiscoverNoDataStrategy"
+            data-test-subj="composeDiscoverModeSelect"
           />
+          <EuiSpacer size="m" />
+          {stepContent}
+          {isAlert && (
+            <>
+              <EuiHorizontalRule margin="m" />
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.alertingV2.composeDiscover.alertCondition.alertConditionsTitle"
+                    defaultMessage="Alert conditions"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <AlertDelayField />
+              <EuiSpacer size="m" />
+              <NoDataStrategySelect
+                value={noDataStrategy ?? 'none'}
+                onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
+                compressed
+                data-test-subj="composeDiscoverNoDataStrategy"
+              />
+            </>
+          )}
+          <EuiHorizontalRule margin="m" />
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.alertCondition.ruleExecutionTitle"
+                defaultMessage="Rule execution"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <ScheduleField />
+          <EuiSpacer size="m" />
+          <LookbackWindowField />
         </>
       )}
-      <EuiSpacer size="m" />
-      <ScheduleField />
-      <EuiSpacer size="m" />
-      <LookbackWindowField />
     </>
   );
 };
