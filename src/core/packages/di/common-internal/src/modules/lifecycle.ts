@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ContainerModule,
-  type ContainerModuleLoadOptions,
-  type ServiceIdentifier,
-} from 'inversify';
+import { ContainerModule, type ContainerModuleLoadOptions } from 'inversify';
 import type { LoggerFactory } from '@kbn/logging';
+import type { ServiceToken } from '@kbn/core-di';
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 
 /** @internal */
@@ -21,7 +18,9 @@ export interface InternalPluginInitializerContext {
 }
 
 /** @internal */
-export type ServiceIdentifierFactory<T> = <K extends keyof T>(key: K) => ServiceIdentifier<T[K]>;
+export type ServiceIdentifierFactory<TBase> = <T extends TBase, K extends keyof T>(
+  key: K
+) => ServiceToken<T[K]>;
 
 function loadEach<T extends object>(
   { bind }: ContainerModuleLoadOptions,
@@ -33,12 +32,13 @@ function loadEach<T extends object>(
   }
 }
 
-function createServiceIdentifierFactory(...prefix: string[]) {
-  return (key: PropertyKey): symbol => Symbol.for([...prefix, String(key)].join('.'));
+function createServiceIdentifierFactory<T>(...prefix: string[]): ServiceIdentifierFactory<T> {
+  return (...key) => Symbol.for([...prefix, key].join('.'));
 }
 
 /** @internal */
-export const InternalPluginInitializer = createServiceIdentifierFactory('plugin', 'initializer');
+export const InternalPluginInitializer =
+  createServiceIdentifierFactory<InternalPluginInitializerContext>('plugin', 'initializer');
 
 /** @internal */
 export const InternalCoreSetup = createServiceIdentifierFactory('core', 'setup');
