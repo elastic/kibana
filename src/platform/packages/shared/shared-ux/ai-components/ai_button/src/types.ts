@@ -74,3 +74,11 @@ export type AiButtonProps =
       /** Tooltip content when `withToolTip` is `true`. Falls back to `aria-label` when omitted. */
       toolTipContent?: React.ReactNode;
     });
+
+/** Props accepted by the exported `AiButton` component. */
+export interface AiButtonComponentProps {
+  children?: React.ReactNode;
+  iconOnly?: boolean;
+  type?: string;
+  [key: string]: unknown;
+}

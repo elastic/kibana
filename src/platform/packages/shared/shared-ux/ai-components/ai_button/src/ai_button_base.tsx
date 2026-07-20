@@ -101,7 +101,6 @@ export const AiButtonBase = (props: AiButtonProps) => {
     const {
       iconType,
       css: userCss,
-      display: _display,
       iconOnly: _iconOnly,
       variant: _variant,
       withToolTip,
