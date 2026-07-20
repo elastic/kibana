@@ -139,6 +139,7 @@ mapped_pages:
 | [cloudLinks](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/cloud_integrations/cloud_links/README.md) | Adds all the links to the Elastic Cloud console. |
 | [cloudSecurityPosture](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/cloud_security_posture/README.md) | Cloud Posture automates the identification and remediation of risks across cloud infrastructures |
 | [contentConnectors](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/content_connectors/README.mdx) | This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins. |
+| [contextEngine](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/context_engine/README.md) | Server-side plugin for the Context Engine. |
 | [crossClusterReplication](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/cross_cluster_replication/README.md) | You can run a local cluster and simulate a remote cluster within a single Kibana directory. |
 | [customBranding](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/custom_branding/README.md) | This is a plugin to configure custom branding. Plugin server-side only. Plugin has three main functions: |
 | [customContent](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/custom_content) | WARNING: Missing or empty README. |
