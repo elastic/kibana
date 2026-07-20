@@ -339,6 +339,7 @@ export function getDashboardApi({
     ...historyManager.api,
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
+    ...unsavedChangesManager.internalApi,
     ...esqlVariablesManager.api,
     ...unsavedChangesManager.internalApi,
     dashboardContainerRef$,

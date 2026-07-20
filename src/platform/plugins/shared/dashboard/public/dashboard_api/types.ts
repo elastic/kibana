@@ -59,6 +59,7 @@ import type { ReadBodyWithResolve } from '../dashboard_client/dashboard_client';
 import type { DashboardLayout } from './layout_manager/types';
 import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardSettings } from './settings_manager';
+import type { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 
 /** The type identifier for dashboard APIs. */
 export const DASHBOARD_API_TYPE = 'dashboard';
@@ -254,7 +255,9 @@ export type UserActivity =
   | { type: ActivityType; start: number; end?: undefined }
   | { type: ActivityType; start?: undefined; end: number };
 
-export type DashboardInternalApi = {
+export type DashboardInternalApi = ReturnType<
+  typeof initializeUnsavedChangesManager
+>['internalApi'] & ReturnType<typeof startTrackingHistory<DashboardState>>['api'] & {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   serializeLayout: () => Pick<DashboardState, 'panels' | 'pinned_panels'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
@@ -263,7 +266,7 @@ export type DashboardInternalApi = {
   publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   publishVariables: () => void;
-} & ReturnType<typeof startTrackingHistory<DashboardState>>['api'];
+};
 
 export interface DashboardUser {
   uid: string;

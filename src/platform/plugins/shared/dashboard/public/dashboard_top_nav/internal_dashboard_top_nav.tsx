@@ -481,6 +481,7 @@ export function InternalDashboardTopNav({
           menu={{ ...appMenuConfig, historyConfig }}
           badges={appHeaderBadges}
           favorite={favoriteButton}
+          spacing="compact"
         />
       )}
       {headerMode === 'registered' && (
@@ -489,6 +490,7 @@ export function InternalDashboardTopNav({
           menu={{ ...appMenuConfig, historyConfig }}
           badges={appHeaderBadges}
           favorite={favoriteButton}
+          spacing="compact"
         />
       )}
       {headerMode === 'legacy' && (

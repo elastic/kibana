@@ -7,12 +7,12 @@
 
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import { AppHeader } from '@kbn/app-header';
 import type { CaseUI } from '../../../../../../common';
 import type { OnUpdateFields } from '../../../../case_view/types';
 import { PAGE_TITLE } from '../../../../../common/translations';
 import { useCasesContext } from '../../../../cases_context/use_cases_context';
 import { ConfirmDeleteCaseModal } from '../../../../confirm_delete_case';
+import { CasesAppHeader } from '../../../../app/cases_app_header';
 import { CaseSettingsPopover } from './case_settings_popover';
 import { useCaseViewHeader } from './hooks/use_case_view_header';
 import { useCloseCaseFlow } from './hooks/use_close_case_flow';
@@ -56,15 +56,23 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
     [caseData.settings, onUpdateField]
   );
 
+  const onExtractObservablesChanged = useCallback(
+    (checked: boolean) =>
+      onUpdateField({
+        key: 'settings',
+        value: { ...caseData.settings, extractObservables: checked },
+      }),
+    [caseData.settings, onUpdateField]
+  );
+
   return (
     <>
-      <AppHeader
+      <CasesAppHeader
         title={headerTitle}
         back={{ href: backHref, label: PAGE_TITLE }}
         badges={badges}
         menu={menu}
         metadata={metadata}
-        sticky={false}
       />
       {closeCaseModal}
       {isDeleteModalVisible && (
@@ -78,6 +86,8 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
         <CaseSettingsPopover
           syncAlerts={caseData.settings.syncAlerts}
           onSyncAlertsChange={onSyncAlertsChanged}
+          extractObservables={caseData.settings.extractObservables ?? false}
+          onExtractObservablesChange={onExtractObservablesChanged}
           showMetrics={showMetrics}
           onShowMetricsChange={onShowMetricsChange}
           isOpen={isSettingsOpen}

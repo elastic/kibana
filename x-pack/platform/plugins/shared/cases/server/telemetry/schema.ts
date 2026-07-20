@@ -174,12 +174,54 @@ export const casesSchema: CasesTelemetrySchema = {
   },
   connectors: {
     all: {
-      all: { totalAttached: long },
-      itsm: { totalAttached: long },
-      sir: { totalAttached: long },
-      jira: { totalAttached: long },
-      resilient: { totalAttached: long },
-      swimlane: { totalAttached: long },
+      all: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of all cases with any connector attached' },
+        },
+      },
+      itsm: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with ServiceNow ITSM connector attached' },
+        },
+      },
+      sir: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with ServiceNow SIR connector attached' },
+        },
+      },
+      jira: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Jira connector attached' },
+        },
+      },
+      resilient: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Resilient connector attached' },
+        },
+      },
+      swimlane: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Swimlane connector attached' },
+        },
+      },
+      thehive: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with The Hive connector attached' },
+        },
+      },
+      caseswebhook: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Cases Webhook connector attached' },
+        },
+      },
       maxAttachedToACase: long,
     },
   },

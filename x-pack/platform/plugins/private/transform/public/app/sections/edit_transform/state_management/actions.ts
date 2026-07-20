@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from 'redux-toolkit-v1';
 
 import type { FormFields } from './form_field';
 import type { FormSections } from './form_section';
