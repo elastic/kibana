@@ -43,6 +43,6 @@ describe('listAiIndices', () => {
 
     await listAiIndices(http);
 
-    expect(http.get.mock.calls[0][1]).not.toHaveProperty('signal');
+    expect(http.get).toHaveBeenCalledWith(aiIndexPath, { version: AI_INDEX_API_VERSION });
   });
 });

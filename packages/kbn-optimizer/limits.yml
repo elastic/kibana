@@ -30,6 +30,7 @@ pageLoadAssetSize:
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
+  contextEngine: 5837
   controls: 10300
   core: 606422
   cps: 9209
