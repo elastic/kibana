@@ -614,6 +614,8 @@ const expectAssetsInstalled = ({
       installed_es: sortBy(res.attributes.installed_es, (o: AssetReference) => o.type),
       package_assets: sortBy(res.attributes.package_assets, (o: AssetReference) => o.type),
     };
+    delete sortedRes.installed_kibana_version;
+
     expect(sortedRes).eql({
       installed_kibana: [
         {
@@ -869,5 +871,14 @@ const expectAssetsInstalled = ({
       verification_status: 'unknown',
       verification_key_id: null,
     });
+  });
+  it('should have set installed_kibana_version to the current Kibana version', async function () {
+    const kibanaVersion = await kibanaServer.version.get();
+    const res = await kibanaServer.savedObjects.get({
+      type: 'epm-packages',
+      id: 'all_assets',
+    });
+
+    expect(res.attributes.installed_kibana_version).equal(kibanaVersion);
   });
 };
