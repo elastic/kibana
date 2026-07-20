@@ -288,10 +288,7 @@ describe('BigQuery', () => {
           maxResults: 1,
         })
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to BigQuery (job job_test)',
-      });
+      expect(result).toEqual({});
     });
   });
 });

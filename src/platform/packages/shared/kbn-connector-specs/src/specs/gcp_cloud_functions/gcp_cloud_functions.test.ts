@@ -393,22 +393,14 @@ describe('GcpCloudFunctionsConnector', () => {
         expect.stringContaining('/v2/projects/my-gcp-project/locations/europe-west1/services'),
         expect.any(Object)
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to GCP Cloud Run API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!GcpCloudFunctionsConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GcpCloudFunctionsConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
+      if (!GcpCloudFunctionsConnector.test) throw new Error('Test handler not defined');
+      await expect(GcpCloudFunctionsConnector.test.handler(mockContext)).rejects.toThrow();
     });
   });
 });

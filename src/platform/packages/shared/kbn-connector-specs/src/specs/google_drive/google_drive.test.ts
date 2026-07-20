@@ -811,10 +811,7 @@ describe('GoogleDriveConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith('https://www.googleapis.com/drive/v3/about', {
         params: { fields: 'user' },
       });
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Google Drive API as user@example.com',
-      });
+      expect(result).toEqual({});
     });
 
     it('should fall back to generic user label when email is missing', async () => {
@@ -831,42 +828,16 @@ describe('GoogleDriveConnector', () => {
       }
       const result = await GoogleDriveConnector.test.handler(mockContext);
 
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Google Drive API as user',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API returns non-200 status', async () => {
-      const mockResponse = {
-        status: 401,
-        data: {},
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      if (!GoogleDriveConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GoogleDriveConnector.test.handler(mockContext);
-
-      expect(result).toEqual({
-        ok: false,
-        message: 'Failed to connect to Google Drive API',
-      });
-    });
-
-    it('should return failure when API throws an error', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
       if (!GoogleDriveConnector.test) {
         throw new Error('Test handler not defined');
       }
-      const result = await GoogleDriveConnector.test.handler(mockContext);
-
-      expect(result).toEqual({
-        ok: false,
-        message: 'Failed to connect to Google Drive API: Invalid credentials',
-      });
+      await expect(GoogleDriveConnector.test.handler(mockContext)).rejects.toThrow();
     });
   });
 });

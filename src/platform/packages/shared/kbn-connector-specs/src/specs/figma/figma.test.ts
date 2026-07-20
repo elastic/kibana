@@ -279,10 +279,7 @@ describe('FigmaConnector', () => {
       const result = await FigmaConnector.test.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.figma.com/v1/me');
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Figma as designer',
-      });
+      expect(result).toEqual({});
     });
 
     it('should fall back to email when handle is not present', async () => {
@@ -295,23 +292,14 @@ describe('FigmaConnector', () => {
 
       const result = await FigmaConnector.test.handler(mockContext);
 
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Figma as designer@example.com',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
-      if (!FigmaConnector.test) {
-        throw new Error('Test handler not defined');
-      }
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid token'));
 
-      const result = await FigmaConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect to Figma API');
-      expect(result.message).toContain('Invalid token');
+      if (!FigmaConnector.test) throw new Error('Test handler not defined');
+      await expect(FigmaConnector.test.handler(mockContext)).rejects.toThrow();
     });
   });
 });

@@ -353,22 +353,16 @@ describe('NotionConnector', () => {
       const result = await NotionConnector.test.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.notion.com/v1/users');
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Notion API: found 3 users',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid API token'));
 
       if (!NotionConnector.test) {
         throw new Error('Test handler not defined');
       }
-      const result = await NotionConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Invalid API token');
+      await expect(NotionConnector.test.handler(mockContext)).rejects.toThrow();
     });
   });
 });

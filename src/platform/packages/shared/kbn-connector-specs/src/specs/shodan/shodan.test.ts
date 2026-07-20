@@ -232,22 +232,14 @@ describe('ShodanConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith('https://api.shodan.io/shodan/host/8.8.8.8', {
         params: { key: 'test-api-key' },
       });
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Shodan API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid API key'));
 
-      if (!ShodanConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await ShodanConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
+      if (!ShodanConnector.test) throw new Error('Test handler not defined');
+      await expect(ShodanConnector.test.handler(mockContext)).rejects.toThrow();
     });
   });
 });

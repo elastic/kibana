@@ -183,23 +183,14 @@ describe('BraveSearchConnector', () => {
           },
         }
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Brave Search API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid API key'));
 
-      if (!BraveSearchConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await BraveSearchConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect to Brave Search API');
-      expect(result.message).toContain('Invalid API key');
+      if (!BraveSearchConnector.test) throw new Error('Test handler not defined');
+      await expect(BraveSearchConnector.test.handler(mockContext)).rejects.toThrow();
     });
   });
 });

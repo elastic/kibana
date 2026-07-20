@@ -587,17 +587,14 @@ describe('Box', () => {
   });
 
   describe('test handler', () => {
-    it('returns ok with tool count on successful connection', async () => {
+    it('returns {} on successful connection', async () => {
       if (!Box.test) {
         throw new Error('test handler not defined');
       }
       const result = await Box.test.handler(mockContext);
 
       expect(mockListTools).toHaveBeenCalled();
-      expect(result).toEqual({
-        ok: true,
-        message: 'Connected to Box MCP server. 2 tools available.',
-      });
+      expect(result).toEqual({});
     });
 
     it('propagates errors thrown by withMcpClient', async () => {

@@ -228,22 +228,14 @@ describe('GreyNoiseConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://api.greynoise.io/v2/noise/quick/8.8.8.8'
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to GreyNoise API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('API key invalid'));
 
-      if (!GreyNoiseConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GreyNoiseConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
+      if (!GreyNoiseConnector.test) throw new Error('Test handler not defined');
+      await expect(GreyNoiseConnector.test.handler(mockContext)).rejects.toThrow();
     });
   });
 });

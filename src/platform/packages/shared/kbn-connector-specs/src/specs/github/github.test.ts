@@ -459,17 +459,14 @@ describe('GithubConnector', () => {
   });
 
   describe('test handler', () => {
-    it('returns ok with tool count on successful connection', async () => {
+    it('returns empty object on successful connection', async () => {
       if (!GithubConnector.test) {
         throw new Error('test handler not defined');
       }
       const result = await GithubConnector.test.handler(mockContext);
 
       expect(mockListTools).toHaveBeenCalled();
-      expect(result).toEqual({
-        ok: true,
-        message: 'Connected to GitHub MCP server. 2 tools available.',
-      });
+      expect(result).toEqual({});
     });
 
     it('propagates errors thrown by withMcpClient', async () => {

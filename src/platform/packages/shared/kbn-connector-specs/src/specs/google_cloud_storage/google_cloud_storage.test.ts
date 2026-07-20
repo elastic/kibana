@@ -451,45 +451,20 @@ describe('GoogleCloudStorageConnector', () => {
   });
 
   describe('test handler', () => {
-    it('should return success on 200 response', async () => {
+    it('should return {} on success', async () => {
       mockClient.get.mockResolvedValue({ status: 200, data: { items: [] } });
 
       if (!GoogleCloudStorageConnector.test) throw new Error('Test handler not defined');
       const result = await GoogleCloudStorageConnector.test.handler(mockContext);
 
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Google Cloud Storage API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return success on 400 response (missing project param proves token is valid)', async () => {
-      mockClient.get.mockRejectedValue({
-        response: {
-          status: 400,
-          data: { error: { code: 400, message: 'Required parameter: project' } },
-        },
-      });
-
-      if (!GoogleCloudStorageConnector.test) throw new Error('Test handler not defined');
-      const result = await GoogleCloudStorageConnector.test.handler(mockContext);
-
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Google Cloud Storage API',
-      });
-    });
-
-    it('should return failure on auth error', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
       if (!GoogleCloudStorageConnector.test) throw new Error('Test handler not defined');
-      const result = await GoogleCloudStorageConnector.test.handler(mockContext);
-
-      expect(result).toEqual({
-        ok: false,
-        message: 'Failed to connect to Google Cloud Storage API: Invalid credentials',
-      });
+      await expect(GoogleCloudStorageConnector.test.handler(mockContext)).rejects.toThrow();
     });
   });
 });

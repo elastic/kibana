@@ -268,25 +268,10 @@ describe('OnePasswordConnector', () => {
         params: { maxPageSize: 1 },
       });
       expect(mockContext.log.debug).toHaveBeenCalledWith('1Password test handler');
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to 1Password Users API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API returns non-200', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({ status: 401, data: {} });
-
-      if (!OnePasswordConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await OnePasswordConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Failed to connect to 1Password Users API');
-    });
-
-    it('should propagate connection errors', async () => {
+    it('should throw on error', async () => {
       (mockClient.get as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       if (!OnePasswordConnector.test) {

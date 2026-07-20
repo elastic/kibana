@@ -12,11 +12,6 @@ import { Outlook } from './outlook';
 
 const GRAPH_BASE = 'https://graph.microsoft.com/v1.0';
 
-interface TestResult {
-  ok: boolean;
-  message?: string;
-}
-
 describe('Outlook', () => {
   const mockClient = {
     get: jest.fn(),
@@ -408,15 +403,12 @@ describe('Outlook', () => {
       if (!Outlook.test?.handler) {
         throw new Error('Test handler not defined');
       }
-      const result = (await Outlook.test.handler(mockContext)) as TestResult;
+      const result = await Outlook.test.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(`${GRAPH_BASE}/me`, {
         params: { $select: 'displayName,mail,userPrincipalName' },
       });
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Outlook as Alice Smith',
-      });
+      expect(result).toEqual({});
     });
 
     it('should fall back to mail when displayName is missing', async () => {
@@ -427,12 +419,9 @@ describe('Outlook', () => {
       if (!Outlook.test?.handler) {
         throw new Error('Test handler not defined');
       }
-      const result = (await Outlook.test.handler(mockContext)) as TestResult;
+      const result = await Outlook.test.handler(mockContext);
 
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Outlook as alice@contoso.com',
-      });
+      expect(result).toEqual({});
     });
 
     it('should fall back to "user" when display info is missing', async () => {
@@ -441,40 +430,27 @@ describe('Outlook', () => {
       if (!Outlook.test?.handler) {
         throw new Error('Test handler not defined');
       }
-      const result = (await Outlook.test.handler(mockContext)) as TestResult;
+      const result = await Outlook.test.handler(mockContext);
 
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Outlook as user',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return ok: false when API throws', async () => {
+    it('should throw on error when API throws', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
       if (!Outlook.test?.handler) {
         throw new Error('Test handler not defined');
       }
-      const result = (await Outlook.test.handler(mockContext)) as TestResult;
-
-      expect(result).toEqual({
-        ok: false,
-        message: 'Invalid credentials',
-      });
+      await expect(Outlook.test.handler(mockContext)).rejects.toThrow();
     });
 
-    it('should return ok: false on non-Error exception', async () => {
+    it('should throw on error on non-Error exception', async () => {
       mockClient.get.mockRejectedValue('string error');
 
       if (!Outlook.test?.handler) {
         throw new Error('Test handler not defined');
       }
-      const result = (await Outlook.test.handler(mockContext)) as TestResult;
-
-      expect(result).toEqual({
-        ok: false,
-        message: 'Unknown error',
-      });
+      await expect(Outlook.test.handler(mockContext)).rejects.toBeDefined();
     });
   });
 });

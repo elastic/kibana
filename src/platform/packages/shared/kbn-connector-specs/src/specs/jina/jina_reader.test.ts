@@ -703,26 +703,16 @@ describe('JinaReaderConnector', () => {
       const result = await JinaReaderConnector.test.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://r.jina.ai');
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Jina Reader API: \nOK',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       const error: HttpError = new Error('Network error');
       error.response = { status: 500, data: {} };
       mockClient.get.mockRejectedValue(error);
 
-      if (!JinaReaderConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await JinaReaderConnector.test.handler(mockContext);
-
-      expect(mockClient.get).toHaveBeenCalledWith('https://r.jina.ai');
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
-      expect(result.message).toContain('Network error');
+      if (!JinaReaderConnector.test) throw new Error('Test handler not defined');
+      await expect(JinaReaderConnector.test.handler(mockContext)).rejects.toThrow();
     });
 
     it('should use overrideBrowseUrl from config', async () => {

@@ -305,22 +305,16 @@ describe('SalesforceConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v66.0/query`, {
         params: { q: 'SELECT Id FROM User LIMIT 1' },
       });
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Salesforce',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid token'));
 
       if (!SalesforceConnector.test) {
         throw new Error('Test handler not defined');
       }
-      const result = await SalesforceConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Invalid token');
+      await expect(SalesforceConnector.test.handler(mockContext)).rejects.toThrow();
     });
   });
 });

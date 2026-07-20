@@ -560,8 +560,7 @@ describe('Snowflake', () => {
         { statement: 'SELECT CURRENT_VERSION()' },
         expect.any(Object)
       );
-      expect(result?.ok).toBe(true);
-      expect(result?.message).toContain('8.44.0');
+      expect(result).toEqual({});
     });
 
     it('should return success when statement is accepted asynchronously', async () => {
@@ -576,8 +575,7 @@ describe('Snowflake', () => {
 
       const result = await testHandler?.(mockContext);
 
-      expect(result?.ok).toBe(true);
-      expect(result?.message).toContain('handle-test');
+      expect(result).toEqual({});
     });
   });
 

@@ -363,10 +363,7 @@ describe('GmailConnector', () => {
       const result = await GmailConnector.test.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(`${GMAIL_API_BASE}/profile`);
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Gmail as user@gmail.com',
-      });
+      expect(result).toEqual({});
     });
 
     it('should fall back to generic user when emailAddress is missing', async () => {
@@ -377,38 +374,14 @@ describe('GmailConnector', () => {
       }
       const result = await GmailConnector.test.handler(mockContext);
 
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Gmail as user',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return ok: false when API returns non-200 status', async () => {
-      mockClient.get.mockResolvedValue({ status: 401, data: {} });
-
-      if (!GmailConnector.test?.handler) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GmailConnector.test.handler(mockContext);
-
-      expect(result).toEqual({
-        ok: false,
-        message: 'Failed to connect to Gmail API',
-      });
-    });
-
-    it('should return ok: false when API throws', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!GmailConnector.test?.handler) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GmailConnector.test.handler(mockContext);
-
-      expect(result).toEqual({
-        ok: false,
-        message: 'Failed to connect to Gmail API: Invalid credentials',
-      });
+      if (!GmailConnector.test) throw new Error('Test handler not defined');
+      await expect(GmailConnector.test.handler(mockContext)).rejects.toThrow();
     });
   });
 });

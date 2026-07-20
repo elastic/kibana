@@ -191,25 +191,21 @@ describe('AzureBlob', () => {
 
       const result = await runTestHandler(mockContext);
 
-      expect(result.ok).toBe(true);
+      expect(result).toEqual({});
       expect(mockClient.get).toHaveBeenCalledWith(
         `${baseUrl}/`,
         expect.objectContaining({ params: { comp: 'list', maxresults: 1 } })
       );
     });
 
-    it('should fail when accountUrl is missing', async () => {
+    it('should throw when accountUrl is missing', async () => {
       const ctxNoConfig = { ...mockContext, config: {} } as unknown as ActionContext;
-      const result = await runTestHandler(ctxNoConfig);
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Storage account URL');
+      await expect(runTestHandler(ctxNoConfig)).rejects.toThrow();
     });
 
-    it('should return ok: false on API error', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Unauthorized'));
-      const result = await runTestHandler(mockContext);
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Unauthorized');
+      await expect(runTestHandler(mockContext)).rejects.toThrow();
     });
   });
 });

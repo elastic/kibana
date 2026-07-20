@@ -504,52 +504,17 @@ describe('HubSpotConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://api.hubapi.com/crm/v3/objects/contacts',
-        { params: { limit: 1 }, validateStatus: expect.any(Function) }
+        { params: { limit: 1 } }
       );
-      expect(result).toEqual({ ok: true, message: 'Successfully connected to HubSpot API' });
+      expect(result).toEqual({});
     });
 
-    it('should return not ok when contacts endpoint returns 401', async () => {
-      mockClient.get.mockResolvedValue({ status: 401 });
-
-      const test = HubSpotConnector.test;
-      if (!test) throw new Error('Expected HubSpotConnector.test to be defined');
-      const result = await test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-    });
-
-    it('should return not ok when contacts endpoint returns 403 (missing scope)', async () => {
-      mockClient.get.mockResolvedValue({ status: 403 });
-
-      const test = HubSpotConnector.test;
-      if (!test) throw new Error('Expected HubSpotConnector.test to be defined');
-      const result = await test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('403');
-    });
-
-    it('should return not ok when contacts endpoint returns 429 (rate limited)', async () => {
-      mockClient.get.mockResolvedValue({ status: 429 });
-
-      const test = HubSpotConnector.test;
-      if (!test) throw new Error('Expected HubSpotConnector.test to be defined');
-      const result = await test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('429');
-    });
-
-    it('should return not ok when request throws', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('ECONNREFUSED'));
 
       const test = HubSpotConnector.test;
       if (!test) throw new Error('Expected HubSpotConnector.test to be defined');
-      const result = await test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('ECONNREFUSED');
+      await expect(test.handler(mockContext)).rejects.toThrow();
     });
   });
 });
