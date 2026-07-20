@@ -73,7 +73,7 @@ export interface MoonJestParseResult {
 
 const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
 
-export const MOON_JEST_LOG_PATH = 'target/kibana-check-jest_output.log';
+export const MOON_JEST_LOG_PATH = 'target/kibana-check-jest-output.log';
 
 const writeMoonJestLog = (output: string): string | undefined => {
   try {

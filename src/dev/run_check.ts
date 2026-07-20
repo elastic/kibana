@@ -167,14 +167,11 @@ const findJestUnitConfig = (filePath: string): string | undefined => {
 
 const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
 
-/** Point the developer at the full jest log and, on CI, upload it as a Buildkite artifact. */
 const reportJestFullLog = async (logPath?: string): Promise<void> => {
   if (!logPath) {
     return;
   }
-  writeln(
-    `    full jest output: ${logPath}${process.env.BUILDKITE ? ' (uploaded to Buildkite)' : ''}`
-  );
+  writeln(`    full Jest output: ${logPath}`);
   writeln('');
 };
 
