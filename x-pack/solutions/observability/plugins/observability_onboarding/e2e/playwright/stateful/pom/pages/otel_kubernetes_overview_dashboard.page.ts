@@ -19,7 +19,6 @@ export class OtelKubernetesOverviewDashboardPage {
   }
 
   async assertNodesPanelNotEmpty() {
-    await expect(this.metricPanelValues.first()).toBeVisible();
-    expect(await this.metricPanelValues.first().textContent()).toMatch(/\d+/);
+    await expect(this.metricPanelValues.first()).toHaveText(/\d+/);
   }
 }

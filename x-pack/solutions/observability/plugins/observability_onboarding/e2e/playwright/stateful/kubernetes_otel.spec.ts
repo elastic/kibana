@@ -117,12 +117,6 @@ kubectl rollout status --watch --timeout=660s daemonset/opentelemetry-kube-stack
    */
   await otelKubernetesFlowPage.assertDataReceivedIndicator(15 * 60_000);
 
-  /**
-   * Additional buffer to ensure data has propagated
-   * to dashboards and Discover before navigating.
-   */
-  await page.waitForTimeout(2 * 60000);
-
   if (!isLogsEssentialsMode) {
     const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
       await otelKubernetesFlowPage.openClusterOverviewDashboardInNewTab()
