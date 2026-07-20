@@ -53,16 +53,11 @@ export const shouldRestoreSettingsBackedWorkflow = (
   workflow: { id: string; spaceId: string },
   pausedSettings: PausedFeatureSettings | undefined
 ): boolean => {
-  // Pre-v2 pause snapshots have no settings flags — restore every recorded workflow
-  // (settings were not turned off by those older pauses either).
-  if (!pausedSettings) {
-    return true;
-  }
   if (isContinuousOnboardingWorkflowId(workflow.id)) {
-    return pausedSettings.continuousOnboardingWasEnabled;
+    return pausedSettings?.continuousOnboardingWasEnabled === true;
   }
   if (isScheduledDiscoveryWorkflowId(workflow.id)) {
-    return pausedSettings.scheduledDiscoveryEnabledSpaceIds.includes(workflow.spaceId);
+    return pausedSettings?.scheduledDiscoveryEnabledSpaceIds.includes(workflow.spaceId) === true;
   }
   // Not gated by the Settings toggles — always eligible for resume.
   return true;

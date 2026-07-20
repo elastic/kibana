@@ -98,8 +98,8 @@ const workflowKey = ({ id, spaceId }: MaintenanceWorkflowTarget): string => `${i
 
 /** Normalise a persisted (possibly newer/unknown) state string to a known state. */
 const normalizeState = (raw: string | undefined): SignificantEventsMaintenanceState =>
-  // Fail-open: unknown values from a newer node (or the legacy `running` label)
-  // are treated as enabled so activity is not permanently blocked.
+  // Fail-open: unknown values from a newer node are treated as enabled so
+  // activity is not permanently blocked.
   raw && isMaintenanceState(raw) ? raw : DEFAULT_MAINTENANCE_STATE;
 
 /**

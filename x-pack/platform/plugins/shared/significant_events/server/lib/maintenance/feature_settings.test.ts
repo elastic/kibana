@@ -71,13 +71,13 @@ describe('shouldRestoreSettingsBackedWorkflow', () => {
     ).toBe(true);
   });
 
-  it('restores settings-backed workflows when pausedSettings is missing (legacy pause)', () => {
+  it('does not restore settings-backed workflows when pausedSettings is missing', () => {
     expect(
       shouldRestoreSettingsBackedWorkflow(
         { id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID, spaceId: 'default' },
         undefined
       )
-    ).toBe(true);
+    ).toBe(false);
     expect(
       shouldRestoreSettingsBackedWorkflow(
         {
@@ -86,7 +86,7 @@ describe('shouldRestoreSettingsBackedWorkflow', () => {
         },
         undefined
       )
-    ).toBe(true);
+    ).toBe(false);
   });
 });
 
