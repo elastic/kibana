@@ -28,6 +28,7 @@ export const createMockConfig = (
     namespace: 'opencode-sandbox',
     image: 'opencode-sandbox:0.1',
     mcpUrl: 'http://host.docker.internal:5610/api/agent_builder/mcp',
+    elasticsearchUrl: 'http://host.docker.internal:9200',
     litellm: {
       baseUrl: 'https://elastic.litellm-prod.ai/v1',
       orchestratorModel: 'llm-gateway/claude-sonnet-4-6',

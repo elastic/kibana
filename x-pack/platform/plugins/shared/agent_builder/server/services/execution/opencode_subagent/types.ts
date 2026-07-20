@@ -52,6 +52,10 @@ export interface OpencodeRunProgress {
   fileContent?: string;
   /** Language hint for the code block (derived from filePath extension). */
   fileLanguage?: string;
+  /** Optional EUI icon override for this specific activity item. */
+  iconType?: string;
+  /** Optional product badge treatment for credential/infrastructure rows. */
+  credentialIconVariant?: 'secured' | 'compute';
   /**
    * For `kibana` connector calls: the connector instance id, so the UI can
    * render that connector's own icon (resolved via its action type).

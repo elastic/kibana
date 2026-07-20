@@ -103,10 +103,16 @@ const buildConnectorContext = (attachments: AttachmentStateManager): ConnectorCo
  * clone, branch, commit, push, and open a PR on the allowed repo(s) — the
  * sandbox already has a scoped, short-lived credential injected into git + gh.
  */
-const buildGitGuidance = (profile: SandboxProfile): string => {
+const buildGitGuidance = (
+  profile: SandboxProfile,
+  credentials?: { github?: { repository?: string; access?: 'read' | 'push-pr' } }
+): string => {
+  if (!credentials?.github) return '';
   const git = profile.policy?.git;
   if (!git || git.mode === 'none') return '';
-  const repos = git.repos ?? [];
+  const repos = [credentials.github.repository, ...(git.repos ?? [])].filter(
+    (repo): repo is string => Boolean(repo)
+  );
   const repoLine =
     repos.length > 0
       ? `You may operate on these repositories only: ${repos.join(', ')}.`
@@ -138,10 +144,91 @@ const buildGitGuidance = (profile: SandboxProfile): string => {
   ].join('\n');
 };
 
+const accessSchema = z.enum(['read', 'write']);
+
+const buildElasticCliGuidance = (credentials?: {
+  elastic?: { kibana?: 'read' | 'write'; elasticsearch?: 'read' | 'write' };
+}): string => {
+  if (!credentials?.elastic?.kibana && !credentials?.elastic?.elasticsearch) {
+    return '';
+  }
+  const grants = [
+    credentials.elastic.kibana ? `Kibana ${credentials.elastic.kibana}` : undefined,
+    credentials.elastic.elasticsearch
+      ? `Elasticsearch ${credentials.elastic.elasticsearch}`
+      : undefined,
+  ]
+    .filter(Boolean)
+    .join(', ');
+
+  return [
+    '## Elastic CLI access',
+    '',
+    `The sandbox is prepared with ${grants} credentials. \`ELASTIC_CLI_CONFIG_FILE\``,
+    'points at a run-scoped Elastic CLI config for the requested products only.',
+    'If the `elastic` binary is available in the sandbox image, use it directly.',
+    'Otherwise use Agent Builder MCP tools for Elastic/Kibana actions.',
+  ].join('\n');
+};
+
+const buildCredentialGuidance = (): string =>
+  [
+    '## Sandbox credential grants',
+    '',
+    'Request only the credentials this coding task actually needs:',
+    '- `credentials.github`: use only for GitHub clone, push, or PR operations.',
+    '- `credentials.elastic.kibana`: REQUIRED when the user asks the sandbox to use ECLI, Elastic CLI, the `elastic` command, Kibana APIs, workflows, saved objects, cases, or other Kibana resources.',
+    '- `credentials.elastic.elasticsearch`: REQUIRED when the user asks the sandbox to use ECLI/Elastic CLI for Elasticsearch APIs, indices, mappings, documents, search, or ES|QL.',
+    'Use `read` unless the task must create, update, delete, push, or open a PR.',
+  ].join('\n');
+
 export const OpencodeSubagentToolName = internalTools.runOpencodeSubagent;
 
 const schema = z.object({
   description: z.string().describe('A short (3-5 word) description of the coding task'),
+  repository: z
+    .string()
+    .optional()
+    .describe(
+      'GitHub repository for sandbox git credentials, as owner/repo or a github.com URL. Provide this whenever the task needs clone, push, or PR access. If the user asks for GitHub work but the repo is unclear, ask a clarifying question before calling this tool.'
+    ),
+  credentials: z
+    .object({
+      github: z
+        .object({
+          repository: z
+            .string()
+            .optional()
+            .describe(
+              'Repository to grant GitHub credentials for, as owner/repo or github.com URL.'
+            ),
+          access: z
+            .enum(['read', 'push-pr'])
+            .optional()
+            .describe('Use read for clone-only; use push-pr only when pushing/opening a PR.'),
+        })
+        .optional()
+        .describe('Request GitHub credentials only when the sandbox needs git/gh access.'),
+      elastic: z
+        .object({
+          kibana: accessSchema
+            .optional()
+            .describe(
+              'Direct Kibana access for Elastic CLI/API calls. Set to read when the task mentions ECLI, Elastic CLI, `elastic`, workflows, saved objects, cases, Kibana APIs, or verifying the Elastic CLI against Kibana. Use write only for Kibana mutations.'
+            ),
+          elasticsearch: accessSchema
+            .optional()
+            .describe(
+              'Direct Elasticsearch access for Elastic CLI/API calls. Set to read when the task mentions ECLI/Elastic CLI with indices, mappings, documents, search, or ES|QL. Use write only for Elasticsearch mutations.'
+            ),
+        })
+        .optional()
+        .describe('Request Elastic CLI credentials only for products the sandbox must access.'),
+    })
+    .optional()
+    .describe(
+      'Least-privilege sandbox credentials to grant for this run. Omit products not needed.'
+    ),
   prompt: z
     .string()
     .describe(
@@ -167,6 +254,12 @@ and GitHub — nothing else. Note: only Node.js is guaranteed to be installed, s
 prefer JavaScript/TypeScript for "run this" tasks unless a repo brings its own
 toolchain.
 
+Elastic CLI / ECLI credential rule:
+- If the user asks to use or verify ECLI / Elastic CLI / the "elastic" command,
+  you MUST request credentials.elastic.
+- Without credentials.elastic, the sandbox will not install/configure Elastic
+  CLI credentials.
+
 Because it is wired back into Agent Builder over MCP, the OpenCode sub-agent can
 call the SAME Kibana-aware tools you have (ES|QL, index mappings, cases,
 connectors, workflows, ...) WHILE it writes and runs code.
@@ -175,7 +268,12 @@ connectors, workflows, ...) WHILE it writes and runs code.
 
 Brief it like a smart engineer who just joined:
 - State the goal and why it matters.
-- Name the repository and any specific files/areas if you know them.
+- Set the structured repository field when the task needs GitHub clone, push, or PR access.
+- If GitHub access is needed and the repository is unclear, incomplete, or ownerless
+  (for example "kibana" instead of "elastic/kibana" or "rosomri/kibana"), ask
+  the user which repo to use before calling this tool. Do not guess the owner.
+- Set the structured credentials field for only the products and access levels the sandbox needs.
+- Name any specific files/areas if you know them.
 - Share what you've already learned (e.g. the failing behaviour, relevant index
   or log data you found via your own tools).
 - Say what deliverable you want back (root cause, a patch, a PR URL).
@@ -201,7 +299,7 @@ export const createOpencodeSubagentTool = ({
     schema,
     tags: ['subagent', 'coding'],
     handler: async (
-      { description, prompt },
+      { description, repository, credentials, prompt },
       { events, runContext, spaceId, request, attachments }
     ) => {
       try {
@@ -212,14 +310,22 @@ export const createOpencodeSubagentTool = ({
         // separate session. The catalog goes into the system prompt; the ids
         // scope the run's tool access (broker/runtime).
         const { catalog, connectorIds } = buildConnectorContext(attachments);
-        const gitGuidance = buildGitGuidance(profile);
-        const systemPrompt = [catalog, gitGuidance].filter(Boolean).join('\n\n') || undefined;
+        const effectiveCredentials = credentials ?? (repository ? { github: { repository } } : {});
+        const gitGuidance = buildGitGuidance(profile, effectiveCredentials);
+        const elasticCliGuidance = buildElasticCliGuidance(effectiveCredentials);
+        const credentialGuidance = buildCredentialGuidance();
+        const systemPrompt =
+          [catalog, gitGuidance, elasticCliGuidance, credentialGuidance]
+            .filter(Boolean)
+            .join('\n\n') || undefined;
         const fullPrompt = `${description}\n\n${prompt}`;
 
         const agentCtx = getAgentFromRunContext(runContext);
 
         const result = await executor.execute({
           prompt: fullPrompt,
+          repository,
+          credentials: effectiveCredentials,
           systemPrompt,
           allowedConnectors: connectorIds.length > 0 ? connectorIds : undefined,
           request,

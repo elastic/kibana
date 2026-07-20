@@ -134,9 +134,108 @@ const extractFileEdit = (rawInput?: Record<string, unknown>): FileEdit | undefin
 interface Classification {
   phase: OpencodePhase;
   label: string;
+  iconType?: string;
   /** Connector instance id, when this call executed a connector sub-action. */
   connectorId?: string;
 }
+
+const shellInnerCommand = (value: string): string => {
+  const trimmed = value.trim();
+  const match = trimmed.match(/^(?:\/usr\/bin\/)?(?:bash|sh)\s+-lc\s+(.+)$/);
+  if (!match?.[1]) {
+    return trimmed;
+  }
+  return match[1].replace(/^['"]|['"]$/g, '').trim();
+};
+
+const firstShellToken = (value: string): string =>
+  shellInnerCommand(value).trim().toLowerCase().split(/\s+/)[0] ?? '';
+
+const commandMatches = (commandText: string, pattern: RegExp): boolean =>
+  pattern.test(shellInnerCommand(commandText));
+
+const classifyCommand = (commandText: string): Classification | undefined => {
+  const normalized = shellInnerCommand(commandText);
+  const firstToken = firstShellToken(commandText);
+
+  if (firstToken === 'elastic' || /(?:^|\s)npx\s+-y\s+@elastic\/cli\b/.test(normalized)) {
+    if (commandMatches(commandText, /\belastic\s+config\b/)) {
+      return { phase: 'kibana', label: 'Inspected Elastic CLI config', iconType: 'gear' };
+    }
+    if (commandMatches(commandText, /\belastic\s+(?:es|stack\s+es)\b/)) {
+      return {
+        phase: 'kibana',
+        label: 'Queried Elasticsearch with Elastic CLI',
+        iconType: 'logoElasticsearch',
+      };
+    }
+    if (commandMatches(commandText, /\belastic\s+(?:kb|stack\s+kb)\b/)) {
+      return { phase: 'kibana', label: 'Queried Kibana with Elastic CLI', iconType: 'logoKibana' };
+    }
+    if (commandMatches(commandText, /\belastic\s+cloud\b/)) {
+      return { phase: 'kibana', label: 'Ran Elastic Cloud CLI', iconType: 'cloudSunny' };
+    }
+    return { phase: 'kibana', label: 'Ran Elastic CLI', iconType: 'logoElasticsearch' };
+  }
+
+  if (firstToken === 'gh') {
+    if (commandMatches(commandText, /\bgh\s+pr\s+create\b/)) {
+      return { phase: 'running', label: 'Opened a GitHub PR', iconType: 'logoGithub' };
+    }
+    if (commandMatches(commandText, /\bgh\s+pr\b/)) {
+      return { phase: 'running', label: 'Checked GitHub PRs', iconType: 'logoGithub' };
+    }
+    return { phase: 'running', label: 'Ran GitHub CLI', iconType: 'logoGithub' };
+  }
+
+  if (firstToken === 'git') {
+    if (commandMatches(commandText, /\bgit\s+clone\b/)) {
+      return { phase: 'running', label: 'Cloned repository', iconType: 'branch' };
+    }
+    if (commandMatches(commandText, /\bgit\s+(?:diff|status|log)\b/)) {
+      return { phase: 'searching', label: 'Inspected git state', iconType: 'branch' };
+    }
+    if (commandMatches(commandText, /\bgit\s+commit\b/)) {
+      return { phase: 'editing', label: 'Committed changes', iconType: 'branch' };
+    }
+    if (commandMatches(commandText, /\bgit\s+push\b/)) {
+      return { phase: 'running', label: 'Pushed branch', iconType: 'branch' };
+    }
+    return { phase: 'running', label: 'Ran git', iconType: 'branch' };
+  }
+
+  if (firstToken === 'npm' || firstToken === 'yarn' || firstToken === 'pnpm') {
+    if (commandMatches(commandText, /\b(?:npm|yarn|pnpm)\s+(?:install|add)\b/)) {
+      return { phase: 'running', label: 'Installed dependencies', iconType: 'package' };
+    }
+    if (commandMatches(commandText, /\b(?:npm|yarn|pnpm)\s+(?:test|run\s+test)\b/)) {
+      return { phase: 'running', label: 'Ran tests', iconType: 'beaker' };
+    }
+    return { phase: 'running', label: `Ran ${firstToken}`, iconType: 'console' };
+  }
+
+  if (commandMatches(commandText, /\bnode\s+scripts\/(?:jest|jest_integration)\b/)) {
+    return { phase: 'running', label: 'Ran Jest tests', iconType: 'beaker' };
+  }
+  if (commandMatches(commandText, /\bnode\s+scripts\/eslint\b/)) {
+    return { phase: 'running', label: 'Ran ESLint', iconType: 'check' };
+  }
+  if (commandMatches(commandText, /\bnode\s+scripts\/type_check\b/)) {
+    return { phase: 'running', label: 'Ran type check', iconType: 'check' };
+  }
+  if (commandMatches(commandText, /\b(?:rg|grep)\b/)) {
+    return { phase: 'searching', label: 'Searched the codebase', iconType: 'search' };
+  }
+  if (commandMatches(commandText, /\b(?:ls|pwd|cat|head|tail)\b/)) {
+    return { phase: 'searching', label: 'Inspected files', iconType: 'folderOpen' };
+  }
+  if (commandMatches(commandText, /\b(?:curl|wget)\b/)) {
+    return { phase: 'running', label: 'Called HTTP endpoint', iconType: 'globe' };
+  }
+  if (commandMatches(commandText, /\b(?:python|python3|node|tsx)\b/)) {
+    return { phase: 'running', label: 'Ran script', iconType: 'console' };
+  }
+};
 
 /**
  * Classify an ACP tool_call into a phase + friendly label, using the tool
@@ -155,7 +254,11 @@ const classifyToolCall = ({
   rawInput?: Record<string, unknown>;
 }): Classification => {
   const hay = `${title ?? ''} ${command ?? ''}`.toLowerCase();
-  const firstToken = (command ?? title ?? '').trim().toLowerCase().split(/\s+/)[0] ?? '';
+  const commandText = command ?? title ?? '';
+  const commandClassification = commandText ? classifyCommand(commandText) : undefined;
+  if (commandClassification) {
+    return commandClassification;
+  }
 
   if (hay.includes('execute_connector_sub_action')) {
     const connectorId =
@@ -176,9 +279,6 @@ const classifyToolCall = ({
   ) {
     return { phase: 'kibana', label: 'Queried Kibana via Agent Builder' };
   }
-  if (firstToken === 'git' || firstToken === 'gh' || /^git\s|^gh\s/.test(hay)) {
-    return { phase: 'running', label: 'Ran git' };
-  }
   if (/todowrite|write_todos|update_plan/.test(hay)) {
     return { phase: 'todo', label: 'Updated the plan' };
   }
@@ -198,6 +298,7 @@ const classifyToolCall = ({
     default:
       break;
   }
+  const firstToken = firstShellToken(commandText);
   if (/^(edit|write|create|patch|apply)$/.test(firstToken)) {
     return { phase: 'editing', label: 'Edited files' };
   }
@@ -218,6 +319,16 @@ const WORKSPACE = '/workspace';
 const CONFIG_PATH = `${WORKSPACE}/opencode.json`;
 /** Where the git HTTPS credential is stored inside the sandbox (per-run, scrubbed). */
 const GIT_CREDENTIALS_PATH = `${WORKSPACE}/.git-credentials`;
+/** Workspace-local GitHub CLI config directory (per-run, scrubbed). */
+const GH_CONFIG_DIR = `${WORKSPACE}/.config/gh`;
+const GH_HOSTS_PATH = `${GH_CONFIG_DIR}/hosts.yml`;
+const GITHUB_ENV_PATH = `${WORKSPACE}/.github-env`;
+const ELASTIC_CLI_CONFIG_PATH = `${WORKSPACE}/.elasticrc.yml`;
+const ELASTIC_CLI_ENV_PATH = `${WORKSPACE}/.elastic-cli-env`;
+const ELASTIC_CLI_PREFIX = `${WORKSPACE}/.elastic-cli-npm`;
+const ELASTIC_CLI_BIN_DIR = `${ELASTIC_CLI_PREFIX}/bin`;
+
+const shSingleQuote = (value: string): string => `'${value.replace(/'/g, `'\\''`)}'`;
 
 /**
  * OpenCode coding runtime, driven over ACP (LAYER 2).
@@ -283,6 +394,7 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
     toolAccess,
     systemPrompt,
     gitCredentials,
+    elasticCliCredentials,
     timeoutMs,
     onProgress,
     abortSignal,
@@ -327,10 +439,36 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
         abortSignal?.throwIfAborted?.();
       }
 
+      if (elasticCliCredentials) {
+        upsert('elastic-cli-install', {
+          phase: 'credential',
+          label: 'Preparing Elastic CLI',
+          status: 'in_progress',
+          iconType: 'logoElasticsearch',
+          credentialIconVariant: 'compute',
+        });
+        await this.ensureElasticCliInstalled(sandbox);
+        upsert('elastic-cli-install', {
+          phase: 'credential',
+          label: 'Elastic CLI ready',
+          status: 'completed',
+          iconType: 'logoElasticsearch',
+          credentialIconVariant: 'compute',
+        });
+        await this.injectElasticCliCredentials(sandbox, elasticCliCredentials);
+        abortSignal?.throwIfAborted?.();
+      }
+
+      const envFiles = [
+        gitCredentials ? GITHUB_ENV_PATH : undefined,
+        elasticCliCredentials ? ELASTIC_CLI_ENV_PATH : undefined,
+      ].filter(Boolean);
+      const credentialEnv = envFiles.map((path) => `. ${path}`).join(' && ');
+      const credentialPrefix = credentialEnv ? `${credentialEnv} && ` : '';
       const child = sandbox.spawn([
         'sh',
         '-lc',
-        `cd ${WORKSPACE} && OPENCODE_CONFIG=${CONFIG_PATH} opencode acp --log-level ERROR`,
+        `cd ${WORKSPACE} && ${credentialPrefix}OPENCODE_CONFIG=${CONFIG_PATH} opencode acp --log-level ERROR`,
       ]);
       child.stderr.on('data', (d) => this.logger.debug(`[opencode acp] ${d.toString().trim()}`));
 
@@ -407,6 +545,7 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
               phase,
               label: phase === 'editing' && filePath ? `Edited ${filePath}` : label,
               status: acpStatusToItem(update.status),
+              iconType: fresh.iconType ?? existing?.iconType,
               command: finalCommand,
               detail:
                 filePath ??
@@ -482,30 +621,62 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
           this.logger.warn(`Failed to scrub git credentials: ${(e as Error).message}`)
         );
       }
+      if (elasticCliCredentials) {
+        await this.scrubElasticCliCredentials(sandbox).catch((e) =>
+          this.logger.warn(`Failed to scrub Elastic CLI credentials: ${(e as Error).message}`)
+        );
+      }
     }
   }
 
   /**
-   * Configure the sandbox's git to authenticate to github.com over HTTPS using
-   * the provided token as the `x-access-token` password. Also rewrites SSH/`git@`
-   * remotes to HTTPS so `git clone git@github.com:...` still works.
+   * Configure the sandbox's git and gh CLI to authenticate to github.com over
+   * HTTPS using the provided token as the `x-access-token` password. Also
+   * rewrites SSH/`git@` remotes to HTTPS so `git clone git@github.com:...`
+   * still works.
    */
   private async injectGitCredentials(sandbox: Sandbox, creds: GitCredentials): Promise<void> {
-    // The token is written to a file (not passed on the command line) to avoid
-    // it appearing in process listings. `credential.helper store` reads it.
+    // The token is written to files (not passed on the command line) to avoid it
+    // appearing in process listings. Git reads `.git-credentials`; gh reads the
+    // default `$HOME/.config/gh/hosts.yml`. We also export GH_* vars for tools
+    // that inherit OpenCode's environment, but the default hosts file is the
+    // durable path when the runtime sanitizes env for shell tool calls.
+    await sandbox.exec(`mkdir -p ${GH_CONFIG_DIR}`, { timeoutMs: 10_000 });
     await sandbox.putFiles([
       {
         path: GIT_CREDENTIALS_PATH,
         contents: `https://x-access-token:${creds.token}@github.com\n`,
       },
+      {
+        path: GITHUB_ENV_PATH,
+        contents: [
+          `export GH_CONFIG_DIR=${shSingleQuote(GH_CONFIG_DIR)}`,
+          `export GH_TOKEN=${shSingleQuote(creds.token)}`,
+          `export GITHUB_TOKEN=${shSingleQuote(creds.token)}`,
+          '',
+        ].join('\n'),
+      },
+      {
+        path: GH_HOSTS_PATH,
+        contents: [
+          'github.com:',
+          `  oauth_token: ${JSON.stringify(creds.token)}`,
+          '  git_protocol: https',
+          '',
+        ].join('\n'),
+      },
     ]);
     await sandbox.exec(
       [
+        `mkdir -p "$HOME/.config/gh"`,
+        `cp ${GH_HOSTS_PATH} "$HOME/.config/gh/hosts.yml"`,
         `git config --global credential.helper 'store --file=${GIT_CREDENTIALS_PATH}'`,
         `git config --global url."https://github.com/".insteadOf git@github.com:`,
         `git config --global url."https://github.com/".insteadOf ssh://git@github.com/`,
-        // gh CLI (if present) reads GH_TOKEN from a login; make the token usable.
         `chmod 600 ${GIT_CREDENTIALS_PATH}`,
+        `chmod 600 ${GITHUB_ENV_PATH}`,
+        `chmod 600 ${GH_HOSTS_PATH}`,
+        `chmod 600 "$HOME/.config/gh/hosts.yml"`,
       ].join(' && '),
       { timeoutMs: 10_000 }
     );
@@ -518,10 +689,61 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
     await sandbox.exec(
       [
         `rm -f ${GIT_CREDENTIALS_PATH}`,
+        `rm -f ${GITHUB_ENV_PATH}`,
+        `rm -rf ${GH_CONFIG_DIR}`,
+        `rm -f "$HOME/.config/gh/hosts.yml"`,
         `git config --global --unset credential.helper 2>/dev/null || true`,
         `git config --global --unset-all url."https://github.com/".insteadOf 2>/dev/null || true`,
       ].join('; '),
       { timeoutMs: 10_000 }
     );
+  }
+
+  private async injectElasticCliCredentials(
+    sandbox: Sandbox,
+    creds: NonNullable<CodingRunParams['elasticCliCredentials']>
+  ): Promise<void> {
+    await sandbox.putFiles([
+      { path: ELASTIC_CLI_CONFIG_PATH, contents: creds.configYml },
+      {
+        path: ELASTIC_CLI_ENV_PATH,
+        contents: [
+          `export ELASTIC_CLI_CONFIG_FILE=${shSingleQuote(ELASTIC_CLI_CONFIG_PATH)}`,
+          `export PATH=${shSingleQuote(ELASTIC_CLI_BIN_DIR)}:$PATH`,
+          '',
+        ].join('\n'),
+      },
+    ]);
+    await sandbox.exec(
+      [`chmod 600 ${ELASTIC_CLI_CONFIG_PATH}`, `chmod 600 ${ELASTIC_CLI_ENV_PATH}`].join(' && '),
+      { timeoutMs: 10_000 }
+    );
+    this.logger.info(`Injected Elastic CLI config (${creds.source}) into sandbox ${sandbox.id}`);
+  }
+
+  private async ensureElasticCliInstalled(sandbox: Sandbox): Promise<void> {
+    const result = await sandbox.exec(
+      [
+        `export PATH=${shSingleQuote(ELASTIC_CLI_BIN_DIR)}:$PATH`,
+        `(command -v elastic >/dev/null 2>&1 || npm install -g --prefix ${shSingleQuote(
+          ELASTIC_CLI_PREFIX
+        )} @elastic/cli)`,
+        'command -v elastic',
+      ].join(' && '),
+      { timeoutMs: 120_000 }
+    );
+    if (result.exitCode !== 0) {
+      throw new Error(
+        `Failed to install Elastic CLI in sandbox (exit ${result.exitCode}): ${
+          result.stderr || result.stdout
+        }`
+      );
+    }
+  }
+
+  private async scrubElasticCliCredentials(sandbox: Sandbox): Promise<void> {
+    await sandbox.exec(`rm -f ${ELASTIC_CLI_CONFIG_PATH} ${ELASTIC_CLI_ENV_PATH}`, {
+      timeoutMs: 10_000,
+    });
   }
 }

@@ -69,6 +69,11 @@ export interface CodingRunParams {
    * this is a deliberate, narrowly-scoped exception to "no secrets in sandbox".
    */
   gitCredentials?: GitCredentials;
+  /**
+   * Elastic CLI config for first-party Kibana/Elasticsearch access. Injected as
+   * a per-run config file and scrubbed afterwards.
+   */
+  elasticCliCredentials?: ElasticCliCredentials;
   /** Max wall-clock for the agent turn. */
   timeoutMs: number;
   /** Streaming activity for the parent agent/UI. */
@@ -82,6 +87,13 @@ export interface GitCredentials {
   token: string;
   /** The connector this token came from (for logging/correlation). */
   connectorId: string;
+}
+
+export interface ElasticCliCredentials {
+  /** Contents of `.elasticrc.yml`. */
+  configYml: string;
+  /** Human-readable source for logging/timeline diagnostics. */
+  source: string;
 }
 
 export interface CodingRunResult {

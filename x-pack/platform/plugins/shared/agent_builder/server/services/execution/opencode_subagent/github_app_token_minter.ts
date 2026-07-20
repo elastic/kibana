@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSign } from 'crypto';
+import { createPrivateKey, createSign } from 'crypto';
 import type { Logger } from '@kbn/core/server';
 
 /**
@@ -29,7 +29,7 @@ const GITHUB_API = 'https://api.github.com';
 const APP_JWT_LIFETIME_SECONDS = 9 * 60;
 
 export interface GithubAppConfig {
-  /** Numeric App ID (or the App's client id — either works as the JWT issuer). */
+  /** Numeric GitHub App ID. */
   appId: string;
   /** App private key PEM (PKCS1 "BEGIN RSA PRIVATE KEY" or PKCS8). */
   privateKeyPem: string;
@@ -62,19 +62,47 @@ const base64url = (input: string | Buffer): string =>
     .replace(/\//g, '_')
     .replace(/=+$/g, '');
 
+const normalizePrivateKeyPem = (privateKeyPem: string): string => {
+  const normalized = privateKeyPem
+    .trim()
+    .replace(/\\r\\n/g, '\n')
+    .replace(/\\n/g, '\n')
+    .replace(/\r\n/g, '\n');
+
+  const match = normalized.match(
+    /-----BEGIN ([A-Z ]+PRIVATE KEY)-----\s*([\s\S]*?)\s*-----END \1-----/
+  );
+  if (!match) {
+    return normalized;
+  }
+
+  const [, label, body] = match;
+  const compactBody = body.replace(/\s+/g, '');
+  const wrappedBody = compactBody.match(/.{1,64}/g)?.join('\n') ?? compactBody;
+  return `-----BEGIN ${label}-----\n${wrappedBody}\n-----END ${label}-----`;
+};
+
 /** Sign an App JWT (RS256) using the App private key. */
 const signAppJwt = (appId: string, privateKeyPem: string): string => {
   const now = Math.floor(Date.now() / 1000);
   const header = { alg: 'RS256', typ: 'JWT' };
   const payload = { iat: now - 60, exp: now + APP_JWT_LIFETIME_SECONDS, iss: appId };
   const signingInput = `${base64url(JSON.stringify(header))}.${base64url(JSON.stringify(payload))}`;
-  // Normalise escaped "\n" that can survive JSON/ESO round-trips as literal
-  // backslash-n, or the PEM won't parse.
-  const pem = privateKeyPem.includes('\\n') ? privateKeyPem.replace(/\\n/g, '\n') : privateKeyPem;
+  const pem = normalizePrivateKeyPem(privateKeyPem);
   const signer = createSign('RSA-SHA256');
   signer.update(signingInput);
   signer.end();
-  const signature = signer.sign(pem);
+
+  let signature: Buffer;
+  try {
+    signature = signer.sign(createPrivateKey(pem));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `GitHub App private key is not a valid unencrypted PEM private key (${message}). ` +
+        'Download a new private key from the GitHub App settings and paste the full PEM, including BEGIN/END lines.'
+    );
+  }
   return `${signingInput}.${base64url(signature)}`;
 };
 
@@ -100,6 +128,16 @@ const ghFetch = async (
   return res.json();
 };
 
+const isUnknownAppError = (error: unknown): boolean => {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes('/app/installations failed (404)') && message.includes('Integration not found')
+  );
+};
+
+const unknownAppMessage = (appId: string): string =>
+  `GitHub App ${appId} was not found by GitHub. Check that the connector App ID is the numeric App ID from GitHub App settings, and that the private key was generated for that same app. Do not use the installation ID, client ID, or client secret.`;
+
 export class GithubAppTokenMinter {
   constructor(private readonly config: GithubAppConfig, private readonly logger?: Logger) {}
 
@@ -110,10 +148,18 @@ export class GithubAppTokenMinter {
    */
   async findInstallationId(accountLogin: string): Promise<number> {
     const jwt = signAppJwt(this.config.appId, this.config.privateKeyPem);
-    const installations = (await ghFetch('/app/installations', { token: jwt })) as Array<{
-      id: number;
-      account?: { login?: string };
-    }>;
+    let installations: Array<{ id: number; account?: { login?: string } }>;
+    try {
+      installations = (await ghFetch('/app/installations', { token: jwt })) as Array<{
+        id: number;
+        account?: { login?: string };
+      }>;
+    } catch (error) {
+      if (isUnknownAppError(error)) {
+        throw new Error(unknownAppMessage(this.config.appId));
+      }
+      throw error;
+    }
     const match = installations.find(
       (i) => i.account?.login?.toLowerCase() === accountLogin.toLowerCase()
     );

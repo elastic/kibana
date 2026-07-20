@@ -13,6 +13,7 @@ import { OpencodeSubagentExecutor, type OpencodeSubagentConfig } from './executo
 import { OpencodeRunClient } from './persistence/run_client';
 import { McpAuthMinter } from './mcp_auth_minter';
 import { GithubTokenResolver } from './github_token_resolver';
+import { ElasticCliCredentialMinter } from './elastic_cli_credential_minter';
 
 /**
  * PoC provider for the OpenCode sub-agent executor.
@@ -47,6 +48,10 @@ export const initOpencodeSubagentExecutor = ({
 }): void => {
   runClient = new OpencodeRunClient(esClient, logger.get('runs'));
   const mcpAuthMinter = new McpAuthMinter(security, logger.get('mcpAuth'));
+  const elasticCliCredentialMinter = new ElasticCliCredentialMinter(
+    security,
+    logger.get('elasticCli')
+  );
   const gitTokenResolver = new GithubTokenResolver(
     getActions,
     encryptedSavedObjects,
@@ -60,7 +65,8 @@ export const initOpencodeSubagentExecutor = ({
     logger,
     runClient,
     mcpAuthMinter,
-    gitTokenResolver
+    gitTokenResolver,
+    elasticCliCredentialMinter
   );
   // Reap any sandbox pods orphaned by a previous process (e.g. a hot-reload that
   // killed the runtime mid-run). Fire-and-forget; never blocks startup.

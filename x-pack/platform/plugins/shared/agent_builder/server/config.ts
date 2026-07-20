@@ -48,6 +48,12 @@ export const configSchema = schema.object({
     mcpUrl: schema.string({
       defaultValue: 'http://host.docker.internal:5610/api/agent_builder/mcp',
     }),
+    // URL the sandbox pod uses for direct Elasticsearch access through the
+    // Elastic CLI. From inside a kind pod on Docker Desktop this is the host
+    // gateway.
+    elasticsearchUrl: schema.maybe(
+      schema.string({ defaultValue: 'http://host.docker.internal:9200' })
+    ),
     // Model gateway (LiteLLM) the sandboxed OpenCode talks to.
     litellm: schema.object({
       baseUrl: schema.string({ defaultValue: 'https://elastic.litellm-prod.ai/v1' }),

@@ -12,7 +12,7 @@ import { GITHUB_APP_PRIVATE_KEY_SECRET_KEY } from '@kbn/agent-builder-common';
 import { SandboxManager } from './sandbox_manager';
 import { SandboxRegistry } from './sandbox_registry';
 import { OpenCodeAcpRuntime } from './opencode_acp_runtime';
-import type { CodingRuntime } from './coding_runtime';
+import type { CodingRuntime, GitCredentials } from './coding_runtime';
 import type {
   Sandbox,
   SandboxSpec,
@@ -22,13 +22,99 @@ import type {
 import type { OpencodeRunProgress } from './types';
 import type { OpencodeRunClient } from './persistence/run_client';
 import type { McpAuthMinter } from './mcp_auth_minter';
-import type { GithubTokenResolver } from './github_token_resolver';
+import type { GithubTokenResolver, GitHubTokenAccess } from './github_token_resolver';
+import type {
+  ElasticCliAccess,
+  ElasticCliCredentials as MintedElasticCliCredentials,
+  ElasticCliCredentialMinter,
+} from './elastic_cli_credential_minter';
 import { GithubUserCredentialSource } from './github_user_credential_source';
 import { GithubAppTokenMinter } from './github_app_token_minter';
 import { ProfileRuntimeResolver } from './profile_runtime_resolver';
 
 /** A profile as it arrives at the executor: resolved with decrypted secrets. */
 type ProfileWithSecrets = SandboxProfile & { secrets?: Record<string, string> };
+
+const normalizeGithubRepo = (owner: string, repo: string): string =>
+  `${owner}/${repo.replace(/\.git$/i, '')}`;
+
+const normalizeGithubRepoInput = (repository: string): string | undefined => {
+  const trimmed = repository.trim();
+  const urlMatch = trimmed.match(
+    /github\.com[:/]([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:\.git)?(?:[/?#\s`'")]|$)/i
+  );
+  if (urlMatch?.[1] && urlMatch[2]) {
+    return normalizeGithubRepo(urlMatch[1], urlMatch[2]);
+  }
+
+  const shorthandMatch = trimmed.match(/^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:\.git)?$/);
+  if (shorthandMatch?.[1] && shorthandMatch[2]) {
+    return normalizeGithubRepo(shorthandMatch[1], shorthandMatch[2]);
+  }
+};
+
+const extractGithubRepoFromPrompt = (prompt: string): string | undefined => {
+  const urlMatch = prompt.match(
+    /github\.com[:/]([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:\.git)?(?:[/?#\s`'")]|$)/i
+  );
+  if (urlMatch?.[1] && urlMatch[2]) {
+    return normalizeGithubRepo(urlMatch[1], urlMatch[2]);
+  }
+
+  const prefixedShorthandMatch = prompt.match(
+    /\b(?:github\s+repo(?:sitory)?|repo(?:sitory)?|clone)\s+([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:[\s`'",.)]|$)/i
+  );
+  if (prefixedShorthandMatch?.[1] && prefixedShorthandMatch[2]) {
+    return normalizeGithubRepo(prefixedShorthandMatch[1], prefixedShorthandMatch[2]);
+  }
+
+  const suffixedShorthandMatch = prompt.match(
+    /\b([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:\.git)?\s+(?:github\s+)?repo(?:sitory)?\b/i
+  );
+  if (suffixedShorthandMatch?.[1] && suffixedShorthandMatch[2]) {
+    return normalizeGithubRepo(suffixedShorthandMatch[1], suffixedShorthandMatch[2]);
+  }
+};
+
+const gitAccessFromPrompt = (
+  prompt: string,
+  requestedRepo?: string
+): GitHubTokenAccess | undefined => {
+  if (!requestedRepo) return undefined;
+  if (
+    /\b(gh\s+pr\s+create|open\s+(a\s+)?pr|open\s+(a\s+)?pull request|pull request|push|commit)\b/i.test(
+      prompt
+    )
+  ) {
+    return 'push-pr';
+  }
+  return 'read';
+};
+
+const gitAccessForRun = (
+  profile: SandboxProfile | undefined,
+  prompt: string,
+  requestedRepo?: string
+): GitHubTokenAccess | undefined => {
+  const mode = profile?.policy?.git?.mode;
+  if (mode === 'clone-ro') return 'read';
+  if (mode === 'push-pr') return 'push-pr';
+  if (mode === 'none') return undefined;
+  return gitAccessFromPrompt(prompt, requestedRepo);
+};
+
+const kibanaUrlFromMcpUrl = (mcpUrl: string): string => {
+  const url = new URL(mcpUrl);
+  url.pathname = url.pathname.replace(/\/api\/agent_builder\/mcp\/?$/, '').replace(/\/$/, '');
+  url.search = '';
+  url.hash = '';
+  return url.toString().replace(/\/$/, '');
+};
+
+const githubCredentialFailureMessage = (diagnostics: string[]): string =>
+  diagnostics.length > 0
+    ? diagnostics.join('; ')
+    : 'GitHub credentials were requested, but Agent Builder could not resolve a usable token. Ask the user to clarify the repository or update the GitHub connector allowed repositories.';
 
 // Re-export shared types for existing importers.
 export type { OpencodePhase, OpencodeItemStatus, OpencodeTodo, OpencodeRunProgress } from './types';
@@ -46,6 +132,7 @@ export interface OpencodeSubagentConfig {
   namespace: string;
   image: string;
   mcpUrl: string;
+  elasticsearchUrl?: string;
   litellm: OpencodeLitellmConfig;
   maxRunSeconds: number;
 }
@@ -77,6 +164,16 @@ export interface OpencodeRunContext {
 export interface ExecuteOpencodeParams {
   prompt: string;
   /**
+   * GitHub repository for sandbox git credentials, when the parent agent can
+   * determine it structurally. Prefer this over prompt regex extraction.
+   */
+  repository?: string;
+  /**
+   * Explicit product credentials the parent Agent Builder agent decided this
+   * sandbox run needs. The executor grants only these capabilities.
+   */
+  credentials?: SandboxCredentialRequest;
+  /**
    * Dynamically composed system instructions for the sub-agent (e.g. the
    * catalog of attached connectors and how to call them). Kept separate from the
    * user `prompt` so it maps onto the runtime's dedicated system-prompt slot.
@@ -106,6 +203,17 @@ export interface ExecuteOpencodeParams {
    * of the process-level default config. This is how an agent "brings" a sandbox.
    */
   profile?: SandboxProfile;
+}
+
+export interface SandboxCredentialRequest {
+  github?: {
+    repository?: string;
+    access?: GitHubTokenAccess;
+  };
+  elastic?: {
+    kibana?: ElasticCliAccess;
+    elasticsearch?: ElasticCliAccess;
+  };
 }
 
 /**
@@ -140,7 +248,8 @@ export class OpencodeSubagentExecutor {
     private readonly logger: Logger,
     private readonly runClient?: OpencodeRunClient,
     private readonly mcpAuthMinter?: McpAuthMinter,
-    private readonly gitTokenResolver?: GithubTokenResolver
+    private readonly gitTokenResolver?: GithubTokenResolver,
+    private readonly elasticCliCredentialMinter?: ElasticCliCredentialMinter
   ) {
     this.provider = new SandboxManager(
       {
@@ -359,6 +468,8 @@ export class OpencodeSubagentExecutor {
 
   async execute({
     prompt,
+    repository,
+    credentials,
     systemPrompt,
     allowedConnectors,
     request,
@@ -427,13 +538,20 @@ export class OpencodeSubagentExecutor {
     // Injected + scrubbed by the runtime; rely on short PAT expiry as backstop.
     // A user-token (Device Flow) source is resolved lazily inside `try` so its
     // interactive "authorize" step can stream into the timeline.
-    let gitCredentials = this.gitTokenResolver
-      ? await this.gitTokenResolver.resolve({
-          request,
-          allowedConnectors,
-          spaceId: runContext?.spaceId,
-        })
-      : undefined;
+    const credentialRepository = credentials?.github?.repository ?? repository;
+    const requestedGitRepo =
+      (credentialRepository ? normalizeGithubRepoInput(credentialRepository) : undefined) ??
+      extractGithubRepoFromPrompt(prompt);
+    const requestedGitAccess =
+      credentials?.github?.access ?? gitAccessForRun(profile, prompt, requestedGitRepo);
+    const shouldResolveGitCredentials = Boolean(credentials?.github ?? repository);
+    const elasticAccess = credentials?.elastic;
+    const shouldResolveElasticCliCredentials = Boolean(
+      elasticAccess?.kibana || elasticAccess?.elasticsearch
+    );
+    let gitCredentials: GitCredentials | undefined;
+    let elasticCliCredentials: MintedElasticCliCredentials | undefined;
+    const gitCredentialDiagnostics: string[] = [];
 
     const persist = this.runClient && runContext;
 
@@ -479,6 +597,50 @@ export class OpencodeSubagentExecutor {
     const emitLifecycle = (item: OpencodeRunProgress) => recordProgress(item);
 
     try {
+      if (shouldResolveElasticCliCredentials && this.elasticCliCredentialMinter && elasticAccess) {
+        elasticCliCredentials = await this.elasticCliCredentialMinter.mint(
+          request,
+          {
+            kibanaUrl: kibanaUrlFromMcpUrl(this.config.mcpUrl),
+            elasticsearchUrl: this.config.elasticsearchUrl,
+            spaceId: runContext?.spaceId,
+            access: elasticAccess,
+          },
+          `${Math.ceil(stack.maxRunSeconds / 60) + 5}m`
+        );
+      }
+
+      if (shouldResolveElasticCliCredentials) {
+        recordProgress({
+          id: 'elastic-cli-credentials',
+          phase: 'credential',
+          label: elasticCliCredentials
+            ? 'Prepared Elastic CLI credentials'
+            : 'No Elastic CLI credentials prepared',
+          status: elasticCliCredentials ? 'completed' : 'failed',
+          iconType: 'logoElasticsearch',
+          credentialIconVariant: 'secured',
+          detail: elasticCliCredentials
+            ? `source: ${elasticCliCredentials.source}; kibana: ${
+                elasticAccess?.kibana ?? 'none'
+              }; elasticsearch: ${elasticAccess?.elasticsearch ?? 'none'}`
+            : 'Unable to mint or reuse an API key for Elastic CLI',
+        });
+      }
+
+      if (shouldResolveGitCredentials && this.gitTokenResolver) {
+        gitCredentials = await this.gitTokenResolver.resolve({
+          request,
+          allowedConnectors,
+          spaceId: runContext?.spaceId,
+          gitRepos: profile?.policy?.git?.repos,
+          requestedRepo: requestedGitRepo,
+          access: requestedGitAccess,
+          requireRequestedRepo: true,
+          onDiagnostic: (message) => gitCredentialDiagnostics.push(message),
+        });
+      }
+
       // If no connector PAT was found and the profile configures a GitHub App
       // Device Flow, obtain a short-lived user token ("act as me") so the sandbox
       // can read private repos the user has access to (e.g. elastic/*). The
@@ -486,7 +648,7 @@ export class OpencodeSubagentExecutor {
       // `credential` item. Cached per space, so the user approves at most once.
       const profileWithSecrets = profile as ProfileWithSecrets | undefined;
       const userCredentialSource = this.getUserCredentialSource(profileWithSecrets);
-      if (!gitCredentials && userCredentialSource) {
+      if (shouldResolveGitCredentials && !gitCredentials && userCredentialSource) {
         // The visible "authorize as me" gesture: confirms the human authorized
         // this run and identifies them in the UI (green credential card).
         const userCred = await userCredentialSource.resolve({
@@ -506,9 +668,51 @@ export class OpencodeSubagentExecutor {
       // git operations (clone/push/PR): least-privilege, auto-expiring, scoped to
       // just the policy's repos. Overrides the user token when available so the
       // sandbox operates with the minimal machine credential, not a broad one.
-      const installCred = await this.resolveInstallToken(profileWithSecrets, recordProgress);
-      if (installCred) {
-        gitCredentials = installCred;
+      if (shouldResolveGitCredentials) {
+        const installCred = await this.resolveInstallToken(profileWithSecrets, recordProgress);
+        if (installCred) {
+          gitCredentials = installCred;
+        }
+      }
+
+      if (shouldResolveGitCredentials) {
+        const githubCredentialsReady = Boolean(gitCredentials && requestedGitRepo);
+        const gitCredentialFailure = !gitCredentials
+          ? githubCredentialFailureMessage(gitCredentialDiagnostics)
+          : !requestedGitRepo
+          ? githubCredentialFailureMessage([
+              'GitHub credentials were requested, but no specific owner/repo was provided. Ask the user which repository to use.',
+              ...gitCredentialDiagnostics,
+            ])
+          : undefined;
+        recordProgress({
+          id: 'github-credentials',
+          phase: 'credential',
+          label: githubCredentialsReady
+            ? 'Resolved GitHub credentials'
+            : 'No GitHub credentials resolved',
+          status: githubCredentialsReady ? 'completed' : 'failed',
+          iconType: 'logoGithub',
+          credentialIconVariant: 'secured',
+          detail: githubCredentialsReady
+            ? `${requestedGitRepo ?? 'GitHub'} · ${requestedGitAccess ?? 'unknown access'}`
+            : gitCredentialDiagnostics.length > 0
+            ? gitCredentialDiagnostics.join('; ')
+            : [
+                !this.gitTokenResolver ? 'Git token resolver unavailable' : undefined,
+                !requestedGitRepo ? 'No GitHub repository was found in the task prompt' : undefined,
+                !requestedGitAccess
+                  ? 'No git access level could be derived for this run'
+                  : undefined,
+              ]
+                .filter(Boolean)
+                .join('; '),
+        });
+        if (gitCredentialFailure) {
+          throw new Error(
+            `GitHub credentials are required for this sandbox run, but could not be prepared: ${gitCredentialFailure}`
+          );
+        }
       }
 
       emitLifecycle({
@@ -573,6 +777,7 @@ export class OpencodeSubagentExecutor {
           allowedConnectors,
         },
         gitCredentials,
+        elasticCliCredentials,
         timeoutMs: stack.maxRunSeconds * 1000,
         onProgress: recordProgress,
         abortSignal,
@@ -622,6 +827,7 @@ export class OpencodeSubagentExecutor {
       await flushTimeline();
       // Revoke the per-run MCP credential so it dies with the (short-lived) config.
       await mcpAuth.revoke();
+      await elasticCliCredentials?.revoke();
       // Model C: keep the sandbox warm for the next turn; release the lease so the
       // idle reaper takes over. Discard only if a fatal error left it unusable.
       if (sandboxAcquired) {
