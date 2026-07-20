@@ -67,6 +67,7 @@ tags:
       description: Alerting documentation
       url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
     x-displayName: Alerting
+  - name: alerting-v2
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
     name: APM agent configuration
@@ -7955,6 +7956,2791 @@ paths:
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/backfill/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/v2/action_policies:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a paginated list of action policies with optional filtering and sorting.<br/><br/>[Required authorization] Route required privileges: read-alerting-v2-action-policies.
+      operationId: get-alerting-v2-action-policies
+      parameters:
+        - description: The page number to return. Defaults to 1.
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: number
+        - description: The number of action policies to return per page. Defaults to 20.
+          in: query
+          name: perPage
+          required: false
+          schema:
+            maximum: 100
+            minimum: 1
+            type: number
+        - description: A text string to search across action policy fields.
+          in: query
+          name: search
+          required: false
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+        - description: Filter by tags. Accepts a single string or an array.
+          in: query
+          name: tags
+          required: false
+          schema:
+            items:
+              maxLength: 128
+              minLength: 1
+              type: string
+            maxItems: 10
+            type: array
+        - description: Filter by enabled status. Accepts the strings true or false.
+          in: query
+          name: enabled
+          required: false
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+            type: string
+        - description: The field to sort action policies by.
+          in: query
+          name: sortField
+          required: false
+          schema:
+            enum:
+              - name
+              - createdAt
+              - updatedAt
+            type: string
+        - description: The sort direction.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_list_response'
+          description: Returns a paginated list of action policies.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates invalid query parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: List action policies
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-action-policies AND read-alerting-v2-rules.
+      operationId: post-alerting-v2-action-policies
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_new_action_policy'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_response'
+          description: Returns the newly created action policy.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates invalid request parameters or body.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Create an action policy
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/action_policies/_bulk:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/_bulk</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Perform bulk actions on action policies.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-action-policies.
+      operationId: post-alerting-v2-action-policies-bulk
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_bulk_action_policies_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_bulk_action_policies_response'
+          description: Returns the result of the bulk action on action policies.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates invalid request body.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Bulk action action policies
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/action_policies/_match_for_rule:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/_match_for_rule</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns action policies that match a given rule, categorised as direct, global, or global-filtered.<br/><br/>[Required authorization] Route required privileges: read-alerting-v2-action-policies.
+      operationId: post-alerting-v2-action-policies-match-for-rule
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_match_action_policies_for_rule_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_match_action_policies_for_rule_response'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates invalid request body.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Match action policies for a rule
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/action_policies/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-action-policies.
+      operationId: delete-alerting-v2-action-policies-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The action policy identifier.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 150
+            minLength: 1
+            type: string
+      responses:
+        '204':
+          description: The action policy was deleted successfully.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an action policy with the given ID does not exist.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Delete an action policy
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read-alerting-v2-action-policies.
+      operationId: get-alerting-v2-action-policies-id
+      parameters:
+        - description: The action policy identifier.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 150
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_response'
+          description: Returns the requested action policy.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an action policy with the given ID does not exist.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Get an action policy
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    patch:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-action-policies.
+      operationId: patch-alerting-v2-action-policies-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The action policy identifier.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 150
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_update_action_policy'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_response'
+          description: Returns the updated action policy.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates invalid request parameters or body.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an action policy with the given ID does not exist.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the action policy was concurrently updated by another caller.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Partially update an action policy.
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates an action policy with the given identifier, or fully replaces it if one already exists.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-action-policies AND read-alerting-v2-rules.
+      operationId: put-alerting-v2-action-policies-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the action policy.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_new_action_policy'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_response'
+          description: Returns the replaced action policy.
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_response'
+          description: Returns the newly created action policy.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates invalid request parameters or body.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the action policy with the given ID does not exist.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the action policy was created or updated concurrently by another caller.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Create or replace an action policy
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/action_policies/{id}/_disable:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/{id}/_disable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Disable an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-action-policies.
+      operationId: post-alerting-v2-action-policies-id-disable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The action policy identifier.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 150
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_response'
+          description: Returns the disabled action policy.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an action policy with the given ID does not exist.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the action policy was concurrently updated by another caller.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Disable an action policy
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/action_policies/{id}/_enable:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/{id}/_enable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Enable an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-action-policies.
+      operationId: post-alerting-v2-action-policies-id-enable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The action policy identifier.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 150
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_response'
+          description: Returns the enabled action policy.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an action policy with the given ID does not exist.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the action policy was concurrently updated by another caller.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Enable an action policy
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/action_policies/{id}/_snooze:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/{id}/_snooze</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Snooze an action policy until a specified time.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-action-policies.
+      operationId: post-alerting-v2-action-policies-id-snooze
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The action policy identifier.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 150
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_snooze_action_policy_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_response'
+          description: Returns the snoozed action policy.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates invalid request parameters or body.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an action policy with the given ID does not exist.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the action policy was concurrently updated by another caller.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Snooze an action policy
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/action_policies/{id}/_unsnooze:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/{id}/_unsnooze</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Remove the snooze from an action policy.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-action-policies.
+      operationId: post-alerting-v2-action-policies-id-unsnooze
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The action policy identifier.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 150
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_response'
+          description: Returns the unsnoozed action policy.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an action policy with the given ID does not exist.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the action policy was concurrently updated by another caller.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Unsnooze an action policy
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/action_policies/{id}/_update_api_key:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/{id}/_update_api_key</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Rotate the API key for an action policy.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-action-policies.
+      operationId: post-alerting-v2-action-policies-id-update-api-key
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The action policy identifier.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 150
+            minLength: 1
+            type: string
+      responses:
+        '204':
+          description: Returns the action policy with the updated API key.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an action policy with the given ID does not exist.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the action policy was concurrently updated by another caller.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Update an action policy API key
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/action_policies/execution_history:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/execution_history</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a paginated list of dispatcher summary events for action policies in the current space.<br/><br/>[Required authorization] Route required privileges: read-alerting-v2-execution-history.
+      operationId: get-alerting-v2-action-policies-execution-history
+      parameters:
+        - description: Page number (1-indexed). Defaults to 1.
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: number
+        - description: Number of events per page. Defaults to 100.
+          in: query
+          name: perPage
+          required: false
+          schema:
+            maximum: 100
+            minimum: 1
+            type: number
+        - description: Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).
+          in: query
+          name: search
+          required: false
+          schema:
+            maxLength: 200
+            minLength: 1
+            type: string
+        - description: Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided. Max 50 ids.
+          in: query
+          name: ruleIds
+          required: false
+          schema:
+            items:
+              maxLength: 150
+              minLength: 1
+              type: string
+            maxItems: 50
+            type: array
+        - description: Outcome filter. When omitted defaults to "all" (both dispatched and throttled). Pass "dispatched" or "throttled" to narrow.
+          in: query
+          name: outcome
+          required: false
+          schema:
+            enum:
+              - dispatched
+              - throttled
+              - all
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_policy_execution_history_response'
+          description: Returns a paginated list of execution history events.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates invalid query parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: List action policy execution history
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/action_policies/execution_history/_count_since:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/execution_history/_count_since</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the count of dispatcher summary events with @timestamp greater than the given ISO timestamp.<br/><br/>[Required authorization] Route required privileges: read-alerting-v2-execution-history.
+      operationId: get-alerting-v2-action-policies-execution-history-count-since
+      parameters:
+        - description: ISO timestamp; count events with @timestamp greater than this.
+          in: query
+          name: since
+          required: true
+          schema:
+            type: string
+        - description: Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).
+          in: query
+          name: search
+          required: false
+          schema:
+            maxLength: 200
+            minLength: 1
+            type: string
+        - description: Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided. Max 50 ids.
+          in: query
+          name: ruleIds
+          required: false
+          schema:
+            items:
+              maxLength: 150
+              minLength: 1
+              type: string
+            maxItems: 50
+            type: array
+        - description: Outcome filter. When omitted defaults to "all" (both dispatched and throttled). Pass "dispatched" or "throttled" to narrow.
+          in: query
+          name: outcome
+          required: false
+          schema:
+            enum:
+              - dispatched
+              - throttled
+              - all
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_policy_execution_events_count_response'
+          description: Returns the count of new execution history events.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates invalid query parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Count new action policy execution events since a timestamp
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/action_policies/suggestions/data_fields:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/suggestions/data_fields</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get suggestions for matcher data fields.<br/><br/>[Required authorization] Route required privileges: read-alerting-v2-alerts.
+      operationId: get-alerting-v2-action-policies-suggestions-data-fields
+      parameters:
+        - in: query
+          name: matcher
+          required: false
+          schema:
+            maxLength: 2048
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: The list of available matcher data field names
+                items:
+                  type: string
+                type: array
+          description: Returns the available matcher data field names.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates invalid query parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Get matcher data fields suggestions
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/action_policies/suggestions/tags:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/suggestions/tags</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get suggestions for action policy tags based on an optional search query.<br/><br/>[Required authorization] Route required privileges: read-alerting-v2-action-policies.
+      operationId: get-alerting-v2-action-policies-suggestions-tags
+      parameters:
+        - in: query
+          name: search
+          required: false
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates invalid query parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Get action policy tags suggestions
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/alerts/_bulk_action:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/_bulk_action</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create actions for multiple alert groups in a single request.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-alerts.
+      operationId: post-alerting-v2-alerts-bulk-action
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_bulk_create_alert_actions_request'
+      responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Bulk create alert actions
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/alerts/{group_hash}/_ack:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{group_hash}/_ack</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-alerts.
+      operationId: post-alerting-v2-alerts-group-hash-ack
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Hash identifying the alert group to apply the action to.
+          in: path
+          name: group_hash
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_new_ack_alert_action'
+      responses:
+        '204':
+          description: Returns the newly created alert action.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alert event was not found.
+      summary: Create an alert _ack action
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/alerts/{group_hash}/_activate:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{group_hash}/_activate</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-alerts.
+      operationId: post-alerting-v2-alerts-group-hash-activate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Hash identifying the alert group to apply the action to.
+          in: path
+          name: group_hash
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_new_activate_alert_action'
+      responses:
+        '204':
+          description: Returns the newly created alert action.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alert event was not found.
+      summary: Create an alert _activate action
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/alerts/{group_hash}/_assign:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{group_hash}/_assign</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-alerts.
+      operationId: post-alerting-v2-alerts-group-hash-assign
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Hash identifying the alert group to apply the action to.
+          in: path
+          name: group_hash
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_new_assign_alert_action'
+      responses:
+        '204':
+          description: Returns the newly created alert action.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alert event was not found.
+      summary: Create an alert _assign action
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/alerts/{group_hash}/_deactivate:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{group_hash}/_deactivate</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-alerts.
+      operationId: post-alerting-v2-alerts-group-hash-deactivate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Hash identifying the alert group to apply the action to.
+          in: path
+          name: group_hash
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_new_deactivate_alert_action'
+      responses:
+        '204':
+          description: Returns the newly created alert action.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alert event was not found.
+      summary: Create an alert _deactivate action
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/alerts/{group_hash}/_snooze:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{group_hash}/_snooze</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-alerts.
+      operationId: post-alerting-v2-alerts-group-hash-snooze
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Hash identifying the alert group to apply the action to.
+          in: path
+          name: group_hash
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_new_snooze_alert_action'
+      responses:
+        '204':
+          description: Returns the newly created alert action.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alert event was not found.
+      summary: Create an alert _snooze action
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/alerts/{group_hash}/_tag:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{group_hash}/_tag</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-alerts.
+      operationId: post-alerting-v2-alerts-group-hash-tag
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Hash identifying the alert group to apply the action to.
+          in: path
+          name: group_hash
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_new_tag_alert_action'
+      responses:
+        '204':
+          description: Returns the newly created alert action.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alert event was not found.
+      summary: Create an alert _tag action
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/alerts/{group_hash}/_unack:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{group_hash}/_unack</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-alerts.
+      operationId: post-alerting-v2-alerts-group-hash-unack
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Hash identifying the alert group to apply the action to.
+          in: path
+          name: group_hash
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_new_unack_alert_action'
+      responses:
+        '204':
+          description: Returns the newly created alert action.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alert event was not found.
+      summary: Create an alert _unack action
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/alerts/{group_hash}/_unsnooze:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{group_hash}/_unsnooze</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-alerts.
+      operationId: post-alerting-v2-alerts-group-hash-unsnooze
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Hash identifying the alert group to apply the action to.
+          in: path
+          name: group_hash
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_new_unsnooze_alert_action'
+      responses:
+        '204':
+          description: Returns the newly created alert action.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alert event was not found.
+      summary: Create an alert _unsnooze action
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/execution_history/rules:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/execution_history/rules</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a paginated list of rule execution events.<br/><br/>[Required authorization] Route required privileges: read-alerting-v2-execution-history.
+      operationId: get-alerting-v2-execution-history-rules
+      parameters:
+        - description: 'Rule id filter. '
+          in: query
+          name: ruleId
+          required: false
+          schema:
+            items:
+              maxLength: 256
+              minLength: 1
+              type: string
+            maxItems: 10
+            minItems: 1
+            type: array
+        - description: 'Outcome filter. '
+          in: query
+          name: outcome
+          required: false
+          schema:
+            items:
+              enum:
+                - success
+                - failure
+              type: string
+            maxItems: 2
+            minItems: 1
+            type: array
+        - description: Inclusive ISO datetime lower bound on event.start.
+          in: query
+          name: from
+          required: false
+          schema:
+            format: date-time
+            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
+            type: string
+        - description: Inclusive ISO datetime upper bound on event.start.
+          in: query
+          name: to
+          required: false
+          schema:
+            format: date-time
+            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
+            type: string
+        - description: Sort field. Defaults to startedAt.
+          in: query
+          name: sort
+          required: true
+          schema:
+            default: startedAt
+            enum:
+              - startedAt
+              - duration
+            type: string
+        - description: Sort direction.
+          in: query
+          name: sortOrder
+          required: true
+          schema:
+            default: desc
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: Page number.
+          in: query
+          name: page
+          required: true
+          schema:
+            default: 1
+            maximum: 10000
+            minimum: 1
+            type: integer
+        - description: Number of results per page.
+          in: query
+          name: perPage
+          required: true
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_executions_response'
+          description: Returns a paginated list of rule execution events.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates invalid query parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: List rule executions
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/rules:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: read-alerting-v2-rules.
+      operationId: get-alerting-v2-rules
+      parameters:
+        - description: The page number to return. Defaults to 1.
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: number
+        - description: The number of rules to return per page. Defaults to 20.
+          in: query
+          name: perPage
+          required: false
+          schema:
+            maximum: 1000
+            minimum: 1
+            type: number
+        - description: The filter to apply to the rules.
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+        - description: The field to sort rules by.
+          in: query
+          name: sortField
+          required: false
+          schema:
+            enum:
+              - kind
+              - enabled
+              - name
+            type: string
+        - description: The direction to sort rules.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: A text string to search across rule fields.
+          in: query
+          name: search
+          required: false
+          schema:
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_list_response'
+          description: Returns a paginated list of rules.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: List rules
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-rules.
+      operationId: post-alerting-v2-rules
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_new_rule'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_response'
+          description: Returns the newly created rule.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Create a rule
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/rules/_bulk_delete:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/_bulk_delete</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: write-alerting-v2-rules.
+      operationId: post-alerting-v2-rules-bulk-delete
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_bulk_operation_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_bulk_operation_response'
+          description: Returns the result of the bulk delete operation.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Delete rules in bulk
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/rules/_bulk_disable:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/_bulk_disable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: write-alerting-v2-rules.
+      operationId: post-alerting-v2-rules-bulk-disable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_bulk_operation_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_bulk_operation_response'
+          description: Returns the result of the bulk disable operation.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Disable rules in bulk
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/rules/_bulk_enable:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/_bulk_enable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: write-alerting-v2-rules.
+      operationId: post-alerting-v2-rules-bulk-enable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_bulk_operation_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_bulk_operation_response'
+          description: Returns the result of the bulk enable operation.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Enable rules in bulk
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/rules/_bulk_get:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/_bulk_get</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: read-alerting-v2-rules.
+      operationId: post-alerting-v2-rules-bulk-get
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_bulk_get_rules_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_bulk_get_rules_response'
+          description: Returns the requested rules.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: One or more rule ids could not be found.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Get rules in bulk
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/rules/_tags:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/_tags</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: read-alerting-v2-rules.
+      operationId: get-alerting-v2-rules-tags
+      parameters:
+        - description: The filter to apply when aggregating rule tags.
+          in: query
+          name: filter
+          required: false
+          schema:
+            maxLength: 1024
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_tags_response'
+          description: Returns the requested rule tags.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Get rule tags
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/rules/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: write-alerting-v2-rules.
+      operationId: delete-alerting-v2-rules-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 150
+            minLength: 1
+            type: string
+      responses:
+        '204':
+          description: The rule was deleted successfully.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates a rule with the given ID does not exist.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Delete a rule
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: read-alerting-v2-rules.
+      operationId: get-alerting-v2-rules-id
+      parameters:
+        - description: The identifier for the rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 150
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_response'
+          description: Returns the requested rule.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates a rule with the given ID does not exist.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Get a rule
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    patch:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: write-alerting-v2-rules.
+      operationId: patch-alerting-v2-rules-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 150
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_update_rule'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_response'
+          description: Returns the updated rule.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates a rule with the given ID does not exist.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the rule was concurrently updated by another caller.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Update a rule
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a rule with the given identifier, or fully replaces it if one already exists.<br/><br/>[Required authorization] Route required privileges: write-alerting-v2-rules.
+      operationId: put-alerting-v2-rules-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 150
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_new_rule'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_response'
+          description: Returns the replaced rule.
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_response'
+          description: Returns the newly created rule.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the rule with the given ID does not exist.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the rule was created or updated concurrently, or the request changes immutable fields.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Create or replace a rule
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/apm/agent_keys:
     post:
       description: |
@@ -85581,6 +88367,1704 @@ components:
         - field_name
       title: aiops_pattern_analysis
       type: object
+    Kibana_HTTP_APIs_alerting_v2_ack_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        action_type:
+          description: Acknowledges an alert.
+          enum:
+            - ack
+          type: string
+        episode_id:
+          description: The episode identifier for the alert to acknowledge.
+          maxLength: 150
+          minLength: 1
+          type: string
+      required:
+        - action_type
+        - episode_id
+    Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_action:
+      description: A bulk action to perform on an action policy.
+      discriminator:
+        mapping:
+          delete: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_delete'
+          disable: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_disable'
+          enable: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_enable'
+          snooze: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_snooze'
+          unsnooze: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_unsnooze'
+          update_api_key: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_update_api_key'
+        propertyName: action
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_enable'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_disable'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_snooze'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_unsnooze'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_delete'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_update_api_key'
+    Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_delete:
+      additionalProperties: false
+      type: object
+      properties:
+        action:
+          description: The bulk action type.
+          enum:
+            - delete
+          type: string
+        id:
+          description: The action policy identifier.
+          maxLength: 150
+          minLength: 1
+          type: string
+      required:
+        - id
+        - action
+    Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_disable:
+      additionalProperties: false
+      type: object
+      properties:
+        action:
+          description: The bulk action type.
+          enum:
+            - disable
+          type: string
+        id:
+          description: The action policy identifier.
+          maxLength: 150
+          minLength: 1
+          type: string
+      required:
+        - id
+        - action
+    Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_enable:
+      additionalProperties: false
+      type: object
+      properties:
+        action:
+          description: The bulk action type.
+          enum:
+            - enable
+          type: string
+        id:
+          description: The action policy identifier.
+          maxLength: 150
+          minLength: 1
+          type: string
+      required:
+        - id
+        - action
+    Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_snooze:
+      additionalProperties: false
+      type: object
+      properties:
+        action:
+          description: The bulk action type.
+          enum:
+            - snooze
+          type: string
+        id:
+          description: The action policy identifier.
+          maxLength: 150
+          minLength: 1
+          type: string
+        snoozedUntil:
+          description: The ISO datetime until which the action policy should be snoozed.
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
+          type: string
+      required:
+        - id
+        - action
+        - snoozedUntil
+    Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_unsnooze:
+      additionalProperties: false
+      type: object
+      properties:
+        action:
+          description: The bulk action type.
+          enum:
+            - unsnooze
+          type: string
+        id:
+          description: The action policy identifier.
+          maxLength: 150
+          minLength: 1
+          type: string
+      required:
+        - id
+        - action
+    Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_update_api_key:
+      additionalProperties: false
+      type: object
+      properties:
+        action:
+          description: The bulk action type.
+          enum:
+            - update_api_key
+          type: string
+        id:
+          description: The action policy identifier.
+          maxLength: 150
+          minLength: 1
+          type: string
+      required:
+        - id
+        - action
+    Kibana_HTTP_APIs_alerting_v2_action_policy_destination:
+      description: An action policy destination configuration.
+      discriminator:
+        mapping:
+          workflow: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_workflow_action_policy_destination'
+        propertyName: type
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_workflow_action_policy_destination'
+    Kibana_HTTP_APIs_alerting_v2_action_policy_grouping_mode:
+      description: 'The grouping mode: per_episode groups by episode lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
+      enum:
+        - per_episode
+        - all
+        - per_field
+      type: string
+    Kibana_HTTP_APIs_alerting_v2_action_policy_list_response:
+      additionalProperties: false
+      description: Paginated list of action policies.
+      type: object
+      properties:
+        items:
+          description: The list of action policies.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_response'
+          type: array
+        page:
+          description: The current page number.
+          type: number
+        perPage:
+          description: The number of action policies per page.
+          type: number
+        total:
+          description: The total number of action policies matching the query.
+          type: number
+      required:
+        - items
+        - total
+        - page
+        - perPage
+    Kibana_HTTP_APIs_alerting_v2_action_policy_response:
+      additionalProperties: false
+      type: object
+      properties:
+        auth:
+          additionalProperties: false
+          description: Authentication and ownership information.
+          type: object
+          properties:
+            createdByUser:
+              description: Whether this policy was created by a user (vs system-generated).
+              type: boolean
+            owner:
+              description: The owner of the action policy.
+              type: string
+          required:
+            - owner
+            - createdByUser
+        createdAt:
+          description: The ISO datetime when the action policy was created.
+          type: string
+        createdBy:
+          anyOf:
+            - type: string
+            - nullable: true
+          description: The user ID who created the action policy.
+        description:
+          description: A description of the action policy.
+          type: string
+        destinations:
+          description: The list of destinations.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_destination'
+          type: array
+        enabled:
+          description: Whether the action policy is enabled.
+          type: boolean
+        groupBy:
+          anyOf:
+            - items:
+                type: string
+              type: array
+            - nullable: true
+          description: The fields used to group alerts, or null for no grouping.
+        groupingMode:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_grouping_mode'
+            - nullable: true
+          description: The grouping mode for alert notifications.
+        id:
+          description: The unique identifier for the action policy.
+          type: string
+        matcher:
+          anyOf:
+            - type: string
+            - nullable: true
+          description: A KQL query to match alerts, or null to match all.
+        name:
+          description: The name of the action policy.
+          type: string
+        snoozedUntil:
+          anyOf:
+            - type: string
+            - nullable: true
+          description: The ISO datetime until which the policy is snoozed, or null if not snoozed.
+        tags:
+          anyOf:
+            - items:
+                type: string
+              type: array
+            - nullable: true
+          description: Tags associated with the action policy.
+        throttle:
+          anyOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                interval:
+                  anyOf:
+                    - type: string
+                    - nullable: true
+                  description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+                strategy:
+                  description: The throttle strategy.
+                  enum:
+                    - on_status_change
+                    - per_status_interval
+                    - time_interval
+                    - every_time
+                  type: string
+              required:
+                - interval
+            - nullable: true
+          description: The throttle configuration for notifications.
+        updatedAt:
+          description: The ISO datetime when the action policy was last updated.
+          type: string
+        updatedBy:
+          anyOf:
+            - type: string
+            - nullable: true
+          description: The user ID who last updated the action policy.
+        version:
+          description: The version, used for optimistic concurrency control.
+          type: string
+      required:
+        - id
+        - name
+        - description
+        - enabled
+        - destinations
+        - matcher
+        - groupBy
+        - tags
+        - groupingMode
+        - throttle
+        - snoozedUntil
+        - auth
+        - createdBy
+        - createdAt
+        - updatedBy
+        - updatedAt
+    Kibana_HTTP_APIs_alerting_v2_action_policy_throttle:
+      additionalProperties: false
+      type: object
+      properties:
+        interval:
+          anyOf:
+            - type: string
+            - nullable: true
+          description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+        strategy:
+          description: The throttle strategy.
+          enum:
+            - on_status_change
+            - per_status_interval
+            - time_interval
+            - every_time
+          type: string
+    Kibana_HTTP_APIs_alerting_v2_activate_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        action_type:
+          description: Activates an alert.
+          enum:
+            - activate
+          type: string
+        reason:
+          description: Reason for activating the alert.
+          maxLength: 1024
+          minLength: 1
+          type: string
+      required:
+        - action_type
+        - reason
+    Kibana_HTTP_APIs_alerting_v2_alert_action:
+      description: 'Request body for creating a single alert action. One of: ack, unack, assign, tag, snooze, unsnooze, activate, deactivate.'
+      discriminator:
+        mapping:
+          ack: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_ack_alert_action'
+          activate: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_activate_alert_action'
+          assign: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_assign_alert_action'
+          deactivate: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_deactivate_alert_action'
+          snooze: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_snooze_alert_action'
+          tag: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_tag_alert_action'
+          unack: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_unack_alert_action'
+          unsnooze: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_unsnooze_alert_action'
+        propertyName: action_type
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_ack_alert_action'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_unack_alert_action'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_assign_alert_action'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_tag_alert_action'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_snooze_alert_action'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_unsnooze_alert_action'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_activate_alert_action'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_deactivate_alert_action'
+    Kibana_HTTP_APIs_alerting_v2_assign_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        action_type:
+          description: Assigns an alerting episode to a user, or clears the assignee when null.
+          enum:
+            - assign
+          type: string
+        assignee_uid:
+          anyOf:
+            - maxLength: 256
+              type: string
+            - nullable: true
+          description: User profile UID of the assignee, or null to remove the assignee from the episode.
+        episode_id:
+          description: The episode identifier to assign.
+          maxLength: 150
+          minLength: 1
+          type: string
+      required:
+        - action_type
+        - episode_id
+        - assignee_uid
+    Kibana_HTTP_APIs_alerting_v2_bulk_action_policies_request:
+      additionalProperties: false
+      type: object
+      properties:
+        actions:
+          description: The list of bulk actions to perform.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_bulk_action'
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - actions
+    Kibana_HTTP_APIs_alerting_v2_bulk_action_policies_response:
+      additionalProperties: false
+      description: Result of a bulk action policy operation.
+      type: object
+      properties:
+        errors:
+          description: Errors encountered during the bulk operation.
+          items:
+            type: object
+            properties:
+              id:
+                description: The identifier of the action policy that failed.
+                type: string
+              message:
+                description: The error message.
+                type: string
+            required:
+              - id
+              - message
+          type: array
+        processed:
+          description: The number of action policies processed.
+          type: number
+        total:
+          description: The total number of action policies targeted.
+          type: number
+      required:
+        - processed
+        - total
+        - errors
+    Kibana_HTTP_APIs_alerting_v2_bulk_create_alert_action_item:
+      allOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_alert_action'
+        - additionalProperties: false
+          description: Alert action payload with group identifier for bulk requests.
+          type: object
+          properties:
+            group_hash:
+              description: Hash identifying the alert group to apply the action to.
+              maxLength: 256
+              minLength: 1
+              type: string
+          required:
+            - group_hash
+    Kibana_HTTP_APIs_alerting_v2_bulk_create_alert_actions_request:
+      description: Request body for bulk create alert actions. Array of 1 to 100 actions, each with group_hash and action payload.
+      items:
+        $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_bulk_create_alert_action_item'
+      maxItems: 100
+      minItems: 1
+      type: array
+    Kibana_HTTP_APIs_alerting_v2_bulk_get_rules_request:
+      additionalProperties: false
+      type: object
+      properties:
+        ids:
+          description: Rule identifiers to retrieve. The response preserved this order.
+          items:
+            description: A rule identifier.
+            maxLength: 150
+            minLength: 1
+            type: string
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - ids
+    Kibana_HTTP_APIs_alerting_v2_bulk_get_rules_response:
+      additionalProperties: false
+      type: object
+      properties:
+        rules:
+          description: The requested rules, in the same order as the requested ids.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_response'
+          type: array
+      required:
+        - rules
+    Kibana_HTTP_APIs_alerting_v2_bulk_operation_request:
+      additionalProperties: false
+      type: object
+      properties:
+        filter:
+          description: KQL filter string to match rules. At most 10000 matching rules are processed per request.
+          maxLength: 4096
+          type: string
+        ids:
+          description: Explicit list of rule IDs to operate on.
+          items:
+            maxLength: 150
+            minLength: 1
+            type: string
+          maxItems: 100
+          minItems: 1
+          type: array
+        match_all:
+          description: When true, targets all rules. Cannot be combined with ids.
+          enum:
+            - true
+          type: boolean
+        search:
+          description: Free-text search string to match rules by name and description.
+          type: string
+    Kibana_HTTP_APIs_alerting_v2_bulk_operation_response:
+      additionalProperties: false
+      description: Result of a bulk rule operation.
+      type: object
+      properties:
+        errors:
+          description: Errors encountered during the bulk operation.
+          items:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  message:
+                    description: The error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                  - statusCode
+              id:
+                description: The identifier of the rule that failed.
+                type: string
+            required:
+              - id
+              - error
+          type: array
+        rules:
+          description: The rules that the operation was applied to.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_response'
+          type: array
+        totalMatched:
+          description: Total number of rules matching the filter when truncated is true.
+          type: number
+        truncated:
+          description: True when the request used a filter that matched more rules than were included in this operation.
+          type: boolean
+      required:
+        - rules
+        - errors
+    Kibana_HTTP_APIs_alerting_v2_composed_rule_query:
+      additionalProperties: false
+      description: 'Composed query: a shared base with appendable breach and recovery segments.'
+      type: object
+      properties:
+        base:
+          description: Base ES|QL query. Time filters are applied automatically via the lookback window.
+          maxLength: 10000
+          minLength: 1
+          type: string
+        breach:
+          additionalProperties: false
+          description: Breach detection configuration (required).
+          type: object
+          properties:
+            segment:
+              description: Appendable ES|QL segment for breach detection (required).
+              maxLength: 10000
+              minLength: 1
+              type: string
+          required:
+            - segment
+        format:
+          enum:
+            - composed
+          type: string
+        recovery:
+          additionalProperties: false
+          description: Recovery query segment. Required when recovery_strategy is "query".
+          type: object
+          properties:
+            segment:
+              description: Appendable ES|QL segment for recovery detection.
+              maxLength: 10000
+              minLength: 1
+              type: string
+          required:
+            - segment
+      required:
+        - format
+        - base
+        - breach
+    Kibana_HTTP_APIs_alerting_v2_deactivate_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        action_type:
+          description: Deactivates an alert.
+          enum:
+            - deactivate
+          type: string
+        reason:
+          description: Reason for deactivating the alert.
+          maxLength: 1024
+          minLength: 1
+          type: string
+      required:
+        - action_type
+        - reason
+    Kibana_HTTP_APIs_alerting_v2_error_response:
+      additionalProperties: false
+      type: object
+      properties:
+        code:
+          description: A stable, machine-readable error code (e.g., "RULE_NOT_FOUND", "INVALID_SCHEDULE"). Safe for clients to branch on.
+          type: string
+        details:
+          additionalProperties: {}
+          description: Optional structured context (e.g., validation field errors, conflict resource IDs).
+          type: object
+        error:
+          description: A short human-readable summary of the error category (e.g., "Not Found", "Bad Request"). Subject to change without notice. Do not parse or rely on its content.
+          type: string
+        message:
+          description: A human-friendly explanation of the error. Subject to change without notice. Do not parse or rely on its content.
+          type: string
+      required:
+        - code
+        - error
+        - message
+    Kibana_HTTP_APIs_alerting_v2_match_action_policies_for_rule_request:
+      additionalProperties: false
+      type: object
+      properties:
+        rule:
+          additionalProperties: false
+          type: object
+          properties:
+            id:
+              description: The ID of the rule.
+              maxLength: 256
+              minLength: 1
+              type: string
+            name:
+              description: The name of the rule, used to evaluate global matcher expressions.
+              maxLength: 256
+              minLength: 1
+              type: string
+            tags:
+              description: The tags of the rule, used to evaluate global matcher expressions.
+              items:
+                maxLength: 256
+                minLength: 1
+                type: string
+              maxItems: 100
+              type: array
+    Kibana_HTTP_APIs_alerting_v2_match_action_policies_for_rule_response:
+      additionalProperties: false
+      description: Action policies that match a given rule, grouped by match category.
+      type: object
+      properties:
+        items:
+          description: The list of matched action policies.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_matched_action_policy'
+          type: array
+        total:
+          description: Total number of action policies in the space. If greater than the number evaluated, the match results may be incomplete.
+          maximum: 9007199254740991
+          minimum: 0
+          type: integer
+      required:
+        - items
+        - total
+    Kibana_HTTP_APIs_alerting_v2_matched_action_policy:
+      additionalProperties: false
+      description: An action policy that matches a rule, along with the reason it matched.
+      type: object
+      properties:
+        actionPolicy:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_response'
+          description: The matched action policy.
+        category:
+          description: 'Why this action policy matches the rule: "global" (applies to all rules, no filter), or "global-filtered" (applies to all rules, KQL filter evaluated to true).'
+          enum:
+            - global
+            - global-filtered
+          type: string
+      required:
+        - actionPolicy
+        - category
+    Kibana_HTTP_APIs_alerting_v2_new_ack_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        episode_id:
+          description: The episode identifier for the alert to acknowledge.
+          maxLength: 150
+          minLength: 1
+          type: string
+      required:
+        - episode_id
+    Kibana_HTTP_APIs_alerting_v2_new_action_policy:
+      additionalProperties: false
+      type: object
+      properties:
+        description:
+          description: A description of the action policy.
+          maxLength: 1024
+          type: string
+        destinations:
+          description: The list of destinations. At least one is required.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_destination'
+          maxItems: 10
+          minItems: 1
+          type: array
+        groupBy:
+          description: The fields used to group alerts.
+          items:
+            maxLength: 256
+            minLength: 1
+            type: string
+          maxItems: 16
+          type: array
+        groupingMode:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_grouping_mode'
+          description: The grouping mode for alert notifications.
+        matcher:
+          description: A KQL query string to match alerts.
+          maxLength: 4096
+          type: string
+        name:
+          description: The name of the action policy.
+          maxLength: 256
+          minLength: 1
+          type: string
+        tags:
+          description: Tags for categorizing the action policy.
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          type: array
+        throttle:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_throttle'
+          description: The throttle configuration for notifications.
+      required:
+        - name
+        - description
+        - destinations
+    Kibana_HTTP_APIs_alerting_v2_new_activate_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        reason:
+          description: Reason for activating the alert.
+          maxLength: 1024
+          minLength: 1
+          type: string
+      required:
+        - reason
+    Kibana_HTTP_APIs_alerting_v2_new_assign_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        assignee_uid:
+          anyOf:
+            - maxLength: 256
+              type: string
+            - nullable: true
+          description: User profile UID of the assignee, or null to remove the assignee from the episode.
+        episode_id:
+          description: The episode identifier to assign.
+          maxLength: 150
+          minLength: 1
+          type: string
+      required:
+        - episode_id
+        - assignee_uid
+    Kibana_HTTP_APIs_alerting_v2_new_deactivate_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        reason:
+          description: Reason for deactivating the alert.
+          maxLength: 1024
+          minLength: 1
+          type: string
+      required:
+        - reason
+    Kibana_HTTP_APIs_alerting_v2_new_rule:
+      additionalProperties: false
+      type: object
+      properties:
+        artifacts:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_artifact'
+          maxItems: 100
+          type: array
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_grouping'
+        kind:
+          description: 'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.'
+          enum:
+            - alert
+            - signal
+          type: string
+        metadata:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_metadata'
+        no_data_strategy:
+          description: How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.
+          enum:
+            - last_known_status
+            - emit
+            - recover
+            - none
+          type: string
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_query'
+        recovery_strategy:
+          description: How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.
+          enum:
+            - no_breach
+            - query
+            - none
+          type: string
+        schedule:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_schedule'
+        state_transition:
+          anyOf:
+            - additionalProperties: false
+              description: Episode state transition thresholds (alert-only).
+              type: object
+              properties:
+                pending_count:
+                  description: Consecutive breaches before transitioning to active.
+                  maximum: 1000
+                  minimum: 0
+                  type: integer
+                pending_operator:
+                  description: How to combine count and timeframe for pending.
+                  enum:
+                    - AND
+                    - OR
+                  type: string
+                pending_timeframe:
+                  description: Time window for pending evaluation, e.g. 5m, 15m.
+                  type: string
+                recovering_count:
+                  description: Consecutive recoveries before transitioning to inactive.
+                  maximum: 1000
+                  minimum: 0
+                  type: integer
+                recovering_operator:
+                  description: How to combine count and timeframe for recovering.
+                  enum:
+                    - AND
+                    - OR
+                  type: string
+                recovering_timeframe:
+                  description: Time window for recovering evaluation, e.g. 5m, 15m.
+                  type: string
+            - nullable: true
+        time_field:
+          default: '@timestamp'
+          description: Time field used for the lookback window range filter.
+          maxLength: 128
+          minLength: 1
+          type: string
+      required:
+        - kind
+        - metadata
+        - schedule
+        - query
+    Kibana_HTTP_APIs_alerting_v2_new_snooze_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        expiry:
+          description: ISO datetime when snooze should expire.
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
+          type: string
+    Kibana_HTTP_APIs_alerting_v2_new_tag_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        tags:
+          description: List of tags to add to the alert.
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          type: array
+      required:
+        - tags
+    Kibana_HTTP_APIs_alerting_v2_new_unack_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        episode_id:
+          description: The episode identifier for the alert to unacknowledge.
+          maxLength: 150
+          minLength: 1
+          type: string
+      required:
+        - episode_id
+    Kibana_HTTP_APIs_alerting_v2_new_unsnooze_alert_action:
+      additionalProperties: false
+      type: object
+      properties: {}
+    Kibana_HTTP_APIs_alerting_v2_policy_execution_events_count_response:
+      additionalProperties: false
+      type: object
+      properties:
+        count:
+          type: number
+      required:
+        - count
+    Kibana_HTTP_APIs_alerting_v2_policy_execution_history_item:
+      additionalProperties: false
+      type: object
+      properties:
+        '@timestamp':
+          type: string
+        action_group_count:
+          type: number
+        episode_count:
+          type: number
+        outcome:
+          enum:
+            - dispatched
+            - throttled
+          type: string
+        policy:
+          additionalProperties: false
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              anyOf:
+                - type: string
+                - nullable: true
+          required:
+            - id
+        rules:
+          description: Rules referenced by this event, bounded to MAX_EMBEDDED_RULES_PER_ITEM. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `totalRuleCount` for the full count.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                anyOf:
+                  - type: string
+                  - nullable: true
+            required:
+              - id
+          maxItems: 20
+          type: array
+        totalRuleCount:
+          description: Total number of rules referenced by this event after search / rule-filter narrowing. May exceed `rules.length` when the embedded array is truncated to the cap.
+          type: number
+        workflows:
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                anyOf:
+                  - type: string
+                  - nullable: true
+            required:
+              - id
+          maxItems: 100
+          type: array
+      required:
+        - '@timestamp'
+        - policy
+        - outcome
+        - episode_count
+        - action_group_count
+        - rules
+        - totalRuleCount
+        - workflows
+    Kibana_HTTP_APIs_alerting_v2_policy_execution_history_response:
+      additionalProperties: false
+      type: object
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_policy_execution_history_item'
+          type: array
+        page:
+          type: number
+        perPage:
+          type: number
+        searchMatches:
+          anyOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                cap:
+                  description: Maximum number of policy/rule ids the server uses as a filter.
+                  type: number
+                policies:
+                  description: Total policies matching the search.
+                  type: number
+                rules:
+                  description: Total rules matching the search.
+                  type: number
+              required:
+                - policies
+                - rules
+                - cap
+            - nullable: true
+          description: Per-type match counts for the active search, plus the cap used as filter. Null when no search was provided. When policies > cap or rules > cap the result is truncated.
+        totalEvents:
+          type: number
+      required:
+        - items
+        - page
+        - perPage
+        - totalEvents
+        - searchMatches
+    Kibana_HTTP_APIs_alerting_v2_rule_artifact:
+      additionalProperties: false
+      type: object
+      properties:
+        id:
+          description: Artifact identifier.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          description: Artifact type.
+          maxLength: 128
+          minLength: 1
+          type: string
+        value:
+          description: Artifact value.
+          maxLength: 50000
+          minLength: 1
+          type: string
+      required:
+        - id
+        - type
+        - value
+    Kibana_HTTP_APIs_alerting_v2_rule_execution:
+      additionalProperties: false
+      type: object
+      properties:
+        endedAt:
+          type: string
+        error:
+          anyOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                message:
+                  type: string
+                stackTrace:
+                  anyOf:
+                    - type: string
+                    - nullable: true
+              required:
+                - message
+                - stackTrace
+            - nullable: true
+        id:
+          type: string
+        outcome:
+          enum:
+            - success
+            - failure
+          type: string
+        reason:
+          anyOf:
+            - type: string
+            - nullable: true
+        rule:
+          additionalProperties: false
+          type: object
+          properties:
+            id:
+              type: string
+            version:
+              anyOf:
+                - maximum: 9007199254740991
+                  minimum: -9007199254740991
+                  type: integer
+                - nullable: true
+          required:
+            - id
+            - version
+        spaceId:
+          type: string
+        startedAt:
+          type: string
+        timings:
+          additionalProperties: false
+          type: object
+          properties:
+            duration:
+              maximum: 9007199254740991
+              minimum: 0
+              type: integer
+            scheduledDelay:
+              maximum: 9007199254740991
+              minimum: -9007199254740991
+              type: integer
+          required:
+            - duration
+            - scheduledDelay
+      required:
+        - id
+        - rule
+        - spaceId
+        - startedAt
+        - endedAt
+        - timings
+        - outcome
+        - reason
+        - error
+    Kibana_HTTP_APIs_alerting_v2_rule_executions_response:
+      additionalProperties: false
+      type: object
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_execution'
+          type: array
+        page:
+          maximum: 9007199254740991
+          minimum: 1
+          type: integer
+        perPage:
+          maximum: 9007199254740991
+          minimum: 1
+          type: integer
+        total:
+          maximum: 9007199254740991
+          minimum: 0
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - perPage
+    Kibana_HTTP_APIs_alerting_v2_rule_grouping:
+      additionalProperties: false
+      description: Grouping configuration.
+      type: object
+      properties:
+        fields:
+          description: Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.
+          items:
+            maxLength: 256
+            minLength: 1
+            type: string
+          maxItems: 16
+          type: array
+      required:
+        - fields
+    Kibana_HTTP_APIs_alerting_v2_rule_list_response:
+      additionalProperties: false
+      description: Paginated list of rules.
+      type: object
+      properties:
+        items:
+          description: The list of rules.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_response'
+          type: array
+        page:
+          description: The current page number.
+          type: number
+        perPage:
+          description: The number of rules per page.
+          type: number
+        total:
+          description: The total number of rules matching the query.
+          type: number
+      required:
+        - items
+        - total
+        - page
+        - perPage
+    Kibana_HTTP_APIs_alerting_v2_rule_metadata:
+      additionalProperties: false
+      description: Rule metadata.
+      type: object
+      properties:
+        builder_type:
+          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
+          maxLength: 64
+          type: string
+        description:
+          description: Human-readable description of the rule.
+          maxLength: 1024
+          type: string
+        name:
+          description: Rule name (must be unique within the space).
+          maxLength: 256
+          minLength: 1
+          type: string
+        owner:
+          description: Owner of the rule.
+          maxLength: 256
+          type: string
+        tags:
+          description: Tags for categorization, e.g. ["production", "infra"].
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          minItems: 1
+          type: array
+      required:
+        - name
+    Kibana_HTTP_APIs_alerting_v2_rule_query:
+      description: Detection query configuration.
+      discriminator:
+        mapping:
+          composed: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_composed_rule_query'
+          standalone: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_standalone_rule_query'
+        propertyName: format
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_composed_rule_query'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_standalone_rule_query'
+    Kibana_HTTP_APIs_alerting_v2_rule_response:
+      additionalProperties: false
+      type: object
+      properties:
+        artifacts:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_artifact'
+          maxItems: 100
+          type: array
+        createdAt:
+          description: ISO timestamp when the rule was created.
+          type: string
+        createdBy:
+          anyOf:
+            - type: string
+            - nullable: true
+          description: User who created the rule.
+        enabled:
+          description: Whether the rule is enabled.
+          type: boolean
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_grouping'
+        id:
+          description: Unique rule identifier.
+          type: string
+        kind:
+          description: 'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.'
+          enum:
+            - alert
+            - signal
+          type: string
+        metadata:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_metadata'
+        no_data_strategy:
+          description: How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.
+          enum:
+            - last_known_status
+            - emit
+            - recover
+            - none
+          type: string
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_query'
+        recovery_strategy:
+          description: How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.
+          enum:
+            - no_breach
+            - query
+            - none
+          type: string
+        schedule:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_schedule'
+        state_transition:
+          anyOf:
+            - additionalProperties: false
+              description: Episode state transition thresholds (alert-only).
+              type: object
+              properties:
+                pending_count:
+                  description: Consecutive breaches before transitioning to active.
+                  maximum: 1000
+                  minimum: 0
+                  type: integer
+                pending_operator:
+                  description: How to combine count and timeframe for pending.
+                  enum:
+                    - AND
+                    - OR
+                  type: string
+                pending_timeframe:
+                  description: Time window for pending evaluation, e.g. 5m, 15m.
+                  type: string
+                recovering_count:
+                  description: Consecutive recoveries before transitioning to inactive.
+                  maximum: 1000
+                  minimum: 0
+                  type: integer
+                recovering_operator:
+                  description: How to combine count and timeframe for recovering.
+                  enum:
+                    - AND
+                    - OR
+                  type: string
+                recovering_timeframe:
+                  description: Time window for recovering evaluation, e.g. 5m, 15m.
+                  type: string
+            - nullable: true
+        time_field:
+          default: '@timestamp'
+          description: Time field used for the lookback window range filter.
+          maxLength: 128
+          minLength: 1
+          type: string
+        updatedAt:
+          description: ISO timestamp when the rule was last updated.
+          type: string
+        updatedBy:
+          anyOf:
+            - type: string
+            - nullable: true
+          description: User who last updated the rule.
+        version:
+          description: The version of the rule, used for optimistic concurrency control
+          type: string
+      required:
+        - kind
+        - metadata
+        - schedule
+        - query
+        - id
+        - enabled
+        - createdBy
+        - createdAt
+        - updatedBy
+        - updatedAt
+    Kibana_HTTP_APIs_alerting_v2_rule_schedule:
+      additionalProperties: false
+      description: Execution schedule configuration.
+      type: object
+      properties:
+        every:
+          description: Execution interval, e.g. 1m, 5m, 1h.
+          type: string
+        lookback:
+          description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+          type: string
+      required:
+        - every
+    Kibana_HTTP_APIs_alerting_v2_rule_tags_response:
+      additionalProperties: false
+      description: All unique tags across rules.
+      type: object
+      properties:
+        tags:
+          description: The list of unique rule tags.
+          items:
+            type: string
+          type: array
+      required:
+        - tags
+    Kibana_HTTP_APIs_alerting_v2_snooze_action_policy_request:
+      additionalProperties: false
+      type: object
+      properties:
+        snoozedUntil:
+          description: The ISO datetime until which the action policy should be snoozed.
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
+          type: string
+      required:
+        - snoozedUntil
+    Kibana_HTTP_APIs_alerting_v2_snooze_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        action_type:
+          description: Snoozes an alert.
+          enum:
+            - snooze
+          type: string
+        expiry:
+          description: ISO datetime when snooze should expire.
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
+          type: string
+      required:
+        - action_type
+    Kibana_HTTP_APIs_alerting_v2_standalone_rule_query:
+      additionalProperties: false
+      description: 'Standalone queries: independent full queries for breach, recovery, and no_data.'
+      type: object
+      properties:
+        breach:
+          additionalProperties: false
+          description: Breach detection configuration (required).
+          type: object
+          properties:
+            query:
+              description: Full ES|QL query for breach detection (required).
+              maxLength: 10000
+              minLength: 1
+              type: string
+          required:
+            - query
+        format:
+          enum:
+            - standalone
+          type: string
+        no_data:
+          additionalProperties: false
+          description: No-data detection query. Required when no_data_strategy is not "none".
+          type: object
+          properties:
+            query:
+              description: Full ES|QL query that detects presence of data.
+              maxLength: 10000
+              minLength: 1
+              type: string
+          required:
+            - query
+        recovery:
+          additionalProperties: false
+          description: Recovery query. Required when recovery_strategy is "query".
+          type: object
+          properties:
+            query:
+              description: Full ES|QL query for recovery detection.
+              maxLength: 10000
+              minLength: 1
+              type: string
+          required:
+            - query
+      required:
+        - format
+        - breach
+    Kibana_HTTP_APIs_alerting_v2_tag_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        action_type:
+          description: Adds tags to an alert.
+          enum:
+            - tag
+          type: string
+        tags:
+          description: List of tags to add to the alert.
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          type: array
+      required:
+        - action_type
+        - tags
+    Kibana_HTTP_APIs_alerting_v2_unack_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        action_type:
+          description: Removes acknowledgement from an alert.
+          enum:
+            - unack
+          type: string
+        episode_id:
+          description: The episode identifier for the alert to unacknowledge.
+          maxLength: 150
+          minLength: 1
+          type: string
+      required:
+        - action_type
+        - episode_id
+    Kibana_HTTP_APIs_alerting_v2_unsnooze_alert_action:
+      additionalProperties: false
+      type: object
+      properties:
+        action_type:
+          description: Removes snooze from an alert.
+          enum:
+            - unsnooze
+          type: string
+      required:
+        - action_type
+    Kibana_HTTP_APIs_alerting_v2_update_action_policy:
+      additionalProperties: false
+      type: object
+      properties:
+        description:
+          description: A description of the action policy.
+          maxLength: 1024
+          type: string
+        destinations:
+          description: The list of destinations. At least one is required.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_destination'
+          maxItems: 10
+          minItems: 1
+          type: array
+        groupBy:
+          anyOf:
+            - items:
+                maxLength: 256
+                minLength: 1
+                type: string
+              maxItems: 16
+              type: array
+            - nullable: true
+          description: The fields used to group alerts.
+        groupingMode:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_grouping_mode'
+            - nullable: true
+          description: The grouping mode for alert notifications.
+        matcher:
+          anyOf:
+            - maxLength: 4096
+              type: string
+            - nullable: true
+          description: A KQL query string to match alerts.
+        name:
+          description: The name of the action policy.
+          maxLength: 256
+          minLength: 1
+          type: string
+        tags:
+          anyOf:
+            - items:
+                maxLength: 128
+                minLength: 1
+                type: string
+              maxItems: 20
+              type: array
+            - nullable: true
+          description: Tags for categorizing the action policy.
+        throttle:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_action_policy_throttle'
+            - nullable: true
+          description: The throttle configuration for notifications.
+        version:
+          description: The current version of the action policy, used for optimistic concurrency control.
+          maxLength: 256
+          minLength: 1
+          type: string
+      required:
+        - version
+    Kibana_HTTP_APIs_alerting_v2_update_rule:
+      additionalProperties: false
+      type: object
+      properties:
+        artifacts:
+          anyOf:
+            - items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_artifact'
+              maxItems: 100
+              type: array
+            - nullable: true
+        enabled:
+          description: Whether the rule is enabled.
+          type: boolean
+        grouping:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_grouping'
+            - nullable: true
+        metadata:
+          additionalProperties: false
+          type: object
+          properties:
+            builder_type:
+              anyOf:
+                - maxLength: 64
+                  type: string
+                - nullable: true
+            description:
+              description: Human-readable description of the rule.
+              maxLength: 1024
+              type: string
+            name:
+              description: Rule name (must be unique within the space).
+              maxLength: 256
+              minLength: 1
+              type: string
+            owner:
+              description: Owner of the rule.
+              maxLength: 256
+              type: string
+            tags:
+              description: Tags for categorization, e.g. ["production", "infra"].
+              items:
+                maxLength: 128
+                minLength: 1
+                type: string
+              maxItems: 20
+              minItems: 1
+              type: array
+        no_data_strategy:
+          anyOf:
+            - enum:
+                - last_known_status
+                - emit
+                - recover
+                - none
+              type: string
+            - nullable: true
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_query'
+        recovery_strategy:
+          anyOf:
+            - enum:
+                - no_breach
+                - query
+                - none
+              type: string
+            - nullable: true
+        schedule:
+          anyOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                every:
+                  description: Execution interval, e.g. 1m, 5m, 1h.
+                  type: string
+                lookback:
+                  description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+                  type: string
+            - nullable: true
+        state_transition:
+          anyOf:
+            - anyOf:
+                - additionalProperties: false
+                  description: Episode state transition thresholds (alert-only).
+                  type: object
+                  properties:
+                    pending_count:
+                      description: Consecutive breaches before transitioning to active.
+                      maximum: 1000
+                      minimum: 0
+                      type: integer
+                    pending_operator:
+                      description: How to combine count and timeframe for pending.
+                      enum:
+                        - AND
+                        - OR
+                      type: string
+                    pending_timeframe:
+                      description: Time window for pending evaluation, e.g. 5m, 15m.
+                      type: string
+                    recovering_count:
+                      description: Consecutive recoveries before transitioning to inactive.
+                      maximum: 1000
+                      minimum: 0
+                      type: integer
+                    recovering_operator:
+                      description: How to combine count and timeframe for recovering.
+                      enum:
+                        - AND
+                        - OR
+                      type: string
+                    recovering_timeframe:
+                      description: Time window for recovering evaluation, e.g. 5m, 15m.
+                      type: string
+                - nullable: true
+            - nullable: true
+        time_field:
+          maxLength: 128
+          minLength: 1
+          type: string
+        version:
+          description: The current version of the rule, used for optimistic concurrency control.
+          maxLength: 256
+          minLength: 1
+          type: string
+    Kibana_HTTP_APIs_alerting_v2_workflow_action_policy_destination:
+      additionalProperties: false
+      type: object
+      properties:
+        id:
+          description: The workflow connector identifier.
+          maxLength: 150
+          minLength: 1
+          type: string
+        type:
+          description: The destination type.
+          enum:
+            - workflow
+          type: string
+      required:
+        - type
+        - id
     Kibana_HTTP_APIs_alerts_filter_query:
       additionalProperties: false
       properties:
