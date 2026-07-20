@@ -465,6 +465,7 @@ export const User: FC<UserProps> = memo(function User({
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
+            riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </EuiFlyoutBody>
