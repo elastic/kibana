@@ -202,7 +202,9 @@ export const CallToolInputSchema = lazySchema(() =>
     arguments: z
       .record(z.string().max(200), z.unknown())
       .optional()
-      .describe('Arguments to pass to the tool. Tool-specific; use listTools to see parameter details.'),
+      .describe(
+        'Arguments to pass to the tool. Tool-specific; use listTools to see parameter details.'
+      ),
   })
 );
 export type CallToolInput = z.infer<typeof CallToolInputSchema>;

@@ -222,8 +222,6 @@ export const ConnectorIconsMap: Map<
   ],
   [
     '.monday_com',
-    lazy(
-      () => import(/* webpackChunkName: "connectorIconMondayCom" */ './specs/monday_com/icon')
-    ),
+    lazy(() => import(/* webpackChunkName: "connectorIconMondayCom" */ './specs/monday_com/icon')),
   ],
 ]);
