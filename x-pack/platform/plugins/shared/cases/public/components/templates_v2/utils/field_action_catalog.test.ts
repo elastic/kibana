@@ -19,19 +19,13 @@ describe('getValidationActions', () => {
   });
 
   it('offers min/max only for number controls', () => {
-    expect(ruleIds('INPUT_NUMBER')).toEqual(
-      expect.arrayContaining(['min', 'max'])
-    );
+    expect(ruleIds('INPUT_NUMBER')).toEqual(expect.arrayContaining(['min', 'max']));
     expect(ruleIds('INPUT_TEXT')).not.toEqual(expect.arrayContaining(['min', 'max']));
   });
 
   it('offers min_length/max_length only for text controls', () => {
-    expect(ruleIds('INPUT_TEXT')).toEqual(
-      expect.arrayContaining(['min_length', 'max_length'])
-    );
-    expect(ruleIds('TEXTAREA')).toEqual(
-      expect.arrayContaining(['min_length', 'max_length'])
-    );
+    expect(ruleIds('INPUT_TEXT')).toEqual(expect.arrayContaining(['min_length', 'max_length']));
+    expect(ruleIds('TEXTAREA')).toEqual(expect.arrayContaining(['min_length', 'max_length']));
     expect(ruleIds('INPUT_NUMBER')).not.toEqual(
       expect.arrayContaining(['min_length', 'max_length'])
     );
