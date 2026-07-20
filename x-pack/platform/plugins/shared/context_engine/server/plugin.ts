@@ -58,21 +58,36 @@ export class ContextEnginePlugin
     };
   }
 
-  async start(coreStart: CoreStart): Promise<ContextEnginePluginStart> {
+  start(coreStart: CoreStart): ContextEnginePluginStart {
+    const aiIndexLogger = this.logger.get('ai_indices');
+
     this.aiIndexService = new AiIndexService({
       esClient: coreStart.elasticsearch.client.asInternalUser,
-      logger: this.logger.get('ai_indices'),
+      logger: aiIndexLogger,
     });
 
-    const internalSoClient = coreStart.savedObjects.getUnsafeInternalClient();
-    const uiSettings = coreStart.uiSettings.asScopedToClient(internalSoClient);
-    const isEnabled = await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
+    const aiIndexService = this.aiIndexService;
+    const registry = this.aiIndexRegistry;
 
-    await this.aiIndexRegistry.startupRegister({
-      aiIndexService: this.aiIndexService,
-      isEnabled: isEnabled ?? false,
-      logger: this.logger.get('ai_indices'),
-    });
+    // Fire-and-forget: getUnsafeInternalClient() requires spaces to be fully initialized,
+    // which may not be the case when other plugins' start() runs. Deferring to a microtask
+    // lets the startup sequence complete before we read uiSettings.
+    Promise.resolve()
+      .then(async () => {
+        const internalSoClient = coreStart.savedObjects.getUnsafeInternalClient();
+        const uiSettings = coreStart.uiSettings.asScopedToClient(internalSoClient);
+        const isEnabled = await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
+        await registry.startupRegister({
+          aiIndexService,
+          isEnabled: isEnabled ?? false,
+          logger: aiIndexLogger,
+        });
+      })
+      .catch((err) => {
+        aiIndexLogger.warn(
+          `AI index startup registration failed: ${err instanceof Error ? err.message : String(err)}`
+        );
+      });
 
     return {};
   }
