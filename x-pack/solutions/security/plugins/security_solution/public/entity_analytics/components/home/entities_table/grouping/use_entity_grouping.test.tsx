@@ -17,9 +17,9 @@ import type { EntityURLStateResult } from '../hooks/use_entity_url_state';
 import { getAggregationsByGroupField, useEntityGrouping } from './use_entity_grouping';
 import type { Filter } from '@kbn/es-query';
 import {
+  useFetchFilteredResolutionGroupData,
   useFetchGroupedData,
-  useFetchResolutionGroupDataPathA,
-  useFetchResolutionGroupDataPathB,
+  useFetchUnfilteredResolutionGroupData,
 } from './use_fetch_grouped_data';
 
 jest.mock('@kbn/grouping', () => ({
@@ -38,8 +38,8 @@ jest.mock('../../../../../common/hooks/use_has_entity_resolution_license', () =>
 
 jest.mock('./use_fetch_grouped_data', () => ({
   useFetchGroupedData: jest.fn(() => ({ data: undefined, isFetching: false })),
-  useFetchResolutionGroupDataPathA: jest.fn(() => ({ data: undefined, isFetching: false })),
-  useFetchResolutionGroupDataPathB: jest.fn(() => ({ data: undefined, isFetching: false })),
+  useFetchUnfilteredResolutionGroupData: jest.fn(() => ({ data: undefined, isFetching: false })),
+  useFetchFilteredResolutionGroupData: jest.fn(() => ({ data: undefined, isFetching: false })),
 }));
 
 const mockDataView = { fields: [] } as unknown as DataView;
@@ -254,16 +254,16 @@ describe('useEntityGrouping — entity type plain-field query', () => {
   });
 });
 
-describe('useEntityGrouping — filter detection and Path A/B routing', () => {
-  const mockPathA = useFetchResolutionGroupDataPathA as jest.Mock;
-  const mockPathB = useFetchResolutionGroupDataPathB as jest.Mock;
+describe('useEntityGrouping — filtered and unfiltered routing', () => {
+  const mockUnfilteredResolutionResult = useFetchUnfilteredResolutionGroupData as jest.Mock;
+  const mockFilteredResolutionResult = useFetchFilteredResolutionGroupData as jest.Mock;
   const mockUseGrouping = useGrouping as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
-    mockPathA.mockReturnValue({ data: undefined, isFetching: false });
-    mockPathB.mockReturnValue({ data: undefined, isFetching: false });
+    mockUnfilteredResolutionResult.mockReturnValue({ data: undefined, isFetching: false });
+    mockFilteredResolutionResult.mockReturnValue({ data: undefined, isFetching: false });
     (useFetchGroupedData as jest.Mock).mockReturnValue({ data: undefined, isFetching: false });
     mockUseGrouping.mockReturnValue({
       selectedGroups: [ENTITY_GROUPING_OPTIONS.RESOLUTION],
@@ -273,7 +273,7 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
     });
   });
 
-  it('enables Path A when state.query is undefined and groupFilters is empty', () => {
+  it('enables unfiltered grouping when state.query is undefined and groupFilters is empty', () => {
     renderHook(
       () =>
         useEntityGrouping({
@@ -285,11 +285,11 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
       { wrapper }
     );
 
-    expect(mockPathA.mock.calls[0][0].enabled).toBe(true);
-    expect(mockPathB.mock.calls[0][0].enabled).toBe(false);
+    expect(mockUnfilteredResolutionResult.mock.calls[0][0].enabled).toBe(true);
+    expect(mockFilteredResolutionResult.mock.calls[0][0].enabled).toBe(false);
   });
 
-  it('enables Path A for a canonical empty state.query bool', () => {
+  it('enables unfiltered grouping for a canonical empty state.query bool', () => {
     const emptyBool: ESBoolQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
 
     renderHook(
@@ -303,11 +303,11 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
       { wrapper }
     );
 
-    expect(mockPathA.mock.calls[0][0].enabled).toBe(true);
-    expect(mockPathB.mock.calls[0][0].enabled).toBe(false);
+    expect(mockUnfilteredResolutionResult.mock.calls[0][0].enabled).toBe(true);
+    expect(mockFilteredResolutionResult.mock.calls[0][0].enabled).toBe(false);
   });
 
-  it('enables Path B when state.query has any active top-level clause', () => {
+  it('enables filtered grouping when state.query has any active top-level clause', () => {
     const activeQuery: ESBoolQuery = {
       bool: {
         filter: [{ term: { 'host.name': 'my-host' } } as unknown as ESBoolQuery],
@@ -328,11 +328,11 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
       { wrapper }
     );
 
-    expect(mockPathA.mock.calls[0][0].enabled).toBe(false);
-    expect(mockPathB.mock.calls[0][0].enabled).toBe(true);
+    expect(mockUnfilteredResolutionResult.mock.calls[0][0].enabled).toBe(false);
+    expect(mockFilteredResolutionResult.mock.calls[0][0].enabled).toBe(true);
   });
 
-  it('enables Path B when groupFilters is non-empty and includes them in the Path B filter', () => {
+  it('enables filtered grouping when groupFilters is non-empty and includes them in the query', () => {
     const groupFilter: Filter = { meta: {}, query: { match_phrase: { 'host.name': 'srv-01' } } };
 
     renderHook(
@@ -347,13 +347,15 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
       { wrapper }
     );
 
-    expect(mockPathA.mock.calls[0][0].enabled).toBe(false);
-    expect(mockPathB.mock.calls[0][0].enabled).toBe(true);
-    expect(mockPathB.mock.calls[0][0].filter).toBeDefined();
-    expect(JSON.stringify(mockPathB.mock.calls[0][0].filter)).toContain('srv-01');
+    expect(mockUnfilteredResolutionResult.mock.calls[0][0].enabled).toBe(false);
+    expect(mockFilteredResolutionResult.mock.calls[0][0].enabled).toBe(true);
+    expect(mockFilteredResolutionResult.mock.calls[0][0].filter).toBeDefined();
+    expect(JSON.stringify(mockFilteredResolutionResult.mock.calls[0][0].filter)).toContain(
+      'srv-01'
+    );
   });
 
-  it('passes a single active state.query straight through as the Path B filter', () => {
+  it('passes a single active state.query straight through to filtered grouping', () => {
     const activeQuery: ESBoolQuery = {
       bool: {
         filter: [{ term: { 'host.name': 'my-host' } } as unknown as ESBoolQuery],
@@ -374,10 +376,10 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
       { wrapper }
     );
 
-    expect(mockPathB.mock.calls[0][0].filter).toEqual(activeQuery);
+    expect(mockFilteredResolutionResult.mock.calls[0][0].filter).toEqual(activeQuery);
   });
 
-  it('does not duplicate a global filter already present in state.query for Path B', () => {
+  it('does not duplicate a global filter already present in state.query', () => {
     // useBaseEsQuery already folded the active global filter into state.query.
     const stateQueryWithGlobal: ESBoolQuery = {
       bool: {
@@ -399,10 +401,10 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
       { wrapper }
     );
 
-    expect(mockPathB.mock.calls[0][0].filter).toEqual(stateQueryWithGlobal);
+    expect(mockFilteredResolutionResult.mock.calls[0][0].filter).toEqual(stateQueryWithGlobal);
   });
 
-  it('wraps state.query and compiled groupFilters into a single bool.filter for Path B', () => {
+  it('wraps state.query and compiled groupFilters into one filtered-grouping query', () => {
     const activeQuery: ESBoolQuery = {
       bool: {
         filter: [{ term: { 'host.name': 'my-host' } } as unknown as ESBoolQuery],
@@ -425,21 +427,21 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
       { wrapper }
     );
 
-    const { filter } = mockPathB.mock.calls[0][0];
+    const { filter } = mockFilteredResolutionResult.mock.calls[0][0];
     expect(filter.bool.filter).toHaveLength(2);
     expect(filter.bool.filter).toContainEqual(activeQuery);
     expect(JSON.stringify(filter.bool.filter)).toContain('alice');
   });
 });
 
-describe('useEntityGrouping — Path B data wiring', () => {
-  const mockPathB = useFetchResolutionGroupDataPathB as jest.Mock;
+describe('useEntityGrouping — filtered resolution data wiring', () => {
+  const mockFilteredResolutionResult = useFetchFilteredResolutionGroupData as jest.Mock;
   const mockUseGrouping = useGrouping as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
-    (useFetchResolutionGroupDataPathA as jest.Mock).mockReturnValue({
+    (useFetchUnfilteredResolutionGroupData as jest.Mock).mockReturnValue({
       data: undefined,
       isFetching: false,
     });
@@ -450,7 +452,7 @@ describe('useEntityGrouping — Path B data wiring', () => {
       groupsUnit: jest.fn(),
       options: [],
     });
-    mockPathB.mockReturnValue({
+    mockFilteredResolutionResult.mockReturnValue({
       data: {
         groupData: {
           groupByFields: {
@@ -473,7 +475,7 @@ describe('useEntityGrouping — Path B data wiring', () => {
     });
   });
 
-  it('forwards Path B groupData into groupData when a user filter is active', () => {
+  it('forwards filtered resolution data when a user filter is active', () => {
     const activeQuery: ESBoolQuery = {
       bool: {
         filter: [{ term: { 'host.name': 'my-host' } } as unknown as ESBoolQuery],
@@ -508,13 +510,13 @@ describe('useEntityGrouping — Path B data wiring', () => {
 });
 
 describe('useEntityGrouping — synthesized resolution bucket shape', () => {
-  const mockPathA = useFetchResolutionGroupDataPathA as jest.Mock;
+  const mockUnfilteredResolutionResult = useFetchUnfilteredResolutionGroupData as jest.Mock;
   const mockUseGrouping = useGrouping as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
-    (useFetchResolutionGroupDataPathB as jest.Mock).mockReturnValue({
+    (useFetchFilteredResolutionGroupData as jest.Mock).mockReturnValue({
       data: undefined,
       isFetching: false,
     });
@@ -525,7 +527,7 @@ describe('useEntityGrouping — synthesized resolution bucket shape', () => {
       groupsUnit: jest.fn(),
       options: [],
     });
-    mockPathA.mockReturnValue({
+    mockUnfilteredResolutionResult.mockReturnValue({
       data: {
         groupData: {
           groupByFields: {
@@ -613,6 +615,9 @@ describe('useEntityGrouping — synthesized resolution bucket shape', () => {
       { wrapper }
     );
 
-    expect(mockPathA.mock.calls[0][0]).toMatchObject({ pageIndex: 3, pageSize: 50 });
+    expect(mockUnfilteredResolutionResult.mock.calls[0][0]).toMatchObject({
+      pageIndex: 3,
+      pageSize: 50,
+    });
   });
 });

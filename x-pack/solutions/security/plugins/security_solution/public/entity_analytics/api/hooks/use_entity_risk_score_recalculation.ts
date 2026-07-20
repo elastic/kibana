@@ -16,9 +16,9 @@ import { RISK_INPUTS_TAB_QUERY_ID } from '../../components/entity_details_flyout
 import { RESOLUTION_GROUP_QUERY_KEY } from '../../components/entity_resolution/hooks/use_resolution_group';
 import {
   QUERY_KEY_ENTITY_ANALYTICS,
+  QUERY_KEY_FILTERED_RESOLUTION_GROUPS,
   QUERY_KEY_GRID_DATA,
-  QUERY_KEY_RESOLUTION_PATH_A,
-  QUERY_KEY_RESOLUTION_PATH_B,
+  QUERY_KEY_UNFILTERED_RESOLUTION_GROUPS,
 } from '../../components/home/entities_table/constants';
 import { useOnAssetCriticalityToolEvent } from '../../hooks/use_on_asset_criticality_tool_event';
 
@@ -77,12 +77,11 @@ export const useEntityRiskScoreRecalculation = <T extends EntityType>({
     queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });
     // Entity analytics home table rows (flat grid + the leaf tables inside expanded groups).
     queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_GRID_DATA] });
-    // Resolution group accordion headers read risk from Path A/B fetch results.
     queryClient.invalidateQueries({
-      queryKey: [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_RESOLUTION_PATH_A],
+      queryKey: [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_UNFILTERED_RESOLUTION_GROUPS],
     });
     queryClient.invalidateQueries({
-      queryKey: [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_RESOLUTION_PATH_B],
+      queryKey: [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_FILTERED_RESOLUTION_GROUPS],
     });
     // Context-specific extras (e.g. agent-builder attachment cache).
     onRecalculation?.();

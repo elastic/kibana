@@ -14,8 +14,8 @@ import { EntityType } from '../../../../../../common/entity_analytics/types';
 import {
   getGroupedEntitiesQuery,
   parseTargetMetadataHits,
-  useFetchResolutionGroupDataPathA,
-  useFetchResolutionGroupDataPathB,
+  useFetchUnfilteredResolutionGroupData,
+  useFetchFilteredResolutionGroupData,
   ESQL_LIMIT_CAP,
   type EntitiesGroupingQuery,
 } from './use_fetch_grouped_data';
@@ -254,7 +254,7 @@ describe('getGroupedEntitiesQuery', () => {
 
 // ─── Shared helpers for ES|QL fetch hook tests ──────────────────────────────
 
-const makePathAEsqlResponse = (
+const makeUnfilteredResolutionEsqlResponse = (
   targets: Array<{
     id: string;
     name: string;
@@ -278,7 +278,7 @@ const makePathAEsqlResponse = (
   params: { query: '' },
 });
 
-const makePathBEsqlResponse = (
+const makeFilteredResolutionEsqlResponse = (
   groups: Array<{ group_key: string; group_risk: number | null; group_size: number }>
 ) => ({
   response: {
@@ -288,7 +288,7 @@ const makePathBEsqlResponse = (
   params: { query: '' },
 });
 
-// Shape returned by the Path B distinct-group count ES|QL query (`| STATS total = COUNT(*)`).
+// Shape returned by the filtered distinct-group count ES|QL query (`| STATS total = COUNT(*)`).
 const makeGroupCountEsqlResponse = (total: number) => ({
   response: {
     columns: [{ name: 'total' }],
@@ -306,7 +306,7 @@ const setupKibanaMock = () => {
   });
 };
 
-describe('useFetchResolutionGroupDataPathA', () => {
+describe('useFetchUnfilteredResolutionGroupData', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupKibanaMock();
@@ -314,7 +314,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
 
   it('returns target metadata from ES|QL rows without a separate metadata DSL query', async () => {
     (getESQLResults as jest.Mock).mockResolvedValue(
-      makePathAEsqlResponse([
+      makeUnfilteredResolutionEsqlResponse([
         {
           id: 'user:alice',
           name: 'alice',
@@ -334,7 +334,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
       );
 
     const { result } = renderHook(
-      () => useFetchResolutionGroupDataPathA({ pageIndex: 0, pageSize: 10 }),
+      () => useFetchUnfilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }),
       { wrapper: createWrapper() }
     );
 
@@ -353,7 +353,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
 
   it('sets doc_count to 1 plus the alias count from the terms agg', async () => {
     (getESQLResults as jest.Mock).mockResolvedValue(
-      makePathAEsqlResponse([
+      makeUnfilteredResolutionEsqlResponse([
         {
           id: 'user:alice',
           name: 'alice',
@@ -389,7 +389,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
       );
 
     const { result } = renderHook(
-      () => useFetchResolutionGroupDataPathA({ pageIndex: 0, pageSize: 10 }),
+      () => useFetchUnfilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }),
       { wrapper: createWrapper() }
     );
 
@@ -405,7 +405,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
 
   it('wraps each target entity id in an array as bucket.key with key_as_string and selectedGroup', async () => {
     (getESQLResults as jest.Mock).mockResolvedValue(
-      makePathAEsqlResponse([
+      makeUnfilteredResolutionEsqlResponse([
         {
           id: 'user:alice',
           name: 'alice',
@@ -424,7 +424,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
       );
 
     const { result } = renderHook(
-      () => useFetchResolutionGroupDataPathA({ pageIndex: 0, pageSize: 10 }),
+      () => useFetchUnfilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }),
       { wrapper: createWrapper() }
     );
 
@@ -438,7 +438,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
   });
 
   it(`caps the ES|QL LIMIT at ${ESQL_LIMIT_CAP} when (pageIndex+1)*pageSize would exceed it`, async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(makePathAEsqlResponse([]));
+    (getESQLResults as jest.Mock).mockResolvedValue(makeUnfilteredResolutionEsqlResponse([]));
     mockSearch.mockReturnValue(
       of({
         rawResponse: {
@@ -448,7 +448,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
       })
     );
 
-    renderHook(() => useFetchResolutionGroupDataPathA({ pageIndex: 999, pageSize: 100 }), {
+    renderHook(() => useFetchUnfilteredResolutionGroupData({ pageIndex: 999, pageSize: 100 }), {
       wrapper: createWrapper(),
     });
 
@@ -462,7 +462,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
   });
 
   it('sorts by effective_risk DESC then entity.id ASC for stable pagination ties', async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(makePathAEsqlResponse([]));
+    (getESQLResults as jest.Mock).mockResolvedValue(makeUnfilteredResolutionEsqlResponse([]));
     mockSearch.mockReturnValue(
       of({
         rawResponse: {
@@ -472,7 +472,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
       })
     );
 
-    renderHook(() => useFetchResolutionGroupDataPathA({ pageIndex: 0, pageSize: 10 }), {
+    renderHook(() => useFetchUnfilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }), {
       wrapper: createWrapper(),
     });
 
@@ -485,7 +485,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
   });
 
   it('uses track_total_hits result as groupsCount', async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(makePathAEsqlResponse([]));
+    (getESQLResults as jest.Mock).mockResolvedValue(makeUnfilteredResolutionEsqlResponse([]));
     mockSearch.mockReturnValue(
       of({
         rawResponse: {
@@ -496,7 +496,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
     );
 
     const { result } = renderHook(
-      () => useFetchResolutionGroupDataPathA({ pageIndex: 0, pageSize: 10 }),
+      () => useFetchUnfilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }),
       { wrapper: createWrapper() }
     );
 
@@ -506,7 +506,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
   });
 
   it('counts targets for groupsCount and all entities (targets + aliases) for unitsCount', async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(makePathAEsqlResponse([]));
+    (getESQLResults as jest.Mock).mockResolvedValue(makeUnfilteredResolutionEsqlResponse([]));
     mockSearch
       .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 3 } } } })) // group count (targets only)
       .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 8 } } } })) // unit count (all entities)
@@ -515,7 +515,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
       );
 
     const { result } = renderHook(
-      () => useFetchResolutionGroupDataPathA({ pageIndex: 0, pageSize: 10 }),
+      () => useFetchUnfilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }),
       { wrapper: createWrapper() }
     );
 
@@ -537,7 +537,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
       resolutionRisk: 100 - n,
     });
     (getESQLResults as jest.Mock).mockResolvedValue(
-      makePathAEsqlResponse([mkTarget(0), mkTarget(1), mkTarget(2), mkTarget(3)])
+      makeUnfilteredResolutionEsqlResponse([mkTarget(0), mkTarget(1), mkTarget(2), mkTarget(3)])
     );
     mockSearch
       .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 4 } } } })) // group count
@@ -547,7 +547,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
       );
 
     const { result } = renderHook(
-      () => useFetchResolutionGroupDataPathA({ pageIndex: 1, pageSize: 2 }),
+      () => useFetchUnfilteredResolutionGroupData({ pageIndex: 1, pageSize: 2 }),
       { wrapper: createWrapper() }
     );
 
@@ -564,7 +564,7 @@ describe('useFetchResolutionGroupDataPathA', () => {
   });
 });
 
-describe('useFetchResolutionGroupDataPathB', () => {
+describe('useFetchFilteredResolutionGroupData', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupKibanaMock();
@@ -575,11 +575,11 @@ describe('useFetchResolutionGroupDataPathB', () => {
       bool: { filter: [{ term: { 'host.name': 'my-host' } }], must: [], should: [], must_not: [] },
     };
 
-    (getESQLResults as jest.Mock).mockResolvedValue(makePathBEsqlResponse([]));
+    (getESQLResults as jest.Mock).mockResolvedValue(makeFilteredResolutionEsqlResponse([]));
     mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: { value: 0 }, hits: [] } } }));
 
     renderHook(
-      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10, filter: userFilter }),
+      () => useFetchFilteredResolutionGroupData({ pageIndex: 0, pageSize: 10, filter: userFilter }),
       { wrapper: createWrapper() }
     );
 
@@ -594,7 +594,9 @@ describe('useFetchResolutionGroupDataPathB', () => {
     };
 
     (getESQLResults as jest.Mock).mockResolvedValue(
-      makePathBEsqlResponse([{ group_key: 'user:alice', group_risk: 90, group_size: 1 }])
+      makeFilteredResolutionEsqlResponse([
+        { group_key: 'user:alice', group_risk: 90, group_size: 1 },
+      ])
     );
     // Call 1: total count; Call 2: metadata fixup
     mockSearch
@@ -602,7 +604,7 @@ describe('useFetchResolutionGroupDataPathB', () => {
       .mockReturnValueOnce(of({ rawResponse: { hits: { hits: [] } } }));
 
     renderHook(
-      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10, filter: userFilter }),
+      () => useFetchFilteredResolutionGroupData({ pageIndex: 0, pageSize: 10, filter: userFilter }),
       { wrapper: createWrapper() }
     );
 
@@ -629,7 +631,9 @@ describe('useFetchResolutionGroupDataPathB', () => {
     // group_risk (50) is deliberately different from the metadata riskScore (90) so the assertion
     // proves resolutionRiskScore came from the metadata branch, not the group_risk fallback.
     (getESQLResults as jest.Mock).mockResolvedValue(
-      makePathBEsqlResponse([{ group_key: 'target-user-001', group_risk: 50, group_size: 1 }])
+      makeFilteredResolutionEsqlResponse([
+        { group_key: 'target-user-001', group_risk: 50, group_size: 1 },
+      ])
     );
 
     const metadataHit = {
@@ -648,7 +652,7 @@ describe('useFetchResolutionGroupDataPathB', () => {
       .mockReturnValueOnce(of({ rawResponse: { hits: { hits: [metadataHit] } } })); // fixup
 
     const { result } = renderHook(
-      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10 }),
+      () => useFetchFilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }),
       { wrapper: createWrapper() }
     );
 
@@ -674,7 +678,9 @@ describe('useFetchResolutionGroupDataPathB', () => {
     // No metadata hit for the group_key (fixup returns nothing), so resolutionRiskScore must fall
     // back to the STATS join's group_risk rather than surfacing null.
     (getESQLResults as jest.Mock).mockResolvedValue(
-      makePathBEsqlResponse([{ group_key: 'target-user-001', group_risk: 77, group_size: 1 }])
+      makeFilteredResolutionEsqlResponse([
+        { group_key: 'target-user-001', group_risk: 77, group_size: 1 },
+      ])
     );
 
     mockSearch
@@ -682,7 +688,7 @@ describe('useFetchResolutionGroupDataPathB', () => {
       .mockReturnValueOnce(of({ rawResponse: { hits: { hits: [] } } })); // fixup: no metadata
 
     const { result } = renderHook(
-      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10 }),
+      () => useFetchFilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }),
       { wrapper: createWrapper() }
     );
 
@@ -694,7 +700,9 @@ describe('useFetchResolutionGroupDataPathB', () => {
 
   it('sets resolutionRiskScore to null when neither metadata nor group_risk is present', async () => {
     (getESQLResults as jest.Mock).mockResolvedValue(
-      makePathBEsqlResponse([{ group_key: 'target-user-001', group_risk: null, group_size: 1 }])
+      makeFilteredResolutionEsqlResponse([
+        { group_key: 'target-user-001', group_risk: null, group_size: 1 },
+      ])
     );
 
     mockSearch
@@ -702,7 +710,7 @@ describe('useFetchResolutionGroupDataPathB', () => {
       .mockReturnValueOnce(of({ rawResponse: { hits: { hits: [] } } })); // fixup: no metadata
 
     const { result } = renderHook(
-      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10 }),
+      () => useFetchFilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }),
       { wrapper: createWrapper() }
     );
 
@@ -714,12 +722,14 @@ describe('useFetchResolutionGroupDataPathB', () => {
 
   it('wraps each group_key in an array as bucket.key', async () => {
     (getESQLResults as jest.Mock).mockResolvedValue(
-      makePathBEsqlResponse([{ group_key: 'user:alice', group_risk: 85, group_size: 2 }])
+      makeFilteredResolutionEsqlResponse([
+        { group_key: 'user:alice', group_risk: 85, group_size: 2 },
+      ])
     );
     mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: { value: 1 }, hits: [] } } }));
 
     const { result } = renderHook(
-      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10 }),
+      () => useFetchFilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }),
       { wrapper: createWrapper() }
     );
 
@@ -732,10 +742,10 @@ describe('useFetchResolutionGroupDataPathB', () => {
   });
 
   it(`caps the ES|QL LIMIT at ${ESQL_LIMIT_CAP} when (pageIndex+1)*pageSize would exceed it`, async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(makePathBEsqlResponse([]));
+    (getESQLResults as jest.Mock).mockResolvedValue(makeFilteredResolutionEsqlResponse([]));
     mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: { value: 0 }, hits: [] } } }));
 
-    renderHook(() => useFetchResolutionGroupDataPathB({ pageIndex: 999, pageSize: 100 }), {
+    renderHook(() => useFetchFilteredResolutionGroupData({ pageIndex: 999, pageSize: 100 }), {
       wrapper: createWrapper(),
     });
 
@@ -752,10 +762,10 @@ describe('useFetchResolutionGroupDataPathB', () => {
   });
 
   it('sorts by group_risk DESC, group_size DESC, then group_key ASC for stable pagination ties', async () => {
-    (getESQLResults as jest.Mock).mockResolvedValue(makePathBEsqlResponse([]));
+    (getESQLResults as jest.Mock).mockResolvedValue(makeFilteredResolutionEsqlResponse([]));
     mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: { value: 0 }, hits: [] } } }));
 
-    renderHook(() => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10 }), {
+    renderHook(() => useFetchFilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }), {
       wrapper: createWrapper(),
     });
 
@@ -772,7 +782,9 @@ describe('useFetchResolutionGroupDataPathB', () => {
     (getESQLResults as jest.Mock).mockImplementation(({ esqlQuery }: { esqlQuery: string }) =>
       Promise.resolve(
         esqlQuery.includes('group_risk')
-          ? makePathBEsqlResponse([{ group_key: 'user:alice', group_risk: 85, group_size: 2 }])
+          ? makeFilteredResolutionEsqlResponse([
+              { group_key: 'user:alice', group_risk: 85, group_size: 2 },
+            ])
           : makeGroupCountEsqlResponse(137)
       )
     );
@@ -781,7 +793,7 @@ describe('useFetchResolutionGroupDataPathB', () => {
       .mockReturnValueOnce(of({ rawResponse: { hits: { hits: [] } } })); // metadata fixup
 
     const { result } = renderHook(
-      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10 }),
+      () => useFetchFilteredResolutionGroupData({ pageIndex: 0, pageSize: 10 }),
       { wrapper: createWrapper() }
     );
 

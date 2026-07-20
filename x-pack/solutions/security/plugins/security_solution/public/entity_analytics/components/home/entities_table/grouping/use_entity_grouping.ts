@@ -34,9 +34,9 @@ import {
   type EntitiesGroupingAggregation,
   type EntitiesGroupingQuery,
   type TargetMetadataMap,
+  useFetchFilteredResolutionGroupData,
   useFetchGroupedData,
-  useFetchResolutionGroupDataPathA,
-  useFetchResolutionGroupDataPathB,
+  useFetchUnfilteredResolutionGroupData,
 } from './use_fetch_grouped_data';
 import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
 import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
@@ -149,7 +149,7 @@ export const useEntityGrouping = ({
     [defaultGroupingOptions, hasResolutionLicense, groupingId]
   );
 
-  // Memoized so the downstream userFilterForPathB / nonResolutionGroupingQuery memos aren't
+  // Memoized so the downstream filteredResolutionFilter / nonResolutionGroupingQuery memos aren't
   // defeated by buildEsQuery returning a fresh object reference on every render.
   const additionalFilters = useMemo(
     () => buildEsQuery(dataView, [], groupFilters),
@@ -158,15 +158,15 @@ export const useEntityGrouping = ({
   const isResolutionGrouping = selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION;
   const uniqueValue = useMemo(() => `${selectedGroup}-${uuid.v4()}`, [selectedGroup]);
 
-  // Path A (fast top-N) is valid only without filters. Any active filter requires Path B
-  // (STATS join) so a match on an alias still surfaces its target group.
+  // The fast target-only query is valid without filters. Filtered grouping requires a STATS join
+  // so a match on an alias still surfaces its target group.
   const noUserFilterActive = useMemo(
     () => !hasActiveTopLevelBoolClauses(query) && groupFilters.length === 0,
     [query, groupFilters]
   );
 
   // state.query already includes any active global filter from useBaseEsQuery.
-  const userFilterForPathB = useMemo((): ESBoolQuery | undefined => {
+  const filteredResolutionFilter = useMemo((): ESBoolQuery | undefined => {
     if (!isResolutionGrouping || noUserFilterActive) return undefined;
     const filterClauses: ESBoolQuery[] = [];
     if (hasActiveTopLevelBoolClauses(query)) filterClauses.push(query);
@@ -176,23 +176,23 @@ export const useEntityGrouping = ({
     return { bool: { must: [], filter: filterClauses, should: [], must_not: [] } };
   }, [isResolutionGrouping, noUserFilterActive, query, groupFilters, additionalFilters]);
 
-  // Resolution fetch hooks — always called, enabled flag controls actual execution
-  const pathAResult = useFetchResolutionGroupDataPathA({
+  // Resolution fetch hooks are always called; enabled controls execution.
+  const unfilteredResolutionResult = useFetchUnfilteredResolutionGroupData({
     pageIndex,
     pageSize,
     enabled: isResolutionGrouping && noUserFilterActive,
   });
 
-  const pathBResult = useFetchResolutionGroupDataPathB({
+  const filteredResolutionResult = useFetchFilteredResolutionGroupData({
     pageIndex,
     pageSize,
-    filter: userFilterForPathB,
+    filter: filteredResolutionFilter,
     enabled: isResolutionGrouping && !noUserFilterActive,
   });
 
   const nonResolutionGroupingQuery = useMemo((): EntitiesGroupingQuery => {
     if (isResolutionGrouping) {
-      // Resolution uses the ES|QL Path A/B hooks instead. Return an inert query only to satisfy
+      // Resolution uses dedicated ES|QL hooks instead. Return an inert query only to satisfy
       // the required `query` arg — useFetchGroupedData is disabled for this case (see enabled flag).
       return { size: 0 } as EntitiesGroupingQuery;
     }
@@ -293,7 +293,9 @@ export const useEntityGrouping = ({
     enabled: !isResolutionGrouping && !!selectedGroup && !isNoneGroup([selectedGroup]),
   });
 
-  const activeResolutionResult = noUserFilterActive ? pathAResult : pathBResult;
+  const activeResolutionResult = noUserFilterActive
+    ? unfilteredResolutionResult
+    : filteredResolutionResult;
 
   const isFetching = isResolutionGrouping
     ? activeResolutionResult.isFetching

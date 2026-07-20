@@ -23,8 +23,8 @@ import {
   ENTITY_TYPE_TERMS_CLAUSE,
   QUERY_KEY_GROUPING_DATA,
   QUERY_KEY_ENTITY_ANALYTICS,
-  QUERY_KEY_RESOLUTION_PATH_A,
-  QUERY_KEY_RESOLUTION_PATH_B,
+  QUERY_KEY_FILTERED_RESOLUTION_GROUPS,
+  QUERY_KEY_UNFILTERED_RESOLUTION_GROUPS,
 } from '../constants';
 import { DataViewContext } from '..';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
@@ -176,7 +176,7 @@ export interface ResolutionFetchResult {
   targetMetadata: TargetMetadataMap;
 }
 
-interface PathATargetRow extends Record<string, unknown> {
+interface UnfilteredResolutionTargetRow extends Record<string, unknown> {
   'entity.id': string | null;
   'entity.name': string | null;
   'entity.EngineMetadata.Type': string | null;
@@ -186,7 +186,7 @@ interface PathATargetRow extends Record<string, unknown> {
   'entity.relationships.resolution.risk.calculated_score_norm': number | null;
 }
 
-interface PathBGroupRow extends Record<string, unknown> {
+interface FilteredResolutionGroupRow extends Record<string, unknown> {
   group_key: string | null;
   group_risk: number | null;
   group_size: number | null;
@@ -226,7 +226,9 @@ const buildGroupCountEsql = (indexPattern: string): string =>
 | STATS by_group = COUNT(*) BY group_key
 | STATS total = COUNT(*)`;
 
-const buildTargetMetadataFromPathARows = (rows: PathATargetRow[]): TargetMetadataMap => {
+const buildTargetMetadataFromUnfilteredRows = (
+  rows: UnfilteredResolutionTargetRow[]
+): TargetMetadataMap => {
   const result: TargetMetadataMap = new Map();
   for (const row of rows) {
     const id = row[ENTITY_FIELDS.ENTITY_ID];
@@ -242,11 +244,10 @@ const buildTargetMetadataFromPathARows = (rows: PathATargetRow[]): TargetMetadat
 };
 
 /**
- * Path A: unfiltered resolution grouping via an ES|QL top-N over targets.
- * Only valid with no user filter active: the top-N pre-sort cannot account for filtered-out
- * alias members, so any filter routes to Path B (STATS join) instead.
+ * Fetches unfiltered resolution groups via an ES|QL top-N over targets. The top-N pre-sort
+ * cannot account for filtered-out alias members, so this query is valid only without user filters.
  */
-export const useFetchResolutionGroupDataPathA = ({
+export const useFetchUnfilteredResolutionGroupData = ({
   pageIndex,
   pageSize,
   enabled = true,
@@ -268,7 +269,7 @@ export const useFetchResolutionGroupDataPathA = ({
   return useQuery(
     [
       QUERY_KEY_ENTITY_ANALYTICS,
-      QUERY_KEY_RESOLUTION_PATH_A,
+      QUERY_KEY_UNFILTERED_RESOLUTION_GROUPS,
       { pageIndex, pageSize, indexPattern },
     ],
     async (): Promise<ResolutionFetchResult> => {
@@ -318,7 +319,7 @@ export const useFetchResolutionGroupDataPathA = ({
         ),
       ]);
 
-      const allRows = esqlResponseToRecords<PathATargetRow>(esqlResult.response);
+      const allRows = esqlResponseToRecords<UnfilteredResolutionTargetRow>(esqlResult.response);
       const pageRows = allRows.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
       const pageTargetIds = pageRows
         .map((r) => r[ENTITY_FIELDS.ENTITY_ID])
@@ -350,11 +351,12 @@ export const useFetchResolutionGroupDataPathA = ({
         )
       );
 
-      const targetMetadata = buildTargetMetadataFromPathARows(pageRows);
+      const targetMetadata = buildTargetMetadataFromUnfilteredRows(pageRows);
 
       const buckets: ResolutionGroupBucket[] = pageRows
         .filter(
-          (r): r is PathATargetRow & { 'entity.id': string } => r[ENTITY_FIELDS.ENTITY_ID] !== null
+          (r): r is UnfilteredResolutionTargetRow & { 'entity.id': string } =>
+            r[ENTITY_FIELDS.ENTITY_ID] !== null
         )
         .map((r) => {
           const id = r[ENTITY_FIELDS.ENTITY_ID];
@@ -390,11 +392,10 @@ export const useFetchResolutionGroupDataPathA = ({
 };
 
 /**
- * Path B: filtered resolution grouping via an ES|QL STATS join, so a matching alias still
- * surfaces its target's group (which the top-N shape can't express). Used whenever any user
- * filter is active.
+ * Fetches filtered resolution groups via an ES|QL STATS join so a matching alias still surfaces
+ * its target's group, which the unfiltered top-N query cannot express.
  */
-export const useFetchResolutionGroupDataPathB = ({
+export const useFetchFilteredResolutionGroupData = ({
   pageIndex,
   pageSize,
   filter,
@@ -418,7 +419,7 @@ export const useFetchResolutionGroupDataPathB = ({
   return useQuery(
     [
       QUERY_KEY_ENTITY_ANALYTICS,
-      QUERY_KEY_RESOLUTION_PATH_B,
+      QUERY_KEY_FILTERED_RESOLUTION_GROUPS,
       { pageIndex, pageSize, filter, indexPattern },
     ],
     async (): Promise<ResolutionFetchResult> => {
@@ -458,7 +459,7 @@ export const useFetchResolutionGroupDataPathB = ({
         ),
       ]);
 
-      const allRows = esqlResponseToRecords<PathBGroupRow>(esqlResult.response);
+      const allRows = esqlResponseToRecords<FilteredResolutionGroupRow>(esqlResult.response);
       const pageRows = allRows.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
       const pageGroupKeys = pageRows.map((r) => r.group_key).filter((k): k is string => k !== null);
 
@@ -489,7 +490,9 @@ export const useFetchResolutionGroupDataPathB = ({
       const targetMetadata = parseTargetMetadataHits(metadataResult.rawResponse.hits.hits);
 
       const buckets: ResolutionGroupBucket[] = pageRows
-        .filter((r): r is PathBGroupRow & { group_key: string } => r.group_key !== null)
+        .filter(
+          (r): r is FilteredResolutionGroupRow & { group_key: string } => r.group_key !== null
+        )
         .map((r) => {
           const metadata = targetMetadata.get(r.group_key);
           return {
