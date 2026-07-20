@@ -5,45 +5,76 @@
  * 2.0.
  */
 
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentVersionRef,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 
-const createMockAttachment = (
+const makeVersionedAttachment = (
   id: string,
   type: string,
-  data: unknown,
-  options: { active?: boolean; description?: string; estimatedTokens?: number } = {}
+  options: {
+    version?: number;
+    description?: string;
+    estimatedTokens?: number;
+    data?: unknown;
+  } = {}
 ): VersionedAttachment => ({
   id,
   type,
   versions: [
     {
-      version: 1,
-      data,
+      version: options.version ?? 1,
+      data: options.data ?? {},
       created_at: new Date().toISOString(),
       content_hash: 'hash123',
       estimated_tokens: options.estimatedTokens ?? 100,
     },
   ],
-  current_version: 1,
-  active: options.active ?? true,
+  current_version: options.version ?? 1,
+  active: true,
   description: options.description,
 });
 
+const makeRef = (
+  attachment: VersionedAttachment,
+  options: {
+    version?: AttachmentVersionRef['version'];
+    operation?: AttachmentVersionRef['operation'];
+    actor?: AttachmentVersionRef['actor'];
+  } = {}
+): AttachmentVersionRef => ({
+  attachment_id: attachment.id,
+  version: options?.version ? options.version : attachment.versions[0].version,
+  ...(options?.operation ? { operation: options.operation } : {}),
+  ...(options?.actor ? { actor: options.actor } : {}),
+});
+
+const makeStateManager = (records: VersionedAttachment[]): AttachmentStateManager =>
+  ({
+    getAttachmentRecord: (id: string) => records.find((r) => r.id === id),
+  } as AttachmentStateManager);
+
 describe('formatAttachmentsMetadata', () => {
-  it('should return an empty string for no attachments', () => {
-    expect(formatAttachmentsMetadata([])).toBe('');
+  it('returns empty string for no attachment refs', () => {
+    const stateManager = makeStateManager([]);
+    expect(formatAttachmentsMetadata([], stateManager)).toBe('');
   });
 
-  it('should render summary-only metadata for a single attachment', () => {
-    const attachments = [
-      createMockAttachment('1', 'text', 'Hello world', {
-        description: 'Test',
-        estimatedTokens: 42,
-      }),
-    ];
+  it('renders metadata for a single attachment ref', () => {
+    const attachment = makeVersionedAttachment('1', 'text', {
+      description: 'Test',
+      estimatedTokens: 42,
+      data: 'Hello world',
+    });
+    const stateManager = makeStateManager([attachment]);
 
-    const result = formatAttachmentsMetadata(attachments);
+    const result = formatAttachmentsMetadata(
+      [makeRef(attachment, { operation: 'created', actor: 'user' })],
+      stateManager
+    );
 
     expect(result).toContain('count="1"');
     expect(result).toContain('attachment_id="1"');
@@ -51,47 +82,88 @@ describe('formatAttachmentsMetadata', () => {
     expect(result).toContain('version="1"');
     expect(result).toContain('estimated_tokens="42"');
     expect(result).toContain('description="Test"');
-    // Content is never inlined, regardless of count — only metadata.
+    expect(result).toContain('operation="created"');
+    expect(result).toContain('actor="user"');
+    // Content is never inlined — only metadata.
     expect(result).not.toContain('Hello world');
   });
 
-  it('should render metadata for multiple attachments regardless of count (no threshold)', () => {
-    const many = Array.from({ length: 6 }, (_, i) =>
-      createMockAttachment(`${i}`, 'text', `Content ${i}`)
+  it('renders metadata for multiple attachment refs', () => {
+    const attachments = Array.from({ length: 6 }, (_, i) =>
+      makeVersionedAttachment(`${i}`, 'text')
     );
+    const stateManager = makeStateManager(attachments);
+    const refs = attachments.map((a) => makeRef(a));
 
-    const result = formatAttachmentsMetadata(many);
+    const result = formatAttachmentsMetadata(refs, stateManager);
 
     expect(result).toContain('count="6"');
-    expect(result).not.toContain('Content 0');
     for (let i = 0; i < 6; i++) {
       expect(result).toContain(`attachment_id="${i}"`);
     }
   });
 
-  it('should not filter by active/deleted — callers decide which attachments to pass', () => {
-    // formatAttachmentsMetadata is a pure formatter now; filtering is the caller's job.
-    const attachments = [createMockAttachment('1', 'text', 'Deleted', { active: false })];
+  it('skips refs where getAttachmentRecord returns undefined', () => {
+    const stateManager = makeStateManager([]);
 
-    const result = formatAttachmentsMetadata(attachments);
+    const result = formatAttachmentsMetadata(
+      [{ attachment_id: 'missing-id', version: 1 }],
+      stateManager
+    );
+
+    // count reflects the raw refs list length, but no attachment element is rendered
+    expect(result).toContain('count="1"');
+    expect(result).not.toContain('attachment_id="missing-id"');
+  });
+
+  it('falls back to latest version when the requested version does not exist on the record', () => {
+    const attachment = makeVersionedAttachment('1', 'text', { version: 1 });
+    const stateManager = makeStateManager([attachment]);
+
+    const result = formatAttachmentsMetadata([makeRef(attachment, { version: 99 })], stateManager);
 
     expect(result).toContain('attachment_id="1"');
   });
 
-  it('should include description in XML attributes', () => {
-    const attachments = [createMockAttachment('1', 'text', 'Content', { description: 'My notes' })];
+  it('includes operation and actor from the ref in XML attributes', () => {
+    const attachment = makeVersionedAttachment('1', 'text');
+    const stateManager = makeStateManager([attachment]);
 
-    const result = formatAttachmentsMetadata(attachments);
+    const result = formatAttachmentsMetadata(
+      [makeRef(attachment, { operation: 'created', actor: 'agent' })],
+      stateManager
+    );
+
+    expect(result).toContain('operation="created"');
+    expect(result).toContain('actor="agent"');
+  });
+
+  it('excludes operation and actor from XML attributes when not present on ref', () => {
+    const attachment = makeVersionedAttachment('1', 'text');
+    const stateManager = makeStateManager([attachment]);
+
+    const result = formatAttachmentsMetadata([makeRef(attachment)], stateManager);
+
+    expect(result).not.toContain('operation=');
+    expect(result).not.toContain('actor=');
+  });
+
+  it('includes description in XML attributes', () => {
+    const attachment = makeVersionedAttachment('1', 'text', { description: 'My notes' });
+    const stateManager = makeStateManager([attachment]);
+
+    const result = formatAttachmentsMetadata([makeRef(attachment)], stateManager);
 
     expect(result).toContain('description="My notes"');
   });
 
-  it('should escape XML special characters in description', () => {
-    const attachments = [
-      createMockAttachment('1', 'text', 'Content', { description: 'Test <>&"\'' }),
-    ];
+  it('escapes XML special characters in description', () => {
+    const attachment = makeVersionedAttachment('1', 'text', {
+      description: 'Test <>&"\'',
+    });
+    const stateManager = makeStateManager([attachment]);
 
-    const result = formatAttachmentsMetadata(attachments);
+    const result = formatAttachmentsMetadata([makeRef(attachment)], stateManager);
 
     expect(result).toContain('&lt;');
     expect(result).toContain('&gt;');

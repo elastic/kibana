@@ -221,8 +221,8 @@ describe('prepareConversation', () => {
 
       // attachment_context should contain the 'were added' block with the attachment metadata
       expect(result.nextInput.attachment_context).toBeDefined();
-      expect(result.nextInput.attachment_context).toContain('were added');
-      expect(result.nextInput.attachment_context).toContain('note-1');
+      expect(result.nextInput.attachment_context).toContain('<conversation-attachments count="1">');
+      expect(result.nextInput.attachment_context).toContain('attachment_id="note-1"');
 
       // attachment_types should carry the type description for new types
       expect(result.nextInput.attachment_types).toEqual([

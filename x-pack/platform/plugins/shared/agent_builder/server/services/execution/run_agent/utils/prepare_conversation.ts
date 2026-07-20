@@ -30,9 +30,9 @@ import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 import { mergeAttachmentRefs } from './add_round_complete_event';
 import {
   type AttachmentContextProvider,
-  buildAttachmentContext,
   makeAttachmentContextProvider,
 } from './attachment_context';
+import { formatAttachmentsMetadata } from './attachment_presentation';
 
 export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {
   input: ProcessedRoundInput;
@@ -348,7 +348,7 @@ const prepareRoundInput = async ({
     if ('attachment_context' in input && input.attachment_context) {
       inputAttachments.attachment_context = input.attachment_context;
     } else {
-      inputAttachments.attachment_context = buildAttachmentContext(
+      inputAttachments.attachment_context = formatAttachmentsMetadata(
         input.attachment_refs,
         attachmentStateManager
       );

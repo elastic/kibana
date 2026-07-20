@@ -5,22 +5,31 @@
  * 2.0.
  */
 
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion, type AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 
 /**
  * Formats attachment metadata (id/type/version/estimated tokens/description) as XML.
  * Returns `''` for an empty list.
  */
-export const formatAttachmentsMetadata = (attachments: VersionedAttachment[]): string => {
+export const formatAttachmentsMetadata = (
+  attachments: AttachmentVersionRef[],
+  attachmentStateManager: AttachmentStateManager
+): string => {
   if (attachments.length === 0) {
     return '';
   }
 
-  const attachmentElements: XmlNode[] = attachments.flatMap((attachment) => {
-    const latest = getLatestVersion(attachment);
-    if (!latest) {
+  const attachmentElements: XmlNode[] = attachments.flatMap((attachmentRef) => {
+    const attachment = attachmentStateManager.getAttachmentRecord(attachmentRef.attachment_id);
+    if (!attachment) {
+      return [];
+    }
+    const attachmentVersion =
+      attachment.versions.find((aVer) => aVer.version === attachmentRef.version) ??
+      getLatestVersion(attachment);
+    if (!attachmentVersion) {
       return [];
     }
 
@@ -30,8 +39,10 @@ export const formatAttachmentsMetadata = (attachments: VersionedAttachment[]): s
         attributes: {
           attachment_id: attachment.id,
           type: attachment.type,
-          version: latest.version,
-          estimated_tokens: latest.estimated_tokens,
+          operation: attachmentRef.operation,
+          actor: attachmentRef.actor,
+          version: attachmentVersion.version,
+          estimated_tokens: attachmentVersion.estimated_tokens,
           description: attachment.description,
         },
       } satisfies XmlNode,
@@ -42,7 +53,13 @@ export const formatAttachmentsMetadata = (attachments: VersionedAttachment[]): s
     {
       tagName: 'conversation-attachments',
       attributes: { count: attachments.length },
-      children: attachmentElements,
+      children: [
+        {
+          tagName: 'note',
+          children: ['Use attachment_read(attachment_id) to access content.'],
+        },
+        ...attachmentElements,
+      ],
     },
     { escapeContent: false }
   );

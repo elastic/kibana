@@ -69,7 +69,7 @@ import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
 import type { CompactedConversation } from './conversation_compactor';
-import { buildAttachmentContext } from './attachment_context';
+import { formatAttachmentsMetadata } from './attachment_presentation';
 
 type SourceEvents = ConvertedEvents;
 
@@ -171,7 +171,7 @@ export const addRoundCompleteEvent = ({
           round.state = buildRoundState({ round, events, stateManager });
 
           if (round.input.attachment_refs && round.input.attachment_refs.length > 0) {
-            const attachmentContext = buildAttachmentContext(
+            const attachmentContext = formatAttachmentsMetadata(
               round.input.attachment_refs,
               attachmentStateManager
             );
