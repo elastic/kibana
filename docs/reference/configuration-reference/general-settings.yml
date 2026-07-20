@@ -699,7 +699,7 @@ groups:
       - setting: logging.loggers[]
         id: logging-loggers
         description: |
-          Allows you to [customize a specific logger instance](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#customize-specific-log-records).
+          Allows you to [customize a specific logger instance](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#customize-specific-log-records), including its level, appenders, and optional [meta filters](./logging-settings.md).
         datatype: string
         applies_to:
           stack: ga
