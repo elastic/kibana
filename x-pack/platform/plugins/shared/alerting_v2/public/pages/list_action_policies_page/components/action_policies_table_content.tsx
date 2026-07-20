@@ -128,7 +128,8 @@ export const ActionPoliciesTableContent = ({
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const { items } = useContentListItems();
   const policyToView = useMemo(
-    () => (policyToViewId ? items.map(toPolicy).find((p) => p.id === policyToViewId) ?? null : null),
+    () =>
+      policyToViewId ? items.map(toPolicy).find((p) => p.id === policyToViewId) ?? null : null,
     [policyToViewId, items]
   );
   const updatedByUids = useMemo(

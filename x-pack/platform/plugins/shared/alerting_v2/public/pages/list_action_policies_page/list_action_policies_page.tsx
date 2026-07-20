@@ -10,12 +10,12 @@ import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import { experimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { ActionPoliciesTable } from './components/action_policies_table';
-import { EuiSpacer } from '@elastic/eui';
 
 const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
   'xpack.alertingV2.actionPoliciesList.pageTitle',
