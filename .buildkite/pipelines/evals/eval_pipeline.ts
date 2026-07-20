@@ -182,32 +182,17 @@ function buildEvalsYaml({
     })
     .join('\n');
 
-  const suiteIds = selectedSuites.map((s) => s.id).join(',');
-  const suiteStepKeys = selectedSuites.map((s) => `kbn-evals-${normalizeBuildkiteKey(s.id)}`);
-
-  const postCompareStep = isPrBuild
-    ? [
-        `      - label: 'LLM Evals: Post Comparison'`,
-        `        key: kbn-evals-post-comparison`,
-        `        command: bash .buildkite/scripts/steps/evals/post_eval_comment.sh`,
-        `        env:`,
-        `          KBN_EVALS: '1'`,
-        `          EVAL_SUITE_IDS: '${suiteIds}'`,
-        `        depends_on:`,
-        ...suiteStepKeys.map((k) => `          - ${k}`),
-        `        allow_dependency_failure: true`,
-        `        timeout_in_minutes: 10`,
-        `        agents:`,
-        `          image: family/kibana-ubuntu-2404`,
-        `          imageProject: elastic-images-prod`,
-        `          provider: gcp`,
-        `          machineType: n2-standard-2`,
-        `          preemptible: true`,
-      ].join('\n')
-    : null;
-
   const prBuildId = process.env.BUILDKITE_BUILD_ID ?? '';
   const prNumber = process.env.BUILDKITE_PULL_REQUEST ?? '';
+
+  // Post-comparison steps are generated dynamically inside the fanout pipeline
+  // in run_suite.sh (sibling of the notify step), so they run only after all
+  // model steps complete and execution IDs are written to Buildkite metadata.
+  // The refresh block below depends on those fanout keys — Buildkite resolves
+  // step keys globally across a build.
+  const postCompareStepKeys = isPrBuild
+    ? selectedSuites.map((s) => `kbn-evals-${normalizeBuildkiteKey(s.id)}-post-comparison`)
+    : [];
 
   // Block + trigger steps live OUTSIDE the eval group so the group itself
   // completes cleanly and doesn't cause a "blocked" state on the GitHub check.
@@ -217,7 +202,7 @@ function buildEvalsYaml({
         `    key: kbn-evals-refresh-block`,
         `    blocked_state: passed`,
         `    depends_on:`,
-        `      - kbn-evals-post-comparison`,
+        ...postCompareStepKeys.map((k) => `      - ${k}`),
         `    allow_dependency_failure: true`,
       ].join('\n')
     : null;
@@ -270,7 +255,6 @@ function buildEvalsYaml({
     `      - build`,
     `    steps:`,
     suiteSteps,
-    ...(postCompareStep ? [postCompareStep] : []),
     // Block + trigger steps are top-level (outside the group) so the group
     // completes independently and reports a clean status to GitHub.
     ...(refreshBlockStep ? [refreshBlockStep] : []),

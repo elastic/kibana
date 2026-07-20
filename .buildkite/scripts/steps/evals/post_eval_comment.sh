@@ -159,4 +159,9 @@ fi
 
 echo "--- Posting eval comparison comment to PR #${GITHUB_PR_NUMBER}"
 export GITHUB_PR_NUMBER
+# Fresh-baseline refreshes delete-and-recreate the comment so it surfaces at the
+# bottom of the thread (visible to the PR author); standard runs update in-place.
+if [[ -n "$FRESH_BASELINE_PR_EXPERIMENT_ID" ]]; then
+  export EVAL_COMMENT_CLEAR_PREVIOUS=1
+fi
 cat "$MARKDOWN_FILE" | node -r @kbn/babel-register/install .buildkite/scripts/steps/evals/post_eval_pr_comment.ts
