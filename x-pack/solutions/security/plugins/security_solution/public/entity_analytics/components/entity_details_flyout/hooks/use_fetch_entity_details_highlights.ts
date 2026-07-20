@@ -45,7 +45,7 @@ const entityHighlightsSchema = {
         required: ['title', 'text'],
       },
       description:
-        'A list of highlight items, each with a title and text. Only include highlights for which information is available in the context.',
+        'A list of highlight items, each with a title and text. Only include highlights for signals that are present and non-empty in the context. Return an empty list when none of those signals are available — do not invent filler about missing data.',
     },
     recommended_actions: {
       type: 'array',
@@ -53,7 +53,7 @@ const entityHighlightsSchema = {
         type: 'string',
       },
       description:
-        'A list of actionable recommendations for the security analyst. Omit this field if no actions are available.',
+        'A list of actionable recommendations for the security analyst. Omit this field when no signals support concrete actions.',
     },
   },
   required: ['highlights'],
