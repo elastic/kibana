@@ -7,7 +7,7 @@
 
 // APM settings store comma-separated index-pattern expressions, so keep their bound
 // aligned with Kibana's broader index-pattern (index_management) `maxLength` adoption.
-export const APM_INDEX_PATTERN_MAX_LENGTH = 1000;
+export const APM_INDEX_PATTERN_MAX_LENGTH = 2048;
 
 export const APM_INDEX_SETTING_KEYS = [
   'transaction',
