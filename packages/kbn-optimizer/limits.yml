@@ -12,7 +12,7 @@ pageLoadAssetSize:
   alerting: 22371
   alertingVTwo: 56591
   apm: 53172
-  apmShared: 5985
+  apmShared: 5852
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -170,7 +170,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79863
-  securitySolution: 189500
+  securitySolution: 208457
   securitySolutionEss: 42592
   securitySolutionServerless: 57112
   serverless: 7412
