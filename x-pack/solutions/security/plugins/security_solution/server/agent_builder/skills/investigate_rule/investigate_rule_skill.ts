@@ -196,11 +196,15 @@ positive.
 
 ### Step 4: Produce Output
 
-This skill is **read-only and diagnostic**. It explains the noise and suggests
-remediations the user can perform in the Detection Rules UI. It never applies a change,
-offers to apply one, or hands off to a rule-mutation skill. The exception proposal below
-is **plain-text guidance the analyst types into the UI themselves** — describing it in a
-structured way is expected; it is not an auto-applied or machine-actionable change.
+This skill is **diagnostic**. It explains the noise and suggests remediations.
+
+- **Exception, suppression, and threshold changes** are plain-text guidance the analyst
+  applies in the Detection Rules UI themselves — describing a structured exception for the
+  analyst to create is fine; it is not a machine-actionable change.
+- **Query rewrites** (confirmed rule over-matching where narrowing the ES|QL query is the
+  right fix): you **MAY offer to apply the change in-chat**. See Remediation Guidance below
+  for the exact handoff pattern. Do not offer this for unconfirmed open-alert concentration —
+  only when Signal A analyst dispositions confirm a query fix is warranted.
 
 The output must always contain these five sections, in order. Use a \`##\` header for each
 section (e.g. \`## Alert Volume\`) — **do not use numbered list items for sections**; tables
@@ -265,16 +269,38 @@ load the alert-analysis skill."
 
 ## Remediation Guidance
 
-This skill does not change rules and has no in-chat rule-mutation capability.
-When you have identified a fix:
+### Exceptions, suppression, and threshold changes
 
-- Describe it in plain text and tell the user how to perform it themselves in the
-  Detection Rules UI (e.g., add an exception, narrow the query, adjust the
-  threshold, or configure alert suppression).
-- Do **not** offer to make the change, claim you can change the rule, hand off to
-  a mutation skill, or emit an auto-applied / machine-actionable change. (Describing a
-  structured exception in plain text for the analyst to create themselves is fine — that
-  is guidance, not a rule mutation.)
+Describe these in plain text so the analyst can apply them in the Detection Rules UI. Do
+**not** offer to apply exceptions, suppression, or threshold changes in-chat — there is no
+tool for these operations.
+
+### Query rewrites (confirmed over-matching only)
+
+When Signal A analyst dispositions confirm the rule is over-matching (closed
+\`false_positive\` alerts where a narrower query would have avoided the detections), you
+**may offer to apply the query change in-chat** — but only after completing the full
+analysis output above and only when you can express the change as a concrete natural-language
+description. The steps are:
+
+1. **Describe the proposed query change** in your output so the user knows exactly what
+   will change before anything is applied (e.g., "I'll add a filter to exclude
+   \`process.parent.name = \"gitlab-runner\"\` from the query").
+2. **Ask the user to confirm** before proceeding.
+3. **Only after confirmation:** read the \`detection-rule-edit\` skill from
+   \`skills/security/rules\`, then call \`security.create_detection_rule\` with two
+   parameters:
+   - \`user_query\`: a natural-language description of the query change to apply
+   - \`attachment_id\`: the rule attachment ID already present in the conversation (from
+     Step 0 — either the user-opened attachment or the one created by
+     \`resolve_rule_attachment\`)
+4. Render the updated attachment inline after the tool returns.
+
+**Do not offer this path when:**
+- The evidence is Signal B only (open-alert concentration, no confirmed dispositions).
+- The appropriate fix is an exception or suppression rather than a query change.
+- No rule attachment is in the conversation (i.e., \`resolve_rule_attachment\` was never
+  called and the user did not open a rule attachment).
 
 ---
 
@@ -282,8 +308,7 @@ When you have identified a fix:
 
 Use the five \`##\` sections from Step 4 (Alert volume, Confirmed dispositions, Root cause,
 Recommended remediation, Confidence boundary). Within each section, **prose, bullets, or
-tables are all fine** — use whatever reads best for the data. (Read-only: never apply or
-offer to apply a change.)
+tables are all fine** — use whatever reads best for the data.
 
 ---
 
