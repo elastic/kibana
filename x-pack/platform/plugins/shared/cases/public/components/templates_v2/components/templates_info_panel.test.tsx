@@ -43,11 +43,8 @@ describe('TemplatesInfoPanel', () => {
   it('points the learn more link at the manage-case-templates doc', async () => {
     renderWithTestingProviders(<TemplatesInfoPanel />);
 
-    const link = await screen.findByText('Learn more');
-    expect(link.closest('a')).toHaveAttribute(
-      'href',
-      expect.stringContaining('cases/manage-case-templates')
-    );
+    const link = await screen.findByRole('link', { name: /Learn more/ });
+    expect(link).toHaveAttribute('href', expect.stringContaining('cases/manage-case-templates'));
   });
 
   it('renders the illustration', async () => {
