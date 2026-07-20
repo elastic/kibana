@@ -222,7 +222,7 @@ const SetupMethodFilter: React.FC<{
       id="browseIntegrationsSetupMethodPopover"
       aria-label={i18n.translate(
         'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodPopoverAriaLabel',
-        { defaultMessage: 'Deployment method options' }
+        { defaultMessage: 'Ingestion method options' }
       )}
       isOpen={isOpen}
       closePopover={closePopover}
@@ -239,7 +239,7 @@ const SetupMethodFilter: React.FC<{
         >
           <FormattedMessage
             id="xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodLabel"
-            defaultMessage="Deployment method"
+            defaultMessage="Ingestion method"
           />
         </EuiFilterButton>
       }

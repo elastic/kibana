@@ -215,15 +215,15 @@ describe('SearchAndFiltersBar', () => {
     });
   });
 
-  describe('Setup Method (Deployment Method) Filter', () => {
-    it('renders the deployment method filter button when agentless is enabled', () => {
+  describe('Setup Method (Ingestion Method) Filter', () => {
+    it('renders the ingestion method filter button when agentless is enabled', () => {
       mockUseAgentless.mockReturnValue({ isAgentlessEnabled: true });
 
       const { getByTestId } = renderSearchAndFiltersBar();
       expect(getByTestId('browseIntegrations.searchBar.setupMethodBtn')).toBeInTheDocument();
     });
 
-    it('does not render the deployment method filter button when agentless is disabled', () => {
+    it('does not render the ingestion method filter button when agentless is disabled', () => {
       mockUseAgentless.mockReturnValue({ isAgentlessEnabled: false });
 
       const { queryByTestId } = renderSearchAndFiltersBar();
