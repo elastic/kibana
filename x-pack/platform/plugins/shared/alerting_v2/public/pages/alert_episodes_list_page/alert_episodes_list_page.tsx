@@ -423,7 +423,7 @@ export const AlertEpisodesListPage = () => {
         sticky={false}
         title={i18n.EPISODES_LIST_PAGE_TITLE}
         titleAppend={<ExperimentalBadge />}
-        padding={{ bleed: 'm' }}
+        spacing="bleed"
         menu={episodesMenu}
       />
       <EuiSpacer size="m" />

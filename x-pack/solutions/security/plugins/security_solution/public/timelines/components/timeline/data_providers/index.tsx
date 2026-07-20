@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { v4 as uuidv4 } from 'uuid';
