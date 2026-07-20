@@ -16,5 +16,6 @@ export const IndexMode = {
   logsdb: LOGSDB_INDEX_MODE,
   time_series: TIME_SERIES_MODE,
   lookup: LOOKUP_INDEX_MODE,
-  vectordb: VECTORDB_DOCUMENT_INDEX_MODE,
+  lookup: LOOKUP_INDEX_MODE,
+} as const;
 } as const;
