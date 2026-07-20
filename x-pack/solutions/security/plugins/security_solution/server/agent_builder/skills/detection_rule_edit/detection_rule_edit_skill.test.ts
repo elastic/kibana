@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0. and/or licensed to Elasticsearch B.V. under one of the contributor
  * license agreements.
  */
@@ -11,7 +18,7 @@ import {
   SECURITY_LABS_SEARCH_TOOL_ID,
   SECURITY_RUN_RULE_PREVIEW_TOOL_ID,
 } from '../../tools';
-import { getDetectionRuleEditSkill } from './index';
+import { getDetectionRuleEditSkill } from '.';
 
 describe('getDetectionRuleEditSkill', () => {
   describe('stable metadata', () => {
@@ -37,7 +44,7 @@ describe('getDetectionRuleEditSkill', () => {
   describe('registry tools', () => {
     it('exposes create_detection_rule, labs_search, generate_esql, and product_documentation when preview is disabled', () => {
       const skill = getDetectionRuleEditSkill({ rulePreviewEnabled: false });
-      expect(skill.getRegistryTools()).toEqual([
+      expect(skill.getRegistryTools!()).toEqual([
         SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
         SECURITY_LABS_SEARCH_TOOL_ID,
         platformCoreTools.generateEsql,
@@ -47,7 +54,7 @@ describe('getDetectionRuleEditSkill', () => {
 
     it('adds run_rule_preview only when rulePreviewEnabled is true', () => {
       const skill = getDetectionRuleEditSkill({ rulePreviewEnabled: true });
-      expect(skill.getRegistryTools()).toEqual([
+      expect(skill.getRegistryTools!()).toEqual([
         SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
         SECURITY_LABS_SEARCH_TOOL_ID,
         platformCoreTools.generateEsql,
@@ -78,7 +85,9 @@ describe('getDetectionRuleEditSkill', () => {
 
     it('mandates re-stringifying the full rule object on edit', () => {
       for (const rulePreviewEnabled of [true, false]) {
-        expect(getContent(rulePreviewEnabled)).toMatch(/re-stringify the (ENTIRE|FULL) rule object/i);
+        expect(getContent(rulePreviewEnabled)).toMatch(
+          /re-stringify the (ENTIRE|FULL) rule object/i
+        );
       }
     });
 
@@ -144,9 +153,7 @@ describe('getDetectionRuleEditSkill', () => {
     it('still has the non-preview checklist intact', () => {
       expect(content).toMatch(/Checklist before finishing the answer/);
       expect(content).toMatch(/Did I call the tool read attachment first/);
-      expect(content).toMatch(
-        /Did I render inline the latest version of the attachment/
-      );
+      expect(content).toMatch(/Did I render inline the latest version of the attachment/);
     });
   });
 });
