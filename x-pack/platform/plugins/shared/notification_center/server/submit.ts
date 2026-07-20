@@ -83,10 +83,10 @@ const writeNotification = async (
 };
 
 /**
- * Build the `notification_id` and, for `timeseries` types, the `event_timestamp` for a submission.
- * The registry `kind` of the `(namespace, type)` selects the id scheme; a payload missing the parts
- * that kind requires is rejected before anything is written. `state` types carry no event time —
- * they rely on the write-time `@timestamp`.
+ * Build the `notification_id` and, for `timeseries` notification kind, the `event_timestamp` for a submission.
+ * A payload missing the parts that the notification kind requires is rejected before anything is written.
+ * `state` kinds of notifications require an entity and state.
+ * `timeseries` kinds of notifications require an event and epochMs.
  */
 const buildIdAndTimestamp = (
   namespace: string,
@@ -123,8 +123,9 @@ const buildIdAndTimestamp = (
 
 /**
  * Build the `forType` producer API: bind a submitter to a registered `(namespace, type)` whose
- * `submit` builds the `notification_id` from the type's registry `kind`, then delegates to the
- * write path.
+ * `submit` builds the `notification_id` from the type's registry `kind`. This keeps NC in charge of
+ * logic around how notifications are stored and displayed, while making it easier and more readable
+ * for producers to submit notifications.
  */
 export const buildForType =
   (core: NotificationCenterCore): NotificationCenterPluginSetup['forType'] =>

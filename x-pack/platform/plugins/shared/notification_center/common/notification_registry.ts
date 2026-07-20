@@ -15,7 +15,6 @@ import type { NotificationNamespaceDefinition } from './notification_registry_ty
  * Notification Center uses this to build query filters, display metadata in the UI,
  * and properly gate notifications based on feature flags. A type's `feature_flag`
  * is optional — omit it to send that type immediately with no gate.
- * Derived types are defined in `notification_registry_utils.ts`.
  */
 export const NOTIFICATION_REGISTRY = {
   inference: {

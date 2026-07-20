@@ -13,10 +13,9 @@ export const NOTIFICATION_ID_SEPARATOR = ':';
 /**
  * Inputs for a `state` notification id: `<namespace>:<type>:<entity>:<state>`.
  *
- * Use when a notification represents the *current state* of an entity. Re-push
- * with the same `(namespace, type, entity, state)` is a no-op via query-time collapse;
- * a new `state` produces a new id (the previous state's notification ages out
- * under its retention TTL).
+ * Use when a notification represents the *current state* of an entity.
+ * Submitting a notification with the same `(namespace, type, entity, state)`
+ * is valid behavior and users will not see duplicates.
  */
 export interface StateNotificationIdParts {
   /** Registry namespace that owns the notification, e.g. `inference`. */
@@ -32,8 +31,8 @@ export interface StateNotificationIdParts {
 /**
  * Inputs for a `timeseries` notification id: `<namespace>:<type>:<event>:<epochMs>`.
  *
- * Use when each occurrence is distinct and should not collapse. The `epochMs`
- * segment makes every push unique and avoids colon collisions with ISO 8601.
+ * Use when each occurrence is distinct and should create new notifications for users. The `epochMs`
+ * segment makes every push unique.
  */
 export interface TimeseriesNotificationIdParts {
   /** Registry namespace that owns the notification, e.g. `inference`. */

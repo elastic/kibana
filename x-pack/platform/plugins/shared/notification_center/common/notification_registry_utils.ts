@@ -29,9 +29,8 @@ export type NotificationKindOf<
   : 'state';
 
 /**
- * A valid `(namespace, type)` pair. The mapped type binds each namespace to only
- * its own types, so `{ namespace: 'inference', type: 'modelStatus' }` is assignable
- * but a type from another namespace is not.
+ * A valid `(namespace, type)` pair. Adds compile-time type safety to ensure
+ * namespaces and types use the NOTIFICATION_REGISTRY as the source of truth.
  */
 export type NotificationTypeRef = {
   [N in NotificationNamespace]: {
@@ -49,7 +48,7 @@ export const NOTIFICATION_NAMESPACES = Object.keys(NOTIFICATION_REGISTRY) as [
 /**
  * Syntactic sugar for plugins to submit specific notification types without worrying about the
  * literal strings already set in the registry.
- * Reachable as `NOTIFICATION_TYPES.<namespace>.<type>`, passed to `forType`.
+ * i.e. `NOTIFICATION_TYPES.<namespace>.<type>`, passed to `forType`.
  */
 export const NOTIFICATION_TYPES = Object.fromEntries(
   Object.entries(NOTIFICATION_REGISTRY).map(([namespace, definition]) => [
@@ -63,9 +62,7 @@ export const NOTIFICATION_TYPES = Object.fromEntries(
 };
 
 /**
- * Join a namespace/type already known valid — registry-derived or post-schema-validation —
- * into its `<namespace>.<typeId>` id. Plugin-internal: producers never build type ids by hand,
- * they submit through `forType`, so this is deliberately not re-exported from the common entry.
+ * Simple helper to create the id string for a notification type to avoid duplicated logic in other functions.
  */
 export const joinNotificationTypeId = (namespace: string, type: string): string =>
   `${namespace}.${type}`;
@@ -75,7 +72,6 @@ export const isRegisteredNotificationRef = (namespace: string, type: string): bo
   if (!Object.hasOwn(NOTIFICATION_REGISTRY, namespace)) {
     return false;
   }
-  // Dynamic string index into the typed const registry; guarded by the hasOwn check above.
   const { types } = (NOTIFICATION_REGISTRY as Record<string, NotificationNamespaceDefinition>)[
     namespace
   ];
@@ -84,8 +80,8 @@ export const isRegisteredNotificationRef = (namespace: string, type: string): bo
 
 /**
  * Runtime companion to {@link NotificationKindOf}: the declared `kind` for a `(namespace, type)`,
- * defaulting to `state`. The submit path drives id building off this, so the registry — not the
- * shape of the producer's payload — decides the id scheme.
+ * defaulting to `state`.
+ * This lets us keep the registry as the source of truth to determine how the notification id is built.
  */
 export const resolveNotificationKind = (namespace: string, type: string): NotificationKind => {
   const definition = (NOTIFICATION_REGISTRY as Record<string, NotificationNamespaceDefinition>)[

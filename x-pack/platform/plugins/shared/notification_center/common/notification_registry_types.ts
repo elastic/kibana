@@ -15,18 +15,18 @@ export interface NotificationDisplayMetadata {
 
 /**
  * The nature of a notification type. `state` (default) represents the current state of an
- * entity and collapses on re-emit (id parts `{ entity, state }`); `timeseries` is a stream of
- * discrete, timestamped occurrences that are each kept (id parts `{ event, epochMs }`).
+ * entity and these types of notifications get de-duped at query time. `timeseries` is a stream of
+ * discrete, timestamped occurrences. Each occurrence creating a new notification for users.
  */
 export type NotificationKind = 'state' | 'timeseries';
 
 /** UI-facing definition of one notification type within a namespace. */
 export interface NotificationTypeDefinition extends NotificationDisplayMetadata {
   /**
-   * Static LaunchDarkly key gating this type, by convention
-   * `notificationCenter.types.<namespace>.<typeId>`. Kept as a literal so the
-   * feature flag code-ref scanner can discover it.
-   * Omit to send this notification type immediately without a feature flag gate.
+   * Static LaunchDarkly key gating this type. Use this convention:
+   * `notificationCenter.types.<namespace>.<typeId>`.
+   * Kept as a literal so the feature flag code-ref scanner can discover it.
+   * Omit to send this notification type immediately with no gate.
    */
   feature_flag?: string;
   /** Notification nature; defaults to `state` when omitted. */

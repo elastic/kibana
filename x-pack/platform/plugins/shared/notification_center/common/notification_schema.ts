@@ -45,18 +45,17 @@ export const ctaSchema = z
 
 /**
  * Field shape shared by the write and read schemas. `namespace` and `type` are
- * both drawn from the notification registry; the registry also owns which types
- * belong to which namespace — the pair itself is enforced on the write side.
+ * both drawn from the notification registry
  */
 const notificationObject = z
   .object({
     /** Idempotency key; see notification_id.ts for the ID conventions. */
     notification_id: z.string().min(1).max(512),
-    /** Occurrence time, set by NC for `timeseries` types; absent for `state` (use `@timestamp`). */
+    /** Occurrence time, set by NC for `timeseries` notification kind */
     event_timestamp: z.iso.datetime().optional(),
     /** Registry namespace that owns this notification, e.g. `inference`. */
     namespace: z.enum(NOTIFICATION_NAMESPACES),
-    /** Registry type within `namespace`, e.g. `modelStatus`; the pair is checked on write. */
+    /** Registry type within `namespace`, e.g. `modelStatus` */
     type: z.string().min(1).max(64),
     title: z.string().min(1).max(256),
     description: z.string().min(1).max(2000),
@@ -66,9 +65,8 @@ const notificationObject = z
   .strict();
 
 /**
- * The assembled write payload, validated before append. `event_timestamp` is NC-derived — the
- * occurrence time for `timeseries` types, omitted for `state` (which relies on the write-time
- * `@timestamp`). The `(namespace, type)` pair must be registered.
+ * The assembled write payload, validated before append.
+ * The `(namespace, type)` pair must be registered in the NOTIFICATION_REGISTRY.
  */
 export const notificationWriteSchema = notificationObject.superRefine((value, ctx) => {
   if (!isRegisteredNotificationRef(value.namespace, value.type)) {
@@ -88,8 +86,6 @@ export const notificationReadSchema = notificationObject
   .extend({
     /** Ingest time, stamped on write by NC — never producer-supplied. */
     '@timestamp': z.iso.datetime(),
-    // Reads relax registry/enum membership for forward-compat but keep the same non-empty,
-    // bounded invariants as the write side so consumers can trust the identifiers.
     namespace: z.string().min(1).max(64),
     type: z.string().min(1).max(64),
     // Catch unknown severity tiers that may be added in the future

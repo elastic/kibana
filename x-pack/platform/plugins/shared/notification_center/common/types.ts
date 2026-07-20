@@ -25,7 +25,7 @@ export type Notification = z.infer<typeof notificationReadSchema>;
 /**
  * Producer submit input.
  * `namespace` and `type` are replaced by the typed pair from NotificationTypeRef,
- * so a type from the wrong namespace does not typecheck.
+ * so a type from the wrong namespace does not pass typecheck.
  */
 export type NotificationInput = Omit<
   z.input<typeof notificationWriteSchema>,
@@ -34,12 +34,11 @@ export type NotificationInput = Omit<
   NotificationTypeRef;
 
 /**
- * A fully-assembled draft handed to the submit path before validation: `namespace` is a
- * registered enum and `type` is free-form (the pair is enforced at parse time).
+ * A fully-assembled draft handed to the submit path before validation
  */
 export type NotificationDraft = z.input<typeof notificationWriteSchema>;
 
-/** Fields a producer supplies for every notification, independent of id strategy. */
+/** Custom fields a producer supplies for every notification to give it context. */
 export interface NotificationContent {
   title: string;
   description: string;
@@ -55,8 +54,7 @@ export type StateSubmitIdParts = Omit<StateNotificationIdParts, 'namespace' | 't
 export type TimeseriesSubmitIdParts = Omit<TimeseriesNotificationIdParts, 'namespace' | 'type'>;
 
 /**
- * Producer payload for `forType(ref).submit(...)`. The type's registry `kind` selects the id
- * parts: `{ entity, state }` for `state` (default), `{ event, epochMs }` for `timeseries`.
+ * Producer payload for `forType(ref).submit(...)`
  */
 export type NotificationSubmitInput<
   N extends NotificationNamespace,
