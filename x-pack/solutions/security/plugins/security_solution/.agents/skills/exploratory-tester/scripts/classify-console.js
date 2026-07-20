@@ -41,8 +41,8 @@
     }
 
     // ── Level 1: server error (5xx) ─────────────────────────────────────────
-    if (/ 50[0-9]/.test(msg) || msg.includes(' 500') || msg.includes(' 502') ||
-        msg.includes(' 503') || msg.includes(' 504')) {
+    // ── Level 1: server error (5xx) ────────────────────────────────────────────────
+    if (/\b50[0-9]\b/.test(msg)) {
       r.level1.push({ type: 'server_error', text: msg.substring(0, 200) });
       return;
     }
