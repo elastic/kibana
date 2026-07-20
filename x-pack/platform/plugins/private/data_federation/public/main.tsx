@@ -8,7 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, useHistory, useLocation } from 'react-router-dom';
-import { EuiBetaBadge, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -105,7 +105,7 @@ export const Main: FunctionComponent = () => {
     <>
       <AppHeader
         title={mainTranslations.pageTitle}
-        titleAppend={<EuiBetaBadge label={mainTranslations.technicalPreview} size="m" />}
+        badges={[{ label: mainTranslations.technicalPreview }]}
         tabs={tabs}
         spacing="bleed"
         docLink={DOCS_LINK}
