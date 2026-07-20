@@ -22,6 +22,8 @@ const [
 
 export interface SignificantEventsScheduledWorkflowsConfig {
   detectionIntervalMinutes: number;
+  detectionBucketIntervalMinutes: number;
+  detectionLookbackMinutes: number;
   targetCoverageMinutes: number;
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
@@ -132,6 +134,8 @@ export const createSignificantEventsScheduledWorkflowsService = ({
         workflowIdSuffix: spaceId,
         values: {
           detectionIntervalMinutes: config.detectionIntervalMinutes,
+          detectionBucketIntervalMinutes: config.detectionBucketIntervalMinutes,
+          detectionLookbackMinutes: config.detectionLookbackMinutes,
           targetCoverageMinutes: config.targetCoverageMinutes,
         },
       }),

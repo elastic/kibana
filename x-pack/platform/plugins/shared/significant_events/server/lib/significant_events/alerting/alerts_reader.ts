@@ -8,7 +8,6 @@
 import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { SignificantEventsAlertsReaderV1 } from './v1_alerts_reader';
 import { SignificantEventsAlertsReaderV2 } from './v2_alerts_reader';
 
 export interface ChangePointScanParams {
@@ -55,7 +54,7 @@ export interface OccurrencesEsqlParams {
 
 export interface ISignificantEventsAlertsReader {
   readonly index: string;
-  readonly ruleIdColumn: 'rule_uuid' | 'rule_id';
+  readonly ruleIdColumn: 'rule_id';
 
   buildOccurrencesEsqlRequest(params: OccurrencesEsqlParams): EsqlQueryRequest;
 
@@ -82,11 +81,5 @@ export function buildRuleMetadataMap(queryLinks: QueryLink[]): Map<string, RuleM
   return map;
 }
 
-export const ALERTS_READER_V1: ISignificantEventsAlertsReader =
-  new SignificantEventsAlertsReaderV1();
 export const ALERTS_READER_V2: ISignificantEventsAlertsReader =
   new SignificantEventsAlertsReaderV2();
-
-export function createAlertsReader(alertingV2Active: boolean): ISignificantEventsAlertsReader {
-  return alertingV2Active ? ALERTS_READER_V2 : ALERTS_READER_V1;
-}
