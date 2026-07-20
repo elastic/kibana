@@ -23,6 +23,21 @@ const testParamWithNewLine = {
   value: `-----BEGIN CERTIFICATE-----\nMIICMzBgNV\n\npAqEAJlQND\n-----END CERTIFICATE-----`,
 };
 
+/**
+ * Security regression guard: the resolved secret (with `hideParams: false`) must
+ * never surface anywhere in the inspect response, regardless of which field emits
+ * it. Asserts each non-empty line of the cert independently since `JSON.stringify`
+ * escapes the embedded newlines.
+ */
+const assertNoRawSecret = (apiResponse: unknown) => {
+  const serialized = JSON.stringify(apiResponse);
+  for (const line of testParamWithNewLine.value.split('\n')) {
+    if (line.trim().length > 0) {
+      expect(serialized).not.toContain(line);
+    }
+  }
+};
+
 const DECODED_BROWSER_CODE =
   '// asset:/Users/vigneshh/elastic/synthetics/examples/todos/basic.journey.ts\nimport { journey, step, expect } from "@elastic/synthetics";\njourney("check if title is present", ({ page, params }) => {\n  step("launch app", async () => {\n    await page.goto(params.url);\n  });\n  step("assert title", async () => {\n    const header = await page.$("h1");\n    expect(await header.textContent()).toBe("todos");\n  });\n});\n';
 
@@ -135,6 +150,8 @@ apiTest.describe(
           ],
         },
       ]);
+
+      assertNoRawSecret(apiResponse);
     });
 
     apiTest('inspect project browser monitor', async ({ apiClient }) => {
@@ -239,7 +256,10 @@ apiTest.describe(
       delete compiledStream.processors[0].add_fields.fields.config_id;
       delete compiledStream.processors[0].add_fields.fields.kibanaUrl;
 
-      expect(enabledStream?.vars?.password).toBe('********');
+      // Fleet `vars` entries keep their `{ value, type }` shape; only the value is redacted.
+      expect(enabledStream?.vars?.password?.value).toBe('********');
+
+      assertNoRawSecret(apiResponse);
 
       expect(enabledStream?.compiled_stream).toStrictEqual({
         __ui: { is_tls_enabled: false },

@@ -70,8 +70,9 @@ describe('redactInspectedSecrets', () => {
     const result = redactInspectedSecrets(privateConfig);
     const input = result.inputs[0];
 
-    expect(input.vars.password).toBe(INSPECT_SECRET_REDACTED_VALUE);
-    expect(input.vars.username).toBe(INSPECT_SECRET_REDACTED_VALUE);
+    // Fleet `vars` entries keep their `{ value, type }` shape; only the value is redacted.
+    expect(input.vars.password).toEqual({ value: INSPECT_SECRET_REDACTED_VALUE, type: 'password' });
+    expect(input.vars.username).toEqual({ value: INSPECT_SECRET_REDACTED_VALUE, type: 'text' });
     expect(input.streams[0].compiled_stream.password).toBe(INSPECT_SECRET_REDACTED_VALUE);
     expect(input.streams[0].compiled_stream.username).toBe(INSPECT_SECRET_REDACTED_VALUE);
   });

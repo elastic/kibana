@@ -27,6 +27,14 @@ export const INSPECT_REDACTED_SECRET_KEYS: ReadonlySet<string> = new Set(
 );
 
 /**
+ * Fleet policy `vars` entries have a `{ value, type }` shape. Redact those in
+ * place (keep `type` and any other metadata) so the redacted output still
+ * matches the `PackagePolicy` type instead of collapsing to a bare string.
+ */
+const isFleetVarEntry = (val: unknown): val is Record<string, unknown> =>
+  typeof val === 'object' && val !== null && !Array.isArray(val) && 'value' in val;
+
+/**
  * Deep-clones `value`, replacing any object property whose key is a monitor
  * secret with a redacted placeholder. Applied to the inspect response so
  * credentials (password, TLS key, username, request/response checks, ...) are
@@ -48,7 +56,9 @@ export const redactInspectedSecrets = <T>(
     const redacted: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(value)) {
       if (keysToRedact.has(key)) {
-        redacted[key] = INSPECT_SECRET_REDACTED_VALUE;
+        redacted[key] = isFleetVarEntry(val)
+          ? { ...val, value: INSPECT_SECRET_REDACTED_VALUE }
+          : INSPECT_SECRET_REDACTED_VALUE;
       } else if (keysToPreserve.has(key)) {
         // Leave the subtree untouched: `params` is masked by `hideParams` and the
         // source/script fields power the "Source code" panel. Recursing here would
