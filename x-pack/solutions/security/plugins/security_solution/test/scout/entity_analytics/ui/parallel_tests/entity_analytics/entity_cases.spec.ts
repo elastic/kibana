@@ -21,9 +21,9 @@
  *
  * Coverage:
  *  - Opening the host entity flyout and using "Add to new case" creates a
- *    `security.entity` attachment that then shows in the Attachments tab's Entities
- *    accordion (entity table).
- *  - The Entities accordion renders the entity table for attachments created via API.
+ *    `security.entity` attachment that then shows as an Entities accordion (with a
+ *    count badge) in the Attachments tab.
+ *  - The Entities accordion renders for attachments created via API.
  *  - A case with no entity attachments renders no Entities accordion.
  *
  * The flyout test opens the host entity flyout directly by URL (mirroring the
@@ -33,9 +33,13 @@
  * the flyout directly keeps the test free of detection-rule / alert-generation
  * dependencies.
  *
- * Tests log in as admin so the entity table has Entity Analytics index-read
- * privileges; without them the accordion renders the no-privileges callout instead
- * of the table.
+ * These tests assert the Entities accordion and its count badge (rendered by the
+ * cases framework from the case's attachments), not the Entity Analytics table
+ * inside the accordion. The table is gated on EA index-read privileges and
+ * entity-store data — Entity Analytics' concern, not the cases-attachment feature
+ * under test — so this suite runs as the least-privileged `platform_engineer` role
+ * (per Security Solution convention, `loginAsAdmin()` is reserved for scenarios
+ * that genuinely require admin, e.g. entity-store management).
  *
  * To run locally:
  *
@@ -44,16 +48,9 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { spaceTest, tags } from '../../fixtures';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-const CASE_DEFAULTS = {
-  connector: { id: 'none', name: 'none', type: '.none', fields: null },
-  settings: { syncAlerts: false, extractObservables: false },
-  owner: 'securitySolution',
-} as const;
 
 // Seed identity for the host entity the flyout add-to-case test opens. The entity
 // store is seeded with this id/name so the host flyout (opened directly by URL)
@@ -77,7 +74,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
       await apiServices.cases.cleanup.deleteAllCases(scoutSpace.id);
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPlatformEngineer();
     });
 
     spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
@@ -113,60 +110,38 @@ spaceTest.describe(
 
             await entityCases.openAttachmentsTab();
             await expect(entityCases.entityAccordion).toBeVisible();
-            await expect(entityCases.entityTabTable).toBeVisible();
+            await expect(entityCases.entityAccordionBadge).toHaveText('1');
           }
         );
       }
     );
 
     spaceTest(
-      'Entities accordion renders the entity table when attachments were added via API',
-      async ({ pageObjects, scoutSpace, apiServices }) => {
+      'Entities accordion renders when entity attachments were added via API',
+      async ({ pageObjects, entityCasesApi }) => {
         const { entityCases } = pageObjects;
-        const { data: created } = await apiServices.cases.create(
-          {
-            title: `Scout entity case – API – ${scoutSpace.id}`,
-            description: 'Created by Scout entity attachment test',
-            tags: ['scout'],
-            ...CASE_DEFAULTS,
-          },
-          scoutSpace.id
-        );
-        // Entity attachment is a unified type not present in the shared AttachmentRequest
-        // union — double-assert to bridge the gap without widening to `any`.
-        type CasesCommentParam = Parameters<typeof apiServices.cases.comments.create>[1];
-        await apiServices.cases.comments.create(
-          created.id,
-          {
-            type: SECURITY_ENTITY_ATTACHMENT_TYPE,
-            attachmentId: SEED_HOST_ENTITY_ID,
-            metadata: { entityName: SEED_HOST_NAME, entityType: 'host' },
-            owner: 'securitySolution',
-          } as unknown as CasesCommentParam,
-          scoutSpace.id
-        );
+        const created = await entityCasesApi.createCaseWithEntityAttachment({
+          entityId: SEED_HOST_ENTITY_ID,
+          entityName: SEED_HOST_NAME,
+          entityType: 'host',
+        });
 
         await entityCases.navigateToCase(created.id);
 
         await entityCases.openAttachmentsTab();
         await expect(entityCases.entityAccordion).toBeVisible();
-        await expect(entityCases.entityTabTable).toBeVisible();
+        await expect(entityCases.entityAccordionBadge).toHaveText('1');
       }
     );
 
     spaceTest(
       'renders no Entities accordion when a case has no entity attachments',
-      async ({ pageObjects, scoutSpace, apiServices }) => {
+      async ({ pageObjects, entityCasesApi }) => {
         const { entityCases } = pageObjects;
-        const { data: created } = await apiServices.cases.create(
-          {
-            title: `Scout entity case – empty – ${scoutSpace.id}`,
-            description: 'No entity attachments',
-            tags: [],
-            ...CASE_DEFAULTS,
-          },
-          scoutSpace.id
-        );
+        const created = await entityCasesApi.createCase({
+          description: 'No entity attachments',
+          tags: [],
+        });
 
         await entityCases.navigateToCase(created.id);
 
@@ -176,7 +151,6 @@ spaceTest.describe(
         // than a per-type empty state, which no longer exists in the unified UI.
         await entityCases.openAttachmentsTab();
         await expect(entityCases.entityAccordion).toBeHidden();
-        await expect(entityCases.entityTabTable).toBeHidden();
       }
     );
   }

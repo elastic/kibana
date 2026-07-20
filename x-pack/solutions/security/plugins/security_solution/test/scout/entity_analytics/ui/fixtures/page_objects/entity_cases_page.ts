@@ -10,7 +10,6 @@ import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import {
   ADD_TO_NEW_CASE_TEST_ID,
   ADD_TO_EXISTING_CASE_TEST_ID,
-  ENTITY_TAB_TABLE_TEST_ID,
 } from '../../../../../../common/cases/attachments/entity/test_ids';
 
 /**
@@ -24,6 +23,13 @@ import {
  * (`case-view-attachment-accordion-security.entity`) inside the consolidated
  * Attachments tab, and the accordion is only rendered when the case has at
  * least one entity attachment.
+ *
+ * These helpers deliberately assert against the accordion and its count badge
+ * (both rendered by the cases framework from the case's attachments) rather than
+ * the Entity Analytics table inside it. The table is gated on EA index-read
+ * privileges and entity-store data, which are Entity Analytics' concern, not the
+ * cases-attachment feature under test — asserting the accordion keeps this suite
+ * runnable as the least-privileged `platform_engineer` role.
  */
 export class EntityCasesPage {
   // Entity flyout – Take Action popover
@@ -35,7 +41,7 @@ export class EntityCasesPage {
   public readonly attachmentsTab: Locator;
   public readonly attachmentsContainer: Locator;
   public readonly entityAccordion: Locator;
-  public readonly entityTabTable: Locator;
+  public readonly entityAccordionBadge: Locator;
 
   // New-case creation flyout (rendered by the Cases plugin)
   public readonly createCaseNameInput: Locator;
@@ -58,7 +64,11 @@ export class EntityCasesPage {
     this.entityAccordion = page.testSubj.locator(
       `case-view-attachment-accordion-${SECURITY_ENTITY_ATTACHMENT_TYPE}`
     );
-    this.entityTabTable = page.testSubj.locator(ENTITY_TAB_TABLE_TEST_ID);
+    // Count badge on the accordion header; rendered by the cases framework from the
+    // number of entity attachments on the case, independent of EA read privileges.
+    this.entityAccordionBadge = page.testSubj.locator(
+      `case-view-attachment-badge-${SECURITY_ENTITY_ATTACHMENT_TYPE}`
+    );
 
     // Scope to the Cases plugin's stable `caseTitle` form row, then the single
     // `<input>` within it — avoids matching stray `data-test-subj="input"` fields
