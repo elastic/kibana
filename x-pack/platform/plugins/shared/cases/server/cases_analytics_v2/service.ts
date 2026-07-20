@@ -477,9 +477,7 @@ export class CasesAnalyticsV2Service {
    */
   public async triggerBackfillReconciliation(): Promise<void> {
     if (!this.enabled) {
-      this.logger.debug(
-        'cases-analyticsV2: triggerBackfillReconciliation skipped — v2 disabled'
-      );
+      this.logger.debug('cases-analyticsV2: triggerBackfillReconciliation skipped — v2 disabled');
       return;
     }
     if (this.taskManager == null) {

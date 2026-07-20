@@ -238,9 +238,8 @@ const backfillCasesForSpace = async (
  * has not yet been flagged `legacyCasesMigrated`. Spaces with no custom fields are never backfilled
  * (there is nothing to derive `extended_fields` from), so they are never "pending".
  */
-const configureNeedsCaseBackfill = (
-  so: SavedObject<ConfigurationPersistedAttributes>
-): boolean => (so.attributes.customFields?.length ?? 0) > 0 && !so.attributes.legacyCasesMigrated;
+const configureNeedsCaseBackfill = (so: SavedObject<ConfigurationPersistedAttributes>): boolean =>
+  (so.attributes.customFields?.length ?? 0) > 0 && !so.attributes.legacyCasesMigrated;
 
 /**
  * Whether ANY space still needs its existing cases backfilled — the exact predicate
