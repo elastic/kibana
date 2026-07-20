@@ -9,7 +9,11 @@
 
 import { savedDataViewSpecSchema } from '@kbn/as-code-data-views-schema';
 import { schema } from '@kbn/config-schema';
-import { asCodeMetaSchema, asCodePaginationResponseMetaSchema } from '@kbn/as-code-shared-schemas';
+import {
+  asCodeMetaSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 
 const dataViewsMetaSchema = asCodeMetaSchema.extends({
   namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 100 })),
@@ -32,7 +36,7 @@ export const asCodeMinimalResponseSchema = schema.object({
 });
 
 export const asCodePaginatedResponseSchema = schema.object({
-  data: schema.arrayOf(asCodeMinimalResponseSchema),
+  data: schema.arrayOf(asCodeMinimalResponseSchema, { maxSize: PAGINATION_MAX_SIZE }),
   meta: asCodePaginationResponseMetaSchema,
 });
 

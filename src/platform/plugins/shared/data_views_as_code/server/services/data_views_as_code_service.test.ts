@@ -27,6 +27,8 @@ const createMockDataViewLazy = ({
   version = '1',
   namespaces = ['default'],
   spec = {},
+  minimalSpec = spec,
+  fieldAttrs = (spec.fieldAttrs as Record<string, unknown> | undefined) ?? {},
   savedObjectBody,
 }: {
   id?: string;
@@ -34,6 +36,8 @@ const createMockDataViewLazy = ({
   version?: string;
   namespaces?: string[];
   spec?: Record<string, unknown>;
+  minimalSpec?: Record<string, unknown>;
+  fieldAttrs?: Record<string, unknown>;
   savedObjectBody?: Record<string, unknown>;
 } = {}) =>
   ({
@@ -42,8 +46,8 @@ const createMockDataViewLazy = ({
     version,
     namespaces,
     toSpec: jest.fn().mockResolvedValue(spec),
-    toMinimalSpec: jest.fn().mockResolvedValue(spec),
-    getFieldAttrs: jest.fn().mockReturnValue(new Map(Object.entries(spec.fieldAttrs ?? {}))),
+    toMinimalSpec: jest.fn().mockResolvedValue(minimalSpec),
+    getFieldAttrs: jest.fn().mockReturnValue(new Map(Object.entries(fieldAttrs))),
     getAsSavedObjectBody: jest.fn().mockReturnValue(savedObjectBody ?? spec),
   } as unknown as DataViewLazy);
 
@@ -279,6 +283,32 @@ describe('DataViewsAsCodeService', () => {
 
       const result = await service.get('dv-3');
 
+      expect(result.data).toEqual(getExpectedMappedData(detailedSpec));
+    });
+
+    it('should restore fieldAttrs from getFieldAttrs so popularity is mapped', async () => {
+      const { service, mockDataViewsService } = createService();
+
+      const detailedSpec = {
+        title: 'metrics-*',
+        fieldAttrs: { bytes: { count: 7, customLabel: 'Bytes' } },
+      };
+      const minimalSpec = {
+        title: 'metrics-*',
+        fieldAttrs: { bytes: { customLabel: 'Bytes' } },
+      };
+      const mockDataView = createMockDataViewLazy({
+        id: 'dv-5',
+        spec: detailedSpec,
+        minimalSpec,
+        fieldAttrs: detailedSpec.fieldAttrs,
+      });
+      mockDataViewsService.getDataViewLazy.mockResolvedValue(mockDataView);
+
+      const result = await service.get('dv-5');
+
+      expect(mockDataView.toMinimalSpec).toHaveBeenCalledTimes(1);
+      expect(mockDataView.getFieldAttrs).toHaveBeenCalled();
       expect(result.data).toEqual(getExpectedMappedData(detailedSpec));
     });
   });
