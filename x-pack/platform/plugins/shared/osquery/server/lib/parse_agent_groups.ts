@@ -161,7 +161,7 @@ export const parseAgentSelection = async (
       esClient,
       context
     );
-    kueryFragments.push(buildPolicyIdsOrVariantsKuery(uniq(osqueryPolicies)));
+    kueryFragments.push(buildPolicyIdsOrVariantsKuery(osqueryPolicies));
     if (allAgentsSelected) {
       const kuery = kueryFragments.join(' and ');
       const fetchedAgents = await aggregateResults(
