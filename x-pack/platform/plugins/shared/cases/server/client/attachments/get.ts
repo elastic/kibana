@@ -73,7 +73,7 @@ export const getAllDocumentsAttachedToCase = async (
     caseId,
     filter,
     attachmentTypes,
-    additionalUnifiedAttachmentTypes,
+    unifiedAttachmentTypes,
   }: GetAllDocumentsAttachedToCase,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
@@ -99,7 +99,7 @@ export const getAllDocumentsAttachedToCase = async (
 
     const documents = await attachmentService.getter.getAllDocumentsAttachedToCase({
       attachmentTypes,
-      additionalUnifiedAttachmentTypes,
+      unifiedAttachmentTypes,
       caseId: theCase.id,
       filter: combineFilters(filterArray),
       owner: theCase.owner,

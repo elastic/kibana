@@ -63,7 +63,7 @@ describe('findCasesContainingAllDocuments', () => {
         calls: [params],
       } = jest.mocked(casesClient.attachments.getAllDocumentsAttachedToCase).mock;
 
-      expect(params[0].additionalUnifiedAttachmentTypes).toEqual(['security.entity']);
+      expect(params[0].unifiedAttachmentTypes).toEqual(['security.entity']);
     });
 
     it('returns case id when an entity attachment id is present', async () => {

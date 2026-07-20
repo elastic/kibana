@@ -77,7 +77,7 @@ export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs & {
    * query alongside the alert/event types. Used by the "already attached" dedup check so
    * non-alert unified attachments can participate.
    */
-  additionalUnifiedAttachmentTypes?: string[];
+  unifiedAttachmentTypes?: string[];
 };
 
 export interface AlertIdsAggsResult {

@@ -140,7 +140,7 @@ export interface GetAllDocumentsAttachedToCase {
    * Extra unified attachment `type` values (e.g. `security.entity`) to include alongside
    * the alert/event types, so non-alert unified attachments participate in the query.
    */
-  additionalUnifiedAttachmentTypes?: string[];
+  unifiedAttachmentTypes?: string[];
 }
 
 /**

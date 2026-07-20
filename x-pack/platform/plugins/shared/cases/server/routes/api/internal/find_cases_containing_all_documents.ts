@@ -124,7 +124,7 @@ export const processCase = async (
     filter: combineFilters([legacyFilter, unifiedFilter], 'or' as const),
     // Entity attachments aren't alerts/events, so include their unified type explicitly
     // or the getter's default alert/event type filter would exclude them.
-    additionalUnifiedAttachmentTypes: [SECURITY_ENTITY_ATTACHMENT_TYPE],
+    unifiedAttachmentTypes: [SECURITY_ENTITY_ATTACHMENT_TYPE],
   });
 
   // Combine document ids from cases-comments and cases-attachments for deduplication
