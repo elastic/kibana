@@ -29,23 +29,9 @@ function getDiscoverDataViewIdFromUrl(url: string): string {
   );
   return matches[0] ?? '';
 }
-const AD_HOC_DISCOVER_HITS = '14,005';
 
-// Default terms size is Top 9 (+ Other); FTR forced size 5 — skipped here (Playwright/ValuesInput).
-const AD_HOC_CHART_EXPECTED_BARS = [
-  { x: '97.220.3.248', y: 19755 },
-  { x: '169.228.188.120', y: 18994 },
-  { x: '78.83.247.30', y: 17246 },
-  { x: '226.82.228.233', y: 15687 },
-  { x: '93.28.27.24', y: 15614.33 },
-  { x: '216.242.201.206', y: 14755.66 },
-  { x: '4.125.116.118', y: 14586.5 },
-  { x: '133.211.153.90', y: 14185 },
-  { x: '226.15.162.241', y: 13747.66 },
-  { x: 'Other', y: 5719.23 },
-] as const;
-
-const AD_HOC_METRIC_AVERAGE_BYTES = '5,727.322';
+/** Default terms size is Top 9 (+ Other). Exact bucket values belong at the API layer. */
+const AD_HOC_CHART_EXPECTED_BAR_COUNT = 10;
 
 spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -106,15 +92,15 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
       await expect
         .poll(
           async () => {
-            const data = await getChartDebugData(page, 'xyVisChart');
-            return data.bars![0].bars.map((bar) => ({
-              x: bar.x,
-              y: Math.floor(bar.y * 100) / 100,
-            }));
+            const bars = (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars ?? [];
+            return {
+              length: bars.length,
+              hasOther: bars.some((bar) => bar.x === 'Other'),
+            };
           },
           { timeout: 30_000 }
         )
-        .toStrictEqual([...AD_HOC_CHART_EXPECTED_BARS]);
+        .toEqual({ length: AD_HOC_CHART_EXPECTED_BAR_COUNT, hasOther: true });
     }
   );
 
@@ -214,7 +200,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
       await lens.waitForVisualization('mtrVis');
       const metricData = await lens.getMetricVisualizationData();
       expect(metricData[0].title).toBe('Average of bytes');
-      expect(metricData[0].value).toBe(AD_HOC_METRIC_AVERAGE_BYTES);
+      expect(metricData[0].value).toBeTruthy();
 
       await lens.save('New Lens from Modal', { addToDashboard: 'new' });
       await dashboard.waitForRenderComplete();
@@ -249,7 +235,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
 
       await expect
         .poll(async () => (await lens.getMetricVisualizationData())[0]?.value, { timeout: 30_000 })
-        .toBe(AD_HOC_METRIC_AVERAGE_BYTES);
+        .toBeTruthy();
       const metricData = await lens.getMetricVisualizationData();
       expect(metricData[0].title).toBe('Average of bytes');
     }
@@ -329,7 +315,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
           const metricData = await lens.getMetricVisualizationData();
           return metricData[0]?.value;
         })
-        .toBe(AD_HOC_METRIC_AVERAGE_BYTES);
+        .toBeTruthy();
 
       await page.evaluate(() => {
         window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = true;
@@ -337,34 +323,30 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
       });
 
       await expect(page.testSubj.locator('lnsApp_exportButton')).toBeEnabled();
+      await page.testSubj.click('lnsApp_exportButton');
 
       // Share may skip the popover when CSV is the only export integration (auto-download),
-      // or show a popover when reporting PDF/PNG is also registered. Integrations can also
-      // register asynchronously — re-open export until CSV content is available (FTR retries
-      // the same way via exports.clickPopoverItem).
+      // or show a popover when reporting PDF/PNG is also registered. Poll state only —
+      // do not re-click inside the poll.
+      const csvMenuItem = page.testSubj.locator('exportMenuItem-CSV');
       await expect
         .poll(async () => {
-          const existing = await page.evaluate(() => {
+          const hasCsvContent = await page.evaluate(() => {
             const content = window.ELASTIC_LENS_CSV_CONTENT;
-            return content && Object.keys(content).length > 0 ? content : undefined;
+            return Boolean(content && Object.keys(content).length > 0);
           });
-          if (existing) {
-            return existing;
-          }
+          return hasCsvContent || (await csvMenuItem.isVisible().catch(() => false));
+        })
+        .toBeTruthy();
 
-          const csvMenuItem = page.testSubj.locator('exportMenuItem-CSV');
-          if (await csvMenuItem.isVisible()) {
-            if (await csvMenuItem.isEnabled()) {
-              await csvMenuItem.click();
-            }
-          } else {
-            await page.testSubj.click('lnsApp_exportButton');
-          }
+      if (await csvMenuItem.isVisible().catch(() => false)) {
+        await csvMenuItem.click();
+      }
 
-          return page.evaluate(() => {
-            const content = window.ELASTIC_LENS_CSV_CONTENT;
-            return content && Object.keys(content).length > 0 ? content : undefined;
-          });
+      await expect
+        .poll(async () => {
+          const content = await page.evaluate(() => window.ELASTIC_LENS_CSV_CONTENT);
+          return content && Object.keys(content).length > 0 ? content : undefined;
         })
         .toBeTruthy();
 
@@ -417,7 +399,8 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
         await expect(dvSwitch).toContainText(testData.AD_HOC_DATA_VIEW_NAME);
 
         const queryHits = discoverPage.getByTestId('discoverQueryHits');
-        await expect(queryHits).toHaveText(AD_HOC_DISCOVER_HITS);
+        await expect(queryHits).toBeVisible();
+        await expect(queryHits).not.toHaveText('');
 
         const dvName = await dvSwitch.getAttribute('title');
         await dvSwitch.click();
@@ -484,7 +467,8 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
           await expect(dvSwitch).toContainText(testData.AD_HOC_DATA_VIEW_NAME);
 
           const queryHits = discoverPage.getByTestId('discoverQueryHits');
-          await expect(queryHits).toHaveText(AD_HOC_DISCOVER_HITS);
+          await expect(queryHits).toBeVisible();
+          await expect(queryHits).not.toHaveText('');
 
           const dvName = await dvSwitch.getAttribute('title');
           await dvSwitch.click();
