@@ -77,6 +77,17 @@ export class MonacoEditorOutputActionsProvider {
     this.setEditorActionsCss({
       visibility: 'hidden',
     });
+    // Relinquish editor focus so any highlight recomputation queued after this reset
+    // (e.g. the layout event fired when the copy success toast mounts) sees
+    // hasTextFocus() === false and stays in the hide branch. Without this, the copy
+    // callback keeps the editor focused with its selection intact -- via the actions'
+    // onMouseDown preventDefault -- so the debounced highlight re-renders the button
+    // that the copy just hid. See https://github.com/elastic/kibana/issues/278855.
+    this.blurEditor();
+  }
+
+  private blurEditor() {
+    this.editor.getDomNode()?.querySelector<HTMLTextAreaElement>('textarea.inputarea')?.blur();
   }
 
   private updateEditorActions(lineNumber?: number) {
