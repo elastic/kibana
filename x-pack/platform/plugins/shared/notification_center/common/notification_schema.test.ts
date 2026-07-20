@@ -51,16 +51,17 @@ describe('notificationWriteSchema', () => {
     }
   );
 
-  it.each([
-    'notification_id',
-    'event_timestamp',
-    'namespace',
-    'type',
-    'title',
-    'description',
-  ] as const)('requires %s', (field) => {
-    const { [field]: _omitted, ...rest } = validInput;
-    expect(() => notificationWriteSchema.parse(rest)).toThrow();
+  it.each(['notification_id', 'namespace', 'type', 'title', 'description'] as const)(
+    'requires %s',
+    (field) => {
+      const { [field]: _omitted, ...rest } = validInput;
+      expect(() => notificationWriteSchema.parse(rest)).toThrow();
+    }
+  );
+
+  it('accepts an omitted event_timestamp (state notifications carry none)', () => {
+    const { event_timestamp: _omitted, ...rest } = validInput;
+    expect(() => notificationWriteSchema.parse(rest)).not.toThrow();
   });
 
   it('rejects unknown top-level fields (strict)', () => {

@@ -49,8 +49,7 @@ export const NOTIFICATION_NAMESPACES = Object.keys(NOTIFICATION_REGISTRY) as [
 /**
  * Syntactic sugar for plugins to submit specific notification types without worrying about the
  * literal strings already set in the registry.
- * Reachable as: `NOTIFICATION_TYPES.<namespace>.<type>`.
- * Plugins pass this leaf format to `forType` to submit specific notification types.
+ * Reachable as `NOTIFICATION_TYPES.<namespace>.<type>`, passed to `forType`.
  */
 export const NOTIFICATION_TYPES = Object.fromEntries(
   Object.entries(NOTIFICATION_REGISTRY).map(([namespace, definition]) => [
@@ -81,4 +80,16 @@ export const isRegisteredNotificationRef = (namespace: string, type: string): bo
     namespace
   ];
   return Object.hasOwn(types, type);
+};
+
+/**
+ * Runtime companion to {@link NotificationKindOf}: the declared `kind` for a `(namespace, type)`,
+ * defaulting to `state`. The submit path drives id building off this, so the registry — not the
+ * shape of the producer's payload — decides the id scheme.
+ */
+export const resolveNotificationKind = (namespace: string, type: string): NotificationKind => {
+  const definition = (NOTIFICATION_REGISTRY as Record<string, NotificationNamespaceDefinition>)[
+    namespace
+  ];
+  return definition?.types[type]?.kind ?? 'state';
 };

@@ -10,7 +10,7 @@ import type { NotificationNamespaceDefinition } from './notification_registry_ty
 /**
  * This registry is a static store where plugins declare which notifications they produce.
  * Each notification is identified by a unique `(namespace, type)` pair.
- * This type ensures plugins only submit notifications that have been declared here.
+ * This registry ensures plugins only submit notifications that have been declared here.
  *
  * Notification Center uses this to build query filters, display metadata in the UI,
  * and properly gate notifications based on feature flags. A type's `feature_flag`
@@ -26,6 +26,7 @@ export const NOTIFICATION_REGISTRY = {
         display_name: 'Model status',
         description: 'A change to the lifecycle status of an inference model, such as deprecation.',
         feature_flag: 'notificationCenter.types.inference.modelStatus',
+        kind: 'state',
       },
     },
   },

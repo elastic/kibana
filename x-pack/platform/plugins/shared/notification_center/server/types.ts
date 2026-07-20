@@ -29,7 +29,7 @@ export interface NotificationSubmitter<
 > {
   /**
    * Validate the content, check the type's feature flag, build the `notification_id` from the
-   * type's id strategy, stamp `@timestamp`, and append one document to the
+   * type's `kind`, stamp `@timestamp`, and append one document to the
    * `.kibana-notification-center` data stream.
    */
   submit: (input: NotificationSubmitInput<N, T>) => Promise<SubmitNotificationResult>;

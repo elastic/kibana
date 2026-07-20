@@ -3,7 +3,7 @@
 The **Notification Center** is the in-product surface for notifications within search solution,
 such as inference model status updates.
 It is a **presentation + ingestion layer**: consumers evaluate their own state and push notifications
-to the center through a type-bound submitter; this plugin builds the idempotency key, stores and
+to the center through submitter helper; this plugin builds the idempotency key, stores and
 queries notifications for users, and renders them.
 
 ## Feature flags
@@ -11,8 +11,8 @@ queries notifications for users, and renders them.
 The plugin is gated by two [core feature flags](../../../../../src/core/packages/feature-flags/README.mdx),
 both **off by default**:
 
-| Key                                    | Purpose                              |
-| -------------------------------------- | ------------------------------------ |
+| Key                                              | Purpose                              |
+| ------------------------------------------------ | ------------------------------------ |
 | `notificationCenter.uiEnabled`                   | Kibana UI visibility                 |
 | `notificationCenter.types.inference.modelStatus` | Inference model status notifications |
 
@@ -55,9 +55,8 @@ touch the Feature Flags service themselves.
 
 1. Add the type to `NOTIFICATION_REGISTRY` in
    [`common/notification_registry.ts`](./common/notification_registry.ts) under its
-   namespace, with a static `feature_flag` key by convention
-   `notificationCenter.types.<namespace>.<typeId>`. `NOTIFICATION_TYPE_FLAGS` is derived
-   from these entries; omit `feature_flag` to send the type ungated:
+   namespace, with a static `feature_flag` key. Use this convention for features flags:
+   `notificationCenter.types.<namespace>.<typeId>`. omit `feature_flag` to send this type of notification without a feature flag check:
    ```ts
    export const NOTIFICATION_REGISTRY = {
      inference: {
@@ -68,6 +67,7 @@ touch the Feature Flags service themselves.
            display_name: 'Model status',
            description: 'A change to the lifecycle status of an inference model.',
            feature_flag: 'notificationCenter.types.inference.modelStatus',
+           kind: 'state',
          },
        },
      },
@@ -90,10 +90,9 @@ touch the Feature Flags service themselves.
      evaluation-rules: {}
    ```
 
-`submit` performs the gate check itself, reading the derived flag off by default;
+`submit` performs the feature flag check itself. Flags default to off.
 producers never call the Feature Flags service directly. Notifications of a type are shown only
-when the plugin is visible (`notificationCenter.uiEnabled`) and the type's own
-`notificationCenter.types.<namespace>.<typeId>` flag is on.
+when the NC plugin is enabled and the type's own `notificationCenter.types.<namespace>.<typeId>` flag is on.
 
 ## Notification schema
 
@@ -118,36 +117,34 @@ protocol-relative (`//host`), and backslash (`/\host`) URLs are rejected.
 ## Notification kind and id
 
 A notification's `notification_id` is a deterministic idempotency key so duplicates can be
-collapsed at query time. **The Notification Center builds it** from the type's registry `kind`;
-producers never construct the id and never track notification state themselves.
+collapsed at query time. **The Notification Center builds it** based on what's defined in the notification type registry;
+producers never construct the id by hand and never track notification state themselves.
 
 - **`state`** (default) — id `<namespace>:<type>:<entity>:<state>`. The notification represents
   the _current state_ of an entity; re-emitting the same state collapses to one entry, and a new
   `state` produces a new id. `submit` takes `{ entity, state }`.
   - e.g. `inference:modelStatus:my-endpoint:deprecated`
 - **`timeseries`** — id `<namespace>:<type>:<event>:<epochMs>`. Each occurrence is distinct and
-  kept; the epoch-milliseconds segment makes every push unique without colon collisions from ISO
-  8601 timestamps. `submit` takes `{ event, epochMs }`.
+  written to the data stream.
   - e.g. `inference:modelStatus:memoryLimit:1750118400000`
 
-A type declares its nature with `kind` in the registry (`kind: 'timeseries'`); omit it for `state`.
+A notification declares which variant it is with `kind` in the registry (`kind: 'timeseries'`). defaults to `state`.
 
 ## Submitting notifications (`forType`)
 
 The server **setup** contract exposes `forType(ref)`, which binds a submitter to a registered
-notification type. Pass a registry ref (`NOTIFICATION_TYPES.<namespace>.<type>`); the returned
-`submit` takes only the notification content and the type's id parts — NC supplies `namespace`,
-`type`, the `notification_id` (built from the type's `kind`), and `@timestamp`. There is no HTTP
-creation path — plugins call `submit` in-process.
+notification type.
+
+- Pass a registry ref (`NOTIFICATION_TYPES.<namespace>.<type>`)
+- the returned `submit` takes only the notification content and the type's id parts.
+- NC supplies `namespace`, `type`, the `notification_id` (built from the type's `kind`), and `@timestamp`.
 
 Re-pushing a `state` notification with the same parts appends another document; at query time
 duplicates are collapsed and a separate cleanup-task keeps the index size under control. Invalid
 content throws `NotificationValidationError` and nothing is written.
 
-`submit` resolves to `{ status: 'submitted' | 'skipped_disabled' }`. A type whose `feature_flag`
-is off (including when the LaunchDarkly value is unreachable — flags default to `false`) is **not
-an error**: nothing is written and the call resolves with `skipped_disabled`. Producers that need
-delivery guaranteed must ensure the type's flag is enabled.
+`submit` returns a promise with value: `{ status: 'submitted' | 'skipped_disabled' }`.
+In the case of notification with a `feature_flag` that is disabled, submit resolves with `skipped_disabled`.
 
 ### Example usage
 
@@ -164,7 +161,9 @@ A plugin declares `notificationCenter` in `optionalPlugins` (or `requiredPlugins
 import { NOTIFICATION_TYPES, SEVERITY } from '@kbn/notification-center-plugin/common';
 import type { NotificationCenterPluginSetup } from '@kbn/notification-center-plugin/server';
 
-export async function reportDeprecatedEndpoint(notificationCenter: NotificationCenterPluginSetup) {
+export const reportDeprecatedEndpoint = async (
+  notificationCenter: NotificationCenterPluginSetup
+) => {
   const endpoint = await findDeprecatedEndpoint();
   await notificationCenter.forType(NOTIFICATION_TYPES.inference.modelStatus).submit({
     entity: endpoint.id,
@@ -174,7 +173,7 @@ export async function reportDeprecatedEndpoint(notificationCenter: NotificationC
     description: `${endpoint.name} is deprecated and will be removed in a future release.`,
     // cta is optional — see common/notification_schema.ts
   });
-}
+};
 ```
 
 ### Checking it landed

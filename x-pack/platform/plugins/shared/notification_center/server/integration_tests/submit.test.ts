@@ -62,8 +62,8 @@ describe('notificationCenter forType().submit() [integration]', () => {
       throw new Error('Failed to initialize the notification data stream client');
     }
 
-    // submit resolves its client via core.getStartServices().dataStreams;
-    // mock the start service to return the test client bound to the test ES cluster.
+    // submit resolves its client via core.getStartServices().dataStreams,
+    // so mock the start service to return the test client bound to the test ES cluster.
     const dataStreams = { initializeClient: async () => client } as unknown as DataStreamsStart;
     const featureFlags = { getBooleanValue: async () => true };
     const core = {

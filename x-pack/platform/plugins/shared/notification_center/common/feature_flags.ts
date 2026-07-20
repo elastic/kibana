@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-/**
- * Feature flag definitions used by the Notification Center plugin.
- */
-
 import { NOTIFICATION_REGISTRY } from './notification_registry';
 import { joinNotificationTypeId } from './notification_registry_utils';
 
@@ -20,18 +16,11 @@ export const NOTIFICATION_CENTER_UI_ENABLED_FLAG = 'notificationCenter.uiEnabled
 export const NOTIFICATION_CENTER_UI_ENABLED_DEFAULT = false;
 
 /**
- * This object stores a map of notification types and their feature flag value.
+ * Registry types keyed by `<namespace>.<typeId>`, mapped to their LaunchDarkly flag key. Only
+ * types that declare a `feature_flag` are gated; a type with no entry always passes.
  *
- * Each notification type is gated by its own boolean feature flag rather than a
- * single list, so the Feature Flags service can control which notifications are
- * sent out.
- *
- * Notifications are each identified by the `<namespace>.<typeId>` from the registry.
- * Only types that declare a `feature_flag` appear here
- * Gating a new notification type requires two edits:
- *  1. add it to the registry with a `feature_flag`, and
- *  2. add the matching flag definition as a YAML file in the external
- *    `elastic/kibana-feature-flags` repository
+ * Gating a new type takes two edits: add `feature_flag` to its registry entry, and add the
+ * matching flag definition to the external `elastic/kibana-feature-flags` repository.
  */
 const buildNotificationTypeFlags = (): Record<string, string> => {
   const entries: Array<[string, string]> = [];

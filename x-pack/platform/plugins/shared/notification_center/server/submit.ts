@@ -11,7 +11,10 @@ import {
   NOTIFICATION_TYPE_FLAGS,
   NOTIFICATION_TYPE_ENABLED_DEFAULT,
 } from '../common/feature_flags';
-import { joinNotificationTypeId } from '../common/notification_registry_utils';
+import {
+  joinNotificationTypeId,
+  resolveNotificationKind,
+} from '../common/notification_registry_utils';
 import { buildStateNotificationId, buildTimeseriesNotificationId } from '../common/notification_id';
 import type {
   NotificationDocument,
@@ -80,47 +83,65 @@ const writeNotification = async (
 };
 
 /**
- * Build the `forType` producer API: bind a submitter to a registered `(namespace, type)` that
- * builds the `notification_id` from the type's kind, then delegates to the write path.
+ * Build the `notification_id` and, for `timeseries` types, the `event_timestamp` for a submission.
+ * The registry `kind` of the `(namespace, type)` selects the id scheme; a payload missing the parts
+ * that kind requires is rejected before anything is written. `state` types carry no event time —
+ * they rely on the write-time `@timestamp`.
+ */
+const buildIdAndTimestamp = (
+  namespace: string,
+  type: string,
+  idParts: StateSubmitIdParts | TimeseriesSubmitIdParts
+): { notification_id: string; event_timestamp?: string } => {
+  if (resolveNotificationKind(namespace, type) === 'timeseries') {
+    if (!('epochMs' in idParts)) {
+      throw new NotificationValidationError(
+        `"${joinNotificationTypeId(
+          namespace,
+          type
+        )}" is a timeseries type; submit requires event and epochMs`
+      );
+    }
+    const { event, epochMs } = idParts;
+    return {
+      notification_id: buildTimeseriesNotificationId({ namespace, type, event, epochMs }),
+      event_timestamp: new Date(epochMs).toISOString(),
+    };
+  }
+
+  if (!('entity' in idParts)) {
+    throw new NotificationValidationError(
+      `"${joinNotificationTypeId(
+        namespace,
+        type
+      )}" is a state type; submit requires entity and state`
+    );
+  }
+  const { entity, state } = idParts;
+  return { notification_id: buildStateNotificationId({ namespace, type, entity, state }) };
+};
+
+/**
+ * Build the `forType` producer API: bind a submitter to a registered `(namespace, type)` whose
+ * `submit` builds the `notification_id` from the type's registry `kind`, then delegates to the
+ * write path.
  */
 export const buildForType =
   (core: NotificationCenterCore): NotificationCenterPluginSetup['forType'] =>
   ({ namespace, type }) => ({
     submit: (input) => {
       const { title, description, severity, cta } = input;
-      // The type's kind fixes which id parts the input carries, so field presence
-      // discriminates the two builders.
-      const idParts: StateSubmitIdParts | TimeseriesSubmitIdParts = input;
-      const { notification_id, event_timestamp } =
-        'epochMs' in idParts
-          ? {
-              notification_id: buildTimeseriesNotificationId({
-                namespace,
-                type,
-                event: idParts.event,
-                epochMs: idParts.epochMs,
-              }),
-              event_timestamp: new Date(idParts.epochMs).toISOString(),
-            }
-          : {
-              notification_id: buildStateNotificationId({
-                namespace,
-                type,
-                entity: idParts.entity,
-                state: idParts.state,
-              }),
-              event_timestamp: new Date().toISOString(),
-            };
+      const { notification_id, event_timestamp } = buildIdAndTimestamp(namespace, type, input);
 
       return writeNotification(core, {
         notification_id,
-        event_timestamp,
         namespace,
         type,
         title,
         description,
         severity,
         cta,
+        ...(event_timestamp && { event_timestamp }),
       });
     },
   });
