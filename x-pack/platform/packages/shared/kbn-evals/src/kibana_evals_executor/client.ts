@@ -240,10 +240,12 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                         // did not surface its own. Previously `traceId` (the client task-span id) was
                         // spread last and always won, so trace-based token/latency/toolCalls
                         // evaluators queried the eval client trace (no inference spans) → null.
+                        // Use a truthy check (not `??`) so an empty-string traceId also falls back
+                        // instead of being queried as a literal `trace.id == ""`.
                         // (elastic/kibana#276308)
                         output: {
                           ...taskOutput,
-                          traceId: (taskOutput as { traceId?: string })?.traceId ?? traceId,
+                          traceId: (taskOutput as { traceId?: string })?.traceId || traceId,
                         },
                         expected: example.output ?? null,
                         metadata: example.metadata ?? {},

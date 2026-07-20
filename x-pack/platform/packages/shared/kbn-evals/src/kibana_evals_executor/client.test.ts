@@ -309,6 +309,39 @@ describe('KibanaEvalsClient', () => {
     expect(seenOutputTraceId).toBe('client-task-span-trace');
   });
 
+  it('falls back to the client task-span id when the task surfaces an empty-string traceId', async () => {
+    const client = createClient();
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+    // A task-provided empty string is not a usable trace id — it must NOT win over the
+    // client task-span trace id (a plain `??` would let it through since '' is not
+    // null/undefined). (#276308)
+    const task = async () => ({ value: 1, traceId: '' });
+
+    let seenOutputTraceId: string | undefined;
+    const evaluators: Array<
+      Evaluator<EvaluationDataset['examples'][number], { value: number; traceId?: string }>
+    > = [
+      {
+        name: 'CapturesTraceId',
+        kind: 'CODE',
+        evaluate: async ({ output }) => {
+          seenOutputTraceId = output?.traceId;
+          return { score: 1 };
+        },
+      },
+    ];
+
+    (getCurrentTraceId as jest.Mock).mockReturnValue('client-task-span-trace');
+
+    await client.runExperiment({ datasets: [dataset], task }, evaluators);
+
+    expect(seenOutputTraceId).toBe('client-task-span-trace');
+  });
+
   it('limits concurrent task execution using the concurrency option', async () => {
     const client = createClient();
 
