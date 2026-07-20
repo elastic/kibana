@@ -2278,10 +2278,10 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@9.4.1":
-  version "9.4.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.4.1.tgz#252fb4f10a8d8a7dd88a5d80daa1d2ceaba5af7d"
-  integrity sha512-3tFtSzvHfl/mUT/A6+TY1uiikK80iPfIySjpTwuxgwu2db57KUM/9a14vx5pnIf2etzJTrD8QOxlnVxBM+AHLg==
+"@elastic/elasticsearch@9.4.2":
+  version "9.4.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.4.2.tgz#be41243fb67b73b3114ca803cd153591782b6c8b"
+  integrity sha512-H9myMlLUeotkZhZ4ppinoMGDFxmW3lY8/s+4TIk1vFHyCvWU1Ej4T7azX5buCzemyFApgN0ywnEuvOtpel2VZg==
   dependencies:
     "@elastic/transport" "^9.3.5"
     tslib "^2.4.0"
