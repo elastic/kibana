@@ -9,7 +9,7 @@ applies_to:
 
 # MongoDB connector [mongodb-action-type]
 
-The MongoDB connector provides access to MongoDB collections using the native MongoDB driver. Use it to query documents, run aggregation pipelines, discover collection structure, and insert, update, or delete documents from workflows. AI agents can only use the read-only actions (find, aggregate, count, listCollections) — write actions (insertOne, updateOne, deleteOne) are workflow-only and never exposed to agents. It supports any MongoDB deployment reachable via a connection URI: Atlas clusters (`mongodb+srv://`), self-hosted replica sets, and standalone instances.
+The MongoDB connector provides access to MongoDB collections using the native MongoDB driver. Use it to query documents, run aggregation pipelines, discover collection structure, and insert, update, or delete documents from workflows. AI agents can only use the read-only actions (find, aggregate, count, listCollections) — write actions (insertOne, updateOne, deleteOne) are workflow-only and never exposed to agents. It supports any MongoDB deployment reachable through a connection URI: Atlas clusters (`mongodb+srv://`), self-hosted replica sets, and standalone instances.
 
 ## Create connectors in {{kib}} [define-mongodb-ui]
 
@@ -57,7 +57,7 @@ Aggregate
     - `limit` (optional): Maximum number of documents to return (1–1000). Defaults to 100.
 
 Count
-:   Count documents in a MongoDB collection matching an optional filter. Returns the total document count. Useful for understanding data volume before running a find or aggregate.
+:   Count documents in a MongoDB collection matching an optional filter. Returns the total document count. Use this to understand data volume before running a find or aggregate.
     - `collection` (required): Name of the collection to count documents in.
     - `database` (optional): Database to query. Defaults to the database in the connection URI path if omitted.
     - `filter` (optional): MongoDB query filter. Omit or pass `{}` to count all documents. Example: `{"status": "active"}`.
@@ -69,13 +69,13 @@ Follow the discovery pattern before querying: *List collections* → *Find* with
 The following actions are workflow-only — they are never exposed to AI agents:
 
 Insert one
-:   Insert a single document into a MongoDB collection.
+:   Insert a single document into a MongoDB collection. Use this to create a new record from a workflow, such as logging an event or saving a processed result. Returns the inserted document ID and whether the write was acknowledged.
     - `collection` (required): Name of the collection to insert into.
     - `database` (optional): Database to write to. Defaults to the database in the connection URI path if omitted.
-    - `document` (required): Document to insert. Do not include `_id` unless you want to set it explicitly. Example: `{"name": "Alice", "status": "active"}`.
+    - `document` (required): Document to insert. Don't include `_id` unless you want to set it explicitly. Example: `{"name": "Alice", "status": "active"}`.
 
 Update one
-:   Update a single document in a MongoDB collection.
+:   Update the first document matching a filter in a MongoDB collection. Use this to modify an existing record from a workflow, such as changing a status field or applying a partial update. Returns matched and modified counts, the upserted document ID (if any), and whether the write was acknowledged.
     - `collection` (required): Name of the collection to update.
     - `database` (optional): Database to write to. Defaults to the database in the connection URI path if omitted.
     - `filter` (required): Filter to match the document to update. Example: `{"_id": "abc"}`.
@@ -83,7 +83,7 @@ Update one
     - `upsert` (optional): If `true`, insert a new document when no document matches the filter.
 
 Delete one
-:   Delete a single document from a MongoDB collection.
+:   Delete the first document matching a filter from a MongoDB collection. Use this to remove a single record from a workflow, such as cleaning up a processed item. Returns the number of documents deleted and whether the write was acknowledged.
     - `collection` (required): Name of the collection to delete from.
     - `database` (optional): Database to write to. Defaults to the database in the connection URI path if omitted.
     - `filter` (required): Filter to match the document to delete. Example: `{"_id": "abc"}`.
@@ -102,12 +102,12 @@ The MongoDB connector authenticates with a separate connection URI (host, port, 
 
 For **Atlas clusters**:
 
-1. In [MongoDB Atlas](https://cloud.mongodb.com/), navigate to your project and go to **Database → Connect**.
-2. Choose **Drivers** and copy the connection string. It starts with `mongodb+srv://`.
+1. In [MongoDB Atlas](https://cloud.mongodb.com/), go to your project's **Database → Connect** page.
+2. Select **Drivers** and copy the connection string. It starts with `mongodb+srv://`.
 3. Remove `<username>:<password>@` from the string — credentials go in the separate Username and Password fields, not the URI.
 4. In {{kib}}, create a MongoDB connector, and enter the connection URI, username, and password of a database user with the access your workflows and agents need.
 
-For **self-hosted deployments**, use a `mongodb://` connection URI with the host and port (and optionally the database path) for your replica set or standalone instance, and provide credentials via Username and Password.
+For **self-hosted deployments**, use a `mongodb://` connection URI with the host and port (and optionally the database path) for your replica set or standalone instance, and provide credentials through the Username and Password fields.
 
 ::::{note}
 The username and password are stored as encrypted secrets and never exposed in Kibana UI or logs. Agent-facing tool actions (find, aggregate, count, listCollections) are read-only; insertOne, updateOne, and deleteOne are workflow-only and are never exposed to agents.

@@ -293,7 +293,11 @@ export const MongoDBConnector: ConnectorSpec = {
 
     insertOne: {
       isTool: false,
-      description: 'Insert a single document into a MongoDB collection.',
+      description:
+        'Insert a single document into a MongoDB collection. Use this to create a new record ' +
+        'from a workflow, such as logging an event or saving a processed result. ' +
+        'Returns the inserted document ID and whether the write was acknowledged. ' +
+        'Workflow-only — not available to agents.',
       input: InsertOneInputSchema,
       handler: async (ctx, input: InsertOneInput) => {
         const { uri } = ctx.config as { uri: string };
@@ -307,7 +311,12 @@ export const MongoDBConnector: ConnectorSpec = {
 
     updateOne: {
       isTool: false,
-      description: 'Update a single document in a MongoDB collection.',
+      description:
+        'Update the first document matching a filter in a MongoDB collection. Use this to ' +
+        'modify an existing record from a workflow, such as changing a status field or applying ' +
+        'a partial update. Set upsert to insert a new document when no match is found. ' +
+        'Returns matched and modified counts, the upserted document ID (if any), and whether ' +
+        'the write was acknowledged. Workflow-only — not available to agents.',
       input: UpdateOneInputSchema,
       handler: async (ctx, input: UpdateOneInput) => {
         const { uri } = ctx.config as { uri: string };
@@ -328,7 +337,11 @@ export const MongoDBConnector: ConnectorSpec = {
 
     deleteOne: {
       isTool: false,
-      description: 'Delete a single document from a MongoDB collection.',
+      description:
+        'Delete the first document matching a filter from a MongoDB collection. Use this to ' +
+        'remove a single record from a workflow, such as cleaning up a processed item. ' +
+        'Returns the number of documents deleted and whether the write was acknowledged. ' +
+        'Workflow-only — not available to agents.',
       input: DeleteOneInputSchema,
       handler: async (ctx, input: DeleteOneInput) => {
         const { uri } = ctx.config as { uri: string };
