@@ -27,7 +27,7 @@ export interface AuthorSpecAction {
   error?: string;
 }
 
-/** Action recording the outcome of the structural check + normalization of a spec. */
+/** Action recording the outcome of structural and compile/render validation. */
 export interface ValidateSpecAction {
   type: 'validate_spec';
   success: boolean;
@@ -37,6 +37,7 @@ export interface ValidateSpecAction {
   title?: string;
   attempt: number;
   error?: string;
+  warnings?: string[];
 }
 
 export type VegaAction = GenerateEsqlAction | AuthorSpecAction | ValidateSpecAction;

@@ -16,6 +16,7 @@ import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { normalizeVegaSpec } from './normalize_spec';
+import { validateVegaSpec } from './vega_validator';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
 import { buildReferenceExamplesBlock } from './reference_examples';
 import {
@@ -106,6 +107,14 @@ const VegaStateAnnotation = Annotation.Root({
   existingEsql: Annotation<string | undefined>(),
   chartType: Annotation<SupportedChartType | undefined>(),
   // internal
+  /**
+   * Whether the model has already reviewed Vega warnings once. Further warnings
+   * are accepted so benign or unavoidable warnings cannot consume the retry budget.
+   */
+  warningsReviewed: Annotation<boolean>({
+    reducer: (_, newValue) => newValue,
+    default: () => false,
+  }),
   esqlQuery: Annotation<string>(),
   columns: Annotation<EsqlEsqlColumnInfo[] | undefined>(),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
@@ -125,8 +134,8 @@ type VegaState = typeof VegaStateAnnotation.State;
 /**
  * Build the LangGraph that authors a Vega-Lite spec: resolve an ES|QL query
  * (executing it for its result columns), ask the model to author a spec,
- * structurally check + normalize it, and retry authoring with error feedback
- * until it succeeds or the attempt budget is exhausted.
+ * normalize and compile/render-validate it, and retry authoring with error
+ * feedback until it succeeds or the attempt budget is exhausted.
  */
 export const createVegaGraph = async (
   modelProvider: ModelProvider,
@@ -247,7 +256,13 @@ export const createVegaGraph = async (
     const attempt = state.currentAttempt + 1;
     logger.debug(`Authoring Vega-Lite spec (attempt ${attempt}/${MAX_RETRY_ATTEMPTS})`);
 
-    // Feed back authoring and structural-check failures so the next attempt can fix them.
+    const reviewingWarnings = state.actions.some(
+      (action) =>
+        isValidateSpecAction(action) && action.success && (action.warnings?.length ?? 0) > 0
+    );
+
+    // Feed back authoring and validation failures, plus every Vega warning, so
+    // the next attempt can fix genuine issues.
     const previousContext = state.actions
       .filter((action) => isAuthorSpecAction(action) || isValidateSpecAction(action))
       .map((action) => {
@@ -259,13 +274,20 @@ export const createVegaGraph = async (
         if (!action.success) {
           return `Validation attempt ${action.attempt} failed: ${action.error}`;
         }
+        if (action.warnings && action.warnings.length > 0) {
+          return `Validation attempt ${
+            action.attempt
+          } rendered, but Vega emitted these warnings:\n${action.warnings
+            .map((warning) => `- ${warning}`)
+            .join('\n')}`;
+        }
         return undefined;
       })
       .filter(Boolean)
       .join('\n');
 
     const additionalContext = previousContext
-      ? `Previous attempts:\n${previousContext}\n\nPlease fix the errors above and return a single valid JSON object matching the response schema ("title" and "spec").`
+      ? `Previous attempts:\n${previousContext}\n\nReturn a single valid JSON object matching the response schema ("title" and "spec"). Fix any error above. For each warning, decide for yourself whether it signals a real authoring mistake (for example, an encoding or property Vega dropped or ignored) and fix it, or whether it is harmless or unavoidable and can be left as-is. Validation runs against empty sample data, so warnings about empty or infinite extents and disabled external data loading are expected. If a warning needs no change, keep that part of the spec unchanged.`
       : undefined;
 
     const prompt = createAuthorVegaSpecPrompt({
@@ -294,11 +316,12 @@ export const createVegaGraph = async (
     return {
       currentAttempt: attempt,
       actions: [action],
+      warningsReviewed: state.warningsReviewed || reviewingWarnings,
     };
   };
 
-  // Structurally check the authored spec (it must declare a renderable view),
-  // then normalize (harden) it into the render-ready form that is stored.
+  // Structurally check and normalize the authored spec, then compile and render
+  // it in isolation before storing it.
   const validateSpecNode = async (state: VegaState) => {
     const attempt = state.currentAttempt;
     const lastAuthor = [...state.actions].reverse().find(isAuthorSpecAction);
@@ -323,6 +346,17 @@ export const createVegaGraph = async (
         columns: state.columns,
       });
 
+      const { error: renderError, warnings } = await validateVegaSpec({
+        spec: normalized,
+        logger,
+      });
+      if (renderError) {
+        throw new Error(renderError);
+      }
+      if (warnings.length > 0) {
+        logger.debug(`Vega spec validated with warnings: ${warnings.join('; ')}`);
+      }
+
       action = {
         type: 'validate_spec',
         success: true,
@@ -330,6 +364,7 @@ export const createVegaGraph = async (
         spec: JSON.stringify(normalized, null, 2),
         title: lastAuthor.title,
         attempt,
+        warnings,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -349,7 +384,9 @@ export const createVegaGraph = async (
           isValidateSpecAction(action) && action.success && !!action.spec
       );
 
-    const chosen = rendered[0];
+    // Prefer the latest warning-free spec. If warning review did not clear all
+    // warnings, return the latest rendered spec rather than failing generation.
+    const chosen = rendered.find((action) => !action.warnings?.length) ?? rendered[0];
 
     if (chosen?.spec) {
       return { spec: chosen.spec, title: chosen.title ?? null, error: null };
@@ -390,8 +427,12 @@ export const createVegaGraph = async (
   const shouldRetryRouter = (state: VegaState): string => {
     const lastValidate = [...state.actions].reverse().find(isValidateSpecAction);
 
-    // Retry authoring when the spec failed the structural check, bounded by the budget.
-    if (lastValidate?.success) {
+    // Retry failed specs, and give successfully rendered warnings one bounded
+    // model review pass. Persistent warnings are accepted after that pass.
+    const hasWarnings = (lastValidate?.warnings?.length ?? 0) > 0;
+    const needsRepair = !lastValidate?.success || (hasWarnings && !state.warningsReviewed);
+
+    if (!needsRepair) {
       return FINALIZE_NODE;
     }
 
