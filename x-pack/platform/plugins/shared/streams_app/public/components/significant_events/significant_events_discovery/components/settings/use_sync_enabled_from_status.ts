@@ -10,8 +10,15 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 
 /**
  * Reconcile a settings hook's local `enabled` flag with the live value from
- * maintenance status (after pause/resume) and write it back to uiSettings.
- * No-op until `enabledFromStatus` is known.
+ * maintenance status (after pause/resume).
+ *
+ * WHY write uiSettings: the browser uiSettings client caches values; writing
+ * keeps later local reads aligned with the server-driven pause/resume toggle
+ * without waiting for a full page reload.
+ *
+ * Dirty drafts: when the user has already toggled `enabled` locally (draft
+ * differs from saved), only `saved` is synced so an unsaved edit is not
+ * clobbered by the next status poll.
  */
 export const useSyncEnabledFromStatus = <T extends { enabled: boolean }>({
   client,
@@ -30,12 +37,26 @@ export const useSyncEnabledFromStatus = <T extends { enabled: boolean }>({
     if (enabledFromStatus === undefined) {
       return;
     }
-    const syncEnabled = (previous: T): T =>
-      previous.enabled === enabledFromStatus
+
+    let savedEnabledBefore = false;
+    setSaved((previous) => {
+      savedEnabledBefore = previous.enabled;
+      return previous.enabled === enabledFromStatus
         ? previous
         : { ...previous, enabled: enabledFromStatus };
-    setSaved(syncEnabled);
-    setDraft(syncEnabled);
-    void client.set(settingId, enabledFromStatus);
+    });
+    setDraft((previous) => {
+      const draftDirtyOnEnabled = previous.enabled !== savedEnabledBefore;
+      if (draftDirtyOnEnabled) {
+        return previous;
+      }
+      return previous.enabled === enabledFromStatus
+        ? previous
+        : { ...previous, enabled: enabledFromStatus };
+    });
+
+    void client.set(settingId, enabledFromStatus).catch(() => {
+      // Best-effort cache sync; Save still goes through the settings HTTP route.
+    });
   }, [enabledFromStatus, client, settingId, setSaved, setDraft]);
 };

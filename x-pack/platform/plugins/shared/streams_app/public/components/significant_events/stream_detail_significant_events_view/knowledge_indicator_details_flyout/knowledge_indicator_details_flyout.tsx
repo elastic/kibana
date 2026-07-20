@@ -42,7 +42,6 @@ import {
   PROMOTE_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
 import { useBlocksNewActivity } from '../../../../hooks/significant_events/use_significant_events_maintenance';
-import { ACTIVITY_PAUSED_TOOLTIP } from '../../significant_events_discovery/components/shared/translations';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../significant_events_discovery/components/queries_table/translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
@@ -79,7 +78,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     promoteQuery,
     isMutating: isActionMutating,
   } = useKnowledgeIndicatorActions({ streamName, onSuccess: onClose });
-  const { blocksActivity, isBlocked } = useBlocksNewActivity();
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { deleteKnowledgeIndicatorsInBulk, isDeleting: isKIDeleting } =
     useStreamKnowledgeIndicatorsBulkDelete({ streamName, onSuccess: onClose });
@@ -165,11 +164,8 @@ export function KnowledgeIndicatorDetailsFlyout({
 
     const isStats = knowledgeIndicator.query.type === QUERY_TYPE_STATS;
     const isPromoteDisabled = isMutating || blocksActivity || isStats;
-    const promoteTooltip = isBlocked
-      ? ACTIVITY_PAUSED_TOOLTIP
-      : isStats
-      ? STATS_PROMOTE_DISABLED_TOOLTIP
-      : undefined;
+    const promoteTooltip =
+      activityBlockTooltip ?? (isStats ? STATS_PROMOTE_DISABLED_TOOLTIP : undefined);
 
     return [
       ...(!knowledgeIndicator.rule.backed
@@ -201,7 +197,7 @@ export function KnowledgeIndicatorDetailsFlyout({
         {DELETE_LABEL}
       </EuiContextMenuItem>,
     ];
-  }, [blocksActivity, isBlocked, isMutating, knowledgeIndicator, promoteQuery]);
+  }, [activityBlockTooltip, blocksActivity, isMutating, knowledgeIndicator, promoteQuery]);
 
   const title =
     knowledgeIndicator.kind === 'feature'

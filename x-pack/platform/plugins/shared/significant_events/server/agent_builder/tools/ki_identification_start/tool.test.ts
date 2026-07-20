@@ -30,14 +30,18 @@ describe('createKiIdentificationStartTool', () => {
       managementApi: managementApi as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
     });
+    const maintenanceService = {
+      getState: jest.fn().mockResolvedValue('enabled'),
+    };
 
     const tool = createKiIdentificationStartTool({
       telemetry: telemetry as never,
       streamsKIsOnboardingClient,
+      maintenanceService: maintenanceService as never,
     });
     const context = createMockToolContext();
 
-    return { tool, context, managementApi };
+    return { tool, context, managementApi, maintenanceService };
   };
 
   it('triggers onboarding workflow and returns immediately by default', async () => {

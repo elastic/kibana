@@ -14,23 +14,23 @@ Load this skill when the user wants to:
 
 ### Triggering an investigation
 
-Use `platform.core.execute_workflow` with the following parameters:
+Use `platform.sig_events.investigation_start` with the following parameters:
 
 ```
-workflowId: "system-significant-events-investigation"
-inputs:
-  message: "<required – describe the issue or event to investigate>"
-  stream_names: ["<optional – data stream names to scope the investigation>"]
-  context: { <optional – any structured context, e.g. sig event or alert metadata> }
-  concurrency_key: "<optional – stable key to de-duplicate repeated investigations>"
+message: "<required – describe the issue or event to investigate>"
+stream_names: ["<optional – data stream names to scope the investigation>"]
+context: { <optional – any structured context, e.g. sig event or alert metadata> }
+concurrency_key: "<optional – stable key to de-duplicate repeated investigations>"
 waitForCompletion: true
 ```
 
-**Always set `waitForCompletion: true`.** The call waits synchronously for up to ~120s (a fixed wait window in the `execute_workflow` tool — not configurable from here) and then returns the execution. If the investigation finishes within that window, the result includes the full structured root-cause findings; since investigations may take a few minutes, longer runs return a still-running execution, so treat **Checking investigation status** as the expected next step rather than a rare fallback. Present the results in the same turn once they're available (see **Presenting results**).
+Do **not** use `platform.core.execute_workflow` for this workflow — `investigation_start` targets the managed investigation workflow and enforces the Significant Events pause gate.
+
+**Always set `waitForCompletion: true`.** The call waits synchronously for up to ~120s and then returns the execution. If the investigation finishes within that window, the result includes the full structured root-cause findings; since investigations may take a few minutes, longer runs return a still-running execution, so treat **Checking investigation status** as the expected next step rather than a rare fallback. Present the results in the same turn once they're available (see **Presenting results**).
 
 - Before triggering, briefly tell the user you're starting the investigation and that it may take a few minutes — the agent gathers and correlates logs, traces, and metrics before reaching a conclusion.
 - Stay on the tool call until it returns; do not ask the user to come back later, and do not start polling in a loop — call `get_workflow_execution_status` once if needed.
-- If `execute_workflow` returns with a non-terminal execution (it exceeded the ~120s wait window), continue to **Checking investigation status**.
+- If `investigation_start` returns with a non-terminal execution (it exceeded the ~120s wait window), continue to **Checking investigation status**.
 
 **Input schema:**
 - `message` (string, required) — a clear description of the issue to investigate. Include symptoms, time range, and any relevant context. Be specific.
@@ -40,12 +40,9 @@ waitForCompletion: true
 
 **Example call (free-form issue):**
 ```
-execute_workflow({
-  workflowId: "system-significant-events-investigation",
-  inputs: {
-    message: "Error rate on the checkout service spiked by 400% starting at 14:30 UTC. HTTP 503 errors are dominating.",
-    stream_names: ["logs-checkout-service.default", "metrics-checkout-service.default"]
-  },
+investigation_start({
+  message: "Error rate on the checkout service spiked by 400% starting at 14:30 UTC. HTTP 503 errors are dominating.",
+  stream_names: ["logs-checkout-service.default", "metrics-checkout-service.default"],
   waitForCompletion: true
 })
 ```
@@ -66,20 +63,17 @@ When the user wants to investigate a Significant Event, gather the event's metad
 
 **Example call (sig event context):**
 ```
-execute_workflow({
-  workflowId: "system-significant-events-investigation",
-  inputs: {
-    message: "Checkout latency p99 breached SLO\n\nP99 latency on checkout climbed above 2s for 20 minutes during peak traffic.",
-    stream_names: ["logs-checkout-service.default", "metrics-checkout-service.default"],
-    concurrency_key: "checkout-latency-slo-breach",
-    context: {
-      source: "significant_event",
-      event_uuid: "8f1c...",
-      event_id: "checkout-latency-slo-breach",
-      status: "open",
-      severity: "high",
-      confidence: 0.82
-    }
+investigation_start({
+  message: "Checkout latency p99 breached SLO\n\nP99 latency on checkout climbed above 2s for 20 minutes during peak traffic.",
+  stream_names: ["logs-checkout-service.default", "metrics-checkout-service.default"],
+  concurrency_key: "checkout-latency-slo-breach",
+  context: {
+    source: "significant_event",
+    event_uuid: "8f1c...",
+    event_id: "checkout-latency-slo-breach",
+    status: "open",
+    severity: "high",
+    confidence: 0.82
   },
   waitForCompletion: true
 })
@@ -103,23 +97,20 @@ When the user wants to investigate an alert, load the alert's data first, then t
 
 **Example call (alert context):**
 ```
-execute_workflow({
-  workflowId: "system-significant-events-investigation",
-  inputs: {
-    message: "Alert \"High error rate - checkout\" fired at 2024-05-21T14:30:00Z. Reason: error rate is 38% (above the 5% threshold) for service checkout in environment production.",
-    stream_names: ["logs-checkout-service.default"],
-    concurrency_key: "a1b2c3d4-0000-1111-2222-333344445555",
-    context: {
-      source: "alert",
-      alert: {
-        uuid: "a1b2c3d4-0000-1111-2222-333344445555",
-        rule_name: "High error rate - checkout",
-        reason: "error rate is 38% (above the 5% threshold) for service checkout in environment production",
-        status: "active",
-        start: "2024-05-21T14:30:00Z",
-        service_name: "checkout",
-        host_name: null
-      }
+investigation_start({
+  message: "Alert \"High error rate - checkout\" fired at 2024-05-21T14:30:00Z. Reason: error rate is 38% (above the 5% threshold) for service checkout in environment production.",
+  stream_names: ["logs-checkout-service.default"],
+  concurrency_key: "a1b2c3d4-0000-1111-2222-333344445555",
+  context: {
+    source: "alert",
+    alert: {
+      uuid: "a1b2c3d4-0000-1111-2222-333344445555",
+      rule_name: "High error rate - checkout",
+      reason: "error rate is 38% (above the 5% threshold) for service checkout in environment production",
+      status: "active",
+      start: "2024-05-21T14:30:00Z",
+      service_name: "checkout",
+      host_name: null
     }
   },
   waitForCompletion: true
@@ -128,11 +119,11 @@ execute_workflow({
 
 ### Checking investigation status
 
-Use this when `execute_workflow` returned before the investigation reached a terminal state (which is expected for investigations that take longer than ~120s).
+Use this when `investigation_start` returned before the investigation reached a terminal state (which is expected for investigations that take longer than ~120s).
 
-Use `platform.core.get_workflow_execution_status` with the `executionId` from the returned execution.
+Use `platform.core.get_workflow_execution_status` with the `workflowExecutionId` from the returned result.
 
-- Status `running` — investigation is still in progress; let the user know it's still running and share the `executionId` so they can ask for an update later.
+- Status `running` — investigation is still in progress; let the user know it's still running and share the `workflowExecutionId` so they can ask for an update later.
 - Status `completed` — the execution output contains the RCA findings.
 - Status `failed` — the output contains error details.
 
@@ -140,9 +131,9 @@ Use `platform.core.get_workflow_execution_status` with the `executionId` from th
 
 When you trigger an investigation for a Significant Event, record it on the event using `platform.streams.sig_events.event_investigation_attach` — once immediately when the investigation starts, and again once it reaches a terminal state. The event only tracks that a run happened and when; it does not track status — the full investigation state (hypotheses, conclusion) lives on the workflow execution itself, which the UI fetches or follows using `workflow_execution_id`.
 
-**On start** (right after `execute_workflow` returns an execution id):
+**On start** (right after `investigation_start` returns an execution id):
 - `event_uuid` — the `event_uuid` of the Significant Event.
-- `workflow_execution_id` — the `executionId` returned by `execute_workflow`.
+- `workflow_execution_id` — the `workflowExecutionId` returned by `investigation_start`.
 - `started_at` — the execution start time from the workflow execution object.
 - Omit `completed_at`.
 

@@ -17,15 +17,13 @@ import type { StreamsAppSearchBarProps } from '../../../../streams_app_search_ba
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
-import { ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import { GenerateSplitButton } from '../shared/generate_split_button';
 import { FindSignificantEventsButton } from './find_significant_events_button';
 import { STREAMS_TABLE_SEARCH_ARIA_LABEL } from './translations';
 import { StreamsTreeTable } from './tree_table';
 
 export function StreamsView() {
-  const { blocksActivity, isBlocked } = useBlocksNewActivity();
-  const pausedTooltip = isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined;
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [searchText, setSearchText] = useState('');
 
   const searchQuery = useMemo(() => parseSearchQuery(searchText), [searchText]);
@@ -145,7 +143,7 @@ export function StreamsView() {
                 queriesConnectors.loading ||
                 isScheduling
               }
-              runDisabledTooltip={pausedTooltip}
+              runDisabledTooltip={activityBlockTooltip}
               isConfigDisabled={selectedStreams.length === 0}
               isLoading={isScheduling}
             />
@@ -157,7 +155,7 @@ export function StreamsView() {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning || blocksActivity}
-              disabledTooltip={pausedTooltip}
+              disabledTooltip={activityBlockTooltip}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -182,7 +180,7 @@ export function StreamsView() {
           loading={isStreamsLoading}
           searchQuery={searchQuery}
           blocksActivity={blocksActivity}
-          isBlocked={isBlocked}
+          activityBlockTooltip={activityBlockTooltip}
           selection={{
             selected: selectedStreams,
             onSelectionChange: setSelectedStreams,

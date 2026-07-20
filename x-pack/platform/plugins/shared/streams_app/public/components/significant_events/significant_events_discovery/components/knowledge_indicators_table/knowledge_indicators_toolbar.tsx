@@ -23,7 +23,6 @@ import { KnowledgeIndicatorsSubtypeFilter } from '../../../stream_detail_signifi
 import { MATCH_QUERY_TYPE } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_type';
 import { KnowledgeIndicatorsStatusFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_status_filter';
 import { StreamFilter } from '../stream_filter';
-import { ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import {
   SEARCH_PLACEHOLDER,
   SEARCH_ARIA_LABEL,
@@ -62,8 +61,8 @@ interface KnowledgeIndicatorsToolbarProps {
   hasPromotableSelected: boolean;
   /** When true, Promote is disabled (global pause / status loading). */
   blocksActivity?: boolean;
-  /** When true, show paused tooltip copy (not while status is merely loading). */
-  isBlocked?: boolean;
+  /** Explains why Promote is disabled (loading / error / paused). */
+  activityBlockTooltip?: string;
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onStatusFilterChange: (filter: 'active' | 'excluded') => void;
   onSelectedTypesChange: (types: string[]) => void;
@@ -96,7 +95,7 @@ export function KnowledgeIndicatorsToolbar({
   selectionContainsNonExcludable,
   hasPromotableSelected,
   blocksActivity = false,
-  isBlocked = false,
+  activityBlockTooltip,
   onSearchChange,
   onStatusFilterChange,
   onSelectedTypesChange,
@@ -221,7 +220,7 @@ export function KnowledgeIndicatorsToolbar({
         )}
         {selectedTypes.length === 1 && selectedTypes[0] === MATCH_QUERY_TYPE && (
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined}>
+            <EuiToolTip content={activityBlockTooltip}>
               <EuiButtonEmpty
                 iconType="plusInCircle"
                 size="xs"

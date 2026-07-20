@@ -50,7 +50,6 @@ import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { getFormattedError } from '../../../../../util/errors';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
-import { ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import { useScheduledDiscoverySettings } from './use_scheduled_discovery_settings';
 import {
@@ -85,7 +84,12 @@ export function SettingsTab() {
   // Pause turns these Settings toggles off (and Resume restores only those that
   // were previously on). While paused, the toggles are not editable.
   // `blocksActivity` is also true while status is loading (pessimistic).
-  const { blocksActivity, isBlocked, status: maintenanceStatus } = useBlocksNewActivity();
+  const {
+    blocksActivity,
+    isBlocked,
+    status: maintenanceStatus,
+    activityBlockTooltip,
+  } = useBlocksNewActivity();
   const isActivityToggleDisabled = !canEditSettings || blocksActivity;
   const isActivityConfigDisabled = (draftEnabled: boolean) =>
     !canEditSettings || !draftEnabled || blocksActivity;
@@ -122,8 +126,7 @@ export function SettingsTab() {
   // Disable while status is loading too; pause tooltip copy only when actually paused.
   const activitySettingsDirty = scheduledDiscovery.hasChanged || continuousExtraction.hasChanged;
   const saveBlockedByPause = blocksActivity && activitySettingsDirty;
-  const showPausedSaveTooltip = isBlocked && activitySettingsDirty;
-  const pausedTooltip = isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined;
+  const showPausedSaveTooltip = blocksActivity && activitySettingsDirty;
 
   const savedConfigYaml = useMemo(() => {
     try {
@@ -334,7 +337,7 @@ export function SettingsTab() {
             <EuiFlexItem grow={5}>
               <EuiForm component="div">
                 <EuiFormRow>
-                  <EuiToolTip content={pausedTooltip}>
+                  <EuiToolTip content={activityBlockTooltip}>
                     <EuiSwitch
                       data-test-subj="streams-settings-scheduled-discovery-toggle"
                       label={i18n.translate(
@@ -406,7 +409,7 @@ export function SettingsTab() {
                       }))
                     }
                     min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
+                    disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -643,7 +646,7 @@ export function SettingsTab() {
             <EuiFlexItem grow={5}>
               <EuiForm component="div">
                 <EuiFormRow>
-                  <EuiToolTip content={pausedTooltip}>
+                  <EuiToolTip content={activityBlockTooltip}>
                     <EuiSwitch
                       data-test-subj="streams-settings-continuous-onboarding-toggle"
                       label={i18n.translate(
@@ -805,7 +808,7 @@ export function SettingsTab() {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={showPausedSaveTooltip ? pausedTooltip : undefined}>
+                  <EuiToolTip content={showPausedSaveTooltip ? activityBlockTooltip : undefined}>
                     <EuiButton
                       data-test-subj="streams-settings-save-button"
                       color="primary"

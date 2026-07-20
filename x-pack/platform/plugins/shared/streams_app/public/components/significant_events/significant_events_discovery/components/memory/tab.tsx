@@ -29,7 +29,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
-import { ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import {
   useConsolidateMemory,
   useMemorySearch,
@@ -73,8 +72,7 @@ export function MemoryTab() {
 
   // While Significant Events is paused, enabling memory workflows or triggering a
   // manual workflow is rejected server-side (409). Disable those controls here.
-  const { blocksActivity, isBlocked } = useBlocksNewActivity();
-  const pausedTooltip = isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined;
+  const { blocksActivity, isBlocked, activityBlockTooltip } = useBlocksNewActivity();
 
   const workflowActions: Array<{
     key: string;
@@ -245,7 +243,9 @@ export function MemoryTab() {
                                   (blocksActivity && !workflowsEnabled)
                                 }
                                 toolTipContent={
-                                  isBlocked && !workflowsEnabled ? pausedTooltip : undefined
+                                  isBlocked && !workflowsEnabled
+                                    ? activityBlockTooltip
+                                    : undefined
                                 }
                                 data-test-subj="streamsMemoryToggleWorkflowsButton"
                               >
@@ -278,7 +278,7 @@ export function MemoryTab() {
                               (action.requiresManage && !canManage) ||
                               blocksActivity
                             }
-                            toolTipContent={blocksActivity ? pausedTooltip : undefined}
+                            toolTipContent={blocksActivity ? activityBlockTooltip : undefined}
                             data-test-subj={action.testSubj}
                           >
                             {action.label}

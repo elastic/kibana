@@ -73,7 +73,13 @@ export function SignificantEventsDiscoveryPage() {
   const canManageStreams = streamsUiPrivileges.manage;
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  const { isBlocked, status: maintenanceStatus } = useBlocksNewActivity();
+  const {
+    isBlocked,
+    isLoading: isMaintenanceStatusLoading,
+    isError: isMaintenanceStatusError,
+    status: maintenanceStatus,
+  } = useBlocksNewActivity();
+  const showMaintenanceBanners = tab !== 'settings';
 
   const onOnboardingFailed = useCallback(
     (error: string) => {
@@ -252,7 +258,70 @@ export function SignificantEventsDiscoveryPage() {
       <KiGenerationProvider onFailed={onOnboardingFailed}>
         <SignificantEventsDiscoveryProvider>
           <StreamsAppPageTemplate.Body grow>
-            {isBlocked && tab !== 'settings' && (
+            {showMaintenanceBanners && isMaintenanceStatusLoading && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="primary"
+                  iconType="clock"
+                  data-test-subj="significantEventsStatusLoadingBanner"
+                  title={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.statusLoadingBannerTitle',
+                    { defaultMessage: 'Checking Significant Events activity status' }
+                  )}
+                >
+                  <p>
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.statusLoadingBannerBody',
+                      {
+                        defaultMessage:
+                          'Manual triggers stay disabled until activity status is known.',
+                      }
+                    )}
+                  </p>
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            )}
+            {showMaintenanceBanners && isMaintenanceStatusError && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="danger"
+                  iconType="error"
+                  data-test-subj="significantEventsStatusErrorBanner"
+                  title={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.statusErrorBannerTitle',
+                    { defaultMessage: 'Could not load Significant Events activity status' }
+                  )}
+                >
+                  <p>
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.statusErrorBannerBody',
+                      {
+                        defaultMessage:
+                          'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
+                      }
+                    )}
+                  </p>
+                  {canManageStreams && (
+                    <EuiButton
+                      href={router.link('/_discovery/{tab}', { path: { tab: 'settings' } })}
+                      color="danger"
+                      size="s"
+                      data-test-subj="significantEventsStatusErrorBannerSettingsLink"
+                    >
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.statusErrorBannerSettingsButton',
+                        { defaultMessage: 'Go to Settings' }
+                      )}
+                    </EuiButton>
+                  )}
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            )}
+            {showMaintenanceBanners && isBlocked && (
               <>
                 <EuiCallOut
                   announceOnMount

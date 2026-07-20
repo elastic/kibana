@@ -31,7 +31,7 @@ import { DetectionFlyout } from './detection_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { formatTimestamp } from '../../../../../util/formatters';
-import { ACTIVITY_PAUSED_TOOLTIP, CHANGE_TYPE_LABELS } from '../shared/translations';
+import { CHANGE_TYPE_LABELS } from '../shared/translations';
 
 const DISCOVERY_STATUS_LABELS = {
   processed: i18n.translate('xpack.streams.detectionsTab.statusProcessed', {
@@ -58,8 +58,7 @@ const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
 export const DetectionsTab = () => {
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
-  const { blocksActivity, isBlocked } = useBlocksNewActivity();
-  const pausedTooltip = isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined;
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();
@@ -192,7 +191,7 @@ export const DetectionsTab = () => {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning || blocksActivity}
-              disabledTooltip={pausedTooltip}
+              disabledTooltip={activityBlockTooltip}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -14,10 +14,10 @@ import {
   SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { MEMORY_WORKFLOW_IDS } from '../../lib/maintenance/managed_workflow_targets';
 import { createServerRoute } from '../../routes/create_server_route';
 import type {
   MemoryEntry,
@@ -532,13 +532,6 @@ const detectGapsRoute = createWorkflowTriggerRoute(
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
   'Trigger gap detection for memory'
 );
-
-const MEMORY_WORKFLOW_IDS = [
-  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
-] as const;
 
 const getMemoryWorkflowsEnabledRoute = createServerRoute({
   endpoint: 'GET /internal/streams/memory/_workflows/enabled',

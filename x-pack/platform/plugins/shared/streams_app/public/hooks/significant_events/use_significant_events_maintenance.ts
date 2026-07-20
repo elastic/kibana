@@ -13,6 +13,7 @@ import {
   type SignificantEventsMaintenanceStatus,
   type SignificantEventsMaintenanceSummary,
 } from '@kbn/significant-events-plugin/common';
+import { getActivityBlockTooltip } from '../../components/significant_events/significant_events_discovery/components/shared/translations';
 import { useKibana } from '../use_kibana';
 import { getFormattedError } from '../../util/errors';
 
@@ -89,6 +90,7 @@ export const useMaintenanceStatus = () => {
  * `blocksActivity` is also true while status is loading or the status query
  * failed (pessimistic) so enable toggles / run buttons do not look available
  * when pause state is unknown.
+ * `activityBlockTooltip` explains why controls are disabled (loading, error, or paused).
  */
 export const useBlocksNewActivity = (): {
   blocksActivity: boolean;
@@ -96,11 +98,13 @@ export const useBlocksNewActivity = (): {
   isLoading: boolean;
   isError: boolean;
   status: SignificantEventsMaintenanceStatus | undefined;
+  activityBlockTooltip: string | undefined;
 } => {
   const { data: status, isLoading, isError } = useMaintenanceStatus();
   const isBlocked = status ? stateBlocksNewActivity(status.state) : false;
   const blocksActivity = isLoading || isError || isBlocked;
-  return { blocksActivity, isBlocked, isLoading, isError, status };
+  const activityBlockTooltip = getActivityBlockTooltip({ isLoading, isError, isBlocked });
+  return { blocksActivity, isBlocked, isLoading, isError, status, activityBlockTooltip };
 };
 
 /** Pause and resume actions. Each is a single synchronous API call that returns

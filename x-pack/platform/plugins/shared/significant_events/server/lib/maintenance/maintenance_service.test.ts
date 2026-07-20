@@ -699,15 +699,56 @@ describe('SignificantEventsMaintenanceService', () => {
   });
 
   describe('persist write failures', () => {
-    it('propagates a pause persist failure after the sweep has already applied side effects', async () => {
+    it('fails before the sweep when pause intent cannot be persisted', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service, soClient } = makeService({ management: api });
 
-      soClient.create.mockRejectedValueOnce(new Error('so write failed on pause'));
+      soClient.create.mockRejectedValueOnce(new Error('so write failed on pause intent'));
 
-      await expect(service.pause({ request: REQUEST })).rejects.toThrow('so write failed on pause');
-      // Sweep still disabled workflows before the failed write.
+      await expect(service.pause({ request: REQUEST })).rejects.toThrow(
+        'so write failed on pause intent'
+      );
+      expect(updateWorkflow).not.toHaveBeenCalled();
+      await expect(service.getState({ request: REQUEST })).resolves.toBe('enabled');
+    });
+
+    it('returns a paused summary with snapshot failure when the post-sweep write fails', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient } = makeService({ management: api });
+
+      // Intent write succeeds; snapshot write (second create) fails.
+      const store = new Map<string, Record<string, unknown>>();
+      soClient.get.mockImplementation(async (type: string, id: string) => {
+        const attributes = store.get(`${type}:${id}`);
+        if (!attributes) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        return { id, type, references: [], attributes };
+      });
+      soClient.create.mockImplementation(
+        async (type: string, attributes: Record<string, unknown>, options: { id: string }) => {
+          const key = `${type}:${options.id}`;
+          if (store.has(key)) {
+            throw new Error('so write failed on pause snapshot');
+          }
+          store.set(key, attributes);
+          return { id: options.id, type, references: [], attributes };
+        }
+      );
+
+      // Intent already blocks activity — surface partial success instead of a hard failure.
+      const summary = await service.pause({ request: REQUEST });
+      expect(summary.state).toBe('paused');
+      expect(summary.partialFailures).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            target: 'pause',
+            error: expect.stringContaining('so write failed on pause snapshot'),
+          }),
+        ])
+      );
       expect(updateWorkflow).toHaveBeenCalled();
+      await expect(service.getState({ request: REQUEST })).resolves.toBe('paused');
     });
   });
 
@@ -886,7 +927,7 @@ describe('SignificantEventsMaintenanceService', () => {
       );
     });
 
-    it('preserves pause disable counts in lastSummary when resume is incomplete', async () => {
+    it('reports remaining disabled counts in lastSummary when resume is incomplete', async () => {
       const { api } = makeManagementApi({
         failEnableFor: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       });
@@ -902,8 +943,9 @@ describe('SignificantEventsMaintenanceService', () => {
       const resumeSummary = await service.resume({ request: REQUEST });
 
       expect(resumeSummary.state).toBe('paused');
-      expect(resumeSummary.workflowsDisabled).toBe(pauseSummary.workflowsDisabled);
-      expect(resumeSummary.rulesDisabled).toBe(pauseSummary.rulesDisabled);
+      // Only the workflow that failed to re-enable remains; the rule was restored.
+      expect(resumeSummary.workflowsDisabled).toBe(1);
+      expect(resumeSummary.rulesDisabled).toBe(0);
       expect(resumeSummary.partialFailures.length).toBeGreaterThan(0);
     });
 

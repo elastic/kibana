@@ -466,6 +466,10 @@ export class SignificantEventsPlugin
         agentBuilder,
         telemetry,
         streamsKIsOnboardingClient: this.streamsKIsOnboardingClient,
+        maintenanceService: this.maintenanceService,
+        getWorkflowApi: () => this.server?.workflowsManagement?.management,
+        getSpaceId: (request: KibanaRequest) =>
+          plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
         memoryToolsOptions,
         logger: this.logger,
         isAvailable: () => isSignificantEventsAvailable(core.featureFlags),
@@ -572,17 +576,11 @@ export class SignificantEventsPlugin
     if (!this.maintenanceService) {
       return;
     }
-    try {
-      await this.maintenanceService.reassertPausedWorkflows({
-        request: createMaintenanceSystemRequest(),
-      });
-    } catch (error: unknown) {
-      this.logger.error(
-        `significant_events: failed to re-assert pause after workflow install: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
+    // Propagate failures: swallowing them lets install succeed while newly
+    // installed workflows stay enabled during a paused deployment.
+    await this.maintenanceService.reassertPausedWorkflows({
+      request: createMaintenanceSystemRequest(),
+    });
   }
 
   private logManagedResourceError(context: string, error: unknown): void {

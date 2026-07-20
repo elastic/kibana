@@ -39,7 +39,7 @@ import { useBlocksNewActivity } from '../../../../../hooks/significant_events/us
 import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getSignificantEventStatusColor } from '../shared/status_display';
-import { ACTIVITY_PAUSED_TOOLTIP, SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
+import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { SigEventDetails } from '../../../significant_event_details/sig_event_details';
 import { EventInvestigations } from './event_investigations';
@@ -143,7 +143,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   }, []);
 
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation({ onTriggerSuccess });
-  const { blocksActivity, isBlocked } = useBlocksNewActivity();
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const { updateEventStatus, isUpdating } = useUpdateSignificantEvent({
     onUpdateSuccess: onClose,
   });
@@ -293,11 +293,8 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={
-                isBlocked
-                  ? ACTIVITY_PAUSED_TOOLTIP
-                  : isInvestigationRunning
-                  ? RESTART_INVESTIGATION_TOOLTIP
-                  : undefined
+                activityBlockTooltip ??
+                (isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined)
               }
             >
               <EuiButton

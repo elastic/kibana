@@ -6,8 +6,10 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
+import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
 import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
@@ -18,7 +20,7 @@ import {
   createSignificantEventsOnboardingSkill,
   createGapDetectionSkill,
 } from '../../memory_and_investigation/skills/memory';
-import { streamsInvestigationManagementSkill } from '../../memory_and_investigation/skills/investigation_management';
+import { createStreamsInvestigationManagementSkill } from '../../memory_and_investigation/skills/investigation_management';
 
 type SignificantEventsSkill = Parameters<AgentBuilderPluginStart['skills']['register']>[0];
 
@@ -26,6 +28,9 @@ interface RegisterSignificantEventsSkillsOptions {
   agentBuilder: AgentBuilderPluginStart;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
+  maintenanceService?: SignificantEventsMaintenanceService;
+  getWorkflowApi?: () => WorkflowsServerPluginSetup['management'] | undefined;
+  getSpaceId?: (request: KibanaRequest) => string;
   memoryToolsOptions: MemoryToolsOptions;
   logger: Logger;
   isAvailable: () => Promise<boolean>;
@@ -51,6 +56,9 @@ export const registerSignificantEventsSkills = async ({
   agentBuilder,
   telemetry,
   streamsKIsOnboardingClient,
+  maintenanceService,
+  getWorkflowApi,
+  getSpaceId,
   memoryToolsOptions,
   logger,
   isAvailable,
@@ -61,12 +69,28 @@ export const registerSignificantEventsSkills = async ({
     knowledgeIndicatorsManagementSkill,
     significantEventsKIGroundingSkill,
     significantEventsManagementSkill,
-    ...(streamsKIsOnboardingClient
-      ? [createKiIdentificationManagementSkill({ telemetry, streamsKIsOnboardingClient })]
+    ...(streamsKIsOnboardingClient && maintenanceService
+      ? [
+          createKiIdentificationManagementSkill({
+            telemetry,
+            streamsKIsOnboardingClient,
+            maintenanceService,
+          }),
+        ]
       : []),
     createSignificantEventsOnboardingSkill(memoryToolsOptions),
     createGapDetectionSkill(memoryToolsOptions),
-    streamsInvestigationManagementSkill,
+    // Investigation skill needs maintenance + workflows so Agent Builder cannot
+    // bypass pause via platform.core.execute_workflow.
+    ...(maintenanceService && getWorkflowApi && getSpaceId
+      ? [
+          createStreamsInvestigationManagementSkill({
+            maintenanceService,
+            getWorkflowApi,
+            getSpaceId,
+          }),
+        ]
+      : []),
   ];
 
   // Registers only the skills not registered yet. Already-registered skills are skipped (a second

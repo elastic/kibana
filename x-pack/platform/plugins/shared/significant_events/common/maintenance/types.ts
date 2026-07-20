@@ -23,8 +23,8 @@ export interface SignificantEventsMaintenanceFailure {
  * While `state` is `paused`, `workflowsDisabled` / `rulesDisabled` are the
  * sizes of the current disabled snapshots (not only the last sweep’s deltas),
  * and `executionsCancelled` accumulates across re-pauses. On a successful
- * resume those counts are zero. On an incomplete resume they keep the prior
- * pause counts so the UI still shows what Pause turned off.
+ * resume those counts are zero. On an incomplete resume they reflect what is
+ * still recorded as disabled after the resume attempt.
  */
 export interface SignificantEventsMaintenanceSummary {
   state: SignificantEventsMaintenanceState;
@@ -54,4 +54,9 @@ export interface SignificantEventsMaintenanceStatus {
   lastSummary?: SignificantEventsMaintenanceSummary;
   /** Current continuous / scheduled discovery toggle values (caller space). */
   featureSettings?: SignificantEventsMaintenanceFeatureSettings;
+  /**
+   * True when live feature-toggle values could not be read. Callers should not
+   * treat a missing `featureSettings` as "still enabled".
+   */
+  featureSettingsUnavailable?: boolean;
 }

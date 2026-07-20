@@ -13,6 +13,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { classifyError } from '../../utils/error_utils';
 import { startKiIdentificationToolHandler } from './handler';
@@ -38,9 +39,11 @@ const onboardingStartSchema = z.object({
 export const createKiIdentificationStartTool = ({
   telemetry,
   streamsKIsOnboardingClient,
+  maintenanceService,
 }: {
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
+  maintenanceService: SignificantEventsMaintenanceService;
 }): BuiltinSkillBoundedTool<typeof onboardingStartSchema> => ({
   id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
   type: ToolType.builtin,
@@ -72,6 +75,7 @@ export const createKiIdentificationStartTool = ({
         steps: resolvedSteps,
         connectors,
         streamsKIsOnboardingClient,
+        maintenanceService,
         request,
       });
 

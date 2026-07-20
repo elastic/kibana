@@ -48,7 +48,7 @@ import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
 import { getSignificantEventStatusColor } from '../shared/status_display';
-import { ACTIVITY_PAUSED_TOOLTIP, SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
+import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
@@ -71,10 +71,10 @@ const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
 
 const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
-  const { blocksActivity, isBlocked } = useBlocksNewActivity();
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   return (
     <EuiToolTip
-      content={isBlocked ? ACTIVITY_PAUSED_TOOLTIP : RUN_ARIA_LABEL}
+      content={activityBlockTooltip ?? RUN_ARIA_LABEL}
       disableScreenReaderOutput
     >
       <EuiButtonIcon
@@ -288,8 +288,7 @@ export const SigEventsTab = () => {
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();
-  const { blocksActivity, isBlocked } = useBlocksNewActivity();
-  const pausedTooltip = isBlocked ? ACTIVITY_PAUSED_TOOLTIP : undefined;
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { data, isLoading, isError, refetch, pagination, setPagination } =
     useFetchSignificantEvents({
@@ -448,7 +447,7 @@ export const SigEventsTab = () => {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning || blocksActivity}
-              disabledTooltip={pausedTooltip}
+              disabledTooltip={activityBlockTooltip}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -67,7 +67,9 @@ export const FindSignificantEventsButton = ({
       primaryIconType="significantEvents"
       onPrimaryClick={onRun}
       isPrimaryDisabled={isPrimaryDisabled}
-      primaryDisabledTooltip={isPrimaryDisabled ? disabledTooltip : undefined}
+      // Only attach the pause/status tooltip when start is blocked — not while
+      // the primary action is merely loading an in-progress run.
+      primaryDisabledTooltip={isDisabled ? disabledTooltip : undefined}
       isPrimaryLoading={isRunning}
       primaryDataTestSubj={primaryDataTestSubj}
       secondaryAriaLabel={SECONDARY_ARIA_LABEL}

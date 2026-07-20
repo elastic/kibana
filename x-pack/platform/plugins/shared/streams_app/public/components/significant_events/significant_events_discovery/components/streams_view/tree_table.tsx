@@ -32,7 +32,6 @@ import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useStreamsTour } from '../../../../streams_tour';
 import { QueryStreamBadge, TechnicalPreviewBadge } from '../../../../stream_badges';
-import { ACTIVITY_PAUSED_TOOLTIP } from '../shared/translations';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';
@@ -66,7 +65,7 @@ export function StreamsTreeTable({
   searchQuery,
   selection,
   blocksActivity = false,
-  isBlocked = false,
+  activityBlockTooltip,
   onOnboardStreamActionClick,
   onStopOnboardingActionClick,
 }: {
@@ -77,8 +76,8 @@ export function StreamsTreeTable({
   selection: EuiTableSelectionType<TableRow>;
   /** When true, per-row onboard actions are disabled (global pause / status loading). */
   blocksActivity?: boolean;
-  /** When true, show paused tooltip copy (not while status is merely loading). */
-  isBlocked?: boolean;
+  /** Explains why onboard actions are disabled (loading / error / paused). */
+  activityBlockTooltip?: string;
   onOnboardStreamActionClick: (streamName: string) => void;
   onStopOnboardingActionClick: (streamName: string) => void;
 }) {
@@ -474,9 +473,7 @@ export function StreamsTreeTable({
                 return (
                   <EuiToolTip
                     position="top"
-                    content={
-                      isBlocked ? ACTIVITY_PAUSED_TOOLTIP : RUN_STREAM_ONBOARDING_BUTTON_LABEL
-                    }
+                    content={activityBlockTooltip ?? RUN_STREAM_ONBOARDING_BUTTON_LABEL}
                     display="block"
                     disableScreenReaderOutput
                   >

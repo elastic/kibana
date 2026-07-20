@@ -150,6 +150,32 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
             <EuiSpacer />
           </>
         )}
+        {status?.featureSettingsUnavailable && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              iconType="warning"
+              data-test-subj="streams-settings-maintenance-feature-settings-unavailable"
+              title={i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.maintenance.featureSettingsUnavailableTitle',
+                { defaultMessage: 'Some activity settings could not be loaded' }
+              )}
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.maintenance.featureSettingsUnavailableBody',
+                  {
+                    defaultMessage:
+                      'Scheduled discovery and continuous onboarding status may be incomplete. Pause and Resume still work; refresh or retry if those toggles look wrong.',
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
         {!canManage && statusReady && (
           <>
             <EuiCallOut
