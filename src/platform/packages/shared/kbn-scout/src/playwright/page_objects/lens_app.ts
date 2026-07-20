@@ -59,28 +59,6 @@ export class LensApp {
     await this.waitForLensApp();
   }
 
-  async switchDataPanelDataView({ id, title }: { id: string; title: string }) {
-    const dataViewSwitch = this.page.testSubj.locator('lns-dataView-switch-link');
-    const layerDataViewSwitch = this.page.testSubj.locator('lns_layerIndexPatternLabel');
-
-    await dataViewSwitch.click();
-
-    const switcher = this.page.testSubj.locator('indexPattern-switcher');
-    await switcher.waitFor({ state: 'visible' });
-    await this.page.testSubj.locator('indexPattern-switcher--input').fill(title);
-
-    // Display titles are not unique, so select by the data view ID exposed as the option value.
-    const dataViewOption = switcher
-      .getByRole('option')
-      .and(this.page.locator(`[value=${JSON.stringify(id)}]`));
-    await dataViewOption.click();
-
-    // The picker closes before Lens finishes switching data sources, and the field-list loader can
-    // briefly be absent before its request starts. Wait for the layer's datasource state instead.
-    await expect(layerDataViewSwitch).toHaveAttribute('title', title);
-    await switcher.waitFor({ state: 'hidden' });
-  }
-
   /**
    * Switches the active visualization via the chart switcher.
    *
