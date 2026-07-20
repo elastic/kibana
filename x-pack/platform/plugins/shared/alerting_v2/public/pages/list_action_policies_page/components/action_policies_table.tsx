@@ -5,37 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type {
-  ActionPolicyBulkAction,
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import type {  
   ActionPolicyResponse,
   CreateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
-import type { Query } from '@elastic/eui';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import {
-  ContentList,
-  ContentListFooter,
+  ContentList,  
   ContentListProvider,
-  ContentListTable,
-  ContentListToolbar,
-  createColumn,
-  SelectableFilterPopover,
-  StandardFilterOption,
-  useContentListSelection,
-  useContentListState,
 } from '@kbn/content-list';
-import type { ContentListItem } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
 import { TAG_FILTER_ID } from '@kbn/content-list-provider';
-import { filter } from '@kbn/content-list-toolbar';
-import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
-import { useFetchTags } from '../../../hooks/use_fetch_tags';
-import { resolveDisplayName } from '../../../utils/resolve_display_name';
-import { ActionPolicyDestinationsSummary } from '../../../components/action_policy/action_policy_destinations_summary';
-import { ActionPolicySnoozePopover } from '../../../components/action_policy/action_policy_snooze_popover';
 import { DeleteActionPolicyConfirmModal } from '../../../components/action_policy/delete_confirmation_modal';
 import { ActionPolicyDetailsFlyout } from '../../../components/action_policy/details_flyout/action_policy_details_flyout';
 import { paths } from '../../../constants';
@@ -48,88 +30,9 @@ import { useSnoozeActionPolicy } from '../../../hooks/use_snooze_action_policy';
 import { useUnsnoozeActionPolicy } from '../../../hooks/use_unsnooze_action_policy';
 import { useUpdateActionPolicyApiKey } from '../../../hooks/use_update_action_policy_api_key';
 import { UserCapabilities } from '../../../services/user_capabilities';
-import { ActionPoliciesBulkActions } from './action_policies_bulk_actions';
-import { ActionPolicyActionsCell } from './action_policy_actions_cell';
 import { UpdateApiKeyConfirmationModal } from './update_api_key_confirmation_modal';
 import { ENABLED_FILTER_ID, useActionPoliciesDataSource } from '../action_policies_data_source';
-import type { ActionPolicyContentListItem } from '../action_policies_data_source';
-
-const { Column } = ContentListTable;
-
-const RefetchConnector = ({ onReady }: { onReady: (refetch: () => void) => void }) => {
-  const { refetch } = useContentListState();
-  useEffect(() => {
-    onReady(refetch);
-  }, [onReady, refetch]);
-  return null;
-};
-
-type BulkActionMutate = ReturnType<typeof useBulkActionActionPolicies>['mutate'];
-
-interface ConnectedBulkActionsProps {
-  bulkAction: BulkActionMutate;
-  isLoading: boolean;
-}
-
-const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsProps) => {
-  const { selectedItems, selectedCount, clearSelection } = useContentListSelection();
-
-  if (selectedCount === 0) return null;
-
-  const selectedPolicies = selectedItems.map((item) => toPolicy(item));
-
-  const handleBulkAction = (
-    action: 'enable' | 'disable' | 'delete' | 'snooze' | 'unsnooze' | 'update_api_key',
-    snoozedUntil?: string
-  ) => {
-    const ids = selectedPolicies.map((p) => p.id);
-    const actions: ActionPolicyBulkAction[] =
-      action === 'snooze' && snoozedUntil
-        ? ids.map((id) => ({ id, action: 'snooze', snoozedUntil }))
-        : ids.map((id) => ({ id, action } as ActionPolicyBulkAction));
-    bulkAction({ actions }, { onSuccess: clearSelection });
-  };
-
-  return (
-    <ActionPoliciesBulkActions
-      selectedPolicies={selectedPolicies}
-      onClearSelection={clearSelection}
-      onBulkAction={handleBulkAction}
-      isLoading={isLoading}
-    />
-  );
-};
-
-const toPolicy = (item: ContentListItem): ActionPolicyResponse =>
-  (item as ActionPolicyContentListItem).policy;
-
-const DestinationsColumn = createColumn({
-  id: 'destinations',
-  name: i18n.translate('xpack.alertingV2.actionPoliciesList.column.destinations', {
-    defaultMessage: 'Destinations',
-  }),
-  render: (item) => <ActionPolicyDestinationsSummary destinations={toPolicy(item).destinations} />,
-});
-
-const ENABLED_FILTER_OPTIONS = [
-  {
-    key: 'enabled' as const,
-    label: i18n.translate('xpack.alertingV2.actionPoliciesList.filter.enabled.option.enabled', {
-      defaultMessage: 'Enabled',
-    }),
-  },
-  {
-    key: 'disabled' as const,
-    label: i18n.translate('xpack.alertingV2.actionPoliciesList.filter.enabled.option.disabled', {
-      defaultMessage: 'Disabled',
-    }),
-  },
-];
-
-const ENABLED_FILTER_TITLE = i18n.translate(
-  'xpack.alertingV2.actionPoliciesList.filter.enabled.title',
-  { defaultMessage: 'State' }
-);
+import { ActionPoliciesTableContent, ENABLED_FILTER_OPTIONS } from './action_policies_table_content';
 
 const enabledFieldDefinition: FieldDefinition = {
   fieldName: ENABLED_FILTER_ID,
@@ -151,77 +54,6 @@ const tagFieldDefinition: FieldDefinition = {
 };
 
 const FEATURES_FIELDS: FieldDefinition[] = [enabledFieldDefinition, tagFieldDefinition];
-
-const EnabledFilter = filter.createComponent({
-  resolve: () => ({
-    type: 'custom_component' as const,
-    component: ({ query, onChange }: { query?: Query; onChange?: (query: Query) => void }) => (
-      <SelectableFilterPopover
-        fieldName={ENABLED_FILTER_ID}
-        title={ENABLED_FILTER_TITLE}
-        query={query}
-        onChange={onChange}
-        options={ENABLED_FILTER_OPTIONS}
-        renderOption={(option, { isActive }) => (
-          <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
-        )}
-        singleSelection
-        data-test-subj="actionPoliciesEnabledFilter"
-      />
-    ),
-  }),
-});
-
-const TAGS_FILTER_TITLE = i18n.translate('xpack.alertingV2.actionPoliciesList.filter.tags.title', {
-  defaultMessage: 'Tags',
-});
-
-const TagsFilterComponent = ({
-  query,
-  onChange,
-}: {
-  query?: Query;
-  onChange?: (query: Query) => void;
-}) => {
-  const { data: tagNames = [] } = useFetchTags();
-  const options = useMemo(() => tagNames.map((tag) => ({ key: tag, label: tag })), [tagNames]);
-  return (
-    <SelectableFilterPopover
-      fieldName={TAG_FILTER_ID}
-      title={TAGS_FILTER_TITLE}
-      query={query}
-      onChange={onChange}
-      options={options}
-      renderOption={(option, { isActive }) => (
-        <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
-      )}
-      data-test-subj="actionPoliciesTagsFilter"
-    />
-  );
-};
-
-const TagsFilter = filter.createComponent({
-  resolve: () => ({
-    type: 'custom_component' as const,
-    component: TagsFilterComponent,
-  }),
-});
-
-const UPDATED_BY_COLUMN_NAME = i18n.translate(
-  'xpack.alertingV2.actionPoliciesList.column.updatedBy',
-  { defaultMessage: 'Updated by' }
-);
-
-const UpdatedByCell = ({ uid }: { uid: string | null | undefined }) => {
-  const { data: profileByUid } = useBulkGetUserProfiles({ uids: uid ? [uid] : [] });
-  if (!uid) return null;
-  return <>{resolveDisplayName(uid, profileByUid, uid)}</>;
-};
-
-const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
-  'xpack.alertingV2.actionPoliciesList.pageTitle',
-  { defaultMessage: 'Action Policies' }
-);
 
 export const ActionPoliciesTable = () => {
   const refetchRef = useRef<() => void>(() => {});
@@ -349,135 +181,29 @@ export const ActionPoliciesTable = () => {
         }}
       >
         <ContentList>
-          <RefetchConnector onReady={onRefetchReady} />
-          <ContentListToolbar>
-            <ContentListToolbar.Filters>
-              <TagsFilter />
-              <EnabledFilter />
-            </ContentListToolbar.Filters>
-          </ContentListToolbar>
-          <ConnectedBulkActions bulkAction={bulkAction} isLoading={isBulkActionInProgress} />
-          <ContentListTable
-            title={ACTION_POLICIES_LIST_PAGE_TITLE}
-            scrollableInline
-            responsiveBreakpoint={false}
-          >
-            <Column.Name showDescription onClick={(item) => setPolicyToView(toPolicy(item))} />
-            <DestinationsColumn />
-            <Column
-              id="tags"
-              name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.tags', {
-                defaultMessage: 'Tags',
-              })}
-              render={(item) => {
-                const { tags } = toPolicy(item);
-                if (!tags?.length) return null;
-                return (
-                  <EuiFlexGroup gutterSize="xs" wrap>
-                    {tags.map((tag) => (
-                      <EuiFlexItem grow={false} key={tag}>
-                        <EuiBadge color="hollow">{tag}</EuiBadge>
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGroup>
-                );
-              }}
-            />
-            <Column.UpdatedAt />
-            <Column
-              id="updatedBy"
-              name={UPDATED_BY_COLUMN_NAME}
-              width="150px"
-              render={(item) => <UpdatedByCell uid={toPolicy(item).updatedBy} />}
-            />
-            <Column
-              id="enabled"
-              name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.enabled', {
-                defaultMessage: 'Enabled',
-              })}
-              width="80px"
-              render={(item) => {
-                const policy = toPolicy(item);
-                const isLoading =
-                  (isEnabling && enableVariables === policy.id) ||
-                  (isDisabling && disableVariables === policy.id);
-                return (
-                  <EuiSwitch
-                    compressed
-                    checked={policy.enabled}
-                    disabled={!canWrite || isLoading || isBulkActionInProgress}
-                    title={!canWrite ? i18n.translate(
-                      'xpack.alertingV2.actionPoliciesList.column.enabled.disabledTooltip',
-                      { defaultMessage: 'You do not have permission to enable/disable this policy' }
-                    ) : undefined}
-                    onChange={() => {
-                      if (policy.enabled) {
-                        disablePolicy(policy.id);
-                      } else {
-                        enablePolicy(policy.id);
-                      }
-                    }}
-                    label=""
-                    aria-label={i18n.translate(
-                      'xpack.alertingV2.actionPoliciesList.column.enabled.ariaLabel',
-                      {
-                        defaultMessage: '{name} enabled',
-                        values: { name: policy.name },
-                      }
-                    )}
-                  />
-                );
-              }}
-            />
-            {/* Snooze popover — only for enabled policies when user can write */}
-            <Column
-              id="notify"
-              name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.notify', {
-                defaultMessage: 'Notify',
-              })}
-              width="50px"
-              render={(item) => {
-                const policy = toPolicy(item);
-                if (!policy.enabled || !canWrite) return null;
-                return (
-                  <ActionPolicySnoozePopover
-                    policy={policy}
-                    onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
-                    onCancelSnooze={(id) => unsnoozePolicy(id)}
-                    isLoading={
-                      (isSnoozing && snoozeVariables?.id === policy.id) ||
-                      (isUnsnoozing && unsnoozeVariables === policy.id)
-                    }
-                  />
-                );
-              }}
-            />
-            {/* Row actions */}
-            <Column
-              id="actions"
-              name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.actions', {
-                defaultMessage: 'Actions',
-              })}
-              render={(item) => {
-                const policy = toPolicy(item);
-                return (
-                  <ActionPolicyActionsCell
-                    policy={policy}
-                    canWrite={canWrite}
-                    onViewDetails={setPolicyToView}
-                    onEdit={(id) => navigateToEdit(id)}
-                    onClone={clonePolicy}
-                    onDelete={setPolicyToDelete}
-                    onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
-                    onCancelSnooze={(id) => unsnoozePolicy(id)}
-                    onUpdateApiKey={(id) => setPolicyToUpdateApiKey(id)}
-                    isDisabled={isBulkActionInProgress}
-                  />
-                );
-              }}
-            />
-          </ContentListTable>
-          <ContentListFooter />
+          <ActionPoliciesTableContent
+            canWrite={canWrite}
+            isEnabling={isEnabling}
+            enableVariables={enableVariables}
+            isDisabling={isDisabling}
+            disableVariables={disableVariables}
+            isSnoozing={isSnoozing}
+            snoozeVariables={snoozeVariables}
+            isUnsnoozing={isUnsnoozing}
+            unsnoozeVariables={unsnoozeVariables}
+            isBulkActionInProgress={isBulkActionInProgress}
+            bulkAction={bulkAction}
+            onRefetchReady={onRefetchReady}
+            onViewDetails={setPolicyToView}
+            onEdit={navigateToEdit}
+            onClone={clonePolicy}
+            onDelete={setPolicyToDelete}
+            onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
+            onCancelSnooze={(id) => unsnoozePolicy(id)}
+            onUpdateApiKey={(id) => setPolicyToUpdateApiKey(id)}
+            enablePolicy={enablePolicy}
+            disablePolicy={disablePolicy}
+          />
         </ContentList>
       </ContentListProvider>
 
