@@ -45739,7 +45739,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
-            maxLength: 50
+            maxLength: 255
             type: string
       responses:
         '200':
