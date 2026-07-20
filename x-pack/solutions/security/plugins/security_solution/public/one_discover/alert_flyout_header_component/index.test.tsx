@@ -12,7 +12,7 @@ import TestRenderer, { act } from 'react-test-renderer';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { AlertFlyoutHeader } from '.';
 import type { StartServices } from '../../types';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';

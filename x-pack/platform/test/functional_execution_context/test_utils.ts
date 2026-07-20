@@ -59,7 +59,13 @@ export async function readLogFile(): Promise<Ecs[]> {
   return logFileContent
     .split('\n')
     .filter(Boolean)
-    .map<Ecs>((str) => JSON.parse(str));
+    .flatMap<Ecs>((str) => {
+      try {
+        return [JSON.parse(str)];
+      } catch {
+        return [];
+      }
+    });
 }
 
 /**

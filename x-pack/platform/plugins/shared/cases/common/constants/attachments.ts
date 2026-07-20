@@ -190,3 +190,14 @@ export const PREFIX_TO_OWNER_MAP: Partial<Record<string, string>> = {
   observability: OBSERVABILITY_OWNER,
   stack: GENERAL_CASES_OWNER,
 };
+
+/**
+ * Registers an owner→prefix mapping so the owner's legacy `alert`/`event`
+ * attachments resolve to a valid unified type (e.g. `security.alert`). For
+ * dynamically registered owners (e.g. FTR fixtures); built-in solutions are
+ * seeded in {@link OWNER_TO_PREFIX_MAP}. Only the forward map is updated —
+ * `PREFIX_TO_OWNER_MAP` must stay unambiguous when owners share a prefix.
+ */
+export const registerOwnerPrefix = (owner: string, prefix: string): void => {
+  OWNER_TO_PREFIX_MAP[owner] = prefix;
+};

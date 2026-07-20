@@ -11,12 +11,16 @@ import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { useCspFlyoutApi } from './use_csp_flyout_api';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 
-jest.mock('react-redux', () => ({ useStore: () => ({}) }));
+jest.mock('react-redux-v7', () => ({ useStore: () => ({}) }));
 jest.mock('react-router-dom', () => ({ useHistory: () => ({}) }));
 jest.mock('../../common/hooks/is_in_security_app');
 
 jest.mock('../shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: unknown }) => children,
+}));
+
+jest.mock('../shared/utils/build_flyout_nav_title', () => ({
+  buildFlyoutNavTitle: (title: string) => title,
 }));
 
 jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
