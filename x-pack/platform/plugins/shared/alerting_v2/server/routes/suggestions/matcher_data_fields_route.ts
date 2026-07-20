@@ -17,7 +17,12 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 
 const matcherDataFieldsQuerySchema = z.object({
-  matcher: z.string().min(1).max(2048).optional(),
+  matcher: z
+    .string()
+    .min(1)
+    .max(2048)
+    .optional()
+    .describe('Optional matcher expression used to scope suggested data field names.'),
 });
 
 const matcherDataFieldsResponseSchema = z
