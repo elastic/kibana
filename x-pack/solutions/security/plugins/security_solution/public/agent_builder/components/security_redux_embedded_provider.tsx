@@ -6,11 +6,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Provider } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import { Provider } from 'react-redux-v7';
+import { createMemoryHistory } from 'history';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { Router } from '@kbn/shared-ux-router';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { SecurityAppStore } from '../../common/store/types';
 import { KibanaContextProvider } from '../../common/lib/kibana/kibana_react';
@@ -33,6 +36,29 @@ export interface SecurityReduxEmbeddedProviderProps {
   resolveCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   children: React.ReactNode;
 }
+
+const useHasRouterContext = (): boolean => {
+  try {
+    useLocation();
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Reuse a host Router when present and mount an in-memory Router for surfaces with none (chrome embeddable)
+ */
+const EmbeddedRouter: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const hasRouterContext = useHasRouterContext();
+  const [fallbackHistory] = useState(() => createMemoryHistory());
+
+  if (hasRouterContext) {
+    return <>{children}</>;
+  }
+
+  return <Router history={fallbackHistory}>{children}</Router>;
+};
 
 /**
  * Agent Builder attachment Canvas renders outside Security's `ReduxStoreProvider` and outside the
@@ -89,19 +115,21 @@ export const SecurityReduxEmbeddedProvider: React.FC<SecurityReduxEmbeddedProvid
         ...bundle.kibanaServices,
       }}
     >
-      <CellActionsProvider
-        getTriggerCompatibleActions={bundle.kibanaServices.uiActions.getTriggerCompatibleActions}
-      >
-        <NavigationProvider core={bundle.kibanaServices}>
-          <Provider store={bundle.store}>
-            <UpsellingProvider upsellingService={bundle.kibanaServices.upselling}>
-              <CaseProvider>
-                <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
-              </CaseProvider>
-            </UpsellingProvider>
-          </Provider>
-        </NavigationProvider>
-      </CellActionsProvider>
+      <EmbeddedRouter>
+        <CellActionsProvider
+          getTriggerCompatibleActions={bundle.kibanaServices.uiActions.getTriggerCompatibleActions}
+        >
+          <NavigationProvider core={bundle.kibanaServices}>
+            <Provider store={bundle.store}>
+              <UpsellingProvider upsellingService={bundle.kibanaServices.upselling}>
+                <CaseProvider>
+                  <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
+                </CaseProvider>
+              </UpsellingProvider>
+            </Provider>
+          </NavigationProvider>
+        </CellActionsProvider>
+      </EmbeddedRouter>
     </KibanaContextProvider>
   );
 };
