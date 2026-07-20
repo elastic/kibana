@@ -100,7 +100,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
   const showObservableTypesSection =
     hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled;
 
-  const showLegacySection = templatesEnabled;
+  const showLegacySection = templatesEnabled && (customFields.length > 0 || templates.length > 0);
 
   return (
     <>

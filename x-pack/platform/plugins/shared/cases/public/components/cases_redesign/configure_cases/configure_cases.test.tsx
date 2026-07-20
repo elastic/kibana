@@ -173,7 +173,33 @@ describe('ConfigureCasesRedesign', () => {
     expect(screen.getByTestId('legacy-templates-view-new-link')).toBeInTheDocument();
   });
 
-  it('shows add buttons for empty legacy custom fields and templates when the switch is on', async () => {
+  it('renders the legacy section when only legacy templates exist', async () => {
+    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    useCasesConfig.mockReturnValue({
+      attachmentsEnabled: false,
+      chatEnabled: false,
+      templatesEnabled: true,
+      detailsRedesignEnabled: false,
+      casesRedesign: { list: false, details: false, settings: true },
+    });
+    useGetCaseConfigurationMock.mockImplementation(() => ({
+      ...useCaseConfigureResponse,
+      data: {
+        ...useCaseConfigureResponse.data,
+        customFields: [],
+        templates: templatesConfigurationMock,
+      },
+    }));
+
+    renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+    expect(
+      await screen.findByTestId('cases-redesign-legacy-custom-fields-section')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('show-legacy-custom-fields-switch')).not.toBeChecked();
+  });
+
+  it('does not render the legacy section when templates v2 is enabled but no legacy config exists', async () => {
     const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
@@ -193,16 +219,12 @@ describe('ConfigureCasesRedesign', () => {
 
     renderWithTestingProviders(<ConfigureCasesRedesign />);
 
+    await screen.findByTestId('cases-redesign-settings-panel');
+
     expect(
-      await screen.findByTestId('cases-redesign-legacy-custom-fields-section')
-    ).toBeInTheDocument();
-
-    await userEvent.click(await screen.findByTestId('show-legacy-custom-fields-switch'));
-
-    expect(await screen.findByTestId('add-custom-field')).toBeInTheDocument();
-    expect(screen.getByTestId('add-template')).toBeInTheDocument();
-    expect(screen.getByTestId('empty-custom-fields')).toBeInTheDocument();
-    expect(screen.getByTestId('empty-templates')).toBeInTheDocument();
+      screen.queryByTestId('cases-redesign-legacy-custom-fields-section')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('show-legacy-custom-fields-switch')).not.toBeInTheDocument();
   });
 
   it('opens add custom field flyout with add header when switch is on', async () => {
