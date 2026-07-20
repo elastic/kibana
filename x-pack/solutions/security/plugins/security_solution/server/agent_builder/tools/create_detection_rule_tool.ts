@@ -34,6 +34,9 @@ import type { RuleAttachmentData } from '../attachments/rule';
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
 
+const RULE_CREATION_GENERIC_ERROR_MESSAGE =
+  'Failed to create detection rule. Please try again or refine your request.';
+
 const isRuleAttachment = (
   attachment: VersionedAttachment
 ): attachment is VersionedAttachment<SecurityAgentBuilderAttachments.rule, RuleAttachmentData> =>
@@ -321,7 +324,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
                 type: ToolResultType.error,
                 data: {
                   message:
-                    'Failed to create detection rule. Please try again or refine your request.',
+                    RULE_CREATION_GENERIC_ERROR_MESSAGE,
                 },
               },
             ],
@@ -402,7 +405,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
               type: ToolResultType.error,
               data: {
                 message:
-                  'Failed to create detection rule. Please try again or refine your request.',
+                  RULE_CREATION_GENERIC_ERROR_MESSAGE,
               },
             },
           ],

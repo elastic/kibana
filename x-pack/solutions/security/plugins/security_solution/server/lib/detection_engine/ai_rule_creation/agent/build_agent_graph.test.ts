@@ -93,6 +93,36 @@ describe('rejectionNode', () => {
     });
   });
 
+  it('formats INCOHERENT with a rephrase prompt', async () => {
+    const result = await rejectionNode(
+      createState({
+        rejectionReason: {
+          code: 'INCOHERENT',
+          message: 'Request did not describe a detectable behavior',
+        },
+      })
+    );
+
+    expect(result).toEqual({
+      rejectionMessage: expect.stringContaining('rephrase'),
+    });
+  });
+
+  it('formats NOT_SECURITY_RELEVANT with a security-focus prompt', async () => {
+    const result = await rejectionNode(
+      createState({
+        rejectionReason: {
+          code: 'NOT_SECURITY_RELEVANT',
+          message: 'Request is not a security detection scenario',
+        },
+      })
+    );
+
+    expect(result).toEqual({
+      rejectionMessage: expect.stringContaining('security'),
+    });
+  });
+
   it('returns an empty update when rejectionReason is not set', async () => {
     expect(await rejectionNode(createState())).toEqual({});
   });
