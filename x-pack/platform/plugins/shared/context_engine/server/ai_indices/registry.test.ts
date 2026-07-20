@@ -16,7 +16,7 @@ const makeProperties = (overrides: Partial<AiIndexProperties> = {}): AiIndexProp
   description: 'A test AI index',
   dest: { type: 'index', value: '.ai-index-idx-test' },
   automations: [],
-  sources: [{ type: 'kbn_api', value: '/api/test/{id}' }],
+  sources: [],
   ...overrides,
 });
 

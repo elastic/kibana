@@ -25,20 +25,12 @@ describe('AgentBuilderSmlPlugin.setup()', () => {
     plugin.setup(coreSetup, makeSetupDeps({ contextEngine: { registerAiIndex } }));
 
     expect(registerAiIndex).toHaveBeenCalledTimes(1);
-    expect(registerAiIndex).toHaveBeenCalledWith('sml', {
+    expect(registerAiIndex).toHaveBeenCalledWith('elastic', {
       name: 'Elastic',
       description: expect.stringContaining('Agent Builder'),
       dest: { type: 'index', value: '.ai-index-idx-sml-data' },
       automations: [],
-      sources: expect.arrayContaining([
-        { type: 'kbn_api', value: '/api/dashboards/{id}' },
-        { type: 'kbn_api', value: '/api/visualizations/{id}' },
-        { type: 'kbn_api', value: '/api/actions/connector/{id}' },
-        { type: 'kbn_api', value: '/api/workflows/workflow/{id}' },
-        { type: 'kbn_api', value: '/api/alerting/v2/rules/{id}' },
-        { type: 'kbn_api', value: '/api/alerting/v2/action_policies/{id}' },
-        { type: 'kbn_api', value: '/api/streams/{name}/significant_events' },
-      ]),
+      sources: [],
     });
   });
 

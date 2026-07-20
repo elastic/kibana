@@ -97,19 +97,11 @@ const putAiIndexBodySchema = schema.object({
   ),
   sources: schema.arrayOf(
     schema.object({
-      type: schema.oneOf([schema.literal('esql'), schema.literal('kbn_api')], {
-        meta: {
-          description:
-            'The source type. `esql` for an ES|QL query, `kbn_api` for a Kibana API route pattern.',
-        },
-      }),
+      type: schema.literal('esql'),
       value: schema.string({
         minLength: 0,
         maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
-        meta: {
-          description:
-            'The source value; an ES|QL query when `type` is `esql`, or a Kibana route pattern (e.g. `/api/dashboards/{id}`) when `type` is `kbn_api`.',
-        },
+        meta: { description: 'An ES|QL query.' },
       }),
     }),
     {
