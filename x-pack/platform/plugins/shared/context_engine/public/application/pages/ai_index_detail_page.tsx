@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiCode,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,11 +21,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import type { AiIndexSource } from '../../../common/http_api/ai_indices';
-import { EditSourcesModal } from '../components/edit_sources_modal';
+import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { SourceTypeBadge } from '../components/source_picker';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { toSourceType } from '../utils/sources';
@@ -37,11 +39,18 @@ const SourceRow = ({ source }: { source: AiIndexSource }) => (
       </EuiFlexItem>
       {/* minWidth: 0 lets the flex item shrink so long queries truncate instead of overflowing the panel */}
       <EuiFlexItem css={{ minWidth: 0 }}>
-        <EuiText size="s" className="eui-textTruncate">
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.sources.esqlPrefix', {
-            defaultMessage: 'ES|QL · {query}',
-            values: { query: source.value },
-          })}
+        <EuiText size="s" color="subdued" className="eui-textTruncate">
+          <FormattedMessage
+            id="xpack.contextEngine.aiIndexDetail.sources.esqlPrefix"
+            defaultMessage="ES|QL · {query}"
+            values={{
+              query: (
+                <EuiCode language="sql" transparentBackground>
+                  {source.value}
+                </EuiCode>
+              ),
+            }}
+          />
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -225,7 +234,7 @@ export const AiIndexDetailPage = () => {
         </EuiPanel>
       </KibanaPageTemplate.Section>
       {isEditingSources && aiIndex && (
-        <EditSourcesModal
+        <EditSourcesFlyout
           aiIndex={aiIndex}
           onClose={() => setIsEditingSources(false)}
           onSaved={() => {

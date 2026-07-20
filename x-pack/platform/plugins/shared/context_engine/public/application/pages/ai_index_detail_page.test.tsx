@@ -122,7 +122,7 @@ describe('AiIndexDetailPage', () => {
     expect(await screen.findByTestId('contextAiIndexDetailError')).toHaveTextContent('boom');
   });
 
-  it('opens the edit sources modal with the current sources selected', async () => {
+  it('opens the edit sources flyout with the current sources selected', async () => {
     const services = coreMock.createStart();
     services.http.get.mockResolvedValue(aiIndex);
 
@@ -132,7 +132,7 @@ describe('AiIndexDetailPage', () => {
 
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
-    expect(await screen.findByTestId('contextEditSourcesModal')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextEditSourcesFlyout')).toBeInTheDocument();
     // Stored sources are restored as raw ES|QL, keyed by their query.
     expect(await screen.findByTestId('contextSelectedSource-FROM My view')).toBeInTheDocument();
   });
@@ -170,9 +170,9 @@ describe('AiIndexDetailPage', () => {
       );
     });
 
-    // Modal closes and the detail data is refetched after a successful save.
+    // Flyout closes and the detail data is refetched after a successful save.
     await waitFor(() => {
-      expect(screen.queryByTestId('contextEditSourcesModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextEditSourcesFlyout')).not.toBeInTheDocument();
     });
     expect(services.http.get).toHaveBeenCalledTimes(2);
   });
