@@ -179,6 +179,7 @@ test.describe(
       await serviceFlyoutPage.clickFooterAction('openAlerts');
 
       await expect(page).toHaveURL(new RegExp(`/app/observability/alerts`));
+      await expect(page.getByTestId('alertsPageWithData')).toBeVisible();
     });
 
     test('navigates to SLOs from flyout footer actions', async ({
