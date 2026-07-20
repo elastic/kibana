@@ -651,7 +651,7 @@ export class Server {
 
     await this.plugins.start(this.coreStart);
 
-    await this.http.start({ featureFlags: featureFlagsStart });
+    await this.http.start();
 
     return this.coreStart;
   }

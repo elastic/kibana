@@ -37,7 +37,6 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   options?: Pick<
     RouteConfigOptions<Method>,
     | 'xsrfRequired'
-    | 'selfCallable'
     | 'tags'
     | 'body'
     | 'timeout'

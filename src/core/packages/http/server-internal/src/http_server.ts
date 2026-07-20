@@ -66,11 +66,7 @@ import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 import { type InternalStaticAssets, StaticAssets } from './static_assets';
-import {
-  createSelfCallPreAuthHandler,
-  createSelfCallPreHandler,
-  createSelfCallPreResponseHandler,
-} from './self_client_policy';
+import { createSelfCallPreHandler, createSelfCallPreResponseHandler } from './self_client_observer';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -236,7 +232,6 @@ export class HttpServer {
   private readonly authResponseHeaders: AuthHeadersStorage;
   private readonly env: Env;
   private redactedSessionIdGetter?: (request: KibanaRequest) => Promise<string | undefined>;
-  private selfCallableEnforcement = false;
 
   constructor(
     private readonly coreContext: CoreContext,
@@ -254,10 +249,6 @@ export class HttpServer {
 
   public isListening() {
     return this.server !== undefined && this.server.listener.listening;
-  }
-
-  public setSelfCallableEnforcement(enforcement: boolean): void {
-    this.selfCallableEnforcement = enforcement;
   }
 
   /** @internal */
@@ -334,9 +325,7 @@ export class HttpServer {
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
     this.setupRequestStateAssignment(config, basePathService, executionContext, userActivity);
-    const getSelfCallableEnforcement = () => this.selfCallableEnforcement;
-    this.server.ext('onPreAuth', createSelfCallPreAuthHandler(getSelfCallableEnforcement));
-    this.server.ext('onPreHandler', createSelfCallPreHandler(getSelfCallableEnforcement));
+    this.server.ext('onPreHandler', createSelfCallPreHandler());
     this.server.ext('onPreResponse', createSelfCallPreResponseHandler(this.log.get('self-client')));
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
@@ -1083,7 +1072,6 @@ export class HttpServer {
       access: route.options.access ?? 'internal',
       deprecated,
       security: route.security,
-      selfCallable: route.options.selfCallable === true,
       ...omitBy({ excludeFromRateLimiter: route.options.excludeFromRateLimiter }, isNil),
     };
     // Log HTTP API target consumer.

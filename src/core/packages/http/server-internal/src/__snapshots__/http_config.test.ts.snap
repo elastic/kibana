@@ -104,7 +104,6 @@ Object {
     "xContentTypeOptions": "nosniff",
   },
   "selfHttp": Object {
-    "selfCallableEnforcement": false,
     "ssl": Object {},
     "target": "auto",
   },

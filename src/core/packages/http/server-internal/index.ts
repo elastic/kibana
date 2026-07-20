@@ -10,7 +10,6 @@
 export { config, HttpConfig } from './src/http_config';
 export type { HttpConfigType } from './src/http_config';
 export { HttpService } from './src/http_service';
-export { httpFeatureFlags, SELF_CALLABLE_ENFORCEMENT_FEATURE_FLAG } from './src/feature_flags';
 export { HttpServer } from './src/http_server';
 export type { HttpServerSetup } from './src/http_server';
 export type {

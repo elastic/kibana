@@ -27,7 +27,7 @@ import {
 } from '@kbn/core-http-common';
 import type { HttpConfig } from './http_config';
 import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
-import { SELF_CALL_HEADER } from './self_client_policy';
+import { SELF_CALL_HEADER } from './self_client_observer';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const DEFAULT_TIMEOUT_MS = 60_000;

@@ -60,7 +60,6 @@ describe('Versioned route', () => {
               stability: 'experimental',
             },
             excludeFromOAS: true,
-            selfCallable: true,
             tags: ['1', '2', '3'],
           },
           description: 'test',
@@ -86,13 +85,9 @@ describe('Versioned route', () => {
             stability: 'experimental',
           },
           excludeFromOAS: true,
-          selfCallable: true,
           tags: ['1', '2', '3'],
         },
       });
-      expect(router.registerRoute).toHaveBeenCalledWith(
-        expect.objectContaining({ options: expect.objectContaining({ selfCallable: true }) })
-      );
     });
   });
 

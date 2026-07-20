@@ -24,7 +24,6 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type {
   RequestHandlerContextBase,
   IContextContainer,
@@ -57,7 +56,6 @@ import { registerCoreHandlers } from './register_lifecycle_handlers';
 import type { ExternalUrlConfigType } from './external_url';
 import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 import { createInternalHttpSelfClient, type InternalHttpSelfService } from './self_client';
-import { SELF_CALLABLE_ENFORCEMENT_FEATURE_FLAG } from './feature_flags';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
@@ -68,10 +66,6 @@ export interface SetupDeps {
   context: InternalContextSetup;
   executionContext: InternalExecutionContextSetup;
   userActivity: InternalUserActivityServiceSetup;
-}
-
-export interface StartDeps {
-  featureFlags?: FeatureFlagsStart;
 }
 
 /** @internal */
@@ -85,12 +79,10 @@ export class HttpService
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
   private configSubscription?: Subscription;
-  private selfCallableEnforcementSubscription?: Subscription;
   private currentConfig?: HttpConfig;
   private selfClient?: InternalHttpSelfService;
 
   private readonly log: Logger;
-  private readonly selfCallableEnforcementLog: Logger;
   private readonly env: Env;
   private internalPreboot?: InternalHttpServicePreboot;
   private internalSetup?: InternalHttpServiceSetup;
@@ -101,7 +93,6 @@ export class HttpService
 
     this.env = env;
     this.log = logger.get('http');
-    this.selfCallableEnforcementLog = this.log.get('self-client', 'enforcement');
     this.config$ = combineLatest([
       configService.atPath<HttpConfigType>(httpConfig.path, { ignoreUnchanged: false }),
       configService.atPath<CspConfigType>(cspConfig.path),
@@ -273,46 +264,8 @@ export class HttpService
     };
   }
 
-  public async start({ featureFlags }: StartDeps = {}) {
+  public async start() {
     const config = await firstValueFrom(this.config$);
-    const enforcementFallback = config.selfHttp.selfCallableEnforcement;
-    this.httpServer.setSelfCallableEnforcement(enforcementFallback);
-
-    if (featureFlags) {
-      await new Promise<void>((resolve) => {
-        let initialized = false;
-        const finishInitialization = () => {
-          if (!initialized) {
-            initialized = true;
-            resolve();
-          }
-        };
-
-        this.selfCallableEnforcementSubscription = featureFlags
-          .getBooleanValue$(SELF_CALLABLE_ENFORCEMENT_FEATURE_FLAG, enforcementFallback)
-          .subscribe({
-            next: (enforcement) => {
-              this.httpServer.setSelfCallableEnforcement(enforcement);
-              finishInitialization();
-            },
-            error: () => {
-              this.httpServer.setSelfCallableEnforcement(enforcementFallback);
-              this.selfCallableEnforcementLog.error(
-                'Self-callable enforcement feature flag failed; using the configured fallback.'
-              );
-              finishInitialization();
-            },
-            complete: () => {
-              if (!initialized) {
-                this.selfCallableEnforcementLog.error(
-                  'Self-callable enforcement feature flag produced no value; using the configured fallback.'
-                );
-                finishInitialization();
-              }
-            },
-          });
-      });
-    }
 
     if (this.shouldListen(config)) {
       this.log.debug('stopping preboot server');
@@ -443,8 +396,6 @@ export class HttpService
   public async stop() {
     this.configSubscription?.unsubscribe();
     this.configSubscription = undefined;
-    this.selfCallableEnforcementSubscription?.unsubscribe();
-    this.selfCallableEnforcementSubscription = undefined;
 
     if (!this.isPrebootServerStopped) {
       this.isPrebootServerStopped = false;

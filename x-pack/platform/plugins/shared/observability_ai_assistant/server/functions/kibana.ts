@@ -9,9 +9,6 @@ import type { HttpSelfFetchQuery, KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
 
-const SELF_CALL_NOT_ALLOWED_CODE = 'SELF_CALL_NOT_ALLOWED';
-const SELF_CALL_NOT_ALLOWED_TOOL_RESPONSE =
-  'The requested Kibana API is not available to the AI Assistant.';
 const SAFE_ERROR_CODE = /^(?:UND_ERR_[A-Z0-9_]+|E[A-Z0-9_]+|ABORT_ERR)$/;
 const SAFE_ERROR_TYPES = new Set(['AbortError', 'Error', 'HttpSelfFetchError', 'TypeError']);
 
@@ -29,17 +26,10 @@ const getErrorDiagnostics = (error: unknown): ErrorDiagnostics => {
   const errorWithDetails = error as Error & {
     code?: unknown;
     response?: { status?: unknown };
-    body?: { attributes?: { code?: unknown }; statusCode?: unknown };
+    body?: { statusCode?: unknown };
   };
-  const bodyCode = errorWithDetails.body?.attributes?.code;
-  const rawCode =
-    bodyCode === SELF_CALL_NOT_ALLOWED_CODE ? SELF_CALL_NOT_ALLOWED_CODE : errorWithDetails.code;
-  let code: string | undefined;
-  if (rawCode === SELF_CALL_NOT_ALLOWED_CODE) {
-    code = SELF_CALL_NOT_ALLOWED_CODE;
-  } else if (typeof rawCode === 'string' && SAFE_ERROR_CODE.test(rawCode)) {
-    code = rawCode;
-  }
+  const rawCode = errorWithDetails.code;
+  const code = typeof rawCode === 'string' && SAFE_ERROR_CODE.test(rawCode) ? rawCode : undefined;
   const rawStatusCode = errorWithDetails.response?.status ?? errorWithDetails.body?.statusCode;
   const statusCode =
     typeof rawStatusCode === 'number' && rawStatusCode >= 100 && rawStatusCode <= 599
@@ -114,10 +104,6 @@ export function registerKibanaFunction({
             ? { http: { response: { status_code: diagnostics.statusCode } } }
             : {}),
         });
-
-        if (diagnostics.code === SELF_CALL_NOT_ALLOWED_CODE) {
-          return { content: SELF_CALL_NOT_ALLOWED_TOOL_RESPONSE };
-        }
 
         throw error;
       }

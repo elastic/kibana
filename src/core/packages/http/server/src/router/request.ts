@@ -34,7 +34,6 @@ export interface KibanaRouteOptions extends RouteOptionsApp {
   xsrfRequired: boolean;
   access: 'internal' | 'public';
   security?: InternalRouteSecurity;
-  selfCallable?: boolean;
   excludeFromRateLimiter?: boolean;
 }
 

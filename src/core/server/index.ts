@@ -54,7 +54,6 @@ import type {
 } from '@kbn/core-plugins-server-internal';
 
 export { bootstrap } from '@kbn/core-root-server-internal';
-export { httpFeatureFlags as featureFlags } from '@kbn/core-http-server-internal';
 
 export type { PluginOpaqueId } from '@kbn/core-base-common';
 export type {

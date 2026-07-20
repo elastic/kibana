@@ -16,7 +16,6 @@ import { readFileSync } from 'node:fs';
 import http from 'node:http';
 import https from 'node:https';
 import Supertest from 'supertest';
-import { BehaviorSubject } from 'rxjs';
 import {
   fetch as undiciFetch,
   Headers as UndiciHeaders,
@@ -31,7 +30,6 @@ import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { createConfigService } from '@kbn/core-http-server-mocks';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import {
   config as httpConfigDescriptor,
   type HttpConfigType,
@@ -69,10 +67,7 @@ type TestHttpConfig = Omit<Partial<HttpConfigType>, 'selfHttp' | 'ssl' | 'versio
   versioned?: Partial<HttpConfigType['versioned']>;
 };
 
-const startServer = async (
-  serverConfig: TestHttpConfig = { port: TEST_PORT },
-  featureFlags = coreFeatureFlagsMock.createStart()
-) => {
+const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) => {
   const logger = loggingSystemMock.create();
   const server = createInternalHttpService({
     logger,
@@ -92,23 +87,10 @@ const startServer = async (
     docLinks: docLinksServiceMock.createSetupContract(),
   });
 
-  const {
-    server: innerServer,
-    createRouter,
-    registerOnPostAuth,
-    registerOnPreAuth,
-  } = await server.setup(setupDeps);
+  const { server: innerServer, createRouter, registerOnPostAuth } = await server.setup(setupDeps);
   const router = createRouter('/');
   const supertest = Supertest(innerServer.listener);
   const started = { httpStart: null as InternalHttpServiceStart | null };
-  const lifecycleCalls = { preAuthForNonOpted: 0, nonOptedHandler: 0 };
-
-  registerOnPreAuth((request, response, toolkit) => {
-    if (request.route.path === '/self/not_opted') {
-      lifecycleCalls.preAuthForNonOpted++;
-    }
-    return toolkit.next();
-  });
   registerOnPostAuth((request, response, toolkit) => {
     if (request.route.path === '/self/authz_denied') {
       return response.forbidden({ body: 'Rejected by test authorization' });
@@ -142,7 +124,6 @@ const startServer = async (
           remaining: schema.number({ min: 0 }),
         }),
       },
-      options: { selfCallable: true },
     },
     async (context, req, res) => {
       if (req.params.remaining === 0) {
@@ -165,14 +146,11 @@ const startServer = async (
 
   router.get(
     {
-      path: '/self/not_opted',
+      path: '/self/observed_target',
       security: routeSecurity,
       validate: false,
     },
-    (_context, _req, res) => {
-      lifecycleCalls.nonOptedHandler++;
-      return res.ok({ body: { ok: true } });
-    }
+    (_context, _req, res) => res.ok({ body: { ok: true } })
   );
 
   router.get(
@@ -189,7 +167,6 @@ const startServer = async (
       path: '/self/target_url',
       security: routeSecurity,
       validate: false,
-      options: { selfCallable: true },
     },
     (_context, req, res) => {
       return res.ok({
@@ -208,7 +185,6 @@ const startServer = async (
       path: '/self/redirect',
       security: routeSecurity,
       validate: false,
-      options: { selfCallable: true },
     },
     (_context, _req, res) => res.redirected({ headers: { location: '/self/target_url' } })
   );
@@ -234,7 +210,6 @@ const startServer = async (
       path: '/self/cookie_target',
       security: routeSecurity,
       validate: false,
-      options: { selfCallable: true },
     },
     (_context, req, res) =>
       res.ok({
@@ -261,10 +236,10 @@ const startServer = async (
 
   router.get(
     {
-      path: '/self/public_opted',
+      path: '/self/public_target',
       security: routeSecurity,
       validate: false,
-      options: { access: 'public', selfCallable: true },
+      options: { access: 'public' },
     },
     (_context, req, res) =>
       res.ok({
@@ -277,10 +252,10 @@ const startServer = async (
 
   router.get(
     {
-      path: '/self/internal_opted',
+      path: '/self/internal_target',
       security: routeSecurity,
       validate: false,
-      options: { access: 'internal', selfCallable: true },
+      options: { access: 'internal' },
     },
     (_context, req, res) =>
       res.ok({
@@ -293,7 +268,7 @@ const startServer = async (
 
   router.get(
     {
-      path: '/self/call_opted/{access}',
+      path: '/self/call_access/{access}',
       security: routeSecurity,
       validate: {
         params: schema.object({
@@ -304,17 +279,16 @@ const startServer = async (
     async (_context, req, res) => {
       const body = await started
         .httpStart!.selfClient.asScoped(req)
-        .fetch<{ internalOrigin: string; marker: string }>(`/self/${req.params.access}_opted`);
+        .fetch<{ internalOrigin: string; marker: string }>(`/self/${req.params.access}_target`);
       return res.ok({ body });
     }
   );
 
   router.versioned
     .get({
-      path: '/self/versioned_opted',
+      path: '/self/versioned_target',
       access: 'public',
       security: routeSecurity,
-      options: { selfCallable: true },
     })
     .addVersion({ version: '2023-10-31', validate: false }, (_context, req, res) =>
       res.ok({
@@ -334,7 +308,7 @@ const startServer = async (
     async (_context, req, res) => {
       const body = await started
         .httpStart!.selfClient.asScoped(req)
-        .fetch<{ apiVersion: string; marker: string }>('/self/versioned_opted', {
+        .fetch<{ apiVersion: string; marker: string }>('/self/versioned_target', {
           version: '2023-10-31',
         });
       return res.ok({ body });
@@ -364,9 +338,9 @@ const startServer = async (
     }
   );
 
-  started.httpStart = await server.start({ featureFlags });
+  started.httpStart = await server.start();
 
-  return { server, httpStart: started.httpStart, featureFlags, lifecycleCalls, logger, supertest };
+  return { server, httpStart: started.httpStart, logger, supertest };
 };
 
 describe('Http self client', () => {
@@ -433,7 +407,7 @@ describe('Http self client', () => {
     });
   });
 
-  describe('receiving route policy', () => {
+  describe('receiving self-call observation', () => {
     let server: HttpService;
 
     afterEach(async () => {
@@ -442,30 +416,26 @@ describe('Http self client', () => {
       https.globalAgent.destroy();
     });
 
-    it('allows and safely logs non-opted routes in observe mode after authorization', async () => {
-      const started = await startServer({
-        port: TEST_PORT,
-        selfHttp: { target: 'auto', selfCallableEnforcement: false, ssl: {} },
-      });
+    it('allows and safely logs self calls after authorization', async () => {
+      const started = await startServer({ port: TEST_PORT });
       server = started.server;
       (started.logger.get().info as jest.Mock).mockClear();
 
       await started.supertest
-        .get('/self/not_opted?filter=raw-value')
+        .get('/self/observed_target?filter=raw-value')
         .set('x-kbn-self-call', 'true')
         .expect(200, { ok: true });
 
       expect(started.logger.get().info).toHaveBeenCalledWith(
-        'Kibana self HTTP call targeted a route that has not opted in',
+        'Kibana self HTTP call completed',
         expect.objectContaining({
-          event: { action: 'kibana_self_http_route_not_allowed' },
+          event: { action: 'kibana_self_http_request' },
           http: {
             request: { method: 'GET' },
             response: { status_code: 200 },
           },
           labels: expect.objectContaining({
-            self_http_route_template: '/self/not_opted',
-            self_http_enforcement_mode: 'observe',
+            self_http_route_template: '/self/observed_target',
             self_http_status_class: '2xx',
           }),
         })
@@ -480,80 +450,15 @@ describe('Http self client', () => {
       expect(started.logger.get().info).not.toHaveBeenCalled();
     });
 
-    it('uses the true config fallback to deny non-opted routes', async () => {
-      const started = await startServer({
-        port: TEST_PORT,
-        selfHttp: { target: 'auto', selfCallableEnforcement: true, ssl: {} },
-      });
+    it('supports public, internal, and versioned target routes', async () => {
+      const started = await startServer({ port: TEST_PORT });
       server = started.server;
 
-      const response = await started.supertest
-        .get('/self/not_opted')
-        .set('x-kbn-self-call', 'true')
-        .expect(403);
-
-      expect(response.body).toEqual(
-        expect.objectContaining({
-          message: 'Kibana self HTTP call is not allowed for this route.',
-          attributes: { code: 'SELF_CALL_NOT_ALLOWED' },
-        })
-      );
-      expect(started.lifecycleCalls).toEqual({ preAuthForNonOpted: 0, nonOptedHandler: 0 });
-      expect(started.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
-        'core.http.selfCallableEnforcement',
-        true
-      );
-      expect(started.logger.get().info).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          http: {
-            request: { method: 'GET' },
-            response: { status_code: 403 },
-          },
-          labels: expect.objectContaining({
-            self_http_enforcement_mode: 'enforce',
-            self_http_status_class: '4xx',
-          }),
-        })
-      );
-    });
-
-    it('updates cached enforcement when the feature flag changes without per-request evaluation', async () => {
-      const enforcement$ = new BehaviorSubject(false);
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue$.mockReturnValue(enforcement$);
-      const started = await startServer(
-        {
-          port: TEST_PORT,
-          selfHttp: { target: 'auto', selfCallableEnforcement: false, ssl: {} },
-        },
-        featureFlags
-      );
-      server = started.server;
-
-      await started.supertest.get('/self/not_opted').set('x-kbn-self-call', 'true').expect(200);
-      enforcement$.next(true);
-      await started.supertest.get('/self/not_opted').set('x-kbn-self-call', 'true').expect(403);
-
-      expect(featureFlags.getBooleanValue$).toHaveBeenCalledTimes(1);
-      expect(featureFlags.getBooleanValue$).toHaveBeenCalledWith(
-        'core.http.selfCallableEnforcement',
-        false
-      );
-    });
-
-    it('allows opted public, internal, and versioned routes in enforce mode', async () => {
-      const started = await startServer({
-        port: TEST_PORT,
-        selfHttp: { target: 'auto', selfCallableEnforcement: true, ssl: {} },
-      });
-      server = started.server;
-
-      await started.supertest.get('/self/call_opted/public').expect(200, {
+      await started.supertest.get('/self/call_access/public').expect(200, {
         internalOrigin: 'Kibana',
         marker: 'true',
       });
-      await started.supertest.get('/self/call_opted/internal').expect(200, {
+      await started.supertest.get('/self/call_access/internal').expect(200, {
         internalOrigin: 'Kibana',
         marker: 'true',
       });

@@ -335,9 +335,6 @@ export class CoreKibanaRequest<
       deprecated: ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
         ?.deprecated,
       access: this.getAccess(request),
-      selfCallable:
-        ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.selfCallable ??
-        false,
       tags: request.route?.settings?.tags || [],
       security: this.getSecurity(request),
       timeout: {

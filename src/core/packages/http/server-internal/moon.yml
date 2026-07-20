@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/core-base-common'
   - '@kbn/core-base-server-internal'
   - '@kbn/core-execution-context-server-internal'
-  - '@kbn/core-feature-flags-server'
   - '@kbn/core-http-common'
   - '@kbn/core-http-server'
   - '@kbn/core-http-context-server-internal'

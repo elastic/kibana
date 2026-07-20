@@ -355,12 +355,6 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   access?: RouteAccess;
 
   /**
-   * Whether requests made by Core's scoped self HTTP client may target this route.
-   * Defaults to `false`. This opt-in applies to every version of a versioned route.
-   */
-  selfCallable?: boolean;
-
-  /**
    * Additional metadata tag strings to attach to the route.
    */
   tags?: readonly string[];

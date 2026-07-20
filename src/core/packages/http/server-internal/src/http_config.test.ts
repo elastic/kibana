@@ -246,10 +246,9 @@ describe('publicBaseUrl', () => {
 });
 
 describe('selfHttp', () => {
-  test('defaults to automatic targeting and disabled enforcement', () => {
+  test('defaults to automatic targeting', () => {
     expect(config.schema.validate({}).selfHttp).toEqual({
       target: 'auto',
-      selfCallableEnforcement: false,
       ssl: {},
     });
   });
@@ -258,28 +257,23 @@ describe('selfHttp', () => {
     expect(config.schema.validate({ selfHttp: { target: 'local' } }).selfHttp.target).toBe('local');
   });
 
-  test('accepts enabled enforcement and outbound certificate authorities', () => {
+  test('accepts outbound certificate authorities', () => {
     expect(
       config.schema.validate({
         selfHttp: {
-          selfCallableEnforcement: true,
           ssl: { certificateAuthorities: ['/path/to/ca.pem'] },
         },
       }).selfHttp
     ).toEqual({
       target: 'auto',
-      selfCallableEnforcement: true,
       ssl: { certificateAuthorities: ['/path/to/ca.pem'] },
     });
   });
 
-  test('rejects unsupported targets and non-boolean enforcement', () => {
+  test('rejects unsupported targets', () => {
     expect(() => config.schema.validate({ selfHttp: { target: 'inject' } })).toThrow(
       '[selfHttp.target]'
     );
-    expect(() =>
-      config.schema.validate({ selfHttp: { selfCallableEnforcement: 'enforce' } })
-    ).toThrow('[selfHttp.selfCallableEnforcement]');
   });
 });
 
@@ -902,7 +896,6 @@ describe('HttpConfig', () => {
 
     expect(httpConfig.selfHttp).toEqual({
       target: 'local',
-      selfCallableEnforcement: false,
       ssl: { certificateAuthorities: undefined },
     });
   });

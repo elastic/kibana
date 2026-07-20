@@ -171,24 +171,7 @@ describe('kibana tool', () => {
     expect(serializedLog).not.toContain('source.example');
   });
 
-  it('maps SELF_CALL_NOT_ALLOWED to a safe response without retrying', async () => {
-    const error = createFetchError({ status: 403, code: 'SELF_CALL_NOT_ALLOWED' });
-    const { handler, fetch } = registerFunction({ fetchError: error });
-
-    await expect(
-      handler({
-        arguments: {
-          method: 'GET',
-          pathname: '/api/private-target/private-id',
-        },
-      })
-    ).resolves.toEqual({
-      content: 'The requested Kibana API is not available to the AI Assistant.',
-    });
-    expect(fetch).toHaveBeenCalledTimes(1);
-  });
-
-  it('keeps ordinary 403 authorization handling distinct', async () => {
+  it('propagates 403 authorization failures', async () => {
     const error = createFetchError({ status: 403, code: 'FORBIDDEN' });
     const { handler, fetch } = registerFunction({ fetchError: error });
 
