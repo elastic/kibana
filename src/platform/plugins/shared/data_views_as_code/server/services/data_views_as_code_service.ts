@@ -134,6 +134,10 @@ export class DataViewsAsCodeService {
       fields: ['name', 'title', 'timeFieldName'],
     });
 
+    /**
+     * `search` reads directly from Saved Objects (instead of DataViewsService) to return a lightweight list view and map results to the as-code shape.
+     * This enabled the use `getMeta` because these utils operate on saved-object fields.
+     */
     const dataViews = result.saved_objects
       .filter((so) => !isSavedObjectErrorResult(so))
       .map((so) => {
