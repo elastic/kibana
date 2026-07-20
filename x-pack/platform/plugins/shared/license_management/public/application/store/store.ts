@@ -12,8 +12,8 @@ import {
   type CombinedState,
   type PreloadedState,
   type StoreEnhancer,
-} from 'redux';
-import thunk from 'redux-thunk';
+} from 'redux-v4';
+import thunk from 'redux-thunk-v2';
 
 import { licenseManagement } from './reducers';
 import type { LicenseManagementState, ThunkServices } from './types';
