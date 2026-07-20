@@ -1,98 +1,28 @@
 {
   "10.11.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.11.0 and 10.12.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "id": "id",
+      "name": "Policy 1",
+      "namespace": "default",
+      "inactivity_timeout": 0,
+      "is_verifier": true,
+      "min_agent_version": "8.0.0",
+      "package_agent_version_conditions": [
+        { "name": "apache", "title": "Apache HTTP Server", "version_condition": ">=8.0.0" }
+      ]
     }
   ],
   "10.12.0": [
     {
-      "id": "string?",
-      "space_ids": "array?",
-      "name": "string",
-      "namespace": "string",
-      "description": "string?",
-      "is_managed": "boolean?",
-      "has_fleet_server": "boolean?",
-      "is_default": "boolean?",
-      "is_default_fleet_server": "boolean?",
-      "unenroll_timeout": "number?",
-      "inactivity_timeout": "number?",
-      "monitoring_enabled": "array?",
-      "keep_monitoring_alive": "null|boolean?",
-      "data_output_id": "null|string?",
-      "monitoring_output_id": "null|string?",
-      "download_source_id": "null|string?",
-      "fleet_server_host_id": "null|string?",
-      "agent_features": "array?",
-      "is_protected": "boolean?",
-      "overrides": "null|record?",
-      "supports_agentless": "null|boolean?",
-      "global_data_tags": "array?",
-      "monitoring_pprof_enabled": "boolean?",
-      "required_versions": "null|array?",
-      "is_verifier": "boolean?",
-      "has_agent_version_conditions": "boolean?",
-      "min_agent_version": "string?|null",
-      "package_agent_version_conditions": "array?|null",
-      "is_preconfigured": "boolean?",
-      "revision": "number?",
-      "schema_version": "string?",
-      "status": "active?|inactive?",
-      "updated_at": "string?",
-      "updated_by": "string?",
-      "advanced_settings": {
-        "agent_limits_go_max_procs": "null|any?",
-        "agent_download_timeout": "null|any?",
-        "agent_download_target_directory": "null|any?",
-        "agent_logging_metrics_period": "null|any?",
-        "agent_logging_level": "null|any?",
-        "agent_logging_to_files": "null|any?",
-        "agent_logging_files_rotateeverybytes": "null|any?",
-        "agent_logging_files_keepfiles": "null|any?",
-        "agent_logging_files_interval": "null|any?",
-        "agent_monitoring_runtime_experimental": "null|any?",
-        "agent_features_disable_policy_change_acks_enabled": "null|any?",
-        "agent_features_include_tags_in_events_enabled": "null|any?",
-        "agent_internal": "null|any?"
-      },
-      "agentless": {
-        "cluster_id": "string?",
-        "cloud_connectors": {
-          "target_csp": "aws?|azure?|gcp?",
-          "enabled": "boolean"
-        },
-        "resources": {
-          "requests": {
-            "memory": "string?",
-            "cpu": "string?"
-          }
-        }
-      },
-      "monitoring_http": {
-        "enabled": "boolean?",
-        "host": "string?",
-        "port": "number?",
-        "buffer": {
-          "enabled": "boolean?"
-        }
-      },
-      "monitoring_diagnostics": {
-        "limit": {
-          "interval": "string?",
-          "burst": "number?"
-        },
-        "uploader": {
-          "max_retries": "number?",
-          "init_dur": "string?",
-          "max_dur": "string?"
-        }
-      }
+      "id": "id",
+      "name": "Policy 1",
+      "namespace": "default",
+      "inactivity_timeout": 0,
+      "is_verifier": true,
+      "min_agent_version": "8.0.0",
+      "package_agent_version_conditions": [
+        { "name": "apache", "title": "Apache HTTP Server", "version_condition": ">=8.0.0" }
+      ]
     }
   ]
 }
