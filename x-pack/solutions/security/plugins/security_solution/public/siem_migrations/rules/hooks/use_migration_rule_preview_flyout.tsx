@@ -10,10 +10,19 @@ import React, { useCallback, useState, useMemo } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
-import { MigrationRuleDetailsFlyout } from '../components/rule_details_flyout';
+import {
+  MigrationRuleDetailsFlyout,
+  type MigrationFlyoutNavigation,
+} from '../components/rule_details_flyout';
 
 interface UseMigrationRuleDetailsFlyoutParams {
   isLoading?: boolean;
+  /**
+   * Ordered rules of the currently loaded table page, used for prev/next navigation.
+   * Must be the same array that backs `getMigrationRuleData`, so that navigation
+   * targets always resolve.
+   */
+  migrationRules: RuleMigrationRule[];
   getMigrationRuleData: (ruleId: string) =>
     | {
         migrationRule?: RuleMigrationRule;
@@ -28,10 +37,18 @@ interface UseMigrationRuleDetailsFlyoutResult {
   migrationRuleDetailsFlyout: ReactNode;
   openMigrationRuleDetails: (rule: RuleMigrationRule) => void;
   closeMigrationRuleDetails: () => void;
+  /** Id of the rule currently opened in the flyout, if any */
+  openedMigrationRuleId?: string;
+  /**
+   * Navigation state for the opened rule within the loaded page. Boundary flags are
+   * computed ONLY here. The same object is passed to the flyout.
+   */
+  navigation: MigrationFlyoutNavigation;
 }
 
 export function useMigrationRuleDetailsFlyout({
   isLoading,
+  migrationRules,
   getMigrationRuleData,
   extraTabsFactory,
   ruleActionsFactory,
@@ -48,6 +65,36 @@ export function useMigrationRuleDetailsFlyout({
     setMigrationRuleId(rule.id);
   }, []);
   const closeMigrationRuleDetails = useCallback(() => setMigrationRuleId(undefined), []);
+
+  const openedRuleIndex = useMemo(
+    () => (migrationRuleId ? migrationRules.findIndex((rule) => rule.id === migrationRuleId) : -1),
+    [migrationRules, migrationRuleId]
+  );
+
+  const goToPrevious = useCallback(() => {
+    const previousRule = migrationRules[openedRuleIndex - 1];
+    if (openedRuleIndex > 0 && previousRule) {
+      setMigrationRuleId(previousRule.id);
+    }
+  }, [migrationRules, openedRuleIndex]);
+
+  const goToNext = useCallback(() => {
+    const nextRule = migrationRules[openedRuleIndex + 1];
+    if (openedRuleIndex !== -1 && nextRule) {
+      setMigrationRuleId(nextRule.id);
+    }
+  }, [migrationRules, openedRuleIndex]);
+
+  const navigation = useMemo<MigrationFlyoutNavigation>(() => {
+    // openedRuleIndex is -1 when the opened rule is not in the loaded page:
+    // both flags false, so the arrows render disabled. Flags are computed ONLY here.
+    return {
+      hasPrevious: openedRuleIndex > 0,
+      hasNext: openedRuleIndex !== -1 && openedRuleIndex < migrationRules.length - 1,
+      goToPrevious,
+      goToNext,
+    };
+  }, [openedRuleIndex, migrationRules.length, goToPrevious, goToNext]);
 
   const ruleActions = useMemo(
     () =>
@@ -73,9 +120,12 @@ export function useMigrationRuleDetailsFlyout({
         ruleActions={ruleActions}
         extraTabs={extraTabs}
         isDataLoading={isLoading}
+        navigation={navigation}
       />
     ),
     openMigrationRuleDetails,
     closeMigrationRuleDetails,
+    openedMigrationRuleId: migrationRuleData?.migrationRule ? migrationRuleId : undefined,
+    navigation,
   };
 }
