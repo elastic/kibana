@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPanel,
   EuiPopover,
   EuiToolTip,
   type EuiContextMenuPanelDescriptor,
@@ -195,9 +194,15 @@ export const ActionPolicyActionsMenu = ({
       ),
       width: 320,
       content: (
-        <EuiPanel>
+        <div
+          css={css`
+            padding: ${euiTheme.size.m};
+            padding-top: ${euiTheme.size.s};
+          `}
+        >
           <ActionPolicySnoozeForm
             isSnoozed={snoozed}
+            showTitle={false}
             onApplySnooze={(snoozedUntil) => {
               onSnooze(policy.id, snoozedUntil);
               closePopover();
@@ -207,7 +212,7 @@ export const ActionPolicyActionsMenu = ({
               closePopover();
             }}
           />
-        </EuiPanel>
+        </div>
       ),
     },
   ];
