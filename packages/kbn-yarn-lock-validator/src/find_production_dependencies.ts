@@ -36,8 +36,9 @@ export function findProductionDependencies(
     }
     const resolvedVersion = pnpmLock.rootDependencies[name];
     if (resolvedVersion) {
-      // importer records the version only; the snapshot key is `name@version(peers)`
-      queue.push(`${name}@${resolvedVersion}`);
+      // importer records the resolved version, which for `npm:` aliases is itself
+      // a `name@version` snapshot key; compose it the same way as child deps.
+      queue.push(toSnapshotKey(name, resolvedVersion));
     }
   }
 

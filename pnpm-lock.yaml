@@ -12,6 +12,10 @@ overrides:
   '@babel/parser': 7.24.7
   '@babel/plugin-transform-typescript': 7.24.7
   '@bufbuild/protobuf': 2.5.2
+  '@elastic/charts>@reduxjs/toolkit': npm:@reduxjs/toolkit@1.9.7
+  '@elastic/charts>immer': npm:immer@9.0.21
+  '@elastic/charts>react-redux': npm:react-redux@7.2.8
+  '@elastic/charts>redux': npm:redux@4.2.1
   '@elastic/elasticsearch@9>@elastic/transport': 9.3.7
   '@emnapi/core': 1.11.1
   '@emnapi/runtime': 1.11.1
@@ -122,7 +126,7 @@ importers:
         version: 2.0.10(react-router-dom@5.3.4(react@18.2.0))(react@18.2.0)
       '@elastic/charts':
         specifier: 71.9.0
-        version: 71.9.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(reselect@4.1.8)
+        version: 71.9.0(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(reselect@5.1.0)
       '@elastic/datemath':
         specifier: 5.0.3
         version: 5.0.3(moment@2.30.1)
@@ -157,8 +161,8 @@ importers:
         specifier: 1.9.0
         version: 1.9.0
       '@elastic/monaco-esql':
-        specifier: 3.5.0
-        version: 3.5.0(monaco-editor@0.44.0)(monaco-promql@1.8.0)
+        specifier: 4.13.0
+        version: 4.13.0(monaco-editor@0.44.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -597,6 +601,9 @@ importers:
       '@kbn/cleanup-before-exit':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-cleanup-before-exit
+      '@kbn/cli':
+        specifier: workspace:*
+        version: link:src/cli
       '@kbn/cloud':
         specifier: workspace:*
         version: link:src/platform/packages/shared/cloud
@@ -3823,8 +3830,8 @@ importers:
         specifier: 1.41.1
         version: 1.41.1
       '@reduxjs/toolkit':
-        specifier: 1.9.7
-        version: 1.9.7(react-redux@7.2.8(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0))(react@18.2.0)
+        specifier: 2.12.0
+        version: 2.12.0(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)
       '@slack/webhook':
         specifier: 7.0.6
         version: 7.0.6
@@ -3893,7 +3900,7 @@ importers:
         version: 6.0.0(@types/react@18.2.79)(react@18.2.0)(xstate@5.26.0)
       '@xyflow/react':
         specifier: 12.11.1
-        version: 12.11.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@9.0.21)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 12.11.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       adm-zip:
         specifier: 0.5.16
         version: 0.5.16
@@ -4105,8 +4112,11 @@ importers:
         specifier: 0.7.1
         version: 0.7.1
       immer:
-        specifier: 9.0.21
-        version: 9.0.21
+        specifier: 11.1.8
+        version: 11.1.8
+      immer-v9:
+        specifier: npm:immer@9.0.21
+        version: immer@9.0.21
       inquirer:
         specifier: 8.2.7
         version: 8.2.7(@types/node@24.10.13)
@@ -4160,7 +4170,7 @@ importers:
         version: 3.0.1
       kea:
         specifier: 2.6.0
-        version: 2.6.0(react-redux@7.2.8(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0))(react@18.2.0)(redux@4.2.1)(reselect@4.1.8)
+        version: 2.6.0(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)
       langsmith:
         specifier: 0.7.1
         version: 0.7.1(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.0)(zod@4.4.3))(ws@8.21.0)
@@ -4342,8 +4352,11 @@ importers:
         specifier: 0.33.0
         version: 0.33.0(react@18.2.0)
       react-redux:
-        specifier: 7.2.8
-        version: 7.2.8(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
+        specifier: 9.2.0
+        version: 9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1)
+      react-redux-v7:
+        specifier: npm:react-redux@7.2.8
+        version: react-redux@7.2.8(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
       react-reverse-portal:
         specifier: 2.3.0
         version: 2.3.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -4378,14 +4391,14 @@ importers:
         specifier: 1.0.4
         version: 1.0.4
       redux:
-        specifier: 4.2.1
-        version: 4.2.1
+        specifier: 5.0.1
+        version: 5.0.1
       redux-actions:
         specifier: 2.6.5
         version: 2.6.5
       redux-devtools-extension:
         specifier: 2.13.8
-        version: 2.13.8(redux@4.2.1)
+        version: 2.13.8(redux@5.0.1)
       redux-saga:
         specifier: 1.3.0
         version: 1.3.0
@@ -4393,11 +4406,20 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       redux-thunk:
-        specifier: 2.4.2
-        version: 2.4.2(redux@4.2.1)
+        specifier: 3.1.0
+        version: 3.1.0(redux@5.0.1)
+      redux-thunk-v2:
+        specifier: npm:redux-thunk@2.4.2
+        version: redux-thunk@2.4.2(redux@5.0.1)
       redux-thunks:
         specifier: 1.0.0
-        version: 1.0.0(redux-thunk@2.4.2(redux@4.2.1))
+        version: 1.0.0(redux-thunk@3.1.0(redux@5.0.1))
+      redux-toolkit-v1:
+        specifier: npm:@reduxjs/toolkit@1.9.7
+        version: '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)'
+      redux-v4:
+        specifier: npm:redux@4.2.1
+        version: redux@4.2.1
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -4420,8 +4442,11 @@ importers:
         specifier: 7.5.2
         version: 7.5.2
       reselect:
-        specifier: 4.1.8
-        version: 4.1.8
+        specifier: 5.1.0
+        version: 5.1.0
+      reselect-v4:
+        specifier: npm:reselect@4.1.8
+        version: reselect@4.1.8
       rison-node:
         specifier: 2.1.1
         version: 2.1.1
@@ -4975,6 +5000,9 @@ importers:
       '@kbn/detections-response-ftr-services':
         specifier: workspace:*
         version: link:x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response
+      '@kbn/dev':
+        specifier: workspace:*
+        version: link:src/dev
       '@kbn/dev-cli-errors':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-cli-errors
@@ -6386,8 +6414,8 @@ importers:
         specifier: 6.9.0
         version: 6.9.0
       tar-fs:
-        specifier: 3.1.2
-        version: 3.1.2
+        specifier: 3.1.3
+        version: 3.1.3
       terser-webpack-plugin:
         specifier: 5.3.17
         version: 5.3.17(@swc/core@1.15.18(@swc/helpers@0.5.19))(esbuild@0.27.2)(webpack@5.96.1)
@@ -6666,6 +6694,8 @@ importers:
   packages/kbn-yarn-install-scripts: {}
 
   packages/kbn-yarn-lock-validator: {}
+
+  src/cli: {}
 
   src/core: {}
 
@@ -7180,6 +7210,8 @@ importers:
   src/core/test-helpers/kbn-server: {}
 
   src/core/test-helpers/model-versions: {}
+
+  src/dev: {}
 
   src/platform/kbn-ui/chrome-layout: {}
 
@@ -10486,6 +10518,9 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 6.0.3
 
+  '@elastic/esql-definitions@4.14.0':
+    resolution: {integrity: sha512-vIEPBDtLFhVrg9+HlZqJvDnOusmqXIRXqQ0ZXjxz5hwgHk/xoRyx0DhIWuAdzdFQyZf2Jk+aHkjjXn8ixcxnMQ==}
+
   '@elastic/esql@4.9.1':
     resolution: {integrity: sha512-pdOR21qr80GmdNa+OzXhMLdd7eXyylmCP2uNEDrTy2uAFFH7ylKS4WB8pEuHBZl+ZfBS9IAIFJFpi6uA7mOoaQ==}
 
@@ -10537,14 +10572,10 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@3.5.0':
-    resolution: {integrity: sha512-+itmhlzswEGSveIjhlDpm01NiiavuDaI7HjiyA1hG2JE3Ovs7gsMRRQsXH3yprAlWGFBlofrL0kNb8mWZrKqkw==}
+  '@elastic/monaco-esql@4.13.0':
+    resolution: {integrity: sha512-VCgIde5ZgCFK93Pn0dLif24g4WiAhtHQFQvJ3Yp7Nibc7CvcKcUEkQSevRLFykfULy6TNTqzDR/6BVqskboOkA==}
     peerDependencies:
-      monaco-editor: '*'
-      monaco-promql: '*'
-    peerDependenciesMeta:
-      monaco-promql:
-        optional: true
+      monaco-editor: '>=0.30.0'
 
   '@elastic/node-crypto@1.2.3':
     resolution: {integrity: sha512-S9L6jb0rx7M8WJd6m4EzgRJp/U7Wb1bq2x9GDh7DRcCD6MoNN1/wyYoPGxPrF3XgOsixmO1tcy70qUyw1b+OkA==}
@@ -13838,6 +13869,17 @@ packages:
       react-redux:
         optional: true
 
+  '@reduxjs/toolkit@2.12.0':
+    resolution: {integrity: sha512-KiT+RzZbp6mQET+Mg+h2c97+9j1sNflUxQkIHI7Yuzf6Peu+OYpmkn6nbHWmLLWj+1ZODUJFwGZ7gx3L9R9EOw==}
+    peerDependencies:
+      react: ^16.9.0 || ^17.0.0 || ^18 || ^19
+      react-redux: ^7.2.1 || ^8.1.3 || ^9.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-redux:
+        optional: true
+
   '@remix-run/router@1.23.3':
     resolution: {integrity: sha512-4An71tdz9X8+3sI4Qqqd2LWd9vS39J7sqd9EU4Scw7TJE/qB10Flv/UuqbPVgfQV9XoK8Np6jNquZitnZq5i+Q==}
     engines: {node: '>=14.0.0'}
@@ -14282,6 +14324,9 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  '@standard-schema/utils@0.3.0':
+    resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
 
   '@statoscope/extensions@5.28.1':
     resolution: {integrity: sha512-jxkHSNfr7KJOfxlueCtahv1LqscTALLkcGSrYCU71C4tR9GVYoVCUMOrhAFJr6ia+GlPhSaxOSk/j+Ay+ZN9vg==}
@@ -15476,9 +15521,6 @@ packages:
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
-
-  '@types/use-sync-external-store@0.0.3':
-    resolution: {integrity: sha512-EwmlvuaxPNej9+T4v5AuBPJa2x2UOJVdjCtDHgcDqitUeOtjnJKJ+apYjVcAoBEMjKW1VVFGZLUb5+qqa09XFA==}
 
   '@types/use-sync-external-store@0.0.6':
     resolution: {integrity: sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg==}
@@ -19808,6 +19850,9 @@ packages:
   immediate@3.0.6:
     resolution: {integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==}
 
+  immer@11.1.8:
+    resolution: {integrity: sha512-/tbkHMW7y10Lx6i1crLjD4/OhNkRG+Fo7byZHtah0547nIeXYcpIXaUh0IAQY6gO5459qpGGYapcEOHtFXkIuA==}
+
   immer@9.0.21:
     resolution: {integrity: sha512-bc4NBHqOqSfRW7POMkHd51LvClaeMXpm8dx0e8oE2GORbq5aRK7Bxl4FyzVLdGtLmvLKL7BTDBG5ACQm4HWjTA==}
 
@@ -23404,29 +23449,8 @@ packages:
       react-native:
         optional: true
 
-  react-redux@8.1.3:
-    resolution: {integrity: sha512-n0ZrutD7DaX/j9VscF+uTALI3oUPa/pO4Z3soOBIjuRn/FzVu6aehhysxZCLi6y7duMf52WNZGMl7CtuK5EnRw==}
-    peerDependencies:
-      '@types/react': 18.2.79
-      '@types/react-dom': 18.2.25
-      react: ^16.8 || ^17.0 || ^18.0
-      react-dom: ^16.8 || ^17.0 || ^18.0
-      react-native: '>=0.59'
-      redux: ^4 || ^5.0.0-beta.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      '@types/react-dom':
-        optional: true
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
-      redux:
-        optional: true
-
-  react-redux@9.3.0:
-    resolution: {integrity: sha512-KQopgqFo/p/fgmAs5qz6p5RWaNAzq40WAu7fJIXnQpYxFPbJYtsJPWvGeF2rOBaY/kEuV77AVsX8TsQzKm+A/g==}
+  react-redux@9.2.0:
+    resolution: {integrity: sha512-ROY9fvHhwOD9ySfrF0wmvu//bKCQ6AeZZq1nJNtbDC+kk5DuSuNX/n6YWYF/SYy7bSba4D4FSz8DJeKY/S/r+g==}
     peerDependencies:
       '@types/react': 18.2.79
       react: ^18.0 || ^19
@@ -23672,6 +23696,11 @@ packages:
     peerDependencies:
       redux: ^4
 
+  redux-thunk@3.1.0:
+    resolution: {integrity: sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==}
+    peerDependencies:
+      redux: ^5.0.0
+
   redux-thunks@1.0.0:
     resolution: {integrity: sha512-/obl3xW0jc3cCnWxOyVlLkJ0b/jokBkqXKWE0DSqbuwdDZq0JMCLpRl7PSUfgpup0Eu2x8hzD6OPe45lv/ngBQ==}
     peerDependencies:
@@ -23862,6 +23891,9 @@ packages:
 
   reselect@4.1.8:
     resolution: {integrity: sha512-ab9EmR80F/zQTMNeneUr4cv+jSwPJgIlvEmVwLerwrWVbpLlBuls9XHzIeTFy4cegU2NHBp3va0LKOzU5qFEYQ==}
+
+  reselect@5.1.0:
+    resolution: {integrity: sha512-aw7jcGLDpSgNDyWBQLv2cedml85qd95/iszJjN988zX1t7AVRJi19d9kto5+W7oCfQ94gyo40dVbT6g2k4/kXg==}
 
   resize-observer-polyfill@1.5.1:
     resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==}
@@ -25028,8 +25060,8 @@ packages:
   tar-fs@2.1.5:
     resolution: {integrity: sha512-OboTd8mmMhZDNPV+UjQcK9yKAatXu2aJ+r1w4im1Otd4M4fl2hwvdoXUxIYHFTHWK/3y3FarBP70v3vwmGlOxw==}
 
-  tar-fs@3.1.2:
-    resolution: {integrity: sha512-QGxxTxxyleAdyM3kpFs14ymbYmNFrfY+pHj7Z8FgtbZ7w2//VAgLMac7sT6nRpIHjppXO2AwwEOg0bPFVRcmXw==}
+  tar-fs@3.1.3:
+    resolution: {integrity: sha512-/hU4AXnIdZu+Gvl1pk0oI5f5HxWsCJRtY2aFaJdk9VvyL48DWU6iU5WAIPG+wIi1YvWA6eTJvIviP/tMAZZNwQ==}
 
   tar-stream@2.2.0:
     resolution: {integrity: sha512-ujeqbceABgwMZxEJnk2HDY2DlnUZ+9oEcb1KzTVfYHio0UE6dG71n60d8D2I4qNvleWrrXpmjpt7vZeF1LnMZQ==}
@@ -28214,10 +28246,10 @@ snapshots:
     dependencies:
       object-hash: 1.3.1
 
-  '@elastic/charts@71.9.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(reselect@4.1.8)':
+  '@elastic/charts@71.9.0(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(reselect@5.1.0)':
     dependencies:
       '@popperjs/core': 2.11.8
-      '@reduxjs/toolkit': 1.9.7(react-redux@8.1.3(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(redux@4.2.1))(react@18.2.0)
+      '@reduxjs/toolkit': 1.9.7(react-redux@7.2.8(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0))(react@18.2.0)
       bezier-easing: 2.1.0
       chroma-js: 2.4.2
       classnames: 2.5.1
@@ -28232,17 +28264,15 @@ snapshots:
       moment: 2.30.1
       moment-timezone: 0.6.1
       prop-types: 15.8.1
-      re-reselect: 4.0.1(reselect@4.1.8)
+      re-reselect: 4.0.1(reselect@5.1.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      react-redux: 8.1.3(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(redux@4.2.1)
+      react-redux: 7.2.8(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
       redux: 4.2.1
       ts-debounce: 4.0.0
       utility-types: 3.11.0
       uuid: 14.0.1
     transitivePeerDependencies:
-      - '@types/react'
-      - '@types/react-dom'
       - react-native
       - reselect
 
@@ -28308,6 +28338,8 @@ snapshots:
     dependencies:
       eslint: 8.57.0
       typescript: 6.0.3
+
+  '@elastic/esql-definitions@4.14.0': {}
 
   '@elastic/esql@4.9.1':
     dependencies:
@@ -28403,11 +28435,10 @@ snapshots:
 
   '@elastic/micro-jq@1.9.0': {}
 
-  '@elastic/monaco-esql@3.5.0(monaco-editor@0.44.0)(monaco-promql@1.8.0)':
+  '@elastic/monaco-esql@4.13.0(monaco-editor@0.44.0)':
     dependencies:
+      '@elastic/esql-definitions': 4.14.0
       monaco-editor: 0.44.0
-    optionalDependencies:
-      monaco-promql: 1.8.0
 
   '@elastic/node-crypto@1.2.3': {}
 
@@ -29246,7 +29277,7 @@ snapshots:
       raf-schd: 4.0.3
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      react-redux: 9.3.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1)
+      react-redux: 9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1)
       redux: 5.0.1
     transitivePeerDependencies:
       - '@types/react'
@@ -32238,7 +32269,7 @@ snapshots:
       react: 18.2.0
       react-redux: 7.2.8(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
 
-  '@reduxjs/toolkit@1.9.7(react-redux@8.1.3(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(redux@4.2.1))(react@18.2.0)':
+  '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)':
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
@@ -32246,7 +32277,19 @@ snapshots:
       reselect: 4.1.8
     optionalDependencies:
       react: 18.2.0
-      react-redux: 8.1.3(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(redux@4.2.1)
+      react-redux: 9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1)
+
+  '@reduxjs/toolkit@2.12.0(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)':
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+      '@standard-schema/utils': 0.3.0
+      immer: 11.1.8
+      redux: 5.0.1
+      redux-thunk: 3.1.0(redux@5.0.1)
+      reselect: 5.1.0
+    optionalDependencies:
+      react: 18.2.0
+      react-redux: 9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1)
 
   '@remix-run/router@1.23.3': {}
 
@@ -32841,6 +32884,8 @@ snapshots:
   '@sovpro/delimited-stream@1.1.0': {}
 
   '@standard-schema/spec@1.1.0': {}
+
+  '@standard-schema/utils@0.3.0': {}
 
   '@statoscope/extensions@5.28.1': {}
 
@@ -34337,8 +34382,6 @@ snapshots:
 
   '@types/unist@3.0.3': {}
 
-  '@types/use-sync-external-store@0.0.3': {}
-
   '@types/use-sync-external-store@0.0.6': {}
 
   '@types/uuid@10.0.0': {}
@@ -34734,13 +34777,13 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-  '@xyflow/react@12.11.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@9.0.21)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@xyflow/react@12.11.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@xyflow/system': 0.0.78
       classcat: 5.0.5
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      zustand: 4.5.7(@types/react@18.2.79)(immer@9.0.21)(react@18.2.0)
+      zustand: 4.5.7(@types/react@18.2.79)(immer@11.1.8)(react@18.2.0)
     optionalDependencies:
       '@types/react': 18.2.79
       '@types/react-dom': 18.2.25
@@ -39589,6 +39632,8 @@ snapshots:
 
   immediate@3.0.6: {}
 
+  immer@11.1.8: {}
+
   immer@9.0.21: {}
 
   immutable@5.1.8: {}
@@ -40745,12 +40790,12 @@ snapshots:
 
   kdbush@4.1.0: {}
 
-  kea@2.6.0(react-redux@7.2.8(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0))(react@18.2.0)(redux@4.2.1)(reselect@4.1.8):
+  kea@2.6.0(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0):
     dependencies:
       react: 18.2.0
-      react-redux: 7.2.8(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
-      redux: 4.2.1
-      reselect: 4.1.8
+      react-redux: 9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1)
+      redux: 5.0.1
+      reselect: 5.1.0
 
   keyv@4.5.4:
     dependencies:
@@ -43819,9 +43864,9 @@ snapshots:
       strip-json-comments: 2.0.1
     optional: true
 
-  re-reselect@4.0.1(reselect@4.1.8):
+  re-reselect@4.0.1(reselect@5.1.0):
     dependencies:
-      reselect: 4.1.8
+      reselect: 5.1.0
 
   re2js@1.3.3: {}
 
@@ -44074,23 +44119,7 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
       react-native: 0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0)
 
-  react-redux@8.1.3(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(redux@4.2.1):
-    dependencies:
-      '@babel/runtime': 7.28.4
-      '@types/hoist-non-react-statics': 3.3.7(@types/react@18.2.79)
-      '@types/use-sync-external-store': 0.0.3
-      hoist-non-react-statics: 3.3.2
-      react: 18.2.0
-      react-is: 18.3.1
-      use-sync-external-store: 1.6.0(react@18.2.0)
-    optionalDependencies:
-      '@types/react': 18.2.79
-      '@types/react-dom': 18.2.25
-      react-dom: 18.2.0(react@18.2.0)
-      react-native: 0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0)
-      redux: 4.2.1
-
-  react-redux@9.3.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1):
+  react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1):
     dependencies:
       '@types/use-sync-external-store': 0.0.6
       react: 18.2.0
@@ -44410,9 +44439,9 @@ snapshots:
       reduce-reducers: 0.4.3
       to-camel-case: 1.0.0
 
-  redux-devtools-extension@2.13.8(redux@4.2.1):
+  redux-devtools-extension@2.13.8(redux@5.0.1):
     dependencies:
-      redux: 4.2.1
+      redux: 5.0.1
 
   redux-saga-testing@2.0.2: {}
 
@@ -44424,9 +44453,17 @@ snapshots:
     dependencies:
       redux: 4.2.1
 
-  redux-thunks@1.0.0(redux-thunk@2.4.2(redux@4.2.1)):
+  redux-thunk@2.4.2(redux@5.0.1):
     dependencies:
-      redux-thunk: 2.4.2(redux@4.2.1)
+      redux: 5.0.1
+
+  redux-thunk@3.1.0(redux@5.0.1):
+    dependencies:
+      redux: 5.0.1
+
+  redux-thunks@1.0.0(redux-thunk@3.1.0(redux@5.0.1)):
+    dependencies:
+      redux-thunk: 3.1.0(redux@5.0.1)
 
   redux@4.2.1:
     dependencies:
@@ -44690,6 +44727,8 @@ snapshots:
   requires-port@1.0.0: {}
 
   reselect@4.1.8: {}
+
+  reselect@5.1.0: {}
 
   resize-observer-polyfill@1.5.1: {}
 
@@ -46057,7 +46096,7 @@ snapshots:
       tar-stream: 2.2.0
     optional: true
 
-  tar-fs@3.1.2:
+  tar-fs@3.1.3:
     dependencies:
       pump: 3.0.4
       tar-stream: 3.2.0
@@ -47800,12 +47839,12 @@ snapshots:
 
   zod@4.4.3: {}
 
-  zustand@4.5.7(@types/react@18.2.79)(immer@9.0.21)(react@18.2.0):
+  zustand@4.5.7(@types/react@18.2.79)(immer@11.1.8)(react@18.2.0):
     dependencies:
       use-sync-external-store: 1.6.0(react@18.2.0)
     optionalDependencies:
       '@types/react': 18.2.79
-      immer: 9.0.21
+      immer: 11.1.8
       react: 18.2.0
 
   zwitch@1.0.5: {}

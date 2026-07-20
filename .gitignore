@@ -255,7 +255,9 @@ src/platform/plugins/shared/console/packaging/react/translations
 /examples/user_profile_examples/package.json
 /examples/v8_profiler_examples/package.json
 /examples/workflows_extensions_example/package.json
+/src/cli/package.json
 /src/core/package.json
+/src/dev/package.json
 /src/platform/packages/shared/kbn-encrypted-saved-objects-shared/package.json
 /src/platform/plugins/private/advanced_settings/package.json
 /src/platform/plugins/private/event_annotation/package.json
