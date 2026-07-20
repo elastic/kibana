@@ -1900,13 +1900,13 @@ describe('delete()', () => {
 
     test(`deletes any existing authorization tokens`, async () => {
       await actionsClient.delete({ id: '1' });
-      expect(connectorTokenClient.deleteAllConnectorTokens).toHaveBeenCalledTimes(1);
+      expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
     test('revokes tokens before deleting the saved object', async () => {
       const callOrder: string[] = [];
-      connectorTokenClient.deleteAllConnectorTokens.mockImplementationOnce(async () => {
-        callOrder.push('deleteAllConnectorTokens');
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
       });
       unsecuredSavedObjectsClient.delete.mockImplementationOnce(async () => {
         callOrder.push('soDelete');
@@ -1915,7 +1915,7 @@ describe('delete()', () => {
 
       await actionsClient.delete({ id: '1' });
 
-      expect(callOrder).toEqual(['deleteAllConnectorTokens', 'soDelete']);
+      expect(callOrder).toEqual(['deleteConnectorTokens', 'soDelete']);
     });
 
     describe('when connector has authMode per-user', () => {
@@ -1935,9 +1935,9 @@ describe('delete()', () => {
         });
       });
 
-      test(`passes authMode per-user to deleteAllConnectorTokens`, async () => {
+      test(`passes authMode per-user to deleteConnectorTokens`, async () => {
         await actionsClient.delete({ id: '1' });
-        expect(connectorTokenClient.deleteAllConnectorTokens).toHaveBeenCalledWith({
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
           connectorId: '1',
           authMode: 'per-user',
         });
@@ -1961,9 +1961,9 @@ describe('delete()', () => {
         });
       });
 
-      test(`passes authMode shared to deleteAllConnectorTokens`, async () => {
+      test(`passes authMode shared to deleteConnectorTokens`, async () => {
         await actionsClient.delete({ id: '1' });
-        expect(connectorTokenClient.deleteAllConnectorTokens).toHaveBeenCalledWith({
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
           connectorId: '1',
           authMode: 'shared',
         });
@@ -1971,7 +1971,7 @@ describe('delete()', () => {
     });
 
     test(`failing to delete tokens logs error instead of throw`, async () => {
-      connectorTokenClient.deleteAllConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
+      connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
       await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to delete auth tokens for connector "1": Fail`
@@ -2247,7 +2247,7 @@ describe('update()', () => {
 
     test(`deletes any existing authorization tokens`, async () => {
       await updateOperation();
-      expect(connectorTokenClient.deleteAllConnectorTokens).toHaveBeenCalledTimes(1);
+      expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
     describe('when connector has authMode per-user', () => {
@@ -2277,12 +2277,12 @@ describe('update()', () => {
         });
       });
 
-      test(`passes authMode per-user to deleteAllConnectorTokens`, async () => {
+      test(`passes authMode per-user to deleteConnectorTokens`, async () => {
         await actionsClient.update({
           id: 'my-action',
           action: { name: 'my name', config: {}, secrets: {} },
         });
-        expect(connectorTokenClient.deleteAllConnectorTokens).toHaveBeenCalledWith({
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
           connectorId: 'my-action',
           authMode: 'per-user',
         });
@@ -2316,12 +2316,12 @@ describe('update()', () => {
         });
       });
 
-      test(`passes authMode shared to deleteAllConnectorTokens`, async () => {
+      test(`passes authMode shared to deleteConnectorTokens`, async () => {
         await actionsClient.update({
           id: 'my-action',
           action: { name: 'my name', config: {}, secrets: {} },
         });
-        expect(connectorTokenClient.deleteAllConnectorTokens).toHaveBeenCalledWith({
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
           connectorId: 'my-action',
           authMode: 'shared',
         });
@@ -2329,7 +2329,7 @@ describe('update()', () => {
     });
 
     test(`failing to delete tokens logs error instead of throw`, async () => {
-      connectorTokenClient.deleteAllConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
+      connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
       await expect(updateOperation()).resolves.toBeTruthy();
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to delete auth tokens for connector "my-action" after update: Fail`

@@ -220,7 +220,7 @@ export const getAxiosInstance = ({
         // We don't know for sure that it is an access token issue but remove saved
         // token just to be sure
         if (statusCode >= 400 && statusCode < 500) {
-          await connectorTokenClient.deleteAllConnectorTokens({ connectorId });
+          await connectorTokenClient.deleteConnectorTokens({ connectorId });
         }
         return Promise.reject(error);
       }

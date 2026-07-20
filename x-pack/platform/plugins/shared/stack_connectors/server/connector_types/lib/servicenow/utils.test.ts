@@ -417,7 +417,7 @@ describe('utils', () => {
 
       await expect(() => mockResponseCallback(errorResponse)).rejects.toEqual(errorResponse);
 
-      expect(connectorTokenClient.deleteAllConnectorTokens).toHaveBeenCalledWith({
+      expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
         connectorId: '123',
       });
     });
@@ -466,7 +466,7 @@ describe('utils', () => {
 
       await expect(() => mockResponseCallback(errorResponse)).rejects.toEqual(errorResponse);
 
-      expect(connectorTokenClient.deleteAllConnectorTokens).not.toHaveBeenCalled();
+      expect(connectorTokenClient.deleteConnectorTokens).not.toHaveBeenCalled();
     });
   });
 

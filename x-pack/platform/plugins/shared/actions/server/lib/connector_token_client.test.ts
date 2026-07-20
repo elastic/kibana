@@ -504,7 +504,7 @@ describe('delete()', () => {
       ],
     };
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce(findResult);
-    await connectorTokenClient.deleteAllConnectorTokens({ connectorId: '1' });
+    await connectorTokenClient.deleteConnectorTokens({ connectorId: '1' });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(2);
     expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -555,7 +555,7 @@ describe('delete()', () => {
       unsecuredSavedObjectsClient.delete.mockResolvedValue({});
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(sharedFindResult);
 
-      await connectorTokenClient.deleteAllConnectorTokens({
+      await connectorTokenClient.deleteConnectorTokens({
         connectorId: '123',
         authMode: 'shared',
       });
@@ -570,7 +570,7 @@ describe('delete()', () => {
       unsecuredSavedObjectsClient.delete.mockResolvedValue({});
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(userFindResult);
 
-      await connectorTokenClient.deleteAllConnectorTokens({
+      await connectorTokenClient.deleteConnectorTokens({
         connectorId: '123',
         authMode: 'per-user',
       });
@@ -596,11 +596,11 @@ describe('delete()', () => {
       );
     });
 
-    test('deleteAllConnectorTokens defaults to shared when no authMode', async () => {
+    test('deleteConnectorTokens defaults to shared when no authMode', async () => {
       unsecuredSavedObjectsClient.delete.mockResolvedValue({});
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(sharedFindResult);
 
-      await connectorTokenClient.deleteAllConnectorTokens({ connectorId: '123' });
+      await connectorTokenClient.deleteConnectorTokens({ connectorId: '123' });
 
       expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
         'connector_token',

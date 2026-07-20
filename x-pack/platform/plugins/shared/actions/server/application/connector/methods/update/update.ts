@@ -210,7 +210,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   }
 
   try {
-    await context.connectorTokenClient.deleteAllConnectorTokens({ connectorId: id, authMode });
+    await context.connectorTokenClient.deleteConnectorTokens({ connectorId: id, authMode });
   } catch (e) {
     context.logger.error(
       `Failed to delete auth tokens for connector "${id}" after update: ${e.message}`

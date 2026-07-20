@@ -630,7 +630,7 @@ export class ActionsClient {
 
   private async deleteConnectorAuthTokens(id: string, authMode?: AuthMode) {
     try {
-      await this.context.connectorTokenClient.deleteAllConnectorTokens({
+      await this.context.connectorTokenClient.deleteConnectorTokens({
         connectorId: id,
         authMode,
       });

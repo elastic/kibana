@@ -193,41 +193,29 @@ export class ConnectorTokenClient {
   }
 
   /**
-   * Delete tokens for a specific user (per-user scope only).
+   * Delete all connector tokens (delegates to shared or user client)
    */
   public async deleteConnectorTokens(options: {
-    profileUid: string;
+    profileUid?: string;
     connectorId: string;
     tokenType?: string;
-    credentialType?: string;
-    authType?: string;
-    provider?: string;
-  }): Promise<void> {
-    this.log({
-      method: 'deleteConnectorTokens',
-      scope: PER_USER_TOKEN_SCOPE,
-      fields: { connectorId: options.connectorId },
-    });
-    return this.userClient.deleteConnectorTokens(options);
-  }
-
-  /**
-   * Delete all tokens for a connector (routes to user or shared client based on authMode).
-   */
-  public async deleteAllConnectorTokens(options: {
-    connectorId: string;
     credentialType?: string;
     authMode?: typeof PER_USER_TOKEN_SCOPE | typeof SHARED_TOKEN_SCOPE;
     authType?: string;
     provider?: string;
   }): Promise<void> {
-    const scope = this.getScope(undefined, options.authMode);
+    const scope = this.getScope(options.profileUid, options.authMode);
     this.log({
-      method: 'deleteAllConnectorTokens',
+      method: 'deleteConnectorTokens',
       scope,
       fields: { connectorId: options.connectorId },
     });
     if (scope === PER_USER_TOKEN_SCOPE) {
+      if (options.profileUid) {
+        return this.userClient.deleteConnectorTokens(
+          options as Parameters<typeof this.userClient.deleteConnectorTokens>[0]
+        );
+      }
       return this.userClient.deleteAllConnectorTokens({
         connectorId: options.connectorId,
         credentialType: options.credentialType,
