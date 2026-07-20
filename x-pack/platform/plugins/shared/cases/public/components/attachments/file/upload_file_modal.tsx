@@ -253,7 +253,7 @@ const UploadFileModalComponent: React.FC<UploadFileModalProps> = ({
               size="s"
               color="warning"
               iconType="warning"
-              text={i18n.DUPLICATE_FILE_WARNING(duplicateFileName)}
+              title={i18n.DUPLICATE_FILE_WARNING(duplicateFileName)}
               announceOnMount
             />
             <EuiSpacer size="s" />
