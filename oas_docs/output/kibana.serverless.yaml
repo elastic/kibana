@@ -79,7 +79,7 @@ tags:
     x-displayName: Connectors
   - name: Dashboards
     description: |
-      > **Technical preview** — The Dashboards API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+      > This documentation is temporarily hosted at a separate location.
       >
       > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
     externalDocs:
@@ -332,7 +332,7 @@ tags:
     x-displayName: Task manager
   - name: Visualizations
     description: |
-      > **Technical preview** — The Visualizations API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+      > This documentation is temporarily hosted at a separate location.
       >
       > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
     externalDocs:
@@ -11311,7 +11311,7 @@ paths:
       summary: Get dashboards
       operationId: get-dashboards-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -11323,7 +11323,7 @@ paths:
       summary: Create a dashboard
       operationId: create-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -11336,7 +11336,7 @@ paths:
       summary: Get a dashboard
       operationId: get-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -11348,7 +11348,7 @@ paths:
       summary: Update a dashboard
       operationId: update-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -11360,7 +11360,7 @@ paths:
       summary: Delete a dashboard
       operationId: delete-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -46322,7 +46322,7 @@ paths:
           description: forbidden
         '404':
           description: not found
-      summary: Delete a markdown library item.
+      summary: Delete a markdown library item
       tags:
         - Markdowns
       x-codeSamples:
@@ -46474,7 +46474,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The unique ID of the markdown library item to be created or updated
+        - description: The unique ID of the markdown library item to be created or updated.
           in: path
           name: id
           required: true
@@ -46687,7 +46687,7 @@ paths:
           description: invalid request
         '403':
           description: forbidden
-      summary: Upsert markdown library item
+      summary: Upsert a markdown library item
       tags:
         - Markdowns
       x-codeSamples:
@@ -49157,15 +49157,6 @@ paths:
               - propagated
               - resolution
             type: string
-        - description: Maximum number of history entries to return per request.
-          in: query
-          name: page_size
-          required: false
-          schema:
-            default: 100
-            maximum: 1000
-            minimum: 1
-            type: integer
         - description: When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.
           in: query
           name: include_contributions
@@ -64636,7 +64627,7 @@ paths:
       summary: Get visualizations
       operationId: get-visualizations-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -64648,7 +64639,7 @@ paths:
       summary: Create a visualization
       operationId: create-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -64661,7 +64652,7 @@ paths:
       summary: Get a visualization
       operationId: get-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -64673,7 +64664,7 @@ paths:
       summary: Update a visualization
       operationId: update-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -64685,7 +64676,7 @@ paths:
       summary: Delete a visualization
       operationId: delete-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -74306,8 +74297,9 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePercentage'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValue'
-      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges.
+      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and for named palettes.
       title: Color By Value
     Kibana_HTTP_APIs_colorByValueAbsolute:
       additionalProperties: false
@@ -74352,6 +74344,31 @@ components:
         - range
         - steps
       title: Color By Value (Absolute)
+      type: object
+    Kibana_HTTP_APIs_colorByValuePalette:
+      additionalProperties: false
+      description: Color by value using a palette, with colors distributed across the range of values.
+      properties:
+        palette:
+          description: The name of the palette to apply across the value range.
+          enum:
+            - status
+            - temperature
+            - complementary
+            - negative
+            - positive
+            - cool
+            - warm
+            - gray
+          type: string
+        type:
+          enum:
+            - distributed_palette
+          type: string
+      required:
+        - type
+        - palette
+      title: Color By Value (Palette)
       type: object
     Kibana_HTTP_APIs_colorByValuePercentage:
       additionalProperties: false
@@ -87259,6 +87276,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -87341,6 +87359,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -87422,6 +87441,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -87715,6 +87735,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -87798,6 +87819,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -87881,6 +87903,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -87964,6 +87987,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -88047,6 +88071,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -125297,9 +125322,14 @@ components:
           items:
             $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreHistoryEntry'
           type: array
+        interval:
+          description: The effective Elasticsearch `date_histogram` interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.
+          maxLength: 10
+          type: string
       required:
         - entity_id
         - entity_type
+        - interval
         - entries
     Security_Entity_Analytics_API_RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
