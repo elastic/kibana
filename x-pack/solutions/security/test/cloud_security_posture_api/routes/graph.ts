@@ -1292,6 +1292,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should filter unknown targets', async () => {
         const response = await postGraph(supertest, {
+          showUnknownTarget: false,
           query: {
             indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
             originEventIds: [],
@@ -3777,6 +3778,163 @@ export default function (providerContext: FtrProviderContext) {
             expect(edge.type).equal('solid');
           });
         });
+      });
+    });
+
+    describe('Field type mismatch resilience', () => {
+      // Exercises two failure modes that real integration indices trigger:
+      //
+      //   1. Wrong type — user.id mapped as long (PostgreSQL / AWS IAM pattern).
+      //      The aws_bedrock integration uses `TO_STRING(user.id) LIKE "arn:..."` and
+      //      fetch_events_graph.ts casts `| EVAL user.id = TO_STRING(user.id)` before
+      //      the enrichment query, so both the LIKE condition and the preserve branch
+      //      CASE return type are always keyword regardless of the underlying mapping.
+      //
+      //   2. Absent fields — dozens of integration-specific fields are not in this index.
+      //      Under SET unmapped_fields="NULLIFY" they become null-typed.  Null-typed
+      //      fields in CASE result positions are fine (polymorphic null).  However,
+      //      ES|QL validates ALL function-argument types at plan time regardless of
+      //      branch reachability — so null-typed fields passed to TO_STRING / TO_BOOLEAN /
+      //      TO_LOWER / STARTS_WITH / MV_FIRST / CONCAT etc. trigger errors.
+      //      Every field that appears as a function argument across all integration files
+      //      must have an explicit mapping with any valid non-null type.
+      //      CASE-result-only fields (host.id, service.id, entity.id, etc.) are left
+      //      unmapped since ES|QL accepts null-typed values in result positions.
+      //
+      //      NOTE: SET unmapped_fields="LOAD" is NOT used because ES|QL does not support
+      //      accessing subfields of flattened-type parents under LOAD mode
+      //      (e.g. m365_defender.event.additional_fields.*, snyk.audit_logs.content.*,
+      //      greenhouse.audit.event.meta.name, cisco_meraki.*.vap).  Under NULLIFY those
+      //      subfields are accessible as keyword (flattened maps all leaves to keyword in
+      //      ES|QL).  In production these fields exist in the real integration indices so
+      //      their types come from the merged mapping across all queried indices.
+      const testIndex = 'test-graph-type-mismatch';
+
+      before(async () => {
+        await es.indices.create({
+          index: testIndex,
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              'event.id': { type: 'keyword' },
+              'event.action': { type: 'keyword' },
+              'event.dataset': { type: 'keyword' },
+              'event.kind': { type: 'keyword' },
+              'event.category': { type: 'keyword' },
+              'event.type': { type: 'keyword' },
+              'event.module': { type: 'keyword' },
+              'data_stream.dataset': { type: 'keyword' },
+              'user.name': { type: 'keyword' },
+              // Deliberately wrong type — user.id as long mimics PostgreSQL / AWS IAM.
+              // fetch_events_graph.ts casts it to keyword before enrichment runs.
+              'user.id': { type: 'long' },
+              'user.email': { type: 'keyword' },
+              'user.domain': { type: 'keyword' },
+              'user.target.id': { type: 'keyword' },
+              'user.target.name': { type: 'keyword' },
+              'user.target.email': { type: 'keyword' },
+              'user.target.domain': { type: 'keyword' },
+              'host.name': { type: 'keyword' },
+              'host.id': { type: 'keyword' },
+              'host.hostname': { type: 'keyword' },
+              'host.target.id': { type: 'keyword' },
+              'host.target.name': { type: 'keyword' },
+              'host.target.hostname': { type: 'keyword' },
+              'service.name': { type: 'keyword' },
+              'service.target.name': { type: 'keyword' },
+              'entity.id': { type: 'keyword' },
+              'entity.namespace': { type: 'keyword' },
+              'entity.target.id': { type: 'keyword' },
+              'cloud.provider': { type: 'keyword' },
+              // Integration CASE branch function arguments (TO_STRING, TO_BOOLEAN, TO_LOWER).
+              // All must have a non-null schema type; values are absent from the test document.
+              'source.ip': { type: 'ip' },
+              'destination.ip': { type: 'ip' },
+              'misp.event.orgc_id': { type: 'long' },
+              'greenhouse.audit.event.meta.name': { type: 'keyword' },
+              'gitlab.audit.target_id': { type: 'long' },
+              'jamf_pro.events.event.object_id': { type: 'long' },
+              'jamf_pro.events.event.policy_id': { type: 'long' },
+              'jamf_pro.events.event.jssid': { type: 'long' },
+              'jamf_pro.events.event.patch_policy_id': { type: 'long' },
+              'tanium.action_history.action.id': { type: 'long' },
+              'tanium.endpoint_config.item.id': { type: 'long' },
+              'citrix.cef_format': { type: 'boolean' },
+              'servicenow.event.applied.value': { type: 'boolean' },
+              'zscaler_zia.dns.request.action': { type: 'keyword' },
+              'zscaler_zia.tunnel.action.type': { type: 'keyword' },
+              'container.name': { type: 'keyword' },
+              'destination.domain': { type: 'keyword' },
+              'forgerock.objectId': { type: 'keyword' },
+              'forgerock.principal': { type: 'keyword' },
+              'infoblox_bloxone_ddi.dns_data.source': { type: 'keyword' },
+              'microsoft_intune.audit.properties.target_display_names': { type: 'keyword' },
+              'microsoft_intune.audit.properties.target_object_ids': { type: 'keyword' },
+              'url.domain': { type: 'keyword' },
+              'url.path': { type: 'keyword' },
+            },
+          },
+        });
+
+        await es.index({
+          index: testIndex,
+          id: 'type-mismatch-evt-1',
+          refresh: true,
+          document: {
+            '@timestamp': '2024-09-01T12:00:00.000Z',
+            'event.id': 'type-mismatch-evt-1',
+            'event.action': 'invoke',
+            'event.dataset': 'aws_bedrock.invocation',
+            'data_stream.dataset': 'aws_bedrock.invocation',
+            'user.name': 'test-user',
+            'user.id': 42, // long — exercises wrong-type + LIKE + CASE mismatch paths
+            'host.name': 'bedrock-host',
+            // All other fields absent from the document:
+            // - Function-argument fields (source.ip, etc.) are schema-typed above but
+            //   null-valued here — safe under NULLIFY.
+            // - CASE-result-only fields (host.id, service.id, etc.) are both
+            //   schema-absent and value-absent — null-typed, safe in result positions.
+          },
+        });
+      });
+
+      after(async () => {
+        await es.indices.delete({ index: testIndex, ignore_unavailable: true });
+      });
+
+      it('returns 200 when user.id is mapped as long and many fields are unmapped', async () => {
+        // Without the fix this returns 500 with one of:
+        //   "LIKE does not support type [long]"    (user.id LIKE in aws_bedrock)
+        //   "argument of [CASE] must be [long]"    (preserve branch type mismatch)
+        const response = await postGraph(supertest, {
+          query: {
+            originEventIds: [],
+            indexPatterns: [testIndex],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [{ match_phrase: { 'event.id': 'type-mismatch-evt-1' } }],
+              },
+            },
+          },
+        }).expect(result(200, logger));
+
+        expect(response.body).to.have.property('nodes');
+        expect(response.body.nodes.length).to.be.greaterThan(0);
+
+        // The user entity node must exist and carry user.id as a string (not a number),
+        // confirming that the | EVAL user.id = TO_STRING(user.id) pre-cast ran correctly.
+        const userNode = response.body.nodes.find((n: any) =>
+          n.documentsData?.some(
+            (d: any) => d.type === 'entity' && d.entity?.sourceFields?.['user.id'] !== undefined
+          )
+        );
+        expect(userNode).to.not.be(undefined);
+        const sourceFields = userNode.documentsData.find((d: any) => d.type === 'entity').entity
+          .sourceFields;
+        // user.id was indexed as long 42 but must surface as the string "42" after TO_STRING
+        expect(sourceFields['user.id']).to.equal('42');
       });
     });
   });

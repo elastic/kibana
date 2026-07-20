@@ -218,6 +218,19 @@ describe('getEsqlFn', () => {
     expect(result?.columns?.[0]?.meta?.esMeta).toBeUndefined();
   });
 
+  it('requests column_metadata from Elasticsearch', async () => {
+    const mockSearchService = getMockSearchService([{ name: 'host', type: 'keyword' }]);
+
+    await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index' },
+      createExecutionContext()
+    );
+
+    const options = mockSearchService.esql.mock.calls[0][1];
+    expect(options?.columnMetadata).toBe(true);
+  });
+
   it('resolves meta.sourceParams.sourceField for STATS BY alias = column', async () => {
     const mockSearchService = getMockSearchService([
       { name: 'cnt', type: 'long' },
