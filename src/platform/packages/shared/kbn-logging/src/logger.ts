@@ -12,6 +12,57 @@ import type { LogRecord } from './log_record';
 import type { LogLevelId } from './log_level';
 
 /**
+ * Defines a log filter based on {@link LogRecord.meta} key-value pairs.
+ *
+ * When a logger has one or more meta filters configured, any log record whose
+ * meta satisfies ALL predicates in `match` is evaluated against the filter's
+ * `level` instead of the logger's nominal level. The most permissive matching
+ * filter wins, allowing specific meta values to receive more verbose output
+ * without increasing the noise for the rest of the logger's traffic.
+ *
+ * Matching uses strict equality (`===`). A string `"3"` in config does not match
+ * numeric `3` in meta. Match keys support nested objects (`labels.ruleType`) and
+ * flat top-level keys (`'labels.ruleType'`).
+ *
+ * Omit `filters` or set `filters: []` on a child logger to inherit filters from the
+ * nearest ancestor. Set `filters: null` to opt out of inherited filters.
+ *
+ * Records that pass a filter are forwarded to appenders with their full {@link LogRecord.meta}.
+ * Avoid placing sensitive data in meta fields referenced by filters.
+ *
+ * @remarks Troubleshooting silent filters:
+ * - Verify meta key shape (nested vs flat) matches the filter path.
+ * - Confirm value types match exactly (string vs number vs boolean).
+ * - Remember {@link Logger.isLevelEnabled} ignores filters; pass meta on the log call
+ *   or use a message function instead of guarding with `isLevelEnabled`.
+ *
+ * @example
+ * ```yaml
+ * logging:
+ *   loggers:
+ *     - name: plugins.alerting
+ *       level: warn
+ *       filters:
+ *         - type: meta
+ *           match:
+ *             labels.ruleType: esql
+ *           level: debug
+ * ```
+ *
+ * @public
+ */
+export interface MetaFilterConfig {
+  type: 'meta';
+  /** Key-value pairs that must ALL match the log record's {@link LogRecord.meta} (strict equality). */
+  match: Record<string, string | number | boolean>;
+  /**
+   * Effective minimum log level for records whose meta satisfies `match`.
+   * Must be more permissive than the logger's nominal level to have any effect.
+   */
+  level: LogLevelId;
+}
+
+/**
  * @public
  */
 export type LogMessageSource = string | (() => string);
@@ -30,6 +81,8 @@ export interface Logger {
    * @param meta - The ECS meta to attach to the log entry
    *
    * @remark If a function is provided for the message, it will only be evaluated if the logger's level is high enough for this level.
+   *         When meta filters are configured, pass meta on the log call (or use the function form) rather than relying on
+   *         {@link Logger.isLevelEnabled}, which ignores filters.
    *         This can be used as an alternative to {@link Logger.isLevelEnabled} to wrap expensive logging operations into a conditional blocks.
    */
   trace<Meta extends LogMeta = LogMeta>(message: LogMessageSource, meta?: Meta): void;
@@ -41,6 +94,8 @@ export interface Logger {
    * @param meta - The ECS meta to attach to the log entry
    *
    * @remark If a function is provided for the message, it will only be evaluated if the logger's level is high enough for this level.
+   *         When meta filters are configured, pass meta on the log call (or use the function form) rather than relying on
+   *         {@link Logger.isLevelEnabled}, which ignores filters.
    *         This can be used as an alternative to {@link Logger.isLevelEnabled} to wrap expensive logging operations into a conditional blocks.
    */
   debug<Meta extends LogMeta = LogMeta>(message: LogMessageSource, meta?: Meta): void;
@@ -52,6 +107,8 @@ export interface Logger {
    * @param meta - The ECS meta to attach to the log entry
    *
    * @remark If a function is provided for the message, it will only be evaluated if the logger's level is high enough for this level.
+   *         When meta filters are configured, pass meta on the log call (or use the function form) rather than relying on
+   *         {@link Logger.isLevelEnabled}, which ignores filters.
    *         This can be used as an alternative to {@link Logger.isLevelEnabled} to wrap expensive logging operations into a conditional blocks.
    */
   info<Meta extends LogMeta = LogMeta>(message: LogMessageSource, meta?: Meta): void;
@@ -63,6 +120,8 @@ export interface Logger {
    * @param meta - The ECS meta to attach to the log entry
    *
    * @remark If a function is provided for the message, it will only be evaluated if the logger's level is high enough for this level.
+   *         When meta filters are configured, pass meta on the log call (or use the function form) rather than relying on
+   *         {@link Logger.isLevelEnabled}, which ignores filters.
    *         This can be used as an alternative to {@link Logger.isLevelEnabled} to wrap expensive logging operations into a conditional blocks.
    */
   warn<Meta extends LogMeta = LogMeta>(errorOrMessage: LogMessageSource | Error, meta?: Meta): void;
@@ -74,6 +133,8 @@ export interface Logger {
    * @param meta - The ECS meta to attach to the log entry
    *
    * @remark If a function is provided for the message, it will only be evaluated if the logger's level is high enough for this level.
+   *         When meta filters are configured, pass meta on the log call (or use the function form) rather than relying on
+   *         {@link Logger.isLevelEnabled}, which ignores filters.
    *         This can be used as an alternative to {@link Logger.isLevelEnabled} to wrap expensive logging operations into a conditional blocks.
    */
   error<Meta extends LogMeta = LogMeta>(
@@ -88,6 +149,8 @@ export interface Logger {
    * @param meta - The ECS meta to attach to the log entry
    *
    * @remark If a function is provided for the message, it will only be evaluated if the logger's level is high enough for this level.
+   *         When meta filters are configured, pass meta on the log call (or use the function form) rather than relying on
+   *         {@link Logger.isLevelEnabled}, which ignores filters.
    *         This can be used as an alternative to {@link Logger.isLevelEnabled} to wrap expensive logging operations into a conditional blocks.
    */
   fatal<Meta extends LogMeta = LogMeta>(
@@ -99,8 +162,11 @@ export interface Logger {
   log(record: LogRecord): void;
 
   /**
-   * Checks if given level is currently enabled for this logger.
-   * Can be used to wrap expensive logging operations into conditional blocks
+   * Checks if given level is currently enabled for this logger based on the nominal level only.
+   * Can be used to wrap expensive logging operations into conditional blocks.
+   *
+   * Meta filters are not reflected here. On loggers with meta filters configured, pass meta directly
+   * on the log call or use a message function instead of guarding with `isLevelEnabled`.
    *
    * @example
    * ```ts
