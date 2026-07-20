@@ -15,8 +15,9 @@ import type {
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server/task';
 import { createToken } from '@kbn/core-di';
+import type { Newable } from 'inversify';
 
-type TaskRunnerConstructor<T> = new (...args: never[]) => T;
+type TaskRunnerConstructor<T> = Newable<T>;
 
 export interface AlertingTaskRunner {
   run(params: {

@@ -33,13 +33,12 @@ function loadEach<T extends object>(
   }
 }
 
-function createServiceIdentifierFactory<T>(...prefix: string[]): ServiceIdentifierFactory<T> {
-  return (...key) => Symbol.for([...prefix, key].join('.'));
+function createServiceIdentifierFactory(...prefix: string[]) {
+  return (key: PropertyKey): symbol => Symbol.for([...prefix, String(key)].join('.'));
 }
 
 /** @internal */
-export const InternalPluginInitializer =
-  createServiceIdentifierFactory<InternalPluginInitializerContext>('plugin', 'initializer');
+export const InternalPluginInitializer = createServiceIdentifierFactory('plugin', 'initializer');
 
 /** @internal */
 export const InternalCoreSetup = createServiceIdentifierFactory('core', 'setup');

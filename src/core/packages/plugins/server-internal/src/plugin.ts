@@ -24,6 +24,7 @@ import type {
   PrebootPlugin,
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type { ServiceToken } from '@kbn/core-di';
 import { Setup, Start } from '@kbn/core-di';
 import { createSetupModule, createStartModule } from '@kbn/core-di-internal';
 
@@ -144,7 +145,7 @@ export class PluginWrapper<
 
     return [
       this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins),
-      this.container?.get<TSetup>(Setup),
+      this.container?.get(Setup as ServiceToken<TSetup>),
     ].find(Boolean)!;
   }
 
@@ -167,7 +168,7 @@ export class PluginWrapper<
     this.container?.load(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
-      this.container?.get<TStart>(Start),
+      this.container?.get(Start as ServiceToken<TStart>),
     ].find(Boolean)!;
 
     if (isPromise(contract)) {
