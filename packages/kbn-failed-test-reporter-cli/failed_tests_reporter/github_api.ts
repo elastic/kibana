@@ -12,6 +12,7 @@ import Url from 'url';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const BASE_URL = 'https://api.github.com/repos/elastic/kibana/';
+const SEARCH_ISSUES_URL = 'https://api.github.com/search/issues';
 
 export interface GithubIssue {
   html_url: string;
@@ -30,6 +31,18 @@ export interface GithubIssueMini {
   body: GithubIssue['body'];
   html_url: GithubIssue['html_url'];
   node_id: GithubIssue['node_id'];
+}
+
+interface GithubIssueSearchItem {
+  number: GithubIssue['number'];
+  html_url: GithubIssue['html_url'];
+  node_id: GithubIssue['node_id'];
+  title: GithubIssue['title'];
+  body: GithubIssue['body'] | null;
+}
+
+interface GithubIssueSearchResponse {
+  items: GithubIssueSearchItem[];
 }
 
 interface RequestOptions {
@@ -121,6 +134,38 @@ export class GithubApi {
     );
 
     return resp.data;
+  }
+
+  async findOpenIssueByTitle(
+    title: string,
+    labels: string[] = []
+  ): Promise<GithubIssueMini | undefined> {
+    const query = [
+      'repo:elastic/kibana',
+      'is:issue',
+      'is:open',
+      'in:title',
+      ...labels.map((label) => `label:${label}`),
+      `"${title.replace(/"/g, '\\"')}"`,
+    ].join(' ');
+    const searchParams = new URLSearchParams({ q: query, per_page: '10' });
+    const resp = await this.request<GithubIssueSearchResponse>(
+      {
+        method: 'GET',
+        url: `${SEARCH_ISSUES_URL}?${searchParams.toString()}`,
+      },
+      { items: [] }
+    );
+
+    const issue = resp.data.items.find((item) => item.title === title);
+    return issue
+      ? {
+          number: issue.number,
+          body: issue.body ?? '',
+          html_url: issue.html_url,
+          node_id: issue.node_id,
+        }
+      : undefined;
   }
 
   private async request<T>(

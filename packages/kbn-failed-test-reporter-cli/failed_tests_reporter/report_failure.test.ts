@@ -536,6 +536,10 @@ describe('createSystemicFailureIssue()', () => {
       5
     );
 
+    expect(api.findOpenIssueByTitle).toHaveBeenCalledWith(
+      'Systemic test failure: x-pack/test/functional/config.ts',
+      ['failed-test']
+    );
     expect(api.createIssue).toHaveBeenCalledTimes(1);
     const [title, body, labels] = api.createIssue.mock.calls[0];
     expect(title).toBe('Systemic test failure: x-pack/test/functional/config.ts');
@@ -544,6 +548,34 @@ describe('createSystemicFailureIssue()', () => {
     expect(body).toContain('- suite 0 - test 0');
     expect(body).toContain('First failure: [kibana-on-merge - main](https://build-url)');
     expect(labels).toEqual(['failed-test']);
+  });
+
+  it('adds a comment to an existing open systemic issue instead of creating a duplicate', async () => {
+    const api = new GithubApi();
+    api.findOpenIssueByTitle.mockResolvedValue({
+      body: 'existing issue body',
+      html_url: 'https://github.com/elastic/kibana/issues/123',
+      node_id: 'node-id',
+      number: 123,
+    });
+    const failures = Array.from({ length: 6 }, (_, i) => makeFailure(i));
+
+    const issue = await createSystemicFailureIssue(
+      'https://build-url',
+      failures,
+      api,
+      'main',
+      'kibana-on-merge',
+      5
+    );
+
+    expect(issue.html_url).toBe('https://github.com/elastic/kibana/issues/123');
+    expect(api.createIssue).not.toHaveBeenCalled();
+    expect(api.addIssueComment).toHaveBeenCalledTimes(1);
+    const [issueNumber, comment] = api.addIssueComment.mock.calls[0];
+    expect(issueNumber).toBe(123);
+    expect(comment).toContain('exceeding the cap of 5 new issues');
+    expect(comment).toContain('First failure: [kibana-on-merge - main](https://build-url)');
   });
 
   it('truncates the failing tests list to 20 entries', async () => {

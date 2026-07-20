@@ -280,8 +280,42 @@ function getConfigPath(command?: string): string {
   return match ? match[1] : 'unknown config';
 }
 
+function getSystemicFailureSummary({
+  buildUrl,
+  failures,
+  branch,
+  pipeline,
+  cap,
+  config,
+}: {
+  buildUrl: string;
+  failures: TestFailure[];
+  branch: string;
+  pipeline: string;
+  cap: number;
+  config: string;
+}) {
+  const failingTests = failures.slice(0, 20).map((f) => `- ${f.classname} - ${f.name}`);
+  if (failures.length > 20) {
+    failingTests.push(`- ...and ${failures.length - 20} more`);
+  }
+
+  return [
+    `${failures.length} tests failed on a tracked branch in a single run, exceeding the cap of ${cap} new issues.`,
+    'Individual issues were not opened because this usually indicates a systemic or environmental failure',
+    '(e.g. the run ran out of disk space) rather than genuine per-test regressions.',
+    '',
+    `- Config: \`${config}\``,
+    `- New failures suppressed: ${failures.length}`,
+    `- First failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`,
+    '',
+    'Failing tests:',
+    ...failingTests,
+  ].join('\n');
+}
+
 /**
- * Opens a single umbrella issue when a config produces more new failures than the
+ * Opens or updates an umbrella issue when a config produces more new failures than the
  * per-report cap. This preserves the signal in GitHub (which config broke, and how badly)
  * without opening one issue per test for what is almost always a systemic/environmental
  * failure. Intentionally omits the `test.class`/`test.name` metadata used by ci-stats so
@@ -299,24 +333,13 @@ export async function createSystemicFailureIssue(
   const config = getConfigPath(failures[0]?.commandLine);
   const titlePrefix = prependTitle && prependTitle.trim() !== '' ? `${prependTitle} ` : '';
   const title = `Systemic test failure: ${titlePrefix}${config}`;
+  const body = getSystemicFailureSummary({ buildUrl, failures, branch, pipeline, cap, config });
+  const existingIssue = await api.findOpenIssueByTitle(title, ['failed-test']);
 
-  const failingTests = failures.slice(0, 20).map((f) => `- ${f.classname} - ${f.name}`);
-  if (failures.length > 20) {
-    failingTests.push(`- ...and ${failures.length - 20} more`);
+  if (existingIssue) {
+    await api.addIssueComment(existingIssue.number, redactSensitiveGithubFailureText(body));
+    return existingIssue;
   }
-
-  const body = [
-    `${failures.length} tests failed on a tracked branch in a single run, exceeding the cap of ${cap} new issues.`,
-    'Individual issues were not opened because this usually indicates a systemic or environmental failure',
-    '(e.g. the run ran out of disk space) rather than genuine per-test regressions.',
-    '',
-    `- Config: \`${config}\``,
-    `- New failures suppressed: ${failures.length}`,
-    `- First failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`,
-    '',
-    'Failing tests:',
-    ...failingTests,
-  ].join('\n');
 
   return await api.createIssue(title, redactSensitiveGithubFailureText(body), ['failed-test']);
 }
