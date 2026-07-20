@@ -309,6 +309,24 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('searchExecutions', () => {
+    it('should call GET /internal/workflows/executions with query', async () => {
+      const params = {
+        query: JSON.stringify({ match_all: {} }),
+        from: 0,
+        size: 25,
+        sort: JSON.stringify([{ startedAt: { order: 'desc' } }]),
+        trackTotalHits: true,
+      };
+      await api.searchExecutions(params);
+
+      expect(http.get).toHaveBeenCalledWith('/internal/workflows/executions', {
+        query: params,
+        version: INTERNAL_VERSION,
+      });
+    });
+  });
+
   describe('getWorkflowExecutions', () => {
     it('should call GET /api/workflows/workflow/{id}/executions with query', async () => {
       const params = {

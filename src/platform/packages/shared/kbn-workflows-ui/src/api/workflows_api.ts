@@ -216,9 +216,9 @@ export class WorkflowApi {
   }
 
   async searchExecutions(params?: SearchExecutionsParams): Promise<WorkflowExecutionListDto> {
-    return this.http.get(`${BASE}/executions`, {
+    return this.http.get(`${INTERNAL_BASE}/executions`, {
       query: params as HttpFetchQuery,
-      version: API_VERSION,
+      version: INTERNAL_API_VERSION,
     });
   }
 
