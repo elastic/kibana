@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { getSavedObjectKqlFilter } from '../../common';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
@@ -57,10 +58,19 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
 
     const locationFilter = getSavedObjectKqlFilter({ field: 'locations.id', values: locationId });
 
-    const data = await monitorConfigRepository.find({
-      perPage: 0,
-      filter: locationFilter,
-    });
+    // Private locations are shared across spaces and deleted globally (force: true below),
+    // so the "in use" check must count monitors in every space — not just the caller's.
+    // The request-scoped client only sees the current space, so use the internal repository
+    // scoped to all spaces to avoid deleting a location still used by monitors elsewhere.
+    const data = await monitorConfigRepository.find(
+      {
+        perPage: 0,
+        filter: locationFilter,
+        namespaces: [ALL_SPACES_ID],
+      },
+      undefined,
+      internalSOClient
+    );
 
     if (data.total > 0) {
       return response.badRequest({
