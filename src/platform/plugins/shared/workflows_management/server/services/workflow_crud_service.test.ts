@@ -11,6 +11,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { CoreStart } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { EsWorkflow } from '@kbn/workflows';
 
 import type { WorkflowCrudDeps } from './types';
 import { WorkflowCrudService } from './workflow_crud_service';
@@ -2147,6 +2148,56 @@ describe('WorkflowCrudService', () => {
       );
 
       jest.restoreAllMocks();
+    });
+
+    it('field-only enabled toggle syncs definition.enabled in the persisted document', async () => {
+      // Validates the fix for elastic/security-team#18145:
+      // when enabled is toggled without a YAML edit, definition.enabled must
+      // be kept in sync with the top-level enabled column so that export/import
+      // round-trips preserve the correct enabled state.
+      const existingDefinition = {
+        name: 'Test Workflow',
+        enabled: false,
+        version: '1' as const,
+        triggers: [],
+        steps: [],
+      };
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({
+                enabled: false,
+                definition: existingDefinition,
+                yaml: 'name: Test Workflow',
+              }),
+              _seq_no: 1,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+      client.index.mockResolvedValue({ result: 'updated', _seq_no: 2, _primary_term: 1 });
+
+      const service = new WorkflowCrudService(deps);
+      // Field-only update: no yaml key, just enabled: true
+      await service.updateWorkflow(
+        'wf-1',
+        { enabled: true } satisfies Partial<EsWorkflow>,
+        'default',
+        request
+      );
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            enabled: true,
+            definition: expect.objectContaining({ enabled: true }),
+          }),
+        })
+      );
     });
 
     it('re-applies field updates against fresh existingSource on each OCC retry', async () => {

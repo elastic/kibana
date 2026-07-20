@@ -15,7 +15,12 @@ import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ComposeDiscoverForm, getSteps } from '.';
 import { validateStep } from '../validate_step';
-import { Comparator, Aggregation } from '../rule_builder/threshold/form_types';
+import {
+  Comparator,
+  Aggregation,
+  DEFAULT_THRESHOLD_FORM_VALUES,
+} from '../rule_builder/threshold/form_types';
+import { BuilderStateProvider } from '../rule_builder/builder_state_context';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
 import { createMockServices, createTestQueryClient } from '../../../test_utils';
 import type { FormValues } from '../../../form/types';
@@ -119,102 +124,43 @@ describe('step validation', () => {
     jest.clearAllMocks();
   });
 
-  describe('alertCondition.validate', () => {
+  describe('alertCondition step validation', () => {
     const alertStep = getSteps(false).steps.find((s) => s.id === 'alertCondition')!;
 
-    it('declares query fields and a queryCommitted meetsPrecondition', () => {
+    it('declares query fields, queryCommitted meetsPrecondition, and no custom validate', () => {
       expect(alertStep.fields).toEqual(['query']);
+      expect(alertStep.validate).toBeUndefined();
       expect(alertStep.meetsPrecondition?.(createState({ queryCommitted: true }))).toBe(true);
       expect(alertStep.meetsPrecondition?.(createState({ queryCommitted: false }))).toBe(false);
     });
 
-    it('returns true when queryCommitted and composed alert query is complete', async () => {
+    it('delegates to methods.trigger with query when meetsPrecondition passes', async () => {
       const state = createState({ queryCommitted: true });
       const methods = {
-        getValues: (field?: keyof FormValues) => {
-          if (field === 'kind') return 'alert';
-          if (field === 'query') {
-            return {
-              format: 'composed',
-              base: 'FROM logs-*',
-              breach: { segment: '| WHERE status == "error"' },
-            };
-          }
-          return undefined;
-        },
+        trigger: jest.fn().mockResolvedValue(true),
       } as unknown as UseFormReturn<FormValues>;
 
-      expect(await validateStep(alertStep, methods, state)).toBe(true);
+      const result = await validateStep(alertStep, methods, state);
+
+      expect(methods.trigger).toHaveBeenCalledWith(['query']);
+      expect(result).toBe(true);
     });
 
-    it('returns false for a base-only alert persisted as a standalone query (no_where)', async () => {
-      const state = createState({ queryCommitted: true });
-      const methods = {
-        getValues: (field?: keyof FormValues) => {
-          if (field === 'kind') return 'alert';
-          if (field === 'query') {
-            return { format: 'standalone', breach: { query: 'FROM logs-*' } };
-          }
-          return undefined;
-        },
-      } as unknown as UseFormReturn<FormValues>;
-
-      // Per #621/#623 an alert without an alert condition cannot advance.
-      expect(await validateStep(alertStep, methods, state)).toBe(false);
-    });
-
-    it('returns false for a composed alert with base but no breach segment in edit mode', async () => {
-      const state = createState({ queryCommitted: true, mode: 'edit' });
-      const methods = {
-        getValues: (field?: keyof FormValues) => {
-          if (field === 'kind') return 'alert';
-          if (field === 'query') {
-            return {
-              format: 'composed',
-              base: 'FROM logs-*',
-              breach: { segment: '' },
-            };
-          }
-          return undefined;
-        },
-      } as unknown as UseFormReturn<FormValues>;
-
-      expect(await validateStep(alertStep, methods, state)).toBe(false);
-    });
-
-    it('returns true for a signal rule with a non-empty standalone query', async () => {
-      const state = createState({ queryCommitted: true });
-      const methods = {
-        getValues: (field?: keyof FormValues) => {
-          if (field === 'kind') return 'signal';
-          if (field === 'query') {
-            return { format: 'standalone', breach: { query: 'FROM logs-*' } };
-          }
-          return undefined;
-        },
-      } as unknown as UseFormReturn<FormValues>;
-
-      expect(await validateStep(alertStep, methods, state)).toBe(true);
-    });
-
-    it('returns false when the composed alert query has no base (empty query)', async () => {
-      const state = createState({ queryCommitted: true });
-      const methods = {
-        getValues: (field?: keyof FormValues) => {
-          if (field === 'kind') return 'alert';
-          if (field === 'query') {
-            return { format: 'composed', base: '', breach: { segment: '' } };
-          }
-          return undefined;
-        },
-      } as unknown as UseFormReturn<FormValues>;
-
-      expect(await validateStep(alertStep, methods, state)).toBe(false);
-    });
-
-    it('returns false when queryCommitted is false', async () => {
+    it('returns false when queryCommitted is false without calling trigger', async () => {
       const state = createState({ queryCommitted: false });
-      const methods = {} as UseFormReturn<FormValues>;
+      const methods = {
+        trigger: jest.fn(),
+      } as unknown as UseFormReturn<FormValues>;
+
+      expect(await validateStep(alertStep, methods, state)).toBe(false);
+      expect(methods.trigger).not.toHaveBeenCalled();
+    });
+
+    it('returns false when trigger rejects query validation', async () => {
+      const state = createState({ queryCommitted: true });
+      const methods = {
+        trigger: jest.fn().mockResolvedValue(false),
+      } as unknown as UseFormReturn<FormValues>;
 
       expect(await validateStep(alertStep, methods, state)).toBe(false);
     });
@@ -256,6 +202,7 @@ describe('step validation', () => {
     it('renders runbook and related dashboard artifact fields', () => {
       renderComposeDiscoverDetailsStep();
 
+      expect(screen.getByText('Rule details')).toBeInTheDocument();
       expect(screen.getByText('Artifacts')).toBeTruthy();
       expect(screen.getByText('Runbook')).toBeTruthy();
       expect(screen.getByTestId('addRunbookButton')).toBeTruthy();
@@ -300,6 +247,7 @@ describe('step validation', () => {
         (s) => s.id === 'builderCondition'
       )!;
       expect(builderStep.meetsPrecondition).toBeUndefined();
+      expect(builderStep.fields).toBeUndefined();
     });
 
     it('validateStep uses threshold builder validation without queryCommitted', async () => {
@@ -327,65 +275,33 @@ describe('step validation', () => {
     });
   });
 
-  describe('notifications.validate', () => {
+  describe('notifications step validation', () => {
     const notificationsStep = getSteps(true).steps.find((s) => s.id === 'notifications')!;
 
-    it('declares notifications fields', () => {
+    it('declares notifications fields and no custom validate', () => {
       expect(notificationsStep.fields).toEqual(['notifications']);
+      expect(notificationsStep.validate).toBeUndefined();
     });
 
-    it('returns true when notifications are disabled', async () => {
+    it('delegates to methods.trigger with notifications', async () => {
       const state = createState({ mode: 'create' });
       const methods = {
-        getValues: jest.fn().mockReturnValue(undefined),
+        trigger: jest.fn().mockResolvedValue(true),
       } as unknown as UseFormReturn<FormValues>;
-      expect(await validateStep(notificationsStep, methods, state)).toBe(true);
+
+      const result = await validateStep(notificationsStep, methods, state);
+
+      expect(methods.trigger).toHaveBeenCalledWith(['notifications']);
+      expect(result).toBe(true);
     });
 
-    it('returns false when an existing-workflow action has no workflowId', async () => {
+    it('returns false when trigger rejects notifications validation', async () => {
       const state = createState({ mode: 'create' });
       const methods = {
-        getValues: jest.fn().mockReturnValue({
-          workflows: [{ id: 'item-1', source: 'existing', workflowId: null }],
-        }),
+        trigger: jest.fn().mockResolvedValue(false),
       } as unknown as UseFormReturn<FormValues>;
+
       expect(await validateStep(notificationsStep, methods, state)).toBe(false);
-    });
-
-    it('returns true for a complete existing-workflow action', async () => {
-      const state = createState({ mode: 'create' });
-      const methods = {
-        getValues: jest.fn().mockReturnValue({
-          workflows: [{ id: 'item-1', source: 'existing', workflowId: 'wf-1' }],
-        }),
-      } as unknown as UseFormReturn<FormValues>;
-      expect(await validateStep(notificationsStep, methods, state)).toBe(true);
-    });
-
-    it('returns false for an inline action with no connector', async () => {
-      const state = createState({ mode: 'create' });
-      const methods = {
-        getValues: jest.fn().mockReturnValue({
-          workflows: [
-            {
-              id: 'item-1',
-              source: 'inline',
-              stepType: 'email',
-              connectorId: null,
-              params: '',
-            },
-          ],
-        }),
-      } as unknown as UseFormReturn<FormValues>;
-      expect(await validateStep(notificationsStep, methods, state)).toBe(false);
-    });
-
-    it('returns true when notifications.workflows is empty', async () => {
-      const state = createState({ mode: 'create' });
-      const methods = {
-        getValues: jest.fn().mockReturnValue({ workflows: [] }),
-      } as unknown as UseFormReturn<FormValues>;
-      expect(await validateStep(notificationsStep, methods, state)).toBe(true);
     });
   });
 
@@ -453,6 +369,8 @@ describe('shell shared fields', () => {
     renderShell({ step: 0 }, { kind: 'alert' });
 
     expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
+    expect(screen.getByText('Alert conditions')).toBeInTheDocument();
+    expect(screen.getByText('Rule execution')).toBeInTheDocument();
     expect(screen.getByTestId('alertDelayFormRow')).toBeInTheDocument();
     expect(screen.getByText('Schedule')).toBeInTheDocument();
     expect(screen.getByText('Lookback Window')).toBeInTheDocument();
@@ -465,9 +383,33 @@ describe('shell shared fields', () => {
     );
 
     expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
+    expect(screen.queryByText('Alert conditions')).not.toBeInTheDocument();
+    expect(screen.getByText('Rule execution')).toBeInTheDocument();
     expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
     expect(screen.getByText('Schedule')).toBeInTheDocument();
     expect(screen.getByText('Lookback Window')).toBeInTheDocument();
+  });
+
+  it('renders section titles on the threshold builder alert condition step', () => {
+    const services = { ...createMockServices(), dashboard: mockDashboard };
+    const builderState = DEFAULT_THRESHOLD_FORM_VALUES;
+    render(
+      <BuilderStateProvider builderState={builderState} setBuilderState={jest.fn()}>
+        <ComposeDiscoverForm
+          state={createState({ queryCommitted: true, step: 0 })}
+          dispatch={jest.fn()}
+          services={services}
+          onRecoveryTypeChange={jest.fn()}
+          onKindChange={jest.fn()}
+          isEditing={false}
+          builderType="threshold"
+        />
+      </BuilderStateProvider>,
+      { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES }, services) }
+    );
+
+    expect(screen.getByText('Alert conditions')).toBeInTheDocument();
+    expect(screen.getByText('Rule execution')).toBeInTheDocument();
   });
 
   it('does not render shared fields on non-alert-condition steps', () => {
