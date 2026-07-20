@@ -436,12 +436,6 @@ export function InternalDashboardTopNav({
     };
   }, [undoDisabled, redoDisabled, dashboardInternalApi]);
 
-  useEffect(() => {
-    return coreServices.chrome.setBreadcrumbsAppendExtension({
-      content: <DashboardFavoriteButton dashboardId={lastSavedId} />,
-      order: 0,
-    });
-  }, [lastSavedId]);
   const appMenuConfig = useMemo(() => {
     if (!visibilityProps.showTopNavMenu) {
       return undefined;
