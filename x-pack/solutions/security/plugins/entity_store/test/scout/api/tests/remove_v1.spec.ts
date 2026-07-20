@@ -20,10 +20,11 @@ const SYSTEM_INDICES_SUPERUSER = 'system_indices_superuser';
 const SYSTEM_INDICES_SUPERUSER_PASSWORD = process.env.TEST_ES_PASS ?? 'changeme';
 const SYSTEM_INDEX_HEADERS = { 'x-elastic-product-origin': 'kibana' };
 
-// For the default namespace, SavedObjectsUtils.getConvertedObjectId returns the id
-// unchanged, so the raw .kibana document id equals the legacy SO id.
+// entity-definition was a `multiple-isolated` SO type, so the raw .kibana
+// document id is `entity-definition:<objectId>` with no namespace prefix
+// (see generateRawId in the core SO serializer).
 const v1EntityDefinitionDocId = (entityType: string, namespace: string) =>
-  `security_${entityType}_${namespace}`;
+  `entity-definition:security_${entityType}_${namespace}`;
 
 const ALL_ENTITY_TYPES = ['user', 'host', 'service', 'generic'] as const;
 
@@ -51,6 +52,16 @@ apiTest.describe('Entity Store remove_v1 SO cleanup', { tag: ENTITY_STORE_TAGS }
       responseType: 'json',
       body: {},
     });
+    // Remove any seeded docs unconditionally so a failed install cannot leak
+    // legacy documents into sibling suites sharing this cluster.
+    await Promise.all(
+      ALL_ENTITY_TYPES.map((type) =>
+        systemIndicesEsClient.delete(
+          { index: KIBANA_INDEX, id: v1EntityDefinitionDocId(type, 'default'), refresh: true },
+          { headers: SYSTEM_INDEX_HEADERS, ignore: [404] }
+        )
+      )
+    );
   });
 
   apiTest(

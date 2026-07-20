@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EntityType } from '../../common';
@@ -26,9 +26,15 @@ interface StopAndRemoveV1Params {
  * saved object. The `entity-definition` SO type is no longer registered, so we
  * cannot use `savedObjectsClient.delete` for it — instead we delete the
  * underlying document directly via the internal ES client.
+ *
+ * The type was registered as `namespaceType: 'multiple-isolated'` from its
+ * first release, so the raw `_id` is always `entity-definition:<objectId>`
+ * with no namespace prefix, and the object id was never uuidv5-converted.
+ * The namespace is already encoded in the definition id
+ * (`security_<type>_<namespace>`).
  */
-const getV1EntityDefinitionSoId = (namespace: string, definitionId: string): string =>
-  SavedObjectsUtils.getConvertedObjectId(namespace, 'entity-definition', definitionId);
+const getV1EntityDefinitionSoDocId = (definitionId: string): string =>
+  `entity-definition:${definitionId}`;
 
 interface StopAndRemoveV1SharedTasksParams {
   namespace: string;
@@ -152,7 +158,7 @@ async function stopAndRemoveV1Once({
     tryAsBoolean(esClient.indices.deleteDataStream({ name: updatesDataStream }, { ignore: [404] })),
     tryAsBoolean(
       internalEsClient.delete(
-        { index: '.kibana', id: getV1EntityDefinitionSoId(namespace, definitionId) },
+        { index: '.kibana', id: getV1EntityDefinitionSoDocId(definitionId) },
         { ignore: [404] }
       )
     ),
