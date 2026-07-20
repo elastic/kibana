@@ -12,4 +12,4 @@ export interface SupportsJsonExport {
 }
 
 export const apiSupportsJsonExport = (api: unknown | null): api is SupportsJsonExport =>
-  Boolean((api as SupportsJsonExport).supportsJsonExport);
+  Boolean(api && (api as SupportsJsonExport).supportsJsonExport);
