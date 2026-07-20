@@ -8,5 +8,6 @@
  */
 
 export * from 'zod/v3';
+export type { StandardSchemaV1 } from 'zod/v3/standard-schema';
 export { isZod } from './util';
 export type { ZodEsque } from './types';

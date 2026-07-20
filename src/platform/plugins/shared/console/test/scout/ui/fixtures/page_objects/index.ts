@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare module '@elastic/opentelemetry-node/sdk' {
-  export * from '@elastic/opentelemetry-node/types/sdk';
-}
+export { ConsolePage } from './console_page';

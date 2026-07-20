@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare module '@a2a-js/sdk/server' {
-  export * from '@a2a-js/sdk/dist/server';
-}
+import { createPlaywrightConfig } from '@kbn/scout';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

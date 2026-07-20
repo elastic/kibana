@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare module 'vega-lite' {
-  export * from 'vega-lite/build';
-}
+export * from '../node_modules/@langchain/langgraph/dist/index.d.ts';
+export type {
+  InteropZodToStateDefinition,
+  ReducedZodChannel,
+} from '../node_modules/@langchain/langgraph/dist/graph/zod/meta.d.ts';

@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare module '@opentelemetry/semantic-conventions/incubating' {
-  export * from '@opentelemetry/semantic-conventions/build/src/index-incubating';
-}
+export { buildCurrentUser } from './src/build_current_user';
+export { useCurrentUser, CURRENT_USER_DATA_PATH } from './src/use_current_user';
+export type { UseCurrentUserResult } from './src/use_current_user';
+export type {
+  AuthenticatedUser,
+  CurrentUser,
+  GetUserProfileResponse,
+  UserProfileAvatarData,
+  UserSettingsData,
+} from './src/types';

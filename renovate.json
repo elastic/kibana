@@ -1203,7 +1203,7 @@
         "@elastic/ecs"
       ],
       "reviewers": [
-        "team:obs-onboarding-team"
+        "team:streams-ui"
       ],
       "matchBaseBranches": [
         "main"
@@ -1211,7 +1211,7 @@
       "labels": [
         "release_note:skip",
         "backport:all-open",
-        "Team:obs-onboarding"
+        "Team:streams-ui"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -4351,13 +4351,13 @@
         "@xstate/react"
       ],
       "reviewers": [
-        "team:obs-onboarding-team"
+        "team:streams-ui"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-onboarding",
+        "Team:streams-ui",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4373,13 +4373,13 @@
         "@xstate5/react"
       ],
       "reviewers": [
-        "team:obs-onboarding-team"
+        "team:streams-ui"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-onboarding",
+        "Team:streams-ui",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4393,13 +4393,13 @@
         "constate"
       ],
       "reviewers": [
-        "team:obs-onboarding-team"
+        "team:streams-ui"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-onboarding",
+        "Team:streams-ui",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4412,13 +4412,13 @@
         "oniguruma-to-es"
       ],
       "reviewers": [
-        "team:obs-onboarding-team"
+        "team:streams-ui"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-onboarding",
+        "Team:streams-ui",
         "release_note:skip",
         "backport:all-open"
       ],
