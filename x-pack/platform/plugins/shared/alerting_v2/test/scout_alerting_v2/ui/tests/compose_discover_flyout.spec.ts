@@ -27,6 +27,15 @@ const EDITED_RULE_NAME = 'scout-compose-discover-edited';
 const NO_TIME_FIELD_RULE_NAME = 'scout-compose-discover-no-time-field';
 // `logs-*` is never ingested, so no date field resolves — the sad path.
 const NO_TIME_FIELD_QUERY = 'FROM logs-* | LIMIT 10';
+/**
+ * Index whose only date field is `timestamp` (no `@timestamp`) — mirrors
+ * kibana_sample_data_flights for standalone time-field resolution.
+ */
+const TIMESTAMP_ONLY_INDEX = 'test-compose-discover-timestamp-only';
+const TIMESTAMP_ONLY_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | STATS count = COUNT(*) BY Carrier | WHERE count > 100`;
+const CREATE_SIGNAL_TIMESTAMP_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | WHERE Carrier == "ES-Air" | LIMIT 10`;
+const BROKEN_TIME_FIELD_RULE_NAME = 'scout-compose-discover-broken-time-field';
+const CREATE_SIGNAL_TIMESTAMP_RULE_NAME = 'scout-compose-discover-standalone-time-field';
 const RUNBOOK_TEXT = 'Investigate failed transactions';
 
 test.describe(
@@ -52,6 +61,26 @@ test.describe(
         document: { '@timestamp': new Date().toISOString(), message: 'hello' },
         refresh: 'wait_for',
       });
+      await esClient.indices.create(
+        {
+          index: TIMESTAMP_ONLY_INDEX,
+          mappings: {
+            properties: {
+              timestamp: { type: 'date' },
+              Carrier: { type: 'keyword' },
+            },
+          },
+        },
+        { ignore: [400] }
+      );
+      await esClient.index({
+        index: TIMESTAMP_ONLY_INDEX,
+        document: {
+          timestamp: new Date().toISOString(),
+          Carrier: 'ES-Air',
+        },
+        refresh: 'wait_for',
+      });
     });
 
     test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
@@ -63,6 +92,7 @@ test.describe(
     test.afterAll(async ({ esClient, apiServices }) => {
       await apiServices.alertingV2.rules.cleanUp();
       await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
+      await esClient.indices.delete({ index: TIMESTAMP_ONLY_INDEX }, { ignore: [404] });
     });
 
     test('create flow: open flyout, define query, step through, and submit', async ({
@@ -88,6 +118,16 @@ test.describe(
       await test.step('alert is the default mode (heuristic split succeeds)', async () => {
         await expect(pageObjects.composeDiscover.summarySection('success')).toBeVisible();
         await expect(pageObjects.composeDiscover.alertSummaryEditorButton).toBeVisible();
+      });
+
+      await test.step('time field resolves to the index date field', async () => {
+        // Happy path: TEST_INDEX exposes `@timestamp`.
+        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('@timestamp');
+        await expect(pageObjects.composeDiscover.timeFieldSelector).not.toHaveAttribute(
+          'aria-invalid',
+          'true'
+        );
+        await expect(pageObjects.composeDiscover.timeFieldError).toBeHidden();
       });
 
       await test.step('Next is enabled after query is committed', async () => {
@@ -253,12 +293,115 @@ test.describe(
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
 
         // EUI omits `aria-invalid` when valid rather than setting it to "false".
+        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('@timestamp');
         await expect(pageObjects.composeDiscover.timeFieldSelector).not.toHaveAttribute(
           'aria-invalid',
           'true'
         );
         await expect(pageObjects.composeDiscover.timeFieldError).toBeHidden();
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
+      });
+    });
+
+    test('edit flow: broken standalone alert can select timestamp and save', async ({
+      pageObjects,
+      apiServices,
+    }) => {
+      let ruleId: string;
+
+      await test.step('seed a standalone alert with an invalid stored time field', async () => {
+        const rule = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            kind: 'alert',
+            query: {
+              format: 'standalone',
+              breach: { query: TIMESTAMP_ONLY_QUERY },
+            },
+            // Intentionally wrong — index only has `timestamp`.
+            time_field: '@timestamp',
+            grouping: { fields: ['Carrier'] },
+            metadata: { name: BROKEN_TIME_FIELD_RULE_NAME },
+          })
+        );
+        ruleId = rule.id;
+      });
+
+      await test.step('refresh the rules list and open the edit flyout', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+      });
+
+      await test.step('sandbox opens in YAML mode and offers the real timestamp field', async () => {
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+        await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeVisible();
+        await pageObjects.composeDiscover.selectSandboxTimeField('timestamp');
+        await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue(
+          'timestamp'
+        );
+      });
+
+      await test.step('apply and save persists timestamp', async () => {
+        await pageObjects.composeDiscover.clickApply();
+        // Apply updates YAML via React state — wait until the editor reflects it
+        // before Save, or YamlSubmit can persist the stale `@timestamp` value.
+        await expect(pageObjects.composeDiscover.flyout).toContainText('time_field: timestamp');
+        await expect(pageObjects.composeDiscover.flyout).not.toContainText(
+          "time_field: '@timestamp'"
+        );
+        await pageObjects.composeDiscover.clickYamlSubmit();
+        await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+
+        await expect
+          .poll(async () => (await apiServices.alertingV2.rules.get(ruleId!)).time_field, {
+            timeout: 30_000,
+          })
+          .toBe('timestamp');
+      });
+    });
+
+    test('create flow: signal (standalone) mode can select timestamp and create', async ({
+      pageObjects,
+      apiServices,
+    }) => {
+      await test.step('open create flyout, commit a query, then switch to signal mode', async () => {
+        await pageObjects.composeDiscover.openCreateFlyout();
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+
+        // ModeSelect stays disabled until a query is committed (and while the
+        // sandbox is open). Apply first, then switch to Signal (standalone).
+        await pageObjects.composeDiscover.setSandboxQuery(CREATE_SIGNAL_TIMESTAMP_QUERY);
+        await pageObjects.composeDiscover.selectSandboxTimeField('timestamp');
+        await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue(
+          'timestamp'
+        );
+        await pageObjects.composeDiscover.clickApply();
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
+        await pageObjects.composeDiscover.selectMode('signal');
+      });
+
+      await test.step('name the rule and submit', async () => {
+        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('timestamp');
+        await pageObjects.composeDiscover.clickNext(); // Details
+        await pageObjects.composeDiscover.setRuleName(CREATE_SIGNAL_TIMESTAMP_RULE_NAME);
+        await pageObjects.composeDiscover.clickSubmit();
+        await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+      });
+
+      await test.step('created rule persists the selected timestamp field', async () => {
+        await expect
+          .poll(
+            async () => {
+              const { items } = await apiServices.alertingV2.rules.find({
+                search: CREATE_SIGNAL_TIMESTAMP_RULE_NAME,
+              });
+              return items[0]?.time_field;
+            },
+            { timeout: 30_000 }
+          )
+          .toBe('timestamp');
       });
     });
 
