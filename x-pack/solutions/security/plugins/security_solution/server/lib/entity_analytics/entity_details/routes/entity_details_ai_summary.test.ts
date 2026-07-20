@@ -10,7 +10,11 @@ import {
   MAX_ENTITY_SUMMARY_HIGHLIGHTS,
   MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS,
 } from '@kbn/entity-store/common/entity_summary';
-import { getMetadataEntityIndexPattern } from '@kbn/entity-store/common';
+import {
+  ENTITY_METADATA,
+  ENTITY_SCHEMA_VERSION_V2,
+  getEntityIndexPattern,
+} from '@kbn/entity-store/common';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { ENTITY_AI_SUMMARY_PERSISTED_EVENT } from '../../../telemetry/event_based/events';
 import {
@@ -194,7 +198,11 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
       elasticsearch: {
         cluster: [],
         index: {
-          [getMetadataEntityIndexPattern('default')]: ['read'],
+          [getEntityIndexPattern({
+            schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+            dataset: ENTITY_METADATA,
+            namespace: 'default',
+          })]: ['read'],
         },
       },
     });

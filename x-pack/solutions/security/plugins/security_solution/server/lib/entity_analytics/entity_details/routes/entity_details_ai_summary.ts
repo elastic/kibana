@@ -12,7 +12,12 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { AiSummaryMetadataDoc } from '@kbn/entity-store/common';
-import { AI_SUMMARY_EVENT_ACTION, getMetadataEntityIndexPattern } from '@kbn/entity-store/common';
+import {
+  AI_SUMMARY_EVENT_ACTION,
+  ENTITY_METADATA,
+  ENTITY_SCHEMA_VERSION_V2,
+  getEntityIndexPattern,
+} from '@kbn/entity-store/common';
 import {
   capEntitySummaryContent,
   MAX_ENTITY_ID_LENGTH,
@@ -214,10 +219,14 @@ const hasMetadataReadPrivilege = async ({
   const { hasAllRequested } = await checkPrivileges({
     elasticsearch: {
       cluster: [],
-      // Reads hit the metadata datastream backing indices (index pattern), not the
-      // write alias (`getEntityMetadataAlias`).
+      // Same bare datastream name the GET read authorizes against via the metadata
+      // client (`getMetadataEntitiesDataStreamName` → `getEntityIndexPattern`)
       index: {
-        [getMetadataEntityIndexPattern(spaceId)]: ['read'],
+        [getEntityIndexPattern({
+          schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+          dataset: ENTITY_METADATA,
+          namespace: spaceId,
+        })]: ['read'],
       },
     },
   });
