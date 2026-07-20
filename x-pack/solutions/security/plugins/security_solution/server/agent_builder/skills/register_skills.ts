@@ -24,6 +24,7 @@ import { createFindRulesSkill } from './find_rules';
 import { siemReadinessSkill } from './siem_readiness';
 import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
 import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
+import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -85,7 +86,9 @@ export const registerSkills = async ({
   if (experimentalFeatures.dexAiSkillFindRules) {
     await agentBuilder.skills.register(createFindRulesSkill({ getStartServices, logger }));
   }
-  await agentBuilder.skills.register(siemReadinessSkill);
+  if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
+    await agentBuilder.skills.register(siemReadinessSkill);
+  }
 
   if (experimentalFeatures.leadGenerationEnabled) {
     agentBuilder.skills.register(entityAnalyticsLeadsSkill);

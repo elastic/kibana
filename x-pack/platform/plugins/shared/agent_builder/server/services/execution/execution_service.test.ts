@@ -21,6 +21,7 @@ const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
   get: jest.fn(),
   updateStatus: jest.fn(),
   appendEvents: jest.fn(),
+  updateHeartbeat: jest.fn(),
   peek: jest.fn(),
   readEvents: jest.fn(),
   find: jest.fn().mockResolvedValue([]),
@@ -45,6 +46,14 @@ jest.mock('./task/abort_monitor', () => ({
     start: jest.fn(),
     stop: jest.fn(),
     getSignal: jest.fn().mockReturnValue(new AbortController().signal),
+  })),
+}));
+
+// Mock heartbeat reporter
+jest.mock('./task/heartbeat_reporter', () => ({
+  HeartbeatReporter: jest.fn().mockImplementation(() => ({
+    start: jest.fn(),
+    stop: jest.fn(),
   })),
 }));
 
