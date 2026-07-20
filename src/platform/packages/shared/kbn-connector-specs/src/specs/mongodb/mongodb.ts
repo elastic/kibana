@@ -11,24 +11,30 @@
  * MongoDB Connector
  *
  * Provides read-only access to MongoDB collections using the native MongoDB
- * driver. Supports any MongoDB deployment reachable via a connection string:
+ * driver. Supports any MongoDB deployment reachable via a connection URI:
  * Atlas (mongodb+srv://...), self-hosted replica sets, or standalone instances.
  *
  * Because MongoDB speaks a binary wire protocol (not HTTP), this connector
  * instantiates a fresh MongoClient per action call and closes it when done,
- * ignoring the Axios client injected by the framework. Once the connector-specs
- * framework gains first-class binary transport support this handler will be
- * migrated to use those facilities.
+ * ignoring the Axios client injected by the framework. This is a standalone
+ * stopgap: once the connector-specs framework gains first-class pooled binary
+ * transport support (RO-599, kibana#275613) this handler will be migrated to
+ * use those facilities instead of connecting per call.
  *
- * Auth: the connection string encodes all credentials (user, password, authSource,
- * TLS options). It is stored as a secret and never exposed to the browser.
+ * Auth: HTTP Basic (username + password), read directly from ctx.secrets and
+ * passed to MongoClient as `auth: { username, password }`.
+ *
+ * Known limitation: unlike a framework-provided client, this standalone version
+ * does not enforce a host allowlist (SSRF protection) on the configured URI.
+ * This is a temporary gap, to be closed when this migrates to the real
+ * client-registry framework.
  */
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { Db, CollectionInfo } from 'mongodb';
+import { ConnectionString } from 'mongodb-connection-string-url';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import { MONGODB_CONNECTION_STRING_AUTH_ID } from '../../auth_types/mongodb_connection_string';
 import type { FindInput, AggregateInput, CountInput, ListCollectionsInput } from './types';
 import {
   FindInputSchema,
@@ -40,20 +46,47 @@ import {
 // Stages that mutate data or execute arbitrary code — block these in aggregate
 const DISALLOWED_AGGREGATE_STAGES = new Set(['$out', '$merge', '$function', '$accumulator']);
 
+/** Resolve the database name: action input → URI path → error. */
+const resolveDb = (inputDatabase: string | undefined, uri: string): string => {
+  if (inputDatabase) return inputDatabase;
+
+  try {
+    const { pathname } = new ConnectionString(uri);
+    const dbFromUri = pathname.slice(1);
+    if (dbFromUri) return dbFromUri;
+  } catch {
+    // fall through
+  }
+
+  throw new Error(
+    'database name is required — include it in the URI path (mongodb://host/mydb) or pass it in the action input'
+  );
+};
+
 /**
  * Connect to MongoDB, run fn, always close.
- * Creates a fresh client per call (maxPoolSize: 1) as the framework does not
- * yet provide a pooled driver transport.
+ * Creates a fresh client per call (maxPoolSize: 1) as this standalone version
+ * does not yet provide a pooled driver transport.
  */
-const withClient = async <T>(ctx: ActionContext, fn: (db: Db) => Promise<T>): Promise<T> => {
+const withClient = async <T>(
+  ctx: ActionContext,
+  database: string,
+  fn: (db: Db) => Promise<T>
+): Promise<T> => {
   // Dynamic import keeps the mongodb driver out of the browser bundle.
   // Both kbn-optimizer and kbn-rspack-optimizer declare 'mongodb' as a browser
   // external so this import is never resolved during browser bundling.
   const { MongoClient } = await import(/* webpackChunkName: "mongodbDriver" */ 'mongodb');
-  const { connectionString } = ctx.secrets as { connectionString: string };
-  const { database } = ctx.config as { database: string };
+  const { uri } = ctx.config as { uri: string };
+  const { username, password } = ctx.secrets as { username: string; password: string };
 
-  const client = new MongoClient(connectionString, {
+  const client = new MongoClient(uri, {
+    auth: { username, password },
+    // Default to admin so credentials created there work without ?authSource=admin in the URI.
+    // The driver gives programmatic options precedence over the connection string, so only
+    // apply this default when the URI omits authSource — otherwise ?authSource=<db> in the URI
+    // (which the help text and docs tell users to use) would be silently ignored.
+    ...(new ConnectionString(uri).searchParams.has('authSource') ? {} : { authSource: 'admin' }),
     maxPoolSize: 1,
     serverSelectionTimeoutMS: 5_000,
     connectTimeoutMS: 10_000,
@@ -111,30 +144,34 @@ export const MongoDBConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
-  // The connection string carries all credentials and is stored as an encrypted
-  // secret via the mongodb_connection_string auth type. The Axios client
-  // injected by the framework is not used by any handler.
+  // Credentials (username/password) are stored as encrypted secrets via the
+  // basic auth type. The Axios client injected by the framework is not used
+  // by any handler — this connector talks to MongoDB over its native driver.
   auth: {
-    types: [MONGODB_CONNECTION_STRING_AUTH_ID],
+    types: ['basic'],
   },
 
-  // Config (unencrypted): only the database name.
-  // The connection string (sensitive) lives in auth secrets, not here.
+  // Config (unencrypted): the connection URI. Credentials are NOT included in
+  // the URI — they live in auth secrets (basic auth) instead.
   schema: lazySchema(() =>
     z.object({
-      database: z
+      uri: z
         .string()
         .min(1)
-        .describe('Default database name to use for all actions.')
+        .describe('MongoDB connection URI.')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.mongodb.config.database.label', {
-            defaultMessage: 'Database',
+          label: i18n.translate('core.kibanaConnectorSpecs.mongodb.config.uri.label', {
+            defaultMessage: 'Connection URI',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.mongodb.config.database.helpText', {
-            defaultMessage: 'The name of the MongoDB database to query.',
+          helpText: i18n.translate('core.kibanaConnectorSpecs.mongodb.config.uri.helpText', {
+            defaultMessage:
+              'Full MongoDB connection string. Supports mongodb:// and mongodb+srv:// schemes. ' +
+              'Include the database name in the path (e.g. /mydb) to use it as the default for actions. ' +
+              'Credentials are authenticated against the admin database by default; append ' +
+              '?authSource=<db> to override.',
           }),
-          placeholder: 'my_database',
+          placeholder: 'mongodb://hostname:27017/mydb',
         }),
     })
   ),
@@ -148,7 +185,9 @@ export const MongoDBConnector: ConnectorSpec = {
         'Use listCollections first to discover available collection names.',
       input: FindInputSchema,
       handler: async (ctx, input: FindInput) => {
-        return withClient(ctx, async (db) => {
+        const { uri } = ctx.config as { uri: string };
+        const database = resolveDb(input.database, uri);
+        return withClient(ctx, database, async (db) => {
           const cursor = db.collection(input.collection).find(input.filter ?? {}, {
             projection: input.projection,
             sort: input.sort,
@@ -189,7 +228,9 @@ export const MongoDBConnector: ConnectorSpec = {
               : [...input.pipeline.slice(0, -1), { $limit: maxLimit }]
             : [...input.pipeline, { $limit: maxLimit }];
 
-        return withClient(ctx, async (db) => {
+        const { uri } = ctx.config as { uri: string };
+        const database = resolveDb(input.database, uri);
+        return withClient(ctx, database, async (db) => {
           const results = await db.collection(input.collection).aggregate(pipeline).toArray();
           return { count: results.length, results };
         });
@@ -204,7 +245,9 @@ export const MongoDBConnector: ConnectorSpec = {
         'before running a find or aggregate.',
       input: CountInputSchema,
       handler: async (ctx, input: CountInput) => {
-        return withClient(ctx, async (db) => {
+        const { uri } = ctx.config as { uri: string };
+        const database = resolveDb(input.database, uri);
+        return withClient(ctx, database, async (db) => {
           const count = await db.collection(input.collection).countDocuments(input.filter ?? {});
           return { count };
         });
@@ -218,12 +261,14 @@ export const MongoDBConnector: ConnectorSpec = {
         'Use this first to discover what data is available before calling find, aggregate, or count.',
       input: ListCollectionsInputSchema,
       handler: async (ctx, input: ListCollectionsInput) => {
-        return withClient(ctx, async (db) => {
+        const { uri } = ctx.config as { uri: string };
+        const database = resolveDb(input.database, uri);
+        return withClient(ctx, database, async (db) => {
           const { nameFilter } = input;
           const filter = nameFilter ? { name: { $regex: nameFilter } } : {};
           const collections = await db.listCollections<CollectionInfo>(filter).toArray();
           return {
-            database: (ctx.config as { database: string }).database,
+            database,
             count: collections.length,
             collections: collections.map((c) => ({ name: c.name, type: c.type })),
           };
@@ -234,11 +279,14 @@ export const MongoDBConnector: ConnectorSpec = {
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.mongodb.test.description', {
-      defaultMessage: 'Verifies the connection string is valid by pinging the MongoDB deployment.',
+      defaultMessage:
+        'Verifies the connection URI and credentials are valid by pinging the MongoDB deployment.',
     }),
     handler: async (ctx) => {
       try {
-        await withClient(ctx, async (db) => {
+        // Ping against admin — it always exists and doesn't require the
+        // configured URI to include a database path.
+        await withClient(ctx, 'admin', async (db) => {
           await db.command({ ping: 1 });
         });
         return { ok: true, message: 'Connected to MongoDB successfully.' };

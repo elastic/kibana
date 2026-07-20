@@ -21,6 +21,12 @@ export const FindInputSchema = lazySchema(() =>
       .describe(
         'Name of the collection to query. Use listCollections to discover available names.'
       ),
+    database: z
+      .string()
+      .optional()
+      .describe(
+        'Database to query. Defaults to the database in the connection URI path if omitted.'
+      ),
     filter: z
       .record(z.string(), z.unknown())
       .optional()
@@ -36,7 +42,7 @@ export const FindInputSchema = lazySchema(() =>
           'Omit to return all fields.'
       ),
     sort: z
-      .record(z.string(), z.unknown())
+      .record(z.string(), z.union([z.literal(1), z.literal(-1)]))
       .optional()
       .describe(
         'Sort order for results. 1 = ascending, -1 = descending. ' +
@@ -74,6 +80,12 @@ export const AggregateInputSchema = lazySchema(() =>
       .describe(
         'Name of the collection to aggregate. Use listCollections to discover available names.'
       ),
+    database: z
+      .string()
+      .optional()
+      .describe(
+        'Database to query. Defaults to the database in the connection URI path if omitted.'
+      ),
     pipeline: z
       .array(z.record(z.string(), z.unknown()))
       .min(1)
@@ -104,6 +116,12 @@ export type AggregateInput = z.infer<typeof AggregateInputSchema>;
 export const CountInputSchema = lazySchema(() =>
   z.object({
     collection: z.string().min(1).describe('Name of the collection to count documents in.'),
+    database: z
+      .string()
+      .optional()
+      .describe(
+        'Database to query. Defaults to the database in the connection URI path if omitted.'
+      ),
     filter: z
       .record(z.string(), z.unknown())
       .optional()
@@ -121,6 +139,12 @@ export type CountInput = z.infer<typeof CountInputSchema>;
 
 export const ListCollectionsInputSchema = lazySchema(() =>
   z.object({
+    database: z
+      .string()
+      .optional()
+      .describe(
+        'Database to list collections from. Defaults to the database in the connection URI path if omitted.'
+      ),
     nameFilter: z
       .string()
       .optional()
