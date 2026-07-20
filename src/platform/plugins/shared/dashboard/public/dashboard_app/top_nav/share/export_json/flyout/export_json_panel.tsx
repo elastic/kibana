@@ -29,7 +29,7 @@ import {
 import { css } from '@emotion/react';
 import { CodeEditor, XJsonLang } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { coreServices, shareService } from '../../../services/kibana_services';
+import { coreServices, shareService } from '../../../../../services/kibana_services';
 import type { ExportJsonSanitizedState } from './types';
 
 export type ExportJsonPanelProps<SanitizedState extends object> =

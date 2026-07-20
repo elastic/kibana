@@ -14,9 +14,9 @@ import { i18n } from '@kbn/i18n';
 import type { ExportShareParameters } from '@kbn/share-plugin/public';
 import { useShareTypeContext } from '@kbn/share-plugin/public';
 
-import { DASHBOARD_API_PATH, type DashboardState } from '../../../common';
-import { type DashboardSanitizeResponseBody } from '../../../server';
-import { sanitizeDashboard } from '../sanitize_dashboard';
+import { DASHBOARD_API_PATH, type DashboardState } from '../../../../../common';
+import { type DashboardSanitizeResponseBody } from '../../../../../server';
+import { sanitizeDashboard } from './sanitize_dashboard';
 import { ExportJsonFlyout, type ExportJsonSharingData } from './flyout';
 
 export const exportJsonConfig: ExportShareParameters = {

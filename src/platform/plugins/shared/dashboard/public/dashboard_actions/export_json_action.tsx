@@ -87,7 +87,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
       parentApi: embeddable.parentApi,
       loadContent: async ({ closeFlyout }) => {
         const [{ ExportJsonFlyout }, isByReference] = await Promise.all([
-          import('../share/export_json/flyout/export_json_flyout'),
+          import('../dashboard_app/top_nav/share/export_json/flyout/export_json_flyout'),
           supportsByReference ? embeddable.canUnlinkFromLibrary() : false,
         ]);
 
