@@ -470,6 +470,8 @@ module.exports = {
     '@elastic/eui/badge-accessibility-rules': 'error',
     '@elastic/eui/consistent-is-invalid-props': 'error',
     '@elastic/eui/tooltip-no-interactive-content': 'error',
+    '@elastic/eui/accessible-interactive-element': 'error',
+    '@elastic/eui/eui/no-unnamed-radio-group': 'error',
   },
 
   overrides: [
