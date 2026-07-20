@@ -419,6 +419,36 @@ describe('getTemplateDefinitionJsonSchema', () => {
       expect(metadataProps?.options).toBeDefined();
       expect(metadataProps?.default).toBeDefined();
     });
+
+    // Every control whose value flows through useYamlFormSync honors `metadata.default` at runtime.
+    // Because metadata is locked to additionalProperties:false, each such control MUST declare
+    // `default` as a named property — otherwise the editor false-flags a working default (the
+    // DATE_PICKER regression). Parametrized so a newly-added control can't silently reintroduce it.
+    const valueBearingControls = Object.values(FieldType).filter(
+      (control) => control !== FieldType.MARKDOWN
+    );
+
+    it.each(valueBearingControls)('allows default in the %s metadata schema', (control) => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const branch = getFieldsOneOfBranches(schema).find(
+        ({ controlConst }) => controlConst === control
+      );
+      expect(branch).toBeDefined();
+
+      const metadata = getBranchMetadata(branch!.branch);
+      expect((metadata?.properties as JsonSchemaObject | undefined)?.default).toBeDefined();
+    });
+
+    it('omits default for the display-only MARKDOWN control (it holds no value)', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const branch = getFieldsOneOfBranches(schema).find(
+        ({ controlConst }) => controlConst === FieldType.MARKDOWN
+      );
+      expect(branch).toBeDefined();
+
+      const metadata = getBranchMetadata(branch!.branch);
+      expect((metadata?.properties as JsonSchemaObject | undefined)?.default).toBeUndefined();
+    });
   });
 
   describe('defaultSnippets (field-type scaffolding autocomplete)', () => {
