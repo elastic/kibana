@@ -35,7 +35,9 @@ function ServiceFlyoutLensChartComponent({
   rangeTo,
   refreshToken,
 }: ServiceFlyoutLensChartProps) {
-  const { lens, dataViews } = useServiceFlyoutContext();
+  const {
+    deps: { lens, dataViews },
+  } = useServiceFlyoutContext();
   const timeRange = useMemo(() => ({ from: rangeFrom, to: rangeTo }), [rangeFrom, rangeTo]);
 
   const { value: builtAttributes } = useAsync(async () => {

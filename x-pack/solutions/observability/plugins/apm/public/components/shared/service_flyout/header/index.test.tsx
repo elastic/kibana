@@ -89,8 +89,8 @@ describe('ServiceFlyoutHeader', () => {
 
     // `ServiceBadges` is self-contained and covered by its own test; here we only assert that the
     // header renders it.
-    jest.spyOn(ServiceBadgesModule, 'ServiceBadges').mockImplementation((props: any) => {
-      mockServiceBadges(props);
+    jest.spyOn(ServiceBadgesModule, 'ServiceBadges').mockImplementation(() => {
+      mockServiceBadges();
       return React.createElement('div', { 'data-test-subj': 'serviceBadgesMock' });
     });
 
