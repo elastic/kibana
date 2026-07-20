@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
-import * as reactRedux from 'react-redux';
+import * as reactRedux from 'react-redux-v7';
 import { useMonitorLatestPing } from './use_monitor_latest_ping';
 import { ConfigKey, MonitorTypeEnum, type Ping } from '../../../../../../common/runtime_types';
 import { getMonitorLastRunAction } from '../../../state';
@@ -52,8 +52,8 @@ jest.mock('./use_selected_location', () => ({
 
 const mockDispatch = jest.fn();
 const mockLatestPingState = jest.fn();
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const actual = jest.requireActual('react-redux-v7');
   return {
     ...actual,
     useDispatch: () => mockDispatch,

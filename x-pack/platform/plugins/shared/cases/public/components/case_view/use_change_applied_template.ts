@@ -12,7 +12,7 @@ import type { CaseSettings } from '../../../common/types/domain';
 import type { TemplateSettings } from '../../../common/types/domain/template/v1';
 import type { CaseUI } from '../../../common';
 import type { FieldSchema } from '../../../common/types/domain/template/fields';
-import { isInlineField } from '../../../common/types/domain/template/fields';
+import { isDisplayOnlyField, isInlineField } from '../../../common/types/domain/template/fields';
 import { patchCase } from '../../containers/api';
 import { casesMutationsKeys } from '../../containers/constants';
 import { useCasesToast } from '../../common/use_cases_toast';
@@ -40,6 +40,12 @@ interface ChangeAppliedTemplateArgs {
   caseData: CaseUI;
   /** Pass null to remove the applied template. `settings` are the template's raw definition values. */
   newTemplate: NewAppliedTemplate;
+  /**
+   * Pre-validated extended field values (snake_case keys) collected from the fields form.
+   * When provided, used directly instead of computing carry-over values via
+   * `computeNewExtendedFields`. Only meaningful when `newTemplate` is non-null.
+   */
+  extendedFields?: Record<string, string>;
 }
 
 /**
@@ -57,7 +63,8 @@ export const computeNewExtendedFields = (
 ): Record<string, string> => {
   const result: Record<string, string> = {};
   for (const field of newTemplateFields) {
-    if (isInlineField(field)) {
+    // Display-only fields (e.g. MARKDOWN) hold no value and are never written to the case.
+    if (isInlineField(field) && !isDisplayOnlyField(field)) {
       const snakeKey = getFieldSnakeKey(field.name, field.type);
       const camelKey = getFieldCamelKey(field.name, field.type);
       const existingValue = currentExtendedFields[camelKey];
@@ -81,9 +88,10 @@ export const useChangeAppliedTemplate = () => {
   const { showErrorToast } = useCasesToast();
 
   return useMutation(
-    ({ caseData, newTemplate }: ChangeAppliedTemplateArgs) => {
+    ({ caseData, newTemplate, extendedFields }: ChangeAppliedTemplateArgs) => {
       const newExtendedFields = newTemplate
-        ? computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {})
+        ? extendedFields ??
+          computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {})
         : {};
       return patchCase({
         caseId: caseData.id,
