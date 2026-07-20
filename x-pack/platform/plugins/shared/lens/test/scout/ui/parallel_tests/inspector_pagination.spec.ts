@@ -75,13 +75,18 @@ spaceTest.describe('Lens inspector pagination', { tag: tags.stateful.classic }, 
       await inspector.open('lnsApp_inspectButton');
       await inspector.setTablePageSize(INSPECTOR_PAGE_SIZE);
 
+      // Wait for the resized page to land — getTableData snapshots the DOM immediately.
+      await expect
+        .poll(async () => (await inspector.getTableData()).length)
+        .toBe(INSPECTOR_PAGE_SIZE);
       const pageOneRows = await inspector.getTableData();
-      expect(pageOneRows).toHaveLength(INSPECTOR_PAGE_SIZE);
 
-      await page.testSubj.click('pagination-button-1');
+      await inspector.goToTablePage(1);
+      await expect
+        .poll(async () => await inspector.getTableData())
+        .not.toStrictEqual(pageOneRows);
       const pageTwoRows = await inspector.getTableData();
       expect(pageTwoRows).toHaveLength(INSPECTOR_PAGE_SIZE);
-      expect(pageTwoRows).not.toStrictEqual(pageOneRows);
     }
   );
 });

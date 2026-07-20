@@ -68,7 +68,19 @@ export class Inspector {
 
   async setTablePageSize(size: number) {
     await this.tablePaginationPopoverButton.click();
-    await this.page.testSubj.click(`tablePagination-${size}-rows`);
+    const option = this.page.testSubj.locator(`tablePagination-${size}-rows`);
+    await option.click();
+    // Wait for the page-size popover to close before callers read the table.
+    await option.waitFor({ state: 'hidden' });
+  }
+
+  /** Switches the inspector table to the given 0-based page and waits until it is current. */
+  async goToTablePage(pageIndex: number) {
+    const pageButton = this.page.testSubj.locator(`pagination-button-${pageIndex}`);
+    await pageButton.click();
+    await this.page
+      .locator(`[data-test-subj="pagination-button-${pageIndex}"][aria-current="page"]`)
+      .waitFor({ state: 'visible' });
   }
 
   async close() {
