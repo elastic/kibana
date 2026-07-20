@@ -101,7 +101,7 @@ const putAiIndexBodySchema = schema.object({
       value: schema.string({
         minLength: 0,
         maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
-        meta: { description: 'An ES|QL query.' },
+        meta: { description: 'The source value; an ES|QL query when `type` is `esql`.' },
       }),
     }),
     {

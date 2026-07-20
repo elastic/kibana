@@ -76,10 +76,7 @@ export class AiIndexRegistry {
       logger.info(`AI index '${id}' registered successfully`);
     } catch (err) {
       if (err instanceof InvalidAiIndexDestError) {
-        logger.warn(
-          `AI index '${id}' dest is not ready (backing index may not exist yet): ${err.message}. ` +
-            `Registration will be retried on next Kibana restart.`
-        );
+        logger.warn(`AI index '${id}' dest is not valid: '${err.message}'. Skipped.`);
       } else {
         logger.warn(
           `Failed to register AI index '${id}': ${err instanceof Error ? err.message : String(err)}`
