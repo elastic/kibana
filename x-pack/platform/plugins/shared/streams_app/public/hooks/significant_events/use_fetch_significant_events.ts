@@ -7,7 +7,11 @@
 
 import { useEffect, useState } from 'react';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type {
+  SignificantEvent,
+  SignificantEventStatus,
+  Severity,
+} from '@kbn/significant-events-schema';
 import type { PaginatedResponse } from '@kbn/streams-plugin/common';
 import { useKibana } from '../use_kibana';
 import { useFetchErrorToast } from '../use_fetch_error_toast';
@@ -15,7 +19,8 @@ import { useFetchErrorToast } from '../use_fetch_error_toast';
 interface UseFetchSignificantEventsParams {
   from: string | number;
   to: string | number;
-  status?: string[];
+  status?: SignificantEventStatus[];
+  severity?: Severity[];
   stream?: string[];
   search?: string;
 }
@@ -24,6 +29,7 @@ export const useFetchSignificantEvents = ({
   from,
   to,
   status,
+  severity,
   stream,
   search,
 }: UseFetchSignificantEventsParams) => {
@@ -40,7 +46,7 @@ export const useFetchSignificantEvents = ({
 
   useEffect(() => {
     setPagination((prev) => (prev.page === 1 ? prev : { ...prev, page: 1 }));
-  }, [from, to, status, stream, search]);
+  }, [from, to, status, severity, stream, search]);
 
   const query = useQuery<PaginatedResponse<SignificantEvent>, Error>({
     queryKey: [
@@ -50,6 +56,7 @@ export const useFetchSignificantEvents = ({
       from,
       to,
       status,
+      severity,
       stream,
       search,
     ],
@@ -64,6 +71,7 @@ export const useFetchSignificantEvents = ({
             from: new Date(from).toISOString(),
             to: new Date(to).toISOString(),
             ...(status?.length ? { status } : {}),
+            ...(severity?.length ? { severity } : {}),
             ...(stream?.length ? { stream } : {}),
             ...(search ? { search } : {}),
           },

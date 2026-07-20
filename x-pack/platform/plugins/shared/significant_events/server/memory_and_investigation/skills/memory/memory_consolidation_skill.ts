@@ -17,6 +17,7 @@ export const createMemoryConsolidationSkill = (options: MemoryToolsOptions) =>
     id: 'streams-memory-consolidation',
     name: 'streams-memory-consolidation',
     basePath: 'skills/platform/streams',
+    excludeFromElasticCapabilities: true,
     description,
     content,
     getInlineTools: () => toInlineMemoryTools(createMemoryTools(options)),
