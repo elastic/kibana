@@ -11,7 +11,7 @@ import type { ExistingFailedTestIssue } from './existing_failed_test_issues';
 import type { TestFailure } from './get_failures';
 import { getLocationFromClassname, getReportNameFromClassname } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
-import type { GithubApi } from './github_api';
+import type { GithubApi, GithubIssueComment } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
 
 function redactHostnameSuffix(text: string, suffix: string): string {
@@ -51,13 +51,60 @@ function truncateFailureBody(failure: string, maxCharacters: number = 8192): str
       ].join('\n');
 }
 
-function getFailureBodyFromIssueBody(body: string): string | undefined {
-  const match = body.match(/```[\r\n]+([\s\S]*?)[\r\n]+```/);
-  if (!match) {
+function getCodeBlocksFromText(text: string): string[] {
+  const blocks: string[] = [];
+  const codeBlockRe = /```[\r\n]+([\s\S]*?)[\r\n]+```/g;
+  let match: RegExpExecArray | null;
+  while ((match = codeBlockRe.exec(text)) !== null) {
+    blocks.push(match[1].trim());
+  }
+  return blocks;
+}
+
+/**
+ * JUnit failure text is a single blob combining the error message and the stack
+ * trace. Extract just the message, i.e. everything before the first stack-frame
+ * line, falling back to the full blob when the heuristic yields nothing.
+ */
+export function extractErrorMessage(failureText: string): string {
+  const lines = failureText.split('\n');
+  const firstStackFrame = lines.findIndex((line) => /^\s+at /.test(line));
+  if (firstStackFrame === -1) {
+    return failureText.trim();
+  }
+  const message = lines.slice(0, firstStackFrame).join('\n').trim();
+  return message || failureText.trim();
+}
+
+/**
+ * Decide whether the current error message should be posted in the follow-up
+ * comment. It is included only when it is truly new: not already contained in
+ * any code block of the issue body or of any previous comment. Returns the
+ * redacted, truncated message when new, `undefined` otherwise.
+ */
+function getNewErrorMessageForComment(
+  issueBody: string,
+  comments: GithubIssueComment[],
+  errorMessage: string | undefined
+): string | undefined {
+  if (!errorMessage) {
     return undefined;
   }
 
-  return match[1].trim();
+  const currentErrorMsg = truncateFailureBody(errorMessage).trim();
+  if (!currentErrorMsg) {
+    return undefined;
+  }
+
+  const redactedCurrent = redactSensitiveGithubFailureText(currentErrorMsg);
+  // The current message from CI is raw. Historical blocks are usually already
+  // redacted (we redact before posting), but older issues may still hold raw
+  // text. Redacting them again is idempotent.
+  const alreadyReported = [issueBody, ...comments.map((comment) => comment.body)]
+    .flatMap(getCodeBlocksFromText)
+    .some((block) => redactSensitiveGithubFailureText(block).includes(redactedCurrent));
+
+  return alreadyReported ? undefined : redactedCurrent;
 }
 
 const NOT_AVAILABLE = 'N/A';
@@ -274,8 +321,23 @@ export async function createFailureIssue(
   }
 }
 
-function createFTRComment(buildUrl: string, branch: string, pipeline: string): string {
-  return `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
+function createFTRComment(
+  buildUrl: string,
+  branch: string,
+  pipeline: string,
+  newErrorMessage?: string
+): string {
+  const base = `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
+  if (!newErrorMessage) {
+    return base;
+  }
+
+  /*
+   * The error message is only included when it has not been reported on the
+   * issue before (see getNewErrorMessageForComment), so repeat failures with a
+   * known error stay link-only while genuinely new errors surface immediately.
+   */
+  return `${base}\n\nNew error message:\n\`\`\`\n${newErrorMessage}\n\`\`\``;
 }
 
 function createScoutComment(
@@ -290,8 +352,8 @@ function createScoutComment(
   } - ${branch}](${buildUrl})`;
   if (!newErrorMessage) {
     /*
-     * If there's a failure with the same error message as before, just post a comment
-     * with pipeline link and failure target.
+     * If the error message was already reported on this issue (body or any
+     * previous comment), just post a comment with pipeline link and failure target.
      *
      * Example:
      *
@@ -323,9 +385,7 @@ function createScoutComment(
    * ```
    */
 
-  return `${base}\n\nNew error message:\n\`\`\`\n${redactSensitiveGithubFailureText(
-    newErrorMessage
-  )}\n\`\`\``;
+  return `${base}\n\nNew error message:\n\`\`\`\n${newErrorMessage}\n\`\`\``;
 }
 
 async function updateFTRFailureIssue(
@@ -333,7 +393,8 @@ async function updateFTRFailureIssue(
   issue: ExistingFailedTestIssue,
   api: GithubApi,
   branch: string,
-  pipeline: string
+  pipeline: string,
+  failure?: TestFailure
 ) {
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
   const newBody = updateIssueMetadata(issue.github.body, {
@@ -342,7 +403,17 @@ async function updateFTRFailureIssue(
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
-  const commentText = createFTRComment(buildUrl, branch, pipeline);
+  let newErrorMessage: string | undefined;
+  if (failure) {
+    const comments = await api.getIssueComments(issue.github.number);
+    newErrorMessage = getNewErrorMessageForComment(
+      issue.github.body,
+      comments,
+      extractErrorMessage(failure.failure)
+    );
+  }
+
+  const commentText = createFTRComment(buildUrl, branch, pipeline, newErrorMessage);
   await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };
@@ -363,19 +434,12 @@ async function updateScoutFailureIssue(
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
-  const previousFailureBody = getFailureBodyFromIssueBody(issue.github.body);
-  let newErrorMessage: string | undefined;
-  if (failure.errorMessage && previousFailureBody) {
-    const currentErrorMsg = truncateFailureBody(failure.errorMessage).trim();
-    // Current error.message from CI is raw. The issue's first code block is usually already
-    // redacted (we redact on create), but older issues may still hold raw text. Redacting
-    // previous again is idempotent.
-    const redactedPrevious = redactSensitiveGithubFailureText(previousFailureBody);
-    const redactedCurrent = redactSensitiveGithubFailureText(currentErrorMsg);
-    if (!redactedPrevious.includes(redactedCurrent)) {
-      newErrorMessage = redactedCurrent;
-    }
-  }
+  const comments = await api.getIssueComments(issue.github.number);
+  const newErrorMessage = getNewErrorMessageForComment(
+    issue.github.body,
+    comments,
+    failure.errorMessage
+  );
 
   const commentText = createScoutComment(failure, buildUrl, branch, pipeline, newErrorMessage);
   await api.addIssueComment(issue.github.number, commentText);
@@ -394,6 +458,6 @@ export async function updateFailureIssue(
   if (failure && isScoutFailure(failure)) {
     return updateScoutFailureIssue(buildUrl, issue, api, branch, pipeline, failure);
   } else {
-    return updateFTRFailureIssue(buildUrl, issue, api, branch, pipeline);
+    return updateFTRFailureIssue(buildUrl, issue, api, branch, pipeline, failure);
   }
 }
