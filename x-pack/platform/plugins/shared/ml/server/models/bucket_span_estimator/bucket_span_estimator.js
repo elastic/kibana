@@ -267,7 +267,13 @@ export function estimateBucketSpanFactory(client) {
     }
   }
 
-  const getFieldCardinality = function (index, field, runtimeMappings, indicesOptions) {
+  const getFieldCardinality = function (
+    index,
+    field,
+    runtimeMappings,
+    indicesOptions,
+    projectRouting
+  ) {
     return new Promise((resolve, reject) => {
       asCurrentUser
         .search(
@@ -283,9 +289,9 @@ export function estimateBucketSpanFactory(client) {
                 },
               },
               ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+              ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
             },
             ...(indicesOptions ?? {}),
-            ...(this.projectRouting !== undefined ? { project_routing: this.projectRouting } : {}),
           },
           { maxRetries: 0 }
         )
@@ -299,13 +305,20 @@ export function estimateBucketSpanFactory(client) {
     });
   };
 
-  const getRandomFieldValues = function (index, field, query, runtimeMappings, indicesOptions) {
+  const getRandomFieldValues = function (
+    index,
+    field,
+    query,
+    runtimeMappings,
+    indicesOptions,
+    projectRouting
+  ) {
     let fieldValues = [];
     return new Promise((resolve, reject) => {
       const NUM_PARTITIONS = 10;
       // use a partitioned search to load 10 random fields
       // load ten fields, to test that there are at least 10.
-      getFieldCardinality(index, field, runtimeMappings, indicesOptions)
+      getFieldCardinality(index, field, runtimeMappings, indicesOptions, projectRouting)
         .then((value) => {
           const numPartitions = Math.floor(value / NUM_PARTITIONS) || 1;
           asCurrentUser
@@ -327,11 +340,9 @@ export function estimateBucketSpanFactory(client) {
                     },
                   },
                   ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+                  ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
                 },
                 ...(indicesOptions ?? {}),
-                ...(this.projectRouting !== undefined
-                  ? { project_routing: this.projectRouting }
-                  : {}),
               },
               { maxRetries: 0 }
             )
@@ -424,7 +435,8 @@ export function estimateBucketSpanFactory(client) {
               formConfig.splitField,
               formConfig.query,
               formConfig.runtimeMappings,
-              formConfig.indicesOptions
+              formConfig.indicesOptions,
+              formConfig.projectRouting
             )
               .then((splitFieldValues) => {
                 runEstimator(splitFieldValues);
