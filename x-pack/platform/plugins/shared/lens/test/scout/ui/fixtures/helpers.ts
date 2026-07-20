@@ -84,54 +84,53 @@ export async function createRuntimeFieldFromEditor(
 }
 
 /**
- * Triggers Lens CSV export after the export button has been clicked.
- * Share may auto-download when CSV is the only integration, or show a popover when
- * reporting is also registered — handles either without racing waiters.
- * Kept out of the spec to satisfy `playwright/no-conditional-in-test`.
+ * Opens Lens export and completes the CSV download path.
+ *
+ * Lens Share has two product outcomes after one Export click:
+ * - auto-download when CSV is the only integration (`ELASTIC_LENS_CSV_CONTENT` with debug flag)
+ * - a popover item when reporting is also registered (`exportMenuItem-CSV`)
+ *
+ * Waits for Export to be enabled (app signal that visualization data is present), clicks once,
+ * then waits for either readiness signal and clicks the menu item at most once.
+ * Dual-path handling lives here (not in the spec) for `playwright/no-conditional-in-test`.
  */
 export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
+  const exportButton = page.testSubj.locator('lnsApp_exportButton');
   const csvMenuItem = page.testSubj.locator('exportMenuItem-CSV');
-  type CsvExportReady = 'menu' | 'content';
-  let csvExportReady: CsvExportReady | undefined;
 
+  // Readiness before click: csvEnabled / shareUrlEnabled both require hasData.
+  await expect(exportButton).toBeEnabled();
+  await exportButton.click();
+
+  let shouldClickMenu = false;
+  // justified: share integrations resolve asynchronously after Export opens
   await expect
-    .poll(async () => {
-      const hasContent = await page.evaluate(() => {
-        const content = (
-          window as Window & {
-            ELASTIC_LENS_CSV_CONTENT?: Record<string, { content: string; type: string }>;
-          }
-        ).ELASTIC_LENS_CSV_CONTENT;
-        return Boolean(content && Object.keys(content).length > 0);
-      });
-      if (hasContent) {
-        csvExportReady = 'content';
-        return csvExportReady;
-      }
-      if (await csvMenuItem.isVisible()) {
-        csvExportReady = 'menu';
-        return csvExportReady;
-      }
-      return null;
-    })
-    .toBeTruthy();
+    .poll(
+      async () => {
+        const hasContent = await page.evaluate(() => {
+          const content = (
+            window as Window & {
+              ELASTIC_LENS_CSV_CONTENT?: Record<string, { content: string; type: string }>;
+            }
+          ).ELASTIC_LENS_CSV_CONTENT;
+          return Boolean(content && Object.keys(content).length > 0);
+        });
+        if (hasContent) {
+          return true;
+        }
+        if (await csvMenuItem.isVisible()) {
+          shouldClickMenu = true;
+          return true;
+        }
+        return false;
+      },
+      { timeout: 30_000 }
+    )
+    .toBe(true);
 
-  if (csvExportReady === 'menu') {
+  if (shouldClickMenu) {
     await csvMenuItem.click();
   }
-
-  await expect
-    .poll(async () => {
-      const content = await page.evaluate(() => {
-        return (
-          window as Window & {
-            ELASTIC_LENS_CSV_CONTENT?: Record<string, { content: string; type: string }>;
-          }
-        ).ELASTIC_LENS_CSV_CONTENT;
-      });
-      return content && Object.keys(content).length > 0 ? content : undefined;
-    })
-    .toBeTruthy();
 }
 
 type DashboardAndLens = Pick<PageObjects, 'dashboard' | 'lens'>;

@@ -192,9 +192,15 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
       });
 
       await lens.waitForVisualization('mtrVis');
-      const metricData = await lens.getMetricVisualizationData();
-      expect(metricData[0].title).toBe('Average of bytes');
-      expect(metricData[0].value).toBeTruthy();
+      await expect
+        .poll(async () => {
+          const metric = (await lens.getMetricVisualizationData())[0];
+          if (!metric?.title || !metric?.value) {
+            return null;
+          }
+          return { title: metric.title, hasValue: true };
+        })
+        .toStrictEqual({ title: 'Average of bytes', hasValue: true });
 
       await lens.save('New Lens from Modal', { addToDashboard: 'new' });
       await dashboard.waitForRenderComplete();
@@ -227,11 +233,16 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
       await lens.save(title, { addToDashboard: 'none' });
       await lens.waitForVisualization('mtrVis');
 
+      // Poll title + value together — chart tiles can briefly disappear after save.
       await expect
-        .poll(async () => (await lens.getMetricVisualizationData())[0]?.value)
-        .toBeTruthy();
-      const metricData = await lens.getMetricVisualizationData();
-      expect(metricData[0].title).toBe('Average of bytes');
+        .poll(async () => {
+          const metric = (await lens.getMetricVisualizationData())[0];
+          if (!metric?.title || !metric?.value) {
+            return null;
+          }
+          return { title: metric.title, hasValue: true };
+        })
+        .toStrictEqual({ title: 'Average of bytes', hasValue: true });
     }
   );
 
@@ -303,22 +314,35 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
       await lens.save(`Lens adhoc csv download ${scoutSpace.id}`, { addToDashboard: 'none' });
       await lens.waitForVisualization('mtrVis');
 
-      // Ensure the metric has data before exporting — csvEnabled requires hasData.
+      // Stable chart + data before Export — empty activeData makes CSV auto-download a no-op.
       await expect
         .poll(async () => {
-          const metricData = await lens.getMetricVisualizationData();
-          return metricData[0]?.value;
+          const metric = (await lens.getMetricVisualizationData())[0];
+          if (!metric?.title || !metric?.value) {
+            return null;
+          }
+          return { title: metric.title, hasValue: true };
         })
-        .toBeTruthy();
+        .toStrictEqual({ title: 'Average of bytes', hasValue: true });
 
       await page.evaluate(() => {
         window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = true;
         window.ELASTIC_LENS_CSV_CONTENT = undefined;
       });
 
-      await expect(page.testSubj.locator('lnsApp_exportButton')).toBeEnabled();
-      await page.testSubj.click('lnsApp_exportButton');
       await completeLensCsvExport(page);
+
+      await expect
+        .poll(async () => {
+          const content = await page.evaluate(
+            () =>
+              window.ELASTIC_LENS_CSV_CONTENT as
+                | Record<string, { content: string; type: string }>
+                | undefined
+          );
+          return content && Object.keys(content).length > 0 ? content : undefined;
+        })
+        .toBeTruthy();
 
       const csvContent = await page.evaluate(
         () =>
@@ -326,8 +350,6 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
             | Record<string, { content: string; type: string }>
             | undefined
       );
-
-      expect(csvContent).toBeTruthy();
       expect(Object.keys(csvContent!)).toHaveLength(1);
 
       await page.evaluate(() => {
