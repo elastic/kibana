@@ -153,4 +153,17 @@ describe('resetReconciliationTask', () => {
     ).resolves.toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('locked'));
   });
+
+  it('does not throw when the scheduling step fails (it now runs inside the try scope)', async () => {
+    // scheduleReconciliationTask was moved inside resetReconciliationTask's try so the "never
+    // throws" contract is local. Pin it: even if scheduling rejects (here via ensureScheduled), the
+    // reset must still resolve rather than propagate — independent of scheduleReconciliationTask's
+    // own internal error handling.
+    const tm = taskManagerMock.createStart();
+    (tm.ensureScheduled as jest.Mock).mockRejectedValueOnce(new Error('tm unavailable'));
+
+    await expect(
+      resetReconciliationTask({ taskManager: tm, logger, intervalMinutes: 30 })
+    ).resolves.toBeUndefined();
+  });
 });

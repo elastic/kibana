@@ -19,7 +19,7 @@ import {
 } from './writer/attachments';
 import { ensureCaseIndex } from './ensure_indices/case';
 import { ensureActivityIndex } from './ensure_indices/activity';
-import { RECONCILIATION_TASK_ID } from './reconciliation';
+import { RESET_TASK_ID, RESET_TASK_TYPE } from './reconciliation/reset_task';
 import { makeCase, makeUserAction } from './__test_helpers__';
 
 jest.mock('./ensure_indices/case');
@@ -240,30 +240,25 @@ describe('CasesAnalyticsV2Service', () => {
       await expect(service.triggerBackfillReconciliation()).resolves.toBeUndefined();
     });
 
-    it('clears the reconciliation cursor so the next tick runs a full backfill', async () => {
+    it('schedules the dedicated full-reset task (throttled, cursor-seeding) rather than clearing the periodic cursor', async () => {
       const service = build(true);
       const taskManager = await startWithTaskManager(service);
 
       await service.triggerBackfillReconciliation();
 
-      // Ensures the singleton task exists, then rewrites its state to empty — the empty cursor is
-      // what forces the next periodic tick to walk every case rather than an incremental delta.
-      expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
-        expect.objectContaining({ id: RECONCILIATION_TASK_ID })
+      // Routes through the one-shot reset task: removes any in-flight reset first (singleton id),
+      // then schedules a fresh one. It must NOT touch the periodic reconciliation task's state.
+      expect(taskManager.removeIfExists).toHaveBeenCalledWith(RESET_TASK_ID);
+      expect(taskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({ id: RESET_TASK_ID, taskType: RESET_TASK_TYPE })
       );
-      expect(taskManager.bulkUpdateState).toHaveBeenCalledWith(
-        [RECONCILIATION_TASK_ID],
-        expect.any(Function)
-      );
-      const stateUpdater = (taskManager.bulkUpdateState as jest.Mock).mock.calls[0][1];
-      expect(stateUpdater()).toEqual({});
+      expect(taskManager.bulkUpdateState).not.toHaveBeenCalled();
     });
 
-    it('never throws when the underlying task-manager calls fail', async () => {
+    it('never throws when scheduling the reset task fails', async () => {
       const service = build(true);
       const taskManager = await startWithTaskManager(service);
-      (taskManager.ensureScheduled as jest.Mock).mockRejectedValue(new Error('tm down'));
-      (taskManager.bulkUpdateState as jest.Mock).mockRejectedValue(new Error('tm down'));
+      (taskManager.schedule as jest.Mock).mockRejectedValue(new Error('tm down'));
 
       await expect(service.triggerBackfillReconciliation()).resolves.toBeUndefined();
     });

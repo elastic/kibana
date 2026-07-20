@@ -545,17 +545,33 @@ permanent, not a transient window, until the case's next real edit.
 
 To close this, the migration fires a one-shot hook when its case
 backfill reaches a terminal state (fully complete **or** gives up after
-the failure cap). Note the give-up case: the nudge still fires, and the
-full walk faithfully mirrors whatever is currently in the SOs — that
-re-indexes the cases that _were_ backfilled but does **not** mean the
-backfill succeeded for every case. Cases that never backfilled stay
-without `extended_fields` until a later Kibana restart re-runs the
-migration to completion (which fires the nudge again). The hook calls
-`CasesAnalyticsV2Service.triggerBackfillReconciliation()`, which clears
-the reconciliation cursor so the **next tick runs a single full
-backfill walk** (no `updated_at` filter) and mirrors the freshly
-backfilled `extended_fields` into `.cases`. The walk persists a fresh
-cursor on success, so subsequent ticks return to cheap incremental mode.
+the failure cap). The hook calls
+`CasesAnalyticsV2Service.triggerBackfillReconciliation()`, which
+**schedules the dedicated full-reset task** — the same
+`cases.analyticsV2.fullReset` task that `POST /reset` uses (see "Reset
+the index"). That task re-walks every case with `lastRunAt: undefined`,
+mirroring the freshly backfilled `extended_fields` into `.cases`, and
+seeds the periodic cursors on completion so reconciliation returns to
+incremental mode.
+
+We deliberately route through the reset task rather than clearing the
+periodic reconciliation cursor. The periodic task is tuned for
+`O(delta)` ticks — no inter-page throttle, Task Manager's default
+timeout — so forcing a full walk through it would run unthrottled and,
+on a tenant large enough to exceed that timeout, would re-walk from
+scratch every tick and never settle back into incremental mode (the
+periodic cursor only advances on a full successful drain). The reset
+task is purpose-built for full walks: it throttles inter-page writes
+(`resetPageDelayMs`), runs under a larger configurable timeout
+(`resetTaskTimeoutMinutes`), reports live progress under
+`/state.active_reset`, and seeds the post-walk cursors itself.
+
+Note the give-up case: the nudge still fires, and the reset walk
+faithfully mirrors whatever is currently in the SOs — that re-indexes
+the cases that _were_ backfilled but does **not** mean the backfill
+succeeded for every case. Cases that never backfilled stay without
+`extended_fields` until a later Kibana restart re-runs the migration to
+completion (which fires the nudge again).
 
 Safety properties (all covered by tests):
 
@@ -563,16 +579,20 @@ Safety properties (all covered by tests):
   `hasPendingCaseBackfill(configures)`, derived from the restart-durable
   `legacyCasesMigrated` per-space flags — **not** a per-run write count.
   A no-op restart of an already-migrated cluster sees no pending work
-  and triggers **no** re-index. This also closes the boundary case where
+  and triggers **no** reset. This also closes the boundary case where
   the migration's final run writes zero cases (e.g. a restart wiped the
   in-progress cursor and the last run only re-scans already-written
   cases) yet still needs to nudge analytics.
-- **No feedback loop.** Reconciliation reads case SOs and writes only to
+- **No feedback loop.** The reset walk reads case SOs and writes only to
   `.cases`; it never writes case SOs, so it cannot re-trigger the
-  migration task. The full walk runs once, then reverts to incremental.
+  migration task.
+- **No concurrent walks.** `scheduleResetTask` removes any in-flight
+  reset first (singleton task id), so a nudge landing while an admin
+  `/reset` is running replaces it rather than racing a second walk.
 - **Decoupled + non-fatal.** The callback is dependency-injected from
   `plugin.ts`; it no-ops when analytics v2 is disabled and swallows its
-  own errors, so it can never fail or retry the migration task.
+  own errors (scheduling failures are logged, never propagated), so it
+  can never fail or retry the migration task.
 
 ## Activity surface
 

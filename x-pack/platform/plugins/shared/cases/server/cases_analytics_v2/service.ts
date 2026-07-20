@@ -21,12 +21,8 @@ import { CasesAnalyticsV2DataViewService } from './data_view/service';
 import { ensureCaseIndex } from './ensure_indices/case';
 import { ensureActivityIndex } from './ensure_indices/activity';
 import { ensureAttachmentsIndex } from './ensure_indices/attachments';
-import {
-  registerReconciliationTask,
-  resetReconciliationTask,
-  scheduleReconciliationTask,
-} from './reconciliation';
-import { registerResetTask } from './reconciliation/reset_task';
+import { registerReconciliationTask, scheduleReconciliationTask } from './reconciliation';
+import { registerResetTask, scheduleResetTask, RESET_TASK_ID } from './reconciliation/reset_task';
 import { registerCasesAnalyticsV2Routes } from './routes';
 import {
   CasesAnalyticsV2Writer,
@@ -458,9 +454,8 @@ export class CasesAnalyticsV2Service {
   }
 
   /**
-   * Clears the reconciliation cursor so the NEXT periodic tick runs as a one-time full backfill
-   * (walks every case, no `updated_at` filter). Invoked once by the cases templates migration when
-   * it finishes backfilling existing cases' `extended_fields`.
+   * Schedules a one-time full reset (backfill) of the analytics indices. Invoked once by the cases
+   * templates migration when it finishes backfilling existing cases' `extended_fields`.
    *
    * Why it's needed: that backfill writes `extended_fields` via a raw saved-objects `bulkUpdate`,
    * which stamps only the SO-framework `updated_at` — NOT the case-domain `attributes.updated_at`
@@ -468,12 +463,22 @@ export class CasesAnalyticsV2Service {
    * never re-emit the backfilled cases on their own, and their `extended_fields` would be
    * permanently missing from `.cases`. A single full walk after the backfill mirrors them reliably.
    *
+   * Routes through the dedicated `cases.analyticsV2.fullReset` task (the same one the `/reset` route
+   * schedules) rather than clearing the periodic reconciliation cursor. The reset task is
+   * purpose-built for full walks: it throttles inter-page writes (`resetPageDelayMs`), runs under a
+   * configurable, larger timeout (`resetTaskTimeoutMinutes`), reports live progress, and — critically
+   * for large tenants — seeds the periodic cursors on completion so reconciliation returns to cheap
+   * incremental mode. Clearing the periodic cursor instead would force the periodic task (no throttle,
+   * default timeout) to do the full walk, and on a tenant large enough to exceed that timeout it would
+   * re-walk from scratch every tick and never settle back into incremental mode.
+   *
    * Safe and bounded:
    *  - No-op when v2 is disabled, or before `start()` has captured the Task Manager contract.
-   *  - Runs the full walk ONCE: on success the walk persists a fresh cursor (`tickStartedAt`), so
-   *    subsequent ticks return to cheap incremental mode — this does not re-index on every tick.
-   *  - `writer.upsertCase` is idempotent on `_id`, so racing an in-flight tick is harmless.
-   *  - Never throws; a failure here must not fail the caller (the migration task).
+   *  - `scheduleResetTask` removes any in-flight reset first (singleton id), so this can't stack
+   *    concurrent walks; bulk writes are idempotent on `_id`.
+   *  - Never throws: `scheduleResetTask` throws only on a Task Manager scheduling failure, which is
+   *    caught here so it can't surface into the migration task that calls it. The success log fires
+   *    only after scheduling actually succeeds.
    */
   public async triggerBackfillReconciliation(): Promise<void> {
     if (!this.enabled) {
@@ -487,22 +492,13 @@ export class CasesAnalyticsV2Service {
       return;
     }
     try {
-      await resetReconciliationTask({
-        taskManager: this.taskManager,
-        logger: this.logger,
-        intervalMinutes: this.reconciliationIntervalMinutes,
-        // Empty state → the next tick walks every case (full backfill), mirroring the freshly
-        // backfilled extended_fields. One-time: the successful walk persists a fresh cursor.
-        initialState: {},
-      });
+      await scheduleResetTask({ taskManager: this.taskManager, logger: this.logger });
       this.logger.info(
-        'cases-analyticsV2: reconciliation cursor reset for a one-time full backfill following cases templates migration completion'
+        `cases-analyticsV2: scheduled full reset (${RESET_TASK_ID}) to backfill extended_fields into .cases following cases templates migration completion`
       );
     } catch (err) {
-      // resetReconciliationTask already swallows its own errors, but guard defensively so this can
-      // never surface into the migration task that calls it.
       this.logger.warn(
-        `cases-analyticsV2: failed to trigger backfill reconciliation after templates migration: ${
+        `cases-analyticsV2: failed to schedule full reset after templates migration: ${
           err instanceof Error ? err.message : String(err)
         }`
       );
