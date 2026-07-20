@@ -15,7 +15,7 @@ import type { ContentListItem } from '@kbn/content-list';
 import { TAG_FILTER_ID, useContentListItems, useContentListSelection, useContentListState } from '@kbn/content-list-provider';
 import { filter } from '@kbn/content-list-toolbar';
 import { ActionPolicySnoozePopover } from '../../../components/action_policy/action_policy_snooze_popover';
-import { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
+import type { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import { useFetchTags } from '../../../hooks/use_fetch_tags';
 import { resolveDisplayName } from '../../../utils/resolve_display_name';
