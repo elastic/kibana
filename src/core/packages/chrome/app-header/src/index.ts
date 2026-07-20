@@ -32,7 +32,7 @@ export type {
   AppHeaderMetadataItems,
   AppHeaderMetadataTextItem,
   AppHeaderMenu,
-  AppHeaderPadding,
+  AppHeaderSpacing,
   AppHeaderConfig,
   AppHeaderTitle,
   AppHeaderTitleSaveResult,
