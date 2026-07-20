@@ -75,7 +75,10 @@ export const getUpdateAssetCriticalityStepDefinition = (
         );
 
         const { entities } = await crudClient.listEntities({
-          filter: [{ term: { 'entity.id': entityId } }, { term: { 'entity.EngineMetadata.Type': entityType } }],
+          filter: [
+            { term: { 'entity.id': entityId } },
+            { term: { 'entity.EngineMetadata.Type': entityType } },
+          ],
           size: 1,
         });
 

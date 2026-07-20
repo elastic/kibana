@@ -78,9 +78,10 @@ const createMockContext = (
 describe('updateAssetCriticalityStepDefinition', () => {
   const updateEntity = jest.fn();
   const listEntities = jest.fn();
-  const createCRUDClient = jest
-    .fn()
-    .mockReturnValue({ updateEntity, listEntities }) as unknown as EntityStoreStartContract['createCRUDClient'];
+  const createCRUDClient = jest.fn().mockReturnValue({
+    updateEntity,
+    listEntities,
+  }) as unknown as EntityStoreStartContract['createCRUDClient'];
   const getCreateCRUDClient = jest.fn(async () => createCRUDClient);
   const getClient = jest.fn();
   const getWorkflowsExtensionsStart = jest.fn(
@@ -117,7 +118,9 @@ describe('updateAssetCriticalityStepDefinition', () => {
     (createCRUDClient as jest.Mock).mockReturnValue({ updateEntity, listEntities });
     getCreateCRUDClient.mockImplementation(async () => createCRUDClient);
     updateEntity.mockResolvedValue(undefined);
-    listEntities.mockResolvedValue({ entities: [{ 'entity.id': 'host:my-host', 'entity.type': 'host' }] });
+    listEntities.mockResolvedValue({
+      entities: [{ 'entity.id': 'host:my-host', 'entity.type': 'host' }],
+    });
     getLicense.mockResolvedValue({ hasAtLeast: () => true });
     checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
     checkPrivileges.mockResolvedValue(buildCheckPrivilegesResponse(true));
@@ -297,11 +300,16 @@ describe('updateAssetCriticalityStepDefinition', () => {
         criticality_level: 'high_impact',
       });
 
-      await expect(updateAssetCriticalityStepDefinition.handler(mockContext)).rejects.toMatchObject({
-        type: 'NotFoundError',
-      });
+      await expect(updateAssetCriticalityStepDefinition.handler(mockContext)).rejects.toMatchObject(
+        {
+          type: 'NotFoundError',
+        }
+      );
       expect(listEntities).toHaveBeenCalledWith({
-        filter: [{ term: { 'entity.id': 'host:my-host' } }, { term: { 'entity.EngineMetadata.Type': 'host' } }],
+        filter: [
+          { term: { 'entity.id': 'host:my-host' } },
+          { term: { 'entity.EngineMetadata.Type': 'host' } },
+        ],
         size: 1,
       });
       expect(updateEntity).not.toHaveBeenCalled();
