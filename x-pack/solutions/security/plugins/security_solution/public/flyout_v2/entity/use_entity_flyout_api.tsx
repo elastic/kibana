@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { useKibana } from '../../common/lib/kibana';
@@ -17,6 +17,24 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
+import {
+  formatFlyoutTitle,
+  GENERIC_ENTITY_TITLE,
+  HOST_TITLE,
+  SERVICE_TITLE,
+  USER_TITLE,
+  RISK_INPUTS_TITLE,
+  ANOMALY_INSIGHTS_TITLE,
+  ALERTS_INSIGHTS_TITLE,
+  MISCONFIGURATION_INSIGHTS_TITLE,
+  VULNERABILITY_INSIGHTS_TITLE,
+  ENTITY_GRAPH_VIEW_TITLE,
+  RESOLUTION_TITLE,
+  ENTRA_INSIGHTS_TITLE,
+  OKTA_INSIGHTS_TITLE,
+  FIELDS_TABLE_TITLE,
+} from '../shared/constants/flyout_titles';
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
 import type { HostProps } from './host/main';
 import type { UserProps } from './user/main';
@@ -219,43 +237,75 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
 
   // Main entity flyouts.
   const openHostFlyout = useCallback(
-    ({ title, ...props }: OpenHostFlyoutParams) =>
-      open(<Host {...props} />, mainProperties(undefined, title)),
+    ({ title, ...props }: OpenHostFlyoutParams) => {
+      const flyoutTitle = title ?? formatFlyoutTitle(HOST_TITLE, props.hostName);
+      open(<Host {...props} />, mainProperties(undefined, flyoutTitle));
+    },
     [open, mainProperties]
   );
   const openHostFlyoutAsChild = useCallback(
-    ({ title, ...props }: OpenHostFlyoutParams) =>
-      open(<Host {...props} />, mainProperties('inherit', title), 'inherit'),
+    ({ title, ...props }: OpenHostFlyoutParams) => {
+      const childTitle = title ?? formatFlyoutTitle(HOST_TITLE, props.hostName);
+      open(
+        <Host {...props} />,
+        mainProperties('inherit', buildFlyoutNavTitle(childTitle)),
+        'inherit'
+      );
+    },
     [open, mainProperties]
   );
   const openUserFlyout = useCallback(
-    ({ title, ...props }: OpenUserFlyoutParams) =>
-      open(<User {...props} />, mainProperties(undefined, title)),
+    ({ title, ...props }: OpenUserFlyoutParams) => {
+      const flyoutTitle = title ?? formatFlyoutTitle(USER_TITLE, props.userName);
+      open(<User {...props} />, mainProperties(undefined, flyoutTitle));
+    },
     [open, mainProperties]
   );
   const openUserFlyoutAsChild = useCallback(
-    ({ title, ...props }: OpenUserFlyoutParams) =>
-      open(<User {...props} />, mainProperties('inherit', title), 'inherit'),
+    ({ title, ...props }: OpenUserFlyoutParams) => {
+      const childTitle = title ?? formatFlyoutTitle(USER_TITLE, props.userName);
+      open(
+        <User {...props} />,
+        mainProperties('inherit', buildFlyoutNavTitle(childTitle)),
+        'inherit'
+      );
+    },
     [open, mainProperties]
   );
   const openServiceFlyout = useCallback(
-    ({ title, ...props }: OpenServiceFlyoutParams) =>
-      open(<Service {...props} />, mainProperties(undefined, title)),
+    ({ title, ...props }: OpenServiceFlyoutParams) => {
+      const flyoutTitle = title ?? formatFlyoutTitle(SERVICE_TITLE, props.serviceName);
+      open(<Service {...props} />, mainProperties(undefined, flyoutTitle));
+    },
     [open, mainProperties]
   );
   const openServiceFlyoutAsChild = useCallback(
-    ({ title, ...props }: OpenServiceFlyoutParams) =>
-      open(<Service {...props} />, mainProperties('inherit', title), 'inherit'),
+    ({ title, ...props }: OpenServiceFlyoutParams) => {
+      const childTitle = title ?? formatFlyoutTitle(SERVICE_TITLE, props.serviceName);
+      open(
+        <Service {...props} />,
+        mainProperties('inherit', buildFlyoutNavTitle(childTitle)),
+        'inherit'
+      );
+    },
     [open, mainProperties]
   );
   const openGenericEntityFlyout = useCallback(
-    ({ title, ...props }: OpenGenericEntityFlyoutParams) =>
-      open(<GenericEntity {...props} />, mainProperties(undefined, title)),
+    ({ title, ...props }: OpenGenericEntityFlyoutParams) => {
+      const flyoutTitle = title ?? GENERIC_ENTITY_TITLE;
+      open(<GenericEntity {...props} />, mainProperties(undefined, flyoutTitle));
+    },
     [open, mainProperties]
   );
   const openGenericEntityFlyoutAsChild = useCallback(
-    ({ title, ...props }: OpenGenericEntityFlyoutParams) =>
-      open(<GenericEntity {...props} />, mainProperties('inherit', title), 'inherit'),
+    ({ title, ...props }: OpenGenericEntityFlyoutParams) => {
+      const childTitle = title ?? GENERIC_ENTITY_TITLE;
+      open(
+        <GenericEntity {...props} />,
+        mainProperties('inherit', buildFlyoutNavTitle(childTitle)),
+        'inherit'
+      );
+    },
     [open, mainProperties]
   );
 
@@ -277,7 +327,8 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         default:
           children = <GenericEntity entityId={entityId} scopeId={scopeId} />;
       }
-      open(children, mainProperties('inherit', title), 'inherit');
+      const childTitle = title ?? entityName ?? entityId;
+      open(children, mainProperties('inherit', buildFlyoutNavTitle(childTitle)), 'inherit');
     },
     [open, mainProperties]
   );
@@ -285,52 +336,82 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   // Entity tool flyouts.
   const openEntityRiskInputs = useCallback(
     ({ title, ...props }: OpenEntityRiskInputsParams) =>
-      open(<RiskInputs {...props} />, toolProperties(title)),
+      open(
+        <RiskInputs {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(RISK_INPUTS_TITLE, props.entityName))
+      ),
     [open, toolProperties]
   );
   const openEntityAnomalyInsights = useCallback(
     ({ title, ...props }: OpenEntityAnomalyInsightsParams) =>
-      open(<AnomalyInsights {...props} />, toolProperties(title)),
+      open(
+        <AnomalyInsights {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(ANOMALY_INSIGHTS_TITLE, props.value))
+      ),
     [open, toolProperties]
   );
   const openEntityAlertsInsights = useCallback(
     ({ title, ...props }: OpenEntityAlertsInsightsParams) =>
-      open(<AlertsInsights {...props} />, toolProperties(title)),
+      open(
+        <AlertsInsights {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(ALERTS_INSIGHTS_TITLE, props.value))
+      ),
     [open, toolProperties]
   );
   const openEntityMisconfigurationInsights = useCallback(
     ({ title, ...props }: OpenEntityMisconfigurationInsightsParams) =>
-      open(<MisconfigurationInsights {...props} />, toolProperties(title)),
+      open(
+        <MisconfigurationInsights {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(MISCONFIGURATION_INSIGHTS_TITLE, props.value))
+      ),
     [open, toolProperties]
   );
   const openEntityVulnerabilityInsights = useCallback(
     ({ title, ...props }: OpenEntityVulnerabilityInsightsParams) =>
-      open(<VulnerabilityInsights {...props} />, toolProperties(title)),
+      open(
+        <VulnerabilityInsights {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(VULNERABILITY_INSIGHTS_TITLE, props.value))
+      ),
     [open, toolProperties]
   );
   const openEntityGraphView = useCallback(
     ({ title, ...props }: OpenEntityGraphViewParams) =>
-      open(<GraphView {...props} />, toolProperties(title)),
+      open(
+        <GraphView {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(ENTITY_GRAPH_VIEW_TITLE, props.entityName))
+      ),
     [open, toolProperties]
   );
   const openEntityResolution = useCallback(
     ({ title, ...props }: OpenEntityResolutionParams) =>
-      open(<Resolution {...props} />, toolProperties(title)),
+      open(
+        <Resolution {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(RESOLUTION_TITLE, props.entityName))
+      ),
     [open, toolProperties]
   );
   const openEntityEntraInsights = useCallback(
     ({ title, ...props }: OpenEntityEntraInsightsParams) =>
-      open(<EntraInsights {...props} />, toolProperties(title)),
+      open(
+        <EntraInsights {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(ENTRA_INSIGHTS_TITLE, props.value))
+      ),
     [open, toolProperties]
   );
   const openEntityOktaInsights = useCallback(
     ({ title, ...props }: OpenEntityOktaInsightsParams) =>
-      open(<OktaInsights {...props} />, toolProperties(title)),
+      open(
+        <OktaInsights {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(OKTA_INSIGHTS_TITLE, props.value))
+      ),
     [open, toolProperties]
   );
   const openEntityFieldsTable = useCallback(
     ({ title, ...props }: OpenEntityFieldsTableParams) =>
-      open(<FieldsTableTool {...props} />, toolProperties(title)),
+      open(
+        <FieldsTableTool {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(FIELDS_TABLE_TITLE, props.entityName))
+      ),
     [open, toolProperties]
   );
 
