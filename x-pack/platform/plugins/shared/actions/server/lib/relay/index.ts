@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_integration_node',
-  rootDir: '../../../../../..',
-  roots: [
-    '<rootDir>/x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations-server',
-  ],
-};
+export { RelayClient } from './relay_client';
+export { RelayRequestError } from './relay_error';
+export type {
+  RelayCallbackResponse,
+  RelayClaimResponse,
+  RelayClientContract,
+  RelayInstallRequest,
+  RelayInstallResponse,
+} from './types';
