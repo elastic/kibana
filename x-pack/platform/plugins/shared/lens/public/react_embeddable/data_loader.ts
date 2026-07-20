@@ -406,7 +406,6 @@ export function loadEmbeddableData(
 
   return {
     cleanup: () => {
-      // Cancel any in-flight searches to reduce load on the Elasticsearch cluster
       internalApi.expressionAbortController$.getValue()?.abort();
       for (const subscription of subscriptions) {
         subscription.unsubscribe();
