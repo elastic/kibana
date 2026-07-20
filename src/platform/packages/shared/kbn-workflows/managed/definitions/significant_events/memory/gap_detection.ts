@@ -11,12 +11,12 @@ import GAP_DETECTION_YAML from './gap_detection.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID =
-  'system-streams-memory-gap-detection';
+  'system-significant-events-memory-gap-detection';
 
 export const SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
   pluginId: 'significant_events',
-  version: 2,
+  version: 3,
   billable: false,
   yaml: GAP_DETECTION_YAML,
   management: {

@@ -211,9 +211,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(parentQueries).to.have.length(1);
         expect(parentQueries[0].id).to.eql('logs.otel.queries-test.query1');
 
-        const rules = await alertingApi.searchRules(roleAuthc, '');
-        expect(rules.body.data).to.have.length(1);
-        expect(rules.body.data[0].name).to.eql('should not be deleted');
+        const rules = await alertingApi.searchRulesV2(roleAuthc);
+        expect(rules.body.items).to.have.length(1);
+        expect(rules.body.items[0].metadata.name).to.eql('should not be deleted');
       });
     });
 
