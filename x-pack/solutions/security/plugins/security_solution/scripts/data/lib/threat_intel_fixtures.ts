@@ -153,11 +153,14 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario> = {
     name: 'Okta identity takeover feed',
     title: 'Okta identity takeover via stolen sessions from Russian IP space',
     body:
-      'Threat actors are abusing stolen Okta sessions from Russian IP 192[.]0[.]2[.]50 ' +
-      '(192.0.2.50) to reset passwords, strip MFA (user.mfa.factor.deactivate), and grant Super ' +
-      'Admin to finance and IT accounts including cfo@corp.example and it-admin@corp.example. ' +
-      'Follow-on activity includes system.api_token.create and privileged app group membership. ' +
-      'Hunt ATT&CK T1078.004, T1556, T1098, and T1136.003 across okta.system telemetry.',
+      // Keep campaign/actor language explicit so enrich_taxonomy marks diamond_suitable
+      // true (generic "threat actors" alone has been gated false and skipped extract_diamond).
+      'LAPSUS$-style identity campaign: operators abusing stolen Okta sessions from Russian IP ' +
+      '192[.]0[.]2[.]50 (192.0.2.50) to reset passwords, strip MFA (user.mfa.factor.deactivate), and ' +
+      'grant Super Admin to finance and IT accounts including cfo@corp.example and ' +
+      'it-admin@corp.example. Follow-on activity includes system.api_token.create and privileged ' +
+      'app group membership. Hunt ATT&CK T1078.004, T1556, T1098, and T1136.003 across ' +
+      'okta.system telemetry.',
     joinIocs: [
       { type: 'ip', value: '192.0.2.50', defanged: '192[.]0[.]2[.]50' },
       { type: 'email', value: 'cfo@corp.example' },
@@ -266,11 +269,46 @@ const xmlEscape = (value: string): string =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
 
+const htmlEscape = (value: string): string =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
 const cdata = (value: string): string =>
   `<![CDATA[${value.replace(/\]\]>/g, ']]]]><![CDATA[>')}]]>`;
 
 const timestampAt = (startMs: number, endMs: number, ratio: number): string =>
   new Date(Math.round(startMs + (endMs - startMs) * ratio)).toISOString();
+
+/**
+ * Offline mock "upstream article" for Intelligence Hub's external link.
+ * Becomes report `source.url` after mustard RSS ingestion. Requires mustard
+ * `isBrowsableReportUrl` to allow `data:` (http/https alone hides the link).
+ */
+export const buildPackArticleDataUrl = (scenario: PackTiScenario): string => {
+  const mitreLine = scenario.mitre.length
+    ? `<p><strong>Techniques:</strong> ${htmlEscape(scenario.mitre.join(', '))}</p>`
+    : '';
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>${htmlEscape(scenario.title)}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 42rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #1a1a1a; }
+    .feed { color: #666; font-size: 0.875rem; margin-bottom: 0.5rem; }
+    h1 { font-size: 1.5rem; margin: 0 0 1rem; }
+    p { margin: 0 0 1rem; }
+  </style>
+</head>
+<body>
+  <p class="feed">${htmlEscape(scenario.name)}</p>
+  <h1>${htmlEscape(scenario.title)}</h1>
+  <p>${htmlEscape(scenario.body)}</p>
+  ${mitreLine}
+</body>
+</html>`;
+
+  return `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
+};
 
 export const buildPackRssDataUrl = ({
   scenario,
@@ -282,16 +320,17 @@ export const buildPackRssDataUrl = ({
   const guid = `ti-report-${scenario.packId}`;
   const mitreLine = scenario.mitre.length ? ` Techniques: ${scenario.mitre.join(', ')}.` : '';
   const description = `${scenario.body}${mitreLine}`;
+  const articleLink = xmlEscape(buildPackArticleDataUrl(scenario));
   const feedBody = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
     <title>${xmlEscape(scenario.name)}</title>
-    <link>https://example.elastic.dev/threat-intel/${xmlEscape(scenario.packId)}</link>
+    <link>${articleLink}</link>
     <language>en</language>
     <item>
       <title>${xmlEscape(scenario.title)}</title>
       <guid isPermaLink="false">${xmlEscape(guid)}</guid>
-      <link>https://example.elastic.dev/threat-intel/${xmlEscape(scenario.packId)}/primary</link>
+      <link>${articleLink}</link>
       <pubDate>${new Date(reportTimestamp).toUTCString()}</pubDate>
       <description>${cdata(description)}</description>
     </item>
