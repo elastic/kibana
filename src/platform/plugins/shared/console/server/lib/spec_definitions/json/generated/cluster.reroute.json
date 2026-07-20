@@ -27,7 +27,12 @@
             "index": "",
             "shard": "",
             "node": "",
-            "allow_primary": "__flag__"
+            "allow_primary": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           },
           "move": {
             "index": "",
@@ -44,13 +49,23 @@
             "index": "",
             "shard": "",
             "node": "",
-            "accept_data_loss": "__flag__"
+            "accept_data_loss": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           },
           "allocate_empty_primary": {
             "index": "",
             "shard": "",
             "node": "",
-            "accept_data_loss": "__flag__"
+            "accept_data_loss": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           }
         }
       ]

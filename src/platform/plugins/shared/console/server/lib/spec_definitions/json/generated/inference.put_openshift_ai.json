@@ -50,7 +50,12 @@
         }
       },
       "task_settings": {
-        "return_documents": "__flag__",
+        "return_documents": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "top_n": ""
       }
     },

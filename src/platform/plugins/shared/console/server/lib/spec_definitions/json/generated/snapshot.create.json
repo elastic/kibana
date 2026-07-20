@@ -23,11 +23,26 @@
         ]
       },
       "feature_states": [],
-      "ignore_unavailable": "__flag__",
-      "include_global_state": "__flag__",
+      "ignore_unavailable": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "include_global_state": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "indices": "",
       "metadata": {},
-      "partial": "__flag__"
+      "partial": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
     },
     "methods": [
       "PUT",

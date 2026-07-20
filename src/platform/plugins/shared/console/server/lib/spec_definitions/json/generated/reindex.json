@@ -70,7 +70,9 @@
             "java"
           ]
         },
-        "options": {}
+        "options": {
+          "*": ""
+        }
       },
       "source": {
         "index": "",
@@ -79,7 +81,9 @@
         },
         "remote": {
           "connect_timeout": "",
-          "headers": {},
+          "headers": {
+            "*": ""
+          },
           "host": "",
           "username": "",
           "password": "",
@@ -95,11 +99,83 @@
         },
         "sort": "",
         "_source": {
-          "exclude_vectors": "__flag__",
+          "exclude_vectors": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "excludes": "",
           "includes": ""
         },
-        "runtime_mappings": {}
+        "runtime_mappings": {
+          "*": {
+            "fields": {
+              "*": {
+                "type": {
+                  "__one_of": [
+                    "boolean",
+                    "composite",
+                    "date",
+                    "double",
+                    "geo_point",
+                    "geo_shape",
+                    "ip",
+                    "keyword",
+                    "long",
+                    "lookup"
+                  ]
+                }
+              }
+            },
+            "fetch_fields": [
+              {
+                "field": "",
+                "format": ""
+              }
+            ],
+            "format": "",
+            "input_field": "",
+            "target_field": "",
+            "target_index": "",
+            "script": {
+              "source": "",
+              "id": "",
+              "params": {},
+              "lang": {
+                "__one_of": [
+                  "painless",
+                  "expression",
+                  "mustache",
+                  "java"
+                ]
+              },
+              "options": {
+                "*": ""
+              }
+            },
+            "on_script_error": {
+              "__one_of": [
+                "fail",
+                "continue"
+              ]
+            },
+            "type": {
+              "__one_of": [
+                "boolean",
+                "composite",
+                "date",
+                "double",
+                "geo_point",
+                "geo_shape",
+                "ip",
+                "keyword",
+                "long",
+                "lookup"
+              ]
+            }
+          }
+        }
       }
     },
     "methods": [

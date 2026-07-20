@@ -28,23 +28,48 @@
             "index": "",
             "indices": "",
             "index_routing": "",
-            "is_hidden": "__flag__",
-            "is_write_index": "__flag__",
+            "is_hidden": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "is_write_index": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
             "routing": "",
             "search_routing": "",
-            "must_exist": "__flag__"
+            "must_exist": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           },
           "remove": {
             "alias": "",
             "aliases": "",
             "index": "",
             "indices": "",
-            "must_exist": "__flag__"
+            "must_exist": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           },
           "remove_index": {
             "index": "",
             "indices": "",
-            "must_exist": "__flag__"
+            "must_exist": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           }
         }
       ]

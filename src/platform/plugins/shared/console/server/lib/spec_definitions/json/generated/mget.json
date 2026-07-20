@@ -25,7 +25,12 @@
           "_index": "",
           "routing": "",
           "_source": {
-            "exclude_vectors": "__flag__",
+            "exclude_vectors": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
             "excludes": "",
             "includes": ""
           },

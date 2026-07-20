@@ -10,7 +10,12 @@
       "field": "",
       "size": "",
       "timeout": "",
-      "case_insensitive": "__flag__",
+      "case_insensitive": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "index_filter": {
         "__scope_link": "GLOBAL.query"
       },

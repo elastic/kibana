@@ -30,8 +30,12 @@
       },
       "service_settings": {
         "batch_size": "",
-        "headers": {},
-        "input_type": {},
+        "headers": {
+          "*": ""
+        },
+        "input_type": {
+          "*": ""
+        },
         "query_parameters": [
           []
         ],
@@ -39,13 +43,19 @@
           "content": ""
         },
         "response": {
-          "json_parser": {}
+          "json_parser": {
+            "*": ""
+          }
         },
-        "secret_parameters": {},
+        "secret_parameters": {
+          "*": ""
+        },
         "url": ""
       },
       "task_settings": {
-        "parameters": {}
+        "parameters": {
+          "*": ""
+        }
       }
     },
     "methods": [

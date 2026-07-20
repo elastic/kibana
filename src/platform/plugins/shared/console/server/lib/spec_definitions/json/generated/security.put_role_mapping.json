@@ -12,7 +12,12 @@
       ]
     },
     "data_autocomplete_rules": {
-      "enabled": "__flag__",
+      "enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "metadata": {},
       "roles": [],
       "role_templates": [
@@ -35,7 +40,9 @@
                 "java"
               ]
             },
-            "options": {}
+            "options": {
+              "*": ""
+            }
           }
         }
       ],
@@ -46,7 +53,9 @@
         "all": [
           {}
         ],
-        "field": {},
+        "field": {
+          "*": ""
+        },
         "except": {}
       },
       "run_as": []

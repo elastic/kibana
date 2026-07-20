@@ -13,7 +13,9 @@
       "data": "",
       "hint": {
         "uids": [],
-        "labels": {}
+        "labels": {
+          "*": ""
+        }
       }
     },
     "methods": [

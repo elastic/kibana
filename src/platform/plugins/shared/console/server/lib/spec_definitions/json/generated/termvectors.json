@@ -33,13 +33,40 @@
         "min_term_freq": "",
         "min_word_length": ""
       },
-      "per_field_analyzer": {},
+      "per_field_analyzer": {
+        "*": ""
+      },
       "fields": [],
-      "field_statistics": "__flag__",
-      "offsets": "__flag__",
-      "payloads": "__flag__",
-      "positions": "__flag__",
-      "term_statistics": "__flag__",
+      "field_statistics": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "offsets": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "payloads": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "positions": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "term_statistics": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "routing": "",
       "version": "",
       "version_type": {

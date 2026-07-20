@@ -11,7 +11,12 @@
         "replication": [
           {
             "names": "",
-            "allow_restricted_indices": "__flag__"
+            "allow_restricted_indices": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           }
         ],
         "search": [
@@ -22,7 +27,12 @@
             },
             "names": "",
             "query": "",
-            "allow_restricted_indices": "__flag__"
+            "allow_restricted_indices": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           }
         ]
       },

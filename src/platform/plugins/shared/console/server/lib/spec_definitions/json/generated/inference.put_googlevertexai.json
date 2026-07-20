@@ -57,7 +57,12 @@
         "max_batch_size": ""
       },
       "task_settings": {
-        "auto_truncate": "__flag__",
+        "auto_truncate": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "top_n": "",
         "thinking_config": {
           "thinking_budget": ""

@@ -20,7 +20,12 @@
     "data_autocomplete_rules": {
       "index": "",
       "shard": "",
-      "primary": "__flag__",
+      "primary": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "current_node": ""
     },
     "methods": [

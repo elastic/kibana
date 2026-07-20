@@ -7,6 +7,28 @@
       "pretty": "__flag__",
       "create": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "indices": [],
+      "analytics_collection_name": "",
+      "template": {
+        "script": {
+          "source": "",
+          "id": "",
+          "params": {},
+          "lang": {
+            "__one_of": [
+              "painless",
+              "expression",
+              "mustache",
+              "java"
+            ]
+          },
+          "options": {
+            "*": ""
+          }
+        }
+      }
+    },
     "methods": [
       "PUT"
     ],

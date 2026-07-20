@@ -44,7 +44,12 @@
       },
       "task_settings": {
         "input_type": "",
-        "return_token": "__flag__"
+        "return_token": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
       }
     },
     "methods": [

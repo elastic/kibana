@@ -116,7 +116,12 @@
               "write"
             ]
           },
-          "allow_restricted_indices": "__flag__"
+          "allow_restricted_indices": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
         }
       ]
     },

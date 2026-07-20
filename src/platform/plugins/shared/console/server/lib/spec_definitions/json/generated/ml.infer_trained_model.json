@@ -54,7 +54,12 @@
             "span": ""
           },
           "results_field": "",
-          "multi_label": "__flag__",
+          "multi_label": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "labels": []
         },
         "fill_mask": {

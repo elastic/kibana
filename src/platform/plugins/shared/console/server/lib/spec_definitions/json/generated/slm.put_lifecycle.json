@@ -18,12 +18,27 @@
     },
     "data_autocomplete_rules": {
       "config": {
-        "ignore_unavailable": "__flag__",
+        "ignore_unavailable": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "indices": "",
-        "include_global_state": "__flag__",
+        "include_global_state": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "feature_states": [],
         "metadata": {},
-        "partial": "__flag__"
+        "partial": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
       },
       "name": "",
       "repository": "",

@@ -15,7 +15,12 @@
       "start": []
     },
     "data_autocomplete_rules": {
-      "desc": "__flag__",
+      "desc": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "end": "",
       "page": {
         "from": "",

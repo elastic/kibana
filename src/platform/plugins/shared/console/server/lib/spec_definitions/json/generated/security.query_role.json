@@ -9,6 +9,8 @@
     "data_autocomplete_rules": {
       "query": {
         "bool": {
+          "boost": "",
+          "_name": "",
           "filter": {
             "__scope_link": "GLOBAL.query"
           },
@@ -24,19 +26,110 @@
           }
         },
         "exists": {
+          "boost": "",
+          "_name": "",
           "field": ""
         },
         "ids": {
+          "boost": "",
+          "_name": "",
           "values": ""
         },
-        "match": {},
-        "match_all": {},
-        "prefix": {},
-        "range": {},
+        "match": {
+          "*": {
+            "boost": "",
+            "_name": "",
+            "analyzer": "",
+            "auto_generate_synonyms_phrase_query": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "cutoff_frequency": "",
+            "fuzziness": "",
+            "fuzzy_rewrite": "",
+            "fuzzy_transpositions": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "lenient": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "max_expansions": "",
+            "minimum_should_match": "",
+            "operator": {
+              "__one_of": [
+                "and",
+                "or"
+              ]
+            },
+            "prefix_length": "",
+            "query": "",
+            "zero_terms_query": {
+              "__one_of": [
+                "all",
+                "none"
+              ]
+            }
+          }
+        },
+        "match_all": {
+          "boost": "",
+          "_name": ""
+        },
+        "prefix": {
+          "*": {
+            "boost": "",
+            "_name": "",
+            "rewrite": "",
+            "value": "",
+            "case_insensitive": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          }
+        },
+        "range": {
+          "*": {
+            "boost": "",
+            "_name": "",
+            "relation": {
+              "__one_of": [
+                "within",
+                "contains",
+                "intersects"
+              ]
+            },
+            "gt": "",
+            "gte": "",
+            "lt": "",
+            "lte": ""
+          }
+        },
         "simple_query_string": {
+          "boost": "",
+          "_name": "",
           "analyzer": "",
-          "analyze_wildcard": "__flag__",
-          "auto_generate_synonyms_phrase_query": "__flag__",
+          "analyze_wildcard": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "auto_generate_synonyms_phrase_query": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "default_operator": {
             "__one_of": [
               "and",
@@ -47,15 +140,54 @@
           "flags": "",
           "fuzzy_max_expansions": "",
           "fuzzy_prefix_length": "",
-          "fuzzy_transpositions": "__flag__",
-          "lenient": "__flag__",
+          "fuzzy_transpositions": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "lenient": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "minimum_should_match": "",
           "query": "",
           "quote_field_suffix": ""
         },
-        "term": {},
-        "terms": {},
-        "wildcard": {}
+        "term": {
+          "*": {
+            "boost": "",
+            "_name": "",
+            "value": "",
+            "case_insensitive": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          }
+        },
+        "terms": {
+          "boost": "",
+          "_name": ""
+        },
+        "wildcard": {
+          "*": {
+            "boost": "",
+            "_name": "",
+            "case_insensitive": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "rewrite": "",
+            "value": "",
+            "wildcard": ""
+          }
+        }
       },
       "from": "",
       "sort": "",

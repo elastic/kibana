@@ -23,7 +23,7 @@ describe('generateBodyParams', () => {
     expect(generateBodyParams(mockRequestType, mockSchema)).toEqual({});
   });
 
-  it('returns empty object for value body', () => {
+  it('returns empty object for scalar value body', () => {
     const requestType: SpecificationTypes.Request = {
       ...mockRequestType,
       body: {
@@ -39,14 +39,16 @@ describe('generateBodyParams', () => {
     expect(generateBodyParams(requestType, mockSchema)).toEqual({ leader_index: '' });
   });
 
-  it('generates __flag__ for boolean properties', () => {
+  it('generates boolean choices for boolean properties', () => {
     const requestType = makeRequestWithBody([
       getMockProperty({
         propertyName: 'expand_wildcards',
         type: { kind: 'instance_of', type: { name: 'boolean', namespace: '_builtins' } },
       }),
     ]);
-    expect(generateBodyParams(requestType, mockSchema)).toEqual({ expand_wildcards: '__flag__' });
+    expect(generateBodyParams(requestType, mockSchema)).toEqual({
+      expand_wildcards: { __one_of: [true, false] },
+    });
   });
 
   it('generates empty string for property with server default', () => {
@@ -116,7 +118,23 @@ describe('generateBodyParams', () => {
     });
   });
 
-  it('generates {} for dictionary properties', () => {
+  it('WHEN an array contains booleans SHOULD generate JSON boolean choices', () => {
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'flags',
+        type: {
+          kind: 'array_of',
+          value: { kind: 'instance_of', type: { name: 'boolean', namespace: '_builtins' } },
+        },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, mockSchema)).toEqual({
+      flags: { __any_of: [true, false] },
+    });
+  });
+
+  it('generates wildcard rules for scalar dictionaries', () => {
     const requestType = makeRequestWithBody([
       getMockProperty({ propertyName: 'flat_field' }),
       getMockProperty({
@@ -129,17 +147,40 @@ describe('generateBodyParams', () => {
         },
       }),
     ]);
-    expect(generateBodyParams(requestType, mockSchema)).toEqual({ flat_field: '', settings: {} });
+    expect(generateBodyParams(requestType, mockSchema)).toEqual({
+      flat_field: '',
+      settings: { '*': '' },
+    });
   });
 
-  it('generates the literal string for literal value', () => {
+  it('leaves arbitrary user-defined dictionary values untyped', () => {
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'metadata',
+        type: {
+          kind: 'dictionary_of',
+          key: { kind: 'instance_of', type: { name: 'string', namespace: '_builtins' } },
+          value: { kind: 'user_defined_value' },
+          singleKey: false,
+        },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, mockSchema)).toEqual({ metadata: {} });
+  });
+
+  it.each([
+    ['string', 'azureopenai'],
+    ['number', 42],
+    ['boolean', true],
+  ] as const)('preserves the JSON type for a literal %s value', (_type, value) => {
     const requestType = makeRequestWithBody([
       getMockProperty({
         propertyName: 'service',
-        type: { kind: 'literal_value', value: 'azureopenai' },
+        type: { kind: 'literal_value', value },
       }),
     ]);
-    expect(generateBodyParams(requestType, mockSchema)).toEqual({ service: 'azureopenai' });
+    expect(generateBodyParams(requestType, mockSchema)).toEqual({ service: value });
   });
 
   it('recursively generates nested properties for interface types', () => {
@@ -176,6 +217,94 @@ describe('generateBodyParams', () => {
     });
   });
 
+  it('WHEN an interface inherits properties SHOULD apply child properties last', () => {
+    const parentInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'Parent', namespace: '_types' },
+      properties: [
+        getMockProperty({ propertyName: 'inherited' }),
+        getMockProperty({
+          propertyName: 'mode',
+          type: { kind: 'instance_of', type: { name: 'boolean', namespace: '_builtins' } },
+        }),
+      ],
+      specLocation: '',
+    };
+    const childInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'Child', namespace: '_types' },
+      inherits: { type: parentInterface.name },
+      properties: [getMockProperty({ propertyName: 'mode' })],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = {
+      ...mockSchema,
+      types: [parentInterface, childInterface],
+    };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'child',
+        type: { kind: 'instance_of', type: childInterface.name },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      child: { inherited: '', mode: '' },
+    });
+  });
+
+  it('WHEN inherited properties use generics SHOULD substitute the concrete type', () => {
+    const baseGenericName = { name: 'TValue', namespace: '_types.Base' };
+    const childGenericName = { name: 'TValue', namespace: '_types.Child' };
+    const baseInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'Base', namespace: '_types' },
+      generics: [baseGenericName],
+      properties: [
+        getMockProperty({
+          propertyName: 'value',
+          type: { kind: 'instance_of', type: baseGenericName },
+        }),
+      ],
+      specLocation: '',
+    };
+    const childInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'Child', namespace: '_types' },
+      generics: [childGenericName],
+      inherits: {
+        type: baseInterface.name,
+        generics: [{ kind: 'instance_of', type: childGenericName }],
+      },
+      properties: [],
+      specLocation: '',
+    };
+    const valueEnum: SpecificationTypes.Enum = {
+      kind: 'enum',
+      name: { name: 'Value', namespace: '_types' },
+      members: [{ name: 'first' }, { name: 'second' }],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = {
+      ...mockSchema,
+      types: [baseInterface, childInterface, valueEnum],
+    };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'child',
+        type: {
+          kind: 'instance_of',
+          type: childInterface.name,
+          generics: [{ kind: 'instance_of', type: valueEnum.name }],
+        },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      child: { value: { __one_of: ['first', 'second'] } },
+    });
+  });
+
   it('returns __scope_link to GLOBAL.query for QueryContainer', () => {
     const queryContainer: SpecificationTypes.Interface = {
       kind: 'interface',
@@ -198,6 +327,26 @@ describe('generateBodyParams', () => {
     ]);
     expect(generateBodyParams(requestType, schema)).toEqual({
       query: { __scope_link: 'GLOBAL.query' },
+    });
+  });
+
+  it('WHEN QueryContainer has another namespace SHOULD generate its declared properties', () => {
+    const queryContainer: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'QueryContainer', namespace: 'custom' },
+      properties: [getMockProperty({ propertyName: 'custom_query' })],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [queryContainer] };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'query',
+        type: { kind: 'instance_of', type: queryContainer.name },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      query: { custom_query: '' },
     });
   });
 
@@ -288,6 +437,47 @@ describe('generateBodyParams', () => {
     });
   });
 
+  it('WHEN a union has multiple object branches SHOULD keep only common rules', () => {
+    const firstInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'First', namespace: '_types' },
+      properties: [
+        getMockProperty({ propertyName: 'common' }),
+        getMockProperty({ propertyName: 'first_only' }),
+      ],
+      specLocation: '',
+    };
+    const secondInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'Second', namespace: '_types' },
+      properties: [
+        getMockProperty({ propertyName: 'common' }),
+        getMockProperty({ propertyName: 'second_only' }),
+      ],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = {
+      ...mockSchema,
+      types: [firstInterface, secondInterface],
+    };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'variant',
+        type: {
+          kind: 'union_of',
+          items: [
+            { kind: 'instance_of', type: firstInterface.name },
+            { kind: 'instance_of', type: secondInterface.name },
+          ],
+        },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      variant: { common: '' },
+    });
+  });
+
   it('generates empty string for union containing an open-ended string type', () => {
     const enumType: SpecificationTypes.Enum = {
       kind: 'enum',
@@ -309,6 +499,87 @@ describe('generateBodyParams', () => {
       }),
     ]);
     expect(generateBodyParams(requestType, schema)).toEqual({ mixed: '' });
+  });
+
+  it('WHEN a value body resolves to an object SHOULD generate its properties', () => {
+    const bodyInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'Body', namespace: '_types' },
+      properties: [getMockProperty({ propertyName: 'name' })],
+      specLocation: '',
+    };
+    const bodyAlias: SpecificationTypes.TypeAlias = {
+      kind: 'type_alias',
+      name: { name: 'BodyAlias', namespace: '_types' },
+      type: { kind: 'instance_of', type: bodyInterface.name },
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = {
+      ...mockSchema,
+      types: [bodyInterface, bodyAlias],
+    };
+    const requestType: SpecificationTypes.Request = {
+      ...mockRequestType,
+      body: {
+        kind: 'value',
+        value: { kind: 'instance_of', type: bodyAlias.name },
+      },
+    };
+
+    expect(generateBodyParams(requestType, schema)).toEqual({ name: '' });
+  });
+
+  it('WHEN a dictionary value is typed SHOULD generate wildcard value rules', () => {
+    const dictionaryValue: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'DictionaryValue', namespace: '_types' },
+      properties: [
+        getMockProperty({
+          propertyName: 'enabled',
+          type: { kind: 'instance_of', type: { name: 'boolean', namespace: '_builtins' } },
+        }),
+      ],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [dictionaryValue] };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'entries',
+        type: {
+          kind: 'dictionary_of',
+          key: { kind: 'instance_of', type: { name: 'string', namespace: '_builtins' } },
+          value: { kind: 'instance_of', type: dictionaryValue.name },
+          singleKey: false,
+        },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      entries: { '*': { enabled: { __one_of: [true, false] } } },
+    });
+  });
+
+  it('WHEN an array contains objects SHOULD generate an object item rule', () => {
+    const itemInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'Item', namespace: '_types' },
+      properties: [getMockProperty({ propertyName: 'name' })],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [itemInterface] };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'items',
+        type: {
+          kind: 'array_of',
+          value: { kind: 'instance_of', type: itemInterface.name },
+        },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      items: [{ name: '' }],
+    });
   });
 
   it('handles multiple flat properties together', () => {

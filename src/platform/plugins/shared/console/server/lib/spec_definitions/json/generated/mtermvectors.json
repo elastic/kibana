@@ -30,7 +30,12 @@
           "_index": "",
           "doc": "",
           "fields": "",
-          "field_statistics": "__flag__",
+          "field_statistics": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "filter": {
             "max_doc_freq": "",
             "max_num_terms": "",
@@ -40,11 +45,31 @@
             "min_term_freq": "",
             "min_word_length": ""
           },
-          "offsets": "__flag__",
-          "payloads": "__flag__",
-          "positions": "__flag__",
+          "offsets": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "payloads": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "positions": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "routing": "",
-          "term_statistics": "__flag__",
+          "term_statistics": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "version": "",
           "version_type": {
             "__one_of": [

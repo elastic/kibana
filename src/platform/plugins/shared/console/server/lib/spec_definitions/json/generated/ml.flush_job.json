@@ -13,7 +13,12 @@
     },
     "data_autocomplete_rules": {
       "advance_time": "",
-      "calc_interim": "__flag__",
+      "calc_interim": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "end": "",
       "skip_time": "",
       "start": ""

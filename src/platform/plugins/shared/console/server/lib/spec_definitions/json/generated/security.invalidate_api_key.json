@@ -10,7 +10,12 @@
       "id": "",
       "ids": [],
       "name": "",
-      "owner": "__flag__",
+      "owner": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "realm_name": "",
       "username": ""
     },

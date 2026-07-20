@@ -7,7 +7,12 @@
       "pretty": "__flag__"
     },
     "data_autocomplete_rules": {
-      "allow_lazy_open": "__flag__",
+      "allow_lazy_open": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "analysis_limits": {
         "model_memory_limit": ""
       },
@@ -16,8 +21,18 @@
       "categorization_filters": [],
       "description": "",
       "model_plot_config": {
-        "annotations_enabled": "__flag__",
-        "enabled": "__flag__",
+        "annotations_enabled": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "enabled": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "terms": ""
       },
       "model_prune_window": "",
@@ -59,14 +74,34 @@
                   "value": ""
                 }
               ],
-              "scope": {}
+              "scope": {
+                "*": {
+                  "filter_id": "",
+                  "filter_type": {
+                    "__one_of": [
+                      "include",
+                      "exclude"
+                    ]
+                  }
+                }
+              }
             }
           ]
         }
       ],
       "per_partition_categorization": {
-        "enabled": "__flag__",
-        "stop_on_warn": "__flag__"
+        "enabled": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "stop_on_warn": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
       }
     },
     "methods": [

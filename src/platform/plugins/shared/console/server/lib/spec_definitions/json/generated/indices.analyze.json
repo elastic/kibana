@@ -11,7 +11,12 @@
       "analyzer": "",
       "attributes": [],
       "char_filter": [],
-      "explain": "__flag__",
+      "explain": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "field": "",
       "filter": [],
       "normalizer": "",

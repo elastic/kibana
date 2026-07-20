@@ -41,9 +41,19 @@
       },
       "task_settings": {
         "input_type": "",
-        "return_documents": "__flag__",
+        "return_documents": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "top_k": "",
-        "truncation": "__flag__"
+        "truncation": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
       }
     },
     "methods": [

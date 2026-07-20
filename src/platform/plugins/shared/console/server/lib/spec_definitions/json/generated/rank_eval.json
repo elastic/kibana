@@ -42,14 +42,34 @@
       ],
       "metric": {
         "precision": {
-          "ignore_unlabeled": "__flag__"
+          "k": "",
+          "relevant_rating_threshold": "",
+          "ignore_unlabeled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
         },
-        "recall": {},
-        "mean_reciprocal_rank": {},
+        "recall": {
+          "k": "",
+          "relevant_rating_threshold": ""
+        },
+        "mean_reciprocal_rank": {
+          "k": "",
+          "relevant_rating_threshold": ""
+        },
         "dcg": {
-          "normalize": "__flag__"
+          "k": "",
+          "normalize": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
         },
         "expected_reciprocal_rank": {
+          "k": "",
           "maximum_relevance": ""
         }
       }

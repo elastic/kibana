@@ -37,7 +37,12 @@
           "last_value"
         ]
       },
-      "enabled": "__flag__"
+      "enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
     },
     "methods": [
       "PUT"

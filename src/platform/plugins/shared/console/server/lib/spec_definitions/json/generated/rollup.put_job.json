@@ -44,7 +44,9 @@
       "page_size": "",
       "rollup_index": "",
       "timeout": "",
-      "headers": {}
+      "headers": {
+        "*": ""
+      }
     },
     "methods": [
       "PUT"

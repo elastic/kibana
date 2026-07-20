@@ -35,9 +35,19 @@
       "_source_includes": []
     },
     "data_autocomplete_rules": {
-      "detect_noop": "__flag__",
+      "detect_noop": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "doc": "",
-      "doc_as_upsert": "__flag__",
+      "doc_as_upsert": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "script": {
         "source": "",
         "id": "",
@@ -50,11 +60,23 @@
             "java"
           ]
         },
-        "options": {}
+        "options": {
+          "*": ""
+        }
       },
-      "scripted_upsert": "__flag__",
+      "scripted_upsert": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "_source": {
-        "exclude_vectors": "__flag__",
+        "exclude_vectors": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "excludes": "",
         "includes": ""
       },

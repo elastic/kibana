@@ -27,7 +27,12 @@
       "write_index_only": "__flag__"
     },
     "data_autocomplete_rules": {
-      "date_detection": "__flag__",
+      "date_detection": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "dynamic": {
         "__one_of": [
           "strict",
@@ -38,19 +43,137 @@
       },
       "dynamic_date_formats": [],
       "dynamic_templates": [
-        {}
+        {
+          "*": {
+            "mapping": {
+              "meta": {
+                "*": ""
+              },
+              "fields": {
+                "*": {}
+              }
+            },
+            "runtime": {
+              "fields": {
+                "*": {
+                  "type": {
+                    "__one_of": [
+                      "boolean",
+                      "composite",
+                      "date",
+                      "double",
+                      "geo_point",
+                      "geo_shape",
+                      "ip",
+                      "keyword",
+                      "long",
+                      "lookup"
+                    ]
+                  }
+                }
+              },
+              "fetch_fields": [
+                {
+                  "field": "",
+                  "format": ""
+                }
+              ],
+              "format": "",
+              "input_field": "",
+              "target_field": "",
+              "target_index": "",
+              "script": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "on_script_error": {
+                "__one_of": [
+                  "fail",
+                  "continue"
+                ]
+              },
+              "type": {
+                "__one_of": [
+                  "boolean",
+                  "composite",
+                  "date",
+                  "double",
+                  "geo_point",
+                  "geo_shape",
+                  "ip",
+                  "keyword",
+                  "long",
+                  "lookup"
+                ]
+              }
+            },
+            "match": "",
+            "path_match": "",
+            "unmatch": "",
+            "path_unmatch": "",
+            "match_mapping_type": "",
+            "unmatch_mapping_type": "",
+            "match_pattern": {
+              "__one_of": [
+                "simple",
+                "regex"
+              ]
+            }
+          }
+        }
       ],
       "_field_names": {
-        "enabled": "__flag__"
+        "enabled": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
       },
       "_meta": {},
-      "numeric_detection": "__flag__",
-      "properties": {},
+      "numeric_detection": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "properties": {
+        "*": {
+          "meta": {
+            "*": ""
+          },
+          "fields": {
+            "*": {}
+          }
+        }
+      },
       "_routing": {
-        "required": "__flag__"
+        "required": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
       },
       "_source": {
-        "enabled": "__flag__",
+        "enabled": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "excludes": [],
         "includes": [],
         "mode": {
@@ -61,7 +184,74 @@
           ]
         }
       },
-      "runtime": {}
+      "runtime": {
+        "*": {
+          "fields": {
+            "*": {
+              "type": {
+                "__one_of": [
+                  "boolean",
+                  "composite",
+                  "date",
+                  "double",
+                  "geo_point",
+                  "geo_shape",
+                  "ip",
+                  "keyword",
+                  "long",
+                  "lookup"
+                ]
+              }
+            }
+          },
+          "fetch_fields": [
+            {
+              "field": "",
+              "format": ""
+            }
+          ],
+          "format": "",
+          "input_field": "",
+          "target_field": "",
+          "target_index": "",
+          "script": {
+            "source": "",
+            "id": "",
+            "params": {},
+            "lang": {
+              "__one_of": [
+                "painless",
+                "expression",
+                "mustache",
+                "java"
+              ]
+            },
+            "options": {
+              "*": ""
+            }
+          },
+          "on_script_error": {
+            "__one_of": [
+              "fail",
+              "continue"
+            ]
+          },
+          "type": {
+            "__one_of": [
+              "boolean",
+              "composite",
+              "date",
+              "double",
+              "geo_point",
+              "geo_shape",
+              "ip",
+              "keyword",
+              "long",
+              "lookup"
+            ]
+          }
+        }
+      }
     },
     "methods": [
       "PUT",

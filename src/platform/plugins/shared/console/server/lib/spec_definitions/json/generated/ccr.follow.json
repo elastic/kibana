@@ -35,7 +35,12 @@
         "mode": "",
         "routing_path": "",
         "soft_deletes": {
-          "enabled": "__flag__",
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "retention_lease": {
             "period": ""
           }
@@ -73,7 +78,12 @@
         },
         "codec": "",
         "routing_partition_size": "",
-        "load_fixed_bitset_filters_eagerly": "__flag__",
+        "load_fixed_bitset_filters_eagerly": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "hidden": "",
         "auto_expand_replicas": "",
         "merge": {
@@ -89,7 +99,12 @@
           "slowlog": {
             "level": "",
             "source": "",
-            "reformat": "__flag__",
+            "reformat": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
             "threshold": {
               "query": {
                 "warn": "",
@@ -174,7 +189,12 @@
           "name": "",
           "indexing_complete": "",
           "origination_date": "",
-          "parse_origination_date": "__flag__",
+          "parse_origination_date": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "step": {
             "wait_time_threshold": ""
           },
@@ -212,11 +232,21 @@
         "priority": "",
         "top_metrics_max_size": "",
         "analysis": {
-          "analyzer": {},
-          "char_filter": {},
-          "filter": {},
-          "normalizer": {},
-          "tokenizer": {}
+          "analyzer": {
+            "*": {}
+          },
+          "char_filter": {
+            "*": ""
+          },
+          "filter": {
+            "*": ""
+          },
+          "normalizer": {
+            "*": {}
+          },
+          "tokenizer": {
+            "*": ""
+          }
         },
         "settings": {},
         "time_series": {
@@ -225,12 +255,24 @@
         },
         "queries": {
           "cache": {
-            "enabled": "__flag__"
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           }
         },
-        "similarity": {},
+        "similarity": {
+          "*": {}
+        },
         "mapping": {
-          "coerce": "__flag__",
+          "coerce": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "total_fields": {
             "limit": "",
             "ignore_dynamic_beyond_limit": ""
@@ -264,7 +306,12 @@
         "indexing.slowlog": {
           "level": "",
           "source": "",
-          "reformat": "__flag__",
+          "reformat": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "threshold": {
             "index": {
               "warn": "",
@@ -288,7 +335,12 @@
               "hybridfs"
             ]
           },
-          "allow_mmap": "__flag__",
+          "allow_mmap": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "stats_refresh_interval": ""
         }
       }

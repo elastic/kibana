@@ -56,7 +56,9 @@
       },
       "task_settings": {
         "user": "",
-        "headers": {}
+        "headers": {
+          "*": ""
+        }
       }
     },
     "methods": [

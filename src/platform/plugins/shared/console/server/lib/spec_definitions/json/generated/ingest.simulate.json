@@ -20,40 +20,215 @@
         "on_failure": [
           {
             "append": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "value": "",
               "media_type": "",
               "copy_from": "",
-              "allow_duplicates": "__flag__",
-              "ignore_empty_values": "__flag__"
+              "allow_duplicates": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "ignore_empty_values": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "attachment": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "indexed_chars": "",
               "indexed_chars_field": "",
               "max_field_bytes": "",
               "properties": [],
               "target_field": "",
-              "remove_binary": "__flag__",
+              "remove_binary": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "resource_name": ""
             },
             "bytes": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "cef": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": "",
-              "ignore_empty_values": "__flag__",
+              "ignore_empty_values": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "timezone": ""
             },
             "circle": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "error_distance": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "shape_type": {
                 "__one_of": [
                   "geo_shape",
@@ -63,6 +238,33 @@
               "target_field": ""
             },
             "community_id": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "source_ip": "",
               "source_port": "",
               "destination_ip": "",
@@ -73,11 +275,48 @@
               "transport": "",
               "target_field": "",
               "seed": "",
-              "ignore_missing": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "convert": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": "",
               "type": {
                 "__one_of": [
@@ -93,15 +332,79 @@
               }
             },
             "csv": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "empty_value": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "quote": "",
               "separator": "",
               "target_fields": "",
-              "trim": "__flag__"
+              "trim": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "date": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "formats": [],
               "locale": "",
@@ -110,6 +413,33 @@
               "output_format": ""
             },
             "date_index_name": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "date_formats": [],
               "date_rounding": "",
               "field": "",
@@ -119,22 +449,151 @@
               "timezone": ""
             },
             "dissect": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "append_separator": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "pattern": ""
             },
             "dot_expander": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "override": "__flag__",
+              "override": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "path": ""
             },
-            "drop": {},
+            "drop": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": ""
+            },
             "enrich": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "max_matches": "",
-              "override": "__flag__",
+              "override": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "policy_name": "",
               "shape_relation": {
                 "__one_of": [
@@ -147,9 +606,63 @@
               "target_field": ""
             },
             "fail": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "message": ""
             },
             "fingerprint": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "fields": "",
               "target_field": "",
               "salt": "",
@@ -162,23 +675,129 @@
                   "MurmurHash3"
                 ]
               },
-              "ignore_missing": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "foreach": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "processor": {}
             },
             "ip_location": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "database_file": "",
               "field": "",
-              "first_only": "__flag__",
-              "ignore_missing": "__flag__",
+              "first_only": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "properties": [],
               "target_field": "",
-              "download_database_on_pipeline_creation": "__flag__"
+              "download_database_on_pipeline_creation": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "geo_grid": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "tile_type": {
                 "__one_of": [
@@ -192,7 +811,12 @@
               "children_field": "",
               "non_children_field": "",
               "precision_field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_format": {
                 "__one_of": [
                   "geojson",
@@ -201,36 +825,213 @@
               }
             },
             "geoip": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "database_file": "",
               "field": "",
-              "first_only": "__flag__",
-              "ignore_missing": "__flag__",
+              "first_only": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "properties": [],
               "target_field": "",
-              "download_database_on_pipeline_creation": "__flag__"
+              "download_database_on_pipeline_creation": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "grok": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "ecs_compatibility": "",
               "field": "",
-              "ignore_missing": "__flag__",
-              "pattern_definitions": {},
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "pattern_definitions": {
+                "*": ""
+              },
               "patterns": [],
-              "trace_match": "__flag__",
-              "validate_only": "__flag__"
+              "trace_match": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "validate_only": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "gsub": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "pattern": "",
               "replacement": "",
               "target_field": ""
             },
             "html_strip": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "inference": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "model_id": "",
               "target_field": "",
               "field_map": {},
@@ -251,86 +1052,482 @@
                 "input_field": "",
                 "output_field": ""
               },
-              "ignore_missing": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "join": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "separator": "",
               "target_field": ""
             },
             "json": {
-              "add_to_root": "__flag__",
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
+              "add_to_root": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "add_to_root_conflict_strategy": {
                 "__one_of": [
                   "replace",
                   "merge"
                 ]
               },
-              "allow_duplicate_keys": "__flag__",
+              "allow_duplicate_keys": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "field": "",
               "target_field": ""
             },
             "kv": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "exclude_keys": [],
               "field": "",
               "field_split": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "include_keys": [],
               "prefix": "",
-              "strip_brackets": "__flag__",
+              "strip_brackets": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": "",
               "trim_key": "",
               "trim_value": "",
               "value_split": ""
             },
             "lowercase": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "network_direction": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "source_ip": "",
               "destination_ip": "",
               "target_field": "",
               "internal_networks": [],
               "internal_networks_field": "",
-              "ignore_missing": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "pipeline": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "name": "",
-              "ignore_missing_pipeline": "__flag__"
+              "ignore_missing_pipeline": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "redact": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "patterns": [],
-              "pattern_definitions": {},
+              "pattern_definitions": {
+                "*": ""
+              },
               "prefix": "",
               "suffix": "",
-              "ignore_missing": "__flag__",
-              "skip_if_unlicensed": "__flag__",
-              "trace_redact": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "skip_if_unlicensed": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "trace_redact": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "registered_domain": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "target_field": "",
-              "ignore_missing": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "remove": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "keep": "",
-              "ignore_missing": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "rename": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "reroute": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "destination": "",
               "dataset": "",
               "namespace": ""
             },
             "script": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "id": "",
               "lang": {
                 "__one_of": [
@@ -344,18 +1541,109 @@
               "source": ""
             },
             "set": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "copy_from": "",
               "field": "",
-              "ignore_empty_value": "__flag__",
+              "ignore_empty_value": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "media_type": "",
-              "override": "__flag__",
+              "override": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "value": ""
             },
             "set_security_user": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "properties": []
             },
             "sort": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "order": {
                 "__one_of": [
@@ -366,38 +1654,273 @@
               "target_field": ""
             },
             "split": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
-              "preserve_trailing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "preserve_trailing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "separator": "",
               "target_field": ""
             },
-            "terminate": {},
+            "terminate": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": ""
+            },
             "trim": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "uppercase": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "urldecode": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "uri_parts": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
-              "keep_original": "__flag__",
-              "remove_if_successful": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "keep_original": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "remove_if_successful": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "user_agent": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "regex_file": "",
               "target_field": "",
               "properties": {
@@ -409,47 +1932,227 @@
                   "version"
                 ]
               },
-              "extract_device_type": "__flag__"
+              "extract_device_type": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             }
           }
         ],
         "processors": [
           {
             "append": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "value": "",
               "media_type": "",
               "copy_from": "",
-              "allow_duplicates": "__flag__",
-              "ignore_empty_values": "__flag__"
+              "allow_duplicates": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "ignore_empty_values": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "attachment": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "indexed_chars": "",
               "indexed_chars_field": "",
               "max_field_bytes": "",
               "properties": [],
               "target_field": "",
-              "remove_binary": "__flag__",
+              "remove_binary": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "resource_name": ""
             },
             "bytes": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "cef": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": "",
-              "ignore_empty_values": "__flag__",
+              "ignore_empty_values": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "timezone": ""
             },
             "circle": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "error_distance": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "shape_type": {
                 "__one_of": [
                   "geo_shape",
@@ -459,6 +2162,33 @@
               "target_field": ""
             },
             "community_id": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "source_ip": "",
               "source_port": "",
               "destination_ip": "",
@@ -469,11 +2199,48 @@
               "transport": "",
               "target_field": "",
               "seed": "",
-              "ignore_missing": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "convert": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": "",
               "type": {
                 "__one_of": [
@@ -489,15 +2256,79 @@
               }
             },
             "csv": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "empty_value": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "quote": "",
               "separator": "",
               "target_fields": "",
-              "trim": "__flag__"
+              "trim": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "date": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "formats": [],
               "locale": "",
@@ -506,6 +2337,33 @@
               "output_format": ""
             },
             "date_index_name": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "date_formats": [],
               "date_rounding": "",
               "field": "",
@@ -515,22 +2373,151 @@
               "timezone": ""
             },
             "dissect": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "append_separator": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "pattern": ""
             },
             "dot_expander": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "override": "__flag__",
+              "override": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "path": ""
             },
-            "drop": {},
+            "drop": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": ""
+            },
             "enrich": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "max_matches": "",
-              "override": "__flag__",
+              "override": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "policy_name": "",
               "shape_relation": {
                 "__one_of": [
@@ -543,9 +2530,63 @@
               "target_field": ""
             },
             "fail": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "message": ""
             },
             "fingerprint": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "fields": "",
               "target_field": "",
               "salt": "",
@@ -558,23 +2599,129 @@
                   "MurmurHash3"
                 ]
               },
-              "ignore_missing": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "foreach": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "processor": {}
             },
             "ip_location": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "database_file": "",
               "field": "",
-              "first_only": "__flag__",
-              "ignore_missing": "__flag__",
+              "first_only": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "properties": [],
               "target_field": "",
-              "download_database_on_pipeline_creation": "__flag__"
+              "download_database_on_pipeline_creation": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "geo_grid": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "tile_type": {
                 "__one_of": [
@@ -588,7 +2735,12 @@
               "children_field": "",
               "non_children_field": "",
               "precision_field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_format": {
                 "__one_of": [
                   "geojson",
@@ -597,36 +2749,213 @@
               }
             },
             "geoip": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "database_file": "",
               "field": "",
-              "first_only": "__flag__",
-              "ignore_missing": "__flag__",
+              "first_only": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "properties": [],
               "target_field": "",
-              "download_database_on_pipeline_creation": "__flag__"
+              "download_database_on_pipeline_creation": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "grok": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "ecs_compatibility": "",
               "field": "",
-              "ignore_missing": "__flag__",
-              "pattern_definitions": {},
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "pattern_definitions": {
+                "*": ""
+              },
               "patterns": [],
-              "trace_match": "__flag__",
-              "validate_only": "__flag__"
+              "trace_match": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "validate_only": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "gsub": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "pattern": "",
               "replacement": "",
               "target_field": ""
             },
             "html_strip": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "inference": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "model_id": "",
               "target_field": "",
               "field_map": {},
@@ -647,86 +2976,482 @@
                 "input_field": "",
                 "output_field": ""
               },
-              "ignore_missing": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "join": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "separator": "",
               "target_field": ""
             },
             "json": {
-              "add_to_root": "__flag__",
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
+              "add_to_root": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "add_to_root_conflict_strategy": {
                 "__one_of": [
                   "replace",
                   "merge"
                 ]
               },
-              "allow_duplicate_keys": "__flag__",
+              "allow_duplicate_keys": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "field": "",
               "target_field": ""
             },
             "kv": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "exclude_keys": [],
               "field": "",
               "field_split": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "include_keys": [],
               "prefix": "",
-              "strip_brackets": "__flag__",
+              "strip_brackets": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": "",
               "trim_key": "",
               "trim_value": "",
               "value_split": ""
             },
             "lowercase": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "network_direction": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "source_ip": "",
               "destination_ip": "",
               "target_field": "",
               "internal_networks": [],
               "internal_networks_field": "",
-              "ignore_missing": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "pipeline": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "name": "",
-              "ignore_missing_pipeline": "__flag__"
+              "ignore_missing_pipeline": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "redact": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "patterns": [],
-              "pattern_definitions": {},
+              "pattern_definitions": {
+                "*": ""
+              },
               "prefix": "",
               "suffix": "",
-              "ignore_missing": "__flag__",
-              "skip_if_unlicensed": "__flag__",
-              "trace_redact": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "skip_if_unlicensed": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "trace_redact": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "registered_domain": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "target_field": "",
-              "ignore_missing": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "remove": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "keep": "",
-              "ignore_missing": "__flag__"
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "rename": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "reroute": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "destination": "",
               "dataset": "",
               "namespace": ""
             },
             "script": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "id": "",
               "lang": {
                 "__one_of": [
@@ -740,18 +3465,109 @@
               "source": ""
             },
             "set": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "copy_from": "",
               "field": "",
-              "ignore_empty_value": "__flag__",
+              "ignore_empty_value": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "media_type": "",
-              "override": "__flag__",
+              "override": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "value": ""
             },
             "set_security_user": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "properties": []
             },
             "sort": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
               "order": {
                 "__one_of": [
@@ -762,38 +3578,273 @@
               "target_field": ""
             },
             "split": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
-              "preserve_trailing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "preserve_trailing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "separator": "",
               "target_field": ""
             },
-            "terminate": {},
+            "terminate": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": ""
+            },
             "trim": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "uppercase": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "urldecode": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "uri_parts": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
-              "keep_original": "__flag__",
-              "remove_if_successful": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "keep_original": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "remove_if_successful": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "user_agent": {
+              "description": "",
+              "if": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "ignore_failure": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "on_failure": [
+                {}
+              ],
+              "tag": "",
               "field": "",
-              "ignore_missing": "__flag__",
+              "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "regex_file": "",
               "target_field": "",
               "properties": {
@@ -805,12 +3856,22 @@
                   "version"
                 ]
               },
-              "extract_device_type": "__flag__"
+              "extract_device_type": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             }
           }
         ],
         "version": "",
-        "deprecated": "__flag__",
+        "deprecated": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "_meta": {},
         "created_date": "",
         "created_date_millis": "",

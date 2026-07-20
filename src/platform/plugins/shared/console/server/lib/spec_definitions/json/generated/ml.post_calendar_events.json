@@ -14,8 +14,18 @@
           "description": "",
           "end_time": "",
           "start_time": "",
-          "skip_result": "__flag__",
-          "skip_model_update": "__flag__",
+          "skip_result": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "skip_model_update": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "force_time_shift": ""
         }
       ]

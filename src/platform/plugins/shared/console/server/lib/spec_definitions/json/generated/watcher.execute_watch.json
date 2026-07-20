@@ -8,25 +8,488 @@
       "debug": "__flag__"
     },
     "data_autocomplete_rules": {
-      "action_modes": {},
+      "action_modes": {
+        "*": {
+          "__one_of": [
+            "simulate",
+            "force_simulate",
+            "execute",
+            "force_execute",
+            "skip"
+          ]
+        }
+      },
       "alternative_input": {},
-      "ignore_condition": "__flag__",
-      "record_execution": "__flag__",
+      "ignore_condition": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "record_execution": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "simulated_actions": {
         "actions": [],
         "all": {},
-        "use_all": "__flag__"
+        "use_all": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
       },
       "trigger_data": {
         "scheduled_time": "",
         "triggered_time": ""
       },
       "watch": {
-        "actions": {},
+        "actions": {
+          "*": {
+            "action_type": {
+              "__one_of": [
+                "email",
+                "webhook",
+                "index",
+                "logging",
+                "slack",
+                "pagerduty"
+              ]
+            },
+            "condition": {
+              "always": {},
+              "array_compare": {
+                "*": {
+                  "path": ""
+                }
+              },
+              "compare": {
+                "*": {
+                  "*": ""
+                }
+              },
+              "never": {},
+              "script": {
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "params": {},
+                "source": "",
+                "id": ""
+              }
+            },
+            "foreach": "",
+            "max_iterations": "",
+            "name": "",
+            "throttle_period": "",
+            "throttle_period_in_millis": "",
+            "transform": {
+              "chain": [
+                {}
+              ],
+              "script": {
+                "lang": "",
+                "params": {},
+                "source": "",
+                "id": ""
+              },
+              "search": {
+                "request": {
+                  "body": {
+                    "query": {
+                      "__scope_link": "GLOBAL.query"
+                    }
+                  },
+                  "indices": [],
+                  "indices_options": {
+                    "allow_no_indices": {
+                      "__one_of": [
+                        true,
+                        false
+                      ]
+                    },
+                    "expand_wildcards": {
+                      "__one_of": [
+                        "all",
+                        "open",
+                        "closed",
+                        "hidden",
+                        "none"
+                      ]
+                    },
+                    "ignore_unavailable": {
+                      "__one_of": [
+                        true,
+                        false
+                      ]
+                    },
+                    "ignore_throttled": {
+                      "__one_of": [
+                        true,
+                        false
+                      ]
+                    }
+                  },
+                  "search_type": {
+                    "__one_of": [
+                      "query_then_fetch",
+                      "dfs_query_then_fetch"
+                    ]
+                  },
+                  "template": {
+                    "explain": {
+                      "__one_of": [
+                        true,
+                        false
+                      ]
+                    },
+                    "id": "",
+                    "params": {},
+                    "profile": {
+                      "__one_of": [
+                        true,
+                        false
+                      ]
+                    },
+                    "source": ""
+                  },
+                  "rest_total_hits_as_int": {
+                    "__one_of": [
+                      true,
+                      false
+                    ]
+                  }
+                },
+                "timeout": ""
+              }
+            },
+            "index": {
+              "index": "",
+              "doc_id": "",
+              "refresh": {
+                "__one_of": [
+                  "true",
+                  "false",
+                  "wait_for"
+                ]
+              },
+              "op_type": {
+                "__one_of": [
+                  "index",
+                  "create"
+                ]
+              },
+              "timeout": "",
+              "execution_time_field": ""
+            },
+            "logging": {
+              "level": "",
+              "text": "",
+              "category": ""
+            },
+            "email": {
+              "id": "",
+              "bcc": "",
+              "body": {
+                "html": "",
+                "text": ""
+              },
+              "cc": "",
+              "from": "",
+              "priority": {
+                "__one_of": [
+                  "lowest",
+                  "low",
+                  "normal",
+                  "high",
+                  "highest"
+                ]
+              },
+              "reply_to": "",
+              "sent_date": "",
+              "subject": "",
+              "to": "",
+              "attachments": {
+                "*": {
+                  "http": {
+                    "content_type": "",
+                    "inline": {
+                      "__one_of": [
+                        true,
+                        false
+                      ]
+                    },
+                    "request": {
+                      "auth": {
+                        "basic": {
+                          "password": "",
+                          "username": ""
+                        }
+                      },
+                      "body": "",
+                      "connection_timeout": "",
+                      "headers": {
+                        "*": ""
+                      },
+                      "host": "",
+                      "method": {
+                        "__one_of": [
+                          "head",
+                          "get",
+                          "post",
+                          "put",
+                          "delete"
+                        ]
+                      },
+                      "params": {
+                        "*": ""
+                      },
+                      "path": "",
+                      "port": "",
+                      "proxy": {
+                        "host": "",
+                        "port": ""
+                      },
+                      "read_timeout": "",
+                      "scheme": {
+                        "__one_of": [
+                          "http",
+                          "https"
+                        ]
+                      },
+                      "url": ""
+                    }
+                  },
+                  "reporting": {
+                    "url": "",
+                    "inline": {
+                      "__one_of": [
+                        true,
+                        false
+                      ]
+                    },
+                    "retries": "",
+                    "interval": "",
+                    "request": {
+                      "auth": {
+                        "basic": {
+                          "password": "",
+                          "username": ""
+                        }
+                      },
+                      "body": "",
+                      "connection_timeout": "",
+                      "headers": {
+                        "*": ""
+                      },
+                      "host": "",
+                      "method": {
+                        "__one_of": [
+                          "head",
+                          "get",
+                          "post",
+                          "put",
+                          "delete"
+                        ]
+                      },
+                      "params": {
+                        "*": ""
+                      },
+                      "path": "",
+                      "port": "",
+                      "proxy": {
+                        "host": "",
+                        "port": ""
+                      },
+                      "read_timeout": "",
+                      "scheme": {
+                        "__one_of": [
+                          "http",
+                          "https"
+                        ]
+                      },
+                      "url": ""
+                    }
+                  },
+                  "data": {
+                    "format": {
+                      "__one_of": [
+                        "json",
+                        "yaml"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "pagerduty": {
+              "account": "",
+              "attach_payload": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "client": "",
+              "client_url": "",
+              "contexts": [
+                {
+                  "href": "",
+                  "src": "",
+                  "type": {
+                    "__one_of": [
+                      "link",
+                      "image"
+                    ]
+                  }
+                }
+              ],
+              "description": "",
+              "event_type": {
+                "__one_of": [
+                  "trigger",
+                  "resolve",
+                  "acknowledge"
+                ]
+              },
+              "incident_key": "",
+              "proxy": {
+                "host": "",
+                "port": ""
+              }
+            },
+            "slack": {
+              "account": "",
+              "message": {
+                "attachments": [
+                  {
+                    "author_icon": "",
+                    "author_link": "",
+                    "author_name": "",
+                    "color": "",
+                    "fallback": "",
+                    "fields": [
+                      {
+                        "short": {
+                          "__one_of": [
+                            true,
+                            false
+                          ]
+                        },
+                        "title": "",
+                        "value": ""
+                      }
+                    ],
+                    "footer": "",
+                    "footer_icon": "",
+                    "image_url": "",
+                    "pretext": "",
+                    "text": "",
+                    "thumb_url": "",
+                    "title": "",
+                    "title_link": "",
+                    "ts": ""
+                  }
+                ],
+                "dynamic_attachments": {
+                  "attachment_template": {
+                    "author_icon": "",
+                    "author_link": "",
+                    "author_name": "",
+                    "color": "",
+                    "fallback": "",
+                    "fields": [
+                      {
+                        "short": {
+                          "__one_of": [
+                            true,
+                            false
+                          ]
+                        },
+                        "title": "",
+                        "value": ""
+                      }
+                    ],
+                    "footer": "",
+                    "footer_icon": "",
+                    "image_url": "",
+                    "pretext": "",
+                    "text": "",
+                    "thumb_url": "",
+                    "title": "",
+                    "title_link": "",
+                    "ts": ""
+                  },
+                  "list_path": ""
+                },
+                "from": "",
+                "icon": "",
+                "text": "",
+                "to": []
+              }
+            },
+            "webhook": {
+              "auth": {
+                "basic": {
+                  "password": "",
+                  "username": ""
+                }
+              },
+              "body": "",
+              "connection_timeout": "",
+              "headers": {
+                "*": ""
+              },
+              "host": "",
+              "method": {
+                "__one_of": [
+                  "head",
+                  "get",
+                  "post",
+                  "put",
+                  "delete"
+                ]
+              },
+              "params": {
+                "*": ""
+              },
+              "path": "",
+              "port": "",
+              "proxy": {
+                "host": "",
+                "port": ""
+              },
+              "read_timeout": "",
+              "scheme": {
+                "__one_of": [
+                  "http",
+                  "https"
+                ]
+              },
+              "url": ""
+            }
+          }
+        },
         "condition": {
           "always": {},
-          "array_compare": {},
-          "compare": {},
+          "array_compare": {
+            "*": {
+              "path": ""
+            }
+          },
+          "compare": {
+            "*": {
+              "*": ""
+            }
+          },
           "never": {},
           "script": {
             "lang": {
@@ -45,7 +508,9 @@
         "input": {
           "chain": {
             "inputs": [
-              {}
+              {
+                "*": {}
+              }
             ]
           },
           "http": {
@@ -59,7 +524,9 @@
               },
               "body": "",
               "connection_timeout": "",
-              "headers": {},
+              "headers": {
+                "*": ""
+              },
               "host": "",
               "method": {
                 "__one_of": [
@@ -70,7 +537,9 @@
                   "delete"
                 ]
               },
-              "params": {},
+              "params": {
+                "*": ""
+              },
               "path": "",
               "port": "",
               "proxy": {
@@ -104,7 +573,12 @@
               },
               "indices": [],
               "indices_options": {
-                "allow_no_indices": "__flag__",
+                "allow_no_indices": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
                 "expand_wildcards": {
                   "__one_of": [
                     "all",
@@ -114,8 +588,18 @@
                     "none"
                   ]
                 },
-                "ignore_unavailable": "__flag__",
-                "ignore_throttled": "__flag__"
+                "ignore_unavailable": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "ignore_throttled": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "search_type": {
                 "__one_of": [
@@ -124,13 +608,28 @@
                 ]
               },
               "template": {
-                "explain": "__flag__",
+                "explain": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
                 "id": "",
                 "params": {},
-                "profile": "__flag__",
+                "profile": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
                 "source": ""
               },
-              "rest_total_hits_as_int": "__flag__"
+              "rest_total_hits_as_int": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "timeout": ""
           },
@@ -138,11 +637,53 @@
         },
         "metadata": {},
         "status": {
-          "actions": {},
+          "actions": {
+            "*": {
+              "ack": {
+                "state": {
+                  "__one_of": [
+                    "awaits_successful_execution",
+                    "ackable",
+                    "acked"
+                  ]
+                },
+                "timestamp": ""
+              },
+              "last_execution": {
+                "successful": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "timestamp": "",
+                "reason": ""
+              },
+              "last_successful_execution": {
+                "successful": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "timestamp": "",
+                "reason": ""
+              },
+              "last_throttle": {
+                "reason": "",
+                "timestamp": ""
+              }
+            }
+          },
           "last_checked": "",
           "last_met_condition": "",
           "state": {
-            "active": "__flag__",
+            "active": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
             "timestamp": ""
           },
           "version": "",
@@ -169,7 +710,12 @@
               },
               "indices": [],
               "indices_options": {
-                "allow_no_indices": "__flag__",
+                "allow_no_indices": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
                 "expand_wildcards": {
                   "__one_of": [
                     "all",
@@ -179,8 +725,18 @@
                     "none"
                   ]
                 },
-                "ignore_unavailable": "__flag__",
-                "ignore_throttled": "__flag__"
+                "ignore_unavailable": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "ignore_throttled": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "search_type": {
                 "__one_of": [
@@ -189,13 +745,28 @@
                 ]
               },
               "template": {
-                "explain": "__flag__",
+                "explain": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
                 "id": "",
                 "params": {},
-                "profile": "__flag__",
+                "profile": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
                 "source": ""
               },
-              "rest_total_hits_as_int": "__flag__"
+              "rest_total_hits_as_int": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             },
             "timeout": ""
           }

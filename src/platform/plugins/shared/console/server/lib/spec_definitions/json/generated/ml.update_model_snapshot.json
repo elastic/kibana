@@ -8,7 +8,12 @@
     },
     "data_autocomplete_rules": {
       "description": "",
-      "retain": "__flag__"
+      "retain": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
     },
     "methods": [
       "POST"

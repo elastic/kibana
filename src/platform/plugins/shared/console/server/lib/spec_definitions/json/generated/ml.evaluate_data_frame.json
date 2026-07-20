@@ -13,6 +13,17 @@
           "predicted_field": "",
           "top_classes_field": "",
           "metrics": {
+            "auc_roc": {
+              "class_name": "",
+              "include_curve": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
+            },
+            "precision": {},
+            "recall": {},
             "accuracy": {},
             "multiclass_confusion_matrix": {}
           }
@@ -21,6 +32,17 @@
           "actual_field": "",
           "predicted_probability_field": "",
           "metrics": {
+            "auc_roc": {
+              "class_name": "",
+              "include_curve": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
+            },
+            "precision": {},
+            "recall": {},
             "confusion_matrix": {}
           }
         },

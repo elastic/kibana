@@ -34,7 +34,12 @@
       },
       "service_settings": {
         "adaptive_allocations": {
-          "enabled": "__flag__",
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "max_number_of_allocations": "",
           "min_number_of_allocations": ""
         },
@@ -46,7 +51,12 @@
         "max_chunks_per_doc": ""
       },
       "task_settings": {
-        "return_documents": "__flag__"
+        "return_documents": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
       }
     },
     "methods": [

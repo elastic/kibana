@@ -9,15 +9,30 @@
     "data_autocomplete_rules": {
       "scheduling": {
         "access_control": {
-          "enabled": "__flag__",
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "interval": ""
         },
         "full": {
-          "enabled": "__flag__",
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "interval": ""
         },
         "incremental": {
-          "enabled": "__flag__",
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "interval": ""
         }
       }

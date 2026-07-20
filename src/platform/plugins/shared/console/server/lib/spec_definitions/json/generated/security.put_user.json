@@ -19,7 +19,12 @@
       "password": "",
       "password_hash": "",
       "roles": [],
-      "enabled": "__flag__"
+      "enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
     },
     "methods": [
       "PUT",

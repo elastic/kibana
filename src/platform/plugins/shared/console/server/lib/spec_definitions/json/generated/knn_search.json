@@ -9,7 +9,12 @@
     },
     "data_autocomplete_rules": {
       "_source": {
-        "exclude_vectors": "__flag__",
+        "exclude_vectors": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "excludes": "",
         "includes": ""
       },
@@ -17,7 +22,12 @@
         {
           "field": "",
           "format": "",
-          "include_unmapped": "__flag__"
+          "include_unmapped": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
         }
       ],
       "stored_fields": "",

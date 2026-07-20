@@ -22,18 +22,47 @@
       "allow_partial_results": "__flag__"
     },
     "data_autocomplete_rules": {
-      "columnar": "__flag__",
+      "columnar": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "filter": {
         "__scope_link": "GLOBAL.query"
       },
       "time_zone": "",
       "locale": "",
-      "params": "",
-      "profile": "__flag__",
+      "params": [],
+      "profile": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "query": "",
-      "tables": {},
-      "include_ccs_metadata": "__flag__",
-      "include_execution_metadata": "__flag__",
+      "tables": {
+        "*": {
+          "*": {
+            "integer": [],
+            "keyword": [],
+            "long": [],
+            "double": []
+          }
+        }
+      },
+      "include_ccs_metadata": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "include_execution_metadata": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "project_routing": ""
     },
     "methods": [

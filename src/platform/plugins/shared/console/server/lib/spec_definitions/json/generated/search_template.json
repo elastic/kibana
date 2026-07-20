@@ -32,10 +32,20 @@
       "typed_keys": "__flag__"
     },
     "data_autocomplete_rules": {
-      "explain": "__flag__",
+      "explain": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "id": "",
       "params": {},
-      "profile": "__flag__",
+      "profile": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "source": "",
       "project_routing": ""
     },

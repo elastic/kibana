@@ -23,9 +23,19 @@
       ]
     },
     "data_autocomplete_rules": {
-      "desc": "__flag__",
+      "desc": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "end": "",
-      "exclude_interim": "__flag__",
+      "exclude_interim": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
       "page": {
         "from": "",
         "size": ""

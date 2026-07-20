@@ -17,21 +17,82 @@
     },
     "data_autocomplete_rules": {
       "template": {
-        "aliases": {},
+        "aliases": {
+          "*": {
+            "filter": {
+              "__scope_link": "GLOBAL.query"
+            },
+            "index_routing": "",
+            "is_hidden": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "is_write_index": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "routing": "",
+            "search_routing": ""
+          }
+        },
         "mappings": {
           "all_field": {
             "analyzer": "",
-            "enabled": "__flag__",
-            "omit_norms": "__flag__",
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "omit_norms": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
             "search_analyzer": "",
             "similarity": "",
-            "store": "__flag__",
-            "store_term_vector_offsets": "__flag__",
-            "store_term_vector_payloads": "__flag__",
-            "store_term_vector_positions": "__flag__",
-            "store_term_vectors": "__flag__"
+            "store": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "store_term_vector_offsets": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "store_term_vector_payloads": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "store_term_vector_positions": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "store_term_vectors": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           },
-          "date_detection": "__flag__",
+          "date_detection": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "dynamic": {
             "__one_of": [
               "strict",
@@ -42,25 +103,153 @@
           },
           "dynamic_date_formats": [],
           "dynamic_templates": [
-            {}
+            {
+              "*": {
+                "mapping": {
+                  "meta": {
+                    "*": ""
+                  },
+                  "fields": {
+                    "*": {}
+                  }
+                },
+                "runtime": {
+                  "fields": {
+                    "*": {
+                      "type": {
+                        "__one_of": [
+                          "boolean",
+                          "composite",
+                          "date",
+                          "double",
+                          "geo_point",
+                          "geo_shape",
+                          "ip",
+                          "keyword",
+                          "long",
+                          "lookup"
+                        ]
+                      }
+                    }
+                  },
+                  "fetch_fields": [
+                    {
+                      "field": "",
+                      "format": ""
+                    }
+                  ],
+                  "format": "",
+                  "input_field": "",
+                  "target_field": "",
+                  "target_index": "",
+                  "script": {
+                    "source": "",
+                    "id": "",
+                    "params": {},
+                    "lang": {
+                      "__one_of": [
+                        "painless",
+                        "expression",
+                        "mustache",
+                        "java"
+                      ]
+                    },
+                    "options": {
+                      "*": ""
+                    }
+                  },
+                  "on_script_error": {
+                    "__one_of": [
+                      "fail",
+                      "continue"
+                    ]
+                  },
+                  "type": {
+                    "__one_of": [
+                      "boolean",
+                      "composite",
+                      "date",
+                      "double",
+                      "geo_point",
+                      "geo_shape",
+                      "ip",
+                      "keyword",
+                      "long",
+                      "lookup"
+                    ]
+                  }
+                },
+                "match": "",
+                "path_match": "",
+                "unmatch": "",
+                "path_unmatch": "",
+                "match_mapping_type": "",
+                "unmatch_mapping_type": "",
+                "match_pattern": {
+                  "__one_of": [
+                    "simple",
+                    "regex"
+                  ]
+                }
+              }
+            }
           ],
           "_field_names": {
-            "enabled": "__flag__"
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           },
           "index_field": {
-            "enabled": "__flag__"
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           },
           "_meta": {},
-          "numeric_detection": "__flag__",
-          "properties": {},
+          "numeric_detection": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "properties": {
+            "*": {
+              "meta": {
+                "*": ""
+              },
+              "fields": {
+                "*": {}
+              }
+            }
+          },
           "_routing": {
-            "required": "__flag__"
+            "required": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           },
           "_size": {
-            "enabled": "__flag__"
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           },
           "_source": {
-            "enabled": "__flag__",
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
             "excludes": [],
             "includes": [],
             "mode": {
@@ -71,8 +260,80 @@
               ]
             }
           },
-          "runtime": {},
-          "enabled": "__flag__",
+          "runtime": {
+            "*": {
+              "fields": {
+                "*": {
+                  "type": {
+                    "__one_of": [
+                      "boolean",
+                      "composite",
+                      "date",
+                      "double",
+                      "geo_point",
+                      "geo_shape",
+                      "ip",
+                      "keyword",
+                      "long",
+                      "lookup"
+                    ]
+                  }
+                }
+              },
+              "fetch_fields": [
+                {
+                  "field": "",
+                  "format": ""
+                }
+              ],
+              "format": "",
+              "input_field": "",
+              "target_field": "",
+              "target_index": "",
+              "script": {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              "on_script_error": {
+                "__one_of": [
+                  "fail",
+                  "continue"
+                ]
+              },
+              "type": {
+                "__one_of": [
+                  "boolean",
+                  "composite",
+                  "date",
+                  "double",
+                  "geo_point",
+                  "geo_shape",
+                  "ip",
+                  "keyword",
+                  "long",
+                  "lookup"
+                ]
+              }
+            }
+          },
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "subobjects": {
             "__one_of": [
               "true",
@@ -81,7 +342,12 @@
             ]
           },
           "_data_stream_timestamp": {
-            "enabled": "__flag__"
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           }
         },
         "settings": {
@@ -89,7 +355,12 @@
           "mode": "",
           "routing_path": "",
           "soft_deletes": {
-            "enabled": "__flag__",
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
             "retention_lease": {
               "period": ""
             }
@@ -127,7 +398,12 @@
           },
           "codec": "",
           "routing_partition_size": "",
-          "load_fixed_bitset_filters_eagerly": "__flag__",
+          "load_fixed_bitset_filters_eagerly": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "hidden": "",
           "auto_expand_replicas": "",
           "merge": {
@@ -143,7 +419,12 @@
             "slowlog": {
               "level": "",
               "source": "",
-              "reformat": "__flag__",
+              "reformat": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "threshold": {
                 "query": {
                   "warn": "",
@@ -228,7 +509,12 @@
             "name": "",
             "indexing_complete": "",
             "origination_date": "",
-            "parse_origination_date": "__flag__",
+            "parse_origination_date": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
             "step": {
               "wait_time_threshold": ""
             },
@@ -266,11 +552,21 @@
           "priority": "",
           "top_metrics_max_size": "",
           "analysis": {
-            "analyzer": {},
-            "char_filter": {},
-            "filter": {},
-            "normalizer": {},
-            "tokenizer": {}
+            "analyzer": {
+              "*": {}
+            },
+            "char_filter": {
+              "*": ""
+            },
+            "filter": {
+              "*": ""
+            },
+            "normalizer": {
+              "*": {}
+            },
+            "tokenizer": {
+              "*": ""
+            }
           },
           "settings": {},
           "time_series": {
@@ -279,12 +575,24 @@
           },
           "queries": {
             "cache": {
-              "enabled": "__flag__"
+              "enabled": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
             }
           },
-          "similarity": {},
+          "similarity": {
+            "*": {}
+          },
           "mapping": {
-            "coerce": "__flag__",
+            "coerce": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
             "total_fields": {
               "limit": "",
               "ignore_dynamic_beyond_limit": ""
@@ -318,7 +626,12 @@
           "indexing.slowlog": {
             "level": "",
             "source": "",
-            "reformat": "__flag__",
+            "reformat": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
             "threshold": {
               "index": {
                 "warn": "",
@@ -342,7 +655,12 @@
                 "hybridfs"
               ]
             },
-            "allow_mmap": "__flag__",
+            "allow_mmap": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
             "stats_refresh_interval": ""
           }
         },
@@ -369,14 +687,24 @@
               "last_value"
             ]
           },
-          "enabled": "__flag__",
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "frozen_after": ""
         },
         "data_stream_options": ""
       },
       "version": "",
       "_meta": {},
-      "deprecated": "__flag__"
+      "deprecated": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
     },
     "methods": [
       "PUT",

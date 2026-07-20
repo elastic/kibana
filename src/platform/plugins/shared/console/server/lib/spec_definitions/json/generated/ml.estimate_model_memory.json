@@ -44,7 +44,17 @@
                     "value": ""
                   }
                 ],
-                "scope": {}
+                "scope": {
+                  "*": {
+                    "filter_id": "",
+                    "filter_type": {
+                      "__one_of": [
+                        "include",
+                        "exclude"
+                      ]
+                    }
+                  }
+                }
               }
             ],
             "detector_description": "",
@@ -61,21 +71,45 @@
             "function": "",
             "over_field_name": "",
             "partition_field_name": "",
-            "use_null": "__flag__"
+            "use_null": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
           }
         ],
         "influencers": [],
         "latency": "",
         "model_prune_window": "",
-        "multivariate_by_fields": "__flag__",
+        "multivariate_by_fields": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "per_partition_categorization": {
-          "enabled": "__flag__",
-          "stop_on_warn": "__flag__"
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "stop_on_warn": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
         },
         "summary_count_field_name": ""
       },
-      "max_bucket_cardinality": {},
-      "overall_cardinality": {}
+      "max_bucket_cardinality": {
+        "*": ""
+      },
+      "overall_cardinality": {
+        "*": ""
+      }
     },
     "methods": [
       "POST"

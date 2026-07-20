@@ -92,7 +92,9 @@
             "java"
           ]
         },
-        "options": {}
+        "options": {
+          "*": ""
+        }
       },
       "slice": {
         "field": "",

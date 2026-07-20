@@ -41,7 +41,9 @@
             "java"
           ]
         },
-        "options": {}
+        "options": {
+          "*": ""
+        }
       }
     },
     "methods": [

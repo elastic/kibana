@@ -32,7 +32,12 @@
       },
       "service_settings": {
         "adaptive_allocations": {
-          "enabled": "__flag__",
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
           "max_number_of_allocations": "",
           "min_number_of_allocations": ""
         },

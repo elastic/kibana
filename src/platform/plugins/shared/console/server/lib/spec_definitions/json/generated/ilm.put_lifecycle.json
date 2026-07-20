@@ -24,12 +24,23 @@
               "allocate": {
                 "number_of_replicas": "",
                 "total_shards_per_node": "",
-                "include": {},
-                "exclude": {},
-                "require": {}
+                "include": {
+                  "*": ""
+                },
+                "exclude": {
+                  "*": ""
+                },
+                "require": {
+                  "*": ""
+                }
               },
               "delete": {
-                "delete_searchable_snapshot": "__flag__"
+                "delete_searchable_snapshot": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "downsample": {
                 "fixed_interval": "",
@@ -41,7 +52,12 @@
                 "index_codec": ""
               },
               "migrate": {
-                "enabled": "__flag__"
+                "enabled": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "readonly": {},
               "rollover": {
@@ -61,12 +77,22 @@
               },
               "searchable_snapshot": {
                 "snapshot_repository": "",
-                "force_merge_index": "__flag__"
+                "force_merge_index": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "shrink": {
                 "number_of_shards": "",
                 "max_primary_shard_size": "",
-                "allow_write_after_shrink": "__flag__"
+                "allow_write_after_shrink": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "unfollow": {},
               "wait_for_snapshot": {
@@ -80,12 +106,23 @@
               "allocate": {
                 "number_of_replicas": "",
                 "total_shards_per_node": "",
-                "include": {},
-                "exclude": {},
-                "require": {}
+                "include": {
+                  "*": ""
+                },
+                "exclude": {
+                  "*": ""
+                },
+                "require": {
+                  "*": ""
+                }
               },
               "delete": {
-                "delete_searchable_snapshot": "__flag__"
+                "delete_searchable_snapshot": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "downsample": {
                 "fixed_interval": "",
@@ -97,7 +134,12 @@
                 "index_codec": ""
               },
               "migrate": {
-                "enabled": "__flag__"
+                "enabled": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "readonly": {},
               "rollover": {
@@ -117,12 +159,22 @@
               },
               "searchable_snapshot": {
                 "snapshot_repository": "",
-                "force_merge_index": "__flag__"
+                "force_merge_index": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "shrink": {
                 "number_of_shards": "",
                 "max_primary_shard_size": "",
-                "allow_write_after_shrink": "__flag__"
+                "allow_write_after_shrink": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "unfollow": {},
               "wait_for_snapshot": {
@@ -136,12 +188,23 @@
               "allocate": {
                 "number_of_replicas": "",
                 "total_shards_per_node": "",
-                "include": {},
-                "exclude": {},
-                "require": {}
+                "include": {
+                  "*": ""
+                },
+                "exclude": {
+                  "*": ""
+                },
+                "require": {
+                  "*": ""
+                }
               },
               "delete": {
-                "delete_searchable_snapshot": "__flag__"
+                "delete_searchable_snapshot": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "downsample": {
                 "fixed_interval": "",
@@ -153,7 +216,12 @@
                 "index_codec": ""
               },
               "migrate": {
-                "enabled": "__flag__"
+                "enabled": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "readonly": {},
               "rollover": {
@@ -173,12 +241,22 @@
               },
               "searchable_snapshot": {
                 "snapshot_repository": "",
-                "force_merge_index": "__flag__"
+                "force_merge_index": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "shrink": {
                 "number_of_shards": "",
                 "max_primary_shard_size": "",
-                "allow_write_after_shrink": "__flag__"
+                "allow_write_after_shrink": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "unfollow": {},
               "wait_for_snapshot": {
@@ -192,12 +270,23 @@
               "allocate": {
                 "number_of_replicas": "",
                 "total_shards_per_node": "",
-                "include": {},
-                "exclude": {},
-                "require": {}
+                "include": {
+                  "*": ""
+                },
+                "exclude": {
+                  "*": ""
+                },
+                "require": {
+                  "*": ""
+                }
               },
               "delete": {
-                "delete_searchable_snapshot": "__flag__"
+                "delete_searchable_snapshot": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "downsample": {
                 "fixed_interval": "",
@@ -209,7 +298,12 @@
                 "index_codec": ""
               },
               "migrate": {
-                "enabled": "__flag__"
+                "enabled": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "readonly": {},
               "rollover": {
@@ -229,12 +323,22 @@
               },
               "searchable_snapshot": {
                 "snapshot_repository": "",
-                "force_merge_index": "__flag__"
+                "force_merge_index": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "shrink": {
                 "number_of_shards": "",
                 "max_primary_shard_size": "",
-                "allow_write_after_shrink": "__flag__"
+                "allow_write_after_shrink": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "unfollow": {},
               "wait_for_snapshot": {
@@ -248,12 +352,23 @@
               "allocate": {
                 "number_of_replicas": "",
                 "total_shards_per_node": "",
-                "include": {},
-                "exclude": {},
-                "require": {}
+                "include": {
+                  "*": ""
+                },
+                "exclude": {
+                  "*": ""
+                },
+                "require": {
+                  "*": ""
+                }
               },
               "delete": {
-                "delete_searchable_snapshot": "__flag__"
+                "delete_searchable_snapshot": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "downsample": {
                 "fixed_interval": "",
@@ -265,7 +380,12 @@
                 "index_codec": ""
               },
               "migrate": {
-                "enabled": "__flag__"
+                "enabled": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "readonly": {},
               "rollover": {
@@ -285,12 +405,22 @@
               },
               "searchable_snapshot": {
                 "snapshot_repository": "",
-                "force_merge_index": "__flag__"
+                "force_merge_index": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "shrink": {
                 "number_of_shards": "",
                 "max_primary_shard_size": "",
-                "allow_write_after_shrink": "__flag__"
+                "allow_write_after_shrink": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
               },
               "unfollow": {},
               "wait_for_snapshot": {

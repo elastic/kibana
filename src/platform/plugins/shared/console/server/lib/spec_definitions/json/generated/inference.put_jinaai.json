@@ -53,10 +53,20 @@
             "float"
           ]
         },
-        "multimodal_model": "__flag__"
+        "multimodal_model": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
       },
       "task_settings": {
-        "return_documents": "__flag__",
+        "return_documents": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "input_type": {
           "__one_of": [
             "classification",
@@ -65,7 +75,12 @@
             "search"
           ]
         },
-        "late_chunking": "__flag__",
+        "late_chunking": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
         "top_n": ""
       }
     },
