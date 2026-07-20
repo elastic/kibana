@@ -10,6 +10,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { CoreStart } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { EsWorkflow } from '@kbn/workflows';
 import type {
   StepExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
