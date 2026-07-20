@@ -10,7 +10,7 @@ import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { ExperimentalBadge } from '../../components/experimental_badge';
+import { experimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
@@ -62,7 +62,7 @@ export const ListActionPoliciesPage = () => {
       <AppHeader
         sticky={false}
         title={ACTION_POLICIES_LIST_PAGE_TITLE}
-        titleAppend={<ExperimentalBadge />}
+        badges={[experimentalBadge]}
         spacing="bleed"
         menu={actionPoliciesMenu}
       />
