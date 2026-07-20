@@ -56,6 +56,9 @@ const PLACEHOLDER_ATTRIBUTES: Record<string, string> = {
   'gen_ai.tool.definitions': '[TOOL_DEFINITIONS]',
   'gen_ai.tool.description': '[TOOL_DESCRIPTION]',
   'gen_ai.tool.call.result': '[TOOL_RESULT]',
+  'gen_ai.input.messages': '[INPUT_MESSAGES]',
+  'gen_ai.output.messages': '[OUTPUT_MESSAGES]',
+  'gen_ai.system_instructions': '[SYSTEM_INSTRUCTIONS]',
 };
 
 interface SpanEvent {

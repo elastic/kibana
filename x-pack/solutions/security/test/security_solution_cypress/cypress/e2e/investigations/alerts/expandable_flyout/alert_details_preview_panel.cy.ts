@@ -15,15 +15,13 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
-  CORRELATIONS_ANCESTRY_SECTION_TABLE,
   CORRELATIONS_SESSION_SECTION_TABLE,
   CORRELATIONS_SOURCE_SECTION_TABLE,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel_correlations_tab';
 import {
-  openCorrelationsTab,
   clickExpandFromRelatedBySession,
-  clickExpandFromRelatedByAncestry,
   clickExpandFromRelatedBySource,
+  openCorrelationsTab,
 } from '../../../../tasks/expandable_flyout/alert_details_left_panel_correlations_tab';
 import {
   closePreview,
@@ -31,18 +29,18 @@ import {
   openNewFlyout,
 } from '../../../../tasks/expandable_flyout/alert_details_preview_panel';
 import {
-  DOCUMENT_DETAILS_FLYOUT_HEADER_LINK_ICON,
-  DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE,
   DOCUMENT_DETAILS_FLYOUT_FOOTER,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_LINK_ICON,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel';
 import {
-  PREVIEW_SECTION,
-  PREVIEW_BANNER,
   DOCUMENT_DETAILS_FLYOUT_PREVIEW_FOOTER,
   DOCUMENT_DETAILS_FLYOUT_PREVIEW_FOOTER_LINK,
   PREVIEW_BACK_BUTTON,
+  PREVIEW_BANNER,
   PREVIEW_CLOSE_BUTTON,
+  PREVIEW_SECTION,
 } from '../../../../screens/expandable_flyout/alert_details_preview_panel';
 import {
   expandDocumentDetailsExpandableFlyoutLeftSection,
@@ -152,9 +150,12 @@ describe(
     });
 
     it('should open a new flyout when footer link is clicked', () => {
-      cy.log('open alert preview from related alerts by ancestry');
-      cy.get(CORRELATIONS_ANCESTRY_SECTION_TABLE).should('exist');
-      clickExpandFromRelatedByAncestry();
+      cy.log('open alert preview from related alerts by source event');
+      // the ancestry section's date picker defaults to the last 1 day, which has no alerts in
+      // this test's data, so this is driven from the source event section instead, which is
+      // unaffected by that change and still has data
+      cy.get(CORRELATIONS_SOURCE_SECTION_TABLE).should('exist');
+      clickExpandFromRelatedBySource();
 
       cy.log('Verify preview section is visible');
 

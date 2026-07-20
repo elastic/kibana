@@ -9,19 +9,22 @@ import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useCallback, useMemo } from 'react';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
+import {
+  type Indicator,
+  RawIndicatorFieldId,
+} from '../../../common/threat_intelligence/types/indicator';
+import { getIndicatorFieldAndValue } from '../../threat_intelligence/modules/indicators/utils/field_value';
 import { useKibana } from '../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context'; // Lazy-loaded so consumers of this hook don't statically pull the IOC flyout graph into their
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
+import { formatFlyoutTitle, IOC_TITLE } from '../shared/constants/flyout_titles';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the IOC flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
@@ -64,20 +67,23 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   // `session` is the only thing that differs between a main and a child flyout. It is kept private
   // here so callers never have to reason about it: they pick `openIocFlyout` (main) or
   // `openIocFlyoutAsChild` (child) and this helper maps that to the right session.
   const open = useCallback(
-    (children: ReactNode, session: OverlaySystemFlyoutOpenOptions['session']) => {
+    (
+      children: ReactNode,
+      session: OverlaySystemFlyoutOpenOptions['session'],
+      title: OverlaySystemFlyoutOpenOptions['title']
+    ) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
+        title,
       };
       overlays.openSystemFlyout(
         flyoutProviders({
@@ -86,7 +92,10 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
           history,
           children: (
             <FlyoutSessionContextProvider
-              value={session === 'inherit' ? 'inherit' : mainFlyoutSessionMode}
+              value={{
+                session: session === 'inherit' ? 'inherit' : sessionMode,
+                historyKey,
+              }}
             >
               <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
             </FlyoutSessionContextProvider>
@@ -95,15 +104,7 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
         properties
       );
     },
-    [
-      overlays,
-      services,
-      store,
-      history,
-      defaultDocumentFlyoutProperties,
-      historyKey,
-      mainFlyoutSessionMode,
-    ]
+    [overlays, services, store, history, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   // Builds the flyout content (an `IOCDetails` element with a record derived from the indicator),
@@ -120,14 +121,24 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
     []
   );
 
+  const getTitle = useCallback(
+    ({ indicator }: OpenIocFlyoutParams) =>
+      formatFlyoutTitle(
+        IOC_TITLE,
+        getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Name).value
+      ),
+    []
+  );
+
   const openIocFlyout = useCallback(
-    (params: OpenIocFlyoutParams) => open(buildContent(params), mainFlyoutSessionMode),
-    [open, buildContent, mainFlyoutSessionMode]
+    (params: OpenIocFlyoutParams) => open(buildContent(params), sessionMode, getTitle(params)),
+    [open, buildContent, sessionMode, getTitle]
   );
 
   const openIocFlyoutAsChild = useCallback(
-    (params: OpenIocFlyoutParams) => open(buildContent(params), 'inherit'),
-    [open, buildContent]
+    (params: OpenIocFlyoutParams) =>
+      open(buildContent(params), 'inherit', buildFlyoutNavTitle(getTitle(params))),
+    [open, buildContent, getTitle]
   );
 
   return useMemo(

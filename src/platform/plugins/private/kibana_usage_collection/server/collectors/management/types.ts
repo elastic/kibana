@@ -83,10 +83,12 @@ export interface UsageStats {
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
+  'securitySolution:enableNewFlyout': boolean;
   'securitySolution:enableAssetCriticality': boolean;
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:excludeColdAndFrozenTiersInPrevalence': boolean;
   'securitySolution:enableAssetInventory': boolean;
+  'securitySolution:enableSiemReadiness': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'securitySolution:suppressionBehaviorOnAlertClosure': string;
   'securitySolution:defaultValueReportMinutes': string;
