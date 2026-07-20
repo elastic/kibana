@@ -15,6 +15,7 @@ import { paths } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { ActionPoliciesTable } from './components/action_policies_table';
+import { EuiSpacer } from '@elastic/eui';
 
 const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
   'xpack.alertingV2.actionPoliciesList.pageTitle',
@@ -66,7 +67,7 @@ export const ListActionPoliciesPage = () => {
         spacing="bleed"
         menu={actionPoliciesMenu}
       />
-
+      <EuiSpacer size="m" />
       <ActionPoliciesTable />
     </>
   );
