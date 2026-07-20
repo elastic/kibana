@@ -73,7 +73,12 @@ describe('AiIndexRegistry', () => {
 
     it('skips put() when entry already exists', async () => {
       const service = makeServiceMock({
-        get: jest.fn().mockResolvedValue({ id: 'test', ...makeProperties(), date_created: '', date_modified: '' }),
+        get: jest.fn().mockResolvedValue({
+          id: 'test',
+          ...makeProperties(),
+          date_created: '',
+          date_modified: '',
+        }),
       });
       registry.register('test', makeProperties());
 
@@ -83,7 +88,6 @@ describe('AiIndexRegistry', () => {
     });
 
     it('calls put() when entry does not exist', async () => {
-      const { AiIndexNotFoundError } = jest.requireActual('./errors');
       const service = makeServiceMock({
         get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('test')),
         put: jest.fn().mockResolvedValue('created'),
@@ -96,7 +100,6 @@ describe('AiIndexRegistry', () => {
     });
 
     it('logs a warning and does not throw when put() throws InvalidAiIndexDestError', async () => {
-      const { AiIndexNotFoundError } = jest.requireActual('./errors');
       const service = makeServiceMock({
         get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('test')),
         put: jest.fn().mockRejectedValue(new InvalidAiIndexDestError('dest not ready')),
@@ -107,13 +110,10 @@ describe('AiIndexRegistry', () => {
         registry.startupRegister({ aiIndexService: service, isEnabled: true, logger })
       ).resolves.not.toThrow();
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('dest not ready')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('dest not ready'));
     });
 
     it('logs a warning and does not throw when put() throws an unexpected error', async () => {
-      const { AiIndexNotFoundError } = jest.requireActual('./errors');
       const service = makeServiceMock({
         get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('test')),
         put: jest.fn().mockRejectedValue(new Error('ES cluster unavailable')),
@@ -124,13 +124,10 @@ describe('AiIndexRegistry', () => {
         registry.startupRegister({ aiIndexService: service, isEnabled: true, logger })
       ).resolves.not.toThrow();
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('ES cluster unavailable')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('ES cluster unavailable'));
     });
 
     it('registers multiple entries independently', async () => {
-      const { AiIndexNotFoundError } = jest.requireActual('./errors');
       const service = makeServiceMock({
         get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('any')),
         put: jest.fn().mockResolvedValue('created'),
