@@ -259,9 +259,9 @@ export const compareCmd: Command<void> = {
           urlObj.username = '';
           urlObj.password = '';
           const baseUrl = urlObj.toString().replace(/\/+$/, '');
-          comparePageUrl = `${baseUrl}/app/management/ai/evals/compare?runA=${encodeURIComponent(
-            firstExperimentId
-          )}&runB=${encodeURIComponent(secondExperimentId)}`;
+          comparePageUrl = `${baseUrl}/app/management/ai/evals/compare?type=execution&baseline=${encodeURIComponent(
+            secondExperimentId
+          )}&target=${encodeURIComponent(firstExperimentId)}`;
         } catch {
           log.warning(`Invalid Kibana URL for compare page link: ${effectiveKibanaUrl}`);
         }
