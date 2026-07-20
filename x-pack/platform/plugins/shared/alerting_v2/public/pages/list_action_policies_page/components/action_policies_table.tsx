@@ -13,7 +13,6 @@ import { ContentList, ContentListProvider } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
 import { TAG_FILTER_ID } from '@kbn/content-list-provider';
 import { DeleteActionPolicyConfirmModal } from '../../../components/action_policy/delete_confirmation_modal';
-import { ActionPolicyDetailsFlyout } from '../../../components/action_policy/details_flyout/action_policy_details_flyout';
 import { paths } from '../../../constants';
 import { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useCreateActionPolicy } from '../../../hooks/use_create_action_policy';
@@ -60,7 +59,6 @@ export const ActionPoliciesTable = () => {
 
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
-  const [policyToView, setPolicyToView] = useState<ActionPolicyResponse | null>(null);
 
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
@@ -191,7 +189,6 @@ export const ActionPoliciesTable = () => {
             isBulkActionInProgress={isBulkActionInProgress}
             bulkAction={bulkAction}
             onRefetchReady={onRefetchReady}
-            onViewDetails={setPolicyToView}
             onEdit={navigateToEdit}
             onClone={clonePolicy}
             onDelete={setPolicyToDelete}
@@ -230,38 +227,6 @@ export const ActionPoliciesTable = () => {
             });
           }}
           isLoading={isUpdatingApiKey}
-        />
-      )}
-
-      {policyToView && (
-        <ActionPolicyDetailsFlyout
-          policy={policyToView}
-          canWrite={canWrite}
-          onClose={() => setPolicyToView(null)}
-          onEdit={(id) => {
-            setPolicyToView(null);
-            navigateToEdit(id);
-          }}
-          onClone={(p) => {
-            setPolicyToView(null);
-            clonePolicy(p);
-          }}
-          onDelete={(p) => {
-            setPolicyToView(null);
-            setPolicyToDelete(p);
-          }}
-          onEnable={(id) => enablePolicy(id)}
-          onDisable={(id) => disablePolicy(id)}
-          onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
-          onCancelSnooze={(id) => unsnoozePolicy(id)}
-          onUpdateApiKey={(id) => {
-            setPolicyToView(null);
-            setPolicyToUpdateApiKey(id);
-          }}
-          isStateLoading={
-            (isEnabling && enableVariables === policyToView.id) ||
-            (isDisabling && disableVariables === policyToView.id)
-          }
         />
       )}
     </>

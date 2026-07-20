@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { ActionPolicyBulkAction, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import type { Query } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSwitch } from '@elastic/eui';
@@ -26,6 +26,7 @@ import {
   useContentListState,
 } from '@kbn/content-list-provider';
 import { filter } from '@kbn/content-list-toolbar';
+import { ActionPolicyDetailsFlyout } from '../../../components/action_policy/details_flyout/action_policy_details_flyout';
 import { ActionPolicySnoozePopover } from '../../../components/action_policy/action_policy_snooze_popover';
 import type { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
@@ -58,7 +59,6 @@ interface Props {
   isBulkActionInProgress: boolean;
   bulkAction: BulkActionMutate;
   onRefetchReady: (refetch: () => void) => void;
-  onViewDetails: (policy: ActionPolicyResponse) => void;
   onEdit: (id: string) => void;
   onClone: (policy: ActionPolicyResponse) => void;
   onDelete: (policy: ActionPolicyResponse) => void;
@@ -116,7 +116,6 @@ export const ActionPoliciesTableContent = ({
   isBulkActionInProgress,
   bulkAction,
   onRefetchReady,
-  onViewDetails,
   onEdit,
   onClone,
   onDelete,
@@ -126,7 +125,12 @@ export const ActionPoliciesTableContent = ({
   enablePolicy,
   disablePolicy,
 }: Props) => {
+  const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const { items } = useContentListItems();
+  const policyToView = useMemo(
+    () => (policyToViewId ? items.map(toPolicy).find((p) => p.id === policyToViewId) ?? null : null),
+    [policyToViewId, items]
+  );
   const updatedByUids = useMemo(
     () =>
       items.map((item) => toPolicy(item).updatedBy).filter((uid): uid is string => Boolean(uid)),
@@ -155,7 +159,7 @@ export const ActionPoliciesTableContent = ({
         scrollableInline
         responsiveBreakpoint={false}
       >
-        <Column.Name showDescription onClick={(item) => onViewDetails(toPolicy(item))} />
+        <Column.Name showDescription onClick={(item) => setPolicyToViewId(toPolicy(item).id)} />
         <DestinationsColumn />
         <Column
           id="tags"
@@ -271,7 +275,7 @@ export const ActionPoliciesTableContent = ({
               <ActionPolicyActionsCell
                 policy={policy}
                 canWrite={canWrite}
-                onViewDetails={onViewDetails}
+                onViewDetails={(p) => setPolicyToViewId(p.id)}
                 onEdit={onEdit}
                 onClone={onClone}
                 onDelete={onDelete}
@@ -285,6 +289,37 @@ export const ActionPoliciesTableContent = ({
         />
       </ContentListTable>
       <ContentListFooter />
+      {policyToView && (
+        <ActionPolicyDetailsFlyout
+          policy={policyToView}
+          canWrite={canWrite}
+          onClose={() => setPolicyToViewId(null)}
+          onEdit={(id) => {
+            setPolicyToViewId(null);
+            onEdit(id);
+          }}
+          onClone={(p) => {
+            setPolicyToViewId(null);
+            onClone(p);
+          }}
+          onDelete={(p) => {
+            setPolicyToViewId(null);
+            onDelete(p);
+          }}
+          onEnable={(id) => enablePolicy(id)}
+          onDisable={(id) => disablePolicy(id)}
+          onSnooze={(id, until) => onSnooze(id, until)}
+          onCancelSnooze={(id) => onCancelSnooze(id)}
+          onUpdateApiKey={(id) => {
+            setPolicyToViewId(null);
+            onUpdateApiKey(id);
+          }}
+          isStateLoading={
+            (isEnabling && enableVariables === policyToView.id) ||
+            (isDisabling && disableVariables === policyToView.id)
+          }
+        />
+      )}
     </>
   );
 };
