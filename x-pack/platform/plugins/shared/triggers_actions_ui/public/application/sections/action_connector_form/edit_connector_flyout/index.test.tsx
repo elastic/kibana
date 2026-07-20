@@ -7,16 +7,16 @@
 
 import React, { lazy } from 'react';
 
-import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor, act, screen } from '@testing-library/react';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
+import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import EditConnectorFlyout from '.';
 import type { ActionConnector, GenericValidationResult } from '../../../../types';
 import { EditConnectorTabs } from '../../../../types';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
-import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const updateConnectorResponse = {
   connector_type_id: 'test',
@@ -365,6 +365,38 @@ describe('EditConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
       expect(getByText(TECH_PREVIEW_LABEL)).toBeInTheDocument();
+    });
+
+    it('does not show a docs link when the connector type has no docsUrl', async () => {
+      const { queryByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(queryByTestId('edit-connector-flyout-header-docs-link')).not.toBeInTheDocument();
+    });
+
+    it('shows a docs link when the connector type has a docsUrl', async () => {
+      const connectorDocsUrl =
+        'https://www.elastic.co/docs/reference/kibana/connectors-kibana/test-action-type';
+      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, docsUrl: connectorDocsUrl });
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(getByTestId('edit-connector-flyout-header-docs-link')).toHaveAttribute(
+        'href',
+        connectorDocsUrl
+      );
     });
   });
 
@@ -749,50 +781,5 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
       expect(await screen.findByTestId('testConnectorTab')).toBeEnabled();
     });
-  });
-});
-
-describe('is spec connector', () => {
-  let appMockRenderer: AppMockRenderer;
-  const onClose = jest.fn();
-  const onConnectorUpdated = jest.fn();
-
-  const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
-    actionConnectorFields: lazy(() => import('../connector_mock')),
-    validateParams: (): Promise<GenericValidationResult<unknown>> => {
-      const validationResult = { errors: {} };
-      return Promise.resolve(validationResult);
-    },
-  });
-
-  const actionTypeRegistry = actionTypeRegistryMock.create();
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    // Spec connectors are not registered client-side; the spec fetch path is irrelevant
-    // for this test since it only asserts tab rendering, which is gated on registry lookup.
-    actionTypeRegistry.has.mockReturnValue(false);
-    actionTypeRegistry.get.mockReturnValue(actionTypeModel);
-    appMockRenderer = createAppMockRenderer();
-    appMockRenderer.coreStart.application.capabilities = {
-      ...appMockRenderer.coreStart.application.capabilities,
-      actions: { save: true, show: true, execute: true },
-    };
-    appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
-    appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
-  });
-
-  it('should not render the test tab', async () => {
-    const { getByTestId } = appMockRenderer.render(
-      <EditConnectorFlyout
-        actionTypeRegistry={actionTypeRegistry}
-        onClose={onClose}
-        connector={connector}
-        onConnectorUpdated={onConnectorUpdated}
-      />
-    );
-
-    expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
-    expect(screen.queryByTestId('testConnectorTab')).not.toBeInTheDocument();
   });
 });

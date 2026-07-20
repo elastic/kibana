@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { TextExpansionCallOutState } from './text_expansion_callout';
@@ -21,9 +21,6 @@ export const ModelDeploymentInProgress = ({
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon color="success" type="clock" aria-hidden />
-          </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiText color="success" size="xs">
               <h3>

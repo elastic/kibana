@@ -1,10 +1,2 @@
-## New episode suffix
-{{episodeSuffix}}
-
 ## Active batch
 {{{activeBatch}}}
-{{#continuationCandidates}}
-
-## Continuation Candidates
-{{{.}}}
-{{/continuationCandidates}}

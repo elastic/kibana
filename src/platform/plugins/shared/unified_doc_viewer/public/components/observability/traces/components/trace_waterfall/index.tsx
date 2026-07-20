@@ -71,7 +71,11 @@ function InternalTraceWaterfall({
   dataView,
   ebtDetail = TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
 }: Props) {
-  const { data, discoverShared } = getUnifiedDocViewerServices();
+  const { data, apmShared } = getUnifiedDocViewerServices();
+  const FocusedTraceWaterfallWithFetching = useMemo(
+    () => apmShared.FocusedTraceWaterfallWithFetching,
+    [apmShared.FocusedTraceWaterfallWithFetching]
+  );
   const { indexes } = useDataSourcesContext();
 
   const [restoredTraceId, setRestoredTraceId] = useRestorableState('restoredTraceId', null);
@@ -122,10 +126,6 @@ function InternalTraceWaterfall({
   }, [renderReady]);
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
-
-  const FocusedTraceWaterfall = discoverShared.features.registry.getById(
-    'observability-focused-trace-waterfall'
-  )?.render;
 
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.apm.traces,
@@ -252,8 +252,6 @@ function InternalTraceWaterfall({
     [ebtDetail, openInDiscoverSectionAction, setShowFullScreenWaterfall]
   );
 
-  if (!FocusedTraceWaterfall) return null;
-
   return (
     <>
       {showFullScreenWaterfall && renderReady ? (
@@ -307,7 +305,7 @@ function InternalTraceWaterfall({
             }
           `}
         >
-          <FocusedTraceWaterfall
+          <FocusedTraceWaterfallWithFetching
             traceId={traceId}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}

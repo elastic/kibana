@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt, offsetRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
 
 interface MobileStatsTimeseries {
   x: number;
@@ -28,18 +28,17 @@ export interface MobilePeriodStats {
 
 export const mobileStatsRoute = defineRoute<MobilePeriodStats>()({
   endpoint: 'GET /internal/apm/mobile-services/{serviceName}/stats',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
+  params: z.object({
+    path: z.object({
+      serviceName: z.string(),
     }),
-    query: t.intersection([
-      kueryRt,
-      rangeRt,
-      environmentRt,
-      offsetRt,
-      t.partial({
-        transactionType: t.string,
-      }),
-    ]),
+    query: z
+      .object({
+        transactionType: z.string().optional(),
+      })
+      .merge(kuerySchema)
+      .merge(rangeSchema)
+      .merge(environmentSchema)
+      .merge(offsetSchema),
   }),
 });

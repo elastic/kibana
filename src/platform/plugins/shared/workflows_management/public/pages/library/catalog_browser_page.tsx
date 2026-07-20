@@ -7,24 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
 import { CatalogBrowser, useLibraryEnabled } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
-import { WorkflowsDeepLinks } from '../../deep_links';
+import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
 const libraryPageTitle = i18n.translate('workflowsManagement.libraryPage.pageTitle', {
-  defaultMessage: 'Library',
+  defaultMessage: 'Template Library',
 });
 
 const experimentalBadgeLabel = i18n.translate('workflowsManagement.libraryPage.experimentalBadge', {
   defaultMessage: 'Experimental',
 });
+
+const contributeLinkLabel = i18n.translate('workflowsManagement.libraryPage.contributeLink', {
+  defaultMessage: 'Contribute a template',
+});
+
+// The Workflow Template Library ships from `elastic/workflows`; the header
+// link takes users to the repo home so they can orient themselves before
+// opening an issue or PR (per Tinsae's feedback on the PR).
+const CONTRIBUTE_TEMPLATE_URL = 'https://github.com/elastic/workflows';
 
 /**
  * Workflow Template Library catalog page (`/app/workflows/library`). The
@@ -38,10 +49,38 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
 
   useWorkflowsBreadcrumbs(libraryPageTitle);
 
+  const headerBadges = useMemo<AppHeaderBadge[]>(
+    () => [
+      {
+        label: experimentalBadgeLabel,
+        color: 'hollow',
+        'data-test-subj': 'workflowLibraryExperimentalBadge',
+      },
+    ],
+    []
+  );
+
+  const headerMenu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        {
+          id: 'contributeTemplate',
+          order: 1,
+          label: contributeLinkLabel,
+          iconType: 'logoGithub',
+          href: CONTRIBUTE_TEMPLATE_URL,
+          target: '_blank',
+          testId: 'workflowLibraryContributeLink',
+        },
+      ],
+    }),
+    []
+  );
+
   const handleSelect = useCallback(
     (template: Template) => {
       application.navigateToApp(PLUGIN_ID, {
-        deepLinkId: WorkflowsDeepLinks.library,
+        deepLinkId: WorkflowsPageName.library,
         path: template.slug,
       });
     },
@@ -61,23 +100,7 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
       data-test-subj="workflowLibraryCatalogBrowserPage"
       restrictWidth={false}
     >
-      <EuiPageTemplate.Header
-        bottomBorder
-        pageTitle={
-          <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
-            <EuiFlexItem grow={false}>{libraryPageTitle}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="hollow"
-                iconType="flask"
-                data-test-subj="workflowLibraryExperimentalBadge"
-              >
-                {experimentalBadgeLabel}
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      />
+      <AppHeader title={libraryPageTitle} badges={headerBadges} menu={headerMenu} />
       <EuiPageTemplate.Section paddingSize="m" grow>
         <CatalogBrowser onSelect={handleSelect} />
       </EuiPageTemplate.Section>

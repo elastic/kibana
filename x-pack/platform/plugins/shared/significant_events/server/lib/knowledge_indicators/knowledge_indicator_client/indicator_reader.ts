@@ -165,6 +165,7 @@ export class IndicatorReader {
       ruleUnbacked?: RuleUnbackedFilter;
       queryIds?: string[];
       minSeverityScore?: number;
+      includeExpired?: boolean;
     }
   ): Promise<QueryLink[]> {
     const minSeverityFilter =
@@ -180,6 +181,7 @@ export class IndicatorReader {
 
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
+      filters?.includeExpired ? undefined : IS_NOT_EXPIRED,
       ruleUnbackedPostGroupingWhere(filters?.ruleUnbacked ?? 'exclude'),
       minSeverityFilter
     );
@@ -188,8 +190,14 @@ export class IndicatorReader {
     return docs.filter(isStoredQueryKnowledgeIndicator).map(fromStoredQuery);
   }
 
-  async getStreamToQueryLinksMap(streamNames: string[]): Promise<Record<string, QueryLink[]>> {
-    const links = await this.getQueryLinks(streamNames, { ruleUnbacked: 'include' });
+  async getStreamToQueryLinksMap(
+    streamNames: string[],
+    options: { includeExpired?: boolean } = {}
+  ): Promise<Record<string, QueryLink[]>> {
+    const links = await this.getQueryLinks(streamNames, {
+      ruleUnbacked: 'include',
+      includeExpired: options.includeExpired,
+    });
     const result: Record<string, QueryLink[]> = {};
     for (const name of streamNames) {
       result[name] = [];
@@ -203,9 +211,17 @@ export class IndicatorReader {
     return result;
   }
 
-  async bulkGetQueriesByIds(stream: string, ids: string[]): Promise<QueryLink[]> {
+  async bulkGetQueriesByIds(
+    stream: string,
+    ids: string[],
+    options: { includeExpired?: boolean } = {}
+  ): Promise<QueryLink[]> {
     if (ids.length === 0) return [];
-    return this.getQueryLinks([stream], { queryIds: ids, ruleUnbacked: 'include' });
+    return this.getQueryLinks([stream], {
+      queryIds: ids,
+      ruleUnbacked: 'include',
+      includeExpired: options.includeExpired,
+    });
   }
 
   async getRuleBackedQueryLinks(): Promise<QueryLink[]> {
@@ -237,6 +253,7 @@ export class IndicatorReader {
 
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
+      IS_NOT_EXPIRED,
       esql.exp`\`query.rule_backed\` == false`,
       esql.exp`\`query.query_type\` != ${esql.str(QUERY_TYPE_STATS)}`,
       minSeverityFilter

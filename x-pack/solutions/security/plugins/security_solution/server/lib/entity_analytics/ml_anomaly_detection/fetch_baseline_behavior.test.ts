@@ -46,6 +46,7 @@ describe('fetchBaselineBehavior', () => {
     jobName: null,
     threatTactics: [],
     threatTechniques: [],
+    hasThreatTactics: false,
     ...overrides,
   });
 

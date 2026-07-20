@@ -18,7 +18,7 @@ page_description: |
   {{kib}} relies on three high-level entities to set the logging service: appenders, loggers, and root. These can be configured in the `logging` namespace in `kibana.yml`.
 
   * Appenders define where log messages are displayed (stdout or console) and their layout (`pattern` or `json`). They also allow you to specify if you want the logs stored and, if so, where (file on the disk), or shipped to an OpenTelemetry (OTLP) endpoint.
-  * Loggers define what logging settings, such as the level of verbosity and the appenders, to apply to a particular context. Each log entry context provides information about the service or plugin that emits it and any of its sub-parts, for example, `metrics.ops` or `elasticsearch.query`.
+  * Loggers define what logging settings, such as the level of verbosity, appenders, and optional meta filters, to apply to a particular context. Each log entry context provides information about the service or plugin that emits it and any of its sub-parts, for example, `metrics.ops` or `elasticsearch.query`.
   * Root is a logger that applies to all the log entries in {{kib}}.
 
   For details on audit logging settings, refer to the [{{kib}} security settings](./security-settings.md#audit-logging-settings).
@@ -365,6 +365,73 @@ groups:
         datatype: string
         applies_to:
           stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.loggers[].<logger>.filters
+        description: |
+          Optional list of meta filters for this logger context. Each filter temporarily lowers the effective log level for records whose `meta` matches all configured key-value predicates, so you can enable verbose logging for a subset of traffic without raising the logger's nominal `level`.
+
+          At most, 10 filters are allowed per logger. Omit the setting or set it to `[]` to inherit filters from the nearest ancestor logger (same inheritance pattern as `appenders`). Set `filters: null` to opt out of inherited filters without defining your own.
+
+          For example, to keep most alerting logs at `warn`, but enable `debug` for ES|QL rules when plugins emit `labels.ruleType` in log meta:
+
+          ```yaml
+          logging:
+            loggers:
+              - name: plugins.alerting
+                level: warn
+                filters:
+                  - type: meta
+                    match:
+                      labels.ruleType: esql
+                    level: debug
+          ```
+
+          Matching uses strict equality (`===`). A string `"3"` in config does not match numeric `3` in meta. Filter paths support nested meta (`labels.ruleType`) and flat top-level keys (`'labels.ruleType'`). Filters only affect records that include matching meta at the log call site. They do not change `isLevelEnabled` checks.
+
+          Meta filters apply inside {{kib}} before log records are written to appenders. Collection and shipping (Filebeat, Elastic Agent, or OpenTelemetry) only see records that already passed the filter.
+        datatype: array
+        applies_to:
+          stack: ga 9.6
+          self: ga
+          ech: unavailable
+
+      - setting: logging.loggers[].<logger>.filters[].type
+        description: |
+          Filter type. Only `meta` is supported.
+        datatype: enum
+        options:
+          - option: meta
+        applies_to:
+          stack: ga 9.6
+          self: ga
+          ech: unavailable
+
+      - setting: logging.loggers[].<logger>.filters[].match
+        description: |
+          Map of key-value predicates. Every entry must match the log record's `meta` for the filter to apply. Keys are dot-notation paths into nested meta (for example, `labels.ruleType` or `labels.actionId`). Values may be strings, numbers, or booleans. Each `match` object can have up to 10 keys, string keys can contain up to 256 characters, and string values can contain up to 1024 characters.
+        datatype: object
+        applies_to:
+          stack: ga 9.6
+          self: ga
+          ech: unavailable
+
+      - setting: logging.loggers[].<logger>.filters[].level
+        description: |
+          Effective minimum log level for records whose meta satisfies `match`. Must be more permissive (more verbose) than the logger's nominal `level` to have any effect. Required.
+        datatype: enum
+        options:
+          - option: all
+          - option: fatal
+          - option: error
+          - option: warn
+          - option: info
+          - option: debug
+          - option: trace
+          - option: off
+        applies_to:
+          stack: ga 9.6
           self: ga
           ech: unavailable
 

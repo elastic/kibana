@@ -34,7 +34,7 @@ export const ConnectToProject = ({
           <EuiText size="s">
             <strong>
               {i18n.translate('vectordbOnboarding.pathSelection.connectLabel', {
-                defaultMessage: 'Connect to your project:',
+                defaultMessage: 'Project endpoint:',
               })}
             </strong>
           </EuiText>

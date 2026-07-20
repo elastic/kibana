@@ -20,8 +20,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingChart, useEuiTheme } from
 import React from 'react';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { unit } from '@kbn/apm-common';
 import type { Coordinate } from '../../../../../typings/timeseries';
-import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { APM_DOTTED_LINE_STYLE, splitSeriesAtNullGaps } from '../utils/timeseries_gap_handling';
 

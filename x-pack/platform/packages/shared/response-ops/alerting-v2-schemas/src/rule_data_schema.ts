@@ -390,7 +390,7 @@ export const createRuleDataBaseSchema = z
     grouping: groupingSchema.optional(),
     artifacts: z.array(artifactSchema).max(100).optional(),
   })
-  .strip();
+  .strict();
 
 /** Cross-field validation predicates — shared between the CRUD API and the manage_rule tool. */
 
@@ -539,7 +539,7 @@ export const updateRuleDataSchema = z
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
-  .strip()
+  .strict()
   .check((ctx) => {
     if (ctx.value.no_data_strategy === noDataStrategy.emit) {
       ctx.issues.push({

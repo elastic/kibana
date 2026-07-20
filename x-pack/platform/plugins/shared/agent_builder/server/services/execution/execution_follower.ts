@@ -16,7 +16,8 @@ import {
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from './persistence';
 import {
-  FOLLOW_EXECUTION_IDLE_TIMEOUT_MS,
+  FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS,
+  FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS,
   FOLLOW_EXECUTION_TIMEOUT_MS,
   FOLLOW_POLL_INTERVAL_MS,
   FOLLOW_TERMINAL_READ_MAX_RETRIES,
@@ -85,8 +86,10 @@ async function* pollExecutionEvents(
 ): AsyncGenerator<ChatEvent> {
   let lastEventIndex = since ?? 0;
   let lastStatus: ExecutionStatus | undefined;
+  let lastHeartbeat: string | undefined;
+  let hasStartedRunning = false;
   const startTime = Date.now();
-  let lastActivityTime = startTime;
+  let lastLivenessTime = startTime;
 
   while (true) {
     const now = Date.now();
@@ -97,28 +100,40 @@ async function* pollExecutionEvents(
         `Execution ${executionId} timed out: no terminal status reached within ${FOLLOW_EXECUTION_TIMEOUT_MS}ms`
       );
     }
-    if (now - lastActivityTime > FOLLOW_EXECUTION_IDLE_TIMEOUT_MS) {
+    if (hasStartedRunning) {
+      if (now - lastLivenessTime > FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS) {
+        throw createInternalError(
+          `Execution ${executionId} timed out: no heartbeat for ${FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS}ms`
+        );
+      }
+    } else if (now - lastLivenessTime > FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS) {
       throw createInternalError(
-        `Execution ${executionId} timed out: no activity for ${FOLLOW_EXECUTION_IDLE_TIMEOUT_MS}ms`
+        `Execution ${executionId} timed out: not claimed by a worker within ${FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS}ms`
       );
     }
 
-    // 1. Lightweight peek: status + event count (no events payload)
+    // 1. Lightweight peek: status + event count + last heartbeat (no events payload)
     const peek = await executionClient.peek(executionId);
     if (!peek) {
       throw new Error(`Execution ${executionId} not found`);
     }
 
-    const { status, error, eventCount } = peek;
+    const { status, error, eventCount, lastHeartbeat: heartbeat } = peek;
 
-    // 2. Fetch new events only if the count has increased
+    // 2. Advancing heartbeat is a liveness signal
+    if (heartbeat !== undefined && heartbeat !== lastHeartbeat) {
+      lastHeartbeat = heartbeat;
+      lastLivenessTime = Date.now();
+    }
+
+    // 3. Fetch new events only if the count has increased
     let receivedRoundComplete = false;
     const hasNewEvents = eventCount > lastEventIndex;
     if (hasNewEvents) {
       const { events: newEvents } = await executionClient.readEvents(executionId, lastEventIndex);
 
       if (newEvents.length > 0) {
-        lastActivityTime = Date.now();
+        lastLivenessTime = Date.now();
       }
       for (const event of newEvents) {
         yield event;
@@ -129,13 +144,17 @@ async function* pollExecutionEvents(
       lastEventIndex += newEvents.length;
     }
 
-    // 3. Track status changes for idle timeout
+    // 4. Status changes also count as liveness
     if (status !== lastStatus) {
-      lastActivityTime = Date.now();
+      lastLivenessTime = Date.now();
       lastStatus = status;
     }
 
-    // 4. Handle terminal statuses
+    if (status === ExecutionStatus.running) {
+      hasStartedRunning = true;
+    }
+
+    // 5. Handle terminal statuses
     if (status === ExecutionStatus.failed) {
       throw error
         ? createAgentBuilderError(error.code, error.message, error.meta)
@@ -153,7 +172,7 @@ async function* pollExecutionEvents(
       return;
     }
 
-    // 5. Not terminal yet — wait before next poll
+    // 6. Not terminal yet — wait before next poll
     await delay(FOLLOW_POLL_INTERVAL_MS);
   }
 }

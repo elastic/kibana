@@ -65,10 +65,15 @@ describe('createVegaGraph', () => {
     // without a REFERENCE EXAMPLES block. Individual tests override this.
     selectInvoke = jest.fn().mockResolvedValue({ exampleIds: [] });
     withStructuredOutput = jest.fn(() => ({ invoke: selectInvoke }));
+    // The default and low-effort models share a connector so the default-model
+    // fallback in `generateVisualizationEsql` stays out of these tests.
+    const scopedModel = {
+      connector: { connectorId: 'default-connector' },
+      chatModel: { invoke, withStructuredOutput },
+    };
     modelProvider = {
-      getDefaultModel: jest.fn().mockResolvedValue({
-        chatModel: { invoke, withStructuredOutput },
-      }),
+      getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
+      selectModel: jest.fn().mockResolvedValue(scopedModel),
     } as unknown as ModelProvider;
     mockedGenerateEsql.mockResolvedValue({ query: GENERATED_ESQL } as Awaited<
       ReturnType<typeof generateEsql>
@@ -92,22 +97,51 @@ describe('createVegaGraph', () => {
       currentAttempt: 0,
       actions: [],
       spec: null,
+      title: null,
       error: null,
     });
   };
 
   it('generates ES|QL then authors and normalizes a spec', async () => {
-    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar', encoding: { x: { field: 'status' } } }));
+    invoke.mockResolvedValue(
+      asCodeBlock({
+        title: 'Counts by status',
+        spec: { mark: 'bar', encoding: { x: { field: 'status' } } },
+      })
+    );
 
     const state = await run();
 
     expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
     expect(state.error).toBeNull();
+    expect(state.title).toBe('Counts by status');
     const spec = JSON.parse(state.spec!);
     expect(spec.$schema).toBe(VEGA_LITE_SCHEMA);
-    expect(spec.data).toEqual({ url: { '%type%': 'esql', query: GENERATED_ESQL } });
+    expect(spec.data).toEqual({
+      url: { '%type%': 'esql', '%context%': true, query: GENERATED_ESQL },
+    });
     expect(spec.mark).toBe('bar');
     expect(state.esqlQuery).toBe(GENERATED_ESQL);
+  });
+
+  it('keeps panel title out of a faceted Vega-Lite nested spec', async () => {
+    invoke.mockResolvedValue(
+      asCodeBlock({
+        title: 'Latency by region',
+        spec: {
+          facet: { field: 'region', type: 'nominal' },
+          spec: { mark: 'bar', encoding: { x: { field: 'latency' } } },
+        },
+      })
+    );
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.title).toBe('Latency by region');
+    const spec = JSON.parse(state.spec!);
+    expect(spec.facet).toEqual({ field: 'region', type: 'nominal' });
+    expect(spec.spec.mark).toBe('bar');
+    expect(spec).not.toHaveProperty('title');
   });
 
   it('injects the model-selected reference example into the authoring prompt', async () => {
@@ -136,7 +170,7 @@ describe('createVegaGraph', () => {
     expect(selectInvoke).toHaveBeenCalledTimes(1);
   });
 
-  it('does not select reference examples when ES|QL resolution fails', async () => {
+  it('does not author a spec when ES|QL resolution fails, despite selecting examples in parallel', async () => {
     mockedGenerateEsql.mockResolvedValue({
       query: 'FROM logs-*',
       error: 'verification_exception: boom',
@@ -144,7 +178,7 @@ describe('createVegaGraph', () => {
 
     await run();
 
-    expect(selectInvoke).not.toHaveBeenCalled();
+    expect(selectInvoke).toHaveBeenCalledTimes(1);
     expect(invoke).not.toHaveBeenCalled();
   });
 
@@ -228,13 +262,14 @@ describe('createVegaGraph', () => {
 
   it('rejects an authored spec with no renderable view and retries', async () => {
     invoke
-      .mockResolvedValueOnce(asCodeBlock({ title: 'no mark here' }))
-      .mockResolvedValueOnce(asCodeBlock({ mark: 'arc' }));
+      .mockResolvedValueOnce(asCodeBlock({ title: 'no mark here', spec: { description: 'empty' } }))
+      .mockResolvedValueOnce(asCodeBlock({ title: 'Arc chart', spec: { mark: 'arc' } }));
 
     const state = await run({ esqlQuery: PROVIDED_ESQL });
 
     expect(invoke).toHaveBeenCalledTimes(2);
     expect(state.error).toBeNull();
+    expect(state.title).toBe('Arc chart');
     expect(JSON.parse(state.spec!).mark).toBe('arc');
   });
 
@@ -336,5 +371,48 @@ describe('createVegaGraph', () => {
     expect(state.spec).toBeNull();
     expect(state.error).toEqual(expect.any(String));
     expect(invoke).toHaveBeenCalledTimes(3);
+  });
+
+  describe('render warnings', () => {
+    it('hands every warning to the agent for one review pass, then finalizes its result', async () => {
+      invoke
+        .mockResolvedValueOnce(asCodeBlock({ mark: 'text', encoding: { x2: { value: 1 } } }))
+        .mockResolvedValueOnce(asCodeBlock({ mark: 'text', encoding: { x: { value: 1 } } }));
+      mockedValidateVegaSpec
+        .mockResolvedValueOnce({
+          warnings: [
+            'x2 dropped as it is incompatible with "text".',
+            'Infinite extent for field "count": [Infinity, -Infinity]',
+          ],
+        })
+        .mockResolvedValueOnce({ warnings: [] });
+
+      const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+      expect(invoke).toHaveBeenCalledTimes(2);
+      expect(state.error).toBeNull();
+      // Every warning — not a pre-filtered subset — is fed back, and the model is
+      // told to judge each one for itself.
+      const secondPrompt = JSON.stringify(invoke.mock.calls[1][0]);
+      expect(secondPrompt).toContain('x2 dropped as it is incompatible');
+      expect(secondPrompt).toContain('Infinite extent for field');
+      expect(secondPrompt).toContain('decide for yourself');
+    });
+
+    it('makes a single review pass and accepts the spec when the agent keeps its warnings', async () => {
+      // The model returns the same warning-bearing spec every time (it judged the
+      // warnings harmless / unavoidable). We must not loop the whole budget.
+      invoke.mockResolvedValue(asCodeBlock({ mark: 'text', encoding: { x2: { value: 1 } } }));
+      mockedValidateVegaSpec.mockResolvedValue({
+        warnings: ['Infinite extent for field "count": [Infinity, -Infinity]'],
+      });
+
+      const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+      // One initial authoring pass + one warning-review pass, then we accept.
+      expect(invoke).toHaveBeenCalledTimes(2);
+      expect(state.error).toBeNull();
+      expect(state.spec).not.toBeNull();
+    });
   });
 });

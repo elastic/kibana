@@ -1,0 +1,1 @@
+Confirm or refute incident hypotheses using the knowledge base. Unlocks search_knowledge_indicators and execute_esql. Provides the search-first protocol, KI type guidance, confirmation-query recipe, cause_kis derivation (including topology filter), dependency_edges/infra_components construction, and shared array field formats. Load when investigating what is failing and why.

@@ -28,8 +28,10 @@ export {
   apiClientFixture,
   coreWorkerFixtures,
   esArchiverFixture,
+  networkFixture,
   createPlaywrightConfig,
   createLazyPageObject,
+  extendPlaywrightPage,
 } from './src/playwright';
 
 // Playwright integration
@@ -47,6 +49,11 @@ export * from './src/playwright/ui_components';
 // Page-object wrappers and helpers for shared Kibana surfaces.
 export {
   ContentListWrapper,
+  DataGrid,
+  DiscoverApp,
+  FilterBar,
+  QueryBar,
+  UnifiedTabs,
   buildContentListSearch,
   buildContentListUrlRegex,
   ListingTable,
@@ -72,6 +79,7 @@ export type {
   ApiClientOptions,
   ApiClientResponse,
   BrowserAuthFixture,
+  NetworkFixture,
   RequestAuthFixture,
   SamlAuth,
   ScoutSpaceParallelFixture,
@@ -100,3 +108,7 @@ export type {
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from 'playwright/test';
+
+// Config-set constants — exported so test files can import instead of redeclaring.
+export { AUDIT_LOG_PATH } from './src/servers/configs/config_sets/security_audit/shared';
+export { OTEL_RECEIVER_PORT } from './src/servers/configs/config_sets/security_audit_otel/shared';

@@ -93,6 +93,24 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(result).toHaveProperty('schema');
   });
 
+  it('returns isTestable true when the spec opts in to testing', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.abuseipdb',
+      configurationUtilities,
+    });
+    expect(result).toHaveProperty('isTestable', true);
+  });
+
+  it('returns isTestable false when the spec does not opt in to testing', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.alienvault-otx',
+      configurationUtilities,
+    });
+    expect(result).toHaveProperty('isTestable', false);
+  });
+
   it('rejects with 404 when the connector type has no spec', async () => {
     await expect(
       getConnectorSpecAsJsonSchema({
