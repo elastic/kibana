@@ -130,7 +130,7 @@ describe('ApmIndices', () => {
 
   it('surfaces the backend message in the danger toast when save fails', async () => {
     saveApmIndices.mockRejectedValue({
-      body: { message: 'error must be 1000 characters or fewer' },
+      body: { message: 'error must be 2048 characters or fewer' },
       message: 'Bad Request',
     });
 
@@ -148,7 +148,7 @@ describe('ApmIndices', () => {
     await waitFor(() => {
       expect(addDanger).toHaveBeenCalledWith(
         expect.objectContaining({
-          text: expect.stringContaining('error must be 1000 characters or fewer'),
+          text: expect.stringContaining('error must be 2048 characters or fewer'),
         })
       );
     });
