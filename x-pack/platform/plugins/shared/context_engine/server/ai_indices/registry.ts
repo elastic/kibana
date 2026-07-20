@@ -10,23 +10,18 @@ import type { AiIndexProperties } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from './service';
 import { AiIndexNotFoundError, InvalidAiIndexDestError } from './errors';
 
-interface RegistrationEntry {
-  id: string;
-  properties: AiIndexProperties;
-}
-
 export class AiIndexRegistry {
-  private readonly entries: RegistrationEntry[] = [];
+  private readonly entries = new Map<string, AiIndexProperties>();
   private started = false;
 
   register(id: string, properties: AiIndexProperties): void {
     if (this.started) {
       throw new Error('registerAiIndex called after plugin start');
     }
-    if (this.entries.some((e) => e.id === id)) {
+    if (this.entries.has(id)) {
       throw new Error(`AI index '${id}' is already registered`);
     }
-    this.entries.push({ id, properties });
+    this.entries.set(id, properties);
   }
 
   async startupRegister({
@@ -45,7 +40,7 @@ export class AiIndexRegistry {
       return;
     }
 
-    for (const { id, properties } of this.entries) {
+    for (const [id, properties] of this.entries) {
       await this.registerOne({ id, properties, aiIndexService, logger });
     }
   }
