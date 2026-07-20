@@ -37,6 +37,7 @@ import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SetupPlugins,
 } from '../../plugin_contract';
+import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
@@ -93,5 +94,7 @@ export const registerTools = (
     agentBuilder.tools.register(pciFieldMapperTool(core, logger));
   }
 
-  registerSiemReadinessTools(agentBuilder, core, logger, isServerless);
+  if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
+    registerSiemReadinessTools(agentBuilder, core, logger, isServerless);
+  }
 };

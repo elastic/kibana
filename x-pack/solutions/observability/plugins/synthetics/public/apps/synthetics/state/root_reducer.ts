@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineReducers } from '@reduxjs/toolkit';
+import { combineReducers } from 'redux-toolkit-v1';
 
 import type { MaintenanceWindowsState } from './maintenance_windows';
 import { maintenanceWindowsReducer } from './maintenance_windows';
