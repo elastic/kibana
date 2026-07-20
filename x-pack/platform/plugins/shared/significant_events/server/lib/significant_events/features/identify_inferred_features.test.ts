@@ -66,13 +66,18 @@ describe('selectPreviouslyIdentifiedFeatures', () => {
     ).toEqual(selected.map((feature) => feature.id));
   });
 
-  it('returns every feature when the window is large enough', () => {
+  it('keeps filling the window after one feature type is exhausted', () => {
     const features = [
       createFeature({ id: 'entity', type: 'entity' }),
-      createFeature({ id: 'technology', type: 'technology' }),
+      createFeature({ id: 'technology-1', type: 'technology', confidence: 90 }),
+      createFeature({ id: 'technology-2', type: 'technology', confidence: 80 }),
     ];
 
-    expect(selectPreviouslyIdentifiedFeatures(features, 100)).toHaveLength(2);
+    expect(selectPreviouslyIdentifiedFeatures(features, 3).map(({ id }) => id)).toEqual([
+      'entity',
+      'technology-1',
+      'technology-2',
+    ]);
   });
 });
 
@@ -134,6 +139,23 @@ describe('applySemanticFeatureAliases', () => {
           candidateId: 'go-opentelemetry',
           type: 'technology',
           hitIds: new Set(['different-feature']),
+        },
+      ]
+    );
+
+    expect(result.features[0]).toBe(feature);
+    expect(result.reuseCount).toBe(0);
+  });
+
+  it('does not count a candidate reusing its own id', () => {
+    const feature = createFeature({ id: 'okta' });
+    const result = applySemanticFeatureAliases(
+      [feature],
+      [
+        {
+          candidateId: 'okta',
+          type: 'technology',
+          hitIds: new Set(['okta']),
         },
       ]
     );
@@ -282,26 +304,19 @@ describe('buildTelemetry', () => {
     has_filtered_documents: true,
   };
 
-  it('zero-fills deduplication counters on failure', () => {
-    expect(buildTelemetry(context, 100, { state: 'failure' })).toEqual(
-      expect.objectContaining({
-        features_remapped: 0,
-        semantic_verify_calls: 0,
-        semantic_verify_reuses: 0,
-      })
-    );
-  });
-
-  it('zero-fills deduplication counters when canceled', () => {
-    expect(buildTelemetry(context, 100, { state: 'canceled' })).toEqual(
-      expect.objectContaining({
-        state: 'canceled',
-        features_remapped: 0,
-        semantic_verify_calls: 0,
-        semantic_verify_reuses: 0,
-      })
-    );
-  });
+  it.each(['failure', 'canceled'] as const)(
+    'zero-fills deduplication counters when %s',
+    (state) => {
+      expect(buildTelemetry(context, 100, { state })).toEqual(
+        expect.objectContaining({
+          state,
+          features_remapped: 0,
+          semantic_verify_calls: 0,
+          semantic_verify_reuses: 0,
+        })
+      );
+    }
+  );
 
   it('includes deduplication counters on success', () => {
     expect(

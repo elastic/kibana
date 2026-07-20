@@ -9,7 +9,6 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { EbtTelemetryClient } from './client';
 import {
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
 } from './constants';
 
@@ -92,43 +91,6 @@ describe('EbtTelemetryClient', () => {
             },
           },
         }
-      );
-    });
-  });
-
-  describe('trackFeaturesIdentified', () => {
-    it('tracks feature identification and deduplication telemetry', () => {
-      const event = {
-        run_id: 'run-1',
-        connector_id: 'test-connector',
-        iteration: 2,
-        docs_count: 20,
-        features_new: 3,
-        features_updated: 4,
-        features_remapped: 2,
-        semantic_verify_calls: 3,
-        semantic_verify_reuses: 1,
-        total_filters: 8,
-        filters_capped: false,
-        has_filtered_documents: true,
-        input_tokens_used: 300,
-        output_tokens_used: 150,
-        total_tokens_used: 450,
-        cached_tokens_used: 20,
-        duration_ms: 1200,
-        excluded_features_count: 6,
-        llm_ignored_count: 1,
-        code_ignored_count: 2,
-        stream_name: 'logs.test',
-        stream_type: 'wired' as const,
-        state: 'success' as const,
-      };
-
-      client.trackFeaturesIdentified(event);
-
-      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE,
-        event
       );
     });
   });

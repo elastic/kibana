@@ -97,6 +97,7 @@ describe('reconcileInferredFeatures', () => {
       allKnownFeatures: [existing],
     });
 
+    expect(result.updatedFeatures).toHaveLength(1);
     expect(result.updatedFeatures[0]).toEqual(
       expect.objectContaining({
         id: 'okta',
@@ -107,7 +108,7 @@ describe('reconcileInferredFeatures', () => {
     expect(result.remappedCount).toBe(1);
   });
 
-  it('matches a safely validated alias before falling back to fingerprints', () => {
+  it('remaps a stored alias to its canonical id', () => {
     const existing = createStoredFeature({
       id: 'opentelemetry',
       properties: { name: 'opentelemetry' },
@@ -123,8 +124,59 @@ describe('reconcileInferredFeatures', () => {
       allKnownFeatures: [existing],
     });
 
+    expect(result.updatedFeatures).toHaveLength(1);
     expect(result.updatedFeatures[0].id).toBe('opentelemetry');
     expect(result.remappedCount).toBe(1);
+  });
+
+  it.each([
+    {
+      precedence: 'exact ids over aliases',
+      raw: createRawFeature({ id: 'otel', properties: { source: 'raw' } }),
+      known: [
+        createStoredFeature({ id: 'otel', properties: { source: 'exact' } }),
+        createStoredFeature({
+          id: 'opentelemetry',
+          properties: { source: 'alias' },
+          meta: { aliases: ['otel'] },
+        }),
+      ],
+      expectedId: 'otel',
+      expectedRemappedCount: 0,
+    },
+    {
+      precedence: 'aliases over normalized ids',
+      raw: createRawFeature({ id: 'okta-3.15.0', properties: { source: 'raw' } }),
+      known: [
+        createStoredFeature({
+          id: 'okta-canonical',
+          properties: { source: 'alias' },
+          meta: { aliases: ['okta-3.15.0'] },
+        }),
+        createStoredFeature({ id: 'okta', properties: { source: 'normalized' } }),
+      ],
+      expectedId: 'okta-canonical',
+      expectedRemappedCount: 1,
+    },
+    {
+      precedence: 'normalized ids over fingerprints',
+      raw: createRawFeature({ id: 'java-1.2.3', properties: { language: 'java' } }),
+      known: [
+        createStoredFeature({ id: 'java', properties: { source: 'normalized' } }),
+        createStoredFeature({ id: 'jvm', properties: { language: 'java' } }),
+      ],
+      expectedId: 'java',
+      expectedRemappedCount: 1,
+    },
+  ])('prefers $precedence', ({ raw, known, expectedId, expectedRemappedCount }) => {
+    const result = reconcile({
+      rawFeatures: [raw],
+      allKnownFeatures: known,
+    });
+
+    expect(result.updatedFeatures).toHaveLength(1);
+    expect(result.updatedFeatures[0].id).toBe(expectedId);
+    expect(result.remappedCount).toBe(expectedRemappedCount);
   });
 
   it('picks the most recently updated candidate for a normalized match', () => {
@@ -149,7 +201,9 @@ describe('reconcileInferredFeatures', () => {
       allKnownFeatures: [older, newer],
     });
 
+    expect(result.updatedFeatures).toHaveLength(1);
     expect(result.updatedFeatures[0].id).toBe('okta-3.15.0');
+    expect(result.remappedCount).toBe(1);
   });
 
   it('does not merge exact or normalized ids across feature types', () => {

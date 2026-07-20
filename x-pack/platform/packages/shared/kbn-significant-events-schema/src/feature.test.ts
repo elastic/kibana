@@ -6,7 +6,7 @@
  */
 
 import type { BaseFeature } from './feature';
-import { mergeFeature, normalizeFeatureSlugForMatching } from './feature';
+import { computeFeatureUuid, mergeFeature, normalizeFeatureSlugForMatching } from './feature';
 
 const createFeature = ({
   id = 'okta',
@@ -59,6 +59,14 @@ describe('normalizeFeatureSlugForMatching', () => {
 
   it('returns the normalized slug when stripping would empty it', () => {
     expect(normalizeFeatureSlugForMatching('  -1.2.3  ')).toBe('-1.2.3');
+  });
+
+  it('keeps matching normalization out of UUID generation', () => {
+    const canonical = { id: 'okta', stream_name: 'logs.test' };
+    const versioned = { id: 'okta-3.15.0', stream_name: 'logs.test' };
+
+    expect(normalizeFeatureSlugForMatching(versioned.id)).toBe(canonical.id);
+    expect(computeFeatureUuid(versioned)).not.toBe(computeFeatureUuid(canonical));
   });
 });
 
