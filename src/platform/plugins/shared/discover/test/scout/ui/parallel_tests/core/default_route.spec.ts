@@ -34,7 +34,7 @@ spaceTest.describe('Discover default route', { tag: '@local-stateful-classic' },
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsViewer();
   });
 
   spaceTest.afterEach(async ({ scoutSpace }) => {
