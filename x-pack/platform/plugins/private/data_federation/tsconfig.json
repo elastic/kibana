@@ -17,7 +17,8 @@
     "@kbn/core-http-browser",
     "@kbn/cloud-plugin",
     "@kbn/shared-ux-router",
-    "@kbn/features-plugin"
+    "@kbn/features-plugin",
+    "@kbn/kibana-react-plugin"
   ],
   "exclude": [
     "target/**/*",

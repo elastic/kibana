@@ -63,7 +63,7 @@ export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
   pluginId: 'significant_events',
-  version: 10,
+  version: 11,
   billable: false,
   yaml: TRIAGE_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,

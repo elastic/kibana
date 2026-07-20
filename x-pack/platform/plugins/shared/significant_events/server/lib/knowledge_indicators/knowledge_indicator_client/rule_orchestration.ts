@@ -8,47 +8,21 @@
 import type { QueryLink } from '@kbn/significant-events-schema';
 import pLimit from 'p-limit';
 import {
-  STREAMS_RULE_CONSUMER,
-  STREAMS_ESQL_RULE_TYPE_ID,
-  type CreateRuleBody,
   type IRulesManagementClient,
-  type UpdateRuleBody,
+  type SignificantEventsRuleDefinition,
 } from './rules/rules_management_client';
 import { TIMESTAMP } from '../fields';
 import { scheduleIntervalForQuery } from '../../significant_events/rules/schedule';
 
 const RULE_INSTALL_CONCURRENCY = 10;
-const RULE_TAG = 'streams';
 
-export function toCreateRuleBody(queryLink: QueryLink): CreateRuleBody {
+export function toRuleDefinition(queryLink: QueryLink): SignificantEventsRuleDefinition {
   const { query } = queryLink;
   return {
     name: query.title,
-    consumer: STREAMS_RULE_CONSUMER,
-    alertTypeId: STREAMS_ESQL_RULE_TYPE_ID,
-    actions: [] as never[],
-    params: {
-      timestampField: TIMESTAMP,
-      query: query.esql.query,
-    },
-    enabled: true,
-    tags: [RULE_TAG, queryLink.stream_name],
-    schedule: {
-      interval: scheduleIntervalForQuery(query),
-    },
-  };
-}
-
-export function toUpdateRuleBody(queryLink: QueryLink): UpdateRuleBody {
-  const { query } = queryLink;
-  return {
-    name: query.title,
-    actions: [] as never[],
-    params: {
-      timestampField: TIMESTAMP,
-      query: query.esql.query,
-    },
-    tags: [RULE_TAG, queryLink.stream_name],
+    streamName: queryLink.stream_name,
+    timestampField: TIMESTAMP,
+    esqlQuery: query.esql.query,
     schedule: {
       interval: scheduleIntervalForQuery(query),
     },
@@ -64,10 +38,10 @@ export async function installQueries(
 
   await Promise.all([
     ...queriesToCreate.map((queryLink) =>
-      limiter(() => client.createRule(queryLink.rule_id, toCreateRuleBody(queryLink)))
+      limiter(() => client.createRule(queryLink.rule_id, toRuleDefinition(queryLink)))
     ),
     ...queriesToUpdate.map((queryLink) =>
-      limiter(() => client.updateRule(queryLink.rule_id, toUpdateRuleBody(queryLink)))
+      limiter(() => client.updateRule(queryLink.rule_id, toRuleDefinition(queryLink)))
     ),
   ]);
 }
