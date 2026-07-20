@@ -25,7 +25,7 @@ fields:
   - name: escalate
     control: TOGGLE
     label: Escalate
-    type: keyword
+    type: boolean
     metadata:
       default: false
 `;

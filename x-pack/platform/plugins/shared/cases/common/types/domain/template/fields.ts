@@ -158,6 +158,11 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
 
 export const ToggleFieldSchema = BaseFieldSchema.extend({
   control: z.literal(FieldType.TOGGLE),
+  // A toggle stores a boolean value, so its extended-field storage key is `<name>_as_boolean` and
+  // it publishes as a native `boolean` runtime field (see cases_analytics_v2 runtime_fields.ts).
+  // Overriding BaseFieldSchema's `keyword` here is what makes the analytics layer's boolean branch
+  // reachable — without it a toggle would surface as a keyword string ('true'/'false') in Lens/Discover.
+  type: z.literal('boolean'),
   metadata: z
     .object({
       default: z.boolean().optional(),

@@ -103,7 +103,7 @@ export const FIELD_DEFAULT_SNIPPETS: DefaultSnippet[] = [
       name: NAME,
       label: LABEL,
       control: FieldType.TOGGLE,
-      type: 'keyword',
+      type: 'boolean',
       metadata: { default: false },
     },
   },

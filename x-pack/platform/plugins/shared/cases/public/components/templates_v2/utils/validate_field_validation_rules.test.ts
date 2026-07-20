@@ -88,7 +88,7 @@ fields:
         regex: "2024"
   - name: escalate
     control: TOGGLE
-    type: keyword
+    type: boolean
     validation:
       pattern:
         regex: "true"`;
