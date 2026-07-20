@@ -26,13 +26,17 @@ const mockConnect = jest.fn();
 const mockClose = jest.fn();
 const mockDb = jest.fn();
 const mockCollection = jest.fn();
+const mockInsertOne = jest.fn();
+const mockUpdateOne = jest.fn();
+const mockDeleteOne = jest.fn();
+const mockMongoClientCtor = jest.fn().mockImplementation(() => ({
+  connect: mockConnect,
+  db: mockDb,
+  close: mockClose,
+}));
 
 jest.mock('mongodb', () => ({
-  MongoClient: jest.fn().mockImplementation(() => ({
-    connect: mockConnect,
-    db: mockDb,
-    close: mockClose,
-  })),
+  MongoClient: mockMongoClientCtor,
 }));
 
 // ---------------------------------------------------------------------------
@@ -41,8 +45,8 @@ jest.mock('mongodb', () => ({
 
 const mockContext = {
   client: {} as ActionContext['client'], // unused — connector uses native driver
-  config: { database: 'test_db' },
-  secrets: { connectionString: 'mongodb://localhost:27017' },
+  config: { uri: 'mongodb://localhost:27017/test_db' },
+  secrets: { username: 'testuser', password: 'testpass' },
   log: { debug: jest.fn(), error: jest.fn(), warn: jest.fn() },
 } as unknown as ActionContext;
 
@@ -65,17 +69,28 @@ beforeEach(() => {
     command: mockCommand,
   });
 
-  // collection() returns an object with find/aggregate/countDocuments
+  // collection() returns an object with find/aggregate/countDocuments/insertOne/updateOne/deleteOne
   mockCollection.mockReturnValue({
     find: jest.fn().mockReturnValue({ toArray: mockFindToArray }),
     aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
     countDocuments: mockCountDocuments,
+    insertOne: mockInsertOne,
+    updateOne: mockUpdateOne,
+    deleteOne: mockDeleteOne,
   });
 
   mockFindToArray.mockResolvedValue([]);
   mockAggregateToArray.mockResolvedValue([]);
   mockCountDocuments.mockResolvedValue(0);
   mockListCollectionsToArray.mockResolvedValue([]);
+  mockInsertOne.mockResolvedValue({ insertedId: 'abc123', acknowledged: true });
+  mockUpdateOne.mockResolvedValue({
+    matchedCount: 1,
+    modifiedCount: 1,
+    upsertedId: null,
+    acknowledged: true,
+  });
+  mockDeleteOne.mockResolvedValue({ deletedCount: 1, acknowledged: true });
 });
 
 // ---------------------------------------------------------------------------
@@ -88,15 +103,21 @@ describe('MongoDBConnector metadata and wiring', () => {
     expect(spec).toBe(MongoDBConnector);
   });
 
-  it('all actions are isTool:true', () => {
+  it('read/discovery actions are isTool:true', () => {
     expect(MongoDBConnector.actions.find.isTool).toBe(true);
     expect(MongoDBConnector.actions.aggregate.isTool).toBe(true);
     expect(MongoDBConnector.actions.count.isTool).toBe(true);
     expect(MongoDBConnector.actions.listCollections.isTool).toBe(true);
   });
 
-  it('uses mongodb_connection_string auth', () => {
-    expect(MongoDBConnector.auth?.types).toEqual(['mongodb_connection_string']);
+  it('write actions are isTool:false (workflow-only, not exposed to agents)', () => {
+    expect(MongoDBConnector.actions.insertOne.isTool).toBe(false);
+    expect(MongoDBConnector.actions.updateOne.isTool).toBe(false);
+    expect(MongoDBConnector.actions.deleteOne.isTool).toBe(false);
+  });
+
+  it('uses basic auth', () => {
+    expect(MongoDBConnector.auth?.types).toEqual(['basic']);
   });
 
   it('supports workflows and agentBuilder', () => {
@@ -115,21 +136,87 @@ describe('MongoDBConnector metadata and wiring', () => {
 // ---------------------------------------------------------------------------
 
 describe('MongoDBConnector schema', () => {
-  it('only contains database in config schema (connectionString is in auth secrets)', () => {
+  it('only contains uri in config schema (credentials are in basic auth secrets)', () => {
     const { schema } = MongoDBConnector;
     expect(schema).toBeDefined();
     if (!schema) return;
-    const result = schema.parse({ database: 'mydb' });
-    expect(result.database).toBe('mydb');
-    // connectionString is NOT in the config schema — it lives in auth secrets
-    expect(Object.keys(result)).toEqual(['database']);
+    const result = schema.parse({ uri: 'mongodb://localhost:27017/mydb' });
+    expect(result.uri).toBe('mongodb://localhost:27017/mydb');
+    // username/password are NOT in the config schema — they live in basic auth secrets
+    expect(Object.keys(result)).toEqual(['uri']);
   });
 
-  it('rejects missing database', () => {
+  it('rejects missing uri', () => {
     const { schema } = MongoDBConnector;
     expect(schema).toBeDefined();
     if (!schema) return;
     expect(() => schema.parse({})).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Connection options (auth + authSource)
+// ---------------------------------------------------------------------------
+
+describe('connection options', () => {
+  it('passes username/password from secrets as MongoClient auth', async () => {
+    await MongoDBConnector.actions.count.handler(mockContext, { collection: 'orders' });
+
+    expect(mockMongoClientCtor).toHaveBeenCalledWith(
+      'mongodb://localhost:27017/test_db',
+      expect.objectContaining({ auth: { username: 'testuser', password: 'testpass' } })
+    );
+  });
+
+  it('defaults authSource to admin when the URI omits it', async () => {
+    await MongoDBConnector.actions.count.handler(mockContext, { collection: 'orders' });
+
+    expect(mockMongoClientCtor).toHaveBeenCalledWith(
+      'mongodb://localhost:27017/test_db',
+      expect.objectContaining({ authSource: 'admin' })
+    );
+  });
+
+  it('does not override authSource when the URI already specifies one', async () => {
+    const ctxWithAuthSource = {
+      ...mockContext,
+      config: { uri: 'mongodb://localhost:27017/test_db?authSource=other_db' },
+    } as unknown as ActionContext;
+
+    await MongoDBConnector.actions.count.handler(ctxWithAuthSource, { collection: 'orders' });
+
+    const [, options] = mockMongoClientCtor.mock.calls[0];
+    expect(options.authSource).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Database resolution
+// ---------------------------------------------------------------------------
+
+describe('database resolution', () => {
+  it('uses the database from the URI path when action input omits it', async () => {
+    await MongoDBConnector.actions.count.handler(mockContext, { collection: 'orders' });
+    expect(mockDb).toHaveBeenCalledWith('test_db');
+  });
+
+  it('uses the database from action input when provided, overriding the URI path', async () => {
+    await MongoDBConnector.actions.count.handler(mockContext, {
+      collection: 'orders',
+      database: 'other_db',
+    });
+    expect(mockDb).toHaveBeenCalledWith('other_db');
+  });
+
+  it('throws when neither action input nor the URI path provides a database', async () => {
+    const ctxWithoutDbPath = {
+      ...mockContext,
+      config: { uri: 'mongodb://localhost:27017' },
+    } as unknown as ActionContext;
+
+    await expect(
+      MongoDBConnector.actions.count.handler(ctxWithoutDbPath, { collection: 'orders' })
+    ).rejects.toThrow('database name is required');
   });
 });
 
@@ -199,6 +286,9 @@ describe('find', () => {
       find: jest.fn().mockReturnValue({ toArray: mockFindToArray }),
       aggregate: jest.fn(),
       countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
     };
     mockCollection.mockReturnValue(collectionInstance);
 
@@ -225,6 +315,9 @@ describe('find', () => {
       find: jest.fn().mockReturnValue({ toArray: mockFindToArray }),
       aggregate: jest.fn(),
       countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
     };
     mockCollection.mockReturnValue(collectionInstance);
 
@@ -258,6 +351,9 @@ describe('aggregate', () => {
       find: jest.fn(),
       aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
     };
     mockCollection.mockReturnValue(collectionInstance);
 
@@ -280,6 +376,9 @@ describe('aggregate', () => {
       find: jest.fn(),
       aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
     };
     mockCollection.mockReturnValue(collectionInstance);
 
@@ -300,6 +399,9 @@ describe('aggregate', () => {
       find: jest.fn(),
       aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
       countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
     };
     mockCollection.mockReturnValue(collectionInstance);
 
@@ -358,6 +460,9 @@ describe('count', () => {
       find: jest.fn(),
       aggregate: jest.fn(),
       countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
     };
     mockCollection.mockReturnValue(collectionInstance);
 
@@ -377,11 +482,129 @@ describe('count', () => {
       find: jest.fn(),
       aggregate: jest.fn(),
       countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
     };
     mockCollection.mockReturnValue(collectionInstance);
 
     await MongoDBConnector.actions.count.handler(mockContext, { collection: 'orders' });
     expect(mockCountDocuments).toHaveBeenCalledWith({});
+  });
+});
+
+// ---------------------------------------------------------------------------
+// insertOne
+// ---------------------------------------------------------------------------
+
+describe('insertOne', () => {
+  it('inserts a document and returns the inserted id', async () => {
+    mockInsertOne.mockResolvedValue({ insertedId: 'abc123', acknowledged: true });
+
+    const result = await MongoDBConnector.actions.insertOne.handler(mockContext, {
+      collection: 'orders',
+      document: { status: 'pending' },
+    });
+
+    expect(mockCollection).toHaveBeenCalledWith('orders');
+    expect(mockInsertOne).toHaveBeenCalledWith({ status: 'pending' });
+    expect(result).toEqual({ insertedId: 'abc123', acknowledged: true });
+  });
+
+  it('closes the client even if insertOne throws', async () => {
+    mockInsertOne.mockRejectedValue(new Error('write error'));
+    await expect(
+      MongoDBConnector.actions.insertOne.handler(mockContext, {
+        collection: 'orders',
+        document: {},
+      })
+    ).rejects.toThrow('write error');
+    expect(mockClose).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateOne
+// ---------------------------------------------------------------------------
+
+describe('updateOne', () => {
+  it('updates a document matching the filter', async () => {
+    mockUpdateOne.mockResolvedValue({
+      matchedCount: 1,
+      modifiedCount: 1,
+      upsertedId: null,
+      acknowledged: true,
+    });
+
+    const result = await MongoDBConnector.actions.updateOne.handler(mockContext, {
+      collection: 'orders',
+      filter: { _id: 'abc' },
+      update: { $set: { status: 'shipped' } },
+    });
+
+    expect(mockUpdateOne).toHaveBeenCalledWith(
+      { _id: 'abc' },
+      { $set: { status: 'shipped' } },
+      { upsert: false }
+    );
+    expect(result).toEqual({
+      matchedCount: 1,
+      modifiedCount: 1,
+      upsertedId: null,
+      acknowledged: true,
+    });
+  });
+
+  it('passes upsert through when set', async () => {
+    mockUpdateOne.mockResolvedValue({
+      matchedCount: 0,
+      modifiedCount: 0,
+      upsertedId: 'new-id',
+      acknowledged: true,
+    });
+
+    const result = await MongoDBConnector.actions.updateOne.handler(mockContext, {
+      collection: 'orders',
+      filter: { _id: 'abc' },
+      update: { $set: { status: 'shipped' } },
+      upsert: true,
+    });
+
+    expect(mockUpdateOne).toHaveBeenCalledWith(
+      { _id: 'abc' },
+      { $set: { status: 'shipped' } },
+      { upsert: true }
+    );
+    expect(result.upsertedId).toBe('new-id');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// deleteOne
+// ---------------------------------------------------------------------------
+
+describe('deleteOne', () => {
+  it('deletes a document matching the filter', async () => {
+    mockDeleteOne.mockResolvedValue({ deletedCount: 1, acknowledged: true });
+
+    const result = await MongoDBConnector.actions.deleteOne.handler(mockContext, {
+      collection: 'orders',
+      filter: { _id: 'abc' },
+    });
+
+    expect(mockDeleteOne).toHaveBeenCalledWith({ _id: 'abc' });
+    expect(result).toEqual({ deletedCount: 1, acknowledged: true });
+  });
+
+  it('closes the client even if deleteOne throws', async () => {
+    mockDeleteOne.mockRejectedValue(new Error('write error'));
+    await expect(
+      MongoDBConnector.actions.deleteOne.handler(mockContext, {
+        collection: 'orders',
+        filter: {},
+      })
+    ).rejects.toThrow('write error');
+    expect(mockClose).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -400,6 +623,13 @@ describe('test handler', () => {
     const result = await testHandler.handler(mockContext);
     expect(result.ok).toBe(true);
     expect(result.message).toContain('Connected');
+  });
+
+  it('pings the admin database regardless of the configured URI path', async () => {
+    expect(testHandler).toBeDefined();
+    if (!testHandler) return;
+    await testHandler.handler(mockContext);
+    expect(mockDb).toHaveBeenCalledWith('admin');
   });
 
   it('returns ok:false with message on connection failure', async () => {
