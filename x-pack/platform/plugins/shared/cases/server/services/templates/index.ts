@@ -22,7 +22,7 @@ import type {
   Template,
   UpdateTemplateInput,
 } from '../../../common/types/domain/template/v1';
-import { toFieldNames, trimFieldDefaults } from './utils';
+import { toFieldDefinitions, trimFieldDefaults } from './utils';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import type {
   TemplatesFindRequest,
@@ -85,7 +85,7 @@ export class TemplatesService {
         ...so.attributes,
         fieldSearchMatches:
           searchLower !== '' &&
-          (so.attributes.fieldNames ?? []).some(
+          (so.attributes.fieldDefinitions ?? []).some(
             (field) =>
               field.label.toLowerCase().includes(searchLower) ||
               field.name.toLowerCase().includes(searchLower)
@@ -261,13 +261,13 @@ export class TemplatesService {
                 },
                 {
                   nested: {
-                    path: `${SO}.fieldNames`,
+                    path: `${SO}.fieldDefinitions`,
                     query: {
                       bool: {
                         should: [
                           {
                             wildcard: {
-                              [`${SO}.fieldNames.name`]: {
+                              [`${SO}.fieldDefinitions.name`]: {
                                 value: `*${search}*`,
                                 case_insensitive: true,
                               },
@@ -275,7 +275,7 @@ export class TemplatesService {
                           },
                           {
                             match: {
-                              [`${SO}.fieldNames.label`]: search,
+                              [`${SO}.fieldDefinitions.label`]: search,
                             },
                           },
                         ],
@@ -340,7 +340,14 @@ export class TemplatesService {
   ): Promise<SavedObject<Template>> {
     const normalizedDefinition = trimFieldDefaults(input.definition);
     const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
+    // The case-default title is optional in the definition, so the identity name must come from
+    // `input.name` (the editor always sends it) or, for API back-compat, the definition's title.
     const templateName = input.name ?? parsedDefinition.name;
+    if (!templateName) {
+      throw Boom.badRequest(
+        'A template name is required: provide `name` or a case-default title in the definition.'
+      );
+    }
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -363,7 +370,7 @@ export class TemplatesService {
         tags: input.tags,
         author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: toFieldNames(parsedDefinition.fields),
+        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields),
         isEnabled: input.isEnabled ?? true,
       } as Template,
       { refresh: true, id }
@@ -388,7 +395,13 @@ export class TemplatesService {
 
     const normalizedDefinition = trimFieldDefaults(input.definition);
     const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
+    // See createTemplate: identity name comes from `input.name` or the definition's (optional) title.
     const templateName = input.name ?? parsedDefinition.name;
+    if (!templateName) {
+      throw Boom.badRequest(
+        'A template name is required: provide `name` or a case-default title in the definition.'
+      );
+    }
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -412,10 +425,15 @@ export class TemplatesService {
         tags: input.tags,
         author: currentTemplate.attributes.author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: toFieldNames(parsedDefinition.fields),
+        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields),
         usageCount: currentTemplate.attributes.usageCount,
         lastUsedAt: currentTemplate.attributes.lastUsedAt,
         isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,
+        // Carry the v1 lineage forward across edits/version bumps. The bridges read only the
+        // `isLatest` version, so dropping this here would silently degrade a migrated template to
+        // name-only resolution on the first edit (losing duplicate-name disambiguation, and breaking
+        // entirely on rename).
+        legacyKey: currentTemplate.attributes.legacyKey,
       } as Template,
       {
         refresh: true,
@@ -435,7 +453,7 @@ export class TemplatesService {
       { refresh: true }
     );
 
-    // Update may shift `fieldNames` (different field set, renamed fields,
+    // Update may shift `fieldDefinitions` (different field set, renamed fields,
     // changed types). Tell v2 to refresh.
     this.dependencies.refreshAnalyticsV2DataView();
 

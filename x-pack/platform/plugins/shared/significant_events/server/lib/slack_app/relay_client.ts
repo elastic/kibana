@@ -6,6 +6,7 @@
  */
 
 import { readFileSync } from 'fs';
+import { rootCertificates } from 'node:tls';
 import { Agent } from 'undici';
 import type { Logger } from '@kbn/core/server';
 import { getNodeSSLOptions } from '@kbn/actions-utils';
@@ -64,7 +65,10 @@ export class RelayClient {
 
     // Read CA certificate(s) from the file path(s) defined in the config.
     const caPaths = tls?.certificateAuthorities;
-    const ca = caPaths ? (Array.isArray(caPaths) ? caPaths : [caPaths]).map(readFile) : undefined;
+    let ca = caPaths ? (Array.isArray(caPaths) ? caPaths : [caPaths]).map(readFile) : undefined;
+    if (ca && ca.length > 0) {
+      ca = [...rootCertificates, ...ca];
+    }
 
     // If we don't have any custom TLS settings and full verification is requested,
     // we don't need a custom dispatcher — that's the default `fetch` behavior.
@@ -82,7 +86,7 @@ export class RelayClient {
         key,
         allowPartialTrustChain: true,
         rejectUnauthorized,
-        checkServerIdentity,
+        ...(checkServerIdentity ? { checkServerIdentity } : {}),
       },
     });
   }
