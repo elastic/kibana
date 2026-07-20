@@ -179,7 +179,13 @@ function formatDurationFromTime(time?: string): string {
   return Number.isFinite(seconds) ? formatDurationSeconds(seconds) : NOT_AVAILABLE;
 }
 
-function createFTRTitle(failure: TestFailure, prependTitle: string): string {
+/*
+ * The `JUnit` functions below handle every failure that arrives as JUnit XML —
+ * FTR, Jest, and Cypress — as opposed to the `Scout` ones, which handle Scout's
+ * NDJSON failure reports.
+ */
+
+function createJUnitTitle(failure: TestFailure, prependTitle: string): string {
   if (prependTitle && prependTitle.trim() !== '') {
     return `Failing test: ${prependTitle} ${failure.classname} - ${failure.name}`;
   }
@@ -190,7 +196,7 @@ function createScoutTitle(failure: ScoutTestFailureExtended): string {
   return `Failing test: ${failure.classname} - ${failure.name}`;
 }
 
-function createFTRBody(
+function createJUnitBody(
   failure: TestFailure,
   buildUrl: string,
   branch: string,
@@ -303,7 +309,7 @@ function createScoutBody(
   });
 }
 
-async function createFTRFailureIssue(
+async function createJUnitFailureIssue(
   buildUrl: string,
   failure: TestFailure,
   api: GithubApi,
@@ -311,8 +317,8 @@ async function createFTRFailureIssue(
   pipeline: string,
   prependTitle: string
 ) {
-  const title = createFTRTitle(failure, prependTitle);
-  const body = createFTRBody(failure, buildUrl, branch, pipeline);
+  const title = createJUnitTitle(failure, prependTitle);
+  const body = createJUnitBody(failure, buildUrl, branch, pipeline);
   const labels = ['failed-test'];
 
   return await api.createIssue(title, body, labels);
@@ -343,11 +349,11 @@ export async function createFailureIssue(
   if (isScoutFailure(failure)) {
     return createScoutFailureIssue(buildUrl, failure, api, branch, pipeline);
   } else {
-    return createFTRFailureIssue(buildUrl, failure, api, branch, pipeline, prependTitle);
+    return createJUnitFailureIssue(buildUrl, failure, api, branch, pipeline, prependTitle);
   }
 }
 
-function createFTRComment(
+function createJUnitComment(
   buildUrl: string,
   branch: string,
   pipeline: string,
@@ -400,7 +406,7 @@ function createScoutComment(
   } - ${branch}](${buildUrl})${renderErrorMessageSection(errorMessage)}`;
 }
 
-async function updateFTRFailureIssue(
+async function updateJUnitFailureIssue(
   buildUrl: string,
   issue: ExistingFailedTestIssue,
   api: GithubApi,
@@ -425,7 +431,7 @@ async function updateFTRFailureIssue(
     );
   }
 
-  const commentText = createFTRComment(buildUrl, branch, pipeline, errorMessage);
+  const commentText = createJUnitComment(buildUrl, branch, pipeline, errorMessage);
   await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };
@@ -466,6 +472,6 @@ export async function updateFailureIssue(
   if (failure && isScoutFailure(failure)) {
     return updateScoutFailureIssue(buildUrl, issue, api, branch, pipeline, failure);
   } else {
-    return updateFTRFailureIssue(buildUrl, issue, api, branch, pipeline, failure);
+    return updateJUnitFailureIssue(buildUrl, issue, api, branch, pipeline, failure);
   }
 }
