@@ -103,10 +103,11 @@ describe('useCustomContentHtml', () => {
       expect(result.current.html).toBe('');
     });
 
-    it('sets isAiUnavailable when the error message mentions no inference connector', async () => {
-      (streamGenerate as jest.Mock).mockRejectedValue(
-        new Error('No inference connector configured')
-      );
+    it('sets isAiUnavailable when the error carries code no_connector', async () => {
+      const err = Object.assign(new Error('No inference connector configured'), {
+        code: 'no_connector',
+      });
+      (streamGenerate as jest.Mock).mockRejectedValue(err);
 
       const { result } = renderHook(() => useCustomContentHtml({ ...baseParams }));
 

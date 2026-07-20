@@ -112,17 +112,16 @@ export function useCustomContentHtml({
       },
       controller.signal
     )
-      .catch((err: Error) => {
+      .catch((err: Error & { code?: string }) => {
         if (err.name !== 'AbortError') {
           hasFailed = true;
           stopInterval();
-          if (err.message.toLowerCase().includes('no inference connector')) {
+          if (err.code === 'no_connector') {
             setIsAiUnavailable(true);
-            setIsLoading(false);
           } else {
             setError(err instanceof Error ? err.message : String(err));
-            setIsLoading(false);
           }
+          setIsLoading(false);
         }
       })
       .finally(() => {

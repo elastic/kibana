@@ -30,13 +30,17 @@ export async function streamNdjson(
 
   const processLine = (line: string) => {
     if (!line.trim()) return;
-    let event: { token?: string; error?: string };
+    let event: { token?: string; error?: string; code?: string };
     try {
-      event = JSON.parse(line) as { token?: string; error?: string };
+      event = JSON.parse(line) as { token?: string; error?: string; code?: string };
     } catch {
       return;
     }
-    if (event.error) throw new Error(event.error);
+    if (event.error) {
+      const err = new Error(event.error) as Error & { code?: string };
+      if (event.code) err.code = event.code;
+      throw err;
+    }
     if (event.token) onToken(event.token);
   };
 

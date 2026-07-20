@@ -107,18 +107,27 @@ export function registerGenerateRoute(
       const { prompt, colorMode } = request.body;
 
       const connector = await inference.getDefaultConnector(request).catch(() => undefined);
-      if (!connector) {
-        return response.badRequest({
-          body: i18n.translate('xpack.customContent.generateRoute.noConnectorError', {
-            defaultMessage: 'No inference connector configured',
-          }),
-        });
-      }
-      const { connectorId } = connector;
 
       const passThrough = new PassThrough();
       const abortController = new AbortController();
       const abortSub = request.events.aborted$.subscribe(() => abortController.abort());
+
+      if (!connector) {
+        passThrough.write(
+          JSON.stringify({
+            error: i18n.translate('xpack.customContent.generateRoute.noConnectorError', {
+              defaultMessage: 'No inference connector configured',
+            }),
+            code: 'no_connector',
+          }) + '\n'
+        );
+        passThrough.end();
+        return response.ok({
+          headers: { 'Content-Type': 'application/x-ndjson' },
+          body: passThrough,
+        });
+      }
+      const { connectorId } = connector;
 
       const systemPrompt = buildSystemPromptStatic(colorMode);
 
