@@ -8,7 +8,6 @@
  */
 
 /**
- * Breakpoints where AppMenu renders the enabled switch outside the overflow menu.
- * Keep aligned with `AppMenuComponent` (`m`/`l` inline switch + overflow items, `xl` fully inline).
+ * Viewport breakpoints where the enabled switch moves from the app menu to the title toolbar.
  */
 export const WORKFLOW_DETAIL_INLINE_TOOLBAR_BREAKPOINTS = ['m', 'l', 'xl'] as const;

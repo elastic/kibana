@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { type EuiBreakpointSize, useEuiTheme } from '@elastic/eui';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
 
@@ -26,17 +26,26 @@ export const useCurrentChromeApplicationBreakpoint = (): EuiBreakpointSize | und
   const { euiTheme } = useEuiTheme();
   const [breakpoint, setBreakpoint] = useState<EuiBreakpointSize>();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const application = document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
     if (!(application instanceof HTMLElement)) {
       setBreakpoint(undefined);
       return;
     }
 
+    const updateBreakpoint = (width: number) => {
+      setBreakpoint(resolveBreakpoint(width, euiTheme.breakpoint));
+    };
+    const { paddingLeft, paddingRight } = getComputedStyle(application);
+    const initialWidth =
+      application.clientWidth - (parseFloat(paddingLeft) || 0) - (parseFloat(paddingRight) || 0);
+
+    updateBreakpoint(initialWidth);
+
     const resizeObserver = new ResizeObserver(([entry]) => {
       const width = entry.contentBoxSize[0]?.inlineSize ?? entry.contentRect.width;
 
-      setBreakpoint(resolveBreakpoint(width, euiTheme.breakpoint));
+      updateBreakpoint(width);
     });
 
     resizeObserver.observe(application, { box: 'content-box' });

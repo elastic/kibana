@@ -9,14 +9,26 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import type { EuiBreakpointSize } from '@elastic/eui';
 import { AppMenuComponent } from './app_menu';
-import type { AppMenuConfig } from '../types';
+import type { AppMenuConfig, AppMenuItemType } from '../types';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
-let mockCurrentBreakpoint = 'xl';
+let mockCurrentBreakpoint: EuiBreakpointSize | undefined = 'xl';
+let mockViewportBreakpoint: EuiBreakpointSize = 'xl';
+
 jest.mock('@kbn/core-chrome-layout-utils', () => ({
   useCurrentChromeApplicationBreakpoint: () => mockCurrentBreakpoint,
 }));
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+
+  return {
+    ...actual,
+    useCurrentEuiBreakpoint: () => mockViewportBreakpoint,
+  };
+});
 
 describe('AppMenu', () => {
   const defaultItems = [
@@ -31,6 +43,7 @@ describe('AppMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCurrentBreakpoint = 'xl';
+    mockViewportBreakpoint = 'xl';
   });
 
   describe('rendering', () => {
@@ -100,8 +113,32 @@ describe('AppMenu', () => {
       expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
     });
 
-    it('should render individual menu items at the wide application breakpoint', () => {
-      mockCurrentBreakpoint = 'm';
+    it('should render individual menu items at m/l/xl application breakpoints', () => {
+      for (const breakpoint of ['m', 'l', 'xl'] as const) {
+        mockCurrentBreakpoint = breakpoint;
+
+        const { unmount } = render(<AppMenuComponent config={defaultConfig} />);
+
+        expect(screen.getByText('Item 1')).toBeInTheDocument();
+        expect(screen.getByText('Item 2')).toBeInTheDocument();
+
+        unmount();
+      }
+    });
+
+    it('should fall back to viewport breakpoints when application measurement is unavailable', () => {
+      mockCurrentBreakpoint = undefined;
+      mockViewportBreakpoint = 'm';
+
+      render(<AppMenuComponent config={defaultConfig} />);
+
+      expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
+      expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
+    });
+
+    it('should use viewport xl as wide when application measurement is unavailable', () => {
+      mockCurrentBreakpoint = undefined;
+      mockViewportBreakpoint = 'xl';
 
       render(<AppMenuComponent config={defaultConfig} />);
 
@@ -110,23 +147,57 @@ describe('AppMenu', () => {
     });
 
     it('should render overflow button at the wide breakpoint when item is marked as overflow', () => {
+      const forcedOverflowItem: AppMenuItemType = {
+        id: 'singleOverflowItem',
+        label: 'Single overflow item',
+        run: jest.fn(),
+        iconType: 'gear',
+        order: 1,
+        overflow: true,
+      };
       const forcedOverflowConfig: AppMenuConfig = {
-        items: [
-          {
-            id: 'singleOverflowItem',
-            label: 'Single overflow item',
-            run: jest.fn(),
-            iconType: 'gear',
-            order: 1,
-            overflow: true,
-          },
-        ],
+        items: [forcedOverflowItem],
       };
 
       render(<AppMenuComponent config={forcedOverflowConfig} />);
 
       expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
       expect(screen.queryByText('Single overflow item')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('viewport breakpoint mapping', () => {
+    it('should render collapsed content at viewport s', () => {
+      mockViewportBreakpoint = 's';
+
+      render(<AppMenuComponent config={defaultConfig} breakpointSource="viewport" />);
+
+      expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
+      expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
+    });
+
+    it('should render medium content at viewport m and l', () => {
+      for (const breakpoint of ['m', 'l'] as const) {
+        mockViewportBreakpoint = breakpoint;
+
+        const { unmount } = render(
+          <AppMenuComponent config={defaultConfig} breakpointSource="viewport" />
+        );
+
+        expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
+        expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
+
+        unmount();
+      }
+    });
+
+    it('should render wide content at viewport xl', () => {
+      mockViewportBreakpoint = 'xl';
+
+      render(<AppMenuComponent config={defaultConfig} breakpointSource="viewport" />);
+
+      expect(screen.getByText('Item 1')).toBeInTheDocument();
+      expect(screen.getByText('Item 2')).toBeInTheDocument();
     });
   });
 
