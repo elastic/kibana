@@ -91,6 +91,25 @@ export class AgentBuilderSmlPlugin
       getSmlService,
     });
 
+    setupDeps.contextEngine?.registerAiIndex('sml', {
+      name: 'Elastic',
+      description:
+        'Kibana resources available for use in Agent Builder, including dashboards, ' +
+        'visualizations, connectors, workflows, alerting rules, action policies, ' +
+        'and significant events.',
+      dest: { type: 'index', value: '.ai-index-idx-sml-data' },
+      automations: [],
+      sources: [
+        { type: 'kbn_api', value: '/api/dashboards/{id}' },
+        { type: 'kbn_api', value: '/api/visualizations/{id}' },
+        { type: 'kbn_api', value: '/api/actions/connector/{id}' },
+        { type: 'kbn_api', value: '/api/workflows/workflow/{id}' },
+        { type: 'kbn_api', value: '/api/alerting/v2/rules/{id}' },
+        { type: 'kbn_api', value: '/api/alerting/v2/action_policies/{id}' },
+        { type: 'kbn_api', value: '/api/streams/{name}/significant_events' },
+      ],
+    });
+
     return {
       registerType: smlSetup.registerType,
     };
