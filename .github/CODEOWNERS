@@ -371,6 +371,7 @@ src/core/packages/user-storage/server-mocks @elastic/appex-sharedux
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
 src/dev @elastic/kibana-operations
+src/platform/kbn-ui/callout @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout-constants @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout-utils @elastic/appex-sharedux
