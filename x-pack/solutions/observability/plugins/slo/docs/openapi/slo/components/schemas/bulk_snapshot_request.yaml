@@ -28,6 +28,7 @@ properties:
         instanceId:
           type: string
           description: >
-            The SLO instance id. Use '*' for the default (ungrouped) instance.
-            When omitted, defaults to '*'.
+            The SLO instance ID.
+            Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000).
+            Set a specific value to return that instance only.
           example: '*'

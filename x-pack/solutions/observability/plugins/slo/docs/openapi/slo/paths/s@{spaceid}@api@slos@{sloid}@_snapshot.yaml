@@ -1,9 +1,12 @@
 get:
   summary: Compute an SLO instance summary at a point in time
   operationId: getSnapshotOp
+  x-state: 'Generally available; added in 9.6.0'
   description: >
-    Compute the summary of a single SLO instance at a given point in time.
-    The endpoint is synchronous and returns the result directly.
+    Compute the summary of an SLO at a given point in time.
+    When `instanceId` is provided, returns that instance.
+    When `instanceId` is omitted or set to `'*'`, returns all matching instances (up to 1000).
+    The endpoint is synchronous and returns results directly.
     You must have the `read` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.
   tags:
@@ -23,8 +26,9 @@ get:
     - name: instanceId
       in: query
       description: >
-        The SLO instance id. Use '*' for the default (ungrouped) instance.
-        When omitted, defaults to '*'.
+        The SLO instance ID.
+        Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000).
+        Set a specific value (for example `host.name:web-01`) to return that instance only.
       required: false
       schema:
         type: string
@@ -108,3 +112,16 @@ get:
                 statusCode: 403
                 error: Forbidden
                 message: "security_exception: action [slo_read] is unauthorized for user"
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
+          examples:
+            notFoundExample:
+              summary: Not found
+              value:
+                statusCode: 404
+                error: Not Found
+                message: 'SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found'

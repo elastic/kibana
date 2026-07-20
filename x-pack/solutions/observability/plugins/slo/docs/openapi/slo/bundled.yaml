@@ -1235,8 +1235,9 @@ paths:
     post:
       summary: Compute SLO instance summaries in bulk at a point in time
       operationId: bulkSnapshotOp
+      x-state: Generally available; added in 9.6.0
       description: |
-        Compute the summary of multiple SLO instances at a given point in time. The endpoint is synchronous and returns results directly. Each result contains either a summary (on success) or a per-instance error. The list of requests is limited to 100 entries. You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+        Compute the summary of multiple SLO instances at a given point in time. The endpoint is synchronous and returns results directly. Each result contains either a summary (on success) or a per-instance error. The list of requests is limited to 100 entries. When `instanceId` is omitted or set to `'*'`, the API returns a result for each matching instance (up to 1000 per SLO). You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
         - slo
       parameters:
@@ -1330,8 +1331,9 @@ paths:
     get:
       summary: Compute an SLO instance summary at a point in time
       operationId: getSnapshotOp
+      x-state: Generally available; added in 9.6.0
       description: |
-        Compute the summary of a single SLO instance at a given point in time. The endpoint is synchronous and returns the result directly. You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+        Compute the summary of an SLO at a given point in time. When `instanceId` is provided, returns that instance. When `instanceId` is omitted or set to `'*'`, returns all matching instances (up to 1000). The endpoint is synchronous and returns results directly. You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
         - slo
       parameters:
@@ -1349,7 +1351,7 @@ paths:
         - name: instanceId
           in: query
           description: |
-            The SLO instance id. Use '*' for the default (ungrouped) instance. When omitted, defaults to '*'.
+            The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value (for example `host.name:web-01`) to return that instance only.
           required: false
           schema:
             type: string
@@ -1433,6 +1435,19 @@ paths:
                     statusCode: 403
                     error: Forbidden
                     message: 'security_exception: action [slo_read] is unauthorized for user'
+        '404':
+          description: Not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    statusCode: 404
+                    error: Not Found
+                    message: SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found
 components:
   parameters:
     kbn_xsrf:
@@ -2868,7 +2883,7 @@ components:
               instanceId:
                 type: string
                 description: |
-                  The SLO instance id. Use '*' for the default (ungrouped) instance. When omitted, defaults to '*'.
+                  The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value to return that instance only.
                 example: '*'
     snapshot_result:
       title: Snapshot result
