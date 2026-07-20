@@ -55,7 +55,6 @@ const successResult = {
   summary: { episodesStarted: 0, recovered: 0, stillOpen: 0, medianDurationMs: 0 },
   isLoading: false,
   isError: false,
-  error: undefined,
   refetch: jest.fn(),
 };
 
@@ -84,44 +83,13 @@ describe('AlertTimelineSection', () => {
     expect(screen.getByTestId('alertTimelineSectionLoading')).toBeInTheDocument();
   });
 
-  it('shows the error callout for a generic (non-403/404) failure', () => {
+  it('shows the error callout when the fetch fails', () => {
     mockUseFetchRuleEvents.mockReturnValue({
       ...successResult,
       isError: true,
-      error: { statusCode: 500, message: 'boom' },
     });
     renderSection();
     expect(screen.getByTestId('ruleAlertTimelineSection')).toBeInTheDocument();
     expect(screen.getByTestId('alertTimelineSectionError')).toBeInTheDocument();
-  });
-
-  it('hides the whole section for a 403 error', () => {
-    mockUseFetchRuleEvents.mockReturnValue({
-      ...successResult,
-      isError: true,
-      error: { attributes: { rawResponse: { status: 403 } } },
-    });
-    renderSection();
-    expect(screen.queryByTestId('ruleAlertTimelineSection')).not.toBeInTheDocument();
-  });
-
-  it('hides the whole section for a 404 error', () => {
-    mockUseFetchRuleEvents.mockReturnValue({
-      ...successResult,
-      isError: true,
-      error: { response: { status: 404 } },
-    });
-    renderSection();
-    expect(screen.queryByTestId('ruleAlertTimelineSection')).not.toBeInTheDocument();
-  });
-
-  it('hides the whole section for an "unknown index" error (alerts:none user)', () => {
-    mockUseFetchRuleEvents.mockReturnValue({
-      ...successResult,
-      isError: true,
-      error: new Error('Unknown index [.rule-events]'),
-    });
-    renderSection();
-    expect(screen.queryByTestId('ruleAlertTimelineSection')).not.toBeInTheDocument();
   });
 });

@@ -248,24 +248,14 @@ export const useFetchRuleEvents = ({
     (enabled && summaryQuery.isLoading) ||
     groupingValuesQuery.isLoading;
 
-  // Queries whose failure should surface as a section-level error.
   // `startsQuery` is intentionally excluded: if only the (optional) true-start
   // overlay fails, the chart still renders correctly with windowed starts.
-  const errorableQueries = [
-    topNSeriesQuery,
-    selectionQuery,
-    phasesQuery,
-    summaryQuery,
-    groupingValuesQuery,
-  ];
-
-  const isError = errorableQueries.some((query) => query.isError);
-
-  // The error stays intentionally generic (`unknown`): we don't classify failure
-  // kinds here, we just surface the first errored query so callers can branch
-  // (e.g. hide the section for access errors, show a callout otherwise). New
-  // failure kinds need no changes here.
-  const error = errorableQueries.find((query) => query.isError)?.error ?? undefined;
+  const isError =
+    topNSeriesQuery.isError ||
+    selectionQuery.isError ||
+    phasesQuery.isError ||
+    summaryQuery.isError ||
+    groupingValuesQuery.isError;
 
   return {
     phases,
@@ -273,7 +263,6 @@ export const useFetchRuleEvents = ({
     summary: summaryQuery.data ?? EMPTY_SUMMARY,
     isLoading,
     isError,
-    error,
     refetch: () => {
       topNSeriesQuery.refetch();
       selectionQuery.refetch();

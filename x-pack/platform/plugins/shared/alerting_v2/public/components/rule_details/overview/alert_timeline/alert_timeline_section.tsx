@@ -28,7 +28,6 @@ import { deriveAlertTimelineData } from '@kbn/alerting-v2-episodes-ui/alert_time
 import { AlertTimelineLegend } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { useRule } from '../../rule_context';
 import { useFetchRuleEvents } from '../../../../hooks/use_fetch_rule_events';
-import { isInaccessibleEpisodeDataError } from '../../../../utils/esql_search_error';
 import { getDiscoverHrefForRuleQuery } from '../../../../utils/discover_href_for_episode';
 import { paths } from '../../../../constants';
 import { AlertTimelineChart } from './alert_timeline_chart';
@@ -65,15 +64,13 @@ export const AlertTimelineSection: React.FC = () => {
     return resolveGteLte(timeRange.from, timeRange.to);
   }, [timeRange.from, timeRange.to, refreshTick]);
 
-  const { phases, groupingValuesByHash, summary, isLoading, isError, error } = useFetchRuleEvents({
+  const { phases, groupingValuesByHash, summary, isLoading, isError } = useFetchRuleEvents({
     ruleId: rule.id,
     windowStartMs,
     windowEndMs,
     groupingFields,
     data,
   });
-
-  const isAccessError = isError && isInaccessibleEpisodeDataError(error);
 
   const timelineData = useMemo(
     () =>
@@ -128,10 +125,6 @@ export const AlertTimelineSection: React.FC = () => {
     },
     [application, getEpisodeHref]
   );
-
-  if (isAccessError) {
-    return null;
-  }
 
   return (
     <div data-test-subj="ruleAlertTimelineSection">

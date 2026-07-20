@@ -77,7 +77,6 @@ export const useFetchSeriesGroupingValues = ({
     data: query.data ?? EMPTY_RESULT,
     isLoading: query.isLoading && isEnabled,
     isError: query.isError,
-    error: query.error,
     refetch: query.refetch,
   };
 };
