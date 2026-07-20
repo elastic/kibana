@@ -15,6 +15,7 @@ export * from './specs/aws_lambda/aws_lambda';
 export * from './specs/bigquery/bigquery';
 export * from './specs/brave_search/brave_search';
 export * from './specs/gcp_cloud_functions/gcp_cloud_functions';
+export * from './specs/gcp_cli/gcp_cli';
 export * from './specs/figma/figma';
 export * from './specs/github/github';
 export * from './specs/google_calendar/google_calendar';

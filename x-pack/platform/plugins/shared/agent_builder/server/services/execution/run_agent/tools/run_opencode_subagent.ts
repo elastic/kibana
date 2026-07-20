@@ -171,6 +171,37 @@ const buildElasticCliGuidance = (credentials?: {
   ].join('\n');
 };
 
+const buildGcpCliGuidance = (credentials?: {
+  gcp?: {
+    projectId?: string;
+    access?: 'read' | 'write';
+    services?: string[];
+    regions?: string[];
+  };
+}): string => {
+  if (!credentials?.gcp) return '';
+  const serviceLine = credentials.gcp.services?.length
+    ? `Requested services: ${credentials.gcp.services.join(', ')}.`
+    : 'Use only the Google Cloud services required by the task.';
+  const regionLine = credentials.gcp.regions?.length
+    ? `Requested regions: ${credentials.gcp.regions.join(', ')}.`
+    : undefined;
+  return [
+    '## Google Cloud CLI access',
+    '',
+    `The sandbox is prepared with Google Cloud CLI credentials for project ${
+      credentials.gcp.projectId ?? 'the configured project'
+    }.`,
+    `Access level requested: ${credentials.gcp.access ?? 'read'}.`,
+    serviceLine,
+    regionLine,
+    '`CLOUDSDK_CONFIG`, `GOOGLE_APPLICATION_CREDENTIALS`, and `CLOUDSDK_CORE_PROJECT`',
+    'are configured for this run. Use the `gcloud` command directly.',
+  ]
+    .filter(Boolean)
+    .join('\n');
+};
+
 const buildCredentialGuidance = (): string =>
   [
     '## Sandbox credential grants',
@@ -179,6 +210,7 @@ const buildCredentialGuidance = (): string =>
     '- `credentials.github`: use only for GitHub clone, push, or PR operations.',
     '- `credentials.elastic.kibana`: REQUIRED when the user asks the sandbox to use ECLI, Elastic CLI, the `elastic` command, Kibana APIs, workflows, saved objects, cases, or other Kibana resources.',
     '- `credentials.elastic.elasticsearch`: REQUIRED when the user asks the sandbox to use ECLI/Elastic CLI for Elasticsearch APIs, indices, mappings, documents, search, or ES|QL.',
+    '- `credentials.gcp`: REQUIRED when the user asks the sandbox to use Google Cloud CLI, `gcloud`, Cloud Run, Cloud Logging, GCS, or generic GCP project resources.',
     'Use `read` unless the task must create, update, delete, push, or open a PR.',
   ].join('\n');
 
@@ -224,6 +256,30 @@ const schema = z.object({
         })
         .optional()
         .describe('Request Elastic CLI credentials only for products the sandbox must access.'),
+      gcp: z
+        .object({
+          connectorId: z
+            .string()
+            .optional()
+            .describe('Optional Google Cloud CLI connector id to use for this run.'),
+          projectId: z
+            .string()
+            .optional()
+            .describe('GCP project id to configure as the default gcloud project.'),
+          access: accessSchema
+            .optional()
+            .describe('Use read for inspection; use write only for mutating gcloud tasks.'),
+          services: z
+            .array(z.string())
+            .optional()
+            .describe('Google Cloud services needed by the task, such as logging or cloud_run.'),
+          regions: z
+            .array(z.string())
+            .optional()
+            .describe('GCP regions needed by the task, such as us-central1.'),
+        })
+        .optional()
+        .describe('Request Google Cloud CLI credentials only when the sandbox must use gcloud.'),
     })
     .optional()
     .describe(
@@ -260,6 +316,12 @@ Elastic CLI / ECLI credential rule:
 - Without credentials.elastic, the sandbox will not install/configure Elastic
   CLI credentials.
 
+Google Cloud CLI / gcloud credential rule:
+- If the user asks to use Google Cloud CLI / gcloud / Cloud Run / Cloud Logging /
+  GCS / generic GCP project resources, you MUST request credentials.gcp.
+- Without credentials.gcp, the sandbox will not install/configure Google Cloud
+  CLI credentials.
+
 Because it is wired back into Agent Builder over MCP, the OpenCode sub-agent can
 call the SAME Kibana-aware tools you have (ES|QL, index mappings, cases,
 connectors, workflows, ...) WHILE it writes and runs code.
@@ -270,7 +332,7 @@ Brief it like a smart engineer who just joined:
 - State the goal and why it matters.
 - Set the structured repository field when the task needs GitHub clone, push, or PR access.
 - If GitHub access is needed and the repository is unclear, incomplete, or ownerless
-  (for example "kibana" instead of "elastic/kibana" or "rosomri/kibana"), ask
+  (for example "kibana" instead of "elastic/kibana" or "example/kibana"), ask
   the user which repo to use before calling this tool. Do not guess the owner.
 - Set the structured credentials field for only the products and access levels the sandbox needs.
 - Name any specific files/areas if you know them.
@@ -313,9 +375,10 @@ export const createOpencodeSubagentTool = ({
         const effectiveCredentials = credentials ?? (repository ? { github: { repository } } : {});
         const gitGuidance = buildGitGuidance(profile, effectiveCredentials);
         const elasticCliGuidance = buildElasticCliGuidance(effectiveCredentials);
+        const gcpCliGuidance = buildGcpCliGuidance(effectiveCredentials);
         const credentialGuidance = buildCredentialGuidance();
         const systemPrompt =
-          [catalog, gitGuidance, elasticCliGuidance, credentialGuidance]
+          [catalog, gitGuidance, elasticCliGuidance, gcpCliGuidance, credentialGuidance]
             .filter(Boolean)
             .join('\n\n') || undefined;
         const fullPrompt = `${description}\n\n${prompt}`;

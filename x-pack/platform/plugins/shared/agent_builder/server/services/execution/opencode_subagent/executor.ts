@@ -28,6 +28,11 @@ import type {
   ElasticCliCredentials as MintedElasticCliCredentials,
   ElasticCliCredentialMinter,
 } from './elastic_cli_credential_minter';
+import type {
+  GcpCliCredentialRequest,
+  GcpCliCredentials as ResolvedGcpCliCredentials,
+  GcpCliCredentialResolver,
+} from './gcp_cli_credential_resolver';
 import { GithubUserCredentialSource } from './github_user_credential_source';
 import { GithubAppTokenMinter } from './github_app_token_minter';
 import { ProfileRuntimeResolver } from './profile_runtime_resolver';
@@ -214,6 +219,7 @@ export interface SandboxCredentialRequest {
     kibana?: ElasticCliAccess;
     elasticsearch?: ElasticCliAccess;
   };
+  gcp?: GcpCliCredentialRequest;
 }
 
 /**
@@ -249,7 +255,8 @@ export class OpencodeSubagentExecutor {
     private readonly runClient?: OpencodeRunClient,
     private readonly mcpAuthMinter?: McpAuthMinter,
     private readonly gitTokenResolver?: GithubTokenResolver,
-    private readonly elasticCliCredentialMinter?: ElasticCliCredentialMinter
+    private readonly elasticCliCredentialMinter?: ElasticCliCredentialMinter,
+    private readonly gcpCliCredentialResolver?: GcpCliCredentialResolver
   ) {
     this.provider = new SandboxManager(
       {
@@ -549,9 +556,13 @@ export class OpencodeSubagentExecutor {
     const shouldResolveElasticCliCredentials = Boolean(
       elasticAccess?.kibana || elasticAccess?.elasticsearch
     );
+    const gcpAccess = credentials?.gcp;
+    const shouldResolveGcpCliCredentials = Boolean(gcpAccess);
     let gitCredentials: GitCredentials | undefined;
     let elasticCliCredentials: MintedElasticCliCredentials | undefined;
+    let gcpCliCredentials: ResolvedGcpCliCredentials | undefined;
     const gitCredentialDiagnostics: string[] = [];
+    const gcpCredentialDiagnostics: string[] = [];
 
     const persist = this.runClient && runContext;
 
@@ -625,6 +636,34 @@ export class OpencodeSubagentExecutor {
                 elasticAccess?.kibana ?? 'none'
               }; elasticsearch: ${elasticAccess?.elasticsearch ?? 'none'}`
             : 'Unable to mint or reuse an API key for Elastic CLI',
+        });
+      }
+
+      if (shouldResolveGcpCliCredentials && this.gcpCliCredentialResolver && gcpAccess) {
+        gcpCliCredentials = await this.gcpCliCredentialResolver.resolve({
+          request,
+          allowedConnectors,
+          spaceId: runContext?.spaceId,
+          requested: gcpAccess,
+          onDiagnostic: (message) => gcpCredentialDiagnostics.push(message),
+        });
+      }
+
+      if (shouldResolveGcpCliCredentials) {
+        recordProgress({
+          id: 'gcp-cli-credentials',
+          phase: 'credential',
+          label: gcpCliCredentials
+            ? 'Prepared Google Cloud CLI credentials'
+            : 'No Google Cloud CLI credentials prepared',
+          status: gcpCliCredentials ? 'completed' : 'failed',
+          iconType: 'logoGCP',
+          credentialIconVariant: 'secured',
+          detail: gcpCliCredentials
+            ? `source: ${gcpCliCredentials.source}; project: ${gcpCliCredentials.projectId}`
+            : gcpCredentialDiagnostics.length > 0
+            ? gcpCredentialDiagnostics.join('; ')
+            : 'Unable to resolve a Google Cloud CLI connector for this run',
         });
       }
 
@@ -778,6 +817,7 @@ export class OpencodeSubagentExecutor {
         },
         gitCredentials,
         elasticCliCredentials,
+        gcpCliCredentials,
         timeoutMs: stack.maxRunSeconds * 1000,
         onProgress: recordProgress,
         abortSignal,

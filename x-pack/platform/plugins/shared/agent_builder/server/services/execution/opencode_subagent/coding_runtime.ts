@@ -74,6 +74,11 @@ export interface CodingRunParams {
    * a per-run config file and scrubbed afterwards.
    */
   elasticCliCredentials?: ElasticCliCredentials;
+  /**
+   * Google Cloud CLI config for connector-backed sandbox access. Injected as
+   * per-run files and scrubbed afterwards.
+   */
+  gcpCliCredentials?: GcpCliCredentials;
   /** Max wall-clock for the agent turn. */
   timeoutMs: number;
   /** Streaming activity for the parent agent/UI. */
@@ -92,6 +97,15 @@ export interface GitCredentials {
 export interface ElasticCliCredentials {
   /** Contents of `.elasticrc.yml`. */
   configYml: string;
+  /** Human-readable source for logging/timeline diagnostics. */
+  source: string;
+}
+
+export interface GcpCliCredentials {
+  /** Service account JSON used by the POC gcloud setup path. */
+  serviceAccountJson: string;
+  /** GCP project configured as the default gcloud project. */
+  projectId: string;
   /** Human-readable source for logging/timeline diagnostics. */
   source: string;
 }

@@ -14,6 +14,7 @@ import { OpencodeRunClient } from './persistence/run_client';
 import { McpAuthMinter } from './mcp_auth_minter';
 import { GithubTokenResolver } from './github_token_resolver';
 import { ElasticCliCredentialMinter } from './elastic_cli_credential_minter';
+import { GcpCliCredentialResolver } from './gcp_cli_credential_resolver';
 
 /**
  * PoC provider for the OpenCode sub-agent executor.
@@ -57,6 +58,11 @@ export const initOpencodeSubagentExecutor = ({
     encryptedSavedObjects,
     logger.get('gitToken')
   );
+  const gcpCliCredentialResolver = new GcpCliCredentialResolver(
+    getActions,
+    encryptedSavedObjects,
+    logger.get('gcpCli')
+  );
   // The GitHub App credential source is built per-profile inside the executor
   // (from each profile's own githubApp config + private-key secret), not from
   // global config — a profile brings its own git credential story.
@@ -66,7 +72,8 @@ export const initOpencodeSubagentExecutor = ({
     runClient,
     mcpAuthMinter,
     gitTokenResolver,
-    elasticCliCredentialMinter
+    elasticCliCredentialMinter,
+    gcpCliCredentialResolver
   );
   // Reap any sandbox pods orphaned by a previous process (e.g. a hot-reload that
   // killed the runtime mid-run). Fire-and-forget; never blocks startup.
