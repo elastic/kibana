@@ -22,6 +22,51 @@ KIBANA_URL = os.environ["KIBANA_URL"]
 
 AUTH_HEADER = "Basic " + base64.b64encode(ES_AUTH.encode()).decode()
 
+# Appended to seeded summaries/descriptions so Nightshift flyouts exceed the 300 code-point
+# TruncatableSummary threshold and show "Show more" during local demos.
+NIGHTSHIFT_TRUNCATION_DEMO_SUFFIX = (
+    " Additional Nightshift demo context: treat this incident as active until error budgets "
+    "recover for two consecutive hours. Compare deploy markers, canary traffic share, regional "
+    "load, checkout funnel conversion, support ticket volume, and synthetic login checks before "
+    "declaring mitigation complete or closing the incident in Nightshift."
+)
+
+
+def code_point_length(text: str) -> int:
+    return len(list(text))
+
+
+def lengthen_for_truncation_demo(text: str, min_code_points: int = 301) -> str:
+    combined = text
+    while code_point_length(combined) < min_code_points:
+        combined = f"{combined}{NIGHTSHIFT_TRUNCATION_DEMO_SUFFIX}"
+    return combined
+
+
+def lengthen_significant_events_ndjson(ndjson: str) -> str:
+    lines = [line for line in ndjson.strip().split("\n") if line.strip()]
+    output: list[str] = []
+    for line in lines:
+        obj = json.loads(line)
+        if set(obj.keys()) == {"create"}:
+            output.append(line)
+            continue
+        if isinstance(obj.get("summary"), str):
+            obj["summary"] = lengthen_for_truncation_demo(obj["summary"])
+        for signal in obj.get("signals", []):
+            if isinstance(signal, dict) and isinstance(signal.get("description"), str):
+                signal["description"] = lengthen_for_truncation_demo(signal["description"])
+        output.append(json.dumps(obj, separators=(",", ":")))
+    return "\n".join(output) + "\n"
+
+
+def prepare_ki_feature_for_seed(feature: dict) -> dict:
+    prepared = dict(feature)
+    description = prepared.get("description")
+    if isinstance(description, str):
+        prepared["description"] = lengthen_for_truncation_demo(description)
+    return prepared
+
 # (index, detection anchor in minutes ago, change point shape)
 STREAMS = [
     ("logs.web-frontend", 120, "spike"),
@@ -522,7 +567,7 @@ def seed_ki_features() -> None:
         operations = [
             {
                 "index": {
-                    "feature": feature,
+                    "feature": prepare_ki_feature_for_seed(feature),
                 }
             }
             for feature in features

@@ -9,6 +9,9 @@
 #   - Detection flyout (trend chart, ES|QL evidence, entity pills)
 #   - Entity flyout (summary, evidence, raw document)
 #
+# Summaries and signal descriptions are lengthened past the Nightshift 300 code-point
+# truncation threshold so event, detection, and entity flyouts show "Show more" after seeding.
+#
 # Schema (post #277711 / signals model):
 #   - status: open | closed | dismissed
 #   - severity: 20-low | 40-medium | 60-high | 80-critical
@@ -98,6 +101,16 @@ bulk_index() {
   fi
 }
 
+lengthen_significant_events_ndjson() {
+  local body="$1"
+  SCRIPT_DIR="$SCRIPT_DIR" BODY="$body" ES_URL="$ES_URL" ES_AUTH="$ES_AUTH" KIBANA_URL="$KIBANA_URL" python3 -c '
+import os, sys
+sys.path.insert(0, os.environ["SCRIPT_DIR"])
+from seed_nightshift_helpers import lengthen_significant_events_ndjson
+print(lengthen_significant_events_ndjson(os.environ["BODY"]), end="")
+'
+}
+
 if [[ "$CLEAN" == "true" ]]; then
   echo "Cleaning prior Nightshift seed indices ..."
   for idx in "$INDEX" "$DETECTIONS_INDEX" "$DISCOVERIES_INDEX"; do
@@ -161,6 +174,8 @@ EVENTS_BODY=$(cat <<NDJSON
 NDJSON
 )
 
+EVENTS_BODY="$(lengthen_significant_events_ndjson "$EVENTS_BODY")"
+
 bulk_index "7 significant events" "$INDEX" "$EVENTS_BODY"
 echo "Successfully indexed 7 significant events."
 
@@ -216,6 +231,8 @@ DISCOVERIES_BODY=$(cat <<NDJSON
 {"@timestamp":"${TWO_HOURS_AGO}","kind":"discovery","discovery_id":"discovery-007","event_id":"evt-007","processed":true,"severity":"20-low","confidence":0.38,"stream_names":["metrics.cache-service"],"title":"Cache layer — brief hit-rate dip (dismissed)","summary":"Redis cache hit rate dipped for about eight minutes during a routine node replacement. Throughput and error rates stayed flat; no user-facing impact was observed.","symptom_hypothesis":"Planned cache node drain caused a transient hit-rate dip that recovered once the replacement node joined the cluster.","causal_features":[{"feature_id":"cache-service","name":"cache-service","stream_name":"metrics.cache-service"}],"signals":[{"type":"detection","stream_name":"metrics.cache-service","confirmed":false,"collected_at":"${TWO_HOURS_AGO}","description":"Testing: whether cache hit rate dropped below baseline during the node replacement. Expected if true: sustained dip without recovery. Found: an eight-minute dip that fully recovered. Why: timing aligns with a planned node drain. Verdict: does not confirm — dismissed as benign maintenance noise.","evidence":{"esql_query":"FROM metrics.cache-service\n| WHERE service.name == \"cache-service\"\n| STATS hit_rate = AVG(cache.hit_rate)\n  BY minute = BUCKET(@timestamp, 1 minute)\n| SORT minute DESC","result":"empty"},"metadata":{"detection_id":"det-011","rule_uuid":"rule-uuid-011","rule_name":"cache-hit-rate-dip","change_point_type":"dip","p_value":0.12}}],"kibana.space_ids":["default"]}
 NDJSON
 )
+
+DISCOVERIES_BODY="$(lengthen_significant_events_ndjson "$DISCOVERIES_BODY")"
 
 bulk_index "7 discoveries" "$DISCOVERIES_INDEX" "$DISCOVERIES_BODY"
 echo "Successfully indexed 7 discoveries."

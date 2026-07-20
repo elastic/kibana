@@ -33,6 +33,7 @@ import { AiButton } from '@kbn/shared-ux-ai-components';
 import { getConfidenceColor } from '../get_confidence_color';
 import { useKibana } from '../../../utils/kibana_react';
 import { FlyoutSectionTitle } from './flyout_section_title';
+import { TruncatableSummary } from './truncatable_summary';
 
 export interface EntityFlyoutProps {
   feature: Feature;
@@ -222,9 +223,11 @@ export function EntityFlyout({
               })}
             </FlyoutSectionTitle>
             <EuiSpacer size="s" />
-            <EuiText size="s" data-test-subj="nightshiftEntityFlyoutSummary">
-              <p>{feature.description}</p>
-            </EuiText>
+            <TruncatableSummary
+              summary={feature.description}
+              testSubj="nightshiftEntityFlyoutSummary"
+              toggleTestSubj="nightshiftEntityFlyoutSummaryToggle"
+            />
             <EuiSpacer size="l" />
           </>
         )}
