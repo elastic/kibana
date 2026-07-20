@@ -606,7 +606,7 @@ describe('CsvESQLGenerator', () => {
       expect(mockDataClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            query: `${query.esql}\n| LIMIT 500`,
+            query: `${query.esql} | LIMIT 500`,
             params: expect.arrayContaining([expect.objectContaining({ crew_id: '123' })]),
           }),
         }),
@@ -642,7 +642,7 @@ describe('CsvESQLGenerator', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             // identifier-type variables must be sent to ES with the ?? prefix
-            query: 'FROM test_csv_tokens | STATS COUNT(*) BY ??breakdown_field\n| LIMIT 500',
+            query: 'FROM test_csv_tokens | STATS COUNT(*) BY ??breakdown_field | LIMIT 500',
             params: expect.arrayContaining([expect.objectContaining({ breakdown_field: 'bytes' })]),
           }),
         }),
