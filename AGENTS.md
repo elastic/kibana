@@ -85,7 +85,7 @@ Follow existing patterns in the target area first; below are common defaults.
 - Use `@elastic/eui` components with Emotion (`@emotion/react`) for styling.
 
 ### Schema validation
-- When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`). The CodeQL DoS queries enforce this for `js/kibana/unbounded-string-in-schema` (covers `schema.string()` and `z.string()`) and `js/kibana/unbounded-array-in-schema` (covers `schema.arrayOf()` only); `z.array()` is not flagged today but should still be bounded with `.max()`.
+- When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
 
 ## Internationalization (i18n)
 - Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md
