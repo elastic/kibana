@@ -1,6 +1,6 @@
 version: "1"
 
-name: Memory Synthesis
+name: Significant Events Memory Synthesis
 description: >
   Synthesizes significant events knowledge indicators into wiki pages using the
   streams-memory-synthesis skill. The default Agent Builder agent loads the skill,
@@ -9,13 +9,13 @@ enabled: false
 settings:
   timeout: "30m"
   concurrency:
-    key: "streams-sigevents-memory"
+    key: "significant-events-memory-synthesis"
     strategy: drop
     max: 1
 tags:
   - observability
   - streams
-  - sigevents
+  - significant-events
   - memory
 
 triggers:

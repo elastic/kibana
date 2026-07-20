@@ -67,6 +67,7 @@ export async function eventsWriteHandler({
   const now = new Date().toISOString();
   const eventUuid = uuidv4();
 
+  // `wait_for` so the immediate triage `_count` after events_write returns can see this version.
   await eventClient.bulkCreate(
     [
       {
@@ -76,9 +77,15 @@ export async function eventsWriteHandler({
         event_id: eventId,
         previous_event_uuid: latestEvent?.event_uuid,
         severity: input.severity,
+        // Carry the investigations lineage forward so a re-open (new version) keeps the
+        // investigations already attached to the episode. Triage relies on this to skip
+        // re-investigating an event that has been investigated before. Closing via
+        // update_event_status already spreads `...latest`, so it carries them too; the UI
+        // attach path writes this field via attachInvestigationToEvent.
+        investigations: latestEvent?.investigations,
       },
     ],
-    { throwOnFail: true }
+    { throwOnFail: true, refresh: 'wait_for' }
   );
 
   return {
