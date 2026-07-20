@@ -32,7 +32,6 @@ import { initializeStateManagement } from './initializers/initialize_state_manag
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 import type { LensEmbeddableStartServices } from './types';
-import { LENS_VIS_API_PATH } from '../../common/paths';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices

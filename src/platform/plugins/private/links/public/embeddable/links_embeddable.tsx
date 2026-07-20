@@ -31,7 +31,6 @@ import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } f
 import { DISPLAY_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 import {
   DASHBOARD_LINK_TYPE,
-  LINKS_API_PATH,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/constants';

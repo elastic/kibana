@@ -31,7 +31,7 @@ import type {
   LinksByValueState,
   LinksEmbeddableState,
 } from '../common';
-import type { Link, LinksApiState } from '../server';
+import type { Link } from '../server';
 
 export type LinksParentApi = PresentationContainer &
   HasType<typeof DASHBOARD_API_TYPE> &

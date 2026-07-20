@@ -14,7 +14,6 @@ import type {
 import type { PublishesTooltipLabel } from '@kbn/controls-schemas/src/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { PublishesESQLVariable, QueryESQLControl, StaticESQLControl } from '@kbn/esql-types';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type {
   CanIndicateRelatedSiblings,
   HasEditCapabilities,
