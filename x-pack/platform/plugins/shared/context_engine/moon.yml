@@ -18,6 +18,8 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/context_engine
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-http-browser'
+  - '@kbn/react-query'
   - '@kbn/scout'
   - '@kbn/logging'
   - '@kbn/config-schema'
