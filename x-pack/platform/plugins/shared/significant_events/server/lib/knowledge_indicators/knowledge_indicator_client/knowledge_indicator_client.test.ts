@@ -18,7 +18,7 @@ import {
   type StoredTombstone,
 } from '../data_stream';
 import type { SignificantEventsAlertingContext } from '../../significant_events/alerting/significant_events_alerting_context';
-import { ALERTS_READER_V1 } from '../../significant_events/alerting/alerts_reader';
+import { ALERTS_READER_V2 } from '../../significant_events/alerting/alerts_reader';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 
 jest.mock('../../significant_events/latest_source_query', () => {
@@ -88,8 +88,7 @@ function createAlertingContext(
   rulesManagementClient: SignificantEventsAlertingContext['rulesClient']
 ): SignificantEventsAlertingContext {
   return {
-    alertingV2Active: false,
-    alertsReader: ALERTS_READER_V1,
+    alertsReader: ALERTS_READER_V2,
     rulesClient: rulesManagementClient,
   };
 }

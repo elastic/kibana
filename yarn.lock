@@ -5248,6 +5248,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/context-engine-plugin@link:x-pack/platform/plugins/shared/context_engine":
+  version "0.0.0"
+  uid ""
+
 "@kbn/context-switcher-components@link:src/platform/packages/shared/context-switcher-components":
   version "0.0.0"
   uid ""
@@ -6913,6 +6917,10 @@
   uid ""
 
 "@kbn/eslint-plugin-imports@link:packages/kbn-eslint-plugin-imports":
+  version "0.0.0"
+  uid ""
+
+"@kbn/eslint-plugin-kbn-ui@link:packages/kbn-eslint-plugin-kbn-ui":
   version "0.0.0"
   uid ""
 
@@ -9817,6 +9825,10 @@
   uid ""
 
 "@kbn/ui-actions-plugin@link:src/platform/plugins/shared/ui_actions":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-callout@link:src/platform/kbn-ui/callout":
   version "0.0.0"
   uid ""
 
