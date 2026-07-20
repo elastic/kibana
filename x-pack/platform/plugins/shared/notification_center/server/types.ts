@@ -8,6 +8,7 @@
 import type {
   NotificationNamespace,
   NotificationTypeName,
+  NotificationKindOf,
 } from '../common/notification_registry_utils';
 import type { NotificationSubmitInput } from '../common/types';
 
@@ -38,13 +39,15 @@ export interface NotificationSubmitter<
 /** Public server-side setup contract. */
 export interface NotificationCenterPluginSetup {
   /**
-   * Bind a submitter to a registered notification type, passing a registry ref such as
-   * `NOTIFICATION_TYPES.inference.modelStatus`. The returned `submit` takes only the
-   * notification content and the type's id parts (`namespace`, `type`, and the id come from NC).
+   * Bind a submitter to a registered notification type. The `ref` is a `NOTIFICATION_TYPES` leaf
+   * (`NOTIFICATION_TYPES.<namespace>.<type>`), which carries the registry `kind` so the id scheme is
+   * fixed without a runtime lookup. The returned `submit` takes only the notification content and
+   * the type's id parts (`namespace`, `type`, and the id come from NC).
    */
   forType: <N extends NotificationNamespace, T extends NotificationTypeName<N>>(ref: {
     namespace: N;
     type: T;
+    kind: NotificationKindOf<N, T>;
   }) => NotificationSubmitter<N, T>;
 }
 

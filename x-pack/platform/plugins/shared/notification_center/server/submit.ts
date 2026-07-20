@@ -11,10 +11,8 @@ import {
   NOTIFICATION_TYPE_FLAGS,
   NOTIFICATION_TYPE_ENABLED_DEFAULT,
 } from '../common/feature_flags';
-import {
-  joinNotificationTypeId,
-  resolveNotificationKind,
-} from '../common/notification_registry_utils';
+import { joinNotificationTypeId } from '../common/notification_registry_utils';
+import type { NotificationKind } from '../common/notification_registry_types';
 import { buildStateNotificationId, buildTimeseriesNotificationId } from '../common/notification_id';
 import type {
   NotificationDocument,
@@ -89,11 +87,12 @@ const writeNotification = async (
  * `timeseries` kinds of notifications require an event and epochMs.
  */
 const buildIdAndTimestamp = (
+  kind: NotificationKind,
   namespace: string,
   type: string,
   idParts: StateSubmitIdParts | TimeseriesSubmitIdParts
 ): { notification_id: string; event_timestamp?: string } => {
-  if (resolveNotificationKind(namespace, type) === 'timeseries') {
+  if (kind === 'timeseries') {
     if (!('epochMs' in idParts)) {
       throw new NotificationValidationError(
         `"${joinNotificationTypeId(
@@ -129,10 +128,15 @@ const buildIdAndTimestamp = (
  */
 export const buildForType =
   (core: NotificationCenterCore): NotificationCenterPluginSetup['forType'] =>
-  ({ namespace, type }) => ({
+  ({ namespace, type, kind }) => ({
     submit: (input) => {
       const { title, description, severity, cta } = input;
-      const { notification_id, event_timestamp } = buildIdAndTimestamp(namespace, type, input);
+      const { notification_id, event_timestamp } = buildIdAndTimestamp(
+        kind,
+        namespace,
+        type,
+        input
+      );
 
       return writeNotification(core, {
         notification_id,

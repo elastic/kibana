@@ -51,13 +51,24 @@ export const NOTIFICATION_NAMESPACES = Object.keys(NOTIFICATION_REGISTRY) as [
  * i.e. `NOTIFICATION_TYPES.<namespace>.<type>`, passed to `forType`.
  */
 export const NOTIFICATION_TYPES = Object.fromEntries(
-  Object.entries(NOTIFICATION_REGISTRY).map(([namespace, definition]) => [
-    namespace,
-    Object.fromEntries(Object.keys(definition.types).map((type) => [type, { namespace, type }])),
-  ])
+  Object.entries(NOTIFICATION_REGISTRY).map(
+    ([namespace, definition]: [string, NotificationNamespaceDefinition]) => [
+      namespace,
+      Object.fromEntries(
+        Object.entries(definition.types).map(([type, { kind }]) => [
+          type,
+          { namespace, type, kind: kind ?? 'state' },
+        ])
+      ),
+    ]
+  )
 ) as {
   readonly [N in NotificationNamespace]: {
-    readonly [T in NotificationTypeName<N>]: { readonly namespace: N; readonly type: T };
+    readonly [T in NotificationTypeName<N>]: {
+      readonly namespace: N;
+      readonly type: T;
+      readonly kind: NotificationKindOf<N, T>;
+    };
   };
 };
 
@@ -76,16 +87,4 @@ export const isRegisteredNotificationRef = (namespace: string, type: string): bo
     namespace
   ];
   return Object.hasOwn(types, type);
-};
-
-/**
- * Runtime companion to {@link NotificationKindOf}: the declared `kind` for a `(namespace, type)`,
- * defaulting to `state`.
- * This lets us keep the registry as the source of truth to determine how the notification id is built.
- */
-export const resolveNotificationKind = (namespace: string, type: string): NotificationKind => {
-  const definition = (NOTIFICATION_REGISTRY as Record<string, NotificationNamespaceDefinition>)[
-    namespace
-  ];
-  return definition?.types[type]?.kind ?? 'state';
 };
