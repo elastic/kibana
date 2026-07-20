@@ -215,8 +215,13 @@ describe('getAgentStatusForAgentPolicy', () => {
           bool: expect.objectContaining({
             must: expect.arrayContaining([
               expect.objectContaining({
-                terms: {
-                  policy_id: agentPolicyIds,
+                bool: {
+                  should: [
+                    { terms: { policy_id: agentPolicyIds } },
+                    { prefix: { policy_id: 'agentPolicyId1#' } },
+                    { prefix: { policy_id: 'agentPolicyId2#' } },
+                  ],
+                  minimum_should_match: 1,
                 },
               }),
             ]),
@@ -231,6 +236,46 @@ describe('getAgentStatusForAgentPolicy', () => {
           }),
         }),
         timeout: expect.any(String),
+      })
+    );
+  });
+
+  it('matches version-specific policy variants when a single agentPolicyId is provided', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        aggregations: {
+          status: {
+            buckets: [{ key: 'online', doc_count: 1 }],
+          },
+        },
+      }),
+    };
+
+    const soClient = {
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [{ id: 'agentPolicyId', attributes: { name: 'Policy 1' } }],
+      }),
+    };
+
+    await getAgentStatusForAgentPolicy(esClient as any, soClient as any, 'agentPolicyId');
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            must: expect.arrayContaining([
+              expect.objectContaining({
+                bool: {
+                  should: [
+                    { term: { policy_id: 'agentPolicyId' } },
+                    { prefix: { policy_id: 'agentPolicyId#' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              }),
+            ]),
+          }),
+        }),
       })
     );
   });
