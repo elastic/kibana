@@ -75650,7 +75650,7 @@ paths:
   /s/{spaceId}/api/observability/slos/_bulk_snapshot:
     post:
       description: |
-        Compute the summary of multiple SLO instances at a given point in time. The endpoint is synchronous and returns results directly. Each result contains either a summary (on success) or a per-instance error. The list of requests is limited to 100 entries. You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+        Compute the summary of multiple SLO instances at a given point in time. The endpoint is synchronous and returns results directly. Each result contains either a summary (on success) or a per-instance error. The list of requests is limited to 100 entries. When `instanceId` is omitted or set to `'*'`, the API returns a result for each matching instance (up to 1000 per SLO). You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       operationId: bulkSnapshotOp
       parameters:
         - $ref: '#/components/parameters/SLOs_kbn_xsrf'
@@ -75742,6 +75742,7 @@ paths:
       summary: Compute SLO instance summaries in bulk at a point in time
       tags:
         - slo
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -76242,7 +76243,7 @@ paths:
   /s/{spaceId}/api/observability/slos/{sloId}/_snapshot:
     get:
       description: |
-        Compute the summary of a single SLO instance at a given point in time. The endpoint is synchronous and returns the result directly. You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+        Compute the summary of an SLO at a given point in time. When `instanceId` is provided, returns that instance. When `instanceId` is omitted or set to `'*'`, returns all matching instances (up to 1000). The endpoint is synchronous and returns results directly. You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       operationId: getSnapshotOp
       parameters:
         - $ref: '#/components/parameters/SLOs_kbn_xsrf'
@@ -76257,7 +76258,7 @@ paths:
             format: date-time
             type: string
         - description: |
-            The SLO instance id. Use '*' for the default (ungrouped) instance. When omitted, defaults to '*'.
+            The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value (for example `host.name:web-01`) to return that instance only.
           in: query
           name: instanceId
           required: false
@@ -76343,9 +76344,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Forbidden response
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found
+                    statusCode: 404
+              schema:
+                $ref: '#/components/schemas/SLOs_404_response'
+          description: Not found response
       summary: Compute an SLO instance summary at a point in time
       tags:
         - slo
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -143950,7 +143965,7 @@ components:
                 type: string
               instanceId:
                 description: |
-                  The SLO instance id. Use '*' for the default (ungrouped) instance. When omitted, defaults to '*'.
+                  The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value to return that instance only.
                 example: '*'
                 type: string
             required:
