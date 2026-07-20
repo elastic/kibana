@@ -42,6 +42,11 @@ jest.mock('../../../../context/apm_service/use_apm_service_context', () => ({
   useApmServiceContext: () => mockUseApmServiceContext(),
 }));
 
+const mockUseApmRoutePath = jest.fn();
+jest.mock('../../../../hooks/use_apm_route_path', () => ({
+  useApmRoutePath: () => mockUseApmRoutePath(),
+}));
+
 const mockUseFetcher = jest.fn();
 jest.mock('../../../../hooks/use_fetcher', () => ({
   useFetcher: () => mockUseFetcher(),
