@@ -10,7 +10,7 @@
 import React from 'react';
 
 import { AiButtonBase } from './ai_button_base';
-import type { AiButtonComponentProps, AiButtonProps } from './types';
+import type { AiButtonProps } from './types';
 
 export type { AiButtonProps } from './types';
 
@@ -18,6 +18,6 @@ export type { AiButtonProps } from './types';
  * Renders the AI button with variant-based styling and icon behavior.
  * @param props - AI button configuration.
  */
-export const AiButton = (props: AiButtonComponentProps) => {
-  return <AiButtonBase {...(props as AiButtonProps)} />;
+export const AiButton = (props: AiButtonProps) => {
+  return <AiButtonBase {...props} />;
 };
