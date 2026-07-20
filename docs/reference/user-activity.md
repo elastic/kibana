@@ -85,6 +85,36 @@ Dashboard query expressions and filter values are recorded without redaction. Ma
 
 When `metadata.errors` is not empty, `error.type` is `panel_errors` and `error.message` contains the error list as JSON.
 
+### Example: Query dashboard refresh events
+
+The user activity service emits log events but does not store them in {{es}}. To query dashboard refresh events in Discover:
+
+1. Configure the user activity service to write JSON events to a file:
+
+   ```yaml
+   user_activity:
+     enabled: true
+     appenders:
+       file:
+         type: file
+         fileName: /var/log/kibana/user_activity.log
+         layout:
+           type: json
+   ```
+
+2. Restart {{kib}}, open a dashboard, and refresh it to generate a `dashboard_refresh` event.
+3. [Ingest the ECS-formatted log file with {{agent}}](docs-content://solutions/observability/logs/ecs-formatted-application-logs.md#add-the-custom-logs-integration-to-your-project). When you configure the Custom Logs integration, use `/var/log/kibana/user_activity.log` as the log file path and apply the JSON settings described in the ingestion instructions so that the event fields are stored at the top level.
+4. Find **Discover** in the navigation menu or use the global search field, select **ES|QL**, and run:
+
+   ```esql
+   FROM logs-*
+   | WHERE event.action == "dashboard_refresh"
+   | KEEP @timestamp, user.name, object.name, event.duration, event.outcome, metadata.panel_count, error.message
+   | SORT @timestamp DESC
+   ```
+
+To return only refreshes where at least one panel has a blocking error, add `AND event.outcome == "failure"` to the `WHERE` command.
+
 ## Logs schema
 
 User activity events are written as JSON log entries. When using the JSON logging layout, these entries are ECS-compatible (see [Elastic Common Schema (ECS)](ecs://reference/index.md)) and may include additional non-ECS fields used by Kibana (for example, `kibana.space.id` and `object.*`).
