@@ -10,7 +10,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { AttackFlyoutHeader } from '.';
 import type { StartServices } from '../../types';
