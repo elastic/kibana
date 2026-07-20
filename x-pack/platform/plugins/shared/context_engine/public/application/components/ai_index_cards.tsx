@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import React from 'react';
 import type { AiIndexHttpItem } from '../../../common/http_api/ai_indices';
 import { useListAiIndices } from '../hooks/use_list_ai_indices';
@@ -41,11 +41,6 @@ const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href: string
     values: { count: aiIndex.automations.length },
   });
 
-  const updatedLabel = i18n.translate('xpack.contextEngine.landing.card.updated', {
-    defaultMessage: 'Updated {time}',
-    values: { time: moment(aiIndex.date_modified).fromNow() },
-  });
-
   return (
     <EuiCard
       data-test-subj="contextAiIndexCard"
@@ -54,12 +49,15 @@ const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href: string
       paddingSize="l"
       title={aiIndex.name}
       href={href}
-      description={false}
       footer={
         <>
           <EuiHorizontalRule margin="m" />
           <EuiText size="xs" color="subdued" data-test-subj="contextAiIndexCardUpdated">
-            {updatedLabel}
+            <FormattedMessage
+              id="xpack.contextEngine.landing.card.updated"
+              defaultMessage="Updated {time}"
+              values={{ time: <FormattedRelative value={aiIndex.date_modified} /> }}
+            />
           </EuiText>
         </>
       }

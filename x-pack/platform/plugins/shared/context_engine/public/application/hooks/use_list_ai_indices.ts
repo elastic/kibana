@@ -15,7 +15,6 @@ interface UseListAiIndicesResult {
   aiIndices: AiIndexHttpItem[];
   isLoading: boolean;
   error: Error | undefined;
-  refetch: () => void;
 }
 
 export const useListAiIndices = (): UseListAiIndicesResult => {
@@ -23,10 +22,10 @@ export const useListAiIndices = (): UseListAiIndicesResult => {
     services: { http },
   } = useKibana();
 
-  const { data, isLoading, error, refetch } = useQuery<ListAiIndexResponse, Error>({
+  const { data, isLoading, error } = useQuery<ListAiIndexResponse, Error>({
     queryKey: contextEngineQueryKeys.aiIndex.list(),
     queryFn: ({ signal }) => listAiIndices(http, { signal }),
   });
 
-  return { aiIndices: data?.ai_indices ?? [], isLoading, error: error ?? undefined, refetch };
+  return { aiIndices: data?.ai_indices ?? [], isLoading, error: error ?? undefined };
 };

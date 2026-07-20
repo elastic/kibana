@@ -14,12 +14,6 @@ const buildPath = (path: string, params?: Record<string, string>): string => {
   return queryParams.size ? `${path}?${queryParams}` : path;
 };
 
-/**
- * Centralized navigation for the Context Engine app. URLs are resolved through
- * Kibana's `application` service so they include the app base path, and clicks
- * on the resulting `href`s are turned into in-app (SPA) navigation by the
- * `RedirectAppLinks` wrapper mounted in `mount.tsx`.
- */
 export const useNavigation = () => {
   const {
     services: { application },
