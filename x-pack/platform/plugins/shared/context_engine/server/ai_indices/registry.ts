@@ -63,11 +63,10 @@ export class AiIndexRegistry {
       logger.debug(`AI index '${id}' already registered — skipping`);
       return;
     } catch (err) {
-      const isNotFound =
-        err instanceof AiIndexNotFoundError ||
-        (err instanceof Error && (err as Error & { statusCode?: number }).statusCode === 404);
-      if (!isNotFound) {
-        logger.warn(`Failed to check AI index '${id}' registration status: ${err.message}`);
+      if (!(err instanceof AiIndexNotFoundError)) {
+        logger.warn(
+          `Failed to check AI index '${id}' registration status: ${err instanceof Error ? err.message : String(err)}`
+        );
         return;
       }
     }
@@ -82,7 +81,9 @@ export class AiIndexRegistry {
             `Registration will be retried on next Kibana restart.`
         );
       } else {
-        logger.warn(`Failed to register AI index '${id}': ${err.message}`);
+        logger.warn(
+          `Failed to register AI index '${id}': ${err instanceof Error ? err.message : String(err)}`
+        );
       }
     }
   }

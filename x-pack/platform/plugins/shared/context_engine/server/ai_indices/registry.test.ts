@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AiIndexRegistry } from './registry';
-import { InvalidAiIndexDestError } from './errors';
+import { AiIndexNotFoundError, InvalidAiIndexDestError } from './errors';
 import type { AiIndexService } from './service';
 import type { AiIndexProperties } from '../../common/http_api/ai_indices';
 
@@ -41,7 +41,7 @@ describe('AiIndexRegistry', () => {
   describe('register()', () => {
     it('buffers a registration before startupRegister is called', async () => {
       const service = makeServiceMock({ get: jest.fn().mockResolvedValue(undefined) });
-      service.get.mockRejectedValue(Object.assign(new Error('not found'), { statusCode: 404 }));
+      service.get.mockRejectedValue(new AiIndexNotFoundError('test'));
       service.put.mockResolvedValue('created');
 
       registry.register('test', makeProperties());
