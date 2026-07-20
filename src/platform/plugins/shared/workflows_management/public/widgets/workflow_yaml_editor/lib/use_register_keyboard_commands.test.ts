@@ -13,13 +13,16 @@ import { useRegisterKeyboardCommands } from './use_register_keyboard_commands';
 
 jest.mock('@kbn/monaco', () => ({
   monaco: {
-    KeyMod: { CtrlCmd: 2048, Shift: 1024 },
+    KeyMod: { CtrlCmd: 2048, Shift: 1024, Alt: 512 },
     KeyCode: {
       Slash: 85,
       Digit7: 38,
       KeyK: 46,
       KeyS: 54,
+      KeyF: 36,
       Enter: 3,
+      UpArrow: 16,
+      DownArrow: 18,
     },
     editor: {
       EditorOption: { readOnly: 81 },
@@ -52,6 +55,15 @@ const createMockEditor = (readOnly = false) => {
   };
 };
 
+const defaultHandlers = () => ({
+  openActionsPopover: jest.fn(),
+  save: jest.fn(),
+  run: jest.fn(),
+  saveAndRun: jest.fn(),
+  moveStepUp: jest.fn(),
+  moveStepDown: jest.fn(),
+});
+
 describe('useRegisterKeyboardCommands', () => {
   it('returns registerKeyboardCommands and unregisterKeyboardCommands functions', () => {
     const { result } = renderHook(() => useRegisterKeyboardCommands());
@@ -60,7 +72,7 @@ describe('useRegisterKeyboardCommands', () => {
     expect(typeof result.current.unregisterKeyboardCommands).toBe('function');
   });
 
-  it('registers five keyboard actions on the editor', () => {
+  it('registers eight keyboard actions on the editor', () => {
     const { result } = renderHook(() => useRegisterKeyboardCommands());
     const editor = createMockEditor();
 
@@ -71,11 +83,13 @@ describe('useRegisterKeyboardCommands', () => {
         save: jest.fn(),
         run: jest.fn(),
         saveAndRun: jest.fn(),
+        moveStepUp: jest.fn(),
+        moveStepDown: jest.fn(),
       });
     });
 
-    // toggle comment, open actions popover, save, run, save and run
-    expect(editor.addAction).toHaveBeenCalledTimes(5);
+    // toggle comment, open actions popover, save, run, save and run, find & replace, move up/down
+    expect(editor.addAction).toHaveBeenCalledTimes(8);
   });
 
   it('calls save callback when save action runs on a writable editor', () => {
@@ -90,6 +104,8 @@ describe('useRegisterKeyboardCommands', () => {
         save,
         run: jest.fn(),
         saveAndRun: jest.fn(),
+        moveStepUp: jest.fn(),
+        moveStepDown: jest.fn(),
       });
     });
 
@@ -115,6 +131,8 @@ describe('useRegisterKeyboardCommands', () => {
         save: jest.fn(),
         run,
         saveAndRun: jest.fn(),
+        moveStepUp: jest.fn(),
+        moveStepDown: jest.fn(),
       });
     });
 
@@ -138,6 +156,8 @@ describe('useRegisterKeyboardCommands', () => {
         save: jest.fn(),
         run: jest.fn(),
         saveAndRun,
+        moveStepUp: jest.fn(),
+        moveStepDown: jest.fn(),
       });
     });
 
@@ -163,6 +183,8 @@ describe('useRegisterKeyboardCommands', () => {
         save: jest.fn(),
         run: jest.fn(),
         saveAndRun: jest.fn(),
+        moveStepUp: jest.fn(),
+        moveStepDown: jest.fn(),
       });
     });
 
@@ -189,6 +211,8 @@ describe('useRegisterKeyboardCommands', () => {
         save,
         run,
         saveAndRun: jest.fn(),
+        moveStepUp: jest.fn(),
+        moveStepDown: jest.fn(),
       });
     });
 
@@ -217,6 +241,8 @@ describe('useRegisterKeyboardCommands', () => {
       save: jest.fn(),
       run: jest.fn(),
       saveAndRun: jest.fn(),
+      moveStepUp: jest.fn(),
+      moveStepDown: jest.fn(),
     };
 
     act(() => {
@@ -228,8 +254,8 @@ describe('useRegisterKeyboardCommands', () => {
       result.current.registerKeyboardCommands(params);
     });
 
-    // Each of the 5 previous disposables should have been disposed
-    expect(disposable1.dispose).toHaveBeenCalledTimes(5);
+    // Each of the 8 previous disposables should have been disposed
+    expect(disposable1.dispose).toHaveBeenCalledTimes(8);
   });
 
   it('unregisterKeyboardCommands disposes all actions', () => {
@@ -248,6 +274,8 @@ describe('useRegisterKeyboardCommands', () => {
         save: jest.fn(),
         run: jest.fn(),
         saveAndRun: jest.fn(),
+        moveStepUp: jest.fn(),
+        moveStepDown: jest.fn(),
       });
     });
 
@@ -255,7 +283,7 @@ describe('useRegisterKeyboardCommands', () => {
       result.current.unregisterKeyboardCommands();
     });
 
-    expect(disposable.dispose).toHaveBeenCalledTimes(5);
+    expect(disposable.dispose).toHaveBeenCalledTimes(8);
   });
 
   it('triggers toggle comment on the editor for the comment action', () => {
@@ -277,6 +305,8 @@ describe('useRegisterKeyboardCommands', () => {
         save: jest.fn(),
         run: jest.fn(),
         saveAndRun: jest.fn(),
+        moveStepUp: jest.fn(),
+        moveStepDown: jest.fn(),
       });
     });
 
@@ -290,5 +320,37 @@ describe('useRegisterKeyboardCommands', () => {
     });
 
     expect(editor.trigger).toHaveBeenCalledWith('keyboard', 'editor.action.commentLine', null);
+  });
+
+  it('triggers find replace on the editor for the findAndReplace action', () => {
+    const { result } = renderHook(() => useRegisterKeyboardCommands());
+    const editor = createMockEditor(false);
+
+    act(() => {
+      result.current.registerKeyboardCommands({
+        editor,
+        openActionsPopover: jest.fn(),
+        save: jest.fn(),
+        run: jest.fn(),
+        saveAndRun: jest.fn(),
+        moveStepUp: jest.fn(),
+        moveStepDown: jest.fn(),
+      });
+    });
+
+    const findAction = editor._actions.find(
+      (a) => a.id === 'workflows.editor.action.findAndReplace'
+    );
+    expect(findAction).toBeDefined();
+
+    act(() => {
+      findAction!.run(editor);
+    });
+
+    expect(editor.trigger).toHaveBeenCalledWith(
+      'keyboard',
+      'editor.action.startFindReplaceAction',
+      null
+    );
   });
 });

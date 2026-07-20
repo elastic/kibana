@@ -7,43 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transparentize, useEuiShadow, useEuiTheme } from '@elastic/eui';
-import { css as cssClassName } from '@emotion/css';
 import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { monaco } from '@kbn/monaco';
+import { useStepHighlightBlockClass } from './use_step_highlight_block_class';
 import { selectEditorFocusedStepInfo } from '../../../../entities/workflows/store';
-import { FOCUSED_STEP_DECORATION_INSET_PX } from '../../styles/constants';
 
-export const useFocusedStepDecoration = (editor: monaco.editor.IStandaloneCodeEditor | null) => {
+export interface StepLineRange {
+  lineStart: number;
+  lineEnd: number;
+}
+
+/**
+ * Draws the border + shadow block around the focused step.
+ * When `overrideRange` is set (e.g. right after inserting a step), that range
+ * takes precedence so the highlight appears before workflowLookup catches up.
+ */
+export const useFocusedStepDecoration = (
+  editor: monaco.editor.IStandaloneCodeEditor | null,
+  overrideRange?: StepLineRange | null
+) => {
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
-  const { euiTheme } = useEuiTheme();
-
-  const borderColor = euiTheme.colors.vis.euiColorVis2;
-  const shadowSmall = useEuiShadow('s');
-
-  const blockClassName = useMemo(
-    () =>
-      // we use the pseudo-element to control the size of the decoration
-      // setting width with calc won't work, since decorations parent has a size 0x0
-      cssClassName`
-        position: relative;
-
-        &::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: 0;
-          right: ${FOCUSED_STEP_DECORATION_INSET_PX}px;
-          border: 1px solid ${borderColor};
-          border-radius: 4px;
-          ${shadowSmall}
-          background-color: ${transparentize(borderColor, 0.02)};
-          pointer-events: none;
-      }`,
-    [borderColor, shadowSmall]
-  );
+  const blockClassName = useStepHighlightBlockClass();
 
   const decorationsCollection = useMemo(() => {
     if (!editor) {
@@ -57,14 +42,20 @@ export const useFocusedStepDecoration = (editor: monaco.editor.IStandaloneCodeEd
       return;
     }
 
-    if (!focusedStepInfo) {
+    const range = overrideRange
+      ? overrideRange
+      : focusedStepInfo
+      ? { lineStart: focusedStepInfo.lineStart, lineEnd: focusedStepInfo.lineEnd }
+      : null;
+
+    if (!range) {
       decorationsCollection.clear();
       return;
     }
 
     decorationsCollection.set([
       {
-        range: new monaco.Range(focusedStepInfo.lineStart, 1, focusedStepInfo.lineEnd, 1),
+        range: new monaco.Range(range.lineStart, 1, range.lineEnd, 1),
         options: {
           blockClassName,
           isWholeLine: true,
@@ -72,7 +63,7 @@ export const useFocusedStepDecoration = (editor: monaco.editor.IStandaloneCodeEd
         },
       },
     ]);
-  }, [editor, focusedStepInfo, blockClassName, decorationsCollection]);
+  }, [editor, focusedStepInfo, overrideRange, blockClassName, decorationsCollection]);
 
   // Cleanup effect: only clears decorations on unmount or when
   // editor/decorationsCollection changes, avoiding unnecessary clears

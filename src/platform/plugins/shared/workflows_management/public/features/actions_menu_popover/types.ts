@@ -15,7 +15,10 @@ export interface EditorCommand {
   label: string;
   iconType: IconType;
   description?: string;
+  shortcut?: string[];
 }
+
+export type IconVariant = 'trigger' | 'platform' | 'external' | 'flowControl' | 'neutral';
 
 export interface JumpToStepEntry {
   id: string;
@@ -57,6 +60,7 @@ interface ActionBase {
   description?: string;
   instancesLabel?: string;
   iconColor?: string;
+  iconVariant?: IconVariant;
   stability?: StepStabilityLevel;
   /**
    * Ids from the root menu down through this row (for groups: path to open this group).

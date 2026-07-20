@@ -44,17 +44,27 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   isOpen,
 }: ActionsMenuPopoverProps) {
   useEffect(() => {
-    if (isOpen) {
-      const el = document.querySelector("[name='actions-menu-search']") as HTMLElement | null;
-      el?.focus();
-    }
+    if (!isOpen) return;
+    // Portal mount can lag one frame — focus once open content is in the DOM
+    const id = window.requestAnimationFrame(() => {
+      const el = document.querySelector(
+        "input[name='actions-menu-search']"
+      ) as HTMLInputElement | null;
+      el?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(id);
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
     <EuiPortal>
-      <div css={backdropCss} onClick={closePopover} />
+      <div
+        css={backdropCss}
+        onClick={closePopover}
+        data-test-subj="actionsMenuBackdrop"
+        aria-hidden
+      />
       <EuiPanel paddingSize="none" hasShadow css={panelCss}>
         <ActionsMenu
           onActionSelected={onActionSelected}
