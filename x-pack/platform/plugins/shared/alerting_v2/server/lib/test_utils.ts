@@ -118,6 +118,7 @@ export function createRuleExecutionPipelineInput(
     ruleId: 'rule-1',
     spaceId: 'default',
     scheduledAt: '2025-01-01T00:00:00.000Z',
+    executionUuid: 'execution-uuid',
     abortSignal: new AbortController().signal,
     ...overrides,
   };

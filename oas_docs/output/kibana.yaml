@@ -98,7 +98,7 @@ tags:
     x-displayName: Connectors
   - name: Dashboards
     description: |
-      > **Technical preview** — The Dashboards API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+      > This documentation is temporarily hosted at a separate location.
       >
       > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
     externalDocs:
@@ -402,7 +402,7 @@ tags:
       Enables you to invalidate user sessions for security and session management purposes.
   - name: Visualizations
     description: |
-      > **Technical preview** — The Visualizations API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+      > This documentation is temporarily hosted at a separate location.
       >
       > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
     externalDocs:
@@ -13618,7 +13618,7 @@ paths:
       summary: Get dashboards
       operationId: get-dashboards-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -13630,7 +13630,7 @@ paths:
       summary: Create a dashboard
       operationId: create-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -13643,7 +13643,7 @@ paths:
       summary: Get a dashboard
       operationId: get-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -13655,7 +13655,7 @@ paths:
       summary: Update a dashboard
       operationId: update-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -13667,7 +13667,7 @@ paths:
       summary: Delete a dashboard
       operationId: delete-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -52981,15 +52981,6 @@ paths:
               - propagated
               - resolution
             type: string
-        - description: Maximum number of history entries to return per request.
-          in: query
-          name: page_size
-          required: false
-          schema:
-            default: 100
-            maximum: 1000
-            minimum: 1
-            type: integer
         - description: When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.
           in: query
           name: include_contributions
@@ -53084,17 +53075,21 @@ paths:
                       nullable: true
                     type: object
                   coreMigrationVersion:
+                    maxLength: 256
                     type: string
                   id:
+                    maxLength: 512
                     type: string
                   initialNamespaces:
                     items:
+                      maxLength: 512
                       type: string
                     maxItems: 100
                     minItems: 1
                     type: array
                   migrationVersion:
                     additionalProperties:
+                      maxLength: 256
                       type: string
                     type: object
                   references:
@@ -53103,10 +53098,13 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         name:
+                          maxLength: 1024
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - name
@@ -53115,10 +53113,13 @@ paths:
                     maxItems: 1000
                     type: array
                   type:
+                    maxLength: 256
                     type: string
                   typeMigrationVersion:
+                    maxLength: 256
                     type: string
                   version:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53228,8 +53229,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53328,17 +53331,21 @@ paths:
                 properties:
                   fields:
                     items:
+                      maxLength: 1024
                       type: string
                     maxItems: 100
                     type: array
                   id:
+                    maxLength: 512
                     type: string
                   namespaces:
                     items:
+                      maxLength: 512
                       type: string
                     maxItems: 100
                     type: array
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53442,8 +53449,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53565,8 +53574,10 @@ paths:
                       nullable: true
                     type: object
                   id:
+                    maxLength: 512
                     type: string
                   namespace:
+                    maxLength: 512
                     minLength: 1
                     type: string
                   references:
@@ -53575,10 +53586,13 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         name:
+                          maxLength: 1024
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - name
@@ -53587,8 +53601,10 @@ paths:
                     maxItems: 1000
                     type: array
                   type:
+                    maxLength: 256
                     type: string
                   version:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53703,8 +53719,10 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - type
@@ -53714,8 +53732,10 @@ paths:
                         type: object
                         properties:
                           id:
+                            maxLength: 512
                             type: string
                           type:
+                            maxLength: 256
                             type: string
                         required:
                           - type
@@ -53733,8 +53753,10 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - type
@@ -53743,11 +53765,14 @@ paths:
                   type: array
                 search:
                   description: Search for documents to export using the Elasticsearch Simple Query String syntax.
+                  maxLength: 10000
                   type: string
                 type:
                   anyOf:
-                    - type: string
+                    - maxLength: 256
+                      type: string
                     - items:
+                        maxLength: 256
                         type: string
                       maxItems: 100
                       type: array
@@ -53850,6 +53875,7 @@ paths:
           required: true
           schema:
             items:
+              maxLength: 256
               type: string
             maxItems: 100
             type: array
@@ -53858,6 +53884,7 @@ paths:
           name: search
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: The boolean operator to use when combining multiple values.
           in: query
@@ -53875,6 +53902,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -53883,6 +53911,7 @@ paths:
           name: sort_field
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Return only saved objects that have a reference to the specified saved object(s).
           in: query
@@ -53894,8 +53923,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53905,8 +53936,10 @@ paths:
                   type: object
                   properties:
                     id:
+                      maxLength: 512
                       type: string
                     type:
+                      maxLength: 256
                       type: string
                   required:
                     - type
@@ -53933,8 +53966,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53944,8 +53979,10 @@ paths:
                   type: object
                   properties:
                     id:
+                      maxLength: 512
                       type: string
                     type:
+                      maxLength: 256
                       type: string
                   required:
                     - type
@@ -53968,6 +54005,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -53976,12 +54014,14 @@ paths:
           name: filter
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: Aggregations as a JSON string.
           in: query
           name: aggs
           required: false
           schema:
+            maxLength: 100000
             type: string
         - description: The namespaces (spaces) to search in.
           in: query
@@ -53989,6 +54029,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 512
               type: string
             maxItems: 100
             type: array
@@ -54259,8 +54300,10 @@ paths:
                       createNewCopy:
                         type: boolean
                       destinationId:
+                        maxLength: 512
                         type: string
                       id:
+                        maxLength: 512
                         type: string
                       ignoreMissingReferences:
                         type: boolean
@@ -54274,10 +54317,13 @@ paths:
                           type: object
                           properties:
                             from:
+                              maxLength: 512
                               type: string
                             to:
+                              maxLength: 512
                               type: string
                             type:
+                              maxLength: 256
                               type: string
                           required:
                             - type
@@ -54286,6 +54332,7 @@ paths:
                         maxItems: 100
                         type: array
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - type
@@ -54369,6 +54416,7 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: Overwrite an existing saved object.
           in: query
@@ -54396,15 +54444,18 @@ paths:
                     nullable: true
                   type: object
                 coreMigrationVersion:
+                  maxLength: 256
                   type: string
                 initialNamespaces:
                   items:
+                    maxLength: 512
                     type: string
                   maxItems: 100
                   minItems: 1
                   type: array
                 migrationVersion:
                   additionalProperties:
+                    maxLength: 256
                     type: string
                   type: object
                 references:
@@ -54413,10 +54464,13 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       name:
+                        maxLength: 1024
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - name
@@ -54425,6 +54479,7 @@ paths:
                   maxItems: 1000
                   type: array
                 typeMigrationVersion:
+                  maxLength: 256
                   type: string
               required:
                 - attributes
@@ -54506,12 +54561,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
         - description: When true, force deletion of multi-namespace objects from all namespaces.
           in: query
@@ -54576,12 +54633,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -54656,12 +54715,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
         - description: Overwrite an existing saved object.
           in: query
@@ -54689,15 +54750,18 @@ paths:
                     nullable: true
                   type: object
                 coreMigrationVersion:
+                  maxLength: 256
                   type: string
                 initialNamespaces:
                   items:
+                    maxLength: 512
                     type: string
                   maxItems: 100
                   minItems: 1
                   type: array
                 migrationVersion:
                   additionalProperties:
+                    maxLength: 256
                     type: string
                   type: object
                 references:
@@ -54706,10 +54770,13 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       name:
+                        maxLength: 1024
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - name
@@ -54718,6 +54785,7 @@ paths:
                   maxItems: 1000
                   type: array
                 typeMigrationVersion:
+                  maxLength: 256
                   type: string
               required:
                 - attributes
@@ -54798,12 +54866,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       requestBody:
         content:
@@ -54829,10 +54899,13 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       name:
+                        maxLength: 1024
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - name
@@ -54845,6 +54918,7 @@ paths:
                     nullable: true
                   type: object
                 version:
+                  maxLength: 256
                   type: string
               required:
                 - attributes
@@ -54930,12 +55004,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -72236,7 +72312,7 @@ paths:
       summary: Get visualizations
       operationId: get-visualizations-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -72248,7 +72324,7 @@ paths:
       summary: Create a visualization
       operationId: create-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -72261,7 +72337,7 @@ paths:
       summary: Get a visualization
       operationId: get-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -72273,7 +72349,7 @@ paths:
       summary: Update a visualization
       operationId: update-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -72285,7 +72361,7 @@ paths:
       summary: Delete a visualization
       operationId: delete-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -85137,6 +85213,8 @@ components:
             agent_download_timeout:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
+              nullable: true
+            agent_features_include_tags_in_events_enabled:
               nullable: true
             agent_internal:
               nullable: true
@@ -107887,6 +107965,8 @@ components:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
               nullable: true
+            agent_features_include_tags_in_events_enabled:
+              nullable: true
             agent_internal:
               nullable: true
             agent_limits_go_max_procs:
@@ -118973,6 +119053,8 @@ components:
             agent_download_timeout:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
+              nullable: true
+            agent_features_include_tags_in_events_enabled:
               nullable: true
             agent_internal:
               nullable: true
@@ -138340,9 +138422,14 @@ components:
           items:
             $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreHistoryEntry'
           type: array
+        interval:
+          description: The effective Elasticsearch `date_histogram` interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.
+          maxLength: 10
+          type: string
       required:
         - entity_id
         - entity_type
+        - interval
         - entries
     Security_Entity_Analytics_API_RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
