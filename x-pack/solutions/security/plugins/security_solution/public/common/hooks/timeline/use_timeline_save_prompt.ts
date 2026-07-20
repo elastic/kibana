@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { AppLeaveHandler } from '@kbn/core-application-browser';
 import { useHistory } from 'react-router-dom';
 import { useShowTimelineForGivenPath } from '../../utils/timeline/use_show_timeline_for_path';

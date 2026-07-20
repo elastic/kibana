@@ -11,12 +11,12 @@ import CONVERSATION_SCRAPER_YAML from './conversation_scraper.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID =
-  'system-streams-memory-conversation-scraper';
+  'system-significant-events-memory-conversation-scraper';
 
 export const SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   pluginId: 'significant_events',
-  version: 2,
+  version: 3,
   billable: false,
   yaml: CONVERSATION_SCRAPER_YAML,
   management: {

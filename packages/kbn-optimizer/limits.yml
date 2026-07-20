@@ -170,7 +170,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79863
-  securitySolution: 188674
+  securitySolution: 189500
   securitySolutionEss: 42592
   securitySolutionServerless: 57112
   serverless: 7412
@@ -180,7 +180,7 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64059
-  significant_events: 3551
+  significant_events: 3601
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
