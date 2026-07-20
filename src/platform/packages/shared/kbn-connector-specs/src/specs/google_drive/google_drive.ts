@@ -19,6 +19,18 @@ const DEFAULT_EXPORT_MIME_TYPE = 'application/pdf';
 // XLSX preserves tabular structure better than PDF for spreadsheets
 const SHEETS_EXPORT_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
+// Files in shared drives (Team Drives) have no individual owner. The Drive API excludes
+// them from list/search results and rejects access by ID unless the caller explicitly
+// opts into shared drive support. `supportsAllDrives` is required on every shared-drive
+// operation; `includeItemsFromAllDrives` additionally surfaces shared-drive files in
+// list/search results. The files.export endpoint accepts neither and is not gated behind
+// them, so exporting shared-drive Google Docs/Sheets works without extra params.
+// See https://developers.google.com/workspace/drive/api/guides/enable-shareddrives
+const SHARED_DRIVE_LIST_PARAMS = {
+  includeItemsFromAllDrives: true,
+  supportsAllDrives: true,
+} as const;
+
 /**
  * Escapes special characters in a string for use in Google Drive query syntax.
  * Google Drive queries use single quotes for string values, so backslashes
@@ -151,11 +163,12 @@ export const GoogleDriveConnector: ConnectorSpec = {
           orderBy?: string;
         };
 
-        const params: Record<string, string | number> = {
+        const params: Record<string, string | number | boolean> = {
           q: typedInput.query,
           pageSize: Math.min(typedInput.pageSize || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
           fields:
             'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+          ...SHARED_DRIVE_LIST_PARAMS,
         };
 
         if (typedInput.pageToken) {
@@ -227,11 +240,12 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
         const folderId = typedInput.folderId || DEFAULT_FOLDER_ID;
         const trashedFilter = typedInput.includeTrashed ? '' : ' and trashed=false';
-        const params: Record<string, string | number> = {
+        const params: Record<string, string | number | boolean> = {
           q: `'${escapeQueryValue(folderId)}' in parents${trashedFilter}`,
           pageSize: Math.min(typedInput.pageSize || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
           fields:
             'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+          ...SHARED_DRIVE_LIST_PARAMS,
         };
 
         if (typedInput.pageToken) {
@@ -282,6 +296,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             {
               params: {
                 fields: 'id, name, mimeType, size',
+                supportsAllDrives: true,
               },
             }
           );
@@ -316,6 +331,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
               {
                 params: {
                   alt: 'media',
+                  supportsAllDrives: true,
                 },
                 responseType: 'arraybuffer',
               }
@@ -382,7 +398,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             typedInput.fileIds.map(async (fileId) => {
               try {
                 const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files/${fileId}`, {
-                  params: { fields: metadataFields },
+                  params: { fields: metadataFields, supportsAllDrives: true },
                 });
                 return response.data;
               } catch (error: unknown) {
