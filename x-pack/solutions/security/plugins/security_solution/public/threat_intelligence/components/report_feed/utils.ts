@@ -14,21 +14,34 @@ import type {
 import type { ThreatReportFeedItem } from './types';
 import { SEVERITY_RANK, type ReportFeedSort } from './constants';
 
+/**
+ * Whether Hub should render `source.url` as an external link.
+ * Allows http(s) and offline fixture articles (`data:text/html` only).
+ * Other `data:` MIME types (svg, javascript, …) stay hidden.
+ */
 export const isBrowsableReportUrl = (url: string | undefined): url is string => {
   if (!url) return false;
   try {
     const { protocol } = new URL(url);
-    return protocol === 'http:' || protocol === 'https:';
+    if (protocol === 'http:' || protocol === 'https:') return true;
+    if (protocol !== 'data:') return false;
+    const commaIdx = url.indexOf(',');
+    if (commaIdx === -1) return false;
+    const meta = url.slice('data:'.length, commaIdx).toLowerCase();
+    const mime = meta.split(';')[0] ?? '';
+    return mime === 'text/html';
   } catch {
     return false;
   }
 };
 
 export const getSourceFaviconUrl = (sourceUrl?: string): string | undefined => {
-  if (!isBrowsableReportUrl(sourceUrl)) return undefined;
+  if (!sourceUrl) return undefined;
   try {
-    const host = new URL(sourceUrl).hostname;
-    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=32`;
+    const { protocol, hostname } = new URL(sourceUrl);
+    if (protocol !== 'http:' && protocol !== 'https:') return undefined;
+    if (!hostname) return undefined;
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=32`;
   } catch {
     return undefined;
   }
