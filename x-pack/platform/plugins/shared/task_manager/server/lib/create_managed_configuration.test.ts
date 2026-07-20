@@ -314,63 +314,54 @@ describe('createManagedConfiguration()', () => {
         const { subscription, errors$ } = setupScenario(DEFAULT_POLL_INTERVAL, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL * 10);
-        expect(subscription).toHaveBeenNthCalledWith(2, 600);
-        expect(subscription).toHaveBeenNthCalledWith(3, 570);
-        expect(subscription).toHaveBeenNthCalledWith(4, 541);
-        expect(subscription).toHaveBeenNthCalledWith(5, 513);
-        expect(subscription).toHaveBeenNthCalledWith(6, DEFAULT_POLL_INTERVAL);
+        expect(subscription).toHaveBeenNthCalledWith(2, 3600);
+        expect(subscription).toHaveBeenNthCalledWith(3, 3420);
+        expect(subscription).toHaveBeenNthCalledWith(4, 3249);
+        expect(subscription).toHaveBeenNthCalledWith(5, 3086);
+        expect(subscription).toHaveBeenNthCalledWith(6, 3000);
         // No new calls due to value not changing and usage of distinctUntilChanged()
         expect(subscription).toHaveBeenCalledTimes(6);
       });
 
       test('should decrease configuration after error and reset to initial poll interval when poll interval < default and TM utilization > 25%', async () => {
-        const { subscription, errors$ } = setupScenario(
-          DEFAULT_POLL_INTERVAL - 20,
-          CLAIM_STRATEGY_MGET
-        );
+        const { subscription, errors$ } = setupScenario(2800, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL * 10);
-        expect(subscription).toHaveBeenNthCalledWith(2, 576);
-        expect(subscription).toHaveBeenNthCalledWith(3, 547);
-        expect(subscription).toHaveBeenNthCalledWith(4, 519);
-        expect(subscription).toHaveBeenNthCalledWith(5, DEFAULT_POLL_INTERVAL - 20);
+        expect(subscription).toHaveBeenNthCalledWith(2, 3360);
+        expect(subscription).toHaveBeenNthCalledWith(3, 3192);
+        expect(subscription).toHaveBeenNthCalledWith(4, 3032);
+        expect(subscription).toHaveBeenNthCalledWith(5, 2800);
         // No new calls due to value not changing and usage of distinctUntilChanged()
         expect(subscription).toHaveBeenCalledTimes(5);
       });
 
       test('should decrease configuration after error and reset to default poll interval when poll interval < default and TM utilization < 25%', async () => {
-        const { subscription, errors$, utilization$ } = setupScenario(
-          DEFAULT_POLL_INTERVAL - 20,
-          CLAIM_STRATEGY_MGET
-        );
+        const { subscription, errors$, utilization$ } = setupScenario(2800, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         for (let i = 0; i < 10; i++) {
           utilization$.next(20);
           jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
         }
-        expect(subscription).toHaveBeenNthCalledWith(2, 576);
-        expect(subscription).toHaveBeenNthCalledWith(3, 547);
-        expect(subscription).toHaveBeenNthCalledWith(4, 519);
-        expect(subscription).toHaveBeenNthCalledWith(5, DEFAULT_POLL_INTERVAL);
+        expect(subscription).toHaveBeenNthCalledWith(2, 3360);
+        expect(subscription).toHaveBeenNthCalledWith(3, 3192);
+        expect(subscription).toHaveBeenNthCalledWith(4, 3032);
+        expect(subscription).toHaveBeenNthCalledWith(5, 3000);
         // No new calls due to value not changing and usage of distinctUntilChanged()
         expect(subscription).toHaveBeenCalledTimes(5);
       });
 
       test('should change configuration based on TM utilization', async () => {
-        const { subscription, utilization$ } = setupScenario(
-          DEFAULT_POLL_INTERVAL / 2,
-          CLAIM_STRATEGY_MGET
-        );
+        const { subscription, utilization$ } = setupScenario(500, CLAIM_STRATEGY_MGET);
         const u = [15, 35, 5, 48, 0];
         for (let i = 0; i < u.length; i++) {
           utilization$.next(u[i]);
           jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
         }
-        expect(subscription).toHaveBeenNthCalledWith(2, 500);
-        expect(subscription).toHaveBeenNthCalledWith(3, 250);
-        expect(subscription).toHaveBeenNthCalledWith(4, 500);
-        expect(subscription).toHaveBeenNthCalledWith(5, 250);
-        expect(subscription).toHaveBeenNthCalledWith(6, 500);
+        expect(subscription).toHaveBeenNthCalledWith(2, 3000);
+        expect(subscription).toHaveBeenNthCalledWith(3, 500);
+        expect(subscription).toHaveBeenNthCalledWith(4, 3000);
+        expect(subscription).toHaveBeenNthCalledWith(5, 500);
+        expect(subscription).toHaveBeenNthCalledWith(6, 3000);
         expect(subscription).toHaveBeenCalledTimes(6);
       });
 
@@ -379,7 +370,7 @@ describe('createManagedConfiguration()', () => {
         utilization$.next(20);
         jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
         expect(logger.debug).toHaveBeenCalledWith(
-          'Poll interval configuration changing from 100 to 500 after a change in the average task load: 20.'
+          'Poll interval configuration changing from 100 to 3000 after a change in the average task load: 20.'
         );
       });
     });

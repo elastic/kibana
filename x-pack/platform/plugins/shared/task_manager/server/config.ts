@@ -15,7 +15,7 @@ export const MAX_CAPACITY = 50;
 export const MIN_CAPACITY = 5;
 export const DEFAULT_MAX_WORKERS = 10;
 export const MGET_DEFAULT_POLL_INTERVAL = 500;
-export const DEFAULT_POLL_INTERVAL = MGET_DEFAULT_POLL_INTERVAL;
+export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 
 // Monitoring Constants

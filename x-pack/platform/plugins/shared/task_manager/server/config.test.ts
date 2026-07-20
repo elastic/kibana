@@ -38,7 +38,7 @@ describe('config validation', () => {
           "level": "debug",
           "warn_delayed_task_start_in_seconds": 60,
         },
-        "monitored_stats_required_freshness": 1500,
+        "monitored_stats_required_freshness": 4000,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": Object {
           "custom": Object {},
@@ -47,7 +47,7 @@ describe('config validation', () => {
             "warn_threshold": 80,
           },
         },
-        "poll_interval": 500,
+        "poll_interval": 3000,
         "request_capacity": 1000,
         "request_timeouts": Object {
           "update_by_query": 30000,
@@ -68,7 +68,7 @@ describe('config validation', () => {
     expect(() => {
       configSchema.validate(config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (500)"`
+      `"The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (3000)"`
     );
   });
 
@@ -102,7 +102,7 @@ describe('config validation', () => {
           "level": "debug",
           "warn_delayed_task_start_in_seconds": 60,
         },
-        "monitored_stats_required_freshness": 1500,
+        "monitored_stats_required_freshness": 4000,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": Object {
           "custom": Object {},
@@ -111,7 +111,7 @@ describe('config validation', () => {
             "warn_threshold": 80,
           },
         },
-        "poll_interval": 500,
+        "poll_interval": 3000,
         "request_capacity": 1000,
         "request_timeouts": Object {
           "update_by_query": 30000,
@@ -164,7 +164,7 @@ describe('config validation', () => {
           "level": "debug",
           "warn_delayed_task_start_in_seconds": 60,
         },
-        "monitored_stats_required_freshness": 1500,
+        "monitored_stats_required_freshness": 4000,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": Object {
           "custom": Object {
@@ -178,7 +178,7 @@ describe('config validation', () => {
             "warn_threshold": 80,
           },
         },
-        "poll_interval": 500,
+        "poll_interval": 3000,
         "request_capacity": 1000,
         "request_timeouts": Object {
           "update_by_query": 30000,
@@ -262,12 +262,12 @@ describe('config validation', () => {
 
   test('any claim strategy is valid and poll interval uses default value', () => {
     const result = configSchema.validate({ claim_strategy: 'anything!' });
-    expect(result.poll_interval).toEqual(500);
+    expect(result.poll_interval).toEqual(3000);
   });
 
   test('mget claim strategy defaults poll interval to 500ms', () => {
     const result = configSchema.validate({ claim_strategy: CLAIM_STRATEGY_MGET });
-    expect(result.poll_interval).toEqual(500);
+    expect(result.poll_interval).toEqual(3000);
   });
 
   test('discovery active_nodes_lookback must be a valid duration', () => {
