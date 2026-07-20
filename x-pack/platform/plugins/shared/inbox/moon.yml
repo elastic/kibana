@@ -35,6 +35,8 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/workflows-extensions'
   - '@kbn/zod'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-server'
 tags:
   - plugin
   - prod

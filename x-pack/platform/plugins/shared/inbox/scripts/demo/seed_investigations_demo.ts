@@ -516,7 +516,9 @@ const deleteConversation = async (config: SeedConfig, row: InvestigationRow) => 
     if (response.status === 401 || response.status === 403) {
       // eslint-disable-next-line no-console
       console.warn(
-        `Skipped delete ${row.conversation_id} (${username}): ${response.status} — set KIBANA_PASSWORD_${username.toUpperCase()} if needed`
+        `Skipped delete ${row.conversation_id} (${username}): ${
+          response.status
+        } — set KIBANA_PASSWORD_${username.toUpperCase()} if needed`
       );
       return;
     }

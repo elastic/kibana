@@ -80,6 +80,10 @@ describe('registerConversationRoutes', () => {
               }
             ),
         })),
+        // POC workaround route registers PUT; mock must include it for registration.
+        put: jest.fn().mockImplementation(() => ({
+          addVersion: jest.fn(),
+        })),
         delete: jest.fn().mockImplementation(() => ({
           addVersion: jest.fn(),
         })),
@@ -166,6 +170,10 @@ describe('registerConversationRoutes', () => {
                 }
               }
             ),
+        })),
+        // POC workaround route registers PUT; mock must include it for registration.
+        put: jest.fn().mockImplementation(() => ({
+          addVersion: jest.fn(),
         })),
         delete: jest.fn().mockImplementation(() => ({
           addVersion: jest.fn(),

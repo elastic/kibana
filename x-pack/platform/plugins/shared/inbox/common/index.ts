@@ -40,11 +40,7 @@ export {
   INBOX_WATCH_URL_TEMPLATE,
   buildWatchUrl,
 } from './watches';
-export type {
-  Investigation,
-  ListInvestigationsResponse,
-  ProposalEnvelope,
-} from './investigations';
+export type { Investigation, ListInvestigationsResponse, ProposalEnvelope } from './investigations';
 export {
   DAYBREAK_EVIDENCE_ATTACHMENT_ID,
   DAYBREAK_PROPOSAL_ATTACHMENT_ID,
