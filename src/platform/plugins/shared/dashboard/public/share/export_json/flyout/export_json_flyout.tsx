@@ -63,7 +63,7 @@ export const ExportJsonFlyout = <
 }: ExportJsonSharingData<State> & {
   objectType: string;
   closeFlyout: () => void;
-  apiPath?: string;
+  apiPath?: string; // if provided, the "Open in Console" button is shown
   sanitizeState: SanitizeStateFunction<State, SanitizedState>;
 }) => {
   const [exportFullState, setExportFullState] = useState<boolean>(false);
