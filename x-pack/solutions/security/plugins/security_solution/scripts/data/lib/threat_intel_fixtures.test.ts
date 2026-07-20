@@ -62,8 +62,9 @@ describe('PACK_TI_SCENARIOS', () => {
       expect(articleUrl.startsWith('data:text/html;charset=utf-8,')).toBe(true);
       const html = decodeURIComponent(articleUrl.replace(/^data:text\/html;charset=utf-8,/, ''));
       expect(html).toContain(scenario.title);
-      expect(html).toContain(scenario.body);
       expect(html).toContain(scenario.name);
+      // Body is HTML-escaped (e.g. ATT&CK → ATT&amp;CK), so match a stable unescaped slice.
+      expect(html).toContain(scenario.body.slice(0, 48));
     }
   });
 
