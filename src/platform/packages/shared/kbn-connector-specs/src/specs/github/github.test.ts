@@ -46,6 +46,13 @@ describe('GithubConnector', () => {
   });
 
   describe('auth', () => {
+    it('supports allowed repository configuration for sandbox GitHub App tokens', () => {
+      const result = GithubConnector.schema?.safeParse({
+        allowedRepos: 'elastic/kibana, my-org/*',
+      });
+      expect(result?.success).toBe(true);
+    });
+
     it('supports bearer auth labeled as Personal Access Token (PAT)', () => {
       const bearerType = GithubConnector.auth?.types.find(
         (t) => typeof t === 'object' && t.type === 'bearer'
@@ -64,6 +71,31 @@ describe('GithubConnector', () => {
         isEarsExperimentalEnabled: true,
       });
       const result = schema.safeParse({ authType: 'bearer', token: 'some-legacy-token' });
+      expect(result.success).toBe(true);
+    });
+
+    it('supports GitHub App auth for sandbox installation tokens', () => {
+      const githubAppType = GithubConnector.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'github_app'
+      );
+      expect(githubAppType).toEqual(
+        expect.objectContaining({
+          type: 'github_app',
+          overrides: expect.objectContaining({ label: 'GitHub App (sandbox git/gh)' }),
+        })
+      );
+    });
+
+    it('validates GitHub App auth secrets', () => {
+      const schema = generateSecretsSchemaFromSpec(GithubConnector.auth, {
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: true,
+      });
+      const result = schema.safeParse({
+        authType: 'github_app',
+        appId: '123456',
+        privateKey: '-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----',
+      });
       expect(result.success).toBe(true);
     });
 
@@ -469,6 +501,23 @@ describe('GithubConnector', () => {
       expect(result).toEqual({
         ok: true,
         message: 'Connected to GitHub MCP server. 2 tools available.',
+      });
+    });
+
+    it('accepts GitHub App credentials without a repo-scoped token at setup time', async () => {
+      if (!GithubConnector.test) {
+        throw new Error('test handler not defined');
+      }
+      const result = await GithubConnector.test.handler({
+        ...mockContext,
+        secrets: { authType: 'github_app' },
+      } as unknown as ActionContext);
+
+      expect(mockListTools).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        ok: true,
+        message:
+          'GitHub App credentials are configured. Agent Builder sandboxes will mint repo-scoped installation tokens at run time.',
       });
     });
 

@@ -79,6 +79,57 @@ export const BEARER_AUTH_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const GITHUB_APP_AUTH_LABEL = i18n.translate('connectorSpecs.githubAppAuth.label', {
+  defaultMessage: 'GitHub App',
+});
+
+export const GITHUB_APP_ID_LABEL = i18n.translate('connectorSpecs.githubAppAuth.appId.label', {
+  defaultMessage: 'App ID',
+});
+
+export const GITHUB_APP_ID_HELP_TEXT = i18n.translate(
+  'connectorSpecs.githubAppAuth.appId.helpText',
+  {
+    defaultMessage: 'The numeric ID of the GitHub App.',
+  }
+);
+
+export const GITHUB_APP_ID_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.githubAppAuth.appId.requiredMessage',
+  {
+    defaultMessage: 'App ID is required',
+  }
+);
+
+export const GITHUB_APP_ID_INVALID_MESSAGE = i18n.translate(
+  'connectorSpecs.githubAppAuth.appId.invalidMessage',
+  {
+    defaultMessage: 'App ID must be the numeric GitHub App ID.',
+  }
+);
+
+export const GITHUB_APP_PRIVATE_KEY_LABEL = i18n.translate(
+  'connectorSpecs.githubAppAuth.privateKey.label',
+  {
+    defaultMessage: 'Private key',
+  }
+);
+
+export const GITHUB_APP_PRIVATE_KEY_HELP_TEXT = i18n.translate(
+  'connectorSpecs.githubAppAuth.privateKey.helpText',
+  {
+    defaultMessage:
+      'The PEM private key for the GitHub App. Used by Kibana to mint short-lived installation tokens.',
+  }
+);
+
+export const GITHUB_APP_PRIVATE_KEY_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.githubAppAuth.privateKey.requiredMessage',
+  {
+    defaultMessage: 'Private key is required',
+  }
+);
+
 export const NO_AUTH_LABEL = i18n.translate('connectorSpecs.authType.noAuth.label', {
   defaultMessage: 'None',
 });

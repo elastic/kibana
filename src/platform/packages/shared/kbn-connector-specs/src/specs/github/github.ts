@@ -103,6 +103,15 @@ export const GithubConnector: ConnectorSpec = {
           }),
         },
       },
+      {
+        type: 'github_app',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.github.auth.githubApp.label', {
+            defaultMessage: 'GitHub App (sandbox git/gh)',
+          }),
+        },
+      },
     ],
     headers: {
       Accept: 'application/vnd.github+json',
@@ -123,6 +132,21 @@ export const GithubConnector: ConnectorSpec = {
           }),
           helpText: i18n.translate('connectorSpecs.github.config.serverUrl.helpText', {
             defaultMessage: 'The URL of the GitHub Copilot MCP server.',
+          }),
+        }),
+      allowedRepos: z
+        .string()
+        .optional()
+        .describe('GitHub repositories this connector may grant sandbox git access to')
+        .meta({
+          widget: 'text',
+          placeholder: 'elastic/kibana, my-org/*',
+          label: i18n.translate('connectorSpecs.github.config.allowedRepos.label', {
+            defaultMessage: 'Allowed repositories',
+          }),
+          helpText: i18n.translate('connectorSpecs.github.config.allowedRepos.helpText', {
+            defaultMessage:
+              'Comma, space, or newline separated owner/repo entries. Use owner/* to allow all repositories for an owner.',
           }),
         }),
     })
@@ -406,6 +430,14 @@ export const GithubConnector: ConnectorSpec = {
         'Verifies connection to the GitHub Copilot MCP server by listing available tools.',
     }),
     handler: async (ctx) => {
+      if (ctx.secrets?.authType === 'github_app') {
+        return {
+          ok: true,
+          message:
+            'GitHub App credentials are configured. Agent Builder sandboxes will mint repo-scoped installation tokens at run time.',
+        };
+      }
+
       return withMcpClient(ctx, async (mcp) => {
         const { tools } = await mcp.listTools();
         return {

@@ -13,6 +13,7 @@ export * from './auth_types/aws_credentials';
 export * from './auth_types/bearer';
 export * from './auth_types/basic';
 export * from './auth_types/gcp_service_account';
+export { GithubAppAuth } from './auth_types/github_app';
 export * from './auth_types/none';
 export * from './auth_types/oauth';
 export { OAuthAuthorizationCode } from './auth_types/oauth_authorization_code';
