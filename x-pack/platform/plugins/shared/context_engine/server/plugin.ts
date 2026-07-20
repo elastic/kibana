@@ -85,7 +85,9 @@ export class ContextEnginePlugin
       })
       .catch((err) => {
         aiIndexLogger.warn(
-          `AI index startup registration failed: ${err instanceof Error ? err.message : String(err)}`
+          `AI index startup registration failed: ${
+            err instanceof Error ? err.message : String(err)
+          }`
         );
       });
 
