@@ -38,8 +38,10 @@ jest.mock('../service_flyout_context', () => ({
 
 function makeContext(sloRead = true) {
   return {
-    core: { application: { capabilities: { slo: { read: sloRead } } } },
-    share: { url: { locators: { get: mockLocatorsGet } } },
+    deps: {
+      core: { application: { capabilities: { slo: { read: sloRead } } } },
+      share: { url: { locators: { get: mockLocatorsGet } } },
+    },
   };
 }
 

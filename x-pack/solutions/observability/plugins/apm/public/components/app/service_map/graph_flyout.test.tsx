@@ -30,6 +30,16 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   }),
 }));
 
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {},
+    share: {},
+    lens: {},
+    dataViews: {},
+    plugins: {},
+  }),
+}));
+
 jest.mock('@xyflow/react', () => {
   const original = jest.requireActual('@xyflow/react');
   return {
