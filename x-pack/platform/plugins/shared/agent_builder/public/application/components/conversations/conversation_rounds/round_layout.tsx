@@ -107,16 +107,13 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 
   const {
     isResponseLoading,
+    isStreaming,
     error,
     retry: retrySendMessage,
     resumeRound,
     isResuming,
   } = useConversationStream();
-  // Once the round reaches awaitingPrompt the response is effectively paused and the user
-  // should be able to answer the HITL prompt immediately. Locking only during response loading
-  // (round still in progress / resume in flight) prevents clicks while the assistant is actively
-  // generating, without the 1–2 s delay caused by the trailing stream close.
-  const isHitlDisabled = isResponseLoading && !isResuming;
+  const isHitlDisabled = isStreaming && !isResuming;
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;

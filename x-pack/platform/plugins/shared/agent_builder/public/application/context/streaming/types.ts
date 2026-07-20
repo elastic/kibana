@@ -11,8 +11,6 @@ export type StreamType = 'send' | 'regenerate' | 'resume';
 
 export interface ActiveStream {
   type: StreamType;
-  /** Number of in-flight mutations for this conversation. Ref-counted so a send and a resume can overlap. */
-  count: number;
 }
 
 export interface StreamRecord {
