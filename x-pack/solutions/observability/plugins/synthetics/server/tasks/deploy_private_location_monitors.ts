@@ -267,7 +267,8 @@ export class DeployPrivateLocationMonitors {
           privateConfigs,
           allPrivateLocations,
           spaceId,
-          maintenanceWindows
+          maintenanceWindows,
+          { retryFailedCreates: true }
         );
 
         if (result?.failedCreates && result.failedCreates.length > 0) {
