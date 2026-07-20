@@ -21,6 +21,15 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/zod'
   - '@kbn/std'
+  - '@kbn/core-data-streams-server'
+  - '@kbn/core-data-streams-server-mocks'
+  - '@kbn/core-user-storage-server'
+  - '@kbn/core-user-storage-server-mocks'
+  - '@kbn/data-streams'
+  - '@kbn/es-mappings'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/test'
+  - '@kbn/tooling-log'
 tags:
   - plugin
   - prod

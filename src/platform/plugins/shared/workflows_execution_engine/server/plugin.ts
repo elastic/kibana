@@ -32,11 +32,8 @@ import {
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
-import {
-  maybeDrainConcurrencyQueueAfterTerminal,
-  maybeDrainConcurrencyQueueBeforeEnqueue,
-} from './concurrency/concurrency_queue_drainer';
-import { maybeScheduleDormantQueuedRunIfNeeded } from './concurrency/maybe_schedule_dormant_queued_run';
+import { maybeDrainConcurrencyQueueBeforeEnqueue } from './concurrency/concurrency_queue_drainer';
+import { handleConcurrencyBlockedExecution } from './concurrency/maybe_schedule_dormant_queued_run';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
   cancelWorkflow,
@@ -44,6 +41,7 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { handlePostExecutionLoop } from './execution_functions/handle_post_execution_loop';
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
@@ -253,12 +251,16 @@ export class WorkflowsExecutionEnginePlugin
               });
 
               if (interruptedOutcome === 'task_complete') {
-                await maybeDrainConcurrencyQueueAfterTerminal({
-                  workflowExecutionRepository,
-                  workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
-                  logger,
+                await handlePostExecutionLoop({
                   workflowRunId,
                   spaceId,
+                  fakeRequest,
+                  workflowExecutionRepository,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                  workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                  meteringService: this.meteringService,
+                  cloudSetup: setupDependencies.cloudSetup,
+                  logger,
                 });
                 return;
               }
@@ -377,11 +379,22 @@ export class WorkflowsExecutionEnginePlugin
               });
 
               if (interruptedOutcome === 'task_complete') {
+                await handlePostExecutionLoop({
+                  workflowRunId,
+                  spaceId,
+                  fakeRequest,
+                  workflowExecutionRepository,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                  workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                  meteringService: this.meteringService,
+                  cloudSetup: setupDependencies.cloudSetup,
+                  logger,
+                });
                 return;
               }
 
               try {
-                await resumeWorkflow({
+                const { idleTimeoutResumeAt } = await resumeWorkflow({
                   workflowRunId,
                   spaceId,
                   taskAbortController,
@@ -393,6 +406,16 @@ export class WorkflowsExecutionEnginePlugin
                   meteringService: this.meteringService,
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                 });
+
+                if (
+                  taskInstance.id === getWorkflowGlobalTimeoutResumeTaskId(workflowRunId) &&
+                  idleTimeoutResumeAt
+                ) {
+                  // Task Manager deletes one-shot resume tasks on success unless a future
+                  // runAt is returned. Re-arm this stable waiter when chained HITL leaves the
+                  // execution waiting again (e.g. external resume → second waitForApproval).
+                  return { runAt: idleTimeoutResumeAt, state: {} };
+                }
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
@@ -598,12 +621,13 @@ export class WorkflowsExecutionEnginePlugin
               const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
               if (!canProceed) {
                 if (workflowExecution.id && workflowExecution.spaceId) {
-                  await maybeScheduleDormantQueuedRunIfNeeded({
+                  await handleConcurrencyBlockedExecution({
                     workflowExecutionId: workflowExecution.id,
                     spaceId: workflowExecution.spaceId,
                     request: fakeRequest,
                     workflowExecutionRepository,
                     workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                    internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                     logger,
                   });
                 }
@@ -836,12 +860,13 @@ export class WorkflowsExecutionEnginePlugin
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
       if (!canProceed) {
         if (workflowExecution.id && workflowExecution.spaceId) {
-          await maybeScheduleDormantQueuedRunIfNeeded({
+          await handleConcurrencyBlockedExecution({
             workflowExecutionId: workflowExecution.id,
             spaceId: workflowExecution.spaceId,
             request,
             workflowExecutionRepository,
             workflowTaskManager,
+            internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
             logger: this.logger,
           });
         }
@@ -904,12 +929,13 @@ export class WorkflowsExecutionEnginePlugin
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
       if (!canProceed) {
         if (workflowExecution.id && workflowExecution.spaceId) {
-          await maybeScheduleDormantQueuedRunIfNeeded({
+          await handleConcurrencyBlockedExecution({
             workflowExecutionId: workflowExecution.id,
             spaceId: workflowExecution.spaceId,
             request,
             workflowExecutionRepository,
             workflowTaskManager,
+            internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
             logger: this.logger,
           });
         }
@@ -1072,12 +1098,16 @@ export class WorkflowsExecutionEnginePlugin
           return;
         }
 
-        await maybeScheduleDormantQueuedRunIfNeeded({
+        // `false` means the current execution was queued or terminalized before a task ran.
+        // `cancel-in-progress` returns true for the new execution; cancelled older executions
+        // resume sync parents through their own running task's normal cancellation path.
+        await handleConcurrencyBlockedExecution({
           workflowExecutionId: p.workflowExecution.id as string,
           spaceId: p.workflowExecution.spaceId ?? 'default',
           request,
           workflowExecutionRepository,
           workflowTaskManager,
+          internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
           logger: this.logger,
         });
       };
@@ -1239,7 +1269,8 @@ export class WorkflowsExecutionEnginePlugin
       executionId,
       spaceId,
       input,
-      request
+      request,
+      options
     ) => {
       await checkLicense(plugins.licensing);
 
@@ -1275,17 +1306,18 @@ export class WorkflowsExecutionEnginePlugin
         );
       }
 
-      const resumedBy = await getAuthenticatedUser(
-        request,
-        coreStart.security,
-        coreStart.elasticsearch.client
-      );
+      const resumedBy =
+        options?.resumedBy ??
+        (request
+          ? await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client)
+          : 'unknown');
+      const resumedAt = new Date().toISOString();
 
       const resumeContext = {
         ...workflowExecution.context,
         resumeInput: input,
         resumedBy,
-        resumedAt: new Date().toISOString(),
+        resumedAt,
       };
 
       await internalResumeWorkflowExecution(executionId, spaceId, resumeContext, request);
@@ -1306,11 +1338,13 @@ export class WorkflowsExecutionEnginePlugin
         });
       }
 
-      await workflowTaskManager.scheduleImmediateResume({
-        executionId,
-        spaceId,
-        fakeRequest: request,
-      });
+      if (!request) {
+        // External resume: wake the idle-timeout task created when entering WAITING_FOR_INPUT.
+        // That task retains the workflow runner API key; ad-hoc tasks scheduled without a
+        // request cannot be executed by workflow:resume (no fakeRequest at run time).
+        await plugins.taskManager.runSoon(getWorkflowGlobalTimeoutResumeTaskId(executionId));
+        return;
+      }
 
       await plugins.taskManager
         .removeIfExists(getWorkflowGlobalTimeoutResumeTaskId(executionId))
@@ -1322,8 +1356,11 @@ export class WorkflowsExecutionEnginePlugin
           );
         });
 
-      // Same idea as cancel: nudge TM so the resume task runs as soon as possible
-      await workflowTaskManager.forceRunIdleTasks(executionId, {
+      // scheduleAndRunImmediateResume uses a stable per-execution task id
+      // (removeIfExists + schedule) so only one resume task can exist at a time,
+      // then nudges Task Manager via runSoon without relying on index freshness.
+      await workflowTaskManager.scheduleAndRunImmediateResume({
+        executionId,
         spaceId,
         fakeRequest: request,
       });

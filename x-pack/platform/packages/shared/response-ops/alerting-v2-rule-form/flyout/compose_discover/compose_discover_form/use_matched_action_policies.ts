@@ -13,7 +13,7 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 
 interface UseMatchedActionPoliciesParams {
-  http?: HttpStart;
+  http: HttpStart;
   ruleId?: string;
   name?: string;
   tags?: string[];
@@ -23,6 +23,7 @@ export interface UseMatchedActionPoliciesResult {
   isLoading: boolean;
   error: Error | null;
   items: MatchedActionPolicy[];
+  total: number;
 }
 
 export const useMatchedActionPolicies = ({
@@ -31,7 +32,7 @@ export const useMatchedActionPolicies = ({
   name,
   tags,
 }: UseMatchedActionPoliciesParams): UseMatchedActionPoliciesResult => {
-  const enabled = Boolean(http) && (Boolean(ruleId) || Boolean(name) || Boolean(tags?.length));
+  const enabled = Boolean(ruleId) || Boolean(name) || Boolean(tags?.length);
 
   const body = {
     rule: {
@@ -43,13 +44,11 @@ export const useMatchedActionPolicies = ({
 
   const { isLoading, error, data } = useQuery({
     queryKey: ['matchedActionPolicies', ruleId, name, tags],
-    queryFn: async (): Promise<MatchActionPoliciesForRuleResponse> => {
-      if (!http) return { items: [] };
-      return http.fetch<MatchActionPoliciesForRuleResponse>(
+    queryFn: () =>
+      http.fetch<MatchActionPoliciesForRuleResponse>(
         '/api/alerting/v2/action_policies/_match_for_rule',
         { method: 'POST', body: JSON.stringify(body) }
-      );
-    },
+      ),
     enabled,
     keepPreviousData: true,
     refetchOnWindowFocus: false,
@@ -59,5 +58,6 @@ export const useMatchedActionPolicies = ({
     isLoading: enabled && isLoading,
     error: error instanceof Error ? error : error != null ? new Error(String(error)) : null,
     items: data?.items ?? [],
+    total: data?.total ?? 0,
   };
 };

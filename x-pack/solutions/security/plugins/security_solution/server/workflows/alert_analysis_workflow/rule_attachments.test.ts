@@ -11,6 +11,7 @@ import {
   BulkActionEditTypeEnum,
   type BulkActionEditPayload,
 } from '../../../common/api/detection_engine/rule_management';
+import { convertRuleSearchTermToKQL } from '../../../common/detection_engine/rule_management/rule_filtering';
 import type { DetectionRulesAuthz } from '../../../common/detection_engine/rule_management/authz';
 import type { PrebuiltRulesCustomizationStatus } from '../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { MlAuthz } from '../../lib/machine_learning/authz';
@@ -35,13 +36,45 @@ const createWorkflowAction = (workflowId = WORKFLOW_ID) => createWorkflowActionF
 const createWorkflowSystemAction = (workflowId = WORKFLOW_ID) =>
   createWorkflowSystemActionFixture(workflowId);
 
+// Emulates the parts of rulesClient.find the service relies on: server-side name sorting,
+// count-only requests (perPage 0), page slicing, and the attachment-filter KQL the service pushes
+// into `filter`. Attachment narrowing is derived from that filter rather than done in memory: each
+// `actionRef` group is a "has the workflow action" requirement, negated when wrapped in `not (...)`.
+// A filter that requires both (e.g. the attached count under the `not_attached` filter) matches
+// nothing, mirroring the contradictory KQL. The id-based path (getRulesByIds) passes an enriched id
+// filter with no `actionRef`, so it falls through to the full set like the real client does.
 const createRulesClient = (rules: RuleAlertType[]): jest.Mocked<RulesClient> =>
   ({
-    find: jest.fn().mockResolvedValue({
-      data: rules,
-      total: rules.length,
-      page: 1,
-      perPage: 2000,
+    find: jest.fn().mockImplementation(async ({ options } = {}) => {
+      const { filter = '', page = 1, perPage = 0, sortField, sortOrder } = options ?? {};
+
+      let matched = rules;
+      if (typeof filter === 'string' && filter.includes('actionRef')) {
+        const negatedGroups = (filter.match(/not \(/g) ?? []).length;
+        const totalGroups = (filter.match(/actionRef/g) ?? []).length;
+        const requireAttached = totalGroups - negatedGroups > 0;
+        const requireNotAttached = negatedGroups > 0;
+        matched = matched.filter((rule) => {
+          const attached = hasAlertAnalysisWorkflowAction(rule, WORKFLOW_ID);
+          if (requireAttached && !attached) {
+            return false;
+          }
+          if (requireNotAttached && attached) {
+            return false;
+          }
+          return true;
+        });
+      }
+      if (sortField === 'name') {
+        const direction = sortOrder === 'desc' ? -1 : 1;
+        matched = [...matched].sort((a, b) => a.name.localeCompare(b.name) * direction);
+      }
+
+      const total = matched.length;
+      const start = (page - 1) * perPage;
+      const data = perPage === 0 ? [] : matched.slice(start, start + perPage);
+
+      return { data, total, page, perPage };
     }),
   } as Partial<jest.Mocked<RulesClient>> as jest.Mocked<RulesClient>);
 
@@ -88,7 +121,9 @@ describe('alert analysis workflow rule attachments', () => {
       workflowId: WORKFLOW_ID,
     });
 
-    await expect(service.getRuleAttachmentStats({ search: '' })).resolves.toEqual({
+    await expect(
+      service.getRuleAttachmentStats({ search: '', attachmentFilter: 'all' })
+    ).resolves.toEqual({
       total: 2,
       attached: 1,
     });
@@ -101,7 +136,7 @@ describe('alert analysis workflow rule attachments', () => {
     );
   });
 
-  it('returns paginated rule attachment summaries', async () => {
+  it('returns a server-paginated page of rule attachment summaries', async () => {
     const rulesClient = createRulesClient([
       createRule({ id: 'rule-3' }),
       createRule({ id: 'rule-2', enabled: false }),
@@ -112,23 +147,25 @@ describe('alert analysis workflow rule attachments', () => {
       workflowId: WORKFLOW_ID,
     });
 
-    await expect(service.getRuleAttachments({ search: '', page: 2, perPage: 1 })).resolves.toEqual({
+    await expect(
+      service.getRuleAttachments({ search: '', attachmentFilter: 'all', page: 2, perPage: 1 })
+    ).resolves.toEqual({
       total: 3,
       attached: 1,
       page: 2,
       perPage: 1,
       rules: [
         {
-          id: 'rule-3',
-          name: 'Rule rule-3',
-          enabled: true,
+          id: 'rule-2',
+          name: 'Rule rule-2',
+          enabled: false,
           attached: false,
         },
       ],
     });
   });
 
-  it('sorts rules deterministically by enabled state, name, and id before paginating', async () => {
+  it('delegates sorting and pagination to the rules client (by name, ascending)', async () => {
     const rulesClient = createRulesClient([
       createRule({ id: 'rule-3', enabled: false }),
       createRule({ id: 'rule-2' }),
@@ -139,15 +176,55 @@ describe('alert analysis workflow rule attachments', () => {
       workflowId: WORKFLOW_ID,
     });
 
-    await expect(service.getRuleAttachments({ search: '', page: 1, perPage: 3 })).resolves.toEqual(
+    await service.getRuleAttachments({ search: '', attachmentFilter: 'all', page: 1, perPage: 3 });
+
+    expect(rulesClient.find).toHaveBeenCalledWith(
       expect.objectContaining({
-        rules: [
-          expect.objectContaining({ id: 'rule-1' }),
-          expect.objectContaining({ id: 'rule-2' }),
-          expect.objectContaining({ id: 'rule-3' }),
-        ],
+        options: expect.objectContaining({
+          page: 1,
+          perPage: 3,
+          sortField: 'name',
+          sortOrder: 'asc',
+        }),
       })
     );
+  });
+
+  it('returns the true total without throwing when more than the attach cap match', async () => {
+    const rules = Array.from({ length: 2500 }, (_, index) => createRule({ id: `rule-${index}` }));
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient: createRulesClient(rules),
+      workflowId: WORKFLOW_ID,
+    });
+
+    await expect(
+      service.getRuleAttachmentStats({ search: '', attachmentFilter: 'all' })
+    ).resolves.toEqual({
+      total: 2500,
+      attached: 0,
+    });
+  });
+
+  it('paginates past the attach cap without throwing', async () => {
+    const rules = Array.from({ length: 2500 }, (_, index) =>
+      // zero-pad so name sort order is deterministic for the assertion below
+      createRule({ id: `rule-${String(index).padStart(4, '0')}` })
+    );
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient: createRulesClient(rules),
+      workflowId: WORKFLOW_ID,
+    });
+
+    const result = await service.getRuleAttachments({
+      search: '',
+      attachmentFilter: 'all',
+      page: 3,
+      perPage: 20,
+    });
+
+    expect(result.total).toBe(2500);
+    expect(result.rules).toHaveLength(20);
+    expect(result.rules[0].id).toBe('rule-0040');
   });
 
   it('returns selectable rule ids for all matching rules missing the workflow action', async () => {
@@ -161,11 +238,83 @@ describe('alert analysis workflow rule attachments', () => {
       workflowId: WORKFLOW_ID,
     });
 
-    await expect(service.getRuleAttachmentSelection({ search: '' })).resolves.toEqual({
+    await expect(
+      service.getRuleAttachmentSelection({ search: '', attachmentFilter: 'all' })
+    ).resolves.toEqual({
       total: 3,
       attached: 1,
       selectable: 2,
       attachedRuleIds: ['rule-1'],
+      ruleIds: ['rule-2', 'rule-3'],
+    });
+  });
+
+  it('narrows stats, list, and selection to only attached rules when filtered', async () => {
+    const buildService = () =>
+      createAlertAnalysisWorkflowRuleAttachmentService({
+        rulesClient: createRulesClient([
+          createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
+          createRule({ id: 'rule-2' }),
+          createRule({ id: 'rule-3', systemActions: [createWorkflowSystemAction()] }),
+        ]),
+        workflowId: WORKFLOW_ID,
+      });
+
+    await expect(
+      buildService().getRuleAttachmentStats({ search: '', attachmentFilter: 'attached' })
+    ).resolves.toEqual({ total: 2, attached: 2 });
+
+    await expect(
+      buildService().getRuleAttachments({
+        search: '',
+        attachmentFilter: 'attached',
+        page: 1,
+        perPage: 20,
+      })
+    ).resolves.toEqual(
+      expect.objectContaining({
+        total: 2,
+        attached: 2,
+        rules: [
+          expect.objectContaining({ id: 'rule-1', attached: true }),
+          expect.objectContaining({ id: 'rule-3', attached: true }),
+        ],
+      })
+    );
+
+    await expect(
+      buildService().getRuleAttachmentSelection({ search: '', attachmentFilter: 'attached' })
+    ).resolves.toEqual({
+      total: 2,
+      attached: 2,
+      selectable: 0,
+      attachedRuleIds: ['rule-1', 'rule-3'],
+      ruleIds: [],
+    });
+  });
+
+  it('narrows stats, list, and selection to only rules missing the workflow when filtered', async () => {
+    const buildService = () =>
+      createAlertAnalysisWorkflowRuleAttachmentService({
+        rulesClient: createRulesClient([
+          createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
+          createRule({ id: 'rule-2' }),
+          createRule({ id: 'rule-3' }),
+        ]),
+        workflowId: WORKFLOW_ID,
+      });
+
+    await expect(
+      buildService().getRuleAttachmentStats({ search: '', attachmentFilter: 'not_attached' })
+    ).resolves.toEqual({ total: 2, attached: 0 });
+
+    await expect(
+      buildService().getRuleAttachmentSelection({ search: '', attachmentFilter: 'not_attached' })
+    ).resolves.toEqual({
+      total: 2,
+      attached: 0,
+      selectable: 2,
+      attachedRuleIds: [],
       ruleIds: ['rule-2', 'rule-3'],
     });
   });
@@ -305,10 +454,52 @@ describe('alert analysis workflow rule attachments', () => {
     expect(bulkEditRulesFn).not.toHaveBeenCalled();
   });
 
-  it('bounds concurrent bulkEdit calls when detaching many rules', async () => {
-    const ruleCount = 25;
+  it('collapses detaches that share the same remaining action list into one bulkEdit', async () => {
+    // Every rule carries only the workflow action, so after detaching it they all end up with the
+    // same empty action list. That is the case the UI hits when it bulk-detaches a set it just
+    // bulk-attached, and it used to fire one bulkEdit per rule (which is what hung). It should now
+    // collapse to a single bulkEdit for all of them.
+    const ruleCount = 50;
     const rules = Array.from({ length: ruleCount }, (_, index) =>
       createRule({ id: `rule-${index}`, actions: [createWorkflowAction()] })
+    );
+    const bulkEditRulesFn = jest.fn().mockImplementation(async ({ rules: editedRules }) => ({
+      rules: editedRules,
+      skipped: [],
+      errors: [],
+      total: editedRules.length,
+    })) as jest.MockedFunction<typeof bulkEditRules>;
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient: createRulesClient(rules),
+      workflowId: WORKFLOW_ID,
+      bulkEditDependencies: createBulkEditDependencies(),
+      bulkEditRulesFn,
+    });
+
+    await expect(
+      service.updateRuleAttachments({
+        attachRuleIds: [],
+        detachRuleIds: rules.map(({ id }) => id),
+      })
+    ).resolves.toEqual({
+      matched: ruleCount,
+      updated: ruleCount,
+    });
+    expect(bulkEditRulesFn).toHaveBeenCalledTimes(1);
+    expect(bulkEditRulesFn).toHaveBeenCalledWith(
+      expect.objectContaining({ rules, actions: [expect.anything()] })
+    );
+  });
+
+  it('bounds concurrent bulkEdit calls when detaching many rules with distinct action lists', async () => {
+    const ruleCount = 25;
+    // Give each rule a unique extra connector so its remaining action list after detach is unique,
+    // forcing one bulkEdit per rule (the worst case) so the concurrency bound is exercised.
+    const rules = Array.from({ length: ruleCount }, (_, index) =>
+      createRule({
+        id: `rule-${index}`,
+        actions: [createWorkflowAction(), createConnectorAction(`connector-${index}`)],
+      })
     );
     let active = 0;
     let maxActive = 0;
@@ -340,8 +531,13 @@ describe('alert analysis workflow rule attachments', () => {
   });
 
   it('attempts every detach even when one bulkEdit rejects, and reports the failure count', async () => {
+    // Unique extra connectors keep each detach in its own bulkEdit group, so a single group's
+    // rejection maps to exactly one failed rule instead of collapsing with the others.
     const rules = Array.from({ length: 5 }, (_, index) =>
-      createRule({ id: `rule-${index}`, actions: [createWorkflowAction()] })
+      createRule({
+        id: `rule-${index}`,
+        actions: [createWorkflowAction(), createConnectorAction(`connector-${index}`)],
+      })
     );
     // One rule's detach rejects at the transport level; the others must still be attempted
     // rather than aborted, and the failure must be surfaced.
@@ -378,5 +574,95 @@ describe('alert analysis workflow rule attachments', () => {
     await expect(
       service.updateRuleAttachments({ attachRuleIds: ['rule-1'], detachRuleIds: ['rule-1'] })
     ).rejects.toThrow('Rules cannot be both attached and detached in the same request');
+  });
+
+  it('searches rule names by substring, matching the Rules page behavior', async () => {
+    const rulesClient = createRulesClient([createRule({ id: 'rule-1' })]);
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient,
+      workflowId: WORKFLOW_ID,
+    });
+
+    await service.getRuleAttachments({
+      search: 'Def',
+      attachmentFilter: 'all',
+      page: 1,
+      perPage: 20,
+    });
+
+    // A single search term must become a `name.keyword: *term*` substring filter (the same KQL
+    // the Rules page uses), not a whole-word/prefix `search`. Otherwise `Def` would not match
+    // `Endpoint Security (Elastic Defend)`.
+    const { options } = rulesClient.find.mock.calls[0][0] as {
+      options: { filter?: string; search?: string; searchFields?: string[] };
+    };
+    expect(options.filter).toEqual(expect.stringContaining('alert.attributes.name.keyword: *Def*'));
+    expect(options.filter).toEqual(expect.stringContaining(convertRuleSearchTermToKQL('Def')));
+    expect(options.search).toBeUndefined();
+    expect(options.searchFields).toBeUndefined();
+  });
+
+  it('does not add a name search filter when the search term is empty', async () => {
+    const rulesClient = createRulesClient([createRule({ id: 'rule-1' })]);
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient,
+      workflowId: WORKFLOW_ID,
+    });
+
+    await service.getRuleAttachments({
+      search: '   ',
+      attachmentFilter: 'all',
+      page: 1,
+      perPage: 20,
+    });
+
+    // `findRules` always enriches the filter with the rule-type mapping, so the filter is never
+    // empty. What matters is that a blank search adds no `name` condition.
+    const { options } = rulesClient.find.mock.calls[0][0] as { options: { filter?: string } };
+    expect(options.filter ?? '').not.toContain('alert.attributes.name');
+  });
+
+  it('throws when more than the max number of rules are selected for update', async () => {
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient: createRulesClient([]),
+      workflowId: WORKFLOW_ID,
+      bulkEditDependencies: createBulkEditDependencies(),
+    });
+
+    await expect(
+      service.updateRuleAttachments({
+        attachRuleIds: Array.from({ length: 2001 }, (_, index) => `rule-${index}`),
+        detachRuleIds: [],
+      })
+    ).rejects.toThrow('More than 2000 rules were selected');
+  });
+
+  it('throws when a selected rule id cannot be resolved', async () => {
+    // find resolves only rule-1 (total 1) but two ids were requested.
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient: createRulesClient([createRule({ id: 'rule-1' })]),
+      workflowId: WORKFLOW_ID,
+      bulkEditDependencies: createBulkEditDependencies(),
+    });
+
+    await expect(
+      service.updateRuleAttachments({
+        attachRuleIds: ['rule-1', 'missing-rule'],
+        detachRuleIds: [],
+      })
+    ).rejects.toThrow('Failed to resolve 1 selected rule(s)');
+  });
+
+  it('throws when bulk edit dependencies are missing but changes are required', async () => {
+    // rule-1 lacks the workflow action, so attaching it is a real change that needs bulk-edit
+    // dependencies; omitting them must fail loudly rather than silently no-op.
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient: createRulesClient([createRule({ id: 'rule-1' })]),
+      workflowId: WORKFLOW_ID,
+    });
+
+    await expect(
+      service.updateRuleAttachments({ attachRuleIds: ['rule-1'], detachRuleIds: [] })
+    ).rejects.toThrow('Bulk edit dependencies are required');
   });
 });
