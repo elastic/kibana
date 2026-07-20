@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { EventClient } from '../../../lib/significant_events/events';
 
+export interface EventSearchInput {
+  query?: string;
+  page?: number;
+  per_page?: number;
+  stream_names?: string[];
+  status?: SignificantEventStatus;
+}
 export async function searchEventsToolHandler({
   eventClient,
   params,
 }: {
   eventClient: EventClient;
-  params: {
-    query?: string;
-    stream_names?: string[];
-    state?: 'open' | 'closed';
-    page?: number;
-    per_page?: number;
-  };
+  params: EventSearchInput;
 }): Promise<{
   events: SignificantEvent[];
   page: number;
@@ -34,10 +35,10 @@ export async function searchEventsToolHandler({
   };
 
   const response =
-    params.state !== undefined
+    params.status !== undefined
       ? await eventClient.findLatestByCurrentStatePaginated({
           ...sharedParams,
-          state: params.state,
+          status: params.status ? [params.status] : undefined,
         })
       : await eventClient.findLatestPaginated(sharedParams);
 

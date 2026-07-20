@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/github/get_serverless_release_sha_cli');
+require('@kbn/dev/github/get_serverless_release_sha_cli');
