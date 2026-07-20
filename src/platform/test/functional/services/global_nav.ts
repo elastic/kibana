@@ -42,7 +42,7 @@ export class GlobalNavService extends FtrService {
    * flip mid-session (e.g. entering a solution view), so this is probed per call.
    *
    * The active header can be briefly absent while navigating, so we wait for one of the known headers
-   * to settle before deciding.
+   * to settle before deciding. Pages without a recognized header retain classic behavior.
    */
   public async isNextProjectChrome(): Promise<boolean> {
     const detectHeader = async (): Promise<boolean | undefined> => {
@@ -58,13 +58,17 @@ export class GlobalNavService extends FtrService {
       return undefined;
     };
 
-    return await this.retry.tryForTime(2000, async () => {
-      const result = await detectHeader();
-      if (result === undefined) {
-        throw new Error('no chrome header has rendered yet');
-      }
-      return result;
-    });
+    try {
+      return await this.retry.tryForTime(2000, async () => {
+        const result = await detectHeader();
+        if (result === undefined) {
+          throw new Error('no chrome header has rendered yet');
+        }
+        return result;
+      });
+    } catch {
+      return (await detectHeader()) ?? false;
+    }
   }
 
   public async moveMouseToLogo(): Promise<void> {
