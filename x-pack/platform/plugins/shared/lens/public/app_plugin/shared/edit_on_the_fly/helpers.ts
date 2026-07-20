@@ -239,7 +239,9 @@ export const getSuggestions = async (
       },
     };
   } catch (e) {
-    setErrors?.([e]);
+    if (!abortController?.signal.aborted) {
+      setErrors?.([e]);
+    }
   }
   return undefined;
 };

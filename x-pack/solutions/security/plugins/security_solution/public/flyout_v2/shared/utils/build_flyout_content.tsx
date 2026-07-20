@@ -17,6 +17,13 @@ import {
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { FlyoutLoading } from '../components/flyout_loading';
+import {
+  formatFlyoutTitle,
+  HOST_TITLE,
+  NETWORK_TITLE,
+  RULE_TITLE,
+  USER_TITLE,
+} from '../constants/flyout_titles';
 
 const Host = lazy(() => import('../../entity/host/main').then((m) => ({ default: m.Host })));
 const Network = lazy(() => import('../../network/main').then((m) => ({ default: m.Network })));
@@ -76,6 +83,35 @@ export const buildFlyoutContent = (
         <User userName={value} hit={hit} />
       </Suspense>
     );
+  }
+
+  return null;
+};
+
+/**
+ * Returns the flyout-history title for the given field/value pair, in the format
+ * `"{canonical type}: {value}"` (e.g. `"Network: 10.0.0.1"`, `"Rule: My Rule"`). Mirrors the field
+ * detection in {@link buildFlyoutContent} so callers can pass a consistent `title` to
+ * `overlays.openSystemFlyout` alongside the content it returns. Returns `null` for unsupported
+ * fields (mirroring `buildFlyoutContent`'s `null` return for the same case).
+ */
+export const buildFlyoutTitleFromField = (field: string, value: string): string | null => {
+  const ecsField = getEcsField(field);
+
+  if (ecsField?.type === IP_FIELD_TYPE) {
+    return formatFlyoutTitle(NETWORK_TITLE, value);
+  }
+
+  if (field === SIGNAL_RULE_NAME_FIELD_NAME || field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME) {
+    return formatFlyoutTitle(RULE_TITLE, value);
+  }
+
+  if (field === HOST_NAME_FIELD_NAME) {
+    return formatFlyoutTitle(HOST_TITLE, value);
+  }
+
+  if (field === USER_NAME_FIELD_NAME) {
+    return formatFlyoutTitle(USER_TITLE, value);
   }
 
   return null;

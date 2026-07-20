@@ -10,13 +10,14 @@ import type { DatasetConfig } from '../types';
 
 const toInputDetections = (discoveries: Array<Partial<Discovery>>): Array<Partial<Detection>> =>
   discoveries
-    .flatMap((discovery) => discovery.detections ?? [])
-    .map((detection) => ({
-      ...detection,
-      detection_evidence: {
-        change_point_type: 'spike',
-        p_value: 0.0001,
-      },
+    .flatMap((discovery) => discovery.signals ?? [])
+    .map((signal) => ({
+      detection_id: signal.metadata?.detection_id,
+      rule_name: signal.metadata?.rule_name,
+      rule_uuid: signal.metadata?.rule_uuid,
+      stream_name: signal.stream_name,
+      change_point_type: signal.metadata?.change_point_type ?? 'spike',
+      p_value: signal.metadata?.p_value ?? 0.0001,
     }));
 
 /**
@@ -28,133 +29,197 @@ const toInputDetections = (discoveries: Array<Partial<Discovery>>): Array<Partia
  */
 const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
   kind: 'discovery',
-  discovery_slug: 'transactionhistory__frontend-transactionhistory-read-timeout',
-  title:
-    'transactionhistory — DB and cache layer: connection failures cascading to frontend read timeouts',
+  event_id: 'transactionhistory__frontend-transactionhistory-read-timeout',
+  title: 'Ledger backends — customer transaction connectivity failure',
+  symptom_hypothesis:
+    'Customer transaction flows are failing because ledger database and cache dependencies refuse connections.',
   summary:
-    'transactionhistory, balancereader, and ledgerwriter are failing off the same ledger-db outage: transactionhistory cannot obtain SQL connections to ledger-db (SQLState 08001) and its HikariCP pool fails to initialize, cache errors surface in transactionhistory and balancereader, frontend read requests to transactionhistory are timing out, and ledgerwriter cannot retrieve account balances from balancereader to commit transactions. Users cannot view transaction history or account balances, and payment/deposit submissions fail. Onset ~14:30 UTC with no sign of recovery.',
-  root_cause:
-    "transactionhistory's HikariCP connection pool cannot reach the ledger-db PostgreSQL backend (SQLState 08001); the shared cache layer then errors, so transactionhistory and balancereader cannot serve reads and the frontend receives read timeouts on transaction-history calls. ledgerwriter additionally fails because it calls balancereader to validate balances before committing, propagating the outage to payment and deposit submissions.",
-  criticality: 90,
-  confidence: 82,
-  detections: [
+    'balancereader, transactionhistory, and ledgerwriter are all returning connection-refused errors to the frontend, with concurrent cache errors in balancereader/transactionhistory and a SQL connection failure (SQLState 08001) in transactionhistory. Users cannot view account balances, cannot view transaction history, and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
+  severity: '80-critical',
+  confidence: 0.82,
+  stream_names: ['logs'],
+  signals: [
     {
-      kind: 'detection',
-      rule_name: 'Transaction history SQL connection failure',
-      rule_uuid: '52ad96d3-5d06-5baa-b2de-cd654fbe33f6',
+      type: 'detection',
       stream_name: 'logs',
-    },
-    {
-      kind: 'detection',
-      rule_name: 'HikariCP connection pool initialization',
-      rule_uuid: 'f0816e40-c465-563f-91fc-280e23a4ef4e',
-      stream_name: 'logs',
-    },
-    {
-      kind: 'detection',
-      rule_name: 'Transaction history cache errors',
-      rule_uuid: 'e2b04e1f-44ed-582f-8e4f-9f62e4706141',
-      stream_name: 'logs',
-    },
-    {
-      kind: 'detection',
-      rule_name: 'Balance reader cache errors',
-      rule_uuid: '5961763e-fabc-5bdc-a5fc-aa2c5c4af768',
-      stream_name: 'logs',
-    },
-    {
-      kind: 'detection',
-      rule_name: 'Frontend → transactionhistory read timeout',
-      rule_uuid: '1432a71f-0833-55c7-93f4-ac40261e47df',
-      stream_name: 'logs',
-    },
-    {
-      kind: 'detection',
-      rule_name: 'Ledger writer failed to retrieve account balance',
-      rule_uuid: 'c3a7f1e9-4b2d-5e86-9a1c-7d3f2b8e0a64',
-      stream_name: 'logs',
-    },
-  ],
-  cause_kis: [
-    { name: 'transactionhistory', stream_name: 'logs' },
-    { name: 'balancereader', stream_name: 'logs' },
-    { name: 'ledgerwriter', stream_name: 'logs' },
-  ],
-  dependency_edges: [
-    { source: 'transactionhistory', target: 'ledger-db', exposure: 'exposed' },
-    { source: 'balancereader', target: 'ledger-db', exposure: 'exposed' },
-    { source: 'frontend', target: 'transactionhistory', exposure: 'exposed' },
-    { source: 'ledgerwriter', target: 'balancereader', exposure: 'exposed' },
-    { source: 'ledgerwriter', target: 'ledger-db', exposure: 'exposed' },
-  ],
-  // Lean evidence trail — carries the `esql_query` for the judge to re-run; no `confirmed` stamp
-  // (the judge must verify each query itself and stamp `confirmed: true` before promoting).
-  evidences: [
-    {
-      rule_name: 'Transaction history SQL connection failure',
-      rule_uuid: '52ad96d3-5d06-5baa-b2de-cd654fbe33f6',
-      stream_name: 'logs',
-      result: 'found',
-      row_count: 1,
+      confirmed: true,
       description:
-        'Testing: whether transactionhistory cannot obtain SQL connections to the ledger-db PostgreSQL backend. Expected if true: SQLState 08001 connection-failure errors on the JDBC path. Found: 1 row at 14:34:19Z — SQL Error 0, SQLState: 08001 (connection refused) from transactionhistory. Verdict: confirms — the database backend is unreachable, breaking transaction-history reads.',
-      esql_query:
-        'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "SQLState: 08001") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        'Testing: whether transactionhistory cannot obtain SQL connections to the postgresql backend. Expected if true: SQLState 08001 connection-failure errors on the JDBC path. Found: 1 row at 14:34:19Z — SQL Error 0, SQLState: 08001 (connection refused) from transactionhistory. Verdict: confirms — the database backend is unreachable, breaking transaction-history reads.',
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "SQLState: 08001") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: 'db7de543-0f37-5db4-a0ff-c75c92f0eca1-det',
+        rule_name: 'Transaction History Database SQL Connection Error',
+        rule_uuid: 'db7de543-0f37-5db4-a0ff-c75c92f0eca1',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
     },
     {
-      rule_name: 'HikariCP connection pool initialization',
-      rule_uuid: 'f0816e40-c465-563f-91fc-280e23a4ef4e',
+      type: 'detection',
       stream_name: 'logs',
-      result: 'found',
-      row_count: 1,
+      confirmed: true,
       description:
-        "Testing: whether transactionhistory's HikariCP connection pool is repeatedly failing to initialize against ledger-db. Expected if true: recurring 'HikariPool-1 - Starting' re-initialization lines on the JDBC path. Found: 1 row at 14:34:19Z — HikariPool-1 restarting as it fails to acquire a database connection. Verdict: confirms — the pool cannot establish connections, the mechanism behind the SQLState 08001 failures.",
-      esql_query:
-        'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "HikariPool-1 - Starting") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        'Testing: whether the frontend is actively failing to reach transactionhistory with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to transactionhistory:8080. Found: 1 row at 14:33:36Z — connection refused (Errno 111) to transactionhistory:8080 on the /transactions path. Verdict: confirms — users cannot view transaction history; the backend failure is user-visible.',
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting transaction_list") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: '2cd4c371-f1c3-5c19-a115-1c03be31317e-det',
+        rule_name: 'Frontend → Transaction History Connection Failures',
+        rule_uuid: '2cd4c371-f1c3-5c19-a115-1c03be31317e',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
     },
     {
-      rule_name: 'Transaction history cache errors',
-      rule_uuid: 'e2b04e1f-44ed-582f-8e4f-9f62e4706141',
+      type: 'detection',
       stream_name: 'logs',
-      result: 'found',
-      row_count: 1,
+      confirmed: true,
       description:
-        "Testing: whether transactionhistory's cache layer is failing as a downstream effect of the database outage. Expected if true: 'getTransactions | Cache error' entries from transactionhistory. Found: 1 row at 14:34:59Z — transactionhistory emitting 'getTransactions | Cache error'. Verdict: confirms — cache reads are failing, leaving transactionhistory unable to serve transaction lists.",
-      esql_query:
-        'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "getTransactions | Cache error") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        'Testing: whether the frontend is actively failing to reach balancereader with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to balancereader:8080. Found: 1 row at 14:33:35Z — connection refused (Errno 111) to balancereader:8080 on the /balances path. Verdict: confirms — earliest confirmed failure in the cascade; users cannot view account balances.',
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a-det',
+        rule_name: 'Frontend → Balance Reader Connection Failures',
+        rule_uuid: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
     },
     {
-      rule_name: 'Balance reader cache errors',
-      rule_uuid: '5961763e-fabc-5bdc-a5fc-aa2c5c4af768',
+      type: 'detection',
       stream_name: 'logs',
-      result: 'found',
-      row_count: 1,
+      confirmed: true,
       description:
-        "Testing: whether balancereader is hit by the same cache failure as transactionhistory. Expected if true: 'getBalance | Cache error' entries from balancereader. Found: 1 row at 14:34:59Z — balancereader emitting 'getBalance | Cache error' from the same DB outage. Verdict: confirms — the failure spans both read services, broadening the blast radius to balance lookups.",
-      esql_query:
-        'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "getBalance | Cache error") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        "Testing: whether the shared cache layer is failing as a downstream effect of the database outage, across both transactionhistory and balancereader. Expected if true: 'Cache error' entries from both services. Found: 2 rows at 14:34:59Z — transactionhistory emitting 'getTransactions | Cache error' and balancereader emitting 'getBalance | Cache error'. Verdict: confirms — cache reads are failing in both services, broadening the blast radius from transaction-history reads to balance lookups.",
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Cache error") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 2',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: '159d6c01-9b26-5d7f-99c6-a3471e00d97e-det',
+        rule_name: 'Cache Errors in Balance Reader or Transaction History',
+        rule_uuid: '159d6c01-9b26-5d7f-99c6-a3471e00d97e',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
     },
     {
-      rule_name: 'Frontend → transactionhistory read timeout',
-      rule_uuid: '1432a71f-0833-55c7-93f4-ac40261e47df',
+      type: 'detection',
       stream_name: 'logs',
-      result: 'found',
-      row_count: 1,
-      description:
-        'Testing: whether the database cascade surfaces to end users as frontend read failures against transactionhistory. Expected if true: HTTPConnectionPool read timeout / connection refused from frontend to transactionhistory:8080. Found: 1 row at 14:33:36Z — connection refused (Errno 111) to transactionhistory:8080 on the /transactions path. Verdict: confirms — users cannot view transaction history; the backend failure is user-visible.',
-      esql_query:
-        'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting transaction_list") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
-    },
-    {
-      rule_name: 'Ledger writer failed to retrieve account balance',
-      rule_uuid: 'c3a7f1e9-4b2d-5e86-9a1c-7d3f2b8e0a64',
-      stream_name: 'logs',
-      result: 'found',
-      row_count: 1,
+      confirmed: true,
       description:
         "Testing: whether ledgerwriter is blocked from committing transactions because it cannot retrieve account balances from balancereader. Expected if true: ERROR from LedgerWriterController 'Failed to retrieve account balance'. Found: 1 row at 14:34:29Z — ledgerwriter logging 'Failed to retrieve account balance'. Verdict: confirms — ledgerwriter cannot validate balances via balancereader, so payment and deposit submissions fail.",
-      esql_query:
-        'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Failed to retrieve account balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Failed to retrieve account balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: '0ae69b00-d0f3-5c57-971d-2470ad5b6459-det',
+        rule_name: 'Ledger Writer Failed to Retrieve Account Balance',
+        rule_uuid: '0ae69b00-d0f3-5c57-971d-2470ad5b6459',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
+    },
+    {
+      type: 'detection',
+      stream_name: 'logs',
+      confirmed: true,
+      description:
+        'Testing: whether the frontend is failing to submit deposit transactions to ledgerwriter with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to ledgerwriter:8080. Found: 1 row at 14:33:39Z — connection refused (Errno 111) to ledgerwriter:8080 on the /transactions path. Verdict: confirms — deposit submissions are failing; users cannot complete deposit transactions.',
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error submitting deposit") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: '64f04c77-495a-58cb-beba-98108fcaa5dd-det',
+        rule_name: 'Frontend → Ledger Writer Deposit Submission Error',
+        rule_uuid: '64f04c77-495a-58cb-beba-98108fcaa5dd',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
+    },
+    {
+      type: 'detection',
+      stream_name: 'logs',
+      confirmed: true,
+      description:
+        'Testing: whether the frontend is failing to submit payment transactions to ledgerwriter with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to ledgerwriter:8080. Found: 1 row at 14:33:38Z — connection refused (Errno 111) to ledgerwriter:8080 on the /transactions path. Verdict: confirms — payment submissions are failing; users cannot complete payment transactions.',
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error submitting payment") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: '431f1573-2ad6-5847-9602-283c63450d6b-det',
+        rule_name: 'Frontend → Ledger Writer Payment Submission Error',
+        rule_uuid: '431f1573-2ad6-5847-9602-283c63450d6b',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
+    },
+  ],
+  causal_features: [
+    { feature_id: 'transactionhistory', name: 'transactionhistory', stream_name: 'logs' },
+    { feature_id: 'balancereader', name: 'balancereader', stream_name: 'logs' },
+    { feature_id: 'ledgerwriter', name: 'ledgerwriter', stream_name: 'logs' },
+  ],
+  blast_radius: [
+    {
+      type: 'dependency',
+      feature_id: 'frontend-balancereader',
+      source: 'frontend',
+      target: 'balancereader',
+      stream_name: 'logs',
+    },
+    {
+      type: 'dependency',
+      feature_id: 'frontend-transactionhistory',
+      source: 'frontend',
+      target: 'transactionhistory',
+      stream_name: 'logs',
+    },
+    {
+      type: 'dependency',
+      feature_id: 'frontend-ledgerwriter',
+      source: 'frontend',
+      target: 'ledgerwriter',
+      stream_name: 'logs',
+    },
+    {
+      type: 'dependency',
+      feature_id: 'ledgerwriter-balancereader',
+      source: 'ledgerwriter',
+      target: 'balancereader',
+      stream_name: 'logs',
+    },
+    {
+      type: 'dependency',
+      feature_id: 'ledgerwriter-postgresql',
+      source: 'ledgerwriter',
+      target: 'postgresql',
+      stream_name: 'logs',
+    },
+    {
+      type: 'dependency',
+      feature_id: 'transactionhistory-postgresql',
+      source: 'transactionhistory',
+      target: 'postgresql',
+      stream_name: 'logs',
     },
   ],
 };
@@ -162,53 +227,55 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
 /** Benign authentication activity spike — must stay a SEPARATE discovery from the failure cascade. */
 const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
   kind: 'discovery',
-  discovery_slug: 'userservice__successful-user-login',
-  title: 'User Service — login and account creation: successful activity volume spike',
+  event_id: 'userservice__successful-user-login',
+  title: 'Authentication activity — successful completion volume increase',
+  symptom_hypothesis:
+    'Successful login and account-creation activity increased without an observed failure.',
   summary:
-    'userservice is logging a spike in successful login and account-creation events. No user-blocking failure is occurring — all observed events are successful completions, consistent with load-generator activity ramping up around 14:30 UTC. This is a separate, independent signal from the backend cascade and does not represent a failure condition.',
-  root_cause:
-    'Normal load-driven volume increase in successful login and account-creation traffic; all operations succeeded — no failure condition.',
-  criticality: 10,
-  confidence: 68,
-  detections: [
+    'Successful login and account-creation events increased around 14:30 UTC. All sampled events completed successfully, with no observed error signature or blocked user task.',
+  severity: '20-low',
+  confidence: 0.35,
+  signals: [
     {
-      kind: 'detection',
-      rule_name: 'Successful user login',
-      rule_uuid: 'cbfedad7-d40c-5dde-a84f-d1cba23084b3',
+      type: 'detection',
       stream_name: 'logs',
-    },
-    {
-      kind: 'detection',
-      rule_name: 'New user account created',
-      rule_uuid: 'd60afc3c-dac9-51b5-b55d-bfd6c522b269',
-      stream_name: 'logs',
-    },
-  ],
-  cause_kis: [{ name: 'userservice', stream_name: 'logs' }],
-  evidences: [
-    {
-      rule_name: 'Successful user login',
-      rule_uuid: 'cbfedad7-d40c-5dde-a84f-d1cba23084b3',
-      stream_name: 'logs',
-      result: 'found',
-      row_count: 1,
+      confirmed: true,
       description:
         'Testing: whether the spike in successful logins represents a failure or anomalous activity. Expected if true: error logs or credential-stuffing patterns. Found: 1 row at 14:30:05Z — successful login event with no error signature. Verdict: refutes — the spike is a volume increase in successful logins, consistent with load-generator ramp-up.',
-      esql_query:
-        'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Login Successful") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Login Successful") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: '0dfb4f2f-2060-5369-9d75-02287ea4e060-det',
+        rule_name: 'Successful User Login',
+        rule_uuid: '0dfb4f2f-2060-5369-9d75-02287ea4e060',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
     },
     {
-      rule_name: 'New user account created',
-      rule_uuid: 'd60afc3c-dac9-51b5-b55d-bfd6c522b269',
+      type: 'detection',
       stream_name: 'logs',
-      result: 'found',
-      row_count: 1,
+      confirmed: true,
       description:
         'Testing: whether the spike in new account creations represents a failure or anomalous activity. Expected if true: error logs or suspicious automated-creation patterns. Found: 1 row at 14:30:12Z — successful account-creation event with no error signature. Verdict: refutes — the spike is a volume increase in successful account creations, consistent with load-generator ramp-up.',
-      esql_query:
-        'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Successfully created user") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Successfully created user") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: '334488fe-8405-5e30-b538-ba028b6b0961-det',
+        rule_name: 'New User Account Created',
+        rule_uuid: '334488fe-8405-5e30-b538-ba028b6b0961',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
     },
   ],
+  causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
 };
 
 export const discovery: DatasetConfig['discovery'] = [
@@ -219,38 +286,38 @@ export const discovery: DatasetConfig['discovery'] = [
       detections: toInputDetections([LEDGER_DB_CASCADE_DISCOVERY, BENIGN_AUTH_DISCOVERY]),
     },
     // Ground-truth continuation chains (ordered, by readable `rule_name`) the continuation eval
-    // replays one rule per cycle. Each chain legitimately continues ONE episode, so the agent
-    // should reuse a single slug. `semantic` = same service + symptom, no rule_uuid overlap;
+    // replays one rule per cycle. Each chain legitimately continues ONE event, so the agent
+    // should reuse a single event_id. `semantic` = same service + symptom, no rule_uuid overlap;
     // `cascade` = upstream → downstreams across services, linked by dependency topology.
     continuationChains: {
       semantic: [
-        'Transaction history SQL connection failure',
-        'HikariCP connection pool initialization',
+        'Frontend → Ledger Writer Payment Submission Error',
+        'Frontend → Ledger Writer Deposit Submission Error',
       ],
       cascade: [
-        'Transaction history SQL connection failure',
-        'Frontend → transactionhistory read timeout',
-        'Ledger writer failed to retrieve account balance',
+        'Transaction History Database SQL Connection Error',
+        'Frontend → Transaction History Connection Failures',
+        'Ledger Writer Failed to Retrieve Account Balance',
       ],
     },
     output: {
       expected_ground_truth:
-        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->ledger-db SQLState 08001, cache errors, frontend read timeouts), benign-auth (successful login/signup spike, no failures)]',
+        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures), benign-auth (successful login/signup spike, no failures)]',
       expected_discoveries: [LEDGER_DB_CASCADE_DISCOVERY, BENIGN_AUTH_DISCOVERY],
       criteria: [
         {
-          id: 'root-cause-sql-connection',
-          text: 'Identifies the transactionhistory↔ledger-db SQL connection failure (SQLState 08001 / failed JDBC connections, HikariCP pool init) as the root cause of the failure cascade.',
+          id: 'symptom-hypothesis-sql-connection',
+          text: 'States one evidence-grounded sentence connecting every grouped detection through the literal transactionhistory↔postgresql SQL connection failure (SQLState 08001 / failed JDBC connections). Uses only signals confirmed for their own operation/path; a found-but-inconclusive row does not establish correlation. Does not introduce another endpoint or claim a final root cause.',
           score: 3,
         },
         {
           id: 'cascade-transactionhistory-cluster',
-          text: 'Groups the SQL connection failure, HikariCP pool init, transaction history cache errors, and the frontend→transactionhistory read timeout into a single discovery (transactionhistory service cluster).',
+          text: 'Groups the SQL connection failure, the shared cache errors, and the frontend→transactionhistory connection failures into a single discovery (transactionhistory service cluster).',
           score: 1,
         },
         {
           id: 'cascade-full-grouping',
-          text: 'Further collapses balancereader cache errors and ledgerwriter balance-retrieval failure into the same cascading discovery as the transactionhistory cluster — all six detections linked under the shared ledger-db root cause rather than split into separate service-scoped discoveries.',
+          text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster — all seven detections linked by the evidence-backed postgresql/cache failure hypothesis rather than split into separate service-scoped discoveries.',
           score: 2,
         },
         {
@@ -260,12 +327,17 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'dependency-chain',
-          text: 'Names the dependency from transactionhistory to ledger-db (via HikariCP/JDBC) and the downstream impact on the frontend read path.',
+          text: 'Names the dependency from transactionhistory to postgresql and the downstream impact on the frontend read/write paths across balancereader and ledgerwriter.',
           score: 1,
         },
         {
           id: 'error-signatures',
-          text: 'Cites observed error signatures (SQLState 08001, cache error, read timeout) rather than generic phrasing.',
+          text: 'Cites observed error signatures (SQLState 08001, cache error, connection refused) rather than generic phrasing.',
+          score: 1,
+        },
+        {
+          id: 'objective-narrative',
+          text: 'Uses a stable failure-domain title and an objective summary of observed state and potential impact, without recommendations, next actions, or urgency language.',
           score: 1,
         },
       ],
@@ -283,28 +355,28 @@ export const discoveryJudge: DatasetConfig['discoveryJudge'] = [
     },
     output: {
       expected_ground_truth:
-        'cascade discovery (transactionhistory/balancereader/ledgerwriter → ledger-db SQLState 08001, ' +
-        'user-blocking read timeouts)=promoted; ' +
-        'benign authentication spike (successful logins/signups only, no failures)=demoted',
+        'cascade discovery (transactionhistory/balancereader/ledgerwriter → postgresql SQLState 08001, ' +
+        'user-blocking connection-refused failures)=open/80-critical; ' +
+        'benign authentication spike (successful logins/signups only, no failures)=dismissed',
       criteria: [
         {
-          id: 'promote-active-cascade',
-          text: 'Promotes the cascade discovery: active database-connectivity failures cascading to user-facing transactionhistory read timeouts warrant immediate on-call action.',
+          id: 'open-active-cascade',
+          text: 'Sets status=open with severity=80-critical for the cascade discovery because active database-connectivity failures broadly break core customer balance, transaction-history, payment, and deposit journeys. Bases critical severity on demonstrated customer impact and scope, without requiring PII exposure or a fixed downstream-service count.',
           score: 3,
         },
         {
           id: 'independent-verification',
-          text: "Independently verifies at least one key evidence via execute_esql before deciding — re-runs an esql_query from the cascade discovery's input evidences[] and stamps confirmed: true from its own query results, rather than trusting pre-collected findings at face value.",
+          text: "Independently verifies at least one key signal via execute_esql before deciding — re-runs an evidence.esql_query from the cascade discovery's input signals[] and stamps confirmed: true from its own query results, rather than trusting pre-collected findings at face value.",
           score: 2,
         },
         {
-          id: 'demote-benign-auth',
-          text: 'Demotes the benign authentication spike: successful login and account-creation volume without failure symptoms, blocked user tasks, or sensitive-data exposure is not an actionable incident.',
+          id: 'dismiss-benign-auth',
+          text: 'Sets status=dismissed for the benign authentication spike: successful login and account-creation volume without failure symptoms, blocked user tasks, or sensitive-data exposure is not an actionable incident.',
           score: 3,
         },
         {
           id: 'do-not-escalate-benign-auth',
-          text: 'Does not promote or acknowledge the benign authentication spike as if it were part of the ledger-db outage; it stays separate non-incident noise.',
+          text: 'Does not set status=open for the benign authentication spike as if it were part of the ledger-db outage; it stays separate non-incident noise.',
           score: 2,
         },
       ],
