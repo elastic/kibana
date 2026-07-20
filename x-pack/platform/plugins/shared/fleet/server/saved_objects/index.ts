@@ -40,6 +40,7 @@ import {
   AgentPolicySchemaV4,
   AgentPolicySchemaV5,
   AgentPolicySchemaV6,
+  AgentPolicySchemaV7,
   EpmPackagesSchemaV6,
   EpmPackagesSchemaV7,
   EpmPackagesSchemaV8,
@@ -507,6 +508,18 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '12': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -634,6 +647,18 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
             create: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '7': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
           },
         },
       },
