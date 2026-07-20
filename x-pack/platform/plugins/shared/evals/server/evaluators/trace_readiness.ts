@@ -57,9 +57,6 @@ const hasResolvedEvidence = (round: EvidenceRound): boolean =>
  * non-empty and unchanged across two polls (absorbing export skew, where the root can
  * index before the final span's content).
  *
- * Fallbacks: docs with no resolvable evidence fail fast (`unresolvable`); if the budget
- * is exhausted with partial evidence (no root, or an unstable response), it grades
- * best-effort and logs loudly so the degradation isn't silent.
  */
 export const awaitTraceReady = async (
   traceAccessor: TraceAccessorWithSearch,
@@ -87,12 +84,9 @@ export const awaitTraceReady = async (
         lastRound = round;
 
         if (!hasResolvedEvidence(round)) {
-          const profileSummary = await summarizeProfiles(traceAccessor);
-          throw new pRetry.AbortError(
-            new TraceReadinessError(
-              `Trace ${traceAccessor.traceId} has documents but evidence is unresolvable for profile "${profile}". Probed profiles: ${profileSummary}`,
-              'unresolvable'
-            )
+          throw new TraceReadinessError(
+            `Trace ${traceAccessor.traceId} is not ready: documents indexed but no gradable evidence yet for profile "${profile}"`,
+            'not_ready'
           );
         }
 
@@ -140,6 +134,18 @@ export const awaitTraceReady = async (
       return lastRound;
     }
 
+    // Documents were present but no gradable evidence ever resolved within the budget: now
+    // conclude "unresolvable" and attach the per-profile probe so misconfigured instrumentation
+    // (or a truly empty trace) is easy to diagnose.
+    if (lastRound) {
+      const profileSummary = await summarizeProfiles(traceAccessor);
+      throw new TraceReadinessError(
+        `Trace ${traceAccessor.traceId} has documents but evidence is unresolvable for profile "${profile}". Probed profiles: ${profileSummary}`,
+        'unresolvable'
+      );
+    }
+
+    // Never saw any documents within the budget — surface the not_ready error as-is.
     throw error;
   }
 };

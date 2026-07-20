@@ -126,13 +126,37 @@ describe('awaitTraceReady', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('best-effort'));
   });
 
-  it('fails fast without retries when docs exist but the requested mapping resolves no evidence', async () => {
-    normalizeEvidenceMock.mockResolvedValueOnce({
+  it('waits out partial indexing (auxiliary spans only) and grades once content resolves', async () => {
+    const empty: EvidenceRound = {
+      input: { message: '' },
+      response: { message: '' },
+      steps: [],
+    };
+    const resolved: EvidenceRound = {
+      input: { message: 'hello' },
+      response: { message: 'world' },
+      steps: [],
+    };
+    // polls 1-2: only auxiliary spans indexed, so evidence is unresolvable; poll 3 seeds the
+    // content baseline; poll 4 confirms it is stable and gates on the root span.
+    normalizeEvidenceMock
+      .mockResolvedValueOnce(empty)
+      .mockResolvedValueOnce(empty)
+      .mockResolvedValue(resolved);
+
+    await expect(run()).resolves.toEqual(resolved);
+    // The unresolvable branch retried instead of aborting, so no probe and no degradation.
+    expect(probeProfilesMock).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('concludes "unresolvable" (with a probe) only after exhausting the budget', async () => {
+    normalizeEvidenceMock.mockResolvedValue({
       input: { message: '' },
       response: { message: '' },
       steps: [],
     });
-    probeProfilesMock.mockResolvedValueOnce([
+    probeProfilesMock.mockResolvedValue([
       {
         profile: 'elastic-inference',
         evidence: {
@@ -152,7 +176,8 @@ describe('awaitTraceReady', () => {
         ),
       })
     );
-    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes((FAST_BUDGET.retries ?? 0) + 1);
+    expect(probeProfilesMock).toHaveBeenCalledTimes(1);
     expect(hasRootSpanMock).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
   });
