@@ -11,6 +11,7 @@ import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   COMMON_HEADERS,
+  DEV_TOOLS_READ_ROLE,
   DISCOVER_SESSION_API_BASE_PATH,
   KBN_ARCHIVES,
   TEST_DISCOVER_SESSION_ID,
@@ -27,9 +28,11 @@ const buildUrl = (params: Record<string, string | number>) => {
 
 apiTest.describe('GET /api/discover_sessions', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
+  let devToolsReaderCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
     viewerCredentials = await requestAuth.getApiKeyForViewer();
+    devToolsReaderCredentials = await requestAuth.getApiKeyForCustomRole(DEV_TOOLS_READ_ROLE);
     await kbnClient.importExport.load(KBN_ARCHIVES.SESSION_WITH_CONTROL);
   });
 
@@ -157,5 +160,17 @@ apiTest.describe('GET /api/discover_sessions', { tag: tags.deploymentAgnostic },
     });
 
     expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest('returns 403 when the user cannot read Discover sessions', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ query: 'ESQL' }), {
+      headers: {
+        ...COMMON_HEADERS,
+        ...devToolsReaderCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(403);
   });
 });
