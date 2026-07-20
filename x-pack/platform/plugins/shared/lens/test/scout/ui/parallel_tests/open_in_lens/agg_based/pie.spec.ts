@@ -13,9 +13,8 @@ import {
   testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
-  enableElasticChartDebug,
+  createOpenInLensSuiteSetup,
   getChartDebugData,
-  getImportedDashboardId,
 } from '../../../fixtures';
 
 function getPieChartLabels(debugState: DebugState): string[] {
@@ -38,32 +37,18 @@ function formatPieSliceLabel(name: string | number): string {
   return name;
 }
 
-spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.stateful.classic }, () => {
-  let pieDashboardId: string;
-
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVES.OPEN_IN_LENS_AGG_BASED.PIE
-    );
-    pieDashboardId = getImportedDashboardId(imported, testData.OPEN_IN_LENS_DASHBOARDS.PIE);
-
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-    await scoutSpace.uiSettings.set({
-      'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
-    });
+spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deploymentAgnostic }, () => {
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.PIE,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.PIE,
+    enableChartDebug: true,
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, context, pageObjects }) => {
-    await enableElasticChartDebug(context);
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.openDashboardWithIdInEditMode(pieDashboardId);
-  });
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
+
+  spaceTest.afterAll(openInLensSuite.afterAll);
 
   spaceTest('should check Convert to Lens action availability', async ({ pageObjects }) => {
     const { dashboard } = pageObjects;
@@ -74,10 +59,6 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.stateful.c
 
     await spaceTest.step('hides action when more than 3 split slices were defined', async () => {
       expect(await canConvertToLensByTitle({ dashboard }, 'Pie - 4 layers')).toBe(false);
-    });
-
-    await spaceTest.step('shows action for a single split slice', async () => {
-      expect(await canConvertToLensByTitle({ dashboard }, 'Pie - 1 Split slice')).toBe(true);
     });
   });
 

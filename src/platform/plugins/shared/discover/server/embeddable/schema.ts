@@ -315,6 +315,7 @@ export const classicTabSchema = schema.object({
 export const esqlTabSchema = schema.object(
   {
     ...dataTableSchema.getPropSchemas(),
+    ...dataTableLimitsSchema.getPropSchemas(),
     data_source: esqlDataSourceSchema,
   },
   {

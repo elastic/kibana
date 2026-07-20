@@ -210,8 +210,6 @@ dependsOn:
   - '@kbn/siem-readiness'
   - '@kbn/presentation-publishing'
   - '@kbn/entity-store'
-  - '@kbn/entityManager-plugin'
-  - '@kbn/entities-schema'
   - '@kbn/inference-plugin'
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/core-security-server-mocks'
@@ -219,6 +217,8 @@ dependsOn:
   - '@kbn/data-stream-adapter'
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-user-profile-common'
+  - '@kbn/core-user-profile-server'
+  - '@kbn/core-user-profile-server-mocks'
   - '@kbn/langchain'
   - '@kbn/discover-shared-plugin'
   - '@kbn/react-hooks'
@@ -256,7 +256,6 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/core-metrics-server'
   - '@kbn/core-elasticsearch-server-utils'
-  - '@kbn/rrule'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-server'
   - '@kbn/object-utils'
@@ -302,6 +301,9 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/date-range-picker'
+  - '@kbn/esql-types'
+  - '@kbn/discoveries-schemas'
+  - '@kbn/chart-icons'
 tags:
   - plugin
   - prod

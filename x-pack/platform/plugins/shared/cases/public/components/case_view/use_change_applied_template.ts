@@ -8,25 +8,54 @@
 import { useMutation } from '@kbn/react-query';
 import type { z } from '@kbn/zod/v4';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
+import type { CaseSettings } from '../../../common/types/domain';
+import type { TemplateSettings } from '../../../common/types/domain/template/v1';
 import type { CaseUI } from '../../../common';
 import type { FieldSchema } from '../../../common/types/domain/template/fields';
-import { isInlineField } from '../../../common/types/domain/template/fields';
+import { isDisplayOnlyField, isInlineField } from '../../../common/types/domain/template/fields';
 import { patchCase } from '../../containers/api';
 import { casesMutationsKeys } from '../../containers/constants';
 import { useCasesToast } from '../../common/use_cases_toast';
 import type { ServerError } from '../../types';
 import { getFieldCamelKey, getFieldSnakeKey } from '../../../common/utils';
 import { getYamlDefaultAsString } from '../templates_v2/utils';
-import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import * as i18n from './translations';
 
 type Field = z.infer<typeof FieldSchema>;
 
+/**
+ * A template's raw definition values as passed to {@link useChangeAppliedTemplate}. `settings` is
+ * applied to the case; the case's connector is intentionally left untouched (applying a template
+ * never changes an existing case's connector — see the apply-template modal notice). `null` removes
+ * the applied template.
+ */
+export type NewAppliedTemplate = {
+  id: string;
+  version: number;
+  fields: Field[];
+  settings?: TemplateSettings;
+} | null;
+
 interface ChangeAppliedTemplateArgs {
   caseData: CaseUI;
-  /** Pass null to remove the applied template. */
-  newTemplate: { id: string; version: number; fields: Field[] } | null;
+  /** Pass null to remove the applied template. `settings` are the template's raw definition values. */
+  newTemplate: NewAppliedTemplate;
+  /**
+   * Pre-validated extended field values (snake_case keys) collected from the fields form.
+   * When provided, used directly instead of computing carry-over values via
+   * `computeNewExtendedFields`. Only meaningful when `newTemplate` is non-null.
+   */
+  extendedFields?: Record<string, string>;
 }
+
+/**
+ * A template is authoritative for the case's settings: keys it declares are applied and keys it
+ * omits (or a template with no settings block) default to off, matching the create flow.
+ */
+const buildTemplateSettings = (settings: TemplateSettings | undefined): CaseSettings => ({
+  syncAlerts: settings?.syncAlerts ?? false,
+  extractObservables: settings?.extractObservables ?? false,
+});
 
 export const computeNewExtendedFields = (
   newTemplateFields: Field[],
@@ -34,14 +63,21 @@ export const computeNewExtendedFields = (
 ): Record<string, string> => {
   const result: Record<string, string> = {};
   for (const field of newTemplateFields) {
-    if (isInlineField(field)) {
+    // Display-only fields (e.g. MARKDOWN) hold no value and are never written to the case.
+    if (isInlineField(field) && !isDisplayOnlyField(field)) {
       const snakeKey = getFieldSnakeKey(field.name, field.type);
       const camelKey = getFieldCamelKey(field.name, field.type);
       const existingValue = currentExtendedFields[camelKey];
-      if (existingValue !== undefined && existingValue !== '') {
-        result[snakeKey] = String(existingValue);
-      } else {
-        result[snakeKey] = getYamlDefaultAsString(field.metadata?.default);
+      const value =
+        existingValue !== undefined && existingValue !== ''
+          ? String(existingValue)
+          : getYamlDefaultAsString(field.metadata?.default);
+      // Omit empty values instead of writing '' / '[]'. A present-but-empty key trips the server's
+      // partial-update validation for required fields (the "Field X is required" error seen when
+      // applying or changing a template); omitting it lets the update treat the field as untouched,
+      // and the user fills it on the case afterwards.
+      if (value !== '' && value !== '[]') {
+        result[snakeKey] = value;
       }
     }
   }
@@ -49,19 +85,23 @@ export const computeNewExtendedFields = (
 };
 
 export const useChangeAppliedTemplate = () => {
-  const { showErrorToast, showSuccessToast } = useCasesToast();
-  const refreshCaseViewPage = useRefreshCaseViewPage();
+  const { showErrorToast } = useCasesToast();
 
   return useMutation(
-    ({ caseData, newTemplate }: ChangeAppliedTemplateArgs) => {
+    ({ caseData, newTemplate, extendedFields }: ChangeAppliedTemplateArgs) => {
       const newExtendedFields = newTemplate
-        ? computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {})
+        ? extendedFields ??
+          computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {})
         : {};
       return patchCase({
         caseId: caseData.id,
         updatedCase: {
           template: newTemplate ? { id: newTemplate.id, version: newTemplate.version } : null,
           [CASE_EXTENDED_FIELDS]: newExtendedFields,
+          // The applied template owns the case settings (a template that declares none, or removing
+          // the template, resets them to off). The case's connector is intentionally NOT changed
+          // here — applying a template never reassigns an existing case's connector.
+          settings: buildTemplateSettings(newTemplate?.settings),
         },
         version: caseData.version,
       });
@@ -69,8 +109,10 @@ export const useChangeAppliedTemplate = () => {
     {
       mutationKey: casesMutationsKeys.changeAppliedTemplate,
       onSuccess: () => {
-        refreshCaseViewPage();
-        showSuccessToast(i18n.TEMPLATE_CHANGED_SUCCESSFULLY);
+        // Applying a template changes case fields and settings that several independently-cached
+        // components render. A full page reload is the simplest reliable way to reflect all of the
+        // updates at once (react-query cache invalidation alone left some components stale).
+        window.location.reload();
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_CHANGING_TEMPLATE });

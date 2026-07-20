@@ -7,19 +7,28 @@
 
 import React, { lazy, Suspense } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { getEcsField } from '../../../flyout/document_details/right/components/table_field_name_cell';
+import { getEcsField } from '../components/table_field_name_cell';
 import {
   HOST_NAME_FIELD_NAME,
   IP_FIELD_TYPE,
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { FlyoutLoading } from '../components/flyout_loading';
+import {
+  formatFlyoutTitle,
+  HOST_TITLE,
+  NETWORK_TITLE,
+  RULE_TITLE,
+  USER_TITLE,
+} from '../constants/flyout_titles';
 
 const Host = lazy(() => import('../../entity/host/main').then((m) => ({ default: m.Host })));
 const Network = lazy(() => import('../../network/main').then((m) => ({ default: m.Network })));
 const RuleDetails = lazy(() => import('../../rule/main').then((m) => ({ default: m.RuleDetails })));
+const User = lazy(() => import('../../entity/user/main').then((m) => ({ default: m.User })));
 
 const SuspenseFallback = <FlyoutLoading />;
 
@@ -31,6 +40,7 @@ const SuspenseFallback = <FlyoutLoading />;
  * - IP fields → Network details flyout (value = IP address)
  * - Rule name field → Rule details flyout (value = rule ID)
  * - Host name → Host details flyout (pass hit for entity resolution)
+ * - User name → User details flyout (pass hit for entity resolution)
  */
 export const buildFlyoutContent = (
   field: string,
@@ -65,6 +75,43 @@ export const buildFlyoutContent = (
         <Host hostName={value} hit={hit} />
       </Suspense>
     );
+  }
+
+  if (field === USER_NAME_FIELD_NAME) {
+    return (
+      <Suspense fallback={SuspenseFallback}>
+        <User userName={value} hit={hit} />
+      </Suspense>
+    );
+  }
+
+  return null;
+};
+
+/**
+ * Returns the flyout-history title for the given field/value pair, in the format
+ * `"{canonical type}: {value}"` (e.g. `"Network: 10.0.0.1"`, `"Rule: My Rule"`). Mirrors the field
+ * detection in {@link buildFlyoutContent} so callers can pass a consistent `title` to
+ * `overlays.openSystemFlyout` alongside the content it returns. Returns `null` for unsupported
+ * fields (mirroring `buildFlyoutContent`'s `null` return for the same case).
+ */
+export const buildFlyoutTitleFromField = (field: string, value: string): string | null => {
+  const ecsField = getEcsField(field);
+
+  if (ecsField?.type === IP_FIELD_TYPE) {
+    return formatFlyoutTitle(NETWORK_TITLE, value);
+  }
+
+  if (field === SIGNAL_RULE_NAME_FIELD_NAME || field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME) {
+    return formatFlyoutTitle(RULE_TITLE, value);
+  }
+
+  if (field === HOST_NAME_FIELD_NAME) {
+    return formatFlyoutTitle(HOST_TITLE, value);
+  }
+
+  if (field === USER_NAME_FIELD_NAME) {
+    return formatFlyoutTitle(USER_TITLE, value);
   }
 
   return null;

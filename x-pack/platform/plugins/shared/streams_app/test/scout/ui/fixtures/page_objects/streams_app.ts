@@ -11,7 +11,6 @@ import moment from 'moment';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import {
   EuiCodeBlockWrapper,
-  EuiComboBoxWrapper,
   EuiDataGridWrapper,
   EuiSuperSelectWrapper,
   KibanaCodeEditorWrapper,
@@ -35,6 +34,7 @@ export class StreamsApp {
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
   public readonly concatLiteralInput;
+  public readonly createStreamButton;
   public readonly createQueryStreamButton;
   public readonly childStreamTypeSelector;
   public readonly queryStreamFlyout;
@@ -49,24 +49,17 @@ export class StreamsApp {
   public readonly fetchMoreMatchingSamplesButton;
 
   constructor(private readonly page: ScoutPage) {
-    this.processorFieldComboBox = new EuiComboBoxWrapper(
-      this.page,
+    this.processorFieldComboBox = this.page.components.comboBox(
       'streamsAppProcessorFieldSelectorComboFieldText'
     );
-    this.conditionEditorFieldComboBox = new EuiComboBoxWrapper(
-      this.page,
+    this.conditionEditorFieldComboBox = this.page.components.comboBox(
       'streamsAppConditionEditorFieldText'
     );
-    this.conditionEditorValueComboBox = new EuiComboBoxWrapper(
-      this.page,
+    this.conditionEditorValueComboBox = this.page.components.comboBox(
       'streamsAppConditionEditorValueText'
     );
-    this.processorTypeComboBox = new EuiComboBoxWrapper(
-      this.page,
-      'streamsAppProcessorTypeSelector'
-    );
-    this.dateProcessorFormatsComboBox = new EuiComboBoxWrapper(
-      this.page,
+    this.processorTypeComboBox = this.page.components.comboBox('streamsAppProcessorTypeSelector');
+    this.dateProcessorFormatsComboBox = this.page.components.comboBox(
       'streamsAppDateProcessorFormatsComboBox'
     );
     this.fieldTypeSuperSelect = new EuiSuperSelectWrapper(
@@ -86,6 +79,7 @@ export class StreamsApp {
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
     this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
+    this.createStreamButton = this.page.getByTestId('streamsAppCreateStreamButton');
     this.createQueryStreamButton = this.page.getByTestId('streamsAppCreateQueryStreamButton');
     this.childStreamTypeSelector = this.page.getByTestId('streamsAppChildStreamTypeSelector');
     this.queryStreamFlyout = this.page.getByTestId('streamsAppQueryStreamFlyout');
@@ -142,10 +136,6 @@ export class StreamsApp {
 
   async gotoSchemaEditorTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'schema');
-  }
-
-  async gotoSignificantEventsTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'significantEvents');
   }
 
   async gotoAttachmentsTab(streamName: string) {
@@ -352,10 +342,21 @@ export class StreamsApp {
   }
 
   // Streams header utility methods
+
+  /**
+   * The shared app header only renders the first two badges inline and collapses the rest into a
+   * "Show N more badges" overflow popover (overflow triggers at more than three badges). Call this
+   * from tests that drive a stream with enough badges to overflow (e.g. TSDB streams) so overflowed
+   * badges like the lifecycle badge become assertable.
+   */
+  async openBadgesOverflow() {
+    await this.page.testSubj.click('appHeaderBadgesOverflow');
+  }
+
   async verifyLifecycleBadge(streamName: string, expectedLabel: string) {
-    await expect(
-      this.page.locator(`[data-test-subj="lifecycleBadge-${streamName}"]`)
-    ).toContainText(expectedLabel);
+    await expect(this.page.testSubj.locator(`lifecycleBadge-${streamName}`)).toContainText(
+      expectedLabel
+    );
   }
 
   async verifyClassicBadge() {
@@ -435,10 +436,10 @@ export class StreamsApp {
     operator?: string;
   }) {
     if (field) {
-      await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
+      await this.conditionEditorFieldComboBox.setCustomSelectedOptions([field]);
     }
     if (value) {
-      await this.conditionEditorValueComboBox.setCustomSingleOption(value);
+      await this.conditionEditorValueComboBox.setCustomSelectedOptions([value]);
     }
     if (operator) {
       await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
@@ -734,15 +735,15 @@ export class StreamsApp {
   }
 
   async selectProcessorType(value: string) {
-    await this.processorTypeComboBox.selectSingleOption(value);
+    await this.processorTypeComboBox.setSelectedOptions([value]);
   }
 
   async fillProcessorFieldInput(value: string, options?: { isCustomValue: boolean }) {
     const isCustomValue = options?.isCustomValue || false;
     if (isCustomValue) {
-      return await this.processorFieldComboBox.setCustomSingleOption(value);
+      return await this.processorFieldComboBox.setCustomSelectedOptions([value]);
     }
-    await this.processorFieldComboBox.selectSingleOption(value);
+    await this.processorFieldComboBox.setSelectedOptions([value]);
   }
 
   async fillGrokPatternInput(value: string) {
@@ -768,11 +769,11 @@ export class StreamsApp {
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
-    await this.processorFieldComboBox.setCustomSingleOption(value);
+    await this.processorFieldComboBox.setCustomSelectedOptions([value]);
   }
 
   async fillDateProcessorFormatInput(value: string) {
-    await this.dateProcessorFormatsComboBox.setCustomMultiOption(value);
+    await this.dateProcessorFormatsComboBox.setCustomSelectedOptions([value]);
   }
 
   async fillDateProcessorTargetFieldInput(value: string) {
@@ -808,9 +809,9 @@ export class StreamsApp {
   }
 
   async fillCondition(field: string, operator: string, value: string) {
-    await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
+    await this.conditionEditorFieldComboBox.setCustomSelectedOptions([field]);
     await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
-    await this.conditionEditorValueComboBox.setCustomSingleOption(value);
+    await this.conditionEditorValueComboBox.setCustomSelectedOptions([value]);
   }
 
   async removeProcessor(pos: number) {
@@ -1219,8 +1220,13 @@ export class StreamsApp {
 
   async selectAllAttachmentsInFlyout() {
     const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
-    // Click the header checkbox to select all
     await flyoutTable.locator('thead input[type="checkbox"]').click();
+  }
+
+  async selectAttachmentInFlyout(attachmentTitle: string) {
+    const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
+    const row = flyoutTable.getByRole('row', { name: attachmentTitle });
+    await row.locator('input[type="checkbox"]').click();
   }
 
   async clickAddToStreamButton() {
@@ -1325,7 +1331,17 @@ export class StreamsApp {
     await this.concatLiteralInput.fill(value);
   }
 
+  async openCreateStreamPopover() {
+    await this.createStreamButton.click();
+  }
+
+  async openStreamsSettings() {
+    await this.page.getByTestId('app-menu-overflow-button').click();
+    await this.page.getByTestId('streamsAppSettingsButton').click();
+  }
+
   async clickCreateQueryStreamButton() {
+    await this.openCreateStreamPopover();
     await this.createQueryStreamButton.click();
   }
 
@@ -1358,8 +1374,8 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamButton() {
-    await this.page.getByTestId('streamsAppStreamDetailActionsButton').click();
-    await this.page.getByTestId('deleteQueryStreamButton').click();
+    await this.page.testSubj.click('app-menu-overflow-button');
+    await this.page.testSubj.click('streamsDeleteStreamButton');
   }
 
   async fillDeleteQueryStreamModalInput(value: string) {

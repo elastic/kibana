@@ -6,16 +6,7 @@
  */
 
 import type { ErrorToastOptions, ToastInputFields } from '@kbn/core/public';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  logicalCSS,
-  useEuiTheme,
-} from '@elastic/eui';
-import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
+import { useMemo } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isValidOwner } from '../../common/utils/owner';
 import type { CaseUI } from '../../common';
@@ -33,7 +24,6 @@ import {
 } from './translations';
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
-import { TruncatedText } from '../components/truncated_text';
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
@@ -124,8 +114,8 @@ const getErrorMessage = (error: Error | ServerError): string => {
 
 export const useCasesToast = () => {
   const { appId } = useApplication();
-  const { application, i18n, theme, userProfile } = useKibana().services;
-  const { getUrlForApp, navigateToUrl } = application;
+  const services = useKibana().services;
+  const { getUrlForApp, navigateToUrl } = services.application;
 
   const toasts = useToasts();
 
@@ -164,16 +154,20 @@ export const useCasesToast = () => {
         const renderContent = getToastContent({ theCase, content, attachments });
 
         return toasts.addSuccess({
-          color: 'success',
-          iconType: 'check',
-          title: toMountPoint(<TruncatedText text={renderTitle} />, { i18n, theme, userProfile }),
-          text: toMountPoint(
-            <CaseToastSuccessContent
-              content={renderContent}
-              onViewCaseClick={url != null ? onViewCaseClick : undefined}
-            />,
-            { i18n, theme, userProfile }
-          ),
+          'data-test-subj': 'cases-toast-success-attach',
+          title: renderTitle,
+          text: renderContent,
+          ...(url != null
+            ? {
+                actionProps: {
+                  primary: {
+                    onClick: onViewCaseClick,
+                    'data-test-subj': 'toaster-content-case-view-link',
+                    children: VIEW_CASE,
+                  },
+                },
+              }
+            : {}),
         });
       },
       showErrorToast: (error: Error | ServerError, opts?: ErrorToastOptions) => {
@@ -181,11 +175,20 @@ export const useCasesToast = () => {
           toasts.addError(getError(error), { title: getErrorMessage(error), ...opts });
         }
       },
-      showSuccessToast: (title: string, text?: ToastInputFields['text']) => {
-        toasts.addSuccess({ title, text, className: 'eui-textBreakWord' });
+      showSuccessToast: (
+        title: string,
+        text?: ToastInputFields['text'],
+        actionProps?: ToastInputFields['actionProps']
+      ) => {
+        toasts.addSuccess({ title, text, actionProps, className: 'eui-textBreakWord' });
       },
-      showDangerToast: (title: string, text?: string) => {
-        toasts.addDanger({ title, text, className: 'eui-textBreakWord' });
+      showDangerToast: (title: string, text?: React.ReactNode) => {
+        // Rich (non-string) content must be rendered via a mount point.
+        const mountedText =
+          text != null && typeof text !== 'string'
+            ? toMountPoint(text, services.rendering)
+            : text ?? undefined;
+        toasts.addDanger({ title, text: mountedText, className: 'eui-textBreakWord' });
       },
       showInfoToast: (title: string, text?: string) => {
         toasts.addInfo({
@@ -195,45 +198,6 @@ export const useCasesToast = () => {
         });
       },
     }),
-    [i18n, theme, userProfile, appId, getUrlForApp, navigateToUrl, toasts]
+    [appId, getUrlForApp, navigateToUrl, toasts, services.rendering]
   );
 };
-
-export const CaseToastSuccessContent = ({
-  onViewCaseClick,
-  content,
-}: {
-  onViewCaseClick?: () => void;
-  content?: string;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <>
-      {content !== undefined ? (
-        <EuiText
-          size="s"
-          css={css`
-            ${logicalCSS('margin-bottom', euiTheme.size.s)};
-          `}
-          data-test-subj="toaster-content-sync-text"
-        >
-          {content}
-        </EuiText>
-      ) : null}
-      {onViewCaseClick !== undefined ? (
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              onClick={onViewCaseClick}
-              data-test-subj="toaster-content-case-view-link"
-            >
-              {VIEW_CASE}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : null}
-    </>
-  );
-};
-CaseToastSuccessContent.displayName = 'CaseToastSuccessContent';

@@ -9,6 +9,9 @@
 
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
+  buildTrendlineQueryWithMetricFieldMap,
+  buildTrendlineBucketExpression,
+  LENS_METRIC_DEFAULT_COLOR_STEPS,
   type FormBasedPersistedState,
   type MetricVisualizationState,
   type PersistedIndexPatternLayer,
@@ -18,6 +21,7 @@ import {
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { TextBasedLayerColumn } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import {
@@ -25,6 +29,7 @@ import {
   DEFAULT_PRIMARY_LABELS_ALIGNMENT,
   DEFAULT_PRIMARY_VALUE_ALIGNMENT,
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
+  DEFAULT_DENSITY,
   DEFAULT_SECONDARY_LABEL_VISIBLE,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
@@ -36,8 +41,10 @@ import {
   buildDataSourceState,
   buildDatasourceStates,
   buildReferences,
+  generateAdHocDataViewId,
   generateApiLayer,
   getAdhocDataviews,
+  getDataSourceIndex,
   isTextBasedLayer,
   nonNullable,
   operationFromColumn,
@@ -84,6 +91,7 @@ const ACCESSOR = 'metric_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
+const LEGACY_METRIC_DENSITY = 'compact' as const;
 
 type MetricStyling = NonNullable<MetricConfig['styling']>;
 type MetricIconName = NonNullable<NonNullable<MetricStyling['icon']>['name']>;
@@ -153,16 +161,13 @@ function convertStylingToStateFormat(
   hasSecondary: boolean
 ): Partial<MetricVisualizationState> {
   if (!styling) {
-    return {};
+    return { density: DEFAULT_DENSITY };
   }
   const primaryStyling = styling.primary;
   const secondaryStyling = styling.secondary;
 
-  if (!primaryStyling && !secondaryStyling) {
-    return {};
-  }
-
   return stripUndefined({
+    density: styling.density ?? DEFAULT_DENSITY,
     valueFontMode:
       primaryStyling?.value?.sizing != null
         ? primaryStyling.value.sizing === 'fill'
@@ -191,6 +196,7 @@ function convertStylingToAPIFormat(
   const iconName = visualization.icon ? iconCompat.toAPI(visualization.icon) : undefined;
 
   return stripUndefined({
+    density: visualization.density ?? LEGACY_METRIC_DENSITY,
     icon: iconName
       ? {
           name: iconName,
@@ -246,17 +252,27 @@ function buildVisualizationState(config: MetricConfig): MetricVisualizationState
     throw new Error('The second metric must be the secondary metric.');
   }
 
+  // Without a max (bar background) or breakdown there is no data range to color
+  // against, so a named palette colors a single value across an absolute range.
+  const useNumericRangeForPalette =
+    !layer.breakdown_by && primaryMetric.background_chart?.type !== 'bar';
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     metricAccessor: getAccessorName('metric'),
+    ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
     ...(primaryMetric.color?.type === 'static'
       ? fromStaticColorAPIToLensState(primaryMetric.color)
       : {}),
     ...(isColorByValueColor(primaryMetric.color)
-      ? { palette: fromColorByValueAPIToLensState(primaryMetric.color) }
+      ? {
+          palette: fromColorByValueAPIToLensState(
+            primaryMetric.color,
+            LENS_METRIC_DEFAULT_COLOR_STEPS,
+            useNumericRangeForPalette
+          ),
+        }
       : {}),
-    ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
     ...(primaryMetric.subtitle ? { subtitle: primaryMetric.subtitle } : {}),
     showBar: false,
     ...convertStylingToStateFormat(layer.styling, !!secondaryMetric),
@@ -470,24 +486,36 @@ function enrichConfigurationWithVisualizationProperties(
       primaryMetric.subtitle = visualization.subtitle;
     }
 
-    if (visualization.trendlineLayerType) {
+    if (
+      visualization.trendlineLayerId &&
+      visualization.trendlineMetricAccessor &&
+      visualization.trendlineTimeAccessor
+    ) {
       // Trend takes precedence; do not retain bar-only fields (e.g. max_value) on the API config.
       primaryMetric.background_chart = { type: 'trend' };
     }
 
+    if (visualization.applyColorTo === 'value' || visualization.applyColorTo === 'background') {
+      primaryMetric.apply_color_to = visualization.applyColorTo;
+    }
+
+    // The color/palette is derived from its own state presence, mirroring rendering: a color/palette
+    // set without `apply_color_to` still paints the background.
     if (visualization.palette) {
       const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
-      const isValidRange = state.breakdown_by || colorByValue?.range === 'absolute';
-      primaryMetric.color = colorByValue && isValidRange ? colorByValue : AUTO_COLOR;
+      // A percentage-ranged palette (custom or named) only makes sense when there is a data range
+      // to color against: a breakdown or a max (bar background). On a single value with neither,
+      // only an absolute-ranged palette (`rangeType: 'number'`) is acceptable; otherwise the
+      // coloring is dropped entirely (the palette falls back to AUTO).
+      const isPercentagePalette = visualization.palette.params?.rangeType === 'percent';
+      const isSingleValue = !state.breakdown_by && !visualization.maxAccessor;
+      const hasInvalidRangeType = isPercentagePalette && isSingleValue;
+
+      primaryMetric.color = colorByValue && !hasInvalidRangeType ? colorByValue : AUTO_COLOR;
     } else if (visualization.color) {
       primaryMetric.color = fromStaticColorLensStateToAPI(visualization.color);
     } else {
       primaryMetric.color = AUTO_COLOR;
-    }
-
-    // Check for valid enum, some integration panels have applyColorTo === 'bar', which is not a valid API enum; treat unknown values as unselected.
-    if (visualization.applyColorTo === 'value' || visualization.applyColorTo === 'background') {
-      primaryMetric.apply_color_to = visualization.applyColorTo;
     }
   }
 
@@ -670,13 +698,177 @@ export type MetricAttributesWithoutFiltersAndQuery = Omit<MetricAttributes, 'sta
   state: Omit<MetricAttributes['state'], 'filters' | 'query'>;
 };
 
+/**
+ * Type guard that narrows a TextBasedLayer to one with a defined index and an ES|QL query.
+ * Both fields are optional on TextBasedLayer, and query is the broad AggregateQuery union;
+ * this guard ensures index is a string and query is specifically the { esql: string } variant.
+ */
+function isEsqlLayerWithIndex(
+  layer: TextBasedLayer | undefined
+): layer is TextBasedLayer & { index: string; query: { esql: string } } {
+  return Boolean(layer?.index && layer.query && 'esql' in layer.query);
+}
+
+/**
+ * Builds a text-based trendline layer for ES|QL metric charts.
+ * The trendline layer needs its own ES|QL query with BUCKET() time bucketing
+ * and copies of the metric columns from the main layer.
+ */
+function buildEsqlTrendlineLayer(
+  config: MetricConfig,
+  mainLayer: {
+    index: string;
+    query: { esql: string };
+    timeField?: string;
+    columns: TextBasedLayerColumn[];
+  }
+): { layer: TextBasedLayer; dataViewId: string } | undefined {
+  const [primaryMetric] = config.metrics ?? [];
+  if (
+    !primaryMetric ||
+    isSecondaryMetric(primaryMetric) ||
+    primaryMetric.background_chart?.type !== 'trend'
+  )
+    return undefined;
+
+  const dataSource = 'data_source' in config ? config.data_source : undefined;
+  if (!dataSource || dataSource.type !== 'esql') return undefined;
+
+  const timeField = mainLayer.timeField;
+  if (!timeField) return undefined;
+
+  const metricColumn = mainLayer.columns.find((c) => c.columnId === getAccessorName('metric'));
+  const secondaryColumn = mainLayer.columns.find(
+    (c) => c.columnId === getAccessorName('secondary')
+  );
+  const breakdownColumn = mainLayer.columns.find(
+    (c) => c.columnId === getAccessorName('breakdown')
+  );
+
+  // Build the trendline query: take the main query and add time bucketing.
+  // For queries without STATS, raw metric columns are aggregated and breakdown
+  // columns are preserved in BY so the generated query columns match the layer columns.
+  let trendlineQueryResult: ReturnType<typeof buildTrendlineQueryWithMetricFieldMap>;
+  try {
+    trendlineQueryResult = buildTrendlineQueryWithMetricFieldMap(
+      dataSource.query,
+      timeField,
+      [metricColumn, secondaryColumn]
+        .filter((c): c is TextBasedLayerColumn => Boolean(c))
+        .map((c) => c.fieldName),
+      breakdownColumn ? [breakdownColumn.fieldName] : []
+    );
+  } catch (error) {
+    throw new Error(
+      `Failed to build ES|QL trendline query for metric chart: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+
+  // Build trendline columns: time bucket + copies of metric columns from main layer
+  // The fieldName must match the ES|QL result column name, which is the full
+  // BUCKET expression (e.g. "BUCKET(timestamp, 75, ?_tstart, ?_tend)"),
+  // not the raw field name.
+  const timeColumn: TextBasedLayerColumn = {
+    columnId: HISTOGRAM_COLUMN_NAME,
+    fieldName: buildTrendlineBucketExpression(timeField),
+    meta: { type: 'date' },
+  };
+
+  const trendlineColumns: TextBasedLayerColumn[] = [
+    timeColumn,
+    ...(metricColumn
+      ? [
+          {
+            ...metricColumn,
+            columnId: `${ACCESSOR}_trendline`,
+            fieldName:
+              trendlineQueryResult.metricFieldMap.get(metricColumn.fieldName) ??
+              metricColumn.fieldName,
+          },
+        ]
+      : []),
+  ];
+
+  // Add secondary metric column if present
+  if (secondaryColumn) {
+    trendlineColumns.push({
+      ...secondaryColumn,
+      columnId: `${getAccessorName('secondary')}_trendline`,
+      fieldName:
+        trendlineQueryResult.metricFieldMap.get(secondaryColumn.fieldName) ??
+        secondaryColumn.fieldName,
+    });
+  }
+
+  // Add breakdown column if present
+  if (breakdownColumn) {
+    trendlineColumns.push({
+      ...breakdownColumn,
+      columnId: `${getAccessorName('breakdown')}_trendline`,
+    });
+  }
+
+  const dataSourceIndex = getDataSourceIndex(dataSource);
+  const dataViewId = generateAdHocDataViewId({ ...dataSourceIndex, dataSourceType: 'esql' });
+
+  return {
+    layer: {
+      index: dataViewId,
+      query: { esql: trendlineQueryResult.query },
+      timeField,
+      columns: trendlineColumns,
+    },
+    dataViewId,
+  };
+}
+
 export function fromAPItoLensState(config: MetricConfig): MetricAttributesWithoutFiltersAndQuery {
-  const _buildDataLayer = (cfg: unknown, i: number) =>
+  // buildDatasourceStates passes layer configs as `unknown` since it's shared across all chart
+  // types. The cast is safe here because this callback is only invoked for form-based (non-ES|QL)
+  // data sources, which are always MetricConfigNoESQL for metric charts.
+  const _buildDataLayer = (cfg: unknown, _i: number) =>
     buildFormBasedLayer(cfg as MetricConfigNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
   const visualization = buildVisualizationState(config);
+
+  // For ES|QL metric charts with trendlines, create the trendline text-based layer.
+  // buildDatasourceStates only creates the main layer; the trendline needs its own
+  // layer with a BUCKET() time-bucketing query.
+  const trendlineLayerId = (visualization as MetricVisualizationState).trendlineLayerId;
+  const mainLayer = layers.textBased?.layers?.[DEFAULT_LAYER_ID];
+  if (trendlineLayerId && isEsqlLayerWithIndex(mainLayer)) {
+    const trendlineResult = buildEsqlTrendlineLayer(config, {
+      index: mainLayer.index,
+      query: { esql: mainLayer.query.esql },
+      timeField: mainLayer.timeField,
+      columns: mainLayer.columns,
+    });
+    if (trendlineResult) {
+      layers.textBased = {
+        ...layers.textBased,
+        layers: {
+          ...layers.textBased!.layers,
+          [trendlineLayerId]: trendlineResult.layer,
+        },
+      };
+      // Register the trendline layer's dataview so ad-hoc dataviews are generated
+      const dataSource = 'data_source' in config ? config.data_source : undefined;
+      if (dataSource) {
+        const dataSourceIndex = getDataSourceIndex(dataSource);
+        usedDataviews[trendlineLayerId] = {
+          type: 'adHocDataView',
+          ...dataSourceIndex,
+          ...(dataSource.type === 'esql'
+            ? { dataSourceType: 'esql' as const, esqlQuery: dataSource.query }
+            : {}),
+        };
+      }
+    }
+  }
 
   const { adHocDataViews, internalReferences } = getAdhocDataviews(usedDataviews);
 

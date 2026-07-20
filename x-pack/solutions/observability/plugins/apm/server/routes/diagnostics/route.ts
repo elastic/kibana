@@ -15,23 +15,23 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
-import * as t from 'io-ts';
-import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
+import { isoToEpoch } from '@kbn/zod-helpers/v4';
+import type { ApmEvent } from '@kbn/apm-types';
+import { rangeSchema } from '@kbn/apm-api-shared';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import type { ServiceMapDiagnosticResponse } from '../../../common/service_map_diagnostic_types';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import type { ApmEvent } from './bundle/get_apm_events';
+import { getTraceSampleIds } from '../service_map/get_trace_sample_ids';
 import { getDiagnosticsBundle } from './get_diagnostics_bundle';
 import { getFleetPackageInfo } from './get_fleet_package_info';
 import {
   getDestinationParentIds,
-  getSourceSpanIds,
   getExitSpans,
+  getSourceSpanIds,
 } from './service_map/get_exit_spans_from_samples';
 import { getTraceCorrelation } from './service_map/get_trace_correlation';
-import { rangeRt } from '../default_api_types';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import type { ServiceMapDiagnosticResponse } from '../../../common/service_map_diagnostic_types';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { getTraceSampleIds } from '../service_map/get_trace_sample_ids';
 export interface IndiciesItem {
   index: string;
   fieldMappings: {
@@ -92,17 +92,19 @@ export type DiagnosticsBundle = Promise<{
 const getServiceMapDiagnosticsRoute = createApmServerRoute({
   security: { authz: { requiredPrivileges: ['apm'] } },
   endpoint: 'POST /internal/apm/diagnostics/service-map',
-  params: t.type({
-    body: t.intersection([
-      rangeRt,
-      t.type({
-        sourceNode: t.string,
-        destinationNode: t.string,
-      }),
-      t.partial({
-        traceId: t.string,
-      }),
-    ]),
+  params: z.object({
+    body: rangeSchema
+      .merge(
+        z.object({
+          sourceNode: z.string().max(1024),
+          destinationNode: z.string().max(1024),
+        })
+      )
+      .merge(
+        z.object({
+          traceId: z.string().max(1024).optional(),
+        })
+      ),
   }),
   handler: async (resources): Promise<ServiceMapDiagnosticResponse> => {
     const { start, end, destinationNode, traceId, sourceNode } = resources.params.body;
@@ -192,12 +194,14 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
 const getDiagnosticsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/diagnostics',
   security: { authz: { requiredPrivileges: ['apm'] } },
-  params: t.partial({
-    query: t.partial({
-      kuery: t.string,
-      start: isoToEpochRt,
-      end: isoToEpochRt,
-    }),
+  params: z.object({
+    query: z
+      .object({
+        kuery: z.string().max(10_000).optional(),
+        start: z.string().max(1024).transform(isoToEpoch).optional(),
+        end: z.string().max(1024).transform(isoToEpoch).optional(),
+      })
+      .optional(),
   }),
   handler: async (
     resources

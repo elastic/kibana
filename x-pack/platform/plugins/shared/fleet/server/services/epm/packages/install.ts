@@ -60,6 +60,7 @@ import {
   FleetUnauthorizedError,
   FleetTooManyRequestsError,
   PackageInvalidDeploymentMode,
+  PackageAssetsVerificationError,
 } from '../../../errors';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -308,6 +309,7 @@ export async function handleInstallPackageFailure({
     targetVersion: pkgVersion,
     createdAt: new Date().toISOString(),
     latestAttempts: installedPkg?.attributes.latest_install_failed_attempts,
+    missingAssets: error instanceof PackageAssetsVerificationError ? error.meta : undefined,
   });
   // if there is an unknown server error, check the installType and do the following actions
   try {
@@ -1330,6 +1332,7 @@ export async function createInstallation(options: {
   let savedObject: Installation = {
     installed_kibana: [],
     installed_kibana_space_id: options.spaceId,
+    installed_kibana_version: appContextService.getKibanaVersion(),
     installed_es: [],
     package_assets: [],
     es_index_patterns: toSaveESIndexPatterns,
@@ -1461,6 +1464,7 @@ export const saveKibanaAssetsRefs = async (
         pkgName,
         {
           installed_kibana: newAssetRefs,
+          installed_kibana_version: appContextService.getKibanaVersion(),
         },
         { refresh: false }
       );

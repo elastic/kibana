@@ -15,11 +15,6 @@ import {
   type EsqlSummaryState,
 } from './esql_query_summary_section';
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: () => <div data-test-subj="codeEditorMock" />,
-  ESQL_LANG_ID: 'esql',
-}));
-
 const BASE = 'FROM logs-*';
 const ALERT_SEGMENT = '| WHERE count > 100';
 

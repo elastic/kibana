@@ -38,7 +38,7 @@ export const AVAILABLE_INDICES: AvailableIndexMetadata[] = [
   {
     pattern: 'metrics-endpoint.policy-*',
     description:
-      'Elastic Defend policy responses containing warnings and errors for policy responses',
+      'Elastic Defend policy response documents include success, warning, and failure actions; action status and diagnostic context must be used to determine whether a policy response needs remediation.',
   },
   {
     pattern: 'logs-endpoint.events.file-*',
