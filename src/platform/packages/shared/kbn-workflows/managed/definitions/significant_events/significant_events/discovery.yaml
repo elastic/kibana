@@ -170,7 +170,7 @@ steps:
                     '@timestamp':
                       gte: '{{ inputs.detectionLookback }}'
         on-failure:
-          continue: true
+          continue: false
 
       - name: foreach_stamp_processed
         type: foreach
