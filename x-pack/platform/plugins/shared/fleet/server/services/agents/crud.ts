@@ -11,7 +11,7 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery, escapeQuotes } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
@@ -20,6 +20,10 @@ import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
+import {
+  buildPolicyIdsOrVariantsEsFilter,
+  removeVersionSuffixFromPolicyId,
+} from '../../../common/services/version_specific_policies_utils';
 import { AGENTS_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 import {
   FleetError,
@@ -702,13 +706,9 @@ export async function getAgentVersionsForAgentPolicyIds(
       >({
         query: {
           bool: {
-            filter: [
-              {
-                terms: {
-                  policy_id: agentPolicyIds,
-                },
-              },
-            ],
+            // Also matches agents on version-specific variants of the given policies
+            // (e.g. `id#9.2`), which would otherwise be missed by an exact terms match.
+            filter: [buildPolicyIdsOrVariantsEsFilter(agentPolicyIds)],
           },
         },
         index: AGENTS_INDEX,
@@ -716,7 +716,10 @@ export async function getAgentVersionsForAgentPolicyIds(
       })
     );
 
-    const groupedHits = groupBy(hits, (hit) => hit._source?.policy_id);
+    // Group by base policy id so version-specific variants roll up under their parent policy.
+    const groupedHits = groupBy(hits, (hit) =>
+      hit._source?.policy_id ? removeVersionSuffixFromPolicyId(hit._source.policy_id) : undefined
+    );
 
     for (const [policyId, policyHits] of Object.entries(groupedHits)) {
       const versionCounts: Record<string, number> = {};

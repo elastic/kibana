@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import { EuiComboBoxWrapper, type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import {
+  type KbnComboBoxObject,
+  type KibanaUrl,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
 import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT, SERVICE_OPBEANS_JAVA } from '../constants';
 
 export class ServiceMapPage {
   public serviceMap: Locator;
   public serviceMapGraph: Locator;
+  public serviceMapViewport: Locator;
   public mapControls: Locator;
   public zoomInBtn: Locator;
   public zoomOutBtn: Locator;
@@ -23,8 +30,6 @@ export class ServiceMapPage {
   public serviceMapPopover: Locator;
   public serviceMapPopoverContent: Locator;
   public serviceMapPopoverTitle: Locator;
-  public serviceMapServiceDetailsButton: Locator;
-  public serviceMapFocusMapButton: Locator;
   public serviceMapDependencyDetailsButton: Locator;
   public serviceMapEdgeExploreTracesButton: Locator;
   public serviceMapOptionsPanel: Locator;
@@ -39,8 +44,7 @@ export class ServiceMapPage {
   public serviceMapFindMatchSummary: Locator;
   public readonly serviceMapEmbeddable: Locator;
   public readonly serviceMapEditorSaveButton: Locator;
-  public readonly serviceMapEditorServiceNameComboBox: EuiComboBoxWrapper;
-  public readonly serviceMapEditorEnvironmentComboBoxInput: Locator;
+  public readonly serviceMapEditorServiceNameComboBox: KbnComboBoxObject;
   public readonly serviceMapEditorKueryInput: Locator;
   public readonly serviceMapViewFullMapButton: Locator;
   public readonly dashboardEmbeddablePanel: Locator;
@@ -52,6 +56,7 @@ export class ServiceMapPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.serviceMap = page.testSubj.locator('serviceMap');
     this.serviceMapGraph = page.testSubj.locator('serviceMapGraph');
+    this.serviceMapViewport = this.serviceMapGraph.locator('.react-flow__viewport');
     this.mapControls = page.locator('[data-testid="rf__controls"]');
     this.zoomInBtn = this.mapControls.getByRole('button', { name: 'Zoom In' });
     this.zoomOutBtn = this.mapControls.getByRole('button', { name: 'Zoom Out' });
@@ -63,10 +68,6 @@ export class ServiceMapPage {
     this.serviceMapPopover = page.testSubj.locator('serviceMapPopover');
     this.serviceMapPopoverContent = page.testSubj.locator('serviceMapPopoverContent');
     this.serviceMapPopoverTitle = page.testSubj.locator('serviceMapPopoverTitle');
-    this.serviceMapServiceDetailsButton = page.testSubj.locator(
-      'apmServiceContentsServiceDetailsButton'
-    );
-    this.serviceMapFocusMapButton = page.testSubj.locator('apmServiceContentsFocusMapButton');
     this.serviceMapDependencyDetailsButton = page.testSubj.locator(
       'apmDependencyContentsDependencyDetailsButton'
     );
@@ -81,8 +82,7 @@ export class ServiceMapPage {
     this.serviceMapFindMatchSummary = page.testSubj.locator('serviceMapFindMatchSummary');
     this.serviceMapEmbeddable = page.testSubj.locator('apmServiceMapEmbeddable');
     this.serviceMapEditorSaveButton = page.testSubj.locator('apmServiceMapEditorSaveButton');
-    this.serviceMapEditorServiceNameComboBox = new EuiComboBoxWrapper(
-      page,
+    this.serviceMapEditorServiceNameComboBox = page.components.comboBox(
       'apmServiceMapEditorServiceNameComboBox'
     );
     this.serviceMapEditorServiceNameComboBoxLoading = page.testSubj.locator(
@@ -91,9 +91,6 @@ export class ServiceMapPage {
     this.serviceMapEditorEnvironmentComboBoxLoading = page.testSubj.locator(
       'apmServiceMapEditorEnvironmentComboBoxLoading'
     );
-    this.serviceMapEditorEnvironmentComboBoxInput = page.testSubj
-      .locator('apmServiceMapEditorEnvironmentComboBox')
-      .locator('[data-test-subj="comboBoxInput"]');
     this.serviceMapEditorKueryInput = page.testSubj.locator('apmServiceMapEditorKueryInput');
     this.serviceMapViewFullMapButton = page.testSubj.locator('serviceMapViewFullMapButton');
     this.dashboardEmbeddablePanel = page.testSubj.locator('embeddablePanel');
@@ -155,8 +152,15 @@ export class ServiceMapPage {
   }
 
   async selectServiceMapEditorEnvironment(environment: string) {
-    await this.serviceMapEditorEnvironmentComboBoxInput.click();
-    await this.page.keyboard.type(environment, { delay: 50 });
+    // `asPlainText` async combo that defaults to "All". Use fill() (replaces the
+    // existing text — raw keyboard.type would append → "Allstaging") and then click
+    // the option by name: this waits for the async list to filter to the exact
+    // option before selecting, avoiding a keyboard pick of a stale suggestion.
+    const searchInput = this.page.testSubj
+      .locator('apmServiceMapEditorEnvironmentComboBox')
+      .locator('[data-test-subj="comboBoxSearchInput"]');
+    await searchInput.click();
+    await searchInput.fill(environment);
     const environmentOption = this.page.getByRole('option', { name: environment });
     await environmentOption.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await environmentOption.click();
@@ -207,11 +211,29 @@ export class ServiceMapPage {
 
   /**
    * After fit view, the map animates; merging alert/SLO badges can also re-run layout + fitView (see graph.tsx).
-   * Wait briefly so clicks target the final node positions.
+   * React Flow drives that animation via the viewport `transform`, so the layout is settled once the
+   * transform stops changing between consecutive frames. Polls that signal (Playwright auto-retries the
+   * assertion) instead of a fixed sleep, so clicks always target the final node positions.
    */
   async settleServiceMapLayout() {
     await this.serviceMapGraph.waitFor({ state: 'visible' });
-    await new Promise<void>((resolve) => setTimeout(resolve, 800));
+    await this.serviceMapViewport.waitFor({ state: 'attached', timeout: EXTENDED_TIMEOUT });
+
+    let previousTransform: string | null = null;
+
+    await expect
+      .poll(
+        async () => {
+          const currentTransform = await this.serviceMapViewport.evaluate(
+            (el) => getComputedStyle(el).transform
+          );
+          const isStable = currentTransform === previousTransform;
+          previousTransform = currentTransform;
+          return isStable;
+        },
+        { timeout: EXTENDED_TIMEOUT }
+      )
+      .toBe(true);
   }
 
   async clickFitView() {
@@ -219,43 +241,24 @@ export class ServiceMapPage {
     await this.settleServiceMapLayout();
   }
 
-  /**
-   * Click handlers can no-op while nodes remount or the viewport is still animating after fit view / badge merge.
-   * Retries: dismiss, settle, click, until popover content is visible.
-   */
-  private async clickUntilPopoverVisible(clickFn: () => Promise<void>) {
-    const maxAttempts = 4;
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      await this.dismissPopoverIfOpen();
-      await this.settleServiceMapLayout();
-      try {
-        await clickFn();
-        await this.serviceMapPopoverContent.waitFor({ state: 'visible', timeout: 15000 });
-        return;
-      } catch (err) {
-        if (attempt === maxAttempts - 1) {
-          throw err;
-        }
-      }
-    }
-  }
-
-  async openServiceNodePopover(serviceName: string) {
-    await this.clickUntilPopoverVisible(async () => {
-      await this.clickServiceNode(serviceName);
-    });
+  async openServiceNodeFlyout(serviceName: string) {
+    await this.settleServiceMapLayout();
+    await this.clickServiceNode(serviceName);
+    await this.page.testSubj
+      .locator('serviceFlyoutOverview')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   async openNodePopover(nodeId: string) {
-    await this.clickUntilPopoverVisible(async () => {
-      await this.clickNode(nodeId);
-    });
+    await this.settleServiceMapLayout();
+    await this.clickNode(nodeId);
+    await this.serviceMapPopoverContent.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   async openEdgePopover(edgeId: string) {
-    await this.clickUntilPopoverVisible(async () => {
-      await this.clickEdge(edgeId);
-    });
+    await this.settleServiceMapLayout();
+    await this.clickEdge(edgeId);
+    await this.serviceMapPopoverContent.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   getNodeById(nodeId: string) {

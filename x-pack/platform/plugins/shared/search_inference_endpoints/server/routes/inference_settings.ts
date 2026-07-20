@@ -78,7 +78,7 @@ export const defineInferenceSettingsRoutes = ({
       path: APIRoutes.GET_INFERENCE_SETTINGS,
       security: {
         authz: {
-          requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
+          requiredPrivileges: [ApiPrivileges.read(PLUGIN_ID)],
         },
       },
     })
@@ -86,7 +86,7 @@ export const defineInferenceSettingsRoutes = ({
       {
         security: {
           authz: {
-            requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
+            requiredPrivileges: [ApiPrivileges.read(PLUGIN_ID)],
           },
         },
         validate: {},

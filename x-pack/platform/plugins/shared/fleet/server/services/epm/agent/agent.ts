@@ -113,14 +113,17 @@ export function compileTemplate(
     throw new PackageInvalidArchiveError(`Error while compiling agent template: ${err.message}`);
   }
 
-  // Must run before replaceRootLevelYamlVariables: stringify output may contain
-  // unquoted `"` chars (e.g. regexp patterns) that cause this regex to match
-  // across lines and corrupt the YAML structure.
-  compiledTemplate = compiledTemplate.replace(/"(?:[^"\\]|\\.)*"/gs, (match) =>
-    match.includes('\n')
+  // Must run before replaceRootLevelYamlVariables: yaml.stringify output may contain
+  // double-quoted scalars with literal newlines that the yaml parser rejects.
+  // The alternation skips YAML single-quoted scalars first (including any `"` they
+  // contain) so that a `"` inside e.g. `'user"name'` is never treated as a
+  // double-quote delimiter.
+  compiledTemplate = compiledTemplate.replace(/'(?:[^']|'')*'|"(?:[^"\\]|\\.)*"/gs, (match) => {
+    if (match[0] === "'") return match; // single-quoted scalar — no escaping needed
+    return match.includes('\n')
       ? match.replace(/\n+/g, (newlines) => '\\n'.repeat(newlines.length - 1))
-      : match
-  );
+      : match;
+  });
 
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
 

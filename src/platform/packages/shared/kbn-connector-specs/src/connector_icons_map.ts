@@ -209,4 +209,15 @@ export const ConnectorIconsMap: Map<
     '.snowflake',
     lazy(() => import(/* webpackChunkName: "connectorIconsnowflake" */ './specs/snowflake/icon')),
   ],
+
+  ['.box', lazy(() => import(/* webpackChunkName: "connectorIconbox" */ './specs/box/icon'))],
+
+  [
+    '.dropbox',
+    lazy(() => import(/* webpackChunkName: "connectorIcondropbox" */ './specs/dropbox/icon')),
+  ],
+  [
+    '.one_drive',
+    lazy(() => import(/* webpackChunkName: "connectorIconOneDrive" */ './specs/one_drive/icon')),
+  ],
 ]);

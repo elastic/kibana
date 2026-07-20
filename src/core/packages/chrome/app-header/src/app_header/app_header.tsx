@@ -15,8 +15,9 @@ import type {
   AppHeaderBack,
   AppHeaderBadge,
   AppHeaderMetadataItems,
-  AppHeaderPadding,
+  AppHeaderSpacing,
   AppHeaderTab,
+  AppHeaderTitle,
 } from '../types';
 import { useHasLegacyActionMenu } from './hooks/chrome';
 import { AppHeaderShell } from './app_header_shell';
@@ -29,17 +30,33 @@ import { AppHeaderMetadata } from './app_header_metadata';
 import { useResolvedBadges, useShareAction } from './hooks';
 
 export interface AppHeaderViewProps {
-  title?: string;
+  title?: AppHeaderTitle;
   back?: AppHeaderBack | AppHeaderBack[];
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
-  menu?: AppMenuConfig;
+  menu?: AppMenuConfig & { isCollapsed?: boolean };
   favorite?: ReactNode;
+  titleAppend?: ReactNode;
   metadata?: AppHeaderMetadataItems;
+  /**
+   * Defaults to `true`. Set to `false` only when the surrounding full-page layout provides its own
+   * sticky-header mechanism for the correct scrolling container.
+   */
   sticky?: boolean;
-  padding?: AppHeaderPadding;
+  /**
+   * Controls the horizontal inset. `standard` keeps the 16px symmetric gutter. When omitted it
+   * defaults to `standard`, except a titleless header (only a back and/or overflow button) defaults
+   * to `compact` so sparse legacy states don't look too tall. Bleed modes are compatibility options
+   * for headers that cannot yet move outside a padded parent.
+   */
+  spacing?: AppHeaderSpacing;
   docLink?: string;
   showAddIntegrations?: boolean;
+  /**
+   * Omits the header's bottom border. Used when the content rendered below the header owns the
+   * separating line instead (e.g. Discover using UnifiedTabs).
+   */
+  borderless?: boolean;
 }
 
 export const AppHeaderView = React.memo<AppHeaderViewProps>(
@@ -50,21 +67,41 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     badges,
     menu,
     favorite,
+    titleAppend,
     metadata,
     sticky,
-    padding,
+    spacing,
+    borderless,
     docLink,
     showAddIntegrations,
   }) => {
     const hasLegacyActionMenu = useHasLegacyActionMenu();
     const shareAction = useShareAction(menu);
     const resolvedBadges = useResolvedBadges(badges);
+
+    // Sparse legacy states (only a back and/or overflow-menu button, no title or other content) look
+    // too tall at the standard height, so default them to the shorter `compact` spacing. An explicit
+    // `spacing` from the caller always wins.
+    const isSparse =
+      title === undefined &&
+      !resolvedBadges?.length &&
+      !tabs?.length &&
+      !metadata?.length &&
+      !titleAppend &&
+      !favorite;
+    const resolvedSpacing = spacing ?? (isSparse ? 'compact' : 'standard');
+
+    // Match the title size to the spacing: the shorter `compact` header uses an `xs` title, while the
+    // roomier standard/bleed headers use `s`.
+    const titleSize = resolvedSpacing === 'compact' ? 'xs' : 's';
+
     const show =
       title !== undefined ||
       back !== undefined ||
       !!tabs?.length ||
       !!resolvedBadges?.length ||
       !!menu?.items?.length ||
+      !!titleAppend ||
       !!shareAction ||
       !!favorite ||
       !!metadata?.length ||
@@ -78,16 +115,18 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
 
     return (
       <AppHeaderShell
-        title={<TitleArea title={title} back={back} />}
+        title={<TitleArea title={title} back={back} size={titleSize} />}
         badges={<AppBadges badges={resolvedBadges} />}
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
+        titleAppend={titleAppend}
         trailing={
           <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />
         }
         metadata={metadata?.length ? <AppHeaderMetadata metadata={metadata} /> : undefined}
         tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}
         sticky={sticky}
-        padding={padding}
+        spacing={resolvedSpacing}
+        borderless={borderless}
       />
     );
   }
@@ -96,7 +135,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
 AppHeaderView.displayName = 'AppHeaderView';
 
 export interface AppHeaderProps extends AppHeaderViewProps {
-  title: string;
+  title: AppHeaderTitle;
 }
 
 export const AppHeader = React.memo<AppHeaderProps>((props) => {

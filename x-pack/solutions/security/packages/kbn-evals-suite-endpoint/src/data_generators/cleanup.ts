@@ -9,7 +9,12 @@ import type { Client } from '@elastic/elasticsearch';
 
 const EVAL_SEEDED_INDICES = [
   'metrics-endpoint.metadata-default',
+  'metrics-endpoint.metadata_current_*',
+  '.metrics-endpoint.metadata_united_*',
+  'logs-elastic_agent.endpoint_security-default',
+  'logs-endpoint.alerts-default',
   'logs-endpoint.events.process-default',
+  'metrics-endpoint.metrics-default',
   'metrics-endpoint.policy-default',
 ];
 

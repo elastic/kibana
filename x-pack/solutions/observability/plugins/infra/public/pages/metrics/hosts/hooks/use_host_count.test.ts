@@ -17,6 +17,10 @@ jest.mock('../../../../hooks/use_fetcher');
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../containers/plugin_config_context');
 jest.mock('./use_unified_search');
+// Pin the first-paint gate open so the test needn't mount its upstream contexts.
+jest.mock('./use_hosts_page_ready', () => ({
+  useHostsPageReady: () => true,
+}));
 
 describe('useHostCount', () => {
   jest.spyOn(useTimeRangeMetadataContextModule, 'useTimeRangeMetadataContext').mockReturnValue({

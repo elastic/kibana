@@ -22,8 +22,8 @@ jest.mock('../../../../common/components/inspect/use_inspect');
 jest.mock('../../../../common/lib/kibana');
 
 const mockGetState = jest.fn();
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const actual = jest.requireActual('react-redux-v7');
   return {
     ...actual,
     useDispatch: jest.fn(),
@@ -84,6 +84,11 @@ describe('TimelineModalHeader', () => {
               read: true,
             }),
           },
+          hooks: {
+            useCasesAddToNewCaseFlyout: jest.fn().mockReturnValue({ open: jest.fn() }),
+            useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
+          },
+          config: { attachmentsEnabled: false },
         },
         uiSettings: {
           get: jest.fn(),

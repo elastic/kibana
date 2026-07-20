@@ -11,6 +11,7 @@ import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import type React from 'react';
 import { useEffect, useRef } from 'react';
 import { type TriggerType, TriggerTypes } from '@kbn/workflows';
+import { HardcodedIcons } from '@kbn/workflows-ui';
 import { buildSuggestTechPreviewBadgeRules } from './get_suggest_tech_preview_badge_styles';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -19,7 +20,6 @@ import {
   type GetIconBase64Params,
   getTriggerBoltFallbackDataUrl,
 } from '../../../shared/ui/step_icons/get_icon_base64';
-import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
 import { MonochromeIcons } from '../../../shared/ui/step_icons/monochrome_icons';
 import { triggerSchemas } from '../../../trigger_schemas';
 import { collectTechPreviewSuggestAriaPrefixes } from '../lib/autocomplete/suggestions/collect_tech_preview_suggest_aria_prefixes';
@@ -79,6 +79,10 @@ export const predefinedStepTypes = [
   {
     actionTypeId: 'waitForInput',
     displayName: 'Wait For Input',
+  },
+  {
+    actionTypeId: 'waitForApproval',
+    displayName: 'Wait For Approval',
   },
   {
     actionTypeId: 'data.set',
@@ -215,45 +219,52 @@ export function useDynamicTypeIcons(
     if (!hasConnectorTypes && !hasTriggerDefinitions && !hasEditorMounted) {
       return;
     }
-    const registry = actionTypeRegistryRef.current;
-    const connectorTypes = Object.values(connectorTypesData ?? {}).map((connector) => {
-      // API can list types not registered in the UI registry => get() throws if missing.
-      const icon = registry.has(connector.actionTypeId)
-        ? registry.get(connector.actionTypeId)?.iconClass
-        : undefined;
-      return {
-        actionTypeId: connector.actionTypeId,
-        displayName: connector.displayName,
-        ...(icon !== undefined && { icon }),
-      };
-    });
+    const getAllTypes = (): ConnectorTypeInfoMinimal[] => {
+      const registry = actionTypeRegistryRef.current;
+      const connectorTypes = Object.values(connectorsDataRef.current?.connectorTypes ?? {}).map(
+        (connector) => {
+          // API can list types not registered in the UI registry => get() throws if missing.
+          const icon = registry.has(connector.actionTypeId)
+            ? registry.get(connector.actionTypeId)?.iconClass
+            : undefined;
+          return {
+            actionTypeId: connector.actionTypeId,
+            displayName: connector.displayName,
+            ...(icon !== undefined && { icon }),
+          };
+        }
+      );
 
-    const registeredTypes = workflowsExtensionsRef.current.getAllStepDefinitions().map((step) => ({
-      actionTypeId: step.id,
-      displayName: step.label,
-      fromRegistry: true,
-      icon: step.icon,
-    }));
+      const registeredTypes = workflowsExtensionsRef.current
+        .getAllStepDefinitions()
+        .map((step) => ({
+          actionTypeId: step.id,
+          displayName: step.label,
+          fromRegistry: true,
+          icon: step.icon,
+        }));
 
-    const registeredTriggerTypes = triggerSchemas.getTriggerDefinitions().map((t) => ({
-      actionTypeId: t.id,
-      displayName: t.title ?? t.id,
-      isTrigger: true,
-      ...(t.icon !== undefined && { icon: t.icon }),
-    }));
+      const registeredTriggerTypes = triggerSchemas.getTriggerDefinitions().map((t) => ({
+        actionTypeId: t.id,
+        displayName: t.title ?? t.id,
+        isTrigger: true,
+        ...(t.icon !== undefined && { icon: t.icon }),
+      }));
 
-    const allTypes = [
-      ...predefinedStepTypes,
-      ...connectorTypes,
-      ...registeredTypes,
-      ...registeredTriggerTypes,
-    ];
+      return [
+        ...predefinedStepTypes,
+        ...connectorTypes,
+        ...registeredTypes,
+        ...registeredTriggerTypes,
+      ];
+    };
 
     const runInjection = async () => {
       const myRunId = ++injectionRunIdRef.current;
       setStabilityBadgeThemeContext(euiThemeContext);
       // Use ref at injection time so retries (150ms, 500ms, etc.) see the current DOM and find the iframe if it appeared.
       const editorContainer = editorContainerRef?.current ?? undefined;
+      const allTypes = getAllTypes();
       await injectDynamicConnectorIcons(allTypes, editorContainer);
       injectSuggestTechPreviewBadges(editorContainer, euiThemeContext);
       await injectDynamicShadowIcons(

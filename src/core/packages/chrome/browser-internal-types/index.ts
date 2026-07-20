@@ -20,15 +20,16 @@ import type {
   ChromeBreadcrumbsAppendExtension,
   ChromeBreadcrumbsBadge,
   ChromeNext,
-  ChromeProjectNavigationNode,
-  ChromeSetProjectBreadcrumbsParams,
+  GlobalHeaderAiButton,
   ChromeUserBanner,
   GlobalSearchConfig,
-  AppDeepLinkId,
+  NavigationCustomization,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionId,
+  ChromeProjectNavigationNode,
+  ChromeSetProjectBreadcrumbsParams,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
@@ -92,13 +93,9 @@ export interface InternalChromeStart extends ChromeStart {
     setKibanaName(kibanaName: string): void;
 
     /** Initialise project navigation from a definition tree. */
-    initNavigation<
-      LinkId extends AppDeepLinkId = AppDeepLinkId,
-      Id extends string = string,
-      ChildrenId extends string = Id
-    >(
+    initNavigation<TTree extends NavigationTreeDefinition>(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+      navigationTree$: Observable<TTree>
     ): void;
 
     /** Get an observable of the resolved project navigation tree and active nodes. */
@@ -106,6 +103,14 @@ export interface InternalChromeStart extends ChromeStart {
       solutionId: SolutionId;
       navigationTree: NavigationTreeDefinitionUI;
       activeNodes: ChromeProjectNavigationNode[][];
+      overflowItemIds: string[];
+      /** Default top-level item IDs before any user customization is applied. */
+      defaultItemIds: string[];
+      /**
+       * Top-level body nodes the sidebar will actually render: home node excluded,
+       * hidden nodes removed, and panel-openers with no visible descendants pruned.
+       */
+      renderableNodes: ChromeProjectNavigationNode[];
     }>;
 
     /** Get an observable of the current project breadcrumbs. */
@@ -123,6 +128,18 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
+
+    /**
+     * Set navigation customization for live preview.
+     * Pass undefined to clear the customization and revert to the original order.
+     */
+    setNavigationCustomization(customization: NavigationCustomization | undefined): void;
+
+    /** Observable that emits the customize navigation handler when registered by the navigation plugin. */
+    getCustomizeNavigationHandler$(): Observable<(() => void) | null>;
+
+    /** Register the handler that opens the navigation customization modal. Called once by the navigation plugin. */
+    registerCustomizeNavigationHandler(handler: () => void): void;
   };
 
   /** @internal Extends public `next` with `get$` for Chrome layout components. */
@@ -131,6 +148,9 @@ export interface InternalChromeStart extends ChromeStart {
 
 /** @internal */
 export interface InternalChromeNext extends ChromeNext {
+  aiButton: ChromeNext['aiButton'] & {
+    get$(): Observable<GlobalHeaderAiButton[]>;
+  };
   contextSwitcher: ChromeNext['contextSwitcher'] & {
     get$(): Observable<ReactNode>;
   };
@@ -143,5 +163,8 @@ export interface InternalChromeNext extends ChromeNext {
   };
   appHeader: ChromeNext['appHeader'] & {
     get$(): Observable<AppHeaderConfig | undefined>;
+  };
+  userMenu: ChromeNext['userMenu'] & {
+    get$(): Observable<ReactNode>;
   };
 }

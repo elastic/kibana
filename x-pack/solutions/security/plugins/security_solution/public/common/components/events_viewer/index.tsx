@@ -16,8 +16,8 @@ import {
 } from '@kbn/securitysolution-data-table';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect, useDispatch, useSelector } from 'react-redux-v7';
 import { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type {
@@ -69,6 +69,7 @@ const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 export interface EventsViewerProps {
   bulkActions: boolean | BulkActionsProp;
   cellActionsTriggerId?: string;
+  dataTableId?: string;
   defaultModel: SubsetDataTableModel;
   end: string;
   entityType?: EntityType;
@@ -93,6 +94,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   bulkActions,
   cellActionsTriggerId,
   clearSelected,
+  dataTableId,
   defaultModel,
   end,
   entityType = 'events',
@@ -104,10 +106,11 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   setSelected,
   pageScope,
   start,
-  tableId,
+  tableId: eventTableId,
   topRightMenuOptions,
   unit = defaultUnit,
 }) => {
+  const tableId = (dataTableId ?? eventTableId) as TableId;
   const dispatch = useDispatch();
   const theme: EuiTheme = useContext(ThemeContext);
   const tableContext = useMemo(() => ({ tableId }), [tableId]);

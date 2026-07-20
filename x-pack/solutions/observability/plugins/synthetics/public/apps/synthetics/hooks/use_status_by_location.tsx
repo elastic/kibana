@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
+import { useSyntheticsEsSearch } from './use_synthetics_es_search';
 import { MONITOR_STATUS_ENUM } from '../../../../common/constants/monitor_management';
 import { useMonitorHealthColor } from '../components/monitors_page/hooks/use_monitor_health_color';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
@@ -14,6 +14,7 @@ import { getSyntheticsCcsIndex } from '../../../../common/get_synthetics_indices
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
+  STATUS_LOOKBACK_RANGE_FILTER,
 } from '../../../../common/constants/client_defaults';
 import type { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../contexts';
@@ -34,7 +35,7 @@ export function useStatusByLocation({
 
   const { locations: allLocations } = useLocations();
 
-  const { data, loading } = useEsSearch(
+  const { data, loading } = useSyntheticsEsSearch(
     {
       index: getSyntheticsCcsIndex(remoteName),
       size: 0,
@@ -43,6 +44,7 @@ export function useStatusByLocation({
           filter: [
             FINAL_SUMMARY_FILTER,
             EXCLUDE_RUN_ONCE_FILTER,
+            STATUS_LOOKBACK_RANGE_FILTER,
             {
               term: {
                 config_id: configId,

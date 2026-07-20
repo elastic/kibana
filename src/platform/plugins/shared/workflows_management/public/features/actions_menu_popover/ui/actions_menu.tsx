@@ -27,7 +27,6 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../hooks/use_kibana';
-import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
 import { STEPS_PREFIX, useDisplayOptions } from '../lib/use_display_options';
@@ -147,10 +146,7 @@ export function ActionsMenu({
         >
           <span css={shouldUseGroupStyle ? styles.groupIconInner : styles.actionIconInner}>
             {isActionConnectorGroup(action) || isActionConnectorOption(action) ? (
-              <StepIcon
-                stepType={getBaseConnectorType(action.connectorType)}
-                executionStatus={undefined}
-              />
+              <StepIcon stepType={action.connectorType} executionStatus={undefined} />
             ) : isActionGroup(action) || isActionOption(action) ? (
               <EuiIcon
                 type={action.iconType}

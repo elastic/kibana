@@ -28,7 +28,7 @@ import {
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import type { AnomalyDateFunction } from '@kbn/ml-anomaly-utils/types';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getSpaceUrlPrefix, type SpaceId } from '@kbn/core-spaces-common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -116,7 +116,7 @@ export function buildExplorerUrl(
   jobIds: string[],
   timeRange: { from: string; to: string; mode?: string },
   type: MlAnomalyResultType,
-  spaceId: string,
+  spaceId: SpaceId,
   r?: AlertExecutionResult
 ): string {
   const isInfluencerResult = type === ML_ANOMALY_RESULT_TYPE.INFLUENCER;
@@ -185,8 +185,7 @@ export function buildExplorerUrl(
     },
   };
 
-  const spacePathComponent: string =
-    !spaceId || spaceId === DEFAULT_SPACE_ID ? '' : `/s/${spaceId}`;
+  const spacePathComponent = spaceId ? getSpaceUrlPrefix(spaceId) : '';
 
   return `${spacePathComponent}/app/ml/explorer/?_g=${encodeURIComponent(
     rison.encode(globalState)
@@ -1006,7 +1005,7 @@ export function alertingServiceProvider(
   const getFormatted = async (
     indexPattern: string,
     resultType: MlAnomalyDetectionAlertParams['resultType'],
-    spaceId: string,
+    spaceId: SpaceId,
     value: AggResultsResponse
   ): Promise<
     | { payload: AnomalyDetectionAlertPayload; context: AnomalyDetectionAlertContext; name: string }
@@ -1051,7 +1050,7 @@ export function alertingServiceProvider(
      */
     execute: async (
       params: MlAnomalyDetectionAlertParams,
-      spaceId: string,
+      spaceId: SpaceId,
       state?: AnomalyDetectionRuleState
     ): Promise<
       | {

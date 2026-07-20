@@ -17,7 +17,6 @@ import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   securityServiceMock,
-  coreMock,
 } from '@kbn/core/server/mocks';
 import type {
   IRouter,
@@ -50,7 +49,7 @@ import type { PluginStartContract as ActionPluginStartContract } from '@kbn/acti
 import type { Mutable } from 'utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ScriptsLibraryMock } from '../services/scripts_library/mocks';
 import { referenceDataMocks } from '../lib/reference_data/mocks';
@@ -112,9 +111,14 @@ export const createMockEndpointAppContextService = (
     fleetDependencies: fleetStartServices,
   }).service.asInternalUser();
   const endpointMetadataService = new EndpointMetadataService(
-    esClient,
-    savedObjectsClientMock.create(),
-    fleetServices
+    {
+      getInternalEsClient: () => esClient,
+      getInternalFleetServices: () => fleetServices,
+      savedObjects: { createInternalScopedSoClient: () => savedObjectsClientMock.create() },
+      createLogger: () => loggingSystemMock.create().get(),
+      isCcsEnabled: jest.fn().mockResolvedValue(false),
+    } as unknown as EndpointAppContextService,
+    DEFAULT_SPACE_ID
   );
   const casesClientMock = createCasesClientMock();
   const fleetFromHostFilesClientMock = createFleetFromHostFilesClientMock();
@@ -154,6 +158,7 @@ export const createMockEndpointAppContextService = (
     }),
     savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
     isServerless: jest.fn().mockReturnValue(false),
+    isCcsEnabled: jest.fn().mockResolvedValue(false),
     getInternalEsClient: jest.fn().mockReturnValue(esClient),
     getActiveSpace: jest.fn(async (_) => ({
       id: DEFAULT_SPACE_ID,
@@ -194,7 +199,6 @@ export const createMockEndpointAppContextServiceSetupContract =
       cloud: cloudMock.createSetup(),
       loggerFactory: loggingSystemMock.create(),
       telemetry: analyticsServiceMock.createAnalyticsServiceSetup(),
-      httpServiceSetup: coreMock.createSetup().http,
     };
   };
 

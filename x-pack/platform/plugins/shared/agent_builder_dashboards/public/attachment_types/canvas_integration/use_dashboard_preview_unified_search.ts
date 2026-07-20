@@ -6,12 +6,19 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { distinctUntilChanged, map } from 'rxjs';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { isOfQueryType, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import {
+  apiPublishesEsqlUsage,
+  combineCompatibleChildrenApis,
+  type PublishesEsqlUsage,
+} from '@kbn/presentation-publishing';
 import { isEqual } from 'lodash';
 import type { DashboardState } from '@kbn/dashboard-plugin/server';
 import { DEFAULT_TIME_RANGE } from '@kbn/agent-builder-dashboards-common';
@@ -50,6 +57,8 @@ export const useDashboardPreviewUnifiedSearch = ({
   const [query, setQuery] = useState<Query>(normalizeQuery(toStoredQuery(dashboardState.query)));
   const [filters, setFilters] = useState<Filter[]>(toStoredFilters(dashboardState.filters) ?? []);
   const [dataViews, setDataViews] = useState<DataView[]>([]);
+  const [isApproximate, setIsApproximate] = useState(false);
+  const [hasEsqlPanel, setHasEsqlPanel] = useState(false);
 
   useEffect(() => {
     if (!dashboardApi) {
@@ -97,6 +106,32 @@ export const useDashboardPreviewUnifiedSearch = ({
       querySubscription.unsubscribe();
       dataViewsSubscription.unsubscribe();
       timeRangeSubscription.unsubscribe();
+    };
+  }, [dashboardApi]);
+
+  useEffect(() => {
+    if (!dashboardApi) {
+      setIsApproximate(false);
+      setHasEsqlPanel(false);
+      return;
+    }
+
+    const approximationSubscription = dashboardApi.isApproximate$.subscribe(setIsApproximate);
+    const esqlUsageSubscription = combineCompatibleChildrenApis<PublishesEsqlUsage, boolean[]>(
+      dashboardApi,
+      'usesEsql$',
+      apiPublishesEsqlUsage,
+      []
+    )
+      .pipe(
+        map((usesEsqlValues) => usesEsqlValues.some(Boolean)),
+        distinctUntilChanged()
+      )
+      .subscribe(setHasEsqlPanel);
+
+    return () => {
+      approximationSubscription.unsubscribe();
+      esqlUsageSubscription.unsubscribe();
     };
   }, [dashboardApi]);
 
@@ -171,12 +206,27 @@ export const useDashboardPreviewUnifiedSearch = ({
       displayStyle: 'inPage' as const,
       disableSubscribingToGlobalDataServices: true,
       enableDateRangePicker: true,
+      esqlApproximation: {
+        isApproximate,
+        onChange: (nextIsApproximate: boolean) =>
+          dashboardApi?.setEsqlApproximation(nextIsApproximate),
+        disabled: !hasEsqlPanel,
+        additionalText: i18n.translate(
+          'agentBuilderDashboards.esqlApproximationToggle.additionalText',
+          {
+            defaultMessage:
+              'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
+          }
+        ),
+      },
     }),
     [
       dashboardApi,
       dashboardState.title,
       dataViews,
       filters,
+      hasEsqlPanel,
+      isApproximate,
       onFiltersUpdated,
       onQuerySubmit,
       onRefresh,

@@ -96,6 +96,54 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
   return z.any();
 }
 
+const getSubActionMetadata = (
+  actionTypeId: string,
+  subActionName: string
+): Pick<BaseConnectorContract, 'description' | 'documentation' | 'examples'> | undefined => {
+  if (actionTypeId !== '.xsoar') {
+    return undefined;
+  }
+
+  if (subActionName === 'getPlaybooks') {
+    return {
+      description: 'Retrieve XSOAR playbooks visible to the connector.',
+      examples: {
+        snippet: `- name: get_xsoar_playbooks
+  type: xsoar.getPlaybooks
+  connector-id: <connector-id>`,
+      },
+    };
+  }
+
+  if (subActionName === 'run') {
+    return {
+      description: 'Create an XSOAR incident and optionally associate it with a playbook.',
+      examples: {
+        params: {
+          name: 'Suspicious login detected',
+          playbookId: '<xsoar-playbook-id>',
+          body: '{"details":"Investigate suspicious login activity.","type":"Unclassified"}',
+        },
+        snippet: `- name: create_xsoar_incident
+  type: xsoar.run
+  connector-id: <connector-id>
+  with:
+    name: Suspicious login detected
+    playbookId: <xsoar-playbook-id>
+    createInvestigation: true
+    severity: 2
+    body: |
+      {
+        "details": "Investigate suspicious login activity.",
+        "type": "Unclassified"
+      }`,
+      },
+    };
+  }
+
+  return undefined;
+};
+
 /**
  * Get registered step definitions from workflowExtensions, converted to BaseConnectorContract
  */
@@ -160,9 +208,11 @@ function convertDynamicConnectorsToContractsInternal(
 
           const paramsSchema = getSubActionParamsSchema(connectorType.actionTypeId, subAction.name);
           const outputSchema = getSubActionOutputSchema(connectorType.actionTypeId, subAction.name);
+          const metadata = getSubActionMetadata(connectorType.actionTypeId, subAction.name);
 
           connectorContracts.push({
             actionTypeId: connectorType.actionTypeId,
+            displayName: connectorType.displayName,
             type: subActionType,
             summary: subAction.displayName,
             paramsSchema,
@@ -170,6 +220,7 @@ function convertDynamicConnectorsToContractsInternal(
             outputSchema,
             description: `${connectorType.displayName} - ${subAction.displayName}`,
             instances: connectorType.instances,
+            ...metadata,
           });
         });
       } else {
@@ -180,6 +231,7 @@ function convertDynamicConnectorsToContractsInternal(
 
         connectorContracts.push({
           actionTypeId: connectorType.actionTypeId,
+          displayName: connectorType.displayName,
           type: connectorTypeName,
           summary: connectorType.displayName,
           paramsSchema,
@@ -194,6 +246,7 @@ function convertDynamicConnectorsToContractsInternal(
       // Return a basic connector contract as fallback
       connectorContracts.push({
         actionTypeId: connectorType.actionTypeId,
+        displayName: connectorType.displayName,
         type: connectorType.actionTypeId,
         summary: connectorType.displayName,
         paramsSchema: z.any(),

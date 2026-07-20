@@ -11,12 +11,14 @@ import type {
   BulkCreateWorkflowsCommand,
   ExecutionStatus,
   ExecutionType,
+  UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
   WorkflowsEventsLogDocumentSource,
   WorkflowsSearchParams,
 } from '@kbn/workflows';
+import type { Template } from '@kbn/workflows-library';
 
 export interface BulkCreateWorkflowsParams {
   workflows: BulkCreateWorkflowsCommand['workflows'];
@@ -162,4 +164,29 @@ export interface SearchTriggerEventLogResult {
   total: number;
   page: number;
   size: number;
+}
+
+export interface RestoreWorkflowVersionParams {
+  signal?: AbortSignal;
+}
+
+export interface RestoreWorkflowVersionResponseDto extends UpdatedWorkflowResponseDto {
+  version: number;
+}
+
+export interface GetCatalogParams {
+  solution?: string;
+  category?: string;
+  search?: string;
+}
+
+export interface GetCatalogResponse {
+  templates: Template[];
+}
+
+export interface GetLibraryHealthResponse {
+  sourceMode: 'http' | 'bundle';
+  lastRefreshAt?: string;
+  lastError?: { message: string; at: string };
+  enabled: boolean;
 }

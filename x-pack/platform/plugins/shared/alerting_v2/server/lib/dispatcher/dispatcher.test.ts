@@ -104,6 +104,7 @@ function buildDispatcherService(deps: {
   workflowsManagement: WorkflowsServerPluginSetup['management'];
 }): DispatcherService {
   const { loggerService } = createLoggerService();
+
   const pipeline = new DispatcherPipeline(loggerService, [
     new FetchEpisodesStep(deps.queryService),
     new FetchSuppressionsStep(deps.queryService),
@@ -220,7 +221,7 @@ describe('DispatcherService', () => {
       expect(queryEsClient.esql.query).toHaveBeenCalledWith(
         {
           query: getDispatchableAlertEventsQuery().query,
-          drop_null_columns: false,
+          drop_null_columns: true,
           filter: {
             range: {
               '@timestamp': {

@@ -8,6 +8,7 @@
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import {
+  AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
   OBSERVABLE_TYPE_IPV4,
   OBSERVABLE_TYPE_HOSTNAME,
 } from '../../../common/constants/observables';
@@ -72,7 +73,7 @@ describe('utils', () => {
         byDescription: {
           buckets: [
             {
-              key: 'Auto extract observables',
+              key: AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
               doc_count: 1,
               byType: {
                 buckets: [
@@ -1331,7 +1332,7 @@ describe('utils', () => {
 
   describe('getCountsAndMaxAlertsData', () => {
     const savedObjectsClient = savedObjectsRepositoryMock.create();
-    savedObjectsClient.find.mockResolvedValue({
+    const legacyResponse = {
       total: 3,
       saved_objects: [],
       per_page: 1,
@@ -1427,14 +1428,26 @@ describe('utils', () => {
           ],
         },
       },
-    });
+    };
+
+    // Default the unified (cases-attachments) query to empty so the merge with
+    // the legacy (cases-comments) query is a no-op unless a test overrides it.
+    const emptyResponse = {
+      total: 0,
+      saved_objects: [],
+      per_page: 0,
+      page: 0,
+    };
 
     beforeEach(() => {
       jest.clearAllMocks();
+      savedObjectsClient.find.mockResolvedValue(emptyResponse);
     });
 
     it('returns the correct counts and max data', async () => {
       const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
+
+      savedObjectsClient.find.mockResolvedValueOnce(legacyResponse);
 
       const res = await getCountsAndMaxAlertsData({
         savedObjectsClient: telemetrySavedObjectsClient,
@@ -1835,7 +1848,7 @@ describe('utils', () => {
           byDescription: {
             buckets: [
               {
-                key: 'Auto extract observables',
+                key: AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
                 doc_count: 2,
                 byType: {
                   buckets: [

@@ -122,10 +122,10 @@ describe('getAttackDiscoveryGenerations', () => {
       expect(result.generations[0].discoveries).toBe(0);
     });
 
-    it('returns the correct loading_message', () => {
-      expect(result.generations[0].loading_message).toBe(
-        'AI is analyzing up to 100 alerts in the last 24 hours to generate discoveries.'
-      );
+    it('returns undefined loading_message for a failed generation', () => {
+      // loading_message is only present while status is 'started'; for terminal
+      // runs the aggregated value is always stale, so the transform omits it.
+      expect(result.generations[0].loading_message).toBeUndefined();
     });
 
     it('returns the correct end', () => {
@@ -362,8 +362,10 @@ describe('getAttackDiscoveryGenerations', () => {
       expect(result.generations[0].reason).toBeUndefined();
     });
 
-    it('returns the loading_message as "Loading..."', () => {
-      expect(result.generations[0].loading_message).toBe('Loading...');
+    it('returns undefined loading_message for a succeeded generation', () => {
+      // loading_message is only present while status is 'started'; for terminal
+      // runs the aggregated value is always stale, so the transform omits it.
+      expect(result.generations[0].loading_message).toBeUndefined();
     });
 
     it('returns the undefined end', () => {
