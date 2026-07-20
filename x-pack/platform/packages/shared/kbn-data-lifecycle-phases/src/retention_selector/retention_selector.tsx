@@ -128,7 +128,7 @@ export const RetentionSelector = ({
     const normalizedSearchValue = isSearchActive ? searchValue.trim().toLowerCase() : '';
 
     let result = options;
-    if (shouldShowManagedFilter && !includeManagedPolicies) {
+    if (showSearch && shouldShowManagedFilter && !includeManagedPolicies) {
       // Always keep the currently-selected policy visible, even when it is managed
       result = result.filter((option) => !option.isManaged || option.name === selectedOptionName);
     }
