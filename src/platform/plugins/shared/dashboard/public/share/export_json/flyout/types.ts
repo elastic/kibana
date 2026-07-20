@@ -23,4 +23,4 @@ export interface ExportJsonSanitizedState<SanitizedState extends object> {
 
 export type SanitizeStateFunction<State extends object, SanitizedState extends object> = (
   state: State
-) => Promise<{ data: SanitizedState; warnings: Array<{ message: string }> }>;
+) => Promise<{ data: SanitizedState | undefined; warnings: Array<{ message: string }> }>;

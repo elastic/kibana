@@ -66,10 +66,10 @@ export function useSanitizedState<State extends object, SanitizedState extends o
     setWarnings([]);
 
     sanitizeState(state)
-      .then(({ data: responseData, warnings: responseWarnings }) => {
+      .then((response) => {
         if (!isMounted) return;
-        setWarnings(responseWarnings.map(({ message }) => message));
-        setData(responseData);
+        setWarnings(response.warnings.map(({ message }) => message));
+        setData(response.data);
         setStatus('success');
       })
       .catch((e) => {

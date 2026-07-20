@@ -263,7 +263,6 @@ function SuccessState({
 }
 
 function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry: () => void }) {
-  const errorMessage = error?.message ?? 'Unknown error';
   return (
     <EuiFlexGroup
       direction="column"
@@ -292,12 +291,14 @@ function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry: () 
                   defaultMessage: 'Sorry, there was an error loading the JSON source.',
                 })}
               </p>
-              <p>
-                {i18n.translate('dashboard.exportJson.sanitizeErrorDetails', {
-                  defaultMessage: 'Error: {errorMessage}',
-                  values: { errorMessage },
-                })}
-              </p>
+              {error && (
+                <p>
+                  {i18n.translate('dashboard.exportJson.sanitizeErrorDetails', {
+                    defaultMessage: 'Error: {errorMessage}',
+                    values: { errorMessage: error.message },
+                  })}
+                </p>
+              )}
             </EuiText>
           }
           actions={
@@ -337,7 +338,7 @@ export const ExportJsonPanel = <State extends object, SanitizedState extends obj
   }, [status]);
 
   const jsonValue = useMemo(
-    () => (status === 'success' && data !== undefined ? JSON.stringify(data, null, 2) : ''),
+    () => (status === 'success' && data !== undefined ? JSON.stringify(data, null, 2) : undefined),
     [data, status]
   );
 
@@ -364,7 +365,7 @@ export const ExportJsonPanel = <State extends object, SanitizedState extends obj
         <EuiFlexItem grow css={{ minHeight: 0 }}>
           {status === 'loading' ? (
             <LoadingState />
-          ) : status === 'success' ? (
+          ) : status === 'success' && jsonValue ? (
             <SuccessState openInConsoleRequest={openInConsoleRequest} jsonValue={jsonValue} />
           ) : (
             <ErrorState error={error} onRetry={onRetry} />

@@ -125,7 +125,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
               return {
                 data:
                   result.data.panels?.length !== 1 || !isDashboardPanel(result.data.panels[0])
-                    ? state
+                    ? undefined
                     : result.data.panels[0].config,
                 warnings: result.warnings ?? [],
               };
