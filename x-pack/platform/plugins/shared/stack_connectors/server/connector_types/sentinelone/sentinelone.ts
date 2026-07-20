@@ -408,6 +408,8 @@ export class SentinelOneConnector extends SubActionConnector<
           ...req.params,
           APIToken: this.secrets.token,
         },
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
       },
       connectorUsageCollector
     );
