@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-/** Matches the portable seeder label so re-seeded data is interchangeable in dev. */
-export const AD2_SCENARIO_SEED_LABEL = 'ad-portable-seeder-2026-07';
+/** Seed label for scenario-registry fixtures. */
+export const AD2_SCENARIO_SEED_LABEL = 'ad-scenario-registry-2026-07';
 
-export const AD2_SCENARIO_ID_PREFIX = 'ad-portable-';
+export const AD2_SCENARIO_ID_PREFIX = 'ad-scenario-';
 
 export const AD2_ALERTS_INDEX = '.alerts-security.alerts-default';
 

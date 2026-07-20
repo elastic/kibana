@@ -9,7 +9,7 @@ import { AD2_CLEAN_SCENARIO_KEYS } from '../scenario_registry';
 import type { AttackDiscoveryAgentBuilderExample } from '../types';
 import { buildScenarioRegistryProvidedAlertsExample } from './build_scenario_registry_provided_alerts';
 
-/** Matches portable seeder `seed --profile clean` scenario keys (4 chains, 16 alerts). */
+/** Clean-profile scenario keys (4 attack chains, 16 alerts). */
 export const CLEAN_PROFILE_SCENARIO_KEYS = AD2_CLEAN_SCENARIO_KEYS;
 
 export const encodedPowershellProvidedAlertsExample = buildScenarioRegistryProvidedAlertsExample({
@@ -102,6 +102,6 @@ export const cleanProfileProvidedAlertsExamples: AttackDiscoveryAgentBuilderExam
 export const cleanProfileProvidedAlertsDataset = {
   name: 'attack-discovery-agent-builder: scenario-registry (clean profile)',
   description:
-    'Provided-alerts Attack Discovery evals for all four clean-profile chains from the Kibana-native scenario registry (parity with portable seeder `seed --profile clean`).',
+    'Provided-alerts Attack Discovery evals for all four clean-profile chains from the scenario registry.',
   examples: cleanProfileProvidedAlertsExamples,
 };

@@ -11,8 +11,8 @@ import {
   cleanProfileProvidedAlertsExamples,
 } from './clean_profile_provided_alerts';
 
-/** Portable seeder clean profile keys (ad-2.0-portable-seeder.py `profile == "clean"`). */
-const PORTABLE_SEEDER_CLEAN_PROFILE_KEYS = [
+/** Scenario keys for the clean profile (4 attack chains, 16 alerts). */
+const CLEAN_PROFILE_KEYS = [
   'encoded-powershell',
   'bits-mshta',
   'linux-curl',
@@ -20,20 +20,16 @@ const PORTABLE_SEEDER_CLEAN_PROFILE_KEYS = [
 ] as const;
 
 describe('clean profile provided-alerts datasets', () => {
-  it('covers the same scenario keys as the portable seeder clean profile', () => {
-    expect([...CLEAN_PROFILE_SCENARIO_KEYS].sort()).toEqual(
-      [...PORTABLE_SEEDER_CLEAN_PROFILE_KEYS].sort()
-    );
-    expect([...AD2_CLEAN_SCENARIO_KEYS].sort()).toEqual(
-      [...PORTABLE_SEEDER_CLEAN_PROFILE_KEYS].sort()
-    );
+  it('covers all four clean-profile scenario keys', () => {
+    expect([...CLEAN_PROFILE_SCENARIO_KEYS].sort()).toEqual([...CLEAN_PROFILE_KEYS].sort());
+    expect([...AD2_CLEAN_SCENARIO_KEYS].sort()).toEqual([...CLEAN_PROFILE_KEYS].sort());
   });
 
   it('defines one provided-alerts example per clean-profile scenario', () => {
     const exampleKeys = cleanProfileProvidedAlertsExamples.map(
       (example) => example.metadata?.scenarioKey
     );
-    expect(exampleKeys).toEqual([...PORTABLE_SEEDER_CLEAN_PROFILE_KEYS]);
+    expect(exampleKeys).toEqual([...CLEAN_PROFILE_KEYS]);
     expect(cleanProfileProvidedAlertsExamples).toHaveLength(4);
     expect(
       cleanProfileProvidedAlertsExamples.every(

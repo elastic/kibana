@@ -31,7 +31,7 @@ describe('AD2 scenario registry (clean profile)', () => {
     ).toBe(true);
   });
 
-  it('uses deterministic portable-seeder ids and labels', () => {
+  it('uses deterministic scenario-registry ids and labels', () => {
     const plan = buildAd2SeedPlan({
       profile: 'clean',
       scenarioKey: 'encoded-powershell',
@@ -39,19 +39,19 @@ describe('AD2 scenario registry (clean profile)', () => {
     });
 
     expect(plan.alerts).toHaveLength(4);
-    expect(plan.alerts[0]?.id).toBe('ad-portable-encoded-powershell-alert-1');
+    expect(plan.alerts[0]?.id).toBe('ad-scenario-encoded-powershell-alert-1');
     expect(plan.alerts[0]?.source).toMatchObject({
       labels: {
-        ad_portable_seed: 'ad-portable-seeder-2026-07',
+        ad_portable_seed: 'ad-scenario-registry-2026-07',
         ad_test_scenario: 'encoded-powershell',
       },
       host: { name: 'wks-alice-01' },
     });
     expect(getAd2ScenarioAlertIds('encoded-powershell')).toEqual([
-      'ad-portable-encoded-powershell-alert-1',
-      'ad-portable-encoded-powershell-alert-2',
-      'ad-portable-encoded-powershell-alert-3',
-      'ad-portable-encoded-powershell-alert-4',
+      'ad-scenario-encoded-powershell-alert-1',
+      'ad-scenario-encoded-powershell-alert-2',
+      'ad-scenario-encoded-powershell-alert-3',
+      'ad-scenario-encoded-powershell-alert-4',
     ]);
   });
 
