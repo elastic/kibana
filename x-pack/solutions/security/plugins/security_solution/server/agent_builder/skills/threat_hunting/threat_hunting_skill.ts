@@ -82,6 +82,7 @@ The following embedded query templates provide common hunting patterns (availabl
 - Operationalize confirmed findings by converting hunt queries into detection rules
 - Prefer ECS field names: process.name, process.executable, event.action, source.ip, destination.ip, user.name, host.name
 - Document your hunting trail — future analysts need the context
+- **Always re-execute the query when the user asks to "run it now", "run again", or "run the hunt" — even if you already generated or ran an equivalent query earlier in the conversation.** Answering from conversational context instead of a fresh 'platform.core.execute_esql' call risks reporting stale or hallucinated results; the user's request for re-execution is a signal that they want live, current data, not a recap.
 
 ## Receiving a Forensic Handoff (BlackHat Phase 2)
 
