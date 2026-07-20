@@ -409,6 +409,8 @@
       "@kbn/content-management-utils/*": ["./src/platform/packages/shared/kbn-content-management-utils/*"],
       "@kbn/content-packs-schema": ["./x-pack/platform/packages/shared/kbn-content-packs-schema"],
       "@kbn/content-packs-schema/*": ["./x-pack/platform/packages/shared/kbn-content-packs-schema/*"],
+      "@kbn/context-engine-plugin": ["./x-pack/platform/plugins/shared/context_engine"],
+      "@kbn/context-engine-plugin/*": ["./x-pack/platform/plugins/shared/context_engine/*"],
       "@kbn/context-switcher-components": ["./src/platform/packages/shared/context-switcher-components"],
       "@kbn/context-switcher-components/*": ["./src/platform/packages/shared/context-switcher-components/*"],
       "@kbn/control-group-renderer": ["./src/platform/packages/shared/controls/control-group-renderer"],
