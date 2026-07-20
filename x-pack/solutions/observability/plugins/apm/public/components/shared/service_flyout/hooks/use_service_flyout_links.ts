@@ -61,7 +61,7 @@ export function useServiceFlyoutLinks({
     [canReadSlos, share, serviceName, environment]
   );
 
-  const alerts = useAlertsHref({ core, serviceName, environment, rangeFrom, rangeTo });
+  const alerts = useAlertsHref();
 
   const tracesDiscover = useDiscoverHref({
     indexType: 'traces',

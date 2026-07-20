@@ -6,34 +6,26 @@
  */
 
 import { useMemo } from 'react';
-import type { CoreStart } from '@kbn/core/public';
 import { escapeQuotes } from '@kbn/es-query';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import rison from '@kbn/rison';
-import type { Environment } from '../../../../../../common/environment_rt';
 import {
   isEnvironmentDefined,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../../../common/environment_filter_values';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../../../common/es_fields/apm';
 import { getAlertingCapabilities } from '../../hooks/get_alerting_capabilities';
+import { useServiceFlyoutContext } from '../../service_flyout_context';
 
-interface UseAlertsHrefParams {
-  core: CoreStart;
-  serviceName: string;
-  environment: Environment;
-  rangeFrom: string;
-  rangeTo: string;
-}
+export function useAlertsHref(): string | undefined {
+  const {
+    deps: { core },
+    service,
+    filters: { environment, rangeFrom, rangeTo },
+  } = useServiceFlyoutContext();
 
-export function useAlertsHref({
-  core,
-  serviceName,
-  environment,
-  rangeFrom,
-  rangeTo,
-}: UseAlertsHrefParams): string | undefined {
   const { canReadAlerts } = getAlertingCapabilities(core.application.capabilities);
+
   return useMemo(() => {
     if (!canReadAlerts) return undefined;
     const base = core.http.basePath.prepend(observabilityPaths.alerts);
@@ -46,9 +38,9 @@ export function useAlertsHref({
         : isEnvironmentDefined(environment)
         ? `${SERVICE_ENVIRONMENT}: "${escapeQuotes(environment)}"`
         : null;
-    const kuery = [`${SERVICE_NAME}: "${escapeQuotes(serviceName)}"`, envKuery]
+    const kuery = [`${SERVICE_NAME}: "${escapeQuotes(service.name)}"`, envKuery]
       .filter(Boolean)
       .join(' AND ');
     return `${base}?_a=${rison.encode({ kuery, rangeFrom, rangeTo })}`;
-  }, [canReadAlerts, core.http.basePath, environment, serviceName, rangeFrom, rangeTo]);
+  }, [canReadAlerts, core.http.basePath, environment, service.name, rangeFrom, rangeTo]);
 }

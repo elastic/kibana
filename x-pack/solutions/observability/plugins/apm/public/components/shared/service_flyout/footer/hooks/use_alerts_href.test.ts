@@ -13,38 +13,58 @@ import {
 } from '../../../../../../common/environment_filter_values';
 import { useAlertsHref } from './use_alerts_href';
 
+const mockPrepend = jest.fn().mockImplementation((path: string) => path);
+
+const mockUseServiceFlyoutContext = jest.fn();
+jest.mock('../../service_flyout_context', () => ({
+  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+}));
+
+function buildContext(
+  overrides: {
+    serviceName?: string;
+    environment?: string;
+    rangeFrom?: string;
+    rangeTo?: string;
+    canReadAlerts?: boolean;
+  } = {}
+) {
+  const {
+    serviceName = 'opbeans-java',
+    environment = 'production',
+    rangeFrom = 'now-15m',
+    rangeTo = 'now',
+    canReadAlerts = true,
+  } = overrides;
+  return {
+    deps: {
+      core: {
+        http: { basePath: { prepend: mockPrepend } },
+        application: { capabilities: { apm: { 'alerting:show': canReadAlerts } } },
+      },
+    },
+    service: { name: serviceName },
+    filters: { environment, rangeFrom, rangeTo },
+  };
+}
+
+function renderAlertsHref(overrides: Parameters<typeof buildContext>[0] = {}) {
+  mockUseServiceFlyoutContext.mockReturnValue(buildContext(overrides));
+  return renderHook(() => useAlertsHref()).result.current;
+}
+
 function getKuery(href: string): string {
   const encoded = href.split('?_a=')[1];
   return (rison.decode(encoded) as any).kuery;
 }
 
-const mockPrepend = jest.fn().mockImplementation((path: string) => path);
-const mockCore = {
-  http: { basePath: { prepend: mockPrepend } },
-  application: { capabilities: { apm: { 'alerting:show': true } } },
-} as any;
-
-function renderAlertsHref(overrides: Partial<Parameters<typeof useAlertsHref>[0]> = {}) {
-  return renderHook(() =>
-    useAlertsHref({
-      core: mockCore,
-      serviceName: 'opbeans-java',
-      environment: 'production',
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-      ...overrides,
-    })
-  ).result.current;
-}
-
 describe('useAlertsHref', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns undefined when the user lacks the alerting:show capability', () => {
-    const href = renderAlertsHref({
-      core: {
-        ...mockCore,
-        application: { capabilities: { apm: { 'alerting:show': false } } },
-      },
-    });
+    const href = renderAlertsHref({ canReadAlerts: false });
     expect(href).toBeUndefined();
   });
 
