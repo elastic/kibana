@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import { test as baseTest } from '@kbn/scout';
+import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 
 export const TSDB_DATA_VIEW_ID = '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51';
 export const TSDB_INDEX = 'kibana_sample_data_logstsdb';
@@ -23,6 +24,17 @@ export interface DownsampleTSDBIndexOptions {
   isStream: boolean;
   interval?: string;
   deleteOriginal?: boolean;
+}
+
+export interface TsdbHelper {
+  downsampleTSDBIndex: (
+    indexOrStream: string,
+    options: DownsampleTSDBIndexOptions
+  ) => Promise<string>;
+}
+
+interface LensUiWorkerFixtures extends ScoutWorkerFixtures {
+  tsdbHelper: TsdbHelper;
 }
 
 const DOWNSAMPLE_RETRY_TIMEOUT = 15_000;
@@ -56,34 +68,50 @@ const retryDownsample = async (downsample: () => Promise<void>): Promise<void> =
   }
 };
 
-export async function downsampleTSDBIndex(
-  esClient: Client,
-  indexOrStream: string,
-  { isStream, interval = '1h', deleteOriginal = false }: DownsampleTSDBIndexOptions
-): Promise<string> {
-  let sourceIndex = indexOrStream;
+export const test = baseTest.extend<ScoutTestFixtures, LensUiWorkerFixtures>({
+  tsdbHelper: [
+    async ({ esClient, log }, use) => {
+      const downsampleTSDBIndex: TsdbHelper['downsampleTSDBIndex'] = async (
+        indexOrStream,
+        { isStream, interval = '1h', deleteOriginal = false }
+      ) => {
+        let sourceIndex = indexOrStream;
 
-  if (isStream) {
-    const rolloverResponse = await esClient.indices.rollover({ alias: indexOrStream });
-    sourceIndex = rolloverResponse.old_index;
-  }
+        // Block and downsample only work at index level, so a data stream must be rolled over
+        // first to resolve its previous backing index.
+        if (isStream) {
+          log.info(
+            `Force a rollover for the "${indexOrStream}" data stream to get the backing index`
+          );
+          const rolloverResponse = await esClient.indices.rollover({ alias: indexOrStream });
+          sourceIndex = rolloverResponse.old_index;
+        }
 
-  const downsampledTargetIndex = `${indexOrStream}_downsampled`;
-  await esClient.indices.addBlock({ index: sourceIndex, block: 'write' });
+        const downsampledTargetIndex = `${indexOrStream}_downsampled`;
+        log.info(`Adding a write block to the "${sourceIndex}" index`);
+        await esClient.indices.addBlock({ index: sourceIndex, block: 'write' });
 
-  // Downsampling can race with the write block becoming effective and fail with a transient
-  // null_pointer_exception. Preserve the bounded retry used by the migrated FTR service.
-  await retryDownsample(async () => {
-    await esClient.indices.downsample({
-      index: sourceIndex,
-      target_index: downsampledTargetIndex,
-      config: { fixed_interval: interval },
-    });
-  });
+        log.info(`Downsampling the "${sourceIndex}" index into "${downsampledTargetIndex}"`);
+        // Downsampling can race with the write block becoming effective and fail with a transient
+        // null_pointer_exception. Preserve the bounded retry used by the migrated FTR service.
+        await retryDownsample(async () => {
+          await esClient.indices.downsample({
+            index: sourceIndex,
+            target_index: downsampledTargetIndex,
+            config: { fixed_interval: interval },
+          });
+        });
 
-  if (deleteOriginal) {
-    await esClient.indices.delete({ index: sourceIndex });
-  }
+        if (deleteOriginal) {
+          log.info(`Deleting the original "${sourceIndex}" index`);
+          await esClient.indices.delete({ index: sourceIndex });
+        }
 
-  return downsampledTargetIndex;
-}
+        return downsampledTargetIndex;
+      };
+
+      await use({ downsampleTSDBIndex });
+    },
+    { scope: 'worker' },
+  ],
+});

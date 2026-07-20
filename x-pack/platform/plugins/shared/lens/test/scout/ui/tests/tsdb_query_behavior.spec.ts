@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   ROLLED_UP_MEDIAN_WARNING,
@@ -13,7 +13,7 @@ import {
   TSDB_ES_ARCHIVE,
   TSDB_INDEX,
   TSDB_TIME_RANGE,
-  downsampleTSDBIndex,
+  test,
 } from '../fixtures';
 
 test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnostic }, () => {
@@ -21,7 +21,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
   const downsampledDataViewTitle = `${TSDB_INDEX},${TSDB_INDEX}_downsampled`;
   const createdDataViewIds: string[] = [];
 
-  test.beforeAll(async ({ apiServices, esArchiver, esClient, uiSettings }) => {
+  test.beforeAll(async ({ apiServices, esArchiver, tsdbHelper, uiSettings }) => {
     await esArchiver.loadIfNeeded(TSDB_ES_ARCHIVE);
 
     const { data: tsdbDataView } = await apiServices.dataViews.create({
@@ -38,7 +38,9 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
       'timepicker:timeDefaults': JSON.stringify(TSDB_TIME_RANGE),
     });
 
-    downsampledTargetIndex = await downsampleTSDBIndex(esClient, TSDB_INDEX, { isStream: false });
+    downsampledTargetIndex = await tsdbHelper.downsampleTSDBIndex(TSDB_INDEX, {
+      isStream: false,
+    });
     const { data: downsampleDataView } = await apiServices.dataViews.create({
       title: downsampledDataViewTitle,
       timeFieldName: '@timestamp',
