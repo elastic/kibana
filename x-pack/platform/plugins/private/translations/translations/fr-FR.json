@@ -24130,7 +24130,6 @@
     "xpack.indexLifecycleMgmt.policyTable.headers.linkedIndicesHeader": "Index liés",
     "xpack.indexLifecycleMgmt.policyTable.headers.modifiedDateHeader": "Date modifiée",
     "xpack.indexLifecycleMgmt.policyTable.headers.nameHeader": "Nom",
-    "xpack.indexLifecycleMgmt.policyTable.hiddenPoliciesSwitchLabel": "Inclure les politiques système gérées",
     "xpack.indexLifecycleMgmt.policyTable.indexTemplatesFlyout.headerText": "Modèles d'index qui appliquent {policyName}",
     "xpack.indexLifecycleMgmt.policyTable.indexTemplatesTable.caption": "Modèles d'index",
     "xpack.indexLifecycleMgmt.policyTable.indexTemplatesTable.nameHeader": "Nom du modèle d'index",

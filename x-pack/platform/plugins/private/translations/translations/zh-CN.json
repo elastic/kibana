@@ -24261,7 +24261,6 @@
     "xpack.indexLifecycleMgmt.policyTable.headers.linkedIndicesHeader": "已链接索引",
     "xpack.indexLifecycleMgmt.policyTable.headers.modifiedDateHeader": "上次修改日期",
     "xpack.indexLifecycleMgmt.policyTable.headers.nameHeader": "名称",
-    "xpack.indexLifecycleMgmt.policyTable.hiddenPoliciesSwitchLabel": "包括托管系统策略",
     "xpack.indexLifecycleMgmt.policyTable.indexTemplatesFlyout.headerText": "应用 {policyName} 的索引模板",
     "xpack.indexLifecycleMgmt.policyTable.indexTemplatesTable.caption": "索引模板",
     "xpack.indexLifecycleMgmt.policyTable.indexTemplatesTable.nameHeader": "索引模板名称",

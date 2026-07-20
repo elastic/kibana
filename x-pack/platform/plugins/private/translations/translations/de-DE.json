@@ -24172,7 +24172,6 @@
     "xpack.indexLifecycleMgmt.policyTable.headers.linkedIndicesHeader": "Verknüpfte Indizes",
     "xpack.indexLifecycleMgmt.policyTable.headers.modifiedDateHeader": "Geändertes Datum",
     "xpack.indexLifecycleMgmt.policyTable.headers.nameHeader": "Name",
-    "xpack.indexLifecycleMgmt.policyTable.hiddenPoliciesSwitchLabel": "Verwaltete Systemrichtlinien einbeziehen",
     "xpack.indexLifecycleMgmt.policyTable.indexTemplatesFlyout.headerText": "Indexvorlagen, die {policyName} anwenden",
     "xpack.indexLifecycleMgmt.policyTable.indexTemplatesTable.caption": "Indexvorlagen",
     "xpack.indexLifecycleMgmt.policyTable.indexTemplatesTable.nameHeader": "Indexvorlagenname",

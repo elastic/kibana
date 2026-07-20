@@ -166,9 +166,6 @@ describe('policy table', () => {
   test('does not show any hidden policies by default', () => {
     renderWithI18n(<TestComponent testPolicies={policies} />);
 
-    const includeHiddenPoliciesSwitch = screen.getByTestId('includeHiddenPoliciesSwitch');
-    expect(includeHiddenPoliciesSwitch).toHaveAttribute('aria-checked', 'false');
-
     const visiblePolicies = getPolicies();
     const hasManagedPolicies = visiblePolicies.some((p) => {
       const policyRow = screen.getByTestId(`policyTableRow-${p.name}`);
@@ -197,8 +194,9 @@ describe('policy table', () => {
   test('shows hidden policies with Managed badges when setting is switched on', async () => {
     renderWithI18n(<TestComponent testPolicies={policies} />);
 
-    const includeHiddenPoliciesSwitch = screen.getByTestId('includeHiddenPoliciesSwitch');
-    fireEvent.click(includeHiddenPoliciesSwitch);
+    const searchInput = screen.getByPlaceholderText(/Search/i);
+    fireEvent.change(searchInput, { target: { value: 'is:policy._meta.managed' } });
+    fireEvent.keyUp(searchInput, { key: 'Enter', keyCode: 13, which: 13 });
 
     const perPageButton = screen.getByText(/Rows per page/);
     fireEvent.click(perPageButton);
@@ -303,8 +301,9 @@ describe('policy table', () => {
   test('confirmation modal shows warning when delete button is pressed for a hidden policy', async () => {
     renderWithI18n(<TestComponent testPolicies={policies} />);
 
-    const includeHiddenPoliciesSwitch = screen.getByTestId('includeHiddenPoliciesSwitch');
-    fireEvent.click(includeHiddenPoliciesSwitch);
+    const searchInput = screen.getByPlaceholderText(/Search/i);
+    fireEvent.change(searchInput, { target: { value: 'is:policy._meta.managed' } });
+    fireEvent.keyUp(searchInput, { key: 'Enter', keyCode: 13, which: 13 });
 
     const perPageButton = screen.getByText(/Rows per page/);
     fireEvent.click(perPageButton);

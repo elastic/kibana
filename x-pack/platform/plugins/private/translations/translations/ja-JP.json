@@ -24258,7 +24258,6 @@
     "xpack.indexLifecycleMgmt.policyTable.headers.linkedIndicesHeader": "リンクされたインデックス",
     "xpack.indexLifecycleMgmt.policyTable.headers.modifiedDateHeader": "変更日",
     "xpack.indexLifecycleMgmt.policyTable.headers.nameHeader": "名前",
-    "xpack.indexLifecycleMgmt.policyTable.hiddenPoliciesSwitchLabel": "管理されたシステムポリシーを含む",
     "xpack.indexLifecycleMgmt.policyTable.indexTemplatesFlyout.headerText": "{policyName}を適用するインデックステンプレート",
     "xpack.indexLifecycleMgmt.policyTable.indexTemplatesTable.caption": "インデックステンプレート",
     "xpack.indexLifecycleMgmt.policyTable.indexTemplatesTable.nameHeader": "インデックステンプレート名",
