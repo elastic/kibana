@@ -327,7 +327,10 @@ export class FunctionalTestRunner {
     const cleanup = lifecycle.cleanup.trigger();
     await Promise.race([
       cleanup,
-      setTimeoutAsync(timeoutMs).then(() => {
+      // `ref: false` so this timer doesn't keep the Node event loop alive if `cleanup`
+      // wins the race. Otherwise an embedder that awaits `run()` without a hard
+      // `process.exit()` would have its exit delayed by up to `timeoutMs`.
+      setTimeoutAsync(timeoutMs, undefined, { ref: false }).then(() => {
         timedOut = true;
       }),
     ]);
