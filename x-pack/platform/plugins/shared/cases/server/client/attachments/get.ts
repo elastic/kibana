@@ -69,12 +69,7 @@ const normalizeDocumentResponse = (
  * Retrieves all documents attached to a specific case.
  */
 export const getAllDocumentsAttachedToCase = async (
-  {
-    caseId,
-    filter,
-    attachmentTypes,
-    unifiedAttachmentTypes,
-  }: GetAllDocumentsAttachedToCase,
+  { caseId, filter, attachmentTypes, unifiedAttachmentTypes }: GetAllDocumentsAttachedToCase,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<DocumentResponse> => {
