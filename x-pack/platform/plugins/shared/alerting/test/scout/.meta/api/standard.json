@@ -1,5 +1,9 @@
 {
-  "sha1": "87414f90fb39f243e28b61e850062216f99037bb",
+  "sha1": "e0328c58b0a11bc1a294e0f9186ac01ce84f355f",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "f8b956f17e7e029-39f26992a3def3c",
@@ -1002,6 +1006,30 @@
       }
     },
     {
+      "id": "bbc292ffe7decc7-832b6d839a10bb6",
+      "title": "Stack alerts privilege - read privilege returns alert-authorized rule types from the internal _rule_types endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_read.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    },
+    {
       "id": "bbc292ffe7decc7-fa76fad64f6ca0c",
       "title": "Stack alerts privilege - read privilege can read muted alert state via _find_muted_alerts",
       "expectedStatus": "passed",
@@ -1021,7 +1049,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_read.spec.ts",
-        "line": 70,
+        "line": 91,
         "column": 12
       }
     },
@@ -1045,7 +1073,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_read.spec.ts",
-        "line": 90,
+        "line": 111,
         "column": 14
       }
     },
@@ -1069,7 +1097,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_read.spec.ts",
-        "line": 90,
+        "line": 111,
         "column": 14
       }
     },
@@ -1093,7 +1121,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_read.spec.ts",
-        "line": 100,
+        "line": 121,
         "column": 12
       }
     },
@@ -1117,7 +1145,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_read.spec.ts",
-        "line": 113,
+        "line": 134,
         "column": 12
       }
     }
