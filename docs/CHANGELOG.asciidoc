@@ -166,6 +166,7 @@ Kibana platform::
 Machine Learning::
 * Prevents removing all spaces from a {ml} job or trained model through the spaces update APIs ({kibana-pull}276490[#276490]).
 * Restricts the clear audit messages API so users can only clear messages for jobs they can access, and only against valid notification indices ({kibana-pull}276419[#276419]).
+* Adds request size limits to the file upload and `index_exists` endpoints ({kibana-pull}274566[#274566]).
 
 [[release-notes-8.19.18]]
 == {kib} 8.19.18
