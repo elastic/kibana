@@ -6,7 +6,7 @@
  */
 
 import { matchPath } from 'react-router-dom';
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,

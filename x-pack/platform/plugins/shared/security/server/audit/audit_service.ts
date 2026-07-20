@@ -25,6 +25,35 @@ import type { SecurityPluginSetup } from '../plugin';
 export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
 
+// OTel-only overrides injected into the appender config when the audit appender is of type 'otel'.
+// These translations/suppressions/defaults bring the output into alignment with Serverless
+// audit log field requirements without touching the upstream AuditEvent type or any non-OTel path.
+
+export const AUDIT_OTEL_FIELD_RENAMES: Record<string, string | string[]> = {
+  'kibana.space_id': 'kibana.space.id',
+  'kibana.session_id': 'kibana.session.id',
+  'kibana.lookup_realm': 'kibana.lookup.realm',
+  'kibana.authentication_type': 'authentication.type',
+  'client.ip': ['source.address', 'source.ip'],
+  'trace.id': 'request.id',
+  // OTel semconv: singular 'header' with per-key attributes (not plural 'headers' object)
+  'http.request.headers.x-forwarded-for': 'http.request.header.x-forwarded-for',
+};
+
+// Both fields are excluded on Serverless; stripped from log record and resource attributes.
+export const AUDIT_OTEL_FIELD_DROPS: string[] = ['service.version', 'host.name'];
+
+// event.type is required on every audit log. Authentication events omit it; default to 'access'.
+// SO/Space events already carry a specific type (e.g. 'creation', 'deletion') so are unaffected.
+export const AUDIT_OTEL_FIELD_DEFAULTS: Record<string, string | string[]> = {
+  'event.type': ['access'],
+};
+
+// OTel semantic conventions require HTTP method to be uppercase (e.g. 'GET' not 'get').
+// Kibana's route method is lowercase; the upstream AuditEvent is left as-is so that
+// non-OTel appenders (file, console) continue to receive the original casing.
+export const AUDIT_OTEL_FIELD_UPPERCASE: string[] = ['http.request.method'];
+
 const normalize = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);
 
 interface AuditServiceSetupParams {
@@ -165,24 +194,39 @@ export class AuditService {
 }
 
 export const createLoggingConfig = (config: ConfigType['audit']) =>
-  map<Pick<SecurityLicenseFeatures, 'allowAuditLogging'>, LoggerContextConfigInput>((features) => ({
-    appenders: {
-      auditTrailAppender: config.appender ?? {
-        type: 'console',
-        layout: {
-          type: 'pattern',
-          highlight: true,
+  map<Pick<SecurityLicenseFeatures, 'allowAuditLogging'>, LoggerContextConfigInput>((features) => {
+    const baseAppender = config.appender ?? {
+      type: 'console' as const,
+      layout: {
+        type: 'pattern' as const,
+        highlight: true,
+      },
+    };
+    // When the configured appender is OTel, inject audit-specific field transforms
+    // (renames, drops, defaults) to satisfy Serverless audit log field requirements at
+    // the output layer — without touching the upstream AuditEvent type.
+    const appender =
+      baseAppender.type === 'otel'
+        ? {
+            ...baseAppender,
+            fieldRenames: { ...baseAppender.fieldRenames, ...AUDIT_OTEL_FIELD_RENAMES },
+            fieldDrops: [...(baseAppender.fieldDrops ?? []), ...AUDIT_OTEL_FIELD_DROPS],
+            fieldDefaults: { ...AUDIT_OTEL_FIELD_DEFAULTS, ...baseAppender.fieldDefaults },
+            fieldUppercase: [...(baseAppender.fieldUppercase ?? []), ...AUDIT_OTEL_FIELD_UPPERCASE],
+          }
+        : baseAppender;
+
+    return {
+      appenders: { auditTrailAppender: appender },
+      loggers: [
+        {
+          name: 'audit.ecs',
+          level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
+          appenders: ['auditTrailAppender'],
         },
-      },
-    },
-    loggers: [
-      {
-        name: 'audit.ecs',
-        level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
-        appenders: ['auditTrailAppender'],
-      },
-    ],
-  }));
+      ],
+    };
+  });
 
 /**
  * Evaluates the list of provided ignore rules, and filters out events only

@@ -19,14 +19,16 @@ import { streamsInvestigationManagementSkill } from '../../memory_and_investigat
 const KI_IDENTIFICATION_SKILL_ID = 'ki-identification-management';
 const INVESTIGATION_SKILL_ID = streamsInvestigationManagementSkill.id;
 
-// Core skills registered whenever the feature is available. `ki-identification-management` is only
-// added when a KI onboarding client is present, so it is tracked separately below.
+// Core skills registered whenever the feature is available. The investigation skill is part of the
+// unified experience, so it registers with the rest. `ki-identification-management` is only added
+// when a KI onboarding client is present, so it is tracked separately below.
 const CORE_SKILL_IDS = [
   knowledgeIndicatorsManagementSkill.id,
   significantEventsKIGroundingSkill.id,
   significantEventsManagementSkill.id,
   'significant-events-onboarding',
   'streams-gap-detection',
+  INVESTIGATION_SKILL_ID,
 ];
 
 const telemetry = {} as EbtTelemetryClient;
@@ -43,7 +45,6 @@ const createOptions = (
     memoryToolsOptions,
     logger: loggerMock.create(),
     isAvailable: jest.fn().mockResolvedValue(true),
-    isInvestigationEnabled: jest.fn().mockResolvedValue(false),
     ...overrides,
   };
   return { agentBuilder, options };
@@ -63,7 +64,7 @@ describe('registerSignificantEventsSkills', () => {
     expect(agentBuilder.skills.register).not.toHaveBeenCalled();
   });
 
-  it('registers the core skills (without KI onboarding) when available and investigation disabled', async () => {
+  it('registers the core skills (without KI onboarding) when available', async () => {
     const { agentBuilder, options } = createOptions();
 
     await registerSignificantEventsSkills(options);
@@ -71,7 +72,6 @@ describe('registerSignificantEventsSkills', () => {
     const registeredIds = getRegisteredIds(agentBuilder);
     expect(registeredIds).toEqual(expect.arrayContaining(CORE_SKILL_IDS));
     expect(registeredIds).not.toContain(KI_IDENTIFICATION_SKILL_ID);
-    expect(registeredIds).not.toContain(INVESTIGATION_SKILL_ID);
     expect(registeredIds).toHaveLength(CORE_SKILL_IDS.length);
   });
 
@@ -85,10 +85,8 @@ describe('registerSignificantEventsSkills', () => {
     expect(registeredIds).toHaveLength(CORE_SKILL_IDS.length + 1);
   });
 
-  it('registers the investigation skill when the investigation flag is enabled', async () => {
-    const { agentBuilder, options } = createOptions({
-      isInvestigationEnabled: jest.fn().mockResolvedValue(true),
-    });
+  it('registers the investigation skill as part of the core skills when available', async () => {
+    const { agentBuilder, options } = createOptions();
 
     await registerSignificantEventsSkills(options);
 
@@ -116,22 +114,6 @@ describe('registerSignificantEventsSkills', () => {
     await ensureRegistered();
 
     expect(getRegisteredIds(agentBuilder)).toEqual(expect.arrayContaining(CORE_SKILL_IDS));
-  });
-
-  it('registers the investigation skill on a later investigation flip without re-registering core skills', async () => {
-    const isInvestigationEnabled = jest.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
-    const { agentBuilder, options } = createOptions({ isInvestigationEnabled });
-
-    const { ensureRegistered } = await registerSignificantEventsSkills(options);
-    expect(getRegisteredIds(agentBuilder)).not.toContain(INVESTIGATION_SKILL_ID);
-    const coreCalls = agentBuilder.skills.register.mock.calls.length;
-
-    await ensureRegistered();
-
-    const registeredIds = getRegisteredIds(agentBuilder);
-    expect(registeredIds).toContain(INVESTIGATION_SKILL_ID);
-    // Only the investigation skill is added on the flip; core skills are not re-registered.
-    expect(agentBuilder.skills.register.mock.calls.length).toBe(coreCalls + 1);
   });
 
   it('does not latch on partial failure and retries on the next call', async () => {
