@@ -335,22 +335,30 @@ const TagsFilter = filter.createComponent({
   }),
 });
 
+const EnabledFilterComponent = ({
+  query,
+  onChange,
+}: {
+  query?: Query;
+  onChange?: (query: Query) => void;
+}) => (
+  <SelectableFilterPopover
+    fieldName={ENABLED_FILTER_ID}
+    title={ENABLED_FILTER_TITLE}
+    query={query}
+    onChange={onChange}
+    options={ENABLED_FILTER_OPTIONS}
+    renderOption={(option, { isActive }) => (
+      <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
+    )}
+    singleSelection
+    data-test-subj="actionPoliciesEnabledFilter"
+  />
+);
+
 const EnabledFilter = filter.createComponent({
   resolve: () => ({
     type: 'custom_component' as const,
-    component: ({ query, onChange }: { query?: Query; onChange?: (query: Query) => void }) => (
-      <SelectableFilterPopover
-        fieldName={ENABLED_FILTER_ID}
-        title={ENABLED_FILTER_TITLE}
-        query={query}
-        onChange={onChange}
-        options={ENABLED_FILTER_OPTIONS}
-        renderOption={(option, { isActive }) => (
-          <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
-        )}
-        singleSelection
-        data-test-subj="actionPoliciesEnabledFilter"
-      />
-    ),
+    component: EnabledFilterComponent,
   }),
 });
