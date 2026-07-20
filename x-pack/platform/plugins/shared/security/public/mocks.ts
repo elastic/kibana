@@ -35,6 +35,7 @@ function createStartMock() {
       userProfile$: of({}),
       userProfileLoaded$: of(true),
       enabled$: of(true),
+      dataUpdates$: of({}),
     },
     uiApi: getUiApiMock.createStart(),
   };

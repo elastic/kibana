@@ -42,15 +42,23 @@ export function AnnotationsList() {
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  const { mutateAsync: deleteAnnotation, isLoading: isDeleteLoading } = useDeleteAnnotation();
-  const onDelete = async (deleteSelection?: Annotation) => {
-    if (deleteSelection) {
-      await deleteAnnotation({ annotations: [deleteSelection] });
-    } else {
-      await deleteAnnotation({ annotations: selection });
-      setSelection([]);
-    }
-    refetch();
+  const { mutate: deleteAnnotation, isLoading: isDeleteLoading } = useDeleteAnnotation();
+  const onDelete = (deleteSelection?: Annotation) => {
+    const annotations = deleteSelection ? [deleteSelection] : selection;
+    deleteAnnotation(
+      { annotations },
+      {
+        onSuccess: () => {
+          if (!deleteSelection) {
+            setSelection([]);
+          }
+          refetch();
+        },
+        onSettled: () => {
+          setIsDeleteModalVisible(false);
+        },
+      }
+    );
   };
 
   const renderToolsLeft = () => {
