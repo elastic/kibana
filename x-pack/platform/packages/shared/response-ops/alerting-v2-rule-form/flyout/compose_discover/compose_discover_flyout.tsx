@@ -66,7 +66,6 @@ import {
 } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
-import { ComposeDiscoverTimeFieldContextProvider } from './compose_discover_time_field_context';
 import { useResolveTimeField } from './use_resolve_time_field';
 
 const LazyYamlRuleForm = React.lazy(() =>
@@ -1183,7 +1182,7 @@ export function ComposeDiscoverFlyout({
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
       <FormProvider {...methods}>
-        <ComposeDiscoverTimeFieldContextProvider value={{ timeFieldOptions, isTimeFieldResolved }}>
+        <>
           <EuiFlyout
             key={flyoutKey}
             type="overlay"
@@ -1321,7 +1320,7 @@ export function ComposeDiscoverFlyout({
                 query={sandboxQuery}
                 onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
                 tabs={sandboxTabs}
-                timeField={sandboxTimeField || '@timestamp'}
+                timeField={sandboxTimeField}
                 onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}
                 timeFieldOptions={timeFieldOptions}
                 isTimeFieldResolved={sandboxIsTimeFieldResolved}
@@ -1342,7 +1341,7 @@ export function ComposeDiscoverFlyout({
           {isConfirmCloseVisible && (
             <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
           )}
-        </ComposeDiscoverTimeFieldContextProvider>
+        </>
       </FormProvider>
     </RuleFormProvider>
   );
