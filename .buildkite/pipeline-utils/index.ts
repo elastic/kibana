@@ -17,3 +17,5 @@ export * from './utils';
 export * from './pr_labels';
 export * from './scout';
 export * from './version-bump/utils';
+
+export const X = 5;
