@@ -207,6 +207,19 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 }
               );
 
+              // Prefer the traceId the task itself produced (e.g. the agent-builder converse
+              // RESPONSE body `trace_id`, which points at the server-side inference trace where
+              // ChatComplete / gen_ai.usage.* token + duration spans live). Fall back to the
+              // eval's client task-span trace id only when the task did not surface its own.
+              // Used both for the stored run (Evals UI trace link) and for evaluator input, so
+              // both point at the same, correct trace. Previously `traceId` (the client
+              // task-span id) always won for evaluator input, and the stored run never resolved
+              // it at all, so both queried the eval client trace (no inference spans) → null /
+              // wrong trace link. A truthy check (not `??`) ensures an empty-string traceId also
+              // falls back instead of being queried as a literal `trace.id == ""`.
+              // (elastic/kibana#276308)
+              const resolvedTraceId = (taskOutput as { traceId?: string })?.traceId || traceId;
+
               runs[runKey] = {
                 exampleIndex,
                 repetition: rep,
@@ -214,7 +227,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 expected: example.output ?? null,
                 metadata: example.metadata ?? {},
                 output: taskOutput,
-                traceId,
+                traceId: resolvedTraceId,
               };
 
               this.options.log.info(
@@ -233,19 +246,9 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                       const _traceId = getCurrentTraceId();
                       const _result = await evaluator.evaluate({
                         input: example.input,
-                        // Prefer the traceId the task itself produced (e.g. the agent-builder
-                        // converse RESPONSE body `trace_id`, which points at the server-side
-                        // inference trace where ChatComplete / gen_ai.usage.* token + duration spans
-                        // live). Fall back to the eval's client task-span trace id only when the task
-                        // did not surface its own. Previously `traceId` (the client task-span id) was
-                        // spread last and always won, so trace-based token/latency/toolCalls
-                        // evaluators queried the eval client trace (no inference spans) → null.
-                        // Use a truthy check (not `??`) so an empty-string traceId also falls back
-                        // instead of being queried as a literal `trace.id == ""`.
-                        // (elastic/kibana#276308)
                         output: {
                           ...taskOutput,
-                          traceId: (taskOutput as { traceId?: string })?.traceId || traceId,
+                          traceId: resolvedTraceId,
                         },
                         expected: example.output ?? null,
                         metadata: example.metadata ?? {},

@@ -274,9 +274,14 @@ describe('KibanaEvalsClient', () => {
 
     (getCurrentTraceId as jest.Mock).mockReturnValue('client-task-span-trace');
 
-    await client.runExperiment({ datasets: [dataset], task }, evaluators);
+    const [exp] = await client.runExperiment({ datasets: [dataset], task }, evaluators);
 
     expect(seenOutputTraceId).toBe('task-response-trace');
+
+    // The stored run (what the Evals UI trace link reads) must resolve to the same trace id
+    // as the evaluator input, not the raw client task-span id. (#276308)
+    const [firstRun] = Object.values(exp.runs);
+    expect(firstRun.traceId).toBe('task-response-trace');
   });
 
   it('falls back to the client task-span id when the task does not surface a traceId', async () => {
