@@ -51,7 +51,7 @@ export class LensApp {
   }
 
   async waitForLensApp() {
-    await expect(this.lensApp).toBeVisible();
+    await this.lensApp.waitFor({ state: 'visible' });
   }
 
   async openFullEditor() {
@@ -62,7 +62,7 @@ export class LensApp {
   async switchDataPanelDataView(dataViewTitle: string) {
     const dataViewSwitch = this.page.testSubj.locator('lns-dataView-switch-link');
     await dataViewSwitch.click();
-    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
+    await this.page.testSubj.locator('indexPattern-switcher').waitFor({ state: 'visible' });
     const searchInput = this.page.testSubj.locator('indexPattern-switcher--input');
     await searchInput.clear();
     await searchInput.pressSequentially(dataViewTitle);
@@ -80,8 +80,10 @@ export class LensApp {
       );
     // Playwright's .click() auto-retries until actionable — handles the debounce wait
     await dataViewOption.click({ timeout: 10_000 });
-    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeHidden();
-    await expect(this.page.testSubj.locator('fieldListLoading')).toBeHidden({ timeout: 30_000 });
+    await this.page.testSubj.locator('indexPattern-switcher').waitFor({ state: 'hidden' });
+    await this.page.testSubj
+      .locator('fieldListLoading')
+      .waitFor({ state: 'hidden', timeout: 30_000 });
   }
 
   /**
@@ -108,10 +110,10 @@ export class LensApp {
    * viewport to be visible.
    */
   async saveAndReturn() {
-    await expect(this.saveAndReturnButton).toBeVisible();
+    await this.saveAndReturnButton.waitFor({ state: 'visible' });
     await this.saveAndReturnButton.click();
     await expect(this.lensApp).toBeHidden();
-    await expect(this.page.testSubj.locator('dshDashboardViewport')).toBeVisible();
+    await this.page.testSubj.locator('dshDashboardViewport').waitFor({ state: 'visible' });
   }
 
   /**
@@ -133,7 +135,7 @@ export class LensApp {
         }
   ) {
     await this.saveButton.click();
-    await expect(this.saveModal).toBeVisible();
+    await this.saveModal.waitFor({ state: 'visible' });
     await this.savedObjectTitleInput.fill(title);
 
     if (options?.addToDashboard === 'existing') {
@@ -324,7 +326,7 @@ export class LensApp {
       ? `lns-indexPatternDimension-${operation} incompatible`
       : `lns-indexPatternDimension-${operation}`;
     const operationButton = this.page.testSubj.locator(operationSelector);
-    await expect(operationButton).toBeVisible();
+    await operationButton.waitFor({ state: 'visible' });
     await operationButton.scrollIntoViewIfNeeded();
     await operationButton.click();
     await expect(operationButton).toHaveAttribute('aria-pressed', 'true');
@@ -341,7 +343,7 @@ export class LensApp {
 
   private async openChartSwitchPopover() {
     await this.chartSwitchPopover.click();
-    await expect(this.chartSwitchList).toBeVisible();
+    await this.chartSwitchList.waitFor({ state: 'visible' });
   }
 
   async dragFieldToWorkspace(field: string) {
