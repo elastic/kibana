@@ -71,13 +71,14 @@ export class LensApp {
   }
 
   async applyFlyoutChanges() {
-    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
-    await this.page.testSubj.click('applyFlyoutButton');
+    const applyFlyoutButton = this.getApplyFlyoutButton();
+    await applyFlyoutButton.scrollIntoViewIfNeeded();
+    await applyFlyoutButton.click();
     await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'hidden' });
   }
 
   async cancelFlyoutChanges() {
-    await this.page.testSubj.click('cancelFlyoutButton');
+    await this.getCancelFlyoutButton().click();
     await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'hidden' });
   }
 
