@@ -83,7 +83,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 }) => {
   const open = useOpenFlyout();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const { historyKey } = useFlyoutSessionContext();
+  const { historyKey, session: sessionMode } = useFlyoutSessionContext();
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
   const flyoutType = useMemo(() => getFlyoutTypeForField(field), [field]);
@@ -95,19 +95,19 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
+      const resolvedSession = asParent ? FLYOUT_SESSION_KIND.START : sessionMode;
       const baseFlyoutProperties = asParent
         ? defaultToolsFlyoutProperties
         : defaultDocumentFlyoutProperties;
-      const session = asParent ? FLYOUT_SESSION_KIND.START : FLYOUT_SESSION_KIND.INHERIT;
       open(
         flyoutContent,
         {
           ...baseFlyoutProperties,
           historyKey,
-          session,
-          outsideClickCloses: asParent,
+          session: resolvedSession,
+          outsideClickCloses: resolvedSession === FLYOUT_SESSION_KIND.START,
           title:
-            session === FLYOUT_SESSION_KIND.INHERIT
+            resolvedSession === FLYOUT_SESSION_KIND.INHERIT
               ? buildFlyoutNavTitle(flyoutTitle)
               : flyoutTitle,
         },
@@ -115,11 +115,11 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
           ? {
               surface: FLYOUT_SURFACE.FLYOUT,
               flyoutType,
-              session,
+              session: resolvedSession,
               origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
             }
           : undefined,
-        asParent ? FLYOUT_SESSION_KIND.START : undefined
+        resolvedSession
       );
     }
   }, [
@@ -130,6 +130,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
     asParent,
     historyKey,
     flyoutTitle,
+    sessionMode,
   ]);
 
   if (!flyoutContent) {
