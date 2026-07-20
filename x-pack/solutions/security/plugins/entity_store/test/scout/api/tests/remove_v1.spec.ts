@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { PUBLIC_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import { PUBLIC_HEADERS, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import { installAllEntityTypes, uninstallAllEntityTypes } from '../fixtures/helpers';
+import { createSystemIndicesEsClient } from '../fixtures/system_indices_es_client';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
 const KIBANA_INDEX = '.kibana';
 
-// The `.kibana` index is a system index. ES requires x-elastic-product-origin:kibana
-// AND allow_restricted_indices:true on the caller's role for direct write access.
-// We use the `system_indices_superuser` that @kbn/es provisions on every test cluster.
-const SYSTEM_INDICES_SUPERUSER = 'system_indices_superuser';
-const SYSTEM_INDICES_SUPERUSER_PASSWORD = process.env.TEST_ES_PASS ?? 'changeme';
+// The `.kibana` index is a system index; direct access additionally requires
+// the x-elastic-product-origin header alongside allow_restricted_indices.
 const SYSTEM_INDEX_HEADERS = { 'x-elastic-product-origin': 'kibana' };
 
 // entity-definition was a `multiple-isolated` SO type, so the raw .kibana
@@ -32,28 +31,18 @@ apiTest.describe('Entity Store remove_v1 SO cleanup', { tag: ENTITY_STORE_TAGS }
   let defaultHeaders: Record<string, string>;
   let systemIndicesEsClient: Client;
 
-  apiTest.beforeAll(async ({ samlAuth, kbnClient, config }) => {
+  apiTest.beforeAll(async ({ samlAuth, kbnClient, esClient, config }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
     await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
 
-    // Create an ES client authenticated as system_indices_superuser, which has
-    // allow_restricted_indices:true and can therefore read/write .kibana directly.
-    systemIndicesEsClient = new Client({
-      node: config.hosts.elasticsearch,
-      auth: { username: SYSTEM_INDICES_SUPERUSER, password: SYSTEM_INDICES_SUPERUSER_PASSWORD },
-      tls: { rejectUnauthorized: false },
-    });
+    systemIndicesEsClient = await createSystemIndicesEsClient(esClient, config);
   });
 
   apiTest.afterEach(async ({ apiClient }) => {
-    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    // Remove any seeded docs unconditionally so a failed install cannot leak
-    // legacy documents into sibling suites sharing this cluster.
+    // Remove any seeded docs first and unconditionally, so neither a failed
+    // install nor a failed uninstall can leak legacy documents into sibling
+    // suites sharing this cluster.
     await Promise.all(
       ALL_ENTITY_TYPES.map((type) =>
         systemIndicesEsClient.delete(
@@ -62,6 +51,7 @@ apiTest.describe('Entity Store remove_v1 SO cleanup', { tag: ENTITY_STORE_TAGS }
         )
       )
     );
+    await uninstallAllEntityTypes(apiClient, defaultHeaders);
   });
 
   apiTest(
@@ -103,11 +93,7 @@ apiTest.describe('Entity Store remove_v1 SO cleanup', { tag: ENTITY_STORE_TAGS }
       // install triggers AssetManagerClient.init → stopAndRemoveV1 for each
       // entity type, which deletes the entity-definition doc from .kibana via
       // internalEsClient.delete (kibana_system identity).
-      const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
+      const install = await installAllEntityTypes(apiClient, defaultHeaders);
       expect(install.statusCode).toBe(201);
 
       const afterExists = await Promise.all(
@@ -139,11 +125,7 @@ apiTest.describe('Entity Store remove_v1 SO cleanup', { tag: ENTITY_STORE_TAGS }
       );
       expect(beforeExists).toStrictEqual([false, false, false, false]);
 
-      const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
+      const install = await installAllEntityTypes(apiClient, defaultHeaders);
       expect(install.statusCode).toBe(201);
     }
   );
