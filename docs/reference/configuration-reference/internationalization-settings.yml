@@ -28,9 +28,9 @@ groups:
 
       - setting: i18n.locales
         description: |
-          The list of locales that {{kib}} offers in the per-user language picker.
+          The list of locales that {{kib}} offers for per-user language selection.
           Locales not in this list are not available to users, even if translation
-          files for them are installed. Set to `[]` to disable the language picker
+          files for them are installed. Set to `[]` to disable language selection
           entirely.
         datatype: list
         default: '["en", "fr-FR", "ja-JP", "zh-CN", "de-DE"]'

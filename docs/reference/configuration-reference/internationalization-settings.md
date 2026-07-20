@@ -23,14 +23,9 @@ stack: beta 9.5
 serverless: beta
 ```
 
-End users who want to change their own interface language can follow [Change the interface language in Kibana](docs-content://cloud-account/change-interface-language.md).
+Each user can change their display language from the user menu or profile page. For steps, see [Change the interface language in Kibana](docs-content://cloud-account/change-interface-language.md).
 
-When `i18n.locales` is not empty, individual users can choose their preferred display language:
-
-* {applies_to}`self:` **User Profile page** — Users can select a language from the **Language** section on their profile page (**Edit profile** in the header's user menu).
-* {applies_to}`serverless:` {applies_to}`ech:` **User menu** — Users can select a language from the **Language** option in the user menu available from the application header.
-
-When a user sets a preferred language, it is stored in their user profile and takes effect after a page reload.
+When `i18n.locales` is not empty, language selection is available to users. When a user sets a preferred language, it is stored in their user profile and takes effect after a page reload.
 
 ### Resolution priority
 
@@ -79,14 +74,14 @@ previously resolved locale.
 ## Example configurations
 
 ```yaml
-# 1. Default behavior — picker shows the five bundled locales, server defaults
-#    to English. Equivalent to omitting all i18n.* keys.
+# 1. Default behavior — language selection offers the five bundled locales,
+#    server defaults to English. Equivalent to omitting all i18n.* keys.
 
-# 2. Curate the picker to a subset:
+# 2. Curate the available languages to a subset:
 i18n.locales: ["en", "ja-JP"]
 i18n.defaultLocale: "en"
 
-# 3. Disable the per-user picker entirely (server still serves defaultLocale).
+# 3. Disable language selection entirely (server still serves defaultLocale).
 #    The flow-style empty array (square brackets) is the supported way to
 #    express "no locales"; the block-list form has no syntax for an empty list.
 i18n.locales: []
