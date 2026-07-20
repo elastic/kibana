@@ -7,13 +7,16 @@ set -euo pipefail
 # Two modes of operation:
 #
 # 1. Standard mode (PR builds):
-#    Reads EVAL_SUITE_IDS, finds baseline on main via --baseline-branch,
-#    generates a markdown comparison report, and upserts it as a PR comment.
+#    Reads the connector list from Buildkite metadata (written by run_suite.sh at
+#    fanout time), then for each connector reads its full composite execution ID
+#    (written by evaluate.ts after scoring) and calls `compare --baseline-branch main`.
+#    Falls back to a per-suite metadata key or raw TEST_RUN_ID when the connector list
+#    is unavailable (local dev, pre-fanout builds).
 #
 # 2. Fresh baseline mode (triggered from PR block step):
-#    When FRESH_BASELINE_PR_EXPERIMENT_ID is set, compares the original PR
-#    experiment against the fresh main experiment (this build) using direct
-#    two-ID comparison.
+#    When FRESH_BASELINE_PR_EXPERIMENT_ID is set (a base build ID from the PR build),
+#    reconstructs the PR composite from that base ID + suite + model extracted from
+#    this build's composite, then calls `compare <pr-composite> <fresh-composite>`.
 
 # Bootstrap is required so that workspace packages (e.g. @kbn/setup-node-env)
 # are available when calling `node scripts/evals compare`.
@@ -58,45 +61,93 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
 
   echo "--- Comparing eval results for suite: ${suite_id}"
 
-  COMPARE_ARGS=(
+  BASE_COMPARE_ARGS=(
     --suite "$suite_id"
     --format markdown
     --output "$MARKDOWN_FILE"
   )
-
   if [[ -n "$KIBANA_URL" ]]; then
-    COMPARE_ARGS+=(--kibana-url "$KIBANA_URL")
+    BASE_COMPARE_ARGS+=(--kibana-url "$KIBANA_URL")
   fi
 
-  if [[ -n "$FRESH_BASELINE_PR_EXPERIMENT_ID" ]]; then
-    # Fresh baseline mode: compare original PR experiment vs this build's fresh main experiment.
-    # Args: <pr-experiment-id> <fresh-main-experiment-id>
-    if node scripts/evals compare "$FRESH_BASELINE_PR_EXPERIMENT_ID" "$TEST_RUN_ID" \
-      "${COMPARE_ARGS[@]}"; then
-      HAS_RESULTS="true"
-    else
-      echo "Compare failed for suite ${suite_id}; continuing."
-    fi
+  # Read the connector list written by run_suite.sh at fanout time.
+  # Each entry is a connector ID (EVAL_PROJECT value, e.g. "eis-anthropic-claude-4-5-haiku").
+  SUITE_CONNECTORS=""
+  if command -v buildkite-agent >/dev/null 2>&1; then
+    SUITE_CONNECTORS="$(buildkite-agent meta-data get "kbn-evals:connectors:${suite_id}" 2>/dev/null || true)"
+  fi
+
+  if [[ -n "$SUITE_CONNECTORS" ]]; then
+    # Multi-model path: one compare call per connector.
+    IFS=',' read -ra CONNECTOR_ARRAY <<<"$SUITE_CONNECTORS"
+    for connector_id in "${CONNECTOR_ARRAY[@]}"; do
+      connector_id="$(printf '%s' "$connector_id" | xargs)"
+      [[ -z "$connector_id" ]] && continue
+
+      # Read the full composite execution ID for this connector.
+      # evaluate.ts writes "kbn-evals:execution-id:<suite>:<connector>" = "bk-BUILD_ID::suite::model"
+      CONNECTOR_COMPOSITE=""
+      if command -v buildkite-agent >/dev/null 2>&1; then
+        CONNECTOR_COMPOSITE="$(buildkite-agent meta-data get "kbn-evals:execution-id:${suite_id}:${connector_id}" 2>/dev/null || true)"
+      fi
+      if [[ -z "$CONNECTOR_COMPOSITE" ]]; then
+        echo "No execution ID for connector ${connector_id} in suite ${suite_id}; skipping."
+        continue
+      fi
+
+      COMPARE_ARGS=("${BASE_COMPARE_ARGS[@]}")
+
+      if [[ -n "$FRESH_BASELINE_PR_EXPERIMENT_ID" ]]; then
+        # Fresh baseline mode: reconstruct the PR composite from the base build ID and the model
+        # extracted from this build's composite. Both builds use the same connector/model, so
+        # the model segment is identical (e.g. "bk-PR::smoke-tests::anthropic-claude-4-5-haiku").
+        _model="${CONNECTOR_COMPOSITE##*::}"
+        PR_COMPOSITE="${FRESH_BASELINE_PR_EXPERIMENT_ID}::${suite_id}::${_model}"
+        if node scripts/evals compare "$PR_COMPOSITE" "$CONNECTOR_COMPOSITE" "${COMPARE_ARGS[@]}"; then
+          HAS_RESULTS="true"
+        else
+          echo "Compare failed for suite ${suite_id} / connector ${connector_id}; continuing."
+        fi
+      else
+        COMPARE_ARGS+=(--baseline-branch main)
+        if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
+          COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-refresh-block")
+        fi
+        if node scripts/evals compare "$CONNECTOR_COMPOSITE" "${COMPARE_ARGS[@]}"; then
+          HAS_RESULTS="true"
+        else
+          echo "Compare failed for suite ${suite_id} / connector ${connector_id}; continuing."
+        fi
+      fi
+    done
   else
-    # Standard mode: compare this build's experiment against the latest baseline on main.
-    COMPARE_ARGS+=(--baseline-branch main)
-
-    # Pass the PR branch so compare can resolve the base build ID to the full
-    # composite execution ID (e.g. "bk-BUILD_ID::suite::model") via the experiments API.
-    if [[ -n "${BUILDKITE_BRANCH:-}" ]]; then
-      COMPARE_ARGS+=(--pr-branch "$BUILDKITE_BRANCH")
+    # Single-model fallback: used when connector list metadata is unavailable
+    # (local dev, builds predating this change, or non-fanout runs).
+    SUITE_EXECUTION_ID="$TEST_RUN_ID"
+    if command -v buildkite-agent >/dev/null 2>&1; then
+      _meta_id="$(buildkite-agent meta-data get "kbn-evals:execution-id:${suite_id}" 2>/dev/null || true)"
+      [[ -n "$_meta_id" ]] && SUITE_EXECUTION_ID="$_meta_id"
     fi
 
-    # Pass refresh URL so the markdown includes a link to the block step.
-    if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
-      COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-refresh-block")
-    fi
+    COMPARE_ARGS=("${BASE_COMPARE_ARGS[@]}")
 
-    if node scripts/evals compare "$TEST_RUN_ID" \
-      "${COMPARE_ARGS[@]}"; then
-      HAS_RESULTS="true"
+    if [[ -n "$FRESH_BASELINE_PR_EXPERIMENT_ID" ]]; then
+      if node scripts/evals compare "$FRESH_BASELINE_PR_EXPERIMENT_ID" "$SUITE_EXECUTION_ID" \
+        "${COMPARE_ARGS[@]}"; then
+        HAS_RESULTS="true"
+      else
+        echo "Compare failed for suite ${suite_id}; continuing."
+      fi
     else
-      echo "Compare failed for suite ${suite_id}; continuing."
+      COMPARE_ARGS+=(--baseline-branch main)
+      if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
+        COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-refresh-block")
+      fi
+      if node scripts/evals compare "$SUITE_EXECUTION_ID" "${COMPARE_ARGS[@]}"; then
+        HAS_RESULTS="true"
+      else
+        echo "Compare failed for suite ${suite_id}; continuing."
+      fi
     fi
   fi
 done

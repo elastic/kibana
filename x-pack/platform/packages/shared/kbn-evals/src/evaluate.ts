@@ -6,6 +6,7 @@
  */
 
 import { hostname as osHostname } from 'os';
+import { execFileSync } from 'child_process';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
@@ -366,6 +367,31 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             taskModelId: model.id,
             suiteId,
           });
+        }
+      }
+
+      // Publish the full composite execution ID to Buildkite metadata so the
+      // post-comparison step can retrieve it without querying the experiments API.
+      // Per-connector key (kbn-evals:execution-id:<suite>:<connector>) is the primary
+      // path for multi-model fanout builds; the per-suite key is a fallback for single
+      // runs where EVAL_PROJECT is not set.
+      if (executionId && suiteId && process.env.BUILDKITE_BUILD_ID) {
+        const connectorId = process.env.EVAL_PROJECT;
+        try {
+          if (connectorId) {
+            execFileSync(
+              'buildkite-agent',
+              ['meta-data', 'set', `kbn-evals:execution-id:${suiteId}:${connectorId}`, executionId],
+              { stdio: 'ignore' }
+            );
+          }
+          execFileSync(
+            'buildkite-agent',
+            ['meta-data', 'set', `kbn-evals:execution-id:${suiteId}`, executionId],
+            { stdio: 'ignore' }
+          );
+        } catch {
+          // Not running inside Buildkite; skip silently.
         }
       }
     },

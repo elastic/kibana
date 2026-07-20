@@ -282,6 +282,12 @@ EOF
         nl -ba "$FANOUT_PIPELINE_FILE" || true
         exit 1
       fi
+
+      # Publish the connector list so the post-comparison step can discover
+      # which models ran without querying the experiments API.
+      _connectors_csv="$(printf '%s' "$CONNECTOR_IDS" | tr '\n' ',' | sed 's/,$//')"
+      buildkite-agent meta-data set "kbn-evals:connectors:${EVAL_SUITE_ID}" "$_connectors_csv" 2>/dev/null || true
+
       echo "Fanout uploaded. Exiting parent step."
       exit 0
     fi

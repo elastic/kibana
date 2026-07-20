@@ -297,7 +297,7 @@ export class EvalsClient {
     baseExecutionId,
   }: {
     suiteId: string;
-    branch: string;
+    branch?: string;
     baseExecutionId: string;
   }): Promise<BaselineExperiment | undefined> {
     try {
@@ -306,7 +306,7 @@ export class EvalsClient {
         method: 'GET',
         query: {
           suite_id: suiteId,
-          branch,
+          ...(branch != null && { branch }),
           page: 1,
           per_page: 10,
         },
@@ -341,10 +341,12 @@ export class EvalsClient {
   async findLatestBaselineExperiment({
     suiteId,
     branch,
+    taskModelId,
     excludeExecutionId,
   }: {
     suiteId: string;
     branch: string;
+    taskModelId?: string;
     excludeExecutionId?: string;
   }): Promise<BaselineExperiment | undefined> {
     try {
@@ -354,6 +356,7 @@ export class EvalsClient {
         query: {
           suite_id: suiteId,
           branch,
+          ...(taskModelId && { model_id: taskModelId }),
           page: 1,
           per_page: 5,
         },

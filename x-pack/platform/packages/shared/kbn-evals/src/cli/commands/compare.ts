@@ -32,8 +32,6 @@ export const compareCmd: Command<void> = {
 
   Options:
     --baseline-branch  Branch to find the latest baseline experiment on (e.g. "main")
-    --pr-branch        Branch of the PR experiment; used to resolve the full execution ID
-                       when the positional arg is a base build ID (e.g. "bk-BUILD_ID")
     --suite            Suite ID filter for baseline lookup and score filtering
     --format           Output format: "terminal" (default) or "markdown"
     --kibana-url       Kibana URL for generating compare page links in markdown
@@ -45,18 +43,9 @@ export const compareCmd: Command<void> = {
     EVALUATIONS_KBN_API_KEY  API key for authenticating to the target Kibana
   `,
   flags: {
-    string: [
-      'baseline-branch',
-      'pr-branch',
-      'suite',
-      'format',
-      'kibana-url',
-      'output',
-      'refresh-url',
-    ],
+    string: ['baseline-branch', 'suite', 'format', 'kibana-url', 'output', 'refresh-url'],
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
-      --pr-branch        Branch of the PR experiment for resolving the full execution ID
       --suite            Suite ID filter for baseline lookup and score filtering
       --format           Output format: "terminal" (default) or "markdown"
       --kibana-url       Kibana URL for generating compare page links in markdown
@@ -67,7 +56,6 @@ export const compareCmd: Command<void> = {
   run: async ({ log, flagsReader }) => {
     const positionals = flagsReader.getPositionals();
     const baselineBranch = flagsReader.string('baseline-branch');
-    const prBranch = flagsReader.string('pr-branch');
     const suiteId = flagsReader.string('suite');
     const format = flagsReader.string('format') ?? 'terminal';
     const kibanaUrl = flagsReader.string('kibana-url');
@@ -120,35 +108,39 @@ export const compareCmd: Command<void> = {
         );
       }
 
-      // In CI the positional is a base build ID (e.g. "bk-BUILD_ID"). Resolve it to the
-      // full composite execution ID (e.g. "bk-BUILD_ID::suite::model") so the server's
-      // exact term query on metadata.execution_id finds the scores.
-      if (prBranch && !firstExperimentId.includes('::')) {
-        log.info(
-          `Resolving PR experiment for suite "${suiteId}" on branch "${prBranch}" (base ID: ${firstExperimentId})...`
-        );
-        const prExperiment = await evalsClient.findLatestExperimentForBuild({
+      // In CI the positional may be a base build ID (e.g. "bk-BUILD_ID"). Resolve it to the
+      // full composite (e.g. "bk-BUILD_ID::suite::model") so the server's exact-term query
+      // on metadata.execution_id finds the scores. Build IDs are globally unique so omitting
+      // a branch filter is safe.
+      if (!firstExperimentId.includes('::')) {
+        const resolved = await evalsClient.findLatestExperimentForBuild({
           suiteId,
-          branch: prBranch,
           baseExecutionId: firstExperimentId,
         });
-        if (prExperiment) {
-          firstExperimentId = prExperiment.executionId;
-          log.info(`Resolved PR experiment: ${firstExperimentId}`);
+        if (resolved) {
+          log.info(`Resolved PR experiment: ${firstExperimentId} → ${resolved.executionId}`);
+          firstExperimentId = resolved.executionId;
         } else {
-          log.warning(
-            `No PR experiment found for suite "${suiteId}" on branch "${prBranch}" with base ID "${firstExperimentId}". Proceeding with raw ID.`
-          );
+          log.warning(`Could not resolve base ID "${firstExperimentId}"; using raw ID.`);
         }
       }
 
+      // Extract model ID from the composite for model-matched baseline lookup,
+      // so we don't compare haiku scores against a sonnet baseline (or vice versa).
+      const taskModelId = firstExperimentId.includes('::')
+        ? firstExperimentId.split('::').pop()
+        : undefined;
+
       log.info(
-        `Looking up latest baseline experiment for suite "${suiteId}" on branch "${baselineBranch}"...`
+        `Looking up latest baseline experiment for suite "${suiteId}" on branch "${baselineBranch}"${
+          taskModelId ? ` (model: ${taskModelId})` : ''
+        }...`
       );
 
       baselineMetadata = await evalsClient.findLatestBaselineExperiment({
         suiteId,
         branch: baselineBranch,
+        taskModelId,
         excludeExecutionId: firstExperimentId,
       });
 
@@ -171,6 +163,31 @@ export const compareCmd: Command<void> = {
 
       if (positionals.length > 2) {
         throw createFlagError('Unexpected extra arguments. Provide exactly two experiment IDs.');
+      }
+
+      // When --suite is set and a positional looks like a base build ID (no "::" composite
+      // parts), resolve it to the full composite execution ID so the server's exact-term
+      // metadata.execution_id query finds the scores. Build UUIDs are globally unique so
+      // omitting a branch filter is safe.
+      if (suiteId) {
+        const resolveIfNeeded = async (id: string): Promise<string> => {
+          if (id.includes('::')) return id;
+          const resolved = await evalsClient.findLatestExperimentForBuild({
+            suiteId,
+            baseExecutionId: id,
+          });
+          if (resolved) {
+            log.info(`Resolved experiment ${id} → ${resolved.executionId}`);
+            return resolved.executionId;
+          }
+          log.warning(`Could not resolve experiment for base ID "${id}"; using raw ID.`);
+          return id;
+        };
+
+        [firstExperimentId, secondExperimentId] = await Promise.all([
+          resolveIfNeeded(firstExperimentId),
+          resolveIfNeeded(secondExperimentId),
+        ]);
       }
     }
 
