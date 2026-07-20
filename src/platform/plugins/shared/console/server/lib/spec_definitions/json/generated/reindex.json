@@ -59,20 +59,25 @@
       },
       "max_docs": "",
       "script": {
-        "source": "",
-        "id": "",
-        "params": {},
-        "lang": {
-          "__one_of": [
-            "painless",
-            "expression",
-            "mustache",
-            "java"
-          ]
-        },
-        "options": {
-          "*": ""
-        }
+        "__one_of": [
+          {
+            "source": "",
+            "id": "",
+            "params": {},
+            "lang": {
+              "__one_of": [
+                "painless",
+                "expression",
+                "mustache",
+                "java"
+              ]
+            },
+            "options": {
+              "*": ""
+            }
+          },
+          ""
+        ]
       },
       "source": {
         "index": "",
@@ -90,7 +95,6 @@
           "api_key": "",
           "socket_timeout": ""
         },
-        "project_routing": "",
         "size": "",
         "slice": {
           "field": "",
@@ -99,14 +103,21 @@
         },
         "sort": "",
         "_source": {
-          "exclude_vectors": {
-            "__one_of": [
-              true,
-              false
-            ]
-          },
-          "excludes": "",
-          "includes": ""
+          "__one_of": [
+            true,
+            false,
+            {
+              "exclude_vectors": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "excludes": "",
+              "includes": ""
+            },
+            ""
+          ]
         },
         "runtime_mappings": {
           "*": {
@@ -128,31 +139,39 @@
                 }
               }
             },
-            "fetch_fields": [
-              {
-                "field": "",
-                "format": ""
-              }
-            ],
+            "fetch_fields": {
+              "__any_of": [
+                {
+                  "field": "",
+                  "format": ""
+                },
+                ""
+              ]
+            },
             "format": "",
             "input_field": "",
             "target_field": "",
             "target_index": "",
             "script": {
-              "source": "",
-              "id": "",
-              "params": {},
-              "lang": {
-                "__one_of": [
-                  "painless",
-                  "expression",
-                  "mustache",
-                  "java"
-                ]
-              },
-              "options": {
-                "*": ""
-              }
+              "__one_of": [
+                {
+                  "source": "",
+                  "id": "",
+                  "params": {},
+                  "lang": {
+                    "__one_of": [
+                      "painless",
+                      "expression",
+                      "mustache",
+                      "java"
+                    ]
+                  },
+                  "options": {
+                    "*": ""
+                  }
+                },
+                ""
+              ]
             },
             "on_script_error": {
               "__one_of": [

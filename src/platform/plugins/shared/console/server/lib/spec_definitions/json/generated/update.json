@@ -49,20 +49,25 @@
         ]
       },
       "script": {
-        "source": "",
-        "id": "",
-        "params": {},
-        "lang": {
-          "__one_of": [
-            "painless",
-            "expression",
-            "mustache",
-            "java"
-          ]
-        },
-        "options": {
-          "*": ""
-        }
+        "__one_of": [
+          {
+            "source": "",
+            "id": "",
+            "params": {},
+            "lang": {
+              "__one_of": [
+                "painless",
+                "expression",
+                "mustache",
+                "java"
+              ]
+            },
+            "options": {
+              "*": ""
+            }
+          },
+          ""
+        ]
       },
       "scripted_upsert": {
         "__one_of": [
@@ -71,14 +76,21 @@
         ]
       },
       "_source": {
-        "exclude_vectors": {
-          "__one_of": [
-            true,
-            false
-          ]
-        },
-        "excludes": "",
-        "includes": ""
+        "__one_of": [
+          true,
+          false,
+          {
+            "exclude_vectors": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "excludes": "",
+            "includes": ""
+          },
+          ""
+        ]
       },
       "upsert": ""
     },

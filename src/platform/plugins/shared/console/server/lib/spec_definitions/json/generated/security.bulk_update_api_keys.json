@@ -76,9 +76,7 @@
               "read_slm",
               "transport_client",
               "write_connector_secrets",
-              "write_fleet_secrets",
-              "read_project_routing",
-              "manage_project_routing"
+              "write_fleet_secrets"
             ]
           },
           "indices": [

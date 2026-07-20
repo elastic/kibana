@@ -24,10 +24,17 @@
         {
           "id": "",
           "request": {
-            "query": {
-              "__scope_link": "GLOBAL.query"
-            },
-            "size": ""
+            "__one_of": [
+              {
+                "query": {
+                  "__scope_link": "GLOBAL.query"
+                },
+                "size": ""
+              },
+              {
+                "__scope_link": "GLOBAL.query"
+              }
+            ]
           },
           "ratings": [
             {

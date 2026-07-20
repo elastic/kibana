@@ -53,8 +53,6 @@
           ]
         }
       },
-      "number_of_shards": "",
-      "number_of_replicas": "",
       "number_of_routing_shards": "",
       "check_on_startup": {
         "__one_of": [

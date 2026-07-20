@@ -38,46 +38,51 @@
         },
         "match": {
           "*": {
-            "boost": "",
-            "_name": "",
-            "analyzer": "",
-            "auto_generate_synonyms_phrase_query": {
-              "__one_of": [
-                true,
-                false
-              ]
-            },
-            "cutoff_frequency": "",
-            "fuzziness": "",
-            "fuzzy_rewrite": "",
-            "fuzzy_transpositions": {
-              "__one_of": [
-                true,
-                false
-              ]
-            },
-            "lenient": {
-              "__one_of": [
-                true,
-                false
-              ]
-            },
-            "max_expansions": "",
-            "minimum_should_match": "",
-            "operator": {
-              "__one_of": [
-                "and",
-                "or"
-              ]
-            },
-            "prefix_length": "",
-            "query": "",
-            "zero_terms_query": {
-              "__one_of": [
-                "all",
-                "none"
-              ]
-            }
+            "__one_of": [
+              {
+                "boost": "",
+                "_name": "",
+                "analyzer": "",
+                "auto_generate_synonyms_phrase_query": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "cutoff_frequency": "",
+                "fuzziness": "",
+                "fuzzy_rewrite": "",
+                "fuzzy_transpositions": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "lenient": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "max_expansions": "",
+                "minimum_should_match": "",
+                "operator": {
+                  "__one_of": [
+                    "and",
+                    "or"
+                  ]
+                },
+                "prefix_length": "",
+                "query": "",
+                "zero_terms_query": {
+                  "__one_of": [
+                    "all",
+                    "none"
+                  ]
+                }
+              },
+              ""
+            ]
           }
         },
         "match_all": {
@@ -86,16 +91,21 @@
         },
         "prefix": {
           "*": {
-            "boost": "",
-            "_name": "",
-            "rewrite": "",
-            "value": "",
-            "case_insensitive": {
-              "__one_of": [
-                true,
-                false
-              ]
-            }
+            "__one_of": [
+              {
+                "boost": "",
+                "_name": "",
+                "rewrite": "",
+                "value": "",
+                "case_insensitive": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
+              },
+              ""
+            ]
           }
         },
         "range": {
@@ -159,34 +169,50 @@
         },
         "term": {
           "*": {
-            "boost": "",
-            "_name": "",
-            "value": "",
-            "case_insensitive": {
-              "__one_of": [
-                true,
-                false
-              ]
-            }
+            "__one_of": [
+              {
+                "boost": "",
+                "_name": "",
+                "value": "",
+                "case_insensitive": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
+              },
+              ""
+            ]
           }
         },
         "terms": {
           "boost": "",
-          "_name": ""
+          "_name": "",
+          "*": {
+            "index": "",
+            "id": "",
+            "path": "",
+            "routing": ""
+          }
         },
         "wildcard": {
           "*": {
-            "boost": "",
-            "_name": "",
-            "case_insensitive": {
-              "__one_of": [
-                true,
-                false
-              ]
-            },
-            "rewrite": "",
-            "value": "",
-            "wildcard": ""
+            "__one_of": [
+              {
+                "boost": "",
+                "_name": "",
+                "case_insensitive": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "rewrite": "",
+                "value": "",
+                "wildcard": ""
+              },
+              ""
+            ]
           }
         }
       },

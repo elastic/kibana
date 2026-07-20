@@ -21,12 +21,15 @@
           {
             "exclude": [],
             "field": "",
-            "include": [
-              {
-                "boost": "",
-                "term": ""
-              }
-            ],
+            "include": {
+              "__any_of": [
+                {
+                  "boost": "",
+                  "term": ""
+                },
+                ""
+              ]
+            },
             "min_doc_count": "",
             "shard_min_doc_count": "",
             "size": ""
@@ -54,12 +57,15 @@
         {
           "exclude": [],
           "field": "",
-          "include": [
-            {
-              "boost": "",
-              "term": ""
-            }
-          ],
+          "include": {
+            "__any_of": [
+              {
+                "boost": "",
+                "term": ""
+              },
+              ""
+            ]
+          },
           "min_doc_count": "",
           "shard_min_doc_count": "",
           "size": ""

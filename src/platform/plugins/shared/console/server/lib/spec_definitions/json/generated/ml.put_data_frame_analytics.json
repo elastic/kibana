@@ -160,8 +160,13 @@
         }
       },
       "analyzed_fields": {
-        "includes": [],
-        "excludes": []
+        "__one_of": [
+          {
+            "includes": [],
+            "excludes": []
+          },
+          []
+        ]
       },
       "description": "",
       "dest": {
@@ -196,31 +201,39 @@
                 }
               }
             },
-            "fetch_fields": [
-              {
-                "field": "",
-                "format": ""
-              }
-            ],
+            "fetch_fields": {
+              "__any_of": [
+                {
+                  "field": "",
+                  "format": ""
+                },
+                ""
+              ]
+            },
             "format": "",
             "input_field": "",
             "target_field": "",
             "target_index": "",
             "script": {
-              "source": "",
-              "id": "",
-              "params": {},
-              "lang": {
-                "__one_of": [
-                  "painless",
-                  "expression",
-                  "mustache",
-                  "java"
-                ]
-              },
-              "options": {
-                "*": ""
-              }
+              "__one_of": [
+                {
+                  "source": "",
+                  "id": "",
+                  "params": {},
+                  "lang": {
+                    "__one_of": [
+                      "painless",
+                      "expression",
+                      "mustache",
+                      "java"
+                    ]
+                  },
+                  "options": {
+                    "*": ""
+                  }
+                },
+                ""
+              ]
             },
             "on_script_error": {
               "__one_of": [
@@ -245,8 +258,13 @@
           }
         },
         "_source": {
-          "includes": [],
-          "excludes": []
+          "__one_of": [
+            {
+              "includes": [],
+              "excludes": []
+            },
+            []
+          ]
         }
       },
       "headers": {

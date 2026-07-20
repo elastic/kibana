@@ -433,31 +433,39 @@
                           }
                         }
                       },
-                      "fetch_fields": [
-                        {
-                          "field": "",
-                          "format": ""
-                        }
-                      ],
+                      "fetch_fields": {
+                        "__any_of": [
+                          {
+                            "field": "",
+                            "format": ""
+                          },
+                          ""
+                        ]
+                      },
                       "format": "",
                       "input_field": "",
                       "target_field": "",
                       "target_index": "",
                       "script": {
-                        "source": "",
-                        "id": "",
-                        "params": {},
-                        "lang": {
-                          "__one_of": [
-                            "painless",
-                            "expression",
-                            "mustache",
-                            "java"
-                          ]
-                        },
-                        "options": {
-                          "*": ""
-                        }
+                        "__one_of": [
+                          {
+                            "source": "",
+                            "id": "",
+                            "params": {},
+                            "lang": {
+                              "__one_of": [
+                                "painless",
+                                "expression",
+                                "mustache",
+                                "java"
+                              ]
+                            },
+                            "options": {
+                              "*": ""
+                            }
+                          },
+                          ""
+                        ]
                       },
                       "on_script_error": {
                         "__one_of": [
@@ -581,31 +589,39 @@
                       }
                     }
                   },
-                  "fetch_fields": [
-                    {
-                      "field": "",
-                      "format": ""
-                    }
-                  ],
+                  "fetch_fields": {
+                    "__any_of": [
+                      {
+                        "field": "",
+                        "format": ""
+                      },
+                      ""
+                    ]
+                  },
                   "format": "",
                   "input_field": "",
                   "target_field": "",
                   "target_index": "",
                   "script": {
-                    "source": "",
-                    "id": "",
-                    "params": {},
-                    "lang": {
-                      "__one_of": [
-                        "painless",
-                        "expression",
-                        "mustache",
-                        "java"
-                      ]
-                    },
-                    "options": {
-                      "*": ""
-                    }
+                    "__one_of": [
+                      {
+                        "source": "",
+                        "id": "",
+                        "params": {},
+                        "lang": {
+                          "__one_of": [
+                            "painless",
+                            "expression",
+                            "mustache",
+                            "java"
+                          ]
+                        },
+                        "options": {
+                          "*": ""
+                        }
+                      },
+                      ""
+                    ]
                   },
                   "on_script_error": {
                     "__one_of": [
@@ -638,8 +654,7 @@
               "subobjects": {
                 "__one_of": [
                   "true",
-                  "false",
-                  "auto"
+                  "false"
                 ]
               },
               "_data_stream_timestamp": {
@@ -858,31 +873,39 @@
                           }
                         }
                       },
-                      "fetch_fields": [
-                        {
-                          "field": "",
-                          "format": ""
-                        }
-                      ],
+                      "fetch_fields": {
+                        "__any_of": [
+                          {
+                            "field": "",
+                            "format": ""
+                          },
+                          ""
+                        ]
+                      },
                       "format": "",
                       "input_field": "",
                       "target_field": "",
                       "target_index": "",
                       "script": {
-                        "source": "",
-                        "id": "",
-                        "params": {},
-                        "lang": {
-                          "__one_of": [
-                            "painless",
-                            "expression",
-                            "mustache",
-                            "java"
-                          ]
-                        },
-                        "options": {
-                          "*": ""
-                        }
+                        "__one_of": [
+                          {
+                            "source": "",
+                            "id": "",
+                            "params": {},
+                            "lang": {
+                              "__one_of": [
+                                "painless",
+                                "expression",
+                                "mustache",
+                                "java"
+                              ]
+                            },
+                            "options": {
+                              "*": ""
+                            }
+                          },
+                          ""
+                        ]
                       },
                       "on_script_error": {
                         "__one_of": [
@@ -1006,31 +1029,39 @@
                       }
                     }
                   },
-                  "fetch_fields": [
-                    {
-                      "field": "",
-                      "format": ""
-                    }
-                  ],
+                  "fetch_fields": {
+                    "__any_of": [
+                      {
+                        "field": "",
+                        "format": ""
+                      },
+                      ""
+                    ]
+                  },
                   "format": "",
                   "input_field": "",
                   "target_field": "",
                   "target_index": "",
                   "script": {
-                    "source": "",
-                    "id": "",
-                    "params": {},
-                    "lang": {
-                      "__one_of": [
-                        "painless",
-                        "expression",
-                        "mustache",
-                        "java"
-                      ]
-                    },
-                    "options": {
-                      "*": ""
-                    }
+                    "__one_of": [
+                      {
+                        "source": "",
+                        "id": "",
+                        "params": {},
+                        "lang": {
+                          "__one_of": [
+                            "painless",
+                            "expression",
+                            "mustache",
+                            "java"
+                          ]
+                        },
+                        "options": {
+                          "*": ""
+                        }
+                      },
+                      ""
+                    ]
                   },
                   "on_script_error": {
                     "__one_of": [
@@ -1063,8 +1094,7 @@
               "subobjects": {
                 "__one_of": [
                   "true",
-                  "false",
-                  "auto"
+                  "false"
                 ]
               },
               "_data_stream_timestamp": {
@@ -1570,31 +1600,39 @@
                     }
                   }
                 },
-                "fetch_fields": [
-                  {
-                    "field": "",
-                    "format": ""
-                  }
-                ],
+                "fetch_fields": {
+                  "__any_of": [
+                    {
+                      "field": "",
+                      "format": ""
+                    },
+                    ""
+                  ]
+                },
                 "format": "",
                 "input_field": "",
                 "target_field": "",
                 "target_index": "",
                 "script": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "on_script_error": {
                   "__one_of": [
@@ -1718,31 +1756,39 @@
                 }
               }
             },
-            "fetch_fields": [
-              {
-                "field": "",
-                "format": ""
-              }
-            ],
+            "fetch_fields": {
+              "__any_of": [
+                {
+                  "field": "",
+                  "format": ""
+                },
+                ""
+              ]
+            },
             "format": "",
             "input_field": "",
             "target_field": "",
             "target_index": "",
             "script": {
-              "source": "",
-              "id": "",
-              "params": {},
-              "lang": {
-                "__one_of": [
-                  "painless",
-                  "expression",
-                  "mustache",
-                  "java"
-                ]
-              },
-              "options": {
-                "*": ""
-              }
+              "__one_of": [
+                {
+                  "source": "",
+                  "id": "",
+                  "params": {},
+                  "lang": {
+                    "__one_of": [
+                      "painless",
+                      "expression",
+                      "mustache",
+                      "java"
+                    ]
+                  },
+                  "options": {
+                    "*": ""
+                  }
+                },
+                ""
+              ]
             },
             "on_script_error": {
               "__one_of": [
@@ -1775,8 +1821,7 @@
         "subobjects": {
           "__one_of": [
             "true",
-            "false",
-            "auto"
+            "false"
           ]
         },
         "_data_stream_timestamp": {
@@ -1796,20 +1841,25 @@
               "append": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -1841,20 +1891,25 @@
               "attachment": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -1889,20 +1944,25 @@
               "bytes": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -1926,20 +1986,25 @@
               "cef": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -1970,20 +2035,25 @@
               "circle": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2014,20 +2084,25 @@
               "community_id": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2059,20 +2134,25 @@
               "convert": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2108,20 +2188,25 @@
               "csv": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2154,20 +2239,25 @@
               "date": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2189,20 +2279,25 @@
               "date_index_name": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2225,20 +2320,25 @@
               "dissect": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2263,20 +2363,25 @@
               "dot_expander": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2300,20 +2405,25 @@
               "drop": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2329,20 +2439,25 @@
               "enrich": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2382,20 +2497,25 @@
               "fail": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2412,20 +2532,25 @@
               "fingerprint": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2459,20 +2584,25 @@
               "foreach": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2496,20 +2626,25 @@
               "ip_location": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2547,20 +2682,25 @@
               "geo_grid": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2601,20 +2741,25 @@
               "geoip": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2652,20 +2797,25 @@
               "grok": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2705,20 +2855,25 @@
               "gsub": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2744,20 +2899,25 @@
               "html_strip": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2781,20 +2941,25 @@
               "inference": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2836,20 +3001,25 @@
               "join": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2868,20 +3038,25 @@
               "json": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2917,20 +3092,25 @@
               "kv": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -2967,20 +3147,25 @@
               "lowercase": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3004,20 +3189,25 @@
               "network_direction": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3044,20 +3234,25 @@
               "pipeline": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3080,20 +3275,25 @@
               "redact": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3134,20 +3334,25 @@
               "registered_domain": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3171,20 +3376,25 @@
               "remove": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3208,20 +3418,25 @@
               "rename": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3245,20 +3460,25 @@
               "reroute": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3277,20 +3497,25 @@
               "script": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3317,20 +3542,25 @@
               "set": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3362,20 +3592,25 @@
               "set_security_user": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3393,20 +3628,25 @@
               "sort": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3430,20 +3670,25 @@
               "split": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3474,20 +3719,25 @@
               "terminate": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3503,20 +3753,25 @@
               "trim": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3540,20 +3795,25 @@
               "uppercase": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3577,20 +3837,25 @@
               "urldecode": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3614,20 +3879,25 @@
               "uri_parts": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3663,20 +3933,25 @@
               "user_agent": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3720,20 +3995,25 @@
               "append": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3765,20 +4045,25 @@
               "attachment": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3813,20 +4098,25 @@
               "bytes": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3850,20 +4140,25 @@
               "cef": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3894,20 +4189,25 @@
               "circle": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3938,20 +4238,25 @@
               "community_id": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -3983,20 +4288,25 @@
               "convert": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4032,20 +4342,25 @@
               "csv": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4078,20 +4393,25 @@
               "date": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4113,20 +4433,25 @@
               "date_index_name": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4149,20 +4474,25 @@
               "dissect": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4187,20 +4517,25 @@
               "dot_expander": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4224,20 +4559,25 @@
               "drop": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4253,20 +4593,25 @@
               "enrich": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4306,20 +4651,25 @@
               "fail": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4336,20 +4686,25 @@
               "fingerprint": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4383,20 +4738,25 @@
               "foreach": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4420,20 +4780,25 @@
               "ip_location": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4471,20 +4836,25 @@
               "geo_grid": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4525,20 +4895,25 @@
               "geoip": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4576,20 +4951,25 @@
               "grok": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4629,20 +5009,25 @@
               "gsub": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4668,20 +5053,25 @@
               "html_strip": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4705,20 +5095,25 @@
               "inference": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4760,20 +5155,25 @@
               "join": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4792,20 +5192,25 @@
               "json": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4841,20 +5246,25 @@
               "kv": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4891,20 +5301,25 @@
               "lowercase": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4928,20 +5343,25 @@
               "network_direction": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -4968,20 +5388,25 @@
               "pipeline": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5004,20 +5429,25 @@
               "redact": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5058,20 +5488,25 @@
               "registered_domain": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5095,20 +5530,25 @@
               "remove": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5132,20 +5572,25 @@
               "rename": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5169,20 +5614,25 @@
               "reroute": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5201,20 +5651,25 @@
               "script": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5241,20 +5696,25 @@
               "set": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5286,20 +5746,25 @@
               "set_security_user": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5317,20 +5782,25 @@
               "sort": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5354,20 +5824,25 @@
               "split": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5398,20 +5873,25 @@
               "terminate": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5427,20 +5907,25 @@
               "trim": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5464,20 +5949,25 @@
               "uppercase": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5501,20 +5991,25 @@
               "urldecode": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5538,20 +6033,25 @@
               "uri_parts": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [
@@ -5587,20 +6087,25 @@
               "user_agent": {
                 "description": "",
                 "if": {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
+                  "__one_of": [
+                    {
+                      "source": "",
+                      "id": "",
+                      "params": {},
+                      "lang": {
+                        "__one_of": [
+                          "painless",
+                          "expression",
+                          "mustache",
+                          "java"
+                        ]
+                      },
+                      "options": {
+                        "*": ""
+                      }
+                    },
+                    ""
+                  ]
                 },
                 "ignore_failure": {
                   "__one_of": [

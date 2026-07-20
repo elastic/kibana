@@ -9,15 +9,16 @@
 
 import type { SpecificationTypes } from './types';
 import { findTypeDefinition } from './helpers';
+import { isAvailabilityPublic } from './generate_availability';
 
 type Primitive = string | number | boolean;
 const UNSUPPORTED = Symbol('unsupported');
 
 interface OneOf {
-  __one_of: Primitive[];
+  __one_of: BodyParamValue[];
 }
 interface AnyOf {
-  __any_of: Primitive[];
+  __any_of: BodyParamValue[];
 }
 
 type BodyParamValue = Primitive | BodyParamValue[] | OneOf | AnyOf | Record<string, unknown>;
@@ -27,10 +28,12 @@ interface ConversionContext {
   schema: SpecificationTypes.Model;
   genericBindings: ReadonlyMap<string, SpecificationTypes.ValueOf>;
   visitedTypes: ReadonlySet<string>;
+  endpointEnvironments: ReadonlyArray<keyof SpecificationTypes.Availabilities>;
 }
 
-const oneOf = (values: Primitive[]): OneOf => ({ __one_of: values });
-const anyOf = (values: Primitive[]): AnyOf => ({ __any_of: values });
+const endpointEnvironments = ['stack', 'serverless'] as const;
+const oneOf = (values: BodyParamValue[]): OneOf => ({ __one_of: values });
+const anyOf = (values: BodyParamValue[]): AnyOf => ({ __any_of: values });
 const isOneOf = (value: ConversionResult): value is OneOf =>
   typeof value === 'object' && value !== null && '__one_of' in value;
 const isAnyOf = (value: ConversionResult): value is AnyOf =>
@@ -53,13 +56,17 @@ const isSameType = (
  */
 export const generateBodyParams = (
   requestType: SpecificationTypes.Request,
-  schema: SpecificationTypes.Model
+  schema: SpecificationTypes.Model,
+  endpointAvailability: SpecificationTypes.Availabilities
 ): Record<string, unknown> => {
   const { body } = requestType;
   const context: ConversionContext = {
     schema,
     genericBindings: new Map(),
     visitedTypes: new Set(),
+    endpointEnvironments: endpointEnvironments.filter((environment) =>
+      isAvailabilityPublic(endpointAvailability[environment])
+    ),
   };
   if (body.kind === 'properties') {
     return convertProperties(body.properties, context);
@@ -71,12 +78,24 @@ export const generateBodyParams = (
   return {};
 };
 
+const isAvailableInEndpointEnvironments = (
+  availability: SpecificationTypes.Availabilities | undefined,
+  context: ConversionContext
+): boolean =>
+  !availability ||
+  context.endpointEnvironments.every((environment) =>
+    isAvailabilityPublic(availability[environment])
+  );
+
 const convertProperties = (
   properties: SpecificationTypes.Property[],
   context: ConversionContext
 ): Record<string, unknown> => {
   const result: Record<string, unknown> = {};
   for (const property of properties) {
+    if (!isAvailableInEndpointEnvironments(property.availability, context)) {
+      continue;
+    }
     const { name, type } = property;
     const converted = convertBodyValueOf(type, context);
     result[name] = converted === UNSUPPORTED ? '' : converted;
@@ -143,7 +162,7 @@ const convertInterface = (
   definedType: SpecificationTypes.Interface,
   typeName: SpecificationTypes.TypeName,
   context: ConversionContext
-): Record<string, unknown> => {
+): ConversionResult => {
   if (typeName.name === 'QueryContainer' && typeName.namespace === '_types.query_dsl') {
     return { __scope_link: 'GLOBAL.query' };
   }
@@ -157,10 +176,33 @@ const convertInterface = (
         context
       )
     : {};
-  return {
+  const additionalPropertiesBehavior = definedType.behaviors?.find(
+    ({ type }) =>
+      type.namespace === '_spec_utils' &&
+      (type.name === 'AdditionalProperty' || type.name === 'AdditionalProperties')
+  );
+  const additionalPropertiesType = additionalPropertiesBehavior?.generics?.[1];
+  const additionalPropertiesValue = additionalPropertiesType
+    ? convertBodyValueOf(additionalPropertiesType, context)
+    : UNSUPPORTED;
+  const objectValue = {
     ...(isObjectValue(inherited) ? inherited : {}),
+    ...(additionalPropertiesValue === UNSUPPORTED ? {} : { '*': additionalPropertiesValue }),
     ...convertProperties(definedType.properties, context),
   };
+  const shortcutProperty = definedType.properties.find(
+    (property) =>
+      property.name === definedType.shortcutProperty &&
+      isAvailableInEndpointEnvironments(property.availability, context)
+  );
+  if (!shortcutProperty) {
+    return objectValue;
+  }
+
+  const convertedShortcut = convertBodyValueOf(shortcutProperty.type, context);
+  const shortcutValue = convertedShortcut === UNSUPPORTED ? '' : convertedShortcut;
+  const shortcutValues = isOneOf(shortcutValue) ? shortcutValue.__one_of : [shortcutValue];
+  return oneOf(uniqueValues([objectValue, ...shortcutValues]));
 };
 
 const convertInstanceOf = (
@@ -183,7 +225,10 @@ const convertInstanceOf = (
     return UNSUPPORTED;
   }
   if (definedType.kind === 'enum') {
-    return oneOf(definedType.members.map(({ name }) => name));
+    const members = definedType.members.filter(({ availability }) =>
+      isAvailableInEndpointEnvironments(availability, context)
+    );
+    return members.length > 0 ? oneOf(members.map(({ name }) => name)) : UNSUPPORTED;
   }
 
   const key = typeKey(valueOf.type);
@@ -246,7 +291,7 @@ const convertUnion = (
   }
 
   const choices = uniqueValues(
-    converted.flatMap((value): Primitive[] => {
+    converted.flatMap((value): BodyParamValue[] => {
       if (isOneOf(value)) {
         return value.__one_of;
       }

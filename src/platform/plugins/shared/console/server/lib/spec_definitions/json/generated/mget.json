@@ -25,14 +25,21 @@
           "_index": "",
           "routing": "",
           "_source": {
-            "exclude_vectors": {
-              "__one_of": [
-                true,
-                false
-              ]
-            },
-            "excludes": "",
-            "includes": ""
+            "__one_of": [
+              true,
+              false,
+              {
+                "exclude_vectors": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "excludes": "",
+                "includes": ""
+              },
+              ""
+            ]
           },
           "stored_fields": "",
           "version": "",

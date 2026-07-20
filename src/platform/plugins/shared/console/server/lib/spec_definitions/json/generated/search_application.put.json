@@ -12,20 +12,25 @@
       "analytics_collection_name": "",
       "template": {
         "script": {
-          "source": "",
-          "id": "",
-          "params": {},
-          "lang": {
-            "__one_of": [
-              "painless",
-              "expression",
-              "mustache",
-              "java"
-            ]
-          },
-          "options": {
-            "*": ""
-          }
+          "__one_of": [
+            {
+              "source": "",
+              "id": "",
+              "params": {},
+              "lang": {
+                "__one_of": [
+                  "painless",
+                  "expression",
+                  "mustache",
+                  "java"
+                ]
+              },
+              "options": {
+                "*": ""
+              }
+            },
+            ""
+          ]
         }
       }
     },

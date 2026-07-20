@@ -27,8 +27,7 @@
     "data_autocomplete_rules": {
       "index_filter": {
         "__scope_link": "GLOBAL.query"
-      },
-      "project_routing": ""
+      }
     },
     "methods": [
       "POST"

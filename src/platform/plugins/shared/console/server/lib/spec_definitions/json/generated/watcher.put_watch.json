@@ -27,6 +27,15 @@
             "always": {},
             "array_compare": {
               "*": {
+                "*": {
+                  "quantifier": {
+                    "__one_of": [
+                      "some",
+                      "all"
+                    ]
+                  },
+                  "value": ""
+                },
                 "path": ""
               }
             },
@@ -446,6 +455,15 @@
         "always": {},
         "array_compare": {
           "*": {
+            "*": {
+              "quantifier": {
+                "__one_of": [
+                  "some",
+                  "all"
+                ]
+              },
+              "value": ""
+            },
             "path": ""
           }
         },

@@ -34,9 +34,6 @@
       ],
       "s": []
     },
-    "data_autocomplete_rules": {
-      "project_routing": ""
-    },
     "methods": [
       "POST",
       "GET"

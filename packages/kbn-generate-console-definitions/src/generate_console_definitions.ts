@@ -73,7 +73,11 @@ const generateParameters = (
 
   const urlParams = generateQueryParams(requestType as SpecificationTypes.Request, schema);
   const urlComponents = generateUrlComponents(requestType as SpecificationTypes.Request, schema);
-  const bodyParams = generateBodyParams(requestType as SpecificationTypes.Request, schema);
+  const bodyParams = generateBodyParams(
+    requestType as SpecificationTypes.Request,
+    schema,
+    endpoint.availability
+  );
   return { urlParams, urlComponents, bodyParams };
 };
 

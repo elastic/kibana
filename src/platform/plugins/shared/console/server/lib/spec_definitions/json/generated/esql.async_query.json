@@ -70,8 +70,7 @@
           true,
           false
         ]
-      },
-      "project_routing": ""
+      }
     },
     "methods": [
       "POST"

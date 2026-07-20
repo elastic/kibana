@@ -9,27 +9,37 @@
     },
     "data_autocomplete_rules": {
       "_source": {
-        "exclude_vectors": {
-          "__one_of": [
-            true,
-            false
-          ]
-        },
-        "excludes": "",
-        "includes": ""
+        "__one_of": [
+          true,
+          false,
+          {
+            "exclude_vectors": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "excludes": "",
+            "includes": ""
+          },
+          ""
+        ]
       },
-      "docvalue_fields": [
-        {
-          "field": "",
-          "format": "",
-          "include_unmapped": {
-            "__one_of": [
-              true,
-              false
-            ]
-          }
-        }
-      ],
+      "docvalue_fields": {
+        "__any_of": [
+          {
+            "field": "",
+            "format": "",
+            "include_unmapped": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          },
+          ""
+        ]
+      },
       "stored_fields": "",
       "fields": "",
       "filter": {

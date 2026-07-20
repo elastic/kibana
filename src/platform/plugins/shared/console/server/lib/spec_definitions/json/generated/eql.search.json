@@ -29,7 +29,6 @@
       ]
     },
     "data_autocomplete_rules": {
-      "project_routing": "",
       "query": "",
       "case_sensitive": {
         "__one_of": [
@@ -66,14 +65,19 @@
       },
       "size": "",
       "fields": {
-        "field": "",
-        "format": "",
-        "include_unmapped": {
-          "__one_of": [
-            true,
-            false
-          ]
-        }
+        "__one_of": [
+          {
+            "field": "",
+            "format": "",
+            "include_unmapped": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          },
+          ""
+        ]
       },
       "result_position": {
         "__one_of": [
@@ -101,31 +105,39 @@
               }
             }
           },
-          "fetch_fields": [
-            {
-              "field": "",
-              "format": ""
-            }
-          ],
+          "fetch_fields": {
+            "__any_of": [
+              {
+                "field": "",
+                "format": ""
+              },
+              ""
+            ]
+          },
           "format": "",
           "input_field": "",
           "target_field": "",
           "target_index": "",
           "script": {
-            "source": "",
-            "id": "",
-            "params": {},
-            "lang": {
-              "__one_of": [
-                "painless",
-                "expression",
-                "mustache",
-                "java"
-              ]
-            },
-            "options": {
-              "*": ""
-            }
+            "__one_of": [
+              {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              ""
+            ]
           },
           "on_script_error": {
             "__one_of": [

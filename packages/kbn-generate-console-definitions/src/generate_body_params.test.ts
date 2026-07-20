@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SpecificationTypes } from './types';
-import { generateBodyParams } from './generate_body_params';
+import { SpecificationTypes } from './types';
+import { generateBodyParams as generateBodyParamsForAvailability } from './generate_body_params';
 import { getMockProperty, mockRequestType, mockSchema } from './helpers/test_helpers';
 
 const makeRequestWithBody = (
@@ -17,6 +17,17 @@ const makeRequestWithBody = (
   ...mockRequestType,
   body: { kind: 'properties', properties },
 });
+
+const allEndpointEnvironments: SpecificationTypes.Availabilities = {
+  stack: {},
+  serverless: {},
+};
+
+const generateBodyParams = (
+  requestType: SpecificationTypes.Request,
+  schema: SpecificationTypes.Model,
+  endpointAvailability: SpecificationTypes.Availabilities = allEndpointEnvironments
+) => generateBodyParamsForAvailability(requestType, schema, endpointAvailability);
 
 describe('generateBodyParams', () => {
   it('returns empty object for no_body', () => {
@@ -58,6 +69,51 @@ describe('generateBodyParams', () => {
     expect(generateBodyParams(requestType, mockSchema)).toEqual({ timeout: '' });
   });
 
+  describe('WHEN property availability is narrower than the endpoint', () => {
+    it('SHOULD emit only properties public in every endpoint environment', () => {
+      const requestType = makeRequestWithBody([
+        getMockProperty({ propertyName: 'unannotated' }),
+        {
+          ...getMockProperty({ propertyName: 'both' }),
+          availability: allEndpointEnvironments,
+        },
+        {
+          ...getMockProperty({ propertyName: 'stack_only' }),
+          availability: { stack: {} },
+        },
+        {
+          ...getMockProperty({ propertyName: 'serverless_only' }),
+          availability: { serverless: {} },
+        },
+        {
+          ...getMockProperty({ propertyName: 'feature_flagged' }),
+          availability: {
+            stack: {},
+            serverless: { visibility: SpecificationTypes.Visibility.feature_flag },
+          },
+        },
+      ]);
+
+      expect(generateBodyParams(requestType, mockSchema)).toEqual({
+        unannotated: '',
+        both: '',
+      });
+    });
+
+    it('SHOULD keep a stack-only property for a stack-only endpoint', () => {
+      const requestType = makeRequestWithBody([
+        {
+          ...getMockProperty({ propertyName: 'stack_only' }),
+          availability: { stack: {} },
+        },
+      ]);
+
+      expect(generateBodyParams(requestType, mockSchema, { stack: {} })).toEqual({
+        stack_only: '',
+      });
+    });
+  });
+
   it('generates __one_of for enum properties', () => {
     const enumType: SpecificationTypes.Enum = {
       kind: 'enum',
@@ -74,6 +130,34 @@ describe('generateBodyParams', () => {
     ]);
     expect(generateBodyParams(requestType, schema)).toEqual({
       status: { __one_of: ['green', 'yellow', 'red'] },
+    });
+  });
+
+  it('WHEN enum member availability is narrower than the endpoint SHOULD emit only public members', () => {
+    const enumType: SpecificationTypes.Enum = {
+      kind: 'enum',
+      name: { name: 'ClusterPrivilege', namespace: '_types' },
+      members: [
+        { name: 'unannotated' },
+        { name: 'both', availability: allEndpointEnvironments },
+        { name: 'stack_only', availability: { stack: {} } },
+        { name: 'serverless_only', availability: { serverless: {} } },
+      ],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [enumType] };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'privileges',
+        type: { kind: 'instance_of', type: enumType.name },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      privileges: { __one_of: ['unannotated', 'both'] },
+    });
+    expect(generateBodyParams(requestType, schema, { stack: {} })).toEqual({
+      privileges: { __one_of: ['unannotated', 'both', 'stack_only'] },
     });
   });
 
@@ -214,6 +298,32 @@ describe('generateBodyParams', () => {
     ]);
     expect(generateBodyParams(requestType, schema)).toEqual({
       _source: { includes: [], excludes: [] },
+    });
+  });
+
+  it('generates both object and shortcut forms for shortcut interfaces', () => {
+    const scriptInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'Script', namespace: '_types' },
+      properties: [
+        getMockProperty({ propertyName: 'source' }),
+        getMockProperty({ propertyName: 'lang' }),
+      ],
+      shortcutProperty: 'source',
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [scriptInterface] };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'script',
+        type: { kind: 'instance_of', type: scriptInterface.name },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      script: {
+        __one_of: [{ source: '', lang: '' }, ''],
+      },
     });
   });
 
@@ -388,6 +498,7 @@ describe('generateBodyParams', () => {
           },
         }),
       ],
+      shortcutProperty: 'includes',
       specLocation: '',
     };
     const schema: SpecificationTypes.Model = { ...mockSchema, types: [sourceFilter] };
@@ -403,7 +514,11 @@ describe('generateBodyParams', () => {
         },
       }),
     ]);
-    expect(generateBodyParams(requestType, schema)).toEqual({ _source: { includes: [] } });
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      _source: {
+        __one_of: [true, false, { includes: [] }, []],
+      },
+    });
   });
 
   it('generates __one_of for union of enums', () => {
@@ -558,6 +673,55 @@ describe('generateBodyParams', () => {
       entries: { '*': { enabled: { __one_of: [true, false] } } },
     });
   });
+
+  it.each(['AdditionalProperty', 'AdditionalProperties'] as const)(
+    'WHEN an interface declares %s behavior SHOULD generate wildcard rules',
+    (behaviorName) => {
+      const fieldSort: SpecificationTypes.Interface = {
+        kind: 'interface',
+        name: { name: 'FieldSort', namespace: '_types' },
+        properties: [
+          getMockProperty({
+            propertyName: 'order',
+            type: { kind: 'instance_of', type: { name: 'boolean', namespace: '_builtins' } },
+          }),
+        ],
+        specLocation: '',
+      };
+      const sortOptions: SpecificationTypes.Interface = {
+        kind: 'interface',
+        name: { name: 'SortOptions', namespace: '_types' },
+        behaviors: [
+          {
+            type: { name: behaviorName, namespace: '_spec_utils' },
+            generics: [
+              { kind: 'instance_of', type: { name: 'string', namespace: '_builtins' } },
+              { kind: 'instance_of', type: fieldSort.name },
+            ],
+          },
+        ],
+        properties: [getMockProperty({ propertyName: '_doc' })],
+        specLocation: '',
+      };
+      const schema: SpecificationTypes.Model = {
+        ...mockSchema,
+        types: [fieldSort, sortOptions],
+      };
+      const requestType = makeRequestWithBody([
+        getMockProperty({
+          propertyName: 'sort',
+          type: { kind: 'instance_of', type: sortOptions.name },
+        }),
+      ]);
+
+      expect(generateBodyParams(requestType, schema)).toEqual({
+        sort: {
+          '*': { order: { __one_of: [true, false] } },
+          _doc: '',
+        },
+      });
+    }
+  );
 
   it('WHEN an array contains objects SHOULD generate an object item rule', () => {
     const itemInterface: SpecificationTypes.Interface = {

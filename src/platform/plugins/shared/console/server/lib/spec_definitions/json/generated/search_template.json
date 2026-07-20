@@ -46,8 +46,7 @@
           false
         ]
       },
-      "source": "",
-      "project_routing": ""
+      "source": ""
     },
     "methods": [
       "GET",

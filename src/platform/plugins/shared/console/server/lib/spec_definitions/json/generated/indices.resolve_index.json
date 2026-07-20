@@ -21,9 +21,6 @@
         "lookup"
       ]
     },
-    "data_autocomplete_rules": {
-      "project_routing": ""
-    },
     "methods": [
       "GET",
       "POST"
