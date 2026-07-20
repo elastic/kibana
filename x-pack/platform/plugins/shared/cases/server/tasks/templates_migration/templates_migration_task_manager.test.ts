@@ -1011,15 +1011,45 @@ describe('TemplatesMigrationTaskManager', () => {
         CASE_SAVED_OBJECT,
         expect.objectContaining({ namespaces: ['my-space'] })
       );
-      // ...and the case scan filters by owner within that PIT.
+      // ...and the case scan filters by owner within that PIT, scoped to the same namespace as the
+      // PIT. `namespaces` must be on the `find` too: the migration's internal repo is unscoped (no
+      // spaces extension), and without it `find` defaults to the `default` space — returning the
+      // wrong space's cases, which then 404 on bulkUpdate against this space.
       const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
       expect(caseFind?.[0]).toEqual(
         expect.objectContaining({
           type: CASE_SAVED_OBJECT,
+          namespaces: ['my-space'],
           filter: `${CASE_SAVED_OBJECT}.attributes.owner: "securitySolution"`,
           pit: expect.objectContaining({ id: 'pit-1' }),
         })
       );
+    });
+
+    it('backfills a non-default space in its own namespace (find + bulkUpdate stay on the same space)', async () => {
+      // Regression guard for the "37/37 not found (404)" bug: the find must be scoped to the space's
+      // namespace, and the resulting bulkUpdate must target that same namespace so the cases the
+      // scan returned actually resolve.
+      const configSO = buildConfigureSO({
+        owner: 'securitySolution',
+        namespaces: ['analytics-1'],
+        customFields: [buildLegacyCustomField('cf_text')],
+      });
+      mockFindByType(configSO, [
+        buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
+      ]);
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
+      expect(caseFind?.[0]).toEqual(expect.objectContaining({ namespaces: ['analytics-1'] }));
+
+      // The update lands in the space's namespace — not the default namespace.
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(repo.bulkUpdate.mock.calls[0][0]).toEqual([
+        expect.objectContaining({ id: 'case-1', namespace: 'analytics-1' }),
+      ]);
     });
 
     it('backfills cases for a space a prior release already marked field/template-migrated', async () => {

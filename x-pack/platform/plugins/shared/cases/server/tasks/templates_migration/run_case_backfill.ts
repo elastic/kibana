@@ -115,6 +115,15 @@ const backfillCasesForSpace = async (
     const findPage = () =>
       repo.find<CasePersistedAttributes>({
         type: CASE_SAVED_OBJECT,
+        // `namespaces` MUST be passed here, not only to `openPointInTimeForType`. The migration runs
+        // on an unscoped internal repository (no spaces extension); when that extension is absent the
+        // SO repository's `find` defaults `options.namespaces` to `['default']` (see
+        // core `find.ts`), silently returning the wrong space's cases. For a non-default space that
+        // means `find` returns `default` cases which are then `bulkUpdate`d against this space's
+        // namespace and 404 — so the space's real cases are never backfilled, yet the space is
+        // flagged complete. Scoping `find` to the same namespace as the PIT keeps reads and writes on
+        // the same space. (The reconciliation runner documents the identical gotcha.)
+        namespaces,
         perPage: CASE_BACKFILL_PAGE_SIZE,
         pit: { id: cursor.pitId, keepAlive: CASE_BACKFILL_PIT_KEEP_ALIVE },
         ...(cursor.searchAfter ? { searchAfter: cursor.searchAfter } : {}),
