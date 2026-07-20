@@ -303,7 +303,7 @@ function InternalAlertsPage() {
           title={i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })}
           menu={appMenu}
           docLink={docLinks.links.observability.createAlerts}
-          padding={{ bleed: 'l' }}
+          spacing="largeBleed"
         />
         <EuiSpacer size="l" />
         <EuiFlexGroup direction="column" gutterSize="m">
