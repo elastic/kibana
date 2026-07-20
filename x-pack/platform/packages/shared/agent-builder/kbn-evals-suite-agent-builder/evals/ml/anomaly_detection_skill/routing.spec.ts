@@ -57,6 +57,54 @@ evaluate.describe('ML Anomaly Detection - routing', { tag: [...tags.stateful.cla
   );
 
   evaluate(
+    'anomaly investigation queries activate the anomaly-detection skill and ES|QL tool',
+    async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'agent builder: ml-anomaly-detection-skill-investigate',
+          description:
+            'Validates that RCA / "what broke?" questions activate the anomaly-detection skill and ' +
+            'query anomaly results via platform.core.execute_esql.',
+          examples: [
+            {
+              input: {
+                question:
+                  'Something caused a spike in our error rate around 2pm — what broke, and which entity looks like the root cause?',
+              },
+              output: {
+                expected:
+                  'Investigates cross-job anomaly timelines and shared influencers via ES|QL, then ' +
+                  'reports a root-cause entity with affected jobs and severity.',
+              },
+              metadata: {
+                query_intent: 'Anomaly Detection Investigation',
+                expectedSkill: 'anomaly-detection',
+                expectedToolId: 'platform.core.execute_esql',
+              },
+            },
+            {
+              input: {
+                question:
+                  'My anomaly score went from 90 to 55 overnight — did the model renormalize, or is something wrong with the job?',
+              },
+              output: {
+                expected:
+                  'Compares initial_record_score vs record_score (and related explanation fields) via ' +
+                  'ES|QL to explain renormalization drift before blaming config.',
+              },
+              metadata: {
+                query_intent: 'Anomaly Detection Score Explanation',
+                expectedSkill: 'anomaly-detection',
+                expectedToolId: 'platform.core.execute_esql',
+              },
+            },
+          ],
+        },
+      });
+    }
+  );
+
+  evaluate(
     'job creation requests activate the anomaly-detection skill and create-job tool',
     async ({ evaluateDataset }) => {
       await evaluateDataset({
@@ -128,7 +176,7 @@ evaluate.describe('ML Anomaly Detection - routing', { tag: [...tags.stateful.cla
         dataset: {
           name: 'agent builder: ml-anomaly-detection-skill-config-update',
           description:
-            'Validates that requests to change job configuration (e.g. model memory limit) activate ' +
+            'Validates that requests to change job configuration (memory limit, calendars) activate ' +
             'the anomaly-detection skill and use the ad_update_job_config tool.',
           examples: [
             {
@@ -145,6 +193,56 @@ evaluate.describe('ML Anomaly Detection - routing', { tag: [...tags.stateful.cla
                 query_intent: 'Anomaly Detection Job Configuration',
                 expectedSkill: 'anomaly-detection',
                 expectedToolId: 'ml.ad_update_job_config',
+              },
+            },
+            {
+              input: {
+                question:
+                  'Create a new calendar called seasonal_sales_events for my anomaly detection jobs with ' +
+                  "Sept 1 to 16 called 'back to school' and November 27, 2026 for 'black friday'.",
+              },
+              output: {
+                expected:
+                  'Validates existing calendar events via ad_get_job_info, then creates/updates the ' +
+                  'seasonal_sales_events calendar once via ad_update_job_config with both named windows ' +
+                  '(back to school and black friday) attached to the target job(s).',
+              },
+              metadata: {
+                query_intent: 'Anomaly Detection Calendar Events',
+                expectedSkill: 'anomaly-detection',
+                expectedToolId: 'ml.ad_update_job_config',
+              },
+            },
+          ],
+        },
+      });
+    }
+  );
+
+  evaluate(
+    'calendar lookup requests activate the anomaly-detection skill and get-job-info tool',
+    async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'agent builder: ml-anomaly-detection-skill-calendar-lookup',
+          description:
+            'Validates that requests to inspect ML calendars/scheduled events activate the ' +
+            'anomaly-detection skill and use ad_get_job_info (get_calendar_events).',
+          examples: [
+            {
+              input: {
+                question:
+                  'Which ML calendars and scheduled events are associated with my anomaly detection job?',
+              },
+              output: {
+                expected:
+                  'Lists calendars and scheduled events associated with the referenced anomaly ' +
+                  'detection job via the get_calendar_events operation.',
+              },
+              metadata: {
+                query_intent: 'Anomaly Detection Calendar Lookup',
+                expectedSkill: 'anomaly-detection',
+                expectedToolId: 'ml.ad_get_job_info',
               },
             },
           ],
