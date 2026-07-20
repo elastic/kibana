@@ -237,10 +237,28 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
 
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
-        const { resolvedAttachmentId, existingRuleText, isNewCard } = resolveAttachmentTarget(
-          attachments,
-          attachmentId
-        );
+        // resolveAttachmentTarget throws with safe, user-facing messages for known bad states
+        // (stale id, wrong type, no version). Handle separately so the generic catch below
+        // doesn't swallow them.
+        let attachmentTarget: ResolvedAttachmentTarget;
+        try {
+          attachmentTarget = resolveAttachmentTarget(attachments, attachmentId);
+        } catch (resolveError) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message:
+                    resolveError instanceof Error
+                      ? resolveError.message
+                      : 'Could not resolve attachment target',
+                },
+              },
+            ],
+          };
+        }
+        const { resolvedAttachmentId, existingRuleText, isNewCard } = attachmentTarget;
 
         const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
         const iterativeAgent = await getBuildAgent({

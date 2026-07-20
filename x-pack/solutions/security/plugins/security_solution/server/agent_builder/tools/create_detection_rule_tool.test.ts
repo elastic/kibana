@@ -30,10 +30,6 @@ import {
 } from './create_detection_rule_tool';
 import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import {
-  SECURITY_RULE_ATTACHMENT_ID,
-  SecurityAgentBuilderAttachments,
-} from '../../../common/constants';
 
 jest.mock('../../lib/detection_engine/ai_rule_creation/agent', () => ({
   getBuildAgent: jest.fn(),
