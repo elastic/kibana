@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
-import type { UserProfileData } from '@kbn/core-user-profile-common';
-import type { UserProfileService } from './service';
-
-export type CoreUserProfileDelegateContract = Omit<
-  UserProfileService,
-  'getUserProfile$' | 'getEnabled$' | 'getDataUpdates$'
-> & {
-  userProfile$: Observable<UserProfileData | null>;
-  enabled$: Observable<boolean>;
-  dataUpdates$: Observable<UserProfileData>;
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/user-profile/browser-context'],
 };

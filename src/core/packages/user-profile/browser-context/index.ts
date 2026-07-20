@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
-import type { UserProfileData } from '@kbn/core-user-profile-common';
-import type { UserProfileService } from './service';
-
-export type CoreUserProfileDelegateContract = Omit<
-  UserProfileService,
-  'getUserProfile$' | 'getEnabled$' | 'getDataUpdates$'
-> & {
-  userProfile$: Observable<UserProfileData | null>;
-  enabled$: Observable<boolean>;
-  dataUpdates$: Observable<UserProfileData>;
-};
+export { CurrentUserContext } from './src/current_user_context';
+export type { CurrentUserServices } from './src/current_user_context';
+export { CurrentUserProvider } from './src/current_user_provider';
+export type { CurrentUserProviderProps } from './src/current_user_provider';

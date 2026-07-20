@@ -16,9 +16,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/core-security-browser",
     "@kbn/core-user-profile-browser",
-    "@kbn/core-user-profile-browser-hooks",
-    "@kbn/core-user-profile-browser-internal",
-    "@kbn/lazy-object",
   ]
 }
