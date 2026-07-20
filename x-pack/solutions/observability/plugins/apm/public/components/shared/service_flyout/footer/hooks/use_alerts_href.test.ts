@@ -7,6 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import rison from '@kbn/rison';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import {
   ENVIRONMENT_ALL_VALUE,
   ENVIRONMENT_NOT_DEFINED_VALUE,
@@ -100,10 +101,11 @@ describe('useAlertsHref', () => {
     );
   });
 
-  it('wires rangeFrom and rangeTo into the encoded state', () => {
+  it('wires rangeFrom, rangeTo, and status:active into the encoded state', () => {
     const href = renderAlertsHref({ rangeFrom: 'now-1h', rangeTo: 'now' });
     const state = rison.decode(href!.split('?_a=')[1]) as any;
     expect(state.rangeFrom).toEqual('now-1h');
     expect(state.rangeTo).toEqual('now');
+    expect(state.status).toEqual(ALERT_STATUS_ACTIVE);
   });
 });

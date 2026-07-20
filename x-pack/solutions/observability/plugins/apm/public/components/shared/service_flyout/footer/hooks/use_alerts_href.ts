@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { escapeQuotes } from '@kbn/es-query';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import rison from '@kbn/rison';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import {
   isEnvironmentDefined,
   ENVIRONMENT_NOT_DEFINED,
@@ -41,6 +42,6 @@ export function useAlertsHref(): string | undefined {
     const kuery = [`${SERVICE_NAME}: "${escapeQuotes(service.name)}"`, envKuery]
       .filter(Boolean)
       .join(' AND ');
-    return `${base}?_a=${rison.encode({ kuery, rangeFrom, rangeTo })}`;
+    return `${base}?_a=${rison.encode({ kuery, status: ALERT_STATUS_ACTIVE, rangeFrom, rangeTo })}`;
   }, [canReadAlerts, core.http.basePath, environment, service.name, rangeFrom, rangeTo]);
 }
