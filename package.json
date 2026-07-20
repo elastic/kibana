@@ -2254,6 +2254,7 @@
       "cheerio": "1.0.0-rc.12",
       "chokidar": "3.5.3",
       "colorette": "2.0.20",
+      "concaveman": "1.2.0",
       "d3-scale>d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
       "dom-accessibility-api@^0.5.9": "0.5.13",
       "esbuild": "0.27.2",

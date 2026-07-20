@@ -42,6 +42,7 @@ overrides:
   cheerio: 1.0.0-rc.12
   chokidar: 3.5.3
   colorette: 2.0.20
+  concaveman: 1.2.0
   d3-scale>d3-color: npm:@elastic/kibana-d3-color@2.0.1
   dom-accessibility-api@^0.5.9: 0.5.13
   esbuild: 0.27.2
@@ -17195,8 +17196,8 @@ packages:
     resolution: {integrity: sha512-H6xsIBfQ94aESBG8jGHXQ7i5AEpy5ZeVaLDOisDICiTCKpqEfr34/KmTrspKQNoLKNu9gTkovlpQcUi630AKiQ==}
     engines: {'0': node >= 0.8}
 
-  concaveman@2.0.0:
-    resolution: {integrity: sha512-3a9C//4G44/boNehBPZMRh8XxrwBvTXlhENUim+GMm207WoDie/Vq89U5lkhLn3kKA+vxwmwfdQPWIRwjQWoLA==}
+  concaveman@1.2.0:
+    resolution: {integrity: sha512-OcqechF2/kubbffomKqjGEkb0ndlYhEbmyg/fxIGqdfYp5AZjD2Kl5hc97Hh3ngEuHU2314Z4KDbxL7qXGWrQQ==}
 
   confbox@0.2.4:
     resolution: {integrity: sha512-ysOGlgTFbN2/Y6Cg3Iye8YKulHw+R2fNXHrgSmXISQdMnomY6eNDprVdW9R5xBguEqI954+S6709UyiO7B+6OQ==}
@@ -23198,6 +23199,9 @@ packages:
     resolution: {integrity: sha512-K5zQjDllxWkf7Z5xJdV0/B0WTNqx6vxG70zJE4N0kBs4LovmEYWJzQGxC9bS9RAKu3bgM40lrd5zoLJ12MQ5BA==}
     engines: {node: '>= 0.10'}
 
+  rbush@3.0.1:
+    resolution: {integrity: sha512-XRaVO0YecOpEuIvbhbpTrZgoiI6xBlz6hnlr6EHhd+0x9ase6EmeN+hdwwUaJvLcsFFQ8iWVF1GAK1yB0BWi0w==}
+
   rbush@4.0.1:
     resolution: {integrity: sha512-IP0UpfeWQujYC8Jg162rMNc01Rf0gWMMAb2Uxus/Q0qOFw4lCcq6ZnQEZwUoJqWyUGJ9th7JjwI4yIWo+uvoAQ==}
 
@@ -23986,6 +23990,9 @@ packages:
   robots-parser@3.0.1:
     resolution: {integrity: sha512-s+pyvQeIKIZ0dx5iJiQk1tPLJAWln39+MI5jtM8wnyws+G5azk+dMnMX0qfbqNetKKNgcWWOdi0sfm+FbQbgdQ==}
     engines: {node: '>=10.0.0'}
+
+  robust-predicates@2.0.4:
+    resolution: {integrity: sha512-l4NwboJM74Ilm4VKfbAtFeGq7aEjWL+5kVFcmgFA2MrdnQWx9iE/tUGvxY5HyMI7o/WpSIUFLbC5fbeaHgSCYg==}
 
   robust-predicates@3.0.3:
     resolution: {integrity: sha512-NS3levdsRIUOmiJ8FZWCP7LG3QpJyrs/TE0Zpf1yvZu8cAJJ6QMW92H1c7kWpdIHo8RvmLxN/o2JXTKHp74lUA==}
@@ -33539,7 +33546,7 @@ snapshots:
     dependencies:
       '@turf/helpers': 6.5.0
       '@turf/meta': 6.5.0
-      concaveman: 2.0.0
+      concaveman: 1.2.0
 
   '@turf/destination@6.5.0':
     dependencies:
@@ -36250,12 +36257,12 @@ snapshots:
       readable-stream: 2.0.6
       typedarray: 0.0.7
 
-  concaveman@2.0.0:
+  concaveman@1.2.0:
     dependencies:
       point-in-polygon: 1.1.0
-      rbush: 4.0.1
-      robust-predicates: 3.0.3
-      tinyqueue: 3.0.0
+      rbush: 3.0.1
+      robust-predicates: 2.0.4
+      tinyqueue: 2.0.3
 
   confbox@0.2.4: {}
 
@@ -43776,6 +43783,10 @@ snapshots:
       iconv-lite: 0.7.2
       unpipe: 1.0.0
 
+  rbush@3.0.1:
+    dependencies:
+      quickselect: 2.0.0
+
   rbush@4.0.1:
     dependencies:
       quickselect: 3.0.0
@@ -44790,6 +44801,8 @@ snapshots:
   rison-node@2.1.1: {}
 
   robots-parser@3.0.1: {}
+
+  robust-predicates@2.0.4: {}
 
   robust-predicates@3.0.3: {}
 
