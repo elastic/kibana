@@ -19,7 +19,7 @@ import {
 import { css } from '@emotion/react';
 import type { Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';

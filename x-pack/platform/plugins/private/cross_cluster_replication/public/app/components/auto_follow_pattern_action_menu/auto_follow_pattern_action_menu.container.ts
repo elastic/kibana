@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
+import type { AnyAction } from 'redux-v4';
+import type { ThunkDispatch } from 'redux-thunk-v2';
+import { connect } from 'react-redux-v7';
 import type { Props } from './auto_follow_pattern_action_menu';
 import { AutoFollowPatternActionMenu as AutoFollowPatternActionMenuView } from './auto_follow_pattern_action_menu';
 import type { CcrState } from '../../store';

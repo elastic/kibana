@@ -35,11 +35,9 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
         : undefined;
 
     if (lastProcessedTimestamp) {
-      logger.info(
-        `Starting administers maintainer run (incremental from ${lastProcessedTimestamp})`
-      );
+      logger.info(`[administers] Starting run (incremental from ${lastProcessedTimestamp})`);
     } else {
-      logger.info('Starting administers maintainer run (full scan — first run)');
+      logger.info('[administers] Starting run (full scan — first run)');
     }
 
     const collector: RelationshipMaintainerTelemetryCollector = {
@@ -82,7 +80,7 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
+      `[administers] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
     );
 
     // Do not advance the watermark if the run was aborted — the next run should
