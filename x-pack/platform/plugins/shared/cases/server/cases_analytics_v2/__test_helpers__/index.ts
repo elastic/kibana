@@ -23,7 +23,9 @@ import type {
 import type { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { DataView, DataViewSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { stringify as stringifyYaml } from 'yaml';
 import {
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -124,25 +126,78 @@ export const makeUserAction = (
   } as SavedObject<UserActionPersistedAttributes>);
 
 /**
- * Build a `cases-templates` SO with the persisted shape the
- * analytics-v2 data view service reads. Only `attributes.fieldDefinitions`
- * is consumed, so the factory leaves everything else minimal.
+ * Build a `cases-templates` SO with the persisted shape the analytics-v2
+ * data view service reads. The service parses `attributes.definition` (the
+ * raw YAML) and resolves `$ref` fields against the template owner's field
+ * library, so the factory renders the given field entries into a valid YAML
+ * definition and carries an `owner`.
+ *
+ * Field entries are either inline (`{ name, type, control }`) or references
+ * (`{ $ref, name? }`) so tests can exercise both resolution paths.
  */
+export interface TemplateFieldLike {
+  name?: string;
+  label?: string;
+  type?: string;
+  control?: string;
+  $ref?: string;
+}
+
 export interface TemplateLike {
-  fieldDefinitions?: Array<{ name: string; label?: string; type: string; control?: string }>;
+  definition?: string;
+  owner?: string;
 }
 
 export const makeTemplate = (
   id: string,
-  fieldDefinitions: NonNullable<TemplateLike['fieldDefinitions']>
+  fields: TemplateFieldLike[],
+  { owner = 'securitySolution' }: { owner?: string } = {}
 ): SavedObject<TemplateLike> =>
   ({
     type: CASE_TEMPLATE_SAVED_OBJECT,
     id,
     namespaces: ['default'],
     references: [],
-    attributes: { fieldDefinitions },
+    attributes: { owner, definition: stringifyYaml({ fields }) },
   } as unknown as SavedObject<TemplateLike>);
+
+/**
+ * Build a `cases-field-definitions` SO the analytics-v2 data view service
+ * reads for runtime projection. The service consumes `attributes.name`
+ * (what a template `$ref` points at), `attributes.owner` (scopes `$ref`
+ * resolution), `attributes.definition` (a YAML string of a single field
+ * entry), and `attributes.isGlobal`, so the factory derives the YAML from
+ * `{ name, type, control }`.
+ */
+export interface FieldDefinitionLike {
+  name: string;
+  owner: string;
+  definition: string;
+  isGlobal?: boolean;
+}
+
+export const makeFieldDefinition = (
+  id: string,
+  {
+    name,
+    type,
+    control = 'INPUT_TEXT',
+    isGlobal = true,
+    owner = 'securitySolution',
+  }: { name: string; type: string; control?: string; isGlobal?: boolean; owner?: string }
+): SavedObject<FieldDefinitionLike> =>
+  ({
+    type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+    id,
+    namespaces: ['default'],
+    references: [],
+    attributes: {
+      name,
+      owner,
+      isGlobal,
+      definition: stringifyYaml({ name, type, control }),
+    },
+  } as unknown as SavedObject<FieldDefinitionLike>);
 
 // ----- SO client `find` stub -----
 
@@ -178,15 +233,61 @@ export const stubFindWithPages = <T>(
   perPage = 100
 ): void => {
   let callIdx = 0;
-  client.find.mockImplementation(async () => {
+  client.find.mockImplementation(async (options) => {
+    // The data view service reads two SO types per ensure cycle
+    // (templates + field definitions). This legacy stub only feeds the
+    // template/case page sequence; field-definition reads return empty so
+    // they don't consume a page meant for the next cycle. Suites that
+    // exercise global fields use `stubFindByType` instead.
+    const type = (options as { type?: string })?.type;
+    if (type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+      return emptyPage<T>(perPage);
+    }
     const page = pages[callIdx] ?? [];
     callIdx++;
-    return {
-      saved_objects: page.map((so, idx) => ({ ...so, score: 1, sort: [idx] })) as never,
-      total: page.length,
-      per_page: perPage,
-      page: 1,
-    } as SavedObjectsFindResponse<T>;
+    return toFindResponse(page, perPage);
+  });
+};
+
+const emptyPage = <T>(perPage: number): SavedObjectsFindResponse<T> =>
+  toFindResponse<T>([], perPage);
+
+const toFindResponse = <T>(
+  page: Array<SavedObject<T>>,
+  perPage: number
+): SavedObjectsFindResponse<T> =>
+  ({
+    saved_objects: page.map((so, idx) => ({ ...so, score: 1, sort: [idx] })) as never,
+    total: page.length,
+    per_page: perPage,
+    page: 1,
+  } as SavedObjectsFindResponse<T>);
+
+/**
+ * Route the SO client's `find` by requested `type`, each type serving its
+ * own single populated page then empty pages thereafter. Use when a test
+ * needs templates and field definitions to resolve independently (the
+ * data view service reads both per ensure cycle).
+ */
+export const stubFindByType = (
+  client: ReturnType<typeof savedObjectsClientMock.create>,
+  results: {
+    templates?: Array<SavedObject<TemplateLike>>;
+    fieldDefinitions?: Array<SavedObject<FieldDefinitionLike>>;
+  },
+  perPage = 100
+): void => {
+  const served = { templates: false, fieldDefinitions: false };
+  client.find.mockImplementation(async (options) => {
+    const type = (options as { type?: string })?.type;
+    if (type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+      if (served.fieldDefinitions) return emptyPage(perPage);
+      served.fieldDefinitions = true;
+      return toFindResponse(results.fieldDefinitions ?? [], perPage);
+    }
+    if (served.templates) return emptyPage(perPage);
+    served.templates = true;
+    return toFindResponse(results.templates ?? [], perPage);
   });
 };
 
