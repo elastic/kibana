@@ -80,14 +80,6 @@ describe('WorkflowsPlugin', () => {
   });
 
   describe('setup()', () => {
-    const mockWorkflowsUiSettings = (experimentalFeaturesEnabled: boolean) => {
-      coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
-        if (key === WORKFLOWS_UI_SETTING_ID) return true;
-        if (key === WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID) return experimentalFeaturesEnabled;
-        return fallback;
-      });
-    };
-
     it('should return an empty object when workflows UI is disabled', () => {
       coreSetup.uiSettings.get.mockReturnValue(false);
 

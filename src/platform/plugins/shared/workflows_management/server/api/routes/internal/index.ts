@@ -13,7 +13,6 @@ import { registerExecutionOptionsListRoute } from './execution_options_list';
 import { registerGetConfigRoute } from './get_config';
 import { registerGetWorkflowHistoryRoute } from './get_workflow_history';
 import { registerRestoreWorkflowVersionRoute } from './restore_workflow_version';
-import { registerInternalSearchExecutionsRoute } from './search_executions';
 import { registerTriggerEventsLogRoutes } from './trigger_events_log';
 import type { RouteDependencies } from '../types';
 

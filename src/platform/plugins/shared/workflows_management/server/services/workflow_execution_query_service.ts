@@ -239,25 +239,23 @@ export class WorkflowExecutionQueryService {
   async searchExecutionsView(
     params: SearchExecutionsViewParams,
     spaceId: string
-  ): Promise<estypes.SearchResponse<unknown>> {
-    try {
-      return await this.deps.esClient.search({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        query: buildWorkflowExecutionsSearchQuery(params.query, spaceId, {
-          includeManagedExecutions: params.includeManagedExecutions,
-        }),
-        sort: params.sort,
-        from: params.from,
-        size: params.size,
-        track_total_hits: params.trackTotalHits ?? true,
-      });
-    } catch (error) {
-      if (isIndexNotFoundError(error)) {
-        return emptyWorkflowExecutionsSearchResponse();
-      }
-      this.deps.logger.error(`Failed to search workflow executions view: ${error}`);
-      throw error;
-    }
+  ): Promise<WorkflowExecutionListDto> {
+    const from = params.from ?? 0;
+    const size = params.size ?? DEFAULT_PAGE_SIZE;
+    const page = Math.floor(from / size) + 1;
+
+    return searchWorkflowExecutions({
+      esClient: this.deps.esClient,
+      logger: this.deps.logger,
+      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
+      query: buildWorkflowExecutionsSearchQuery(params.query, spaceId, {
+        includeManagedExecutions: params.includeManagedExecutions,
+      }),
+      sort: params.sort,
+      from,
+      size,
+      page,
+    });
   }
 
   async getWorkflowExecutionHistory(

@@ -22,14 +22,6 @@ const setExecutionsViewEnabled = (services: StartServicesMock, enabled: boolean)
   services.settings.globalClient.get$.mockReturnValue(of(enabled));
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useUiSetting: jest.fn(),
-}));
-
-const mockUseUiSetting = jest.requireMock('@kbn/kibana-react-plugin/public')
-  .useUiSetting as jest.Mock;
-
 jest.mock('../pages/executions', () => ({
   WorkflowExecutionsPage: () => <div data-test-subj="workflowExecutionsPage" />,
 }));
@@ -51,8 +43,7 @@ describe('WorkflowExecutionsRouteGate', () => {
       </KibanaContextProvider>
     );
 
-  it('redirects to workflows home when experimental features are off', () => {
-    mockUseUiSetting.mockReturnValue(false);
+  it('redirects to workflows home when the executions view is disabled', () => {
     const services = createStartServicesMock();
     setExecutionsViewEnabled(services, false);
 
@@ -62,8 +53,7 @@ describe('WorkflowExecutionsRouteGate', () => {
     expect(screen.getByTestId('workflowsHomeStub')).toBeInTheDocument();
   });
 
-  it('renders the executions page when experimental features are on', () => {
-    mockUseUiSetting.mockReturnValue(true);
+  it('renders the executions page when the executions view is enabled', () => {
     const services = createStartServicesMock();
     setExecutionsViewEnabled(services, true);
 

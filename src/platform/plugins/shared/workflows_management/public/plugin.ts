@@ -129,7 +129,6 @@ export class WorkflowsPlugin
     triggerSchemas.initialize(plugins.workflowsExtensions);
 
     this.subscribeToWorkflowsSettingChange(core);
-    this.subscribeToExperimentalFeaturesDeepLinksChange(core);
 
     // Availability service: set license and subscribe to availability for app visibility changes
     this.availabilityService.setLicense$(plugins.licensing.license$);
@@ -157,7 +156,6 @@ export class WorkflowsPlugin
   public stop() {
     this.settingsSubscription?.unsubscribe();
     this.appVisibilitySubscription?.unsubscribe();
-    this.experimentalDeepLinksSubscription?.unsubscribe();
     this.availabilityService.stop();
   }
 
@@ -177,17 +175,6 @@ export class WorkflowsPlugin
         core.http.post('/internal/workflows/disable', { version: '1' }).catch((err) => {
           this.logger.error('Failed to disable all workflows on opt-out', { error: err });
         });
-      });
-  }
-
-  private subscribeToExperimentalFeaturesDeepLinksChange(core: CoreStart): void {
-    this.experimentalDeepLinksSubscription = core.uiSettings
-      .get$<boolean>(WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID)
-      .pipe(distinctUntilChanged())
-      .subscribe((experimentalFeaturesEnabled) => {
-        this.appUpdater$.next(() => ({
-          deepLinks: getWorkflowsAppDeepLinks(experimentalFeaturesEnabled),
-        }));
       });
   }
 

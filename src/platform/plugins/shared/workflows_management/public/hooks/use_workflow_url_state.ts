@@ -47,6 +47,7 @@ export function useWorkflowUrlState() {
     stepExecutionId: string | undefined;
     stepId: string | undefined;
     shouldAutoResume: boolean;
+    replayExecutionId: string | undefined;
   } => {
     const params = parse(location.search);
     return {
@@ -57,6 +58,7 @@ export function useWorkflowUrlState() {
       stepExecutionId: firstString(params.stepExecutionId),
       stepId: firstString(params.stepId),
       shouldAutoResume: firstString(params.resume) === 'true',
+      replayExecutionId: firstString(params.replayExecutionId),
     };
   }, [location.search]);
 
@@ -138,6 +140,10 @@ export function useWorkflowUrlState() {
 
   const clearResumeParam = useCallback(() => {
     updateUrlState({ resume: undefined });
+  }, [updateUrlState]);
+
+  const clearReplayExecutionId = useCallback(() => {
+    updateUrlState({ replayExecutionId: undefined });
   }, [updateUrlState]);
 
   const setEditorView = useCallback(

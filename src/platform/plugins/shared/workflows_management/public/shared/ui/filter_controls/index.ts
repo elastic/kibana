@@ -9,4 +9,4 @@
 
 export { FilterControls } from './filter_controls';
 export type { FilterControlsProps } from './filter_controls';
-export type { FilterControlConfig } from './types';
+export type { FilterControlConfig, FilterGroupHandler } from './types';

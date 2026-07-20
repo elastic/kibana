@@ -9,8 +9,6 @@
 
 import { useCallback, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
-import type { FilterControlConfig } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import {
@@ -21,6 +19,7 @@ import {
   DEFAULT_EXECUTION_PAGE_FILTERS,
   EXECUTION_FILTERS_URL_PARAM_KEY,
 } from './workflow_executions_page_constants';
+import type { FilterControlConfig, FilterGroupHandler } from '../../shared/ui/filter_controls';
 
 export const useWorkflowExecutionsPageFilters = () => {
   const history = useHistory();

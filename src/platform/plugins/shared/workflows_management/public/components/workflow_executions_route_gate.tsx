@@ -15,7 +15,7 @@ import { WorkflowExecutionsPage } from '../pages/executions';
 export const WorkflowExecutionsRouteGate = React.memo(() => {
   const isExecutionsViewEnabled = useGlobalExecutionsViewEnabled();
 
-  if (!isExperimentalFeaturesEnabled) {
+  if (!isExecutionsViewEnabled) {
     return <Redirect to="/" />;
   }
 

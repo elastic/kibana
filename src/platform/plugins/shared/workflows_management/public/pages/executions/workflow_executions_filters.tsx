@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useMemo } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
@@ -21,7 +20,11 @@ import {
 } from './workflow_executions_page_constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceId } from '../../hooks/use_space_id';
-import { type FilterControlConfig, FilterControls } from '../../shared/ui/filter_controls';
+import {
+  type FilterControlConfig,
+  FilterControls,
+  type FilterGroupHandler,
+} from '../../shared/ui/filter_controls';
 
 export interface WorkflowExecutionsFiltersProps {
   controlsUrlState?: FilterControlConfig[];
@@ -34,31 +37,17 @@ export interface WorkflowExecutionsFiltersProps {
 }
 
 export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersProps>(
-  ({ filters, query, timeRange, onFiltersChange }) => {
+  ({
+    controlsUrlState,
+    filters,
+    onFilterGroupInit,
+    onFiltersChange,
+    query,
+    setControlsUrlState,
+    timeRange,
+  }) => {
     const { dataViews } = useKibana().services;
     const spaceId = useSpaceId();
-    const history = useHistory();
-
-    const urlStorage = useMemo(
-      () =>
-        createKbnUrlStateStorage({
-          history,
-          useHash: false,
-          useHashQuery: false,
-        }),
-      [history]
-    );
-
-    // Read from the URL only when the storage instance changes (effectively once). The control group
-    // owns the filter state afterwards and syncs it back to the URL via `setControlsUrlState`.
-    // Re-reading on every render (or remounting on URL change) causes the control group to blink on
-    // each edit.
-    const controlsUrlState = useMemo(() => {
-      const persisted = urlStorage.get<FilterControlConfig[] | undefined>(
-        EXECUTION_FILTERS_URL_PARAM_KEY
-      );
-      return persisted ? persisted.map(convertCamelCasedKeysToSnakeCase) : undefined;
-    }, [urlStorage]);
 
     const dataViewSpec = useMemo(
       () => ({
@@ -66,13 +55,6 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
         id: WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
       }),
       []
-    );
-
-    const setControlsUrlState = useCallback(
-      (next: FilterControlConfig[]) => {
-        urlStorage.set(EXECUTION_FILTERS_URL_PARAM_KEY, next);
-      },
-      [urlStorage]
     );
 
     const services = useMemo(
@@ -96,6 +78,7 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
           filters={filters}
           maxControls={4}
           onFiltersChange={onFiltersChange}
+          onInit={onFilterGroupInit}
           query={query}
           services={services}
           setControlsUrlState={setControlsUrlState}
