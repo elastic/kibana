@@ -58,6 +58,23 @@ describe('ConversationServiceImpl', () => {
       expect(getUserFromRequestMock).not.toHaveBeenCalled();
     });
 
+    it('attributes public rounds from an external origin without author to the current Kibana user', async () => {
+      const service = createService();
+
+      const author = await service.getConversationRoundAuthor({
+        request,
+        conversation: createEmptyConversation({
+          access_control: { access_mode: ConversationAccessControlMode.Public },
+        }),
+        origin: {
+          type: ConversationOriginType.Slack,
+          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+        },
+      });
+
+      expect(author).toEqual({ id: 'profile-1', username: 'jane' });
+    });
+
     it('attributes public conversations to the current Kibana user', async () => {
       const service = createService();
 
@@ -93,6 +110,25 @@ describe('ConversationServiceImpl', () => {
         conversation: createEmptyConversation({
           access_control: { access_mode: ConversationAccessControlMode.Private },
         }),
+      });
+
+      expect(author).toBeUndefined();
+      expect(getUserFromRequestMock).not.toHaveBeenCalled();
+    });
+
+    it('does not attribute private conversations even when the external origin provides an author', async () => {
+      const service = createService();
+
+      const author = await service.getConversationRoundAuthor({
+        request,
+        conversation: createEmptyConversation({
+          access_control: { access_mode: ConversationAccessControlMode.Private },
+        }),
+        origin: {
+          type: ConversationOriginType.Slack,
+          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+          author: { id: 'U123', username: 'jane', full_name: 'Jane Doe' },
+        },
       });
 
       expect(author).toBeUndefined();

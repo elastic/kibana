@@ -64,9 +64,10 @@ export class ConversationServiceImpl implements ConversationService {
 
   /**
    * Returns the author of a conversation round.
-   * External origins (e.g. Slack) provide their own author and take precedence. Otherwise, for
-   * public conversations, the author is the Kibana user that initiated the round. Private
-   * conversations are single-owner (captured by conversation.user), so they have no round author.
+   * Only public conversation rounds have an author; private conversations are single-owner
+   * (captured by conversation.user). External origins (e.g. Slack) provide their own author and
+   * take precedence; otherwise the author is the authenticated Kibana user that initiated the
+   * round, including rounds from an external origin that omits `author`.
    */
   async getConversationRoundAuthor({
     request,
@@ -77,12 +78,12 @@ export class ConversationServiceImpl implements ConversationService {
     conversation: Conversation;
     origin?: ExecutionConversationOrigin;
   }): Promise<ConversationRoundAuthor | undefined> {
-    if (origin?.author) {
-      return origin.author;
-    }
-
     if (conversation.access_control?.access_mode !== ConversationAccessControlMode.Public) {
       return undefined;
+    }
+
+    if (origin?.author) {
+      return origin.author;
     }
 
     const user = await this.getCurrentUser({ request });
