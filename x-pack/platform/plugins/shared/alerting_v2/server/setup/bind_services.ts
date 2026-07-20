@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { PluginSetup, PluginStart } from '@kbn/core-di';
+import { once } from 'lodash';
+import type { CoreDiServiceStart } from '@kbn/core-di';
+import { OnStart, PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
@@ -163,11 +165,20 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inRequestScope();
 
-  bind(TaskRunnerFactoryToken).toFactory((context) =>
-    createTaskRunnerFactory({
-      getInjection: () => context.get(CoreStart('injection')),
-    })
-  );
+  // Task Manager is a dependency of this plugin, so it can begin polling and run
+  // a task before this plugin's start lifecycle binds `CoreStart('injection')`.
+  // Resolving it eagerly would throw when the binding is not yet available. The
+  // promise resolves on the plugin's `OnStart` hook, at which point the injection
+  // service is guaranteed to be bound, so task runs wait until the plugin starts.
+  const injectionPromise = new Promise<CoreDiServiceStart>((resolve) => {
+    bind(OnStart).toConstantValue(
+      once((container) => {
+        resolve(container.get(CoreStart('injection')));
+      })
+    );
+  });
+
+  bind(TaskRunnerFactoryToken).toFactory(() => createTaskRunnerFactory({ injectionPromise }));
 
   bind(RuleSavedObjectsClientToken)
     .toResolvedValue(

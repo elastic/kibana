@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
+  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const esArchiver = getService('esArchiver');
@@ -35,14 +35,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await lens.closeDimensionEditor();
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/278484
-  describe.skip('lens rollup tests', () => {
+  describe('lens rollup tests', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/lens/rollup/data');
       await kibanaServer.importExport.load(
         'x-pack/platform/test/functional/fixtures/kbn_archives/rollup/config.json'
       );
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
