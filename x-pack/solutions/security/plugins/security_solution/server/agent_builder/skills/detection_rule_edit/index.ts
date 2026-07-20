@@ -208,7 +208,7 @@ The \`security.create_detection_rule\` tool can return a rejection when it delib
 **When you see \`rejected: true\`:**
 - Do NOT retry the tool under any circumstances — not with a different index pattern, not with a simplified query, not with explicit field names. This is a deliberate decision by the detection engine, not a transient failure.
 - Do NOT use \`attachment_update\` as a fallback to hand-write a rule when the tool rejects. \`attachment_update\` is for editing existing rule fields only — it must never be used to construct a new rule or write a query from scratch.
-- Surface the \`message\` field directly to the user. It is already written for the user to read. Stop there.
+- Surface the \`message\` field directly to the user. It is already written for the user to read. Stop there. Do NOT mention the \`rejectionCode\` value by name — it is an internal code and not meaningful to the user.
 - Follow up based on \`rejectionCode\`:
   - \`NO_DATA\` — The data required for this detection does not exist in this environment. Tell the user what data stream they would need (e.g. "This detection requires \`logs-o365.audit-*\` data. Ingest O365 audit logs first, then try again."). Do NOT retry with a different index and do NOT attempt to build the rule manually.
   - \`INVALID_OUTPUT\` — The agent produced a rule but it failed schema validation. Ask the user to rephrase or add more detail, then retry the tool **once** with the revised description.
