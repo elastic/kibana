@@ -29,14 +29,12 @@ evaluate.describe(
   'Detection rule preview converse',
   { tag: tags.serverless.security.complete },
   () => {
-    evaluate.beforeAll(async ({ esClient, uiSettings, log }) => {
-      await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+    // agentBuilder:experimentalFeatures is forced on for this suite via the
+    // evals_rule_preview Scout server config (--uiSettings.overrides.*), so it
+    // is not toggled here — the settings API rejects mutating an overridden key.
+    evaluate.beforeAll(async ({ esClient, log }) => {
       await seedRulePreviewAlerts(esClient, 8);
       log.info('Seeded logs-endpoint.events.process-default failure events for preview evals');
-    });
-
-    evaluate.afterAll(async ({ uiSettings }) => {
-      await uiSettings.unset('agentBuilder:experimentalFeatures');
     });
 
     evaluate(
