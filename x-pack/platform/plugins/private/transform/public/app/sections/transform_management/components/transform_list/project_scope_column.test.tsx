@@ -130,4 +130,35 @@ describe('ProjectScopeColumn', () => {
     expect(await screen.findByText('Linked project')).toBeInTheDocument();
     expect(screen.queryByText('_alias:linked_local_project')).not.toBeInTheDocument();
   });
+
+  it('uses neutral text while loading custom project routing', async () => {
+    let resolveProjects: (value: { origin: typeof originProject; linkedProjects: [] }) => void;
+    fetchProjects.mockReturnValue(
+      new Promise((resolve) => {
+        resolveProjects = resolve;
+      })
+    );
+
+    const { unmount } = renderProjectScopeColumn(cpsManager, '_alias:linked_local_project');
+
+    expect(screen.getByTestId('transformListProjectScopeButton')).toHaveTextContent('Loading');
+    expect(screen.queryByText('_alias:linked_local_project')).not.toBeInTheDocument();
+
+    resolveProjects!({ origin: originProject, linkedProjects: [] });
+    await waitFor(() => {
+      expect(screen.getByTestId('transformListProjectScopeButton')).toHaveTextContent('1/2');
+    });
+    unmount();
+  });
+
+  it('uses neutral text when custom project routing cannot be resolved', async () => {
+    fetchProjects.mockRejectedValueOnce(new Error('Failed to load projects'));
+
+    renderProjectScopeColumn(cpsManager, '_alias:linked_local_project');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transformListProjectScopeButton')).toHaveTextContent('Unknown');
+    });
+    expect(screen.queryByText('_alias:linked_local_project')).not.toBeInTheDocument();
+  });
 });

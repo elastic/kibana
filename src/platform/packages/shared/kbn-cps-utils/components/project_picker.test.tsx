@@ -246,11 +246,7 @@ describe('ProjectPickerContent', () => {
       render(
         <I18nProvider>
           <EuiThemeProvider>
-            <ProjectPickerContent
-              projects={mockProjects}
-              onProjectRoutingChange={jest.fn()}
-              controlsState="hidden"
-            />
+            <ProjectPickerContent projects={mockProjects} controlsState="hidden" />
           </EuiThemeProvider>
         </I18nProvider>
       );
@@ -272,7 +268,6 @@ describe('ProjectPickerContent', () => {
                 ...mockProjects,
                 originProject: null,
               }}
-              onProjectRoutingChange={jest.fn()}
               controlsState="hidden"
             />
           </EuiThemeProvider>
@@ -281,5 +276,51 @@ describe('ProjectPickerContent', () => {
     });
 
     expect(screen.getByText('Linked CPSProject 1')).toBeInTheDocument();
+  });
+
+  it('shows loading state without projects', async () => {
+    await act(async () => {
+      render(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <ProjectPickerContent
+              projects={{
+                originProject: null,
+                linkedProjects: [],
+                isLoading: true,
+                error: null,
+              }}
+              controlsState="hidden"
+            />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+    });
+
+    expect(screen.getByText('Searching across 0 projects')).toBeInTheDocument();
+  });
+
+  it('shows error state without projects', async () => {
+    await act(async () => {
+      render(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <ProjectPickerContent
+              projects={{
+                originProject: null,
+                linkedProjects: [],
+                isLoading: false,
+                error: new Error('Failed to load projects'),
+              }}
+              controlsState="hidden"
+            />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+    });
+
+    expect(
+      screen.getByText('Failed to load projects. Try refreshing the page.')
+    ).toBeInTheDocument();
   });
 });

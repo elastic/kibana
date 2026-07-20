@@ -31,6 +31,20 @@ const projectScopeLabel = i18n.translate('xpack.transform.transformList.projectS
   defaultMessage: 'Project scope',
 });
 
+const loadingProjectScopeLabel = i18n.translate(
+  'xpack.transform.transformList.projectScope.loadingLabel',
+  {
+    defaultMessage: 'Loading',
+  }
+);
+
+const unknownProjectScopeLabel = i18n.translate(
+  'xpack.transform.transformList.projectScope.unknownLabel',
+  {
+    defaultMessage: 'Unknown',
+  }
+);
+
 const getEffectiveProjectRouting = (projectRouting?: ProjectRouting): ProjectRouting => {
   return projectRouting ?? PROJECT_ROUTING.ORIGIN;
 };
@@ -43,6 +57,20 @@ export const getStaticProjectScopeLabel = (projectRouting?: ProjectRouting): str
   if (projectRouting === undefined || projectRouting === PROJECT_ROUTING.ORIGIN) {
     return originProjectLabel;
   }
+};
+
+export const getProjectScopeSortValue = (projectRouting?: ProjectRouting): string => {
+  if (projectRouting === PROJECT_ROUTING.ALL) {
+    return 'all';
+  }
+
+  // A missing project routing value means the transform is origin-only, which is
+  // the same display bucket as the explicit `_alias:_origin` routing value.
+  if (projectRouting === undefined || projectRouting === PROJECT_ROUTING.ORIGIN) {
+    return 'origin';
+  }
+
+  return `custom:${projectRouting}`;
 };
 
 interface ProjectScopeColumnProps {
@@ -61,7 +89,6 @@ const ProjectScopePopoverContent = ({ cpsManager, projectRouting }: ProjectScope
   return (
     <ProjectPickerContent
       projectRouting={effectiveProjectRouting}
-      onProjectRoutingChange={() => {}}
       projects={projects}
       controlsState="hidden"
     />
@@ -79,17 +106,17 @@ const CustomProjectScopeLabel = ({ cpsManager, projectRouting }: ProjectScopeCol
   );
 
   if (isLoading) {
-    return projectRouting;
+    return loadingProjectScopeLabel;
   }
 
   if (error) {
-    return projectRouting;
+    return unknownProjectScopeLabel;
   }
 
   const projectCount = (originProject ? 1 : 0) + linkedProjects.length;
 
   if (projectCount === 0) {
-    return projectRouting;
+    return unknownProjectScopeLabel;
   }
 
   return `${projectCount}/${cpsManager.getTotalProjectCount()}`;
@@ -122,12 +149,6 @@ export const ProjectScopeColumn = ({ cpsManager, projectRouting }: ProjectScopeC
         <EuiLink
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           data-test-subj="transformListProjectScopeButton"
-          aria-label={i18n.translate(
-            'xpack.transform.transformList.projectScope.openPopoverAriaLabel',
-            {
-              defaultMessage: 'Show project scope for this transform',
-            }
-          )}
         >
           <ProjectScopeLabel cpsManager={cpsManager} projectRouting={projectRouting} />
         </EuiLink>

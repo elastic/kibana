@@ -45,7 +45,7 @@ import { useAppDependencies } from '../../../../app_dependencies';
 
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 import { TransformTaskStateBadge } from './transform_task_state_badge';
-import { ProjectScopeColumn } from './project_scope_column';
+import { getProjectScopeSortValue, ProjectScopeColumn } from './project_scope_column';
 
 const TRUNCATE_TEXT_LINES = 3;
 
@@ -130,6 +130,28 @@ export const useColumns = (
   const { canStartStopTransform } = useTransformCapabilities();
   const { cps } = useAppDependencies();
   const cpsManager = cps?.cpsManager;
+  const [hasLinkedProjects, setHasLinkedProjects] = React.useState(
+    () => cpsManager?.hasLinkedProjects() ?? false
+  );
+
+  React.useEffect(() => {
+    let isMounted = true;
+    setHasLinkedProjects(cpsManager?.hasLinkedProjects() ?? false);
+
+    if (!cpsManager) {
+      return;
+    }
+
+    cpsManager.whenReady().then(() => {
+      if (isMounted) {
+        setHasLinkedProjects(cpsManager.hasLinkedProjects());
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [cpsManager]);
 
   const { actions, modals } = useActions({
     forceDisable: transformSelection.length > 0,
@@ -275,14 +297,15 @@ export const useColumns = (
         );
       },
     },
-    ...(cpsManager && cpsManager.hasLinkedProjects()
+    ...(cpsManager && hasLinkedProjects
       ? [
           {
             name: i18n.translate('xpack.transform.projectScope', {
               defaultMessage: 'Project scope',
             }),
             'data-test-subj': 'transformListColumnProjectScope',
-            sortable: (item: TransformListRow) => item.config.source.project_routing ?? '',
+            sortable: (item: TransformListRow) =>
+              getProjectScopeSortValue(item.config.source.project_routing),
             truncateText: true,
             render(item: TransformListRow) {
               return (

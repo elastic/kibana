@@ -32,7 +32,7 @@ export type ProjectPickerControlsState = 'enabled' | 'disabled' | 'hidden';
 
 export interface ProjectPickerContentProps {
   projectRouting?: ProjectRouting;
-  onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
+  onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
   projects: UseFetchProjectsResult;
   /**
    * Controls the project routing toggle (`All projects` / `This project`):
@@ -65,7 +65,7 @@ export const ProjectPickerContent = ({
   const styles = useMemoCss(projectPickerContentStyles);
   const { originProject, linkedProjects, error, isLoading } = projects;
 
-  if (!originProject && linkedProjects.length === 0) {
+  if (!isLoading && !error && !originProject && linkedProjects.length === 0) {
     return null;
   }
 
@@ -81,7 +81,7 @@ export const ProjectPickerContent = ({
             idSelected={projectRouting ?? PROJECT_ROUTING.ALL}
             options={projectPickerOptions}
             onChange={(optionId: string) => {
-              onProjectRoutingChange(optionId);
+              onProjectRoutingChange?.(optionId);
             }}
             css={styles.buttonGroup}
             buttonSize="compressed"
