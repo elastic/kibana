@@ -69,6 +69,7 @@ const defaultProps: RulesListTableProps = {
   sortField: undefined,
   sortDirection: undefined,
   isLoading: false,
+  canWrite: true,
   selectedCount: 0,
   isAllSelected: false,
   isPageSelected: false,
@@ -151,11 +152,17 @@ describe('RulesListTable', () => {
       expect(screen.getByText('metrics-*')).toBeInTheDocument();
     });
 
-    it('renders Status column with Enabled and Disabled badges', () => {
+    it('renders Enabled column with switches reflecting each rule state', () => {
       renderTable();
 
-      expect(screen.getByTestId('ruleStatusEnabled')).toHaveTextContent('Enabled');
-      expect(screen.getByTestId('ruleStatusDisabled')).toHaveTextContent('Disabled');
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
     });
 
     it('renders Mode column with Alert and Signal', () => {
@@ -452,38 +459,51 @@ describe('RulesListTable', () => {
       expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
 
-    it('calls onToggleEnabled when toggle action is clicked', async () => {
-      const onToggleEnabled = jest.fn();
-      renderTable({ onToggleEnabled });
+    it('does not render a toggle enabled action, since that is handled by the Enabled switch', () => {
+      renderTable();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('toggleEnabledRule-rule-1')).toBeInTheDocument();
-      });
+      expect(screen.queryByTestId('toggleEnabledRule-rule-1')).not.toBeInTheDocument();
+    });
+  });
 
-      fireEvent.click(screen.getByTestId('toggleEnabledRule-rule-1'));
+  describe('enabled switch', () => {
+    it('calls onToggleEnabled when the switch is clicked', () => {
+      const onToggleEnabled = jest.fn();
+      renderTable({ onToggleEnabled });
+
+      fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
 
       expect(onToggleEnabled).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
 
-    it('shows "Disable" for enabled rules and "Enable" for disabled rules', async () => {
+    it('shows a spinner instead of the switch for the rule identified by togglingRuleId', () => {
+      renderTable({ togglingRuleId: 'rule-1' });
+
+      expect(screen.getByTestId('ruleEnabledSpinner-rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeInTheDocument();
+    });
+
+    it('disables the other switches while a toggle is in flight, so a second toggle cannot be dispatched', () => {
+      renderTable({ togglingRuleId: 'rule-1' });
+
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
+    });
+
+    it('does not disable switches when no toggle is in flight', () => {
       renderTable();
 
-      // Enabled rule
-      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-      await waitFor(() => {
-        expect(screen.getByTestId('toggleEnabledRule-rule-1')).toHaveTextContent('Disable');
-      });
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeEnabled();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeEnabled();
+    });
 
-      // Close popover by clicking the button again
-      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+    it('disables all switches while a bulk enable/disable mutation is in flight', () => {
+      renderTable({ isBulkTogglingEnabled: true });
 
-      // Disabled rule
-      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-2'));
-      await waitFor(() => {
-        expect(screen.getByTestId('toggleEnabledRule-rule-2')).toHaveTextContent('Enable');
-      });
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeDisabled();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
     });
   });
 
@@ -501,6 +521,45 @@ describe('RulesListTable', () => {
       fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
 
       expect(onNavigateToDetails).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+  });
+
+  describe('when the user only has read privilege (canWrite=false)', () => {
+    it('hides the selection checkboxes', () => {
+      renderTable({ canWrite: false });
+
+      expect(screen.queryByTestId('selectAllRulesOnPage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('checkboxSelectRow-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('hides the quick edit and actions menu affordances', () => {
+      renderTable({ canWrite: false });
+
+      expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('does not show the bulk action toolbar even when selectedCount > 0', () => {
+      renderTable({ canWrite: false, selectedCount: 1 });
+
+      expect(screen.queryByTestId('bulkActionsButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('clearSelectionButton')).not.toBeInTheDocument();
+    });
+
+    it('hides the enabled switch and shows a read-only status badge instead', () => {
+      renderTable({ canWrite: false });
+
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-2')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledBadge-rule-1')).toHaveTextContent('Enabled');
+      expect(screen.getByTestId('ruleEnabledBadge-rule-2')).toHaveTextContent('Disabled');
+    });
+
+    it('keeps read-only affordances (name link, expand) available', () => {
+      renderTable({ canWrite: false });
+
+      expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
+      expect(screen.getByTestId('expandRule-rule-1')).toBeInTheDocument();
     });
   });
 

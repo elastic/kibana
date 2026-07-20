@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiProvider } from '@elastic/eui';
@@ -95,8 +95,9 @@ describe('PackForm', () => {
     jest.clearAllMocks();
   });
 
-  it('should use packId for cancel button navigation in edit mode when provided', async () => {
-    const testPackId = 'test-pack-id-123';
+  it('should target the Packs list for cancel button navigation in edit mode', async () => {
+    // The read-only Pack details page was removed, so Cancel returns to the
+    // Packs list rather than navigating back to `packs/:packId`.
     const defaultValue = {
       id: 'different-id',
       saved_object_id: 'saved-object-id',
@@ -112,45 +113,24 @@ describe('PackForm', () => {
       references: [],
     };
 
-    renderWithContext(<PackForm editMode={true} defaultValue={defaultValue} packId={testPackId} />);
-
-    expect(mockUseRouterNavigate).toHaveBeenCalledWith(`packs/${testPackId}`);
-  });
-
-  it('should fallback to defaultValue.id for cancel button navigation when packId not provided', async () => {
-    const defaultValue = {
-      id: 'fallback-id',
-      saved_object_id: 'saved-object-id',
-      name: 'Test Pack',
-      description: 'Test Description',
-      enabled: true,
-      queries: {},
-      created_at: '2024-01-01',
-      created_by: 'test-user',
-      updated_at: '2024-01-01',
-      updated_by: 'test-user',
-      policy_ids: [],
-      references: [],
-    };
-
     renderWithContext(<PackForm editMode={true} defaultValue={defaultValue} />);
 
-    expect(mockUseRouterNavigate).toHaveBeenCalledWith(`packs/${defaultValue.id}`);
+    expect(mockUseRouterNavigate).toHaveBeenCalledWith('packs');
+    expect(mockUseRouterNavigate).not.toHaveBeenCalledWith(`packs/${defaultValue.id}`);
   });
 
-  it('should use empty string for cancel button navigation in create mode', async () => {
+  it('should target the Packs list for cancel button navigation in create mode', async () => {
     renderWithContext(<PackForm editMode={false} />);
 
-    expect(mockUseRouterNavigate).toHaveBeenCalledWith('packs/');
+    expect(mockUseRouterNavigate).toHaveBeenCalledWith('packs');
   });
 
-  it('should prioritize packId over defaultValue.id when both are provided', async () => {
-    const testPackId = 'priority-pack-id';
-    const defaultValue = {
-      id: 'should-not-be-used',
-      saved_object_id: 'saved-object-id',
-      name: 'Test Pack',
-      description: 'Test Description',
+  describe('read-only mode', () => {
+    const readOnlyDefaultValue = {
+      id: 'ro-pack',
+      saved_object_id: 'ro-pack',
+      name: 'Read-only Pack',
+      description: '',
       enabled: true,
       queries: {},
       created_at: '2024-01-01',
@@ -161,10 +141,44 @@ describe('PackForm', () => {
       references: [],
     };
 
-    renderWithContext(<PackForm editMode={true} defaultValue={defaultValue} packId={testPackId} />);
+    // EuiCheckableCard puts the data-test-subj on the wrapper; the disabled
+    // state lives on the radio <input> inside it.
+    const radioInput = (wrapper: HTMLElement) => wrapper.querySelector('input[type="radio"]');
 
-    expect(mockUseRouterNavigate).toHaveBeenCalledWith(`packs/${testPackId}`);
-    expect(mockUseRouterNavigate).not.toHaveBeenCalledWith(`packs/${defaultValue.id}`);
+    it('disables the pack Type (Policy/Global) selectable cards', () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} isReadOnly={true} defaultValue={readOnlyDefaultValue} />
+      );
+
+      expect(radioInput(getByTestId('osqueryPackTypePolicy'))).toBeDisabled();
+      expect(radioInput(getByTestId('osqueryPackTypeGlobal'))).toBeDisabled();
+    });
+
+    it('keeps the pack Type selectable cards enabled when writable', () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} isReadOnly={false} defaultValue={readOnlyDefaultValue} />
+      );
+
+      expect(radioInput(getByTestId('osqueryPackTypePolicy'))).not.toBeDisabled();
+      expect(radioInput(getByTestId('osqueryPackTypeGlobal'))).not.toBeDisabled();
+    });
+
+    it('keeps the pack Type selectable cards enabled for a prebuilt pack (policies stay re-targetable)', () => {
+      // A prebuilt pack locks its queries/name/description, but a writePacks
+      // user can still re-point its scheduled agent policies — matching the
+      // "You can modify the scheduled agent policies" callout.
+      const { getByTestId } = renderWithContext(
+        <PackForm
+          editMode={true}
+          isReadOnly={false}
+          isPrebuilt={true}
+          defaultValue={readOnlyDefaultValue}
+        />
+      );
+
+      expect(radioInput(getByTestId('osqueryPackTypePolicy'))).not.toBeDisabled();
+      expect(radioInput(getByTestId('osqueryPackTypeGlobal'))).not.toBeDisabled();
+    });
   });
 
   describe('rruleScheduling feature flag', () => {
@@ -274,7 +288,7 @@ describe('PackForm', () => {
       };
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-b1" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       fireEvent.click(getByTestId('update-pack-button'));
@@ -316,7 +330,7 @@ describe('PackForm', () => {
       };
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-b2" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       fireEvent.click(getByTestId('update-pack-button'));
@@ -353,7 +367,7 @@ describe('PackForm', () => {
       };
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-b3" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       fireEvent.click(getByTestId('update-pack-button'));
@@ -409,7 +423,7 @@ describe('PackForm', () => {
       };
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-b5" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       fireEvent.click(getByTestId('update-pack-button'));
@@ -429,6 +443,81 @@ describe('PackForm', () => {
       // referenced in the local variable so eslint doesn't flag it.
       expect(savedObjectId).toBe('saved-object-id-b5');
     });
+  });
+
+  describe('interval → rrule edit transition (issue #276903)', () => {
+    // Regression: a stale interval-era startDate tripped a false
+    // START_DATE_IN_PAST_ERROR and silently blocked the save.
+    const NOW = new Date('2026-06-19T12:00:00.000Z');
+
+    beforeEach(() => {
+      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockAddDanger.mockClear();
+      jest.useFakeTimers().setSystemTime(NOW);
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+    });
+
+    const enabledIntervalPack = {
+      id: 'pack-transition',
+      saved_object_id: 'saved-transition',
+      name: 'interval-to-rrule-pack',
+      description: '',
+      enabled: true,
+      queries: {},
+      created_at: '2024-01-01',
+      created_by: 'test-user',
+      updated_at: '2024-01-01',
+      updated_by: 'test-user',
+      policy_ids: [],
+      references: [],
+      schedule_type: 'interval' as const,
+      interval: 3600,
+    };
+
+    it('persists the rrule schedule and preserves enabled when an enabled interval pack switches to Date & time and saves', async () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={enabledIntervalPack} />
+      );
+
+      fireEvent.click(getByTestId('osquery-schedule-type-rrule'));
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      expect(submitted.schedule_type).toBe('rrule');
+      expect(submitted.rrule_schedule).toBeDefined();
+      expect(submitted.enabled).toBe(true);
+      // The false past-start error must never fire for an unedited transition.
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
+
+    it('does not block submit or show an error for the unedited interval-to-recurrence transition', async () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={enabledIntervalPack} />
+      );
+
+      fireEvent.click(getByTestId('osquery-schedule-type-rrule'));
+
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
+
+    // The genuinely-blocked-submit path isn't reproducible via this UI (the
+    // date picker can't select a past slot) — covered in `validation.test.ts`.
   });
 
   describe('schedule submit-gate UX (toast on click)', () => {
@@ -478,7 +567,7 @@ describe('PackForm', () => {
       const defaultValue = baseRrulePack({ rrule: 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR' });
 
       const { getByTestId, container } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       // The button stays enabled regardless of schedule validity — the gate is
@@ -517,7 +606,7 @@ describe('PackForm', () => {
       const defaultValue = baseRrulePack(overrides);
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
@@ -531,7 +620,7 @@ describe('PackForm', () => {
       const defaultValue = baseRrulePack({ splay: '5m' });
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
@@ -575,7 +664,7 @@ describe('PackForm', () => {
       };
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-stale-q" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
@@ -596,7 +685,7 @@ describe('PackForm', () => {
       const defaultValue = baseRrulePack({ rrule: 'FREQ=DAILY' });
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
@@ -642,7 +731,7 @@ describe('PackForm', () => {
       };
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-leak" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       fireEvent.click(getByTestId('update-pack-button'));
@@ -653,6 +742,72 @@ describe('PackForm', () => {
       expect(submitted).not.toHaveProperty('schedule_type');
       expect(submitted).not.toHaveProperty('interval');
       expect(submitted).not.toHaveProperty('rrule_schedule');
+    });
+  });
+
+  // Regression for elastic/kibana#277700: the `packHasExplicitSchedule`
+  // computation (`!editMode || defaultValue?.schedule_type !== undefined`) and
+  // its threading through QueriesField → the queries table are only observable
+  // end-to-end. An inverted guard would break production while the hook-level
+  // units stay green, so assert the two branches via the rendered Schedule
+  // column: edit-legacy (not explicit → query own interval) vs edit-explicit
+  // (explicit → inherited pack interval).
+  describe('packHasExplicitSchedule threading to the queries table', () => {
+    beforeEach(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+    });
+
+    afterEach(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+    });
+
+    const packWithQuery = (overrides: Record<string, unknown>) => ({
+      id: 'threaded-pack',
+      saved_object_id: 'threaded-pack-so',
+      name: 'threaded-pack',
+      description: '',
+      enabled: true,
+      queries: {
+        'q-legacy': {
+          query: 'select * from uptime;',
+          interval: 80,
+          ecs_mapping: {},
+        },
+      },
+      created_at: '2024-01-01',
+      created_by: 'test-user',
+      updated_at: '2024-01-01',
+      updated_by: 'test-user',
+      policy_ids: [],
+      references: [],
+      ...overrides,
+    });
+
+    it('shows the query own interval for an edited legacy pack (no schedule_type → not explicit)', () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={packWithQuery({})} />
+      );
+
+      const table = within(getByTestId('packQueriesTable'));
+      expect(table.getByText('80s')).toBeInTheDocument();
+      expect(table.queryByText('3600s')).not.toBeInTheDocument();
+    });
+
+    it('shows the pack interval for a non-override query on an edited explicit pack', () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm
+          editMode={true}
+          defaultValue={packWithQuery({ schedule_type: 'interval', interval: 3600 })}
+        />
+      );
+
+      const table = within(getByTestId('packQueriesTable'));
+      expect(table.getByText('3600s')).toBeInTheDocument();
+      expect(table.queryByText('80s')).not.toBeInTheDocument();
     });
   });
 });

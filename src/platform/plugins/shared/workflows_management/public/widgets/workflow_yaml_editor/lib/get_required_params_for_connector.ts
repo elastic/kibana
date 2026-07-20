@@ -15,7 +15,10 @@ import { getCachedAllConnectors } from './connectors_cache';
 
 export interface RequiredParamForConnector {
   name: string;
-  // `example` holds a type-aware placeholder value (string, array, enum value, etc.), not only strings.
+  // `example` holds a type-aware placeholder value, not only strings: a primitive
+  // (string/number/boolean), an enum/literal value, a structured object/array — e.g. body
+  // example objects from `extractBodyExample` — or a discriminated-union scaffold like
+  // `{ type: '' }`. The downstream YAML stringifier renders any of these shapes.
   example?: unknown;
   defaultValue?: string;
 }
@@ -110,6 +113,7 @@ export function getRequiredParamsForConnector(
     ],
     wait: [{ name: 'duration', example: '5s' }],
     waitForInput: [{ name: 'message', example: 'Please approve before continuing' }],
+    waitForApproval: [{ name: 'message', example: 'Your approval is required to continue' }],
   };
 
   return basicConnectorParams[connectorType] || [];
@@ -199,7 +203,8 @@ function getPlaceholderForSchema(schema: z.ZodType, depth = 0): unknown {
 
 /**
  * Turn a single object field into a parameter descriptor, deriving an example from (in order):
- * the field description, common ES parameter-name heuristics, then a type-aware placeholder.
+ * the field description, common ES parameter-name heuristics, a discriminated-union scaffold, then a
+ * type-aware placeholder.
  */
 function buildParamFromField(key: string, fieldSchema: z.ZodType): ExtractedParam {
   const required = isFieldRequired(fieldSchema);
@@ -227,6 +232,17 @@ function buildParamFromField(key: string, fieldSchema: z.ZodType): ExtractedPara
       example = '{}';
     } else if (key.includes('name')) {
       example = 'my-name';
+    }
+  }
+
+  // Discriminated-union fields (or arrays of them): scaffold the discriminator key so authors can
+  // immediately narrow to a specific member (e.g. `attachment: { type: '' }`). This must run before
+  // the generic placeholder because a discriminated union also matches `ZodUnion`, which would
+  // otherwise collapse it to `{}`.
+  if (example === '') {
+    const discriminatorStub = extractDiscriminatorStub(fieldSchema);
+    if (discriminatorStub) {
+      example = discriminatorStub;
     }
   }
 
@@ -343,6 +359,62 @@ function extractFromUnion(schema: z.ZodUnion): ExtractedParam[] {
   }
 
   return params;
+}
+
+/**
+ * Returns a placeholder shape that surfaces the discriminator key for a
+ * `ZodDiscriminatedUnion` field, or an array containing one such shape for
+ * `ZodArray<ZodDiscriminatedUnion>`. Unwraps `ZodOptional`/`ZodDefault` first.
+ *
+ * Examples:
+ *   z.discriminatedUnion('type', [...])              -> { type: '' }
+ *   z.array(z.discriminatedUnion('type', [...]))     -> [{ type: '' }]
+ *
+ * Returns `undefined` for any other shape so callers can fall back.
+ */
+function extractDiscriminatorStub(fieldSchema: z.ZodType): unknown {
+  let inner: z.ZodType = fieldSchema;
+  if (inner instanceof z.ZodOptional || inner instanceof z.ZodDefault) {
+    inner = inner.unwrap() as z.ZodType;
+  }
+
+  if (inner instanceof z.ZodDiscriminatedUnion) {
+    const key = getDiscriminatorKey(inner);
+    return key ? { [key]: '' } : undefined;
+  }
+
+  if (inner instanceof z.ZodArray) {
+    let element = inner.element as z.ZodType;
+    if (element instanceof z.ZodOptional || element instanceof z.ZodDefault) {
+      element = element.unwrap() as z.ZodType;
+    }
+    if (element instanceof z.ZodDiscriminatedUnion) {
+      const key = getDiscriminatorKey(element);
+      return key ? [{ [key]: '' }] : undefined;
+    }
+  }
+
+  return undefined;
+}
+
+function getDiscriminatorKey(union: z.ZodDiscriminatedUnion): string | undefined {
+  // Zod v4 exposes the discriminator on `def.discriminator`. Fall back to scanning
+  // the first member's shape for a literal field if the API ever changes.
+  const fromDef = (union as unknown as { def?: { discriminator?: unknown } }).def?.discriminator;
+  if (typeof fromDef === 'string') {
+    return fromDef;
+  }
+
+  const options = (union as unknown as { def?: { options?: z.ZodType[] } }).def?.options;
+  const first = options?.[0];
+  if (first instanceof z.ZodObject) {
+    for (const [key, value] of Object.entries(first.shape)) {
+      if (value instanceof z.ZodLiteral) {
+        return key;
+      }
+    }
+  }
+  return undefined;
 }
 
 /**

@@ -55,12 +55,52 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
   let hasAtLeast: jest.Mock;
   let context: SecuritySolutionRequestHandlerContext;
 
+  // Mirrors the parts of rulesClient.find the service relies on: name search, the "has the workflow
+  // action" KQL filter (detected by the actionRef clause), name sorting, count-only requests
+  // (perPage 0), and page slicing.
   const mockFindRules = (rules: RuleAlertType[]) => {
-    rulesClient.find.mockResolvedValue({
-      data: rules,
-      total: rules.length,
-      page: 1,
-      perPage: 2000,
+    rulesClient.find.mockImplementation(async ({ options } = {}) => {
+      const {
+        filter,
+        search,
+        page = 1,
+        perPage = 0,
+        sortField,
+        sortOrder,
+      } = (options ?? {}) as {
+        filter?: string;
+        search?: string;
+        page?: number;
+        perPage?: number;
+        sortField?: string;
+        sortOrder?: string;
+      };
+
+      let matched = rules;
+      if (typeof search === 'string' && search.length > 0) {
+        const lowerSearch = search.toLowerCase();
+        matched = matched.filter((rule) => rule.name.toLowerCase().includes(lowerSearch));
+      }
+      if (typeof filter === 'string' && filter.includes('actionRef')) {
+        matched = matched.filter((rule) =>
+          [...rule.actions, ...(rule.systemActions ?? [])].some(
+            (action) =>
+              action.id === ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID &&
+              (action.params as { subActionParams?: { workflowId?: string } }).subActionParams
+                ?.workflowId === WORKFLOW_ID
+          )
+        );
+      }
+      if (sortField === 'name') {
+        const direction = sortOrder === 'desc' ? -1 : 1;
+        matched = [...matched].sort((a, b) => a.name.localeCompare(b.name) * direction);
+      }
+
+      const total = matched.length;
+      const start = (page - 1) * perPage;
+      const data = perPage === 0 ? [] : matched.slice(start, start + perPage);
+
+      return { data, total, page, perPage };
     });
   };
 
@@ -173,6 +213,36 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
             attached: false,
           },
         ],
+      },
+    });
+  });
+
+  it('passes the attachment filter through to the rule list', async () => {
+    mockFindRules([
+      createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
+      createRule({ id: 'rule-2', enabled: false }),
+    ]);
+    const handler = router.versioned.getRoute('get', ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE).versions[
+      '1'
+    ].handler;
+
+    await handler(
+      context,
+      createRequest({
+        method: 'get',
+        path: ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
+        query: { search: '', attachment_filter: 'attached', page: 1, per_page: 20 },
+      }),
+      mockResponse
+    );
+
+    expect(mockResponse.ok).toHaveBeenCalledWith({
+      body: {
+        total: 1,
+        attached: 1,
+        page: 1,
+        perPage: 20,
+        rules: [{ id: 'rule-1', name: 'Rule rule-1', enabled: true, attached: true }],
       },
     });
   });

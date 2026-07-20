@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
+import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 
 import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
@@ -24,7 +24,8 @@ export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references: SavedObjectReference[] | undefined = undefined,
   isDashboardAppRequest: boolean = false,
-  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
+  useGASchemas?: boolean
 ): {
   dashboardState: DashboardState;
   warnings: Warnings;
@@ -46,22 +47,21 @@ export function transformDashboardOut(
     esqlApproximation,
   } = attributes;
 
-  // Extract tag references
-  const tags: string[] = references
-    ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
-    : [];
+  const { tags } = toAsCodeTags(references);
 
   const { panels, warnings } = transformPanelsOut(
     panelsJSON,
     sections,
     references,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    useGASchemas
   );
 
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
     legacyControls,
     pinned_panels,
-    references
+    references,
+    useGASchemas
   );
 
   const timeRange =
