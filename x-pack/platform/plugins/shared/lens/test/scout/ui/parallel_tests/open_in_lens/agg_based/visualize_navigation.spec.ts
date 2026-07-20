@@ -46,44 +46,37 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'should let the user return back to Visualize if no changes were made',
-      async ({ pageObjects: { visualize, lens } }) => {
-        await visualize.clickEditInLensButton();
-        await lens.waitForVisualization('xyVisChart');
-        expect(await lens.getLayerCount()).toBe(1);
-
-        await lens.goBackToPreviousApp();
-        await expect(visualize.getEditInLensButton()).toBeVisible();
-      }
-    );
-
-    spaceTest(
-      'should let the user return back to Visualize but show a warning modal if changes happened in Lens',
-      async ({ pageObjects: { visualize, lens } }) => {
-        await visualize.clickEditInLensButton();
-        await lens.waitForVisualization('xyVisChart');
-        expect(await lens.getLayerCount()).toBe(1);
-
-        await lens.configureDimension(TIMESTAMP_X_AXIS_DIMENSION);
-
-        await lens.goBackToPreviousApp();
-        await lens.confirmDiscardChangesModal();
-        await expect(visualize.getEditInLensButton()).toBeVisible();
-      }
-    );
-
-    spaceTest(
-      'should let the user return back to Visualize with no modal if changes have been saved in Lens',
+      'should navigate between Visualize and Lens',
       async ({ pageObjects: { visualize, lens }, scoutSpace }) => {
-        await visualize.clickEditInLensButton();
-        await lens.waitForVisualization('xyVisChart');
-        expect(await lens.getLayerCount()).toBe(1);
+        const openInLens = async () => {
+          await visualize.clickEditInLensButton();
+          await lens.waitForVisualization('xyVisChart');
+          expect(await lens.getLayerCount()).toBe(1);
+        };
 
-        await lens.configureDimension(TIMESTAMP_X_AXIS_DIMENSION);
+        await spaceTest.step('return with no changes and no modal', async () => {
+          await openInLens();
+          await lens.goBackToPreviousApp();
+          await expect(visualize.getEditInLensButton()).toBeVisible();
+        });
 
-        await lens.save(`Migrated Viz saved in Lens ${scoutSpace.id}`, { addToDashboard: 'none' });
-        await lens.goBackToPreviousApp();
-        await expect(visualize.getEditInLensButton()).toBeVisible();
+        await spaceTest.step('warn and discard after unsaved Lens changes', async () => {
+          await openInLens();
+          await lens.configureDimension(TIMESTAMP_X_AXIS_DIMENSION);
+          await lens.goBackToPreviousApp();
+          await lens.confirmDiscardChangesModal();
+          await expect(visualize.getEditInLensButton()).toBeVisible();
+        });
+
+        await spaceTest.step('return with no modal after saving in Lens', async () => {
+          await openInLens();
+          await lens.configureDimension(TIMESTAMP_X_AXIS_DIMENSION);
+          await lens.save(`Migrated Viz saved in Lens ${scoutSpace.id}`, {
+            addToDashboard: 'none',
+          });
+          await lens.goBackToPreviousApp();
+          await expect(visualize.getEditInLensButton()).toBeVisible();
+        });
       }
     );
   }
