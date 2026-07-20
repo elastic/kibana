@@ -68,6 +68,17 @@ describe('buildResultsLink', () => {
     compareBy: 'execution',
   };
 
+  const datasetFanoutRun: GeneratedExperimentRun = {
+    executionId: 'e1',
+    executions: [
+      { yaml: '', connectorId: 'c1', datasetIds: ['d1'], executionId: 'e1', experimentId: 'x1' },
+      { yaml: '', connectorId: 'c1', datasetIds: ['d2'], executionId: 'e1', experimentId: 'x1' },
+    ],
+    experimentIds: ['x1'],
+    mode: 'dataset-fanout',
+    compareBy: 'experiment',
+  };
+
   it('links single runs to the experiment detail page', () => {
     const link = buildResultsLink('', 'default', singleRun, ['w1']);
     const url = new URL(`http://host${link}`);
@@ -82,6 +93,14 @@ describe('buildResultsLink', () => {
     expect(url.pathname).toBe('/base/s/team-a/app/management/ai/evals/runs');
     expect(url.searchParams.get('execution_id')).toBe('launch::c1,launch::c2');
     expect(url.searchParams.get('connector')).toBe('c1,c2');
+    expect(url.searchParams.get('workflow_execution_id')).toBe('w1,w2');
+  });
+
+  it('links dataset-fanout runs to the experiment detail page, not the run overview', () => {
+    const link = buildResultsLink('', 'default', datasetFanoutRun, ['w1', 'w2']);
+    const url = new URL(`http://host${link}`);
+    expect(url.pathname).toBe('/app/management/ai/evals/experiments/x1');
+    expect(url.searchParams.get('execution_id')).toBe('e1');
     expect(url.searchParams.get('workflow_execution_id')).toBe('w1,w2');
   });
 });

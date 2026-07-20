@@ -158,7 +158,7 @@ export const buildResultsLink = (
   const spaceSegment = spaceId && spaceId !== DEFAULT_SPACE_ID ? `/s/${spaceId}` : '';
   const appBase = `${serverBasePath}${spaceSegment}${APP_PATH}`;
 
-  if (run.executions.length > 1) {
+  if (run.mode === 'cross-model') {
     const params = new URLSearchParams({
       execution_id: run.executions.map((execution) => execution.executionId).join(','),
       connector: run.executions.map((execution) => execution.connectorId).join(','),

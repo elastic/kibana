@@ -6,12 +6,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { WorkflowDetailDto } from '@kbn/workflows';
 
 export const MAX_ID_LENGTH = 1024;
 export const MAX_NAME_LENGTH = 256;
 
 export const EVALS_EXPERIMENT_WORKFLOW_TAG = 'evals-experiment';
 export const EVALS_WORKFLOW_TAGS = ['evals', EVALS_EXPERIMENT_WORKFLOW_TAG] as const;
+
+export const isEvalsOwnedWorkflow = (
+  workflow: Pick<WorkflowDetailDto, 'definition'> | null | undefined
+): boolean => Boolean(workflow?.definition?.tags?.includes(EVALS_EXPERIMENT_WORKFLOW_TAG));
 
 export const experimentEvaluatorSchema = z.object({
   name: z.string().max(MAX_NAME_LENGTH),

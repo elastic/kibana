@@ -328,7 +328,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
         // model, each with its own execution id. There is no single experiment to
         // land on, so route to the run overview, which shows per-model progress and
         // links to each model's detail (and a compare action) once results land.
-        if (result.executions.length > 1) {
+        if (result.mode === 'cross-model') {
           const params = new URLSearchParams({
             workflow_execution_id: result.executions.map((e) => e.workflow_execution_id).join(','),
             execution_id: result.executions.map((e) => e.execution_id).join(','),

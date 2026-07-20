@@ -15,6 +15,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
+  isEvalsOwnedWorkflow,
   runExperimentRequestSchema,
   type SaveAsWorkflowResponse,
 } from '../../../common/experiments/run_experiment';
@@ -101,6 +102,15 @@ export const registerSaveExperimentWorkflowRoute = ({
         try {
           let responseBody: SaveAsWorkflowResponse;
           if (body.workflow_id) {
+            const existing = await workflowsManagement.management.getWorkflow(
+              body.workflow_id,
+              spaceId
+            );
+            if (!isEvalsOwnedWorkflow(existing)) {
+              return response.notFound({
+                body: { message: `Workflow not found: ${body.workflow_id}` },
+              });
+            }
             await workflowsManagement.management.updateWorkflow(
               body.workflow_id,
               { yaml: workflow.yaml },

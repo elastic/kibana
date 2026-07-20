@@ -19,4 +19,10 @@ export const EVALS_UI_PRIVILEGES = {
   manage: 'manage',
 } as const;
 
-export { MAX_ID_LENGTH, MAX_NAME_LENGTH, EXPERIMENT_LIMITS } from './experiments/run_experiment';
+export {
+  MAX_ID_LENGTH,
+  MAX_NAME_LENGTH,
+  EXPERIMENT_LIMITS,
+  EVALS_EXPERIMENT_WORKFLOW_TAG,
+  isEvalsOwnedWorkflow,
+} from './experiments/run_experiment';

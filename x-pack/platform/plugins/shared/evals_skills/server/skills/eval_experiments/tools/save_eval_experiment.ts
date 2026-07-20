@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { MAX_ID_LENGTH } from '@kbn/evals-plugin/common';
+import { MAX_ID_LENGTH, isEvalsOwnedWorkflow } from '@kbn/evals-plugin/common';
 import { generateSavedWorkflowYaml } from '@kbn/evals-plugin/server';
 import {
   buildWorkflowLink,
@@ -57,12 +57,18 @@ export const saveEvalExperimentTool = (
       const workflow = generateSavedWorkflowYaml(params);
 
       if (workflowId) {
+        const existing = await deps.workflowsApi.getWorkflow(workflowId, spaceId);
+        if (!isEvalsOwnedWorkflow(existing)) {
+          return errorResult(`Workflow not found: ${workflowId}`);
+        }
+
         await deps.workflowsApi.updateWorkflow(
           workflowId,
           { yaml: workflow.yaml },
           spaceId,
           request
         );
+
         return otherResult({
           workflow_id: workflowId,
           name: workflow.name,
@@ -76,6 +82,7 @@ export const saveEvalExperimentTool = (
         spaceId,
         request
       );
+
       return otherResult({
         workflow_id: created.id,
         name: created.name,

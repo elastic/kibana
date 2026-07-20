@@ -8,6 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+import { EVALS_EXPERIMENT_WORKFLOW_TAG } from '@kbn/evals-plugin/common';
 import type { EvalExperimentsToolDeps } from './deps';
 import { listEvalDatasetsTool } from './list_eval_datasets';
 import { listEvaluatorsTool } from './list_evaluators';
@@ -27,6 +28,7 @@ interface WorkflowsApiMock {
   createWorkflow: jest.Mock;
   updateWorkflow: jest.Mock;
   executeWorkflow: jest.Mock;
+  getWorkflow: jest.Mock;
 }
 
 const createDeps = (
@@ -36,6 +38,7 @@ const createDeps = (
     createWorkflow: jest.fn(),
     updateWorkflow: jest.fn(),
     executeWorkflow: jest.fn(),
+    getWorkflow: jest.fn(),
   };
   const deps: EvalExperimentsToolDeps = {
     workflowsApi: workflowsApi as unknown as EvalExperimentsToolDeps['workflowsApi'],
@@ -128,6 +131,9 @@ describe('saveEvalExperimentTool', () => {
 
   it('updates an existing workflow in place when workflow_id is provided', async () => {
     const { deps, workflowsApi } = createDeps();
+    workflowsApi.getWorkflow.mockResolvedValue({
+      definition: { tags: ['evals', EVALS_EXPERIMENT_WORKFLOW_TAG] },
+    });
     workflowsApi.updateWorkflow.mockResolvedValue({});
 
     const result = firstResult(
@@ -137,6 +143,7 @@ describe('saveEvalExperimentTool', () => {
       )
     );
 
+    expect(workflowsApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default');
     expect(workflowsApi.updateWorkflow).toHaveBeenCalledWith(
       'wf-1',
       expect.objectContaining({ yaml: expect.any(String) }),
@@ -146,6 +153,24 @@ describe('saveEvalExperimentTool', () => {
     expect(workflowsApi.createWorkflow).not.toHaveBeenCalled();
     expect(result.data.workflow_id).toBe('wf-1');
     expect(result.data.updated).toBe(true);
+  });
+
+  it('refuses to overwrite a workflow that is not an evals-owned experiment', async () => {
+    const { deps, workflowsApi } = createDeps();
+    workflowsApi.getWorkflow.mockResolvedValue({
+      definition: { tags: ['some-other-feature'] },
+    });
+
+    const result = firstResult(
+      await saveEvalExperimentTool(deps).handler(
+        { ...validConfig, workflow_id: 'wf-foreign' },
+        createContext()
+      )
+    );
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(workflowsApi.updateWorkflow).not.toHaveBeenCalled();
+    expect(workflowsApi.createWorkflow).not.toHaveBeenCalled();
   });
 
   it('returns an error result when saving fails', async () => {
