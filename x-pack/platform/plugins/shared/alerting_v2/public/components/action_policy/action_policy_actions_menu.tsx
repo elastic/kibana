@@ -163,7 +163,6 @@ export const ActionPolicyActionsMenu = ({
       icon: 'trash',
       css: css`
         color: ${euiTheme.colors.textDanger};
-        padding: ${euiTheme.size.s};
       `,
       onClick: () => {
         closePopover();
