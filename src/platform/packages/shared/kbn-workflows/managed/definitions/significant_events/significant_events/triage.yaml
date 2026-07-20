@@ -326,28 +326,61 @@ steps:
                       | where: 'event_id', foreach.item.event_id
                       | first }}
 
-              # Fire-and-forget a root-cause investigation for each newly-opened event.
-              # Async so triage (30m) never blocks on the investigation (60m).
-              # concurrency_key per event_id ensures a re-opened event cancels the prior
-              # in-progress investigation rather than queuing alongside it.
-              - name: trigger_investigation
-                type: workflow.executeAsync
+              # Skip events that already have an investigation attached. events_write carries
+              # the investigations lineage forward on re-open, so any version of the event_id
+              # that carries an investigations entry means this episode was already investigated.
+              # The field is a mapped object, so an `exists` filter matches only versions that
+              # actually carry an entry (an empty investigations array does not count).
+              - name: check_prior_investigation
+                type: elasticsearch.request
                 with:
-                  workflow-id: 'system-significant-events-investigation'
-                  inputs:
-                    message: |
-                      {{ steps.resolve_open_event.output.finding.title }}
+                  method: POST
+                  path: '/{{ consts.EVENTS_INDEX }}/_count?ignore_unavailable=true'
+                  body:
+                    query:
+                      bool:
+                        filter:
+                          - term:
+                              kibana.space_ids: '{{ variables.spaceId }}'
+                          - term:
+                              event_id: '{{ foreach.item.event_id }}'
+                          - exists:
+                              field: investigations
+                on-failure:
+                  continue: true
 
-                      {{ steps.resolve_open_event.output.finding.summary }}
+              # Fire-and-forget a root-cause investigation for each newly-opened event that
+              # has not been investigated before. Async so triage (30m) never blocks on the
+              # investigation (60m). concurrency_key per event_id ensures a re-opened event
+              # cancels the prior in-progress investigation rather than queuing alongside it
+              # (cancel-in-progress / max:1 in the investigation workflow).
+              # The dedupe gate lives on this wrapping `if` step because `workflow.executeAsync`
+              # does not support an inline `if` (it is silently stripped during schema parsing).
+              # On lookup failure we fall through and still trigger, preserving prior behaviour.
+              - name: guard_missing_investigation
+                type: if
+                condition: >-
+                  ${{ steps.check_prior_investigation.error != null
+                    or steps.check_prior_investigation.output.count == 0 }}
+                steps:
+                  - name: trigger_investigation
+                    type: workflow.executeAsync
+                    with:
+                      workflow-id: 'system-significant-events-investigation'
+                      inputs:
+                        message: |
+                          {{ steps.resolve_open_event.output.finding.title }}
 
-                      Probable cause: {{ steps.resolve_open_event.output.finding.symptom_hypothesis }}
-                    stream_names: '${{ steps.resolve_open_event.output.finding.stream_names | default: [] }}'
-                    concurrency_key: '{{ foreach.item.event_id }}'
-                    context:
-                      source: 'significant_event'
-                      event_uuid: '{{ foreach.item.event_uuid }}'
-                      event_id: '{{ foreach.item.event_id }}'
-                      status: '{{ foreach.item.status }}'
+                          {{ steps.resolve_open_event.output.finding.summary }}
+
+                          Probable cause: {{ steps.resolve_open_event.output.finding.symptom_hypothesis }}
+                        stream_names: '${{ steps.resolve_open_event.output.finding.stream_names | default: [] }}'
+                        concurrency_key: '{{ foreach.item.event_id }}'
+                        context:
+                          source: 'significant_event'
+                          event_uuid: '{{ foreach.item.event_uuid }}'
+                          event_id: '{{ foreach.item.event_id }}'
+                          status: '{{ foreach.item.status }}'
 
   - name: output_result
     type: workflow.output
