@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="32" height="32">
+  <!-- Monday.com logo: three oval shapes in brand colors -->
+  <!-- Red oval -->
+  <ellipse cx="24" cy="88" rx="20" ry="24" fill="#FF3D57"/>
+  <!-- Yellow oval -->
+  <ellipse cx="64" cy="88" rx="20" ry="24" fill="#FFCC00"/>
+  <!-- Blue oval -->
+  <ellipse cx="104" cy="88" rx="20" ry="24" fill="#00CA72"/>
+</svg>
