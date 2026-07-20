@@ -254,7 +254,7 @@ export const User: FC<UserProps> = memo(function User({
   ) : undefined;
 
   const onOpenUser = useCallback(() => {
-    openUserFlyoutAsChild({ userName, entityId, scopeId, title: userName });
+    openUserFlyoutAsChild({ userName, entityId, scopeId });
   }, [openUserFlyoutAsChild, userName, entityId, scopeId]);
 
   const onShowRelatedEntity = useCallback(
@@ -282,7 +282,6 @@ export const User: FC<UserProps> = memo(function User({
             entityName: userName,
             entityId: entityStoreEntityId,
             onShowEntity: onOpenUser,
-            title: userName,
           });
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return openEntityAnomalyInsights({
@@ -290,7 +289,6 @@ export const User: FC<UserProps> = memo(function User({
             value: userName,
             entityId: entityStoreEntityId,
             onOpenEntity: onOpenUser,
-            title: userName,
           });
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -300,7 +298,6 @@ export const User: FC<UserProps> = memo(function User({
                 value: userName,
                 entityId: panelDisplayEntityId,
                 onShowEntity: onOpenUser,
-                title: userName,
               });
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return openEntityMisconfigurationInsights({
@@ -308,7 +305,6 @@ export const User: FC<UserProps> = memo(function User({
                 value: userName,
                 entityId: panelDisplayEntityId,
                 onShowEntity: onOpenUser,
-                title: userName,
               });
           }
           break;
@@ -320,7 +316,6 @@ export const User: FC<UserProps> = memo(function User({
             entityName: userName,
             onShowEntity: onShowRelatedEntity,
             onShowOriginatingEntity: onOpenUser,
-            title: userName,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -331,7 +326,6 @@ export const User: FC<UserProps> = memo(function User({
             scopeId,
             onShowEntity: onOpenUser,
             onShowRelatedEntity,
-            title: userName,
           });
         // TODO: currently dead (v1 accessed through left pane tabs, need to perhaps add preview?)
         case EntityDetailsLeftPanelTab.OKTA: {
@@ -341,7 +335,6 @@ export const User: FC<UserProps> = memo(function User({
               managedUser: oktaManagedUser,
               value: userName,
               onOpenUser,
-              title: userName,
             });
           }
           break;
@@ -353,7 +346,6 @@ export const User: FC<UserProps> = memo(function User({
               managedUser: entraManagedUser,
               value: userName,
               onOpenUser,
-              title: userName,
             });
           }
           break;
