@@ -120,12 +120,16 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
 
   const queryable = useMemo(() => {
     // Fail open while resolving or if resolution failed (`queryableColumns`
-    // undefined): treat every field as queryable.
-    const gate = (info?: FieldInfo) =>
-      info && (!queryableColumns || queryableColumns.has(info.field)) ? info : undefined;
+    // undefined): treat every field as queryable. Each field is gated on the
+    // column the generated query references, which is not always the column
+    // the document's value came from: `getEsqlQuery` builds the service name
+    // and culprit predicates on the canonical ECS columns even when the value
+    // was read from an OTel fallback field.
+    const gate = (info?: FieldInfo, queryColumn = info?.field ?? '') =>
+      info && (!queryableColumns || queryableColumns.has(queryColumn)) ? info : undefined;
     return {
-      serviceName: gate(fields.serviceName),
-      culprit: gate(fields.culprit),
+      serviceName: gate(fields.serviceName, fieldConstants.SERVICE_NAME_FIELD),
+      culprit: gate(fields.culprit, fieldConstants.ERROR_CULPRIT_FIELD),
       message: gate(fields.message),
       type: gate(fields.type),
     };

@@ -276,6 +276,49 @@ describe('SimilarErrors', () => {
       expect(screen.queryByTestId('SimilarErrorsOccurrencesChart')).not.toBeInTheDocument();
     });
 
+    it('gates the service name on the column the query references, not the fallback column the value came from', async () => {
+      // The document carries its service name in an OTel fallback column, and
+      // only that fallback column is queryable — but getEsqlQuery references
+      // the canonical ECS column in the WHERE clause, so no query can be built.
+      mockGetESQLQueryColumnsRaw.mockResolvedValue([
+        { name: 'resource.attributes.service.name', type: 'keyword' },
+        { name: 'message', type: 'text' },
+      ]);
+
+      renderSimilarErrors(
+        buildHit({
+          'resource.attributes.service.name': 'test-service',
+          message: 'test error message',
+        })
+      );
+
+      expect(
+        await screen.findByTestId('docViewerSimilarErrorsUnavailableCallout')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('SimilarErrorsOccurrencesChart')).not.toBeInTheDocument();
+    });
+
+    it('builds the query for a document with a fallback service name when the canonical column is queryable', async () => {
+      mockGetESQLQueryColumnsRaw.mockResolvedValue([
+        { name: fieldConstants.SERVICE_NAME_FIELD, type: 'keyword' },
+        { name: 'message', type: 'text' },
+      ]);
+
+      await renderSimilarErrorsAndSettle(
+        buildHit({
+          'resource.attributes.service.name': 'test-service',
+          message: 'test error message',
+        })
+      );
+
+      expect(mockGetEsqlQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          serviceName: 'test-service',
+          message: { fieldName: 'message', value: 'test error message' },
+        })
+      );
+    });
+
     it('queries all fields when column resolution fails', async () => {
       mockGetESQLQueryColumnsRaw.mockRejectedValue(new Error('columns unavailable'));
 

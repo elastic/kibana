@@ -16,7 +16,7 @@ export interface UseQueryableEsqlColumnsResult {
   /**
    * Names of the columns that can be referenced in an ES|QL query against the
    * index pattern. `undefined` while resolution is in progress or after it
-   * failed — callers should fail open and treat every column as queryable.
+   * failed.
    */
   queryableColumns?: Set<string>;
   loading: boolean;
