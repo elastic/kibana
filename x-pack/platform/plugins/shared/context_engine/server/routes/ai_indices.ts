@@ -32,6 +32,7 @@ import { apiPrivileges } from '../../common/features';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
+  AiIndexManagedError,
   AiIndexNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
@@ -130,7 +131,7 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
   if (error instanceof AiIndexNotFoundError) {
     return response.notFound({ body: { message: error.message } });
   }
-  if (error instanceof AiIndexConflictError) {
+  if (error instanceof AiIndexManagedError || error instanceof AiIndexConflictError) {
     return response.conflict({ body: { message: error.message } });
   }
   throw error;

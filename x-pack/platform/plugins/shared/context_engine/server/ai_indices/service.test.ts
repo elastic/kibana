@@ -9,7 +9,12 @@ import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { AiIndexService } from './service';
-import { InvalidAiIndexDestError, AiIndexConflictError, AiIndexNotFoundError } from './errors';
+import {
+  InvalidAiIndexDestError,
+  AiIndexConflictError,
+  AiIndexManagedError,
+  AiIndexNotFoundError,
+} from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
 
@@ -181,7 +186,7 @@ describe('AiIndexService', () => {
       });
 
       await expect(service.put('customer_support', properties)).rejects.toBeInstanceOf(
-        AiIndexConflictError
+        AiIndexManagedError
       );
       expect(storageClient.index).not.toHaveBeenCalled();
     });
@@ -475,7 +480,7 @@ describe('AiIndexService', () => {
         _source: { ...aiIndexDocument, managed: true },
       });
 
-      await expect(service.delete('customer_support')).rejects.toBeInstanceOf(AiIndexConflictError);
+      await expect(service.delete('customer_support')).rejects.toBeInstanceOf(AiIndexManagedError);
       expect(storageClient.delete).not.toHaveBeenCalled();
     });
   });

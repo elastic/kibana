@@ -14,7 +14,12 @@ import type {
   AiIndexHttpItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
-import { InvalidAiIndexDestError, AiIndexConflictError, AiIndexNotFoundError } from './errors';
+import {
+  InvalidAiIndexDestError,
+  AiIndexConflictError,
+  AiIndexManagedError,
+  AiIndexNotFoundError,
+} from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
 
@@ -63,7 +68,7 @@ export class AiIndexService {
 
     const existing = await this.findDocument(aiIndexId);
     if (existing?.document.managed) {
-      throw new AiIndexConflictError(aiIndexId);
+      throw new AiIndexManagedError(aiIndexId);
     }
 
     return this.writeDocument(aiIndexId, { ...properties, managed: false }, existing);
@@ -144,7 +149,7 @@ export class AiIndexService {
       throw new AiIndexNotFoundError(aiIndexId);
     }
     if (existing.document.managed) {
-      throw new AiIndexConflictError(aiIndexId);
+      throw new AiIndexManagedError(aiIndexId);
     }
     await this.storageClient.delete({ id: aiIndexId });
   }
