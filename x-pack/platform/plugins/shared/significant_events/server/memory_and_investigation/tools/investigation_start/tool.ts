@@ -81,7 +81,13 @@ export const createInvestigationStartTool = ({
   `,
   schema: investigationStartSchema,
   handler: async (
-    { message, stream_names: streamNames, context, concurrency_key: concurrencyKey, waitForCompletion },
+    {
+      message,
+      stream_names: streamNames,
+      context,
+      concurrency_key: concurrencyKey,
+      waitForCompletion,
+    },
     { request }
   ) => {
     try {

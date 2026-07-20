@@ -32,7 +32,11 @@ export const createKiIdentificationManagementSkill = ({
     content,
     getInlineTools: () => [
       createKiIdentificationCancelTool({ streamsKIsOnboardingClient }),
-      createKiIdentificationStartTool({ telemetry, streamsKIsOnboardingClient, maintenanceService }),
+      createKiIdentificationStartTool({
+        telemetry,
+        streamsKIsOnboardingClient,
+        maintenanceService,
+      }),
       createKiIdentificationStatusTool({ streamsKIsOnboardingClient }),
     ],
   });

@@ -461,8 +461,7 @@ const createWorkflowTriggerRoute = (
 
       // Documents live in the global workflow space; executions run in the caller's
       // space so they appear in that space's Workflows UI.
-      const executionSpaceId =
-        server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      const executionSpaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
       const workflow = await wfMgmt.management.getWorkflow(
         managedWorkflowId,
@@ -564,9 +563,7 @@ const getMemoryWorkflowsEnabledRoute = createServerRoute({
     }
 
     const fetchedWorkflows = await Promise.all(
-      MEMORY_WORKFLOW_IDS.map((id) =>
-        wfMgmt.management.getWorkflow(id, GLOBAL_WORKFLOW_SPACE_ID)
-      )
+      MEMORY_WORKFLOW_IDS.map((id) => wfMgmt.management.getWorkflow(id, GLOBAL_WORKFLOW_SPACE_ID))
     );
     const workflows = MEMORY_WORKFLOW_IDS.map((id, index) => ({
       id,

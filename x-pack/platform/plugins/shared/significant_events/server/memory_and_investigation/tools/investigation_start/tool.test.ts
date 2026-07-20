@@ -65,10 +65,9 @@ describe('createInvestigationStartTool', () => {
   it('returns an error result when paused without starting the workflow', async () => {
     const { tool, executeWorkflow } = setup({ state: 'paused' });
 
-    const result = await tool.handler(
-      { message: 'should not run', waitForCompletion: true },
-      { request } as never
-    );
+    const result = await tool.handler({ message: 'should not run', waitForCompletion: true }, {
+      request,
+    } as never);
 
     expect(executeWorkflow).not.toHaveBeenCalled();
     if ('results' in result) {

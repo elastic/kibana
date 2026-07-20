@@ -73,10 +73,7 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   return (
-    <EuiToolTip
-      content={activityBlockTooltip ?? RUN_ARIA_LABEL}
-      disableScreenReaderOutput
-    >
+    <EuiToolTip content={activityBlockTooltip ?? RUN_ARIA_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="inspect"
         aria-label={RUN_ARIA_LABEL}

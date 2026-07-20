@@ -260,9 +260,7 @@ export function MemoryTab() {
                                   (blocksActivity && !workflowsEnabled)
                                 }
                                 toolTipContent={
-                                  isBlocked && !workflowsEnabled
-                                    ? activityBlockTooltip
-                                    : undefined
+                                  isBlocked && !workflowsEnabled ? activityBlockTooltip : undefined
                                 }
                                 data-test-subj="streamsMemoryToggleWorkflowsButton"
                               >

@@ -504,11 +504,11 @@ export const createSignificantEventsMaintenanceService = ({
         // Keep every rule recorded so a later resume can retry them.
         return { failedIds: ruleIds, toggledCount: 0 };
       }
-      const { toggledIds, failedIds, failures: ruleFailures } = await setV2RulesEnabled(
-        alertingV2RulesClient,
-        ruleIds,
-        true
-      );
+      const {
+        toggledIds,
+        failedIds,
+        failures: ruleFailures,
+      } = await setV2RulesEnabled(alertingV2RulesClient, ruleIds, true);
       failures.push(...ruleFailures);
       return { failedIds, toggledCount: toggledIds.length };
     } catch (error) {
@@ -662,8 +662,7 @@ export const createSignificantEventsMaintenanceService = ({
     sweep: Awaited<ReturnType<typeof runPauseSweep>>;
   }> => {
     const previousSummary = normalizeSummary(existing?.lastSummary);
-    const actor =
-      mode === 'pause' ? updatedBy : existing?.updatedBy ?? 'system:reassert';
+    const actor = mode === 'pause' ? updatedBy : existing?.updatedBy ?? 'system:reassert';
 
     // 1. Blocking intent first (skip when already paused — reassert/re-pause).
     if (normalizeState(existing?.state) !== 'paused') {
@@ -860,8 +859,11 @@ export const createSignificantEventsMaintenanceService = ({
           );
         }
 
-        const { failedIds: stillDisabledRuleIds, toggledCount: rulesToggled } =
-          await reEnableRules(request, recordedRuleIds, failures);
+        const { failedIds: stillDisabledRuleIds, toggledCount: rulesToggled } = await reEnableRules(
+          request,
+          recordedRuleIds,
+          failures
+        );
 
         const workflowsAndRulesOk =
           stillDisabledWorkflows.length === 0 && stillDisabledRuleIds.length === 0;
@@ -934,9 +936,7 @@ export const createSignificantEventsMaintenanceService = ({
               await disableWorkflow(mgmt, workflow, request, failures);
             }
           }
-          const rulesReEnabled = recordedRuleIds.filter(
-            (id) => !stillDisabledRuleIds.includes(id)
-          );
+          const rulesReEnabled = recordedRuleIds.filter((id) => !stillDisabledRuleIds.includes(id));
           if (rulesReEnabled.length > 0) {
             try {
               const { getSignificantEventsAlertingContext } = await getScopedClients({ request });
