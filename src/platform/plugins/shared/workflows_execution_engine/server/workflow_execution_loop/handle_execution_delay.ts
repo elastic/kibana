@@ -29,7 +29,7 @@ type IdleTimeoutHitlStep =
 function getIdleTimeoutResumeDeadlineMs(
   params: WorkflowExecutionLoopParams,
   workflowExecution: EsWorkflowExecution,
-  scopeStackFrames: StackFrame[]
+  scopeStackFrames: StackFrame[],
   hitlStep: IdleTimeoutHitlStep
 ): number | undefined {
   const deadlineMs: number[] = [];
@@ -73,7 +73,12 @@ async function scheduleWorkflowGlobalTimeoutResumeTask(
   workflowExecution: EsWorkflowExecution,
   hitlStep: IdleTimeoutHitlStep
 ): Promise<void> {
-  const deadlineMs = getIdleTimeoutResumeDeadlineMs(params, workflowExecution, hitlStep);
+  const deadlineMs = getIdleTimeoutResumeDeadlineMs(
+    params,
+    workflowExecution,
+    params.workflowExecutionCursor.currentStackFrames,
+    hitlStep
+  );
   if (deadlineMs === undefined) {
     return;
   }
@@ -116,10 +121,15 @@ export function getWorkflowIdleTimeoutResumeAtAfterLoop(
   }
 
   const stepExecution = params.workflowExecutionState.getLatestStepExecution(node.stepId);
-  const deadlineMs = getIdleTimeoutResumeDeadlineMs(params, workflowExecution, {
-    node,
-    startedAt: stepExecution?.startedAt,
-  });
+  const deadlineMs = getIdleTimeoutResumeDeadlineMs(
+    params,
+    workflowExecution,
+    params.workflowExecutionCursor.currentStackFrames,
+    {
+      node,
+      startedAt: stepExecution?.startedAt,
+    }
+  );
   if (deadlineMs === undefined) {
     return undefined;
   }
