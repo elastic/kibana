@@ -266,6 +266,7 @@ export class AttachmentGetter {
     caseId,
     filter,
     attachmentTypes = [AttachmentType.alert, AttachmentType.event],
+    unifiedAttachmentTypes = [],
     owner,
   }: GetAllDocumentsAttachedToCaseArgs): Promise<
     Array<SavedObject<DocumentAttachmentAttributesV2>>
@@ -280,7 +281,10 @@ export class AttachmentGetter {
       });
 
       const unifiedDocumentsFilter = buildFilter({
-        filters: attachmentTypes.map((type) => toUnifiedAttachmentType(type, owner)),
+        filters: [
+          ...attachmentTypes.map((type) => toUnifiedAttachmentType(type, owner)),
+          ...unifiedAttachmentTypes,
+        ],
         field: 'type',
         operator: 'or',
         type: CASE_ATTACHMENT_SAVED_OBJECT,
