@@ -47,7 +47,7 @@ export const GLOBAL_CORE_WORKFLOW_IDS = [
 /** Investigation workflow (feature-flagged install; always in maintenance sweep). */
 export const INVESTIGATION_WORKFLOW_ID = SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
 
-/** Memory workflows installed in the default space when the memory flag is on. */
+/** Memory workflows installed at the global scope when the memory flag is on. */
 export const MEMORY_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
@@ -69,12 +69,12 @@ export const SCHEDULED_MAINTENANCE_WORKFLOW_IDS = [
 export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [
   ...GLOBAL_CORE_WORKFLOW_IDS,
   INVESTIGATION_WORKFLOW_ID,
+  ...MEMORY_WORKFLOW_IDS,
 ] as const;
 
-/** Workflows installed in the default space (continuous onboarding, memory, legacy). */
+/** Workflows installed in the default space (continuous onboarding, legacy). */
 export const DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS = [
   CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  ...MEMORY_WORKFLOW_IDS,
   LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
 ] as const;
 

@@ -29,16 +29,20 @@ describe('managed_workflow_targets registry', () => {
     }
   });
 
-  it('keeps core + investigation as the global maintenance set', () => {
+  it('keeps core + investigation + memory as the global maintenance set', () => {
     expect(GLOBAL_MAINTENANCE_WORKFLOW_IDS).toEqual([
       ...GLOBAL_CORE_WORKFLOW_IDS,
       INVESTIGATION_WORKFLOW_ID,
+      ...MEMORY_WORKFLOW_IDS,
     ]);
   });
 
-  it('keeps continuous onboarding and memory workflows in the default-space set', () => {
+  it('keeps continuous onboarding in the default-space set (not memory)', () => {
     expect(DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS).toEqual(
-      expect.arrayContaining([CONTINUOUS_ONBOARDING_WORKFLOW_ID, ...MEMORY_WORKFLOW_IDS])
+      expect.arrayContaining([CONTINUOUS_ONBOARDING_WORKFLOW_ID])
     );
+    for (const id of MEMORY_WORKFLOW_IDS) {
+      expect(DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS).not.toContain(id);
+    }
   });
 });

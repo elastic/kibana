@@ -16,6 +16,7 @@ import {
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { MEMORY_WORKFLOW_IDS } from '../../lib/maintenance/managed_workflow_targets';
 import { createServerRoute } from '../../routes/create_server_route';
@@ -458,10 +459,15 @@ const createWorkflowTriggerRoute = (
         );
       }
 
-      // Use the user's current space so the execution appears in the Workflows UI.
-      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      // Documents live in the global workflow space; executions run in the caller's
+      // space so they appear in that space's Workflows UI.
+      const executionSpaceId =
+        server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-      const workflow = await wfMgmt.management.getWorkflow(managedWorkflowId, spaceId);
+      const workflow = await wfMgmt.management.getWorkflow(
+        managedWorkflowId,
+        GLOBAL_WORKFLOW_SPACE_ID
+      );
       if (!workflow || !workflow.definition) {
         throw notFound(
           `Managed workflow "${managedWorkflowId}" not found. Kibana may still be starting up.`
@@ -470,7 +476,7 @@ const createWorkflowTriggerRoute = (
 
       const executionId = await wfMgmt.management.runWorkflow(
         { ...workflow, definition: workflow.definition },
-        spaceId,
+        executionSpaceId,
         {},
         request,
         'significant-events-memory-ui'
@@ -557,9 +563,10 @@ const getMemoryWorkflowsEnabledRoute = createServerRoute({
       };
     }
 
-    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const fetchedWorkflows = await Promise.all(
-      MEMORY_WORKFLOW_IDS.map((id) => wfMgmt.management.getWorkflow(id, spaceId))
+      MEMORY_WORKFLOW_IDS.map((id) =>
+        wfMgmt.management.getWorkflow(id, GLOBAL_WORKFLOW_SPACE_ID)
+      )
     );
     const workflows = MEMORY_WORKFLOW_IDS.map((id, index) => ({
       id,
@@ -593,7 +600,6 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
       );
     }
 
-    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const { enabled } = params.body;
 
     // Block turning memory workflows back on while paused; disabling stays allowed.
@@ -610,7 +616,10 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
     const failures: string[] = [];
 
     for (const managedWorkflowId of MEMORY_WORKFLOW_IDS) {
-      const workflow = await wfMgmt.management.getWorkflow(managedWorkflowId, spaceId);
+      const workflow = await wfMgmt.management.getWorkflow(
+        managedWorkflowId,
+        GLOBAL_WORKFLOW_SPACE_ID
+      );
       if (!workflow) {
         failures.push(`"${managedWorkflowId}" was not found`);
         continue;
@@ -623,7 +632,7 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
       const result = await wfMgmt.management.updateWorkflow(
         workflow.id,
         { enabled },
-        spaceId,
+        GLOBAL_WORKFLOW_SPACE_ID,
         request
       );
       if (result.enabled !== enabled) {
