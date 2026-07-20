@@ -94,18 +94,11 @@ export const euid = {
     /**
      * Query DSL that should match documents sharing the same identity fields as the given sample document.
      * Input: entity type and one document; output: bool/term-style filter, or `undefined` if identity or pipeline gate fails.
+     * Pass `{ excludeHigherRankedFields: false }` when looking up a stored entity by partial identity
+     * (e.g. only `host.name`) — the default partition semantics would require higher-ranked fields
+     * (e.g. `host.id`) to be absent and never match stored entities.
      */
     getEuidFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
-
-    /**
-     * Query DSL for looking up a stored entity by partial identity (e.g. only `host.name`).
-     * Unlike {@link getEuidFilterBasedOnDocument} (partition semantics), this does NOT require
-     * higher-ranked identity fields to be absent. Use this when the caller does not yet have the
-     * full identity (e.g. the Host Details page navigated by host name only).
-     * Input: entity type and one partial identity document; output: bool/term-style filter, or
-     * `undefined` if the document does not contain enough identifying information.
-     */
-    getEuidPartialIdentityFilter: euidModule.getEuidDslPartialIdentityFilter,
 
     /**
      * Query DSL that matches raw source documents belonging to an already-resolved entity-store record.

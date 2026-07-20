@@ -83,6 +83,11 @@ export function getEuidDslDocumentsContainsIdFilter(
  *
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
+ * @param options.excludeHigherRankedFields - When `true` (default), higher-ranked identity fields
+ *   absent from the document must also be missing-or-empty in matched documents (partition
+ *   semantics, used by extraction). Pass `false` when looking up a stored entity by partial
+ *   identity (e.g. only `host.name`) — the stored entity carries the higher-ranked fields
+ *   (e.g. `host.id`), so demanding their absence would always produce zero results.
  * @returns An Elasticsearch DSL query container, or `undefined` if the document does not contain enough
  *   identifying information, or if it would not pass the entity's `documentsFilter` ∧ `postAggFilter`
  *   (same gate as `getEuidDslDocumentsContainsIdFilter` / logs extraction) after field evaluations
@@ -188,26 +193,6 @@ export function getEuidDslFilterBasedOnDocument(
 
   return dsl;
 }
-
-/**
- * Constructs an Elasticsearch DSL filter for looking up a stored entity by partial identity
- * (e.g. only `host.name`, only `user.name`).
- *
- * Unlike {@link getEuidDslFilterBasedOnDocument} (partition semantics), this builder does **not**
- * require higher-ranked identity fields to be absent. Use this when searching for a stored entity
- * from a partial identity — the stored entity will carry the higher-ranked fields (e.g. `host.id`),
- * so demanding their absence would always produce zero results.
- *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
- * @param doc - Partial identity document. May be a flattened or nested shape.
- * @returns An Elasticsearch DSL query container, or `undefined` if the document does not contain
- *   enough identifying information.
- */
-export const getEuidDslPartialIdentityFilter = (
-  entityType: EntityType,
-  doc: any
-): QueryDslQueryContainer | undefined =>
-  getEuidDslFilterBasedOnDocument(entityType, doc, { excludeHigherRankedFields: false });
 
 /**
  * Constructs an Elasticsearch DSL filter for the provided entity type from an already-resolved

@@ -9,13 +9,13 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useEntityFromStore } from './use_entity_from_store';
 
 const mockFetchEntitiesListV2 = jest.fn();
-const mockGetEuidLookupFilterBasedOnDocument = jest.fn();
+const mockGetEuidFilterBasedOnDocument = jest.fn();
 
 jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: () => ({
     euid: {
       dsl: {
-        getEuidPartialIdentityFilter: mockGetEuidLookupFilterBasedOnDocument,
+        getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument,
       },
     },
   }),
@@ -43,15 +43,15 @@ function createWrapper() {
 beforeEach(() => {
   jest.clearAllMocks();
   mockFetchEntitiesListV2.mockResolvedValue({ records: [] });
-  // Return a simple term filter (no host.id exclusion) — same as the real lookup builder.
-  mockGetEuidLookupFilterBasedOnDocument.mockReturnValue({
+  // Return a simple term filter (no host.id exclusion) — same as the real partial-identity lookup.
+  mockGetEuidFilterBasedOnDocument.mockReturnValue({
     bool: { filter: [{ term: { 'host.name': 'web01' } }] },
   });
 });
 
 describe('useEntityFromStore', () => {
   describe('documentFilter path (identityFields supplied, no entityId)', () => {
-    it('calls getEuidPartialIdentityFilter — not the partition builder — so host.name-only lookups succeed', async () => {
+    it('builds the filter with excludeHigherRankedFields: false so host.name-only lookups succeed', async () => {
       renderHook(
         () =>
           useEntityFromStore({
@@ -64,10 +64,12 @@ describe('useEntityFromStore', () => {
 
       await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalled());
 
-      // The lookup builder must have been called (wiring check).
-      expect(mockGetEuidLookupFilterBasedOnDocument).toHaveBeenCalledWith('host', {
-        'host.name': 'web01',
-      });
+      // Partition semantics must be disabled for the lookup (wiring check, #278276).
+      expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith(
+        'host',
+        { 'host.name': 'web01' },
+        { excludeHigherRankedFields: false }
+      );
 
       // The filterQuery forwarded to the API must not contain a host.id exclusion clause.
       const [{ params }] = mockFetchEntitiesListV2.mock.calls[0];

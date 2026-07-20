@@ -9,7 +9,6 @@ import {
   getEuidDslFilterBasedOnDocument,
   getEuidDslFilterBasedOnEntityRecord,
   getEuidDslDocumentsContainsIdFilter,
-  getEuidDslPartialIdentityFilter,
 } from './dsl';
 
 const fieldMissingOrEmpty = (field: string) => ({
@@ -809,17 +808,22 @@ describe('getEuidDslDocumentsContainsIdFilter', () => {
   });
 });
 
-describe('getEuidDslPartialIdentityFilter', () => {
+describe('getEuidDslFilterBasedOnDocument with excludeHigherRankedFields: false (partial-identity lookup)', () => {
+  const partialIdentityFilter = (
+    entityType: Parameters<typeof getEuidDslFilterBasedOnDocument>[0],
+    doc: any
+  ) => getEuidDslFilterBasedOnDocument(entityType, doc, { excludeHigherRankedFields: false });
+
   it('returns undefined when doc is falsy', () => {
-    expect(getEuidDslPartialIdentityFilter('host', null)).toBeUndefined();
-    expect(getEuidDslPartialIdentityFilter('host', {})).toBeUndefined();
+    expect(partialIdentityFilter('host', null)).toBeUndefined();
+    expect(partialIdentityFilter('host', {})).toBeUndefined();
   });
 
   describe('host', () => {
     it('returns term-only filter on host.name with NO must clause (root cause regression guard)', () => {
       // This is the exact scenario from #278276: page passes only host.name, lookup should not
       // require host.id to be absent.
-      const result = getEuidDslPartialIdentityFilter('host', { host: { name: 'server1' } });
+      const result = partialIdentityFilter('host', { host: { name: 'server1' } });
 
       expect(result).toEqual({
         bool: {
@@ -831,7 +835,7 @@ describe('getEuidDslPartialIdentityFilter', () => {
     });
 
     it('returns term-only filter on host.hostname with NO must clause', () => {
-      const result = getEuidDslPartialIdentityFilter('host', {
+      const result = partialIdentityFilter('host', {
         host: { hostname: 'node-1' },
       });
 
@@ -844,7 +848,7 @@ describe('getEuidDslPartialIdentityFilter', () => {
     });
 
     it('returns filter on host.id unchanged (rank 0 — no higher-ranked fields)', () => {
-      const result = getEuidDslPartialIdentityFilter('host', {
+      const result = partialIdentityFilter('host', {
         host: { name: 'ignored', id: 'host-id-1' },
       });
 
@@ -858,9 +862,9 @@ describe('getEuidDslPartialIdentityFilter', () => {
 
   describe('user', () => {
     it('returns filter on user.name with source clause but NO must on higher-ranked absent fields', () => {
-      // Partition builder would add must:[fieldMissingOrEmpty('user.email'),fieldMissingOrEmpty('user.id'),
-      // fieldMissingOrEmpty('user.domain')]. Lookup builder must NOT add those.
-      const result = getEuidDslPartialIdentityFilter('user', {
+      // Default partition semantics would add must:[fieldMissingOrEmpty('user.email'),
+      // fieldMissingOrEmpty('user.id'),fieldMissingOrEmpty('user.domain')]. Lookup must NOT add those.
+      const result = partialIdentityFilter('user', {
         user: { name: 'alice' },
         event: { kind: 'asset', module: 'azure' },
       });
