@@ -43,6 +43,7 @@ import {
   type EntityIdentifierFields,
 } from '../../../../common/entity_analytics/types';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
+import { CriticalityLevels } from '../../../../common/entity_analytics/asset_criticality/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import type { AssetCriticalityDataClient, IdentifierValuesByField } from '../asset_criticality';
 import { buildCriticalitiesQuery } from '../asset_criticality';
@@ -86,6 +87,33 @@ const CRITICALITY_LEVEL_SUMMARY_LABELS: Record<string, string> = {
   extreme_impact: 'Extreme Impact',
 };
 
+const isCriticalityFieldKey = (key: string): boolean =>
+  key === 'criticality_level' || // asset-criticality index / risk docs (V1)
+  key === 'asset.criticality' || // entity store ECS field (V2)
+  key.endsWith('.asset.criticality'); // e.g. host.asset.criticality, user.asset.criticality
+
+const isAssignedCriticalityValue = (value: unknown): boolean =>
+  (Object.values(CriticalityLevels) as string[]).includes(String(value));
+
+/**
+ * Picks only criticality fields from entity-store raw data. Returns undefined when none are
+ * assigned (missing or `unassigned`)
+ */
+const getAssignedCriticalityRawData = (
+  rawData: Record<string, unknown[]>
+): Record<string, unknown[]> | undefined => {
+  const picked: Record<string, unknown[]> = {};
+  for (const [key, values] of Object.entries(rawData)) {
+    if (isCriticalityFieldKey(key)) {
+      picked[key] = values;
+    }
+  }
+  const hasAssigned = Object.values(picked).some((values) =>
+    values.some(isAssignedCriticalityValue)
+  );
+  return hasAssigned ? picked : undefined;
+};
+
 /**
  * Rewrites the criticality-level values inside an anonymized asset-criticality record to
  * their human-readable labels. The value lands in the record under `criticality_level`
@@ -97,18 +125,12 @@ const formatCriticalityLevelsInRecord = (
   record: Record<string, string[]>
 ): Record<string, string[]> =>
   Object.fromEntries(
-    Object.entries(record).map(([key, values]) => {
-      const isCriticalityKey =
-        key === 'criticality_level' ||
-        key === 'asset.criticality' ||
-        key.endsWith('.asset.criticality');
-      return [
-        key,
-        isCriticalityKey
-          ? values.map((value) => CRITICALITY_LEVEL_SUMMARY_LABELS[value] ?? value)
-          : values,
-      ];
-    })
+    Object.entries(record).map(([key, values]) => [
+      key,
+      isCriticalityFieldKey(key)
+        ? values.map((value) => CRITICALITY_LEVEL_SUMMARY_LABELS[value] ?? value)
+        : values,
+    ])
   );
 
 // Always return a new object to prevent mutation
@@ -406,17 +428,21 @@ export const entityDetailsHighlightsServiceFactory = ({
         ]
       : [];
 
-    const assetCriticalityAnonymized_ = formatCriticalityLevelsInRecord(
-      transformRawDataToRecord({
-        anonymizationFields,
-        currentReplacements: localReplacements,
-        getAnonymizedValue,
-        onNewReplacements: localOnNewReplacements,
-        rawData: getRawDataOrDefault(omit(enrichedEntity.fields, '_id')), // We need to exclude _id because asset criticality id contains user data
-      })
+    const criticalityRawData = getAssignedCriticalityRawData(
+      getRawDataOrDefault(enrichedEntity.fields)
     );
-    const assetCriticalityAnonymized = assetCriticalityAnonymized_
-      ? [assetCriticalityAnonymized_]
+    const assetCriticalityAnonymized = criticalityRawData
+      ? [
+          formatCriticalityLevelsInRecord(
+            transformRawDataToRecord({
+              anonymizationFields,
+              currentReplacements: localReplacements,
+              getAnonymizedValue,
+              onNewReplacements: localOnNewReplacements,
+              rawData: criticalityRawData,
+            })
+          ),
+        ]
       : [];
 
     // Vulnerabilities only apply to hosts (enrichment only queries findings when
