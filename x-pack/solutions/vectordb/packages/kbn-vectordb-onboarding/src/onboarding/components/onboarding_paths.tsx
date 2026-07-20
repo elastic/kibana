@@ -8,23 +8,17 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory, useLocation } from 'react-router-dom';
 import SearchLakeSvg from '../../assets/search_lake.svg';
 import VectorStoreEmbeddingsSvg from '../../assets/vector_store_embeddings.svg';
 import { OnboardingPathPanel } from './onboarding_path_panel';
 import { pathQuery } from '../../hooks/use_wizard_path';
+import { useOnboardingNavigate } from '../../hooks/use_onboarding_navigate';
 import type { VectorPath } from '../types';
 import { ONBOARDING_PATH } from '../../routes';
 
-export const OnboardingPaths = () => {
-  const history = useHistory();
-  const { pathname } = useLocation();
-  const choose = (path: VectorPath) =>
-    history.push({
-      pathname: `${ONBOARDING_PATH}/ingest`,
-      search: pathQuery(path),
-      state: { from: pathname },
-    });
+export const OnboardingPaths = ({ origin }: { origin: string }) => {
+  const navigate = useOnboardingNavigate(origin);
+  const choose = (path: VectorPath) => navigate(`${ONBOARDING_PATH}/ingest${pathQuery(path)}`);
 
   return (
     <>

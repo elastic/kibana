@@ -25,6 +25,7 @@ import { ConnectToProject } from '../connection_details/connect_to_project';
 import { useOnboardingCredentials } from '../hooks/use_onboarding_credentials';
 import { OnboardingPaths } from './components/onboarding_paths';
 import { useKibana } from '../services';
+import { ONBOARDING_PATH } from '../routes';
 
 export const OnboardingLandingPage = () => {
   const history = useHistory();
@@ -71,7 +72,7 @@ export const OnboardingLandingPage = () => {
           </EuiFlexGroup>
           <EuiSpacer size="xs" />
           <EuiFlexItem>
-            <OnboardingPaths />
+            <OnboardingPaths origin={ONBOARDING_PATH} />
           </EuiFlexItem>
 
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

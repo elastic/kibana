@@ -17,6 +17,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  outerPanelStyle,
+  iconContainerStyle,
+  getStartedTextStyle,
+} from './onboarding_path_panel.styles';
 
 interface OnboardingPathPanelProps {
   icon: string;
@@ -46,17 +51,7 @@ export const OnboardingPathPanel = ({
       hasBorder
       hasShadow={false}
       color="plain"
-      css={{
-        height: '100%',
-        // On hover, highlight the card's border in the primary color.
-        '&:hover::after': {
-          borderColor: euiTheme.colors.primary,
-        },
-        // On hover, change the icon panel background color to signal the card is clickable.
-        '&:hover .vectordbOnboardingPathIconPanel': {
-          backgroundColor: euiTheme.colors.backgroundBasePrimary,
-        },
-      }}
+      css={outerPanelStyle}
     >
       <EuiSplitPanel.Inner
         color="subdued"
@@ -64,7 +59,7 @@ export const OnboardingPathPanel = ({
         paddingSize="l"
         className="vectordbOnboardingPathIconPanel"
       >
-        <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '100%' }}>
+        <EuiFlexGroup alignItems="center" justifyContent="center" css={iconContainerStyle}>
           <EuiFlexItem grow={false}>
             <EuiImage size={euiTheme.base * 4} src={icon} alt="" />
           </EuiFlexItem>
@@ -83,13 +78,7 @@ export const OnboardingPathPanel = ({
 
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiText
-                size="s"
-                css={{
-                  color: euiTheme.colors.textParagraph,
-                  fontWeight: euiTheme.font.weight.semiBold,
-                }}
-              >
+              <EuiText size="s" css={getStartedTextStyle}>
                 {i18n.translate('vectordbOnboarding.pathSelection.getStarted', {
                   defaultMessage: 'Get started',
                 })}
