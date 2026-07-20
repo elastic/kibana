@@ -91,7 +91,7 @@ When `metadata.errors` is not empty, `error.type` is `panel_errors` and `error.m
 :::::
 
 :::::{note}
-This example uses a custom `user-activity-logs` index. User activity events are emitted through the configured logging appender. To explore them in Discover, route the events to {{es}} using your logging pipeline. For one option, refer to [ingesting ECS-formatted logs with {{agent}}](docs-content://solutions/observability/logs/ecs-formatted-application-logs.md#step-1-add-the-custom-logs-integration-to-your-project-ecs). Your index or data stream name depends on your ingestion configuration.
+This example uses a custom `user-activity-logs` index. User activity events are emitted through the configured logging appenders and are not indexed automatically. To explore them in Discover, route the events to {{es}} using your existing log collection pipeline. Your index or data stream name depends on that configuration.
 :::::
 
 ## Logs schema
