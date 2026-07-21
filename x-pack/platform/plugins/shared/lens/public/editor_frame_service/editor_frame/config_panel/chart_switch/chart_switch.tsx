@@ -183,7 +183,7 @@ export const ChartSwitch = memo(function ChartSwitch({
       dispatchLens(
         removeLayers({
           visualizationId: visualization.activeId,
-          layerIds: Object.keys(framePublicAPI.datasourceLayers),
+          layerIds: Object.keys(mountFrame.datasourceLayers),
         })
       );
     }
