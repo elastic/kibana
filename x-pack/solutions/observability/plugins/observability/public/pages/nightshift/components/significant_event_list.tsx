@@ -94,7 +94,7 @@ export function SignificantEventList({
         >
           {events.map((event, index) => (
             <li
-              key={event.event_id}
+              key={event.event_uuid}
               css={
                 index < events.length - 1
                   ? css`

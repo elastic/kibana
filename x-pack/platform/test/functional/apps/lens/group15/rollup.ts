@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
+  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const esArchiver = getService('esArchiver');
@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/platform/test/functional/fixtures/kbn_archives/rollup/config.json'
       );
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {

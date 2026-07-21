@@ -148,24 +148,13 @@ describe('AppHeaderView', () => {
     expect(screen.getByText('Technical preview')).toBeInTheDocument();
   });
 
-  it('renders an xs title for a single row and an s title when a second row is present', () => {
-    const { unmount: unmountSingle } = renderAppHeader(<AppHeaderView title="Dashboard" />);
+  it('renders an s title for standard spacing and an xs title for compact spacing', () => {
+    const { unmount: unmountStandard } = renderAppHeader(<AppHeaderView title="Dashboard" />);
+    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
+    unmountStandard();
+
+    renderAppHeader(<AppHeaderView title="Dashboard" spacing="compact" />);
     expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-xs/);
-    unmountSingle();
-
-    const { unmount: unmountTabs } = renderAppHeader(
-      <AppHeaderView title="Dashboard" tabs={[{ id: 'overview', label: 'Overview' }]} />
-    );
-    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
-    unmountTabs();
-
-    renderAppHeader(
-      <AppHeaderView
-        title="Dashboard"
-        metadata={[{ type: 'text', label: 'Created by: analyst' }]}
-      />
-    );
-    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
   });
 
   it('renders tab badge and test subject metadata', () => {
@@ -278,16 +267,90 @@ describe('AppHeaderView', () => {
     await waitFor(() => expect(screen.queryByText('Second app')).not.toBeInTheDocument());
   });
 
-  describe('padding', () => {
-    it('resolves bleed "m" to the EUI base paddingSize breakout token', () => {
+  describe('spacing', () => {
+    it.each([true, false])('uses the standard gutter when sticky is %s', (sticky) => {
       const { result } = renderHook(() => useEuiTheme());
 
-      renderAppHeader(<AppHeaderView title="Dashboard" sticky={false} padding={{ bleed: 'm' }} />);
+      renderAppHeader(<AppHeaderView title="Dashboard" sticky={sticky} />);
 
       const root = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
       expect(root).toHaveStyleRule('padding-inline', result.current.euiTheme.size.base);
-      expect(root).toHaveStyleRule('margin-top', `-${result.current.euiTheme.size.base}`);
-      expect(root).toHaveStyleRule('margin-inline', `-${result.current.euiTheme.size.base}`);
+    });
+
+    it('treats explicit standard spacing like the default', () => {
+      const { result } = renderHook(() => useEuiTheme());
+
+      renderAppHeader(<AppHeaderView title="Dashboard" sticky={false} spacing="standard" />);
+
+      const root = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
+      expect(root).toHaveStyleRule('padding-inline', result.current.euiTheme.size.base);
+    });
+
+    it('supports compact and flush spacing', () => {
+      const { result } = renderHook(() => useEuiTheme());
+      const { rerender } = renderAppHeader(
+        <AppHeaderView title="Dashboard" sticky={false} spacing="compact" />
+      );
+
+      const root = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
+      expect(root).toHaveStyleRule('padding-inline', result.current.euiTheme.size.s);
+
+      rerender(
+        <ChromeServiceProvider value={{ chrome: chromeServiceMock.createStartContract() }}>
+          <AppHeaderView title="Dashboard" sticky={false} spacing="flush" />
+        </ChromeServiceProvider>
+      );
+      expect(root).not.toHaveStyleRule('padding-inline', expect.any(String));
+    });
+
+    it.each([
+      ['bleed', 'base'],
+      ['largeBleed', 'l'],
+    ] as const)('uses the matching gutter for %s spacing', (spacing, size) => {
+      const { result } = renderHook(() => useEuiTheme());
+
+      renderAppHeader(<AppHeaderView title="Dashboard" sticky={false} spacing={spacing} />);
+
+      const root = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
+      expect(root).toHaveStyleRule('padding-inline', result.current.euiTheme.size[size]);
+      expect(root).toHaveStyleRule('margin-top', `-${result.current.euiTheme.size[size]}`);
+      expect(root).toHaveStyleRule('margin-inline', `-${result.current.euiTheme.size[size]}`);
+    });
+
+    it('applies symmetric vertical padding matching the horizontal inset', () => {
+      const { result } = renderHook(() => useEuiTheme());
+
+      renderAppHeader(<AppHeaderView title="Dashboard" />);
+
+      const primaryRow = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)
+        .firstElementChild as HTMLElement;
+      expect(primaryRow).toHaveStyleRule('box-sizing', 'border-box');
+      expect(primaryRow).toHaveStyleRule('min-height', '64px');
+      expect(primaryRow).toHaveStyleRule('padding-block-start', result.current.euiTheme.size.base);
+      expect(primaryRow).toHaveStyleRule('padding-block-end', result.current.euiTheme.size.base);
+    });
+
+    it('matches vertical padding to the horizontal inset for compact', () => {
+      const { result } = renderHook(() => useEuiTheme());
+
+      renderAppHeader(<AppHeaderView title="Dashboard" sticky={false} spacing="compact" />);
+
+      const primaryRow = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)
+        .firstElementChild as HTMLElement;
+      expect(primaryRow).toHaveStyleRule('padding-block-start', result.current.euiTheme.size.s);
+      expect(primaryRow).toHaveStyleRule('padding-block-end', result.current.euiTheme.size.s);
+      expect(primaryRow).toHaveStyleRule('min-height', '48px');
+    });
+
+    it('keeps standard vertical padding for flush', () => {
+      const { result } = renderHook(() => useEuiTheme());
+
+      renderAppHeader(<AppHeaderView title="Dashboard" sticky={false} spacing="flush" />);
+
+      const primaryRow = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)
+        .firstElementChild as HTMLElement;
+      expect(primaryRow).toHaveStyleRule('padding-block-start', result.current.euiTheme.size.base);
+      expect(primaryRow).toHaveStyleRule('padding-block-end', result.current.euiTheme.size.base);
     });
   });
 

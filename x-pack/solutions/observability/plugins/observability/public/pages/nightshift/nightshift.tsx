@@ -14,7 +14,6 @@ import { NightshiftApp } from './components/nightshift_app';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
-import { useFetchSignificantEventsAvailability } from './hooks/use_fetch_significant_events_availability';
 
 export function NightshiftPage(): React.ReactElement | null {
   const {
@@ -25,6 +24,8 @@ export function NightshiftPage(): React.ReactElement | null {
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
 
+  // Availability is owned by this flag alone — the /available endpoint is the same
+  // gate on the server, so a second client probe would only duplicate it.
   const isEnabled = featureFlags.getBooleanValue(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false);
 
   useBreadcrumbs(
@@ -40,23 +41,13 @@ export function NightshiftPage(): React.ReactElement | null {
     { serverless }
   );
 
-  const {
-    data: availability,
-    isLoading: isAvailabilityLoading,
-    isFetching: isAvailabilityFetching,
-  } = useFetchSignificantEventsAvailability(isEnabled);
-  const isAvailable = availability?.available === true;
-
-  const shouldRedirect =
-    !isEnabled || (!isAvailabilityLoading && !isAvailabilityFetching && !isAvailable);
-
   useEffect(() => {
-    if (shouldRedirect) {
+    if (!isEnabled) {
       history.replace(OVERVIEW_PATH);
     }
-  }, [history, shouldRedirect]);
+  }, [history, isEnabled]);
 
-  if (!isEnabled || !isAvailable) {
+  if (!isEnabled) {
     return null;
   }
 
