@@ -24,6 +24,98 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
+## 9.4.4 [kibana-9.4.4-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+### Features and enhancements [kibana-9.4.4-features-enhancements]
+
+**Alerting**:
+* Adds a `cases.pushCases` workflow step that pushes the given cases to their external connectors [#267539]({{kib-pull}}267539).
+
+**Data ingestion and Fleet**:
+* Adds an optional `dryRun` flag to {{fleet}} bulk agent API endpoints so callers can preview how many agents would be affected without writing changes [#276377]({{kib-pull}}276377).
+* Supports overriding `data_stream.type` in the simplified package policy API for input-only packages, so collected data can be routed to a different index prefix with matching agent index permissions [#269895]({{kib-pull}}269895).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.4.4 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elasticsearch solution**:
+* Adds a MongoDB connector `datetime_conversion` setting so syncs can clamp, convert, or error on dates outside the supported range instead of always aborting [#277685]({{kib-pull}}277685).
+
+### Fixes [kibana-9.4.4-fixes]
+
+**Alerting**:
+* Improves the Cases file upload modal with human-readable size limits, clearer unsupported-type messaging, per-file size checks, and error state that clears when a new file is selected [#277567]({{kib-pull}}277567).
+* Fixes OAuth client credentials token parsing so any `2xx` response is treated as success [#276321]({{kib-pull}}276321).
+* Defaults a missing reporting job `version` parameter to the current {{kib}} version instead of showing a hardcoded `7.14.0` value [#275469]({{kib-pull}}275469).
+* Fixes {{esql}} query rules dropping parentheses when appending a limit, which could change calculated results [#275231]({{kib-pull}}275231).
+* Fixes **Save and return** for Lens visualizations embedded from the Cases editor so the comment updates correctly [#275117]({{kib-pull}}275117).
+* Extracts observables automatically when alerts are attached to a case through the comments API [#274969]({{kib-pull}}274969).
+* Preserves `context.sourceFields` from the active alert in {{es}} query rule recovery actions so recovery templates can still reference those field values [#274686]({{kib-pull}}274686).
+
+**Connectivity**:
+* Fixes the Google Drive connector so it can find and read files owned by a shared drive [#274303]({{kib-pull}}274303).
+
+**Dashboards and Visualizations**:
+* Limits the Canvas `createTable` expression `rowCount` to a maximum of `10000`, matching the default {{es}} `index.max_result_window` [#276502]({{kib-pull}}276502).
+* Fixes startup crashes from occurring when upgrading {{kib}} if a previous version's `node.options` file was preserved, caused by server-side imports of the browser-only `@elastic/charts` library [#276284]({{kib-pull}}276284).
+* Fixes horizontal padding in the Lens dimension editor [#275993]({{kib-pull}}275993).
+* Fixes the filter popover so that closing the context menu when saving a dashboard doesn't discard changes [#275987]({{kib-pull}}275987).
+* Fixes invisible field names in the Lens field picker when in dark mode [#275785]({{kib-pull}}275785).
+* Fixes incorrect color rendering for non-custom palettes in Lens metric charts [#275203]({{kib-pull}}275203).
+* Fixes color rendering in Lens gauge charts so a color band no longer extends past the configured range, and palette continuity is preserved on save [#272123]({{kib-pull}}272123).
+
+**Data ingestion and Fleet**:
+* Fixes resetting preconfigured agent policies aborting with a 404 on deployments where space awareness is disabled [#276742]({{kib-pull}}276742).
+* Fixes integration policy updates always bumping associated agent policy revisions, even when `bumpRevision` is `false` [#275626]({{kib-pull}}275626).
+* Deletes orphaned `multiple-isolated` saved objects before package import to prevent `ambiguous_conflict` errors that blocked integration install or upgrade [#275552]({{kib-pull}}275552).
+* Fixes adding content connectors from Integrations so the enrollment flyout links to connector setup instead of waiting for incoming data [#274832]({{kib-pull}}274832).
+* Fixes integration rollback for version-specific policies so variants are cleaned up, agents return to the parent policy, and auto-install no longer re-upgrades rolled back packages [#274463]({{kib-pull}}274463).
+* Fixes OpenTelemetry profile integrations to use the `profiles` input type and stop {{fleet}} from managing their data streams [#274205]({{kib-pull}}274205).
+* Improves {{fleet}} setup performance at scale by reconciling agent policy enrollment keys and revisions with bulk aggregations instead of per-policy {{es}} queries [#272604]({{kib-pull}}272604).
+
+**Data management**:
+* Fixes the **Add lifecycle policy** dialog crashing Index Management for indices without aliases [#277815]({{kib-pull}}277815).
+
+**Developer tools**:
+* Fixes Console autocomplete so nested object fields and multi-fields in index mapping bodies suggest mapping options again [#278508]({{kib-pull}}278508).
+* Fixes Console requests that combine comments with triple-quote strings failing with `x_content_e_o_f_exception` [#277259]({{kib-pull}}277259).
+* Fixes a Windows-specific code editor issue that could corrupt multi-line edited text after refresh [#277007]({{kib-pull}}277007).
+* Fixes the Console **Copy** button silently failing to copy response output [#276365]({{kib-pull}}276365).
+* Fixes Console autocomplete matching an incorrect API endpoint when a URL matches both a literal path and a parameterized path [#276239]({{kib-pull}}276239).
+* Improves Console {{esql}} source autocomplete by reusing a fresh source list instead of refetching it on every keystroke [#275535]({{kib-pull}}275535).
+
+**Discover**:
+* Fixes an error when saving text field values that look like JSON objects in lookup index editing [#276693]({{kib-pull}}276693).
+* Fixes a false validation error for `ip` and `version` fields used with the `IN` operator in {{esql}} [#274943]({{kib-pull}}274943).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.4.4 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.4.4 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes `kibana-frontend` page-load transaction names to use low-cardinality `/app/{appId}` labels instead of raw URLs [#275650]({{kib-pull}}275650).
+* Fixes the {{kib}} JSON logger producing objects with a large number of numbered keys [#256233]({{kib-pull}}256233).
+
+**Machine Learning**:
+* Prevents removing all spaces from a {{ml}} job or trained model through the spaces update APIs [#276490]({{kib-pull}}276490).
+* Restricts the clear audit messages API so users can only clear messages for jobs they can access, and only against valid notification indices [#276419]({{kib-pull}}276419).
+* Fixes `xpack.productDocBase.artifactRepositoryProxyUrl` being silently ignored when installing product documentation through a proxy [#274646]({{kib-pull}}274646).
+* Fixes unbounded string and array schema validation by adding `maxLength` and `maxSize` limits [#274342]({{kib-pull}}274342).
+* Makes `winlog.event_data.LogonType` optional for the `security_auth` anomaly detection jobs so they can run on non-Windows authentication logs [#278500]({{kib-pull}}278500).
+* Fixes a crash in {{esql}} query correction when an LLM generates a multi-line `WHERE` clause [#277153]({{kib-pull}}277153).
+
+**Workflows**:
+* Fixes scheduled trigger YAML insertion so nested input `type` fields are not mistaken for triggers [#277976]({{kib-pull}}277976).
+* Fixes relative timestamps that showed **1 month ago** for executions only a few days old after a calendar month boundary [#275877]({{kib-pull}}275877).
+* Fixes validation and autocomplete for Liquid `{% for %}` loops in workflow YAML [#270596]({{kib-pull}}270596).
+* Fixes Workflows validation so `elasticsearch.search` steps accept object-form `sort` [#269687]({{kib-pull}}269687).
+
+
 ## 9.4.3 [kibana-9.4.3-release-notes]
 
 ### Features and enhancements [kibana-9.4.3-features-enhancements]

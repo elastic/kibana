@@ -1,5 +1,5 @@
 {
-  "sha1": "01507264aadb7e08682b9dc66a84bd1a584d3bc3",
+  "sha1": "f8130b9e3d9e854aefc827a8c5b5da72543efb7c",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1037,7 +1037,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 385,
+        "line": 383,
         "column": 7
       }
     },
@@ -2025,7 +2025,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 72,
+        "line": 77,
         "column": 7
       }
     },
@@ -2039,7 +2039,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 82,
+        "line": 87,
         "column": 7
       }
     },
@@ -2053,7 +2053,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 100,
+        "line": 105,
         "column": 7
       }
     },
@@ -2067,7 +2067,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 121,
+        "line": 126,
         "column": 7
       }
     },
@@ -2081,7 +2081,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 131,
+        "line": 136,
         "column": 7
       }
     },
@@ -2095,7 +2095,35 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
-        "line": 148,
+        "line": 153,
+        "column": 7
+      }
+    },
+    {
+      "id": "f8c5fbdc13df3f4-aa140130ccb1a2b",
+      "title": "Stack alerts page roles stackAlertsOnly role does not see the Rules entry in global search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
+        "line": 168,
+        "column": 7
+      }
+    },
+    {
+      "id": "f8c5fbdc13df3f4-700320c6778dec0",
+      "title": "Stack alerts page roles stackAlerts (rules and alerts) role sees the Rules entry in global search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
+        "line": 182,
         "column": 7
       }
     }
