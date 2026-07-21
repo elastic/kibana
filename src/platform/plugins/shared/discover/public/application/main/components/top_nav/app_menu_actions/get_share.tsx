@@ -151,7 +151,20 @@ export const getShareAppMenuItem = ({
       },
       sharingData: {
         isTextBased: isEsqlMode,
-        locatorParams: [{ id: locator.id, params }],
+        locatorParams: [
+          {
+            id: locator.id,
+            params:
+              isEsqlMode && currentTab.esqlVariables?.length
+                ? {
+                    ...params,
+                    // Resolved variable values so the reporting server can bind named params (e.g. ?crew_id).
+                    esqlVariables:
+                      currentTab.esqlVariables as DiscoverAppLocatorParams['esqlVariables'],
+                  }
+                : params,
+          },
+        ],
         ...searchSourceSharingData,
         // CSV reports can be generated without a saved search so we provide a fallback title
         title:
