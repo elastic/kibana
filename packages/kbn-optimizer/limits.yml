@@ -13,7 +13,7 @@ pageLoadAssetSize:
   alertingVTwo: 56591
   apm: 53172
   apmShared: 5985
-  apmSourcesAccess: 2278
+  apmSourcesAccess: 2747
   automaticImport: 18629
   banners: 4006
   canvas: 14881
@@ -38,7 +38,7 @@ pageLoadAssetSize:
   dashboard: 20000
   dashboardMarkdown: 8613
   data: 511931
-  dataFederation: 7106
+  dataFederation: 9029
   dataQuality: 11469
   datasetQuality: 49315
   dataUsage: 8743
