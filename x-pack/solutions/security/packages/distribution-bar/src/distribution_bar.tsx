@@ -236,7 +236,10 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
                         type="cross"
                         size="m"
                         onClick={stat.reset}
-                        aria-label={i18n.translate('distributionBar.removeFilterAriaLabel', {
+                        aria-label={i18n.translate(
+                          'securitySolutionPackages.distributionBar.removeFilterAriaLabel',
+                          { defaultMessage: 'Remove filter' }
+                        )}
                           defaultMessage: 'Remove filter',
                         })}
                       />
