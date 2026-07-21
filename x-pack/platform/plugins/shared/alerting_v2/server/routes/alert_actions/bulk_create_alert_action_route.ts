@@ -19,7 +19,11 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_ALERT_API_PATH } from '../constants';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import { BULK_CREATE_ALERT_ACTION_SUMMARY, bulkCreateAlertActionOasExamples } from './alert_oas_examples';
+import {
+  BULK_CREATE_ALERT_ACTION_SUMMARY,
+  bulkCreateAlertActionOasExamples,
+} from './alert_oas_examples';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
 
 @injectable()
 export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
@@ -46,7 +50,7 @@ export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };

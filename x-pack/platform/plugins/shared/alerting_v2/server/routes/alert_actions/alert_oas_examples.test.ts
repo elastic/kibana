@@ -11,6 +11,10 @@ import {
   getCannotActivateEpisodeMessage,
 } from '../../lib/errors/alert_error_messages';
 import {
+  ALERT_EVENT_NOT_FOUND_DESCRIPTION,
+  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+} from '../route_response_descriptions';
+import {
   CREATE_ACK_ALERT_ACTION_SUMMARY,
   bulkCreateAlertActionOasExamples,
   createAckAlertActionOasExamples,
@@ -29,6 +33,7 @@ describe('alert OAS examples', () => {
       oas.responses?.[400]?.content?.['application/json']?.examples?.invalidAlertAction
     ).toEqual(
       expect.objectContaining({
+        summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
         value: expect.objectContaining({
           code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
           message: getCannotActivateEpisodeMessage('episode-1'),
@@ -39,6 +44,7 @@ describe('alert OAS examples', () => {
       oas.responses?.[404]?.content?.['application/json']?.examples?.alertEventNotFound
     ).toEqual(
       expect.objectContaining({
+        summary: ALERT_EVENT_NOT_FOUND_DESCRIPTION,
         value: expect.objectContaining({
           code: ALERTING_V2_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
           message: getAlertEventNotFoundMessage('group-hash-1', 'episode-1'),

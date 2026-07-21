@@ -25,6 +25,10 @@ import {
   getCannotActivateEpisodeMessage,
 } from '../../lib/errors/alert_error_messages';
 import { jsonExample } from '../json_oas_example';
+import {
+  ALERT_EVENT_NOT_FOUND_DESCRIPTION,
+  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+} from '../route_response_descriptions';
 
 type OASOperationObject = Exclude<
   Awaited<ReturnType<NonNullable<RouteConfigOptions<RouteMethod>['oasOperationObject']>>>,
@@ -124,10 +128,14 @@ const ALERT_EVENT_NOT_FOUND_ERROR: ErrorResponse = {
 const ERROR_EXAMPLES: Record<RouteErrorStatus, ReturnType<typeof jsonExample<ErrorResponse>>> = {
   400: jsonExample(
     'invalidAlertAction',
-    'Invalid alert action request',
+    INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
     INVALID_ALERT_ACTION_ERROR
   ),
-  404: jsonExample('alertEventNotFound', 'Alert event does not exist', ALERT_EVENT_NOT_FOUND_ERROR),
+  404: jsonExample(
+    'alertEventNotFound',
+    ALERT_EVENT_NOT_FOUND_DESCRIPTION,
+    ALERT_EVENT_NOT_FOUND_ERROR
+  ),
 };
 
 const buildAlertOas = ({

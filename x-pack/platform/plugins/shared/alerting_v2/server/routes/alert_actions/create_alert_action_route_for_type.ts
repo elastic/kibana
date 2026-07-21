@@ -25,6 +25,10 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_ALERT_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
+import {
+  ALERT_EVENT_NOT_FOUND_DESCRIPTION,
+  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+} from '../route_response_descriptions';
 
 interface CreateAlertActionRouteForTypeOptions<
   TAction extends CreateAlertActionBody['action_type']
@@ -79,11 +83,11 @@ export const createAlertActionRouteForType = <
         },
         400: {
           body: () => errorResponseSchema,
-          description: 'Indicates an invalid schema or parameters.',
+          description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
         },
         404: {
           body: () => errorResponseSchema,
-          description: 'Indicates the alert event was not found.',
+          description: ALERT_EVENT_NOT_FOUND_DESCRIPTION,
         },
       },
     };
