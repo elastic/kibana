@@ -300,6 +300,14 @@
       ]
     },
     {
+      "id": "security-alert-analysis-workflow",
+      "name": "Alert Analysis Workflow",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow/playwright.config.ts",
+      "tags": ["security", "alert-analysis"],
+      "ciLabels": ["evals:security-alert-analysis-workflow"]
+    },
+    {
       "id": "skill-selection-benchmark",
       "name": "Skill Selection Benchmark",
       "slackChannel": "#agent-builder-alerts",

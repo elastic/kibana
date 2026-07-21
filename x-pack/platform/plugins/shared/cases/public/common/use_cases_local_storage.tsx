@@ -9,10 +9,12 @@ import { useCallback, useState, useRef } from 'react';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useApplication } from './lib/kibana/use_application';
 
+type SetLocalStorageItem<T> = (newItem: T | ((prev: T) => T)) => void;
+
 export const useCasesLocalStorage = <T,>(
   key: string,
   initialValue: T
-): [T, (newItem: T) => void] => {
+): [T, SetLocalStorageItem<T>] => {
   const isStorageInitialized = useRef(false);
   const { appId } = useApplication();
   const { owner } = useCasesContext();
@@ -22,10 +24,21 @@ export const useCasesLocalStorage = <T,>(
 
   const [value, setValue] = useState<T>(() => getStorageItem(lsKey, initialValue));
 
-  const setItem = useCallback(
-    (newValue: T) => {
-      setValue(newValue);
-      saveItemToStorage(lsKey, newValue);
+  // Track the latest value in a ref so functional updates compose when several
+  // setters run in the same render (e.g. distinct filter fields on one key)
+  // without moving the localStorage write into the (impure) state updater.
+  const valueRef = useRef(value);
+  valueRef.current = value;
+
+  const setItem = useCallback<SetLocalStorageItem<T>>(
+    (newValue) => {
+      const resolved =
+        typeof newValue === 'function'
+          ? (newValue as (previous: T) => T)(valueRef.current)
+          : newValue;
+      valueRef.current = resolved;
+      setValue(resolved);
+      saveItemToStorage(lsKey, resolved);
     },
     [lsKey]
   );

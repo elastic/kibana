@@ -17,6 +17,7 @@ export function MachineLearningAnomalyExplorerProvider(
   anomalyCharts: MlAnomalyCharts
 ) {
   const dashboardPage = getPageObject('dashboard');
+  const common = getPageObject('common');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
@@ -147,12 +148,7 @@ export function MachineLearningAnomalyExplorerProvider(
         );
         await label.click();
         await testSubjects.click('confirmSaveSavedObjectButton');
-        await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-          testSubjects
-            .missingOrFail('confirmSaveSavedObjectButton')
-            .then(() => true)
-            .catch(() => false)
-        );
+        await common.waitForSaveModalToClose();
 
         // make sure the dashboard page actually loaded
         const dashboardItemCount = await dashboardPage.getSharedItemsCount();

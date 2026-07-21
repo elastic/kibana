@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { isEmpty } from 'lodash/fp';
 import { selectIsPinnedEventInTimeline } from '../../../timelines/store/selectors';
 import { EventsTdContent } from '../../../timelines/components/timeline/styles';

@@ -23,6 +23,7 @@ import {
 } from './validators';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { TemplatesService } from '../../services/templates';
+import type { FieldDefinitionsService } from '../../services/field_definitions';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 
 describe('validators', () => {
@@ -707,6 +708,7 @@ describe('validators', () => {
       ({
         id: 'case-1',
         attributes: {
+          owner: 'securitySolution',
           template: templateId ? { id: templateId, version: 1 } : null,
         },
       } as unknown as CaseSavedObjectTransformed);
@@ -751,10 +753,14 @@ describe('validators', () => {
     });
 
     let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
+    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
 
     beforeEach(() => {
       templatesService = {
         getTemplate: jest.fn().mockResolvedValue(simpleTemplateSO),
+      };
+      fieldDefinitionsService = {
+        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [] }),
       };
     });
 
@@ -764,6 +770,7 @@ describe('validators', () => {
           updateReq: { id: 'case-1', version: '1' },
           originalCase: makeOriginalCase('tpl-1'),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).resolves.toBeUndefined();
@@ -775,6 +782,7 @@ describe('validators', () => {
           updateReq: { id: 'case-1', version: '1', extended_fields: { summary_as_keyword: 'hi' } },
           originalCase: makeOriginalCase(), // no template
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([{ name: 'summary', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
@@ -786,6 +794,7 @@ describe('validators', () => {
           updateReq: { id: 'case-1', version: '1', extended_fields: { summary_as_keyword: 'hi' } },
           originalCase: makeOriginalCase(), // no template, no global defs
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow(
@@ -806,6 +815,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow('Template missing-tpl not found');
@@ -822,6 +832,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).resolves.toBeUndefined();
@@ -854,6 +865,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow('Invalid extended_fields: Field "Summary" is required');
@@ -883,6 +895,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-1'),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([{ name: 'my_global_field', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
@@ -914,6 +927,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow('Template tpl-1 has an invalid definition');
@@ -930,6 +944,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow(
@@ -950,6 +965,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([{ name: 'summary', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
@@ -967,11 +983,14 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields(),
         })
       ).resolves.toBeUndefined();
 
-      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-from-original');
+      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-from-original', undefined, {
+        includeDeleted: true,
+      });
     });
 
     it('allows global field keys alongside template fields when template is set', async () => {
@@ -988,6 +1007,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([{ name: 'global_tag', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
@@ -1005,6 +1025,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(), // no template
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([
             { name: 'summary', type: 'keyword', label: 'Summary', validation: { required: true } },
           ]),
@@ -1027,6 +1048,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([
             {
               name: 'global_required',
@@ -1049,6 +1071,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(), // no template
           templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
           globalFields: makeGlobalFields([
             { name: 'summary', type: 'keyword', label: 'Summary', validation: { required: true } },
           ]),
@@ -1282,6 +1305,27 @@ describe('validators', () => {
         })
       ).not.toThrow();
     });
+
+    it('does not enforce required_on_close on display-only (MARKDOWN) fields', () => {
+      // A display-only field holds no value and can never satisfy a required check — even if a
+      // template author mistakenly sets required_on_close, it must not block closure.
+      const markdownField = {
+        control: 'MARKDOWN' as const,
+        name: 'instructions',
+        label: 'Instructions',
+        type: 'keyword',
+        metadata: { content: 'Follow these steps.' },
+        validation: { required_on_close: true },
+      } as unknown as InlineField;
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase(),
+          templateFields: [markdownField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
   });
 
   describe('resolveTemplateFieldsForClose', () => {
@@ -1314,11 +1358,15 @@ describe('validators', () => {
       });
 
     let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
+    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
     let logger: jest.Mocked<Logger>;
 
     beforeEach(() => {
       templatesService = {
         getTemplate: jest.fn().mockResolvedValue(templateWithRequiredOnClose()),
+      };
+      fieldDefinitionsService = {
+        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [] }),
       };
       logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
     });
@@ -1327,11 +1375,14 @@ describe('validators', () => {
       const fields = await resolveTemplateFieldsForClose({
         templateId: 'tpl-1',
         templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
         logger,
       });
       expect(fields.length).toBeGreaterThan(0);
       expect(fields[0].name).toBe('resolution');
-      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1', undefined);
+      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1', undefined, {
+        includeDeleted: true,
+      });
     });
 
     it('passes templateVersion as string to getTemplate when provided', async () => {
@@ -1339,9 +1390,12 @@ describe('validators', () => {
         templateId: 'tpl-1',
         templateVersion: 3,
         templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
         logger,
       });
-      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1', '3');
+      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1', '3', {
+        includeDeleted: true,
+      });
     });
 
     it('returns [] when template is not found', async () => {
@@ -1349,6 +1403,7 @@ describe('validators', () => {
       const fields = await resolveTemplateFieldsForClose({
         templateId: 'tpl-missing',
         templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
         logger,
       });
       expect(fields).toEqual([]);
@@ -1365,6 +1420,7 @@ describe('validators', () => {
       const fields = await resolveTemplateFieldsForClose({
         templateId: 'tpl-1',
         templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
         logger,
       });
       expect(fields).toEqual([]);

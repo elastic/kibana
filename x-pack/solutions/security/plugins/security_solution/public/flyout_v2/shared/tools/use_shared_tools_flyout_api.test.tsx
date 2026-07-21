@@ -14,8 +14,8 @@ import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useStore: jest.fn(() => ({})),
 }));
 jest.mock('react-router-dom', () => ({
@@ -37,15 +37,19 @@ const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTabl
 describe('useSharedToolsFlyoutApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     (useKibana as jest.Mock).mockReturnValue({
-      services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } },
+      services: {
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        telemetry: { reportEvent: jest.fn() },
+      },
     });
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
   });
 
   const getProperties = () => mockOpenSystemFlyout.mock.calls[0][1];
 
-  it('openNotes opens a tools flyout without a session (inherits the parent)', () => {
+  it('openNotes opens a tools flyout as a new tools session', () => {
     const { result } = renderHook(() => useSharedToolsFlyoutApi());
     result.current.openNotes({ hit });
 
@@ -54,7 +58,18 @@ describe('useSharedToolsFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 'm', historyKey: documentFlyoutHistoryKey })
     );
-    expect(getProperties().session).toBeUndefined();
+    expect(getProperties().session).toBe('start');
+  });
+
+  it('openNotes sets a title derived from the document', () => {
+    const { result } = renderHook(() => useSharedToolsFlyoutApi());
+    result.current.openNotes({ hit });
+
+    // hit has no event.kind=signal, so getDocumentHistoryTitle falls back to getDocumentTitle
+    // which for a minimal record produces a non-empty string; the important thing is that
+    // a title is always set (never undefined → never "Unknown Flyout").
+    expect(getProperties().title).toBeDefined();
+    expect(typeof getProperties().title).toBe('string');
   });
 
   it('uses the doc-viewer history key when outside the security app', () => {

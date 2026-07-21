@@ -11,7 +11,6 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { significantEventSchema } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -22,36 +21,23 @@ import { eventsWriteHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
-const eventsWriteSchema = significantEventSchema
-  .pick({
-    discovery_slug: true,
-    discovery_id: true,
-    status: true,
-    stream_names: true,
-    rule_names: true,
-    title: true,
-    summary: true,
-    root_cause: true,
-    criticality: true,
-    confidence: true,
-    recommendations: true,
-    assessment_note: true,
-    evidences: true,
-    cause_kis: true,
-    dependency_edges: true,
-    infra_components: true,
-    workflow_execution_id: true,
-  })
-  .extend({
-    // Override the base schema's description — it's written for discovery_write, where
-    // discovery_slug is optional and auto-generated for new episodes. Here it always refers
-    // to an existing discovery, so it's required and must never be omitted.
-    discovery_slug: significantEventSchema.shape.discovery_slug.describe(
-      'Required. Stable episode identifier of the discovery being reviewed — ' +
-        'copy it verbatim from the input discovery.'
-    ),
-    conversation_id: z.string().optional(),
-  });
+const eventsWriteSchema = significantEventSchema.pick({
+  event_id: true,
+  discovery_id: true,
+  status: true,
+  stream_names: true,
+  title: true,
+  symptom_hypothesis: true,
+  summary: true,
+  severity: true,
+  confidence: true,
+  assessment_note: true,
+  signals: true,
+  causal_features: true,
+  blast_radius: true,
+  workflow_execution_id: true,
+  conversation_id: true,
+});
 
 export function createEventsWriteTool({
   getScopedClients,
@@ -68,8 +54,8 @@ export function createEventsWriteTool({
     id: SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Create or version a significant event for a discovery episode. Handles deduplication: looks up the current event version by discovery_slug; if status has not changed, skips the write and returns the existing event_id.
-      For events linked to a discovery episode via discovery_slug. Standalone events not tied to a discovery episode use event_create instead.
+        Create or version a significant event for a discovery event. Handles deduplication: looks up the current event version by event_id; if status has not changed, skips the write and returns the existing event_uuid.,
+        For events linked to a discovery event via event_id. Standalone events not tied to a discovery event use event_create instead.
     `,
     schema: eventsWriteSchema,
     tags: ['streams', 'significant_events'],
@@ -77,8 +63,8 @@ export function createEventsWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        const { getEventClient, licensing } = await getScopedClients({ request });
+        await assertSignificantEventsAccess({ server, licensing });
 
         const data = await eventsWriteHandler({
           eventClient: getEventClient(),
@@ -87,7 +73,7 @@ export function createEventsWriteTool({
 
         telemetry.trackAgentToolEventsWrite({
           success: true,
-          discovery_slug: data.discovery_slug,
+          event_id: data.event_id,
           status: data.status,
           written: data.written,
           stream_names: toolParams.stream_names,
@@ -101,7 +87,7 @@ export function createEventsWriteTool({
         logger.error(`Error running events_write: ${message}`);
         telemetry.trackAgentToolEventsWrite({
           success: false,
-          discovery_slug: toolParams.discovery_slug,
+          event_id: toolParams.event_id,
           status: toolParams.status,
           written: false,
           stream_names: toolParams.stream_names,

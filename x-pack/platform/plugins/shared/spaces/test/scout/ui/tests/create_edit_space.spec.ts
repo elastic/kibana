@@ -183,6 +183,11 @@ test.describe('Spaces Management: Create and Edit', { tag: tags.stateful.classic
       await pageObjects.spaces.saveSpace();
       await pageObjects.spaces.confirmModal();
 
+      // Saving redirects back to the grid; wait for it to land before
+      // re-navigating, otherwise the explicit goto below races the app's own
+      // post-save navigation and Playwright aborts with an interrupted goto.
+      await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
+
       // Re-open the edit page and confirm the feature is still unselected.
       await pageObjects.spaces.gotoEditSpace(spaceId);
       expect(await pageObjects.spaces.isFeatureCategoryChecked('securitySolution')).toBe(false);

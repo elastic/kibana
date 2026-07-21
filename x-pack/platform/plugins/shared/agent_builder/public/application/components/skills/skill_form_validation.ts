@@ -20,28 +20,31 @@ import {
 } from '@kbn/agent-builder-common';
 
 const validationMessages = {
-  id: {
-    required: i18n.translate('xpack.agentBuilder.skills.validation.id.required', {
-      defaultMessage: 'ID is required.',
-    }),
-    tooLong: i18n.translate('xpack.agentBuilder.skills.validation.id.tooLong', {
-      defaultMessage: 'ID must be at most {maxLength} characters.',
-      values: { maxLength: skillIdMaxLength },
-    }),
-    format: i18n.translate('xpack.agentBuilder.skills.validation.id.format', {
-      defaultMessage:
-        'ID must start and end with a letter or number, and contain only lowercase letters, numbers, hyphens, and underscores.',
-    }),
-  },
   name: {
     required: i18n.translate('xpack.agentBuilder.skills.validation.name.required', {
       defaultMessage: 'Name is required.',
     }),
     tooLong: i18n.translate('xpack.agentBuilder.skills.validation.name.tooLong', {
       defaultMessage: 'Name must be at most {maxLength} characters.',
-      values: { maxLength: skillNameMaxLength },
+      values: { maxLength: skillIdMaxLength },
     }),
     format: i18n.translate('xpack.agentBuilder.skills.validation.name.format', {
+      defaultMessage:
+        'Name must start and end with a lowercase letter or number, and contain only lowercase letters, numbers, hyphens, and underscores.',
+    }),
+  },
+  referencedContentName: {
+    required: i18n.translate(
+      'xpack.agentBuilder.skills.validation.referencedContentName.required',
+      {
+        defaultMessage: 'Name is required.',
+      }
+    ),
+    tooLong: i18n.translate('xpack.agentBuilder.skills.validation.referencedContentName.tooLong', {
+      defaultMessage: 'Name must be at most {maxLength} characters.',
+      values: { maxLength: skillNameMaxLength },
+    }),
+    format: i18n.translate('xpack.agentBuilder.skills.validation.referencedContentName.format', {
       defaultMessage:
         'Name must start and end with a letter or number, and contain only letters, numbers, spaces, hyphens, and underscores.',
     }),
@@ -122,24 +125,19 @@ const referencedContentItemSchema: z.ZodType<ReferencedContentItem> = z.object({
   name: z
     .string()
     .trim()
-    .min(1, { message: validationMessages.name.required })
-    .max(skillNameMaxLength, { message: validationMessages.name.tooLong })
-    .regex(skillNameRegexp, { message: validationMessages.name.format }),
+    .min(1, { message: validationMessages.referencedContentName.required })
+    .max(skillNameMaxLength, { message: validationMessages.referencedContentName.tooLong })
+    .regex(skillNameRegexp, { message: validationMessages.referencedContentName.format }),
   relativePath: z.string().trim(),
   content: z.string(),
 });
 
 const skillFormObjectSchema = z.object({
-  id: z
-    .string()
-    .min(1, { message: validationMessages.id.required })
-    .max(skillIdMaxLength, { message: validationMessages.id.tooLong })
-    .regex(skillIdRegexp, { message: validationMessages.id.format }),
   name: z
     .string()
     .min(1, { message: validationMessages.name.required })
-    .max(skillNameMaxLength, { message: validationMessages.name.tooLong })
-    .regex(skillNameRegexp, { message: validationMessages.name.format }),
+    .max(skillIdMaxLength, { message: validationMessages.name.tooLong })
+    .regex(skillIdRegexp, { message: validationMessages.name.format }),
   description: z
     .string()
     .min(1, { message: validationMessages.description.required })
@@ -162,3 +160,12 @@ export const skillFormValidationSchema = skillFormObjectSchema.superRefine((data
 });
 
 export type SkillFormData = z.infer<typeof skillFormObjectSchema>;
+
+/**
+ * Sanitize input into the Name field on the fly so the user can type naturally
+ * without hitting the strict kebab-case validator on every keystroke:
+ * - uppercase letters are lowercased
+ * - any whitespace character becomes a single hyphen
+ */
+export const sanitizeSkillNameInput = (value: string): string =>
+  value.toLowerCase().replace(/\s/g, '-');

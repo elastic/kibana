@@ -163,6 +163,7 @@ interface FindRulesResponse {
     version?: number;
     revision?: number;
     immutable?: boolean;
+    tags?: string[];
   }>;
 }
 
@@ -249,6 +250,101 @@ export const enableRules = async ({
     headers: { 'kbn-xsrf': 'true', 'elastic-api-version': PUBLIC_API_VERSION },
     body: { action: 'enable', ids },
   });
+};
+
+export const disableRules = async ({
+  kbnClient,
+  ids,
+}: {
+  kbnClient: KbnClient;
+  ids: string[];
+}): Promise<void> => {
+  if (ids.length === 0) return;
+  await kbnClient.request({
+    method: 'POST',
+    path: `/api/detection_engine/rules/_bulk_action`,
+    headers: { 'kbn-xsrf': 'true', 'elastic-api-version': PUBLIC_API_VERSION },
+    body: { action: 'disable', ids },
+  });
+};
+
+export const deleteRules = async ({
+  kbnClient,
+  ids,
+}: {
+  kbnClient: KbnClient;
+  ids: string[];
+}): Promise<void> => {
+  if (ids.length === 0) return;
+  await kbnClient.request({
+    method: 'POST',
+    path: `/api/detection_engine/rules/_bulk_action`,
+    headers: { 'kbn-xsrf': 'true', 'elastic-api-version': PUBLIC_API_VERSION },
+    body: { action: 'delete', ids },
+  });
+};
+
+import { allKnownPackHuntRuleIds } from './hunt_ids';
+
+/** Custom Technology Watch pack rules created by this generator (current + legacy ids). */
+export const findGeneratorPackRules = async ({
+  kbnClient,
+}: {
+  kbnClient: KbnClient;
+}): Promise<FindRulesResponse['data']> => {
+  const known = new Set(allKnownPackHuntRuleIds());
+  const installed = await fetchAllInstalledRules({ kbnClient });
+  return installed.filter((r) => {
+    if (
+      known.has(r.rule_id) ||
+      r.rule_id.startsWith('data-generator-pack-') ||
+      r.rule_id === 'data-generator-endpoint-security'
+    ) {
+      return true;
+    }
+    // Ownership tags on custom pack hunts (do not match Endpoint Security by tag alone).
+    const tags = Array.isArray(r.tags)
+      ? r.tags.filter((t): t is string => typeof t === 'string')
+      : [];
+    return tags.includes('data-generator') && tags.some((t) => t.startsWith('pack:'));
+  });
+};
+
+export const createCustomRule = async ({
+  kbnClient,
+  log,
+  rule,
+}: {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  rule: Record<string, unknown>;
+}): Promise<ResolvedRuleRef> => {
+  const resp = await kbnClient.request<Record<string, unknown>>({
+    method: 'POST',
+    path: `/api/detection_engine/rules`,
+    headers: { 'kbn-xsrf': 'true', 'elastic-api-version': PUBLIC_API_VERSION },
+    body: rule,
+  });
+  const id = resp.data.id;
+  const ruleId = resp.data.rule_id;
+  const name = resp.data.name;
+  if (!isString(id) || !isString(ruleId) || !isString(name)) {
+    log.error(`createCustomRule: unexpected response ${JSON.stringify(resp.data)}`);
+    throw new Error('Failed to create custom rule (missing id/rule_id/name)');
+  }
+  return { id, rule_id: ruleId, name };
+};
+
+export const findInstalledRuleByRuleId = async ({
+  kbnClient,
+  ruleId,
+}: {
+  kbnClient: KbnClient;
+  ruleId: string;
+}): Promise<ResolvedRuleRef | undefined> => {
+  const installed = await fetchAllInstalledRules({ kbnClient });
+  const found = installed.find((r) => r.rule_id === ruleId);
+  return found ? { id: found.id, rule_id: found.rule_id, name: found.name } : undefined;
 };
 
 export const resolveRuleset = async ({

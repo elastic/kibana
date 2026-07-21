@@ -109,7 +109,7 @@ const eligibleStreamsRoute = createServerRoute({
     const { streamsClient, globalUiSettingsClient, uiSettingsClient, licensing } =
       await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const query = params?.query ?? {};
 
