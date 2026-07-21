@@ -25,6 +25,7 @@ jest.mock('../../../../../case_view/use_on_refresh_case_view_page');
 
 const mockDeleteCases = jest.fn();
 const mockOnStatusChanged = jest.fn();
+const mockOnSeverityChanged = jest.fn();
 
 (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
 (useDeleteCases as jest.Mock).mockReturnValue({ mutate: mockDeleteCases });
@@ -39,6 +40,7 @@ describe('useCaseViewHeader', () => {
     caseData: basicCase,
     onUpdateField,
     onStatusChanged: mockOnStatusChanged,
+    onSeverityChanged: mockOnSeverityChanged,
   };
 
   beforeEach(() => {
@@ -338,5 +340,21 @@ describe('useCaseViewHeader', () => {
     });
 
     expect(mockOnStatusChanged).toHaveBeenCalledWith('closed');
+  });
+
+  it('calls onSeverityChanged when severity badge item is clicked', () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper,
+    });
+
+    const severityBadge = result.current.badges.find(
+      (b) => b['data-test-subj'] === 'case-view-severity-badge'
+    );
+
+    act(() => {
+      severityBadge?.items?.[3]?.onClick?.();
+    });
+
+    expect(mockOnSeverityChanged).toHaveBeenCalledWith('critical');
   });
 });

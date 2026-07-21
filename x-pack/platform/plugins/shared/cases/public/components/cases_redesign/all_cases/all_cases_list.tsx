@@ -24,6 +24,7 @@ import { CasesList } from './components/list_view';
 import { VIEW_TOGGLE_TABLE_ID, type ViewToggleId } from './constants';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CasesMetrics } from './components/cases_metrics';
+import { CasesListOnboarding } from './onboarding/cases_list_onboarding';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import { initialData, useGetCases } from '../../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
@@ -249,6 +250,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     return (
       <>
         <EuiProgress size="xs" color="accent" className="essentialAnimation" css={cssStyling} />
+
+        {!isSelectorView ? <CasesListOnboarding /> : null}
 
         <CasesTableFilters
           countClosedCases={data.countClosedCases}

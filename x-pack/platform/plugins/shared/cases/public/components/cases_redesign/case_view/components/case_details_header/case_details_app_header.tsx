@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import type { CaseUI } from '../../../../../../common';
+import type { CaseSeverity, CaseUI } from '../../../../../../common';
 import type { OnUpdateFields } from '../../../../case_view/types';
 import { PAGE_TITLE } from '../../../../../common/translations';
 import { useCasesContext } from '../../../../cases_context/use_cases_context';
@@ -33,6 +33,11 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
   const { permissions } = useCasesContext();
   const { onStatusChanged, closeCaseModal } = useCloseCaseFlow({ caseData, onUpdateField });
 
+  const onSeverityChanged = useCallback(
+    (severity: CaseSeverity) => onUpdateField({ key: 'severity', value: severity }),
+    [onUpdateField]
+  );
+
   const {
     headerTitle,
     metadata,
@@ -45,7 +50,7 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
     isSettingsOpen,
     setIsSettingsOpen,
     settingsAnchor,
-  } = useCaseViewHeader({ caseData, onStatusChanged, onUpdateField });
+  } = useCaseViewHeader({ caseData, onStatusChanged, onSeverityChanged, onUpdateField });
 
   const onSyncAlertsChanged = useCallback(
     (checked: boolean) =>

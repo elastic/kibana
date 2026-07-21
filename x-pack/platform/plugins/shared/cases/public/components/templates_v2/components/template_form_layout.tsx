@@ -25,6 +25,7 @@ import { TEMPLATE_PREVIEW_WIDTH_KEY } from '../constants';
 import { TemplateResetModal } from './template_reset_modal';
 import { getTemplateFormBadges, getTemplateFormMenu } from './header_menu';
 import { TemplateEditorLayout } from './template_editor_layout';
+import { TemplateEditorTour } from '../tour/template_editor_tour';
 import {
   type FieldDefaultValue,
   updateYamlFieldDefault,
@@ -594,6 +595,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         // bar on Security or leaving dead space elsewhere.
         css={kbnFullBodyHeightCss(bodyHeightOffset)}
       >
+        <TemplateEditorTour enabled={!isLoading} />
         <EuiFlexItem grow={false}>
           <CasesAppHeader
             title={title}
