@@ -104,8 +104,6 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
-  `${internalNamespaces.streams}.sig-events.discovery`,
-  `${internalNamespaces.streams}.sig-events.discovery-judge`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -125,6 +123,8 @@ export const isAllowedBuiltinAgent = (agentName: string): agentName is AgentBuil
 export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
+  `${internalNamespaces.platformSignificantEvents}.discovery-type`,
+  `${internalNamespaces.platformSignificantEvents}.discovery-judge-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
@@ -172,6 +172,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-conversation-scraper',
   'significant-events-onboarding',
   'streams-gap-detection',
+
+  // Platform – Context Engine
+  'ki-automation-generation',
 
   // Platform – Workflows
   'workflow-authoring',
