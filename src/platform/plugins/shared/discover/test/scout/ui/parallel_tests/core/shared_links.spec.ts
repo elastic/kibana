@@ -18,6 +18,13 @@ const EMPTY_SORT_SNAPSHOT_URL =
 const DEFAULT_SORT_URL_STATE = /sort:!\(!\((?:%27|')@timestamp(?:%27|'),desc\)\)/;
 const EXPECTED_FIRST_ROW_TIMESTAMP = 'Sep 22, 2015 @ 23:50:13.253';
 
+const getUrlInCurrentSpace = (baseUrl: string, appUrl: string) => {
+  const { origin, pathname } = new URL(baseUrl);
+  const spacePath = pathname.match(/^(\/s\/[^/]+)?\/app\//)?.[1] ?? '';
+
+  return `${origin}${spacePath}${appUrl}`;
+};
+
 spaceTest.describe('Discover shared links', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
@@ -52,7 +59,7 @@ spaceTest.describe('Discover shared links', { tag: '@local-stateful-classic' }, 
     async ({ page, pageObjects, scoutSpace }) => {
       await scoutSpace.uiSettings.set({ 'state:storeInSessionStorage': false });
 
-      await page.goto(new URL(EMPTY_SORT_SNAPSHOT_URL, page.url()).toString());
+      await page.goto(getUrlInCurrentSpace(page.url(), EMPTY_SORT_SNAPSHOT_URL));
       await pageObjects.discover.waitUntilTabIsLoaded();
       await pageObjects.discover.selectDataView(testData.DEFAULT_DATA_VIEW);
 
