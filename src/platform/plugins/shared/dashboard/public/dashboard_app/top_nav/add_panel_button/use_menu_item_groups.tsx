@@ -101,7 +101,8 @@ export function getMenuItems(
         id: action.id,
         name: actionName,
         icon: action.getIconType?.(context) ?? 'empty',
-        onClick: (event: React.MouseEvent) => onAddPanelClick(event, dashboardApi, () => action.execute(context)),
+        onClick: (event: React.MouseEvent) =>
+          onAddPanelClick(event, dashboardApi, () => action.execute(context)),
         'data-test-subj': `create-action-${actionName}`,
         description: action?.getDisplayNameTooltip?.(context),
         isDisabled: action?.isDisabled?.(context),
@@ -116,7 +117,11 @@ export function getMenuItems(
     });
 }
 
-export function onAddPanelClick(event: React.MouseEvent, dashboardApi: DashboardApi, onClick: () => void) {
+export function onAddPanelClick(
+  event: React.MouseEvent,
+  dashboardApi: DashboardApi,
+  onClick: () => void
+) {
   dashboardApi.clearOverlays();
   if (event.currentTarget instanceof HTMLAnchorElement) {
     if (

@@ -102,23 +102,18 @@ export function DashboardEmptyScreen() {
     if (showEditPrompt) {
       return (
         <EuiFlexGroup gutterSize="s" wrap css={styles.actionsWrapper}>
-          {
-            hasChatItem && 
+          {hasChatItem && (
             <EuiFlexItem
-                key={OPEN_DASHBOARD_CHAT_ACTION_ID}
-                grow={hasChatItem}
-                css={styles.chatItem}
-              >
-                <DashboardEmptyScreenChat />
+              key={OPEN_DASHBOARD_CHAT_ACTION_ID}
+              grow={hasChatItem}
+              css={styles.chatItem}
+            >
+              <DashboardEmptyScreenChat />
             </EuiFlexItem>
-          }
+          )}
           {featuredItems.map((item) => {
             return (
-              <EuiFlexItem
-                key={item.id}
-                grow={hasChatItem}
-                css={styles.featuredItem}
-              >
+              <EuiFlexItem key={item.id} grow={hasChatItem} css={styles.featuredItem}>
                 {<FeaturedItemCard item={item} />}
               </EuiFlexItem>
             );

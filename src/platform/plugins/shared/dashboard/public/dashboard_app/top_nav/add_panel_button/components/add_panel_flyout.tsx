@@ -123,7 +123,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
         </EuiFlexItem>
         {featuredItems.length > 0 && (
           <EuiFlexItem grow={false} css={styles.featuredPanelsWrapper}>
-            { uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID) &&
+            {uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID) && (
               <AiButton
                 key={OPEN_DASHBOARD_CHAT_ACTION_ID}
                 fullWidth
@@ -139,9 +139,9 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                   defaultMessage: 'Create with chat',
                 })}
               </AiButton>
-            }
-            {featuredItems.map((item) => 
-              !item.isDisabled && <FeaturedItemCard key={item.id} item={item} />
+            )}
+            {featuredItems.map(
+              (item) => !item.isDisabled && <FeaturedItemCard key={item.id} item={item} />
             )}
           </EuiFlexItem>
         )}

@@ -9,18 +9,16 @@ import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
-  type AddPanelActionExtension,
   type OpenDashboardChatActionContext,
 } from '@kbn/dashboard-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 
 export const createOpenDashboardChatAction = (
   openChat: AgentBuilderPluginStart['openChat']
-): ActionDefinition<OpenDashboardChatActionContext, AddPanelActionExtension> => ({
+): ActionDefinition<OpenDashboardChatActionContext> => ({
   id: OPEN_DASHBOARD_CHAT_ACTION_ID,
   type: OPEN_DASHBOARD_CHAT_ACTION_ID,
   order: 0,
-  extension: { isAiAction: true },
   getDisplayName: () =>
     i18n.translate('xpack.agentBuilderDashboards.addPanelFlyout.createWithChatButtonLabel', {
       defaultMessage: 'Create with chat',
