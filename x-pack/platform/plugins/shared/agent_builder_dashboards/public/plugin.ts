@@ -55,10 +55,10 @@ export class AgentBuilderDashboardsPlugin
 
     if (core.application.capabilities.agentBuilder?.show === true) {
       plugins.uiActions.registerActionAsync(OPEN_DASHBOARD_CHAT_ACTION_ID, async () => {
-        const { OpenDashboardChatAction } = await import(
+        const { createOpenDashboardChatAction } = await import(
           './dashboard_empty_screen/open_dashboard_chat_action'
         );
-        return new OpenDashboardChatAction(plugins.agentBuilder.openChat);
+        return createOpenDashboardChatAction(plugins.agentBuilder.openChat);
       });
     }
 

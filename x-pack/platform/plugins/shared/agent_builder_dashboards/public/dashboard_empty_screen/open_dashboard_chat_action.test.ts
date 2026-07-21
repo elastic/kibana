@@ -7,9 +7,9 @@
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '@kbn/dashboard-plugin/public';
-import { OpenDashboardChatAction } from './open_dashboard_chat_action';
+import { createOpenDashboardChatAction } from './open_dashboard_chat_action';
 
-describe('OpenDashboardChatAction', () => {
+describe('createOpenDashboardChatAction', () => {
   const openChat = jest.fn() as jest.MockedFunction<AgentBuilderPluginStart['openChat']>;
 
   beforeEach(() => {
@@ -17,23 +17,23 @@ describe('OpenDashboardChatAction', () => {
   });
 
   it('declares the highlighted extension treatment', () => {
-    const action = new OpenDashboardChatAction(openChat);
+    const action = createOpenDashboardChatAction(openChat);
 
     expect(action.extension).toEqual({ isHighlighted: true });
   });
 
   it('uses the agent icon and Create with chat label', () => {
-    const action = new OpenDashboardChatAction(openChat);
+    const action = createOpenDashboardChatAction(openChat);
 
-    expect(action.getIconType()).toBe('productAgent');
-    expect(action.getDisplayName()).toBe('Create with chat');
+    expect(action.getIconType?.()).toBe('productAgent');
+    expect(action.getDisplayName?.()).toBe('Create with chat');
   });
 
   it('is compatible', async () => {
-    const action = new OpenDashboardChatAction(openChat);
+    const action = createOpenDashboardChatAction(openChat);
 
     await expect(
-      action.isCompatible({
+      action.isCompatible?.({
         initialMessage: 'Create a dashboard',
         trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
       })
@@ -41,7 +41,7 @@ describe('OpenDashboardChatAction', () => {
   });
 
   it('opens Chat with the provided prompt without sending', async () => {
-    const action = new OpenDashboardChatAction(openChat);
+    const action = createOpenDashboardChatAction(openChat);
 
     await action.execute({
       initialMessage: 'Create a dashboard',
@@ -57,7 +57,7 @@ describe('OpenDashboardChatAction', () => {
   });
 
   it('prefills chat with the default chart prompt when none is provided', async () => {
-    const action = new OpenDashboardChatAction(openChat);
+    const action = createOpenDashboardChatAction(openChat);
 
     await action.execute({
       trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },

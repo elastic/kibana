@@ -7,7 +7,6 @@
 
 import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '@kbn/dashboard-plugin/public';
-import { OpenDashboardChatAction } from './dashboard_empty_screen/open_dashboard_chat_action';
 import { AgentBuilderDashboardsPlugin } from './plugin';
 import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
 
@@ -17,6 +16,7 @@ jest.mock('./attachment_types', () => ({
 
 describe('AgentBuilderDashboardsPlugin', () => {
   const registerActionAsync = jest.fn();
+  const openChat = jest.fn();
 
   const createCoreStart = (showAgentBuilder: boolean) =>
     ({
@@ -31,7 +31,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
 
   const createStartDependencies = () =>
     ({
-      agentBuilder: { openChat: jest.fn() },
+      agentBuilder: { openChat },
       dashboard: {},
       share: {
         url: {
@@ -47,6 +47,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
 
   beforeEach(() => {
     registerActionAsync.mockClear();
+    openChat.mockClear();
   });
 
   it('registers a lazy open-dashboard-chat action when Agent Builder is available', async () => {
@@ -59,9 +60,13 @@ describe('AgentBuilderDashboardsPlugin', () => {
       expect.any(Function)
     );
 
-    await expect(registerActionAsync.mock.calls[0][1]()).resolves.toBeInstanceOf(
-      OpenDashboardChatAction
-    );
+    const action = await registerActionAsync.mock.calls[0][1]();
+    expect(action.id).toBe(OPEN_DASHBOARD_CHAT_ACTION_ID);
+
+    await action.execute({
+      trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
+    });
+    expect(openChat).toHaveBeenCalled();
   });
 
   it('does not register dashboard Chat entry points without Agent Builder capabilities', () => {
