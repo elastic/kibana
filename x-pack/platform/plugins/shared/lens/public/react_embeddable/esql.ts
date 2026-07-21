@@ -66,6 +66,7 @@ export async function loadESQLAttributes({
     search: data.search.search,
     signal: abortController.signal,
     timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
+    includeColumnMetadata: true,
   });
 
   const context = {

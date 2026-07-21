@@ -15,6 +15,7 @@ import { bulkCreateAlertActions } from './bulk_create_alert_actions';
 import { uniqueByGroup, successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 import { openSnoozeExpiryModal } from '../components/snooze_expiry_modal';
+import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
 
 export interface SnoozeActionDeps {
   http: HttpStart;
@@ -29,7 +30,8 @@ export const createSnoozeAction = (deps: SnoozeActionDeps): EpisodeAction => ({
   displayName: i18n.SNOOZE,
   iconType: 'bellSlash',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.length > 0 && episodes.some((ep) => ep.last_snooze_action !== 'snooze'),
+    episodes.length > 0 &&
+    episodes.some((ep) => !isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const expiry = await openSnoozeExpiryModal(deps.overlays, deps.rendering);
     if (expiry === undefined) return;
