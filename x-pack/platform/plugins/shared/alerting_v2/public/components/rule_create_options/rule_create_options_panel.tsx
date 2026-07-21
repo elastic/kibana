@@ -12,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiImage,
+  EuiListGroup,
   EuiPageTemplate,
   EuiPanel,
   EuiSpacer,
@@ -415,31 +416,17 @@ const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ ite
       />
       {showClassicTypes && (
         <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="column" gutterSize="s">
-            {items.map((item) => (
-              <EuiFlexItem key={item.id} grow={false}>
-                <EuiPanel
-                  element="button"
-                  hasBorder={false}
-                  hasShadow={false}
-                  color="transparent"
-                  paddingSize="xs"
-                  onClick={item.onClick}
-                  data-test-subj={item['data-test-subj']}
-                >
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="bell" size="m" color="subdued" aria-hidden={true} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">{item.label}</EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiListGroup
+            maxWidth={false}
+            listItems={items.map((item) => ({
+              key: item.id,
+              label: item.label,
+              onClick: item.onClick,
+              iconType: 'bell',
+              'data-test-subj': item['data-test-subj'],
+            }))}
+          />
         </>
       )}
     </>
