@@ -217,14 +217,19 @@ describe('unified data table', () => {
 
       fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
 
+      // openSystemFlyout receives the element but does not render it in tests,
+      // so verify the props on the element passed to the system flyout instead.
       await waitFor(() => {
-        expect(mockPaginatedTimelineDocumentFlyout).toHaveBeenCalledWith(
-          expect.objectContaining({
-            paginationInstanceId: expect.any(String),
-            onAlertUpdated: refetchMock,
-          })
-        );
+        expect(mockOpenSystemFlyout).toHaveBeenCalled();
       });
+
+      const element = mockOpenSystemFlyout.mock.calls[0][0] as React.ReactElement;
+      expect(element.props).toEqual(
+        expect.objectContaining({
+          paginationInstanceId: expect.any(String),
+          onAlertUpdated: refetchMock,
+        })
+      );
 
       expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
       expect(mockDocumentFlyoutWrapper).not.toHaveBeenCalled();

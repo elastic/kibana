@@ -18,6 +18,7 @@ import { AlertsTable } from '.';
 
 jest.mock('@kbn/response-ops-alerts-table', () => ({
   AlertsTable: jest.fn(() => null),
+  alertsTableQueryClient: { mount: jest.fn(), unmount: jest.fn() },
 }));
 jest.mock('../../../agent_builder/hooks/use_report_add_to_chat');
 jest.mock('../../../agent_builder/hooks/use_agent_builder_availability', () => ({
@@ -121,6 +122,9 @@ jest.mock('../../configurations/security_solution_detections', () => ({
 }));
 jest.mock('../../../timelines/components/timeline/body/control_columns', () => ({
   getDefaultControlColumn: jest.fn(() => [{ width: 124 }]),
+}));
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query', () => ({
+  useSearchAlertsQuery: jest.fn(() => ({ data: undefined, isFetching: false })),
 }));
 
 const makeItem = (id: string): TimelineItem =>

@@ -36,6 +36,13 @@ import { FLYOUT_V2_LOADING_SPINNER_TEST_ID } from './components/test_ids';
 
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../common/hooks/is_in_security_app');
+// Avoid persistent tab selection leaking between tests: use in-memory state only.
+jest.mock('../../shared/hooks/use_tabs', () => ({
+  useTabs: jest.fn(({ validTabIds }: { validTabIds: string[] }) => {
+    const [selectedTabId, setSelectedTabId] = jest.requireActual('react').useState(validTabIds[0]);
+    return { selectedTabId, setSelectedTabId };
+  }),
+}));
 jest.mock('./utils/get_timeline_events_details_from_record', () => ({
   getTimelineEventsDetailsFromRecord: jest.fn(() => []),
 }));
