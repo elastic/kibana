@@ -129,7 +129,6 @@ For each test group, answer all four:
 2. **Where should they ideally run in Scout?**
    - **Platform tests** (`src/platform/**`, `x-pack/platform/**`): use `tags.deploymentAgnostic` when the original intent was "run everywhere."
    - **Solution tests** (`x-pack/solutions/observability|security|search/...`): use explicit `tags.stateful.*` + `tags.serverless.<solution>.*` rather than `tags.deploymentAgnostic`.
-   - Use stateful-only Scout tags if the FTR suite was skipped in serverless or Cloud with FTR-only markers such as `skipSvlOblt`, `skipSvlSec`, or `failsOnMKI`; those markers do not exist as Scout tags.
    - Flag tests that currently run in only one environment but could run in both.
 3. **Are there stateful/serverless mirror FTR files?** List each duplicate or near-duplicate found by the mirror-suite discovery step. Decide whether to:
    - merge them into one Scout spec with tags covering both deployment targets,
