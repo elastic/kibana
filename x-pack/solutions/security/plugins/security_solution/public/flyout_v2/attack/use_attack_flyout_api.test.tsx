@@ -13,6 +13,14 @@ import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+  FLYOUT_TOOL,
+  FLYOUT_SESSION_KIND,
+} from '../../common/lib/telemetry';
 
 jest.mock('react-redux-v7', () => ({
   ...jest.requireActual('react-redux-v7'),
@@ -33,13 +41,18 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
 }));
 
 const mockOpenSystemFlyout = jest.fn();
+const mockReportEvent = jest.fn();
 const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTableRecord;
 
 describe('useAttackFlyoutApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     (useKibana as jest.Mock).mockReturnValue({
-      services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } },
+      services: {
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        telemetry: { reportEvent: mockReportEvent },
+      },
     });
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
   });
@@ -53,6 +66,30 @@ describe('useAttackFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 's', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.ATTACK,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: undefined,
+    });
+  });
+
+  it('openAttackFlyout forwards the given origin', () => {
+    const { result } = renderHook(() => useAttackFlyoutApi());
+    result.current.openAttackFlyout({
+      attackId: 'attack-1',
+      indexName: '.alerts-security',
+      origin: FLYOUT_ORIGIN.ATTACKS_TABLE,
+    });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.ATTACK,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.ATTACKS_TABLE,
+    });
   });
 
   it('openAttackFlyoutAsChild opens a system flyout that inherits the current session', () => {
@@ -68,6 +105,13 @@ describe('useAttackFlyoutApi', () => {
         historyKey: documentFlyoutHistoryKey,
       })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.ATTACK,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.INHERIT,
+      origin: undefined,
+    });
   });
 
   it('openAttackCorrelations opens the correlations tool flyout with the tools properties and propagates inherit context to its content', () => {
@@ -78,6 +122,13 @@ describe('useAttackFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 'm', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.TOOL,
+      tool: FLYOUT_TOOL.CORRELATIONS,
+      flyoutType: FLYOUT_TYPE.ATTACK,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: undefined,
+    });
     const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
     expect(children.props.value).toEqual({
       session: 'inherit',
@@ -93,6 +144,13 @@ describe('useAttackFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 'm', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.TOOL,
+      tool: FLYOUT_TOOL.ENTITIES,
+      flyoutType: FLYOUT_TYPE.ATTACK,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: undefined,
+    });
     const { children } = (flyoutProviders as jest.Mock).mock.calls[0][0];
     expect(children.props.value).toEqual({
       session: 'inherit',
