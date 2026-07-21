@@ -28,6 +28,19 @@ jest.mock('@kbn/expandable-flyout', () => ({
   }),
 }));
 
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => false,
+}));
+
+jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openUserFlyout: jest.fn(),
+    openHostFlyout: jest.fn(),
+    openServiceFlyout: jest.fn(),
+    openGenericEntityFlyout: jest.fn(),
+  }),
+}));
+
 const createMockObservation = (overrides: Partial<Observation> = {}): Observation => ({
   entityId: 'entity-1',
   moduleId: 'risk_analysis',
