@@ -101,6 +101,9 @@ const actionPanelDisabledStyle = css({
   opacity: 0.5,
 });
 
+const AI_GRADIENT_START = 'rgb(23, 80, 186)';
+const AI_GRADIENT_END = 'rgb(107, 60, 159)';
+
 const flyoutCardStyles = {
   card: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -108,12 +111,11 @@ const flyoutCardStyles = {
       cursor: 'pointer',
       minWidth: 0,
     }),
-  aiCard: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      borderColor: euiTheme.colors.primary,
-    }),
+  aiCard: css({
+    borderColor: AI_GRADIENT_END,
+  }),
   aiTitle: css({
-    backgroundImage: 'linear-gradient(176deg, rgb(23, 80, 186) 3%, rgb(107, 60, 159) 66%)',
+    backgroundImage: `linear-gradient(176deg, ${AI_GRADIENT_START} 3%, ${AI_GRADIENT_END} 66%)`,
     WebkitBackgroundClip: 'text',
     backgroundClip: 'text',
     color: 'transparent',
@@ -460,7 +462,7 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
     >
       <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="productAgent" size="m" color="text" aria-hidden={true} />
+          <EuiIcon type="productAgent" size="m" color={AI_GRADIENT_END} aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">
