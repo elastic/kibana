@@ -164,6 +164,41 @@ describe('applySemanticFeatureAliases', () => {
     expect(result.reuseCount).toBe(0);
   });
 
+  it('does not record an alias when the model emits both the candidate and the hit', () => {
+    // The model searched with redis-cache, saw redis, and deliberately kept both.
+    // An alias here would silently merge them once redis-cache expires.
+    const result = applySemanticFeatureAliases(
+      [createFeature({ id: 'redis' }), createFeature({ id: 'redis-cache' })],
+      [
+        {
+          candidateId: 'redis-cache',
+          type: 'technology',
+          hitIds: new Set(['redis']),
+        },
+      ]
+    );
+
+    expect(result.features.every((feature) => feature.meta?.aliases === undefined)).toBe(true);
+    expect(result.reuseCount).toBe(0);
+  });
+
+  it('records an alias when the candidate was abandoned for a versioned form of the hit', () => {
+    // Searching with okta-3.14.1 and shipping okta still counts as abandoning the candidate.
+    const result = applySemanticFeatureAliases(
+      [createFeature({ id: 'okta' })],
+      [
+        {
+          candidateId: 'okta-3.14.1',
+          type: 'technology',
+          hitIds: new Set(['okta']),
+        },
+      ]
+    );
+
+    expect(result.features[0].meta?.aliases).toEqual(['okta-3.14.1']);
+    expect(result.reuseCount).toBe(1);
+  });
+
   it('does not capture an ambiguous alias when multiple finalized features match the search hits', () => {
     const result = applySemanticFeatureAliases(
       [createFeature({ id: 'okta' }), createFeature({ id: 'auth0' })],

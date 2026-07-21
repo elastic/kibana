@@ -141,12 +141,14 @@ export const applySemanticFeatureAliases = (
   searchRecords: ReadonlyArray<SemanticFeatureSearchRecord>
 ): { features: BaseFeature[]; reuseCount: number } => {
   let reuseCount = 0;
+  const finalizedFeatureIds = new Set<string>();
   const featureIdsByMatchingId = new Map<string, Set<string>>();
   for (const feature of features) {
     const matchingId = getTypedFeatureMatchingId(feature.type, feature.id);
     const featureIds = featureIdsByMatchingId.get(matchingId) ?? new Set<string>();
     featureIds.add(getTypedFeatureId(feature.type, feature.id));
     featureIdsByMatchingId.set(matchingId, featureIds);
+    finalizedFeatureIds.add(getTypedFeatureId(feature.type, feature.id));
   }
   const aliasesToAddByFeatureId = new Map<string, string[]>();
 
@@ -157,6 +159,10 @@ export const applySemanticFeatureAliases = (
     }
 
     const candidateFeatureId = getTypedFeatureId(type, candidateId);
+    // The model emitted the candidate too, so nothing was abandoned — no alias.
+    if (finalizedFeatureIds.has(candidateFeatureId)) {
+      continue;
+    }
     const reusedFeatureIds = new Set<string>();
     for (const hitId of hitIds) {
       const matchingFeatureIds = featureIdsByMatchingId.get(getTypedFeatureMatchingId(type, hitId));
