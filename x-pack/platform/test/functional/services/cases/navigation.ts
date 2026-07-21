@@ -10,6 +10,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export function CasesNavigationProvider({ getPageObject, getService }: FtrProviderContext) {
   const common = getPageObject('common');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async navigateToApp(app: string = 'cases', appSelector: string = 'cases-app', search?: string) {
@@ -17,9 +18,30 @@ export function CasesNavigationProvider({ getPageObject, getService }: FtrProvid
       await testSubjects.existOrFail(appSelector);
     },
 
+    /**
+     * Clicks a cases header menu item (e.g. `configure-case-button`). In the redesign the item lives
+     * in the app header menu, which collapses into an overflow popover at narrower widths, so open it
+     * first when the item is not directly clickable.
+     */
+    async clickHeaderMenuItem(testSubj: string) {
+      if (await testSubjects.exists(testSubj, { timeout: 2000 })) {
+        await testSubjects.click(testSubj);
+        return;
+      }
+
+      await testSubjects.click('app-menu-overflow-button');
+      await testSubjects.click(testSubj);
+    },
+
     async navigateToConfigurationPage(app: string = 'cases') {
       await this.navigateToApp(app, 'cases-app');
-      await common.clickAndValidate('configure-case-button', 'case-configure-title');
+      await this.clickHeaderMenuItem('configure-case-button');
+      await retry.waitFor('the configuration page to load', async () => {
+        return (
+          (await testSubjects.exists('case-configure-title')) ||
+          (await testSubjects.exists('cases-redesign-settings-panel'))
+        );
+      });
     },
 
     async navigateToSingleCase(app: string = 'cases', caseId: string, tabId?: string) {
