@@ -372,6 +372,14 @@ Expected one of:
           values: { identifier: out.identifier },
         }),
       };
+    case 'unsupportedJoinIndexPrefix':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.unsupportedJoinIndexPrefix', {
+          defaultMessage:
+            'Invalid index pattern [{identifier}], remote clusters are not supported with LOOKUP JOIN',
+          values: { identifier: out.identifier },
+        }),
+      };
     case 'joinOnSingleExpression':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.joinOnSingleExpression', {
@@ -667,11 +675,14 @@ export const errors = {
       type,
     }),
 
-  invalidJoinIndex: (identifier: ESQLSource): ESQLMessage =>
+  invalidJoinIndex: (indexName: string, location: ESQLLocation): ESQLMessage =>
     tagSemanticError(
-      errors.byId('invalidJoinIndex', identifier.location, { identifier: identifier.name }),
+      errors.byId('invalidJoinIndex', location, { identifier: indexName }),
       'getJoinIndices'
     ),
+
+  unsupportedJoinIndexPrefix: (source: ESQLSource): ESQLMessage =>
+    errors.byId('unsupportedJoinIndexPrefix', source.location, { identifier: source.name }),
 
   joinOnSingleExpression: (location: ESQLLocation): ESQLMessage =>
     errors.byId('joinOnSingleExpression', location, {}),

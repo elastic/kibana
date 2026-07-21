@@ -43,6 +43,33 @@ describe('JOIN Validation', () => {
         joinExpectErrors('FROM index | LEFT JOIN join_index_alias_2 ON keywordField', []);
       });
 
+      test('allows coordinator lookup indices and aliases', () => {
+        joinExpectErrors(
+          'FROM index | LOOKUP JOIN _coordinator:coordinator_only_index ON keywordField',
+          []
+        );
+        joinExpectErrors(
+          'FROM remote_cluster:index | LOOKUP JOIN _coordinator:join_index_alias_1 ON keywordField',
+          []
+        );
+      });
+
+      test('validates coordinator targets against coordinator lookup indices', () => {
+        joinExpectErrors(
+          'FROM remote_cluster:index | LOOKUP JOIN _coordinator:lookup_index ON keywordField',
+          ['"lookup_index" is not a valid JOIN index. Please use a "lookup" mode index.']
+        );
+      });
+
+      test('rejects unsupported lookup join prefixes', () => {
+        joinExpectErrors('FROM index | LOOKUP JOIN remote_cluster:join_index ON keywordField', [
+          'Invalid index pattern [remote_cluster:join_index], remote clusters are not supported with LOOKUP JOIN',
+        ]);
+        joinExpectErrors('FROM index | LOOKUP JOIN _COORDINATOR:join_index ON keywordField', [
+          'Invalid index pattern [_COORDINATOR:join_index], remote clusters are not supported with LOOKUP JOIN',
+        ]);
+      });
+
       test('handles correctly conflicts', () => {
         joinExpectErrors(
           'FROM index  | EVAL keywordField = to_IP(keywordField) | LEFT JOIN join_index ON keywordField',
@@ -51,6 +78,11 @@ describe('JOIN Validation', () => {
       });
     });
 
-    test.todo('... AS <alias> ...');
+    test('... AS <alias> ...', () => {
+      joinExpectErrors(
+        'FROM remote_cluster:index | LOOKUP JOIN _coordinator:join_index AS lookup ON keywordField',
+        []
+      );
+    });
   });
 });

@@ -434,6 +434,10 @@ export interface ValidationErrors {
     message: string;
     type: { identifier: string };
   };
+  unsupportedJoinIndexPrefix: {
+    message: string;
+    type: { identifier: string };
+  };
   tooManyForks: {
     message: string;
     type: {};

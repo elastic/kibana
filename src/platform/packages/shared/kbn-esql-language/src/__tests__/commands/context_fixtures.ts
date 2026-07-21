@@ -33,6 +33,16 @@ export const joinIndices: IndexAutocompleteItem[] = [
   },
 ];
 
+export const coordinatorJoinIndices: IndexAutocompleteItem[] = [
+  joinIndices[0],
+  joinIndices[1],
+  {
+    name: 'coordinator_only_index',
+    mode: 'Lookup',
+    aliases: [],
+  },
+];
+
 export const lookupIndexFields = [
   { name: 'booleanField', type: 'boolean' },
   { name: 'dateField', type: 'date' },
@@ -195,6 +205,7 @@ export const mockContext: ICommandContext = {
     type: 'Index',
   })),
   joinSources: joinIndices,
+  coordinatorJoinSources: coordinatorJoinIndices,
   timeSeriesSources: timeseriesIndices,
   inferenceEndpoints,
   histogramBarTarget: 50,

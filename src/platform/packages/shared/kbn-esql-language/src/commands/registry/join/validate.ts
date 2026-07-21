@@ -19,6 +19,7 @@ import { isBinaryExpression, isIdentifier, isSource } from '@elastic/esql';
 import type { ICommandCallbacks, ICommandContext } from '../types';
 import { errors } from '../../definitions/utils/errors';
 import { validateCommandArguments } from '../../definitions/utils/validation';
+import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '../../definitions/constants';
 import { getOnOption } from './utils';
 import type { ESQLMessage } from '../../definitions/types';
 
@@ -30,7 +31,6 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   const { commandType, args } = command as ESQLAstJoinCommand;
-  const joinSources = context?.joinSources || [];
 
   if (!['left', 'right', 'lookup'].includes(commandType)) {
     return [errors.unexpected(command.location, 'JOIN command type')];
@@ -57,28 +57,29 @@ export const validate = (
     return [errors.unexpected(target.location)];
   }
 
-  let isIndexFound = false;
-  for (const { name, aliases } of joinSources) {
-    if (index.name === name) {
-      isIndexFound = true;
-      break;
-    }
+  const prefix = index.prefix?.valueUnquoted;
 
-    if (aliases) {
-      for (const aliasName of aliases) {
-        if (index.name === aliasName) {
-          isIndexFound = true;
-          break;
-        }
-      }
-    }
+  if (prefix && prefix !== COORDINATOR_LOOKUP_JOIN_PREFIX) {
+    return [errors.unsupportedJoinIndexPrefix(index)];
   }
 
-  if (!isIndexFound) {
-    const error = errors.invalidJoinIndex(index);
-    messages.push(error);
+  const isCoordinatorTarget = prefix === COORDINATOR_LOOKUP_JOIN_PREFIX;
+  const coordinatorIndex = isCoordinatorTarget ? index.index : undefined;
+  if (isCoordinatorTarget && !coordinatorIndex) {
+    return [errors.unexpected(index.location)];
+  }
 
-    return messages;
+  const indexName = coordinatorIndex?.valueUnquoted ?? index.name;
+  const indexLocation = coordinatorIndex?.location ?? index.location;
+  const joinSources = isCoordinatorTarget
+    ? context?.coordinatorJoinSources ?? []
+    : context?.joinSources ?? [];
+  const indexExists = joinSources.some(
+    ({ name, aliases = [] }) => name === indexName || aliases.includes(indexName)
+  );
+
+  if (!indexExists) {
+    return [errors.invalidJoinIndex(indexName, indexLocation)];
   }
 
   // Validate JOIN ON expressions
