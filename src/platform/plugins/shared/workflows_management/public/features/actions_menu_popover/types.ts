@@ -18,7 +18,13 @@ export interface EditorCommand {
   shortcut?: string[];
 }
 
-export type IconVariant = 'trigger' | 'platform' | 'external' | 'flowControl' | 'neutral';
+export type IconVariant =
+  | 'trigger'
+  | 'platform'
+  | 'external'
+  | 'flowControl'
+  | 'neutral'
+  | 'dataTransformation';
 
 export interface JumpToStepEntry {
   id: string;

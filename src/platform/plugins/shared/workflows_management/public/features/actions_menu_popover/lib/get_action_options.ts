@@ -121,7 +121,7 @@ export function getActionOptions(
 
   const kibanaCasesGroup: ActionGroup = {
     iconType: 'briefcase',
-    iconColor: euiTheme.colors.textInverse,
+    iconColor: euiTheme.colors.textParagraph,
     id: 'kibana.cases',
     label: i18n.translate('workflows.actionsMenu.kibanaCases', {
       defaultMessage: 'Cases',
@@ -415,10 +415,10 @@ export function getActionOptions(
   // App logos use neutral containers so brand colors stay readable
   elasticSearchGroup.iconVariant = 'neutral';
   kibanaGroup.iconVariant = 'neutral';
-  // Cases uses a briefcase icon (not an app logo) — keep platform treatment
-  kibanaCasesGroup.iconVariant = 'platform';
+  // Cases uses a briefcase glyph — same neutral tile as Kibana / ES / External
+  kibanaCasesGroup.iconVariant = 'neutral';
   aiGroup.iconVariant = 'platform';
-  dataTransformationGroup.iconVariant = 'platform';
+  dataTransformationGroup.iconVariant = 'dataTransformation';
   externalGroup.iconVariant = 'external';
   flowControlGroup.iconVariant = 'flowControl';
 
@@ -470,9 +470,14 @@ function sortOptionsByLabel(options: ActionOptionData[]): void {
   }
 }
 
-/** Filled tile variants (pink / blue / teal) always use inverse glyphs for contrast. */
+/** Filled tile variants (pink / blue / teal / warning) always use inverse glyphs for contrast. */
 export function usesInverseIconColor(variant: IconVariant | undefined): boolean {
-  return variant === 'platform' || variant === 'trigger' || variant === 'flowControl';
+  return (
+    variant === 'platform' ||
+    variant === 'trigger' ||
+    variant === 'flowControl' ||
+    variant === 'dataTransformation'
+  );
 }
 
 function assignIconVariants(

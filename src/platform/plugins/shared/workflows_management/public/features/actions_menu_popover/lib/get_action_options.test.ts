@@ -281,13 +281,13 @@ describe('getActionOptions', () => {
       expect(kibanaGroup.options).toHaveLength(1);
       const casesNested = kibanaGroup.options[0];
       expect(casesNested.id).toBe('kibana.cases');
-      expect(casesNested.iconVariant).toBe('platform');
-      expect(casesNested.iconColor).toBe(mockEuiTheme.colors.textInverse);
+      expect(casesNested.iconVariant).toBe('neutral');
+      expect(casesNested.iconColor).toBe(mockEuiTheme.colors.textParagraph);
       if (isActionGroup(casesNested)) {
         expect(casesNested.options).toHaveLength(1);
         expect(casesNested.options[0].id).toBe('cases.createCase');
-        expect(casesNested.options[0].iconVariant).toBe('platform');
-        expect(casesNested.options[0].iconColor).toBe(mockEuiTheme.colors.textInverse);
+        expect(casesNested.options[0].iconVariant).toBe('neutral');
+        expect(casesNested.options[0].iconColor).toBeUndefined();
       }
     }
   });

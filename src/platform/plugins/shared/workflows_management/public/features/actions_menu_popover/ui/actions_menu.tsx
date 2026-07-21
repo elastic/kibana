@@ -74,6 +74,8 @@ function getIconOuterStyle(
       return styles.iconOuterAppLogo;
     case 'flowControl':
       return styles.iconOuterFlowControl;
+    case 'dataTransformation':
+      return styles.iconOuterDataTransformation;
     case 'platform':
     default:
       return styles.iconOuterPlatform;
@@ -194,12 +196,8 @@ export function ActionsMenu({
         return;
       }
 
-      // Commands: skip hover handling entirely — do not update the right panel.
+      // Commands have no right-panel preview — keep the last preview as-is.
       if (el.closest('[data-command-id]')) {
-        if (hoveredOption || hoveredJumpEntry) {
-          setHoveredOption(null);
-          setHoveredJumpEntry(null);
-        }
         return;
       }
 
@@ -215,11 +213,6 @@ export function ActionsMenu({
     },
     [flatOptions, hoveredOption, hoveredJumpEntry, jumpToStepEntries]
   );
-
-  const handleMouseLeave = useCallback(() => {
-    setHoveredOption(null);
-    setHoveredJumpEntry(null);
-  }, []);
 
   const navigateToPath = useCallback(
     (nextPath: string[]) => {
@@ -306,7 +299,7 @@ export function ActionsMenu({
                 <EuiIcon
                   type={command.iconType}
                   size="m"
-                  color={euiTheme.colors.textInk}
+                  color={euiTheme.colors.textParagraph}
                   aria-hidden={true}
                 />
               </span>
@@ -769,7 +762,7 @@ export function ActionsMenu({
             <div css={styles.searchRow}>{search}</div>
           </div>
 
-          <EuiFlexGroup gutterSize="none" css={styles.body} onMouseLeave={handleMouseLeave}>
+          <EuiFlexGroup gutterSize="none" css={styles.body}>
             {/* Left column — list */}
             <EuiFlexItem css={styles.leftColumn} onMouseMove={handleListMouseMove}>
               {showBreadcrumbs && (
@@ -819,7 +812,22 @@ export function ActionsMenu({
                 hoveredJumpEntry={hoveredJumpEntry}
                 onStepSelected={handleStepOrGroupSelected}
                 onAddStep={handleAddStep}
-                onPinPreview={(action) => {
+                onPinPreview={(action, parentSection) => {
+                  // From a category preview: open that category on the left so the
+                  // list matches the right panel, then pin this step's detail.
+                  if (
+                    parentSection &&
+                    (isActionGroup(parentSection) || isActionConnectorGroup(parentSection))
+                  ) {
+                    const nextPath = parentSection.pathIds ?? [...currentPath, parentSection.id];
+                    const alreadyThere =
+                      nextPath.length === currentPath.length &&
+                      nextPath.every((id, i) => id === currentPath[i]);
+                    if (!alreadyThere) {
+                      setSearchTerm('');
+                      navigateToPath([...nextPath]);
+                    }
+                  }
                   setPinnedOption(action);
                   setHoveredOption(action);
                   setHoveredJumpEntry(null);
@@ -842,7 +850,7 @@ const componentStyles = {
   header: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexShrink: 0,
-      padding: `12px ${euiTheme.size.base}`,
+      padding: `16px ${euiTheme.size.base} 12px`,
       display: 'flex',
       flexDirection: 'column',
       gap: '10px',
@@ -881,8 +889,17 @@ const componentStyles = {
   breadcrumbRow: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexShrink: 0,
+      // Overlap the header border so subpixel centering (panel translate) can't leave a hairline
+      marginTop: -1,
       padding: `8px 16px`,
       borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      position: 'relative',
+      zIndex: 1,
+      fontSize: '12px',
+      '& .euiBreadcrumb, & .euiBreadcrumb__content, & .euiBreadcrumbs__list': {
+        fontSize: '12px',
+      },
     }),
   noResults: css({
     flex: 1,
@@ -925,6 +942,14 @@ const componentStyles = {
         paddingTop: '0 !important',
         maskImage: 'none',
         WebkitMaskImage: 'none',
+        '&::before, &::after': {
+          content: 'none !important',
+          display: 'none !important',
+        },
+        // Breathing room under the search header when a section label leads the list
+        '& > ul:has(> .euiSelectableList__groupLabel:first-child)': {
+          paddingTop: '16px',
+        },
       },
       '& .euiSelectableList__groupLabel': {
         position: 'sticky',
@@ -937,11 +962,17 @@ const componentStyles = {
         borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
         // Opaque so list rows don't show through while the header is stuck
         backgroundColor: euiTheme.colors.backgroundBasePlain,
+        // EUI draws a top rule via ::before on later section labels — remove it
+        '&::before': {
+          content: 'none',
+          display: 'none',
+        },
       },
-      // Space before later section labels (e.g. Commands); no top border —
-      // the preceding row already provides a bottom rule.
+      // Exactly 24px from the previous item to the next section label text
+      // (EUI also adds extra padding-top on later labels — zero that out).
       '& .euiSelectableList__groupLabel ~ .euiSelectableList__groupLabel': {
         marginTop: '24px',
+        paddingTop: 0,
       },
       '& .euiSelectableListItem__content': {
         gap: 0,
@@ -1019,11 +1050,17 @@ const componentStyles = {
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       border: `1px solid ${euiTheme.colors.borderBaseProminent}`,
     }),
-  // Commands — light text background + prominent border
+  // Commands — subdued background + prominent border
   iconOuterCommand: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.backgroundLightText,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       border: `1px solid ${euiTheme.colors.borderBaseProminent}`,
+    }),
+  // Data transformation — Vis8 fill + strong warning border
+  iconOuterDataTransformation: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.vis.euiColorVis8,
+      border: `1px solid ${euiTheme.colors.borderStrongWarning}`,
     }),
   // Flow control — Vis0 fill + strong accent-secondary border
   iconOuterFlowControl: ({ euiTheme }: UseEuiTheme) =>
@@ -1092,6 +1129,7 @@ const componentStyles = {
     css({
       lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
       fontSize: '12px',
+      color: euiThemeContext.euiTheme.colors.textSubdued,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',

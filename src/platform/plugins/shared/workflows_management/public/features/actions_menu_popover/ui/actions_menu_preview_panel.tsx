@@ -50,7 +50,8 @@ interface ActionsMenuPreviewPanelProps {
   hoveredJumpEntry?: JumpToStepEntry | null;
   onStepSelected: (action: ActionOptionData) => void;
   onAddStep?: (action: ActionOptionData) => void;
-  onPinPreview?: (action: ActionOptionData) => void;
+  /** Pin step detail; when `parentSection` is set, also navigate left into that category. */
+  onPinPreview?: (action: ActionOptionData, parentSection?: ActionOptionData) => void;
 }
 
 export function ActionsMenuPreviewPanel({
@@ -314,7 +315,7 @@ function SectionPreviewPanel({
   section: ActionOptionData;
   onStepSelected: (action: ActionOptionData) => void;
   onAddStep?: (action: ActionOptionData) => void;
-  onPinPreview?: (action: ActionOptionData) => void;
+  onPinPreview?: (action: ActionOptionData, parentSection?: ActionOptionData) => void;
   styles: ReturnType<typeof useMemoCss<typeof panelStyles>>;
 }) {
   const steps = useMemo(() => {
@@ -342,7 +343,7 @@ function SectionPreviewPanel({
               step={step}
               onClick={() => onStepSelected(step)}
               onAdd={onAddStep ? () => onAddStep(step) : undefined}
-              onPinPreview={onPinPreview ? () => onPinPreview(step) : undefined}
+              onPinPreview={onPinPreview ? () => onPinPreview(step, section) : undefined}
             />
           ))}
         </div>
@@ -517,6 +518,8 @@ function getPreviewIconContainerStyle(
       return styles.iconContainerAppLogo;
     case 'flowControl':
       return styles.iconContainerFlowControl;
+    case 'dataTransformation':
+      return styles.iconContainerDataTransformation;
     case 'platform':
     default:
       return styles.iconContainerPlatform;
@@ -689,11 +692,11 @@ const panelStyles = {
     flexDirection: 'column',
     gap: '6px',
   }),
-  // Figma: fs=14, fw=500, lh=24, max 3 lines (3×24=72px as in Figma node)
+  // Borealis: semiBold token is 500; 600 (`bold`) is the visible semibold weight
   titleBlockText: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontSize: '14px',
-      fontWeight: 500,
+      fontWeight: euiTheme.font.weight.bold,
       lineHeight: '24px',
       color: euiTheme.colors.textParagraph,
       margin: 0,
@@ -945,6 +948,11 @@ const previewStepRowStyles = {
       backgroundColor: euiTheme.colors.vis.euiColorVis0,
       border: `1px solid ${euiTheme.colors.borderStrongAccentSecondary}`,
     }),
+  iconContainerDataTransformation: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.vis.euiColorVis8,
+      border: `1px solid ${euiTheme.colors.borderStrongWarning}`,
+    }),
   info: css({
     display: 'flex',
     flexDirection: 'column',
@@ -955,7 +963,7 @@ const previewStepRowStyles = {
   labelText: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontSize: '12px',
-      fontWeight: 500,
+      fontWeight: 700,
       lineHeight: '15px',
       color: euiTheme.colors.textParagraph,
       overflow: 'hidden',
