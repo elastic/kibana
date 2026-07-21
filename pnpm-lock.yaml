@@ -47,6 +47,7 @@ overrides:
   chokidar: 3.5.3
   colorette: 2.0.20
   concaveman: 1.2.0
+  d3-format@3: 3.1.0
   d3-scale>d3-color: npm:@elastic/kibana-d3-color@2.0.1
   dom-accessibility-api@^0.5.9: 0.5.13
   esbuild: 0.27.2
@@ -17667,8 +17668,8 @@ packages:
   d3-format@2.0.0:
     resolution: {integrity: sha512-Ab3S6XuE/Q+flY96HXT0jOXcM4EAClYFnRGY5zsjRGNy6qCYrQsMffs7cV5Q9xejb35zxW5hf/guKw34kvIKsA==}
 
-  d3-format@3.1.2:
-    resolution: {integrity: sha512-AJDdYOdnyRDV5b6ArilzCPPwc1ejkHcoyFarqlPqT7zRYjhavcT3uSrqcMvsgh2CgoPbK3RCwyHaVyxYcP2Arg==}
+  d3-format@3.1.0:
+    resolution: {integrity: sha512-YyUI6AEuY/Wpt8KWLgZHsIU86atmikuoOmCfommt0LYHiQSPjvX2AcFc38PX0CBpr2RCyZhjex+NS/LPOv6YqA==}
     engines: {node: '>=12'}
 
   d3-geo-projection@4.0.0:
@@ -36829,7 +36830,7 @@ snapshots:
 
   d3-format@2.0.0: {}
 
-  d3-format@3.1.2: {}
+  d3-format@3.1.0: {}
 
   d3-geo-projection@4.0.0:
     dependencies:
@@ -36873,7 +36874,7 @@ snapshots:
   d3-scale@4.0.2:
     dependencies:
       d3-array: 2.12.1
-      d3-format: 3.1.2
+      d3-format: 3.1.0
       d3-interpolate: 3.0.1
       d3-time: 3.1.0
       d3-time-format: 4.1.0
@@ -46954,7 +46955,7 @@ snapshots:
   vega-format@2.1.0:
     dependencies:
       d3-array: 3.2.4
-      d3-format: 3.1.2
+      d3-format: 3.1.0
       d3-time-format: 4.1.0
       vega-time: 3.1.0
       vega-util: 2.1.0
