@@ -180,9 +180,6 @@ function buildEvalsYaml({
     })
     .join('\n');
 
-  // NOTE: per-suite post-comparison, refresh-block, and refresh-trigger steps
-  // are generated dynamically in run_suite.sh and uploaded via pipeline upload,
-  // so they run only after all model steps complete. See run_suite.sh for details.
   return [
     // NOTE: `getPipeline()` strips `steps:` from YAML fragments so they can be concatenated
     // under the single top-level `steps:` key. This must follow that convention.

@@ -318,9 +318,11 @@ EOF
     depends_on:
       - "kbn-evals-${group_key_safe}-post-comparison"
     allow_dependency_failure: true
-  - trigger: kibana-evals-on-demand
+  - trigger: kibana-evals-on-demand-llm-evals
     label: "LLM Evals: Refresh ${suite_display_name}"
     key: "kbn-evals-${group_key_safe}-refresh-trigger"
+    async: true
+    soft_fail: true
     depends_on:
       - "kbn-evals-${group_key_safe}-refresh-block"
     build:
