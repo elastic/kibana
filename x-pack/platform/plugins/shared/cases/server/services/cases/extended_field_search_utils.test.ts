@@ -128,7 +128,10 @@ describe('resolveExtendedFieldFilters', () => {
     ]);
   });
 
-  it('drops unresolved labels silently', () => {
+  it('returns an empty group for an unresolved label instead of dropping it', () => {
+    // The empty group is preserved (rather than omitted) so buildExtendedFieldFilterClauses can
+    // turn it into a match_none clause — filtering by an unknown label should yield zero results,
+    // not silently be ignored.
     const result = resolveExtendedFieldFilters(
       [
         { label: 'Priority', value: 'high' },
@@ -147,16 +150,17 @@ describe('resolveExtendedFieldFilters', () => {
           templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
+      [],
     ]);
   });
 
-  it('returns empty for no matches', () => {
+  it('returns a single empty group when no filters match', () => {
     const result = resolveExtendedFieldFilters(
       [{ label: 'nonexistent', value: 'test' }],
       templates
     );
 
-    expect(result).toEqual([]);
+    expect(result).toEqual([[]]);
   });
 
   it('resolves USER_PICKER fields and carries control through', () => {
@@ -192,7 +196,7 @@ describe('resolveExtendedFieldFilters', () => {
       [{ templateId: 'tmpl-x', templateVersion: 1, fieldDefinitions: undefined }]
     );
 
-    expect(result).toEqual([]);
+    expect(result).toEqual([[]]);
   });
 
   it('groups multiple storage keys under one label when different templates share the same label but different names', () => {
@@ -974,7 +978,7 @@ describe('buildExtendedFieldFilterClauses', () => {
     ]);
   });
 
-  it('drops DATE_PICKER filter when value is MM/DD/YYYY (non-ISO)', () => {
+  it('returns match_none for DATE_PICKER filter when value is MM/DD/YYYY (non-ISO)', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
         {
@@ -987,7 +991,7 @@ describe('buildExtendedFieldFilterClauses', () => {
       ],
     ]);
 
-    expect(clauses).toHaveLength(0);
+    expect(clauses).toEqual([{ match_none: {} }]);
   });
 
   it('builds range query for DATE_PICKER using YYYY-MM-DD input on flattened path', () => {
@@ -1044,7 +1048,7 @@ describe('buildExtendedFieldFilterClauses', () => {
     ]);
   });
 
-  it('drops DATE_PICKER filter when the date value cannot be parsed', () => {
+  it('returns match_none for DATE_PICKER filter when the date value cannot be parsed', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
         {
@@ -1057,10 +1061,10 @@ describe('buildExtendedFieldFilterClauses', () => {
       ],
     ]);
 
-    expect(clauses).toHaveLength(0);
+    expect(clauses).toEqual([{ match_none: {} }]);
   });
 
-  it('drops numeric filter when value is not a valid number', () => {
+  it('returns match_none for numeric filter when value is not a valid number', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
         {
@@ -1073,10 +1077,10 @@ describe('buildExtendedFieldFilterClauses', () => {
       ],
     ]);
 
-    expect(clauses).toHaveLength(0);
+    expect(clauses).toEqual([{ match_none: {} }]);
   });
 
-  it('drops double filter when value is not a valid number', () => {
+  it('returns match_none for double filter when value is not a valid number', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
         {
@@ -1089,7 +1093,13 @@ describe('buildExtendedFieldFilterClauses', () => {
       ],
     ]);
 
-    expect(clauses).toHaveLength(0);
+    expect(clauses).toEqual([{ match_none: {} }]);
+  });
+
+  it('returns match_none for an empty group (unresolved label)', () => {
+    const clauses = buildExtendedFieldFilterClauses([[]]);
+
+    expect(clauses).toEqual([{ match_none: {} }]);
   });
 
   it('builds term query for USER_PICKER (runtime field emits name values from {uid,name} objects)', () => {

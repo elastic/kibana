@@ -50,6 +50,7 @@ import {
 } from '../../../common/utils/attachments';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { InlineField } from '../../../common/types/domain/template/fields';
+import { getFieldSnakeKey } from '../../../common/utils/template_fields';
 import * as i18n from './translations';
 
 interface CreateIncidentArgs {
@@ -726,14 +727,17 @@ export const enrichCasesWithFieldLabels = (
   }
 
   const globalLabelMap = Object.fromEntries(
-    globalFields.map((field) => [`${field.name}_as_${field.type}`, field.label ?? field.name])
+    globalFields.map((field) => [
+      getFieldSnakeKey(field.name, field.type),
+      field.label ?? field.name,
+    ])
   );
 
   const labelsByTemplateKey = new Map<string, Record<string, string>>();
   for (const so of templateSOs) {
     const fieldKeyToLabel = Object.fromEntries(
       (so.attributes.fieldDefinitions ?? []).map((field) => [
-        `${field.name}_as_${field.type}`,
+        getFieldSnakeKey(field.name, field.type),
         field.label,
       ])
     );

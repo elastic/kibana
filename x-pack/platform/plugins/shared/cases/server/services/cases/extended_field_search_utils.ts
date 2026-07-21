@@ -10,6 +10,7 @@ import { CASE_SAVED_OBJECT, CASE_EXTENDED_FIELDS } from '../../../common/constan
 import type { Template } from '../../../common/types/domain/template/v1';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { FieldType } from '../../../common/types/domain/template/fields';
+import { getFieldSnakeKey } from '../../../common/utils/template_fields';
 
 export interface ExtendedFieldFilter {
   label: string;
@@ -150,10 +151,13 @@ export const resolveExtendedFieldFilters = (
 ): ResolvedExtendedFieldFilter[][] => {
   const labelToMetas = buildLabelToMetasIndex(templates, globalFields);
 
-  return extendedFieldFilters.flatMap(({ label, value }) => {
+  // One entry per input filter — including an empty group `[]` for a label that didn't resolve
+  // to any known field. Preserving the (empty) group lets buildExtendedFieldFilterClauses turn it
+  // into a `match_none` clause instead of the filter being silently dropped (see that function).
+  return extendedFieldFilters.map(({ label, value }) => {
     const metas = labelToMetas.get(label.toLowerCase());
     if (metas == null) return [];
-    const group = [...metas.values()].map((meta) => ({
+    return [...metas.values()].map((meta) => ({
       storageKey: meta.storageKey,
       value,
       esType: meta.esType,
@@ -161,7 +165,6 @@ export const resolveExtendedFieldFilters = (
       templateVersions: meta.templateVersions,
       isGlobal: meta.isGlobal,
     }));
-    return group.length > 0 ? [group] : [];
   });
 };
 
@@ -312,19 +315,23 @@ const buildSingleFilterClause = (
 export const buildExtendedFieldFilterClauses = (
   resolvedFilterGroups: ResolvedExtendedFieldFilter[][]
 ): estypes.QueryDslQueryContainer[] =>
-  resolvedFilterGroups.flatMap((group): estypes.QueryDslQueryContainer[] => {
+  resolvedFilterGroups.map((group): estypes.QueryDslQueryContainer => {
     const clauses = group.flatMap((filter) => {
       const clause = buildSingleFilterClause(filter);
       return clause != null ? [clause] : [];
     });
 
-    if (clauses.length === 0) return [];
+    // An empty group means the filter's label didn't resolve to any known field, or every
+    // candidate value failed to parse (e.g. a non-numeric value for an INPUT_NUMBER field).
+    // Returning match_none makes the filter behave like any other unsatisfiable filter — the
+    // search yields zero results — instead of silently being dropped and matching everything.
+    if (clauses.length === 0) return { match_none: {} };
 
     // Multiple entries in the same group mean the same label resolves to different storage keys
     // across templates — OR them so any matching template's case is returned.
-    if (clauses.length === 1) return clauses;
+    if (clauses.length === 1) return clauses[0];
 
-    return [{ bool: { should: clauses, minimum_should_match: 1 } }];
+    return { bool: { should: clauses, minimum_should_match: 1 } };
   });
 
 /**
@@ -389,7 +396,7 @@ const buildLabelToMetasIndex = (
     isGlobal?: boolean;
   }) => {
     const labelKey = label.toLowerCase();
-    const storageKey = `${name}_as_${type}`;
+    const storageKey = getFieldSnakeKey(name, type);
 
     let byStorageKey = labelToMetas.get(labelKey);
     if (byStorageKey == null) {
