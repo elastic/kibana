@@ -723,14 +723,6 @@ export const AllEntitiesView = ({
         }
         tabs={[
           {
-            label: i18n.translate('xpack.streams.entityCentricLab.entities.tabs.monitoringAssets', {
-              defaultMessage: 'Overview',
-            }),
-            isSelected: categoryTab === 'monitoring',
-            onClick: () => setCategoryTab('monitoring'),
-            'data-test-subj': 'entityCentricLabMonitoringAssetsTab',
-          },
-          {
             label: i18n.translate('xpack.streams.entityCentricLab.entities.tabs.inventory', {
               defaultMessage: 'Inventory ({count})',
               // Cross-category inventory covers the full dataset; per-
@@ -743,6 +735,14 @@ export const AllEntitiesView = ({
             isSelected: categoryTab === 'inventory',
             onClick: () => setCategoryTab('inventory'),
             'data-test-subj': 'entityCentricLabInventoryTab',
+          },
+          {
+            label: i18n.translate('xpack.streams.entityCentricLab.entities.tabs.monitoringAssets', {
+              defaultMessage: 'Monitoring',
+            }),
+            isSelected: categoryTab === 'monitoring',
+            onClick: () => setCategoryTab('monitoring'),
+            'data-test-subj': 'entityCentricLabMonitoringAssetsTab',
           },
         ]}
         rightSideItems={
