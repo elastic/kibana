@@ -57,7 +57,6 @@ import {
   VECTOR_DB_INDEX_MODE,
 } from '../../../../../common/constants';
 import { indexModeLabels, indexModeDescriptions } from '../../../lib/index_mode_labels';
-import { useAppContext } from '../../../app_context';
 
 const buildDlmDefaultValue = (
   lifecycle?: DataRetention
