@@ -157,6 +157,11 @@ export const connectorTypeResponseSchema = schema.object(
         },
       })
     ),
+    is_testable: schema.boolean({
+      meta: {
+        description: 'Indicates whether the connector type supports testing.',
+      },
+    }),
   },
   { meta: { id: 'connector_type_response' } }
 );
@@ -316,6 +321,11 @@ export const getConnectorSpecResponseBodySchema = schema.object({
     meta: {
       description:
         'JSON Schema envelope for the connector form (top-level `config` and `secrets` shapes)',
+    },
+  }),
+  is_testable: schema.boolean({
+    meta: {
+      description: 'When true, this connector type supports the reserved test sub-action.',
     },
   }),
 });

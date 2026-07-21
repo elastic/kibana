@@ -36,12 +36,23 @@ export type {
 } from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
+export { RelayRequestError } from './lib/relay';
+export type {
+  RelayCallbackResponse,
+  RelayClaimResponse,
+  RelayClientContract,
+  RelayInstallRequest,
+  RelayInstallResponse,
+} from './lib/relay';
 
 export {
   asSavedObjectExecutionSource,
   asHttpRequestExecutionSource,
   asNotificationExecutionSource,
+  isNotificationExecutionSource,
   getBasicAuthHeader,
+  NOTIFICATIONS_REQUESTER_ID,
+  WORKFLOWS_NOTIFICATION_REQUESTER_ID,
 } from './lib';
 export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 

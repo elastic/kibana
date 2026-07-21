@@ -23,6 +23,7 @@ export interface UseMatchedActionPoliciesResult {
   isLoading: boolean;
   error: Error | null;
   items: MatchedActionPolicy[];
+  total: number;
 }
 
 export const useMatchedActionPolicies = ({
@@ -57,5 +58,6 @@ export const useMatchedActionPolicies = ({
     isLoading: enabled && isLoading,
     error: error instanceof Error ? error : error != null ? new Error(String(error)) : null,
     items: data?.items ?? [],
+    total: data?.total ?? 0,
   };
 };

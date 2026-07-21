@@ -138,7 +138,7 @@ const createAppDependencies = (httpSetup: HttpSetup): AppDependencies => {
     settings: settingsServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     kibanaVersion,
-    canUseSyntheticSource: false,
+    hasAtLeastEnterpriseLicense: false,
   };
 };
 
@@ -172,6 +172,7 @@ export const WithAppDependencies =
       i18n: i18nServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+      chrome: chromeServiceMock.createStartContract(),
     };
 
     const mergedDependencies = merge(

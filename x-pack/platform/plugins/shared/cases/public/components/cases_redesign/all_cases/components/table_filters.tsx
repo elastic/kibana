@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiFilterGroup } from '@elastic/eui';
+import React, { useCallback, useRef } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiFilterGroup, useEuiTheme } from '@elastic/eui';
 import { mergeWith, isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { MoreFiltersSelectable } from '../../../all_cases/table_filter_config/more_filters_selectable';
@@ -26,6 +26,9 @@ import { TableSearch } from '../../../all_cases/search';
 import { DateRangeFilter } from '../../../all_cases/date_range_filter';
 import type { CasesColumnSelection } from '../types';
 import { ColumnsPopover } from './columns_popover';
+import { SortFilter } from './sort_filter';
+import { useCasesConfig } from '../../../../common/lib/kibana';
+import { useCasesToast } from '../../../../common/use_cases_toast';
 
 export interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -46,6 +49,8 @@ export interface CasesTableFiltersProps {
   onSelectedColumnsChange: (columns: CasesColumnSelection[]) => void;
   listFields: CasesColumnSelection[];
   onListFieldsChange: (fields: CasesColumnSelection[]) => void;
+  sortOrder: 'asc' | 'desc';
+  onSortOrderChange: (sortOrder: 'asc' | 'desc') => void;
 }
 
 const mergeCustomizer = (objValue: string | string[], srcValue: string | string[], key: string) => {
@@ -73,6 +78,8 @@ const CasesTableFiltersComponent = ({
   onSelectedColumnsChange,
   listFields,
   onListFieldsChange,
+  sortOrder,
+  onSortOrderChange,
 }: CasesTableFiltersProps) => {
   const { data: tags = [], isLoading: isLoadingTags } = useGetTags();
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
@@ -82,14 +89,28 @@ const CasesTableFiltersComponent = ({
     isFetching: isLoadingCasesConfiguration,
   } = useGetCaseConfiguration();
 
+  const { euiTheme } = useEuiTheme();
+  const { templatesEnabled } = useCasesConfig();
+  const { showInfoToast } = useCasesToast();
+  const hasShownHiddenFieldsSearchToast = useRef(false);
+
   const onFilterOptionsChange = useCallback(
     (partialFilterOptions: Partial<FilterOptions>) => {
       const newFilterOptions = mergeWith({}, filterOptions, partialFilterOptions, mergeCustomizer);
       if (!isEqual(newFilterOptions, filterOptions)) {
+        if (
+          templatesEnabled &&
+          !hasShownHiddenFieldsSearchToast.current &&
+          typeof partialFilterOptions.search === 'string' &&
+          partialFilterOptions.search.trim() !== ''
+        ) {
+          hasShownHiddenFieldsSearchToast.current = true;
+          showInfoToast(i18n.SEARCH_HIDDEN_FIELDS_INFO_TITLE, i18n.SEARCH_HIDDEN_FIELDS_INFO_TEXT);
+        }
         onFilterChanged(newFilterOptions);
       }
     },
-    [filterOptions, onFilterChanged]
+    [filterOptions, onFilterChanged, showInfoToast, templatesEnabled]
   );
 
   const isLoadingFilters =
@@ -136,6 +157,9 @@ const CasesTableFiltersComponent = ({
       justifyContent="flexStart"
       wrap={true}
       data-test-subj="cases-table-filters"
+      css={css`
+        padding-top: ${euiTheme.size.m};
+      `}
     >
       {isSelectorView && onCreateCasePressed ? (
         <EuiFlexItem grow={false}>
@@ -178,6 +202,11 @@ const CasesTableFiltersComponent = ({
           )}
         </EuiFilterGroup>
       </EuiFlexItem>
+      {viewMode !== VIEW_TOGGLE_TABLE_ID && (
+        <EuiFlexItem grow={false}>
+          <SortFilter sortOrder={sortOrder} onChange={onSortOrderChange} />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         {viewMode === VIEW_TOGGLE_TABLE_ID ? (
           <ColumnsPopover

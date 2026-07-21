@@ -54,13 +54,16 @@ export const ENTITY_STORE_ROUTES = {
     RESOLUTION_LINK: `${PUBLIC_BASE}/resolution/link`,
     RESOLUTION_UNLINK: `${PUBLIC_BASE}/resolution/unlink`,
     RESOLUTION_GROUP: `${PUBLIC_BASE}/resolution/group`,
+    RESOLUTION_RULES_LIST: `${PUBLIC_BASE}/resolution/rules`,
+    RESOLUTION_RULES_ENABLE: (id: string) => `${PUBLIC_BASE}/resolution/rules/${id}/enable`,
+    RESOLUTION_RULES_DISABLE: (id: string) => `${PUBLIC_BASE}/resolution/rules/${id}/disable`,
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE}/check_privileges`,
     FORCE_LOG_EXTRACTION: (entityType: string) =>
       `${INTERNAL_BASE}/${entityType}/force_log_extraction`,
-    FORCE_CCS_EXTRACT_TO_UPDATES: (entityType: string) =>
-      `${INTERNAL_BASE}/${entityType}/force_ccs_extract_to_updates`,
+    FORCE_REMOTE_EXTRACT_TO_UPDATES: (entityType: string) =>
+      `${INTERNAL_BASE}/${entityType}/force_remote_extract_to_updates`,
     FORCE_HISTORY_SNAPSHOT: `${INTERNAL_BASE}/force_history_snapshot`,
     ENTITY_MAINTAINERS_INIT: `${INTERNAL_BASE}/entity_maintainers/init`,
     ENTITY_MAINTAINERS_GET: `${INTERNAL_BASE}/entity_maintainers`,
@@ -84,3 +87,5 @@ export const HISTORY_INDEX_PATTERN = `${getEntityIndexPattern({
   dataset: ENTITY_HISTORY,
   namespace: 'default',
 })}*`;
+
+export const ENTRA_SOURCE_INDEX = 'logs-entityanalytics_entra_id.user-default';

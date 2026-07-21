@@ -9,12 +9,9 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  ALERT_EPISODE_ACTION_TYPE,
-  ALERT_EPISODE_STATUS,
-  type AlertEpisodeStatus,
-} from '@kbn/alerting-v2-schemas';
-import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
+import { ALERT_EPISODE_ACTION_TYPE, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import type { EpisodeActionState, EpisodeStatusGroupAction } from '../../types/action';
+import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
 import { AlertEpisodeStatusBadge } from './status_badge';
 
 // Flex anchor avoids inline line-height missizing
@@ -23,7 +20,7 @@ const tooltipAnchorProps = { css: { display: 'flex' } };
 export interface AlertEpisodeStatusBadgesProps {
   status: AlertEpisodeStatus;
   episodeAction?: EpisodeActionState;
-  groupAction?: AlertEpisodeGroupAction;
+  groupAction?: EpisodeStatusGroupAction;
 }
 
 export function AlertEpisodeStatusBadges({
@@ -32,7 +29,7 @@ export function AlertEpisodeStatusBadges({
   groupAction,
 }: AlertEpisodeStatusBadgesProps) {
   const isAcknowledged = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
-  const isSnoozed = groupAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE;
+  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
 
   return (
     <EuiFlexGroup
@@ -43,13 +40,7 @@ export function AlertEpisodeStatusBadges({
       data-test-subj="alertEpisodeStatusCell"
     >
       <EuiFlexItem grow={false}>
-        <AlertEpisodeStatusBadge
-          status={
-            groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE
-              ? ALERT_EPISODE_STATUS.INACTIVE
-              : status
-          }
-        />
+        <AlertEpisodeStatusBadge status={status} />
       </EuiFlexItem>
       {isSnoozed && (
         <EuiFlexItem grow={false}>

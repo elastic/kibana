@@ -1,6 +1,594 @@
 {
-  "sha1": "a97bedef1742ac455601dbccee31372eb0fc7823",
+  "sha1": "b5a2b609295b9e8f9c766d22965f04c78f0fa73f",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
+    {
+      "id": "bcb9cab26454e44-7c276f5e1f3aed9",
+      "title": "Copy Saved Objects to Space copies a dashboard to the marketing space, with all references",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/copy_saved_objects.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    },
+    {
+      "id": "bcb9cab26454e44-bb0e8256dff0ec0",
+      "title": "Copy Saved Objects to Space allows conflicts to be resolved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/copy_saved_objects.spec.ts",
+        "line": 73,
+        "column": 7
+      }
+    },
+    {
+      "id": "bcb9cab26454e44-7289d225448a782",
+      "title": "Copy Saved Objects to Space avoids conflicts when createNewCopies is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/copy_saved_objects.spec.ts",
+        "line": 108,
+        "column": 7
+      }
+    },
+    {
+      "id": "bcb9cab26454e44-04c5ea37195911f",
+      "title": "Copy Saved Objects to Space copies a dashboard to the marketing space, with circular references",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/copy_saved_objects.spec.ts",
+        "line": 133,
+        "column": 7
+      }
+    },
+    {
+      "id": "ea43afd5e948232-4f527e6e3d7bb73",
+      "title": "Spaces Management: Create and Edit creates a space with a given name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "ea43afd5e948232-9a4ba2bcb2c9c99",
+      "title": "Spaces Management: Create and Edit allows changing space initials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "ea43afd5e948232-f2cfc14bd4d8537",
+      "title": "Spaces Management: Create and Edit allows changing space avatar to an uploaded image",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
+        "line": 76,
+        "column": 7
+      }
+    },
+    {
+      "id": "ea43afd5e948232-46d3a9e2d797fbc",
+      "title": "Spaces Management: Create and Edit changing the space solution updates the side navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
+        "line": 98,
+        "column": 7
+      }
+    },
+    {
+      "id": "ea43afd5e948232-c03d0abad42a1af",
+      "title": "Spaces Management: Create and Edit enabled features can be changed while the solution view remains unselected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
+        "line": 152,
+        "column": 7
+      }
+    },
+    {
+      "id": "ea43afd5e948232-5371058e6174752",
+      "title": "Spaces Management: Create and Edit delete space confirm modal has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
+        "line": 199,
+        "column": 7
+      }
+    },
+    {
+      "id": "ea43afd5e948232-aa5011898a07a49",
+      "title": "Spaces Management: Create and Edit create space page has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
+        "line": 221,
+        "column": 7
+      }
+    },
+    {
+      "id": "0def2c92a84934b-00841c41d181dc1",
+      "title": "Enter space navigation enters a space respecting its default route, then switches back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/enter_space_navigation.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "02640f5b65617b0-b30ef0ed24dce4e",
+      "title": "Spaces feature controls: default space all can access Stack Management but not the Spaces section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_default_space_only.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "02640f5b65617b0-6ae792ac1031a76",
+      "title": "Spaces feature controls: default space all cannot navigate to the spaces grid, create, or edit pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_default_space_only.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    },
+    {
+      "id": "38c84240f1d8631-e4cfd5797d30224",
+      "title": "Spaces feature controls: global all can access the Spaces management section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_global_all.spec.ts",
+        "line": 20,
+        "column": 7
+      }
+    },
+    {
+      "id": "38c84240f1d8631-bbf0c2f0b6dd994",
+      "title": "Spaces feature controls: global all can navigate to the spaces grid, create, and edit pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_global_all.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "e021930de3a6d52-3c065146abcdb5a",
+      "title": "Spaces feature controls: non-default space, role-specific privilege can access Stack Management within its space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_nondefault_space.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "e021930de3a6d52-a39672b18741e67",
+      "title": "Spaces feature controls: non-default space, role-specific privilege does not display Spaces in the management section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_nondefault_space.spec.ts",
+        "line": 45,
+        "column": 9
+      }
+    },
+    {
+      "id": "7cacc8ec845d94b-6ff53900e25cd70",
+      "title": "Spaces Management: List of Spaces lists all the spaces populated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_grid.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "7cacc8ec845d94b-52b9c16f636594b",
+      "title": "Spaces Management: List of Spaces does not display the space switcher button on the current space details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_grid.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "7cacc8ec845d94b-caf941b01753c58",
+      "title": "Spaces Management: List of Spaces displays the space switcher button on a non-current space details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_grid.spec.ts",
+        "line": 75,
+        "column": 7
+      }
+    },
+    {
+      "id": "7cacc8ec845d94b-341156e5b489161",
+      "title": "Spaces Management: List of Spaces switches to a new space using the space switcher button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_grid.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "7cacc8ec845d94b-86809a700e15e09",
+      "title": "Spaces Management: List of Spaces spaces grid page has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_grid.spec.ts",
+        "line": 106,
+        "column": 7
+      }
+    },
+    {
+      "id": "a5225bdc990884a-483f06d1d3cfa82",
+      "title": "Spaces selection: login space selector allows the user to select an initial space from the selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_login.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
+      "id": "a5225bdc990884a-3e09366cbd2b0e7",
+      "title": "Spaces selection: login space selector allows the user to switch between spaces from the navigation menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_login.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "775aea469851335-ea1c24194a49528",
+      "title": "Spaces selection: search spaces in popover shows the search box in the spaces popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_search.spec.ts",
+        "line": 46,
+        "column": 9
+      }
+    },
+    {
+      "id": "775aea469851335-ac709ef92fb10f6",
+      "title": "Spaces selection: search spaces in popover finds a single matching space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_search.spec.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "775aea469851335-0723c5c252f03e3",
+      "title": "Spaces selection: search spaces in popover finds no spaces for a non-matching query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_search.spec.ts",
+        "line": 59,
+        "column": 9
+      }
+    },
     {
       "id": "bd1c362b1516eb7-559491c63e7c12d",
       "title": "Spaces selection as Viewer - displays the space selection menu in header",

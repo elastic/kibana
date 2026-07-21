@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { serviceRt } from '@kbn/apm-common';
+import { z } from '@kbn/zod/v4';
+import { serviceSchema } from '@kbn/apm-common';
 import { defineRoute } from '../types';
 
 export interface DeleteAgentConfigurationResponse {
@@ -14,9 +14,9 @@ export interface DeleteAgentConfigurationResponse {
 
 export const deleteAgentConfigurationRoute = defineRoute<DeleteAgentConfigurationResponse>()({
   endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
-  params: t.type({
-    body: t.type({
-      service: serviceRt,
+  params: z.object({
+    body: z.object({
+      service: serviceSchema,
     }),
   }),
 });

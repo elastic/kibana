@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-rspack-e2e-test
-  description: 'Builds the Kibana distribution with the Rspack optimizer and runs the full on-merge test suite (Jest, Scout, FTR, Cypress, serverless) every 3 hours.'
+  description: 'Builds the Kibana distribution with the Rspack optimizer and runs the full on-merge test suite (Jest, Scout, FTR, Cypress, serverless).'
   links:
     - url: 'https://buildkite.com/elastic/kibana-rspack-e2e-test'
       title: Pipeline link
@@ -20,7 +20,7 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'false'
         SCOUT_REPORTER_ENABLED: 'true'
@@ -33,6 +33,11 @@ spec:
       # Trimmed on-merge variant: build the distribution and run the full test fanout
       # (Jest, Scout, FTR, Cypress, serverless) without lint/typecheck/storybooks/api-docs/etc.
       pipeline_file: .buildkite/pipelines/rspack_e2e_test.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/rspack_e2e_test.yml
+            cleanup_sparse_state: true
       skip_intermediate_builds: false
       provider_settings:
         # Don't auto-build on commits; only run via schedule / manual trigger.
@@ -42,10 +47,10 @@ spec:
         publish_commit_status: false
         build_tags: false
       schedules:
-        Every 12 hours (main):
-          message: Rspack e2e test (every 3 hours)
+        main:
+          message: Rspack e2e test (every hour)
           branch: main
-          cronline: 0 */3 * * * America/New_York
+          cronline: 0 */1 * * * America/New_York
       teams:
         everyone:
           access_level: BUILD_AND_READ

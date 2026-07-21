@@ -5,31 +5,36 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
-import { DEFAULT_ML_AD_LOOKBACK } from './constants';
+import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
+import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { getSecurityMlJobIds } from './get_security_ml_job_ids';
-import type { AnomalyHit } from './types';
+import type { AnomalyHit, RawAnomalyRecord } from './types';
 
-interface RawAnomalyRecord {
-  _id?: string;
-  timestamp: number;
-  job_id: string;
-  detector_index: number;
-  function?: string;
-  record_score: number;
-  field_name?: string;
-  by_field_name?: string;
-  by_field_value?: string;
-  over_field_name?: string;
-  over_field_value?: string;
-  partition_field_name?: string;
-  partition_field_value?: string;
-  actual?: number[];
-  typical?: number[];
-}
+// A missing/empty selection means "no severity filter", which defaults to the
+// standard threshold of 1 rather than truly unbounded (record_score 0 anomalies are noise).
+export const buildScoreRangeFilter = (
+  scoreRanges?: AnomalyScoreRange[]
+): QueryDslQueryContainer => {
+  if (!scoreRanges || scoreRanges.length === 0) {
+    return { range: { record_score: { gte: 1 } } };
+  }
+
+  return {
+    bool: {
+      should: scoreRanges.map(({ min_score: min, max_score: max }) => ({
+        range: {
+          record_score: { gte: Math.max(min, 1), ...(max !== undefined ? { lt: max } : {}) },
+        },
+      })),
+      minimum_should_match: 1,
+    },
+  };
+};
 
 interface RequiredHit {
   _id: string;
@@ -83,12 +88,14 @@ export interface SearchEntityAnomaliesOpts {
   entityId: string;
   fromMs?: number;
   toMs?: number;
+  scoreRanges?: AnomalyScoreRange[];
   jobIds?: string[];
   sort?: Array<{ field: AnomalySortField; order: AnomalySortOrder }>;
   from?: number;
   size?: number;
   logger: Logger;
   ml: MlPluginSetup;
+  request: KibanaRequest;
   securityJobIds?: string[];
   soClient: SavedObjectsClientContract;
 }
@@ -103,17 +110,19 @@ export const searchEntityAnomalies = async ({
   entityId,
   fromMs,
   toMs,
+  scoreRanges,
   jobIds: filterJobIds,
   sort = DEFAULT_SORT_SPEC,
   from = 0,
   size = 100,
   logger,
   ml,
+  request,
   securityJobIds,
   soClient,
 }: SearchEntityAnomaliesOpts): Promise<SearchEntityAnomaliesResult> => {
-  const mlSystem = ml.mlSystemProvider({} as KibanaRequest, soClient);
-  const jobIds = securityJobIds ?? (await getSecurityMlJobIds({ ml, soClient }));
+  const mlSystem = ml.mlSystemProvider(request, soClient);
+  const jobIds = securityJobIds ?? (await getSecurityMlJobIds({ ml, request, soClient }));
 
   const empty: SearchEntityAnomaliesResult = { hits: [], total: 0 };
 
@@ -141,11 +150,11 @@ export const searchEntityAnomalies = async ({
             filter: [
               { term: { result_type: 'record' } },
               { term: { is_interim: false } },
-              { range: { record_score: { gte: 1 } } },
+              buildScoreRangeFilter(scoreRanges),
               {
                 range: {
                   timestamp: {
-                    gte: fromMs ?? `now-${DEFAULT_ML_AD_LOOKBACK}`,
+                    gte: fromMs ?? `now-${ENTITY_ANOMALY_DEFAULT_LOOKBACK}`,
                     ...(toMs !== undefined ? { lte: toMs } : {}),
                   },
                 },
