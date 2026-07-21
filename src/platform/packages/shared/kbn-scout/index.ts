@@ -8,6 +8,7 @@
  */
 
 // CLI tools
+// Scout CLI entry points used by `node scripts/scout`.
 export * as cli from './src/cli';
 
 // Test framework
