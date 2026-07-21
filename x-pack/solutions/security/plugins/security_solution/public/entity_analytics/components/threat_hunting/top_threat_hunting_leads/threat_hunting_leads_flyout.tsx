@@ -33,6 +33,7 @@ import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import type { HuntingLead } from './types';
 import { fromApiLead } from './types';
+import { GeneratedOnLabel } from './generated_on_label';
 import * as i18n from './translations';
 import { renderTextWithEntities } from './shared_lead_components';
 import { MAX_RECENT_LEADS, THREAT_HUNTING_LEADS_SCOPE_ID } from './utils';
@@ -138,7 +139,7 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
           {lastRunTimestamp && (
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued" data-test-subj="leadsFlyoutGeneratedTimestamp">
-                {i18n.getGeneratedOnLabel(lastRunTimestamp)}
+                <GeneratedOnLabel timestamp={lastRunTimestamp} />
               </EuiText>
             </EuiFlexItem>
           )}
