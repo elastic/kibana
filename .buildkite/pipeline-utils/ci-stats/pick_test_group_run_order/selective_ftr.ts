@@ -10,26 +10,12 @@
 import { allChangedFilesInScope, touchedCriticalFiles } from '../../affected-packages';
 
 /**
- * Modules that can never affect FTR tests. When a PR only touches modules in
- * this set (and no FTR-critical paths), FTR configs are skipped entirely.
- *
- * Inverse of Scout's `SCOUT_EXCLUDED_MODULES`: those are FTR/Jest-infra modules
- * that should not trigger Scout; these are Scout/Jest/Cypress/lint modules that
- * should not trigger FTR.
- *
- * Do NOT add:
- * - Product plugins or shared runtime libraries consumed by the Kibana server/UI
- * - `@kbn/test`, `@kbn/test-suites-*`, `@kbn/ftr-*`, `@kbn/journeys`, or other
- *   FTR framework / suite packages
- * - Build toolchain that ships into the Kibana bundle (`@kbn/babel-*`, optimizer)
- * - `@kbn/scout-info` / `@kbn/scout-reporting` — imported by FTR configs and the
- *   FTR mocha reporter (`ScoutFTRReporter`)
- * - `@kbn/test-jest-helpers` — still imported by FTR services (e.g. `delay` in
- *   `@kbn/ftr-common-functional-ui-services` / `@kbn/ftr-common-functional-services`)
+ * Modules that cannot affect FTR. When a PR only touches these (and no critical
+ * paths), FTR is skipped. Do not add FTR runtime deps (e.g. scout-info,
+ * scout-reporting, test-jest-helpers) or product/build packages.
  */
-
 export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
-  // Scout ecosystem (Playwright-only helpers — not FTR runtime deps)
+  // Scout (Playwright)
   '@kbn/scout',
   '@kbn/scout-oblt',
   '@kbn/scout-search',
@@ -38,7 +24,7 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/scout-release-testing',
   '@kbn/content-list-scout',
 
-  // Jest-only helpers (not @kbn/test-jest-helpers — used by FTR services today)
+  // Jest
   '@kbn/test-eui-helpers',
   '@kbn/jest-serializers',
 
@@ -48,7 +34,7 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/osquery-plugin-cypress',
   '@kbn/fleet-plugin-cypress',
 
-  // Storybook / stubs / LLM eval harness
+  // Misc test-only / evals
   '@kbn/storybook',
   '@kbn/web-worker-stub',
   '@kbn/migrator-test-kit',
@@ -58,7 +44,7 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/evals-plugin',
   '@kbn/performance-testing-dataset-extractor',
 
-  // Lint / static analysis (does not affect FTR runtime)
+  // Lint
   '@kbn/eslint-config',
   '@kbn/eslint-plugin-alerting-v2',
   '@kbn/eslint-plugin-disable',
@@ -70,10 +56,7 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/check-kibana-settings-cli',
 ]);
 
-/**
- * Paths that must always keep FTR enabled when touched, even if every
- * categorized module is on the exclusion list (e.g. lockfile + scout-only).
- */
+/** Always keep FTR on when these paths change. */
 export const FTR_CRITICAL_PATHS: readonly string[] = [
   '.buildkite/ftr-manifests/**',
   '.buildkite/scripts/steps/test/ftr_configs.sh',
@@ -89,10 +72,7 @@ export const FTR_CRITICAL_PATHS: readonly string[] = [
   '.nvmrc',
 ];
 
-/**
- * When no categorized modules are affected, skip FTR only if every changed
- * file matches one of these globs (CI/docs/ownership noise).
- */
+/** Uncategorized-only diffs: skip FTR when every file matches. */
 export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   'docs/**',
   '**/docs/**',
@@ -113,7 +93,6 @@ export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   '**/.prettierrc*',
   '.mise.toml',
   '.river/**',
-  // i18n namespace registration / license / renovate noise
   '**/.i18nrc.json',
   '.i18nrc.json',
   'renovate.json',
@@ -122,7 +101,6 @@ export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   'LICENSE',
   'LICENSE.txt',
   '.backportrc.json',
-  // static assets
   '**/*.png',
   '**/*.svg',
   '**/*.gif',
@@ -131,15 +109,7 @@ export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   '**/*.webp',
 ];
 
-/**
- * Returns true when FTR configs should be omitted from the Jest/FTR
- * orchestrator for this PR.
- *
- * - Critical paths always keep FTR on.
- * - Non-empty affected modules → skip only when every module is excluded.
- * - Empty affected modules (uncategorized-only) → skip only when every
- *   changed file matches `FTR_IRRELEVANT_PATHS`.
- */
+/** True when this PR should omit FTR configs. */
 export function shouldSkipFtrTests(
   affectedModules: ReadonlySet<string>,
   changedFiles: readonly string[]

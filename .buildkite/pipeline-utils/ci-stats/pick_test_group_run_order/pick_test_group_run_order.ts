@@ -44,8 +44,6 @@ export async function pickTestGroupRunOrder() {
   const ciStats = new CiStatsClient();
   const config = loadRunOrderConfig();
 
-  // Holds the merge base only when selective testing is enabled; the blocks
-  // below use it (Scout skip check, FTR exclusion, then Jest filter).
   const selectiveTestingMergeBase = config.useSelectiveTesting ? config.prMergeBase : undefined;
 
   // Fast path: a PR whose diff is exclusively Scout test files cannot affect
@@ -83,8 +81,6 @@ export async function pickTestGroupRunOrder() {
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
   if (selectiveTestingMergeBase && selectiveChangedFiles) {
-    // Skip FTR when the PR only touches Scout/Jest/Cypress/lint modules or
-    // CI/docs noise. Jest selective filtering still runs below.
     const directlyAffected = await getAffectedPackages(selectiveTestingMergeBase, {
       strategy: 'git',
       includeDownstream: false,
@@ -99,16 +95,16 @@ export async function pickTestGroupRunOrder() {
       shouldSkipFtrTests(directlyAffected, selectiveChangedFiles)
     ) {
       console.log(
-        `Skipping FTR configs — affected module(s) cannot impact FTR: ${
+        `Skipping FTR configs — diff cannot affect FTR: ${
           directlyAffected.size
             ? [...directlyAffected].join(', ')
-            : '(uncategorized / irrelevant paths only)'
+            : '(irrelevant paths only)'
         }`
       );
       bk.setAnnotation(
         'selective-testing-ftr-excluded',
         'info',
-        'Selective testing: FTR configs were skipped because the diff only touches modules/paths that cannot affect FTR.'
+        'Selective testing: FTR configs skipped (excluded modules / irrelevant paths only).'
       );
       ftrConfigsByQueue.clear();
     }

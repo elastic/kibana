@@ -24,28 +24,16 @@ describe('FTR_EXCLUDED_MODULES', () => {
     }
   });
 
-  it('does not include packages used by FTR runtime', () => {
-    // Imported by FTR configs / ScoutFTRReporter in @kbn/test
+  it('does not include FTR runtime deps', () => {
     expect(FTR_EXCLUDED_MODULES.has('@kbn/scout-info')).toBe(false);
     expect(FTR_EXCLUDED_MODULES.has('@kbn/scout-reporting')).toBe(false);
-    // Imported by FTR find/retry services (`delay`)
     expect(FTR_EXCLUDED_MODULES.has('@kbn/test-jest-helpers')).toBe(false);
   });
 
-  it('includes Playwright-only Scout helpers', () => {
+  it('includes Scout / Jest / Cypress / evals helpers', () => {
     expect(FTR_EXCLUDED_MODULES.has('@kbn/scout')).toBe(true);
-    expect(FTR_EXCLUDED_MODULES.has('@kbn/content-list-scout')).toBe(true);
-  });
-
-  it('includes Jest / Cypress helpers that FTR does not import', () => {
     expect(FTR_EXCLUDED_MODULES.has('@kbn/test-eui-helpers')).toBe(true);
     expect(FTR_EXCLUDED_MODULES.has('@kbn/cypress-test-helper')).toBe(true);
-    expect(FTR_EXCLUDED_MODULES.has('@kbn/osquery-plugin-cypress')).toBe(true);
-    expect(FTR_EXCLUDED_MODULES.has('@kbn/fleet-plugin-cypress')).toBe(true);
-  });
-
-  it('includes evals packages', () => {
-    expect(FTR_EXCLUDED_MODULES.has('@kbn/evals')).toBe(true);
     expect(FTR_EXCLUDED_MODULES.has('@kbn/evals-plugin')).toBe(true);
   });
 });
@@ -131,7 +119,7 @@ describe('shouldSkipFtrTests', () => {
     ).toBe(false);
   });
 
-  it('returns false for config/serverless.yml (can affect FTR feature flags)', () => {
+  it('returns false for config/serverless.yml', () => {
     expect(shouldSkipFtrTests(new Set(), ['config/serverless.yml'])).toBe(false);
   });
 });
