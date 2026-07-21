@@ -166,3 +166,9 @@ dashboard-management,platform,Create a dashboard using kibana_sample_data_logs w
 visualization-creation,platform,Create a bar chart showing the distribution of response codes in kibana_sample_data_logs.,direct,visualization-creation,source=dashboard_management_spec (negative test — loaded as viz-without-dashboard case)
 dashboard-management,platform,Help me write an ES|QL query to find slow transactions,distractor,threat-hunting,source=dashboard_management_spec; corrected from empty — ES|QL query authoring for performance investigation maps to threat-hunting not dashboard; tests dashboard precision
 dashboard-management,platform,What fields are available in the logs-* index?,distractor,streams-management,source=dashboard_management_spec; corrected from empty — field/schema discovery for logs-* maps to streams-management not dashboard; tests dashboard precision
+ki-automation-generation,platform,Set up the Context Engine for my Elasticsearch data,direct,ki-automation-generation,
+ki-automation-generation,platform,Generate Knowledge Indicators from my support case index,direct,ki-automation-generation,
+ki-automation-generation,platform,I want AI agents to be able to answer questions about my data — help me set that up,indirect,ki-automation-generation,
+ki-automation-generation,platform,Create KIs so agents can query my customer records without scanning the raw index,indirect,ki-automation-generation,
+ki-automation-generation,platform,Add a knowledge indicator to track weekly login volume for admin accounts,distractor,knowledge-indicators-management,AMBIGUOUS: creating a single KI manually vs bulk KI generation via workflow
+ki-automation-generation,platform,Run the KI identification task on the logs.ecs stream to find monitoring patterns,distractor,ki-identification-management,AMBIGUOUS: automated KI discovery vs context engine setup

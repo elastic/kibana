@@ -98,6 +98,7 @@ const bySkill = (skillId: string): BenchmarkExample[] =>
 
 export const DASHBOARD_MANAGEMENT_EXAMPLES = bySkill('dashboard-management');
 export const GRAPH_CREATION_EXAMPLES = bySkill('graph-creation');
+export const KI_AUTOMATION_GENERATION_EXAMPLES = bySkill('ki-automation-generation');
 export const SKILL_AUTHORING_EXAMPLES = bySkill('skill-authoring');
 export const VISUALIZATION_CREATION_EXAMPLES = bySkill('visualization-creation');
 

@@ -19,6 +19,7 @@ import {
   FIND_RULES_EXAMPLES,
   FIND_SECURITY_ML_JOBS_EXAMPLES,
   GRAPH_CREATION_EXAMPLES,
+  KI_AUTOMATION_GENERATION_EXAMPLES,
   KI_IDENTIFICATION_MANAGEMENT_EXAMPLES,
   KNOWLEDGE_INDICATORS_MANAGEMENT_EXAMPLES,
   OBSERVABILITY_INVESTIGATION_EXAMPLES,
@@ -120,6 +121,13 @@ evaluate.describe(
       await evaluateBenchmark({
         skillId: 'dashboard-management',
         examples: DASHBOARD_MANAGEMENT_EXAMPLES,
+      });
+    });
+
+    evaluate('ki-automation-generation routing', async ({ evaluateBenchmark }) => {
+      await evaluateBenchmark({
+        skillId: 'ki-automation-generation',
+        examples: KI_AUTOMATION_GENERATION_EXAMPLES,
       });
     });
   }
