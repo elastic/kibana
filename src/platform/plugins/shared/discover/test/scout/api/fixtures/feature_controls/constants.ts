@@ -8,31 +8,18 @@
  */
 
 import type { KibanaRole } from '@kbn/scout';
+import { LOGSTASH_READ_INDEX_PRIVILEGE } from '../../../common/feature_controls/roles';
+
+export {
+  DISCOVER_ALL_ROLE,
+  DISCOVER_READ_ROLE,
+  DISCOVER_READ_URL_CREATE_ROLE,
+} from '../../../common/feature_controls/roles';
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
 } as const;
-
-const LOGSTASH_READ_INDEX_PRIVILEGE = {
-  names: ['logstash-*'],
-  privileges: ['read', 'view_index_metadata'],
-};
-
-export const DISCOVER_ALL_ROLE: KibanaRole = {
-  elasticsearch: { cluster: [], indices: [LOGSTASH_READ_INDEX_PRIVILEGE] },
-  kibana: [{ base: [], feature: { discover: ['all'] }, spaces: ['*'] }],
-};
-
-export const DISCOVER_READ_ROLE: KibanaRole = {
-  elasticsearch: { cluster: [], indices: [LOGSTASH_READ_INDEX_PRIVILEGE] },
-  kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['*'] }],
-};
-
-export const DISCOVER_READ_URL_CREATE_ROLE: KibanaRole = {
-  elasticsearch: { cluster: [], indices: [LOGSTASH_READ_INDEX_PRIVILEGE] },
-  kibana: [{ base: [], feature: { discover: ['read', 'url_create'] }, spaces: ['*'] }],
-};
 
 export const DISCOVER_VISUALIZE_READ_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [LOGSTASH_READ_INDEX_PRIVILEGE] },
