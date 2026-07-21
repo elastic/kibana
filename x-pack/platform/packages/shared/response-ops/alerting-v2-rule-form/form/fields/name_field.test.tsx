@@ -118,4 +118,80 @@ describe('NameField', () => {
       expect(screen.getByText('Name is required.')).toBeInTheDocument();
     });
   });
+
+  it('shows error when submitted with a name longer than 256 characters', async () => {
+    const queryClient = createTestQueryClient();
+    const services = createMockServices();
+
+    const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
+      const form = useForm<FormValues>({
+        defaultValues: {
+          ...defaultTestFormValues,
+          metadata: { ...defaultTestFormValues.metadata, name: 'a'.repeat(257) },
+        },
+      });
+
+      return (
+        <QueryClientProvider client={queryClient}>
+          <FormProvider {...form}>
+            <RuleFormProvider services={services} meta={{ layout: 'page' }}>
+              {children}
+            </RuleFormProvider>
+            <button type="button" onClick={form.handleSubmit(() => {})}>
+              Submit
+            </button>
+          </FormProvider>
+        </QueryClientProvider>
+      );
+    };
+
+    const user = userEvent.setup();
+    render(<NameField />, { wrapper: WrapperWithSubmit });
+
+    const submitButton = screen.getByText('Submit');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Name cannot exceed 256 characters.')).toBeInTheDocument();
+    });
+  });
+
+  it('does not show a length error when submitted with a name of exactly 256 characters', async () => {
+    const queryClient = createTestQueryClient();
+    const services = createMockServices();
+    const onSubmit = jest.fn();
+
+    const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
+      const form = useForm<FormValues>({
+        defaultValues: {
+          ...defaultTestFormValues,
+          metadata: { ...defaultTestFormValues.metadata, name: 'a'.repeat(256) },
+        },
+      });
+
+      return (
+        <QueryClientProvider client={queryClient}>
+          <FormProvider {...form}>
+            <RuleFormProvider services={services} meta={{ layout: 'page' }}>
+              {children}
+            </RuleFormProvider>
+            <button type="button" onClick={form.handleSubmit(onSubmit)}>
+              Submit
+            </button>
+          </FormProvider>
+        </QueryClientProvider>
+      );
+    };
+
+    const user = userEvent.setup();
+    render(<NameField />, { wrapper: WrapperWithSubmit });
+
+    const submitButton = screen.getByText('Submit');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled();
+    });
+    expect(screen.queryByText('Name cannot exceed 256 characters.')).not.toBeInTheDocument();
+  });
 });

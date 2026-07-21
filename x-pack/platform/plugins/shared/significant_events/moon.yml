@@ -78,7 +78,6 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/core-http-server-mocks'
   - '@kbn/apm-utils'
-  - '@kbn/actions-utils'
   - '@kbn/datemath'
 tags:
   - plugin

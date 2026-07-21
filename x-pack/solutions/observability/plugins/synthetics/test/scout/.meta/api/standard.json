@@ -1,5 +1,5 @@
 {
-  "sha1": "ad1df3285afa3de0d9dc8ab026e072a0e67b1469",
+  "sha1": "d3c64a8c92d544b29d9c883746ee662f489f2d7d",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -2721,7 +2721,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/inspect_monitor.spec.ts",
-        "line": 68,
+        "line": 83,
         "column": 12
       }
     },
@@ -2735,7 +2735,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/inspect_monitor.spec.ts",
-        "line": 140,
+        "line": 157,
         "column": 12
       }
     },
@@ -2749,7 +2749,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/inspect_monitor.spec.ts",
-        "line": 211,
+        "line": 228,
         "column": 12
       }
     },

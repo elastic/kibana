@@ -94,6 +94,9 @@ export const euid = {
     /**
      * Query DSL that should match documents sharing the same identity fields as the given sample document.
      * Input: entity type and one document; output: bool/term-style filter, or `undefined` if identity or pipeline gate fails.
+     * Pass `{ excludeHigherRankedFields: false }` when looking up a stored entity by partial identity
+     * (e.g. only `host.name`) — the default partition semantics would require higher-ranked fields
+     * (e.g. `host.id`) to be absent and never match stored entities.
      */
     getEuidFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
 
