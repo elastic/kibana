@@ -9,11 +9,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ActionContext, ConnectorSpec, SandboxCliToken } from '../../connector_spec';
 import { getGcpAccessToken, parseServiceAccountKey } from '../../auth_types/gcp_jwt_helpers';
 
 const GCP_CLOUD_PLATFORM_SCOPE = 'https://www.googleapis.com/auth/cloud-platform';
 const IAM_CREDENTIALS_BASE_URL = 'https://iamcredentials.googleapis.com/v1';
+const WORKSPACE = '/workspace';
+const GCP_CLI_CONFIG_DIR = `${WORKSPACE}/.gcloud`;
+const GCP_CLI_CREDENTIAL_DIR = `${WORKSPACE}/.gcp`;
+const GCP_CLI_ACCESS_TOKEN_PATH = `${GCP_CLI_CREDENTIAL_DIR}/access-token`;
 
 const parseCsv = (value: unknown): string[] => {
   if (Array.isArray(value)) {
@@ -56,6 +60,8 @@ interface MintSandboxTokenInput {
   regions?: string[];
 }
 
+type MintSandboxTokenResponse = SandboxCliToken;
+
 const generateAccessToken = async ({
   bootstrapAccessToken,
   targetServiceAccount,
@@ -93,6 +99,99 @@ const generateAccessToken = async ({
   return {
     accessToken: data.accessToken,
     expiresAt: data.expireTime ? Date.parse(data.expireTime) : Date.now() + 3600_000,
+  };
+};
+
+const describeAccess = async (ctx: ActionContext) => {
+  const config = ctx.config as {
+    projectId?: string;
+    targetServiceAccount?: string;
+    allowedServices?: string;
+    allowedRegions?: string;
+  };
+  return {
+    projectId: config.projectId,
+    targetServiceAccount: config.targetServiceAccount,
+    allowedServices: parseCsv(config.allowedServices),
+    allowedRegions: parseCsv(config.allowedRegions),
+  };
+};
+
+const mintSandboxToken = async (
+  ctx: ActionContext,
+  input: MintSandboxTokenInput
+): Promise<MintSandboxTokenResponse> => {
+  const config = ctx.config as {
+    projectId?: string;
+    targetServiceAccount?: string;
+    allowedServices?: string;
+    allowedRegions?: string;
+  };
+  const serviceAccountJson = ctx.secrets?.serviceAccountJson;
+  if (typeof serviceAccountJson !== 'string') {
+    throw new Error('Missing service account JSON');
+  }
+
+  const serviceAccount = parseServiceAccountKey(serviceAccountJson);
+  const projectId = input.projectId ?? config.projectId ?? serviceAccount.project_id;
+  if (!projectId) {
+    throw new Error('Google Cloud CLI connector requires a projectId');
+  }
+  if (config.projectId && input.projectId && input.projectId !== config.projectId) {
+    throw new Error(
+      `Google Cloud CLI connector targets ${config.projectId}, not ${input.projectId}`
+    );
+  }
+
+  const deniedServices = missingAllowedValues(input.services, parseCsv(config.allowedServices));
+  if (deniedServices.length > 0) {
+    throw new Error(
+      `Google Cloud CLI connector does not allow services: ${deniedServices.join(', ')}`
+    );
+  }
+
+  const deniedRegions = missingAllowedValues(input.regions, parseCsv(config.allowedRegions));
+  if (deniedRegions.length > 0) {
+    throw new Error(
+      `Google Cloud CLI connector does not allow regions: ${deniedRegions.join(', ')}`
+    );
+  }
+
+  const targetServiceAccount =
+    typeof config.targetServiceAccount === 'string' && config.targetServiceAccount.trim()
+      ? config.targetServiceAccount.trim()
+      : serviceAccount.client_email;
+  const bootstrapToken = await getGcpAccessToken(
+    serviceAccount.client_email,
+    serviceAccount.private_key,
+    GCP_CLOUD_PLATFORM_SCOPE
+  );
+  const minted = await generateAccessToken({
+    bootstrapAccessToken: bootstrapToken.accessToken,
+    targetServiceAccount,
+  });
+
+  return {
+    source: 'gcp_cli_connector_token',
+    expiresAt: minted.expiresAt,
+    env: {
+      CLOUDSDK_CONFIG: GCP_CLI_CONFIG_DIR,
+      CLOUDSDK_AUTH_ACCESS_TOKEN_FILE: GCP_CLI_ACCESS_TOKEN_PATH,
+      CLOUDSDK_CORE_PROJECT: projectId,
+    },
+    files: [
+      {
+        path: GCP_CLI_ACCESS_TOKEN_PATH,
+        contents: minted.accessToken,
+        mode: '0600',
+      },
+      {
+        path: `${GCP_CLI_CONFIG_DIR}/configurations/config_default`,
+        contents: `[core]\nproject = ${projectId}\n[auth]\naccess_token_file = ${GCP_CLI_ACCESS_TOKEN_PATH}\n`,
+        mode: '0600',
+      },
+    ],
+    cleanupPaths: [GCP_CLI_CONFIG_DIR, GCP_CLI_CREDENTIAL_DIR],
   };
 };
 
@@ -184,88 +283,33 @@ export const GcpCliConnector: ConnectorSpec = {
       description:
         'Describe the Google Cloud CLI access policy configured on this connector. This does not return credentials.',
       input: lazySchema(() => z.object({})),
-      handler: async (ctx) => {
-        const config = ctx.config as {
-          projectId?: string;
-          targetServiceAccount?: string;
-          allowedServices?: string;
-          allowedRegions?: string;
-        };
-        return {
-          projectId: config.projectId,
-          targetServiceAccount: config.targetServiceAccount,
-          allowedServices: parseCsv(config.allowedServices),
-          allowedRegions: parseCsv(config.allowedRegions),
-        };
-      },
+      handler: describeAccess,
     },
     mintSandboxToken: {
       isTool: false,
       description:
         'Mint a short-lived Google Cloud access token for sandboxed gcloud use. Internal Agent Builder action; not exposed to LLM tools.',
       input: mintSandboxTokenInputSchema,
-      handler: async (ctx, input: MintSandboxTokenInput) => {
-        const config = ctx.config as {
-          projectId?: string;
-          targetServiceAccount?: string;
-          allowedServices?: string;
-          allowedRegions?: string;
-        };
-        const serviceAccountJson = ctx.secrets?.serviceAccountJson;
-        if (typeof serviceAccountJson !== 'string') {
-          throw new Error('Missing service account JSON');
-        }
+      handler: mintSandboxToken,
+    },
+  },
 
-        const serviceAccount = parseServiceAccountKey(serviceAccountJson);
-        const projectId = input.projectId ?? config.projectId ?? serviceAccount.project_id;
-        if (!projectId) {
-          throw new Error('Google Cloud CLI connector requires a projectId');
-        }
-        if (config.projectId && input.projectId && input.projectId !== config.projectId) {
-          throw new Error(
-            `Google Cloud CLI connector targets ${config.projectId}, not ${input.projectId}`
-          );
-        }
-
-        const deniedServices = missingAllowedValues(
-          input.services,
-          parseCsv(config.allowedServices)
-        );
-        if (deniedServices.length > 0) {
-          throw new Error(
-            `Google Cloud CLI connector does not allow services: ${deniedServices.join(', ')}`
-          );
-        }
-
-        const deniedRegions = missingAllowedValues(input.regions, parseCsv(config.allowedRegions));
-        if (deniedRegions.length > 0) {
-          throw new Error(
-            `Google Cloud CLI connector does not allow regions: ${deniedRegions.join(', ')}`
-          );
-        }
-
-        const targetServiceAccount =
-          typeof config.targetServiceAccount === 'string' && config.targetServiceAccount.trim()
-            ? config.targetServiceAccount.trim()
-            : serviceAccount.client_email;
-        const bootstrapToken = await getGcpAccessToken(
-          serviceAccount.client_email,
-          serviceAccount.private_key,
-          GCP_CLOUD_PLATFORM_SCOPE
-        );
-        const minted = await generateAccessToken({
-          bootstrapAccessToken: bootstrapToken.accessToken,
-          targetServiceAccount,
-        });
-
-        return {
-          accessToken: minted.accessToken,
-          expiresAt: minted.expiresAt,
-          projectId,
-          targetServiceAccount,
-          source: 'gcp_cli_connector_token',
-        };
-      },
+  sandboxCli: {
+    skill: [
+      'Use this connector when the sandbox needs Google Cloud CLI access, including gcloud,',
+      'Cloud Run, Cloud Logging, Google Cloud Storage, or generic GCP project inspection.',
+      'Ask for project or region when the prompt does not provide them. Use read access unless',
+      'the task needs to create, update, or delete GCP resources.',
+    ].join(' '),
+    mintToken: {
+      schema: mintSandboxTokenInputSchema,
+      handler: mintSandboxToken,
+    },
+    mintTokenOptions: {
+      handler: describeAccess,
+    },
+    revokeToken: {
+      handler: async () => {},
     },
   },
 

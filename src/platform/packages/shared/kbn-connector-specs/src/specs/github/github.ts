@@ -17,8 +17,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import { UISchemas, type ConnectorSpec } from '../../connector_spec';
+import {
+  UISchemas,
+  type ActionContext,
+  type ConnectorSpec,
+  type SandboxCliToken,
+} from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
+import { GithubAppTokenMinter } from './github_app_token_minter';
 import type {
   CallToolInput,
   GetCommitInput,
@@ -63,6 +69,192 @@ import {
 } from './types';
 
 const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
+const GITHUB_APP_AUTH_TYPE = 'github_app';
+const WORKSPACE = '/workspace';
+const GIT_CREDENTIALS_PATH = `${WORKSPACE}/.git-credentials`;
+const GH_CONFIG_DIR = `${WORKSPACE}/.config/gh`;
+const GH_HOSTS_PATH = `${GH_CONFIG_DIR}/hosts.yml`;
+
+const sandboxCliMintTokenInputSchema = lazySchema(() =>
+  z.object({
+    repository: z.string().optional(),
+    gitRepos: z.array(z.string()).optional(),
+    access: z.enum(['read', 'push-pr']).optional(),
+    requireRequestedRepo: z.boolean().optional(),
+  })
+);
+
+interface SandboxCliMintTokenInput {
+  repository?: string;
+  gitRepos?: string[];
+  access?: 'read' | 'push-pr';
+  requireRequestedRepo?: boolean;
+}
+
+type SandboxCliMintTokenResponse = SandboxCliToken;
+
+const parseAllowedRepos = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value.filter((v): v is string => typeof v === 'string').map((v) => v.trim());
+  }
+  if (typeof value !== 'string') {
+    return [];
+  }
+  return value
+    .split(/[,\s]+/)
+    .map((v) => v.trim())
+    .filter(Boolean);
+};
+
+const normalizeRepo = (repo: string): string =>
+  repo
+    .trim()
+    .replace(/\.git$/i, '')
+    .toLowerCase();
+
+const isRepoAllowed = (repo: string, allowedRepos: string[]): boolean => {
+  const normalizedRepo = normalizeRepo(repo);
+  return allowedRepos.some((allowed) => {
+    const normalizedAllowed = normalizeRepo(allowed);
+    if (normalizedAllowed.endsWith('/*')) {
+      return normalizedRepo.startsWith(`${normalizedAllowed.slice(0, -1)}`);
+    }
+    return normalizedRepo === normalizedAllowed;
+  });
+};
+
+const firstConcreteRepo = (repos: string[]): string | undefined =>
+  repos.filter((repo) => !repo.endsWith('/*'))[0];
+
+const uniqueRepos = (repos: string[]): string[] => [...new Set(repos.filter(Boolean))];
+
+const formatRepoCandidates = (repos: string[]): string =>
+  uniqueRepos(repos).length > 0 ? uniqueRepos(repos).join(', ') : 'none';
+
+const describeSandboxGitAccess = async (ctx: ActionContext) => {
+  const config = ctx.config as { allowedRepos?: string };
+  return {
+    allowedRepos: parseAllowedRepos(config.allowedRepos),
+    supportsAccess: ['read', 'push-pr'],
+  };
+};
+
+const buildGitHubSandboxToken = ({
+  token,
+  source,
+  expiresAt,
+}: {
+  token: string;
+  source: string;
+  expiresAt?: number;
+}): SandboxCliMintTokenResponse => ({
+  source,
+  expiresAt,
+  env: {
+    GIT_TERMINAL_PROMPT: '0',
+    GIT_ASKPASS: '/bin/false',
+    GH_CONFIG_DIR,
+    GH_TOKEN: token,
+    GITHUB_TOKEN: token,
+  },
+  files: [
+    {
+      path: GIT_CREDENTIALS_PATH,
+      contents: `https://x-access-token:${token}@github.com\n`,
+      mode: '0600',
+    },
+    {
+      path: GH_HOSTS_PATH,
+      contents: `github.com:\n  oauth_token: ${token}\n  git_protocol: https\n`,
+      mode: '0600',
+    },
+  ],
+  setupCommands: [
+    `git config --global credential.helper 'store --file ${GIT_CREDENTIALS_PATH}'`,
+    `mkdir -p "$HOME/.config/gh" && cp ${GH_HOSTS_PATH} "$HOME/.config/gh/hosts.yml" && chmod 0600 "$HOME/.config/gh/hosts.yml"`,
+  ],
+  cleanupPaths: [GIT_CREDENTIALS_PATH, GH_CONFIG_DIR, '$HOME/.config/gh/hosts.yml'],
+});
+
+const mintSandboxGitToken = async (
+  ctx: ActionContext,
+  input: SandboxCliMintTokenInput
+): Promise<SandboxCliMintTokenResponse> => {
+  const config = ctx.config as { allowedRepos?: string };
+  const secrets = ctx.secrets;
+  if (!secrets) {
+    throw new Error('GitHub connector is missing secrets');
+  }
+
+  if (secrets.authType === 'bearer' && typeof secrets.token === 'string') {
+    return buildGitHubSandboxToken({
+      token: secrets.token,
+      source: 'github_bearer_connector_token',
+    });
+  }
+
+  if (secrets.authType !== GITHUB_APP_AUTH_TYPE) {
+    throw new Error('GitHub sandbox git credentials require PAT or GitHub App auth');
+  }
+
+  const appId = typeof secrets.appId === 'string' ? secrets.appId : undefined;
+  const privateKey = typeof secrets.privateKey === 'string' ? secrets.privateKey : undefined;
+  if (!appId || !privateKey) {
+    throw new Error('GitHub App connector is missing appId or privateKey');
+  }
+
+  const repos = input.gitRepos ?? [];
+  const allowedRepos = parseAllowedRepos(config.allowedRepos);
+  const candidateRepos = uniqueRepos([...allowedRepos, ...repos]);
+  if (input.requireRequestedRepo && !input.repository) {
+    throw new Error(
+      `GitHub App connector needs a specific repository before minting a token. Candidate repos: ${formatRepoCandidates(
+        candidateRepos
+      )}`
+    );
+  }
+
+  const repo = input.repository ?? firstConcreteRepo(allowedRepos) ?? firstConcreteRepo(repos);
+  if (!repo) {
+    throw new Error(
+      'GitHub App connector requires a requested repo or allowedRepos config to mint an installation token'
+    );
+  }
+
+  if (allowedRepos.length > 0 && !isRepoAllowed(repo, allowedRepos)) {
+    throw new Error(
+      `GitHub App connector is not allowed to mint a token for ${repo}. Allowed repos: ${formatRepoCandidates(
+        allowedRepos
+      )}`
+    );
+  }
+
+  const [owner, repoName] = repo.split('/');
+  if (!owner || !repoName) {
+    throw new Error(`GitHub App connector received invalid repo "${repo}"`);
+  }
+  if (!input.access) {
+    throw new Error('GitHub App connector requires sandbox git access before minting a token');
+  }
+
+  const permissions: Record<string, string> =
+    input.access === 'push-pr'
+      ? { contents: 'write', pull_requests: 'write' }
+      : { contents: 'read' };
+  const minted = await new GithubAppTokenMinter(
+    { appId, privateKeyPem: privateKey },
+    ctx.log.get('githubApp')
+  ).mintForAccount(owner, {
+    repositories: [repoName],
+    permissions,
+  });
+
+  return buildGitHubSandboxToken({
+    token: minted.token,
+    expiresAt: Date.parse(minted.expiresAt),
+    source: 'github_app_installation_token',
+  });
+};
 
 export const GithubConnector: ConnectorSpec = {
   metadata: {
@@ -421,6 +613,28 @@ export const GithubConnector: ConnectorSpec = {
       handler: async (ctx, input: CallToolInput) => {
         return callToolContent(ctx, input.name, input.arguments);
       },
+    },
+  },
+
+  sandboxCli: {
+    skill: [
+      'Use this connector when the sandbox needs real git or GitHub CLI access, including clone,',
+      'fetch, push, branch creation, or opening pull requests with gh.',
+      'Ask for a concrete owner/repo when the task needs push or PR access and the repo is unclear.',
+      'If the repository is incomplete or ownerless, for example "kibana" instead of',
+      '"elastic/kibana" or "example/kibana", ask which repo to use before requesting credentials.',
+      'Do not guess the repository owner.',
+      'Use read access for clone-only work and push-pr only when the task must push or open a PR.',
+    ].join(' '),
+    mintToken: {
+      schema: sandboxCliMintTokenInputSchema,
+      handler: mintSandboxGitToken,
+    },
+    mintTokenOptions: {
+      handler: describeSandboxGitAccess,
+    },
+    revokeToken: {
+      handler: async () => {},
     },
   },
 

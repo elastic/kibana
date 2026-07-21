@@ -25,6 +25,9 @@ export {
 export { getConnectorSpec } from './src/get_connector_spec';
 export {
   isToolAction,
+  SANDBOX_CLI_MINT_TOKEN_ACTION,
+  SANDBOX_CLI_MINT_TOKEN_OPTIONS_ACTION,
+  SANDBOX_CLI_REVOKE_TOKEN_ACTION,
   TEST_CONNECTOR_SUB_ACTION,
   getSandboxCredentialStrategy,
   getSandboxActionAccess,
@@ -42,6 +45,12 @@ export {
 } from './src/connector_utils';
 export { normalizeAuthorizationHeaderValue } from './src/auth_types/oauth_authz_code_and_ears_helpers';
 export { isEarsExperimentalConnector } from './src/lib/ears_experimental_utils';
+export { GithubAppTokenMinter } from './src/specs/github/github_app_token_minter';
+export type {
+  GithubAppConfig,
+  MintedInstallationToken,
+  MintOptions,
+} from './src/specs/github/github_app_token_minter';
 
 export { ConnectorAuthorizationError, isConnectorAuthorizationError } from './src/errors';
 export type { ConnectorAuthorizationReason } from './src/errors';

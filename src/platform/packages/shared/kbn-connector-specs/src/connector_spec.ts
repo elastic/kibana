@@ -299,6 +299,51 @@ export interface ActionContext {
 }
 
 // ============================================================================
+// SANDBOX CLI CREDENTIALS
+// ============================================================================
+
+export const SANDBOX_CLI_MINT_TOKEN_ACTION = '_sandbox_cli_mint_token';
+export const SANDBOX_CLI_MINT_TOKEN_OPTIONS_ACTION = '_sandbox_cli_mint_token_options';
+export const SANDBOX_CLI_REVOKE_TOKEN_ACTION = '_sandbox_cli_revoke_token';
+
+export interface SandboxCliFile {
+  path: string;
+  contents: string;
+  mode?: string;
+}
+
+export interface SandboxCliToken {
+  source: string;
+  expiresAt?: number;
+  env?: Record<string, string>;
+  files?: SandboxCliFile[];
+  setupCommands?: string[];
+  cleanupPaths?: string[];
+}
+
+export interface SandboxCliCapability<
+  TMintInput = unknown,
+  TToken extends SandboxCliToken = SandboxCliToken,
+  TOptions = unknown
+> {
+  /**
+   * Short prompt guidance explaining when the parent agent should request this
+   * connector's CLI credentials and what follow-up questions to ask.
+   */
+  skill: string;
+  mintToken: {
+    schema: z.ZodSchema<TMintInput>;
+    handler: (ctx: ActionContext, input: TMintInput) => Promise<TToken>;
+  };
+  mintTokenOptions?: {
+    handler: (ctx: ActionContext) => Promise<TOptions>;
+  };
+  revokeToken: {
+    handler: (ctx: ActionContext, token: TToken) => Promise<void>;
+  };
+}
+
+// ============================================================================
 // TRANSFORMATIONS
 // ============================================================================
 
@@ -401,6 +446,13 @@ export interface ConnectorSpec {
   // exposure/access is declared on each `ActionDefinition.sandbox`. Absent =
   // the connector is not reachable from sandboxes (fail-safe default).
   sandbox?: ConnectorSandboxSpec;
+
+  /**
+   * Optional connector-owned CLI credential contract. Agent Builder uses this
+   * to describe, mint, and revoke short-lived credentials for sandbox CLIs.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- connector specs provide different CLI token schemas
+  sandboxCli?: SandboxCliCapability<any, any, any>;
 }
 
 // ============================================================================
