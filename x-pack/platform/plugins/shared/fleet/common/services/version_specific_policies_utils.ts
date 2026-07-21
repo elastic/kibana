@@ -145,3 +145,65 @@ export function buildPolicyIdsOrVariantsEsFilter(
     },
   };
 }
+
+// TODO: Remove these two fallback helpers once all fleet-server versions in use populate
+// policy_base_id on agent enrolment. Until then, agents enrolled via an older fleet-server
+// during a mixed-version rollout will lack the field and must be matched via the legacy
+// policy_id term/prefix pattern.
+
+/**
+ * ES query DSL filter preferring `policy_base_id` for migrated documents, with a legacy
+ * `policy_id` fallback for documents that pre-date the `policy_base_id` field.
+ */
+export function buildPolicyBaseIdWithFallbackEsFilter(
+  baseId: string,
+  policyBaseIdField: string = 'policy_base_id',
+  policyIdField: string = DEFAULT_POLICY_ID_FIELD
+) {
+  return {
+    bool: {
+      should: [
+        { term: { [policyBaseIdField]: baseId } },
+        {
+          bool: {
+            must: [
+              { bool: { must_not: { exists: { field: policyBaseIdField } } } },
+              buildPolicyIdOrVariantsEsFilter(baseId, policyIdField),
+            ],
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+}
+
+/**
+ * Same as {@link buildPolicyBaseIdWithFallbackEsFilter}, for multiple base policy ids at once.
+ */
+export function buildPolicyBaseIdsWithFallbackEsFilter(
+  baseIds: string[],
+  policyBaseIdField: string = 'policy_base_id',
+  policyIdField: string = DEFAULT_POLICY_ID_FIELD
+) {
+  const uniqueIds = Array.from(new Set(baseIds));
+  if (uniqueIds.length === 0) {
+    return { match_none: {} };
+  }
+  return {
+    bool: {
+      should: [
+        { terms: { [policyBaseIdField]: uniqueIds } },
+        {
+          bool: {
+            must: [
+              { bool: { must_not: { exists: { field: policyBaseIdField } } } },
+              buildPolicyIdsOrVariantsEsFilter(uniqueIds, policyIdField),
+            ],
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+}

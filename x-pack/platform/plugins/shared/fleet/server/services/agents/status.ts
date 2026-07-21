@@ -24,6 +24,11 @@ import { appContextService } from '../app_context';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
+import {
+  buildPolicyBaseIdWithFallbackEsFilter,
+  buildPolicyBaseIdsWithFallbackEsFilter,
+} from '../../../common/services/version_specific_policies_utils';
+
 import { DEFAULT_NAMESPACES_FILTER } from '../spaces/agent_namespaces';
 
 import { getAgentById, removeSOAttributes } from './crud';
@@ -87,9 +92,9 @@ export async function getAgentStatusForAgentPolicy(
     clauses.push(kueryAsElasticsearchQuery);
   }
   if (agentPolicyIds) {
-    clauses.push({ terms: { policy_base_id: agentPolicyIds } });
+    clauses.push(buildPolicyBaseIdsWithFallbackEsFilter(agentPolicyIds));
   } else if (agentPolicyId) {
-    clauses.push({ term: { policy_base_id: agentPolicyId } });
+    clauses.push(buildPolicyBaseIdWithFallbackEsFilter(agentPolicyId));
   }
 
   const query =
