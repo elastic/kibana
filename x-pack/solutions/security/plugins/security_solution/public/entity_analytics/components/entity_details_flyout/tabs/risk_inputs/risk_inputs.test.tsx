@@ -41,7 +41,9 @@ jest.mock('../../../risk_score_timeline', () => ({
   RiskScoreTimeline: (props: {
     entityId: string;
     scoreType?: string;
-    onPointSelect: (timestamp: string | undefined) => void;
+    onPointSelect: (
+      point: { timestamp: string; scoreNorm: number } | undefined
+    ) => void;
     onRangeChange: (range: { from: string; to: string }) => void;
   }) => (
     <div
@@ -52,7 +54,12 @@ jest.mock('../../../risk_score_timeline', () => ({
       <button
         type="button"
         data-test-subj="mockSelectPoint"
-        onClick={() => props.onPointSelect('2021-08-10T14:00:00.000Z')}
+        onClick={() =>
+          props.onPointSelect({
+            timestamp: '2021-08-10T14:00:00.000Z',
+            scoreNorm: 55,
+          })
+        }
       />
       <button
         type="button"
@@ -72,6 +79,9 @@ jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: () => ({
     euid: {
       getEuidFromObject: (...args: unknown[]) => mockGetEuidFromObject(...args),
+      dsl: {
+        getEuidFilterBasedOnDocument: jest.fn().mockReturnValue(undefined),
+      },
     },
   }),
 }));
@@ -220,10 +230,34 @@ describe('RiskInputsTab', () => {
     expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent('Rule Name');
   });
 
-  it('Does not render the context section if enabled but no asset criticality', () => {
+  it('Renders Contributions with Alerts and Asset criticality even when contribution values are zero', () => {
     mockUseUiSetting.mockReturnValue([true]);
+    mockUseIsExperimentalFeatureEnabled.mockImplementation(
+      (flag: string) => flag === 'entityAnalyticsWatchlistEnabled'
+    );
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          ...riskScore,
+          user: {
+            ...riskScore.user,
+            risk: {
+              ...riskScore.user.risk,
+              // Keep total at 0 so prototype mocks do not invent contribution rows.
+              calculated_score_norm: 0,
+              calculated_level: RiskSeverity.Unknown,
+              category_1_score: 0,
+              category_1_count: 0,
+              modifiers: [],
+            },
+          },
+        },
+      ],
+    });
 
-    const { queryByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <RiskInputsTab
           entityType={EntityType.user}
@@ -233,7 +267,90 @@ describe('RiskInputsTab', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('risk-input-asset-criticality-title')).not.toBeInTheDocument();
+    const title = getByTestId('risk-input-contexts-title');
+    expect(title).toHaveTextContent('Contributions');
+
+    const table = getByTestId('risk-input-contexts-table');
+    expect(table).toHaveTextContent('Alerts');
+    expect(table).toHaveTextContent('Asset criticality');
+    expect(table).toHaveTextContent('Watchlist');
+    expect(table).toHaveTextContent('–');
+    expect(table).toHaveTextContent('0.00');
+    expect(queryByTestId('risk-inputs-asset-criticality-badge')).not.toBeInTheDocument();
+  });
+
+  it('renders alerts inside an accordion labeled Show top contributing alerts', () => {
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [riskScore],
+    });
+    mockUseRiskContributingAlerts.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [alertInputDataMock],
+    });
+
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          onShowAlert={mockOnShowAlert}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('risk-input-alert-title')).not.toBeInTheDocument();
+    expect(getByTestId('risk-input-alerts-accordion')).toHaveTextContent(
+      'Show top contributing alerts'
+    );
+    expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent('Rule Name');
+  });
+
+  it('Renders Alerts contribution using the same score and count as the right-flyout table', () => {
+    mockUseUiSetting.mockReturnValue([true]);
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          ...riskScore,
+          user: {
+            ...riskScore.user,
+            risk: {
+              ...riskScore.user.risk,
+              category_1_score: 42.5,
+              category_1_count: 7,
+              modifiers: [
+                {
+                  type: 'asset_criticality',
+                  contribution: 1,
+                  metadata: {
+                    criticality_level: 'high_impact',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      ],
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          onShowAlert={mockOnShowAlert}
+        />
+      </TestProviders>
+    );
+
+    const table = getByTestId('risk-input-contexts-table');
+    expect(table).toHaveTextContent('Alerts');
+    expect(table).toHaveTextContent('7 alerts');
+    expect(table).toHaveTextContent('+42.50');
   });
 
   it('Renders the context section if enabled and risks contains asset criticality', () => {
@@ -371,13 +488,17 @@ describe('RiskInputsTab', () => {
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('+2.22');
   });
 
-  it('shows extra alerts contribution message', () => {
+  it('shows extra alerts contribution message in the table footer', () => {
     const alerts = times(
       (number) => ({
         ...alertInputDataMock,
         _id: number.toString(),
+        input: {
+          ...alertInputDataMock.input,
+          contribution_score: 20 - number,
+        },
       }),
-      11
+      15
     );
 
     mockUseRiskContributingAlerts.mockReturnValue({
@@ -388,10 +509,23 @@ describe('RiskInputsTab', () => {
     mockUseRiskScore.mockReturnValue({
       loading: false,
       error: false,
-      data: [riskScore],
+      data: [
+        {
+          ...riskScore,
+          user: {
+            ...riskScore.user,
+            risk: {
+              ...riskScore.user.risk,
+              // Higher than the 10 displayed alerts so the "more alerts" footer shows.
+              category_1_count: 20,
+              category_1_score: 50,
+            },
+          },
+        },
+      ],
     });
 
-    const { queryByTestId } = render(
+    const { queryByTestId, getByTestId } = render(
       <TestProviders>
         <RiskInputsTab
           entityType={EntityType.user}
@@ -402,6 +536,10 @@ describe('RiskInputsTab', () => {
     );
 
     expect(queryByTestId('risk-input-extra-alerts-message')).toBeInTheDocument();
+    // Only the top 10 contributing alerts are rendered as rows.
+    expect(getByTestId('risk-input-alerts-accordion').querySelectorAll('tbody tr')).toHaveLength(
+      10
+    );
   });
 
   it('does not show score view toggle without resolution score', () => {
@@ -549,7 +687,7 @@ describe('RiskInputsTab', () => {
 
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('Entity');
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('entity-1');
-    expect(getByTestId('risk-input-alert-title').parentElement).toHaveTextContent('Entity');
+    expect(getByTestId('risk-input-alerts-accordion')).toHaveTextContent('Entity');
     expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent('Rule Name');
   });
 
@@ -612,7 +750,7 @@ describe('RiskInputsTab', () => {
 
     fireEvent.click(getByText('Resolution group risk score'));
 
-    expect(getByTestId('risk-input-alert-title').parentElement).toHaveTextContent('entity-1');
+    expect(getByTestId('risk-input-alerts-accordion')).toHaveTextContent('entity-1');
   });
 
   it('shows entity attribution for context rows in resolution view', () => {
@@ -1168,13 +1306,14 @@ describe('RiskInputsTab', () => {
       expect(queryByTestId('mockRiskScoreTimeline')).not.toBeInTheDocument();
     });
 
-    it('renders the timeline without a PiT indicator when no point is selected', () => {
+    it('renders the timeline without a historical selection affordance when no point is selected', () => {
       enableHistoryFlag();
 
       const { getByTestId, queryByTestId } = renderTab();
 
       expect(getByTestId('mockRiskScoreTimeline')).toBeInTheDocument();
-      expect(queryByTestId('riskInputsTabPitIndicator')).not.toBeInTheDocument();
+      expect(queryByTestId('riskInputsTabBackToLatest')).not.toBeInTheDocument();
+      expect(getByTestId('riskInputsTabContributionsTimestamp')).toBeInTheDocument();
       expect(mockUseRiskScoreHistory).toHaveBeenCalledWith(expect.objectContaining({ skip: true }));
     });
 
@@ -1184,7 +1323,18 @@ describe('RiskInputsTab', () => {
       renderTab();
 
       expect(mockUseRiskContributingAlerts).toHaveBeenLastCalledWith(
-        expect.objectContaining({ riskScore })
+        expect.objectContaining({
+          riskScore: expect.objectContaining({
+            '@timestamp': riskScore['@timestamp'],
+            user: expect.objectContaining({
+              name: 'elastic',
+              risk: expect.objectContaining({
+                calculated_score_norm: 100,
+                calculated_level: RiskSeverity.Critical,
+              }),
+            }),
+          }),
+        })
       );
     });
 
@@ -1207,7 +1357,8 @@ describe('RiskInputsTab', () => {
           skip: false,
         })
       );
-      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+      expect(getByTestId('riskInputsTabBackToLatest')).toBeInTheDocument();
+      expect(getByTestId('riskInputsTabContributionsTimestamp')).toBeInTheDocument();
       expect(mockUseRiskContributingAlerts).toHaveBeenLastCalledWith(
         expect.objectContaining({
           riskScore: expect.objectContaining({
@@ -1230,13 +1381,24 @@ describe('RiskInputsTab', () => {
       const { getByTestId, queryByTestId } = renderTab();
 
       fireEvent.click(getByTestId('mockSelectPoint'));
-      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+      expect(getByTestId('riskInputsTabBackToLatest')).toBeInTheDocument();
 
       fireEvent.click(getByTestId('riskInputsTabBackToLatest'));
 
-      expect(queryByTestId('riskInputsTabPitIndicator')).not.toBeInTheDocument();
+      expect(queryByTestId('riskInputsTabBackToLatest')).not.toBeInTheDocument();
       expect(mockUseRiskContributingAlerts).toHaveBeenLastCalledWith(
-        expect.objectContaining({ riskScore })
+        expect.objectContaining({
+          riskScore: expect.objectContaining({
+            '@timestamp': riskScore['@timestamp'],
+            user: expect.objectContaining({
+              name: 'elastic',
+              risk: expect.objectContaining({
+                calculated_score_norm: 100,
+                calculated_level: RiskSeverity.Critical,
+              }),
+            }),
+          }),
+        })
       );
       expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
         expect.objectContaining({ skip: true })
@@ -1253,12 +1415,12 @@ describe('RiskInputsTab', () => {
       const { getByTestId, queryByTestId } = renderTab();
 
       fireEvent.click(getByTestId('mockSelectPoint'));
-      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+      expect(getByTestId('riskInputsTabBackToLatest')).toBeInTheDocument();
 
       // the selected 2021 timestamp is outside a now-1d..now range
       fireEvent.click(getByTestId('mockRangeExcludingSelection'));
 
-      expect(queryByTestId('riskInputsTabPitIndicator')).not.toBeInTheDocument();
+      expect(queryByTestId('riskInputsTabBackToLatest')).not.toBeInTheDocument();
       expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
         expect.objectContaining({ skip: true })
       );
@@ -1274,12 +1436,12 @@ describe('RiskInputsTab', () => {
       const { getByTestId } = renderTab();
 
       fireEvent.click(getByTestId('mockSelectPoint'));
-      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+      expect(getByTestId('riskInputsTabBackToLatest')).toBeInTheDocument();
 
       // the selected 2021 timestamp is still inside a now-10y..now range
       fireEvent.click(getByTestId('mockRangeIncludingSelection'));
 
-      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+      expect(getByTestId('riskInputsTabBackToLatest')).toBeInTheDocument();
       expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
         expect.objectContaining({ from: PIT_TIMESTAMP, to: PIT_TIMESTAMP, skip: false })
       );
@@ -1363,7 +1525,7 @@ describe('RiskInputsTab', () => {
             skip: false,
           })
         );
-        expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+        expect(getByTestId('riskInputsTabBackToLatest')).toBeInTheDocument();
       });
     });
   });

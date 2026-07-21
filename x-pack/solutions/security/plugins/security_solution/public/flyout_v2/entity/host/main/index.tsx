@@ -51,6 +51,7 @@ import { Footer } from './footer';
 import { useObservedHost } from './hooks/use_observed_host';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
+  buildResolutionRiskScoreFromEntityRecord,
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
@@ -244,6 +245,14 @@ export const Host: FC<HostProps> = memo(function Host({
       : null;
 
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
+
+  const prefetchedResolutionRisk = useMemo(
+    () =>
+      entityStoreV2Enabled && observedHost.entityRecord
+        ? buildResolutionRiskScoreFromEntityRecord(EntityType.host, observedHost.entityRecord)
+        : undefined,
+    [entityStoreV2Enabled, observedHost.entityRecord]
+  );
 
   const onCriticalitySave =
     !!assetCriticalityPrivileges.data?.has_write_permissions &&
@@ -461,6 +470,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            prefetchedResolutionRisk={prefetchedResolutionRisk}
             onShowEntity={onShowRelatedEntity}
             hideHeaderIcons
           />

@@ -17,6 +17,10 @@ import { EntityTypeToScoreField, RiskScoreFields } from '../../../common/search_
 
 /** When true, use entity store v2 index and entity.risk.* fields instead of risk-score.risk-score-* */
 const ENTITY_STORE_V2_RISK_SCORE_FIELD = 'entity.risk.calculated_score_norm';
+const ENTITY_STORE_RESOLUTION_RISK_SCORE_FIELD =
+  'entity.relationships.resolution.risk.calculated_score_norm';
+/** Short runtime-field name — Lens ad-hoc data views struggle with deep nested paths. */
+const RESOLUTION_SCORE_RUNTIME_FIELD = 'resolution_group_risk_score_norm';
 
 const getEntityStoreV2IndexPattern = (spaceId?: string) =>
   getEntitiesAlias(ENTITY_LATEST, spaceId ?? 'default');
@@ -29,6 +33,8 @@ interface GetRiskScoreSummaryAttributesProps {
   entityId?: string;
   dataSource?: 'auto' | 'entity_store' | 'risk_index';
   metricLabel?: string;
+  /** Override the metric field when reading from the entity store (e.g. resolution-group risk). */
+  sourceField?: string;
 }
 
 export const getRiskScoreSummaryAttributes: (
@@ -41,18 +47,36 @@ export const getRiskScoreSummaryAttributes: (
   entityId,
   dataSource = 'auto',
   metricLabel,
+  sourceField: sourceFieldOverride,
 }) => {
   const layerIds = [`layer-id1-${uuidv4()}`, `layer-id2-${uuidv4()}`];
   const internalReferenceId = `internal-reference-id-${uuidv4()}`;
   const columnIds = [`column-id1-${uuidv4()}`, `column-id2-${uuidv4()}`, `column-id3-${uuidv4()}`];
   const useEntityStoreSource =
     dataSource === 'entity_store' || (dataSource === 'auto' && !!entityId);
-  const sourceField = useEntityStoreSource
-    ? ENTITY_STORE_V2_RISK_SCORE_FIELD
-    : EntityTypeToScoreField[riskEntity];
+  const useResolutionRuntimeField =
+    sourceFieldOverride === ENTITY_STORE_RESOLUTION_RISK_SCORE_FIELD;
+  const sourceField = useResolutionRuntimeField
+    ? RESOLUTION_SCORE_RUNTIME_FIELD
+    : sourceFieldOverride
+      ? sourceFieldOverride
+      : useEntityStoreSource
+        ? ENTITY_STORE_V2_RISK_SCORE_FIELD
+        : EntityTypeToScoreField[riskEntity];
   const dataViewIndexPattern = useEntityStoreSource
     ? getEntityStoreV2IndexPattern(spaceId)
     : `risk-score.risk-score-${spaceId ?? 'default'}`;
+  const runtimeFieldMap = useResolutionRuntimeField
+    ? {
+        [RESOLUTION_SCORE_RUNTIME_FIELD]: {
+          type: 'double' as const,
+          script: {
+            source:
+              "if (doc.containsKey('entity.relationships.resolution.risk.calculated_score_norm') && doc['entity.relationships.resolution.risk.calculated_score_norm'].size() != 0) { emit(doc['entity.relationships.resolution.risk.calculated_score_norm'].value); }",
+          },
+        },
+      }
+    : {};
   return {
     title: 'Risk score summary',
     description: '',
@@ -201,8 +225,14 @@ export const getRiskScoreSummaryAttributes: (
           timeFieldName: '@timestamp',
           sourceFilters: [],
           fieldFormats: {},
-          runtimeFieldMap: {},
-          fieldAttrs: {},
+          runtimeFieldMap,
+          fieldAttrs: useResolutionRuntimeField
+            ? {
+                [RESOLUTION_SCORE_RUNTIME_FIELD]: {
+                  customLabel: 'Resolution group risk score',
+                },
+              }
+            : {},
           allowNoIndex: false,
           name: dataViewIndexPattern,
         },

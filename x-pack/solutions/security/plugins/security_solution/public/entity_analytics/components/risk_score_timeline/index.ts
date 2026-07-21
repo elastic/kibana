@@ -6,4 +6,7 @@
  */
 
 export { RiskScoreTimeline } from './risk_score_timeline';
-export type { RiskScoreTimelineProps } from './risk_score_timeline';
+export type {
+  RiskScoreTimelineProps,
+  RiskScoreTimelinePointSelection,
+} from './risk_score_timeline';

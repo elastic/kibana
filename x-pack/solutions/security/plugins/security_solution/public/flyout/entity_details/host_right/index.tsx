@@ -35,6 +35,7 @@ import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedHost } from '../../../flyout_v2/entity/host/main/hooks/use_observed_host';
 import {
+  buildResolutionRiskScoreFromEntityRecord,
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
@@ -213,6 +214,13 @@ export const HostPanel = memo(function HostPanel({
     : null;
 
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
+  const prefetchedResolutionRisk = useMemo(
+    () =>
+      observedHost.entityRecord
+        ? buildResolutionRiskScoreFromEntityRecord(EntityType.host, observedHost.entityRecord)
+        : undefined,
+    [observedHost.entityRecord]
+  );
   const isRiskScoreExist = observedHost.entityRecord
     ? !!getRiskFromEntityRecord(observedHost.entityRecord)
     : !!hostRiskData?.host?.risk;
@@ -330,6 +338,7 @@ export const HostPanel = memo(function HostPanel({
             refetchEntityRecord={entityFromStoreResult.refetch}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            prefetchedResolutionRisk={prefetchedResolutionRisk}
           />
         )}
       </FlyoutBody>

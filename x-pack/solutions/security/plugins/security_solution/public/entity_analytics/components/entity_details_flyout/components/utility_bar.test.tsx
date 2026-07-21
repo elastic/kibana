@@ -31,7 +31,7 @@ describe('RiskInputsUtilityBar', () => {
     expect(queryByTestId('risk-input-utility-bar')).toBeNull();
   });
 
-  it('renders selected risk input message', () => {
+  it('renders selected alerts message', () => {
     const { getByTestId } = render(
       <TestProviders>
         <RiskInputsUtilityBar
@@ -40,7 +40,7 @@ describe('RiskInputsUtilityBar', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('risk-input-utility-bar')).toHaveTextContent('3 selected risk contribution');
+    expect(getByTestId('risk-input-utility-bar')).toHaveTextContent('3 selected alerts');
   });
 
   it('toggles the popover when button is clicked', () => {

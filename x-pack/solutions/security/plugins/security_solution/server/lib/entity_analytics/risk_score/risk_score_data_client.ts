@@ -232,15 +232,17 @@ export class RiskScoreDataClient {
       top_score: { hits: { hits: Array<{ _source?: RiskScoreTimeSeriesSource }> } };
     }>;
 
-    return buckets
-      .map((bucket) =>
-        toHistoryEntry(
-          bucket.top_score.hits.hits[0]?._source,
-          params.entityType,
-          params.includeContributions ?? false
+    return dropTrailingZeroEntries(
+      buckets
+        .map((bucket) =>
+          toHistoryEntry(
+            bucket.top_score.hits.hits[0]?._source,
+            params.entityType,
+            params.includeContributions ?? false
+          )
         )
-      )
-      .filter((entry): entry is RiskScoreHistoryEntry => entry !== undefined);
+        .filter((entry): entry is RiskScoreHistoryEntry => entry !== undefined)
+    );
   };
 
   public getRiskInputsIndex = ({ dataViewId }: { dataViewId: string }) =>
@@ -665,3 +667,18 @@ const toContributionFields = (risk: RiskScoreTimeSeriesRisk): Partial<RiskScoreH
   ...(risk.category_2_count !== undefined && { category_2_count: risk.category_2_count }),
   ...(risk.criticality_level !== undefined && { criticality_level: risk.criticality_level }),
 });
+
+/**
+ * Maintainer `reset_to_zero` writes often land as the newest time-series docs.
+ * Drop trailing zeros so the flyout history chart ends on the latest real score.
+ */
+const dropTrailingZeroEntries = (entries: RiskScoreHistoryEntry[]): RiskScoreHistoryEntry[] => {
+  if (entries.length === 0) {
+    return entries;
+  }
+  let end = entries.length;
+  while (end > 1 && entries[end - 1].calculated_score_norm === 0) {
+    end -= 1;
+  }
+  return end === entries.length ? entries : entries.slice(0, end);
+};

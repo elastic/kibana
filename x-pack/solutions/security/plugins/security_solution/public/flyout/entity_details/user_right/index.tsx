@@ -41,6 +41,7 @@ import { useObservedUser } from '../../../flyout_v2/entity/user/main/hooks/use_o
 import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import {
+  buildResolutionRiskScoreFromEntityRecord,
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
@@ -235,6 +236,14 @@ export const UserPanel = memo(function UserPanel({
 
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
 
+  const prefetchedResolutionRisk = useMemo(
+    () =>
+      observedUser.entityRecord
+        ? buildResolutionRiskScoreFromEntityRecord(EntityType.user, observedUser.entityRecord)
+        : undefined,
+    [observedUser.entityRecord]
+  );
+
   const onCriticalitySave =
     !!assetCriticalityPrivileges.data?.has_write_permissions && entityFromStoreResult.entityRecord
       ? (level: CriticalityLevelWithUnassigned) =>
@@ -340,6 +349,7 @@ export const UserPanel = memo(function UserPanel({
             refetchEntityRecord={entityFromStoreResult.refetch}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            prefetchedResolutionRisk={prefetchedResolutionRisk}
           />
         )}
       </FlyoutBody>

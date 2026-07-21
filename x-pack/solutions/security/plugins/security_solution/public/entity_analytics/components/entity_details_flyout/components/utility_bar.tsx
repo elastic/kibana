@@ -64,10 +64,10 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(({ risk
                 flush="left"
               >
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.text"
-                  defaultMessage="{totalSelectedContributions} selected risk contribution"
+                  id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.selectedAlerts"
+                  defaultMessage="{totalSelectedAlerts} selected alerts"
                   values={{
-                    totalSelectedContributions: riskInputs.length,
+                    totalSelectedAlerts: riskInputs.length,
                   }}
                 />
               </EuiButtonEmpty>

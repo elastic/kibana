@@ -58,21 +58,19 @@ describe('FlyoutRiskSummary', () => {
 
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
 
-    // Alerts
+    // Alerts count is shown inline in the Risk input label, e.g. Alerts (5)
     expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
+      `Alerts (${mockHostRiskScoreState.data?.[0].host.risk.category_1_count})`
     );
 
-    // Result
-    expect(getByTestId('risk-summary-result-count')).toHaveTextContent(
-      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
+    // Positive contributions use +xx.xx (same as left flyout)
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `+${Number(mockHostRiskScoreState.data?.[0].host.risk.category_1_score).toFixed(2)}`
     );
 
     expect(getByTestId('risk-summary-result-score')).toHaveTextContent(
-      `${
-        (mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0) +
-        (mockHostRiskScoreState.data?.[0].host.risk.category_2_score ?? 0)
-      }`
+      // Result footer prefers calculated_score_norm when present (authoritative total).
+      `${mockHostRiskScoreState.data?.[0].host.risk.calculated_score_norm}.00`
     );
 
     expect(getByTestId('entityRiskInputsTitleLink')).toBeInTheDocument();

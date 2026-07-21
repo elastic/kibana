@@ -94,10 +94,17 @@ export const riskScoreHistoryRoute = (
             buckets.setBounds({ min, max });
 
             const bucketInterval = buckets.getInterval();
+            const rangeMs = max.valueOf() - min.valueOf();
+            const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+            // Entity flyout history should plot daily points for typical ranges
+            // (up to ~6 months). Wider ranges still use TimeBuckets so the chart
+            // stays readable.
             const interval =
               bucketInterval.asMilliseconds() < MIN_INTERVAL_MS
-                ? { value: 1, unit: 'h' }
-                : { value: bucketInterval.esValue, unit: bucketInterval.esUnit };
+                ? { value: 1, unit: 'h' as const }
+                : rangeMs <= 180 * ONE_DAY_MS
+                  ? { value: 1, unit: 'd' as const }
+                  : { value: bucketInterval.esValue, unit: bucketInterval.esUnit };
 
             const riskScoreDataClient = (await context.securitySolution).getRiskScoreDataClient();
 

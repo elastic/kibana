@@ -54,6 +54,7 @@ import { useObservedUser } from './hooks/use_observed_user';
 import { useManagedUser } from '../../../../flyout/entity_details/shared/hooks/use_managed_user';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
+  buildResolutionRiskScoreFromEntityRecord,
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
@@ -246,6 +247,14 @@ export const User: FC<UserProps> = memo(function User({
       : null;
 
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
+
+  const prefetchedResolutionRisk = useMemo(
+    () =>
+      entityStoreV2Enabled && observedUser.entityRecord
+        ? buildResolutionRiskScoreFromEntityRecord(EntityType.user, observedUser.entityRecord)
+        : undefined,
+    [entityStoreV2Enabled, observedUser.entityRecord]
+  );
 
   const onCriticalitySave =
     !!assetCriticalityPrivileges.data?.has_write_permissions &&
@@ -484,6 +493,7 @@ export const User: FC<UserProps> = memo(function User({
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            prefetchedResolutionRisk={prefetchedResolutionRisk}
             onShowEntity={onShowRelatedEntity}
             hideHeaderIcons
           />

@@ -103,8 +103,8 @@ describe('risk score history route', () => {
       entityId: 'test-entity-id',
       range: { gte: 'now-30d', lte: 'now' },
       scoreType: 'base',
-      // 30d range at barTarget 50 → 12h buckets
-      interval: { value: 12, unit: 'h' },
+      // 30d range is pinned to daily buckets for the entity flyout history chart
+      interval: { value: 1, unit: 'd' },
       includeContributions: false,
     });
     expect(mockRiskScoreDataClient.getRiskScoreHistory).not.toHaveBeenCalledWith(

@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { EuiTextTruncate } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash/fp';
-import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { useRiskInputActions } from './use_risk_input_actions';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -47,8 +43,8 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
       {
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewTimeline"
-            defaultMessage="Add to new timeline"
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.investigateInTimeline"
+            defaultMessage="Investigate in Timeline"
           />
         ),
 
@@ -82,37 +78,9 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
     telemetry,
   ]);
 
-  return useMemo(() => {
-    const ruleName = get(['alert', ALERT_RULE_NAME], inputs[0]) ?? '';
-    const title = i18n.translate(
-      'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.title',
+  return useMemo(
+    () => [
       {
-        defaultMessage: 'Risk input: {description}',
-        values: {
-          description:
-            inputs.length === 1
-              ? ruleName
-              : i18n.translate(
-                  'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.titleDescription',
-                  {
-                    defaultMessage: '{quantity} selected',
-                    values: {
-                      quantity: inputs.length,
-                    },
-                  }
-                ),
-        },
-      }
-    );
-
-    return [
-      {
-        title: (
-          <EuiTextTruncate
-            width={230} // It prevents the title from taking too much space
-            text={title}
-          />
-        ),
         id: 0,
         items: [
           ...timelineActions,
@@ -143,6 +111,7 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
             : []),
         ],
       },
-    ];
-  }, [addToExistingCase, addToNewCaseClick, inputs, hasCasesPermissions, timelineActions]);
+    ],
+    [addToExistingCase, addToNewCaseClick, hasCasesPermissions, timelineActions]
+  );
 };

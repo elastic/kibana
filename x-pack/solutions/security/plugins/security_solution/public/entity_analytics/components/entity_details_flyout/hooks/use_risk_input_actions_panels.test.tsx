@@ -89,16 +89,18 @@ describe('useRiskInputActionsPanels', () => {
     mockUseIsInSecurityApp.mockReturnValue(true);
   });
 
-  it('displays the rule name when only one alert is selected', () => {
-    const { getByTestId } = customRender();
+  it('does not display a panel title with the alert or rule name', () => {
+    const { queryByTestId, container } = customRender();
 
-    expect(getByTestId('contextMenuPanelTitle')).toHaveTextContent('Risk input: Rule Name');
+    expect(queryByTestId('contextMenuPanelTitle')).not.toBeInTheDocument();
+    expect(container).not.toHaveTextContent('Rule Name');
+    expect(container).not.toHaveTextContent('Risk input:');
   });
 
-  it('displays number of selected alerts when more than one alert is selected', () => {
-    const { getByTestId } = customRender([alertInputDataMock, alertInputDataMock]);
+  it('does not display a panel title when more than one alert is selected', () => {
+    const { queryByTestId } = customRender([alertInputDataMock, alertInputDataMock]);
 
-    expect(getByTestId('contextMenuPanelTitle')).toHaveTextContent('2 selected');
+    expect(queryByTestId('contextMenuPanelTitle')).not.toBeInTheDocument();
   });
 
   it('displays cases actions when user has cases permissions', () => {
@@ -127,7 +129,7 @@ describe('useRiskInputActionsPanels', () => {
 
     const { container } = customRender();
 
-    expect(container).toHaveTextContent('Add to new timeline');
+    expect(container).toHaveTextContent('Investigate in Timeline');
   });
 
   it('does NOT display the timeline action when user has insufficient privileges', () => {
@@ -137,7 +139,7 @@ describe('useRiskInputActionsPanels', () => {
 
     const { container } = customRender();
 
-    expect(container).not.toHaveTextContent('Add to new timeline');
+    expect(container).not.toHaveTextContent('Investigate in Timeline');
   });
 
   it('calls sendBulkEventsToTimelineHandler when timeline action is clicked', () => {
@@ -159,7 +161,7 @@ describe('useRiskInputActionsPanels', () => {
 
     const timelineAction = result.current[0].items?.find(
       (item: Partial<{ name: React.JSX.Element }>) =>
-        item.name?.props?.defaultMessage === 'Add to new timeline'
+        item.name?.props?.defaultMessage === 'Investigate in Timeline'
     );
 
     timelineAction?.onClick?.();
