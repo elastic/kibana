@@ -660,7 +660,9 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
     }
 
     logger.info(
-      `Memory workflows ${enabled ? 'enabled' : 'disabled'} for space "${GLOBAL_WORKFLOW_SPACE_ID}".`
+      `Memory workflows ${
+        enabled ? 'enabled' : 'disabled'
+      } for space "${GLOBAL_WORKFLOW_SPACE_ID}".`
     );
     return { success: true };
   },
