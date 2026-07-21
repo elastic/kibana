@@ -48,6 +48,27 @@ const isIndexNotFound = (error: unknown): boolean => {
 const isMappingConflict = (error: unknown): boolean =>
   errorType(error) === 'illegal_argument_exception';
 
+// Returns true when a plain (non-data-stream) index occupies the name that
+// should belong to the metadata data stream. This can happen on deployments
+// that were upgraded from a version that pre-dates the metadata data stream:
+// if a write arrived after the upgrade but before the index template was
+// installed, ES auto-created a regular index instead of a data stream.
+const detectPlainIndex = async (
+  esClient: ElasticsearchClient,
+  name: string
+): Promise<boolean> => {
+  try {
+    await esClient.indices.getDataStream({ name });
+    return false; // name resolves to a real data stream
+  } catch (err) {
+    if (!isIndexNotFound(err)) {
+      throw err;
+    }
+  }
+  // getDataStream 404'd — check if a plain index is occupying the name
+  return esClient.indices.exists({ index: name });
+};
+
 /**
  * Ensures the metadata data stream and its backing ES assets exist and are
  * up to date with the current mappings.
@@ -62,10 +83,14 @@ const isMappingConflict = (error: unknown): boolean =>
  * Strategy:
  *  - Install the ingest pipeline, component template, and index template — all
  *    idempotent PUTs, safe to re-run on every process boot.
+ *  - Detect and repair corrupted state: if a plain index occupies the data
+ *    stream name (written by ES auto-create before the index template existed),
+ *    delete it and recreate as a proper data stream. The stream is append-only
+ *    and regenerable, so data loss is acceptable.
  *  - PUT mappings in place on the existing data stream — no rollover needed in
  *    the common case.
- *  - If the data stream does not exist (upgrade path), create it from the index
- *    template we just installed.
+ *  - If the data stream does not exist (fresh upgrade path), create it from the
+ *    index template we just installed.
  *  - If the in-place update conflicts (a field was dynamically mapped with a
  *    different type during the pre-sync window), roll the data stream over so the
  *    new backing index picks up the correct types.
@@ -83,6 +108,23 @@ export const ensureMetadataDataStreamMappings = async (
   await putIndexTemplate(esClient, getMetadataEntityIndexTemplateConfig(namespace));
 
   const dataStream = getMetadataEntitiesDataStreamName(namespace);
+
+  // Repair corrupted state: a plain index at the data stream name means ES
+  // auto-created a regular index before the index template was installed on
+  // this deployment. The stream is append-only and fully regenerable
+  // (maintainers rewrite on their next run; AI summaries regenerate on demand),
+  // so deleting the plain index and recreating as a data stream is safe.
+  if (await detectPlainIndex(esClient, dataStream)) {
+    logger.warn(
+      `Plain index found at data stream name ${dataStream} ` +
+        `(pre-template write auto-created a regular index); ` +
+        `deleting and recreating as a data stream`
+    );
+    await esClient.indices.delete({ index: dataStream });
+    await createDataStream(esClient, dataStream, { throwIfExists: false });
+    logger.info(`Replaced corrupted plain index with data stream at ${dataStream}`);
+    return;
+  }
 
   try {
     await putDataStreamMapping(esClient, dataStream, getMetadataIndexMappings());

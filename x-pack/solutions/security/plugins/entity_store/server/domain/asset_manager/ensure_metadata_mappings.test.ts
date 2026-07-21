@@ -68,6 +68,25 @@ describe('ensureMetadataDataStreamMappings', () => {
     expect(esClient.indices.rollover).not.toHaveBeenCalled();
   });
 
+  it('detects and replaces a corrupted plain index with a data stream', async () => {
+    // getDataStream 404s → not a data stream
+    esClient.indices.getDataStream.mockRejectedValueOnce(esError('index_not_found_exception', 404));
+    // indices.exists returns true → a plain index is squatting at the name
+    esClient.indices.exists.mockResolvedValueOnce(true as never);
+
+    await expect(
+      ensureMetadataDataStreamMappings(esClient, 'default', logger)
+    ).resolves.toBeUndefined();
+
+    expect(esClient.indices.delete).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.delete.mock.calls[0][0]).toMatchObject({ index: DATA_STREAM });
+    expect(esClient.indices.createDataStream).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.createDataStream.mock.calls[0][0]).toMatchObject({ name: DATA_STREAM });
+    // Plain index detection must short-circuit — no mapping sync attempt
+    expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Plain index found'));
+  });
+
   it('falls back to a rollover when the in-place update conflicts with an existing field type', async () => {
     esClient.indices.putMapping.mockRejectedValueOnce(esError('illegal_argument_exception', 400));
 
