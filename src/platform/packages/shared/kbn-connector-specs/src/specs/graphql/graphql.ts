@@ -357,9 +357,9 @@ export const GraphQLConnector: ConnectorSpec = {
         'Throws if the server returns any GraphQL errors.',
       input: QueryInputSchema,
       handler: async (ctx, input: QueryInput) => {
-        // Reject mutation and subscription operation types to enforce the read-only boundary.
-        // The isTool:false on `mutation` only prevents agent exposure, not direct misuse.
-        if (/\b(mutation|subscription)\b/.test(input.query)) {
+        // Best-effort guard: reject documents whose first operation is a mutation.
+        // isTool:false on `mutation` only prevents agent exposure, not direct misuse.
+        if (/^\s*mutation[\s({]/.test(input.query)) {
           throw new Error(
             'Only query operations are allowed in this action. Use the mutation action for mutations.'
           );

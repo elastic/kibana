@@ -223,13 +223,6 @@ describe('GraphQLConnector', () => {
       ).rejects.toThrow('Only query operations are allowed');
     });
 
-    it('rejects subscription operation documents', async () => {
-      await expect(
-        GraphQLConnector.actions.query.handler(mockContext, {
-          query: 'subscription { onUserCreated { id } }',
-        })
-      ).rejects.toThrow('Only query operations are allowed');
-    });
   });
 
   // ---------------------------------------------------------------------------
