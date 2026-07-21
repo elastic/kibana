@@ -29,14 +29,7 @@ function RoleAvatar({ role }: { role: string }) {
   };
   const color = colorByRole[role.toLowerCase()] ?? euiTheme.colors.backgroundBaseSubdued;
 
-  return (
-    <EuiAvatar
-      name={role}
-      color={color}
-      size="m"
-      data-test-subj={`genAiRoleBadge-${role}`}
-    />
-  );
+  return <EuiAvatar name={role} color={color} size="m" data-test-subj={`genAiRoleBadge-${role}`} />;
 }
 
 interface Props {

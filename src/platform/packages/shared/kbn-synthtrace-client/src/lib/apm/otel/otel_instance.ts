@@ -76,13 +76,7 @@ export class OtelInstance extends Entity<ApmOtelFields> {
     });
   }
 
-  genAiExitSpan({
-    name,
-    system,
-  }: {
-    name: string;
-    system: string;
-  }) {
+  genAiExitSpan({ name, system }: { name: string; system: string }) {
     return new OtelSpan({
       ...this.fields,
       name,

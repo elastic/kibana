@@ -179,8 +179,7 @@ const AGENT_SYNTHESIS_OUTPUT = JSON.stringify([
 const RAG_EMBED_INPUT = JSON.stringify([
   {
     role: 'user',
-    content:
-      'Encode for retrieval: "What are the side effects of ibuprofen with blood thinners?"',
+    content: 'Encode for retrieval: "What are the side effects of ibuprofen with blood thinners?"',
   },
 ]);
 
@@ -231,7 +230,10 @@ const LONG_OUTPUT = JSON.stringify([
     role: 'assistant',
     content: [
       '## Action Items',
-      ...Array.from({ length: 10 }, (_, i) => `- [ ] Review budget allocation for Section ${i + 1}`),
+      ...Array.from(
+        { length: 10 },
+        (_, i) => `- [ ] Review budget allocation for Section ${i + 1}`
+      ),
       '',
       '## Decisions',
       ...Array.from({ length: 8 }, (_, i) => `- Decision ${i + 1}: Approved in planning document`),

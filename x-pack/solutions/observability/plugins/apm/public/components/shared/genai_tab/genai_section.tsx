@@ -17,7 +17,13 @@ interface Props {
   children: React.ReactNode;
 }
 
-export function GenAiSection({ id, title, initialIsOpen = true, bordered = true, children }: Props) {
+export function GenAiSection({
+  id,
+  title,
+  initialIsOpen = true,
+  bordered = true,
+  children,
+}: Props) {
   return (
     <EuiAccordion
       id={`genAiSection-${id}`}
