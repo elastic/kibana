@@ -281,18 +281,19 @@ describe('JobsHealthService', () => {
   beforeEach(() => {
     dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => MOCK_DATE_NOW);
 
-    annotationService.getDelayedDataAnnotations.mockImplementation(({ jobIds }: { jobIds: string[] }) =>
-      Promise.resolve(
-        jobIds.map((jobId) => ({
-          job_id: jobId,
-          annotation: `Datafeed has missed ${
-            jobId === 'test_job_01' ? 11 : 8
-          } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`,
-          modified_time: 1627660295141,
-          timestamp: 1627653000000,
-          end_timestamp: 1627653300000,
-        }))
-      )
+    annotationService.getDelayedDataAnnotations.mockImplementation(
+      ({ jobIds }: { jobIds: string[] }) =>
+        Promise.resolve(
+          jobIds.map((jobId) => ({
+            job_id: jobId,
+            annotation: `Datafeed has missed ${
+              jobId === 'test_job_01' ? 11 : 8
+            } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`,
+            modified_time: 1627660295141,
+            timestamp: 1627653000000,
+            end_timestamp: 1627653300000,
+          }))
+        )
     );
 
     mlClient.getBuckets.mockResolvedValue({ count: 0, buckets: [] });
