@@ -16,10 +16,12 @@ import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
-import type { ExecutionContextStart, Logger } from '@kbn/core/server';
+import type { ExecutionContextStart, IClusterClient, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { EsRequestLimiter } from '../es_request_limiter';
+import { buildTaskEsClient } from '../es_request_limiter';
 import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
@@ -133,6 +135,8 @@ type Opts = {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  clusterClient?: IClusterClient;
+  esRequestLimiter?: EsRequestLimiter;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -191,6 +195,8 @@ export class TaskManagerRunner implements TaskRunner {
   private eventLogger: TaskEventLogger;
   private isCancelled = false;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
+  private readonly clusterClient?: IClusterClient;
+  private readonly esRequestLimiter?: EsRequestLimiter;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -220,6 +226,8 @@ export class TaskManagerRunner implements TaskRunner {
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    clusterClient,
+    esRequestLimiter,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -243,6 +251,8 @@ export class TaskManagerRunner implements TaskRunner {
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
     this.enrichFakeRequest = enrichFakeRequest;
+    this.clusterClient = clusterClient;
+    this.esRequestLimiter = esRequestLimiter;
   }
 
   /**
@@ -466,9 +476,20 @@ export class TaskManagerRunner implements TaskRunner {
 
           const abortController = new AbortController();
 
+          const esClient =
+            this.clusterClient && this.esRequestLimiter
+              ? buildTaskEsClient({
+                  clusterClient: this.clusterClient,
+                  fakeRequest,
+                  limiter: this.esRequestLimiter,
+                  taskType: this.taskType,
+                })
+              : undefined;
+
           this.task = definition.createTaskRunner({
             taskInstance: sanitizedTaskInstance,
             fakeRequest,
+            esClient,
             abortController,
             enrichRequest,
             executionUuid: this.uuid,

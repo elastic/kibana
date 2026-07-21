@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { parseIntervalAsMillisecond } from './lib/intervals';
+import { KNOWN_ES_REQUEST_SCOPES } from './es_request_limiter/es_request_scopes';
 
 export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_CAPACITY = 10;
@@ -82,6 +83,78 @@ const requestTimeoutsConfig = schema.object({
   /* The request timeout config for task manager's updateByQuery default:30s, min:10s, max:10m */
   update_by_query: schema.number({ defaultValue: 1000 * 30, min: 1000 * 10, max: 1000 * 60 * 10 }),
 });
+
+/*
+ * Per-category budget for Elasticsearch requests issued by running tasks.
+ * `cluster_wide` is the total number of concurrent requests allowed across all
+ * background-task Kibana nodes; each node enforces its partitioned share of it.
+ */
+const esRequestCategoryLimitSchema = schema.object({
+  cluster_wide: schema.number({ min: 1 }),
+});
+
+/*
+ * Per-scope sub-budget nested under the global category budgets. A scope groups
+ * task types (see `es_request_limiter/es_request_scopes`) so a subset of tasks —
+ * e.g. `alerting` — can be capped below the global budget. Each value is a
+ * cluster-wide total (partitioned per node like the category budget) and must be
+ * less than or equal to the matching global `cluster_wide`.
+ */
+const esRequestScopeLimitSchema = schema.object({
+  search: schema.maybe(schema.number({ min: 1 })),
+  write: schema.maybe(schema.number({ min: 1 })),
+});
+
+/*
+ * Limits on the number of concurrent Elasticsearch requests that tasks may issue
+ * through the Task Manager provided client (`RunContext.esClient`). Disabled by
+ * default; when enabled, requests over the per-category budget (or a per-scope
+ * sub-budget) are rejected with a 429-shaped error so the task fails fast instead
+ * of overloading Elasticsearch.
+ */
+const esRequestLimitsSchema = schema.object(
+  {
+    enabled: schema.boolean({ defaultValue: false }),
+    search: schema.maybe(esRequestCategoryLimitSchema),
+    write: schema.maybe(esRequestCategoryLimitSchema),
+    /*
+     * Optional per-scope sub-budgets keyed by scope name. Keys must be a scope
+     * known to the hardcoded membership map; each value must be <= the matching
+     * global category budget.
+     */
+    scopes: schema.maybe(schema.recordOf(schema.string(), esRequestScopeLimitSchema)),
+  },
+  {
+    validate: (config) => {
+      if (!config.scopes) {
+        return;
+      }
+      for (const [scope, limits] of Object.entries(config.scopes)) {
+        if (!KNOWN_ES_REQUEST_SCOPES.includes(scope)) {
+          return `Unknown es_request_limits scope "${scope}". Known scopes: ${KNOWN_ES_REQUEST_SCOPES.join(
+            ', '
+          )}.`;
+        }
+        if (limits.search !== undefined) {
+          if (config.search === undefined) {
+            return `es_request_limits.scopes.${scope}.search is set but no global search.cluster_wide budget is configured.`;
+          }
+          if (limits.search > config.search.cluster_wide) {
+            return `es_request_limits.scopes.${scope}.search (${limits.search}) cannot exceed the global search.cluster_wide (${config.search.cluster_wide}).`;
+          }
+        }
+        if (limits.write !== undefined) {
+          if (config.write === undefined) {
+            return `es_request_limits.scopes.${scope}.write is set but no global write.cluster_wide budget is configured.`;
+          }
+          if (limits.write > config.write.cluster_wide) {
+            return `es_request_limits.scopes.${scope}.write (${limits.write}) cannot exceed the global write.cluster_wide (${config.write.cluster_wide}).`;
+          }
+        }
+      }
+    },
+  }
+);
 
 const validateDuration = (duration: string) => {
   try {
@@ -223,6 +296,7 @@ export const configSchema = schema.object(
     claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_MGET }),
     request_timeouts: requestTimeoutsConfig,
     auto_calculate_default_ech_capacity: schema.boolean({ defaultValue: false }),
+    es_request_limits: esRequestLimitsSchema,
   },
   {
     validate: (config) => {
@@ -241,3 +315,4 @@ export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;
 export type RequestTimeoutsConfig = TypeOf<typeof requestTimeoutsConfig>;
+export type EsRequestLimitsConfig = TypeOf<typeof esRequestLimitsSchema>;

@@ -20,6 +20,9 @@ describe('config validation', () => {
           "active_nodes_lookback": "30s",
           "interval": 10000,
         },
+        "es_request_limits": Object {
+          "enabled": false,
+        },
         "event_loop_delay": Object {
           "monitor": true,
           "warn_threshold": 5000,
@@ -84,6 +87,9 @@ describe('config validation', () => {
           "active_nodes_lookback": "30s",
           "interval": 10000,
         },
+        "es_request_limits": Object {
+          "enabled": false,
+        },
         "event_loop_delay": Object {
           "monitor": true,
           "warn_threshold": 5000,
@@ -145,6 +151,9 @@ describe('config validation', () => {
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
+        },
+        "es_request_limits": Object {
+          "enabled": false,
         },
         "event_loop_delay": Object {
           "monitor": true,
@@ -309,5 +318,59 @@ describe('config validation', () => {
     };
 
     expect(() => configSchema.validate(config)).not.toThrow();
+  });
+
+  describe('es_request_limits scopes', () => {
+    test('accepts a known scope with limits within the global budget', () => {
+      expect(() =>
+        configSchema.validate({
+          es_request_limits: {
+            enabled: true,
+            search: { cluster_wide: 50 },
+            write: { cluster_wide: 50 },
+            scopes: { alerting: { search: 20, write: 10 } },
+          },
+        })
+      ).not.toThrow();
+    });
+
+    test('throws on an unknown scope name', () => {
+      expect(() =>
+        configSchema.validate({
+          es_request_limits: {
+            enabled: true,
+            search: { cluster_wide: 50 },
+            scopes: { bogus: { search: 10 } },
+          },
+        })
+      ).toThrowError(/Unknown es_request_limits scope "bogus"/);
+    });
+
+    test('throws when a scope limit exceeds the global category budget', () => {
+      expect(() =>
+        configSchema.validate({
+          es_request_limits: {
+            enabled: true,
+            search: { cluster_wide: 50 },
+            scopes: { alerting: { search: 60 } },
+          },
+        })
+      ).toThrowError(
+        /es_request_limits\.scopes\.alerting\.search \(60\) cannot exceed the global search\.cluster_wide \(50\)/
+      );
+    });
+
+    test('throws when a scope limit is set without a global category budget', () => {
+      expect(() =>
+        configSchema.validate({
+          es_request_limits: {
+            enabled: true,
+            scopes: { alerting: { search: 10 } },
+          },
+        })
+      ).toThrowError(
+        /es_request_limits\.scopes\.alerting\.search is set but no global search\.cluster_wide budget is configured/
+      );
+    });
   });
 });

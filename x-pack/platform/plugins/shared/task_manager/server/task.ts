@@ -10,7 +10,7 @@
 import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
@@ -93,6 +93,16 @@ export interface RunContext {
    */
   fakeRequest?: KibanaRequest;
   abortController: AbortController;
+
+  /**
+   * A scoped Elasticsearch client provided by Task Manager. Requests made through
+   * it are subject to the configured Elasticsearch request concurrency limits
+   * (`xpack.task_manager.es_request_limits`). `asInternalUser` is always
+   * available; `asCurrentUser` / `asSecondaryAuthUser` are scoped to the task's
+   * API key and throw on use when the task was scheduled without one. Undefined
+   * when Task Manager could not construct a client for this run.
+   */
+  esClient?: IScopedClusterClient;
 
   /**
    * If the task has a known `profile_uid`, binds it to a child fake request

@@ -33,6 +33,7 @@ import {
 } from './kibana_discovery_service/delete_inactive_nodes_task';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskPollingLifecycle } from './polling_lifecycle';
+import { EsRequestLimiter } from './es_request_limiter';
 import type { TaskManagerConfig } from './config';
 import type { Middleware } from './lib/middleware';
 import { createInitialMiddleware, addMiddlewareToChain } from './lib/middleware';
@@ -438,6 +439,17 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
+      // Limits the number of concurrent Elasticsearch requests running tasks may
+      // issue through RunContext.esClient. The cluster-wide budget is partitioned
+      // across active nodes using the live node count from the discovery service.
+      const esRequestLimiter = new EsRequestLimiter({
+        config: this.config.es_request_limits,
+        logger: this.logger,
+      });
+      this.numOfKibanaInstances$
+        .pipe(distinctUntilChanged())
+        .subscribe((numOfNodes) => esRequestLimiter.setActiveNodeCount(numOfNodes));
+
       this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({
         logger: this.logger,
         store: taskStore,
@@ -466,6 +478,8 @@ export class TaskManagerPlugin
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
+        clusterClient: elasticsearch.client,
+        esRequestLimiter,
       });
     }
 
