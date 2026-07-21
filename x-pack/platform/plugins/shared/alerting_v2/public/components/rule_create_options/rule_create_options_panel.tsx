@@ -101,6 +101,25 @@ const actionPanelDisabledStyle = css({
   opacity: 0.5,
 });
 
+const flyoutCardStyles = {
+  card: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.m,
+      cursor: 'pointer',
+      minWidth: 0,
+    }),
+  aiCard: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderColor: euiTheme.colors.primary,
+    }),
+  aiTitle: css({
+    backgroundImage: 'linear-gradient(176deg, rgb(23, 80, 186) 3%, rgb(107, 60, 159) 66%)',
+    WebkitBackgroundClip: 'text',
+    backgroundClip: 'text',
+    color: 'transparent',
+  }),
+};
+
 interface RuleCreateOptionItem {
   id: string;
   iconType: string;
@@ -414,7 +433,7 @@ const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ ite
   );
 };
 
-/** Create-rule flyout — compact list layout matching dashboard "Add panel" style. */
+/** Create-rule flyout — compact layout matching dashboard "Add panel" style. */
 const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
@@ -424,29 +443,35 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   legacyRuleTypes,
 }) => {
   const styles = useMemoCss(listEmptyStateStyles);
+  const cardStyles = useMemoCss(flyoutCardStyles);
 
-  const primaryOptions = useMemo<RuleCreateOptionItem[]>(
-    () => [
-      {
-        id: 'create-esql-rule',
-        iconType: 'code',
-        title: ESQL_RULE_TITLE,
-        description: ESQL_RULE_DESCRIPTION,
-        onClick: onCreateEsqlRule,
-        'data-test-subj': 'createEsqlRuleCard',
-      },
-      {
-        id: 'create-with-agent',
-        iconType: 'productAgent',
-        title: AI_AGENT_TITLE,
-        description: AI_AGENT_DESCRIPTION,
-        onClick: onCreateWithAgent,
-        disabled: createWithAgentDisabled,
-        tooltipText: createWithAgentTooltipText,
-        'data-test-subj': 'createWithAgentCard',
-      },
-    ],
-    [onCreateEsqlRule, onCreateWithAgent, createWithAgentDisabled, createWithAgentTooltipText]
+  const isAgentDisabled = createWithAgentDisabled === true;
+  const hasAgentTooltip = createWithAgentTooltipText !== undefined;
+
+  const agentCard = (
+    <EuiPanel
+      element="button"
+      hasBorder
+      paddingSize="none"
+      aria-disabled={isAgentDisabled || undefined}
+      onClick={isAgentDisabled ? noop : onCreateWithAgent}
+      css={[cardStyles.card, cardStyles.aiCard, isAgentDisabled && actionPanelDisabledStyle]}
+      data-test-subj="createWithAgentCard"
+    >
+      <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="productAgent" size="m" color="text" aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s">
+            <strong css={cardStyles.aiTitle}>{AI_AGENT_TITLE}</strong>
+          </EuiText>
+          <EuiText size="xs" color="subdued">
+            {AI_AGENT_DESCRIPTION}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 
   const builderOptions = useMemo<RuleCreateOptionItem[]>(
@@ -481,12 +506,40 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
 
   return (
     <>
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {primaryOptions.map((item) => (
-          <EuiFlexItem key={item.id} grow={false}>
-            <RuleCreateOptionActionPanel item={item} actionPanelStyle={styles.actionPanel} />
-          </EuiFlexItem>
-        ))}
+      <EuiFlexGroup direction="row" gutterSize="s">
+        <EuiFlexItem>
+          <EuiPanel
+            element="button"
+            hasBorder
+            paddingSize="none"
+            onClick={onCreateEsqlRule}
+            css={cardStyles.card}
+            data-test-subj="createEsqlRuleCard"
+          >
+            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="code" size="m" color="text" aria-hidden={true} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>{ESQL_RULE_TITLE}</strong>
+                </EuiText>
+                <EuiText size="xs" color="subdued">
+                  {ESQL_RULE_DESCRIPTION}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {hasAgentTooltip ? (
+            <EuiToolTip content={createWithAgentTooltipText} display="block">
+              {agentCard}
+            </EuiToolTip>
+          ) : (
+            agentCard
+          )}
+        </EuiFlexItem>
       </EuiFlexGroup>
       <RuleBuilderSectionDivider />
       <EuiFlexGroup direction="column" gutterSize="s">
