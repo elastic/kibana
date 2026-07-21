@@ -245,10 +245,7 @@ export const discoverSessionApiDataSchema = schema.object(
 
 export const discoverSessionApiResponseSchema = schema.object({
   id: schema.string({
-    meta: {
-      description:
-        'The unique ID of the Discover session, as returned by the create or search endpoints.',
-    },
+    meta: { description: 'The Discover session ID.' },
   }),
   data: discoverSessionApiDataSchema,
   meta: asCodeMetaSchema,
