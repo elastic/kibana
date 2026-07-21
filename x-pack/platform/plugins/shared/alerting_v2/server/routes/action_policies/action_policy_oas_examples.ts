@@ -22,6 +22,9 @@ import type {
   SnoozeActionPolicyBody,
   UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
+import { createActionPolicyDataSchema } from '@kbn/alerting-v2-schemas';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import { treeifyError } from '@kbn/zod/v4';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import {
   getActionPolicyNotFoundMessage,
@@ -37,6 +40,7 @@ import {
   INVALID_REQUEST_BODY_DESCRIPTION,
   INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
 } from '../route_response_descriptions';
+import { listActionPoliciesQuerySchema } from './list_action_policies_query_schema';
 
 type OASOperationObject = Exclude<
   Awaited<ReturnType<NonNullable<RouteConfigOptions<RouteMethod>['oasOperationObject']>>>,
@@ -171,11 +175,17 @@ const ACTION_POLICY_TAGS_RESPONSE: ActionPolicyTagsResponse = ['production', 'cr
 
 const SAMPLE_ACTION_POLICY_ID = ACTION_POLICY_RESPONSE.id;
 
+const invalidCreateParse = createActionPolicyDataSchema.safeParse({});
+
+if (invalidCreateParse.success) {
+  throw new Error('expected createActionPolicyDataSchema parse to fail for OAS example');
+}
+
 const INVALID_ACTION_POLICY_DATA_ERROR: ErrorResponse = {
   code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
   error: 'Bad Request',
-  message: getInvalidActionPolicyDataMessage('create', 'name: Required'),
-  details: { context: 'create', errors: { name: ['Required'] } },
+  message: getInvalidActionPolicyDataMessage('create', stringifyZodError(invalidCreateParse.error)),
+  details: { context: 'create', errors: treeifyError(invalidCreateParse.error) },
 };
 
 const ACTION_POLICY_NOT_FOUND_ERROR: ErrorResponse = {
@@ -192,11 +202,17 @@ const ACTION_POLICY_VERSION_CONFLICT_ERROR: ErrorResponse = {
   details: { action_policy_id: SAMPLE_ACTION_POLICY_ID },
 };
 
+const invalidQueryParse = listActionPoliciesQuerySchema.safeParse({ page: Number.NaN });
+
+if (invalidQueryParse.success) {
+  throw new Error('expected listActionPoliciesQuerySchema parse to fail for OAS example');
+}
+
 const INVALID_QUERY_PARAMETERS_ERROR: ErrorResponse = {
   code: 'BAD_REQUEST',
   error: 'Bad Request',
-  message: 'page: Expected number, received nan',
-  details: { errors: { page: ['Expected number, received nan'] } },
+  message: stringifyZodError(invalidQueryParse.error),
+  details: { errors: treeifyError(invalidQueryParse.error) },
 };
 
 const ERROR_EXAMPLES: Record<RouteErrorStatus, ReturnType<typeof jsonExample<ErrorResponse>>> = {
