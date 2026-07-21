@@ -11,8 +11,9 @@ import type { PropsWithChildren, RefObject } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { strings } from '../../../../../strings';
 import { ProjectPickerFilterForm } from './filter_form';
 import { ProjectPickerFilterDisplay, type EditingFilter } from './filter_display/filter_display';
 import { bodyStyles } from './body.styles';
@@ -57,7 +58,16 @@ export function ProjectPickerFrameBodyHeader() {
   }, []);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="none" css={styles.bodyContainer}>
+      {state.isReadOnly && (
+        <EuiFlexItem>
+          <KbnInfoCallout
+            announceOnMount={false}
+            size="s"
+            title={strings.getProjectPickerReadonlyCallout()}
+          />
+        </EuiFlexItem>
+      )}
       {showNoMatchingProjectsWarningCallout && (
         <EuiFlexItem>
           <KbnWarningCallout

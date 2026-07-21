@@ -57,15 +57,19 @@ const createProject = (id: string, tags: Record<string, string> = {}): CPSProjec
   ...tags,
 });
 
-const defaultProps: Pick<ProjectPickerStateProviderProps, 'availableProjects'> = {
+const defaultProps = {
   availableProjects: Array.from({ length: 10 }, () => ({
     _id: faker.string.uuid(),
     _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
     _alias: faker.company.name(),
     _organisation: faker.company.name(),
     _region: faker.helpers.arrayElement(['us-east-1', 'us-west-1', 'eu-west-1']),
-    _provider: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
+    _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
   })),
+  originProjectId: 'p1',
+  defaultProjectRouting: '_alias:origin',
+  onProjectRoutingChange: jest.fn(),
+  defaultProjectRoutingGetter: () => '_alias:origin',
 };
 
 const renderComponent = (

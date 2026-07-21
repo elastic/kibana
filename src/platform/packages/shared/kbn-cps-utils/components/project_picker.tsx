@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useState, type ComponentProps, useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiPopover, EuiToolTip, EuiTourStep, EuiButton, EuiSkeletonRectangle } from '@elastic/eui';
+import { EuiPopover, EuiTourStep, EuiButton, EuiSkeletonRectangle } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ProjectRouting } from '@kbn/es-query';
-import type { UseFetchProjectsResult } from './use_fetch_projects';
+import { type Observable, of, concat, map, catchError } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { useProjectPickerTour } from './use_project_picker_tour';
 import { strings } from './strings';
 import {
@@ -22,55 +22,63 @@ import {
   ProjectPickerList,
 } from './project_picker_update/blocks';
 import { ProjectPickerStateProvider } from './project_picker_update/state';
-import type { CPSProject } from '../types';
+import type { CPSProject, ProjectsData } from '../types';
 
-export interface ProjectPickerProps {
-  projectRouting?: ProjectRouting;
-  onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
-  projects: UseFetchProjectsResult;
-  totalProjectCount: number;
+export interface ProjectPickerProps
+  extends Pick<
+    ComponentProps<typeof ProjectPickerStateProvider>,
+    'defaultProjectRoutingGetter' | 'onProjectRoutingChange'
+  > {
+  getActiveRouteProjects$: () => Observable<ProjectsData | null>;
   isReadonly?: boolean;
+  isDisabled?: boolean;
   settingsComponent?: React.ReactNode;
 }
 
 export const ProjectPicker = ({
-  projectRouting,
   onProjectRoutingChange,
-  projects,
-  totalProjectCount,
   isReadonly = false,
-  settingsComponent,
+  isDisabled = false,
+  getActiveRouteProjects$,
+  defaultProjectRoutingGetter,
 }: ProjectPickerProps) => {
   const [showPopover, setShowPopover] = useState(false);
   const styles = useMemoCss(projectPickerStyles);
   const { isTourOpen, closeTour } = useProjectPickerTour();
 
-  const { originProject, linkedProjects, isLoading, error } = projects;
+  const projectsState$ = useMemo(
+    () =>
+      concat(
+        of({ isLoading: true, data: null as ProjectsData | null }),
+        getActiveRouteProjects$().pipe(
+          map((data) => ({ isLoading: false, data })),
+          catchError(() => of({ isLoading: false, data: null }))
+        )
+      ),
+    [getActiveRouteProjects$]
+  );
 
-  if (totalProjectCount <= 1 || (!isLoading && !originProject && !error)) {
-    return null;
-  }
+  const { isLoading, data: projects } = useObservable(projectsState$, {
+    isLoading: true,
+    data: null,
+  });
 
   if (isLoading) {
     return <ProjectPickerSkeleton />;
   }
 
-  const activeProjectsCount =
-    error || !originProject ? totalProjectCount : linkedProjects.length + 1;
+  if (!projects?.origin || projects.linkedProjects.length === 0) {
+    return null;
+  }
+
+  const { origin: originProject, linkedProjects } = projects;
 
   const button = (
-    <EuiToolTip
-      content={strings.getProjectPickerButtonLabel(activeProjectsCount, totalProjectCount)}
-      disableScreenReaderOutput
-    >
-      <ProjectPickerButton
-        size="xs"
-        filteredProjectsCount={0}
-        totalProjectsCount={totalProjectCount}
-        onClick={() => setShowPopover(!showPopover)}
-        isDisabled={isReadonly}
-      />
-    </EuiToolTip>
+    <ProjectPickerButton
+      size="s"
+      onClick={() => setShowPopover(!showPopover)}
+      isDisabled={isDisabled}
+    />
   );
 
   return (
@@ -101,8 +109,11 @@ export const ProjectPicker = ({
       }}
     >
       <ProjectPickerStateProvider
-        originProjectId={originProject?._id}
+        defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+        originProjectId={originProject._id}
         availableProjects={([] as CPSProject[]).concat(originProject, linkedProjects)}
+        onProjectRoutingChange={onProjectRoutingChange}
+        isReadOnly={isReadonly}
       >
         <EuiPopover
           button={button}
@@ -128,30 +139,6 @@ export const ProjectPicker = ({
 export const ProjectPickerSkeleton = () => (
   <EuiSkeletonRectangle width={48} height={24} borderRadius="m" />
 );
-
-export const DisabledProjectPicker = ({
-  totalProjectCount,
-  customTooltipContent,
-}: {
-  totalProjectCount: number;
-  customTooltipContent?: string;
-}) => {
-  const styles = useMemoCss(projectPickerStyles);
-  if (totalProjectCount <= 1) {
-    return null;
-  }
-
-  return (
-    <ProjectPickerButton
-      size="s"
-      filteredProjectsCount={0}
-      totalProjectsCount={totalProjectCount}
-      onClick={() => {}}
-      customTooltipContent={customTooltipContent}
-      isDisabled
-    />
-  );
-};
 
 const projectPickerStyles = {
   button: ({ euiTheme }: UseEuiTheme) =>

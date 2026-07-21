@@ -19,37 +19,29 @@ import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import * as styles from './button.styles';
 import { strings } from '../../../strings';
+import { useProjectPickerState } from '../../state';
 import { CPSIconDisabled } from '../../../cps_icon';
 
-interface ProjectMetadata {
-  filteredProjectsCount: number;
-  totalProjectsCount: number;
-}
-
-export interface ProjectPickerButtonProps
-  extends Pick<EuiButtonProps, 'size' | 'isDisabled'>,
-    ProjectMetadata {
+export interface ProjectPickerButtonProps extends Pick<EuiButtonProps, 'size' | 'isDisabled'> {
   onClick: () => void;
   customTooltipContent?: string;
 }
 
-export const ProjectPickerButton = ({
-  onClick,
-  size,
-  filteredProjectsCount,
-  totalProjectsCount,
-  isDisabled,
-  customTooltipContent,
-}: ProjectPickerButtonProps) => {
+export const ProjectPickerButton = ({ onClick, size, isDisabled, customTooltipContent }: ProjectPickerButtonProps) => {
   const id = useGeneratedHtmlId();
+  const state = useProjectPickerState();
+
+  const filteredProjectsCount = state.selectedProjects.length;
+  const totalProjectsCount = state.availableProjects.size;
 
   const allProjectsSelected = filteredProjectsCount === totalProjectsCount;
+  const shouldWarn = filteredProjectsCount === 0;
 
   return (
     <EuiToolTip content={customTooltipContent ?? strings.projectPickerButtonAriaLabel} id={id}>
       <EuiButton
-        color="text"
-        iconType={isDisabled ? CPSIconDisabled : 'crossProjectSearch'}
+        color={shouldWarn ? 'warning' : 'text'}
+        iconType={isDisabled ? CPSIconDisabled : shouldWarn ? 'warning' : 'crossProjectSearch'}
         aria-labelledby={id}
         size={size}
         isDisabled={isDisabled}

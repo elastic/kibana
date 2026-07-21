@@ -9,6 +9,7 @@
 
 import React, { type ComponentProps } from 'react';
 import type { StoryObj, Meta } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { faker } from '@faker-js/faker';
 import { ProjectPicker } from './project_picker';
 
@@ -49,6 +50,8 @@ export const ProjectPickerStory: StoryObj<ComponentProps<typeof ProjectPicker>> 
   name: 'ProjectPicker',
   args: {
     availableProjects: createProjects(),
+    defaultProjectRoutingGetter: () => '_alias:origin',
+    onProjectRoutingChange: action('onProjectRoutingChange'),
   },
   render: (props) => <ProjectPicker {...props} />,
 };
@@ -65,6 +68,8 @@ export const ProjectPickerReadOnlyStory: StoryObj<ComponentProps<typeof ProjectP
   args: {
     isReadOnly: true,
     availableProjects: createProjects(100),
+    defaultProjectRoutingGetter: () => '_alias:origin',
+    onProjectRoutingChange: action('onProjectRoutingChange'),
   },
   render: (props) => <ProjectPicker {...props} />,
 };

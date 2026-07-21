@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, type ComponentProps } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { ProjectRouting } from '@kbn/es-query';
+import { from } from 'rxjs';
 import type { ICPSManager } from '../types';
 import { ProjectRoutingAccess } from '../types';
-import { DisabledProjectPicker, ProjectPicker } from './project_picker';
-import { useFetchProjects } from './use_fetch_projects';
+import { ProjectPicker } from './project_picker';
 import { ProjectPickerSettings } from './project_picker_settings';
 
 interface ProjectPickerContainerProps {
@@ -28,14 +28,11 @@ interface ProjectPickerContainerProps {
 export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ cpsManager }) => {
   const access = useObservable(cpsManager.getProjectPickerAccess$(), ProjectRoutingAccess.DISABLED);
 
-  if (access === ProjectRoutingAccess.DISABLED) {
-    return <DisabledProjectPicker totalProjectCount={cpsManager.getTotalProjectCount()} />;
-  }
-
   return (
     <ActiveProjectPicker
       cpsManager={cpsManager}
       isReadonly={access === ProjectRoutingAccess.READONLY}
+      isDisabled={access === ProjectRoutingAccess.DISABLED}
     />
   );
 };
@@ -43,53 +40,22 @@ export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ 
 interface ActiveProjectPickerProps {
   cpsManager: ICPSManager;
   isReadonly: boolean;
+  isDisabled: boolean;
 }
 
-const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({ cpsManager, isReadonly }) => {
-  const { projectRouting, updateProjectRouting } = useProjectRouting(cpsManager);
+const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({
+  cpsManager,
+  isReadonly,
+  isDisabled,
+}) => {
+  const getActiveRouteProjects$ = useCallback<
+    ComponentProps<typeof ProjectPicker>['getActiveRouteProjects$']
+  >(() => {
+    return from(cpsManager.fetchProjects(cpsManager.getProjectRouting()));
+  }, [cpsManager]);
 
-  const fetchProjects = useCallback(
-    (routing?: ProjectRouting) => {
-      return cpsManager.fetchProjects(routing);
-    },
-    [cpsManager]
-  );
-
-  const projects = useFetchProjects(fetchProjects, projectRouting);
-
-  const resetProjectPicker = useCallback(() => {
-    updateProjectRouting(cpsManager.getDefaultProjectRouting());
-  }, [cpsManager, updateProjectRouting]);
-
-  return (
-    <ProjectPicker
-      projectRouting={projectRouting}
-      onProjectRoutingChange={updateProjectRouting}
-      projects={projects}
-      totalProjectCount={cpsManager.getTotalProjectCount()}
-      isReadonly={isReadonly}
-      settingsComponent={<ProjectPickerSettings onResetToDefaults={resetProjectPicker} />}
-    />
-  );
-};
-
-/**
- * Hook for interacting with project routing observable.
- * Subscribes to routing changes and provides setter function.
- */
-const useProjectRouting = (cpsManager: ICPSManager) => {
-  const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(
-    cpsManager.getProjectRouting()
-  );
-
-  useEffect(() => {
-    const subscription = cpsManager.getProjectRouting$().subscribe((newRouting) => {
-      setProjectRouting(newRouting);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+  const defaultProjectRoutingGetter = useCallback(() => {
+    return cpsManager.getDefaultProjectRouting();
   }, [cpsManager]);
 
   const updateProjectRouting = useCallback(
@@ -99,5 +65,18 @@ const useProjectRouting = (cpsManager: ICPSManager) => {
     [cpsManager]
   );
 
-  return { projectRouting, updateProjectRouting };
+  const resetProjectPicker = useCallback(() => {
+    updateProjectRouting(defaultProjectRoutingGetter());
+  }, [defaultProjectRoutingGetter, updateProjectRouting]);
+
+  return (
+    <ProjectPicker
+      defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      onProjectRoutingChange={updateProjectRouting}
+      getActiveRouteProjects$={getActiveRouteProjects$}
+      isReadonly={isReadonly}
+      isDisabled={isDisabled}
+      settingsComponent={<ProjectPickerSettings onResetToDefaults={resetProjectPicker} />}
+    />
+  );
 };

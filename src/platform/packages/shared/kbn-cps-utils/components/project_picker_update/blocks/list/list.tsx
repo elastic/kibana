@@ -136,7 +136,7 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
   const activeProject = activePopover?.project ?? null;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="projectPickerList">
+    <EuiFlexGroup direction="column" gutterSize="none">
       {activePopover?.kind === 'contextMenu' && activeProject && buttonRef.current ? (
         <ProjectPickerListItemContextMenu
           key={`contextMenu-${activeProject._id}`}
@@ -165,6 +165,7 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
                   state.selectedProjects.includes(project._id) &&
                   includedVisibleProjectIds.length === 1
                 }
+                isReadOnly={state.isReadOnly}
                 isOriginProject={state.originProjectId === project._id}
                 toggleDisabledMessage={toggleDisabledMessage}
                 project={project}
