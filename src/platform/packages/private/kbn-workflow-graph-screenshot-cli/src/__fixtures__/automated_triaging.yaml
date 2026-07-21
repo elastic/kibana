@@ -6,6 +6,6 @@ triggers:
   - type: manual
 steps:
   - name: triage
-    type: connector.slack-post-message
+    type: .slack
     connector_id: slack-1
     message: 'Triaging: {{event.title}}'

@@ -118,6 +118,7 @@ dependsOn:
   - '@kbn/streams-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/significant-events-plugin'
+  - '@kbn/investigation-output'
   - '@kbn/react-query'
   - '@kbn/response-ops-rule-form'
   - '@kbn/data-service'

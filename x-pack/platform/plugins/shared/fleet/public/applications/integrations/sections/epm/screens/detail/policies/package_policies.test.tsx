@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { screen } from '@testing-library/react';
+
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 import { allowedExperimentalValues } from '../../../../../../../../common/experimental_features';
 import { ExperimentalFeaturesService } from '../../../../../services';
@@ -173,5 +175,61 @@ describe('PackagePoliciesPage agentless table source', () => {
     const legacyCall = legacyAgentlessCall();
     expect(legacyCall).toBeDefined();
     expect(legacyCall![1]).toEqual({ enabled: true });
+  });
+});
+
+describe('PackagePoliciesPage agent-based section visibility', () => {
+  beforeEach(() => {
+    useGetPackageInfoByKeyQueryMock.mockReturnValue({ data: undefined, isLoading: false });
+    jest.mocked(useAgentlessPolicies).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+      resendRequest: jest.fn(),
+    } as unknown as ReturnType<typeof useAgentlessPolicies>);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  it('hides the Agent-based section when the agent-based policy count is zero', () => {
+    jest.mocked(usePackagePoliciesWithAgentPolicy).mockReturnValue({
+      data: { items: [], total: 0, page: 1, perPage: 10 },
+      isLoading: false,
+      error: null,
+      resendRequest: jest.fn(),
+    } as unknown as ReturnType<typeof usePackagePoliciesWithAgentPolicy>);
+
+    renderPage();
+
+    expect(screen.queryByText('Agent-based')).toBeNull();
+  });
+
+  it('shows the Agent-based section when the agent-based policy count is greater than zero', () => {
+    jest.mocked(usePackagePoliciesWithAgentPolicy).mockReturnValue({
+      data: { items: [], total: 2, page: 1, perPage: 10 },
+      isLoading: false,
+      error: null,
+      resendRequest: jest.fn(),
+    } as unknown as ReturnType<typeof usePackagePoliciesWithAgentPolicy>);
+
+    renderPage();
+
+    expect(screen.getByText('Agent-based')).toBeDefined();
+  });
+
+  it('hides the Agent-based section while the agent-based data is still loading (data is undefined)', () => {
+    jest.mocked(usePackagePoliciesWithAgentPolicy).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      error: null,
+      resendRequest: jest.fn(),
+    } as unknown as ReturnType<typeof usePackagePoliciesWithAgentPolicy>);
+
+    renderPage();
+
+    expect(screen.queryByText('Agent-based')).toBeNull();
   });
 });

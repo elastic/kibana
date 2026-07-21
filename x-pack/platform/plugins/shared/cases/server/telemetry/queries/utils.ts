@@ -8,12 +8,16 @@
 import { get } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
   LEGACY_FILE_ATTACHMENT_TYPE,
   MAX_OBSERVABLES_PER_CASE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import {
   AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
@@ -59,10 +63,13 @@ export const getCountsAggregationQuery = (savedObjectType: string) => ({
   },
 });
 
-export const getAlertsCountsAggregationQuery = () => ({
+export const getAlertsCountsAggregationQuery = (
+  savedObjectType: string = CASE_COMMENT_SAVED_OBJECT,
+  alertField: string = 'alertId'
+) => ({
   counts: {
     date_range: {
-      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.created_at`,
+      field: `${savedObjectType}.attributes.created_at`,
       format: 'dd/MM/yyyy',
       ranges: [
         { from: 'now-1d', to: 'now' },
@@ -73,7 +80,7 @@ export const getAlertsCountsAggregationQuery = () => ({
     aggregations: {
       topAlertsPerBucket: {
         cardinality: {
-          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+          field: `${savedObjectType}.attributes.${alertField}`,
         },
       },
     },
@@ -109,22 +116,25 @@ export const getMaxBucketOnCaseAggregationQuery = (savedObjectType: string) => (
   },
 });
 
-export const getAlertsMaxBucketOnCaseAggregationQuery = () => ({
+export const getAlertsMaxBucketOnCaseAggregationQuery = (
+  savedObjectType: string = CASE_COMMENT_SAVED_OBJECT,
+  alertField: string = 'alertId'
+) => ({
   references: {
     nested: {
-      path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
+      path: `${savedObjectType}.references`,
     },
     aggregations: {
       cases: {
         filter: {
           term: {
-            [`${CASE_COMMENT_SAVED_OBJECT}.references.type`]: CASE_SAVED_OBJECT,
+            [`${savedObjectType}.references.type`]: CASE_SAVED_OBJECT,
           },
         },
         aggregations: {
           ids: {
             terms: {
-              field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
+              field: `${savedObjectType}.references.id`,
             },
             aggregations: {
               reverse: {
@@ -132,7 +142,7 @@ export const getAlertsMaxBucketOnCaseAggregationQuery = () => ({
                 aggregations: {
                   topAlerts: {
                     cardinality: {
-                      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+                      field: `${savedObjectType}.attributes.${alertField}`,
                     },
                   },
                 },
@@ -150,10 +160,13 @@ export const getAlertsMaxBucketOnCaseAggregationQuery = () => ({
   },
 });
 
-export const getUniqueAlertCommentsCountQuery = () => ({
+export const getUniqueAlertCommentsCountQuery = (
+  savedObjectType: string = CASE_COMMENT_SAVED_OBJECT,
+  alertField: string = 'alertId'
+) => ({
   uniqueAlertCommentsCount: {
     cardinality: {
-      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+      field: `${savedObjectType}.attributes.${alertField}`,
     },
   },
 });
@@ -267,44 +280,93 @@ interface CountsAndMaxAlertsAggRes {
     }>;
   };
 }
-export const getCountsAndMaxAlertsData = async ({
+const queryAlertsCountsAndMax = async ({
   savedObjectsClient,
+  savedObjectType,
+  alertField,
+  filter,
 }: {
   savedObjectsClient: TelemetrySavedObjectsClient;
-}) => {
-  const filter = getOnlyAlertsCommentsFilter();
-
-  const res = await savedObjectsClient.find<unknown, CountsAndMaxAlertsAggRes>({
+  savedObjectType: string;
+  alertField: string;
+  filter?: KueryNode;
+}) =>
+  savedObjectsClient.find<unknown, CountsAndMaxAlertsAggRes>({
     page: 0,
     perPage: 0,
     filter,
-    type: CASE_COMMENT_SAVED_OBJECT,
+    type: savedObjectType,
     namespaces: ['*'],
     aggs: {
       by_owner: {
         terms: {
-          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.owner`,
+          field: `${savedObjectType}.attributes.owner`,
           size: 3,
           include: ['securitySolution', 'observability', 'cases'],
         },
         aggs: {
-          ...getAlertsCountsAggregationQuery(),
-          ...getAlertsMaxBucketOnCaseAggregationQuery(),
-          ...getUniqueAlertCommentsCountQuery(),
+          ...getAlertsCountsAggregationQuery(savedObjectType, alertField),
+          ...getAlertsMaxBucketOnCaseAggregationQuery(savedObjectType, alertField),
+          ...getUniqueAlertCommentsCountQuery(savedObjectType, alertField),
         },
       },
     },
   });
 
-  const sec = getSolutionStats('securitySolution', res?.aggregations);
-  const obs = getSolutionStats('observability', res?.aggregations);
-  const main = getSolutionStats('cases', res?.aggregations);
-  const all = getTotalStats(res?.aggregations);
+interface AlertStats {
+  total: number;
+  daily: number;
+  weekly: number;
+  monthly: number;
+  maxOnACase: number;
+}
+
+const mergeAlertStats = (legacy: AlertStats, unified: AlertStats): AlertStats => ({
+  total: legacy.total + unified.total,
+  daily: legacy.daily + unified.daily,
+  weekly: legacy.weekly + unified.weekly,
+  monthly: legacy.monthly + unified.monthly,
+  maxOnACase: Math.max(legacy.maxOnACase, unified.maxOnACase),
+});
+
+export const getCountsAndMaxAlertsData = async ({
+  savedObjectsClient,
+}: {
+  savedObjectsClient: TelemetrySavedObjectsClient;
+}) => {
+  // Alerts can live in legacy `cases-comments` (`alertId`) and, once the
+  // attachments feature flag is on, in unified `cases-attachments`
+  // (`attachmentId`). Query both and merge so telemetry stays accurate across
+  // the migration.
+  const [legacyRes, unifiedRes] = await Promise.all([
+    queryAlertsCountsAndMax({
+      savedObjectsClient,
+      savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+      alertField: 'alertId',
+      filter: getOnlyAlertsCommentsFilter(),
+    }),
+    queryAlertsCountsAndMax({
+      savedObjectsClient,
+      savedObjectType: CASE_ATTACHMENT_SAVED_OBJECT,
+      alertField: 'attachmentId',
+      filter: getOnlyUnifiedAlertsFilter(),
+    }),
+  ]);
+
+  const mergeForOwner = (owner: Owner) =>
+    mergeAlertStats(
+      getSolutionStats(owner, legacyRes?.aggregations),
+      getSolutionStats(owner, unifiedRes?.aggregations)
+    );
+
   return {
-    all,
-    sec,
-    obs,
-    main,
+    all: mergeAlertStats(
+      getTotalStats(legacyRes?.aggregations),
+      getTotalStats(unifiedRes?.aggregations)
+    ),
+    sec: mergeForOwner('securitySolution'),
+    obs: mergeForOwner('observability'),
+    main: mergeForOwner('cases'),
   };
 };
 
@@ -612,6 +674,18 @@ export const getOnlyAlertsCommentsFilter = () =>
     field: 'type',
     operator: 'or',
     type: CASE_COMMENT_SAVED_OBJECT,
+  });
+
+export const getOnlyUnifiedAlertsFilter = () =>
+  buildFilter({
+    filters: [
+      SECURITY_ALERT_ATTACHMENT_TYPE,
+      OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+      STACK_ALERT_ATTACHMENT_TYPE,
+    ],
+    field: 'type',
+    operator: 'or',
+    type: CASE_ATTACHMENT_SAVED_OBJECT,
   });
 
 export const getOnlyConnectorsFilter = () =>

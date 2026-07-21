@@ -376,6 +376,36 @@ export function SettingsTab() {
                 </EuiFormRow>
                 <EuiFormRow
                   label={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.targetCoverageLabel',
+                    { defaultMessage: 'Target coverage (minutes)' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.targetCoverageHelp',
+                    {
+                      defaultMessage:
+                        'Every active rule is scanned at least once within this window. Must exceed the detection interval to spread the fleet across runs.',
+                    }
+                  )}
+                >
+                  <EuiFieldNumber
+                    data-test-subj="streams-settings-scheduled-target-coverage"
+                    value={scheduledDiscovery.draft.targetCoverageMinutes}
+                    onChange={(e) =>
+                      scheduledDiscovery.setDraft((prev) => ({
+                        ...prev,
+                        targetCoverageMinutes: clampNumber(
+                          e.target.value,
+                          MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
+                          Number.MAX_SAFE_INTEGER
+                        ),
+                      }))
+                    }
+                    min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
+                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate(
                     'xpack.streams.significantEventsDiscovery.settings.reviewIntervalLabel',
                     { defaultMessage: 'Review interval (minutes)' }
                   )}

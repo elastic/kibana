@@ -15,12 +15,16 @@ import {
   TEMPLATE_SCHEMA_URI,
 } from '../utils/template_json_schema';
 import { TemplateYamlEditorBase } from './template_yaml_editor';
+import { TemplateActionsMenu } from './template_actions_menu';
 import { TemplateYamlValidationAccordion } from './template_yaml_validation_accordion';
 import { useValidationAccordionPositioning } from '../hooks/use_validation_accordion_positioning';
 import { useFieldNameValidation } from '../hooks/use_field_name_validation';
 import { useUserPickerValidation } from '../hooks/use_user_picker_validation';
+import { useSemanticValidation } from '../hooks/use_semantic_validation';
+import { useRefFieldCompletion } from '../hooks/use_ref_field_completion';
 import { useLineDifferencesDecorations } from '../hooks/use_line_differences_decorations';
 import { useKibana } from '../../../common/lib/kibana';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 
 export interface YamlEditorFormValues {
   definition: string;
@@ -89,6 +93,7 @@ export const TemplateYamlEditor = ({
 }: TemplateYamlEditorProps) => {
   const euiTheme = useEuiTheme();
   const { security } = useKibana().services;
+  const { owner } = useCasesContext();
 
   const {
     editorRef,
@@ -101,6 +106,8 @@ export const TemplateYamlEditor = ({
 
   useFieldNameValidation(editorRef.current, value);
   useUserPickerValidation(editorRef.current, value, security);
+  useSemanticValidation(editorRef.current, value);
+  useRefFieldCompletion(editorRef.current, owner[0]);
   useLineDifferencesDecorations({
     editor: editorRef.current,
     savedValue,
@@ -144,6 +151,14 @@ export const TemplateYamlEditor = ({
           onValidationChange={handleValidationChange}
           onEditorMount={handleEditorMount}
         />
+        {isEditorMounted ? (
+          <TemplateActionsMenu
+            editor={editorRef.current}
+            value={value}
+            onChange={onChange}
+            owner={owner[0]}
+          />
+        ) : null}
       </div>
       <div css={styles.validationFooter}>
         <TemplateYamlValidationAccordion

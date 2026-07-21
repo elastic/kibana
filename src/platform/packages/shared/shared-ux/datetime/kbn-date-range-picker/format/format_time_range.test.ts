@@ -47,6 +47,12 @@ describe('timeRangeToDisplayText', () => {
     expect(toDisplay('-1w')).toBe('Last 1 week');
   });
 
+  it('handles millisecond offsets as named ranges', () => {
+    expect(toDisplay('500ms')).toBe('Last 500 milliseconds');
+    expect(toDisplay('now to +500ms')).toBe('Next 500 milliseconds');
+    expect(toDisplay('-500ms to -250ms')).toBe('500 milliseconds ago → 250 milliseconds ago');
+  });
+
   it('handles now to relative', () => {
     expect(toDisplay('now to +15m')).toBe('Next 15 minutes');
   });
