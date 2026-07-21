@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { agentBuilderDefaultAgentId } from '../src/constants';
 import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
+import { agentBuilderDefaultAgentId } from '../src/constants';
 
 /**
  * L0 Routing Smoke — verifies that the Agent Builder router correctly invokes
@@ -68,37 +68,35 @@ const smokeCases: SmokeCase[] = [
   },
 ];
 
-evaluate.describe(
-  'Threat Intel Hunt — L0 Routing Smoke',
-  { tag: tags.stateful.classic },
-  () => {
-    smokeCases.forEach(({ name, input, expectSkillInvoked, expectToolCalled, reason }) => {
-      evaluate(name, async ({ agentBuilderClient, log }: { agentBuilderClient: any; log: any }) => {
-        log.info(`L0 smoke: ${name}`);
+evaluate.describe('Threat Intel Hunt — L0 Routing Smoke', { tag: tags.stateful.classic }, () => {
+  smokeCases.forEach(({ name, input, expectSkillInvoked, expectToolCalled, reason }) => {
+    evaluate(name, async ({ agentBuilderClient, log }) => {
+      log.info(`L0 smoke: ${name}`);
 
-        const result = await agentBuilderClient.converse({
-          agentId: agentBuilderDefaultAgentId,
-          input,
-        });
-
-        const toolCalls = getToolCallSteps(result);
-        const calledTools = new Set(toolCalls.map((t) => t.tool_id));
-        const hitDomainTool = THREAT_INTEL_TOOLS.some((t) => calledTools.has(t));
-
-        // Primary assertion: skill routing boundary
-        expect(hitDomainTool).to.eql(
-          expectSkillInvoked,
-          `Routing boundary failed: ${reason}. Called tools: ${[...calledTools].join(', ') || '(none)'}`
-        );
-
-        // Secondary assertion: when invoked, correct tool is reached
-        if (expectSkillInvoked && expectToolCalled) {
-          expect(calledTools.has(expectToolCalled)).to.eql(
-            true,
-            `Skill routed but never called ${expectToolCalled}`
-          );
-        }
+      const result = await agentBuilderClient.converse({
+        agentId: agentBuilderDefaultAgentId,
+        input,
       });
+
+      const toolCalls = getToolCallSteps(result);
+      const calledTools = new Set(toolCalls.map((t) => t.tool_id));
+      const hitDomainTool = THREAT_INTEL_TOOLS.some((t) => calledTools.has(t));
+
+      // Primary assertion: skill routing boundary
+      expect(hitDomainTool).to.eql(
+        expectSkillInvoked,
+        `Routing boundary failed: ${reason}. Called tools: ${
+          [...calledTools].join(', ') || '(none)'
+        }`
+      );
+
+      // Secondary assertion: when invoked, correct tool is reached
+      if (expectSkillInvoked && expectToolCalled) {
+        expect(calledTools.has(expectToolCalled)).to.eql(
+          true,
+          `Skill routed but never called ${expectToolCalled}`
+        );
+      }
     });
-  }
-);
+  });
+});

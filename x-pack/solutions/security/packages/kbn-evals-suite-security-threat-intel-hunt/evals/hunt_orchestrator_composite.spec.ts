@@ -43,8 +43,9 @@ const GOLDEN_REPORT = REPORTS[0]; // apt29-dropbox (T1566.001, T1204.002)
 const TIER1_ONLY_REPORT = REPORTS[3]; // insider-threat-credential-theft (T1078, T1486)
 
 const toQuestion = (report: typeof GOLDEN_REPORT, opts?: { tier2_when?: string }): string =>
-  `Run a threat hunt for this report. ${opts?.tier2_when ? `Use tier2_when='${opts.tier2_when}'. ` : ''}` +
-  `Report: ${report.title}\n${report.body}`;
+  `Run a threat hunt for this report. ${
+    opts?.tier2_when ? `Use tier2_when='${opts.tier2_when}'. ` : ''
+  }${`Report: ${report.title}\n${report.body}`}`;
 
 // ── Evaluators ───────────────────────────────────────────────────────────────
 
@@ -82,9 +83,7 @@ base.describe(
         const toolIds = new Set(toolCalls.map((s) => s.tool_id).filter(Boolean));
 
         // ── Step 2: skill-invoked gate ────────────────────────────────────────
-        const orchestratorInvoked = toolIds.has(
-          THREAT_INTEL_TOOL_IDS.hunt_orchestrator
-        );
+        const orchestratorInvoked = toolIds.has(THREAT_INTEL_TOOL_IDS.hunt_orchestrator);
 
         // ── Step 3: tier2 delegation gate ─────────────────────────────────────
         // Tier 2 may or may not run depending on whether Tier 1 found hits.
@@ -92,9 +91,7 @@ base.describe(
         // made the *correct* decision (tier2 when appropriate, skipped when
         // no hits). We approximate this by checking tier2 was NOT called
         // when it shouldn't be, or WAS called when the report has IOCs.
-        const behaviorInvoked = toolIds.has(
-          THREAT_INTEL_TOOL_IDS.hunt_behavior
-        );
+        const behaviorInvoked = toolIds.has(THREAT_INTEL_TOOL_IDS.hunt_behavior);
 
         // ── Step 4: findings in response ──────────────────────────────────────
         // The orchestrator returns findings in its result; we verify the
@@ -122,9 +119,7 @@ base.describe(
               size: 10,
             });
             persistedCount = (searchRes.hits.hits as unknown[]).length;
-            log.info(
-              `[L3] Persisted findings for ${GOLDEN_REPORT.id}: ${persistedCount}`
-            );
+            log.info(`[L3] Persisted findings for ${GOLDEN_REPORT.id}: ${persistedCount}`);
           } catch (e) {
             log.warning(`[L3] ES search failed: ${(e as Error).message}`);
           }
@@ -139,9 +134,7 @@ base.describe(
         // Gate: orchestrator must be called; findings must exist in message;
         // if tier2 ran, persistence should have written ≥1 doc.
         const success =
-          orchestratorInvoked &&
-          hasFindings &&
-          (!behaviorInvoked || persistedCount >= 0);
+          orchestratorInvoked && hasFindings && (!behaviorInvoked || persistedCount >= 0);
 
         return {
           success,
@@ -188,12 +181,8 @@ base.describe(
         const toolCalls = steps.filter((s) => s.type === 'tool_call');
         const toolIds = new Set(toolCalls.map((s) => s.tool_id).filter(Boolean));
 
-        const orchestratorInvoked = toolIds.has(
-          THREAT_INTEL_TOOL_IDS.hunt_orchestrator
-        );
-        const behaviorInvoked = toolIds.has(
-          THREAT_INTEL_TOOL_IDS.hunt_behavior
-        );
+        const orchestratorInvoked = toolIds.has(THREAT_INTEL_TOOL_IDS.hunt_orchestrator);
+        const behaviorInvoked = toolIds.has(THREAT_INTEL_TOOL_IDS.hunt_behavior);
         const messageLower = response.message.toLowerCase();
         const hasFindings = TIER1_ONLY_REPORT.techniques.some((tid) =>
           messageLower.includes(tid.toLowerCase())

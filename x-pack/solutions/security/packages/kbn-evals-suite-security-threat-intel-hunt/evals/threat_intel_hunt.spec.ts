@@ -33,9 +33,13 @@
  *   project (per model), so swapping the connector changes the scored model.
  */
 
-import { tags, selectEvaluators, getToolCallSteps, type Example, type EvaluationDataset } from '@kbn/evals';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type { HttpHandler } from '@kbn/core/public';
+import {
+  tags,
+  selectEvaluators,
+  getToolCallSteps,
+  type Example,
+  type EvaluationDataset,
+} from '@kbn/evals';
 import { evaluate as base } from '../src/evaluate';
 import { REPORTS } from '../src/dataset';
 import { THREAT_INTEL_TOOL_IDS } from '../src/constants';
@@ -100,9 +104,7 @@ base.describe(
   { tag: tags.stateful.classic },
   () => {
     base.beforeAll(async ({ kbnClient, connector, log }) => {
-      log.info(
-        `[L2] Setting genAi:defaultAIConnector to '${connector.id}' for hunt_behavior`
-      );
+      log.info(`[L2] Setting genAi:defaultAIConnector to '${connector.id}' for hunt_behavior`);
       await kbnClient.uiSettings.update({
         'genAi:defaultAIConnector': connector.id,
       });
@@ -130,9 +132,7 @@ base.describe(
           const behaviorStep = toolCalls.find(
             (s) => s.tool_id === THREAT_INTEL_TOOL_IDS.hunt_behavior
           );
-          const args = behaviorStep?.params as
-            | { behaviors?: unknown[] }
-            | undefined;
+          const args = behaviorStep?.params as { behaviors?: unknown[] } | undefined;
           const behaviorCount = args?.behaviors?.length ?? 0;
 
           // ── Skill-invocation gate ───────────────────────────────────────────
@@ -166,8 +166,7 @@ base.describe(
               `Technique coverage: ${(techniqueCoverage * 100).toFixed(0)}%.`,
             scorecard: {
               skillInvoked: skillInvoked ? 1 : 0,
-              correctToolCalled:
-                toolIds.has(THREAT_INTEL_TOOL_IDS.hunt_behavior) ? 1 : 0,
+              correctToolCalled: toolIds.has(THREAT_INTEL_TOOL_IDS.hunt_behavior) ? 1 : 0,
               toolArgsValid: argsValid ? 1 : 0,
               techniqueCoverage: Math.round(techniqueCoverage * 100) / 100,
             },
