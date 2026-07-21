@@ -19,6 +19,7 @@ describe('FetchSuppressionsStep', () => {
       createAlertEpisodeSuppressionsResponse([
         {
           rule_id: 'r1',
+          source: 'internal',
           group_hash: 'h1',
           episode_id: 'e1',
           should_suppress: true,
@@ -80,6 +81,7 @@ describe('FetchSuppressionsStep', () => {
     mockEsClient.esql.query.mockImplementation((args: { query: string }) => {
       const rows: Array<{
         rule_id: string;
+        source: string;
         group_hash: string;
         episode_id: string;
         should_suppress: boolean;
@@ -87,6 +89,7 @@ describe('FetchSuppressionsStep', () => {
       if (args.query.includes(`${longSegment}-r0::`)) {
         rows.push({
           rule_id: `${longSegment}-r0`,
+          source: 'internal',
           group_hash: `${longSegment}-g0`,
           episode_id: 'e0',
           should_suppress: true,
@@ -95,6 +98,7 @@ describe('FetchSuppressionsStep', () => {
       if (args.query.includes(`${longSegment}-r199::`)) {
         rows.push({
           rule_id: `${longSegment}-r199`,
+          source: 'internal',
           group_hash: `${longSegment}-g199`,
           episode_id: 'e199',
           should_suppress: false,

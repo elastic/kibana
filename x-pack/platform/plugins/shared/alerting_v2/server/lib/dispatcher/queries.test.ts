@@ -51,11 +51,11 @@ describe('getDispatchableAlertEventsQuery', () => {
     );
   });
 
-  it('aggregates by rule_id, group_hash, episode_id with episode_status as LAST aggregation', () => {
+  it('aggregates by subject, group_hash, episode_id with episode_status as LAST aggregation', () => {
     const req = getDispatchableAlertEventsQuery();
 
-    expect(req.query).toContain('BY rule_id, group_hash, episode_id');
-    expect(req.query).not.toContain('BY rule_id, group_hash, episode_id, episode_status');
+    expect(req.query).toContain('BY subject, group_hash, episode_id');
+    expect(req.query).not.toContain('BY subject, group_hash, episode_id, episode_status');
     expect(req.query).toContain('last_episode_status = LAST(episode_status, @timestamp)');
   });
 
@@ -100,9 +100,36 @@ describe('getDispatchableAlertEventsQuery', () => {
     const req = getDispatchableAlertEventsQuery();
 
     expect(req.query).toContain(
-      'KEEP last_event_timestamp, rule_id, group_hash, episode_id, last_episode_status, data_json, severity'
+      'KEEP last_event_timestamp, rule_id, source, space_id, group_hash, episode_id, last_episode_status, data_json, severity'
     );
     expect(req.query).toContain('RENAME last_episode_status AS episode_status');
+  });
+
+  it('computes subject via CASE to group internal and external episodes separately', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('subject = CASE(');
+  });
+
+  it('groups INLINE STATS BY subject, group_hash (not rule_id, group_hash)', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('BY subject, group_hash');
+    expect(req.query).not.toContain('BY rule_id, group_hash');
+  });
+
+  it('groups STATS BY subject, group_hash, episode_id', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('BY subject, group_hash, episode_id');
+  });
+
+  it('projects source and space_id via LAST aggregation', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('source = LAST(source, @timestamp) WHERE type IS NOT NULL');
+    expect(req.query).toContain('space_id = LAST(space_id, @timestamp) WHERE type IS NOT NULL');
+    expect(req.query).toContain('KEEP last_event_timestamp, rule_id, source, space_id,');
   });
 
   it('sorts by timestamp ascending with a limit', () => {

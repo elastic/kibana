@@ -49,7 +49,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
     const policiesBySpace = Map.groupBy(policies.values(), (policy) => policy.spaceId);
 
     for (const episode of dispatchable) {
-      const rule = rules.get(episode.rule_id);
+      const rule = episode.rule_id ? rules.get(episode.rule_id) : undefined;
       if (!rule) continue;
 
       const spacePolicies = policiesBySpace.get(rule.spaceId) ?? [];

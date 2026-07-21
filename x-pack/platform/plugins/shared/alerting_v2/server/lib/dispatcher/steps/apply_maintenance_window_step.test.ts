@@ -65,7 +65,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     const ep = createAlertEpisode();
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
     });
 
     const result = await step.execute(state);
@@ -79,7 +79,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     const ep = createAlertEpisode({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
       suppressed: [],
     });
 
@@ -99,7 +99,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     const ep = createAlertEpisode({ last_event_timestamp: '2026-01-22T09:00:00.000Z' });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
     });
 
     const result = await step.execute(state);
@@ -120,7 +120,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
       suppressed: [],
     });
 
@@ -144,7 +144,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
     });
 
     const result = await step.execute(state);
@@ -167,7 +167,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
       suppressed: [],
     });
 
@@ -203,7 +203,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     };
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
       suppressed: [previouslySuppressed],
     });
 
@@ -223,7 +223,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     const state = createDispatcherPipelineState({
       input: createDispatcherPipelineInput({ startedAt: new Date('2026-01-22T12:05:00.000Z') }),
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
       suppressed: [],
     });
 

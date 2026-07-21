@@ -15,6 +15,8 @@ export const createDispatchableAlertEventsResponse = (
     columns: [
       { name: 'last_event_timestamp', type: 'date' },
       { name: 'rule_id', type: 'keyword' },
+      { name: 'source', type: 'keyword' },
+      { name: 'space_id', type: 'keyword' },
       { name: 'group_hash', type: 'keyword' },
       { name: 'episode_id', type: 'keyword' },
       { name: 'episode_status', type: 'keyword' },
@@ -24,6 +26,8 @@ export const createDispatchableAlertEventsResponse = (
     values: alertEpisodes.map((alertEpisode) => [
       alertEpisode.last_event_timestamp,
       alertEpisode.rule_id,
+      alertEpisode.source,
+      alertEpisode.space_id,
       alertEpisode.group_hash,
       alertEpisode.episode_id,
       alertEpisode.episode_status,
@@ -39,12 +43,14 @@ export const createAlertEpisodeSuppressionsResponse = (
   return {
     columns: [
       { name: 'rule_id', type: 'keyword' },
+      { name: 'source', type: 'keyword' },
       { name: 'group_hash', type: 'keyword' },
       { name: 'episode_id', type: 'keyword' },
       { name: 'should_suppress', type: 'boolean' },
     ],
     values: suppressions.map((suppression) => [
       suppression.rule_id,
+      suppression.source,
       suppression.group_hash,
       suppression.episode_id,
       suppression.should_suppress,

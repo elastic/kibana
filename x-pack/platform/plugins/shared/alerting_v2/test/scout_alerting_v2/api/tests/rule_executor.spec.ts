@@ -202,9 +202,9 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       );
 
       // Rule fields
-      expect(event.rule.id).toBe(rule.id);
-      expect(Number.isInteger(event.rule.version)).toBe(true);
-      expect(event.rule.version).toBeGreaterThan(0);
+      expect(event.rule?.id).toBe(rule.id);
+      expect(Number.isInteger(event.rule?.version)).toBe(true);
+      expect(event.rule?.version).toBeGreaterThan(0);
 
       // Event fields
       expect(typeof event.group_hash).toBe('string');

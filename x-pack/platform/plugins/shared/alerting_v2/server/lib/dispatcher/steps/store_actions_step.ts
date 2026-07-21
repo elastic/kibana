@@ -51,7 +51,7 @@ export class StoreActionsStep implements DispatcherStep {
 
     const now = new Date();
     const spaceIdForEpisode = (episode: AlertEpisode) =>
-      rules?.get(episode.rule_id)?.spaceId ?? 'default';
+      (episode.rule_id ? rules?.get(episode.rule_id)?.spaceId : undefined) ?? 'default';
 
     await this.storageService.bulkIndexDocs<AlertAction>({
       index: ALERT_ACTIONS_DATA_STREAM,
@@ -143,7 +143,7 @@ function toAction({
     last_series_event_timestamp: episode.last_event_timestamp,
     actor: 'system',
     action_type: actionType,
-    rule_id: episode.rule_id,
+    rule_id: episode.rule_id ?? '',
     source: 'internal',
     reason,
     space_id: spaceId,

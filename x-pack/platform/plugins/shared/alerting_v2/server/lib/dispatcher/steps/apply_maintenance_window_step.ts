@@ -51,7 +51,7 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
     const newlySuppressed: Array<AlertEpisode & { reason: string }> = [];
 
     for (const episode of dispatchable) {
-      const rule = rules.get(episode.rule_id);
+      const rule = episode.rule_id ? rules.get(episode.rule_id) : undefined;
       const candidates = rule && windowsBySpace.get(rule.spaceId);
       if (!rule || !candidates) {
         newDispatchable.push(episode);

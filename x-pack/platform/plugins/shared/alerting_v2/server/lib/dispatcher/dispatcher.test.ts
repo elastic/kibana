@@ -167,6 +167,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
           rule_id: 'rule-1',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-1',
           episode_id: 'episode-1',
           episode_status: 'active',
@@ -174,6 +176,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-22T07:15:00.000Z',
           rule_id: 'rule-2',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-2',
           episode_id: 'episode-2',
           episode_status: 'inactive',
@@ -183,12 +187,14 @@ describe('DispatcherService', () => {
       const suppressions: AlertEpisodeSuppression[] = [
         {
           rule_id: 'rule-1',
+          source: 'internal',
           group_hash: 'hash-1',
           episode_id: 'episode-1',
           should_suppress: false,
         },
         {
           rule_id: 'rule-2',
+          source: 'internal',
           group_hash: 'hash-2',
           episode_id: 'episode-2',
           should_suppress: false,
@@ -279,6 +285,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
           rule_id: 'rule-1',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-1',
           episode_id: 'episode-1',
           episode_status: 'active',
@@ -286,6 +294,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-22T07:15:00.000Z',
           rule_id: 'rule-2',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-2',
           episode_id: 'episode-2',
           episode_status: 'active',
@@ -295,12 +305,14 @@ describe('DispatcherService', () => {
       const suppressions: AlertEpisodeSuppression[] = [
         {
           rule_id: 'rule-1',
+          source: 'internal',
           group_hash: 'hash-1',
           episode_id: 'episode-1',
           should_suppress: true,
         },
         {
           rule_id: 'rule-2',
+          source: 'internal',
           group_hash: 'hash-2',
           episode_id: 'episode-2',
           should_suppress: false,
@@ -405,6 +417,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-001',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-001-series-1',
           episode_id: 'rule-001-series-1-episode-1',
           episode_status: 'active',
@@ -412,6 +426,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-002',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-002-series-1',
           episode_id: 'rule-002-series-1-episode-1',
           episode_status: 'active',
@@ -419,6 +435,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-003',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-003-series-1',
           episode_id: 'rule-003-series-1-episode-1',
           episode_status: 'active',
@@ -426,6 +444,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:00:00.000Z',
           rule_id: 'rule-003',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-003-series-2',
           episode_id: 'rule-003-series-2-episode-1',
           episode_status: 'active',
@@ -433,6 +453,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:05:00.000Z',
           rule_id: 'rule-003',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-003-series-2',
           episode_id: 'rule-003-series-2-episode-1',
           episode_status: 'inactive',
@@ -440,6 +462,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-003',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-003-series-2',
           episode_id: 'rule-003-series-2-episode-2',
           episode_status: 'active',
@@ -447,6 +471,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-004',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-004-series-1',
           episode_id: 'rule-004-series-1-episode-1',
           episode_status: 'active',
@@ -454,6 +480,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-004',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-004-series-2',
           episode_id: 'rule-004-series-2-episode-1',
           episode_status: 'active',
@@ -461,6 +489,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-005',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-005-series-1',
           episode_id: 'rule-005-series-1-episode-1',
           episode_status: 'active',
@@ -468,6 +498,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-005',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-005-series-2',
           episode_id: 'rule-005-series-2-episode-1',
           episode_status: 'active',
@@ -484,30 +516,35 @@ describe('DispatcherService', () => {
       const suppressions: AlertEpisodeSuppression[] = [
         {
           rule_id: 'rule-001',
+          source: 'internal',
           group_hash: 'rule-001-series-1',
           episode_id: 'rule-001-series-1-episode-1',
           should_suppress: false,
         },
         {
           rule_id: 'rule-002',
+          source: 'internal',
           group_hash: 'rule-002-series-1',
           episode_id: 'rule-002-series-1-episode-1',
           should_suppress: true,
         },
         {
           rule_id: 'rule-004',
+          source: 'internal',
           group_hash: 'rule-004-series-1',
           episode_id: null,
           should_suppress: true,
         },
         {
           rule_id: 'rule-004',
+          source: 'internal',
           group_hash: 'rule-004-series-2',
           episode_id: null,
           should_suppress: true,
         },
         {
           rule_id: 'rule-005',
+          source: 'internal',
           group_hash: 'rule-005-series-1',
           episode_id: 'rule-005-series-1-episode-1',
           should_suppress: true,

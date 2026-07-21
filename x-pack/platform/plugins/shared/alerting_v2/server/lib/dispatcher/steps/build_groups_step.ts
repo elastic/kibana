@@ -75,8 +75,8 @@ export function buildActionGroups(
 
     const group = groupMap.get(actionGroupId)!;
     group.episodes.push(episode);
-    const rule = rules?.get(episode.rule_id);
-    if (rule) {
+    const rule = episode.rule_id ? rules?.get(episode.rule_id) : undefined;
+    if (rule && episode.rule_id) {
       group.rules[episode.rule_id] = { name: rule.name };
     }
   }

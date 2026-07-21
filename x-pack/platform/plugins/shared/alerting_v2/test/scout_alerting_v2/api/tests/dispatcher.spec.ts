@@ -72,7 +72,7 @@ const relativeTime = (secondsAgo: number, base: number = Date.now()): string =>
   new Date(base - secondsAgo * 1000).toISOString();
 
 interface BuildAlertEventInput {
-  ruleId: AlertEvent['rule']['id'];
+  ruleId: NonNullable<AlertEvent['rule']>['id'];
   groupHash: AlertEvent['group_hash'];
   episodeId: NonNullable<AlertEvent['episode']>['id'];
   episodeStatus: NonNullable<AlertEvent['episode']>['status'];

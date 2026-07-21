@@ -222,7 +222,7 @@ function aggregateByPolicy(
     }
     for (const episode of group.episodes) {
       summary.episodeIds.add(episode.episode_id);
-      summary.ruleIds.add(episode.rule_id);
+      summary.ruleIds.add(episode.rule_id ?? '');
     }
   }
   return summaries;
@@ -233,10 +233,11 @@ function aggregateUnmatchedByRule(
 ): Map<RuleId, Set<string>> {
   const byRule = new Map<RuleId, Set<string>>();
   for (const episode of unmatched) {
-    let ids = byRule.get(episode.rule_id);
+    const key = episode.rule_id ?? '';
+    let ids = byRule.get(key);
     if (!ids) {
       ids = new Set();
-      byRule.set(episode.rule_id, ids);
+      byRule.set(key, ids);
     }
     ids.add(episode.episode_id);
   }
