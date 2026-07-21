@@ -18,9 +18,7 @@ import { triggers, type Action, type ActionExecutionContext } from '@kbn/ui-acti
 
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { uiActionsService } from '../../../services/kibana_services';
-import type { AddPanelActionExtension, MenuItemGroup } from './types';
-
-type AddPanelAction = Action<object, AddPanelActionExtension>;
+import type { MenuItemGroup } from './types';
 
 export const useMenuItemGroups = ({
   dashboardApi,
@@ -61,10 +59,10 @@ async function getActionGroups(
   api: DashboardApi,
   context: ActionExecutionContext<object>
 ): Promise<{
-  groups: Record<string, { group: PresentableGroup; actions: AddPanelAction[] }>;
+  groups: Record<string, { group: PresentableGroup; actions: Action[] }>;
   generateMenuItemGroups$: Observable<void>;
 }> {
-  const groups: Record<string, { group: PresentableGroup; actions: AddPanelAction[] }> = {};
+  const groups: Record<string, { group: PresentableGroup; actions: Action[] }> = {};
   const disabledStateChangesSubjects: Array<Observable<void> | undefined> = [];
 
   (
@@ -92,7 +90,7 @@ async function getActionGroups(
 }
 
 export function getMenuItems(
-  actions: AddPanelAction[],
+  actions: Action[],
   dashboardApi: DashboardApi,
   context: ActionExecutionContext
 ) {
@@ -103,24 +101,10 @@ export function getMenuItems(
         id: action.id,
         name: actionName,
         icon: action.getIconType?.(context) ?? 'empty',
-        onClick: (event: React.MouseEvent) => {
-          dashboardApi.clearOverlays();
-          if (event.currentTarget instanceof HTMLAnchorElement) {
-            if (
-              !event.defaultPrevented && // onClick prevented default
-              event.button === 0 &&
-              (!event.currentTarget.target || event.currentTarget.target === '_self') &&
-              !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
-            ) {
-              event.preventDefault();
-            }
-          }
-          action.execute(context);
-        },
+        onClick: (event: React.MouseEvent) => onAddPanelClick(event, dashboardApi, () => action.execute(context)),
         'data-test-subj': `create-action-${actionName}`,
         description: action?.getDisplayNameTooltip?.(context),
         isDisabled: action?.isDisabled?.(context),
-        isAiAction: action.extension?.isAiAction,
         order: action.order ?? 0,
         MenuItem: action.MenuItem ? action.MenuItem({ context }) : undefined,
       };
@@ -132,8 +116,23 @@ export function getMenuItems(
     });
 }
 
+export function onAddPanelClick(event: React.MouseEvent, dashboardApi: DashboardApi, onClick: () => void) {
+  dashboardApi.clearOverlays();
+  if (event.currentTarget instanceof HTMLAnchorElement) {
+    if (
+      !event.defaultPrevented && // onClick prevented default
+      event.button === 0 &&
+      (!event.currentTarget.target || event.currentTarget.target === '_self') &&
+      !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
+    ) {
+      event.preventDefault();
+    }
+  }
+  onClick();
+}
+
 function generateMenuItemGroups(
-  groups: Record<string, { group: PresentableGroup; actions: AddPanelAction[] }>,
+  groups: Record<string, { group: PresentableGroup; actions: Action[] }>,
   dashboardApi: DashboardApi,
   context: ActionExecutionContext
 ): MenuItemGroup[] {

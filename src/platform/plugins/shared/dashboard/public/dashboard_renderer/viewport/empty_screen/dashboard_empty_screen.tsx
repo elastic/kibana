@@ -26,7 +26,7 @@ import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { coreServices } from '../../../services/kibana_services';
+import { coreServices, uiActionsService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { useFeaturedItems } from '../../../dashboard_app/top_nav/add_panel_button/use_featured_items';
 import { FeaturedItemCard } from '../../../dashboard_app/top_nav/add_panel_button/components/featured_item_card';
@@ -43,7 +43,7 @@ export function DashboardEmptyScreen() {
   const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = viewMode === 'edit';
-  const hasChatItem = featuredItems.some((item) => item.id === OPEN_DASHBOARD_CHAT_ACTION_ID);
+  const hasChatItem = uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID);
 
   const styles = useMemoCss(emptyScreenStyles);
 
@@ -102,16 +102,24 @@ export function DashboardEmptyScreen() {
     if (showEditPrompt) {
       return (
         <EuiFlexGroup gutterSize="s" wrap css={styles.actionsWrapper}>
+          {
+            hasChatItem && 
+            <EuiFlexItem
+                key={OPEN_DASHBOARD_CHAT_ACTION_ID}
+                grow={hasChatItem}
+                css={styles.chatItem}
+              >
+                <DashboardEmptyScreenChat />
+            </EuiFlexItem>
+          }
           {featuredItems.map((item) => {
-            const isChatCard = item.id === OPEN_DASHBOARD_CHAT_ACTION_ID;
-
             return (
               <EuiFlexItem
                 key={item.id}
                 grow={hasChatItem}
-                css={isChatCard ? styles.chatItem : styles.featuredItem}
+                css={styles.featuredItem}
               >
-                {isChatCard ? <DashboardEmptyScreenChat /> : <FeaturedItemCard item={item} />}
+                {<FeaturedItemCard item={item} />}
               </EuiFlexItem>
             );
           })}

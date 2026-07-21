@@ -10,14 +10,6 @@
 import type { MouseEventHandler, ReactNode } from 'react';
 import type { IconType, CommonProps } from '@elastic/eui';
 
-export interface AddPanelActionExtension {
-  /**
-   * When true, surfaces may treat this featured item as an AI entry point
-   * (e.g. the add-panel flyout renders it with AiButton styling).
-   */
-  isAiAction?: boolean;
-}
-
 export interface MenuItem extends Pick<CommonProps, 'data-test-subj'> {
   id: string;
   name: string;
@@ -26,7 +18,6 @@ export interface MenuItem extends Pick<CommonProps, 'data-test-subj'> {
   description?: string;
   isDisabled?: boolean;
   isDeprecated?: boolean;
-  isAiAction?: boolean;
   order: number;
   MenuItem?: ReactNode;
 }

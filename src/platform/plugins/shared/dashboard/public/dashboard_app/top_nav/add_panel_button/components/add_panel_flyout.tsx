@@ -26,18 +26,20 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n as i18nFn } from '@kbn/i18n';
+import { i18n, i18n as i18nFn } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import useAsync from 'react-use/lib/useAsync';
 
 import type { DashboardApi } from '../../../../dashboard_api/types';
-import { embeddableService } from '../../../../services/kibana_services';
-import { useMenuItemGroups } from '../use_menu_item_groups';
+import { embeddableService, uiActionsService } from '../../../../services/kibana_services';
+import { onAddPanelClick, useMenuItemGroups } from '../use_menu_item_groups';
 import { useFeaturedItems } from '../use_featured_items';
 import type { MenuItem, MenuItemGroup } from '../types';
 import { Groups } from './groups';
 import { FeaturedItemCard } from './featured_item_card';
+import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '../../../../dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
+import { openDashboardChat } from '../../../../dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat';
 
 const TAB_NEW_ID = 'new' as const;
 const TAB_LIBRARY_ID = 'library' as const;
@@ -121,29 +123,26 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
         </EuiFlexItem>
         {featuredItems.length > 0 && (
           <EuiFlexItem grow={false} css={styles.featuredPanelsWrapper}>
-            {featuredItems.map((item) => {
-              if (item.isDisabled) {
-                return null;
-              }
-
-              if (item.isAiAction) {
-                return (
-                  <AiButton
-                    key={item.id}
-                    fullWidth
-                    size="m"
-                    variant="base"
-                    iconType="productAgent"
-                    onClick={item.onClick}
-                    data-test-subj={item['data-test-subj']}
-                  >
-                    {item.name}
-                  </AiButton>
-                );
-              }
-
-              return <FeaturedItemCard key={item.id} item={item} />;
-            })}
+            { uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID) &&
+              <AiButton
+                key={OPEN_DASHBOARD_CHAT_ACTION_ID}
+                fullWidth
+                size="m"
+                variant="base"
+                iconType="productAgent"
+                onClick={(event: React.MouseEvent) => {
+                  onAddPanelClick(event, dashboardApi, openDashboardChat);
+                }}
+                data-test-subj="create-action-Create with chat"
+              >
+                {i18n.translate('dashboard.addPanelFlyout.createWithChatButtonLabel', {
+                  defaultMessage: 'Create with chat',
+                })}
+              </AiButton>
+            }
+            {featuredItems.map((item) => 
+              !item.isDisabled && <FeaturedItemCard key={item.id} item={item} />
+            )}
           </EuiFlexItem>
         )}
         <EuiFlexItem css={styles.flyoutContentWrapper}>

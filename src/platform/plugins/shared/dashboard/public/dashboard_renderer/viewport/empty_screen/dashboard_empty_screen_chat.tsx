@@ -47,7 +47,7 @@ const promptSuggestions = [
   },
 ] as const;
 
-const openDashboardChat = async (initialMessage?: string) => {
+export const openDashboardChat = async (initialMessage?: string) => {
   const action: Action<OpenDashboardChatActionContext> = await uiActionsService.getAction(
     OPEN_DASHBOARD_CHAT_ACTION_ID
   );
