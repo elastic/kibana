@@ -59,6 +59,21 @@ describe('toStoredDataView', () => {
     });
   });
 
+  it('maps inline allow_hidden_indices to allowHidden', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-hidden-*',
+      time_field: '@timestamp',
+      allow_hidden_indices: true,
+    };
+    const result = toStoredDataView(dataView);
+    expect(result).toEqual({
+      title: 'my-hidden-*',
+      timeFieldName: '@timestamp',
+      allowHidden: true,
+    });
+  });
+
   it('converts index-pattern data_source without runtime fields', () => {
     const dataView: AsCodeDataViewSpec = {
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,

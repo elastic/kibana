@@ -87,5 +87,6 @@ export interface APIAdHocDataView {
   timeFieldName: string | undefined;
   dataSourceType?: string;
   esqlQuery?: string;
+  allowHidden?: boolean;
   fieldSettings?: AsCodeDataViewSpec['field_settings'];
 }

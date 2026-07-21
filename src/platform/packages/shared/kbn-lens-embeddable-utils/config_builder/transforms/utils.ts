@@ -155,7 +155,7 @@ export function generateAdHocDataViewId(
   return base;
 }
 
-export function getAdHocDataViewSpec(dataView: APIAdHocDataView): DataViewSpec {
+export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
   return {
     // Improve id genertation to be more predictable and hit cache more often
     id: generateAdHocDataViewId(dataView),
@@ -165,7 +165,7 @@ export function getAdHocDataViewSpec(dataView: APIAdHocDataView): DataViewSpec {
     sourceFilters: [],
     ...fromApiFieldSettings(dataView.fieldSettings),
     allowNoIndex: false,
-    allowHidden: false,
+    ...(dataView.allowHidden !== undefined ? { allowHidden: dataView.allowHidden } : {}),
     ...(dataView.dataSourceType ? { type: dataView.dataSourceType } : {}),
   };
 }
@@ -245,6 +245,9 @@ export function buildDataSourceStateNoESQL(
         type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: dataViewSpec.title,
         time_field: dataViewSpec.timeFieldName,
+        ...(dataViewSpec.allowHidden !== undefined
+          ? { allow_hidden_indices: dataViewSpec.allowHidden }
+          : {}),
         ...(fieldSettings ? { field_settings: fieldSettings } : {}),
       };
     }
@@ -326,6 +329,9 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
       return {
         index: dataSource.index_pattern,
         timeFieldName: dataSource.time_field ?? timeFieldName,
+        ...(dataSource.allow_hidden_indices !== undefined
+          ? { allowHidden: dataSource.allow_hidden_indices }
+          : {}),
         ...(dataSource.field_settings ? { fieldSettings: dataSource.field_settings } : {}),
       };
     case 'esql':
