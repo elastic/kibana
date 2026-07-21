@@ -307,8 +307,14 @@ async function createSetupSideEffects(
   }
 
   try {
-    logger.debug('Backfilling policy_base_id on fleet-agents and fleet-policies');
-    await backfillPolicyBaseId(esClient);
+    const settings = await settingsService.getSettings(soClient);
+    if (!settings.completed_migrations?.includes('policy_base_id_backfill')) {
+      logger.debug('Backfilling policy_base_id on fleet-agents and fleet-policies');
+      await backfillPolicyBaseId(esClient);
+      await settingsService.saveSettings(soClient, {
+        completed_migrations: [...(settings.completed_migrations ?? []), 'policy_base_id_backfill'],
+      });
+    }
   } catch (_error) {
     // Non-fatal: runBackfill already logged the per-index warning before rethrowing.
   }

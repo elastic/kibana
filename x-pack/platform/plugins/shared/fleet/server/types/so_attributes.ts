@@ -305,6 +305,7 @@ export interface SettingsSOAttributes {
     synthetics?: 'success' | null;
   };
   integration_knowledge_enabled?: boolean;
+  completed_migrations?: string[];
 }
 
 export interface SpaceSettingsSOAttributes {
