@@ -19,6 +19,9 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
+  - '@kbn/content-management-utils'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/as-code-shared-schemas'
 tags:
   - shared-server
   - package

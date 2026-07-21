@@ -20,15 +20,14 @@ import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { SignificantEventsConfig } from '../common/config';
-import { RelayClient } from './lib/slack_app/relay_client';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import {
   createManagedWorkflowsInstaller,
   type ManagedWorkflowsInstaller,
 } from './lib/workflows/setup/managed_workflows_installer';
 import { registerFeatureFlags } from './feature_flags';
-import { registerRules } from './lib/significant_events/rules/register_rules';
 import { getSignificantEventsTuningConfig } from './lib/significant_events/helpers/get_significant_events_tuning_config';
+import { deleteLegacyRules } from './lib/significant_events/rules/delete_legacy_rules';
 
 import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
@@ -124,7 +123,6 @@ export class SignificantEventsPlugin
 
     this.ebtTelemetryService.setup(core.analytics);
 
-    registerRules({ plugins, logger: this.logger.get('rules') });
     registerSignificantEventsInferenceFeatures(
       plugins.searchInferenceEndpoints,
       this.logger.get('inference-features')
@@ -168,24 +166,24 @@ export class SignificantEventsPlugin
         space,
       });
 
-      const getAlertingRulesClient = async () =>
-        pluginsStart.alerting.getRulesClientWithRequestInSpace(
+      const getAlertingV2RulesClient = async () =>
+        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
+
+      const deleteLegacyRulesById = async (ruleIds: string[]): Promise<void> => {
+        if (ruleIds.length === 0) {
+          return;
+        }
+        const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
           request,
           DEFAULT_SPACE_ID,
           rulesClientOptions
         );
-
-      const getAlertingV2RulesClient = async () =>
-        pluginsStart.alertingVTwo
-          ? pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID)
-          : undefined;
+        await deleteLegacyRules(rulesClient, ruleIds);
+      };
 
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
-          uiSettingsClient,
-          getAlertingRulesClient,
           getAlertingV2RulesClient,
-          logger: this.logger,
         });
 
       const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
@@ -214,6 +212,7 @@ export class SignificantEventsPlugin
         attachmentClient,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
+        deleteLegacyRules: deleteLegacyRulesById,
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,
@@ -303,9 +302,7 @@ export class SignificantEventsPlugin
     }
 
     core.pricing.registerProductFeatures(SIGNIFICANT_EVENT_TIERED_FEATURES);
-    registerFeatureFlags(core, this.logger, {
-      isAlertingV2PluginAvailable: 'alertingVTwo' in plugins,
-    });
+    registerFeatureFlags(core, this.logger);
 
     registerRoutes({
       repository: significantEventsRouteRepository,
@@ -351,16 +348,7 @@ export class SignificantEventsPlugin
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
 
-      // Built once here rather than per-request: reads TLS cert/key/CA files from disk
-      // and keeps its own connection pool (see RelayClient's class doc).
-      const relayService = this.config.relayService;
-      if (relayService) {
-        this.server.relayClient = new RelayClient({
-          baseUrl: relayService.url,
-          tls: relayService.tls,
-          logger: this.logger.get('relay-client'),
-        });
-      }
+      this.server.relayClient = plugins.actions.getRelayClient();
     }
 
     // The availability flag observable emits its current value on subscribe. `skip(1)` drops that

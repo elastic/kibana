@@ -12,6 +12,7 @@ import { scriptsDataDir } from './indexing';
 import { ensureEcsSourceIp } from './packs';
 import {
   allThreatIntelSourceIds,
+  buildPackArticleDataUrl,
   buildPackRssDataUrl,
   collectPackJoinFieldValues,
   PACK_TI_SCENARIOS,
@@ -55,7 +56,19 @@ describe('PACK_TI_SCENARIOS', () => {
     expect(THREAT_INTEL_SUBSCRIPTION_ID.toLowerCase()).not.toContain('data-generator');
   });
 
-  it('embeds join IOCs and narrative anchors in the RSS data URL payload', () => {
+  it('builds a data:text/html article URL that embeds the scenario title and body', () => {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+      const articleUrl = buildPackArticleDataUrl(scenario);
+      expect(articleUrl.startsWith('data:text/html;charset=utf-8,')).toBe(true);
+      const html = decodeURIComponent(articleUrl.replace(/^data:text\/html;charset=utf-8,/, ''));
+      expect(html).toContain(scenario.title);
+      expect(html).toContain(scenario.name);
+      // Body is HTML-escaped (e.g. ATT&CK → ATT&amp;CK), so match a stable unescaped slice.
+      expect(html).toContain(scenario.body.slice(0, 48));
+    }
+  });
+
+  it('embeds join IOCs, narrative anchors, and the HTML article data URL in the RSS payload', () => {
     for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
       const url = buildPackRssDataUrl({
         scenario,
@@ -67,6 +80,9 @@ describe('PACK_TI_SCENARIOS', () => {
         expect(xml).toContain(token);
       }
       expect(xml).toContain(scenario.title);
+      expect(xml).toContain(buildPackArticleDataUrl(scenario));
+      expect(xml).not.toContain('example.elastic.dev');
+      expect(xml).not.toContain('elastic.co/security-labs');
       expect(xml.toLowerCase()).not.toContain('data-generator');
       expect(xml.toLowerCase()).not.toContain('data generator');
     }
