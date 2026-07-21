@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { render } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import type { ExportJSONActionApi } from './export_json_action';
 import { ExportJSONAction } from './export_json_action';
+import * as ExportJsonFlyout from '../dashboard_app/top_nav/share/export_json/flyout/export_json_flyout';
 
 const mockOpenLazyFlyout = jest.fn();
 jest.mock('@kbn/presentation-util', () => ({
   openLazyFlyout: (...args: unknown[]) => mockOpenLazyFlyout(...args),
 }));
+
+const exportJsonFlyoutSpy = jest
+  .spyOn(ExportJsonFlyout, 'ExportJsonFlyout')
+  .mockImplementation(() => null as any);
 
 jest.mock('../services/kibana_services', () => ({
   coreServices: {
@@ -76,22 +82,53 @@ describe('Export JSON action', () => {
     await expect(action.execute({ embeddable: {} })).rejects.toThrow();
   });
 
-  it('passes getSerializedStateByValue when embeddable supports library transforms and isByReference is false', async () => {
-    const getSerializedStateByValueMock = jest
-      .fn()
-      .mockReturnValue({ rawState: { byValue: true } });
-    const embeddableWithLibrary: ExportJSONActionApi = {
-      ...context.embeddable,
-      canLinkToLibrary: jest.fn().mockResolvedValue(false),
-      canUnlinkFromLibrary: jest.fn().mockResolvedValue(false),
-      saveToLibrary: jest.fn().mockResolvedValue('id'),
-      getSerializedStateByReference: jest.fn().mockReturnValue({}),
-      getSerializedStateByValue: getSerializedStateByValueMock,
-      hasLibraryItemWithTitle: jest.fn().mockResolvedValue(false),
+  describe('getExportJson branching', () => {
+    let getSerializedStateByValueMock: jest.Mock;
+    let embeddableWithLibrary: ExportJSONActionApi;
+
+    const renderFlyoutContent = async () => {
+      const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
+      render(await loadContent({ closeFlyout: jest.fn() }));
+      return exportJsonFlyoutSpy.mock.calls[0][0];
     };
 
-    await action.execute({ embeddable: embeddableWithLibrary });
+    beforeEach(() => {
+      getSerializedStateByValueMock = jest.fn().mockReturnValue({ rawState: { byValue: true } });
+      embeddableWithLibrary = {
+        ...context.embeddable,
+        canLinkToLibrary: jest.fn().mockResolvedValue(false),
+        canUnlinkFromLibrary: jest.fn().mockResolvedValue(false),
+        saveToLibrary: jest.fn().mockResolvedValue('id'),
+        getSerializedStateByReference: jest.fn().mockReturnValue({}),
+        getSerializedStateByValue: getSerializedStateByValueMock,
+        hasLibraryItemWithTitle: jest.fn().mockResolvedValue(false),
+      };
+    });
 
-    expect(mockOpenLazyFlyout).toHaveBeenCalledTimes(1);
+    it('uses getSerializedStateByValue when supportsByReference and forceExportByValue is false', async () => {
+      await action.execute({ embeddable: embeddableWithLibrary });
+      const { getExportJson } = await renderFlyoutContent();
+
+      getExportJson();
+      expect(getSerializedStateByValueMock).toHaveBeenCalledTimes(1);
+      expect(embeddableWithLibrary.serializeState).not.toHaveBeenCalled();
+    });
+
+    it('uses serializeState when supportsByReference but forceExportByValue is true', async () => {
+      await action.execute({ embeddable: embeddableWithLibrary });
+      const { getExportJson } = await renderFlyoutContent();
+
+      getExportJson(true);
+      expect(getSerializedStateByValueMock).not.toHaveBeenCalled();
+      expect(embeddableWithLibrary.serializeState).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses serializeState when embeddable does not support library transforms', async () => {
+      await action.execute(context);
+      const { getExportJson } = await renderFlyoutContent();
+
+      getExportJson();
+      expect(context.embeddable.serializeState).toHaveBeenCalledTimes(1);
+    });
   });
 });
