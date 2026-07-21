@@ -12,10 +12,14 @@ import {
   fromStoredDataViewToAsCodeSavedSchema,
   toStoredDataView,
 } from '@kbn/as-code-data-views-transforms';
+import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
 import { SavedObjectsErrorHelpers, type SavedObjectsClientContract } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, type DataViewLazy } from '@kbn/data-views-plugin/common';
 import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { omit } from 'lodash';
+import { getMeta } from '@kbn/as-code-shared-schemas';
+import type { TypeOf } from '@kbn/config-schema';
+import type { asCodePaginatedResponseSchema } from '../rest_routes/schema';
 
 export class DataViewsAsCodeService {
   private dataViewsService: DataViewsService;
@@ -27,7 +31,10 @@ export class DataViewsAsCodeService {
   }
 
   private async mapDataView(dataView: DataViewLazy) {
-    const dataViewSpec = await dataView.toSpec({ fieldParams: { fieldName: ['*'] } });
+    const dataViewSpec = await dataView.toMinimalSpec();
+    if (dataView.getFieldAttrs().size > 0)
+      dataViewSpec.fieldAttrs = Object.fromEntries(dataView.getFieldAttrs().entries());
+
     const dataViewAsCode = fromStoredDataViewToAsCodeSavedSchema(dataViewSpec);
 
     return {
@@ -99,10 +106,56 @@ export class DataViewsAsCodeService {
     try {
       return await this.dataViewsService.getDataViewLazy(id);
     } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      if (e instanceof Error && SavedObjectsErrorHelpers.isNotFoundError(e)) {
         return null;
       }
       throw e;
     }
+  }
+
+  public async search({
+    page,
+    perPage,
+    search,
+  }: {
+    page?: number;
+    perPage?: number;
+    search?: string;
+  }): Promise<TypeOf<typeof asCodePaginatedResponseSchema>> {
+    const result = await this.savedObjectsClient.find<DataViewAttributes>({
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
+      page,
+      perPage,
+      search,
+      fields: ['name', 'title', 'timeFieldName'],
+    });
+
+    /**
+     * `search` reads directly from Saved Objects (instead of DataViewsService) to return a lightweight list view and map results to the as-code shape.
+     * This enabled the use `getMeta` because these utils operate on saved-object fields.
+     */
+    const dataViews = result.saved_objects.map((so) => {
+      return {
+        id: so.id,
+        data: {
+          name: so.attributes.name,
+          index_pattern: so.attributes.title,
+          time_field: so.attributes.timeFieldName,
+        },
+        meta: {
+          ...getMeta(so),
+          namespaces: so.namespaces,
+        },
+      };
+    });
+
+    return {
+      data: dataViews,
+      meta: {
+        page: result.page,
+        per_page: result.per_page,
+        total: result.total,
+      },
+    };
   }
 }
