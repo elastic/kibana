@@ -37,6 +37,17 @@ export function removeVersionSuffixFromPolicyId(policyId: string): string {
 }
 
 /**
+ * KQL matching a policy by its base id on the `policy_base_id` field, e.g.
+ * `policy_base_id:"my-policy"`. The id is properly escaped.
+ */
+export function buildPolicyBaseIdKuery(
+  baseId: string,
+  fieldName: string = 'policy_base_id'
+): string {
+  return `${fieldName}:"${escapeQuotes(baseId)}"`;
+}
+
+/**
  * KQL fragment matching only the version-specific variants of a base policy id
  * (e.g. `policy_id:my-policy#*`) — NOT the base id itself.
  */

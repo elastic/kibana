@@ -12,6 +12,7 @@ import { EuiLink } from '@elastic/eui';
 
 import { useLink } from '../hooks';
 import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY, PRIVILEGED_AGENT_KUERY } from '../constants';
+import { buildPolicyBaseIdKuery } from '../../common/services/version_specific_policies_utils';
 
 /**
  * Displays the provided `count` number as a link to the Agents list if it is greater than zero
@@ -40,7 +41,7 @@ export const LinkedAgentCount = memo<
       {...otherEuiLinkProps}
       href={getHref('agent_list', {
         kuery: encodeURIComponent(
-          `${AGENTS_PREFIX}.policy_base_id:"${agentPolicyId}"${
+          `${buildPolicyBaseIdKuery(agentPolicyId, `${AGENTS_PREFIX}.policy_base_id`)}${
             privilegeMode
               ? ` and ${
                   privilegeMode === 'unprivileged'

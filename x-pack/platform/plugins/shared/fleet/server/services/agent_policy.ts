@@ -128,6 +128,7 @@ import {
 import {
   hasVersionSuffix,
   removeVersionSuffixFromPolicyId,
+  buildPolicyBaseIdKuery,
 } from '../../common/services/version_specific_policies_utils';
 
 import { VERIFY_PERMISSIONS_TASK } from '../tasks/agentless/verify_permissions_task';
@@ -976,7 +977,7 @@ class AgentPolicyService {
               showInactive: true,
               perPage: 0,
               page: 1,
-              kuery: `${AGENTS_PREFIX}.policy_base_id:"${agentPolicy.id}"`,
+              kuery: buildPolicyBaseIdKuery(agentPolicy.id, `${AGENTS_PREFIX}.policy_base_id`),
             }).then(({ total }) => (agentPolicy.agents = total));
           } else {
             agentPolicy.agents = 0;
@@ -1680,7 +1681,7 @@ class AgentPolicyService {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_base_id:"${id}"`,
+      kuery: buildPolicyBaseIdKuery(id, `${AGENTS_PREFIX}.policy_base_id`),
     });
 
     if (total > 0 && !agentPolicy?.supports_agentless) {
