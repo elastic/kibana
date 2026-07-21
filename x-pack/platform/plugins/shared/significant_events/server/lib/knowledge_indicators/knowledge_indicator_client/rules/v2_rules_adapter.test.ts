@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { RulesAdapterV2 } from './v2_rules_adapter';
 import type { SignificantEventsRuleDefinition } from './rules_management_client';
 
@@ -317,7 +317,7 @@ describe('RulesAdapterV2', () => {
   describe('bulkDeleteRules', () => {
     it('calls bulkDeleteRules with ids', async () => {
       const mock = makeRulesClientMock();
-      mock.bulkDeleteRules.mockResolvedValue({ rules: [], errors: [] });
+      mock.bulkDeleteRules.mockResolvedValue({ affected_count: 2, errors: [] });
       const adapter = makeAdapter(mock);
       await adapter.bulkDeleteRules(['id-1', 'id-2']);
 
@@ -332,21 +332,34 @@ describe('RulesAdapterV2', () => {
       expect(mock.bulkDeleteRules).not.toHaveBeenCalled();
     });
 
-    it('treats per-rule 404 errors as benign', async () => {
+    it('treats per-rule RULE_NOT_FOUND errors as benign', async () => {
       const mock = makeRulesClientMock();
       mock.bulkDeleteRules.mockResolvedValue({
-        rules: [],
-        errors: [{ id: 'id-1', error: { message: 'nope', statusCode: 404 } }],
+        affected_count: 0,
+        errors: [
+          {
+            id: 'id-1',
+            error: { code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND, message: 'nope' },
+          },
+        ],
       });
       const adapter = makeAdapter(mock);
       await expect(adapter.bulkDeleteRules(['id-1'])).resolves.toBeUndefined();
     });
 
-    it('throws when any error is not 404', async () => {
+    it('throws when any error is not RULE_NOT_FOUND', async () => {
       const mock = makeRulesClientMock();
       mock.bulkDeleteRules.mockResolvedValue({
-        rules: [],
-        errors: [{ id: 'id-1', error: { message: 'storage failure', statusCode: 500 } }],
+        affected_count: 0,
+        errors: [
+          {
+            id: 'id-1',
+            error: {
+              code: ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR,
+              message: 'storage failure',
+            },
+          },
+        ],
       });
       const adapter = makeAdapter(mock);
       await expect(adapter.bulkDeleteRules(['id-1'])).rejects.toThrow(
