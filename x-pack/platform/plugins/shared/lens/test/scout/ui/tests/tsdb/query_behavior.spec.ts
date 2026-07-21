@@ -35,7 +35,6 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
 
     await uiSettings.set({
       'dateFormat:tz': 'UTC',
-      defaultIndex: TSDB_DATA_VIEW_ID,
       'timepicker:timeDefaults': JSON.stringify(TSDB_TIME_RANGE),
     });
 
@@ -51,8 +50,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     createdDataViewIds.push(downsampleDataView.id);
   });
 
-  test.beforeEach(async ({ browserAuth, uiSettings }) => {
-    await uiSettings.set({ defaultIndex: TSDB_DATA_VIEW_ID });
+  test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
 
@@ -71,7 +69,9 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
   test('defaults to median without warnings for non-rolled-up metrics', async ({
     page,
     pageObjects,
+    uiSettings,
   }) => {
+    await uiSettings.set({ defaultIndex: TSDB_DATA_VIEW_ID });
     await pageObjects.lens.openFullEditor();
     const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
     // field list may be slow to render after Lens loads the data view
@@ -101,7 +101,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     );
     const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
     // field list may be slow to render after Lens loads the data view
-    await fieldLocator.waitFor({ state: 'visible', timeout: 10_000 });
+    await fieldLocator.waitFor({ state: 'visible' });
     await fieldLocator.dragTo(page.testSubj.locator('workspace-drag-drop-prompt'));
 
     await expect
@@ -131,7 +131,10 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
   test('allows supported operations and rejects unsupported operations for time series fields', async ({
     page,
     pageObjects,
+    uiSettings,
   }) => {
+    await uiSettings.set({ defaultIndex: TSDB_DATA_VIEW_ID });
+
     const allOperations = [
       'min',
       'average',
@@ -211,7 +214,9 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
   test('shows time series dimension group only for breakdown field picker', async ({
     pageObjects,
     page,
+    uiSettings,
   }) => {
+    await uiSettings.set({ defaultIndex: TSDB_DATA_VIEW_ID });
     await pageObjects.lens.openFullEditor();
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
