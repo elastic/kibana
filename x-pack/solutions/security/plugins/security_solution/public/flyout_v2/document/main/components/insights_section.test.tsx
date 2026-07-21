@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { Provider } from 'react-redux';
-import { createStore } from 'redux';
-import {
-  INSIGHTS_SECTION_TEST_ID,
-  INSIGHTS_SECTION_TITLE,
-  InsightsSection,
-} from './insights_section';
+import { Provider } from 'react-redux-v7';
+import { createStore } from 'redux-v4';
+import { INSIGHTS_SECTION_TEST_ID, InsightsSection } from './insights_section';
+import { INSIGHTS_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -101,6 +98,33 @@ const nonAlertMockHit = createMockHit({
 });
 const onAlertUpdated = jest.fn();
 const mockRenderCellActions = jest.fn(({ children }) => <>{children}</>);
+
+/**
+ * `overlays.openSystemFlyout` is mocked (see `mockOpenSystemFlyout`), so the flyout content it
+ * receives is never actually mounted/rendered (the lazily-loaded `CorrelationsDetails` component
+ * is only ever created as an unrendered element, wrapped in `React.lazy`, so it can't be matched
+ * by type). This walks the unrendered React element tree passed to it looking for the element
+ * carrying the given prop, so tests can inspect callbacks it was given without rendering it.
+ */
+const findElementWithProp = (node: ReactNode, propName: string): React.ReactElement | undefined => {
+  if (Array.isArray(node)) {
+    for (const child of node) {
+      const found = findElementWithProp(child, propName);
+      if (found) {
+        return found;
+      }
+    }
+    return undefined;
+  }
+  if (!React.isValidElement(node)) {
+    return undefined;
+  }
+  const props = node.props as Record<string, unknown>;
+  if (propName in props) {
+    return node;
+  }
+  return findElementWithProp((props as { children?: ReactNode }).children, propName);
+};
 
 describe('InsightsSection', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
@@ -226,6 +250,36 @@ describe('InsightsSection', () => {
       expect.objectContaining({
         historyKey: documentFlyoutHistoryKey,
         session: 'start',
+      })
+    );
+  });
+
+  it('wires onShowAttack so it opens the attack flyout as a child of the correlations flyout', () => {
+    const { getByTestId } = renderInsightsSection();
+
+    fireEvent.click(getByTestId('correlationsOverviewMock'));
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    const correlationsElement = findElementWithProp(
+      mockOpenSystemFlyout.mock.calls[0][0],
+      'onShowAttack'
+    );
+    expect(correlationsElement).toBeDefined();
+
+    const onShowAttack = correlationsElement?.props.onShowAttack;
+    expect(onShowAttack).toBeInstanceOf(Function);
+
+    act(() => {
+      onShowAttack('attack-id-1', '.alerts-security.attack.discovery.alerts-default', 'Attack 1');
+    });
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(2);
+    expect(mockOpenSystemFlyout).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'inherit',
       })
     );
   });
