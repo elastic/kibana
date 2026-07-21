@@ -30,11 +30,10 @@ import {
   SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
 } from '@kbn/significant-events-plugin/common';
 import { AiButton } from '@kbn/shared-ux-ai-components';
-import { getConfidenceColor } from '../get_confidence_color';
 import { useKibana } from '../../../utils/kibana_react';
+import { formatChatAttachmentDescription } from '../chat_attachment_description';
 import { FlyoutSectionTitle } from './flyout_section_title';
 import { TruncatableSummary } from './truncatable_summary';
-import { formatEntityChatAttachmentDescription } from '../chat_attachment_description';
 
 export interface EntityFlyoutProps {
   feature: Feature;
@@ -46,11 +45,10 @@ const confidenceDotColor = (
   confidence: number,
   colors: ReturnType<typeof useEuiTheme>['euiTheme']['colors']
 ): string => {
-  const level = getConfidenceColor(confidence);
-  if (level === 'success') {
+  if (confidence >= 70) {
     return colors.success;
   }
-  if (level === 'warning') {
+  if (confidence >= 40) {
     return colors.warning;
   }
   return colors.danger;
@@ -164,7 +162,7 @@ export function EntityFlyout({
           id: feature.uuid,
           type: SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
           origin: encodeFeatureAttachmentOrigin(feature.stream_name, feature.id),
-          description: formatEntityChatAttachmentDescription(title),
+          description: formatChatAttachmentDescription('Entity', title),
           data: feature,
         },
       ],

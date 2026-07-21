@@ -562,7 +562,7 @@ export class Plugin
 
     const agentBuilder = pluginsStart.agentBuilder;
     if (agentBuilder) {
-      void import('./pages/nightshift/agent_builder/register_attachments')
+      void import('./pages/nightshift/agent_builder/significant_event_attachments')
         .then(({ registerNightshiftAgentBuilderAttachments }) => {
           registerNightshiftAgentBuilderAttachments({ agentBuilder });
         })

@@ -35,7 +35,7 @@ import {
   getNeedsActionEvents,
   getResolvedEvents,
 } from '../significant_event_status';
-import { formatSignificantEventChatAttachmentDescription } from '../chat_attachment_description';
+import { formatChatAttachmentDescription } from '../chat_attachment_description';
 
 // Kept in the URL so a refresh or a shared link restores the open flyout.
 const SELECTED_EVENT_QUERY_PARAM = 'eventUuid';
@@ -84,7 +84,7 @@ export function NightshiftApp(): React.ReactElement {
             id: event.event_uuid,
             type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
             origin: event.event_id,
-            description: formatSignificantEventChatAttachmentDescription(event.title),
+            description: formatChatAttachmentDescription('Significant event', event.title),
             data: event,
           },
         ],

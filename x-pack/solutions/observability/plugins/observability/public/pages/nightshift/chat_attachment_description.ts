@@ -7,21 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
+export type NightshiftChatAttachmentType = 'Detection' | 'Entity' | 'Significant event';
+
 /** Shown in Agent Builder as "Attachment added: {description}". */
-export const formatDetectionChatAttachmentDescription = (name: string): string =>
-  i18n.translate('xpack.observability.nightshift.chatAttachment.detection', {
-    defaultMessage: '[Detection] {name}',
-    values: { name },
-  });
-
-export const formatEntityChatAttachmentDescription = (name: string): string =>
-  i18n.translate('xpack.observability.nightshift.chatAttachment.entity', {
-    defaultMessage: '[Entity] {name}',
-    values: { name },
-  });
-
-export const formatSignificantEventChatAttachmentDescription = (name: string): string =>
-  i18n.translate('xpack.observability.nightshift.chatAttachment.significantEvent', {
-    defaultMessage: '[Significant event] {name}',
-    values: { name },
+export const formatChatAttachmentDescription = (
+  attachmentType: NightshiftChatAttachmentType,
+  name: string
+): string =>
+  i18n.translate('xpack.observability.nightshift.chatAttachment.description', {
+    defaultMessage: '[{attachmentType}] {name}',
+    values: { attachmentType, name },
   });
