@@ -36,8 +36,9 @@ function buildMocks({ featureFlagEnabled = true }: { featureFlagEnabled?: boolea
 
   const chatComplete = jest.fn();
   const getDefaultConnector = jest.fn();
+  const getConnectorList = jest.fn().mockResolvedValue([]);
   const getClient = jest.fn(() => ({ chatComplete }));
-  const inference = { getDefaultConnector, getClient };
+  const inference = { getDefaultConnector, getConnectorList, getClient };
 
   const coreStart = {
     featureFlags: {
