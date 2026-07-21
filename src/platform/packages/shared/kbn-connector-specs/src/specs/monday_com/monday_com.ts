@@ -134,8 +134,8 @@ export const MondayCom: ConnectorSpec = {
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
         return callToolJson(ctx, 'search', {
-          searchTerm: input.searchTerm,
-          searchType: input.searchType,
+          search_term: input.search_term,
+          search_type: input.search_type,
         });
       },
     },
@@ -150,7 +150,7 @@ export const MondayCom: ConnectorSpec = {
       input: GetBoardInfoInputSchema,
       handler: async (ctx, input: GetBoardInfoInput) => {
         return callToolJson(ctx, 'get_board_info', {
-          boardId: input.boardId,
+          board_id: input.board_id,
         });
       },
     },
@@ -164,7 +164,7 @@ export const MondayCom: ConnectorSpec = {
       input: GetBoardItemsInputSchema,
       handler: async (ctx, input: GetBoardItemsInput) => {
         return callToolJson(ctx, 'get_board_items_page', {
-          boardId: input.boardId,
+          board_id: input.board_id,
           cursor: input.cursor,
           limit: input.limit,
         });
@@ -181,10 +181,10 @@ export const MondayCom: ConnectorSpec = {
       input: CreateItemInputSchema,
       handler: async (ctx, input: CreateItemInput) => {
         return callToolJson(ctx, 'create_item', {
-          boardId: input.boardId,
-          name: input.itemName,
-          groupId: input.groupId,
-          columnValues: input.columnValues != null ? JSON.stringify(input.columnValues) : undefined,
+          board_id: input.board_id,
+          name: input.item_name,
+          group_id: input.group_id,
+          column_values: input.column_values != null ? JSON.stringify(input.column_values) : undefined,
         });
       },
     },
@@ -198,9 +198,9 @@ export const MondayCom: ConnectorSpec = {
       input: ChangeItemColumnValuesInputSchema,
       handler: async (ctx, input: ChangeItemColumnValuesInput) => {
         return callToolJson(ctx, 'change_item_column_values', {
-          boardId: input.boardId,
-          itemId: input.itemId,
-          columnValues: JSON.stringify(input.columnValues),
+          board_id: input.board_id,
+          item_id: input.item_id,
+          column_values: JSON.stringify(input.column_values),
         });
       },
     },
@@ -215,7 +215,7 @@ export const MondayCom: ConnectorSpec = {
       input: CreateUpdateInputSchema,
       handler: async (ctx, input: CreateUpdateInput) => {
         return callToolJson(ctx, 'create_update', {
-          itemId: input.itemId,
+          item_id: input.item_id,
           body: input.body,
         });
       },
@@ -230,8 +230,8 @@ export const MondayCom: ConnectorSpec = {
       input: GetUpdatesInputSchema,
       handler: async (ctx, input: GetUpdatesInput) => {
         return callToolJson(ctx, 'get_updates', {
-          objectId: input.objectId,
-          objectType: input.objectType,
+          object_id: input.object_id,
+          object_type: input.object_type,
           limit: input.limit,
         });
       },

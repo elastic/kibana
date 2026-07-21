@@ -147,13 +147,13 @@ describe('MondayCom', () => {
       expect(MondayCom.actions.search.isTool).toBe(true);
     });
 
-    it('calls search with searchTerm and searchType', async () => {
-      const input = parse('search', { searchTerm: 'Q3 roadmap', searchType: 'BOARD' });
+    it('calls search with search_term and search_type', async () => {
+      const input = parse('search', { search_term: 'Q3 roadmap', search_type: 'BOARD' });
       await MondayCom.actions.search.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'search',
-        arguments: { searchTerm: 'Q3 roadmap', searchType: 'BOARD' },
+        arguments: { search_term: 'Q3 roadmap', search_type: 'BOARD' },
       });
     });
   });
@@ -163,13 +163,13 @@ describe('MondayCom', () => {
       expect(MondayCom.actions.getBoardInfo.isTool).toBe(true);
     });
 
-    it('calls get_board_info with boardId mapped to board_id', async () => {
-      const input = parse('getBoardInfo', { boardId: 99887766 });
+    it('calls get_board_info with board_id', async () => {
+      const input = parse('getBoardInfo', { board_id: 99887766 });
       await MondayCom.actions.getBoardInfo.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'get_board_info',
-        arguments: { boardId: 99887766 },
+        arguments: { board_id: 99887766 },
       });
     });
   });
@@ -180,22 +180,22 @@ describe('MondayCom', () => {
     });
 
     it('calls get_board_items_page with defaults applied', async () => {
-      const input = parse('getBoardItemsPage', { boardId: 99887766 });
+      const input = parse('getBoardItemsPage', { board_id: 99887766 });
       await MondayCom.actions.getBoardItemsPage.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'get_board_items_page',
-        arguments: { boardId: 99887766, cursor: undefined, limit: 50 },
+        arguments: { board_id: 99887766, cursor: undefined, limit: 50 },
       });
     });
 
     it('calls get_board_items_page with cursor and custom limit', async () => {
-      const input = parse('getBoardItemsPage', { boardId: 99887766, cursor: 'abc123', limit: 100 });
+      const input = parse('getBoardItemsPage', { board_id: 99887766, cursor: 'abc123', limit: 100 });
       await MondayCom.actions.getBoardItemsPage.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'get_board_items_page',
-        arguments: { boardId: 99887766, cursor: 'abc123', limit: 100 },
+        arguments: { board_id: 99887766, cursor: 'abc123', limit: 100 },
       });
     });
   });
@@ -206,32 +206,32 @@ describe('MondayCom', () => {
     });
 
     it('calls create_item with required fields', async () => {
-      const input = parse('createItem', { boardId: 99887766, itemName: 'Fix login bug' });
+      const input = parse('createItem', { board_id: 99887766, item_name: 'Fix login bug' });
       await MondayCom.actions.createItem.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'create_item',
         arguments: {
-          boardId: 99887766,
+          board_id: 99887766,
           name: 'Fix login bug',
-          groupId: undefined,
-          columnValues: undefined,
+          group_id: undefined,
+          column_values: undefined,
         },
       });
     });
 
-    it('JSON-stringifies columnValues before sending to MCP', async () => {
+    it('JSON-stringifies column_values before sending to MCP', async () => {
       const input = parse('createItem', {
-        boardId: 99887766,
-        itemName: 'Fix login bug',
-        columnValues: { status: { label: 'Done' } },
+        board_id: 99887766,
+        item_name: 'Fix login bug',
+        column_values: { status: { label: 'Done' } },
       });
       await MondayCom.actions.createItem.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'create_item',
         arguments: expect.objectContaining({
-          columnValues: JSON.stringify({ status: { label: 'Done' } }),
+          column_values: JSON.stringify({ status: { label: 'Done' } }),
         }),
       });
     });
@@ -242,20 +242,20 @@ describe('MondayCom', () => {
       expect(MondayCom.actions.changeItemColumnValues.isTool).toBe(true);
     });
 
-    it('calls change_item_column_values with camelCase keys and JSON-stringified columnValues', async () => {
+    it('calls change_item_column_values with snake_case keys and JSON-stringified column_values', async () => {
       const input = parse('changeItemColumnValues', {
-        boardId: 99887766,
-        itemId: 11223344,
-        columnValues: { status: { label: 'Done' } },
+        board_id: 99887766,
+        item_id: 11223344,
+        column_values: { status: { label: 'Done' } },
       });
       await MondayCom.actions.changeItemColumnValues.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'change_item_column_values',
         arguments: {
-          boardId: 99887766,
-          itemId: 11223344,
-          columnValues: JSON.stringify({ status: { label: 'Done' } }),
+          board_id: 99887766,
+          item_id: 11223344,
+          column_values: JSON.stringify({ status: { label: 'Done' } }),
         },
       });
     });
@@ -266,9 +266,9 @@ describe('MondayCom', () => {
       expect(MondayCom.actions.createUpdate.isTool).toBe(true);
     });
 
-    it('calls create_update with camelCase itemId and body', async () => {
+    it('calls create_update with item_id and body', async () => {
       const input = parse('createUpdate', {
-        itemId: 11223344,
+        item_id: 11223344,
         body: 'This has been resolved in the latest deployment.',
       });
       await MondayCom.actions.createUpdate.handler(mockContext, input);
@@ -276,7 +276,7 @@ describe('MondayCom', () => {
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'create_update',
         arguments: {
-          itemId: 11223344,
+          item_id: 11223344,
           body: 'This has been resolved in the latest deployment.',
         },
       });
@@ -288,23 +288,23 @@ describe('MondayCom', () => {
       expect(MondayCom.actions.getUpdates.isTool).toBe(true);
     });
 
-    it('calls get_updates with objectId, objectType, and limit', async () => {
-      const input = parse('getUpdates', { objectId: '11223344' });
+    it('calls get_updates with object_id, object_type, and limit', async () => {
+      const input = parse('getUpdates', { object_id: '11223344' });
       await MondayCom.actions.getUpdates.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'get_updates',
-        arguments: { objectId: '11223344', objectType: 'Item', limit: 25 },
+        arguments: { object_id: '11223344', object_type: 'Item', limit: 25 },
       });
     });
 
-    it('calls get_updates with objectType Board when specified', async () => {
-      const input = parse('getUpdates', { objectId: '99887766', objectType: 'Board' });
+    it('calls get_updates with object_type Board when specified', async () => {
+      const input = parse('getUpdates', { object_id: '99887766', object_type: 'Board' });
       await MondayCom.actions.getUpdates.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'get_updates',
-        arguments: { objectId: '99887766', objectType: 'Board', limit: 25 },
+        arguments: { object_id: '99887766', object_type: 'Board', limit: 25 },
       });
     });
   });

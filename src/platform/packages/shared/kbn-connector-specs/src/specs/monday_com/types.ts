@@ -23,14 +23,14 @@ export type ListToolsInput = z.infer<typeof ListToolsInputSchema>;
 
 export const SearchInputSchema = lazySchema(() =>
   z.object({
-    searchTerm: z
+    search_term: z
       .string()
       .min(1)
       .max(2000)
       .describe(
         'Full-text search term across monday.com. Example: "Q3 roadmap" or "customer onboarding".'
       ),
-    searchType: z
+    search_type: z
       .enum([
         'BOARD',
         'DOCUMENTS',
@@ -51,7 +51,7 @@ export type SearchInput = z.infer<typeof SearchInputSchema>;
 
 export const GetBoardInfoInputSchema = lazySchema(() =>
   z.object({
-    boardId: z
+    board_id: z
       .number()
       .int()
       .positive()
@@ -64,7 +64,7 @@ export type GetBoardInfoInput = z.infer<typeof GetBoardInfoInputSchema>;
 
 export const GetBoardItemsInputSchema = lazySchema(() =>
   z.object({
-    boardId: z
+    board_id: z
       .number()
       .int()
       .positive()
@@ -91,17 +91,17 @@ export type GetBoardItemsInput = z.infer<typeof GetBoardItemsInputSchema>;
 
 export const CreateItemInputSchema = lazySchema(() =>
   z.object({
-    boardId: z
+    board_id: z
       .number()
       .int()
       .positive()
       .describe('The integer ID of the board where the item will be created.'),
-    itemName: z
+    item_name: z
       .string()
       .min(1)
       .max(500)
       .describe('The name (title) of the new item. Example: "Fix login bug" or "Q4 planning".'),
-    groupId: z
+    group_id: z
       .string()
       .max(200)
       .optional()
@@ -110,7 +110,7 @@ export const CreateItemInputSchema = lazySchema(() =>
           'If omitted, the item is added to the first group. ' +
           'Use get_board_info to discover group IDs.'
       ),
-    columnValues: z
+    column_values: z
       .record(z.string().max(200), z.unknown())
       .optional()
       .describe(
@@ -124,19 +124,19 @@ export type CreateItemInput = z.infer<typeof CreateItemInputSchema>;
 
 export const ChangeItemColumnValuesInputSchema = lazySchema(() =>
   z.object({
-    boardId: z
+    board_id: z
       .number()
       .int()
       .positive()
       .describe('The integer ID of the board that contains the item.'),
-    itemId: z
+    item_id: z
       .number()
       .int()
       .positive()
       .describe(
         'The integer ID of the item to update. Use IDs returned by getBoardItemsPage or search.'
       ),
-    columnValues: z
+    column_values: z
       .record(z.string().max(200), z.unknown())
       .describe(
         'Column values to update, keyed by column ID. ' +
@@ -149,7 +149,7 @@ export type ChangeItemColumnValuesInput = z.infer<typeof ChangeItemColumnValuesI
 
 export const CreateUpdateInputSchema = lazySchema(() =>
   z.object({
-    itemId: z
+    item_id: z
       .number()
       .int()
       .positive()
@@ -165,7 +165,7 @@ export type CreateUpdateInput = z.infer<typeof CreateUpdateInputSchema>;
 
 export const GetUpdatesInputSchema = lazySchema(() =>
   z.object({
-    objectId: z
+    object_id: z
       .string()
       .min(1)
       .max(200)
@@ -173,7 +173,7 @@ export const GetUpdatesInputSchema = lazySchema(() =>
         'The ID of the item or board whose updates (comments) you want to retrieve — ' +
           'not an update/comment ID. Pass the item or board integer ID as a string.'
       ),
-    objectType: z
+    object_type: z
       .enum(['Item', 'Board'])
       .default('Item')
       .describe('The type of object: "Item" (default) or "Board".'),
