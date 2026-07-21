@@ -7,7 +7,7 @@
 
 import React, { createContext, useContext } from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { PluginSetupContract as AlertingPluginPublicSetup } from '@kbn/alerting-plugin/public';
@@ -20,7 +20,7 @@ export interface ServiceFlyoutContextValue {
   // Plugin deps provided once by the flyout host — stable across the flyout's lifetime
   deps: {
     core: CoreStart;
-    share: SharePluginSetup;
+    share: SharePublicStart;
     lens: LensPublicStart;
     dataViews: DataViewsPublicPluginStart;
     alerting?: AlertingPluginPublicSetup;
