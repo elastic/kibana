@@ -20,12 +20,10 @@
     "@kbn/shared-ux-router",
     "@kbn/react-kibana-context-theme",
     "@kbn/core-http-browser",
-    "@kbn/logging-mocks",
     "@kbn/spaces-plugin",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
     "@kbn/workflows-management-plugin",
-    "@kbn/workflows-yaml",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common"
   ]
