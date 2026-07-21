@@ -41,9 +41,8 @@ spaceTest.describe('Discover default route', { tag: '@local-stateful-classic' },
     await scoutSpace.uiSettings.unset('defaultRoute');
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
+  spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
   spaceTest(
