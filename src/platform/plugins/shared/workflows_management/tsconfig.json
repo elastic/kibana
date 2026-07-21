@@ -120,7 +120,6 @@
     "@kbn/controls-schemas",
     "@kbn/control-group-renderer",
     "@kbn/controls-constants",
-    "@kbn/data-service",
     "@kbn/app-header",
     "@kbn/deeplinks-workflows",
     "@kbn/core-chrome-app-menu-components",
