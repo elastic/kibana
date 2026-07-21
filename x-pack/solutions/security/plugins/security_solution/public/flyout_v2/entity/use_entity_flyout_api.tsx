@@ -21,21 +21,21 @@ import {
 } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import {
+  ALERTS_INSIGHTS_TITLE,
+  ANOMALY_INSIGHTS_TITLE,
+  ENTITY_GRAPH_VIEW_TITLE,
+  ENTRA_INSIGHTS_TITLE,
+  FIELDS_TABLE_TITLE,
   formatFlyoutTitle,
   GENERIC_ENTITY_TITLE,
   HOST_TITLE,
+  MISCONFIGURATION_INSIGHTS_TITLE,
+  OKTA_INSIGHTS_TITLE,
+  RESOLUTION_TITLE,
+  RISK_INPUTS_TITLE,
   SERVICE_TITLE,
   USER_TITLE,
-  RISK_INPUTS_TITLE,
-  ANOMALY_INSIGHTS_TITLE,
-  ALERTS_INSIGHTS_TITLE,
-  MISCONFIGURATION_INSIGHTS_TITLE,
   VULNERABILITY_INSIGHTS_TITLE,
-  ENTITY_GRAPH_VIEW_TITLE,
-  RESOLUTION_TITLE,
-  ENTRA_INSIGHTS_TITLE,
-  OKTA_INSIGHTS_TITLE,
-  FIELDS_TABLE_TITLE,
 } from '../shared/constants/flyout_titles';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import { useFlyoutSessionContext } from '../session_context';
@@ -54,12 +54,12 @@ import type { FieldsTableToolProps } from './shared/tools/fields_table';
 import type { ResolutionProps } from './shared/tools/resolution';
 import type { GraphViewProps } from './shared/tools/graph_view'; // Lazy-loaded so consumers of this hook don't statically pull the entity flyout graph into their
 import { useFlyoutV2UrlWriter } from '../shared/url_state/flyout_v2_url_writer';
+import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 import {
-  FLYOUT_DESCRIPTOR_KIND,
   decodeFlyoutV2UrlParam,
+  FLYOUT_DESCRIPTOR_KIND,
   urlParamKeyForHistoryKey,
 } from '../shared/url_state/flyout_v2_url_param';
-import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 
 // Lazy-loaded so consumers of this hook don't statically pull the entity flyout graph into their
 // bundle; each chunk only loads when the corresponding flyout is actually opened.
@@ -657,7 +657,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   const openEntityGraphView = useCallback(
     ({ title, origin, flyoutType, ...props }: OpenEntityGraphViewParams) => {
       const { entityId, scopeId, entityName } = props;
-      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.entityGraphView, entityId, scopeId, entityName });
+      writeOnOpen({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityGraphView,
+        entityId,
+        scopeId,
+        entityName,
+        entityType: flyoutType as string | undefined,
+      });
       const onClose = buildOnClose(null);
       open(
         <GraphView {...props} />,

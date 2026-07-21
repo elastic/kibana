@@ -278,6 +278,12 @@ export interface EntityGraphViewDescriptor {
   entityId: string;
   scopeId: string;
   entityName: string;
+  /**
+   * EntityType of the originating entity, stored as a plain string. Used on restore to rebuild the
+   * header's "show entity" action so the entity name/icon reappear after a refresh. Optional for
+   * backward compatibility with URLs encoded before this field existed.
+   */
+  entityType?: string;
 }
 
 export interface EntityResolutionDescriptor {

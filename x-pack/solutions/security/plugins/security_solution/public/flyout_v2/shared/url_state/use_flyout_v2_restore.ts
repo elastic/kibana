@@ -20,7 +20,6 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
 import type { FlyoutApi } from '../../use_flyout_api';
 import { useFlyoutApi } from '../../use_flyout_api';
-import { decodeFlyoutV2UrlParam } from './flyout_v2_url_param';
 import type {
   AnalyzerDescriptor,
   AttackCorrelationsDescriptor,
@@ -58,6 +57,7 @@ import type {
   SessionViewDescriptor,
   UserDescriptor,
 } from './flyout_v2_url_param';
+import { decodeFlyoutV2UrlParam } from './flyout_v2_url_param';
 
 // ---------------------------------------------------------------------------
 // Constants — which descriptor kinds require an async data fetch
@@ -92,6 +92,54 @@ interface RestoreContext {
   attackHit?: DataTableRecord;
   iocIndicator?: Indicator;
 }
+
+/**
+ * Builds the tool-header "show entity" callback for a restored entity tool flyout.
+ *
+ * Entity tools open with `session: 'start'`, so the entity main flyout is not persisted alongside
+ * the tool: on refresh only the tool descriptor is in the URL and there is no parent entity flyout.
+ * The shared tools header hides its source context (the entity name + icon) unless it is given a
+ * title-click handler, so without this callback a restored tool flyout would lose the host/user
+ * info in its header. Rebuilding it here restores both the header label and the
+ * click-to-open-entity behaviour the live flyout provides via its own `onShowEntity` handler.
+ */
+const buildShowEntityCallback = (
+  api: FlyoutApi,
+  {
+    entityType,
+    entityName,
+    entityId,
+    scopeId,
+  }: { entityType?: string; entityName: string; entityId?: string; scopeId?: string }
+): (() => void) => {
+  return () => {
+    switch (entityType) {
+      case 'user':
+        api.openUserFlyoutAsChild({ userName: entityName, entityId, scopeId, title: entityName });
+        break;
+      case 'service':
+        api.openServiceFlyoutAsChild({
+          serviceName: entityName,
+          entityId,
+          scopeId,
+          title: entityName,
+        });
+        break;
+      case 'host':
+        api.openHostFlyoutAsChild({ hostName: entityName, entityId, scopeId, title: entityName });
+        break;
+      default:
+        // Generic / unknown entity type: only openable when we have the canonical entity id.
+        if (entityId) {
+          api.openGenericEntityFlyoutAsChild({
+            scopeId: scopeId ?? '',
+            entityId,
+            title: entityName,
+          });
+        }
+    }
+  };
+};
 
 /**
  * Open a descriptor as the first/main flyout (session = 'start').
@@ -290,6 +338,11 @@ export const openDescriptorAsStart = (
           | EntityType.service,
         entityName: d.entityName,
         entityId: d.entityId,
+        onShowEntity: buildShowEntityCallback(api, {
+          entityType: d.entityType,
+          entityName: d.entityName,
+          entityId: d.entityId,
+        }),
       });
       break;
     }
@@ -299,6 +352,11 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as unknown as EntityType.host | EntityType.user,
         value: d.value,
         entityId: d.entityId,
+        onOpenEntity: buildShowEntityCallback(api, {
+          entityType: d.entityType,
+          entityName: d.value,
+          entityId: d.entityId,
+        }),
       });
       break;
     }
@@ -311,6 +369,11 @@ export const openDescriptorAsStart = (
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
+        onShowEntity: buildShowEntityCallback(api, {
+          entityType: d.entityType,
+          entityName: d.value,
+          entityId: d.entityId,
+        }),
       });
       break;
     }
@@ -323,6 +386,11 @@ export const openDescriptorAsStart = (
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
+        onShowEntity: buildShowEntityCallback(api, {
+          entityType: d.entityType,
+          entityName: d.value,
+          entityId: d.entityId,
+        }),
       });
       break;
     }
@@ -332,7 +400,11 @@ export const openDescriptorAsStart = (
         value: d.value,
         entityId: d.entityId,
         entityType: d.entityType as unknown as EntityType.host | EntityType.generic | undefined,
-        onShowHost: noop,
+        onShowHost: buildShowEntityCallback(api, {
+          entityType: d.entityType,
+          entityName: d.value,
+          entityId: d.entityId,
+        }),
       });
       break;
     }
@@ -343,6 +415,12 @@ export const openDescriptorAsStart = (
         scopeId: d.scopeId,
         entityName: d.entityName,
         onShowEntity: noop,
+        onShowOriginatingEntity: buildShowEntityCallback(api, {
+          entityType: d.entityType,
+          entityName: d.entityName,
+          entityId: d.entityId,
+          scopeId: d.scopeId,
+        }),
       });
       break;
     }
@@ -353,6 +431,12 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as EntityType,
         entityName: d.entityName,
         scopeId: d.scopeId,
+        onShowEntity: buildShowEntityCallback(api, {
+          entityType: d.entityType,
+          entityName: d.entityName,
+          entityId: d.entityId,
+          scopeId: d.scopeId,
+        }),
       });
       break;
     }
@@ -675,11 +759,16 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     // Build resolved context. `useEsDocSearch` already returns `DataTableRecord`s.
     const docHit = docHitRecord ?? undefined;
     const attackHit = attackHitRecord ?? undefined;
+    // Carry `_index` through on the reconstructed indicator (the `Indicator` type only declares
+    // `_id`/`fields`, but the IOC opener reads `_index` off the raw hit to re-persist the URL
+    // descriptor). Without it, re-opening on restore would rewrite the descriptor with an empty
+    // index and a second refresh would no longer restore the flyout.
     const iocIndicator: Indicator | undefined = iocHitRecord
-      ? {
+      ? ({
           _id: iocHitRecord.raw._id ?? '',
+          _index: iocHitRecord.raw._index,
           fields: (iocHitRecord.raw.fields ?? {}) as Indicator['fields'],
-        }
+        } as Indicator)
       : undefined;
 
     const ctx: RestoreContext = { docHit, attackHit, iocIndicator };

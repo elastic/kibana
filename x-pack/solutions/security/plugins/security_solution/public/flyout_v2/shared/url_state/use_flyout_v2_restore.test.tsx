@@ -263,6 +263,44 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     );
   });
 
+  it('restores the tool header source context by passing an onShowEntity that reopens the host', () => {
+    renderRestore(
+      buildUrl([{ kind: 'entityRiskInputs', entityType: 'host', entityName: 'h', entityId: 'eid' }])
+    );
+    act(() => {
+      jest.runAllTimers();
+    });
+    const { onShowEntity } = mockFlyoutApi.openEntityRiskInputs.mock.calls[0][0];
+    expect(typeof onShowEntity).toBe('function');
+
+    // Invoking the header callback reopens the originating entity flyout as a child.
+    act(() => {
+      onShowEntity?.();
+    });
+    expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(
+      expect.objectContaining({ hostName: 'h', entityId: 'eid', title: 'h' })
+    );
+  });
+
+  it('reopens the originating user for a user-scoped tool header callback', () => {
+    renderRestore(
+      buildUrl([
+        { kind: 'entityAnomalyInsights', entityType: 'user', value: 'alice', entityId: 'uid' },
+      ])
+    );
+    act(() => {
+      jest.runAllTimers();
+    });
+    const { onOpenEntity } = mockFlyoutApi.openEntityAnomalyInsights.mock.calls[0][0];
+    expect(typeof onOpenEntity).toBe('function');
+    act(() => {
+      onOpenEntity?.();
+    });
+    expect(mockFlyoutApi.openUserFlyoutAsChild).toHaveBeenCalledWith(
+      expect.objectContaining({ userName: 'alice', entityId: 'uid', title: 'alice' })
+    );
+  });
+
   it('opens entityEntraInsights by constructing ManagedUserHit from stored id/index', () => {
     renderRestore(
       buildUrl([
@@ -624,7 +662,9 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       jest.runAllTimers();
     });
     expect(mockFlyoutApi.openIocFlyout).toHaveBeenCalledWith(
-      expect.objectContaining({ indicator: expect.objectContaining({ _id: 'ioc-1' }) })
+      expect.objectContaining({
+        indicator: expect.objectContaining({ _id: 'ioc-1', _index: 'ti-*' }),
+      })
     );
   });
 

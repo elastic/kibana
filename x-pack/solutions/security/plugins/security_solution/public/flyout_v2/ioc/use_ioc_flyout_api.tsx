@@ -36,6 +36,19 @@ import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 // bundle; the chunk only loads when the flyout is actually opened.
 const IOCDetails = lazy(() => import('./main').then((m) => ({ default: m.IOCDetails })));
 
+/**
+ * The `indicator` is an ES search hit, so at runtime it carries `_index` even though the
+ * `Indicator` type only declares `_id`/`fields`. Persisting it in the URL descriptor lets the
+ * restore hook re-fetch the indicator on refresh: it filters by `_index` against the default
+ * security data view, which matches threat-intel indices (`logs-ti_*`) via its `logs-*` pattern.
+ * Falls back to '' when unavailable (e.g. a case attachment without the source hit), in which case
+ * the restore is gracefully skipped.
+ */
+const getIndicatorIndex = (indicator: Indicator): string => {
+  const rawIndex = (indicator as { _index?: unknown })._index;
+  return typeof rawIndex === 'string' ? rawIndex : '';
+};
+
 export interface OpenIocFlyoutParams {
   /** The indicator to render in the flyout. Its `_id`/`fields` are used to build the flyout's record. */
   indicator: Indicator;
@@ -135,12 +148,10 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
 
   const openIocFlyout = useCallback(
     (params: OpenIocFlyoutParams) => {
-      // indicatorIndex is not available on the Indicator type; '' causes the restore hook to search
-      // across the default index pattern. Best-effort: if not found, the restore is gracefully skipped.
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.ioc,
         indicatorId: params.indicator._id as string,
-        indicatorIndex: '',
+        indicatorIndex: getIndicatorIndex(params.indicator),
       });
       const onClose = buildOnClose(null);
       open(buildContent(params), sessionMode, getTitle(params), onClose, params.origin);
@@ -155,7 +166,7 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
         {
           kind: FLYOUT_DESCRIPTOR_KIND.ioc,
           indicatorId: params.indicator._id as string,
-          indicatorIndex: '',
+          indicatorIndex: getIndicatorIndex(params.indicator),
         },
         'inherit'
       );
