@@ -10,16 +10,26 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
 } from '@kbn/management-settings-ids';
 import { internalScheduledDiscoveryRoutes } from './route';
+import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
+
+jest.mock('../../../agent_builder/agents/discovery', () => ({
+  installDiscoveryAgents: jest.fn().mockResolvedValue(undefined),
+}));
+
+const installDiscoveryAgentsMock = installDiscoveryAgents as jest.MockedFunction<
+  typeof installDiscoveryAgents
+>;
 
 const route =
   internalScheduledDiscoveryRoutes[
@@ -55,6 +65,7 @@ const createHandlerParams = ({
         scheduledWorkflowError ? Promise.reject(scheduledWorkflowError) : Promise.resolve()
       ),
   };
+  const agentBuilder = { agents: { ensure: jest.fn() } };
 
   const handlerParams = {
     params: { body: { scheduledDiscovery } },
@@ -63,7 +74,7 @@ const createHandlerParams = ({
       licensing: {},
       uiSettingsClient,
     }),
-    server: {},
+    server: { agentBuilder },
     significantEventsScheduledWorkflowsService: scheduledWorkflowService,
     getSpaceId: jest.fn().mockResolvedValue('space-a'),
     logger: { warn: jest.fn() },
@@ -75,32 +86,46 @@ const createHandlerParams = ({
     context: {},
   } as unknown as HandlerParams;
 
-  return { handlerParams, uiSettingsClient, scheduledWorkflowService };
+  return { handlerParams, uiSettingsClient, scheduledWorkflowService, agentBuilder };
 };
 
 describe('scheduled significant events discovery settings route', () => {
+  beforeEach(() => {
+    installDiscoveryAgentsMock.mockClear();
+  });
+
   it('persists scheduled discovery settings and reconciles per-space workflows on enable', async () => {
-    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
-      scheduledDiscovery: {
-        enabled: true,
-        detectionIntervalMinutes: 45,
-        reviewIntervalMinutes: 15,
-        discoveryBatchSize: 6,
-        triageBatchSize: 8,
-        maxReviewPasses: 4,
-      },
-    });
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService, agentBuilder } =
+      createHandlerParams({
+        scheduledDiscovery: {
+          enabled: true,
+          detectionIntervalMinutes: 45,
+          targetCoverageMinutes: 60,
+          reviewIntervalMinutes: 15,
+          discoveryBatchSize: 6,
+          triageBatchSize: 8,
+          maxReviewPasses: 4,
+        },
+      });
 
     await route.handler(handlerParams);
 
     expect(uiSettingsClient.setMany).toHaveBeenCalledWith({
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 45,
+      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES]: 60,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 15,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 6,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 8,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 4,
     });
+    expect(installDiscoveryAgentsMock).toHaveBeenCalledWith({
+      agentBuilder,
+      spaceId: 'space-a',
+    });
+    expect(installDiscoveryAgentsMock.mock.invocationCallOrder[0]).toBeLessThan(
+      (scheduledWorkflowService.ensureWorkflow as jest.Mock).mock.invocationCallOrder[0]
+    );
     expect(scheduledWorkflowService.ensureWorkflow).toHaveBeenCalledWith({
       enabled: true,
       request: handlerParams.request,
@@ -109,7 +134,7 @@ describe('scheduled significant events discovery settings route', () => {
         detectionIntervalMinutes: 45,
         detectionBucketIntervalMinutes: 1,
         detectionLookbackMinutes: 40,
-        targetCoverageMinutes: 30,
+        targetCoverageMinutes: 60,
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 6,
         triageBatchSize: 8,
@@ -138,6 +163,7 @@ describe('scheduled significant events discovery settings route', () => {
     expect(uiSettingsClient.setMany).toHaveBeenCalledWith({
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: false,
     });
+    expect(installDiscoveryAgentsMock).not.toHaveBeenCalled();
     expect(scheduledWorkflowService.ensureWorkflow).toHaveBeenCalledWith({
       enabled: false,
       request: handlerParams.request,
@@ -156,24 +182,29 @@ describe('scheduled significant events discovery settings route', () => {
   });
 
   it('reconciles a config-only update while enabled, merging request values over stored settings', async () => {
-    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
-      scheduledDiscovery: {
-        detectionIntervalMinutes: 45,
-      },
-      spaceSettings: {
-        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
-        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
-        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
-        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
-        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 5,
-        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
-      },
-    });
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService, agentBuilder } =
+      createHandlerParams({
+        scheduledDiscovery: {
+          detectionIntervalMinutes: 45,
+        },
+        spaceSettings: {
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 5,
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
+        },
+      });
 
     await route.handler(handlerParams);
 
     expect(uiSettingsClient.setMany).toHaveBeenCalledWith({
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 45,
+    });
+    expect(installDiscoveryAgentsMock).toHaveBeenCalledWith({
+      agentBuilder,
+      spaceId: 'space-a',
     });
     expect(scheduledWorkflowService.ensureWorkflow).toHaveBeenCalledWith({
       enabled: true,
