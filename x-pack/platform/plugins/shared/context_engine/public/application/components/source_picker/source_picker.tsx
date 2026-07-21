@@ -15,17 +15,13 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import type { EsqlView } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
-import { useEsqlViews } from '../../hooks/use_esql_views';
-import { toEsqlViewSourceQuery } from '../../utils/sources';
 import { ConnectorsTab } from './connectors_tab';
 import { EsqlTab } from './esql_tab';
-import { EsqlViewsTab } from './esql_views_tab';
 import type { SelectedSource } from './types';
 
-type TabId = 'esqlViews' | 'esql' | 'connectors';
+type TabId = 'esql' | 'connectors';
 
 interface SourcePickerProps {
   selectedSources: SelectedSource[];
@@ -34,40 +30,11 @@ interface SourcePickerProps {
 
 export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) => {
   const [selectedTab, setSelectedTab] = useState<TabId>('esql');
-  const { views, isLoading } = useEsqlViews();
-
-  const selectedEsqlViewIds = useMemo(
-    () =>
-      new Set(
-        selectedSources.filter((source) => source.type === 'esql_view').map((source) => source.id)
-      ),
-    [selectedSources]
-  );
 
   const selectedEsqlCount = useMemo(
     () => selectedSources.filter((source) => source.type === 'esql').length,
     [selectedSources]
   );
-
-  const toggleEsqlView = (view: EsqlView) => {
-    if (selectedEsqlViewIds.has(view.name)) {
-      onChange(
-        selectedSources.filter(
-          (current) => !(current.type === 'esql_view' && current.id === view.name)
-        )
-      );
-      return;
-    }
-    onChange([
-      ...selectedSources,
-      {
-        type: 'esql_view',
-        id: view.name,
-        label: view.name,
-        value: toEsqlViewSourceQuery(view.name),
-      },
-    ]);
-  };
 
   const addEsqlSource = (query: string) => {
     if (selectedSources.some((current) => current.type === 'esql' && current.id === query)) {
@@ -135,21 +102,6 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           })}
         </EuiTab>
         <EuiTab
-          isSelected={selectedTab === 'esqlViews'}
-          onClick={() => setSelectedTab('esqlViews')}
-          prepend={<EuiIcon type="editorCodeBlock" aria-hidden={true} />}
-          append={
-            selectedEsqlViewIds.size > 0 ? (
-              <EuiNotificationBadge>{selectedEsqlViewIds.size}</EuiNotificationBadge>
-            ) : undefined
-          }
-          data-test-subj="contextSourcePickerTab-esqlViews"
-        >
-          {i18n.translate('xpack.contextEngine.sourcePicker.tabs.esqlViews', {
-            defaultMessage: 'ES|QL Views',
-          })}
-        </EuiTab>
-        <EuiTab
           isSelected={selectedTab === 'connectors'}
           onClick={() => setSelectedTab('connectors')}
           prepend={<EuiIcon type="plugs" aria-hidden={true} />}
@@ -163,14 +115,6 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
 
       <EuiSpacer size="m" />
 
-      {selectedTab === 'esqlViews' && (
-        <EsqlViewsTab
-          views={views}
-          isLoading={isLoading}
-          selectedIds={selectedEsqlViewIds}
-          onToggle={toggleEsqlView}
-        />
-      )}
       {selectedTab === 'esql' && <EsqlTab onAdd={addEsqlSource} />}
       {selectedTab === 'connectors' && <ConnectorsTab />}
     </div>

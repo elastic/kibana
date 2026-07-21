@@ -7,7 +7,6 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
-import { getViews } from '@kbn/esql-utils';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -24,10 +23,6 @@ import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
 import { AiIndexDetailPage } from './ai_index_detail_page';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getViews: jest.fn(),
-}));
-
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: ({
     query,
@@ -43,8 +38,6 @@ jest.mock('@kbn/esql/public', () => ({
     />
   ),
 }));
-
-const getViewsMock = getViews as jest.MockedFunction<typeof getViews>;
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -74,12 +67,6 @@ const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) 
 };
 
 describe('AiIndexDetailPage', () => {
-  beforeEach(() => {
-    getViewsMock.mockResolvedValue({
-      views: [{ name: 'My view', query: 'FROM my-index-* | LIMIT 100' }],
-    });
-  });
-
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -149,11 +136,10 @@ describe('AiIndexDetailPage', () => {
 
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
-    // The ES|QL Views tab is not selected by default, so open it first.
-    fireEvent.click(await screen.findByTestId('contextSourcePickerTab-esqlViews'));
-
-    const toggleButton = await screen.findByTestId('contextAddEsqlViewButton-My view');
-    fireEvent.click(toggleButton);
+    // The ES|QL tab is selected by default; author a raw query and add it.
+    const editor = await screen.findByTestId('mockEsqlEditor');
+    fireEvent.change(editor, { target: { value: 'FROM My view' } });
+    fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
     fireEvent.click(screen.getByTestId('contextEditSourcesDoneButton'));
 
     await waitFor(() => {

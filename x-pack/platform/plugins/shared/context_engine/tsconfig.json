@@ -29,12 +29,9 @@
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
     "@kbn/esql",
-    "@kbn/esql-utils",
-    "@kbn/esql-types",
     "@kbn/es-query",
     "@kbn/try-in-console",
     "@kbn/share-plugin",
-    "@kbn/console-plugin",
-    "@kbn/react-query"
+    "@kbn/console-plugin"
   ]
 }

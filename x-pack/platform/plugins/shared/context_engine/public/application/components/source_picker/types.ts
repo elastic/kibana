@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export type SourceType = 'esql_view' | 'esql' | 'connector';
+export type SourceType = 'esql' | 'connector';
 
 /**
  * Human-readable label for each source type, shown in the source type tag.
@@ -15,9 +15,6 @@ export type SourceType = 'esql_view' | 'esql' | 'connector';
  * is provided.
  */
 export const SOURCE_TYPE_LABELS: Record<SourceType, string> = {
-  esql_view: i18n.translate('xpack.contextEngine.sourceType.esqlView', {
-    defaultMessage: 'ES|QL view',
-  }),
   esql: i18n.translate('xpack.contextEngine.sourceType.esql', {
     defaultMessage: 'ES|QL',
   }),
@@ -28,13 +25,10 @@ export const SOURCE_TYPE_LABELS: Record<SourceType, string> = {
 
 export interface SelectedSource {
   type: SourceType;
-  /** Stable identifier, unique within a source type (e.g. the ES|QL view name). */
+  /** Stable identifier, unique within a source type (e.g. the ES|QL query). */
   id: string;
   /** Human-readable label rendered in the selected-source chips. */
   label: string;
-  /**
-   * Underlying source value sent to the AI index API (e.g. the ES|QL query for
-   * an `esql_view` source).
-   */
+  /** Underlying source value sent to the AI index API (e.g. the ES|QL query). */
   value: string;
 }

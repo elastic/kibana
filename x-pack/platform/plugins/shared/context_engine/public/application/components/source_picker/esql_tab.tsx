@@ -15,6 +15,9 @@ interface EsqlTabProps {
   onAdd: (query: string) => void;
 }
 
+// Reserved up front so the Add button does not jump while ESQLLangEditor mounts.
+const EDITOR_INLINE_MIN_HEIGHT = 180;
+
 const getEsqlQuery = (query: AggregateQuery): string => ('esql' in query ? query.esql : '');
 
 /**
@@ -37,17 +40,19 @@ export const EsqlTab = ({ onAdd }: EsqlTabProps) => {
   return (
     <div data-test-subj="contextEsqlTab">
       <EuiFormRow fullWidth>
-        <ESQLLangEditor
-          query={{ esql: query }}
-          onTextLangQueryChange={(next) => setQuery(getEsqlQuery(next))}
-          onTextLangQuerySubmit={async () => {}}
-          editorIsInline
-          hasOutline
-          hideRunQueryButton
-          hideQueryHistory
-          expandToFitQueryOnMount
-          isLoading={false}
-        />
+        <div css={{ minHeight: EDITOR_INLINE_MIN_HEIGHT }}>
+          <ESQLLangEditor
+            query={{ esql: query }}
+            onTextLangQueryChange={(next) => setQuery(getEsqlQuery(next))}
+            onTextLangQuerySubmit={async () => {}}
+            editorIsInline
+            hasOutline
+            hideRunQueryButton
+            hideQueryHistory
+            expandToFitQueryOnMount
+            isLoading={false}
+          />
+        </div>
       </EuiFormRow>
       <EuiSpacer size="s" />
       <EuiButton

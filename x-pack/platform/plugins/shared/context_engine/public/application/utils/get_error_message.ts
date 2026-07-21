@@ -7,8 +7,7 @@
 
 /**
  * Extracts a human-readable message from an unknown error, preferring the
- * server-provided detail on `error.body.message` (e.g. why a `dest` failed
- * validation) over the generic `error.message` (`Bad Request`).
+ * server-provided detail on `error.body.message` over the generic `error.message`
  */
 export const getErrorMessage = (error: unknown): string =>
   (error as { body?: { message?: string } })?.body?.message ||
