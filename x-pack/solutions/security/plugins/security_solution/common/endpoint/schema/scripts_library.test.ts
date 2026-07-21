@@ -526,16 +526,5 @@ describe('Scripts library schemas', () => {
       });
     });
 
-    describe('List API kuery bound', () => {
-      it('should accept a kuery at the 10000-char limit', () => {
-        expect(() =>
-          ListScriptsRequestSchema.query.validate({ kuery: `name:${'a'.repeat(9995)}` })
-        ).not.toThrow();
-      });
-
-      it('should reject a kuery exceeding 10000 chars', () => {
-        expect(() => ListScriptsRequestSchema.query.validate({ kuery: str(10001) })).toThrow();
-      });
-    });
   });
 });

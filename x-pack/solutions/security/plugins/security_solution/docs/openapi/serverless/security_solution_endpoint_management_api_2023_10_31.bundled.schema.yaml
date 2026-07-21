@@ -1438,7 +1438,6 @@ paths:
             allOf:
               - $ref: '#/components/schemas/Kuery'
               - example: platform:windows
-                maxLength: 10000
       responses:
         '200':
           content:

@@ -18446,7 +18446,6 @@ paths:
             allOf:
               - $ref: '#/components/schemas/Security_Endpoint_Management_API_Kuery'
               - example: platform:windows
-                maxLength: 10000
       responses:
         '200':
           content:
