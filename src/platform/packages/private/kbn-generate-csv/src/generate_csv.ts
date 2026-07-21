@@ -314,6 +314,7 @@ export class CsvGenerator {
     const indexPatternTitle = index.getIndexPattern();
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
+    let userError: boolean | undefined;
     let first = true;
     let currentRecord = -1;
     let totalRecords: number | undefined;
@@ -506,6 +507,7 @@ export class CsvGenerator {
         warnings.push(
           i18nTexts.csvRowCountError({ expected: totalRecords, received: this.csvRowCount })
         );
+        userError = true;
       } else {
         warnings.push(i18nTexts.csvRowCountIndeterminable({ received: this.csvRowCount }));
       }
@@ -539,6 +541,7 @@ export class CsvGenerator {
         csv: { rows: this.csvRowCount },
       },
       warnings,
+      user_error: userError,
       error_code: reportingError?.code,
     };
   }
