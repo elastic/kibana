@@ -238,7 +238,7 @@ The AI Index schema has these base fields (all required unless noted):
 
 | Field | Type | Purpose |
 |---|---|---|
-| `type` | keyword | Useful for categorization and grouping |
+| `type` | keyword | The **KI kind** — the top-level discriminator agents and queries filter on. Set it to the kind of KI this doc represents, e.g. `index_metadata`, `document`, `event`, `fact`, `entity`, `detection`, `feature`. Each strategy uses a stable value (see the per-strategy mapping under "Workflow shapes for each strategy"). **Not** the same as `query_type` (`match`/`stats`, a detection attribute) or `subtype` (a feature's `entity`/`dependency`/… class). |
 | `title` | text + semantic | Short display name; primary semantic surface |
 | `description` | text + semantic | Routing heuristic — what the index/source does NOT contain, key fields, joins |
 | `content` | text + semantic | Free-text for semantic retrieval: purpose, questions answered, access patterns |
@@ -269,7 +269,7 @@ Use it for strategy-specific structured output: status, severity, themes, produc
 
 ```yaml
 id:          <index name or connector_id>
-type:        <type>
+type:        <KI kind, e.g. "index_metadata" | "document" | "detection" | "feature">
 title:       <display_name>
 tags:        [...]
 @timestamp:  <ISO date when KI was last profiled, e.g. "2025-07-21T10:00:00Z">
@@ -325,6 +325,8 @@ Before presenting any workflow to the user:
 
 Use these descriptions as input to `platform.core.generate_workflow`. Do not submit YAML directly
 to the tool — describe the workflow in natural language using these shapes as the spec.
+
+Set the KI `type` field to the stable value for the strategy: Index Metadata → `index_metadata`; Bottom-Up → `document`; Selective / Outlier → `event`; Atomic Facts → `fact`; Cumulative / Wiki-style → `entity`; Detection / Feature → `detection` and `feature` respectively.
 
 **Index Metadata:**
 A `foreach` loop over a hardcoded list of index names. Per iteration: `GET /<index>/_mapping`,
@@ -387,6 +389,8 @@ Targets Observability indices (logs, APM, metrics). It runs **two complementary 
 *Pass 2a — detection (query) profiling:* An `ai.prompt` fed all three grounding results, emitting `detections[]`. Fan out one `elasticsearch.index` doc per detection. Each entry: `{ title, description, esql (complete runnable ES|QL — NOT a template), query_type ("match" | "stats"), severity_score (0–1) }`. Put the complete `esql` into `content` as a materialized access pattern, and mirror `query_type` + `severity_score` into `attributes` (for filter/sort). The `description` **must state the threshold and its baseline rationale** (e.g. "fires when error rate exceeds 20%, ~2× the observed baseline of ~10%"). Every threshold and every `evidence[]` string must be directly justified by a value from `stats_distribution` / `log_patterns` — no invented numbers.
 
 *Pass 2b — feature (knowledge) profiling:* A **separate** `ai.prompt` pass over the same grounding, emitting `features[]`. Fan out one `elasticsearch.index` doc per feature. Each entry: `{ title, description, subtype, slug (stable id), confidence (0–1), evidence_doc_ids[] (source `_id`s from the sample) }`. Put `subtype`, `slug`, and `evidence_doc_ids` into `attributes`; set the base `confidence` field from the feature's confidence. Choose whatever `subtype` values fit the data (for Observability, e.g. `entity`/`dependency`/`technology`/`schema`) — this is free-form strategy output, not a fixed schema.
+
+> **`feature` vs. `entity` (Cumulative / Wiki-style):** these are deliberately different granularities and can coexist. A `feature` KI is a lightweight **inventory / orientation** signal from a single profiling pass — "this index *contains* a service called `checkout`", "it *depends on* Postgres" — answering "what exists in this data?". A Cumulative `entity` KI is a deep **per-instance dossier** enriched over many runs — everything known about one specific entity — answering "tell me everything about X". Reach for `feature` to map the shape of an index; reach for Cumulative when an entity deserves its own evolving profile. If a `feature/entity` grows into a full dossier, promote it to a Cumulative `entity` KI.
 
 *Sinking:*
 - `sink_detection_ki` — `elasticsearch.index` with `id = <index>/<slug-of-title>`, `type = "detection"`, writing `content` (with the materialized query), `attributes` (query_type, severity_score), `evidence`, `expires_at`, `@timestamp`, `confidence`.
