@@ -11,7 +11,7 @@ import { coreMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { PlainIndexDataClientBundle } from './plain_index_data_client_bundle';
-import { PlainIndexDataClient } from './plain_index_data_client';
+import { DeferredDataClient } from '../deferred_data_client';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
@@ -39,11 +39,11 @@ describe('PlainIndexDataClientBundle', () => {
       logger,
     });
 
-    const workflowExecutionsDataClient = await bundle.createWorkflowDataClient();
-    const stepExecutionsDataClient = await bundle.createStepDataClient();
+    const workflowExecutionsDataClient = bundle.createWorkflowDataClient();
+    const stepExecutionsDataClient = bundle.createStepDataClient();
 
-    expect(workflowExecutionsDataClient).toBeInstanceOf(PlainIndexDataClient);
-    expect(stepExecutionsDataClient).toBeInstanceOf(PlainIndexDataClient);
+    expect(workflowExecutionsDataClient).toBeInstanceOf(DeferredDataClient);
+    expect(stepExecutionsDataClient).toBeInstanceOf(DeferredDataClient);
 
     await workflowExecutionsDataClient.search({ query: { match_all: {} } });
     await stepExecutionsDataClient.search({ query: { match_all: {} } });

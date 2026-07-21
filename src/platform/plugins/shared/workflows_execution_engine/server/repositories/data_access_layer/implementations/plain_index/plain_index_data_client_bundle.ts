@@ -22,6 +22,7 @@ import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from '../../types';
+import { DeferredDataClient } from '../deferred_data_client';
 
 export class PlainIndexDataClientBundle implements DataClientBundle {
   constructor(private readonly deps: CreateDataClientDeps) {}
@@ -56,27 +57,31 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
     return Promise.resolve();
   }
 
-  async createWorkflowDataClient(): Promise<WorkflowExecutionsDataClient> {
-    const esClient = await this.deps.coreSetup
-      .getStartServices()
-      .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
-    return new PlainIndexDataClient<EsWorkflowExecution>({
-      esClient,
-      logger: this.deps.logger,
-      indexName: WORKFLOWS_EXECUTIONS_INDEX,
-      mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-    });
+  createWorkflowDataClient(): WorkflowExecutionsDataClient {
+    return new DeferredDataClient<EsWorkflowExecution>(() =>
+      this.deps.coreSetup.getStartServices().then(
+        ([coreStart]) =>
+          new PlainIndexDataClient<EsWorkflowExecution>({
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+            logger: this.deps.logger,
+            indexName: WORKFLOWS_EXECUTIONS_INDEX,
+            mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+          })
+      )
+    );
   }
 
-  async createStepDataClient(): Promise<StepExecutionsDataClient> {
-    const esClient = await this.deps.coreSetup
-      .getStartServices()
-      .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
-    return new PlainIndexDataClient<EsWorkflowStepExecution>({
-      esClient,
-      logger: this.deps.logger,
-      indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-    });
+  createStepDataClient(): StepExecutionsDataClient {
+    return new DeferredDataClient<EsWorkflowStepExecution>(() =>
+      this.deps.coreSetup.getStartServices().then(
+        ([coreStart]) =>
+          new PlainIndexDataClient<EsWorkflowStepExecution>({
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+            logger: this.deps.logger,
+            indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+            mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+          })
+      )
+    );
   }
 }

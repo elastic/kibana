@@ -56,7 +56,6 @@ import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execu
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
-import { DeferredDataClient } from './repositories/deferred_data_client';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -152,12 +151,8 @@ export class WorkflowsExecutionEnginePlugin
     workflowExecutionRepository: WorkflowExecutionRepository;
     stepExecutionRepository: StepExecutionRepository;
   } {
-    const workflowExecutionsDataClient = new DeferredDataClient<EsWorkflowExecution>(() =>
-      this.dataClientBundle.createWorkflowDataClient()
-    );
-    const stepExecutionsDataClient = new DeferredDataClient<EsWorkflowStepExecution>(() =>
-      this.dataClientBundle.createStepDataClient()
-    );
+    const workflowExecutionsDataClient = this.dataClientBundle.createWorkflowDataClient();
+    const stepExecutionsDataClient = this.dataClientBundle.createStepDataClient();
     return {
       workflowExecutionRepository: new WorkflowExecutionRepository(workflowExecutionsDataClient),
       stepExecutionRepository: new StepExecutionRepository(stepExecutionsDataClient),
@@ -914,8 +909,6 @@ export class WorkflowsExecutionEnginePlugin
           throw new Error('Core setup not available');
         }
         const [, , workflowsExecutionEngine] = await this.coreSetup.getStartServices();
-        // const { workflowExecutionRepository, stepExecutionRepository } =
-        //   this.createScopedRepositories();
 
         await runWorkflow({
           workflowExecutionRepository,
@@ -1438,12 +1431,8 @@ export class WorkflowsExecutionEnginePlugin
       resumeWorkflowExecution,
       triggerEvents,
       __internalStorage: {
-        workflowExecutionsDataClient: new DeferredDataClient<EsWorkflowExecution>(() =>
-          this.dataClientBundle.createWorkflowDataClient()
-        ),
-        stepExecutionsDataClient: new DeferredDataClient<EsWorkflowStepExecution>(() =>
-          this.dataClientBundle.createStepDataClient()
-        ),
+        workflowExecutionsDataClient: this.dataClientBundle.createWorkflowDataClient(),
+        stepExecutionsDataClient: this.dataClientBundle.createStepDataClient(),
       },
     };
   }

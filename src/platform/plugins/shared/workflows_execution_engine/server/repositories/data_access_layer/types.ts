@@ -90,8 +90,8 @@ export type StepExecutionsDataClient = DataClient<EsWorkflowStepExecution>;
 export interface DataClientBundle {
   initSetup: () => Promise<void>;
   initStart: () => Promise<void>;
-  createWorkflowDataClient: () => Promise<WorkflowExecutionsDataClient>;
-  createStepDataClient: () => Promise<StepExecutionsDataClient>;
+  createWorkflowDataClient: () => WorkflowExecutionsDataClient;
+  createStepDataClient: () => StepExecutionsDataClient;
 }
 
 export type WorkflowExecutionsSearchRequest = ExecutionsSearchRequest;
