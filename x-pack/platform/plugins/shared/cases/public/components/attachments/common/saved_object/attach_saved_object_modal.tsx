@@ -301,7 +301,7 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
             </EuiFlexGroup>
           ) : items.length === 0 ? (
             <EuiEmptyPrompt
-              iconType="search"
+              iconType="magnify"
               titleSize="xs"
               body={<p>{i18n.NO_ITEMS_FOUND}</p>}
               css={EMPTY_PROMPT_CSS}

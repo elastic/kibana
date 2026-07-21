@@ -81,7 +81,7 @@ function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
             values: { rowIndex: rowIndex + 1 },
           }
         )}
-        iconType={selectedRowIndex === rowIndex ? 'minimize' : 'expand'}
+        iconType={selectedRowIndex === rowIndex ? 'minimize' : 'maximize'}
         color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
       />
     </EuiToolTip>

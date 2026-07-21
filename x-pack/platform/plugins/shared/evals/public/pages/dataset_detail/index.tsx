@@ -598,7 +598,7 @@ export const DatasetDetailPage: React.FC = () => {
                 <EuiFlexItem key={traceId} grow={false}>
                   <EuiButtonEmpty
                     size="xs"
-                    iconType="apmTrace"
+                    iconType="chartWaterfall"
                     onClick={() => setSelectedTraceId(traceId)}
                   >
                     {truncate(traceId, 12)}
@@ -628,7 +628,7 @@ export const DatasetDetailPage: React.FC = () => {
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         <EuiEmptyPrompt
           color={isNotFound ? 'subdued' : 'danger'}
-          iconType={isNotFound ? 'search' : 'warning'}
+          iconType={isNotFound ? 'magnify' : 'warning'}
           title={
             <h2>{isNotFound ? i18n.DATASET_NOT_FOUND_TITLE : i18n.DATASET_LOAD_ERROR_TITLE}</h2>
           }
@@ -751,7 +751,7 @@ export const DatasetDetailPage: React.FC = () => {
               </EuiFlexItem>
               {canManage ? (
                 <EuiFlexItem grow={false}>
-                  <EuiButton iconType="plusInCircle" onClick={openCreateExampleFlyout} fill>
+                  <EuiButton iconType="plusCircle" onClick={openCreateExampleFlyout} fill>
                     {i18n.ADD_EXAMPLE_BUTTON}
                   </EuiButton>
                 </EuiFlexItem>

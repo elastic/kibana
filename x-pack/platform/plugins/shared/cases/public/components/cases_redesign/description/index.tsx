@@ -187,7 +187,7 @@ export const Description = ({
                         aria-label={
                           isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION
                         }
-                        iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+                        iconType={isCollapsed ? 'chevronSingleRight' : 'chevronSingleDown'}
                         onClick={toggleCollapse}
                         data-test-subj="description-collapse-icon"
                       />

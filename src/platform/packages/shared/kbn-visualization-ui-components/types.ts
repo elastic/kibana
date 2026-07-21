@@ -17,20 +17,20 @@ export type LineStyle = 'solid' | 'dashed' | 'dotted';
 // Each consumer extends this base set with its own additional icons.
 export type SharedSetOfIcons =
   | 'asterisk'
-  | 'alert'
+  | 'warning'
   | 'bell'
   | 'bolt'
   | 'bug'
-  | 'editorComment'
+  | 'comment'
   | 'flag'
   | 'heart'
-  | 'mapMarker'
-  | 'starEmpty'
+  | 'waypoint'
+  | 'star'
   | 'tag';
 
 export type AnnotationReferenceLineIcons =
   | SharedSetOfIcons
   | 'circle'
-  | 'pinFilled'
-  | 'starFilled'
+  | 'pinFill'
+  | 'starFill'
   | 'triangle';

@@ -196,7 +196,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
               >
                 <EuiButtonIcon
                   data-test-subj="searchInferenceEndpointsAddEndpointModalCopyModelIdButton"
-                  iconType="copyClipboard"
+                  iconType="copy"
                   size="xs"
                   color="text"
                   aria-label={i18n.translate(
@@ -299,7 +299,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
               >
                 <EuiButtonIcon
                   data-test-subj="searchInferenceEndpointsAddEndpointModalCopyEndpointIdButton"
-                  iconType="copyClipboard"
+                  iconType="copy"
                   size="xs"
                   color="text"
                   aria-label={i18n.translate(

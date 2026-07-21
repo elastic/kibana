@@ -443,7 +443,7 @@ export const ExperimentDetailPage: React.FC = () => {
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         <EuiEmptyPrompt
           color={isNotFound ? 'subdued' : 'danger'}
-          iconType={isNotFound ? 'search' : 'warning'}
+          iconType={isNotFound ? 'magnify' : 'warning'}
           title={
             <h2>
               {isNotFound ? i18n.EXPERIMENT_NOT_FOUND_TITLE : i18n.EXPERIMENT_LOAD_ERROR_TITLE}

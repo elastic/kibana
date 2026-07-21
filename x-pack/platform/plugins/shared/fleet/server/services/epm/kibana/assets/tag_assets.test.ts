@@ -131,7 +131,7 @@ describe('tagKibanaAssets', () => {
     );
     const importedAssets = [
       { id: 'dashboard1', type: 'dashboard' },
-      { id: 's1', type: 'search' },
+      { id: 's1', type: 'magnify' },
       { id: 'c1', type: 'config' },
       { id: 'v1', type: 'visualization' },
       { id: 'osquery-pack-asset1', type: 'osquery-pack-asset' },
@@ -151,7 +151,7 @@ describe('tagKibanaAssets', () => {
       tags: ['fleet-managed-default', 'fleet-pkg-system-default'],
       assign: [
         { id: 'dashboard1', type: 'dashboard' },
-        { id: 's1', type: 'search' },
+        { id: 's1', type: 'magnify' },
         { id: 'v1', type: 'visualization' },
         { id: 'osquery-pack-asset1', type: 'osquery-pack-asset' },
         { id: 'osquery_saved_query1', type: 'osquery-saved-query' },
@@ -307,8 +307,8 @@ describe('tagKibanaAssets', () => {
     const importedAssets = [
       { id: 'dashboard1', type: 'dashboard' },
       { id: 'dashboard2', type: 'dashboard' },
-      { id: 'search_id1', type: 'search' },
-      { id: 'search_id2', type: 'search' },
+      { id: 'search_id1', type: 'magnify' },
+      { id: 'search_id2', type: 'magnify' },
     ] as any;
     const assetTags = [
       {
@@ -364,11 +364,11 @@ describe('tagKibanaAssets', () => {
         },
         {
           id: 'search_id1',
-          type: 'search',
+          type: 'magnify',
         },
         {
           id: 'search_id2',
-          type: 'search',
+          type: 'magnify',
         },
       ],
       refresh: false,
@@ -407,8 +407,8 @@ describe('tagKibanaAssets', () => {
     const importedAssets = [
       { id: 'dashboard1', type: 'dashboard' },
       { id: 'dashboard2', type: 'dashboard' },
-      { id: 'search_id1', type: 'search' },
-      { id: 'search_id2', type: 'search' },
+      { id: 'search_id1', type: 'magnify' },
+      { id: 'search_id2', type: 'magnify' },
     ] as any;
     const assetTags = [{ text: 'Bar', asset_ids: ['dashboard1', 'search_id1'] }];
     await tagKibanaAssets({
@@ -459,11 +459,11 @@ describe('tagKibanaAssets', () => {
         },
         {
           id: 'search_id1',
-          type: 'search',
+          type: 'magnify',
         },
         {
           id: 'search_id2',
-          type: 'search',
+          type: 'magnify',
         },
       ],
       refresh: false,
@@ -502,7 +502,7 @@ describe('tagKibanaAssets', () => {
     const importedAssets = [
       { id: 'dashboard1', type: 'dashboard' },
       { id: 'dashboard2', type: 'dashboard' },
-      { id: 'search_id1', type: 'search' },
+      { id: 'search_id1', type: 'magnify' },
     ] as any;
     const assetTags = [
       {
@@ -560,7 +560,7 @@ describe('tagKibanaAssets', () => {
         },
         {
           id: 'search_id1',
-          type: 'search',
+          type: 'magnify',
         },
       ],
       refresh: false,
@@ -599,8 +599,8 @@ describe('tagKibanaAssets', () => {
     const importedAssets = [
       { id: 'dashboard1', type: 'dashboard' },
       { id: 'dashboard2', type: 'dashboard' },
-      { id: 'search_id1', type: 'search' },
-      { id: 'search_id2', type: 'search' },
+      { id: 'search_id1', type: 'magnify' },
+      { id: 'search_id2', type: 'magnify' },
     ] as any;
     const assetTags = [
       {
@@ -643,8 +643,8 @@ describe('tagKibanaAssets', () => {
     const importedAssets = [
       { id: 'dashboard1', type: 'dashboard' },
       { id: 'dashboard2', type: 'dashboard' },
-      { id: 'search_id1', type: 'search' },
-      { id: 'search_id2', type: 'search' },
+      { id: 'search_id1', type: 'magnify' },
+      { id: 'search_id2', type: 'magnify' },
     ] as any;
     const assetTags = [
       {
@@ -685,8 +685,8 @@ describe('tagKibanaAssets', () => {
       const importedAssets = [
         { id: 'dashboard1', type: 'dashboard' },
         { id: 'dashboard2', type: 'dashboard' },
-        { id: 'search_id1', type: 'search' },
-        { id: 'search_id2', type: 'search' },
+        { id: 'search_id1', type: 'magnify' },
+        { id: 'search_id2', type: 'magnify' },
       ] as any;
       const assetTags = [
         {
@@ -733,8 +733,8 @@ describe('tagKibanaAssets', () => {
       const importedAssets = [
         { id: 'dashboard1', type: 'dashboard' },
         { id: 'dashboard2', type: 'dashboard' },
-        { id: 'search_id1', type: 'search' },
-        { id: 'search_id2', type: 'search' },
+        { id: 'search_id1', type: 'magnify' },
+        { id: 'search_id2', type: 'magnify' },
       ] as any;
       const assetTags = [
         {
@@ -792,8 +792,8 @@ describe('tagKibanaAssets', () => {
     const importedAssets = [
       { id: 'dashboard1', type: 'dashboard' },
       { id: 'dashboard2', type: 'dashboard' },
-      { id: 'search_id1', type: 'search' },
-      { id: 'search_id2', type: 'search' },
+      { id: 'search_id1', type: 'magnify' },
+      { id: 'search_id2', type: 'magnify' },
     ] as any;
 
     await tagKibanaAssets({
@@ -817,8 +817,8 @@ describe('tagKibanaAssets', () => {
     const importedAssets = [
       { id: 'dashboard1', type: 'dashboard' },
       { id: 'dashboard2', type: 'dashboard' },
-      { id: 'search_id1', type: 'search' },
-      { id: 'search_id2', type: 'search' },
+      { id: 'search_id1', type: 'magnify' },
+      { id: 'search_id2', type: 'magnify' },
     ] as any;
     const assetTags = [
       {

@@ -167,7 +167,7 @@ const AlertRetrievalWorkflowsInfoComponent: React.FC<AlertRetrievalWorkflowsInfo
               {(copy) => (
                 <EuiButtonEmpty
                   data-test-subj="alertRetrievalWorkflowsCopyButton"
-                  iconType="copyClipboard"
+                  iconType="copy"
                   onClick={copy}
                   size="s"
                 >
@@ -197,7 +197,7 @@ const AlertRetrievalWorkflowsInfoComponent: React.FC<AlertRetrievalWorkflowsInfo
               fill
               href={createWorkflowUrl}
               iconSide="right"
-              iconType="popout"
+              iconType="external"
               isDisabled={createWorkflowUrl === ''}
               onClick={closePopover}
               size="s"

@@ -43,7 +43,7 @@ const TODO_STATUS_DISPLAY: Record<TodoStatus, TodoStatusDisplay> = {
     }),
   },
   completed: {
-    iconType: 'checkInCircleFilled',
+    iconType: 'checkCircleFill',
     iconColor: 'success',
     isInactive: true,
     label: i18n.translate('xpack.agentBuilder.conversation.todos.statusCompleted', {
@@ -107,7 +107,7 @@ export const TodosStepDisplay: React.FC<TodosStepDisplayProps> = ({ step }) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" size="s" color="subdued" aria-hidden={true} />
+            <EuiIcon type="checkCircleFill" size="s" color="subdued" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" css={headerTextStyles}>

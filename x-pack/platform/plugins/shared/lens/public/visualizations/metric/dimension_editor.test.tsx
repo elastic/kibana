@@ -247,7 +247,7 @@ describe('dimension editor', () => {
         await setIcon('Compute');
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({
-            icon: 'compute',
+            icon: 'processor',
             iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
           })
         );
@@ -262,7 +262,7 @@ describe('dimension editor', () => {
         await setIcon('Compute');
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({
-            icon: 'compute',
+            icon: 'processor',
             iconAlign: LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign,
           })
         );
@@ -276,7 +276,7 @@ describe('dimension editor', () => {
         });
         await setIcon('Compute');
         expect(setState).toHaveBeenCalledWith(
-          expect.objectContaining({ icon: 'compute', iconAlign: 'left' })
+          expect.objectContaining({ icon: 'processor', iconAlign: 'left' })
         );
       });
 

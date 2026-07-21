@@ -21,7 +21,7 @@ export function ChangeHistoryListErrorPrompt({
 
   return (
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       title={<h2>{i18n.LIST_ERROR}</h2>}
       body={
         errorMessage ? (

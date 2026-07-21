@@ -171,7 +171,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
         if (wasSelectedButNowDisabled) {
           return (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="warning"
               style={{ marginRight: '8px' }}
               aria-label={i18n.WORKFLOW_DISABLED_WARNING}

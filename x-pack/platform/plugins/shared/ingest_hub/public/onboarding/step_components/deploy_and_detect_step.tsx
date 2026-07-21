@@ -128,7 +128,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               {onBack && (
-                <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
+                <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
                   <FormattedMessage
                     id="xpack.ingestHub.deployAndDetectStep.backButton"
                     defaultMessage="Back"

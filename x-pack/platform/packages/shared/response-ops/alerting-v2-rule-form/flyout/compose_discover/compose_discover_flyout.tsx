@@ -124,8 +124,8 @@ const SANDBOX_OPEN_MODE_TOGGLE_TOOLTIP = i18n.translate(
 );
 
 const EDIT_MODE_OPTIONS = [
-  { id: 'form', label: FORM_VIEW_LABEL, iconType: 'tableDensityNormal' },
-  { id: 'yaml', label: YAML_VIEW_LABEL, iconType: 'editorCodeBlock' },
+  { id: 'form', label: FORM_VIEW_LABEL, iconType: 'table' },
+  { id: 'yaml', label: YAML_VIEW_LABEL, iconType: 'code' },
 ];
 
 const getQuerySandboxTitle = (isBuilderMode: boolean) =>
@@ -958,7 +958,7 @@ export function ComposeDiscoverFlyout({
       <EuiCallOut
         announceOnMount
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="ruleV2FlyoutValidationErrors"
         title={i18n.translate('xpack.alertingV2.ruleForm.validationErrors.title', {
           defaultMessage: 'Resolve issues before saving',

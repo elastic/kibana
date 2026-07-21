@@ -88,7 +88,7 @@ export const ActionRow = ({
         <EuiFlexItem grow={false}>
           <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
             <EuiButtonIcon
-              iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+              iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
               aria-label={toggleLabel}
               onClick={() => onToggleExpand(action.id)}
               data-test-subj={`actionRowToggle-${action.id}`}

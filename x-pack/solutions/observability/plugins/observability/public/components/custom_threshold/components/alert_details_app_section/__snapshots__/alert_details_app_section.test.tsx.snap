@@ -16,7 +16,7 @@ Array [
     "annotations": Array [
       Object {
         "color": "#C61E25",
-        "icon": "alert",
+        "icon": "warning",
         "id": "custom_threshold_alert_start_annotation",
         "key": Object {
           "timestamp": "2023-03-28T13:40:00.000Z",

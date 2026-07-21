@@ -296,7 +296,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     size="s"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     color="text"
                     onClick={handleOpenAddModal}
                     disabled={modelStatus === EisModelStatus.DeprecatedEOL}

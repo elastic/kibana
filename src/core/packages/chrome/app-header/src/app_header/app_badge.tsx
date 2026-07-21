@@ -102,7 +102,7 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
       color={badge?.color ?? 'hollow'}
       data-test-subj={badge?.['data-test-subj']}
       css={badgeStyle}
-      iconType={hasItems ? 'arrowDown' : undefined}
+      iconType={hasItems ? 'chevronSingleDown' : undefined}
       iconSide={hasItems ? 'right' : undefined}
     >
       {badge.label}

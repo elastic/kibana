@@ -153,7 +153,7 @@ export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
                     )}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <EuiIcon type="popout" size="s" aria-hidden={true} />
+                    <EuiIcon type="external" size="s" aria-hidden={true} />
                   </a>
                 ),
               })),

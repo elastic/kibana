@@ -65,7 +65,7 @@ const SkillReferencedContentFieldArrayEdit: React.FC = () => {
           <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               <EuiButton
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={handleAdd}
                 disabled={atLimit || activeIndex !== null}
                 title={

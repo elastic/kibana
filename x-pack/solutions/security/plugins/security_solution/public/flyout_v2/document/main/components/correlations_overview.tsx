@@ -113,7 +113,7 @@ export const CorrelationsOverview = memo(
             />
           ),
           link,
-          iconType: showIcon ? 'arrowStart' : undefined,
+          iconType: showIcon ? 'chevronLimitLeft' : undefined,
         }}
         data-test-subj={CORRELATIONS_TEST_ID}
       >

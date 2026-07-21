@@ -325,7 +325,7 @@ export const RemotesListPage: React.FC = () => {
         {canManage ? (
           <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={openCreate} fill iconType="plusInCircle">
+              <EuiButton onClick={openCreate} fill iconType="plusCircle">
                 {i18n.CREATE_REMOTE_BUTTON}
               </EuiButton>
             </EuiFlexItem>

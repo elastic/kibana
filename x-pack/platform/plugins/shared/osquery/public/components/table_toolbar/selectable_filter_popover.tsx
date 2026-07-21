@@ -66,7 +66,7 @@ const SelectableFilterPopoverComponent: React.FC<SelectableFilterPopoverProps> =
 
   const triggerButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={togglePopover}
       isLoading={isLoading}
       isSelected={isOpen}

@@ -79,7 +79,7 @@ export function ChangeHistoryPreviewShell({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
-                  iconType="arrowLeft"
+                  iconType="chevronSingleLeft"
                   flush="left"
                   onClick={onBack}
                   data-test-subj="changeHistoryPreviewBack"

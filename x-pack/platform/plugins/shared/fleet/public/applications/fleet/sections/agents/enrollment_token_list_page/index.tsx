@@ -241,7 +241,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
               })}
               button={{
                 props: {
-                  iconType: 'arrowDown',
+                  iconType: 'chevronSingleDown',
                   iconSide: 'right',
                   color: 'primary',
                   isLoading: isBulkActionInProgress,

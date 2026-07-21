@@ -198,7 +198,7 @@ export function MemoryTab() {
                       disableScreenReaderOutput
                     >
                       <EuiButtonIcon
-                        iconType="plusInCircle"
+                        iconType="plusCircle"
                         aria-label={i18n.translate('xpack.streams.memory.newEntryButton', {
                           defaultMessage: 'New memory entry',
                         })}
@@ -218,7 +218,7 @@ export function MemoryTab() {
                         disableScreenReaderOutput
                       >
                         <EuiButtonIcon
-                          iconType="boxesHorizontal"
+                          iconType="boxesVertical"
                           aria-label={i18n.translate('xpack.streams.memory.workflowActionsButton', {
                             defaultMessage: 'Workflow actions',
                           })}

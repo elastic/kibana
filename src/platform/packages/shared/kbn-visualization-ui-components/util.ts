@@ -56,7 +56,7 @@ export const sharedSetOfIcons: IconSet<SharedSetOfIcons> = [
     }),
   },
   {
-    value: 'alert',
+    value: 'warning',
     label: i18n.translate('visualizationUiComponents.iconSelect.alertIconLabel', {
       defaultMessage: 'Alert',
     }),
@@ -80,7 +80,7 @@ export const sharedSetOfIcons: IconSet<SharedSetOfIcons> = [
     }),
   },
   {
-    value: 'editorComment',
+    value: 'comment',
     label: i18n.translate('visualizationUiComponents.iconSelect.commentIconLabel', {
       defaultMessage: 'Comment',
     }),
@@ -98,13 +98,13 @@ export const sharedSetOfIcons: IconSet<SharedSetOfIcons> = [
     }),
   },
   {
-    value: 'mapMarker',
+    value: 'waypoint',
     label: i18n.translate('visualizationUiComponents.iconSelect.mapMarkerIconLabel', {
       defaultMessage: 'Map Marker',
     }),
   },
   {
-    value: 'starEmpty',
+    value: 'star',
     label: i18n.translate('visualizationUiComponents.iconSelect.starIconLabel', {
       defaultMessage: 'Star',
     }),
@@ -130,7 +130,7 @@ export const annotationReferenceLineSharedSetOfIcons: IconSet<AnnotationReferenc
     icon: IconCircle,
   },
   {
-    value: 'pinFilled',
+    value: 'pinFill',
     label: i18n.translate(
       'visualizationUiComponents.annotationReferenceLine.iconSelect.mapPinLabel',
       {
@@ -139,7 +139,7 @@ export const annotationReferenceLineSharedSetOfIcons: IconSet<AnnotationReferenc
     ),
   },
   {
-    value: 'starFilled',
+    value: 'starFill',
     label: i18n.translate(
       'visualizationUiComponents.annotationReferenceLine.iconSelect.starFilledLabel',
       {

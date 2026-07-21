@@ -46,7 +46,7 @@ export const ProfileFormNotices = () => {
               <EuiSpacer size="s" />
               <EuiButtonEmpty
                 size="s"
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 onClick={() => onOpenConflictProfile(conflictProfileId)}
                 data-test-subj="anonymizationProfilesOpenConflictProfile"
               >

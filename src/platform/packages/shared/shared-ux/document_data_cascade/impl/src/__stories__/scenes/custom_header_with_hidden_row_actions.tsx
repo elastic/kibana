@@ -82,7 +82,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
       headerTitle: (
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="securitySignal" size="xl" aria-hidden={true} />
+            <EuiIcon type="radar" size="xl" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiText>
@@ -212,7 +212,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
 
       return [
         {
-          iconType: 'starEmpty',
+          iconType: 'star',
           'aria-label': `favorite ${groupValue}`,
           onClick: () => {
             /** Noop Click handler for favorite */

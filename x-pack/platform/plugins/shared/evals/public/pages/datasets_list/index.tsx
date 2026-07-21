@@ -235,7 +235,7 @@ export const DatasetsListPage: React.FC = () => {
               </EuiFlexItem>
               {canManage ? (
                 <EuiFlexItem grow={false}>
-                  <EuiButton onClick={openCreateFlyout} fill iconType="plusInCircle">
+                  <EuiButton onClick={openCreateFlyout} fill iconType="plusCircle">
                     {i18n.CREATE_DATASET_BUTTON}
                   </EuiButton>
                 </EuiFlexItem>
@@ -264,7 +264,7 @@ export const DatasetsListPage: React.FC = () => {
             actions={
               canManage
                 ? [
-                    <EuiButton onClick={openCreateFlyout} fill iconType="plusInCircle">
+                    <EuiButton onClick={openCreateFlyout} fill iconType="plusCircle">
                       {i18n.CREATE_DATASET_BUTTON}
                     </EuiButton>,
                   ]
@@ -273,7 +273,7 @@ export const DatasetsListPage: React.FC = () => {
           />
         ) : showNoMatches ? (
           <EuiEmptyPrompt
-            iconType="search"
+            iconType="magnify"
             title={<h2>{i18n.NO_MATCHES_TITLE}</h2>}
             body={<p>{i18n.getNoMatchesBody(debouncedSearch)}</p>}
             actions={[

@@ -34,7 +34,7 @@ interface TimelineEntry {
 
 const FLOW_ICONS = {
   detection: 'bell',
-  event: 'documentEdit',
+  event: 'pencil',
 } as const;
 
 function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {

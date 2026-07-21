@@ -636,7 +636,7 @@ const mockApiCalls = (
             {
               pkgkey: 'nginx-0.3.7',
               service: 'kibana',
-              type: 'search' as KibanaAssetType,
+              type: 'magnify' as KibanaAssetType,
               file: 'nginx-6d9e66d0-a1f0-11e7-928f-5dbe6f6f5519.json',
             },
           ],

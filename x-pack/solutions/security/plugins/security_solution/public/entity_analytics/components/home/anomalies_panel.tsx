@@ -73,7 +73,7 @@ export const EntityAnalyticsRecentAnomalies: React.FC<{ watchlistId?: string }> 
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   color={'primary'}
-                  iconType={'popout'}
+                  iconType={'external'}
                   href={anomalyExplorerUrl}
                   target="_blank"
                 >

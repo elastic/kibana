@@ -237,7 +237,7 @@ export const ModelSettings: React.FC = () => {
               ]
             : []),
           <EuiButtonEmpty
-            iconType="popout"
+            iconType="external"
             iconSide="right"
             iconSize="s"
             flush="both"

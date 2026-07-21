@@ -460,7 +460,7 @@ const RiskInputsTabContent = <T extends EntityType>({
             disableScreenReaderOutput
           >
             <EuiButtonIcon
-              iconType="expand"
+              iconType="maximize"
               data-test-subj={EXPAND_ALERT_TEST_ID}
               onClick={() => onShowAlert(data._id, data.input.index)}
               aria-label={i18n.translate(

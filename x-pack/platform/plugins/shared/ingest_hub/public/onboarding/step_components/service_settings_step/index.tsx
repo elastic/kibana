@@ -149,7 +149,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {onBack && (
-            <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
+            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
               <FormattedMessage
                 id="xpack.ingestHub.serviceSettingsStep.backButton"
                 defaultMessage="Back"

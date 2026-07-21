@@ -192,7 +192,7 @@ export const ComposeDiscoverFooter = ({
           {uiState.step > 0 && (
             <EuiButton
               color="text"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               isDisabled={!isBuilderMode && uiState.childOpen}
               onClick={() => dispatch({ type: 'GO_BACK', isBuilderMode })}
               data-test-subj="composeDiscoverBack"
@@ -216,7 +216,7 @@ export const ComposeDiscoverFooter = ({
             <EuiToolTip content={getNextTooltip()}>
               <EuiButton
                 color="text"
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 iconSide="right"
                 isDisabled={nextDisabled}
                 onClick={onNext}

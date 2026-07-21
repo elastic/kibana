@@ -81,7 +81,7 @@ export function WorkflowsEmptyState({ onCreateWorkflow }: WorkflowsEmptyStatePro
               {isLibraryEnabled ? (
                 <EuiButtonEmpty
                   onClick={navigateToLibrary}
-                  iconType="arrowRight"
+                  iconType="chevronSingleRight"
                   iconSide="right"
                   aria-label="Explore library"
                 >

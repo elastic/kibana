@@ -38,7 +38,7 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
       <EuiToolTip content={label}>
         <EuiButtonEmpty
           onClick={onTitleClick}
-          iconType="expand"
+          iconType="maximize"
           size="xs"
           flush="left"
           css={{ maxWidth: '100%', minWidth: 0 }}

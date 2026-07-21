@@ -78,7 +78,7 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
       button={
         <EuiToolTip content={labels.plugins.pluginContextMenuButtonLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             aria-label={labels.plugins.pluginContextMenuButtonLabel}
             onClick={togglePopover}
             data-test-subj={`agentBuilderPluginContextMenuButton-${plugin.id}`}

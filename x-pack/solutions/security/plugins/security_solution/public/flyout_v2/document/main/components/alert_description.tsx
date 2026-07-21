@@ -57,7 +57,7 @@ export const AlertDescription: FC<AlertDescriptionProps> = ({
     () => (
       <EuiButtonEmpty
         size="s"
-        iconType="expand"
+        iconType="maximize"
         onClick={onShowRuleSummary}
         iconSide="right"
         data-test-subj={RULE_SUMMARY_BUTTON_TEST_ID}

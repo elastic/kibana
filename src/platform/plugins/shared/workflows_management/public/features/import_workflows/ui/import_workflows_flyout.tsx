@@ -386,7 +386,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
             if (status === 'success') {
               return (
                 <EuiIcon
-                  type="checkInCircleFilled"
+                  type="checkCircleFill"
                   color="success"
                   data-test-subj={`import-preview-success-${id}`}
                   aria-label={i18n.translate('workflows.importFlyout.preview.successIcon', {

@@ -96,7 +96,7 @@ export const ApiKeyField = ({
         <EuiFormRow hasEmptyLabelSpace>
           <EuiToolTip content={!canCreate ? noPermissionMessage : undefined}>
             <EuiButton
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={onCreate}
               isLoading={isCreating}
               isDisabled={!canCreate}

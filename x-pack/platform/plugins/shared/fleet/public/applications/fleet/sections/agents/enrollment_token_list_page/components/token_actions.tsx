@@ -119,7 +119,7 @@ export const getTokenActionItems = ({
       : i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenAction', {
           defaultMessage: 'Revoke token',
         }),
-    icon: 'minusInCircle',
+    icon: 'minusCircle',
     disabled: revokeDisabled,
     'data-test-subj': plural
       ? 'enrollmentTokensList.bulkRevokeButton'

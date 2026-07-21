@@ -105,7 +105,7 @@ export const DetectionsTab = () => {
             >
               <EuiButtonIcon
                 data-test-subj="detectionsDetailsButton"
-                iconType={isExpanded ? 'minimize' : 'expand'}
+                iconType={isExpanded ? 'minimize' : 'maximize'}
                 aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
                 onClick={() => toggleSelectedDetection(detection)}
               />

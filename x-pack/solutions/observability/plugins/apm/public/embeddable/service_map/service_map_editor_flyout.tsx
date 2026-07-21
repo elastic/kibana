@@ -701,7 +701,7 @@ export function ServiceMapEditorFlyout({
                   label: i18n.translate('xpack.apm.serviceMapEditor.orientationHorizontal', {
                     defaultMessage: 'Horizontal',
                   }),
-                  iconType: 'arrowRight',
+                  iconType: 'chevronSingleRight',
                   'data-test-subj': 'apmServiceMapEditorOrientationHorizontal',
                 },
                 {
@@ -709,7 +709,7 @@ export function ServiceMapEditorFlyout({
                   label: i18n.translate('xpack.apm.serviceMapEditor.orientationVertical', {
                     defaultMessage: 'Vertical',
                   }),
-                  iconType: 'arrowDown',
+                  iconType: 'chevronSingleDown',
                   'data-test-subj': 'apmServiceMapEditorOrientationVertical',
                 },
               ]}

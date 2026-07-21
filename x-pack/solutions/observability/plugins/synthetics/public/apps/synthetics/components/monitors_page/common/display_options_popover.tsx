@@ -61,7 +61,7 @@ export const DisplayOptionsPopover: React.FC = () => {
     <EuiToolTip content={ARIA_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
         data-test-subj="syntheticsOverviewDisplayOptionsButton"
-        iconType="controlsHorizontal"
+        iconType="controls"
         aria-label={ARIA_LABEL}
         onClick={() => setIsOpen((prev) => !prev)}
         display={isOpen ? 'fill' : 'base'}

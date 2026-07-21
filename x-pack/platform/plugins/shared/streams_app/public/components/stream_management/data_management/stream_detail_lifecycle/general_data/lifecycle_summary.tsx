@@ -224,7 +224,7 @@ const getEditLifecycleMethodButton = ({
   return (
     <EuiToolTip content={tooltipLabel} disableScreenReaderOutput>
       <EuiButtonIcon
-        iconType="controlsHorizontal"
+        iconType="controls"
         size="s"
         display="base"
         color="text"

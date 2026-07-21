@@ -129,7 +129,7 @@ export const Notes = memo(({ documentId, onShowNotes, disabled = false }: NotesP
   const addNoteButton = useMemo(
     () => (
       <EuiButtonEmpty
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={onShowNotes}
         size="s"
         disabled={cannotAddNotes}
@@ -147,7 +147,7 @@ export const Notes = memo(({ documentId, onShowNotes, disabled = false }: NotesP
       <EuiToolTip content={ADD_NOTE_BUTTON} disableScreenReaderOutput>
         <EuiButtonIcon
           onClick={onShowNotes}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           disabled={cannotAddNotes}
           css={css`
             margin-left: ${euiTheme.size.xs};

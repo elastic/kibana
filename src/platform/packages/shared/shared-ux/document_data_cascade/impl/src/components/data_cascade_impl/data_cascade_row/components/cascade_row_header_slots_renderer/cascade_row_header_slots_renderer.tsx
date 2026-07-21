@@ -95,7 +95,7 @@ const CascadeRowHeaderSlotsRenderer = ({ headerMetaSlots }: CascadeRowHeaderSlot
       <EuiPanel grow={false} paddingSize="none" css={styles.slotsLeftScrollButton}>
         <EuiToolTip content={scrollLeftLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             color="text"
             size="xs"
             aria-label={scrollLeftLabel}
@@ -123,7 +123,7 @@ const CascadeRowHeaderSlotsRenderer = ({ headerMetaSlots }: CascadeRowHeaderSlot
       <EuiPanel grow={false} paddingSize="none" css={styles.slotsRightScrollButton}>
         <EuiToolTip content={scrollRightLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             color="text"
             size="xs"
             aria-label={scrollRightLabel}

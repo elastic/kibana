@@ -137,7 +137,7 @@ export const TemplateYamlEditor = ({
             {isSaving ? (
               <EuiLoadingSpinner size="s" />
             ) : (
-              <EuiIcon type="checkInCircleFilled" color="success" size="s" aria-hidden={true} />
+              <EuiIcon type="checkCircleFill" color="success" size="s" aria-hidden={true} />
             )}
             <EuiText size="xs" color="subdued">
               {isSaving ? i18n.SAVING_DRAFT : i18n.DRAFT_SAVED}

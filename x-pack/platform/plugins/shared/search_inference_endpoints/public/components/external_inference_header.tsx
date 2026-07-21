@@ -50,7 +50,7 @@ export const ExternalInferenceHeader: React.FC<ExternalInferenceHeaderProps> = (
           {canManage && (
             <EuiFlexItem grow={false}>
               <EuiButton
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 fill
                 data-test-subj="add-inference-endpoint-header-button"
                 onClick={onFlyoutOpen}

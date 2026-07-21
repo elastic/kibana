@@ -238,7 +238,7 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       primaryActionItem: {
         id: 'createFieldDefinition',
         label: i18n.CREATE_FIELD_DEFINITION,
-        iconType: 'plusInCircle' as const,
+        iconType: 'plusCircle' as const,
         run: () => handleCreate(),
         testId: 'createFieldDefinitionButton',
       },

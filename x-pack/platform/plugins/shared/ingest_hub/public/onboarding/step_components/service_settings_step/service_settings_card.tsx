@@ -108,7 +108,12 @@ export function ServiceSettingsCard({
         <EuiFlexItem />
         {hasFlyoutFields && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={onOpenFlyout} iconType="arrowRight" iconSide="right">
+            <EuiButtonEmpty
+              size="s"
+              onClick={onOpenFlyout}
+              iconType="chevronSingleRight"
+              iconSide="right"
+            >
               <FormattedMessage
                 id="xpack.ingestHub.serviceSettingsStep.card.collectionSettingsButton"
                 defaultMessage="Collection settings"

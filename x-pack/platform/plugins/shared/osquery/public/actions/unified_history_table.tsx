@@ -190,12 +190,7 @@ const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
 
   return (
     <EuiToolTip position="top" content={detailsText} disableScreenReaderOutput>
-      <EuiButtonIcon
-        iconType="visTable"
-        {...navProps}
-        isDisabled={!path}
-        aria-label={detailsText}
-      />
+      <EuiButtonIcon iconType="table" {...navProps} isDisabled={!path} aria-label={detailsText} />
     </EuiToolTip>
   );
 };

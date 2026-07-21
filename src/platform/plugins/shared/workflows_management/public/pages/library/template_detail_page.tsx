@@ -122,7 +122,7 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
     <EuiButtonEmpty
       size="xs"
       flush="left"
-      iconType="arrowLeft"
+      iconType="chevronSingleLeft"
       onClick={goToLibrary}
       data-test-subj="workflowLibraryTemplateDetailBackButton"
     >

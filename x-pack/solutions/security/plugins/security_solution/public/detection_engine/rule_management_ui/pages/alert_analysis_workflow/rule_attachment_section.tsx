@@ -581,7 +581,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                           data-test-subj="alertAnalysisWorkflowRuleAttachmentBulkActionsButton"
                           size="s"
                           iconSide="right"
-                          iconType="arrowDown"
+                          iconType="chevronSingleDown"
                           flush="left"
                           isLoading={updateMutation.isLoading}
                           onClick={() => setIsBulkActionsPopoverOpen((isOpen) => !isOpen)}
@@ -597,7 +597,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                         items={[
                           <EuiContextMenuItem
                             key="attach"
-                            icon="plusInCircle"
+                            icon="plusCircle"
                             data-test-subj="alertAnalysisWorkflowRuleAttachmentAttachAction"
                             onClick={() => {
                               closeBulkActionsPopover();
@@ -611,7 +611,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                           </EuiContextMenuItem>,
                           <EuiContextMenuItem
                             key="detach"
-                            icon="minusInCircle"
+                            icon="minusCircle"
                             data-test-subj="alertAnalysisWorkflowRuleAttachmentRemoveAction"
                             onClick={() => {
                               closeBulkActionsPopover();

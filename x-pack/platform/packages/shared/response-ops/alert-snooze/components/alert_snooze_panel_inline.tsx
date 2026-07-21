@@ -66,7 +66,7 @@ export const AlertSnoozePanelInline = ({
       {/* Sticky header — stays at the top of the scrollable popover panel */}
       <div style={stickyHeaderStyle} data-test-subj="alertSnoozePanel">
         <EuiButtonEmpty
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           onClick={onBack}
           size="s"
           flush="left"

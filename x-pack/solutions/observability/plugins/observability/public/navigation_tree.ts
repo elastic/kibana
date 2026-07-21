@@ -109,7 +109,7 @@ function createNavTree({
       },
       {
         link: 'slo',
-        icon: 'visGauge',
+        icon: 'chartGauge',
       },
       ...(streamsAvailable
         ? [
@@ -432,7 +432,7 @@ function createNavTree({
             title: i18n.translate('xpack.observability.obltNav.ingestHub', {
               defaultMessage: 'Ingest Hub',
             }),
-            icon: 'launch',
+            icon: 'rocket',
             children: [
               {
                 link: 'ingestHub' as const,
@@ -451,7 +451,7 @@ function createNavTree({
               defaultMessage: 'Add data',
             }),
             link: 'observabilityOnboarding' as const,
-            icon: 'plusInCircle',
+            icon: 'plusCircle',
             children: [
               {
                 link: 'onboarding' as const,

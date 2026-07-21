@@ -130,7 +130,7 @@ export const RuleActionsMenu = ({
           disableScreenReaderOutput
         >
           <EuiButtonIcon
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             aria-label={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
               defaultMessage: 'More actions',
             })}

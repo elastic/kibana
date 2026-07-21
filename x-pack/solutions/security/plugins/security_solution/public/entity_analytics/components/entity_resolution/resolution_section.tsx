@@ -133,7 +133,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
               callback: handleOpenResolutionTab,
               tooltip: RESOLUTION_GROUP_LINK_TOOLTIP,
             },
-            iconType: hideHeaderIcons ? undefined : 'arrowStart',
+            iconType: hideHeaderIcons ? undefined : 'chevronLimitLeft',
           }),
         }}
         expand={{ expandable: false }}

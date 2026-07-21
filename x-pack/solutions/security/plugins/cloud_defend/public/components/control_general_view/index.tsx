@@ -105,7 +105,7 @@ const AddButton = ({ type, onSelectType, selectors, responses }: AddSelectorButt
         <EuiButton
           fullWidth
           color="primary"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={onButtonClick}
           data-test-subj={`cloud-defend-btnAdd${type}`}
         >

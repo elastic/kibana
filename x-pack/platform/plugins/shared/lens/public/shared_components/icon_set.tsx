@@ -38,7 +38,7 @@ export const metricIconsSet: IconSet<AvailableMetricIcon> = [
       }),
     },
     {
-      value: 'compute',
+      value: 'processor',
       label: i18n.translate('xpack.lens.metric.iconSelect.computeLabel', {
         defaultMessage: 'Compute',
       }),
@@ -50,7 +50,7 @@ export const metricIconsSet: IconSet<AvailableMetricIcon> = [
       }),
     },
     {
-      value: 'temperature',
+      value: 'thermometer',
       label: i18n.translate('xpack.lens.metric.iconSelect.temperatureLabel', {
         defaultMessage: 'Temperature',
       }),

@@ -241,7 +241,7 @@ const DashboardsSubsectionHeader = ({
           disableScreenReaderOutput
         >
           <EuiButtonIcon
-            iconType="plusInCircle"
+            iconType="plusCircle"
             color="text"
             aria-label={i18n.translate(
               'xpack.alertingV2.ruleDetails.artifacts.dashboards.manageAriaLabel',

@@ -27,7 +27,7 @@ export const getEntityIcon = (entityType: string): string => {
     case 'host':
       return 'storage';
     case 'service':
-      return 'node';
+      return 'vectorTriangle';
     case 'generic':
     default:
       return 'globe';

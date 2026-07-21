@@ -53,7 +53,7 @@ export const MeasureButton = () => {
         <EuiButtonIcon
           onClick={() => setIsMeasuring((prev) => !prev)}
           onMouseDown={preventTargetFromLosingFocus}
-          iconType="editorItemAlignCenter"
+          iconType="alignCenterHorizontal"
           isSelected={isMeasuring}
           aria-pressed={isMeasuring}
           aria-label={i18n.translate('kbnDesignTools.measure.button.ariaLabel', {

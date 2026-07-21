@@ -53,11 +53,11 @@ export type TimelineEntry = StateChangeEntry | SeverityChangeEntry | ActionEntry
 
 /** Icon shown on the avatar for each action type (no system actor profile). */
 export const ACTION_ICON: Record<string, IconType> = {
-  ack: 'checkInCircleFilled',
-  unack: 'minusInCircle',
+  ack: 'checkCircleFill',
+  unack: 'minusCircle',
   snooze: 'bellSlash',
   unsnooze: 'bell',
-  deactivate: 'checkInCircleFilled',
+  deactivate: 'checkCircleFill',
   activate: 'refresh',
   tag: 'tag',
   assign: 'user',

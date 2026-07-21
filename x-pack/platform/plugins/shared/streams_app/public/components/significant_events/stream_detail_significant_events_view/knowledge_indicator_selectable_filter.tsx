@@ -100,7 +100,7 @@ export function KnowledgeIndicatorSelectableFilter({
         aria-label={labels.popoverAriaLabel}
         button={
           <EuiFilterButton
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             isSelected={isPopoverOpen}
             hasActiveFilters={selected.length > 0}

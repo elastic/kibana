@@ -217,7 +217,7 @@ export const ConversationSidebarView: React.FC = () => {
                         <EuiFlexItem grow>
                           <EuiButton
                             fullWidth
-                            iconType="search"
+                            iconType="magnify"
                             size="s"
                             color="text"
                             aria-label={searchChatsAriaLabel}

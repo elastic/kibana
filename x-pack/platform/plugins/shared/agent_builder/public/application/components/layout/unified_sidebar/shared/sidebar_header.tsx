@@ -132,7 +132,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
         ) : (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               iconSide="left"
               size="s"
               flush="both"

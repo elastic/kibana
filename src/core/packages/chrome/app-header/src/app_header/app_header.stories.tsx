@@ -69,7 +69,7 @@ const tabs: AppHeaderTab[] = [
   {
     id: 'insights',
     label: 'Insights',
-    badge: { iconType: 'beaker', tooltip: 'Beta feature' },
+    badge: { iconType: 'flask', tooltip: 'Beta feature' },
     onClick: action('tab-insights'),
   },
   { id: 'settings', label: 'Settings', onClick: action('tab-settings') },

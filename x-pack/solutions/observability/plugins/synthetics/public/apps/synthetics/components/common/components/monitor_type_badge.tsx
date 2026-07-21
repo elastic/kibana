@@ -92,5 +92,5 @@ function getMonitorTypeBadgeTitle(monitorType: string) {
 }
 
 function getMonitorTypeBadgeIcon(monitorType: string) {
-  return monitorType === 'browser' ? 'videoPlayer' : 'online';
+  return monitorType === 'browser' ? 'videoPlayer' : 'wifi';
 }

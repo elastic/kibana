@@ -227,7 +227,7 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
       <EuiButton
         size="s"
         color={isEditCta ? 'text' : undefined}
-        iconType={isEditCta ? 'chevronLimitLeft' : 'editorCodeBlock'}
+        iconType={isEditCta ? 'chevronLimitLeft' : 'code'}
         isDisabled={isEditorOpen}
         onClick={onOpenEditor}
         data-test-subj="esqlSummaryOpenEditor"

@@ -150,7 +150,7 @@ export function AlertConditionStep({
           </EuiPanel>
           <EuiSpacer size="s" />
           <EuiButton
-            iconType="editorCodeBlock"
+            iconType="code"
             isDisabled={state.childOpen}
             onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
             data-test-subj="composeDiscoverOpenEditor"

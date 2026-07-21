@@ -126,7 +126,7 @@ export function KnowledgeIndicatorDetailsFlyout({
         items.push(
           <EuiContextMenuItem
             key="feature-exclude"
-            icon="eyeClosed"
+            icon="eyeSlash"
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);

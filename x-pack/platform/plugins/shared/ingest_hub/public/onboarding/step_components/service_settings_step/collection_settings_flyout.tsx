@@ -144,7 +144,7 @@ export function CollectionSettingsFlyout({
             defaultMessage: 'Sensible defaults applied',
           })}
           color="success"
-          iconType="checkInCircleFilled"
+          iconType="checkCircleFill"
         >
           <p>
             <FormattedMessage
@@ -235,7 +235,7 @@ export function CollectionSettingsFlyout({
                       )}
                     </EuiFlexGroup>
                   ))}
-                  <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={handleRegionRowAdd}>
+                  <EuiButtonEmpty size="xs" iconType="plusCircle" onClick={handleRegionRowAdd}>
                     <FormattedMessage
                       id="xpack.ingestHub.serviceSettingsStep.flyout.regions.addRow"
                       defaultMessage="Add region"

@@ -64,7 +64,7 @@ export const SetupPage: React.FC = () => {
         <EuiCallOut
           title="Experimental feature — proceed with caution"
           color="warning"
-          iconType="beaker"
+          iconType="flask"
         >
           <p>
             Elastic Ramen is an <strong>experimental</strong> feature under active development. It
@@ -105,7 +105,7 @@ export const SetupPage: React.FC = () => {
 
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={() => formRef.current?.submit()} iconType="popout">
+                <EuiButton fill onClick={() => formRef.current?.submit()} iconType="external">
                   Connect local agent
                 </EuiButton>
               </EuiFlexItem>

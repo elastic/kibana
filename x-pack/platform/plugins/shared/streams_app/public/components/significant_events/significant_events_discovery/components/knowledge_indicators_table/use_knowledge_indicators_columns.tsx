@@ -71,7 +71,7 @@ export const useKnowledgeIndicatorsColumns = ({
                 >
                   <EuiButtonIcon
                     data-test-subj="knowledgeIndicatorsDetailsButton"
-                    iconType={isExpanded ? 'minimize' : 'expand'}
+                    iconType={isExpanded ? 'minimize' : 'maximize'}
                     aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
                     onClick={() => toggleSelectedKnowledgeIndicator(ki)}
                   />

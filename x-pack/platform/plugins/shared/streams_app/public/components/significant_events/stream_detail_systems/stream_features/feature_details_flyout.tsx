@@ -132,7 +132,7 @@ export function FeatureDetailsFlyout({
                     ? [
                         <EuiContextMenuItem
                           key="exclude"
-                          icon={<EuiIcon type="eyeClosed" color="warning" aria-hidden={true} />}
+                          icon={<EuiIcon type="eyeSlash" color="warning" aria-hidden={true} />}
                           css={css`
                             color: ${euiTheme.colors.warning};
                           `}

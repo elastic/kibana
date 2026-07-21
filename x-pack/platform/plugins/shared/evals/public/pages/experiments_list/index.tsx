@@ -364,7 +364,12 @@ export const ExperimentsListPage: React.FC = () => {
               content={canCompare ? undefined : i18n.COMPARE_SELECTION_HINT}
               position="top"
             >
-              <EuiButton iconType="diff" onClick={handleCompare} isDisabled={!canCompare} size="m">
+              <EuiButton
+                iconType="compare"
+                onClick={handleCompare}
+                isDisabled={!canCompare}
+                size="m"
+              >
                 {i18n.COMPARE_SELECTED_BUTTON}
               </EuiButton>
             </EuiToolTip>
