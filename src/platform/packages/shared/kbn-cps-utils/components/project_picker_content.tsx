@@ -30,18 +30,29 @@ import type { UseFetchProjectsResult } from './use_fetch_projects';
 
 export type ProjectPickerControlsState = 'enabled' | 'disabled' | 'hidden';
 
-export interface ProjectPickerContentProps {
+interface ProjectPickerContentBaseProps {
   projectRouting?: ProjectRouting;
-  onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
   projects: UseFetchProjectsResult;
+}
+
+interface ProjectPickerContentEnabledProps extends ProjectPickerContentBaseProps {
+  controlsState?: 'enabled';
+  onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
+}
+
+interface ProjectPickerContentReadOnlyProps extends ProjectPickerContentBaseProps {
   /**
    * Controls the project routing toggle (`All projects` / `This project`):
-   * - `enabled`: interactive (default)
    * - `disabled`: shown but not interactive
    * - `hidden`: not rendered, leaving a read-only project list
    */
-  controlsState?: ProjectPickerControlsState;
+  controlsState: Exclude<ProjectPickerControlsState, 'enabled'>;
+  onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
 }
+
+export type ProjectPickerContentProps =
+  | ProjectPickerContentEnabledProps
+  | ProjectPickerContentReadOnlyProps;
 
 const projectPickerOptions = [
   {
