@@ -140,7 +140,11 @@ test.describe(
 
         await page.testSubj.click('nav-search-reveal');
         await page.testSubj.fill('nav-search-input', 'Elastic Inference');
-        await expect(page.testSubj.locator('nav-search-no-results')).toBeVisible();
+        await expect(
+          page.testSubj
+            .locator('euiSelectableMessage')
+            .locator('[data-test-subj~="nav-search-no-results"]')
+        ).toBeVisible();
       });
     });
   }
