@@ -33,8 +33,14 @@ export const ALERTING_V2_ERROR_CODES = {
   INVALID_RULE_DATA: 'INVALID_RULE_DATA',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
-  /** Bulk rule operation params combine `ids` with `filter` / `search`. */
-  INVALID_BULK_PARAMS: 'INVALID_BULK_PARAMS',
+  /**
+   * A by-query bulk operation was submitted with `force: true` and the filter
+   * matched more resources than a single request may process. Rejected before
+   * any resource is mutated so the caller sees an all-or-nothing outcome (no
+   * partial execution) — the caller must narrow the filter or split the
+   * operation into multiple requests.
+   */
+  BULK_QUERY_MATCH_LIMIT_EXCEEDED: 'BULK_QUERY_MATCH_LIMIT_EXCEEDED',
   /** PUT body changed a field flagged as immutable. */
   IMMUTABLE_FIELDS_CHANGED: 'IMMUTABLE_FIELDS_CHANGED',
   /** Filter expression referenced an unknown field. */
