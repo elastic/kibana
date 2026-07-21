@@ -67,7 +67,6 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
   const deprecationNotice = isTemplatesV2Enabled ? (
     <EuiCallOut
       announceOnMount
-      title={i18n.LEGACY_CUSTOM_FIELDS_CALLOUT_TITLE}
       color="warning"
       iconType="warning"
       size="s"

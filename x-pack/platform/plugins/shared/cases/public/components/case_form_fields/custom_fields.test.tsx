@@ -58,6 +58,7 @@ describe('CustomFields', () => {
     );
 
     expect(await screen.findByTestId('legacy-custom-fields-deprecated-badge')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Legacy custom fields');
   });
 
   it('should not show the custom fields if the configuration is empty', async () => {

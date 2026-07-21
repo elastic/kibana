@@ -13,8 +13,8 @@ export const CUSTOM_FIELDS = i18n.translate('xpack.cases.customFields', {
   defaultMessage: 'Custom fields',
 });
 
-export const LEGACY_CUSTOM_FIELDS_CALLOUT_TITLE = i18n.translate(
-  'xpack.cases.caseFormFields.legacyCustomFieldsCalloutTitle',
+export const LEGACY_CUSTOM_FIELDS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.caseFormFields.legacyCustomFieldsSectionTitle',
   {
     defaultMessage: 'Legacy custom fields',
   }

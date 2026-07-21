@@ -131,6 +131,9 @@ describe('CreateCaseTemplateFields', () => {
 
     renderWithTestingProviders(<CreateCaseTemplateFields />);
 
+    expect(screen.getByTestId('create-case-custom-fields-title')).toHaveTextContent(
+      'Custom fields'
+    );
     expect(screen.getByTestId('control-hostname')).toHaveTextContent('Host Name');
     expect(screen.getByTestId('control-effort')).toHaveTextContent('Effort Level');
   });

@@ -19,9 +19,9 @@ interface Props {
   configurationCustomFields: CasesConfigurationUI['customFields'];
   setCustomFieldsOptional?: boolean;
   isEditMode?: boolean;
-  /** Renders a Deprecated badge next to the "Custom fields" heading. */
+  /** Renders a Deprecated badge and "Legacy custom fields" heading. */
   showDeprecatedBadge?: boolean;
-  /** Rendered below the "Custom fields" heading (e.g. deprecation callout). */
+  /** Rendered below the section heading (e.g. deprecation callout). */
   notice?: ReactNode;
 }
 
@@ -61,13 +61,17 @@ const CustomFieldsComponent: React.FC<Props> = ({
     return null;
   }
 
+  const sectionTitle = showDeprecatedBadge
+    ? i18n.LEGACY_CUSTOM_FIELDS_SECTION_TITLE
+    : i18n.CUSTOM_FIELDS;
+
   return (
     <EuiFormRow fullWidth>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="m">
-              <h3>{i18n.CUSTOM_FIELDS}</h3>
+              <h3>{sectionTitle}</h3>
             </EuiText>
           </EuiFlexItem>
           {showDeprecatedBadge ? (

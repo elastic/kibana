@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useEffect, useMemo, useRef } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   UseField,
@@ -27,6 +27,7 @@ import {
 } from '../../../common/utils';
 import { isRefField } from '../../../common/types/domain/template/fields';
 import { TemplateFieldsValidationContext } from './template_fields_validation_context';
+import { CUSTOM_FIELDS } from '../case_form_fields/translations';
 
 type FormShape = Record<string, Record<string, unknown>>;
 
@@ -173,9 +174,21 @@ export const CreateCaseTemplateFields: React.FC<CreateCaseTemplateFieldsProps> =
       <FormProvider {...innerForm}>
         {/* Parent CaseFormFields uses gutterSize="none"; pad when nothing separates us from Description. */}
         {addTopSpacing ? <EuiSpacer size="m" /> : null}
-        {globalFieldsFragment}
-        {globalFieldsFragment && templateFieldsFragment && <EuiSpacer />}
-        {templateFieldsFragment}
+        {globalFieldsFragment || templateFieldsFragment ? (
+          <EuiFormRow fullWidth>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText size="m">
+                  <h3 data-test-subj="create-case-custom-fields-title">{CUSTOM_FIELDS}</h3>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiSpacer size="xs" />
+              {globalFieldsFragment}
+              {globalFieldsFragment && templateFieldsFragment && <EuiSpacer />}
+              {templateFieldsFragment}
+            </EuiFlexGroup>
+          </EuiFormRow>
+        ) : null}
       </FormProvider>
     </>
   );
