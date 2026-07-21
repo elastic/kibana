@@ -163,7 +163,7 @@ describe('syncNamespaceTemplatesTask', () => {
       await runner.run();
 
       expect(mockedSyncNamespaceTemplates).toHaveBeenCalledWith(
-        expect.objectContaining({ abortController })
+        expect.objectContaining({ signal: abortController.signal })
       );
       expect(abortController.signal.aborted).toBe(true);
     });
