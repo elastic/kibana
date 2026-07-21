@@ -44,7 +44,7 @@ export class ActionPoliciesListPage {
   }
 
   detailsLink(policyName: string) {
-    return this.page.testSubj.locator(`content-list-table-item-link`, { hasText: policyName});    
+    return this.page.testSubj.locator(`content-list-table-item-link`, { hasText: policyName });
   }
 
   async openDetailsFlyout() {
