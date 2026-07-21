@@ -174,6 +174,7 @@ export function GenAiTab({ genAi }: Props) {
             <EuiDescriptionList
               type="column"
               columnWidths={[1, 3]}
+              compressed
               listItems={extraParams}
               data-test-subj="genAiDetails"
             />
