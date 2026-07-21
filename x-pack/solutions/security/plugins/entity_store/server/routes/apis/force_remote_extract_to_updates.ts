@@ -89,7 +89,7 @@ export function registerForceRemoteExtractToUpdates(router: EntityStorePluginRou
         const entityDefinition = getEntityDefinition(entityType, namespace);
         const result = await remoteLogsExtractionClient.extractToUpdates({
           type: entityType,
-          remoteIndexPatterns: indexPatterns,
+          remoteTargets: { include: indexPatterns, exclude: [] },
           docsLimit: docsLimit ?? DEFAULT_DOCS_LIMIT,
           maxLogsPerPage: maxLogsPerPage ?? LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
           lookbackPeriod: LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,

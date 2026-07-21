@@ -10,6 +10,7 @@ import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import { partition } from 'lodash';
 import { entityStoreMetrics } from '../../monitor/metrics';
 import type {
   EntityType,
@@ -43,7 +44,10 @@ import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index'
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
-import { resolveClosedIndexAdjustments } from '../../infra/elasticsearch/resolve_closed_indices';
+import {
+  resolveEsqlFromClause,
+  type EsqlFromClauseTargets,
+} from '../../infra/elasticsearch/resolve_esql_from_patterns';
 import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
@@ -246,10 +250,11 @@ export class LogsExtractionClient {
     logsCapApplied: boolean;
     logsProcessed: number;
   }> {
-    const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
+    const { local, remote } = await this.getLocalAndRemoteTargets(
       config.additionalIndexPatterns,
       config.excludedIndexPatterns
     );
+    const localIndexPatterns = await resolveEsqlFromClause(this.esClient, local, this.logger);
 
     const mainPromise = this.runMainPath({
       type,
@@ -261,14 +266,11 @@ export class LogsExtractionClient {
       indexPatterns: localIndexPatterns,
     });
 
-    const remoteStrategyIndexPatterns = this.remoteLogsExtractionClient.strategy.buildPatterns({
-      localIndexPatterns,
-      remoteIndexPatterns,
-    });
+    const remoteTargets = this.remoteLogsExtractionClient.strategy.buildPatterns({ local, remote });
     const remotePromise = this.remoteLogsExtractionClient.extractToUpdates({
       type,
       entityDefinition,
-      remoteIndexPatterns: remoteStrategyIndexPatterns,
+      remoteTargets,
       docsLimit: config.docsLimit,
       maxLogsPerPage: config.maxLogsPerPage,
       lookbackPeriod: config.lookbackPeriod,
@@ -285,8 +287,8 @@ export class LogsExtractionClient {
 
     return {
       ...mainResult,
-      isRemote: remoteStrategyIndexPatterns.length > 0,
-      indexPatterns: [...localIndexPatterns, ...remoteStrategyIndexPatterns],
+      isRemote: remoteTargets.include.length > 0,
+      indexPatterns: [...localIndexPatterns, ...remoteTargets.include],
       remoteError: remoteResult.error,
     };
   }
@@ -938,64 +940,36 @@ export class LogsExtractionClient {
   }
 
   /**
-   * Returns local index patterns and remote patterns separately.
-   * Cluster-prefixed patterns (`cluster1:logs-*`) go to remote (CCS strategy).
-   * Unqualified patterns stay local; CPS strategy reuses local patterns for linked projects.
-   * Main extraction uses local patterns only (LOOKUP JOIN does not support remote).
+   * Splits configured patterns into local and remote (cluster-prefixed) targets.
+   * Pure routing — no reconciliation or negation; each pipeline reconciles its own targets
+   * against its own cluster (CCS via the remote patterns, CPS by reusing the local ones).
+   * Main extraction uses local only (LOOKUP JOIN does not support remote).
    */
-  public async getLocalAndRemoteIndexPatterns(
+  public async getLocalAndRemoteTargets(
     additionalIndexPatterns: string[] = [],
     excludedIndexPatterns: string[] = []
-  ): Promise<{ localIndexPatterns: string[]; remoteIndexPatterns: string[] }> {
+  ): Promise<{ local: EsqlFromClauseTargets; remote: EsqlFromClauseTargets }> {
     const all = await this.getAllIndexPatternsIncludingRemote(additionalIndexPatterns);
-    const alertsIndex = getAlertsIndexName(this.namespace);
-    const withoutAlerts = all.filter((index) => index !== alertsIndex);
-
-    const localIndexPatterns: string[] = [];
-    const remoteIndexPatterns: string[] = [];
-
-    withoutAlerts.forEach((index) => {
-      if (isNonLocalIndexName(index)) {
-        remoteIndexPatterns.push(index);
-      } else {
-        localIndexPatterns.push(index);
-      }
-    });
-
-    // Pre-flight: find data streams with closed backing indices and build adjustments.
-    // Open backing indices must be added as positives BEFORE any negations.
-    const { openBackingIndices, negations: closedNegations } = await resolveClosedIndexAdjustments(
-      this.esClient,
-      localIndexPatterns,
-      this.logger
+    const [remoteInclude, localInclude] = partition(all, isNonLocalIndexName);
+    const [remoteExclude, localExclude] = partition(
+      [getAlertsIndexName(this.namespace), ...excludedIndexPatterns],
+      isNonLocalIndexName
     );
-    localIndexPatterns.push(...openBackingIndices);
-
-    // Append after includes: ES negation only subtracts from earlier entries in the same expression.
-    // e.g. `logs-*,-logs-proxy-*` excludes proxy logs, but `-logs-proxy-*,logs-*` does not.
-    excludedIndexPatterns.forEach((pattern) => {
-      if (isNonLocalIndexName(pattern)) {
-        remoteIndexPatterns.push(`-${pattern}`);
-      } else {
-        localIndexPatterns.push(`-${pattern}`);
-      }
-    });
-
-    // Closed-index negations go last — after all positive includes and user exclusions.
-    localIndexPatterns.push(...closedNegations);
-
-    return { localIndexPatterns, remoteIndexPatterns };
+    return {
+      local: { include: localInclude, exclude: localExclude },
+      remote: { include: remoteInclude, exclude: remoteExclude },
+    };
   }
 
   public async getLocalIndexPatterns(
     additionalIndexPatterns: string[] = [],
     excludedIndexPatterns: string[] = []
   ): Promise<string[]> {
-    const { localIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
+    const { local } = await this.getLocalAndRemoteTargets(
       additionalIndexPatterns,
       excludedIndexPatterns
     );
-    return localIndexPatterns;
+    return resolveEsqlFromClause(this.esClient, local, this.logger);
   }
 
   /**

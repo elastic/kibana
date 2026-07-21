@@ -85,14 +85,14 @@ describe('RemoteLogsExtractionClient', () => {
     id: 'ccs',
     client: mockEsClient,
     stateClient: mockStateClient,
-    buildPatterns: ({ remoteIndexPatterns }) => remoteIndexPatterns,
+    buildPatterns: ({ remote }) => remote,
   };
 
   let client: RemoteLogsExtractionClient;
 
   const defaultExtractParams = {
     type: 'host' as const,
-    remoteIndexPatterns: ['remote_cluster:logs-*'],
+    remoteTargets: { include: ['remote_cluster:logs-*'], exclude: [] },
     docsLimit: 10000,
     maxLogsPerPage: DEFAULT_MAX_LOGS_PER_PAGE,
     lookbackPeriod: '3h',
@@ -860,7 +860,7 @@ describe('RemoteLogsExtractionClient', () => {
         id,
         client: mockEsClient,
         stateClient: mockStateClient,
-        buildPatterns: ({ remoteIndexPatterns }) => remoteIndexPatterns,
+        buildPatterns: ({ remote }) => remote,
       });
 
     // The matcher reads only body.error.type, so statusCode is irrelevant here.
