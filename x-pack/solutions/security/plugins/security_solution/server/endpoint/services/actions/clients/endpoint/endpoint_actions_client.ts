@@ -166,20 +166,20 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    // Kill Process: `kill_descendents` is gated by a feature flag and requires that the
+    // Kill Process: `kill_descendants` is gated by a feature flag and requires that the
     // Endpoint supports it (via the `kill_process_descendents` capability).
     if (
       actionRequest.command === 'kill-process' &&
-      actionRequest.parameters?.kill_descendents === true
+      actionRequest.parameters?.kill_descendants === true
     ) {
       if (
         !this.options.endpointService.experimentalFeatures
-          .responseActionsEndpointKillProcessDescendents
+          .responseActionsEndpointKillProcessDescendants
       ) {
         return {
           isValid: false,
           error: new ResponseActionsClientError(
-            'kill-process `kill_descendents` parameter is not enabled',
+            'kill-process `kill_descendants` parameter is not enabled',
             400
           ),
         };

@@ -260,7 +260,7 @@ export interface ResponseActionParametersWithPid {
   entity_id?: never;
   process_name?: never;
   /** Also terminate the descendent (child) processes. Valid for `endpoint` agent type only. */
-  kill_descendents?: boolean;
+  kill_descendants?: boolean;
 }
 
 export interface ResponseActionParametersWithEntityId {
@@ -268,7 +268,7 @@ export interface ResponseActionParametersWithEntityId {
   process_name?: never;
   entity_id: string;
   /** Also terminate the descendent (child) processes. Valid for `endpoint` agent type only. */
-  kill_descendents?: boolean;
+  kill_descendants?: boolean;
 }
 
 export interface ResponseActionParametersWithProcessName {

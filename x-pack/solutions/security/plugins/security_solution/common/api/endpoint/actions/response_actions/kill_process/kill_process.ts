@@ -21,13 +21,13 @@ export const KillProcessRouteRequestSchema = {
       parameters: schema.oneOf([
         schema.object({
           pid: schema.number({ min: 1 }),
-          // `kill_descendents` applies only to the Elastic Defend Endpoint (validated below)
-          kill_descendents: schema.maybe(schema.boolean()),
+          // `kill_descendants` applies only to the Elastic Defend Endpoint (validated below)
+          kill_descendants: schema.maybe(schema.boolean()),
         }),
         schema.object({
           entity_id: schema.string({ minLength: 1, maxLength: 256 }),
-          // `kill_descendents` applies only to the Elastic Defend Endpoint (validated below)
-          kill_descendents: schema.maybe(schema.boolean()),
+          // `kill_descendants` applies only to the Elastic Defend Endpoint (validated below)
+          kill_descendants: schema.maybe(schema.boolean()),
         }),
 
         // Process Name currently applies only to SentinelOne (validated below)
@@ -48,11 +48,11 @@ export const KillProcessRouteRequestSchema = {
         }
 
         if (
-          'kill_descendents' in bodyContent.parameters &&
+          'kill_descendants' in bodyContent.parameters &&
           bodyContent.agent_type &&
           bodyContent.agent_type !== 'endpoint'
         ) {
-          return `[parameters.kill_descendents]: is not valid with agent type of ${bodyContent.agent_type}`;
+          return `[parameters.kill_descendants]: is not valid with agent type of ${bodyContent.agent_type}`;
         }
       },
     }

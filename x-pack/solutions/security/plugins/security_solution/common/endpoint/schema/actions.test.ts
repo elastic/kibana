@@ -714,60 +714,60 @@ describe('actions schemas', () => {
     });
   });
 
-  describe('KillProcessRouteRequestSchema `kill_descendents` parameter', () => {
-    it('should accept `kill_descendents: true` with pid for endpoint agent type', () => {
+  describe('KillProcessRouteRequestSchema `kill_descendants` parameter', () => {
+    it('should accept `kill_descendants: true` with pid for endpoint agent type', () => {
       expect(() => {
         KillProcessRouteRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           agent_type: 'endpoint',
-          parameters: { pid: 1234, kill_descendents: true },
+          parameters: { pid: 1234, kill_descendants: true },
         });
       }).not.toThrow();
     });
 
-    it('should accept `kill_descendents: true` with entity_id for endpoint agent type', () => {
+    it('should accept `kill_descendants: true` with entity_id for endpoint agent type', () => {
       expect(() => {
         KillProcessRouteRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           agent_type: 'endpoint',
-          parameters: { entity_id: 'abc123', kill_descendents: true },
+          parameters: { entity_id: 'abc123', kill_descendants: true },
         });
       }).not.toThrow();
     });
 
-    it('should allow request without kill_descendents', () => {
+    it('should allow request without kill_descendants', () => {
       const result = KillProcessRouteRequestSchema.body.validate({
         endpoint_ids: ['ABC-XYZ-000'],
         agent_type: 'endpoint',
         parameters: { pid: 1234 },
       });
 
-      expect('kill_descendents' in result.parameters).toBe(false);
+      expect('kill_descendants' in result.parameters).toBe(false);
     });
 
-    it('should reject `kill_descendents` when agent_type is crowdstrike', () => {
+    it('should reject `kill_descendants` when agent_type is crowdstrike', () => {
       expect(() => {
         KillProcessRouteRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           agent_type: 'crowdstrike',
-          parameters: { pid: 1234, kill_descendents: true },
+          parameters: { pid: 1234, kill_descendants: true },
         });
-      }).toThrow('[parameters.kill_descendents]: is not valid with agent type of crowdstrike');
+      }).toThrow('[parameters.kill_descendants]: is not valid with agent type of crowdstrike');
     });
 
-    it('should reject `kill_descendents` when agent_type is microsoft_defender_endpoint', () => {
+    it('should reject `kill_descendants` when agent_type is microsoft_defender_endpoint', () => {
       expect(() => {
         KillProcessRouteRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           agent_type: 'microsoft_defender_endpoint',
-          parameters: { pid: 1234, kill_descendents: true },
+          parameters: { pid: 1234, kill_descendants: true },
         });
       }).toThrow(
-        '[parameters.kill_descendents]: is not valid with agent type of microsoft_defender_endpoint'
+        '[parameters.kill_descendants]: is not valid with agent type of microsoft_defender_endpoint'
       );
     });
 
-    it('should allow request without kill_descendents for non-endpoint agentType', () => {
+    it('should allow request without kill_descendants for non-endpoint agentType', () => {
       expect(() => {
         KillProcessRouteRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
