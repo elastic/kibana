@@ -60,7 +60,7 @@ All dashboard actions include the [common log fields](#logs-schema) and populate
 
 ### Dashboard view
 
-`dashboard_view` sets `event.type` to `access`. `event.start` and `event.end` are ISO8601 timestamps, and `event.duration`, measured in nanoseconds, record each continuous period that the dashboard is visible. A period ends when the user navigates away, closes or reloads the tab, or switches browser tabs.
+`dashboard_view` sets `event.type` to `access`. `event.start` and `event.end` are ISO8601 timestamps, and `event.duration`, measured in nanoseconds, records each continuous period that the dashboard is visible. A period ends when the user navigates away, closes or reloads the tab, or switches browser tabs.
 
 ### Dashboard refresh
 
