@@ -118,6 +118,17 @@ export const registerRunExperimentRoute = ({
               error instanceof Error ? error.message : String(error)
             }`
           );
+
+          await Promise.allSettled(
+            workflowExecutionIds.map((workflowExecutionId) =>
+              workflowsManagement.management.cancelWorkflowExecution(
+                workflowExecutionId,
+                spaceId,
+                request
+              )
+            )
+          );
+
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to launch experiment workflow execution(s)' },
