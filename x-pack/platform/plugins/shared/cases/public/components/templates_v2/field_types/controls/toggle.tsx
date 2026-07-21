@@ -16,7 +16,7 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED, TOGGLE_ON, TOGGLE_OFF } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
 type ToggleProps = z.infer<typeof ToggleFieldSchema> & ConditionRenderProps;
 
@@ -25,7 +25,14 @@ const isChecked = (value: unknown): boolean => value === true || value === 'true
 const isDefinedToggleValue = (value: unknown): boolean =>
   value === true || value === false || value === 'true' || value === 'false';
 
-export const Toggle = ({ label, name, type, metadata, isRequired }: ToggleProps) => {
+export const Toggle = ({
+  label,
+  name,
+  type,
+  metadata,
+  isRequired,
+  isRequiredOnClose,
+}: ToggleProps) => {
   const { control } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
   const defaultValue =
@@ -60,7 +67,7 @@ export const Toggle = ({ label, name, type, metadata, isRequired }: ToggleProps)
         return (
           <EuiFormRow
             label={label}
-            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+            labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
             isInvalid={!!fieldState.error}
             error={fieldState.error?.message}
             fullWidth
