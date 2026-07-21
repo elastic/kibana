@@ -23,7 +23,7 @@ set -euo pipefail
 export KBN_BOOTSTRAP_NO_PREBUILT=true
 .buildkite/scripts/bootstrap.sh
 
-GITHUB_PR_NUMBER="${GITHUB_PR_NUMBER:-${BUILDKITE_PULL_REQUEST:-}}"
+GITHUB_PR_NUMBER="${GITHUB_PR_NUMBER:-${EVAL_PR_NUMBER:-${BUILDKITE_PULL_REQUEST:-}}}"
 if [[ -z "$GITHUB_PR_NUMBER" ]] || [[ "$GITHUB_PR_NUMBER" == "false" ]]; then
   echo "Not a PR build; skipping eval comparison comment."
   exit 0
