@@ -121,6 +121,10 @@ const FEATURE_STATE_SUFFIX_PATTERNS = [
 /** Removes mutable suffixes for matching without changing stored ids or UUIDs. */
 export function normalizeFeatureSlugForMatching(id: string): string {
   const normalized = normalizeFeatureSlug(id);
+  if (normalized.length > MAX_ID_LENGTH) {
+    return normalized;
+  }
+
   let candidate = normalized;
 
   while (candidate.length > 0) {

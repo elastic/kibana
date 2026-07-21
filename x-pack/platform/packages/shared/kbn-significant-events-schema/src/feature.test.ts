@@ -7,6 +7,7 @@
 
 import type { BaseFeature } from './feature';
 import { computeFeatureUuid, mergeFeature, normalizeFeatureSlugForMatching } from './feature';
+import { MAX_ID_LENGTH } from './significant_events/constants';
 
 const createFeature = ({
   id = 'okta',
@@ -59,6 +60,12 @@ describe('normalizeFeatureSlugForMatching', () => {
 
   it('returns the normalized slug when stripping would empty it', () => {
     expect(normalizeFeatureSlugForMatching('  -1.2.3  ')).toBe('-1.2.3');
+  });
+
+  it('skips suffix matching for ids above the schema limit', () => {
+    const oversizedId = `-0${'.0'.repeat(MAX_ID_LENGTH)}`;
+
+    expect(normalizeFeatureSlugForMatching(oversizedId)).toBe(oversizedId);
   });
 
   it('keeps matching normalization out of UUID generation', () => {
