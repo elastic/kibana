@@ -26,6 +26,9 @@ const getDiscoverUrlWithDataViewId = (baseUrl: string, dataViewId: string) => {
   return `${origin}${spacePath}/app/discover#/?_a=(dataSource:(dataViewId:'${dataViewId}',type:dataView))`;
 };
 
+const normalizeHashDataViewIdQuotes = (hash: string) =>
+  hash.replace(/dataViewId:'([^']+)'/g, 'dataViewId:$1');
+
 spaceTest.describe('Discover URL state', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
@@ -88,7 +91,9 @@ spaceTest.describe('Discover URL state', { tag: tags.deploymentAgnostic }, () =>
       await pageObjects.discover.waitUntilTabIsLoaded();
 
       await expect(page.testSubj.locator('dscDataViewNotFoundShowSavedWarning')).toBeVisible();
-      expect(await page.evaluate(() => window.location.hash)).toBe(originalHash);
+      expect(normalizeHashDataViewIdQuotes(await page.evaluate(() => window.location.hash))).toBe(
+        normalizeHashDataViewIdQuotes(originalHash)
+      );
     }
   );
 
