@@ -36,8 +36,8 @@ export const AUDIT_OTEL_FIELD_RENAMES: Record<string, string | string[]> = {
   'kibana.authentication_type': 'authentication.type',
   'client.ip': ['source.address', 'source.ip'],
   'trace.id': 'request.id',
-  // OTel semconv: singular 'header' with per-key attributes (not plural 'headers' object)
-  'http.request.headers.x-forwarded-for': 'http.request.header.x-forwarded-for',
+  // X-Forwarded-For maps to network.forwarded_ip (ECS / log-delivery convention).
+  'http.request.headers.x-forwarded-for': 'network.forwarded_ip',
 };
 
 // Both fields are excluded on Serverless; stripped from log record and resource attributes.
