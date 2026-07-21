@@ -16,10 +16,10 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React from 'react';
-import type { InfoPanelProps } from '../types';
+import type { DocsPanelProps } from '../types';
 
 interface OnboardingDocPanelProps {
-  doc: InfoPanelProps;
+  doc: DocsPanelProps;
   telemetryPrefix: string;
 }
 
@@ -45,8 +45,8 @@ export const OnboardingDocPanel = ({ doc, telemetryPrefix }: OnboardingDocPanelP
         href={doc.docsHref}
         external
         target="_blank"
-        data-test-subj={`vectordbWizardInfoPanelDocLink-${doc.id}`}
-        data-telemetry-id={`${telemetryPrefix}-infoPanelDocLink-${doc.id}`}
+        data-test-subj={`vectordbWizardDocsPanelLink-${doc.id}`}
+        data-telemetry-id={`${telemetryPrefix}-docsPanelLink-${doc.id}`}
       >
         {doc.docsLabel}
       </EuiLink>
