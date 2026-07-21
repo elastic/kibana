@@ -36,10 +36,12 @@ import { CasesPageBody } from '../../app/cases_page_body';
 import { GuidedTour } from '../../tour/guided_tour';
 import { TEMPLATES_TOUR_STEPS } from '../tour/tour_steps_config';
 import { TEMPLATES_TOUR_STEP_TEST_ID } from '../tour/constants';
+import { useKibana } from '../../../common/lib/kibana';
 
 export const AllTemplatesPage: React.FC = () => {
   useCasesTemplatesBreadcrumbs();
   const { owner } = useCasesContext();
+  const { docLinks } = useKibana().services;
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
@@ -160,6 +162,9 @@ export const AllTemplatesPage: React.FC = () => {
         title={i18n.TEMPLATE_TITLE}
         back={templatesListBack}
         menu={templatesListMenu}
+        // Native "Documentation" item in the header overflow menu, linking to the case-templates
+        // guide via the doclinks service (kept consistent with the template editor header).
+        docLink={docLinks.links.cases.manageCaseTemplates}
       />
       <GuidedTour
         steps={TEMPLATES_TOUR_STEPS}

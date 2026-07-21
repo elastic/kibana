@@ -20,7 +20,7 @@ import type { ChatCallbackFailurePayload } from '../../../common/http_api/chat_c
 import { buildChatResponseFromEvents } from './utils/chat_response';
 import { CallbackDeliveryService } from './callback_delivery_service';
 
-const callbackUrl = 'https://relay.example.com/events?token=abc';
+const callbackUrl = 'https://relay.example.com/v1/events?token=abc';
 const createConversationExecution = (url: string | null = callbackUrl): AgentExecution =>
   ({
     executionId: 'execution-1',
@@ -39,9 +39,16 @@ const createStandaloneExecution = (): AgentExecution =>
     },
   } as unknown as AgentExecution);
 const responseTimeout = 60000;
-const createCallbackDeliveryService = (ensureUriAllowed = jest.fn()) =>
+const createCallbackDeliveryService = (
+  ensureUriAllowed = jest.fn(),
+  relayClient?: {
+    isRelayOrigin: jest.Mock;
+    postCallback: jest.Mock;
+  }
+) =>
   new CallbackDeliveryService({
     actions: {
+      getRelayClient: jest.fn().mockReturnValue(relayClient),
       getActionsConfigurationUtilities: jest.fn().mockReturnValue({
         ensureUriAllowed,
         getResponseSettings: jest.fn().mockReturnValue({
@@ -113,6 +120,49 @@ describe('callback request delivery', () => {
       redirect: 'error',
       signal: expect.any(AbortSignal),
     });
+  });
+
+  it('uses the Actions Relay client for matching callback URLs', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch');
+    const relayClient = {
+      isRelayOrigin: jest.fn().mockReturnValue(true),
+      postCallback: jest.fn().mockResolvedValue({ status: 204 }),
+    };
+    const callbackDeliveryService = createCallbackDeliveryService(jest.fn(), relayClient);
+
+    await callbackDeliveryService.makeFailureCallbackRequestIfConfigured({
+      execution: createConversationExecution(),
+      payload,
+    });
+
+    expect(relayClient.postCallback).toHaveBeenCalledWith(
+      callbackUrl,
+      payload,
+      expect.any(AbortSignal)
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('uses the Relay client for any path on the configured Relay origin', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch');
+    const relayClient = {
+      isRelayOrigin: jest.fn().mockReturnValue(true),
+      postCallback: jest.fn().mockResolvedValue({ status: 204 }),
+    };
+    const callbackDeliveryService = createCallbackDeliveryService(jest.fn(), relayClient);
+
+    const callbackWithAlternatePath = 'https://relay.example.com/v1/events/?token=abc';
+    await callbackDeliveryService.makeFailureCallbackRequestIfConfigured({
+      execution: createConversationExecution(callbackWithAlternatePath),
+      payload,
+    });
+
+    expect(relayClient.postCallback).toHaveBeenCalledWith(
+      callbackWithAlternatePath,
+      payload,
+      expect.any(AbortSignal)
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('aborts and retries requests that exceed the Actions response timeout', async () => {

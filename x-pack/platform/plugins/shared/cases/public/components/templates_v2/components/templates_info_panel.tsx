@@ -78,7 +78,7 @@ const TemplatesInfoPanelComponent: React.FC<Props> = ({ onStartTour }) => {
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>
-              <EuiLink href={docLinks.links.cases.configureCaseSettings} target="_blank" external>
+              <EuiLink href={docLinks.links.cases.manageCaseTemplates} target="_blank" external>
                 {i18n.LEARN_MORE}
               </EuiLink>
             </EuiFlexItem>
