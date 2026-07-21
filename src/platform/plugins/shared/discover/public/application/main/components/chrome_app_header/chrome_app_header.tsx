@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
-import { AppHeader } from '@kbn/app-header';
+import { DiscoverAppHeader } from '@kbn/app-header/discover';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { getChromeHeaderBack, getChromeHeaderTitle } from './utils';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -20,11 +20,11 @@ import { useIsChromeNextProjectHeader } from './use_is_chrome_next_project_heade
 
 interface ChromeAppHeaderProps {
   menu?: AppMenuConfig;
-  titleAppend?: ReactNode;
+  tabsBar?: ReactNode;
   hasTabs?: boolean;
 }
 
-export const ChromeAppHeader = ({ menu, titleAppend, hasTabs = false }: ChromeAppHeaderProps) => {
+export const ChromeAppHeader = ({ menu, tabsBar, hasTabs = false }: ChromeAppHeaderProps) => {
   const { embeddableEditor } = useDiscoverServices();
   const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
   const persistedDiscoverSession = useInternalStateSelector(
@@ -79,13 +79,13 @@ export const ChromeAppHeader = ({ menu, titleAppend, hasTabs = false }: ChromeAp
         position: relative;
       `}
     >
-      <AppHeader
+      <DiscoverAppHeader
         title={title}
         back={back}
         menu={appMenu}
         sticky={false}
         spacing="compact"
-        titleAppend={titleAppend}
+        tabsBar={tabsBar}
         borderless={hasTabs}
       />
     </div>
