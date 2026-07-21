@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 import { stripMarkdownFences, containsScript, prepareHtml } from '../utils/template_fill';
@@ -21,7 +22,7 @@ export interface UseCustomContentHtmlParams {
   prompt: string | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
-  colorMode: 'LIGHT' | 'DARK';
+  colorMode: EuiThemeColorModeStandard;
   onTemplateChange: (template: string) => void;
 }
 
