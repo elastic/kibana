@@ -34,15 +34,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('defaults the closure option correctly', async () => {
-        await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
+        await cases.common.assertClosureOption('close-by-user');
       });
 
       it('change closure option successfully', async () => {
-        await cases.common.selectRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
+        await cases.common.selectClosureOption('close-by-pushing');
         const toast = await toasts.getElementByIndex(1);
         expect(await toast.getVisibleText()).to.be('Settings successfully updated');
         await toasts.dismissAll();
-        await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
+        await cases.common.assertClosureOption('close-by-pushing');
       });
     });
 
@@ -59,7 +59,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Custom fields', function () {
-      before(async () => {
+      before(async function () {
+        // The redesign settings page does not manage custom fields (moved to the templates v2 UI).
+        if (await cases.common.isRedesignEnabled()) {
+          this.skip();
+        }
         await cases.api.createConfigWithCustomFields({
           customFields: [
             {
@@ -181,7 +185,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Templates', function () {
-      before(async () => {
+      before(async function () {
+        // The redesign settings page does not manage templates (moved to the templates v2 UI).
+        if (await cases.common.isRedesignEnabled()) {
+          this.skip();
+        }
         await cases.api.createConfigWithTemplates({
           templates: [
             {

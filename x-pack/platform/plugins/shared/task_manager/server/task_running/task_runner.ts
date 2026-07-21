@@ -857,6 +857,7 @@ export class TaskManagerRunner implements TaskRunner {
       await this.removeTask();
     } else {
       const { shouldValidate = true } = unwrap(result);
+      const label = `${this.taskType}:${this.instance.task.id}`;
 
       let shouldUpdateTask: boolean = false;
       let partialTask: PartialConcreteTaskInstance = {
@@ -890,7 +891,6 @@ export class TaskManagerRunner implements TaskRunner {
         shouldUpdateTask = true;
 
         if (shouldTaskBeDisabled) {
-          const label = `${this.taskType}:${this.instance.task.id}`;
           this.logger.warn(`Disabling task ${label} as it indicated it should disable itself`, {
             tags: [this.taskType],
           });
@@ -908,12 +908,29 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       if (shouldUpdateTask) {
-        this.instance = asRan(
-          await this.bufferedTaskStore.partialUpdate(partialTask, {
-            validate: shouldValidate,
-            doc: this.instance.task,
-          })
-        );
+        try {
+          this.instance = asRan(
+            await this.bufferedTaskStore.partialUpdate(partialTask, {
+              validate: shouldValidate,
+              doc: this.instance.task,
+            })
+          );
+        } catch (error) {
+          const isVersionConflict =
+            SavedObjectsErrorHelpers.isConflictError(error) ||
+            error.status === 409 ||
+            error.statusCode === 409 ||
+            error.error?.type === 'version_conflict_engine_exception';
+
+          if ((this.isExpired || this.isCancelled) && isVersionConflict) {
+            this.logger.debug(
+              `Skipping the update of expired/cancelled task ${label} because it was reclaimed by another Kibana while running.`,
+              { tags: [this.id, this.taskType] }
+            );
+          } else {
+            throw error;
+          }
+        }
       }
     }
 
