@@ -24,9 +24,8 @@ const createLogger = (): Logger =>
     get: jest.fn(),
   } as unknown as Logger);
 
-const createApmSourcesAccess = (
-  getApmIndices: jest.Mock
-): ApmSourcesAccessPluginStart => ({ getApmIndices } as unknown as ApmSourcesAccessPluginStart);
+const createApmSourcesAccess = (getApmIndices: jest.Mock): ApmSourcesAccessPluginStart =>
+  ({ getApmIndices } as unknown as ApmSourcesAccessPluginStart);
 
 const createLogsDataAccess = (getLogSources: jest.Mock): LogsDataAccessPluginStart =>
   ({
