@@ -14,6 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { GenAiFields } from './get_genai_fields';
@@ -40,6 +41,13 @@ interface DetailRow {
   label: React.ReactNode;
   content: React.ReactNode;
 }
+
+// Remove the last row's bottom border so it doesn't double up with the panel border.
+const noLastRowBorderCss = css`
+  tr:last-child td {
+    border-bottom: none;
+  }
+`;
 
 const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
   {
@@ -207,6 +215,7 @@ export function GenAiTab({ genAi }: Props) {
               items={detailRows}
               columns={DETAIL_COLUMNS}
               data-test-subj="genAiDetails"
+              css={noLastRowBorderCss}
             />
           </GenAiSection>
         </>
