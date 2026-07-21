@@ -8,7 +8,8 @@
 import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
@@ -83,7 +84,6 @@ describe('scheduled significant events discovery settings route', () => {
       scheduledDiscovery: {
         enabled: true,
         detectionIntervalMinutes: 45,
-        targetCoverageMinutes: 60,
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 6,
         triageBatchSize: 8,
@@ -96,7 +96,6 @@ describe('scheduled significant events discovery settings route', () => {
     expect(uiSettingsClient.setMany).toHaveBeenCalledWith({
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 45,
-      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES]: 60,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 15,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 6,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 8,
@@ -108,7 +107,9 @@ describe('scheduled significant events discovery settings route', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 45,
-        targetCoverageMinutes: 60,
+        detectionBucketIntervalMinutes: 1,
+        detectionLookbackMinutes: 40,
+        targetCoverageMinutes: 30,
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 6,
         triageBatchSize: 8,
@@ -143,6 +144,8 @@ describe('scheduled significant events discovery settings route', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 30,
+        detectionBucketIntervalMinutes: 1,
+        detectionLookbackMinutes: 40,
         targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
@@ -178,6 +181,8 @@ describe('scheduled significant events discovery settings route', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 45,
+        detectionBucketIntervalMinutes: 1,
+        detectionLookbackMinutes: 40,
         targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
@@ -219,6 +224,94 @@ describe('scheduled significant events discovery settings route', () => {
     await route.handler(handlerParams);
 
     expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('persists and applies detection bucket interval and lookback when provided', async () => {
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: {
+        detectionBucketIntervalMinutes: 5,
+        detectionLookbackMinutes: 150,
+      },
+      spaceSettings: {
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 5,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
+      },
+    });
+
+    await route.handler(handlerParams);
+
+    expect(uiSettingsClient.setMany).toHaveBeenCalledWith({
+      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES]: 5,
+      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES]: 150,
+    });
+    expect(scheduledWorkflowService.ensureWorkflow).toHaveBeenCalledWith({
+      enabled: true,
+      request: handlerParams.request,
+      spaceId: 'space-a',
+      config: {
+        detectionIntervalMinutes: 30,
+        detectionBucketIntervalMinutes: 5,
+        detectionLookbackMinutes: 150,
+        targetCoverageMinutes: 30,
+        reviewIntervalMinutes: 10,
+        discoveryBatchSize: 3,
+        triageBatchSize: 5,
+        maxReviewPasses: 3,
+      },
+    });
+  });
+
+  it('rejects a lookback that is not an exact multiple of the bucket interval', async () => {
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: {
+        detectionBucketIntervalMinutes: 7,
+        detectionLookbackMinutes: 150,
+      },
+    });
+
+    await expect(route.handler(handlerParams)).rejects.toThrow(
+      'must be an exact multiple of detectionBucketIntervalMinutes'
+    );
+
+    expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+    expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('rejects a bucket interval / lookback pair yielding too few change_point buckets', async () => {
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: {
+        detectionBucketIntervalMinutes: 5,
+        detectionLookbackMinutes: 40,
+      },
+    });
+
+    await expect(route.handler(handlerParams)).rejects.toThrow(
+      'must yield between 22 and 1000 buckets'
+    );
+
+    expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+    expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('validates the resolved pair when only one of the two detection tuning fields is updated', async () => {
+    const { handlerParams } = createHandlerParams({
+      // Stored bucket interval is 5m; a 40m lookback would leave only 8 buckets.
+      scheduledDiscovery: {
+        detectionLookbackMinutes: 40,
+      },
+      spaceSettings: {
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES]: 5,
+      },
+    });
+
+    await expect(route.handler(handlerParams)).rejects.toThrow(
+      'must yield between 22 and 1000 buckets'
+    );
   });
 
   it('rolls back scheduled discovery settings when workflow reconciliation fails', async () => {

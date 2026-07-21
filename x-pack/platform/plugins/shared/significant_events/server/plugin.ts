@@ -27,8 +27,8 @@ import {
   type ManagedWorkflowsInstaller,
 } from './lib/workflows/setup/managed_workflows_installer';
 import { registerFeatureFlags } from './feature_flags';
-import { registerRules } from './lib/significant_events/rules/register_rules';
 import { getSignificantEventsTuningConfig } from './lib/significant_events/helpers/get_significant_events_tuning_config';
+import { deleteLegacyRules } from './lib/significant_events/rules/delete_legacy_rules';
 
 import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
@@ -124,7 +124,6 @@ export class SignificantEventsPlugin
 
     this.ebtTelemetryService.setup(core.analytics);
 
-    registerRules({ plugins, logger: this.logger.get('rules') });
     registerSignificantEventsInferenceFeatures(
       plugins.searchInferenceEndpoints,
       this.logger.get('inference-features')
@@ -168,24 +167,24 @@ export class SignificantEventsPlugin
         space,
       });
 
-      const getAlertingRulesClient = async () =>
-        pluginsStart.alerting.getRulesClientWithRequestInSpace(
+      const getAlertingV2RulesClient = async () =>
+        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
+
+      const deleteLegacyRulesById = async (ruleIds: string[]): Promise<void> => {
+        if (ruleIds.length === 0) {
+          return;
+        }
+        const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
           request,
           DEFAULT_SPACE_ID,
           rulesClientOptions
         );
-
-      const getAlertingV2RulesClient = async () =>
-        pluginsStart.alertingVTwo
-          ? pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID)
-          : undefined;
+        await deleteLegacyRules(rulesClient, ruleIds);
+      };
 
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
-          uiSettingsClient,
-          getAlertingRulesClient,
           getAlertingV2RulesClient,
-          logger: this.logger,
         });
 
       const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
@@ -214,6 +213,7 @@ export class SignificantEventsPlugin
         attachmentClient,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
+        deleteLegacyRules: deleteLegacyRulesById,
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,
@@ -303,9 +303,7 @@ export class SignificantEventsPlugin
     }
 
     core.pricing.registerProductFeatures(SIGNIFICANT_EVENT_TIERED_FEATURES);
-    registerFeatureFlags(core, this.logger, {
-      isAlertingV2PluginAvailable: 'alertingVTwo' in plugins,
-    });
+    registerFeatureFlags(core, this.logger);
 
     registerRoutes({
       repository: significantEventsRouteRepository,

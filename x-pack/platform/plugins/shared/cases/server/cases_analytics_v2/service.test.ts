@@ -32,7 +32,6 @@ const buildService = () =>
     enableAdminRoutes: false,
     resetTaskTimeoutMinutes: 60,
     resetPageDelayMs: 0,
-    templatesEnabled: true,
   });
 
 describe('CasesAnalyticsV2Service', () => {
@@ -143,7 +142,6 @@ describe('CasesAnalyticsV2Service', () => {
         enableAdminRoutes: false,
         resetTaskTimeoutMinutes: 60,
         resetPageDelayMs: 0,
-        templatesEnabled: false,
       });
 
     const startService = async (service: CasesAnalyticsV2Service) => {

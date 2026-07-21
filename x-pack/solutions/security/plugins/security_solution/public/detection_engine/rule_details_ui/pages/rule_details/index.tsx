@@ -246,7 +246,12 @@ export const RuleDetailsPage = connector(
     const isRuleChangesHistoryEnabled =
       ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
 
-    const { application, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
+    const {
+      application,
+      timelines: timelinesUi,
+      spaces: spacesApi,
+      aiRuleCreation,
+    } = useKibana().services;
     const {
       navigateToApp,
       capabilities: { actions },
@@ -362,6 +367,21 @@ export const RuleDetailsPage = connector(
         path: getRuleDetailsTabUrl(ruleId ?? '', 'alerts', ''),
       });
     }, [navigateToApp, ruleId]);
+
+    // Sync after a chat-driven rule save. Must refetch here: the save handler can't write
+    // to this page's react-query cache (security pages use the Cases context's query client).
+    useEffect(() => {
+      let prevSaving: ReadonlySet<string> = new Set();
+      const savingSub = aiRuleCreation.saving$.subscribe((saving) => {
+        if (saving.size < prevSaving.size) {
+          refreshRule();
+        }
+        prevSaving = saving;
+      });
+      return () => {
+        savingSub.unsubscribe();
+      };
+    }, [aiRuleCreation, refreshRule]);
 
     // persist rule until refresh is complete
     useEffect(() => {
