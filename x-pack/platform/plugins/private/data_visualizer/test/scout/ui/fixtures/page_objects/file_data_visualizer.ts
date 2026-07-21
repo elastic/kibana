@@ -22,7 +22,6 @@ export class FileDataVisualizer {
   private readonly filebeatConfigPanel: Locator;
   private readonly filebeatConfigCloseButton: Locator;
   private readonly importSettingsPanel: Locator;
-  private readonly importSuccessCallout: Locator;
   private readonly resultsLinks: Locator;
 
   constructor(private readonly page: ScoutPage) {
@@ -41,9 +40,6 @@ export class FileDataVisualizer {
     this.filebeatConfigPanel = this.page.testSubj.locator('fileDataVisFilebeatConfigPanel');
     this.filebeatConfigCloseButton = this.page.testSubj.locator('fileBeatConfigFlyoutCloseButton');
     this.importSettingsPanel = this.page.testSubj.locator('dataVisualizerFileImportSettingsPanel');
-    this.importSuccessCallout = this.page.testSubj.locator(
-      'dataVisualizerFileImportSuccessCallout'
-    );
     this.resultsLinks = this.page.testSubj.locator('dataVisualizerFileResultsLinks');
   }
 

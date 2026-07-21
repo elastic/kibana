@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 interface DiscoverClassicNavigator {
   goto(options: { queryMode: 'classic' }): Promise<void>;
