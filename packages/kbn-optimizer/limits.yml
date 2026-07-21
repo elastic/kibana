@@ -17,7 +17,7 @@ pageLoadAssetSize:
   automaticImport: 18629
   banners: 4006
   canvas: 14881
-  cases: 242617
+  cases: 310000
   charts: 40269
   cloud: 11743
   cloudConnect: 9149
@@ -30,10 +30,12 @@ pageLoadAssetSize:
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
+  contextEngine: 5837
   controls: 10300
   core: 563984
   cps: 9209
   crossClusterReplication: 12662
+  customContent: 4765
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8613
