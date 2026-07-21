@@ -133,7 +133,11 @@ const buildActionPolicyOas = ({
   return operation;
 };
 
-const policyResponse = (name: string, summary: string, overrides: Record<string, unknown> = {}) => ({
+const policyResponse = (
+  name: string,
+  summary: string,
+  overrides: Record<string, unknown> = {}
+) => ({
   name,
   summary,
   value: { ...ACTION_POLICY_RESPONSE, ...overrides },

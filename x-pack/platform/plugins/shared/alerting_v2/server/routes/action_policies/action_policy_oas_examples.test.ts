@@ -23,27 +23,29 @@ describe('action policy OAS examples', () => {
     expect(
       oas.responses?.[201]?.content?.['application/json']?.examples?.createActionPolicyResponse
     ).toBeDefined();
-    expect(oas.responses?.[400]?.content?.['application/json']?.examples?.invalidActionPolicyData)
-      .toEqual(
-        expect.objectContaining({
-          value: expect.objectContaining({
-            code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
-          }),
-        })
-      );
+    expect(
+      oas.responses?.[400]?.content?.['application/json']?.examples?.invalidActionPolicyData
+    ).toEqual(
+      expect.objectContaining({
+        value: expect.objectContaining({
+          code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
+        }),
+      })
+    );
   });
 
   it('includes 404 examples for get', () => {
     const oas = getActionPolicyOasExamples();
 
-    expect(oas.responses?.[404]?.content?.['application/json']?.examples?.actionPolicyNotFound)
-      .toEqual(
-        expect.objectContaining({
-          value: expect.objectContaining({
-            code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
-          }),
-        })
-      );
+    expect(
+      oas.responses?.[404]?.content?.['application/json']?.examples?.actionPolicyNotFound
+    ).toEqual(
+      expect.objectContaining({
+        value: expect.objectContaining({
+          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
+        }),
+      })
+    );
   });
 
   it('includes 409 examples for upsert', () => {
