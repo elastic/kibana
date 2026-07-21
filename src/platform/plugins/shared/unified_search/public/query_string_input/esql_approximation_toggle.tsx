@@ -32,7 +32,7 @@ const getLabels = (
   invalidLicense: boolean,
   disabled: boolean | undefined,
   isApproximate: boolean,
-  additionalText?: string,
+  additionalText?: string
 ) => {
   if (invalidLicense || disabled) {
     const ariaLabel = i18n.translate('unifiedSearch.esqlApproximationToggle.unavailable', {
@@ -105,7 +105,9 @@ export const EsqlApproximationToggle = ({
 }: EsqlApproximationToggleProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
-  const { services: { docLinks, licensing } } = useKibana<IUnifiedSearchPluginServices>();
+  const {
+    services: { docLinks, licensing },
+  } = useKibana<IUnifiedSearchPluginServices>();
   const learnMoreUrl = docLinks.links.query.queryESQLApproximateResults;
 
   const [invalidLicense, setInvalidLicense] = useState<boolean>(false);
@@ -118,22 +120,19 @@ export const EsqlApproximationToggle = ({
     let cancelled = false;
     licensing.getLicense().then((license) => {
       if (!cancelled) {
-        setInvalidLicense(!Boolean(license && license.isActive && license.hasAtLeast('enterprise')));
+        setInvalidLicense(
+          !Boolean(license && license.isActive && license.hasAtLeast('enterprise'))
+        );
       }
     });
 
     return () => {
       cancelled = true;
-    }
+    };
   }, [licensing]);
 
   const { tooltipContent, ariaLabel, switchLabel } = useMemo(() => {
-    return getLabels(
-      invalidLicense,
-      disabled,
-      isApproximate,
-      additionalText,
-    );
+    return getLabels(invalidLicense, disabled, isApproximate, additionalText);
   }, [disabled, isApproximate, additionalText, invalidLicense]);
 
   return (
