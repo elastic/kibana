@@ -1,0 +1,51 @@
+version: "1"
+name: Dark Watch
+description: >
+  Dark Watch skeleton. Overnight / continuous hunt-style sweeps with
+  allow-listed autonomous actions. Scheduled interval is a stand-in until richer
+  window triggers exist.
+enabled: true
+tags:
+  - watch
+  - watch-dark
+triggers:
+  - type: scheduled
+    with:
+      every: "60m"
+  - type: manual
+steps:
+  - name: watch_policy
+    type: data.set
+    with:
+      watch:
+        mandate: Overnight autonomous response
+        autonomyLevel: 5
+        handoff: brief
+        onDemand: false
+        draft: false
+        cadence: sweep
+        every: 60
+        from: 22
+        to: 6
+        mode: window
+        ui:
+          color: "#f59e0b"
+          icon: bolt
+          order: 30
+        scopeSummary: Mail · IdP · edge / VPN
+        scopes:
+          - name: Mail · IdP
+            access: full
+            label: Read + act
+          - name: Edge / VPN
+            access: full
+            label: Read + act
+          - name: Customer data
+            access: denied
+            label: No access
+        # Capabilities projected from executable steps — see Watch Floor.
+        callables: []
+  - name: hunt_stub
+    type: console
+    with:
+      message: "Dark Watch skeleton hunt pass — add ai.agent / skill steps (see Floor)"

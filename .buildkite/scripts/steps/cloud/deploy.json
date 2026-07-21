@@ -178,7 +178,8 @@
           ],
           "kibana": {
             "version": null,
-            "docker_image": null
+            "docker_image": null,
+            "user_settings_yaml": "xpack.pnd.enabled: true\n"
           }
         },
         "ref_id": "main-kibana"
