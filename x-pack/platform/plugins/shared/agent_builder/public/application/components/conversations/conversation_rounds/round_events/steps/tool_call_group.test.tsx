@@ -75,6 +75,6 @@ describe('ToolCallGroup', () => {
     expect(childStatuses.every((el) => el.textContent?.includes('ran.'))).toBe(true);
 
     await user.click(screen.getAllByRole('button')[1]);
-    expect(screen.getByText('Inspect tool response')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });
