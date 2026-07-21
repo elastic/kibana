@@ -128,8 +128,8 @@ export const MondayCom: ConnectorSpec = {
     search: {
       isTool: true,
       description:
-        'Search Monday.com by keyword within a specific object type. Provide searchTerm and ' +
-        'searchType (one of BOARD, DOCUMENTS, FOLDERS, WORKSPACES, UPDATES, ITEMS, ' +
+        'Search Monday.com by keyword within a specific object type. Provide search_term and ' +
+        'search_type (one of BOARD, DOCUMENTS, FOLDERS, WORKSPACES, UPDATES, ITEMS, ' +
         'TIMELINE_ITEMS, DASHBOARDS). Returns matching objects with names and IDs.',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
@@ -303,7 +303,7 @@ export const MondayCom: ConnectorSpec = {
     '',
     '### Comments and updates',
     'Use `createUpdate` to post a comment on an item and `getUpdates` to read the discussion thread. ' +
-      '`getUpdates` requires `objectId` (the item or board ID as a string) and `objectType` ("Item" or "Board").',
+      '`getUpdates` requires `object_id` (the item or board ID as a string) and `object_type` ("Item" or "Board").',
     '',
     '### Advanced operations',
     'The Monday.com MCP server exposes 60+ tools. Use `listTools` to discover available tools, then `callTool` to invoke them.',
