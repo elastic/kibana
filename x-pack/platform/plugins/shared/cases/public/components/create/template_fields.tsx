@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useEffect, useMemo, useRef } from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   UseField,
@@ -17,7 +17,6 @@ import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useTemplateFormSync } from './use_template_form_sync';
-import * as i18n from './translations';
 import { FieldsRenderer } from '../templates_v2/field_types/field_renderer';
 import { useResolvedFields } from '../field_library/hooks/use_resolved_fields';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
@@ -28,10 +27,21 @@ import {
 } from '../../../common/utils';
 import { isRefField } from '../../../common/types/domain/template/fields';
 import { TemplateFieldsValidationContext } from './template_fields_validation_context';
+import { CUSTOM_FIELDS } from '../case_form_fields/translations';
 
 type FormShape = Record<string, Record<string, unknown>>;
 
-export const CreateCaseTemplateFields: React.FC = () => {
+interface CreateCaseTemplateFieldsProps {
+  /**
+   * When true, adds top spacing so fields don't sit flush against Description.
+   * Omit (or false) when a divider already separates this block from content above.
+   */
+  addTopSpacing?: boolean;
+}
+
+export const CreateCaseTemplateFields: React.FC<CreateCaseTemplateFieldsProps> = ({
+  addTopSpacing = false,
+}) => {
   const parentForm = useParentFormContext();
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
   const { owner } = useCasesContext();
@@ -158,24 +168,27 @@ export const CreateCaseTemplateFields: React.FC = () => {
     return <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />;
   }
 
-  const hasFields = globalFieldsFragment !== null || templateFieldsFragment !== null;
-
   return (
     <>
       <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />
-      {hasFields && (
-        <>
-          <EuiSpacer />
-          <EuiTitle size="s">
-            <h4>{i18n.EXTENDED_FIELDS_TITLE}</h4>
-          </EuiTitle>
-          <EuiSpacer />
-        </>
-      )}
       <FormProvider {...innerForm}>
-        {globalFieldsFragment}
-        {globalFieldsFragment && templateFieldsFragment && <EuiSpacer />}
-        {templateFieldsFragment}
+        {/* Parent CaseFormFields uses gutterSize="none"; pad when nothing separates us from Description. */}
+        {addTopSpacing ? <EuiSpacer size="m" /> : null}
+        {globalFieldsFragment || templateFieldsFragment ? (
+          <EuiFormRow fullWidth>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText size="m">
+                  <h3 data-test-subj="create-case-custom-fields-title">{CUSTOM_FIELDS}</h3>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiSpacer size="xs" />
+              {globalFieldsFragment}
+              {globalFieldsFragment && templateFieldsFragment && <EuiSpacer />}
+              {templateFieldsFragment}
+            </EuiFlexGroup>
+          </EuiFormRow>
+        ) : null}
       </FormProvider>
     </>
   );
