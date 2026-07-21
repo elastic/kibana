@@ -94,7 +94,7 @@ const mergeInputAttachmentsIntoAttachmentState = async (
     }
 
     const contentKey = getContentKey(input, 'unknown');
-    if (attachmentContextProvider.existingByContentKey.has(contentKey)) {
+    if (attachmentContextProvider.hasAttachmentContent(contentKey)) {
       // already present (same content), nothing to do
       continue;
     }
@@ -115,7 +115,7 @@ const mergeInputAttachmentsIntoAttachmentState = async (
 
     const latest = getLatestVersion(created);
     if (latest) {
-      attachmentContextProvider.existingByContentKey.set(
+      attachmentContextProvider.setAttachmentContentKey(
         `${created.type}:${latest.content_hash}`,
         created.id
       );

@@ -11,7 +11,8 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 export interface AttachmentContextProvider {
   areTypeInstructionsNeeded(type: string): boolean;
   markTypeInstructionsProvided(type: string): void;
-  existingByContentKey: Map<string, string>;
+  hasAttachmentContent(key: string): boolean;
+  setAttachmentContentKey(key: string, id: string): void;
 }
 
 export function makeAttachmentContextProvider(
@@ -25,6 +26,11 @@ export function makeAttachmentContextProvider(
   const markTypeInstructionsProvided = (attachmentType: string) => {
     typeInstructionsProvided.add(attachmentType);
   };
+  const hasAttachmentContent = (contentKey: string) => existingByContentKey.has(contentKey);
+  const setAttachmentContentKey = (contentKey: string, id: string) => {
+    existingByContentKey.set(contentKey, id);
+  };
+
   for (const existing of attachmentStateManager.getAll()) {
     const latest = getLatestVersion(existing);
     if (!latest) continue;
@@ -34,6 +40,7 @@ export function makeAttachmentContextProvider(
   return {
     areTypeInstructionsNeeded,
     markTypeInstructionsProvided,
-    existingByContentKey,
+    hasAttachmentContent,
+    setAttachmentContentKey,
   };
 }
