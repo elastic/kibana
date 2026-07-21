@@ -234,7 +234,7 @@ Add the following snippet of Markdown right after (and outside) the `<details>` 
 
 ```markdown
 > [!TIP]
-> Marked AI-fixable: fix PR incoming within ~20-30 min.
+> Marked "AI-fixable": fix PR incoming within ~20-30 min.
 ```
 
 If a fix PR is already up (in draft or in review) in the Kibana repository — the case where you skipped the `ai:fix-flaky` label — mention the PR link in the tip block instead of the automatic-request sentence.
