@@ -13,7 +13,7 @@ import type {
   AppHeaderBack,
   AppHeaderBadge,
   AppHeaderMetadataItems,
-  AppHeaderPadding,
+  AppHeaderSpacing,
   AppHeaderTab,
   AppHeaderTitle,
   AppHeaderMenu,
@@ -29,7 +29,7 @@ export interface MlAppHeaderProps {
   badges?: AppHeaderBadge[];
   metadata?: AppHeaderMetadataItems;
   showDatePicker?: boolean;
-  padding?: AppHeaderPadding;
+  spacing?: AppHeaderSpacing;
   docLink?: string;
 }
 
@@ -41,11 +41,12 @@ export const MlAppHeader: FC<MlAppHeaderProps> = ({
   badges,
   metadata,
   showDatePicker = false,
-  padding,
+  spacing,
   docLink,
 }) => {
   const { isManagementMode } = useContext(MlPageControlsContext);
-  const resolvedPadding = padding ?? (isManagementMode ? 'm' : { bleed: 'l' });
+  // Management pages use the standard 16px inset; elsewhere bleed into a 24px-padded parent.
+  const resolvedSpacing = spacing ?? (isManagementMode ? 'standard' : 'largeBleed');
 
   return (
     <>
@@ -56,7 +57,7 @@ export const MlAppHeader: FC<MlAppHeaderProps> = ({
         tabs={tabs}
         badges={badges}
         metadata={metadata}
-        padding={resolvedPadding}
+        spacing={resolvedSpacing}
         docLink={docLink}
         sticky={false}
         titleAppend={showDatePicker ? <MlDatePickerBar /> : undefined}
