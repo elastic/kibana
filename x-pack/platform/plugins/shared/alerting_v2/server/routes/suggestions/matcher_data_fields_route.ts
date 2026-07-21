@@ -23,6 +23,7 @@ import {
   matcherDataFieldsOasExamples,
 } from '../action_policies/action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
+import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
 
 @injectable()
 export class MatcherDataFieldsRoute extends BaseAlertingRoute {
@@ -49,7 +50,7 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid query parameters.',
+        description: INVALID_QUERY_PARAMETERS_DESCRIPTION,
       },
     },
   };

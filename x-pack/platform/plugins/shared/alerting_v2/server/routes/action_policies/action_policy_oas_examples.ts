@@ -29,6 +29,7 @@ import {
   getInvalidActionPolicyDataMessage,
 } from '../../lib/errors/action_policy_error_messages';
 import { jsonExample } from '../json_oas_example';
+import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
 
 type OASOperationObject = Exclude<
   Awaited<ReturnType<NonNullable<RouteConfigOptions<RouteMethod>['oasOperationObject']>>>,
@@ -184,6 +185,13 @@ const ACTION_POLICY_VERSION_CONFLICT_ERROR: ErrorResponse = {
   details: { action_policy_id: SAMPLE_ACTION_POLICY_ID },
 };
 
+const INVALID_QUERY_PARAMETERS_ERROR: ErrorResponse = {
+  code: 'BAD_REQUEST',
+  error: 'Bad Request',
+  message: 'page: Expected number, received nan',
+  details: { errors: { page: ['Expected number, received nan'] } },
+};
+
 const ERROR_EXAMPLES: Record<RouteErrorStatus, ReturnType<typeof jsonExample<ErrorResponse>>> = {
   400: jsonExample(
     'invalidActionPolicyData',
@@ -200,6 +208,12 @@ const ERROR_EXAMPLES: Record<RouteErrorStatus, ReturnType<typeof jsonExample<Err
     'Concurrent update conflict',
     ACTION_POLICY_VERSION_CONFLICT_ERROR
   ),
+};
+
+const INVALID_QUERY_PARAMETERS_EXAMPLE = {
+  name: 'invalidQueryParameters',
+  summary: INVALID_QUERY_PARAMETERS_DESCRIPTION,
+  value: INVALID_QUERY_PARAMETERS_ERROR,
 };
 
 const buildActionPolicyOas = ({
@@ -300,8 +314,8 @@ export const listActionPoliciesOasExamples = (): OASOperationObject =>
         summary: LIST_ACTION_POLICIES_SUMMARY,
         value: LIST_RESPONSE,
       },
+      400: INVALID_QUERY_PARAMETERS_EXAMPLE,
     },
-    errors: [400],
   });
 
 export const deleteActionPolicyOasExamples = (): OASOperationObject =>
@@ -401,8 +415,8 @@ export const listActionPolicyExecutionHistoryOasExamples = (): OASOperationObjec
         summary: LIST_ACTION_POLICY_EXECUTION_HISTORY_SUMMARY,
         value: EXECUTION_HISTORY_RESPONSE,
       },
+      400: INVALID_QUERY_PARAMETERS_EXAMPLE,
     },
-    errors: [400],
   });
 
 export const countActionPolicyExecutionHistoryOasExamples = (): OASOperationObject =>
@@ -413,8 +427,8 @@ export const countActionPolicyExecutionHistoryOasExamples = (): OASOperationObje
         summary: COUNT_ACTION_POLICY_EXECUTION_HISTORY_SUMMARY,
         value: EXECUTION_HISTORY_COUNT_RESPONSE,
       },
+      400: INVALID_QUERY_PARAMETERS_EXAMPLE,
     },
-    errors: [400],
   });
 
 export const matcherDataFieldsOasExamples = (): OASOperationObject =>
@@ -425,8 +439,8 @@ export const matcherDataFieldsOasExamples = (): OASOperationObject =>
         summary: MATCHER_DATA_FIELDS_SUMMARY,
         value: MATCHER_DATA_FIELDS_RESPONSE,
       },
+      400: INVALID_QUERY_PARAMETERS_EXAMPLE,
     },
-    errors: [400],
   });
 
 export const actionPolicyTagsOasExamples = (): OASOperationObject =>
@@ -437,6 +451,6 @@ export const actionPolicyTagsOasExamples = (): OASOperationObject =>
         summary: ACTION_POLICY_TAGS_SUMMARY,
         value: ACTION_POLICY_TAGS_RESPONSE,
       },
+      400: INVALID_QUERY_PARAMETERS_EXAMPLE,
     },
-    errors: [400],
   });

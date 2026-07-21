@@ -23,6 +23,7 @@ import {
 } from './action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
+import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
 
 @injectable()
 export class ListExecutionHistoryRoute extends BaseAlertingRoute {
@@ -50,7 +51,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid query parameters.',
+        description: INVALID_QUERY_PARAMETERS_DESCRIPTION,
       },
     },
   };
