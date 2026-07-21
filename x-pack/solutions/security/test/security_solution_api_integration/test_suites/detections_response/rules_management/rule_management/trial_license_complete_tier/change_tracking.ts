@@ -36,17 +36,23 @@ export default ({ getService }: FtrProviderContext): void => {
   const utils = getService('securitySolutionUtils');
 
   const refreshHistory = async () => {
-    await es.indices.refresh({ index: CHANGE_HISTORY_DATA_STREAM, ignore_unavailable: true });
+    await es.indices.refresh(
+      { index: CHANGE_HISTORY_DATA_STREAM, ignore_unavailable: true },
+      { headers: { 'x-elastic-product-origin': 'kibana' } }
+    );
   };
 
   const clearHistory = async () => {
     try {
-      await es.deleteByQuery({
-        index: CHANGE_HISTORY_DATA_STREAM,
-        query: { match_all: {} },
-        conflicts: 'proceed',
-        refresh: true,
-      });
+      await es.deleteByQuery(
+        {
+          index: CHANGE_HISTORY_DATA_STREAM,
+          query: { match_all: {} },
+          conflicts: 'proceed',
+          refresh: true,
+        },
+        { headers: { 'x-elastic-product-origin': 'kibana' } }
+      );
     } catch {
       // Change history index may not exist yet
     }
