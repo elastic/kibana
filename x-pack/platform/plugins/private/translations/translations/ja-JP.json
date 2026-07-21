@@ -15855,7 +15855,6 @@
     "xpack.cases.create.confirmModalButton": "保存せずに終了",
     "xpack.cases.create.createCaseFlyoutAriaLabel": "ケースを作成",
     "xpack.cases.create.defaultEmptyTemplateName": "テンプレートが選択されていません",
-    "xpack.cases.create.extendedFieldsTitle": "拡張フィールド",
     "xpack.cases.create.invalidAssignees": "ケースに割り当てられる担当者は{maxAssignees}人以下です。",
     "xpack.cases.create.modalTitle": "ケースを破棄しますか？",
     "xpack.cases.create.solutionSelectorLabel": "次の下にケースを作成：",
