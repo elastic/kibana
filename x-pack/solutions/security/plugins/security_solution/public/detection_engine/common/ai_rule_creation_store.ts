@@ -30,7 +30,6 @@ const NO_SAVES: ReadonlySet<string> = new Set();
 
 export class AiRuleCreationService {
   private readonly saveRuleSubject = new Subject<SaveRuleRequest>();
-  private readonly ruleSavedSubject = new Subject<RuleResponse>();
   // Attachment IDs with a save in flight; saves for different cards run concurrently.
   private readonly savingSubject = new BehaviorSubject<ReadonlySet<string>>(NO_SAVES);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
@@ -40,8 +39,6 @@ export class AiRuleCreationService {
   private session: AiRuleCreationSession | null = null;
 
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
-  /** Emits with the full saved RuleResponse after each successful save. */
-  public readonly ruleSaved$ = this.ruleSavedSubject.asObservable();
   /** Emits the set of attachment IDs with saves in flight; empty when idle. */
   public readonly saving$ = this.savingSubject.asObservable();
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
@@ -84,10 +81,6 @@ export class AiRuleCreationService {
       attachmentId: options?.attachmentId,
       updateOrigin: options?.updateOrigin,
     });
-  };
-
-  public notifyRuleSaved = (rule: RuleResponse): void => {
-    this.ruleSavedSubject.next(rule);
   };
 
   public clearSaving = (attachmentId?: string): void => {
