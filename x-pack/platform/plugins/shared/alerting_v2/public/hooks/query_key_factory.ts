@@ -35,8 +35,8 @@ export const workflowKeys = {
 
 export const matcherSuggestionKeys = {
   all: ['matcherSuggestions'] as const,
-  dataFields: (matcher?: string) =>
-    [...matcherSuggestionKeys.all, 'dataFields', { matcher: matcher || undefined }] as const,
+  ruleEventFields: (matcher?: string) =>
+    [...matcherSuggestionKeys.all, 'ruleEventFields', { matcher: matcher || undefined }] as const,
 };
 
 export const actionPolicyKeys = {

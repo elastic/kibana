@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH } from '@kbn/alerting-v2-constants';
+import { ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH } from '@kbn/alerting-v2-constants';
 import { apiTest } from '../fixtures';
 
 apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classic' }, () => {
@@ -22,14 +22,17 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   apiTest(
     'validation: rejects body with unknown top-level keys (strict schema)',
     async ({ apiClient }) => {
-      const response = await apiClient.post(ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH, {
-        headers: adminHeaders,
-        body: {
-          field: 'rule.name',
-          query: 'test',
-          unknownField: 'x',
-        },
-      });
+      const response = await apiClient.post(
+        ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH,
+        {
+          headers: adminHeaders,
+          body: {
+            field: 'rule.name',
+            query: 'test',
+            unknownField: 'x',
+          },
+        }
+      );
 
       expect(response).toHaveStatusCode(400);
     }
