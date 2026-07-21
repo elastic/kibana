@@ -149,7 +149,7 @@ apiTest.describe(
             title: 'Mocked Conversation Title',
             response: 'Mocked LLM response',
           });
-          await postConverse(
+          const conRes = await postConverse(
             apiClient,
             adminCredentials.apiKeyHeader,
             {
@@ -166,15 +166,20 @@ apiTest.describe(
             mode
           );
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-          const firstAgentRequest = llmProxy.interceptedRequests.find(
-            (request) => request.matchingInterceptorName === 'final-assistant-response'
-          )?.requestBody;
-          expect(firstAgentRequest).toBeDefined();
-          const allMessageContent = firstAgentRequest!.messages
-            .map((m: { content?: unknown }) => String(m.content ?? ''))
-            .join('\n');
-          expect(allMessageContent).toContain('<attachments count="1">');
-          expect(allMessageContent).not.toContain('ignored-origin-id');
+
+          const conversationId = (conRes.body as { conversation_id: string }).conversation_id;
+          expect(conversationId).toBeDefined();
+          const conversation = await getConversation(
+            apiClient,
+            adminCredentials.apiKeyHeader,
+            conversationId
+          );
+          expect(conversation.attachments).toBeDefined();
+          expect(conversation.attachments).toHaveLength(1);
+          expect(conversation.attachments![0].versions).toHaveLength(1);
+          expect(conversation.attachments![0].versions[0].data).toMatchObject({
+            content: 'inline-payload-for-model',
+          });
         }
       );
 
