@@ -15904,7 +15904,6 @@
     "xpack.cases.create.confirmModalButton": "退出而不保存",
     "xpack.cases.create.createCaseFlyoutAriaLabel": "创建案例",
     "xpack.cases.create.defaultEmptyTemplateName": "未选择模板",
-    "xpack.cases.create.extendedFieldsTitle": "扩展字段",
     "xpack.cases.create.invalidAssignees": "无法向案例分配超过 {maxAssignees} 个被分配人。",
     "xpack.cases.create.modalTitle": "丢弃案例？",
     "xpack.cases.create.solutionSelectorLabel": "在以下项下面创建案例：",
