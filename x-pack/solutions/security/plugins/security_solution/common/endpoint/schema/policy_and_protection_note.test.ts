@@ -50,7 +50,7 @@ describe('GetProtectionUpdatesNoteSchema', () => {
 });
 
 describe('CreateUpdateProtectionUpdatesNoteSchema', () => {
-  const { body } = CreateUpdateProtectionUpdatesNoteSchema;
+  const { body, params } = CreateUpdateProtectionUpdatesNoteSchema;
 
   it('should accept a valid note', () => {
     expect(body.validate({ note: 'A short note.' })).toEqual({ note: 'A short note.' });
@@ -68,5 +68,15 @@ describe('CreateUpdateProtectionUpdatesNoteSchema', () => {
   it('should accept note exactly 10000 characters long', () => {
     const maxNote = 'a'.repeat(10000);
     expect(body.validate({ note: maxNote })).toEqual({ note: maxNote });
+  });
+
+  it('should reject package_policy_id longer than 256 characters', () => {
+    const longId = 'a'.repeat(257);
+    expect(() => params.validate({ package_policy_id: longId })).toThrowError();
+  });
+
+  it('should accept package_policy_id exactly 256 characters long', () => {
+    const maxId = 'a'.repeat(256);
+    expect(params.validate({ package_policy_id: maxId })).toEqual({ package_policy_id: maxId });
   });
 });

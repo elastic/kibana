@@ -2688,7 +2688,7 @@ components:
     Kuery:
       description: A KQL string.
       example: "united.endpoint.host.os.name : 'Windows'"
-      maxLength: 10000
+      maxLength: 30000
       type: string
     MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft

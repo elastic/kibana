@@ -252,7 +252,7 @@ describe('test endpoint routes', () => {
       expect(endpointResultList.sortDirection).toEqual(ENDPOINT_DEFAULT_SORT_DIRECTION);
     });
 
-    it('rejects over-limit kuery through registered public route validation with 400', () => {
+    it('rejects over-limit kuery through registered public route validation', () => {
       const { versionConfig } = getRegisteredVersionedRouteMock(
         routerMock,
         'get',
@@ -273,7 +273,7 @@ describe('test endpoint routes', () => {
       let validationError: Error | undefined;
       try {
         httpServerMock.createKibanaRequest({
-          query: { kuery: 'a'.repeat(10001) },
+          query: { kuery: 'a'.repeat(30001) },
           validation: getRequestValidation(requestValidation),
         });
       } catch (error) {
@@ -288,12 +288,7 @@ describe('test endpoint routes', () => {
         throw new Error('Expected over-limit kuery to fail request validation');
       }
 
-      expect(validationError.message).toMatch(/maximum length of \[10000\]/);
-      mockResponse.badRequest.mockReturnValue({
-        status: 400,
-      } as ReturnType<KibanaResponseFactory['badRequest']>);
-      expect(mockResponse.badRequest({ body: validationError.message }).status).toBe(400);
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({ body: validationError.message });
+      expect(validationError.message).toMatch(/maximum length of \[30000\]/);
     });
 
     it('should get forbidden if no security solution access', async () => {

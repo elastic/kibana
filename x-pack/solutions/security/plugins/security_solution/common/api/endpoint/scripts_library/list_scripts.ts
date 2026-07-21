@@ -32,7 +32,7 @@ export const ListScriptsRequestSchema = {
       ),
       kuery: schema.maybe(
         schema.string({
-          maxLength: 10000,
+          maxLength: 30000,
           validate: (value) => isScriptLibraryKqlFilterValid(value).error,
         })
       ),

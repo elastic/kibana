@@ -58,7 +58,7 @@ export type AgentId = z.infer<typeof AgentId>;
 /**
  * A KQL string.
  */
-export const Kuery = lazySchema(() => z.string().max(10000));
+export const Kuery = lazySchema(() => z.string().max(30000));
 export type Kuery = z.infer<typeof Kuery>;
 
 /**

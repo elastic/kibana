@@ -77,13 +77,13 @@ describe('endpoint metadata schema', () => {
       expect(() => query.validate({ kuery: 123 })).toThrowError();
     });
 
-    it('should reject kuery longer than 10000 characters', () => {
-      const longKuery = 'a'.repeat(10001);
+    it('should reject kuery longer than 30000 characters', () => {
+      const longKuery = 'a'.repeat(30001);
       expect(() => query.validate({ kuery: longKuery })).toThrowError();
     });
 
-    it('should accept kuery exactly 10000 characters long', () => {
-      const maxKuery = 'a'.repeat(10000);
+    it('should accept kuery exactly 30000 characters long', () => {
+      const maxKuery = 'a'.repeat(30000);
       expect(query.validate({ kuery: maxKuery })).toEqual({
         page: ENDPOINT_DEFAULT_PAGE,
         pageSize: ENDPOINT_DEFAULT_PAGE_SIZE,

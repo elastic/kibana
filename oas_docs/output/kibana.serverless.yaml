@@ -118779,7 +118779,7 @@ components:
     Security_Endpoint_Management_API_Kuery:
       description: A KQL string.
       example: "united.endpoint.host.os.name : 'Windows'"
-      maxLength: 10000
+      maxLength: 30000
       type: string
     Security_Endpoint_Management_API_MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
