@@ -64,12 +64,12 @@ View [#268951]({{kib-pull}}268951).
 ::::
 
 $$$kibana-272894$$$
-::::{dropdown} Update clients for the dedicated Agentless policies API response model
-**Details**<br> `POST /api/fleet/agentless_policies` now returns a dedicated `AgentlessPolicy` response model instead of the internal `PackagePolicy` shape. The `format` query parameter is removed. The request body no longer accepts `description`, `var_group_selections`, `additional_datastreams_permissions`, or `condition`.
+::::{dropdown} Update clients for the dedicated Managed integrations API response model
+**Details**<br> `POST /api/fleet/managed_integrations` (previously `POST /api/fleet/agentless_policies`) now returns a dedicated `ManagedIntegration` response model instead of the internal `PackagePolicy` shape. The `format` query parameter is removed. The request body no longer accepts `description`, `var_group_selections`, `additional_datastreams_permissions`, or `condition`.
 
 **Impact**<br> External API clients that read `PackagePolicy` fields such as `policy_ids`, `revision`, `supports_agentless`, `secret_references`, `output_id`, `fleet_server_host_id`, or `enabled` from the response receive a different payload. Requests that include removed body fields or the `format` query parameter fail validation.
 
-**Action**<br> Update integrations to consume the `AgentlessPolicy` fields (`id`, `name`, `namespace`, `package`, `inputs`, `vars`, `global_data_tags`, `cloud_connector`, and timestamps). Remove the `format` query parameter and dropped request body fields from create calls.
+**Action**<br> Update integrations to consume the `ManagedIntegration` fields (`id`, `name`, `namespace`, `package`, `inputs`, `vars`, `global_data_tags`, `cloud_connector`, and timestamps). Remove the `format` query parameter and dropped request body fields from create calls.
 
 View [#272894]({{kib-pull}}272894).
 ::::

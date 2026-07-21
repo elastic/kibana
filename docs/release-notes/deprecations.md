@@ -39,6 +39,17 @@ Review the deprecated functionality for Kibana. While deprecations have no immed
 
 ## 9.5.0 [kibana-9.5.0-deprecations]
 
+$$$kibana-276925$$$
+::::{dropdown} Migrate to the renamed Managed integrations API
+**Details**<br> The agentless policies API is renamed to the Managed integrations API. The `/api/fleet/agentless_policies` paths are now served at `/api/fleet/managed_integrations`, and the response model is renamed from `AgentlessPolicy` to `ManagedIntegration`. The original `agentless_policies` paths remain available as deprecated aliases that forward to the same handlers. Creating, updating, upgrading, or copying managed integrations through the {{fleet}} package policy (`/api/fleet/package_policies`) and agent policy (`/api/fleet/agent_policies`) APIs is also deprecated in favor of the Managed integrations API.
+
+**Impact**<br> Clients that call the `agentless_policies` paths, or that create, update, upgrade, or copy managed integrations through the package policy and agent policy APIs, keep working but log deprecation warnings. Clients that reference the `AgentlessPolicy` schema (for example, code generated from the OpenAPI spec) no longer find it.
+
+**Action**<br> Update integrations to call `/api/fleet/managed_integrations` and consume the `ManagedIntegration` response model. Migrate off the deprecated `agentless_policies` paths, and stop using the package policy and agent policy APIs to create, update, upgrade, or copy managed integrations.
+
+View [#276925]({{kib-pull}}276925).
+::::
+
 $$$kibana-272414$$$
 ::::{dropdown} Migrate from deprecated `elastic.apm` settings
 **Details**<br> Elastic {{product.apm}} instrumentation settings under `elastic.apm` are deprecated in favor of OpenTelemetry. Settings continue to work in 9.5 but trigger deprecation warnings. Removal is planned for 10.0.0. Real User Monitoring still relies on Elastic {{product.apm}} until OpenTelemetry browser monitoring is production-ready.
