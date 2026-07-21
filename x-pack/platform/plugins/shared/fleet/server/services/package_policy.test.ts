@@ -4606,6 +4606,48 @@ describe('Package policy service', () => {
       );
     });
 
+    it('should put item in failedPolicies when package name is changed', async () => {
+      const savedObjectsClient = createSavedObjectClientMock();
+      const mockPackagePolicy = createPackagePolicyMock(); // package.name: 'endpoint'
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: mockPackagePolicy,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Change package name from 'endpoint' to 'aws' — both known to mocks so the
+      // outer package-info fetch succeeds, but the per-item guard fires before the
+      // asset-lookup step and puts the item in failedPolicies.
+      const toUpdate = {
+        ...mockPackagePolicy,
+        package: { name: 'aws', title: 'AWS', version: '0.3.3' },
+      };
+
+      const res = await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
+        toUpdate,
+      ]);
+
+      expect(res.failedPolicies).toHaveLength(1);
+      expect(res.updatedPolicies).toHaveLength(0);
+      expect(res.failedPolicies[0].packagePolicy).toEqual(toUpdate);
+      expect(res.failedPolicies[0].error).toEqual(
+        new PackagePolicyValidationError(
+          'Cannot change the package of an existing integration policy. Create a new policy with the desired package.'
+        )
+      );
+    });
+
     it('should allow to update input vars that are frozen with the force flag', async () => {
       const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
