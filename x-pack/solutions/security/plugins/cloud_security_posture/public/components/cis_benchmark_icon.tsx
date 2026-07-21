@@ -46,7 +46,6 @@ export const CISBenchmarkIcon = (props: Props) => {
       size={props.size || 'xl'}
       css={props.style}
       aria-label={props.name}
-      iconProps={props.name ? { title: props.name } : undefined}
     />
   );
 };
