@@ -25,22 +25,27 @@ import {
   ExperimentalFeaturesContextProvider,
   type TransformEnabledFeatures,
 } from './serverless_context';
+import { useTransformCpsPickerAccess } from './hooks/use_transform_cps_picker_access';
 
-export const App: FC<{ history: ScopedHistory }> = ({ history }) => (
-  <Router history={history}>
-    <Routes>
-      <Route
-        path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
-        component={CloneTransformSection}
-      />
-      <Route
-        path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
-        component={CreateTransformSection}
-      />
-      <Route path={`/`} component={TransformManagementSection} />
-    </Routes>
-  </Router>
-);
+export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
+  useTransformCpsPickerAccess();
+
+  return (
+    <Router history={history}>
+      <Routes>
+        <Route
+          path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
+          component={CloneTransformSection}
+        />
+        <Route
+          path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
+          component={CreateTransformSection}
+        />
+        <Route path={`/`} component={TransformManagementSection} />
+      </Routes>
+    </Router>
+  );
+};
 
 export const renderApp = (
   element: HTMLElement,

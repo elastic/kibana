@@ -67,6 +67,8 @@ jest.mock('../../../use_breadcrumbs', () => ({
   useCasesTemplatesBreadcrumbs: jest.fn(),
 }));
 
+const observablesEnabledFeatures = { observables: { enabled: true, autoExtract: true } };
+
 describe('CreateTemplatePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -199,7 +201,7 @@ describe('CreateTemplatePage', () => {
 
   it('defaults a new template to sync alerts + extract observables on (Security) in the saved definition', async () => {
     render(
-      <TestProviders>
+      <TestProviders features={observablesEnabledFeatures}>
         <CreateTemplatePage />
       </TestProviders>
     );
@@ -220,16 +222,9 @@ describe('CreateTemplatePage', () => {
     expect(parsed.settings).toEqual({ syncAlerts: true, extractObservables: true });
   });
 
-  it('resets the panel config (settings/connector) draft to the defaults on successful creation', async () => {
-    const storageKey = `securitySolution.${LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState}`;
-    const configKey = `${storageKey}.config`;
-    // Simulate an in-progress create that toggled both settings off; it must not leak into the next
-    // create — the draft must reset to the solution defaults.
-    localStorage.setItem(
-      configKey,
-      JSON.stringify({ settings: { syncAlerts: false, extractObservables: false } })
-    );
-
+  it('defaults extract observables off where the feature is unavailable (e.g. Observability/Stack)', async () => {
+    // Default test context uses DEFAULT_FEATURES (observables autoExtract off) and a basic license,
+    // so the toggle is hidden and the persisted default must be off.
     render(
       <TestProviders>
         <CreateTemplatePage />
@@ -244,7 +239,38 @@ describe('CreateTemplatePage', () => {
       expect(mockMutateAsync).toHaveBeenCalledTimes(1);
     });
 
-    // The config draft is reset to the create defaults (Security test context → both on), not the
+    const { definition } = (
+      mockMutateAsync.mock.calls[0][0] as { template: { definition: string } }
+    ).template;
+    const parsed = yamlParse(definition) as { settings?: Record<string, boolean> };
+    expect(parsed.settings).toEqual({ syncAlerts: true, extractObservables: false });
+  });
+
+  it('resets the panel config (settings/connector) draft to the defaults on successful creation', async () => {
+    const storageKey = `securitySolution.${LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState}`;
+    const configKey = `${storageKey}.config`;
+    // Simulate an in-progress create that toggled both settings off; it must not leak into the next
+    // create — the draft must reset to the solution defaults.
+    localStorage.setItem(
+      configKey,
+      JSON.stringify({ settings: { syncAlerts: false, extractObservables: false } })
+    );
+
+    render(
+      <TestProviders features={observablesEnabledFeatures}>
+        <CreateTemplatePage />
+      </TestProviders>
+    );
+
+    await userEvent.click(screen.getByRole('tab', { name: /Configuration/ }));
+    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
+    await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+    });
+
+    // The config draft is reset to the create defaults (Security context → both on), not the
     // stale in-progress `{ false, false }`.
     const storedConfig = localStorage.getItem(configKey);
     const parsedConfig = storedConfig ? JSON.parse(storedConfig) : {};

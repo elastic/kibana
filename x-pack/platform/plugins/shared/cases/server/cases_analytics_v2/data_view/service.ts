@@ -73,24 +73,12 @@ interface CasesAnalyticsV2DataViewServiceDeps {
    * reads. Both are hidden SO types, and the request-scoped client passed
    * at ensure time may not include them in `includedHiddenTypes`. The
    * internal client is opted in to `cases`, `cases-templates`, and
-   * `cases-field-definitions` at plugin start — the latter two only when
-   * `templatesEnabled` is true (see below).
+   * `cases-field-definitions` at plugin start.
    *
    * `namespaces: [spaceId]` on the find call scopes results to a single
    * space even though the client itself is unscoped.
    */
   internalSavedObjectsClient: SavedObjectsClientContract;
-  /**
-   * Resolved value of `xpack.cases.templates.enabled`. Gates the per-space
-   * `cases-templates` and `cases-field-definitions` SO walks inside
-   * `collectSnakeKeysForSpace`. When false neither SO type is registered
-   * with core, so calling `internalSavedObjectsClient.find({ type })` for
-   * either would throw "Missing mappings for saved objects types: ...";
-   * the walk short-circuits to an empty list and the data view is
-   * bootstrapped with no runtime field overlay (which is the correct
-   * shape when there are no templates or global fields to project).
-   */
-  templatesEnabled: boolean;
 }
 
 /**
@@ -476,14 +464,12 @@ export class CasesAnalyticsV2DataViewService {
    * field.
    */
   private async collectSnakeKeysForSpace(spaceId: string): Promise<string[]> {
-    // Templates feature flag is off — neither the `cases-templates` nor the
-    // `cases-field-definitions` SO type is registered with core, so naming
-    // either in `find({ type })` would throw "Missing mappings for saved
-    // objects types: ...". Returning empty here is also semantically
-    // correct: with the feature off there are no extended fields to project
-    // as runtime fields.
-    if (!this.deps.templatesEnabled) return [];
-
+    // Both `cases-templates` and `cases-field-definitions` are always
+    // registered with core, so the reads below are always safe. When the
+    // templates feature is off there simply are no template or field-library
+    // documents, so both collectors return empty and the data view is
+    // bootstrapped with no runtime field overlay.
+    //
     // The field library is needed twice — to resolve template `$ref` fields
     // and to project global fields — so it's loaded once and passed to both
     // collectors.
