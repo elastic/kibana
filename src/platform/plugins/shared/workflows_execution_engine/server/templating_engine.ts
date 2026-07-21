@@ -55,26 +55,6 @@ export class WorkflowTemplatingEngine {
       renderLimit: liquidSettings?.renderLimit,
       memoryLimit: liquidSettings?.memoryLimit,
     });
-
-    // register json_parse filter that converts JSON string to object
-    this.engine.registerFilter('json_parse', (value: unknown): unknown => {
-      if (typeof value !== 'string') {
-        return value;
-      }
-      try {
-        return JSON.parse(value);
-      } catch (error) {
-        return value;
-      }
-    });
-
-    // register entries filter that converts an object into an array of {key, value} pairs
-    this.engine.registerFilter('entries', (value: unknown): unknown => {
-      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-        return value;
-      }
-      return Object.entries(value).map(([k, v]) => ({ key: k, value: v }));
-    });
   }
 
   public render<T>(obj: T, context: Record<string, unknown>): T {

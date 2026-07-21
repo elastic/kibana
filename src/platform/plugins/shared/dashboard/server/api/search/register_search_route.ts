@@ -9,23 +9,23 @@
 
 import { once } from 'lodash';
 
+import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG } from '@kbn/as-code-shared-schemas';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { logRequest } from '@kbn/as-code-utils';
+import { schema, ValidationError } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { schema, ValidationError } from '@kbn/config-schema';
-import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG } from '@kbn/as-code-shared-schemas';
 
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
-import { logRequest } from '../log_request';
 import {
   legacySearchRequestParamsSchema,
   legacySearchResponseBodySchema,
-  searchRequestParamsSchema,
   searchResponseBodySchema,
 } from './schemas';
 import { search } from './search';
-import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function registerSearchRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -57,7 +57,7 @@ export function registerSearchRoute(
       },
       validate: {
         request: {
-          query: schema.oneOf([searchRequestParamsSchema, legacySearchRequestParamsSchema]),
+          query: schema.oneOf([asCodeSearchRequestSchema, legacySearchRequestParamsSchema]),
         },
         response: {
           400: {
@@ -89,7 +89,7 @@ export function registerSearchRoute(
             true
           );
           const searchParams = useAsCodeSearchSchemas
-            ? searchRequestParamsSchema.validate(req.query)
+            ? asCodeSearchRequestSchema.validate(req.query)
             : legacySearchRequestParamsSchema.validate(req.query);
 
           const result = await search(

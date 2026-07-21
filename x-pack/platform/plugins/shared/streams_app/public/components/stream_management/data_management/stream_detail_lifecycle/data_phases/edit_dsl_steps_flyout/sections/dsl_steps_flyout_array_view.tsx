@@ -50,6 +50,8 @@ export interface DslStepsFlyoutArrayViewProps {
   reindexErrorsAfterRemoval: (removedIndex: number) => void;
   dataRetentionMs?: number;
   dataRetentionEsFormat?: string;
+  frozenAfterMs?: number;
+  frozenAfterEsFormat?: string;
 }
 
 export const DslStepsFlyoutArrayView = ({
@@ -63,6 +65,8 @@ export const DslStepsFlyoutArrayView = ({
   reindexErrorsAfterRemoval,
   dataRetentionMs,
   dataRetentionEsFormat,
+  frozenAfterMs,
+  frozenAfterEsFormat,
 }: DslStepsFlyoutArrayViewProps) => {
   const { items, form } = arrayField;
   const { sectionStyles, headerStyles, headerNoStepsStyles } = useStyles();
@@ -319,7 +323,7 @@ export const DslStepsFlyoutArrayView = ({
           css={[headerStyles, items.length === 0 && headerNoStepsStyles]}
         >
           <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
+            <EuiTitle size="s">
               <h2 id={flyoutTitleId}>
                 {i18n.translate('xpack.streams.editDslStepsFlyout.title', {
                   defaultMessage: 'Edit downsample steps',
@@ -397,6 +401,8 @@ export const DslStepsFlyoutArrayView = ({
               timeUnitOptions={TIME_UNIT_OPTIONS}
               dataRetentionMs={dataRetentionMs}
               dataRetentionEsFormat={dataRetentionEsFormat}
+              frozenAfterMs={frozenAfterMs}
+              frozenAfterEsFormat={frozenAfterEsFormat}
             />
           ))
         )}

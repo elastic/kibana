@@ -31,6 +31,8 @@ export interface RulesListTableContainerProps {
   sortField?: RulesListTableSortField;
   sortDirection?: 'asc' | 'desc';
   isLoading: boolean;
+  /** When false, write affordances (create/edit/clone/delete/enable/bulk) are hidden. */
+  canWrite: boolean;
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
   onEditInFlyout: (rule: RuleApiResponse) => void;
   onCloneInFlyout: (rule: RuleApiResponse) => void;
@@ -47,6 +49,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   sortField,
   sortDirection,
   isLoading,
+  canWrite,
   onTableChange,
   onEditInFlyout,
   onCloneInFlyout,
@@ -134,6 +137,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         sortField={sortField}
         sortDirection={sortDirection}
         isLoading={isLoading}
+        canWrite={canWrite}
         selectedCount={selectedCount}
         isAllSelected={isAllSelected}
         isPageSelected={isPageSelected}
@@ -152,11 +156,16 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onClone={(r) => onCloneInFlyout(r)}
         onDelete={(r) => setRuleToDelete(r)}
         onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+        togglingRuleId={
+          toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
+        }
+        isBulkTogglingEnabled={bulkEnableMutation.isLoading || bulkDisableMutation.isLoading}
         onTableChange={onTableChange}
       />
       {expandedRule ? (
         <RuleSummaryFlyout
           rule={expandedRule}
+          canWrite={canWrite}
           onClose={() => setExpandedRuleId(null)}
           onQuickEdit={(r) => {
             setExpandedRuleId(null);

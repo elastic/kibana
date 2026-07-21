@@ -18,6 +18,40 @@ interface LegacyCustomField {
 }
 
 /**
+ * Maps a legacy custom-field type to the v2 field-definition `type`. Shared with the case
+ * extended-fields backfill so the storage key it computes (`<name>_as_<type>`) always matches the
+ * type this migration writes into the field definition.
+ * - number → `integer` (v1 numbers are integer-only; matches v2's own number fields)
+ * - toggle → `boolean` (matches the native v2 TOGGLE field's `type`)
+ * - text / unknown → `keyword`
+ */
+export const getV2FieldType = (legacyType: string): 'integer' | 'boolean' | 'keyword' => {
+  if (legacyType === CustomFieldTypes.NUMBER) return 'integer';
+  if (legacyType === CustomFieldTypes.TOGGLE) return 'boolean';
+  return 'keyword';
+};
+
+/**
+ * Strictly coerces a legacy toggle default to a boolean. Legacy toggle values are booleans in
+ * practice, but the persisted config type allows `string | number | boolean`, so a truthy
+ * `Boolean(value)` would wrongly map the string `'false'` to `true`. We therefore map only the
+ * unambiguous boolean / `'true'` / `'false'` shapes and return `undefined` for anything else so the
+ * caller omits the default rather than inventing one.
+ */
+const coerceLegacyToggleDefault = (value: string | number | boolean): boolean | undefined => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (value === 'true') {
+    return true;
+  }
+  if (value === 'false') {
+    return false;
+  }
+  return undefined;
+};
+
+/**
  * Builds a YAML string for a single FieldSchema entry from a legacy custom field configuration.
  * The returned `name` matches the legacy `key` so that per-case `customField.key` references
  * remain meaningful in the v2 system.
@@ -36,14 +70,14 @@ export const buildFieldDefinitionYaml = (
     fieldDef.validation = { required: true };
   }
 
+  fieldDef.type = getV2FieldType(type);
+
   if (type === CustomFieldTypes.TEXT) {
-    fieldDef.type = 'keyword';
     fieldDef.control = FieldType.INPUT_TEXT;
     if (defaultValue !== null && defaultValue !== undefined) {
       fieldDef.metadata = { default: String(defaultValue) };
     }
   } else if (type === CustomFieldTypes.NUMBER) {
-    fieldDef.type = 'integer';
     fieldDef.control = FieldType.INPUT_NUMBER;
     if (defaultValue !== null && defaultValue !== undefined) {
       const asNum = Number(defaultValue);
@@ -52,15 +86,16 @@ export const buildFieldDefinitionYaml = (
       }
     }
   } else if (type === CustomFieldTypes.TOGGLE) {
-    fieldDef.type = 'keyword';
-    fieldDef.control = FieldType.SELECT_BASIC;
-    fieldDef.metadata =
-      defaultValue !== null && defaultValue !== undefined
-        ? { options: ['true', 'false'], default: String(defaultValue) }
-        : { options: ['true', 'false'] };
+    // Legacy toggle maps directly to the native v2 TOGGLE control.
+    fieldDef.control = FieldType.TOGGLE;
+    if (defaultValue !== null && defaultValue !== undefined) {
+      const toggleDefault = coerceLegacyToggleDefault(defaultValue);
+      if (toggleDefault !== undefined) {
+        fieldDef.metadata = { default: toggleDefault };
+      }
+    }
   } else {
     // Unknown type: store as plain keyword text field
-    fieldDef.type = 'keyword';
     fieldDef.control = FieldType.INPUT_TEXT;
   }
 

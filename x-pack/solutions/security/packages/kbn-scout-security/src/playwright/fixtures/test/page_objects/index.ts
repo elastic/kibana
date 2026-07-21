@@ -7,6 +7,7 @@
 
 import type { PageObjects, ScoutPage, ScoutTestConfig } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
+import { AddExceptionFlyoutPage } from './add_exception_flyout';
 import { AIValueReportPage } from './ai_value_report';
 import { AlertsTablePage } from './alerts_table';
 import { AgentBuilderPage } from './agent_builder';
@@ -20,10 +21,13 @@ import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
 import { GraphFlyoutPage } from './graph_flyout_page';
+import { EntityFlyoutAnomaliesPage } from './entity_flyout_anomalies_page';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
+export { AddExceptionButtonType } from './add_exception_flyout';
 
 export interface SecurityPageObjects extends PageObjects {
+  addExceptionFlyoutPage: AddExceptionFlyoutPage;
   aiValueReportPage: AIValueReportPage;
   alertsTablePage: AlertsTablePage;
   agentBuilderPage: AgentBuilderPage;
@@ -39,6 +43,8 @@ export interface SecurityPageObjects extends PageObjects {
   serverlessProjectChromePage: ServerlessProjectChromePage;
   /** Graph Visualization tab inside the alert/event details left panel. */
   graphFlyoutPage: GraphFlyoutPage;
+  /** Entity flyout anomalies section and tab — requires entityAnalyticsAnomalyDetails feature flag. */
+  entityFlyoutAnomaliesPage: EntityFlyoutAnomaliesPage;
 }
 
 export function extendPageObjects(
@@ -48,6 +54,7 @@ export function extendPageObjects(
 ): SecurityPageObjects {
   return {
     ...pageObjects,
+    addExceptionFlyoutPage: createLazyPageObject(AddExceptionFlyoutPage, page),
     aiValueReportPage: createLazyPageObject(AIValueReportPage, page),
     alertsTablePage: createLazyPageObject(AlertsTablePage, page),
     agentBuilderPage: createLazyPageObject(AgentBuilderPage, page),
@@ -65,5 +72,6 @@ export function extendPageObjects(
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
     serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),
     graphFlyoutPage: createLazyPageObject(GraphFlyoutPage, page),
+    entityFlyoutAnomaliesPage: createLazyPageObject(EntityFlyoutAnomaliesPage, page),
   };
 }
