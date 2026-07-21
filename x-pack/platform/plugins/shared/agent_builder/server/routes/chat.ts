@@ -35,7 +35,6 @@ import type {
   ChatCallbackAcceptedResponse,
   ChatCallbackRequestBodyPayload,
 } from '../../common/http_api/chat_callback';
-import { isChatCallbackRequestBodyPayload } from '../../common/http_api/chat_callback';
 import { internalApiPath, publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
@@ -44,6 +43,14 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
 import { buildChatResponseFromEvents } from '../services/execution/utils/chat_response';
+
+interface ResolvedExecutionOptions {
+  useTaskManager: boolean | undefined;
+  origin: ExecutionConversationOrigin | undefined;
+  callback: { url: string } | undefined;
+  executionId: string | undefined;
+  metadata: Record<string, string> | undefined;
+}
 
 export const promptResponseEntrySchema = schema.oneOf([
   schema.object({ allow: schema.boolean() }),
@@ -391,51 +398,48 @@ export function registerChatRoutes({
   };
 
   /**
-   * Derives execution options shared by all converse routes.
-   * Public requests may opt into local or Task Manager execution with _execution_mode,
-   * while callback requests always use Task Manager and carry the callback and origin.
+   * Derives execution options for callback converse requests, which always use
+   * Task Manager and carry the callback, origin, and idempotency-derived execution id.
    */
   const resolveExecutionOptions = (
-    payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload,
-    spaceId?: string
-  ): {
-    useTaskManager: boolean | undefined;
-    origin: ExecutionConversationOrigin | undefined;
-    callback: { url: string } | undefined;
-    executionId: string | undefined;
-    metadata: Record<string, string> | undefined;
-  } => {
-    if (isChatCallbackRequestBodyPayload(payload)) {
-      let origin: ExecutionConversationOrigin | undefined;
-      let executionId = payload.execution_id;
-      let metadata: Record<string, string> | undefined;
+    payload: ChatCallbackRequestBodyPayload,
+    spaceId: string
+  ): ResolvedExecutionOptions => {
+    let origin: ExecutionConversationOrigin | undefined;
+    let executionId = payload.execution_id;
+    let metadata: Record<string, string> | undefined;
 
-      if (payload.origin) {
-        const { idempotency_key: idempotencyKey, ...originRest } = payload.origin;
+    if (payload.origin) {
+      const { idempotency_key: idempotencyKey, ...originRest } = payload.origin;
 
-        origin = originRest;
+      origin = originRest;
 
-        if (idempotencyKey) {
-          // The idempotency key deterministically owns the execution id, scoped to the
-          // space and origin conversation, so a replayed delivery of the same surface
-          // event maps to the same execution document while keys reused across spaces
-          // or threads cannot collide.
-          executionId = createHash('sha256')
-            .update([spaceId, originRest.external_conversation_id, idempotencyKey].join('\u0000'))
-            .digest('hex');
-          metadata = { idempotency_key: idempotencyKey };
-        }
+      if (idempotencyKey) {
+        // The idempotency key deterministically owns the execution id, scoped to the
+        // space and origin conversation, so a replayed delivery of the same surface
+        // event maps to the same execution document while keys reused across spaces
+        // or threads cannot collide.
+        executionId = createHash('sha256')
+          .update([spaceId, originRest.external_conversation_id, idempotencyKey].join('\u0000'))
+          .digest('hex');
+        metadata = { idempotency_key: idempotencyKey };
       }
-
-      return {
-        useTaskManager: true,
-        origin,
-        callback: payload.callback,
-        executionId,
-        metadata,
-      };
     }
 
+    return {
+      useTaskManager: true,
+      origin,
+      callback: payload.callback,
+      executionId,
+      metadata,
+    };
+  };
+
+  /**
+   * Default execution options for public converse requests, which may opt into
+   * local or Task Manager execution with _execution_mode.
+   */
+  const defaultExecutionOptions = (payload: ChatRequestBodyPayload): ResolvedExecutionOptions => {
     const { _execution_mode: executionMode } = payload;
 
     return {
@@ -452,12 +456,12 @@ export function registerChatRoutes({
     payload,
     request,
     executionService,
-    spaceId,
+    executionOptions,
   }: {
     payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload;
     request: KibanaRequest;
     executionService: AgentExecutionService;
-    spaceId?: string;
+    executionOptions?: ResolvedExecutionOptions;
   }) => {
     const {
       agent_id: agentId,
@@ -473,10 +477,8 @@ export function registerChatRoutes({
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
-    const { useTaskManager, origin, callback, executionId, metadata } = resolveExecutionOptions(
-      payload,
-      spaceId
-    );
+    const { useTaskManager, origin, callback, executionId, metadata } =
+      executionOptions ?? defaultExecutionOptions(payload);
 
     return executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
@@ -663,7 +665,7 @@ export function registerChatRoutes({
           payload,
           request,
           executionService,
-          spaceId,
+          executionOptions: resolveExecutionOptions(payload, spaceId),
         });
 
         return response.accepted<ChatCallbackAcceptedResponse>({
