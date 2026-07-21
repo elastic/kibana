@@ -37,7 +37,6 @@ export const useTrainedModelsMenu = ({
         iconType: 'plusInCircle' as const,
         run: onOpenAddModelFlyout,
         testId: 'mlModelsAddTrainedModelButton',
-        disableButton: !canCreateTrainedModels,
       },
       items: [
         {
@@ -53,6 +52,6 @@ export const useTrainedModelsMenu = ({
         },
       ],
     }),
-    [canCreateTrainedModels, canSync, onOpenAddModelFlyout, onOpenSyncFlyout]
+    [canSync, onOpenAddModelFlyout, onOpenSyncFlyout]
   );
 };
