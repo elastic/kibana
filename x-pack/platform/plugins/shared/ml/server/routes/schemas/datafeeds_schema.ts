@@ -58,6 +58,8 @@ export const datafeedConfigSchema = schema.object({
   scroll_size: schema.maybe(schema.number()),
   delayed_data_check_config: schema.maybe(schema.any()),
   indices_options: schema.maybe(indicesOptionsSchema),
+  authorization: schema.maybe(schema.any()),
+  state: schema.maybe(schema.string({ maxLength: 10000 })),
 });
 
 export const datafeedIdSchema = schema.object({ datafeedId: schema.string({ maxLength: 10000 }) });
