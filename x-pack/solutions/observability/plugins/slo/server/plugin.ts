@@ -222,7 +222,12 @@ export class SLOPlugin
           const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
           const transformManager = new DefaultTransformManager(
-            createTransformGenerators(spaceId, dataViewsService, this.isServerless, this.isCpsEnabled),
+            createTransformGenerators(
+              spaceId,
+              dataViewsService,
+              this.isServerless,
+              this.isCpsEnabled
+            ),
             scopedClusterClient,
             logger
           );
