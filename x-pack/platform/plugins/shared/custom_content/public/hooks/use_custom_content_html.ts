@@ -65,14 +65,6 @@ export function useCustomContentHtml({
       return;
     }
 
-    if (!prompt) {
-      setIsLoading(false);
-      return;
-    }
-
-    const controller = new AbortController();
-    let acc = '';
-
     const template = savedTemplate;
 
     if (template) {
@@ -81,6 +73,14 @@ export function useCustomContentHtml({
       setError(undefined);
       return;
     }
+
+    if (!prompt) {
+      setIsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    let acc = '';
 
     setIsLoading(true);
     setError(undefined);
