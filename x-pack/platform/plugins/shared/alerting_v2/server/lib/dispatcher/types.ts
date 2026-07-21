@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SnoozeCondition, SnoozeConditionsMatch } from '@kbn/alerting-v2-schemas';
 import type {
   AlertEpisodeStatus,
   AlertEventSeverity,
@@ -30,6 +31,12 @@ export interface AlertEpisode {
   data?: AlertEpisodeData;
 }
 
+/** The field/severity values of a group's series as-of the time its active snooze was created. */
+export interface SnoozeBaseline {
+  severity?: AlertEventSeverity;
+  data?: AlertEpisodeData;
+}
+
 export interface AlertEpisodeSuppression {
   rule_id: RuleId;
   group_hash: string;
@@ -38,6 +45,14 @@ export interface AlertEpisodeSuppression {
   last_ack_action?: string | null;
   last_deactivate_action?: string | null;
   last_snooze_action?: string | null;
+  // Raw ES|QL output for conditional snooze (JSON-encoded strings, absent for non-conditional snoozes).
+  snooze_ts?: string | null;
+  conditions_json?: string | null;
+  match_json?: string | null;
+  // Parsed + attached in FetchSuppressionsStep.
+  conditions?: SnoozeCondition[];
+  match?: SnoozeConditionsMatch;
+  baseline?: SnoozeBaseline;
 }
 
 export interface DispatcherExecutionParams {
@@ -134,6 +149,7 @@ export interface DispatcherPipelineState {
   readonly suppressions?: AlertEpisodeSuppression[];
   readonly dispatchable?: AlertEpisode[];
   readonly suppressed?: Array<AlertEpisode & { reason: string }>;
+  readonly autoUnsnoozed?: AlertEpisode[];
   readonly rules?: Map<RuleId, Rule>;
   readonly policies?: Map<ActionPolicyId, ActionPolicy>;
   readonly matched?: MatchedPair[];

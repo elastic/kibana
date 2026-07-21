@@ -34,6 +34,7 @@ export class StoreActionsStep implements DispatcherStep {
       throttled = [],
       dispatch = [],
       dispatchable = [],
+      autoUnsnoozed = [],
       policies,
       rules,
     } = state;
@@ -44,7 +45,8 @@ export class StoreActionsStep implements DispatcherStep {
       suppressed.length === 0 &&
       throttled.length === 0 &&
       dispatch.length === 0 &&
-      unmatched.length === 0
+      unmatched.length === 0 &&
+      autoUnsnoozed.length === 0
     ) {
       return { type: 'halt', reason: 'no_actions' };
     }
@@ -117,6 +119,18 @@ export class StoreActionsStep implements DispatcherStep {
             spaceId: spaceIdForEpisode(episode),
           })
         ),
+        // Persist the lift of a conditional snooze whose conditions were met this run, so the
+        // unsnooze is durable and surfaced in the UI (which reads `last_snooze_action`). Written
+        // once: the next run sees `last_snooze_action: 'unsnooze'` and no longer re-evaluates it.
+        ...autoUnsnoozed.map((episode) =>
+          toAction({
+            episode,
+            actionType: 'unsnooze',
+            now,
+            reason: 'snooze condition met',
+            spaceId: spaceIdForEpisode(episode),
+          })
+        ),
       ],
     });
 
@@ -132,7 +146,7 @@ function toAction({
   spaceId,
 }: {
   episode: AlertEpisode;
-  actionType: 'suppress' | 'fire' | 'notified' | 'unmatched';
+  actionType: 'suppress' | 'fire' | 'notified' | 'unmatched' | 'unsnooze';
   now: Date;
   reason?: string;
   spaceId: string;

@@ -29,6 +29,14 @@ const durationSchema = z.string().superRefine((value, ctx) => {
  */
 const tagsSchema = z.array(z.string().min(1).max(MAX_TAG_LENGTH)).max(MAX_TAGS);
 
+/**
+ * The severity levels an alert event (and its episode) can carry. Single source of truth:
+ * the alerting_v2 alert-events datastream schema and the snooze condition values derive from it.
+ */
+export const ALERT_EVENT_SEVERITY_LEVELS = ['info', 'low', 'medium', 'high', 'critical'] as const;
+export const alertEventSeveritySchema = z.enum(ALERT_EVENT_SEVERITY_LEVELS);
+export type AlertEventSeverity = z.infer<typeof alertEventSeveritySchema>;
+
 /** Make a schema optional while preserving its `.describe()` metadata. */
 const optionalWithDescription = <T extends z.ZodType>(schema: T) => {
   const optional = schema.optional();

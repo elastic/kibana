@@ -87,6 +87,9 @@ export const chunkInClauseLiterals = (literals: readonly string[]): string[][] =
 // Expired snoozes are mapped to "snooze_expired" instead of being filtered out: they must stay
 // in the row set so LAST() still picks them as the latest snooze intent. Dropping them before
 // LAST() would resurrect an older snooze (e.g. an indefinite one) for the same series.
+//
+// For the same reason, a snooze without conditions is extracted as the string "null" instead of
+// NULL: LAST() skips null values, so it would fall back to an older snooze's conditions.
 export const getAlertEpisodeSuppressionsQueries = (
   alertEpisodes: AlertEpisode[]
 ): EsqlRequest[] => {
@@ -108,22 +111,32 @@ export const getAlertEpisodeSuppressionsQueries = (
   return chunkInClauseLiterals(uniquePairKeys).map((chunk) => {
     const pairValues = chunk.map((key) => esql.str(key));
 
-    return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
+    return esql`FROM ${ALERT_ACTIONS_DATA_STREAM} METADATA _source
         | EVAL _pair_key = CONCAT(rule_id, ${PAIR_SEPARATOR}, group_hash)
         | WHERE _pair_key IN (${pairValues})
         | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
-        | EVAL _snooze_action = CASE(
-            action_type == "unsnooze", "unsnooze",
-            action_type == "snooze" AND (expiry IS NULL OR expiry > ${minLastEventTimestamp}::datetime), "snooze",
-            action_type == "snooze", "snooze_expired"
-          )
+        | EVAL
+            _snooze_action = CASE(
+              action_type == "unsnooze", "unsnooze",
+              action_type == "snooze" AND (expiry IS NULL OR expiry > ${minLastEventTimestamp}::datetime), "snooze",
+              action_type == "snooze", "snooze_expired"
+            ),
+            conditions_json = CASE(action_type == "snooze", COALESCE(JSON_EXTRACT(_source, "$.conditions"), "null"), NULL),
+            match_json = CASE(action_type == "snooze", COALESCE(JSON_EXTRACT(_source, "$.match"), "null"), NULL)
+        | DROP _source
         | INLINE STATS
-            last_snooze_action = LAST(_snooze_action, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
+            last_snooze_action = LAST(_snooze_action, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
+            snooze_ts = MAX(@timestamp) WHERE action_type == "snooze",
+            conditions_json = LAST(conditions_json, @timestamp) WHERE action_type == "snooze",
+            match_json = LAST(match_json, @timestamp) WHERE action_type == "snooze"
             BY rule_id, group_hash
         | STATS
             last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
             last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-            last_snooze_action = MAX(last_snooze_action)
+            last_snooze_action = MAX(last_snooze_action),
+            snooze_ts = MAX(snooze_ts),
+            conditions_json = MAX(conditions_json),
+            match_json = MAX(match_json)
           BY rule_id, group_hash, episode_id
         | EVAL should_suppress = CASE(
             last_snooze_action == "snooze", true,
@@ -131,7 +144,37 @@ export const getAlertEpisodeSuppressionsQueries = (
             last_deactivate_action == "deactivate", true,
             false
           )
-        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action`.toRequest();
+        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, snooze_ts, conditions_json, match_json`.toRequest();
+  });
+};
+
+// For each series with a conditional snooze, reads the "baseline" from `.rule-events` history: the
+// severity and data field values as-of the snooze's creation `@timestamp`. Compared later against the
+// current values to tell whether a `changed` condition fired. Baseline is per
+// group (rule_id, group_hash); chunked like the other IN-list queries.
+export const getSnoozeBaselineQueries = (pairKeys: string[]): EsqlRequest[] => {
+  const alertEventType: AlertEventType = 'alert';
+
+  return chunkInClauseLiterals(pairKeys).map((chunk) => {
+    const pairValues = chunk.map((key) => esql.str(key));
+
+    return esql`FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM} METADATA _source
+        | WHERE type IS NULL OR type == ${alertEventType}
+        | EVAL rule_id = COALESCE(rule.id, rule_id)
+        | EVAL _pair_key = CONCAT(rule_id, ${PAIR_SEPARATOR}, group_hash)
+        | WHERE _pair_key IN (${pairValues})
+        | EVAL
+            severity_evt = CASE(type IS NOT NULL, severity, NULL),
+            data_json = CASE(type IS NOT NULL, JSON_EXTRACT(_source, "$.data"), NULL)
+        | DROP _source, rule.id
+        | INLINE STATS snooze_ts = MAX(@timestamp) WHERE action_type == "snooze" BY rule_id, group_hash
+        | WHERE snooze_ts IS NOT NULL AND type IS NOT NULL AND @timestamp <= snooze_ts
+        | STATS
+            severity_as_of = LAST(severity_evt, @timestamp),
+            data_json_as_of = LAST(data_json, @timestamp)
+          BY rule_id, group_hash
+        | KEEP rule_id, group_hash, severity_as_of, data_json_as_of
+        | LIMIT 10000`.toRequest();
   });
 };
 

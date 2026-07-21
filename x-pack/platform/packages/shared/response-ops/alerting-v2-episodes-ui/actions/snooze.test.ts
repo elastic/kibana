@@ -58,7 +58,9 @@ describe('createSnoozeAction', () => {
 
   it('execute: opens modal, POSTs unique-by-group SNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue('2026-05-01T00:00:00Z');
+    jest
+      .spyOn(modal, 'openSnoozeExpiryModal')
+      .mockResolvedValue({ expiresAt: '2026-05-01T00:00:00Z' });
     jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
     const onSuccess = jest.fn();
     await createSnoozeAction(deps).execute({
@@ -70,6 +72,64 @@ describe('createSnoozeAction', () => {
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
+  });
+
+  it('execute: passes the episode data fields to the snooze modal', async () => {
+    const deps = makeDeps();
+    const openModalSpy = jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue(undefined);
+    await createSnoozeAction(deps).execute({
+      episodes: [
+        makeEpisode({ episode_data: JSON.stringify({ 'host.name': 'srv-01', bytes: 100 }) }),
+        makeEpisode({ 'episode.id': 'e2', episode_data: JSON.stringify({ env: 'prod' }) }),
+      ],
+    });
+    expect(openModalSpy).toHaveBeenCalledWith(deps.overlays, deps.rendering, [
+      'data.bytes',
+      'data.env',
+      'data.host.name',
+    ]);
+  });
+
+  it('execute: maps conditions to the API shape and the operator to `match`', async () => {
+    const deps = makeDeps();
+    jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue({
+      conditions: [
+        { type: 'severity_equals', value: 'critical' },
+        { type: 'severity_change' },
+        { type: 'field_change', field: 'host.name' },
+      ],
+      conditionOperator: 'all',
+    });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    await createSnoozeAction(deps).execute({ episodes: [makeEpisode()] });
+    expect(bulk.bulkCreateAlertActions).toHaveBeenCalledWith(deps.http, [
+      {
+        group_hash: 'g1',
+        action_type: 'snooze',
+        conditions: [
+          { field: 'severity', operator: 'eq', value: 'critical' },
+          { field: 'severity', operator: 'changed' },
+          { field: 'data.host.name', operator: 'changed' },
+        ],
+        match: 'all',
+      },
+    ]);
+  });
+
+  it('execute: does not double-prefix an already data-prefixed field path', async () => {
+    const deps = makeDeps();
+    jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue({
+      conditions: [{ type: 'field_change', field: 'data.host.name' }],
+    });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    await createSnoozeAction(deps).execute({ episodes: [makeEpisode()] });
+    expect(bulk.bulkCreateAlertActions).toHaveBeenCalledWith(deps.http, [
+      {
+        group_hash: 'g1',
+        action_type: 'snooze',
+        conditions: [{ field: 'data.host.name', operator: 'changed' }],
+      },
+    ]);
   });
 
   it('execute: cancelled modal is a no-op', async () => {

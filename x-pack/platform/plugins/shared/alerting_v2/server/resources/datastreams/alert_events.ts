@@ -7,6 +7,7 @@
 
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { z } from '@kbn/zod/v4';
+import { alertEventSeveritySchema } from '@kbn/alerting-v2-schemas';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
@@ -48,7 +49,6 @@ const alertEventStatusSchema = z.enum(['breached', 'recovered', 'no_data']);
 const alertEventTypeSchema = z.enum(['signal', 'alert']);
 const alertEpisodeStatusSchema = z.enum(['inactive', 'pending', 'active', 'recovering']);
 const alertEpisodeStatusCountSchema = z.number().int().optional();
-const alertEventSeveritySchema = z.enum(['info', 'low', 'medium', 'high', 'critical']);
 
 export const alertEventStatus = alertEventStatusSchema.enum;
 export const alertEventType = alertEventTypeSchema.enum;

@@ -78,6 +78,7 @@ interface BuildAlertEventInput {
   episodeStatus: NonNullable<AlertEvent['episode']>['status'];
   status: AlertEvent['status'];
   data?: AlertEvent['data'];
+  severity?: AlertEvent['severity'];
   timestamp: AlertEvent['@timestamp'];
 }
 
@@ -88,6 +89,7 @@ const buildAlertEvent = ({
   episodeStatus,
   status,
   data = {},
+  severity,
   timestamp,
 }: BuildAlertEventInput): AlertEvent => ({
   '@timestamp': timestamp,
@@ -96,6 +98,7 @@ const buildAlertEvent = ({
   group_hash: groupHash,
   episode: { id: episodeId, status: episodeStatus },
   data,
+  ...(severity ? { severity } : {}),
   status,
   source: 'internal',
   space_id: 'default',
@@ -109,6 +112,8 @@ interface BuildAlertActionInput {
   lastSeriesEventTimestamp: AlertAction['last_series_event_timestamp'];
   timestamp: AlertAction['@timestamp'];
   expiry?: AlertAction['expiry'];
+  conditions?: AlertAction['conditions'];
+  match?: AlertAction['match'];
 }
 
 const buildAlertAction = ({
@@ -119,6 +124,8 @@ const buildAlertAction = ({
   lastSeriesEventTimestamp,
   timestamp,
   expiry,
+  conditions,
+  match,
 }: BuildAlertActionInput): AlertAction => ({
   '@timestamp': timestamp,
   actor: 'elastic',
@@ -128,6 +135,8 @@ const buildAlertAction = ({
   group_hash: groupHash,
   ...(episodeId ? { episode_id: episodeId } : {}),
   ...(expiry ? { expiry } : {}),
+  ...(conditions ? { conditions } : {}),
+  ...(match ? { match } : {}),
   space_id: 'default',
 });
 
@@ -968,6 +977,182 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           source: 'internal',
         });
       }
+    }
+  );
+
+  apiTest(
+    'conditional snooze / lifts the snooze and dispatches when the watched severity first appears after snooze time',
+    async ({ apiServices }) => {
+      const baseTime = Date.now();
+      const eventTs = (sec: number) => relativeTime(sec, baseTime);
+
+      // Seed the snooze first so the dispatcher can't fire the episode before
+      // it exists. The events are older than the snooze and have no severity,
+      // so the snooze should lift when severity shows up later.
+      await apiServices.alertingV2.alertActionsEvents.seed([
+        buildAlertAction({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-cond-snooze-series',
+          actionType: 'snooze',
+          lastSeriesEventTimestamp: eventTs(120),
+          timestamp: eventTs(110),
+          // Indefinite snooze (no expiry): only the condition can lift it.
+          conditions: [{ field: 'severity', operator: 'changed' }],
+          match: 'any',
+        }),
+      ]);
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-cond-snooze-series',
+          episodeId: 'rule-1-cond-snooze-ep-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: eventTs(120),
+        }),
+      ]);
+
+      // No severity yet: the condition is not met and the episode stays suppressed.
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
+        ruleId: 'rule-1',
+        actionTypes: ['suppress'],
+      });
+
+      // Severity appears on a newer event: the condition is now met, so the
+      // dispatcher must write an `unsnooze` and dispatch the episode.
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-cond-snooze-series',
+          episodeId: 'rule-1-cond-snooze-ep-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          severity: 'critical',
+          timestamp: eventTs(5),
+        }),
+      ]);
+
+      // Exactly one unsnooze: later ones must not write another (write-once).
+      const unsnoozeActions = await expectStableCount(apiServices, 1, {
+        ruleId: 'rule-1',
+        actionTypes: ['unsnooze'],
+      });
+
+      expect(unsnoozeActions[0]).toMatchObject({
+        rule_id: 'rule-1',
+        group_hash: 'rule-1-cond-snooze-series',
+        action_type: 'unsnooze',
+        actor: 'system',
+        source: 'internal',
+        reason: 'snooze condition met',
+      });
+
+      // The lifted episode is dispatched, not suppressed.
+      const fires = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId: 'rule-1',
+        actionTypes: ['fire'],
+      });
+
+      expect(fires).toStrictEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            rule_id: 'rule-1',
+            group_hash: 'rule-1-cond-snooze-series',
+            action_type: 'fire',
+            last_series_event_timestamp: eventTs(5),
+          }),
+        ])
+      );
+    }
+  );
+
+  apiTest(
+    'conditional snooze / a newer quick snooze governs over an older conditional snooze',
+    async ({ apiServices }) => {
+      const baseTime = Date.now();
+      const eventTs = (sec: number) => relativeTime(sec, baseTime);
+      const futureExpiry = new Date(baseTime + 24 * 60 * 60 * 1000).toISOString();
+
+      // An older conditional snooze stacked under a newer quick snooze: the quick snooze is the
+      // latest snooze intent, so the old conditions must not run even when they would be met.
+      await apiServices.alertingV2.alertActionsEvents.seed([
+        buildAlertAction({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-stacked-snooze-series',
+          actionType: 'snooze',
+          lastSeriesEventTimestamp: eventTs(120),
+          timestamp: eventTs(110),
+          conditions: [{ field: 'severity', operator: 'changed' }],
+          match: 'any',
+        }),
+        buildAlertAction({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-stacked-snooze-series',
+          actionType: 'snooze',
+          lastSeriesEventTimestamp: eventTs(120),
+          timestamp: eventTs(100),
+          expiry: futureExpiry,
+        }),
+      ]);
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-stacked-snooze-series',
+          episodeId: 'rule-1-stacked-snooze-ep-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: eventTs(120),
+        }),
+      ]);
+
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
+        ruleId: 'rule-1',
+        actionTypes: ['suppress'],
+      });
+
+      // Severity appears, which would meet the old snooze's condition. The quick snooze has no
+      // conditions, so the episode must stay suppressed and no unsnooze must be written.
+      const newEventTs = eventTs(5);
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-stacked-snooze-series',
+          episodeId: 'rule-1-stacked-snooze-ep-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          severity: 'critical',
+          timestamp: newEventTs,
+        }),
+      ]);
+
+      // Wait until the new event has been processed (a suppress action carries its timestamp).
+      await expect
+        .poll(
+          async () => {
+            const suppresses = await apiServices.alertingV2.alertActionsEvents.find({
+              ruleId: 'rule-1',
+              actionTypes: ['suppress'],
+            });
+            return suppresses.filter((action) => action.last_series_event_timestamp === newEventTs)
+              .length;
+          },
+          { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
+        )
+        .toBe(1);
+
+      const unsnoozes = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId: 'rule-1',
+        actionTypes: ['unsnooze'],
+      });
+      expect(unsnoozes).toHaveLength(0);
+
+      const fires = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId: 'rule-1',
+        actionTypes: ['fire'],
+      });
+      expect(fires).toHaveLength(0);
     }
   );
 

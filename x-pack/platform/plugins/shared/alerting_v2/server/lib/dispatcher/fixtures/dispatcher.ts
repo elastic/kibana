@@ -42,12 +42,48 @@ export const createAlertEpisodeSuppressionsResponse = (
       { name: 'group_hash', type: 'keyword' },
       { name: 'episode_id', type: 'keyword' },
       { name: 'should_suppress', type: 'boolean' },
+      { name: 'last_ack_action', type: 'keyword' },
+      { name: 'last_deactivate_action', type: 'keyword' },
+      { name: 'last_snooze_action', type: 'keyword' },
+      { name: 'snooze_ts', type: 'date' },
+      { name: 'conditions_json', type: 'keyword' },
+      { name: 'match_json', type: 'keyword' },
     ],
     values: suppressions.map((suppression) => [
       suppression.rule_id,
       suppression.group_hash,
       suppression.episode_id,
       suppression.should_suppress,
+      suppression.last_ack_action ?? null,
+      suppression.last_deactivate_action ?? null,
+      suppression.last_snooze_action ?? null,
+      suppression.snooze_ts ?? null,
+      suppression.conditions_json ?? null,
+      suppression.match_json ?? null,
+    ]),
+  };
+};
+
+export const createSnoozeBaselineResponse = (
+  rows: Array<{
+    rule_id: string;
+    group_hash: string;
+    severity_as_of?: string | null;
+    data_json_as_of?: string | null;
+  }>
+): EsqlQueryResponse => {
+  return {
+    columns: [
+      { name: 'rule_id', type: 'keyword' },
+      { name: 'group_hash', type: 'keyword' },
+      { name: 'severity_as_of', type: 'keyword' },
+      { name: 'data_json_as_of', type: 'keyword' },
+    ],
+    values: rows.map((row) => [
+      row.rule_id,
+      row.group_hash,
+      row.severity_as_of ?? null,
+      row.data_json_as_of ?? null,
     ]),
   };
 };

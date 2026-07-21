@@ -7,7 +7,10 @@
 
 import { FetchSuppressionsStep } from './fetch_suppressions_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
-import { createAlertEpisodeSuppressionsResponse } from '../fixtures/dispatcher';
+import {
+  createAlertEpisodeSuppressionsResponse,
+  createSnoozeBaselineResponse,
+} from '../fixtures/dispatcher';
 import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';
 
 describe('FetchSuppressionsStep', () => {
@@ -36,6 +39,120 @@ describe('FetchSuppressionsStep', () => {
     if (result.type !== 'continue') return;
     expect(result.data?.suppressions).toHaveLength(1);
     expect(result.data?.suppressions?.[0].should_suppress).toBe(true);
+  });
+
+  it('parses conditions and attaches the snooze baseline for conditional snoozes', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchSuppressionsStep(queryService);
+
+    // First call: the suppressions query returns a conditional snooze.
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createAlertEpisodeSuppressionsResponse([
+        {
+          rule_id: 'r1',
+          group_hash: 'h1',
+          episode_id: 'e1',
+          should_suppress: true,
+          last_snooze_action: 'snooze',
+          snooze_ts: '2026-01-22T07:00:00.000Z',
+          conditions_json: JSON.stringify([{ field: 'severity', operator: 'changed' }]),
+          match_json: JSON.stringify('all'),
+        },
+      ])
+    );
+    // Second call: the baseline query returns the as-of-snooze values for the group.
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createSnoozeBaselineResponse([
+        {
+          rule_id: 'r1',
+          group_hash: 'h1',
+          severity_as_of: 'high',
+          data_json_as_of: JSON.stringify({ 'host.name': 'srv-01' }),
+        },
+      ])
+    );
+
+    const state = createDispatcherPipelineState({
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })],
+    });
+
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
+
+    const suppression = result.data?.suppressions?.[0];
+    expect(suppression?.conditions).toEqual([{ field: 'severity', operator: 'changed' }]);
+    expect(suppression?.match).toBe('all');
+    expect(suppression?.baseline).toEqual({ severity: 'high', data: { host: { name: 'srv-01' } } });
+  });
+
+  it('treats a "null" conditions payload as an unconditional snooze (no baseline query)', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchSuppressionsStep(queryService);
+
+    // The suppressions query writes "null" when the newest snooze has no conditions,
+    // so LAST() does not skip it in favor of an older conditional snooze.
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createAlertEpisodeSuppressionsResponse([
+        {
+          rule_id: 'r1',
+          group_hash: 'h1',
+          episode_id: 'e1',
+          should_suppress: true,
+          last_snooze_action: 'snooze',
+          snooze_ts: '2026-01-22T07:00:00.000Z',
+          conditions_json: 'null',
+          match_json: 'null',
+        },
+      ])
+    );
+
+    const state = createDispatcherPipelineState({
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })],
+    });
+
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
+
+    const suppression = result.data?.suppressions?.[0];
+    expect(suppression?.should_suppress).toBe(true);
+    expect(suppression?.conditions).toBeUndefined();
+    expect(suppression?.match).toBeUndefined();
+    expect(suppression?.baseline).toBeUndefined();
+  });
+
+  it('does not run a baseline query for non-conditional snoozes', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchSuppressionsStep(queryService);
+
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createAlertEpisodeSuppressionsResponse([
+        {
+          rule_id: 'r1',
+          group_hash: 'h1',
+          episode_id: 'e1',
+          should_suppress: true,
+          last_snooze_action: 'snooze',
+        },
+      ])
+    );
+
+    const state = createDispatcherPipelineState({
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })],
+    });
+
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
+    expect(result.data?.suppressions?.[0].conditions).toBeUndefined();
+    expect(result.data?.suppressions?.[0].baseline).toBeUndefined();
   });
 
   it('returns empty suppressions when no episodes exist', async () => {

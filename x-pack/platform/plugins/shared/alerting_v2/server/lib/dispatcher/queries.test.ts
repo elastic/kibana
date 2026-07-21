@@ -10,6 +10,7 @@ import {
   chunkInClauseLiterals,
   getDispatchableAlertEventsQuery,
   getAlertEpisodeSuppressionsQueries,
+  getSnoozeBaselineQueries,
   getLastNotifiedTimestampsQueries,
 } from './queries';
 import { createAlertEpisode } from './fixtures/test_utils';
@@ -293,8 +294,40 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
 
     expect(requests[0].query).toContain(
-      'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action'
+      'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, snooze_ts, conditions_json, match_json'
     );
+  });
+
+  it('extracts snooze conditions and match combinator from _source for the last snooze', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain('METADATA _source');
+    expect(requests[0].query).toContain('JSON_EXTRACT(_source, "$.conditions")');
+    expect(requests[0].query).toContain('JSON_EXTRACT(_source, "$.match")');
+    expect(requests[0].query).toContain(
+      'snooze_ts = MAX(@timestamp) WHERE action_type == "snooze"'
+    );
+  });
+
+  it('extracts missing conditions as the string "null" so LAST() tracks the newest snooze', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    // LAST() skips null values: without the COALESCE, a newer snooze without conditions would be
+    // skipped and an older snooze's conditions would apply.
+    expect(requests[0].query).toContain('COALESCE(JSON_EXTRACT(_source, "$.conditions"), "null")');
+    expect(requests[0].query).toContain('COALESCE(JSON_EXTRACT(_source, "$.match"), "null")');
+  });
+
+  it('drops _source after JSON_EXTRACT and before INLINE STATS', () => {
+    const { query } = getAlertEpisodeSuppressionsQueries([createAlertEpisode()])[0];
+
+    const extractIdx = query.indexOf('JSON_EXTRACT(_source');
+    const dropIdx = query.indexOf('DROP _source');
+    const inlineStatsIdx = query.indexOf('INLINE STATS');
+
+    expect(extractIdx).toBeGreaterThan(-1);
+    expect(dropIdx).toBeGreaterThan(extractIdx);
+    expect(inlineStatsIdx).toBeGreaterThan(dropIdx);
   });
 
   it('handles a single episode', () => {
@@ -353,6 +386,67 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(requests.length).toBeGreaterThanOrEqual(2);
     for (const request of requests) {
       expect(request.query).toContain('expiry > "2026-03-01T00:00:00.000Z"::DATETIME');
+    }
+  });
+});
+
+describe('getSnoozeBaselineQueries', () => {
+  it('returns an empty array for empty input', () => {
+    expect(getSnoozeBaselineQueries([])).toEqual([]);
+  });
+
+  it('reads both data streams and filters by pair key', () => {
+    const requests = getSnoozeBaselineQueries(['rule-1::hash-1', 'rule-2::hash-2']);
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0].query).toContain('.rule-events');
+    expect(requests[0].query).toContain('.alert-actions');
+    expect(requests[0].query).toContain('CONCAT(rule_id, "::", group_hash)');
+    expect(requests[0].query).toContain('rule-1::hash-1');
+    expect(requests[0].query).toContain('rule-2::hash-2');
+  });
+
+  it('broadcasts the per-group snooze timestamp and filters events at-or-before it', () => {
+    const { query } = getSnoozeBaselineQueries(['rule-1::hash-1'])[0];
+
+    expect(query).toContain(
+      'INLINE STATS snooze_ts = MAX(@timestamp) WHERE action_type == "snooze" BY rule_id, group_hash'
+    );
+    expect(query).toContain('@timestamp <= snooze_ts');
+  });
+
+  it('derives the as-of severity and data at group grain', () => {
+    const { query } = getSnoozeBaselineQueries(['rule-1::hash-1'])[0];
+
+    expect(query).toContain('severity_as_of = LAST(severity_evt, @timestamp)');
+    expect(query).toContain('data_json_as_of = LAST(data_json, @timestamp)');
+    expect(query).toContain('BY rule_id, group_hash');
+    expect(query).toContain('KEEP rule_id, group_hash, severity_as_of, data_json_as_of');
+  });
+
+  it('drops _source before INLINE STATS', () => {
+    const { query } = getSnoozeBaselineQueries(['rule-1::hash-1'])[0];
+
+    const extractIdx = query.indexOf('JSON_EXTRACT(_source');
+    const dropIdx = query.indexOf('DROP _source');
+    const inlineStatsIdx = query.indexOf('INLINE STATS');
+
+    expect(dropIdx).toBeGreaterThan(extractIdx);
+    expect(inlineStatsIdx).toBeGreaterThan(dropIdx);
+  });
+
+  it('splits into multiple requests when pair keys exceed the size budget', () => {
+    const longSegment = 'x'.repeat(5_000);
+    const pairKeys = Array.from(
+      { length: 200 },
+      (_, i) => `${longSegment}-r${i}::${longSegment}-g${i}`
+    );
+
+    const requests = getSnoozeBaselineQueries(pairKeys);
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(request.query.length).toBeLessThan(1_000_000);
     }
   });
 });

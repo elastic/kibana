@@ -454,6 +454,94 @@ describe('StoreActionsStep', () => {
     });
   });
 
+  it('records auto-unsnoozed episodes with action_type unsnooze', async () => {
+    const mockService = createMockStorageServiceContract();
+    const step = new StoreActionsStep(mockService);
+
+    const episode = createAlertEpisode({
+      rule_id: 'rule-1',
+      group_hash: 'hash-1',
+      episode_id: 'ep-1',
+      last_event_timestamp: '2026-01-22T07:00:00.000Z',
+    });
+
+    // Lifted conditional snoozes are dispatchable AND recorded as auto-unsnoozed.
+    const state = createDispatcherPipelineState({
+      dispatchable: [episode],
+      autoUnsnoozed: [episode],
+      suppressed: [],
+      throttled: [],
+      dispatch: [],
+      rules: createRules('rule-1'),
+    });
+
+    const result = await step.execute(state);
+
+    expect(result).toEqual({ type: 'continue' });
+    const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
+    const unsnoozeDoc = callArgs.docs.find(
+      (d: Record<string, unknown>) => d.action_type === 'unsnooze'
+    );
+    expect(unsnoozeDoc).toEqual({
+      '@timestamp': mockDate.toISOString(),
+      group_hash: 'hash-1',
+      last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
+      actor: 'system',
+      action_type: 'unsnooze',
+      rule_id: 'rule-1',
+      source: 'internal',
+      reason: 'snooze condition met',
+      space_id: 'default',
+    });
+  });
+
+  it('writes the unsnooze even when the lifted episode is still suppressed (e.g. by ack)', async () => {
+    const mockService = createMockStorageServiceContract();
+    const step = new StoreActionsStep(mockService);
+
+    const episode = createAlertEpisode({
+      rule_id: 'rule-1',
+      group_hash: 'hash-1',
+      episode_id: 'ep-1',
+      last_event_timestamp: '2026-01-22T07:00:00.000Z',
+    });
+
+    const state = createDispatcherPipelineState({
+      suppressed: [{ ...episode, reason: 'ack' }],
+      autoUnsnoozed: [episode],
+      throttled: [],
+      dispatch: [],
+      rules: createRules('rule-1'),
+    });
+
+    await step.execute(state);
+
+    const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
+    const actionTypes = callArgs.docs.map((d: Record<string, unknown>) => d.action_type);
+    expect(actionTypes).toEqual(expect.arrayContaining(['suppress', 'unsnooze']));
+  });
+
+  it('does not halt when only auto-unsnoozed episodes exist', async () => {
+    const mockService = createMockStorageServiceContract();
+    const step = new StoreActionsStep(mockService);
+
+    const episode = createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1' });
+
+    const state = createDispatcherPipelineState({
+      dispatchable: [],
+      autoUnsnoozed: [episode],
+      suppressed: [],
+      throttled: [],
+      dispatch: [],
+      rules: createRules('rule-1'),
+    });
+
+    const result = await step.execute(state);
+
+    expect(result).toEqual({ type: 'continue' });
+    expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
+  });
+
   it('does not halt when only unmatched episodes exist', async () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);

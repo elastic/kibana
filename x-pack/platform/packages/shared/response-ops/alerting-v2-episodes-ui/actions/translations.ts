@@ -64,6 +64,27 @@ export const CANCEL = i18n.translate('xpack.alertingV2.episodesUi.tagsAction.can
   defaultMessage: 'Cancel',
 });
 
+export const SNOOZE_TYPE_LEGEND = i18n.translate(
+  'xpack.alertingV2.episodesUi.snoozeAction.snoozeTypeLegend',
+  {
+    defaultMessage: 'Snooze type',
+  }
+);
+
+export const QUICK_SNOOZE_TAB = i18n.translate(
+  'xpack.alertingV2.episodesUi.snoozeAction.quickSnoozeTab',
+  {
+    defaultMessage: 'Quick Snooze',
+  }
+);
+
+export const CONDITIONAL_SNOOZE_TAB = i18n.translate(
+  'xpack.alertingV2.episodesUi.snoozeAction.conditionalSnoozeTab',
+  {
+    defaultMessage: 'Condition based',
+  }
+);
+
 export const RESOLVE_ACTION_REASON = i18n.translate(
   'xpack.alertingV2.episodesUi.resolveAction.reason',
   {

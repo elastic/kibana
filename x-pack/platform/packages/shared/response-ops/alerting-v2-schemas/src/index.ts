@@ -9,7 +9,13 @@ export * from './rule_data_schema';
 export * from './rule_attachment_schema';
 export * from './error_response_schema';
 export * from './constants';
-export { durationSchema, tagsSchema } from './common';
+export {
+  durationSchema,
+  tagsSchema,
+  ALERT_EVENT_SEVERITY_LEVELS,
+  alertEventSeveritySchema,
+  type AlertEventSeverity,
+} from './common';
 export {
   validateDuration,
   validateMaxDuration,

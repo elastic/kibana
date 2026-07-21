@@ -35,6 +35,7 @@ import {
   createAlertEpisodeSuppressionsResponse,
   createDispatchableAlertEventsResponse,
   createLastNotifiedTimestampsResponse,
+  createSnoozeBaselineResponse,
 } from './fixtures/dispatcher';
 import { getDispatchableAlertEventsQuery } from './queries';
 import {
@@ -352,6 +353,126 @@ describe('DispatcherService', () => {
           }),
         ])
       );
+    });
+
+    it('records an unsnooze action when a conditional snooze is lifted by a field change', async () => {
+      // Current episode value differs from the snooze baseline, so the `changed` condition fires.
+      const alertEpisodes: Array<AlertEpisode & { data_json?: string | null }> = [
+        {
+          last_event_timestamp: '2026-01-22T07:10:00.000Z',
+          rule_id: 'rule-1',
+          group_hash: 'hash-1',
+          episode_id: 'episode-1',
+          episode_status: 'active',
+          data_json: JSON.stringify({ x: 200 }),
+        },
+      ];
+
+      const suppressions: AlertEpisodeSuppression[] = [
+        {
+          rule_id: 'rule-1',
+          group_hash: 'hash-1',
+          episode_id: 'episode-1',
+          should_suppress: true,
+          last_snooze_action: 'snooze',
+          snooze_ts: '2026-01-22T07:05:00.000Z',
+          conditions_json: JSON.stringify([{ field: 'data.x', operator: 'changed' }]),
+          match_json: JSON.stringify('any'),
+        },
+      ];
+
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes)) // fetch episodes
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions)) // fetch suppressions
+        .mockResolvedValueOnce(
+          // snooze baseline: value as-of the snooze (differs from the current 200)
+          createSnoozeBaselineResponse([
+            {
+              rule_id: 'rule-1',
+              group_hash: 'hash-1',
+              data_json_as_of: JSON.stringify({ x: 100 }),
+            },
+          ])
+        )
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse()); // throttling lookup
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: [{ create: { _id: '1', status: 201 } }],
+        errors: false,
+      } as BulkResponse);
+
+      await dispatcherService.run({ previousStartedAt: new Date('2026-01-22T07:30:00.000Z') });
+
+      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
+      const docs = (operations ?? []).filter((_, index) => index % 2 === 1);
+
+      const unsnoozeDocs = docs.filter((d: any) => d.action_type === 'unsnooze');
+      expect(unsnoozeDocs).toHaveLength(1);
+      expect(unsnoozeDocs[0]).toEqual(
+        expect.objectContaining({
+          group_hash: 'hash-1',
+          rule_id: 'rule-1',
+          action_type: 'unsnooze',
+          actor: 'system',
+          reason: 'snooze condition met',
+        })
+      );
+      // The lifted episode is no longer suppressed.
+      expect(docs.filter((d: any) => d.action_type === 'suppress')).toHaveLength(0);
+    });
+
+    it('keeps a conditional snooze suppressed (no unsnooze) while the field is unchanged', async () => {
+      const alertEpisodes: Array<AlertEpisode & { data_json?: string | null }> = [
+        {
+          last_event_timestamp: '2026-01-22T07:10:00.000Z',
+          rule_id: 'rule-1',
+          group_hash: 'hash-1',
+          episode_id: 'episode-1',
+          episode_status: 'active',
+          data_json: JSON.stringify({ x: 100 }),
+        },
+      ];
+
+      const suppressions: AlertEpisodeSuppression[] = [
+        {
+          rule_id: 'rule-1',
+          group_hash: 'hash-1',
+          episode_id: 'episode-1',
+          should_suppress: true,
+          last_snooze_action: 'snooze',
+          snooze_ts: '2026-01-22T07:05:00.000Z',
+          conditions_json: JSON.stringify([{ field: 'data.x', operator: 'changed' }]),
+          match_json: JSON.stringify('any'),
+        },
+      ];
+
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(
+          // baseline equals the current value → no change → snooze holds
+          createSnoozeBaselineResponse([
+            {
+              rule_id: 'rule-1',
+              group_hash: 'hash-1',
+              data_json_as_of: JSON.stringify({ x: 100 }),
+            },
+          ])
+        )
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: [{ create: { _id: '1', status: 201 } }],
+        errors: false,
+      } as BulkResponse);
+
+      await dispatcherService.run({ previousStartedAt: new Date('2026-01-22T07:30:00.000Z') });
+
+      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
+      const docs = (operations ?? []).filter((_, index) => index % 2 === 1);
+
+      expect(docs.filter((d: any) => d.action_type === 'unsnooze')).toHaveLength(0);
+      expect(docs.filter((d: any) => d.action_type === 'suppress')).toHaveLength(1);
     });
 
     it('handles empty alert episode responses', async () => {
