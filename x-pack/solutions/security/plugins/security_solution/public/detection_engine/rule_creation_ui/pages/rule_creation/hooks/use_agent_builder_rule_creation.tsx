@@ -116,7 +116,9 @@ export const useAgentBuilderRuleCreation = ({
   const isAiRuleUpdateRef = useRef(false);
   // Activated by explicit user actions only — never by merely visiting the page.
   const isSyncActive = useObservable(aiRuleCreation.formSyncActive$, false);
+  // Warn once per failure streak; re-armed by the next successful sync.
   const hasWarnedSyncFailureRef = useRef(false);
+  // Saved-rule id the sync targets (see resolveSyncRuleId). Present ⇔ the sync is an update.
   const syncRuleIdRef = useRef<string | undefined>(pageRuleId);
   // Last conversation id seen below, to tell a real conversation switch apart from an update
   // within the same conversation (e.g. our own draft gaining an origin once saved).
@@ -187,9 +189,9 @@ export const useAgentBuilderRuleCreation = ({
       if (!agentBuilder?.addAttachment) {
         return;
       }
+      // `origin` links the card to its saved rule; include it so form syncs never drop the link.
       const ruleId = savedRuleId ?? syncRuleIdRef.current;
       const targetId = aiRuleCreation.getBoundAttachmentId() ?? SECURITY_RULE_ATTACHMENT_ID;
-      const ruleJson = JSON.stringify(ruleData);
       const attachment: AttachmentInput = {
         id: targetId,
         type: SecurityAgentBuilderAttachments.rule,
@@ -197,7 +199,7 @@ export const useAgentBuilderRuleCreation = ({
         ...(label ? { description: label } : {}),
         ...(ruleId ? { origin: ruleId } : {}),
         data: {
-          text: ruleJson,
+          text: JSON.stringify(ruleData),
           attachmentLabel: label,
         },
       };

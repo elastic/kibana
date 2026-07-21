@@ -94,6 +94,7 @@ export const createAiRuleCreationHandler = ({
           }
           notifications.toasts.addSuccess(isUpdate ? RULE_UPDATED_TITLE : RULE_SAVED_TITLE);
 
+          // A post-save form edit must not clobber the attachment.
           aiRuleCreation.deactivateFormSync();
 
           const targetAttachmentId = attachmentId ?? SECURITY_RULE_ATTACHMENT_ID;
