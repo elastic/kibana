@@ -108,6 +108,10 @@ export const TableTab = memo(({ hit, renderCellActions }: TableTabProps) => {
 
   return (
     <EuiInMemoryTable
+      tableCaption={i18n.translate(
+        'xpack.securitySolution.attackDetailsFlyout.table.tableCaption',
+        { defaultMessage: 'Attack details' }
+      )}
       items={items}
       itemId="field"
       columns={columns}
