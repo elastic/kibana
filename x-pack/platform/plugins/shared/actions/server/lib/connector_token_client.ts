@@ -203,6 +203,7 @@ export class ConnectorTokenClient {
     authMode?: typeof PER_USER_TOKEN_SCOPE | typeof SHARED_TOKEN_SCOPE;
     authType?: string;
     provider?: string;
+    skipRevocation?: boolean;
   }): Promise<void> {
     const scope = this.getScope(options.profileUid, options.authMode);
     this.log({
@@ -221,6 +222,7 @@ export class ConnectorTokenClient {
         credentialType: options.credentialType,
         authType: options.authType,
         provider: options.provider,
+        skipRevocation: options.skipRevocation,
       });
     }
     return this.sharedClient.deleteConnectorTokens({

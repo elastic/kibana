@@ -6,6 +6,7 @@
  */
 
 import { omitBy, isUndefined } from 'lodash';
+import pLimit from 'p-limit';
 import { z } from '@kbn/zod/v4';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { Logger, SavedObjectsClientContract, SavedObjectAttributes } from '@kbn/core/server';
@@ -26,6 +27,7 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 
 export const MAX_TOKENS_RETURNED = 1;
 const MAX_RETRY_ATTEMPTS = 3;
+const REVOKE_CONCURRENCY = 10;
 
 interface ConstructorOptions {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
@@ -502,24 +504,39 @@ export class UserConnectorTokenClient {
 
     if (authType === EARS_AUTH_ID && provider) {
       try {
-        let credentialsList: Array<{ credentials: OAuthPersonalCredentials }>;
+        let credentialsList: Array<{ profileUid?: string; credentials: OAuthPersonalCredentials }>;
         if (profileUid) {
           const { connectorToken } = await this.getOAuthPersonalToken({ profileUid, connectorId });
-          credentialsList = connectorToken ? [{ credentials: connectorToken.credentials }] : [];
+          credentialsList = connectorToken
+            ? [{ profileUid, credentials: connectorToken.credentials }]
+            : [];
         } else {
           credentialsList = await this.listOAuthTokensForConnector({ connectorId });
         }
 
-        await Promise.all(
+        const limit = pLimit(REVOKE_CONCURRENCY);
+        const results = await Promise.allSettled(
           credentialsList.map(({ credentials }) =>
-            revokeEarsCredentials({
-              provider,
-              credentials,
-              configurationUtilities: this.configurationUtilities,
-              logger: this.logger,
-            })
+            limit(() =>
+              revokeEarsCredentials({
+                provider,
+                credentials,
+                configurationUtilities: this.configurationUtilities,
+                logger: this.logger,
+              })
+            )
           )
         );
+
+        for (const [i, result] of results.entries()) {
+          if (result.status === 'rejected') {
+            const tokenProfileUid = credentialsList[i].profileUid;
+            const userContext = tokenProfileUid ? `, profileUid "${tokenProfileUid}"` : '';
+            this.logger.error(
+              `Failed to revoke EARS OAuth token for connectorId "${connectorId}"${userContext}: ${result.reason?.message}`
+            );
+          }
+        }
       } catch (err) {
         this.logger.error(
           `Failed to revoke EARS OAuth tokens for connectorId "${connectorId}": ${err.message}`
@@ -582,30 +599,51 @@ export class UserConnectorTokenClient {
     credentialType,
     authType,
     provider,
+    skipRevocation = false,
   }: {
     connectorId: string;
     credentialType?: string;
     authType?: string;
     provider?: string;
+    skipRevocation?: boolean;
   }): Promise<void> {
     const context = this.getContextString(undefined, connectorId);
 
-    await this.revokeOAuthTokens({ connectorId, authType, provider });
+    if (!skipRevocation) {
+      await this.revokeOAuthTokens({ connectorId, authType, provider });
+    }
 
     const credentialTypeFilter = credentialType
       ? ` AND ${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.credentialType: "${credentialType}"`
       : '';
 
     try {
-      const result = await this.unsecuredSavedObjectsClient.find<UserConnectorToken>({
-        type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-        filter: `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${credentialTypeFilter}`,
-      });
-      await Promise.all(
-        result.saved_objects.map((obj) =>
-          this.unsecuredSavedObjectsClient.delete(USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE, obj.id)
-        )
-      );
+      // Always re-fetch page 1: each bulk-delete shifts remaining records to the front.
+      while (true) {
+        const result = await this.unsecuredSavedObjectsClient.find<UserConnectorToken>({
+          type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+          filter: `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${credentialTypeFilter}`,
+          perPage: 100,
+          page: 1,
+        });
+        if (result.saved_objects.length === 0) break;
+        const { statuses } = await this.unsecuredSavedObjectsClient.bulkDelete(
+          result.saved_objects.map((obj) => ({
+            type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+            id: obj.id,
+          }))
+        );
+        const failed = statuses.filter((s) => !s.success);
+        if (failed.length > 0) {
+          this.logger.error(
+            `Failed to delete ${
+              failed.length
+            } user_connector_token record(s) for ${context}: ${failed
+              .map((s) => s.error?.message)
+              .join(', ')}`
+          );
+        }
+      }
     } catch (err) {
       this.logger.error(
         `Failed to delete user_connector_token records for ${context}. Error: ${err.message}`
