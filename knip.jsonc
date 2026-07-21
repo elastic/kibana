@@ -44,7 +44,16 @@
     "oxlint",
     // Imported by the maps plugin (public/classes/styles/vector/symbol_utils.tsx),
     // which relies on root hoisting; knip can't trace it through the workspace graph.
-    "canvg"
+    "canvg",
+    // Declared once in the root package.json but consumed only by nested workspace
+    // members that rely on root hoisting instead of declaring them: svgo by @kbn/dev
+    // (src/dev/build/tasks/copy_source_worker.js), http-proxy/@types/http-proxy by the
+    // kbnGenerated @kbn/test-suites-xpack-platform (x-pack/platform/test alerting_api_integration
+    // connector_types). Knip attributes those imports to the nested workspace, so the root
+    // declaration looks unused.
+    "svgo",
+    "http-proxy",
+    "@types/http-proxy"
   ],
   "workspaces": {
     ".": {
