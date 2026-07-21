@@ -253,7 +253,8 @@ The AI Index schema has these base fields (all required unless noted):
 | `tags` | keyword[] | Filter facets |
 | `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on |
 | `@timestamp` | date | When this KI was last profiled; enables recency guards on scheduled runs |
-| `confidence` | float (0–1) | Calibrated confidence in the KI (see the calibration bands under "Quality & grounding contract"); agents prefer higher-confidence KIs when routing |
+| `confidence` | float (0–1) | **Correctness** — how sure we are the KI's facts are right, calibrated to evidence strength (see the calibration bands under "Quality & grounding contract"). Distinct from `coverage`. |
+| `coverage` | float (0–1) | **Completeness** — how fully the KI's access patterns cover the source's question-classes, emitted by the profiling step. Lets agents prefer better-covered KIs when routing. Optional; most meaningful for Index Metadata KIs. |
 
 **Lifecycle fields for scheduled / expiring KIs:** When a workflow runs on a schedule and its KIs should expire and be deduplicated across runs, declare these in `ensure_target_index` — the AI Index templates use `dynamic: strict`, so undeclared fields are rejected at index time. They are generic across strategies (any scheduled KI run can use them), so unlike strategy-specific output they warrant declared mappings rather than living in `attributes`.
 
@@ -265,7 +266,7 @@ The AI Index schema has these base fields (all required unless noted):
 
 Strategy-specific structured output (e.g. a detection's materialized query and `query_type`/`severity_score`, a feature's `subtype`/`slug`/`confidence`, etc.) goes in `content` + `attributes` and the base `confidence` field like every other strategy — not in bespoke declared mappings.
 
-**Required fields note**: `@timestamp` and `confidence` must be declared in the target index mapping (`ensure_target_index` step). The AI Index templates use `dynamic: strict`, so undeclared fields are rejected at index time. Write both fields from the `sink_index_ki` step: set `@timestamp` to the current ISO date and `confidence` to the score produced by `profile_index`.
+**Required fields note**: `@timestamp` and `confidence` (plus `coverage` if you emit it) must be declared in the target index mapping (`ensure_target_index` step). The AI Index templates use `dynamic: strict`, so undeclared fields are rejected at index time. Write them from the `sink_index_ki` step: set `@timestamp` to the current ISO date, `confidence` to the calibrated correctness score, and `coverage` to the completeness score produced by `profile_index`.
 
 **Rule**: structured facts belong in both `content` and `attributes`, to facilitate exact-match and filter queries, as well as semantic searches.
 
@@ -281,7 +282,8 @@ type:        <KI kind, e.g. "index_metadata" | "document" | "detection" | "featu
 title:       <display_name>
 tags:        [...]
 @timestamp:  <ISO date when KI was last profiled, e.g. "2025-07-21T10:00:00Z">
-confidence:  <0.0–1.0 coverage score from profile_index>
+confidence:  <0.0–1.0 calibrated correctness score (see grounding contract)>
+coverage:    <0.0–1.0 completeness score from profile_index (optional)>
 attributes:
   # Repeat structured values here for exact-match / filter queries.
   # Index Metadata example:
@@ -357,7 +359,7 @@ Before presenting any workflow to the user:
 - [ ] `id` on `elasticsearch.index` is a stable value from a normalized natural key; collisions **merge** (union evidence/tags, average confidence) rather than blind-overwrite
 - [ ] `triggers: [{type: manual}]`
 - [ ] Corpus filter (Phase 3) is applied
-- [ ] `@timestamp` and `confidence` are declared in the target index mapping (`ensure_target_index`) and written by `sink_index_ki`
+- [ ] `@timestamp`, `confidence` (and `coverage` if emitted) are declared in the target index mapping (`ensure_target_index`) and written by `sink_index_ki`
 - [ ] Detection KIs carry the complete runnable query (not a template) in `content`; `query_type` is derived from the ES|QL, not LLM-supplied; every threshold + `evidence[]` string quotes an observed distribution; sample-floor + precision-first guardrails applied
 - [ ] `expires_at` (~30 days) is written to expiring KIs and **omitted** for durable (immutable-fact) KIs
 - [ ] Expiry-based freshness guard is implemented when the workflow runs on a schedule
@@ -451,7 +453,7 @@ Detection guardrails (bake into the prompt):
 
 - **Scheduling:** When the workflow runs on a schedule, query `FROM <target_index> | WHERE id == "<index_name>" | KEEP @timestamp` to retrieve the KI's last-profiled date. Skip re-profiling if the source index has not been updated since that timestamp (e.g. check with `elasticsearch.search` using a `range` query on the source index's `@timestamp`). This avoids burning LLM tokens on unchanged data.
 
-- **Large or noisy indices (multi-iteration with exclusion):** For indices whose content cannot be captured in a single 20-document random sample, use a while-loop convergence pattern: `sample_docs` → `profile_index` → merge into the accumulated result → repeat. Crucially, **exclude what you've already covered on each re-sample** rather than re-rolling blindly: add a `must_not` filter for the entities/patterns already profiled (e.g. `must_not` on known `service.name` values) so each pass sees *new* data instead of re-profiling the same dominant records. Combine with `random_score` for variety within the not-yet-covered slice. Stop when a pass surfaces nothing new, coverage/confidence meets threshold, or max iterations is reached — whichever comes first. Merge per the dedup rules in the grounding contract.
+- **Large or noisy indices (multi-iteration with exclusion):** For indices whose content cannot be captured in a single 20-document random sample, use a while-loop convergence pattern: `sample_docs` → `profile_index` → merge into the accumulated result → repeat. Crucially, **exclude what you've already covered on each re-sample** rather than re-rolling blindly: add a `must_not` filter for the entities/patterns already profiled (e.g. `must_not` on known `service.name` values) so each pass sees *new* data instead of re-profiling the same dominant records. Combine with `random_score` for variety within the not-yet-covered slice. Stop when a pass surfaces nothing new, `coverage` meets threshold, or max iterations is reached — whichever comes first. Merge per the dedup rules in the grounding contract.
 
 - **Validate-and-repair broken `esql_example`:** The access-pattern validation step sets `on-failure.continue: true` so a broken query does not halt the workflow. When a query fails, do not ship the broken example silently. Use `platform.core.generate_esql` to repair it — pass the failing query, the error message, and the index mapping as context — then replace the original `esql_example` with the repaired query before indexing the KI.
 
