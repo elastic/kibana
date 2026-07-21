@@ -224,12 +224,10 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   }
 
   /**
-   * Re-fetches the report doc's current `_seq_no`/`_primary_term` from Elasticsearch and updates
-   * `report` in place. A prior attempt may have partially written to the report doc (e.g.
-   * `ContentStream#writeHead`) before failing, advancing the doc's `seq_no` beyond what we're
-   * still holding in memory. Without refreshing, the next write (a retry, or the final failed/error
-   * status update) reuses the stale value and is rejected by Elasticsearch with a
-   * `version_conflict_engine_exception` (see #255230, #234877).
+   * Re-fetches the report doc's current `_seq_no`/`_primary_term` and updates `report` in place.
+   * A prior attempt can advance the doc's `seq_no` (e.g. via `ContentStream#writeHead`) before
+   * failing; without this refresh the next write reuses the stale value and Elasticsearch rejects
+   * it with a `version_conflict_engine_exception` (#255230, #234877).
    */
   private async refreshReportSeqNo(report: SavedReport): Promise<void> {
     try {
@@ -244,8 +242,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       report._seq_no = document._seq_no;
       report._primary_term = document._primary_term;
     } catch (err) {
-      // Not fatal: fall back to the in-memory values. The subsequent write may still conflict,
-      // but that's no worse than before this refresh was attempted.
+      // Non-fatal: fall back to the in-memory values (the subsequent write may still conflict).
       errorLogger(this.logger, `Error refreshing report doc state for ${report._id}`, err, [
         report._id,
       ]);
@@ -569,10 +566,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 // keep track of the number of times we try within the task
                 atmpts = isNumber(atmpts) ? atmpts + 1 : undefined;
 
-                // On retry attempts, a previous attempt may have already partially written to
-                // the report doc (e.g. ContentStream#writeHead) before failing, advancing its
-                // seq_no beyond what we're holding in memory. Refresh before creating a new
-                // content stream so this attempt's writes don't hit a stale-OCC version conflict.
+                // Retries only: a prior attempt may have advanced the doc's seq_no before failing.
                 if (isNumber(atmpts) && atmpts > 1) {
                   await this.refreshReportSeqNo(rep);
                 }
@@ -616,16 +610,14 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                   ]);
                 } catch (raceErr) {
                   stream.removeListener('error', streamErrorReject!);
-                  // performJob may still be running (e.g. it lost the race to a stream error) and
-                  // could reject later; swallow that so it doesn't surface as an unhandled rejection.
+                  // performJob may still reject after losing the race; swallow it to avoid an
+                  // unhandled rejection.
                   performJobPromise.catch(() => {});
-                  // Swallow any further error from the abandoned stream (e.g. a pending _write
-                  // callback firing after destroy()) so it doesn't crash the process. Use `on`
-                  // (not `once`) so we keep swallowing regardless of how many times the abandoned
-                  // stream errors; an unhandled 'error' event would crash the process.
+                  // Swallow errors from the abandoned stream so an unhandled 'error' can't crash
+                  // the process. `on`, not `once`, in case it errors more than once.
                   stream.on('error', () => {});
-                  // Stop the abandoned stream so it can't keep writing to (and advancing the
-                  // seq_no of) the report doc concurrently with the next retry attempt.
+                  // Stop the abandoned stream so it can't keep writing to the report doc
+                  // concurrently with the next attempt.
                   stream.destroy();
                   throw raceErr;
                 }
@@ -676,10 +668,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             const isLastAttempt = taskAttempts ? taskAttempts >= maxAttempts.maxTaskAttempts : true;
             eventLog.logError(failedToExecuteErr);
 
-            // A prior (retried or not) attempt may have already advanced the report doc's
-            // seq_no (e.g. via ContentStream#writeHead) before failing. Refresh before writing
-            // the failed/error status so this write doesn't also hit a stale-OCC version
-            // conflict (see #234877).
+            // A prior attempt may have advanced the doc's seq_no before failing; refresh so the
+            // failure-status write doesn't hit a version conflict.
             if (report) {
               await this.refreshReportSeqNo(report);
             }

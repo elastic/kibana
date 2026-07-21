@@ -807,16 +807,14 @@ describe('Run Single Report Task', () => {
     );
   });
 
-  // Regression test for https://github.com/elastic/kibana/issues/255230 /
-  // https://github.com/elastic/kibana/issues/234877: if the job fails *after* the
-  // content stream has flushed (writeHead advanced the report doc's seq_no), the
-  // failure status update must not reuse the stale OCC values from claim time,
-  // otherwise setReportFailed fails with version_conflict_engine_exception and the
-  // report stays "processing" forever.
+  // Regression test for https://github.com/elastic/kibana/issues/255230 and
+  // https://github.com/elastic/kibana/issues/234877: when the job fails after the stream advances
+  // the doc's seq_no, the failure-status write must refresh the OCC values, else setReportFailed
+  // hits a version conflict and the report stays "processing".
   it('updates the failure status with fresh seq_no/primary_term when the job fails after the stream has flushed', async () => {
     const claimSeqNo = 10;
     const claimPrimaryTerm = 20;
-    // the report doc's *actual* state after the stream's writeHead advanced it
+    // the doc's actual seq_no/primary_term after the stream's writeHead advanced it
     const freshSeqNo = 42;
     const freshPrimaryTerm = 21;
 
@@ -838,11 +836,10 @@ describe('Run Single Report Task', () => {
       validLicenses: [],
     } as unknown as ExportType);
 
-    // the attempt's stream flushed and advanced the doc before the job failed
     const stream = createStreamMock({ seqNo: freshSeqNo, primaryTerm: freshPrimaryTerm });
     mockGetContentStream.mockImplementation(() => stream);
 
-    // re-fetching the report doc returns the advanced seq_no/primary_term
+    // refreshReportSeqNo re-fetches the doc; return the advanced values
     const { asInternalUser: esClient } = await mockReporting.getEsClient();
     (esClient.get as unknown as jest.Mock).mockResolvedValue({
       _id: 'test1',
@@ -895,8 +892,7 @@ describe('Run Single Report Task', () => {
 
     await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
 
-    // the status update must target the report doc's *current* seq_no/primary_term,
-    // not the stale values from when the job was claimed
+    // the status update must target the doc's current (refreshed) values, not the claim-time ones
     expect(store.setReportFailed).toHaveBeenCalledWith(
       expect.objectContaining({
         _id: 'test1',

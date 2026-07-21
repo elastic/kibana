@@ -855,20 +855,18 @@ describe('Run Scheduled Report Task', () => {
     jest.useRealTimers();
   });
 
-  // Regression test for https://github.com/elastic/kibana/issues/255230:
-  // if an attempt fails *after* the content stream has flushed (writeHead advanced
-  // the report doc's seq_no), the retry attempt must not reuse the stale OCC values,
-  // otherwise its writeHead fails with version_conflict_engine_exception.
+  // Regression test for https://github.com/elastic/kibana/issues/255230: after an attempt advances
+  // the doc's seq_no, the retry must refresh the OCC values instead of reusing the stale ones.
   it('retries with fresh seq_no/primary_term and tears down the failed stream', async () => {
     jest.useFakeTimers();
     configType = createMockConfigSchema({ capture: { maxAttempts: 2 } });
     mockReporting = await createMockReportingCore(configType);
 
-    // the report doc's *actual* state after attempt 1's writeHead advanced it
+    // the doc's actual seq_no/primary_term after attempt 1's writeHead advanced it
     const freshSeqNo = 42;
     const freshPrimaryTerm = 354001;
 
-    // attempt 1 fails after the stream has flushed; attempt 2 succeeds
+    // attempt 1 fails, attempt 2 succeeds
     const runThisTaskFn = jest
       .fn()
       .mockImplementationOnce(() => {
@@ -891,14 +889,13 @@ describe('Run Scheduled Report Task', () => {
       validLicenses: [],
     } as unknown as ExportType);
 
-    // attempt 1's stream flushed and advanced the doc before failing
     const streamAttempt1 = createStreamMock({ seqNo: freshSeqNo, primaryTerm: freshPrimaryTerm });
     const streamAttempt2 = createStreamMock({ seqNo: 43, primaryTerm: freshPrimaryTerm });
     mockGetContentStream
       .mockImplementationOnce(() => streamAttempt1)
       .mockImplementationOnce(() => streamAttempt2);
 
-    // re-fetching the report doc returns the advanced seq_no/primary_term
+    // refreshReportSeqNo re-fetches the doc; return the advanced values
     const { asInternalUser: esClient } = await mockReporting.getEsClient();
     (esClient.get as unknown as jest.Mock).mockResolvedValue({
       _id: savedReportData._id,
@@ -964,7 +961,7 @@ describe('Run Scheduled Report Task', () => {
     expect(runThisTaskFn).toHaveBeenCalledTimes(2);
     expect(mockGetContentStream).toHaveBeenCalledTimes(2);
 
-    // attempt 1 uses the OCC values from when the report was claimed
+    // attempt 1 uses the OCC values from claim time
     expect(mockGetContentStream.mock.calls[0][1]).toEqual(
       expect.objectContaining({
         if_seq_no: savedReportData._seq_no,
@@ -972,8 +969,7 @@ describe('Run Scheduled Report Task', () => {
       })
     );
 
-    // the retry attempt must use the report doc's *current* seq_no/primary_term,
-    // not the stale values from before attempt 1's writeHead
+    // the retry must use the doc's current (refreshed) values, not the stale ones
     expect(mockGetContentStream.mock.calls[1][1]).toEqual(
       expect.objectContaining({
         if_seq_no: freshSeqNo,
@@ -981,8 +977,7 @@ describe('Run Scheduled Report Task', () => {
       })
     );
 
-    // the failed attempt's stream must be torn down so it cannot keep
-    // writing to the report doc concurrently with the retry attempt
+    // the failed attempt's stream must be torn down so it can't keep writing
     expect(streamAttempt1.destroy).toHaveBeenCalled();
 
     jest.useRealTimers();
