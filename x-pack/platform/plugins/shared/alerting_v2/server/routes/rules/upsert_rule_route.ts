@@ -22,6 +22,11 @@ import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
 import { RulesClient } from '../../lib/rules_client/rules_client';
 import { UPSERT_RULE_SUMMARY, upsertRuleOasExamples } from './rule_oas_examples';
+import {
+  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  RULE_NOT_FOUND_DESCRIPTION,
+  RULE_UPSERT_CONFLICT_DESCRIPTION,
+} from '../route_response_descriptions';
 
 @injectable()
 export class UpsertRuleRoute extends BaseAlertingRoute {
@@ -54,16 +59,15 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates the rule with the given ID does not exist.',
+        description: RULE_NOT_FOUND_DESCRIPTION,
       },
       409: {
         body: () => errorResponseSchema,
-        description:
-          'Indicates the rule was created or updated concurrently, or the request changes immutable fields.',
+        description: RULE_UPSERT_CONFLICT_DESCRIPTION,
       },
     },
   };

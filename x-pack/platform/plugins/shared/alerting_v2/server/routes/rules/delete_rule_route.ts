@@ -18,6 +18,7 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
 import { DELETE_RULE_SUMMARY, deleteRuleOasExamples } from './rule_oas_examples';
+import { RULE_NOT_FOUND_DESCRIPTION } from '../route_response_descriptions';
 
 @injectable()
 export class DeleteRuleRoute extends BaseAlertingRoute {
@@ -42,7 +43,7 @@ export class DeleteRuleRoute extends BaseAlertingRoute {
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates a rule with the given ID does not exist.',
+        description: RULE_NOT_FOUND_DESCRIPTION,
       },
     },
   };

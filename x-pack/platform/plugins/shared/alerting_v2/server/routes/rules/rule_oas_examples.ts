@@ -25,6 +25,13 @@ import {
   getRuleVersionConflictMessage,
 } from '../../lib/errors/rule_error_messages';
 import { jsonExample } from '../json_oas_example';
+import {
+  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  RULE_NOT_FOUND_DESCRIPTION,
+  RULE_UPSERT_CONFLICT_DESCRIPTION,
+  RULE_VERSION_CONFLICT_DESCRIPTION,
+  RULES_NOT_FOUND_DESCRIPTION,
+} from '../route_response_descriptions';
 
 type OASOperationObject = Exclude<
   Awaited<ReturnType<NonNullable<RouteConfigOptions<RouteMethod>['oasOperationObject']>>>,
@@ -149,13 +156,29 @@ const RULE_VERSION_CONFLICT_ERROR: ErrorResponse = {
 };
 
 const ERROR_EXAMPLES: Record<RouteErrorStatus, ReturnType<typeof jsonExample<ErrorResponse>>> = {
-  400: jsonExample('invalidRuleData', 'Invalid rule request', INVALID_RULE_DATA_ERROR),
-  404: jsonExample('ruleNotFound', 'Rule does not exist', RULE_NOT_FOUND_ERROR),
+  400: jsonExample(
+    'invalidRuleData',
+    INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+    INVALID_RULE_DATA_ERROR
+  ),
+  404: jsonExample('ruleNotFound', RULE_NOT_FOUND_DESCRIPTION, RULE_NOT_FOUND_ERROR),
   409: jsonExample(
     'ruleVersionConflict',
-    'Concurrent update conflict',
+    RULE_VERSION_CONFLICT_DESCRIPTION,
     RULE_VERSION_CONFLICT_ERROR
   ),
+};
+
+const RULE_UPSERT_CONFLICT_EXAMPLE = {
+  name: 'ruleVersionConflict',
+  summary: RULE_UPSERT_CONFLICT_DESCRIPTION,
+  value: RULE_VERSION_CONFLICT_ERROR,
+};
+
+const RULES_NOT_FOUND_EXAMPLE = {
+  name: 'rulesNotFound',
+  summary: RULES_NOT_FOUND_DESCRIPTION,
+  value: RULE_NOT_FOUND_ERROR,
 };
 
 const buildRuleOas = ({
@@ -220,8 +243,9 @@ export const upsertRuleOasExamples = (): OASOperationObject =>
     responses: {
       200: ruleResponse('upsertRuleReplacedResponse', UPSERT_RULE_SUMMARY),
       201: ruleResponse('upsertRuleCreatedResponse', UPSERT_RULE_SUMMARY),
+      409: RULE_UPSERT_CONFLICT_EXAMPLE,
     },
-    errors: [400, 404, 409],
+    errors: [400, 404],
   });
 
 export const updateRuleOasExamples = (): OASOperationObject =>
@@ -281,8 +305,9 @@ export const bulkGetRulesOasExamples = (): OASOperationObject =>
         summary: BULK_GET_RULES_SUMMARY,
         value: BULK_GET_RESPONSE,
       },
+      404: RULES_NOT_FOUND_EXAMPLE,
     },
-    errors: [400, 404],
+    errors: [400],
   });
 
 export const ruleTagsOasExamples = (): OASOperationObject =>

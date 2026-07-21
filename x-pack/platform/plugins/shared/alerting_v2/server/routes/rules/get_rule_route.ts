@@ -18,6 +18,7 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
 import { GET_RULE_SUMMARY, getRuleOasExamples } from './rule_oas_examples';
+import { RULE_NOT_FOUND_DESCRIPTION } from '../route_response_descriptions';
 
 @injectable()
 export class GetRuleRoute extends BaseAlertingRoute {
@@ -43,7 +44,7 @@ export class GetRuleRoute extends BaseAlertingRoute {
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates a rule with the given ID does not exist.',
+        description: RULE_NOT_FOUND_DESCRIPTION,
       },
     },
   };

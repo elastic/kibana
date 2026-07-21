@@ -22,6 +22,11 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
 import { UPDATE_RULE_SUMMARY, updateRuleOasExamples } from './rule_oas_examples';
+import {
+  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  RULE_NOT_FOUND_DESCRIPTION,
+  RULE_VERSION_CONFLICT_DESCRIPTION,
+} from '../route_response_descriptions';
 
 @injectable()
 export class UpdateRuleRoute extends BaseAlertingRoute {
@@ -48,15 +53,15 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates a rule with the given ID does not exist.',
+        description: RULE_NOT_FOUND_DESCRIPTION,
       },
       409: {
         body: () => errorResponseSchema,
-        description: 'Indicates the rule was concurrently updated by another caller.',
+        description: RULE_VERSION_CONFLICT_DESCRIPTION,
       },
     },
   };

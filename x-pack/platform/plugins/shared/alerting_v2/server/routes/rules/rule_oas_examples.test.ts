@@ -11,6 +11,11 @@ import {
   getRuleNotFoundMessage,
   getRuleVersionConflictMessage,
 } from '../../lib/errors/rule_error_messages';
+import {
+  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  RULE_NOT_FOUND_DESCRIPTION,
+  RULE_UPSERT_CONFLICT_DESCRIPTION,
+} from '../route_response_descriptions';
 import { CreateRuleRoute } from './create_rule_route';
 import {
   CREATE_RULE_SUMMARY,
@@ -33,11 +38,15 @@ describe('rule OAS examples', () => {
     ).toEqual(expect.objectContaining({ summary: CREATE_RULE_SUMMARY }));
     expect(oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRuleData).toEqual(
       expect.objectContaining({
+        summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
         value: expect.objectContaining({
           code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
           message: getInvalidRuleDataMessage('create', 'metadata.name: Required'),
         }),
       })
+    );
+    expect(CreateRuleRoute.validate.response?.[400]?.description).toBe(
+      INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION
     );
   });
 
@@ -46,6 +55,7 @@ describe('rule OAS examples', () => {
 
     expect(oas.responses?.[404]?.content?.['application/json']?.examples?.ruleNotFound).toEqual(
       expect.objectContaining({
+        summary: RULE_NOT_FOUND_DESCRIPTION,
         value: expect.objectContaining({
           code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
           message: getRuleNotFoundMessage('rule-1'),
@@ -61,6 +71,7 @@ describe('rule OAS examples', () => {
       oas.responses?.[409]?.content?.['application/json']?.examples?.ruleVersionConflict
     ).toEqual(
       expect.objectContaining({
+        summary: RULE_UPSERT_CONFLICT_DESCRIPTION,
         value: expect.objectContaining({
           code: ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT,
           message: getRuleVersionConflictMessage('rule-1'),
