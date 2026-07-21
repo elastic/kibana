@@ -105,7 +105,7 @@ apiTest.describe(
         const allMessageContent = firstAgentRequest!.messages
           .map((m: { content?: unknown }) => String(m.content ?? ''))
           .join('\n');
-        expect(allMessageContent).toContain('<conversation-attachments count="1">');
+        expect(allMessageContent).toContain('<attachments count="1">');
         expect(allMessageContent).toContain('<attachment');
       });
 
@@ -173,7 +173,8 @@ apiTest.describe(
           const allMessageContent = firstAgentRequest!.messages
             .map((m: { content?: unknown }) => String(m.content ?? ''))
             .join('\n');
-          expect(allMessageContent).toContain('<conversation-attachments count="1">');
+          expect(allMessageContent).toContain('<attachments count="1">');
+          expect(allMessageContent).not.toContain('ignored-origin-id');
         }
       );
 
