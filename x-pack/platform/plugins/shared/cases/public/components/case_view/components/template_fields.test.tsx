@@ -87,14 +87,21 @@ describe('TemplateFields', () => {
     });
   });
 
-  it('renders all template fields without an Extended fields heading', () => {
+  it('renders the Extended fields heading and all template fields', () => {
     render(<TemplateFields {...defaultProps} />);
 
-    expect(screen.queryByText('Extended fields')).not.toBeInTheDocument();
+    expect(screen.getByText('Extended fields')).toBeInTheDocument();
     expect(screen.getByText('Summary')).toBeInTheDocument();
     expect(screen.getByText('Effort')).toBeInTheDocument();
     expect(screen.getByText('Notes')).toBeInTheDocument();
     expect(screen.getByText('Priority')).toBeInTheDocument();
+  });
+
+  it('does not render the Extended fields heading when showHeader is false', () => {
+    render(<TemplateFields {...defaultProps} showHeader={false} />);
+
+    expect(screen.queryByText('Extended fields')).not.toBeInTheDocument();
+    expect(screen.getByText('Summary')).toBeInTheDocument();
   });
 
   it('fetches the template with the correct id and version', () => {
