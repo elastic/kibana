@@ -85,9 +85,9 @@ class DashboardUserActivitySession {
     if (type === 'refresh') {
       const state = this.api.getSerializedState();
       const refreshInterval = dataService.query.timefilter.timefilter.getRefreshInterval();
-
       meta = {
-        time_range: state.attributes.time_range,
+        // time range is not serialized when `timeRestore` is false so cannot rely on the serialized state
+        time_range: this.api.timeRange$.getValue(),
         ...(refreshInterval &&
           !refreshInterval.pause && { refresh_interval: refreshInterval.value }),
         query: state.attributes.query,
