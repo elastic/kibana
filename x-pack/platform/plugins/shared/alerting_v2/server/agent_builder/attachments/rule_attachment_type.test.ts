@@ -6,10 +6,8 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type {
-  AttachmentResolveContext,
-  AttachmentTypeDefinition,
-} from '@kbn/agent-builder-server/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type {
   Attachment,
   VersionedAttachmentWithOrigin,
@@ -41,9 +39,6 @@ const baseRuleData: RuleAttachmentData = {
   updatedBy: 'elastic',
   updatedAt: '2026-04-10T00:00:00.000Z',
 };
-
-const buildResolveContext = (): AttachmentResolveContext =>
-  ({ request: {} as KibanaRequest, spaceId: 'default' } as AttachmentResolveContext);
 
 type RuleVersionedAttachment = VersionedAttachmentWithOrigin<
   typeof RULE_ATTACHMENT_TYPE,
@@ -120,7 +115,10 @@ describe('createRuleAttachmentType', () => {
     it('returns rule data parsed against the schema', async () => {
       getRule.mockResolvedValueOnce(baseRuleData);
 
-      const result = await definition.resolve!('rule-1', buildResolveContext());
+      const result = await definition.resolve!(
+        'rule-1',
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(getRule).toHaveBeenCalledWith({ id: 'rule-1' });
       expect(result).toEqual(expect.objectContaining({ id: 'rule-1', kind: 'alert' }));
@@ -129,7 +127,10 @@ describe('createRuleAttachmentType', () => {
     it('returns undefined and logs a warning when getRule throws', async () => {
       getRule.mockRejectedValueOnce(new Error('not found'));
 
-      const result = await definition.resolve!('rule-missing', buildResolveContext());
+      const result = await definition.resolve!(
+        'rule-missing',
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(
@@ -142,7 +143,10 @@ describe('createRuleAttachmentType', () => {
     it('returns false when origin_snapshot_at is missing', async () => {
       const attachment = buildVersionedAttachment({ origin_snapshot_at: undefined });
 
-      const result = await definition.isStale!(attachment, buildResolveContext());
+      const result = await definition.isStale!(
+        attachment,
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBe(false);
       expect(getRule).not.toHaveBeenCalled();
@@ -151,7 +155,10 @@ describe('createRuleAttachmentType', () => {
     it('returns false when rule.updatedAt equals snapshot time', async () => {
       getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: '2026-04-10T00:00:00.000Z' });
 
-      const result = await definition.isStale!(buildVersionedAttachment(), buildResolveContext());
+      const result = await definition.isStale!(
+        buildVersionedAttachment(),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBe(false);
     });
@@ -159,7 +166,10 @@ describe('createRuleAttachmentType', () => {
     it('returns false when rule.updatedAt is before snapshot time', async () => {
       getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: '2026-04-09T00:00:00.000Z' });
 
-      const result = await definition.isStale!(buildVersionedAttachment(), buildResolveContext());
+      const result = await definition.isStale!(
+        buildVersionedAttachment(),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBe(false);
     });
@@ -167,7 +177,10 @@ describe('createRuleAttachmentType', () => {
     it('returns true when rule.updatedAt is after snapshot AND differs from latest version', async () => {
       getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: '2026-04-20T00:00:00.000Z' });
 
-      const result = await definition.isStale!(buildVersionedAttachment(), buildResolveContext());
+      const result = await definition.isStale!(
+        buildVersionedAttachment(),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBe(true);
     });
@@ -185,7 +198,10 @@ describe('createRuleAttachmentType', () => {
         ],
       });
 
-      const result = await definition.isStale!(attachment, buildResolveContext());
+      const result = await definition.isStale!(
+        attachment,
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBe(false);
     });
@@ -193,7 +209,10 @@ describe('createRuleAttachmentType', () => {
     it('returns false and logs a warning when getRule throws', async () => {
       getRule.mockRejectedValueOnce(new Error('boom'));
 
-      const result = await definition.isStale!(buildVersionedAttachment(), buildResolveContext());
+      const result = await definition.isStale!(
+        buildVersionedAttachment(),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBe(false);
       expect(logger.warn).toHaveBeenCalledWith(

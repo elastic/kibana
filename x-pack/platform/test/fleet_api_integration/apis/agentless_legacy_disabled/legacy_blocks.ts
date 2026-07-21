@@ -136,10 +136,7 @@ export default function (providerContext: FtrProviderContext) {
             },
           });
 
-        expectLegacyBlock(
-          res,
-          /To create agentless package policies, use the agentless policies API/
-        );
+        expectLegacyBlock(res, /To create managed integrations, use the managed integrations API/);
       });
 
       it('should reject packages that only support agentless deployment', async () => {
@@ -158,7 +155,7 @@ export default function (providerContext: FtrProviderContext) {
             },
           });
 
-        expectLegacyBlock(res, /only supports agentless deployment/);
+        expectLegacyBlock(res, /can only be used as a managed integration/);
       });
 
       it('should reject requests targeting an agentless agent policy', async () => {
@@ -177,7 +174,7 @@ export default function (providerContext: FtrProviderContext) {
             },
           });
 
-        expectLegacyBlock(res, /To add integrations to an agentless agent policy/);
+        expectLegacyBlock(res, /To add integrations to a managed integration/);
       });
     });
 
@@ -190,10 +187,7 @@ export default function (providerContext: FtrProviderContext) {
             name: `renamed-${Date.now()}`,
           });
 
-        expectLegacyBlock(
-          res,
-          /To update agentless package policies, use the agentless policies API/
-        );
+        expectLegacyBlock(res, /To update managed integrations, use the managed integrations API/);
       });
 
       it('should reject re-parenting regular package policies to an agentless agent policy', async () => {
@@ -204,7 +198,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_ids: [agentlessId],
           });
 
-        expectLegacyBlock(res, /To add integrations to an agentless agent policy/);
+        expectLegacyBlock(res, /To add integrations to a managed integration/);
       });
     });
 
@@ -215,10 +209,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ packagePolicyIds: [agentlessId] });
 
-        expectLegacyBlock(
-          res,
-          /To upgrade agentless package policies, use the agentless policies API/
-        );
+        expectLegacyBlock(res, /To upgrade managed integrations, use the managed integrations API/);
       });
 
       it('should reject the whole request when the batch mixes agentless and regular policies', async () => {
@@ -227,10 +218,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ packagePolicyIds: [regularPackagePolicyId, agentlessId] });
 
-        expectLegacyBlock(
-          res,
-          /To upgrade agentless package policies, use the agentless policies API/
-        );
+        expectLegacyBlock(res, /To upgrade managed integrations, use the managed integrations API/);
       });
 
       it('should reject dry runs targeting agentless package policies', async () => {
@@ -239,10 +227,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ packagePolicyIds: [agentlessId] });
 
-        expectLegacyBlock(
-          res,
-          /To upgrade agentless package policies, use the agentless policies API/
-        );
+        expectLegacyBlock(res, /To upgrade managed integrations, use the managed integrations API/);
       });
     });
 
@@ -257,10 +242,7 @@ export default function (providerContext: FtrProviderContext) {
             supports_agentless: true,
           });
 
-        expectLegacyBlock(
-          res,
-          /To create agentless agent policies, use the agentless policies API/
-        );
+        expectLegacyBlock(res, /To create managed integrations, use the managed integrations API/);
       });
 
       it('should reject updating agentless agent policies', async () => {
@@ -273,10 +255,7 @@ export default function (providerContext: FtrProviderContext) {
             description: '',
           });
 
-        expectLegacyBlock(
-          res,
-          /To update agentless agent policies, use the agentless policies API/
-        );
+        expectLegacyBlock(res, /To update managed integrations, use the managed integrations API/);
       });
 
       it('should reject copying agentless agent policies', async () => {
@@ -288,17 +267,17 @@ export default function (providerContext: FtrProviderContext) {
             description: '',
           });
 
-        expectLegacyBlock(res, /Agentless agent policies cannot be copied/);
+        expectLegacyBlock(res, /Managed integrations cannot be copied/);
       });
     });
 
     describe('unaffected flows', () => {
-      it('should still allow managing agentless policies through the agentless policies API', async () => {
+      it('should still allow managing agentless policies through the managed integrations API', async () => {
         const updatedName = `test_agentless-updated-${Date.now()}`;
         const { item } = await apiClient.updateAgentlessPolicy(agentlessId, {
           package: { name: 'test_agentless', version: '1.0.0' },
           name: updatedName,
-          description: 'updated through the agentless API',
+          description: 'updated through the managed integrations API',
           namespace: 'default',
           inputs: {
             'sample-httpjson': {

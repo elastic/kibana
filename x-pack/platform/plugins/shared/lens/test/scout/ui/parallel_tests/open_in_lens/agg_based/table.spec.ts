@@ -6,13 +6,13 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { EuiComboBoxWrapper, spaceTest, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
-  getImportedDashboardId,
+  createOpenInLensSuiteSetup,
 } from '../../../fixtures';
 
 /** Returns the selected option labels from a combo box inside the dimension editor flyout. */
@@ -20,41 +20,20 @@ const getDimensionFlyoutComboBoxSelectedOptions = async (
   page: ScoutPage,
   comboBoxTestSubj: string
 ): Promise<string[]> => {
-  const comboBox = new EuiComboBoxWrapper(page, comboBoxTestSubj);
-  const selectedOptions = await comboBox.getSelectedMultiOptions();
-  if (selectedOptions.length > 0) {
-    return selectedOptions;
-  }
-
-  const value = await comboBox.getSelectedValue();
-  return value ? [value] : [];
+  return page.components.comboBox(comboBoxTestSubj).getSelectedOptions();
 };
 
-spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.stateful.classic }, () => {
-  let tableDashboardId: string;
-
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVES.OPEN_IN_LENS_AGG_BASED.TABLE
-    );
-    tableDashboardId = getImportedDashboardId(imported, testData.OPEN_IN_LENS_DASHBOARDS.TABLE);
-
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-    await scoutSpace.uiSettings.set({
-      'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
-    });
+spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deploymentAgnostic }, () => {
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.TABLE,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.TABLE,
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.openDashboardWithIdInEditMode(tableDashboardId);
-  });
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
+
+  spaceTest.afterAll(openInLensSuite.afterAll);
 
   spaceTest('should not allow converting of unsupported aggregations', async ({ pageObjects }) => {
     const { dashboard } = pageObjects;

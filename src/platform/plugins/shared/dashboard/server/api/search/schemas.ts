@@ -11,8 +11,8 @@ import { schema } from '@kbn/config-schema';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import {
   asCodeMetaSchema,
-  asCodePaginationParamsSchema,
   asCodePaginationResponseMetaSchema,
+  getAsCodeTagsSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 import { accessControlSchema } from '../dashboard_state_schemas';
@@ -56,31 +56,21 @@ export const legacySearchRequestParamsSchema = schema.object({
       },
     })
   ),
-});
-
-export const searchRequestParamsSchema = schema.object({
-  ...asCodePaginationParamsSchema.getPropSchemas(),
-  query: schema.maybe(
-    schema.string({
+  tag_names: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
       meta: {
+        availability: { stability: 'stable', since: '9.6.0' },
         description:
-          'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
+          'A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, dashboards matching any of the tag names are included. If the same name is shared by multiple tags, dashboards matching any of those tags are included.',
       },
     })
   ),
-  tags: schema.maybe(
+  excluded_tag_names: schema.maybe(
     schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
       meta: {
+        availability: { stability: 'stable', since: '9.6.0' },
         description:
-          'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are included.',
-      },
-    })
-  ),
-  excluded_tags: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
-      meta: {
-        description:
-          'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are excluded.',
+          'A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, dashboards matching any of the tag names are excluded. If the same name is shared by multiple tags, dashboards matching any of those tags are excluded.',
       },
     })
   ),
@@ -96,12 +86,7 @@ export const legacySearchResponseBodySchema = schema.object({
         description: schema.maybe(
           schema.string({ meta: { description: 'A short description of the dashboard.' } })
         ),
-        tags: schema.maybe(
-          schema.arrayOf(schema.string(), {
-            maxSize: 100,
-            meta: { description: 'Tag IDs associated with this dashboard.' },
-          })
-        ),
+        tags: schema.maybe(getAsCodeTagsSchema('Tag IDs associated with this dashboard.')),
         time_range: schema.maybe(timeRangeSchema),
         title: schema.string({ meta: { description: 'The dashboard title.' } }),
         access_control: accessControlSchema,
@@ -137,12 +122,7 @@ export const searchResponseBodySchema = schema.object({
         description: schema.maybe(
           schema.string({ meta: { description: 'A short description of the dashboard.' } })
         ),
-        tags: schema.maybe(
-          schema.arrayOf(schema.string(), {
-            maxSize: 100,
-            meta: { description: 'Tag IDs associated with this dashboard.' },
-          })
-        ),
+        tags: schema.maybe(getAsCodeTagsSchema('Tag IDs associated with this dashboard.', 100)),
         time_range: schema.maybe(timeRangeSchema),
         title: schema.string({ meta: { description: 'The dashboard title.' } }),
         access_control: accessControlSchema,

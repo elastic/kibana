@@ -28,6 +28,8 @@ import {
   ALERT_ANALYSIS_WORKFLOW_RUNTIME_CONFIG_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
   AlertAnalysisWorkflowSettings,
+  isThresholdRangeValid,
+  THRESHOLD_RANGE_REFINEMENT,
 } from '../../../common/workflows/alert_analysis_workflow';
 import { ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../../lib/telemetry/event_based/events';
 import type { SecuritySolutionPluginRouter } from '../../types';
@@ -60,14 +62,14 @@ const AlertAnalysisWorkflowSettingsWithConnectorRequestBody = AlertAnalysisWorkf
   connectorId: z.string().optional(),
   workflowEnabled: z.boolean(),
   createConversation: z.boolean(),
-}).refine(
-  ({ autoCloseConfidenceScoreMinThreshold, autoCloseConfidenceScoreMaxThreshold }) =>
-    autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold,
-  {
-    message: 'Minimum confidence score must be lower than maximum confidence score',
-    path: ['autoCloseConfidenceScoreMaxThreshold'],
-  }
-);
+})
+  // The threshold range only applies to auto-close, so mirror the client (`index.tsx`
+  // `isThresholdRangeInvalid`) and only enforce min < max when auto-close is enabled. Otherwise the
+  // UI would let the user save an out-of-range pair while the server rejected it with a 400.
+  .refine(
+    (settings) => !settings.autoCloseEnabled || isThresholdRangeValid(settings),
+    THRESHOLD_RANGE_REFINEMENT
+  );
 
 type AlertAnalysisWorkflowSettingsWithConnectorRequestBodyType = z.infer<
   typeof AlertAnalysisWorkflowSettingsWithConnectorRequestBody

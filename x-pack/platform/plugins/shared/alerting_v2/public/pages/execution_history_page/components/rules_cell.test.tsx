@@ -15,6 +15,7 @@ describe('RulesCell', () => {
     activeRuleId: null,
     onRuleClick: jest.fn(),
     maxVisibleRules: 3,
+    canReadRules: true,
   };
 
   const rule = (id: string, name = `${id}-name`) => ({ id, name });
@@ -91,5 +92,37 @@ describe('RulesCell', () => {
     );
     await userEvent.click(screen.getByRole('button', { name: /47 more/i }));
     expect(await screen.findByText(/46 more rules not shown/i)).toBeInTheDocument();
+  });
+
+  describe('when the user cannot read rules (canReadRules=false)', () => {
+    it('renders the rule names as non-clickable badges', () => {
+      render(
+        <RulesCell
+          {...props}
+          canReadRules={false}
+          rules={[rule('r-1'), rule('r-2')]}
+          totalRuleCount={2}
+        />
+      );
+      expect(screen.getByText('r-1-name')).toBeInTheDocument();
+      expect(screen.getByText('r-2-name')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'r-1-name' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'r-2-name' })).not.toBeInTheDocument();
+    });
+
+    it('does not call onRuleClick when a badge is clicked', async () => {
+      const onRuleClick = jest.fn();
+      render(
+        <RulesCell
+          {...props}
+          canReadRules={false}
+          onRuleClick={onRuleClick}
+          rules={[rule('r-1')]}
+          totalRuleCount={1}
+        />
+      );
+      await userEvent.click(screen.getByText('r-1-name'));
+      expect(onRuleClick).not.toHaveBeenCalled();
+    });
   });
 });

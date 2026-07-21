@@ -19,12 +19,15 @@ import {
   OSQUERY_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
+  OWNER_TO_PREFIX_MAP,
+  registerOwnerPrefix,
 } from '../../constants/attachments';
 import { AttachmentType, ExternalReferenceStorageType } from '../../types/domain';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } from '../../constants';
 import type { AttachmentRequestV2 } from '../../types/api';
 import {
   getAttachmentTypeFromAttributes,
+  getReferenceAttachmentId,
   isMigratedAttachmentType,
   isPersistableType,
   resolveUnifiedAttachmentType,
@@ -107,6 +110,24 @@ describe('migration_utils', () => {
     it('does not produce undefined prefixes for unknown owners', () => {
       expect(toUnifiedAttachmentType(AttachmentType.event, 'unknownOwner')).toBe(
         AttachmentType.event
+      );
+    });
+  });
+
+  describe('registerOwnerPrefix', () => {
+    const customOwner = 'customFixtureOwner';
+
+    afterEach(() => {
+      delete OWNER_TO_PREFIX_MAP[customOwner];
+    });
+
+    it('lets a dynamically registered owner resolve legacy alert/event to a unified type', () => {
+      expect(toUnifiedAttachmentType(AttachmentType.alert, customOwner)).toBe(AttachmentType.alert);
+
+      registerOwnerPrefix(customOwner, 'security');
+
+      expect(toUnifiedAttachmentType(AttachmentType.alert, customOwner)).toBe(
+        SECURITY_ALERT_ATTACHMENT_TYPE
       );
     });
   });
@@ -326,6 +347,40 @@ describe('migration_utils', () => {
 
     it('is false for unrelated persistable subtype ids', () => {
       expect(isPersistableType('.test')).toBe(false);
+    });
+  });
+
+  describe('getReferenceAttachmentId', () => {
+    it('returns attachmentId for unified reference attachments', () => {
+      expect(getReferenceAttachmentId(makeUnifiedRef(SECURITY_ALERT_ATTACHMENT_TYPE))).toBe(
+        'att-id'
+      );
+    });
+
+    it('returns alertId for legacy alert attachments', () => {
+      expect(getReferenceAttachmentId(makeAlert())).toBe('alert-id');
+    });
+
+    it('returns eventId for legacy event attachments', () => {
+      expect(getReferenceAttachmentId(makeEvent())).toBe('evt-id');
+    });
+
+    it('preserves array reference ids', () => {
+      expect(
+        getReferenceAttachmentId({
+          type: AttachmentType.alert,
+          alertId: ['a', 'b'],
+          index: ['i', 'j'],
+          rule: { id: 'rule-id', name: 'rule' },
+          owner,
+        })
+      ).toEqual(['a', 'b']);
+    });
+
+    it('returns undefined for non-reference attachments (user comment)', () => {
+      expect(
+        getReferenceAttachmentId({ type: AttachmentType.user, comment: 'hi', owner })
+      ).toBeUndefined();
     });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { stringify } from 'querystring';
-import { ENVIRONMENT_ALL } from '../../environment_filter_values';
+import { ENVIRONMENT_ALL } from '@kbn/apm-types';
 
 const format = ({ pathname, query }: { pathname: string; query: Record<string, any> }): string => {
   return `${pathname}?${stringify(query)}`;

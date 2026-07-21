@@ -13,6 +13,10 @@ on:
         description: Triggering comment id for dispatched follow-up runs
         required: false
         type: string
+      comment_type:
+        description: Triggering comment event type for dispatched follow-up runs
+        required: false
+        type: string
   bots:
     - github-actions[bot]
     - kibanamachine
@@ -22,13 +26,12 @@ imports:
   - .github/agents/code-reviewer.md
 engine:
   id: claude
-  version: "2.1.165"
+  version: "2.1.206"
   model: opus
   max-turns: 120
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
-    ENABLE_PROMPT_CACHING_1H: "1"
     # Route Claude Code's 1M Opus alias through LiteLLM.
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
@@ -88,6 +91,7 @@ env:
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   REVIEWER_COMMENT_ID: ${{ github.event.inputs.comment_id }}
+  REVIEWER_COMMENT_TYPE: ${{ github.event.inputs.comment_type }}
 tools:
   github:
     toolsets: [default]
@@ -136,11 +140,12 @@ safe-outputs:
     target: ${{ env.PR_NUMBER }}
   resolve-pull-request-review-thread:
     max: 10
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
 ---
 
 # Claude PR Reviewer
 
 Using the imported reviewer instructions:
 - Run in review mode for `pull_request_target` and manual `workflow_dispatch` events without a comment id.
-- Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Comment Dispatcher.
+- Run in follow-up response mode when `workflow_dispatch` includes a comment id and event type from the Reviewer Comment Dispatcher.
 - This reviewer's own gh-aw workflow id is `reviewer-claude`. Use it as "this reviewer's own workflow id" when matching review threads to resolve.

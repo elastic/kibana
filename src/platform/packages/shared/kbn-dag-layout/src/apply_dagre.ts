@@ -8,6 +8,7 @@
  */
 
 import dagre, { graphlib } from '@dagrejs/dagre';
+import type { EdgeLabel } from '@dagrejs/dagre';
 import {
   alignDagreCrossAxisInPlace,
   type CrossAxis,
@@ -92,7 +93,7 @@ export function applyDagre(
   });
 
   const routedEdges: DagPositionedEdge[] = edges.map((edge) => {
-    const dagreEdge = g.edge(edge.source, edge.target);
+    const dagreEdge = g.edge(edge.source, edge.target) as EdgeLabel | undefined;
     const rawPoints = dagreEdge?.points;
     const beforeSource = centersBefore.get(edge.source);
     const beforeTarget = centersBefore.get(edge.target);

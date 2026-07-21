@@ -82,7 +82,11 @@ export const chunkInClauseLiterals = (literals: readonly string[]): string[][] =
 
 // Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
 // aggregations key on rule_id/group_hash so no row spans two chunks. minLastEventTimestamp
-// is computed from the full input so the snooze-expiry filter is consistent across chunks.
+// is computed from the full input so snooze-expiry classification is consistent across chunks.
+//
+// Expired snoozes are mapped to "snooze_expired" instead of being filtered out: they must stay
+// in the row set so LAST() still picks them as the latest snooze intent. Dropping them before
+// LAST() would resurrect an older snooze (e.g. an indefinite one) for the same series.
 export const getAlertEpisodeSuppressionsQueries = (
   alertEpisodes: AlertEpisode[]
 ): EsqlRequest[] => {
@@ -108,9 +112,13 @@ export const getAlertEpisodeSuppressionsQueries = (
         | EVAL _pair_key = CONCAT(rule_id, ${PAIR_SEPARATOR}, group_hash)
         | WHERE _pair_key IN (${pairValues})
         | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
-        | WHERE action_type != "snooze" OR expiry > ${minLastEventTimestamp}::datetime
+        | EVAL _snooze_action = CASE(
+            action_type == "unsnooze", "unsnooze",
+            action_type == "snooze" AND (expiry IS NULL OR expiry > ${minLastEventTimestamp}::datetime), "snooze",
+            action_type == "snooze", "snooze_expired"
+          )
         | INLINE STATS
-            last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
+            last_snooze_action = LAST(_snooze_action, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
             BY rule_id, group_hash
         | STATS
             last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),

@@ -13,7 +13,6 @@ import { useMemo } from 'react';
 import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
-import { useEsqlTimeRangeFilter } from '../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
@@ -45,16 +44,25 @@ interface FixedTimeRange {
 const MAX_FILTERED_ENTITIES = 1000;
 
 /**
- * Time-range-only ES|QL filter for the ML anomalies source. The search bar on
+ * Time-range-only resolver for the ML anomalies source. The search bar on
  * the Entity Analytics home page targets the entity store data view, so its
  * field filters cannot be applied as a pre-filter on the ML anomalies index;
  * they are resolved separately via {@link useFilteredEntityIds}.
+ *
+ * The time range is applied inside the query text as ?_tstart/?_tend named
+ * params (via getESQLResults' timeRange option) rather than the request-level
+ * `filter` DSL. A request-level filter that matches no data makes the FROM
+ * pattern resolve to zero indices, triggering an Elasticsearch bug in LOOKUP
+ * JOIN lookup-index resolution (elastic/kibana#277613).
  */
-const useRecentAnomaliesTimeFilter = (timeRange?: FixedTimeRange): ESBoolQuery => {
+const useRecentAnomaliesTimeRange = (timeRange?: FixedTimeRange): FixedTimeRange => {
   const { from: globalFrom, to: globalTo } = useGlobalTime();
-  const from = timeRange?.from ?? globalFrom;
-  const to = timeRange?.to ?? globalTo;
-  return useEsqlTimeRangeFilter(from, to);
+  const fixedFrom = timeRange?.from;
+  const fixedTo = timeRange?.to;
+  return useMemo(
+    () => ({ from: fixedFrom ?? globalFrom, to: fixedTo ?? globalTo }),
+    [fixedFrom, fixedTo, globalFrom, globalTo]
+  );
 };
 
 const hasActiveFilter = (query?: ESBoolQuery): boolean => {
@@ -172,7 +180,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   timeRange?: FixedTimeRange;
 }) => {
   const search = useKibana().services.data.search.search;
-  const timeFilter = useRecentAnomaliesTimeFilter(params.timeRange);
+  const timeRange = useRecentAnomaliesTimeRange(params.timeRange);
   const { entityIds, isLoading: isEntityIdsLoading } = useFilteredEntityIds(params.spaceId);
   const { jobIds: securityJobIds, isLoading: isSecurityJobIdsLoading } = useSecurityJobIds();
   const { indexExists: mlIndexExists, isLoading: isMlIndexLoading } = useMlAnomaliesIndexExists();
@@ -188,7 +196,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   });
 
   const { isLoading, data, isError } = useQuery(
-    [timeFilter, topRowsEsqlSource, entityIds, securityJobIds, mlIndexExists],
+    [timeRange, topRowsEsqlSource, entityIds, securityJobIds, mlIndexExists],
     async ({ signal }) => {
       if (!topRowsEsqlSource || noFilterMatches || noSecurityJobs || !mlIndexExists) {
         return { records: [], rawResponse: undefined };
@@ -197,7 +205,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
         esqlQuery: topRowsEsqlSource,
         search,
         signal,
-        filter: timeFilter,
+        timeRange,
       });
       return {
         records: esqlResponseToRecords<Record<string, string>>(esqlResult?.response),
@@ -246,7 +254,7 @@ export const useRecentAnomaliesQuery = (params: {
   timeRange?: FixedTimeRange;
 }) => {
   const search = useKibana().services.data.search.search;
-  const timeFilter = useRecentAnomaliesTimeFilter(params.timeRange);
+  const timeRange = useRecentAnomaliesTimeRange(params.timeRange);
   const { entityIds, isLoading: isEntityIdsLoading } = useFilteredEntityIds(params.spaceId);
   const { jobIds: securityJobIds, isLoading: isSecurityJobIdsLoading } = useSecurityJobIds();
   const noFilterMatches = entityIds !== undefined && entityIds.length === 0;
@@ -282,7 +290,7 @@ export const useRecentAnomaliesQuery = (params: {
     rowLabels: string[];
     rawResponse?: ESQLSearchResponse;
   }>(
-    [timeFilter, anomalyDataEsqlSource, rowLabels, entityIds, securityJobIds],
+    [timeRange, anomalyDataEsqlSource, rowLabels, entityIds, securityJobIds],
     async ({ signal }) => {
       if (!anomalyDataEsqlSource || !hasAnomaliesData || noFilterMatches || noSecurityJobs) {
         return { anomalyRecords: [], rowLabels: [] };
@@ -291,7 +299,7 @@ export const useRecentAnomaliesQuery = (params: {
         esqlQuery: anomalyDataEsqlSource,
         search,
         signal,
-        filter: timeFilter,
+        timeRange,
       });
       const anomalyRecords = esqlResponseToRecords<Record<string, string | number>>(
         esqlResult.response

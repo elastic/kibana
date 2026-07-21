@@ -701,8 +701,15 @@ function SecondaryMetricEditor({
   );
 }
 
-const supportingVisualization = (state: MetricVisualizationState) =>
-  state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'panel';
+const supportingVisualization = (state: MetricVisualizationState): SupportingVisType => {
+  if (state.trendlineLayerId) {
+    return 'trendline';
+  }
+  if (showingBar(state)) {
+    return 'bar';
+  }
+  return 'none';
+};
 
 function useScrollIntoView() {
   const anchorRef = useRef<HTMLDivElement>(null);
@@ -1003,12 +1010,12 @@ export function DimensionEditorAdditionalSection({
   });
 
   const showVisTextColorSwatches =
-    supportingVisualization(state) === 'panel' && state.applyColorTo === 'value';
+    supportingVisualization(state) === 'none' && state.applyColorTo === 'value';
 
   const colorMode = state.palette ? 'dynamic' : 'static';
   const { applyColorTo } = state;
   const colorControlsSectionVisible =
-    selectedSupportingVisualization !== 'panel' || Boolean(applyColorTo);
+    selectedSupportingVisualization !== 'none' || Boolean(applyColorTo);
 
   return (
     <div
@@ -1036,11 +1043,11 @@ export function DimensionEditorAdditionalSection({
           data-test-subj="lnsMetric_supporting_visualization_buttons"
           options={[
             {
-              id: `${buttonIdPrefix}panel`,
+              id: `${buttonIdPrefix}none`,
               label: i18n.translate('xpack.lens.metric.backgroundChartNoneLabel', {
                 defaultMessage: 'None',
               }),
-              value: 'panel',
+              value: 'none',
               'data-test-subj': 'lnsMetric_background_chart_none',
             },
             {
@@ -1123,7 +1130,7 @@ export function DimensionEditorAdditionalSection({
           />
         </EuiFormRow>
       )}
-      {selectedSupportingVisualization === 'panel' && (
+      {selectedSupportingVisualization === 'none' && (
         <EuiFormRow
           display="columnCompressed"
           fullWidth

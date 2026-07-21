@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import {
   CommentChildren,
   INDICATOR_FEED_NAME_TEST_ID,
@@ -19,10 +19,30 @@ import { useIndicatorById } from '../hooks/use_indicator_by_id';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { generateMockFileIndicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { LOADING_LOGO_TEST_ID } from './test_ids';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+
+const mockOpenFlyout = jest.fn();
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
+}));
 
 jest.mock('../hooks/use_indicator_by_id');
+jest.mock('../../../../flyout_v2/use_flyout_api');
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 
 describe('attachment_children initComponent', () => {
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+  });
+
   it('should render the basic values', () => {
     const id: string = 'abc123';
     const metadata: IndicatorAttachmentMetadata = {
@@ -65,5 +85,66 @@ describe('attachment_children initComponent', () => {
       </TestProvidersComponent>
     );
     expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should open the legacy expandable flyout when the new flyout is disabled', () => {
+    const id: string = 'abc123';
+    const metadata: IndicatorAttachmentMetadata = {
+      indicatorName: 'indicatorName',
+      indicatorFeedName: 'indicatorFeedName',
+      indicatorType: 'indicatorType',
+    };
+    const indicator = generateMockFileIndicator();
+
+    (useIndicatorById as jest.MockedFunction<typeof useIndicatorById>).mockReturnValue({
+      indicator,
+      isLoading: false,
+    });
+
+    const { getByTestId } = render(
+      <TestProvidersComponent>
+        <CommentChildren id={id} metadata={metadata} />
+      </TestProvidersComponent>
+    );
+
+    fireEvent.click(getByTestId(INDICATOR_NAME_TEST_ID));
+
+    expect(mockOpenFlyout).toHaveBeenCalledWith({
+      right: {
+        id: 'ioc-details-right',
+        params: {
+          id: indicator._id,
+        },
+      },
+    });
+    expect(flyoutApi.openIocFlyout).not.toHaveBeenCalled();
+  });
+
+  it('should open the new IOC flyout when the new flyout is enabled and the indicator is defined', () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+    const id: string = 'abc123';
+    const metadata: IndicatorAttachmentMetadata = {
+      indicatorName: 'indicatorName',
+      indicatorFeedName: 'indicatorFeedName',
+      indicatorType: 'indicatorType',
+    };
+    const indicator = generateMockFileIndicator();
+
+    (useIndicatorById as jest.MockedFunction<typeof useIndicatorById>).mockReturnValue({
+      indicator,
+      isLoading: false,
+    });
+
+    const { getByTestId } = render(
+      <TestProvidersComponent>
+        <CommentChildren id={id} metadata={metadata} />
+      </TestProvidersComponent>
+    );
+
+    fireEvent.click(getByTestId(INDICATOR_NAME_TEST_ID));
+
+    expect(flyoutApi.openIocFlyout).toHaveBeenCalledWith({ indicator });
+    expect(mockOpenFlyout).not.toHaveBeenCalled();
   });
 });

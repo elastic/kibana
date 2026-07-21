@@ -32,7 +32,7 @@ jest.mock('../../../../confirm_delete_case', () => ({
   ConfirmDeleteCaseModal: () => <div data-test-subj="confirm-delete-modal" />,
 }));
 
-jest.mock('../case_settings_popover', () => ({
+jest.mock('./case_settings_popover', () => ({
   CaseSettingsPopover: () => <div data-test-subj="case-settings-popover" />,
 }));
 

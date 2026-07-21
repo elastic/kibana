@@ -135,12 +135,11 @@ export interface AttachmentType<Props> {
   getAttachmentTabViewObject?: (
     props?: CommonAttachmentTabViewProps
   ) => AttachmentTabViewObject<CommonAttachmentTabViewProps>;
-  schemaValidator?: (data: unknown) => void;
 }
 
 interface UnifiedAttachmentSchema {
-  /** Full-payload zod schema. Preferred over `schemaValidator`. */
-  schema?: z.ZodType;
+  /** Full-payload zod schema used for validation and renderer prop narrowing. */
+  schema: z.ZodType;
   /**
    * Schema exposed to workflow authors. When unset, workflow steps fall back to
    * `schema` if it is a Zod object; when `false`, the type is excluded.

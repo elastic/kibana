@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import type { Logger } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
@@ -26,7 +26,7 @@ export const parseTemplateDefinition = (
   definitionYaml: string
 ): ParsedTemplateDefinition | null => {
   try {
-    const raw = yaml.load(definitionYaml);
+    const raw = parseYaml(definitionYaml);
     const result = ParsedTemplateDefinitionSchema.safeParse(raw);
     return result.success ? result.data : null;
   } catch {
@@ -76,6 +76,80 @@ export const resolveV2Template = async (
   }
 
   return definition;
+};
+
+export interface ResolvedV2Template {
+  definition: ParsedTemplateDefinition;
+  templateId: string;
+  templateVersion: number;
+}
+
+/**
+ * Resolves the migrated v2 template for a rule that still stores a legacy (v1) template `key`.
+ *
+ * v1 identified templates by `key` (their `name` was not unique), so the migration records the
+ * originating key on each migrated template as `legacyKey`. We match on that first, which uniquely
+ * and correctly disambiguates v1 templates that shared a name.
+ *
+ * For environments migrated before `legacyKey` was recorded, we fall back to matching by name
+ * (case-insensitive and trimmed, mirroring the template-name uniqueness rule). Returns null when
+ * nothing matches (e.g. the migration has not run) so the caller can fall back to the legacy path.
+ */
+export const resolveV2TemplateForLegacyKey = async (
+  casesClient: CasesClient,
+  legacyKey: string,
+  legacyName: string | undefined,
+  owner: string,
+  logger: Logger
+): Promise<ResolvedV2Template | null> => {
+  const { templates } = await casesClient.templates.getAllTemplates({
+    page: 1,
+    perPage: 10000,
+    sortField: 'name',
+    sortOrder: 'asc',
+    search: '',
+    tags: [],
+    author: [],
+    owner: [owner],
+    isDeleted: false,
+    isEnabled: true,
+  });
+
+  const ownerTemplates = templates.filter((template) => template.owner === owner);
+
+  // Prefer the exact v1 lineage recorded by the migration.
+  let matched = ownerTemplates.find((template) => template.legacyKey === legacyKey);
+
+  // Fallback for pre-`legacyKey` migrations: match by normalized name.
+  if (!matched && legacyName) {
+    const normalizedName = legacyName.trim().toLocaleLowerCase();
+    matched = ownerTemplates.find(
+      (template) => template.name.trim().toLocaleLowerCase() === normalizedName
+    );
+  }
+
+  if (!matched) {
+    logger.warn(
+      `[CasesConnector][resolveV2TemplateForLegacyKey] No migrated v2 template found for legacy template key "${legacyKey}" (owner "${owner}"). Falling back to the legacy template path.`,
+      { tags: ['case-connector:resolveV2TemplateForLegacyKey'] }
+    );
+    return null;
+  }
+
+  const definition = parseTemplateDefinition(matched.definition);
+  if (!definition) {
+    logger.warn(
+      `[CasesConnector][resolveV2TemplateForLegacyKey] Migrated v2 template "${matched.templateId}" (legacy key "${legacyKey}") has an invalid definition. Falling back to the legacy template path.`,
+      { tags: ['case-connector:resolveV2TemplateForLegacyKey'] }
+    );
+    return null;
+  }
+
+  return {
+    definition,
+    templateId: matched.templateId,
+    templateVersion: matched.templateVersion,
+  };
 };
 
 /**

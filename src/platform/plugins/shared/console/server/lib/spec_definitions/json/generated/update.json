@@ -19,6 +19,7 @@
       "require_alias": "__flag__",
       "retry_on_conflict": "",
       "routing": [],
+      "_slice": "",
       "timeout": [
         "1m",
         "-1",

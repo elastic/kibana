@@ -1,0 +1,315 @@
+{
+  "sha1": "e801ccb40115e272ff9cb74f9a7a14151bb82c73",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "ddbe097d43e645b-71bd36ff78b71e0",
+      "title": "Ingest APM data to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/global.setup.ts",
+        "line": 19,
+        "column": 1
+      }
+    },
+    {
+      "id": "c880e9057e93038-3ddfa554e079343",
+      "title": "APM home page redirects the APM root to the service inventory with default query params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/01_home.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
+      "id": "c880e9057e93038-b0fadce492bbcc3",
+      "title": "APM home page includes services that only have metric documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/01_home.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "c880e9057e93038-751d480252cea14",
+      "title": "APM home page navigates to the service overview with its transaction type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/01_home.spec.ts",
+        "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "591c84adcabf97e-a24210fed7daf45",
+      "title": "Comparison feature flag shows comparison enabled on the service inventory page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
+        "line": 32,
+        "column": 9
+      }
+    },
+    {
+      "id": "591c84adcabf97e-04771dbddb015e0",
+      "title": "Comparison feature flag shows comparison enabled on the dependencies page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
+        "line": 32,
+        "column": 9
+      }
+    },
+    {
+      "id": "591c84adcabf97e-be42eca1fcefe7e",
+      "title": "Comparison feature flag shows comparison enabled on the service map page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
+        "line": 32,
+        "column": 9
+      }
+    },
+    {
+      "id": "591c84adcabf97e-803d95222bea3ca",
+      "title": "Comparison feature flag shows comparison disabled on the service inventory page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
+        "line": 47,
+        "column": 9
+      }
+    },
+    {
+      "id": "591c84adcabf97e-da68abb6b5a42e9",
+      "title": "Comparison feature flag shows comparison disabled on the dependencies page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
+        "line": 47,
+        "column": 9
+      }
+    },
+    {
+      "id": "591c84adcabf97e-d13146135c97802",
+      "title": "Comparison feature flag shows comparison disabled on the service map page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
+        "line": 47,
+        "column": 9
+      }
+    },
+    {
+      "id": "f7648c452693488-55cffc8ce0eecb3",
+      "title": "APM no data screen shows the no data screen instead of the service inventory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/03_no_data_screen.spec.ts",
+        "line": 49,
+        "column": 7
+      }
+    },
+    {
+      "id": "f7648c452693488-a2e6b84c74cd876",
+      "title": "APM no data screen bypasses the no data screen on settings pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/03_no_data_screen.spec.ts",
+        "line": 59,
+        "column": 7
+      }
+    },
+    {
+      "id": "bbb704ecf54e746-b5f438e39d8d665",
+      "title": "Anomaly Detection Viewer should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
+        "line": 17,
+        "column": 9
+      }
+    },
+    {
+      "id": "bbb704ecf54e746-33d6a15705dd230",
+      "title": "Anomaly Detection Privileged User should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
+        "line": 27,
+        "column": 9
+      }
+    },
+    {
+      "id": "bbb704ecf54e746-c5bb5d1bcaddc75",
+      "title": "Anomaly Detection Admin should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
+        "line": 47,
+        "column": 9
+      }
+    },
+    {
+      "id": "bbb704ecf54e746-9785a7919050c13",
+      "title": "Anomaly Detection APM Read Privileges With Write Settings should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
+        "line": 65,
+        "column": 9
+      }
+    },
+    {
+      "id": "bbb704ecf54e746-46465c39e998aa3",
+      "title": "Anomaly Detection APM All Privileges Without Write Settings should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "308d319c7066f00-e4b4039002c35af",
+      "title": "APM page navigation resource loading only loads shared resources once when navigating between tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/05_resource_loading.spec.ts",
+        "line": 21,
+        "column": 9
+      }
+    },
+    {
+      "id": "75ee3546fcb9811-93d765a7c716612",
+      "title": "Agent Configuration Viewer should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    },
+    {
+      "id": "75ee3546fcb9811-09b8159d2323da0",
+      "title": "Agent Configuration APM All Privileges Without Write Settings should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
+        "line": 23,
+        "column": 7
+      }
+    },
+    {
+      "id": "75ee3546fcb9811-9ba74430ee8ac12",
+      "title": "Agent Configuration Privileged user should be able to configure, create and delete an agent configuration with all services and production environment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
+        "line": 33,
+        "column": 7
+      }
+    }
+  ]
+}

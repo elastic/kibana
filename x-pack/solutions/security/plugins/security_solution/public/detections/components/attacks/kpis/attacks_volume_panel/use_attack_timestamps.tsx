@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
-import { fetchQueryUnifiedAlerts } from '../../../../containers/detection_engine/alerts/api';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
+import { useAttacksPageFetchMethod } from '../../../../hooks/attacks/use_attacks_page_fetch_method';
+import { useInspectButton } from '../../../alerts_kpis/common/hooks';
+
+const ATTACK_TIMESTAMPS_QUERY_ID = 'attacks-kpi-attack-timestamps';
 
 interface AttackDetails {
   _id: string;
@@ -26,6 +30,9 @@ export interface UseAttackTimestampsProps {
  * @returns The attack start times
  */
 export const useAttackTimestamps = ({ attackIds }: UseAttackTimestampsProps) => {
+  const { deleteQuery, setQuery } = useGlobalTime();
+  const attacksPageFetchMethod = useAttacksPageFetchMethod();
+
   // Get the attack details query
   const attacksDetailsQuery = useMemo(() => {
     if (attackIds.length === 0) return {};
@@ -41,9 +48,11 @@ export const useAttackTimestamps = ({ attackIds }: UseAttackTimestampsProps) => 
     data: detailsData,
     loading: isDetailsLoading,
     refetch: refetchDetails,
+    request,
+    response,
     setQuery: setDetailsQuery,
   } = useQueryAlerts<AttackDetails, {}>({
-    fetchMethod: fetchQueryUnifiedAlerts,
+    fetchMethod: attacksPageFetchMethod,
     query: attacksDetailsQuery,
     skip: attackIds.length === 0,
     queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_DETAILS,
@@ -53,6 +62,22 @@ export const useAttackTimestamps = ({ attackIds }: UseAttackTimestampsProps) => 
   useEffect(() => {
     setDetailsQuery(attacksDetailsQuery);
   }, [attacksDetailsQuery, setDetailsQuery]);
+
+  const refetch = useCallback(() => {
+    if (attackIds.length > 0 && refetchDetails) {
+      refetchDetails();
+    }
+  }, [attackIds.length, refetchDetails]);
+
+  useInspectButton({
+    deleteQuery,
+    loading: isDetailsLoading,
+    response,
+    setQuery,
+    refetch,
+    request,
+    uniqueQueryId: ATTACK_TIMESTAMPS_QUERY_ID,
+  });
 
   // Extract the attack start times
   const attackStartTimes = useMemo(() => {
@@ -73,6 +98,6 @@ export const useAttackTimestamps = ({ attackIds }: UseAttackTimestampsProps) => 
   return {
     attackStartTimes,
     isLoading: isDetailsLoading,
-    refetch: refetchDetails,
+    refetch,
   };
 };

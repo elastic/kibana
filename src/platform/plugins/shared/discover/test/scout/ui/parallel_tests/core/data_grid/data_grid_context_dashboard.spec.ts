@@ -12,7 +12,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '@kbn/scout';
+import { spaceTest } from '../../../fixtures';
 import { testData } from '../../../fixtures/common';
 
 spaceTest.describe(
@@ -62,7 +62,7 @@ spaceTest.describe(
         await pageObjects.dataGrid.waitForDocTableRendered();
         await pageObjects.dashboard.saveDashboard(dashboardName);
 
-        await pageObjects.dataGrid.openSurroundingDocuments(0);
+        await pageObjects.docViewer.openSurroundingDocuments(0);
 
         await expect(page).toHaveURL(/#\/context/);
         await pageObjects.dataGrid.waitForDocTableRendered();

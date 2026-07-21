@@ -102,6 +102,19 @@ All routes are internal (`elastic-api-version: 1`). Read routes require the `rea
 
 For full request/response schemas, see the OpenAPI definitions in [`@kbn/evals-common/impl/schemas/`](../../packages/shared/kbn-evals-common/impl/schemas/).
 
+## Instrumentation profiles
+
+Evaluator routes reconstruct a normalized evidence round (`input.message`, `response.message`, `steps`) from a trace using an **instrumentation profile**. Pass `subject.instrumentation.profile` on `_validate` / `_evaluate`; when omitted, **`elastic-inference`** is used.
+
+| Profile | `user_query` | `agent_response` | `tool_calls` |
+| --- | --- | --- | --- |
+| `elastic-inference` (default) | LLM spans, `gen_ai.input.messages` (`genai_messages`) | LLM spans, `gen_ai.output.messages` (`genai_messages`) | TOOL spans via Elastic inference span kind |
+| `otel-genai-attributes` | Trace attributes `gen_ai.input.messages` (`genai_messages`) | Trace attributes `gen_ai.output.messages` (`genai_messages`) | `execute_tool` spans |
+| `otel-genai-events` | Log event `gen_ai.user.message` (string) | Log event `gen_ai.choice` (string) | `execute_tool` spans |
+| `claude-code` | Log event `user_prompt` (string) | Log event `api_response_body` (`anthropic_message`) | `claude_code.tool` spans (`prefixed_json`) |
+
+Profile definitions live in [`server/evaluators/evidence/profiles.ts`](server/evaluators/evidence/profiles.ts).
+
 ## UI pages
 
 The plugin UI is organized into four navigation tabs:

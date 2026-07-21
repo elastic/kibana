@@ -7,12 +7,22 @@
 
 import React from 'react';
 import { useWatch } from 'react-hook-form';
-import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CustomRecoveryRenderProps } from '../types';
 import type { FormValues } from '../../../form/types';
-import { QuerySummary } from '../query_summary';
+import { QueryBlock } from '../query_summary';
+
+const noBaseQueryDefined = i18n.translate(
+  'xpack.alertingV2.composeDiscover.recoveryCondition.noBaseQueryDefined',
+  { defaultMessage: 'No base query defined' }
+);
+
+const noRecoveryConditionDefined = i18n.translate(
+  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryConditionDefined',
+  { defaultMessage: 'No recovery condition defined' }
+);
 
 export const EsqlRecoveryContent: React.FC<CustomRecoveryRenderProps> = ({ state, dispatch }) => {
   const query = useWatch<FormValues, 'query'>({ name: 'query' });
@@ -21,38 +31,26 @@ export const EsqlRecoveryContent: React.FC<CustomRecoveryRenderProps> = ({ state
 
   return (
     <>
-      <EuiText size="xs" color="subdued">
-        <strong>
+      <QueryBlock
+        label={
           <FormattedMessage
             id="xpack.alertingV2.composeDiscover.recoveryCondition.baseQueryLabel"
             defaultMessage="Base query"
           />
-        </strong>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <QuerySummary
+        }
         query={baseQuery}
-        emptyMessage={i18n.translate(
-          'xpack.alertingV2.composeDiscover.recoveryCondition.noBaseQueryDefined',
-          { defaultMessage: 'No base query defined' }
-        )}
+        emptyMessage={noBaseQueryDefined}
       />
       <EuiSpacer size="m" />
-      <EuiText size="xs" color="subdued">
-        <strong>
+      <QueryBlock
+        label={
           <FormattedMessage
             id="xpack.alertingV2.composeDiscover.recoveryCondition.recoveryConditionLabel"
             defaultMessage="Recovery condition"
           />
-        </strong>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <QuerySummary
+        }
         query={recoveryBlock}
-        emptyMessage={i18n.translate(
-          'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryConditionDefined',
-          { defaultMessage: 'No recovery condition defined' }
-        )}
+        emptyMessage={noRecoveryConditionDefined}
       />
       <EuiSpacer size="s" />
       <EuiButton

@@ -69,13 +69,16 @@ const buildHit = (extra: Record<string, unknown> = {}): DataTableRecord =>
 
 const renderTab = (
   hit: DataTableRecord,
-  { openSystemFlyout = jest.fn() }: { openSystemFlyout?: jest.Mock } = {}
+  {
+    openSystemFlyout = jest.fn(),
+    renderCellActions = jest.fn(),
+  }: { openSystemFlyout?: jest.Mock; renderCellActions?: jest.Mock } = {}
 ) => {
   const startServices = createStartServicesMock();
   startServices.overlays = { ...startServices.overlays, openSystemFlyout };
   return render(
     <TestProviders startServices={startServices}>
-      <OverviewTab hit={hit} onAttackUpdated={jest.fn()} />
+      <OverviewTab hit={hit} onAttackUpdated={jest.fn()} renderCellActions={renderCellActions} />
     </TestProviders>
   );
 };

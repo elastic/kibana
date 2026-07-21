@@ -8,27 +8,17 @@
 import { buildDiscoveryInput } from './build_agent_input';
 
 describe('buildDiscoveryInput', () => {
-  it('emits the exact headings the prompt expects, with compact JSON', () => {
+  it('emits only the Active batch heading with compact JSON', () => {
     const input = buildDiscoveryInput({
-      episodeSuffix: 'a1b2c3d4',
       detections: [{ rule_uuid: 'r1' }],
     });
 
-    expect(input).toBe('## New episode suffix\na1b2c3d4\n\n## Active batch\n[{"rule_uuid":"r1"}]');
+    expect(input).toBe('## Active batch\n[{"rule_uuid":"r1"}]');
     expect(input).not.toContain('\n  '); // not pretty-printed
   });
 
-  it('omits the Continuation Candidates section when there are none', () => {
-    const input = buildDiscoveryInput({ episodeSuffix: 's', detections: [] });
-    expect(input).not.toContain('Continuation Candidates');
-  });
-
-  it('includes the Continuation Candidates section when provided', () => {
-    const input = buildDiscoveryInput({
-      episodeSuffix: 's',
-      detections: [{ rule_uuid: 'r1' }],
-      continuationCandidates: [{ discovery_slug: 'svc__x-s' }],
-    });
-    expect(input).toContain('## Continuation Candidates\n[{"discovery_slug":"svc__x-s"}]');
+  it('renders an empty batch correctly', () => {
+    const input = buildDiscoveryInput({ detections: [] });
+    expect(input).toBe('## Active batch\n[]');
   });
 });

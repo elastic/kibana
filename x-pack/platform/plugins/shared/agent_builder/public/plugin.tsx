@@ -40,6 +40,7 @@ import {
   EventsService,
   type AgentBuilderInternalService,
 } from './services';
+import { createPublicEmbeddableChatAccess } from './services/access';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicRenderersContract } from './services/renderers';
 import { createPublicToolContract } from './services/tools';
@@ -312,6 +313,10 @@ export class AgentBuilderPlugin
       renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
+      getAgentBuilderAccess: createPublicEmbeddableChatAccess({
+        accessChecker,
+        application: core.application,
+      }),
       addAttachment: (attachment: AttachmentInput) => {
         if (this.sidebarCallbacks) {
           this.sidebarCallbacks.addAttachment(attachment);

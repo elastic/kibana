@@ -201,8 +201,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   // Migrated to Jest component test: public/form/results_type_field.test.tsx
   // Phase 2 migration — form field default values are UI-only assertions
 
-  // Failing: See https://github.com/elastic/kibana/issues/276571
-  describe.skip('prebuilt', () => {
+  describe('prebuilt', () => {
     let packName: string;
     let packId: string;
     let savedQueryId: string;

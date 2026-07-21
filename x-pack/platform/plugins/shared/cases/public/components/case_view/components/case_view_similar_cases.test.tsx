@@ -15,7 +15,7 @@ import { CaseViewSimilarCases } from './case_view_similar_cases';
 import { renderWithTestingProviders } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../cases_redesign/case_view/components/sidebar_toggle_button', () => ({
+jest.mock('../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button', () => ({
   SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
 }));
 

@@ -120,6 +120,7 @@ import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
+import { RelayClient, type RelayClientContract } from './lib/relay';
 
 export interface PluginSetupContract {
   registerType<
@@ -151,6 +152,7 @@ export interface PluginSetupContract {
   >;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
+  getRelayClient: () => RelayClientContract | undefined;
   setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
 
   isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
@@ -215,6 +217,7 @@ export interface PluginStartContract {
    * @returns boolean indicating whether the connector was removed or not
    */
   unregisterDynamicConnector: (connectorId: string) => boolean;
+  getRelayClient: () => RelayClientContract | undefined;
 }
 
 export interface ActionsPluginsSetup {
@@ -272,6 +275,7 @@ export class ActionsPlugin
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
   private skippedPreconfiguredConnectorIds: Set<string> = new Set();
+  private relayClient?: RelayClientContract;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -313,6 +317,13 @@ export class ActionsPlugin
     // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor, this.inMemoryMetrics);
     const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
+    this.relayClient = this.actionsConfig.relay
+      ? new RelayClient({
+          baseUrl: this.actionsConfig.relay.url,
+          configurationUtilities: actionsConfigUtils,
+          logger: this.logger.get('relay-client'),
+        })
+      : undefined;
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
       this.inMemoryConnectors.push(getAlertHistoryEsIndex());
@@ -496,6 +507,7 @@ export class ActionsPlugin
         };
       },
       getActionsConfigurationUtilities: () => actionsConfigUtils,
+      getRelayClient: () => this.relayClient,
       setEnabledConnectorTypes: (connectorTypes) => {
         if (
           !!plugins.serverless &&
@@ -812,6 +824,7 @@ export class ActionsPlugin
         this.registerDynamicConnector(connector),
       unregisterDynamicConnector: (connectorId: string) =>
         this.unregisterDynamicConnector(connectorId),
+      getRelayClient: () => this.relayClient,
     };
   }
 

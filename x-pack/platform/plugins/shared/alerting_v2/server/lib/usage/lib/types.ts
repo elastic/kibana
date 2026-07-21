@@ -77,6 +77,9 @@ export interface RuleStatsAggregations {
   count_with_grouping: { doc_count: number };
   avg_grouping_fields_count: { value: number | null };
   min_created_at: { value: number | null; value_as_string?: string };
+  count_by_query_format: { buckets: TermsBucket[] };
+  count_by_recovery_strategy: { buckets: TermsBucket[] };
+  count_by_no_data_strategy: { buckets: TermsBucket[] };
 }
 export type RuleStatsResults = Pick<
   LatestTaskStateSchema,
@@ -93,4 +96,7 @@ export type RuleStatsResults = Pick<
   | 'count_with_grouping'
   | 'avg_grouping_fields_count'
   | 'min_created_at'
+  | 'count_by_query_format'
+  | 'count_by_recovery_strategy'
+  | 'count_by_no_data_strategy'
 >;

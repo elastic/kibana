@@ -168,4 +168,92 @@ describe('installKibanaAssetsWithStreaming', () => {
       { id: 'custom-index-pattern', type: KibanaSavedObjectType.indexPattern },
     ]);
   });
+
+  describe('overwrite gating on Kibana version', () => {
+    const assetsMap = new Map([
+      [
+        'test-package-1.0.0/kibana/dashboard/my-dashboard.json',
+        makeArchiveBuffer('my-dashboard', 'dashboard'),
+      ],
+    ]);
+
+    const install = (installedPkg?: { attributes: { installed_kibana_version?: string } }) =>
+      installKibanaAssetsWithStreaming({
+        spaceId: 'default',
+        packageInstallContext: {
+          archiveIterator: createArchiveIteratorFromMap(assetsMap),
+          paths: [...assetsMap.keys()],
+          packageInfo: {
+            title: 'Test',
+            name: 'test-package',
+            version: '1.0.0',
+            description: 'test',
+            type: 'integration',
+            categories: [],
+            format_version: '1.0.0',
+            release: 'ga',
+            conditions: {},
+            owner: { github: 'elastic/fleet' },
+          } as any,
+        },
+        savedObjectsClient: soClient,
+        pkgName: 'test-package',
+        installedPkg: installedPkg as any,
+      });
+
+    it('overwrites existing assets when the Kibana version increased since the last install', async () => {
+      jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.1.0');
+
+      await install({ attributes: { installed_kibana_version: '9.0.0' } });
+
+      expect(soClientWithSpace.bulkCreate).toBeCalledWith(
+        expect.anything(),
+        expect.objectContaining({ overwrite: true })
+      );
+    });
+
+    it('skips existing assets when the Kibana version is unchanged since the last install', async () => {
+      jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.0');
+
+      await install({ attributes: { installed_kibana_version: '9.0.0' } });
+
+      expect(soClientWithSpace.bulkCreate).toBeCalledWith(
+        expect.anything(),
+        expect.objectContaining({ overwrite: false })
+      );
+    });
+
+    it('skips existing assets when only the patch version changed since the last install', async () => {
+      jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.1');
+
+      await install({ attributes: { installed_kibana_version: '9.0.0' } });
+
+      expect(soClientWithSpace.bulkCreate).toBeCalledWith(
+        expect.anything(),
+        expect.objectContaining({ overwrite: false })
+      );
+    });
+
+    it('overwrites existing assets when no previous Kibana version was recorded (legacy install)', async () => {
+      jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.0');
+
+      await install({ attributes: {} });
+
+      expect(soClientWithSpace.bulkCreate).toBeCalledWith(
+        expect.anything(),
+        expect.objectContaining({ overwrite: true })
+      );
+    });
+
+    it('overwrites existing assets on a fresh install (no installedPkg)', async () => {
+      jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.0');
+
+      await install(undefined);
+
+      expect(soClientWithSpace.bulkCreate).toBeCalledWith(
+        expect.anything(),
+        expect.objectContaining({ overwrite: true })
+      );
+    });
+  });
 });
