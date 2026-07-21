@@ -12,12 +12,35 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
+export interface OrderedToolCall {
+  index: number;
+  toolId: string;
+  params: Record<string, unknown>;
+  groupId?: string;
+  results: unknown[];
+}
+
+/** Tool calls with their original ordering and Agent Builder parallel-call group. */
+export function extractOrderedToolCalls(steps: ConverseStep[]): OrderedToolCall[] {
+  return steps.flatMap((step, index) => {
+    if (step.type !== 'tool_call' || typeof step.tool_id !== 'string') {
+      return [];
+    }
+    return [
+      {
+        index,
+        toolId: step.tool_id,
+        params: isRecord(step.params) ? step.params : {},
+        groupId: typeof step.tool_call_group_id === 'string' ? step.tool_call_group_id : undefined,
+        results: Array.isArray(step.results) ? step.results : [],
+      },
+    ];
+  });
+}
+
 /** Tool ids of every `tool_call` step, in call order. Feeds the trajectory (coverage) evaluator. */
 export function extractToolCallIds(steps: ConverseStep[]): string[] {
-  return steps
-    .filter((step) => step.type === 'tool_call')
-    .map((step) => (typeof step.tool_id === 'string' ? step.tool_id : ''))
-    .filter(Boolean);
+  return extractOrderedToolCalls(steps).map(({ toolId }) => toolId);
 }
 
 /** Total number of `tool_call` steps (the agent's tool-call budget usage). */
@@ -57,6 +80,10 @@ function didExecuteEsqlToolReturnRows(results: unknown[]): boolean {
     }
   }
   return false;
+}
+
+export function didToolCallReturnRows(toolCall: OrderedToolCall): boolean {
+  return didExecuteEsqlToolReturnRows(toolCall.results);
 }
 
 export interface EsqlGroundingSummary {

@@ -17,7 +17,11 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Discovery, EventLifecycleResponse } from '@kbn/significant-events-schema';
+import {
+  getSeverityLabel,
+  type Discovery,
+  type EventLifecycleResponse,
+} from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { changeTypeLabel } from '../shared/translations';
 import {
@@ -66,10 +70,10 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
       timestamp: discovery['@timestamp'],
       title: discovery.title,
       description:
-        discovery.kind === 'discovery' && discovery.criticality != null
-          ? i18n.translate('xpack.streams.lifecycle.criticality', {
-              defaultMessage: 'Criticality {n}',
-              values: { n: discovery.criticality },
+        discovery.kind === 'discovery' && discovery.severity != null
+          ? i18n.translate('xpack.streams.lifecycle.severity', {
+              defaultMessage: 'Severity: {severity}',
+              values: { severity: getSeverityLabel(discovery.severity) },
             })
           : undefined,
     }));
@@ -83,10 +87,10 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
       timestamp: event['@timestamp'],
       title: event.title,
       description:
-        event.criticality != null
-          ? i18n.translate('xpack.streams.lifecycle.criticality', {
-              defaultMessage: 'Criticality {n}',
-              values: { n: event.criticality },
+        event.severity != null
+          ? i18n.translate('xpack.streams.lifecycle.severity', {
+              defaultMessage: 'Severity: {severity}',
+              values: { severity: getSeverityLabel(event.severity) },
             })
           : undefined,
 

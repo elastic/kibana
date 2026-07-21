@@ -49,7 +49,6 @@ dependsOn:
   - '@kbn/embeddable-plugin'
   - '@kbn/scout'
   - '@kbn/content-list-provider'
-  - '@kbn/test'
 tags:
   - plugin
   - prod

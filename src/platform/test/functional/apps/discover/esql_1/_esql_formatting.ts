@@ -58,6 +58,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('ES|QL results formatting with columnsMeta', () => {
+      /**
+       * Migration recommendation: DELETE. We don't need to verify that the setup in the before block worked correctly. The number formatting checks are adequately covered by src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.test.ts and src/platform/packages/shared/kbn-unified-data-table/src/components/source_document.test.tsx
+       */
       it('should have access to kibana_sample_data_flights via ES|QL as prerequesite for next test', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -90,6 +93,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.closeFlyout();
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. This is okay as a smoke test.
+       */
       it('should format ES|QL columns using columnsMeta when type differs from data view field', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -132,6 +138,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.closeFlyout();
       });
 
+      /**
+       * Migration recommendation: DELETE. This is essentially testing the same thing as the case above: ES|QL columns get columnsMeta formatting, data view fields get data view formatting
+       */
       it('should correctly format ES|QL computed columns not in data view', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();

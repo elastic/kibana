@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { State } from '../store';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getExperimentalAllowedValues } from '../../../common/experimental_features';

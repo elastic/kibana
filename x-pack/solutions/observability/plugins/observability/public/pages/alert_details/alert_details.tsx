@@ -314,6 +314,7 @@ export function AlertDetails() {
         <EuiSpacer size="m" />
         <StaleAlert
           alert={alertDetail.formatted}
+          alertIndex={alertDetail.raw._index}
           alertStatus={alertStatus}
           rule={rule}
           onUntrackAlert={onUntrackAlert}

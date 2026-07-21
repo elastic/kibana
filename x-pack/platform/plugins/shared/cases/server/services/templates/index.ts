@@ -22,6 +22,8 @@ import type {
   Template,
   UpdateTemplateInput,
 } from '../../../common/types/domain/template/v1';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
+import { isRefField } from '../../../common/types/domain/template/fields';
 import { toFieldDefinitions, trimFieldDefaults } from './utils';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import type {
@@ -47,6 +49,11 @@ export class TemplatesService {
        * `V2_NOOP_DATA_VIEW_REFRESHER`).
        */
       refreshAnalyticsV2DataView: () => void;
+      /**
+       * Fetches field-library definitions for the given owner so `$ref` fields
+       * can be resolved into the template's cached `fieldDefinitions` summary.
+       */
+      getFieldDefinitionsForOwner: (owner: string) => Promise<FieldDefinition[]>;
     }
   ) {}
 
@@ -340,12 +347,21 @@ export class TemplatesService {
   ): Promise<SavedObject<Template>> {
     const normalizedDefinition = trimFieldDefaults(input.definition);
     const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
+    // The case-default title is optional in the definition, so the identity name must come from
+    // `input.name` (the editor always sends it) or, for API back-compat, the definition's title.
     const templateName = input.name ?? parsedDefinition.name;
+    if (!templateName) {
+      throw Boom.badRequest(
+        'A template name is required: provide `name` or a case-default title in the definition.'
+      );
+    }
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
       owner: input.owner,
     });
+
+    const libraryDefs = await this.getLibraryDefsIfReferenced(parsedDefinition.fields, input.owner);
 
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
@@ -363,7 +379,7 @@ export class TemplatesService {
         tags: input.tags,
         author,
         fieldCount: parsedDefinition.fields.length,
-        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields),
+        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields, libraryDefs),
         isEnabled: input.isEnabled ?? true,
       } as Template,
       { refresh: true, id }
@@ -388,13 +404,21 @@ export class TemplatesService {
 
     const normalizedDefinition = trimFieldDefaults(input.definition);
     const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
+    // See createTemplate: identity name comes from `input.name` or the definition's (optional) title.
     const templateName = input.name ?? parsedDefinition.name;
+    if (!templateName) {
+      throw Boom.badRequest(
+        'A template name is required: provide `name` or a case-default title in the definition.'
+      );
+    }
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
       owner: input.owner,
       excludeTemplateId: currentTemplate.attributes.templateId,
     });
+
+    const libraryDefs = await this.getLibraryDefsIfReferenced(parsedDefinition.fields, input.owner);
 
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
@@ -412,10 +436,15 @@ export class TemplatesService {
         tags: input.tags,
         author: currentTemplate.attributes.author,
         fieldCount: parsedDefinition.fields.length,
-        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields),
+        fieldDefinitions: toFieldDefinitions(parsedDefinition.fields, libraryDefs),
         usageCount: currentTemplate.attributes.usageCount,
         lastUsedAt: currentTemplate.attributes.lastUsedAt,
         isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,
+        // Carry the v1 lineage forward across edits/version bumps. The bridges read only the
+        // `isLatest` version, so dropping this here would silently degrade a migrated template to
+        // name-only resolution on the first edit (losing duplicate-name disambiguation, and breaking
+        // entirely on rename).
+        legacyKey: currentTemplate.attributes.legacyKey,
       } as Template,
       {
         refresh: true,
@@ -529,6 +558,22 @@ export class TemplatesService {
     // the propagation hook wired so future changes to the template field
     // collection reach the data view without a code change.
     this.dependencies.refreshAnalyticsV2DataView();
+  }
+
+  /**
+   * Fetches the owner's field library only when the definition actually has `$ref` fields to
+   * resolve — avoids an unnecessary SO `find` round-trip on every create/update for templates
+   * that only use inline fields.
+   */
+  private async getLibraryDefsIfReferenced(
+    fields: ParsedTemplate['definition']['fields'],
+    owner: string
+  ): Promise<FieldDefinition[]> {
+    if (!fields.some(isRefField)) {
+      return [];
+    }
+
+    return this.dependencies.getFieldDefinitionsForOwner(owner);
   }
 
   /**

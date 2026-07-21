@@ -135,7 +135,7 @@ export const DocumentFlyout = memo(
           if (!ruleId) {
             return <>{props.children}</>;
           }
-          return <OpenFlyoutLink {...props} value={ruleId} />;
+          return <OpenFlyoutLink {...props} value={ruleId} displayValue={props.value} asParent />;
         }
         return <OpenFlyoutLink {...props} />;
       },

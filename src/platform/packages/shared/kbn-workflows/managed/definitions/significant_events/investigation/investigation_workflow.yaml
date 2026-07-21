@@ -46,10 +46,10 @@ steps:
   # Only runs when a sig-event context was supplied (triage or chat-agent paths).
   - name: attach_pending_to_significant_event
     type: kibana.request
-    if: '${{ inputs.context.event_id != null }}'
+    if: '${{ inputs.context.event_uuid != null }}'
     with:
       method: POST
-      path: '/internal/significant_events/events/{{ inputs.context.event_id }}/investigations'
+      path: '/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -150,13 +150,13 @@ steps:
   # UI can surface investigation history and link to the full RCA result. Only runs when
   # a sig-event context was supplied (i.e. the investigation was triggered from triage or
   # from the chat agent for a specific event). Other callers (free-form issues, alerts)
-  # that do not supply `inputs.context.event_id` are unaffected.
+  # that do not supply `inputs.context.event_uuid` are unaffected.
   - name: attach_to_significant_event
     type: kibana.request
-    if: '${{ inputs.context.event_id != null }}'
+    if: '${{ inputs.context.event_uuid != null }}'
     with:
       method: POST
-      path: '/internal/significant_events/events/{{ inputs.context.event_id }}/investigations'
+      path: '/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -168,11 +168,13 @@ steps:
 
   # Reconcile the gaps this investigation surfaced into the _gaps/overview memory
   # page. Deliberately minimal: a cheap model, memory read/write only, no auditing.
-  # Keep connector-id-by-feature in sync with @kbn/significant-events-schema
-  # inference_feature_ids.ts (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
+  # connector-id-by-feature: shared memory connector (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
+  # plugin-id: step-specific cost attribution; aggregate-by: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID.
   - name: merge_investigation_gaps
     type: ai.agent
     connector-id-by-feature: 'significant_events_memory'
+    plugin-id: 'significant_events_memory_investigation_gaps'
+    aggregate-by: 'significant_events'
     create-conversation: false
     with:
       timeout: 120s

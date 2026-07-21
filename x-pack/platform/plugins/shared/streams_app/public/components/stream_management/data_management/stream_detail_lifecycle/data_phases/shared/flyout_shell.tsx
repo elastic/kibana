@@ -19,6 +19,7 @@ import {
   EuiToolTip,
   EuiTitle,
 } from '@elastic/eui';
+import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
 import { useDataPhasesFlyoutStyles } from './use_data_phases_flyout_styles';
 
 export interface FlyoutShellProps {
@@ -48,6 +49,7 @@ export const FlyoutShell = ({
 }: FlyoutShellProps) => {
   const { headerStyles, footerStyles } = useDataPhasesFlyoutStyles();
   const isSaveDisabled = isSaveDisabledDueToInvalid || isSubmitting;
+  const { focusProps } = usePushFlyoutFocus();
 
   const button = (
     <EuiButton
@@ -83,7 +85,9 @@ export const FlyoutShell = ({
       ownFocus={false}
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
+      role="region"
       data-test-subj={dataTestSubj}
+      {...focusProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={headerStyles}>

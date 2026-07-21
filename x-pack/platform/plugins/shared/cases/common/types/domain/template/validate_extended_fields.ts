@@ -6,7 +6,7 @@
  */
 
 import type { InlineField, RefField } from './fields';
-import { FieldType, isInlineField } from './fields';
+import { FieldType, isInlineField, isDisplayOnlyField } from './fields';
 import { evaluateCondition } from './evaluate_conditions';
 import { getFieldSnakeKey } from '../../../utils';
 
@@ -129,7 +129,10 @@ export const validateExtendedFields = (
   { partial = false, onClose = false }: { partial?: boolean; onClose?: boolean } = {}
 ): string[] => {
   const errors: string[] = [];
-  const inlineFields = fields.filter(isInlineField);
+  // Display-only fields (e.g. MARKDOWN) hold no value and are excluded from a case's stored
+  // `extended_fields`, so they take no part in value/required validation. Dropping them here also
+  // ensures their snake key is treated as an unknown key if it is ever submitted.
+  const inlineFields = fields.filter(isInlineField).filter((f) => !isDisplayOnlyField(f));
 
   // 1. Build valid key set
   const validKeys = new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
