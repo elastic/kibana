@@ -120,12 +120,15 @@ export const InvestigationDetailPage: React.FC = () => {
       id: 'overview',
       name: i18n.TAB_OVERVIEW,
       content: (
-        <EuiText>
-          <p>{investigation.summary}</p>
-          <p>
-            <strong>{investigation.affectedSurface}</strong>
-          </p>
-        </EuiText>
+        <>
+          <EuiSpacer size="m" />
+          <EuiText>
+            <p>{investigation.summary}</p>
+            <p>
+              <strong>{investigation.affectedSurface}</strong>
+            </p>
+          </EuiText>
+        </>
       ),
     },
     {
@@ -133,6 +136,7 @@ export const InvestigationDetailPage: React.FC = () => {
       name: i18n.TAB_PROPOSALS,
       content: (
         <>
+          <EuiSpacer size="m" />
           {proposals.map((proposal) => (
             <React.Fragment key={proposal.id}>
               <ProposalRow proposal={proposal} onStatusChange={onStatusChange} />
@@ -146,20 +150,26 @@ export const InvestigationDetailPage: React.FC = () => {
       id: 'timeline',
       name: i18n.TAB_TIMELINE,
       content: (
-        <EuiText size="s">
-          <ul>
-            {investigation.events.map((event) => (
-              <li key={event.id}>
-                {event.timestamp}: {event.summary}
-              </li>
-            ))}
-          </ul>
-        </EuiText>
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="s">
+            <ul>
+              {(investigation.events ?? []).map((event) => (
+                <li key={event.id}>
+                  {event.timestamp}: {event.summary}
+                </li>
+              ))}
+            </ul>
+          </EuiText>
+        </>
       ),
     },
   ];
 
-  const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
+  // Keep EuiTabbedContent uncontrolled. Controlled `selectedTab` + `autoFocus="selected"`
+  // leaves internal selectedTabId undefined, so focusTab() crashes with
+  // "Cannot read properties of null (reading 'focus')" on tab click.
+  const initialTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
 
   return (
     <PndPageSection>
@@ -169,10 +179,10 @@ export const InvestigationDetailPage: React.FC = () => {
         backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }}
       />
       <EuiTabbedContent
+        key={`${id}:${proposalId ?? 'overview'}`}
         tabs={tabs}
-        selectedTab={selectedTab}
+        initialSelectedTab={initialTab}
         onTabClick={(tab) => setSelectedTabId(tab.id)}
-        autoFocus="selected"
       />
     </PndPageSection>
   );
