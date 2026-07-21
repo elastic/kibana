@@ -323,7 +323,7 @@ export const DslStepsFlyoutArrayView = ({
           css={[headerStyles, items.length === 0 && headerNoStepsStyles]}
         >
           <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
+            <EuiTitle size="s">
               <h2 id={flyoutTitleId}>
                 {i18n.translate('xpack.streams.editDslStepsFlyout.title', {
                   defaultMessage: 'Edit downsample steps',

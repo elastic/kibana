@@ -12,6 +12,7 @@ import { getEntityAnomalyOverview } from './get_anomaly_overview';
 import { getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
 
 jest.mock('../ml_anomaly_detection', () => ({
+  ...jest.requireActual('../ml_anomaly_detection'),
   getJobConfig: jest.fn(),
   getSecurityMlJobIds: jest.fn(),
 }));
@@ -229,6 +230,22 @@ describe('getEntityAnomalyOverview', () => {
         Execution: 4,
         Discovery: 4,
         Persistence: 1,
+      });
+    });
+
+    it('computes per-tactic counts within each time bucket', async () => {
+      const result = await getEntityAnomalyOverview(baseParams);
+
+      // bucket1: JOB_A (doc_count 2) → Execution+Discovery=2 each; JOB_B (doc_count 1) → Persistence=1
+      expect(result.anomalyByTimeBucket[0].tacticCounts).toEqual({
+        Execution: 2,
+        Discovery: 2,
+        Persistence: 1,
+      });
+      // bucket2: JOB_A only (doc_count 2) → Execution+Discovery=2 each
+      expect(result.anomalyByTimeBucket[1].tacticCounts).toEqual({
+        Execution: 2,
+        Discovery: 2,
       });
     });
 
@@ -502,7 +519,7 @@ describe('getEntityAnomalyOverview', () => {
       await getEntityAnomalyOverview({
         ...baseParams,
         fromMs: FROM_MS,
-        toMs: FROM_MS + 31 * DAY_MS,
+        toMs: FROM_MS + 46 * DAY_MS,
       });
       expect(getFixedInterval()).toBe('7d');
     });

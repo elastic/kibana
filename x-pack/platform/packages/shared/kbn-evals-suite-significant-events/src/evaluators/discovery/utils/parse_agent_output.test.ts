@@ -22,14 +22,14 @@ describe('extractDiscoveriesFromToolCall', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_DISCOVERY_WRITE,
         tool_call_id: 'dw-1',
-        params: { kind: 'discovery', title: 'DB latency spike', discovery_slug: 'slug-from-input' },
-        results: [{ data: { discovery_slug: 'slug-resolved' } }],
+        params: { kind: 'discovery', title: 'DB latency spike', event_id: 'slug-from-input' },
+        results: [{ data: { event_id: 'slug-resolved' } }],
       },
     ];
     const discoveries = extractDiscoveriesFromToolCall(steps);
     expect(discoveries).toHaveLength(1);
     expect(discoveries[0].title).toBe('DB latency spike');
-    expect(discoveries[0].discovery_slug).toBe('slug-resolved');
+    expect(discoveries[0].event_id).toBe('slug-resolved');
   });
 
   it('returns [] when no discovery_write steps are present', () => {
@@ -37,18 +37,18 @@ describe('extractDiscoveriesFromToolCall', () => {
     expect(extractDiscoveriesFromToolCall(steps)).toEqual([]);
   });
 
-  it('keeps the input discovery_slug when the result carries no override', () => {
+  it('keeps the input event_id when the result carries no override', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
         tool_id: TOOL_ID_DISCOVERY_WRITE,
         tool_call_id: 'dw-2',
-        params: { kind: 'discovery', title: 'CPU spike', discovery_slug: 'original-slug' },
+        params: { kind: 'discovery', title: 'CPU spike', event_id: 'original-slug' },
         results: [{ data: {} }],
       },
     ];
     const discoveries = extractDiscoveriesFromToolCall(steps);
-    expect(discoveries[0].discovery_slug).toBe('original-slug');
+    expect(discoveries[0].event_id).toBe('original-slug');
   });
 });
 
@@ -61,18 +61,18 @@ describe('extractSignificantEventsFromToolCall', () => {
         tool_call_id: 'ew-1',
         params: {
           discovery_id: 'd-1',
-          discovery_slug: 'slug-1',
-          status: 'promoted',
-          criticality: 80,
+          event_id: 'slug-1',
+          status: 'open',
+          severity: '60-high',
           confidence: 0.9,
           assessment_note: 'High confidence DB issue',
-          evidences: [],
+          signals: [],
         },
       },
     ];
     const events = extractSignificantEventsFromToolCall(steps);
     expect(events).toHaveLength(1);
-    expect(events[0].status).toBe('promoted');
+    expect(events[0].status).toBe('open');
     expect(events[0].discovery_id).toBe('d-1');
   });
 
@@ -95,13 +95,13 @@ describe('extractSignificantEventsFromToolCall', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-1',
-        params: { discovery_id: 'd-1', status: 'promoted' },
+        params: { discovery_id: 'd-1', status: 'open', severity: '80-critical' },
       },
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-2',
-        params: { discovery_id: 'd-2', status: 'demoted' },
+        params: { discovery_id: 'd-2', status: 'dismissed', severity: '20-low' },
       },
     ];
     const events = extractSignificantEventsFromToolCall(steps);

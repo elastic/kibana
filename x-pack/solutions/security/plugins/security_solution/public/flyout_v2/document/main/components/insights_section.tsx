@@ -6,7 +6,6 @@
  */
 
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useMemo } from 'react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
@@ -25,16 +24,9 @@ import { EntitiesOverview } from './entities_overview';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
-import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { INSIGHTS_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
-
-export const INSIGHTS_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.insights.sectionTitle',
-  {
-    defaultMessage: 'Insights',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'insights';
 
@@ -66,6 +58,7 @@ export const InsightsSection = memo(
       openDocumentCorrelations,
       openDocumentThreatIntelligence,
       openDocumentPrevalence,
+      openAttackFlyoutAsChild,
     } = useFlyoutApi();
 
     const expanded = useExpandSection({
@@ -96,12 +89,13 @@ export const InsightsSection = memo(
     }, [openDocumentThreatIntelligence, hit]);
 
     const onShowAlert = useCallback(
-      (id: string, indexName: string) =>
+      (id: string, indexName: string, title?: string) =>
         openDocumentFlyoutFromIndexAsChild({
           documentId: id,
           indexName,
           renderCellActions,
           onAlertUpdated,
+          title,
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
@@ -111,15 +105,26 @@ export const InsightsSection = memo(
       [openDocumentEntities, hit]
     );
 
+    const onShowAttack = useCallback(
+      (id: string, indexName: string, title?: string) =>
+        openAttackFlyoutAsChild({ attackId: id, indexName, attackTitle: title }),
+      [openAttackFlyoutAsChild]
+    );
+
     const onShowCorrelationsDetails = useCallback(
-      () => openDocumentCorrelations({ hit, scopeId: '', isRulePreview: false, onShowAlert }),
-      [openDocumentCorrelations, hit, onShowAlert]
+      () =>
+        openDocumentCorrelations({
+          hit,
+          scopeId: '',
+          isRulePreview: false,
+          onShowAlert,
+          onShowAttack,
+        }),
+      [openDocumentCorrelations, hit, onShowAlert, onShowAttack]
     );
 
     const renderFlyoutLink = useCallback(
-      (props: OpenFlyoutLinkProps) => (
-        <OpenFlyoutLink {...props} asParent={props.field === HOST_NAME_FIELD_NAME} />
-      ),
+      (props: OpenFlyoutLinkProps) => <OpenFlyoutLink {...props} />,
       []
     );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod/v4';
-import { environmentSchema } from '@kbn/apm-types';
+import { environmentSchema, anomalyThresholdSchema } from '@kbn/apm-types';
 import type { Environment } from '../../common/environment_rt';
 import { apmRouter } from '../components/routing/apm_route_config';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
@@ -45,6 +45,9 @@ export const APMLocatorPayloadValidator = z.union([
             kuery: z.string().optional(),
             rangeFrom: z.string().optional(),
             rangeTo: z.string().optional(),
+            anomalyThreshold: anomalyThresholdSchema.optional(),
+            comparisonEnabled: z.boolean().optional(),
+            offset: z.string().optional(),
           })
         ),
       })

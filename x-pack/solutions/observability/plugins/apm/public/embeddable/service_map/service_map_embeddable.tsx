@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiCallOut, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
@@ -23,6 +24,7 @@ import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import { useLicenseContext } from '../../context/license/use_license_context';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { EmptyPrompt } from '../../components/app/service_map/empty_prompt';
+import { DisabledPrompt } from '../../components/app/service_map/disabled_prompt';
 import { TimeoutPrompt } from '../../components/app/service_map/timeout_prompt';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
 import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
@@ -35,6 +37,7 @@ import {
 import { SERVICE_FLYOUT_SOURCES } from '../../components/shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../components/shared/service_flyout/types';
 import { ServiceMapSloFlyoutProvider } from '../../components/shared/service_map/service_map_slo_flyout_context';
+import { LicensePrompt } from '../../components/shared/license_prompt';
 import {
   SloOverviewFlyout,
   useSloOverviewFlyout,
@@ -100,6 +103,45 @@ function LoadingSpinner() {
       size="xl"
       style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
     />
+  );
+}
+
+function EmbeddableContainer({
+  children,
+  centered = false,
+}: {
+  children: React.ReactNode;
+  centered?: boolean;
+}) {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      data-test-subj="apmServiceMapEmbeddable"
+      css={css({
+        width: '100%',
+        height: '100%',
+        minWidth: EMBEDDABLE_MIN_WIDTH,
+        minHeight: EMBEDDABLE_MIN_HEIGHT,
+        boxSizing: 'border-box',
+        ...(centered
+          ? {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: euiTheme.size.base,
+            }
+          : {
+              position: 'relative',
+            }),
+      })}
+    >
+      {centered ? (
+        <div css={css({ maxWidth: EMBEDDABLE_MIN_WIDTH, textAlign: 'center' })}>{children}</div>
+      ) : (
+        children
+      )}
+    </div>
   );
 }
 
@@ -300,21 +342,27 @@ export function ServiceMapEmbeddable({
   const showBadgesFailedWarning =
     badgeDependentFiltersActive && badgesStatus === FETCH_STATUS.FAILURE;
 
-  if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
+  if (!license) {
     return (
-      <div
-        data-test-subj="apmServiceMapEmbeddable"
-        style={{
-          width: '100%',
-          height: '100%',
-          minWidth: EMBEDDABLE_MIN_WIDTH,
-          minHeight: EMBEDDABLE_MIN_HEIGHT,
-          position: 'relative',
-          boxSizing: 'border-box',
-        }}
-      >
+      <EmbeddableContainer>
         <LoadingSpinner />
-      </div>
+      </EmbeddableContainer>
+    );
+  }
+
+  if (!isActivePlatinumLicense(license)) {
+    return (
+      <EmbeddableContainer centered>
+        <LicensePrompt text={invalidLicenseMessage} />
+      </EmbeddableContainer>
+    );
+  }
+
+  if (!config.serviceMapEnabled) {
+    return (
+      <EmbeddableContainer centered>
+        <DisabledPrompt />
+      </EmbeddableContainer>
     );
   }
 

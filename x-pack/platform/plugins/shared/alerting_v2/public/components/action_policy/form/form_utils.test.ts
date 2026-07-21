@@ -27,7 +27,13 @@ describe('action policy form utils', () => {
       const payload = toCreatePayload({
         ...state,
         inlineActions: [
-          { id: 'draft-1', source: 'inline', stepType: 'slack', connectorId: 'c1', params: 'm: x' },
+          {
+            id: 'draft-1',
+            source: 'inline',
+            stepType: 'slack2.sendMessage',
+            connectorId: 'c1',
+            params: 'm: x',
+          },
         ],
       });
 

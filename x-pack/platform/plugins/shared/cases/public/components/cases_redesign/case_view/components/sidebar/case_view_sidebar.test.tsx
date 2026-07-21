@@ -41,6 +41,10 @@ jest.mock('../../../../case_view/components/template_fields', () => ({
   TemplateFields: () => <div data-test-subj="case-view-template-fields" />,
 }));
 
+jest.mock('../../../../case_view/components/global_case_fields', () => ({
+  GlobalCaseFields: () => <div data-test-subj="case-view-global-case-fields" />,
+}));
+
 jest.mock('../../../../templates_v2/hooks/use_get_template', () => ({
   useGetTemplate: jest.fn().mockReturnValue({ data: undefined }),
 }));
@@ -120,6 +124,7 @@ describe('CaseViewSidebar (redesign)', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
     useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
     useCasesFeaturesMock.mockReturnValue(useGetCasesFeaturesRes);
   });
@@ -277,6 +282,16 @@ describe('CaseViewSidebar (redesign)', () => {
       .mockReturnValue({ templates: { enabled: true } } as ReturnType<
         typeof KibanaServices.getConfig
       >);
+    localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
+    localStorage.setItem(
+      'securitySolution.cases.caseView.sidebarAccordions',
+      JSON.stringify({
+        attributes: true,
+        legacyCustomFields: true,
+        templateFields: true,
+        connectors: true,
+      })
+    );
     (useGetCaseConfiguration as jest.Mock).mockReturnValue({
       data: {
         customFields: [customFieldsConfigurationMock[1]],
@@ -291,6 +306,8 @@ describe('CaseViewSidebar (redesign)', () => {
 
     renderWithTestingProviders(<CaseViewSidebar caseData={caseDataWithCustomFields} />);
 
+    expect(await screen.findByTestId('case-view-sidebar-legacy-custom-fields')).toBeInTheDocument();
+
     await userEvent.click(await screen.findByRole('switch'));
 
     await waitFor(() => {
@@ -302,6 +319,77 @@ describe('CaseViewSidebar (redesign)', () => {
         customFieldValue: false,
       });
     });
+  });
+
+  it('does not render legacy custom fields accordion when the show-legacy switch is off', async () => {
+    jest
+      .spyOn(KibanaServices, 'getConfig')
+      .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+        typeof KibanaServices.getConfig
+      >);
+    localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'false');
+    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+      data: {
+        customFields: [customFieldsConfigurationMock[1]],
+        observableTypes: [],
+      },
+    });
+
+    renderWithTestingProviders(
+      <CaseViewSidebar caseData={{ ...caseData, customFields: [customFieldsMock[1]] }} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('case-view-page-sidebar')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('case-view-sidebar-legacy-custom-fields')).not.toBeInTheDocument();
+  });
+
+  it('renders legacy custom fields accordion when templates v2 is disabled and fields are configured', async () => {
+    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
+    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+      data: {
+        customFields: [customFieldsConfigurationMock[1]],
+        observableTypes: [],
+      },
+    });
+
+    renderWithTestingProviders(
+      <CaseViewSidebar caseData={{ ...caseData, customFields: [customFieldsMock[1]] }} />
+    );
+
+    expect(await screen.findByTestId('case-view-sidebar-legacy-custom-fields')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('legacy-custom-fields-deprecation-callout')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('legacy-custom-fields-deprecated-badge')).not.toBeInTheDocument();
+  });
+
+  it('renders legacy custom fields accordion closed by default when the switch is on', async () => {
+    jest
+      .spyOn(KibanaServices, 'getConfig')
+      .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+        typeof KibanaServices.getConfig
+      >);
+    localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
+    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+      data: {
+        customFields: [customFieldsConfigurationMock[1]],
+        observableTypes: [],
+      },
+    });
+
+    renderWithTestingProviders(
+      <CaseViewSidebar caseData={{ ...caseData, customFields: [customFieldsMock[1]] }} />
+    );
+
+    const accordion = await screen.findByTestId('case-view-sidebar-legacy-custom-fields');
+    expect(accordion).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-sidebar-legacy-custom-fields-toggle')).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
   });
 
   it('should show the category correctly', async () => {
@@ -358,6 +446,7 @@ describe('CaseViewSidebar (redesign)', () => {
 
       expect(screen.queryByTestId('case-view-sidebar-template-fields')).not.toBeInTheDocument();
       expect(screen.queryByTestId('case-view-template-fields')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('case-view-global-case-fields')).not.toBeInTheDocument();
       // The settings popover has nothing to configure when templates v2 itself is disabled.
       expect(
         screen.queryByTestId('case-view-sidebar-template-fields-settings')
@@ -384,6 +473,8 @@ describe('CaseViewSidebar (redesign)', () => {
       expect(
         screen.queryByTestId('case-view-sidebar-no-template-selected')
       ).not.toBeInTheDocument();
+      // Global fields render alongside the applied template's fields.
+      expect(screen.getByTestId('case-view-global-case-fields')).toBeInTheDocument();
     });
 
     it('shows a "No template selected" placeholder when templates v2 is enabled but no template is applied', async () => {
@@ -399,6 +490,8 @@ describe('CaseViewSidebar (redesign)', () => {
         await screen.findByTestId('case-view-sidebar-no-template-selected')
       ).toBeInTheDocument();
       expect(screen.queryByTestId('case-view-template-fields')).not.toBeInTheDocument();
+      // Global fields apply regardless of whether a template is selected.
+      expect(screen.getByTestId('case-view-global-case-fields')).toBeInTheDocument();
     });
 
     it('does not render the template settings popover for users without update permissions', async () => {

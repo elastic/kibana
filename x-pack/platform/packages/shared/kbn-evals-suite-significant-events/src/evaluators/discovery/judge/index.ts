@@ -10,9 +10,9 @@ import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/eval
 import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
 import type { DiscoveryJudgeEvaluator } from '../types';
 import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grounding';
-import { createToolUsageEvaluator } from './tool_usage/tool_usage';
+import { createJudgeToolUsageEvaluator } from './tool_usage/tool_usage';
 import {
-  createCriticalityCalibrationEvaluator,
+  createSeverityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
 } from '../common/scores_calibration';
 import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
@@ -26,7 +26,7 @@ export const createJudgeEvaluators = (
   scenarioCriteria?: CreateScenarioCriteriaLlmEvaluatorOptions
 ): DiscoveryJudgeEvaluator[] => {
   const codeEvaluators: DiscoveryJudgeEvaluator[] = [
-    createToolUsageEvaluator(),
+    createJudgeToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
     confirmedEvidencesEvaluator,
   ];
@@ -44,7 +44,7 @@ export const createJudgeEvaluators = (
     createStatusCorrectnessEvaluator(criteriaFn),
     createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
     createEvidenceDescriptionEvaluator({ criteriaFn }),
-    createCriticalityCalibrationEvaluator({ criteriaFn }),
+    createSeverityCalibrationEvaluator({ criteriaFn }),
     createConfidenceCalibrationEvaluator({ criteriaFn }),
   ];
 };

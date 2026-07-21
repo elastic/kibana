@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-/**
- * Public server-side setup contract.
- *
- * The external `submit(draft)` API that consumers call to push notifications will be added here
- */
-export type NotificationCenterPluginSetup = Record<string, never>;
+import type { NotificationInput } from '../common/types';
+
+/** Public server-side setup contract. */
+export interface NotificationCenterPluginSetup {
+  /** Validate a draft, stamp `@timestamp`, and append it to the `.kibana-notification-center` data stream. */
+  submitNotification: (draft: NotificationInput) => Promise<void>;
+}
 
 export type NotificationCenterPluginStart = Record<string, never>;
 

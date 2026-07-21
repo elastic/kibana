@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
 import { parse as yamlParse } from 'yaml';
 import type { YamlEditorFormValues } from './template_form';
-import { TemplateFormLayout } from './template_form_layout';
+import { TemplateFormLayout, getTemplateEditorBodyOffset } from './template_form_layout';
 import type { TemplateMetadata } from '../utils/template_metadata';
 import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -130,6 +130,19 @@ const TestWrapper = ({
     />
   );
 };
+
+describe('getTemplateEditorBodyOffset', () => {
+  it('reserves the timeline bottom-bar space only for the Security Solution owner', () => {
+    expect(getTemplateEditorBodyOffset(['securitySolution'])).toBe('57px');
+    expect(getTemplateEditorBodyOffset(['securitySolution', 'cases'])).toBe('57px');
+  });
+
+  it('reserves no space for other solutions (no dead space below the editor)', () => {
+    expect(getTemplateEditorBodyOffset(['observability'])).toBe('0px');
+    expect(getTemplateEditorBodyOffset(['cases'])).toBe('0px');
+    expect(getTemplateEditorBodyOffset([])).toBe('0px');
+  });
+});
 
 describe('TemplateFormLayout', () => {
   const mockOnCreate = jest.fn();
@@ -254,7 +267,7 @@ fields: []`}
     // The editor "blueprint" buffer holds only case defaults + fields. Settings, connector, and
     // template identity are panel-owned and must NOT appear in the editor buffer.
     expect(capturedEditorLayoutProps.yamlValue).toContain('name: Existing title');
-    expect(capturedEditorLayoutProps.yamlValue).toContain('assignees: []');
+    expect(capturedEditorLayoutProps.yamlValue).toContain('fields:');
     expect(capturedEditorLayoutProps.yamlValue).not.toContain('settings:');
     expect(capturedEditorLayoutProps.yamlValue).not.toContain('connector:');
     expect(capturedEditorLayoutProps.yamlValue).not.toContain('template_name');
@@ -282,6 +295,34 @@ fields: []`}
     const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
     const parsed = yamlParse(nextYaml) as Record<string, unknown>;
     expect(parsed.name).toEqual('Updated case title');
+  });
+
+  it('slots a newly added case default into render-panel order and keeps fields last', () => {
+    const mockYamlOnChange = jest.fn();
+    // A case default (severity) plus the custom `fields` block. We add `name`, which comes before
+    // severity in the render panel; `fields` must stay at the bottom.
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: 'severity: high\nfields: []',
+      onChange: mockYamlOnChange,
+      handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
+      isSaving: false,
+      isSaved: false,
+    });
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} initialValue="fields: []" />);
+
+    act(() => {
+      capturedEditorLayoutProps.onCaseDefaultChange?.('name', 'Case title');
+    });
+
+    expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
+    const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
+    // `name` lands before `severity` (render-panel order) and `fields` stays last.
+    expect(Object.keys(yamlParse(nextYaml) as Record<string, unknown>)).toEqual([
+      'name',
+      'severity',
+      'fields',
+    ]);
   });
 
   it('mirrors case-default assignees edits into top-level YAML keys', () => {
@@ -334,10 +375,11 @@ fields: []`,
     expect(parsed.assignees).toEqual([]);
   });
 
-  it('keeps a cleared case-default scalar present as null rather than deleting it', () => {
+  it('removes a cleared case-default scalar entirely rather than writing null', () => {
     const mockYamlOnChange = jest.fn();
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: `name: Case default title
+description: Some default
 severity: high
 fields: []`,
       onChange: mockYamlOnChange,
@@ -349,14 +391,65 @@ fields: []`,
     renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
     act(() => {
-      capturedEditorLayoutProps.onCaseDefaultChange?.('severity', '');
+      capturedEditorLayoutProps.onCaseDefaultChange?.('description', '');
     });
 
     expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
     const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
-    expect(nextYaml).toContain('severity:');
+    // Cleared scalar is dropped from the YAML (no `null` placeholder).
+    expect(nextYaml).not.toContain('null');
     const parsed = yamlParse(nextYaml) as Record<string, unknown>;
-    expect(parsed.severity).toBeNull();
+    expect(parsed).not.toHaveProperty('description');
+  });
+
+  it('writes a case-default edit even after every key was deleted (empty buffer)', () => {
+    const mockYamlOnChange = jest.fn();
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: '',
+      onChange: mockYamlOnChange,
+      handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
+      isSaving: false,
+      isSaved: false,
+    });
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
+
+    act(() => {
+      capturedEditorLayoutProps.onCaseDefaultChange?.('severity', 'high');
+    });
+
+    // An emptied buffer is recovered into a fresh map so the edit is not silently dropped.
+    expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
+    const parsed = yamlParse(mockYamlOnChange.mock.calls[0][0] as string) as Record<
+      string,
+      unknown
+    >;
+    expect(parsed.severity).toEqual('high');
+  });
+
+  it('writes a case-default edit into a comment-only buffer while preserving the comment', () => {
+    const mockYamlOnChange = jest.fn();
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: '# Custom fields rendered on the case when this template is applied.\n',
+      onChange: mockYamlOnChange,
+      handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
+      isSaving: false,
+      isSaved: false,
+    });
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
+
+    act(() => {
+      capturedEditorLayoutProps.onCaseDefaultChange?.('severity', 'high');
+    });
+
+    expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
+    const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
+    expect(nextYaml).toContain(
+      '# Custom fields rendered on the case when this template is applied.'
+    );
+    const parsed = yamlParse(nextYaml) as Record<string, unknown>;
+    expect(parsed.severity).toEqual('high');
   });
 
   it('renders create button for new template', () => {

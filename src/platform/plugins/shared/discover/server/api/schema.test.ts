@@ -14,7 +14,6 @@ import {
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import {
-  discoverSessionApiRequestBodySchema,
   discoverSessionApiResponseSchema,
   discoverSessionApiDataSchema,
   MAX_BREAKDOWN_FIELD_LENGTH,
@@ -559,15 +558,5 @@ describe('discoverSessionApiResponseSchema', () => {
     expect(validated.id).toBe('session-id');
     expect(validated.data.tabs).toHaveLength(2);
     expect(validated.meta.version).toBe('WzEsMV0=');
-  });
-});
-
-describe('discoverSessionApiRequestBodySchema', () => {
-  it('validates create/update request bodies', () => {
-    const validated = discoverSessionApiRequestBodySchema.validate({
-      data: multiTabSessionData,
-    });
-
-    expect(validated.data.title).toBe('My Discover session');
   });
 });
