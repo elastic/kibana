@@ -247,17 +247,15 @@ The AI Index schema has these base fields (all required unless noted):
 | `@timestamp` | date | When this KI was last profiled; enables recency guards on scheduled runs |
 | `confidence` | float (0–1) | Coverage score from `profile_index`; agents prefer higher-confidence KIs when routing |
 
-**Extended fields for Detection / Feature KIs:** Declare all of the following in `ensure_target_index` — the AI Index templates use `dynamic: strict`, so undeclared fields (including the nested `query.*` / `feature.*` sub-fields) are rejected at index time.
+**Lifecycle fields for scheduled / expiring KIs:** When a workflow runs on a schedule and its KIs should expire and be deduplicated across runs, declare these in `ensure_target_index` — the AI Index templates use `dynamic: strict`, so undeclared fields are rejected at index time. They are generic across strategies (any scheduled KI run can use them), so unlike strategy-specific output they warrant declared mappings rather than living in `attributes`.
 
 | Field | Type | Purpose |
 |---|---|---|
-| `query` | object | **Detection KIs.** Nested: `query.esql` (complete, runnable ES|QL — NOT a template), `query.query_type` (`"match"` or `"stats"`), `query.severity_score` (float 0–1), `query.rule_backed` (boolean — whether an alerting rule already covers this condition) |
-| `feature` | object | **Feature KIs.** Nested: `feature.type` (top-level class), `feature.subtype` (`entity` \| `dependency` \| `technology` \| `schema`), `feature.slug` (stable id), `feature.confidence` (float 0–1), `feature.evidence_doc_ids` (keyword[] — source doc `_id`s backing the feature) |
-| `evidence` | keyword[] | Observed distribution values that justify the detection/feature; each string quotes a real distribution (e.g. `"~20% of spans are errors (1,204 / 6,033)"`) |
+| `evidence` | keyword[] | Observed values that justify a materialized detection/fact; each string quotes a real distribution (e.g. `"~20% of spans are errors (1,204 / 6,033)"`) |
 | `expires_at` | date | Expiry date (~30 days); used by the expiry-based freshness guard |
-| `run_id` | keyword | Unique identifier for the workflow execution that produced this KI |
 | `excluded` | boolean | Soft-exclude: KI exists but is skipped by agents |
-| `deleted` | boolean | Soft-delete: KI is retained for audit but treated as removed |
+
+Strategy-specific structured output (e.g. a detection's materialized query and `query_type`/`severity_score`, a feature's `subtype`/`slug`/`confidence`, etc.) goes in `content` + `attributes` and the base `confidence` field like every other strategy — not in bespoke declared mappings.
 
 **Required fields note**: `@timestamp` and `confidence` must be declared in the target index mapping (`ensure_target_index` step). The AI Index templates use `dynamic: strict`, so undeclared fields are rejected at index time. Write both fields from the `sink_index_ki` step: set `@timestamp` to the current ISO date and `confidence` to the score produced by `profile_index`.
 
@@ -319,8 +317,8 @@ Before presenting any workflow to the user:
 - [ ] `triggers: [{type: manual}]`
 - [ ] Corpus filter (Phase 3) is applied
 - [ ] `@timestamp` and `confidence` are declared in the target index mapping (`ensure_target_index`) and written by `sink_index_ki`
-- [ ] Detection KIs carry complete runnable queries (not templates) in `query.esql`; every threshold + `evidence[]` string quotes an observed distribution from `stats_distribution`/`log_patterns`
-- [ ] `run_id` and `expires_at` (~30 days) are written to every detection/feature KI
+- [ ] Detection KIs carry the complete runnable query (not a template) in `content`; every threshold + `evidence[]` string quotes an observed distribution from `stats_distribution`/`log_patterns`
+- [ ] `expires_at` (~30 days) is written to every detection/feature KI
 - [ ] Cross-run title dedup and expiry-based freshness guard are implemented when the workflow runs on a schedule
 
 ## Workflow shapes for each strategy
@@ -386,23 +384,18 @@ Targets Observability indices (logs, APM, metrics). It runs **two complementary 
 2. `log_patterns` — an `elasticsearch.esql.query` using `CATEGORIZE` to cluster messages into templates (e.g. `FROM <index> | STATS count = COUNT() BY pattern = CATEGORIZE(message) | SORT count DESC | LIMIT 25`), so the profiler sees the recurring message shapes rather than raw lines.
 3. `stats_distribution` — an `elasticsearch.esql.query` aggregating field-level distributions and totals: error types, log levels, host/service counts, error-vs-total ratios (e.g. `FROM <index> | STATS count = COUNT() BY error.type, log.level | SORT count DESC | LIMIT 50`). These observed counts are what every threshold and every `evidence[]` string must quote.
 
-*Pass 2a — detection (query) profiling:* An `ai.prompt` fed all three grounding results, emitting `detections[]`. Fan out one `elasticsearch.index` doc per detection. Each entry:
-`{ title, description, query: { esql (complete runnable ES|QL — NOT a template), query_type ("match" | "stats"), severity_score (0–1), rule_backed (bool) }, evidence[] }`.
-The `description` **must state the threshold and its baseline rationale** (e.g. "fires when error rate exceeds 20%, ~2× the observed baseline of ~10%"). Every threshold and every `evidence[]` string must be directly justified by a value from `stats_distribution` / `log_patterns` — no invented numbers.
+*Pass 2a — detection (query) profiling:* An `ai.prompt` fed all three grounding results, emitting `detections[]`. Fan out one `elasticsearch.index` doc per detection. Each entry: `{ title, description, esql (complete runnable ES|QL — NOT a template), query_type ("match" | "stats"), severity_score (0–1) }`. Put the complete `esql` into `content` as a materialized access pattern, and mirror `query_type` + `severity_score` into `attributes` (for filter/sort). The `description` **must state the threshold and its baseline rationale** (e.g. "fires when error rate exceeds 20%, ~2× the observed baseline of ~10%"). Every threshold and every `evidence[]` string must be directly justified by a value from `stats_distribution` / `log_patterns` — no invented numbers.
 
-*Pass 2b — feature (knowledge) profiling:* A **separate** `ai.prompt` pass over the same grounding, emitting `features[]`. Fan out one `elasticsearch.index` doc per feature. Each entry:
-`{ title, description, feature: { type, subtype ("entity" | "dependency" | "technology" | "schema"), slug (stable id), confidence (0–1), evidence_doc_ids[] (source `_id`s from the sample) }, evidence[] }`.
+*Pass 2b — feature (knowledge) profiling:* A **separate** `ai.prompt` pass over the same grounding, emitting `features[]`. Fan out one `elasticsearch.index` doc per feature. Each entry: `{ title, description, subtype, slug (stable id), confidence (0–1), evidence_doc_ids[] (source `_id`s from the sample) }`. Put `subtype`, `slug`, and `evidence_doc_ids` into `attributes`; set the base `confidence` field from the feature's confidence. Choose whatever `subtype` values fit the data (for Observability, e.g. `entity`/`dependency`/`technology`/`schema`) — this is free-form strategy output, not a fixed schema.
 
 *Sinking:*
-- `sink_detection_ki` — `elasticsearch.index` with `id = <index>/<slug-of-title>`, `type = "detection"`, writing the nested `query` object, `evidence`, `run_id`, `expires_at`, `@timestamp`, `confidence`.
-- `sink_feature_ki` — `elasticsearch.index` with `id = <index>/<feature.slug>`, `type = "feature"`, writing the nested `feature` object, `evidence`, `run_id`, `expires_at`, `@timestamp`, `confidence`.
+- `sink_detection_ki` — `elasticsearch.index` with `id = <index>/<slug-of-title>`, `type = "detection"`, writing `content` (with the materialized query), `attributes` (query_type, severity_score), `evidence`, `expires_at`, `@timestamp`, `confidence`.
+- `sink_feature_ki` — `elasticsearch.index` with `id = <index>/<slug>`, `type = "feature"`, writing `content`, `attributes` (subtype, slug, evidence_doc_ids), `evidence`, `expires_at`, `@timestamp`, `confidence`.
 
 *Lifecycle and dedup:*
-- Stamp every KI with `run_id` (unique per workflow execution).
-- Set `expires_at` ~30 days from now; agents and the freshness guard treat an expired KI as stale.
+- Set `expires_at` ~30 days from now; agents and the freshness guard treat an expired KI as stale, so a detection whose condition no longer appears in the data simply ages out.
 - **Expiry-based freshness guard** (not the simple `@timestamp` recency check Strategy 1 uses): before the grounding steps, query the target for the newest non-expired KI for this source index; if one exists (`expires_at` still in the future), skip the profiling run entirely.
-- Cross-run title dedup: before indexing, query the target by `title + source_index`; if a matching KI exists, upsert by its id rather than creating a second doc — duplicate titles across runs were observed without this.
-- After a successful run, soft-delete stale KIs from the same source index that carry an older `run_id` by setting `deleted: true`.
+- Cross-run dedup via stable ids: index with `id = <index>/<slug>` so a re-run upserts the same KI in place rather than creating a second doc — this is what keeps duplicate titles from accumulating across runs.
 
 ## Adapting the recipe
 
