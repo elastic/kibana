@@ -13,13 +13,11 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import { SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
 import type { GetScopedClients } from '../../routes/types';
-import {
-  CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
-} from './managed_workflow_targets';
+import { SCHEDULED_MAINTENANCE_WORKFLOW_IDS } from './managed_workflow_targets';
 
 /**
  * Snapshot of feature toggles that Pause turned off so Resume can restore only
@@ -40,7 +38,7 @@ const scheduledSettingTarget = (spaceId: string): string =>
   `${SCHEDULED_SETTING_TARGET_PREFIX}${spaceId}`;
 
 export const isContinuousOnboardingWorkflowId = (workflowId: string): boolean =>
-  workflowId === CONTINUOUS_ONBOARDING_WORKFLOW_ID ||
+  workflowId === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID ||
   workflowId === LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID;
 
 export const isScheduledDiscoveryWorkflowId = (workflowId: string): boolean =>

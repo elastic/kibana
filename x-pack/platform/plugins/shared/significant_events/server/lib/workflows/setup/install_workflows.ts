@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import type { ManagedWorkflowId, TemplatedManagedWorkflowId } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import {
+  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  type ManagedWorkflowId,
+  type TemplatedManagedWorkflowId,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { installMemoryWorkflows } from '../../../memory_and_investigation/lib/memory/install_managed_workflows';
-import {
-  CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  GLOBAL_CORE_WORKFLOW_IDS,
-} from '../../maintenance/managed_workflow_targets';
+import { GLOBAL_CORE_WORKFLOW_IDS } from '../../maintenance/managed_workflow_targets';
 
-// IDs come from `managed_workflow_targets.ts` so install and pause stay in sync.
+// Groupings come from `managed_workflow_targets.ts` so install and pause stay in sync.
 // These are all non-templated workflows, so they install without template `values`.
 const WORKFLOWS_TO_INSTALL: Array<{
   workflowId: Exclude<ManagedWorkflowId, TemplatedManagedWorkflowId>;
@@ -28,7 +29,7 @@ const WORKFLOWS_TO_INSTALL: Array<{
   // Installed in the default space (not global) so its scheduled executions
   // are stored alongside the onboarding executions it triggers.
   {
-    workflowId: CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+    workflowId: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
     spaceId: DEFAULT_SPACE_ID,
   },
 ];
