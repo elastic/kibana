@@ -133,7 +133,11 @@ export const getExceptionsPreUpdateItemHandler = (
       );
       customYaraSignaturesValidator.notifyFeatureUsage(
         data as ExceptionItemLikeOptions,
-        'CUSTOM_YARA_SIGNATURES'
+        'CUSTOM_YARA_SIGNATURE'
+      );
+      customYaraSignaturesValidator.notifyFeatureUsage(
+        data as ExceptionItemLikeOptions,
+        'CUSTOM_YARA_SIGNATURE_BY_POLICY'
       );
     }
 

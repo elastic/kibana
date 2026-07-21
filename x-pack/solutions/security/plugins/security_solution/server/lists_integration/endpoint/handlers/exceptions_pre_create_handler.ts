@@ -92,7 +92,8 @@ export const getExceptionsPreCreateItemHandler = (
         request
       );
       validatedItem = await customYaraSignaturesValidator.validatePreCreateItem(data);
-      customYaraSignaturesValidator.notifyFeatureUsage(data, 'CUSTOM_YARA_SIGNATURES');
+      customYaraSignaturesValidator.notifyFeatureUsage(data, 'CUSTOM_YARA_SIGNATURE');
+      customYaraSignaturesValidator.notifyFeatureUsage(data, 'CUSTOM_YARA_SIGNATURE_BY_POLICY');
     }
 
     // validate endpoint exceptions
