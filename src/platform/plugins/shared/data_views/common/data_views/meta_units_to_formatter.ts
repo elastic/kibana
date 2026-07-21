@@ -8,6 +8,26 @@
  */
 
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+
+const EXCLUDED_FIELDS_TYPES_FROM_UNITS_FORMATTER = [
+  ES_FIELD_TYPES.HISTOGRAM,
+  ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
+  ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE,
+  ES_FIELD_TYPES.TDIGEST,
+];
+
+/**
+ * Returns true if the unit formatter can be applied to the given ES field type.
+ * Field types whose values are objects cannot be formatted by the units formatter.
+ * @param esTypes - The ES field types to check.
+ * @returns True if the unit formatter can be applied, false otherwise.
+ */
+export const canUnitFormatterBeApplied = (esTypes: string[]) => {
+  return !EXCLUDED_FIELDS_TYPES_FROM_UNITS_FORMATTER.some((excludedType) =>
+    esTypes.includes(excludedType)
+  );
+};
 
 const timeUnitToDurationFmt = (inputFormat = 'milliseconds') => {
   return {

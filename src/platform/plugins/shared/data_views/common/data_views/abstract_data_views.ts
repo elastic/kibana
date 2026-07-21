@@ -25,7 +25,7 @@ import type {
   RuntimeField,
 } from '../types';
 import { removeFieldAttrs } from './utils';
-import { metaUnitsToFormatter } from './meta_units_to_formatter';
+import { canUnitFormatterBeApplied, metaUnitsToFormatter } from './meta_units_to_formatter';
 
 import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
 
@@ -274,7 +274,10 @@ export abstract class AbstractDataView {
       return fieldFormat;
     }
 
-    const fmt = field.defaultFormatter ? metaUnitsToFormatter[field.defaultFormatter] : undefined;
+    const fmt =
+      field.defaultFormatter && canUnitFormatterBeApplied(field.esTypes ?? [])
+        ? metaUnitsToFormatter[field.defaultFormatter]
+        : undefined;
     if (fmt) {
       return this.fieldFormats.getInstance(fmt.id, fmt.params);
     }
