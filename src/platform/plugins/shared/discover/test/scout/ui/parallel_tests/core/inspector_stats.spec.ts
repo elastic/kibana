@@ -31,6 +31,7 @@ spaceTest.describe('Discover inspector request stats', { tag: '@local-stateful-c
 
     await pageObjects.discover.writeAndSubmitKqlQuery('extension: "no-such-extension"');
     await pageObjects.discover.clickAppMenuItem('openInspectorButton');
+    await inspector.openInspectorRequestsView();
     await inspector.openRequestsStatisticsTab();
 
     await expect(page.testSubj.locator('inspector.statistics.hits')).toHaveText('0');
@@ -41,6 +42,7 @@ spaceTest.describe('Discover inspector request stats', { tag: '@local-stateful-c
     const inspector = new Inspector(page);
 
     await pageObjects.discover.clickAppMenuItem('openInspectorButton');
+    await inspector.openInspectorRequestsView();
     await inspector.openRequestsStatisticsTab();
 
     await expect(page.testSubj.locator('inspector.statistics.hits')).toHaveText('500');

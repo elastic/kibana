@@ -85,7 +85,6 @@ export class Inspector {
   }
 
   async openRequestsStatisticsTab() {
-    await this.openInspectorRequestsView();
     await this.requests.statisticsTab.click();
   }
 
