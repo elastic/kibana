@@ -14,14 +14,17 @@ import {
   getRuleVersionConflictMessage,
 } from '../../lib/errors/rule_error_messages';
 import type { AlertingV2OasOperationObject } from '../json_oas_example';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import {
   INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
   RULE_NOT_FOUND_DESCRIPTION,
   RULE_UPSERT_CONFLICT_DESCRIPTION,
+  RULES_NOT_FOUND_DESCRIPTION,
 } from '../route_response_descriptions';
 import { CreateRuleRoute } from './create_rule_route';
 import {
   CREATE_RULE_SUMMARY,
+  bulkGetRulesOasExamples,
   createRuleOasExamples,
   getRuleOasExamples,
   ruleTagsOasExamples,
@@ -74,6 +77,20 @@ describe('rule OAS examples', () => {
         value: expect.objectContaining({
           code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
           message: getRuleNotFoundMessage('rule-1'),
+        }),
+      })
+    );
+  });
+
+  it('includes a generic NOT_FOUND 404 example for bulk get (raw SO Boom)', () => {
+    const oas = bulkGetRulesOasExamples();
+
+    expect(oas.responses?.[404]?.content?.['application/json']?.examples?.rulesNotFound).toEqual(
+      expect.objectContaining({
+        summary: RULES_NOT_FOUND_DESCRIPTION,
+        value: expect.objectContaining({
+          code: 'NOT_FOUND',
+          message: `Saved object [${RULE_SAVED_OBJECT_TYPE}/rule-1] not found`,
         }),
       })
     );

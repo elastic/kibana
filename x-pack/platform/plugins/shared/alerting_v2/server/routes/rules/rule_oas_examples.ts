@@ -26,6 +26,7 @@ import {
   getRuleNotFoundMessage,
   getRuleVersionConflictMessage,
 } from '../../lib/errors/rule_error_messages';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { jsonExample, type AlertingV2OasOperationObject } from '../json_oas_example';
 import {
   INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
@@ -178,10 +179,17 @@ const RULE_UPSERT_CONFLICT_EXAMPLE = {
   value: RULE_VERSION_CONFLICT_ERROR,
 };
 
+// Bulk-get rethrows the raw SO Boom; onError derives `NOT_FOUND` + SO message.
+const RULES_NOT_FOUND_ERROR: ErrorResponse = {
+  code: 'NOT_FOUND',
+  error: 'Not Found',
+  message: `Saved object [${RULE_SAVED_OBJECT_TYPE}/${SAMPLE_RULE_ID}] not found`,
+};
+
 const RULES_NOT_FOUND_EXAMPLE = {
   name: 'rulesNotFound',
   summary: RULES_NOT_FOUND_DESCRIPTION,
-  value: RULE_NOT_FOUND_ERROR,
+  value: RULES_NOT_FOUND_ERROR,
 };
 
 const buildRuleOas = ({
