@@ -53,18 +53,23 @@ export const registerCleanupTask = (
   taskManager.registerTaskDefinitions({
     [CLEANUP_TASK_TYPE]: {
       title: 'Notification Center retention cleanup',
+      // First run may scan up to 180d of data; 10m gives headroom without tying up TM slots.
+      timeout: '10m',
       cost: TaskCost.Tiny,
-      createTaskRunner: () => ({
+      createTaskRunner: ({ abortController }: { abortController: AbortController }) => ({
         run: async () => {
           const [coreStart] = await core.getStartServices();
           const esClient = coreStart.elasticsearch.client.asInternalUser;
           try {
-            await esClient.deleteByQuery({
-              index: NOTIFICATION_DATA_STREAM_NAME,
-              conflicts: 'proceed',
-              refresh: false,
-              query: buildCleanupQuery(),
-            });
+            await esClient.deleteByQuery(
+              {
+                index: NOTIFICATION_DATA_STREAM_NAME,
+                conflicts: 'proceed',
+                refresh: false,
+                query: buildCleanupQuery(),
+              },
+              { signal: abortController.signal }
+            );
           } catch (err) {
             logger.error(`Notification Center cleanup task failed: ${err.message}`);
           }

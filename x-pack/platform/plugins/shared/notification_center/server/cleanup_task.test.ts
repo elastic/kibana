@@ -77,11 +77,13 @@ describe('cleanup_task', () => {
 
     const logger = { error: jest.fn() } as any;
 
+    const abortController = new AbortController();
+
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    it('registers the task with the correct type, title, and cost', () => {
+    it('registers the task with the correct type, title, cost, and timeout', () => {
       registerCleanupTask(core, taskManager, logger);
 
       expect(registerTaskDefinitions).toHaveBeenCalledWith(
@@ -89,24 +91,28 @@ describe('cleanup_task', () => {
           [CLEANUP_TASK_TYPE]: expect.objectContaining({
             title: 'Notification Center retention cleanup',
             cost: TaskCost.Tiny,
+            timeout: '10m',
           }),
         })
       );
     });
 
-    it('run() calls deleteByQuery against the notification data stream', async () => {
+    it('run() calls deleteByQuery against the notification data stream with the abort signal', async () => {
       registerCleanupTask(core, taskManager, logger);
 
       const taskDef = registerTaskDefinitions.mock.calls[0][0][CLEANUP_TASK_TYPE];
-      const runner = taskDef.createTaskRunner();
+      const runner = taskDef.createTaskRunner({ abortController });
       await runner.run();
 
-      expect(deleteByQuery).toHaveBeenCalledWith({
-        index: NOTIFICATION_DATA_STREAM_NAME,
-        conflicts: 'proceed',
-        refresh: false,
-        query: buildCleanupQuery(),
-      });
+      expect(deleteByQuery).toHaveBeenCalledWith(
+        {
+          index: NOTIFICATION_DATA_STREAM_NAME,
+          conflicts: 'proceed',
+          refresh: false,
+          query: buildCleanupQuery(),
+        },
+        { signal: abortController.signal }
+      );
     });
 
     it('run() logs an error and does not throw when deleteByQuery fails', async () => {
@@ -115,7 +121,7 @@ describe('cleanup_task', () => {
       registerCleanupTask(core, taskManager, logger);
 
       const taskDef = registerTaskDefinitions.mock.calls[0][0][CLEANUP_TASK_TYPE];
-      const runner = taskDef.createTaskRunner();
+      const runner = taskDef.createTaskRunner({ abortController });
 
       await expect(runner.run()).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('ES unavailable'));
