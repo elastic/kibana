@@ -38,7 +38,7 @@ export const getStepContent = (docLinks: DocLinksStart) => {
         }),
         description: i18n.translate('vectordbOnboarding.generate.ingest.description', {
           defaultMessage:
-            'Run this sample script to ingest your data and generate embeddings using Jina’s embedding models with no extra configuration.',
+            'Run this sample script to ingest your data and generate embeddings using Jina models with no extra configuration.',
         }),
         api: {
           consoleComment: i18n.translate('vectordbOnboarding.generate.ingest.consoleComment', {
