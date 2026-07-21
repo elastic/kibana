@@ -11,7 +11,7 @@ export type ExportJsonStatus = 'loading' | 'success' | 'error';
 
 export interface ExportJsonSharingData<State extends object> {
   title: string;
-  getExportJson: (byReference?: boolean) => State;
+  getExportJson: (forceExportByValue?: boolean) => State;
 }
 
 export interface ExportJsonSanitizedState<SanitizedState extends object> {

@@ -67,8 +67,11 @@ export const ExportJsonFlyout = <
   apiPath?: string; // if provided, the "Open in Console" button is shown
   sanitizeState: SanitizeStateFunction<State, SanitizedState>;
 }) => {
-  const [exportFullState, setExportFullState] = useState<boolean>(false);
-  const state = useMemo(() => getExportJson(!exportFullState), [getExportJson, exportFullState]);
+  const [forceExportByValue, setForceExportByValue] = useState<boolean>(false);
+  const state = useMemo(
+    () => getExportJson(!forceExportByValue),
+    [getExportJson, forceExportByValue]
+  );
 
   const { status, data, warnings, error, retry } = useSanitizedState<State, SanitizedState>({
     state,
@@ -121,14 +124,14 @@ export const ExportJsonFlyout = <
                 label={i18n.translate('dashboard.exportJson.showFullConfigSwitch', {
                   defaultMessage: 'Show full configuration',
                 })}
-                checked={exportFullState}
-                onChange={() => setExportFullState(!exportFullState)}
+                checked={forceExportByValue}
+                onChange={() => setForceExportByValue(!forceExportByValue)}
               />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
 
-        {isByReference && !exportFullState && (
+        {isByReference && !forceExportByValue && (
           <>
             <EuiSpacer size="s" />
             <EuiCallOut announceOnMount>
