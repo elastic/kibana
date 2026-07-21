@@ -548,6 +548,9 @@ describe('WorkflowDetailHeader', () => {
       </ChangeHistoryModalContext.Provider>
     );
 
+    // History lives in the overflow ("More") menu, so open it before locating the entry point.
+    fireEvent.click(getByTestId('app-menu-overflow-button'));
+
     const historyItem = getByTestId('workflowDetailHistoryButton');
     expect(historyItem).toBeInTheDocument();
 
