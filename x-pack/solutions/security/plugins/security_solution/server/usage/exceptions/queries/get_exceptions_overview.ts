@@ -7,6 +7,7 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import {
   LIST_TYPES,
   type ExceptionMetricsSchema,
@@ -96,22 +97,12 @@ export const getExceptionsOverview = async ({
           must_not: [
             {
               terms: {
-                'exception-list.list_id': [
-                  'endpoint_trusted_apps',
-                  'endpoint_event_filters',
-                  'endpoint_host_isolation_exceptions',
-                  'endpoint_blocklists',
-                ],
+                'exception-list.list_id': [...ENDPOINT_ARTIFACT_LIST_IDS],
               },
             },
             {
               terms: {
-                'exception-list-agnostic.list_id': [
-                  'endpoint_trusted_apps',
-                  'endpoint_event_filters',
-                  'endpoint_host_isolation_exceptions',
-                  'endpoint_blocklists',
-                ],
+                'exception-list-agnostic.list_id': [...ENDPOINT_ARTIFACT_LIST_IDS],
               },
             },
           ],
