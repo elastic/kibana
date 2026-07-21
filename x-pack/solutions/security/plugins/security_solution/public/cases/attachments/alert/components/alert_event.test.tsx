@@ -17,6 +17,7 @@ import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyou
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 import { RulePanelKey } from '../../../../flyout/rule_details/right';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../pages/use_fetch_alert_data');
@@ -95,6 +96,7 @@ describe('AlertEvent', () => {
 
     expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({
       ruleId: 'rule-1',
+      origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
       title: 'Rule: My rule',
     });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
