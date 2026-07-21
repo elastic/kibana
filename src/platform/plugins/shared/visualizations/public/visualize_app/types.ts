@@ -85,6 +85,7 @@ export type VisualizeAppStateContainer = ReduxLikeStateContainer<
 >;
 
 export interface VisualizeServices extends CoreStart {
+  isScreenshotMode: boolean;
   stateTransferService: EmbeddableStateTransfer;
   embeddable: EmbeddableStart;
   history: History;
