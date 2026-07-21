@@ -6,7 +6,6 @@
  */
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { TimesliceMetricIndicator } from '@kbn/slo-schema';
 import {
   timesliceMetricComparatorMapping,
@@ -28,15 +27,6 @@ import { getFilterRange } from './common';
 const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 export class TimesliceMetricTransformGenerator extends TransformGenerator {
-  constructor(
-    spaceId: string,
-    dataViewService: DataViewsService,
-    isServerless: boolean,
-    isCpsEnabled: boolean = false
-  ) {
-    super(spaceId, dataViewService, isServerless, isCpsEnabled);
-  }
-
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     if (!timesliceMetricIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
@@ -51,8 +41,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
       await this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
       slo,
-      this.isServerless,
-      this.isCpsEnabled
+      this.isServerless && this.isCpsEnabled
     );
   }
 

@@ -259,7 +259,7 @@ describe('slo transform template', () => {
     });
   });
 
-  it('adds project_routing when isServerless, isCpsEnabled, and preventCrossProjectSearch', () => {
+  it('adds project_routing when applyProjectRouting and preventCrossProjectSearch', () => {
     const slo = createSLO({
       id: 'irrelevant',
       indicator: createKQLCustomIndicator(),
@@ -280,14 +280,13 @@ describe('slo transform template', () => {
       aggregations,
       settings,
       slo,
-      true,
       true
     );
 
     expect(result.source.project_routing).toBe('_alias:_origin');
   });
 
-  it('omits project_routing when isServerless and isCpsEnabled but not preventCrossProjectSearch', () => {
+  it('omits project_routing when applyProjectRouting but not preventCrossProjectSearch', () => {
     const slo = createSLO({
       id: 'irrelevant',
       indicator: createKQLCustomIndicator(),
@@ -308,42 +307,13 @@ describe('slo transform template', () => {
       aggregations,
       settings,
       slo,
-      true,
       true
     );
 
     expect(result.source.project_routing).toBeUndefined();
   });
 
-  it('omits project_routing when isServerless but isCpsEnabled is false', () => {
-    const slo = createSLO({
-      id: 'irrelevant',
-      indicator: createKQLCustomIndicator(),
-      settings: {
-        syncDelay: oneMinute(),
-        frequency: oneMinute(),
-        preventInitialBackfill: false,
-        preventCrossProjectSearch: true,
-      },
-    });
-
-    const result = getSLOTransformTemplate(
-      transformId,
-      description,
-      source,
-      destination,
-      groupBy,
-      aggregations,
-      settings,
-      slo,
-      true,
-      false
-    );
-
-    expect(result.source.project_routing).toBeUndefined();
-  });
-
-  it('omits project_routing when not serverless even if preventCrossProjectSearch', () => {
+  it('omits project_routing when applyProjectRouting is false', () => {
     const slo = createSLO({
       id: 'irrelevant',
       indicator: createKQLCustomIndicator(),

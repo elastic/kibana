@@ -33,10 +33,9 @@ export const getSLOTransformTemplate = (
   aggregations: TransformPivot['aggregations'] = {},
   settings: TransformSettings,
   slo: SLODefinition,
-  isServerless: boolean,
-  isCpsEnabled: boolean = false
+  applyProjectRouting: boolean = false
 ): TransformPutTransformRequest => {
-  const formattedSource = buildSourceWithFilters(source, slo, isServerless, isCpsEnabled);
+  const formattedSource = buildSourceWithFilters(source, slo, applyProjectRouting);
   return {
     transform_id: transformId,
     description,
@@ -76,14 +75,13 @@ const buildGroupingFilters = (slo: SLODefinition): QueryDslQueryContainer[] => {
 const buildSourceWithFilters = (
   source: TransformSource,
   slo: SLODefinition,
-  isServerless: boolean,
-  isCpsEnabled: boolean
+  applyProjectRouting: boolean
 ): TransformSource => {
   const groupingFilters = buildGroupingFilters(slo);
   const sourceFilters = [source.query?.bool?.filter].flat().filter(Boolean);
   return {
     ...source,
-    ...(isServerless && isCpsEnabled && slo.settings.preventCrossProjectSearch
+    ...(applyProjectRouting && slo.settings.preventCrossProjectSearch
       ? { project_routing: PROJECT_ROUTING_ORIGIN }
       : {}),
     query: {
