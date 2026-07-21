@@ -8,10 +8,10 @@ This file contains the Gherkin templates for optional test plan sections, and th
 
 - [Coverage guidance](#coverage-guidance)
 - [Always-evaluated coverage](#always-evaluated-coverage)
+  - [Upgrade scenarios](#upgrade-scenarios)
 - [Optional section templates](#optional-section-templates)
   - [Multi-space scenarios](#multi-space-scenarios)
   - [Multi-tenant scenarios](#multi-tenant-scenarios)
-  - [Upgrade scenarios](#upgrade-scenarios)
   - [Cross-cluster Search (CCS) scenarios](#cross-cluster-search-ccs-scenarios)
 - [Gherkin rules](#gherkin-rules-strictly-enforced)
 - [Tags](#tags)
@@ -67,6 +67,34 @@ These coverage areas are **evaluated on every generate run**, not included on a 
 
 ---
 
+### Upgrade scenarios
+
+Use `TARGET_VERSION` (detected in Step 2) as the target version. Run upgrade scenarios from each of the following source versions:
+- The last minor of the previous major series (currently `8.19.x`)
+- The last minor of the current major cycle (currently `9.3`)
+
+Check with the team if you are unsure which versions are current — these values change with each release cycle.
+
+```gherkin
+@upgrade
+Scenario: Feature works correctly after upgrading from the last minor of the previous major to TARGET_VERSION
+  Given a Kibana instance running the last minor of the previous major series with existing data relevant to this feature
+  When the instance is upgraded to TARGET_VERSION
+  Then the feature is accessible and behaves as expected
+  And existing data or configuration is preserved without errors
+
+@upgrade
+Scenario: Feature works correctly after upgrading from the last minor of the current major cycle to TARGET_VERSION
+  Given a Kibana instance running the last minor of the current major cycle with existing data relevant to this feature
+  When the instance is upgraded to TARGET_VERSION
+  Then the feature is accessible and behaves as expected
+  And existing data or configuration is preserved without errors
+```
+
+CRUD and dependency-lifecycle scenarios do not have dedicated templates — they are written inline in the feature area they belong to, using the same Gherkin conventions as any other scenario.
+
+---
+
 ## Optional section templates
 
 Include each optional section only when the evidence clearly supports it. If it is not clear whether a section applies, ask the user before including — do not include sections speculatively.
@@ -77,8 +105,6 @@ Include each optional section only when the evidence clearly supports it. If it 
 | **Multi-space** | Feature involves entities that are space-aware in Kibana — rules, cases, alerts, dashboards, saved objects, actions, or any configuration scoped to a Kibana space |
 | **Multi-tenant** | Feature involves data ingestion, index patterns, or configuration in a Serverless or ECH deployment |
 | **CCS** | Feature queries Elasticsearch indices — especially Alerts index or detection rules |
-
-(Upgrade coverage is not on this list — it is [always evaluated](#always-evaluated-coverage) when the trigger fires, not optionally included.)
 
 For RBAC: no template — write scenarios manually based on the roles described in the issue.
 For all others: use the templates below.
@@ -119,32 +145,6 @@ Scenario: Feature data is isolated between tenants
   Given two separate tenants with independent deployments
   When Tenant A configures the feature
   Then Tenant B cannot access or see Tenant A's configuration
-```
-
----
-
-### Upgrade scenarios
-
-Use `TARGET_VERSION` (detected in Step 2) as the target version. Run upgrade scenarios from each of the following source versions:
-- The last minor of the previous major series (currently `8.19.x`)
-- The last minor of the current major cycle (currently `9.3`)
-
-Check with the team if you are unsure which versions are current — these values change with each release cycle.
-
-```gherkin
-@upgrade
-Scenario: Feature works correctly after upgrading from the last minor of the previous major to TARGET_VERSION
-  Given a Kibana instance running the last minor of the previous major series with existing data relevant to this feature
-  When the instance is upgraded to TARGET_VERSION
-  Then the feature is accessible and behaves as expected
-  And existing data or configuration is preserved without errors
-
-@upgrade
-Scenario: Feature works correctly after upgrading from the last minor of the current major cycle to TARGET_VERSION
-  Given a Kibana instance running the last minor of the current major cycle with existing data relevant to this feature
-  When the instance is upgraded to TARGET_VERSION
-  Then the feature is accessible and behaves as expected
-  And existing data or configuration is preserved without errors
 ```
 
 ---
