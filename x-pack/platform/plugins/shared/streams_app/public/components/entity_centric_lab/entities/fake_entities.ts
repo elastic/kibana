@@ -15,6 +15,8 @@
  * so counts and tile↔row identities are guaranteed consistent.
  */
 
+import { CLOUD_PROVIDERS, type CloudProviderId } from './cloud_providers';
+
 export type EntityHealth = 'healthy' | 'atRisk' | 'unhealthy';
 
 export type EntityCategoryId =
@@ -152,8 +154,14 @@ export interface Entity {
   readonly category: EntityCategoryId;
   /** Free-form display string (e.g. "K8s cluster", "Postgres", "APM service"). */
   readonly type: string;
-  /** Sub-grouping for Kubernetes: "Clusters", "Nodes", "Namespaces", etc. */
+  /**
+   * Sub-grouping label. Kubernetes uses it for "Clusters", "Nodes",
+   * "Namespaces", …; Cloud uses it for the service label ("EC2",
+   * "Lambda", …) so the provider > service hierarchy can group off it.
+   */
   readonly subType?: string;
+  /** Cloud provider owner (`aws` / `gcp` / `azure`), set only on cloud entities. */
+  readonly provider?: CloudProviderId;
   readonly health: EntityHealth;
   readonly lastHealthChange: string;
   readonly age: string;
@@ -372,34 +380,6 @@ const SERVICE_SEED_ROWS: readonly SeedRow[] = [
   { name: 'pricing-service', type: 'APM Service', health: 'healthy' },
 ];
 
-// Cloud entities cover the four AWS-flavoured types the Manage table
-// exposes (regions, EC2 instances, Lambda functions, S3 buckets).
-// Every entity is seeded by name so the demo never falls back to
-// generic `cloud-001` placeholders, and so each of the four types in
-// `fake_entity_types.ts` has the same count as what's listed here.
-const CLOUD_SEED_ROWS: readonly SeedRow[] = [
-  // ---------- AWS region (4) ----------
-  { name: 'aws-eu-west-1', type: 'AWS region', health: 'healthy' },
-  { name: 'aws-eu-central-1', type: 'AWS region', health: 'atRisk' },
-  { name: 'aws-us-east-1', type: 'AWS region', health: 'healthy' },
-  { name: 'aws-us-west-2', type: 'AWS region', health: 'healthy' },
-  // ---------- AWS EC2 Instance (4) ----------
-  { name: 'i-0a1b2c3d4e5f6789a', type: 'AWS EC2 Instance', health: 'unhealthy' },
-  { name: 'i-04e5f6a708b9c1d2e', type: 'AWS EC2 Instance', health: 'healthy' },
-  { name: 'i-0b9c1d2e304e5f6a7', type: 'AWS EC2 Instance', health: 'atRisk' },
-  { name: 'i-0e5f6a708b9c1d2e3', type: 'AWS EC2 Instance', health: 'healthy' },
-  // ---------- AWS Lambda function (4) ----------
-  { name: 'orders-api-handler', type: 'AWS Lambda function', health: 'healthy' },
-  { name: 'fraud-screener', type: 'AWS Lambda function', health: 'atRisk' },
-  { name: 'checkout-webhook', type: 'AWS Lambda function', health: 'healthy' },
-  { name: 'auth-callback', type: 'AWS Lambda function', health: 'unhealthy' },
-  // ---------- AWS S3 bucket (4) ----------
-  { name: 'payflow-receipts', type: 'AWS S3 bucket', health: 'healthy' },
-  { name: 'payments-audit-logs', type: 'AWS S3 bucket', health: 'healthy' },
-  { name: 'merchant-assets', type: 'AWS S3 bucket', health: 'healthy' },
-  { name: 'analytics-exports', type: 'AWS S3 bucket', health: 'atRisk' },
-];
-
 const MIDDLEWARE_SEED_ROWS: readonly SeedRow[] = [
   { name: 'kafka-payments', type: 'Kafka', health: 'healthy' },
   { name: 'rabbitmq-checkout', type: 'RabbitMQ', health: 'healthy' },
@@ -431,18 +411,6 @@ const NON_KUBERNETES_SPECS: readonly CategorySpec[] = [
     typeCycle: ['APM Service'],
     seedRows: SERVICE_SEED_ROWS,
     fallbackName: (index) => `svc-${padIndex(index, 2)}`,
-  },
-  {
-    // 16 total entities — 4 per AWS sub-type — all fully seeded by
-    // `CLOUD_SEED_ROWS`. Keeping seed count == total avoids relying
-    // on `typeCycle` here: the fallback names (`cloud-NN`) wouldn't
-    // hint at the sub-type and the table counts would drift away
-    // from the actual instance counts.
-    category: 'cloud',
-    total: 16,
-    typeCycle: ['AWS region', 'AWS EC2 Instance', 'AWS Lambda function', 'AWS S3 bucket'],
-    seedRows: CLOUD_SEED_ROWS,
-    fallbackName: (index) => `cloud-${padIndex(index, 2)}`,
   },
   {
     category: 'middlewares',
@@ -589,15 +557,66 @@ const buildKubernetesEntities = (): Entity[] => {
   return entities;
 };
 
+/**
+ * Cloud entities are generated from the {@link CLOUD_PROVIDERS} taxonomy
+ * rather than a flat seed list so the provider > service hierarchy stays
+ * the single source of truth. Every entity carries `provider` (aws / gcp
+ * / azure) and `subType` (the service label, e.g. "EC2") so the nav,
+ * routes, and grid/list grouping can all key off the same fields.
+ */
+const buildCloudEntities = (): Entity[] => {
+  const entities: Entity[] = [];
+  let index = 0;
+  for (const provider of CLOUD_PROVIDERS) {
+    for (const service of provider.services) {
+      const serviceEntities: Entity[] = [];
+      for (const instance of service.instances) {
+        const tags = buildTags(`cloud-${provider.id}`, index);
+        serviceEntities.push({
+          id: `cloud-${provider.id}-${service.id}-${index + 1}`,
+          name: instance.name,
+          category: 'cloud',
+          provider: provider.id,
+          subType: service.label,
+          type: service.entityType,
+          health: regionAdjustedHealth(instance.health, tags.region),
+          lastHealthChange: '2026-04-14 12:34',
+          age: AGE_SAMPLES[index % AGE_SAMPLES.length],
+          anomalyDetection: ANOMALY_SAMPLES[index % ANOMALY_SAMPLES.length],
+          tags,
+        });
+        index += 1;
+      }
+      entities.push(...sortByHealth(serviceEntities));
+    }
+  }
+  return entities;
+};
+
+const CLOUD_TOTAL = CLOUD_PROVIDERS.reduce(
+  (sum, provider) =>
+    sum +
+    provider.services.reduce((serviceSum, service) => serviceSum + service.instances.length, 0),
+  0
+);
+
+const findSpec = (category: EntityCategoryId): CategorySpec => {
+  const spec = NON_KUBERNETES_SPECS.find((candidate) => candidate.category === category);
+  if (!spec) {
+    throw new Error(`No CategorySpec registered for category "${category}"`);
+  }
+  return spec;
+};
+
 export const buildFakeEntities = (): FakeEntitiesDataset => {
   const entities: Entity[] = [
-    ...buildCategoryEntities(NON_KUBERNETES_SPECS[0]), // hosts
+    ...buildCategoryEntities(findSpec('hosts')),
     ...buildKubernetesEntities(),
-    ...buildCategoryEntities(NON_KUBERNETES_SPECS[1]), // databases
-    ...buildCategoryEntities(NON_KUBERNETES_SPECS[2]), // services
-    ...buildCategoryEntities(NON_KUBERNETES_SPECS[3]), // cloud
-    ...buildCategoryEntities(NON_KUBERNETES_SPECS[4]), // middlewares
-    ...buildCategoryEntities(NON_KUBERNETES_SPECS[5]), // llms
+    ...buildCategoryEntities(findSpec('databases')),
+    ...buildCategoryEntities(findSpec('services')),
+    ...buildCloudEntities(),
+    ...buildCategoryEntities(findSpec('middlewares')),
+    ...buildCategoryEntities(findSpec('llms')),
   ];
 
   const categoryCounts: EntityCategoryCounts[] = ENTITY_CATEGORIES.map((descriptor) => {
@@ -606,6 +625,16 @@ export const buildFakeEntities = (): FakeEntitiesDataset => {
         category: 'kubernetes' as const,
         total: KUBERNETES_SUB_SPECS.reduce((sum, sub) => sum + sub.total, 0),
         subCounts: KUBERNETES_SUB_SPECS.map((sub) => ({ label: sub.label, total: sub.total })),
+      };
+    }
+    if (descriptor.id === 'cloud') {
+      return {
+        category: 'cloud' as const,
+        total: CLOUD_TOTAL,
+        subCounts: CLOUD_PROVIDERS.map((provider) => ({
+          label: provider.label,
+          total: provider.services.reduce((sum, service) => sum + service.instances.length, 0),
+        })),
       };
     }
     const spec = NON_KUBERNETES_SPECS.find((s) => s.category === descriptor.id);

@@ -227,12 +227,6 @@ const defaultFlyoutTabs = (entityTypeId?: string): FlyoutTabConfig[] => [
     enabled: true,
   },
   {
-    id: 'security',
-    label: 'Security',
-    description: 'Key security signals',
-    enabled: true,
-  },
-  {
     id: 'relationships',
     label: 'Relationships',
     description: 'Related entities: upstream, downstream',

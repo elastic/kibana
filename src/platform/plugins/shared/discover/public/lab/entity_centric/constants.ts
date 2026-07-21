@@ -7,7 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ENTITY_CENTRIC_LAB_SETTING = 'discover:entityCentricLab' as const;
+/**
+ * Single, mutually-exclusive lab-mode selector (Stack Management → Advanced
+ * Settings → Discover). Replaces the earlier pair of independent booleans so
+ * only one experience can ever be active at a time:
+ * - `off`: no lab customizations.
+ * - `entityCentric`: Discover renders the fake entity-centric log panel and the
+ *   Observability nav exposes the full Entities section.
+ * - `infraShortTerm`: no Discover customization; the Observability nav renames
+ *   the Entities section to "Infrastructure" and scopes it to a reduced set.
+ */
+export const LAB_MODE_SETTING = 'discover:labMode' as const;
+
+export type LabMode = 'off' | 'entityCentric' | 'infraShortTerm';
 
 export type FakeLogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
 

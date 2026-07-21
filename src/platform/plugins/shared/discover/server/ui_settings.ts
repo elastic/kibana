@@ -254,17 +254,34 @@ export const getUiSettings: (
     }),
     schema: schema.number({ min: -1 }),
   },
-  'discover:entityCentricLab': {
-    name: i18n.translate('discover.advancedSettings.entityCentricLab.title', {
-      defaultMessage: '[Lab] Entity-centric mode',
+  'discover:labMode': {
+    name: i18n.translate('discover.advancedSettings.labMode.title', {
+      defaultMessage: '[Lab] Experience mode',
     }),
-    value: false,
+    value: 'off',
+    type: 'select',
+    options: ['off', 'entityCentric', 'infraShortTerm'],
+    optionLabels: {
+      off: i18n.translate('discover.advancedSettings.labMode.optionOff', {
+        defaultMessage: 'Off',
+      }),
+      entityCentric: i18n.translate('discover.advancedSettings.labMode.optionEntityCentric', {
+        defaultMessage: 'Entity-centric',
+      }),
+      infraShortTerm: i18n.translate('discover.advancedSettings.labMode.optionInfraShortTerm', {
+        defaultMessage: 'Infra-short term',
+      }),
+    },
     category: ['discover'],
-    description: i18n.translate('discover.advancedSettings.entityCentricLab.description', {
+    description: i18n.translate('discover.advancedSettings.labMode.description', {
       defaultMessage:
-        'Experimental: when enabled, Discover renders a panel of fake entity-centric log entries above the results table. Clicking a service name opens an entity detail flyout. Used to prototype the entity-centric experience; refresh the page after changing this setting.',
+        'Experimental: pick a single prototype experience (only one can be active at a time). "Entity-centric" renders a panel of fake entity-centric log entries in Discover — clicking a service name opens an entity detail flyout — and exposes the full Entities section in the Observability nav. "Infra-short term" adds no Discover customization; it renames the Entities section to "Infrastructure" and scopes it to All entities, Cloud, Databases and Kubernetes. Refresh the page after changing this setting.',
     }),
-    schema: schema.boolean(),
+    schema: schema.oneOf([
+      schema.literal('off'),
+      schema.literal('entityCentric'),
+      schema.literal('infraShortTerm'),
+    ]),
     requiresPageReload: true,
   },
 });

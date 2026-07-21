@@ -20,6 +20,8 @@ import { SignificantEventsDiscoveryPage } from '../components/sig_events/signifi
 import {
   AllEntitiesView,
   CategoryEntitiesView,
+  CloudProviderView,
+  CloudServiceView,
   ManageEntityTypesView,
   SignificantEventsView,
 } from '../components/entity_centric_lab';
@@ -106,6 +108,29 @@ const streamsAppRoutes = {
        */
       '/entities': {
         element: <AllEntitiesView />,
+      },
+      /**
+       * Entity-centric lab: Cloud provider hierarchy. These two
+       * templates are more specific than `/entities/{category}` so the
+       * router matches them first, mounting `AllEntitiesView` scoped to
+       * a provider (AWS / GCP / Azure) or a single service (EC2, …).
+       */
+      '/entities/cloud/{provider}': {
+        element: <CloudProviderView />,
+        params: t.type({
+          path: t.type({
+            provider: t.string,
+          }),
+        }),
+      },
+      '/entities/cloud/{provider}/{service}': {
+        element: <CloudServiceView />,
+        params: t.type({
+          path: t.type({
+            provider: t.string,
+            service: t.string,
+          }),
+        }),
       },
       /**
        * Entity-centric lab: per-category sub-pages reachable via the

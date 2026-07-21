@@ -105,6 +105,21 @@ export type StreamsLinkId =
   | 'entitiesDatabases'
   | 'entitiesServices'
   | 'entitiesCloud'
+  // Nested Cloud hierarchy (Cloud > provider > service). Kept in sync
+  // with the `cloudEntityDeepLinks` generated in `streams_app/public/plugin.tsx`
+  // and the nested nav in the Observability `navigation_tree.ts`.
+  | 'entitiesCloudAws'
+  | 'entitiesCloudAwsEc2'
+  | 'entitiesCloudAwsLambda'
+  | 'entitiesCloudAwsS3'
+  | 'entitiesCloudGcp'
+  | 'entitiesCloudGcpCompute'
+  | 'entitiesCloudGcpFunctions'
+  | 'entitiesCloudGcpStorage'
+  | 'entitiesCloudAzure'
+  | 'entitiesCloudAzureVm'
+  | 'entitiesCloudAzureFunctions'
+  | 'entitiesCloudAzureBlob'
   | 'entitiesMiddlewares'
   | 'entitiesLlms'
   | 'entitiesOther';

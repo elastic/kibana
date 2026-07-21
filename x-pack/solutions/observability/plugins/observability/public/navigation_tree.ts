@@ -48,6 +48,7 @@ function createNavTree({
   showAlertingV2,
   ingestHubAvailable,
   entityCentricLabEnabled,
+  infraShortTermEnabled,
 }: {
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
@@ -55,7 +56,216 @@ function createNavTree({
   showAlertingV2?: boolean;
   ingestHubAvailable?: boolean;
   entityCentricLabEnabled?: boolean;
+  infraShortTermEnabled?: boolean;
 }) {
+  // The two lab modes are mutually exclusive; entity-centric takes precedence
+  // if both advanced settings happen to be on. Infra-short-term reuses the
+  // Entities panel but renames it to "Infrastructure" and scopes it to a
+  // reduced category set.
+  const infraShortTermMode = Boolean(infraShortTermEnabled) && !entityCentricLabEnabled;
+  const showEntitiesPanel =
+    Boolean(streamsAvailable) && (Boolean(entityCentricLabEnabled) || infraShortTermMode);
+
+  const entitiesPanelTitle = infraShortTermMode
+    ? i18n.translate('xpack.observability.obltNav.infrastructure', {
+        defaultMessage: 'Infrastructure',
+      })
+    : i18n.translate('xpack.observability.obltNav.entities', {
+        defaultMessage: 'Entities',
+      });
+
+  // Cloud is a nested panel: clicking it navigates to the Cloud landing page,
+  // while the chevron opens a sub-panel of providers (AWS / GCP / Azure), each
+  // of which opens its own sub-panel of services.
+  const cloudCategoryNode = {
+    id: 'entityCentricLab-entitiesCloud',
+    link: 'streams:entitiesCloud' as const,
+    renderAs: 'panelOpener' as const,
+    children: [
+      {
+        children: [
+          {
+            id: 'entityCentricLab-entitiesCloudAws',
+            link: 'streams:entitiesCloudAws' as const,
+            renderAs: 'panelOpener' as const,
+            children: [
+              {
+                children: [
+                  {
+                    id: 'entityCentricLab-entitiesCloudAwsEc2',
+                    link: 'streams:entitiesCloudAwsEc2' as const,
+                  },
+                  {
+                    id: 'entityCentricLab-entitiesCloudAwsLambda',
+                    link: 'streams:entitiesCloudAwsLambda' as const,
+                  },
+                  {
+                    id: 'entityCentricLab-entitiesCloudAwsS3',
+                    link: 'streams:entitiesCloudAwsS3' as const,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: 'entityCentricLab-entitiesCloudGcp',
+            link: 'streams:entitiesCloudGcp' as const,
+            renderAs: 'panelOpener' as const,
+            children: [
+              {
+                children: [
+                  {
+                    id: 'entityCentricLab-entitiesCloudGcpCompute',
+                    link: 'streams:entitiesCloudGcpCompute' as const,
+                  },
+                  {
+                    id: 'entityCentricLab-entitiesCloudGcpFunctions',
+                    link: 'streams:entitiesCloudGcpFunctions' as const,
+                  },
+                  {
+                    id: 'entityCentricLab-entitiesCloudGcpStorage',
+                    link: 'streams:entitiesCloudGcpStorage' as const,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: 'entityCentricLab-entitiesCloudAzure',
+            link: 'streams:entitiesCloudAzure' as const,
+            renderAs: 'panelOpener' as const,
+            children: [
+              {
+                children: [
+                  {
+                    id: 'entityCentricLab-entitiesCloudAzureVm',
+                    link: 'streams:entitiesCloudAzureVm' as const,
+                  },
+                  {
+                    id: 'entityCentricLab-entitiesCloudAzureFunctions',
+                    link: 'streams:entitiesCloudAzureFunctions' as const,
+                  },
+                  {
+                    id: 'entityCentricLab-entitiesCloudAzureBlob',
+                    link: 'streams:entitiesCloudAzureBlob' as const,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  const hostsCategoryNode = {
+    id: 'entityCentricLab-entitiesHosts',
+    link: 'streams:entitiesHosts' as const,
+  };
+  const kubernetesCategoryNode = {
+    id: 'entityCentricLab-entitiesKubernetes',
+    link: 'streams:entitiesKubernetes' as const,
+  };
+  const databasesCategoryNode = {
+    id: 'entityCentricLab-entitiesDatabases',
+    link: 'streams:entitiesDatabases' as const,
+  };
+  const servicesCategoryNode = {
+    id: 'entityCentricLab-entitiesServices',
+    link: 'streams:entitiesServices' as const,
+  };
+  const middlewaresCategoryNode = {
+    id: 'entityCentricLab-entitiesMiddlewares',
+    link: 'streams:entitiesMiddlewares' as const,
+  };
+  const llmsCategoryNode = {
+    id: 'entityCentricLab-entitiesLlms',
+    link: 'streams:entitiesLlms' as const,
+  };
+  // Catch-all bucket for entity types whose `category` field doesn't match a
+  // canonical nav section (legacy seed values, "+ Create new category" inputs).
+  const otherCategoryNode = {
+    id: 'entityCentricLab-entitiesOther',
+    link: 'streams:entitiesOther' as const,
+  };
+
+  // Full category list for the entity-centric lab. The Cloud node keeps its
+  // nested `panelOpener` (in the current chrome side-nav only the top-level
+  // Cloud link renders; providers surface via Cloud's own flyout panel).
+  const entityCentricCategoryChildren = [
+    hostsCategoryNode,
+    kubernetesCategoryNode,
+    databasesCategoryNode,
+    servicesCategoryNode,
+    cloudCategoryNode,
+    middlewaresCategoryNode,
+    llmsCategoryNode,
+    otherCategoryNode,
+  ];
+
+  const entitiesAllSection = {
+    children: [
+      {
+        id: 'entityCentricLab-entitiesAll',
+        link: 'streams:entitiesAll' as const,
+      },
+    ],
+  };
+
+  // The chrome side-nav renderer can't draw an inline collapsible group, so in
+  // Infra-short-term mode "Cloud" is rendered as a *section header* (no link)
+  // with the three providers as flat links beneath it — always visible, no
+  // chevron. This is the closest supported approximation of the nested tree.
+  const infraCloudSection = {
+    id: 'entityCentricLab-infraCloudSection',
+    title: i18n.translate('xpack.observability.obltNav.cloud', {
+      defaultMessage: 'Cloud',
+    }),
+    children: [
+      {
+        id: 'entityCentricLab-entitiesCloudAws',
+        link: 'streams:entitiesCloudAws' as const,
+      },
+      {
+        id: 'entityCentricLab-entitiesCloudGcp',
+        link: 'streams:entitiesCloudGcp' as const,
+      },
+      {
+        id: 'entityCentricLab-entitiesCloudAzure',
+        link: 'streams:entitiesCloudAzure' as const,
+      },
+    ],
+  };
+
+  // Panel sections differ by mode. Entity-centric keeps the full category list
+  // plus a "Manage entity types" shortcut. Infra-short-term shows "All
+  // entities", the Cloud section (with AWS/GCP/Azure), then the remaining flat
+  // categories (Databases, Kubernetes).
+  const entitiesPanelChildren = infraShortTermMode
+    ? [
+        entitiesAllSection,
+        infraCloudSection,
+        {
+          children: [databasesCategoryNode, kubernetesCategoryNode],
+        },
+      ]
+    : [
+        entitiesAllSection,
+        {
+          children: entityCentricCategoryChildren,
+        },
+        {
+          // Duplicate of the Streams panel's "Manage entity types" entry: the
+          // same route is reachable from both panels per the lab design.
+          children: [
+            {
+              id: 'entityCentricLab-manage-fromEntities',
+              link: 'streams:manageEntityTypes' as const,
+            },
+          ],
+        },
+      ];
+
   const navTree: NavigationTreeDefinition = {
     body: [
       {
@@ -101,87 +311,24 @@ function createNavTree({
         link: 'slo',
         icon: 'visGauge',
       },
-      ...(streamsAvailable && entityCentricLabEnabled
+      ...(showEntitiesPanel
         ? [
             {
-              // Entity-centric lab: top-level Entities panel that exposes the
-              // "All entities" landing page, the per-category sub-pages and a
-              // duplicated "Manage entity types" entry. Sits above Streams so
-              // the user lands on the entities experience first when the lab
-              // is enabled.
+              // Entity-centric / Infra-short-term lab: top-level panel that
+              // exposes the "All entities" landing page and the per-category
+              // sub-pages. Sits above Streams so the user lands on it first
+              // when a lab mode is enabled. In Infra-short-term mode it is
+              // titled "Infrastructure", scoped to a reduced category set, and
+              // drops the "Manage entity types" entry entirely.
               id: 'entities',
               link: 'streams:entitiesAll' as const,
               // `cluster` renders three connected circles — reads as
               // "connected things / a network of entities" and is the closest
               // generic-entity metaphor available in the current EUI icon set.
-              // The previous `nodes` value rendered as a broken-image
-              // placeholder because that icon name doesn't exist in Borealis.
               icon: 'cluster',
-              title: i18n.translate('xpack.observability.obltNav.entities', {
-                defaultMessage: 'Entities',
-              }),
+              title: entitiesPanelTitle,
               renderAs: 'panelOpener' as const,
-              children: [
-                {
-                  children: [
-                    {
-                      id: 'entityCentricLab-entitiesAll',
-                      link: 'streams:entitiesAll' as const,
-                    },
-                  ],
-                },
-                {
-                  children: [
-                    {
-                      id: 'entityCentricLab-entitiesHosts',
-                      link: 'streams:entitiesHosts' as const,
-                    },
-                    {
-                      id: 'entityCentricLab-entitiesKubernetes',
-                      link: 'streams:entitiesKubernetes' as const,
-                    },
-                    {
-                      id: 'entityCentricLab-entitiesDatabases',
-                      link: 'streams:entitiesDatabases' as const,
-                    },
-                    {
-                      id: 'entityCentricLab-entitiesServices',
-                      link: 'streams:entitiesServices' as const,
-                    },
-                    {
-                      id: 'entityCentricLab-entitiesCloud',
-                      link: 'streams:entitiesCloud' as const,
-                    },
-                    {
-                      id: 'entityCentricLab-entitiesMiddlewares',
-                      link: 'streams:entitiesMiddlewares' as const,
-                    },
-                    {
-                      id: 'entityCentricLab-entitiesLlms',
-                      link: 'streams:entitiesLlms' as const,
-                    },
-                    {
-                      // Catch-all bucket for entity types whose
-                      // `category` field doesn't match a canonical
-                      // nav section (legacy seed values, "+ Create
-                      // new category" user inputs).
-                      id: 'entityCentricLab-entitiesOther',
-                      link: 'streams:entitiesOther' as const,
-                    },
-                  ],
-                },
-                {
-                  // Duplicate of the Streams panel's "Manage entity types"
-                  // entry: the same route is reachable from both panels per
-                  // the lab design.
-                  children: [
-                    {
-                      id: 'entityCentricLab-manage-fromEntities',
-                      link: 'streams:manageEntityTypes' as const,
-                    },
-                  ],
-                },
-              ],
+              children: entitiesPanelChildren,
             },
           ]
         : []),
@@ -866,7 +1013,11 @@ function createNavTree({
 // Inlined here to avoid a cross-plugin public-import that would couple the
 // Observability nav to Discover's internals; the setting key is a stable
 // public contract registered server-side in `discover/server/ui_settings.ts`.
-const ENTITY_CENTRIC_LAB_SETTING = 'discover:entityCentricLab';
+// Single, mutually-exclusive lab-mode selector registered server-side in
+// `discover/server/ui_settings.ts`. Inlined here to avoid a cross-plugin
+// public import; the setting key is a stable public contract.
+const LAB_MODE_SETTING = 'discover:labMode';
+type LabMode = 'off' | 'entityCentric' | 'infraShortTerm';
 
 export const createDefinition = (
   coreStart: CoreStart,
@@ -879,16 +1030,17 @@ export const createDefinition = (
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
     pluginsStart.ingestHub?.navigationAvailable$ || of(false),
-    coreStart.settings.client.get$<boolean>(ENTITY_CENTRIC_LAB_SETTING, false),
+    coreStart.settings.client.get$<LabMode>(LAB_MODE_SETTING, 'off'),
   ]).pipe(
-    map(([{ status }, chatExperience, ingestHubAvailable, entityCentricLabEnabled]) =>
+    map(([{ status }, chatExperience, ingestHubAvailable, labMode]) =>
       createNavTree({
         streamsAvailable: status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
         showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
         ingestHubAvailable,
-        entityCentricLabEnabled: Boolean(entityCentricLabEnabled),
+        entityCentricLabEnabled: labMode === 'entityCentric',
+        infraShortTermEnabled: labMode === 'infraShortTerm',
       })
     )
   ),

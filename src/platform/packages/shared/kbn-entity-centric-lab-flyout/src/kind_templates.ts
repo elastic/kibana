@@ -2141,7 +2141,14 @@ const buildPodTemplate = (
   );
   return {
     overview,
-    tabs: tabsOf(metrics, logs, alertsByHealth(name, h, 'pod'), relationships, security),
+    tabs: tabsOf(
+      metrics,
+      logs,
+      alertsByHealth(name, h, 'pod'),
+      relationships,
+      security,
+      tracesByHealth(name, h)
+    ),
   };
 };
 

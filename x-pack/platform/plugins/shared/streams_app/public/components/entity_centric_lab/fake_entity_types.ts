@@ -40,7 +40,8 @@ export interface FakeEntityType {
  *     seed `Bare-metal` rows → 13 Bare-metal + 11 VM.
  *   - Databases / Services / Middlewares / LLMs match the
  *     `total` / `typeCycle` of their spec.
- *   - Cloud is fully seeded: 4 of each AWS sub-type.
+ *   - Cloud is fully seeded per provider (AWS / GCP / Azure), one row
+ *     per service, matching `CLOUD_PROVIDERS`.
  *   - Kubernetes sub-types come straight from `KUBERNETES_SUB_SPECS`.
  */
 export const FAKE_ENTITY_TYPES: readonly FakeEntityType[] = [
@@ -138,16 +139,7 @@ export const FAKE_ENTITY_TYPES: readonly FakeEntityType[] = [
     subsetsCount: '4',
     lastUpdate: '2026-03-30',
   },
-  // ---------- Cloud ----------
-  {
-    id: 'aws-region',
-    name: 'AWS region',
-    generatedBy: 'Elastic',
-    category: 'Cloud',
-    entitiesCount: '4',
-    subsetsCount: '1',
-    lastUpdate: '2026-04-02',
-  },
+  // ---------- Cloud · AWS ----------
   {
     id: 'aws-ec2',
     name: 'AWS EC2 Instance',
@@ -174,6 +166,62 @@ export const FAKE_ENTITY_TYPES: readonly FakeEntityType[] = [
     entitiesCount: '4',
     subsetsCount: '1',
     lastUpdate: '2026-04-02',
+  },
+  // ---------- Cloud · GCP ----------
+  {
+    id: 'gcp-compute',
+    name: 'GCP Compute Engine',
+    generatedBy: 'Elastic',
+    category: 'Cloud',
+    entitiesCount: '4',
+    subsetsCount: '1',
+    lastUpdate: '2026-05-11',
+  },
+  {
+    id: 'gcp-functions',
+    name: 'GCP Cloud Function',
+    generatedBy: 'Elastic',
+    category: 'Cloud',
+    entitiesCount: '3',
+    subsetsCount: '1',
+    lastUpdate: '2026-05-09',
+  },
+  {
+    id: 'gcp-storage',
+    name: 'GCP Cloud Storage bucket',
+    generatedBy: 'Elastic',
+    category: 'Cloud',
+    entitiesCount: '3',
+    subsetsCount: '1',
+    lastUpdate: '2026-05-03',
+  },
+  // ---------- Cloud · Azure ----------
+  {
+    id: 'azure-vm',
+    name: 'Azure VM',
+    generatedBy: 'User',
+    category: 'Cloud',
+    entitiesCount: '4',
+    subsetsCount: '1',
+    lastUpdate: '2026-05-14',
+  },
+  {
+    id: 'azure-functions',
+    name: 'Azure Function',
+    generatedBy: 'Elastic',
+    category: 'Cloud',
+    entitiesCount: '3',
+    subsetsCount: '1',
+    lastUpdate: '2026-05-10',
+  },
+  {
+    id: 'azure-blob',
+    name: 'Azure Blob Storage',
+    generatedBy: 'Elastic',
+    category: 'Cloud',
+    entitiesCount: '3',
+    subsetsCount: '1',
+    lastUpdate: '2026-05-02',
   },
   // ---------- Middlewares ----------
   {

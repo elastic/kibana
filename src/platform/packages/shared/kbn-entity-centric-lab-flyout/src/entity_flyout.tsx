@@ -178,6 +178,27 @@ const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
 const isBuiltInTabId = (id: string): id is BuiltInTabId =>
   (BUILT_IN_TAB_IDS as readonly string[]).includes(id);
 
+/**
+ * The only tabs the flyout ever surfaces, in this order. Applied to both the
+ * default tab list and the per-kind template override, so any other tab
+ * (Metrics, Relationships, Security, or wizard-defined custom tabs) is dropped
+ * even when a template explicitly enables it.
+ */
+const VISIBLE_TAB_IDS: readonly string[] = ['overview', 'logs', 'traces', 'alerts'];
+const isVisibleTabId = (id: string): boolean => VISIBLE_TAB_IDS.includes(id);
+
+/**
+ * Labels of the health-indicator badge (see `healthTag` in `kind_templates`).
+ * The header always renders this badge first (top left), ahead of every other
+ * tag, so health is the first thing read regardless of the per-kind tag order.
+ */
+const HEALTH_TAG_LABELS: ReadonlySet<string> = new Set([
+  'Healthy',
+  'At risk',
+  'Degraded',
+  'Unhealthy',
+]);
+
 export const EntityFlyout = ({
   entityName,
   entityType,
@@ -201,7 +222,7 @@ export const EntityFlyout = ({
   // the first position will land on Metrics.
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
-  const { agentBuilder, notifications } = useEntityFlyoutServices();
+  const { agentBuilder, notifications, renderEntityDashboard } = useEntityFlyoutServices();
 
   // Note: the back/forward history toolbar that used to live in the
   // header was removed. `onNavigateEntity` is still accepted as a prop
@@ -229,6 +250,15 @@ export const EntityFlyout = ({
     () => buildFakeEntityOverview(entityName, entityType, effectiveHealth, region),
     [entityName, entityType, effectiveHealth, region]
   );
+
+  // Header badges always lead with the health indicator (see
+  // {@link HEALTH_TAG_LABELS}); the remaining tags keep their per-kind order.
+  const orderedTags = useMemo(() => {
+    const healthIndex = overview.tags.findIndex((tag) => HEALTH_TAG_LABELS.has(tag.label));
+    if (healthIndex <= 0) return overview.tags;
+    const rest = overview.tags.filter((_, index) => index !== healthIndex);
+    return [overview.tags[healthIndex], ...rest];
+  }, [overview.tags]);
   const tabsData = useMemo(
     () => buildFakeEntityTabsData(entityName, entityType, effectiveHealth),
     [entityName, entityType, effectiveHealth]
@@ -249,6 +279,16 @@ export const EntityFlyout = ({
   const kind = useMemo(
     () => entityTypeToKind(entityType) ?? inferEntityKind(entityName),
     [entityType, entityName]
+  );
+
+  // Host-injected dashboard embedded in the Overview tab (e.g. Streams app
+  // renders the "[Kubernetes OTel] Pod Detail" dashboard scoped to the pod).
+  // The shared package can't depend on the `dashboard` plugin, so the host
+  // decides whether to return a node — non-pod entities get `null` and the
+  // Overview tab renders as before.
+  const dashboardSlot = useMemo(
+    () => renderEntityDashboard?.({ entityName, entityType, kind }) ?? null,
+    [renderEntityDashboard, entityName, entityType, kind]
   );
 
   // Ambient hidden `screen_context` attachment. Registered via
@@ -467,12 +507,10 @@ export const EntityFlyout = ({
           defaultMessage: 'Overview',
         }),
       },
-      {
-        id: 'metrics',
-        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.metrics', {
-          defaultMessage: 'Metrics',
-        }),
-      },
+      // Note: the "Metrics" tab is intentionally omitted from the default tab
+      // list (as is "Relationships" below). `'metrics'` is still a recognised
+      // built-in id (see `MetricsTab` in `TabContent`) so a template override
+      // can re-enable it, but it no longer shows by default.
       {
         id: 'logs',
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.logs', {
@@ -501,33 +539,17 @@ export const EntityFlyout = ({
           defaultMessage: 'Alerts',
         }),
       },
-      {
-        id: 'relationships',
-        // Labelled "Relationships" to stay consistent with the streams_app
-        // entity-type drafts (which also use "Relationships"), so the tab
-        // reads the same whether or not a template override is applied.
-        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.relationships', {
-          defaultMessage: 'Relationships',
-        }),
-      },
-      {
-        id: 'security',
-        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.security', {
-          defaultMessage: 'Security',
-        }),
-        appendBadge: overview.securityIssueCount,
-      },
     ];
 
     if (!templateOverride) return defaultTabs;
 
     // Apply user override: respect the user's order, drop disabled tabs,
     // and reuse the user's label verbatim (so renames in the wizard show up
-    // here too). Unknown ids are accepted and rendered via the placeholder
-    // in `TabContent` — that's how the demo's "Custom" / "Profiling" tabs
-    // come to life without further wiring.
+    // here too). Only the globally-allowed tabs ({@link VISIBLE_TAB_IDS}) are
+    // ever surfaced — every other id (including wizard-defined custom tabs) is
+    // dropped even when the template enables it.
     return templateOverride.flyoutTabs
-      .filter((tab) => tab.enabled)
+      .filter((tab) => tab.enabled && isVisibleTabId(tab.id))
       .map((tab) => {
         const builtIn = isBuiltInTabId(tab.id)
           ? defaultTabs.find((candidate) => candidate.id === tab.id)
@@ -538,7 +560,7 @@ export const EntityFlyout = ({
           appendBadge: builtIn?.appendBadge,
         };
       });
-  }, [overview.securityIssueCount, templateOverride, tabsData.traces]);
+  }, [templateOverride, tabsData.traces]);
 
   // If the active tab disappears (override toggled it off, or the user
   // reordered everything and the previously-selected tab is gone), fall
@@ -619,11 +641,20 @@ export const EntityFlyout = ({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
-          {overview.tags.map((tag) => (
+          {orderedTags.map((tag) => (
             <EuiFlexItem grow={false} key={tag.label}>
               <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
             </EuiFlexItem>
           ))}
+          {kind === 'pod' ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="success" data-test-subj="entityCentricLabFlyoutPodPhaseBadge">
+                {i18n.translate('entityCentricLabFlyout.flyout.podPhaseRunning', {
+                  defaultMessage: 'Running',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiTabs bottomBorder={false}>
@@ -655,6 +686,7 @@ export const EntityFlyout = ({
           tabsData={tabsData}
           customLinks={templateOverride?.customLinks}
           onSelectEntity={onSelectEntity}
+          dashboardSlot={dashboardSlot}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -746,6 +778,7 @@ const TabContent = ({
   tabsData,
   customLinks,
   onSelectEntity,
+  dashboardSlot,
 }: {
   readonly activeTab: TabId;
   readonly activeTabLabel: string;
@@ -754,6 +787,7 @@ const TabContent = ({
   readonly tabsData: ReturnType<typeof buildFakeEntityTabsData>;
   readonly customLinks?: readonly FlyoutCustomLink[];
   readonly onSelectEntity?: OnSelectEntity;
+  readonly dashboardSlot?: React.ReactNode;
 }) => {
   // Shared fallback: rendered for the `default` branch (unknown tab id from
   // an override) and for the `traces` branch when the active entity has no
@@ -780,7 +814,7 @@ const TabContent = ({
 
   switch (activeTab) {
     case 'overview':
-      return <OverviewTab overview={overview} />;
+      return <OverviewTab overview={overview} dashboardSlot={dashboardSlot} />;
     case 'metrics':
       return <MetricsTab metrics={tabsData.metrics} />;
     case 'logs':

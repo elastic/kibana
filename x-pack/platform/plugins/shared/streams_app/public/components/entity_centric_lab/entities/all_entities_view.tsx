@@ -17,6 +17,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiSuperDatePicker,
+  EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -32,6 +33,14 @@ const NO_GROW = css`
   flex-grow: 0;
 `;
 
+// Fixed-width column for the in-page Cloud tree so the main content keeps
+// the rest of the row. `flex-shrink: 0` stops the nav collapsing when the
+// grid/list is wide.
+const CLOUD_SIDE_NAV_COLUMN = css`
+  width: 220px;
+  flex-shrink: 0;
+`;
+
 import {
   EntityFlyout,
   EntityFlyoutServicesProvider,
@@ -41,8 +50,10 @@ import {
   resolveEntityTypeIdForName,
   type EntityKind,
   type EntitySelectionContext,
+  type EntityDashboardRenderContext,
 } from '@kbn/entity-centric-lab-flyout';
 import { FAKE_ENTITY_TYPES } from '../fake_entity_types';
+import { K8sDetailDashboard, getK8sDetailDashboardConfig } from './k8s_detail_dashboard';
 
 /**
  * Last-ditch fallback when neither the entity's `.type` string nor any
@@ -82,6 +93,8 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../../hooks/use_time_range_update';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import type { ActiveTagFilters, Entity, EntityCategoryId } from './fake_entities';
+import { getCloudProvider, getCloudService, type CloudProviderId } from './cloud_providers';
+import { useCloudHierarchyEnabled } from './use_cloud_hierarchy';
 import {
   EMPTY_TAG_FILTERS,
   TAG_KEYS,
@@ -91,6 +104,7 @@ import {
   matchesTagFilters,
 } from './fake_entities';
 import { GroupedGridView } from './grouped_grid_view';
+import { CloudSideNav } from './cloud_side_nav';
 import { EntitiesListView } from './entities_list_view';
 import { GeomapView } from './geomap_view';
 import { EntitiesTagFilters } from './entities_tag_filters';
@@ -290,16 +304,43 @@ interface AllEntitiesViewProps {
    * cross-category page mounted at `/entities`.
    */
   readonly categoryScope?: EntityCategoryId;
+  /**
+   * Cloud provider scope (`aws` / `gcp` / `azure`) for the
+   * `/entities/cloud/{provider}` route. Always paired with
+   * `categoryScope="cloud"`. Narrows the slice to that provider and
+   * swaps the header to the provider label + logo.
+   */
+  readonly cloudProviderScope?: CloudProviderId;
+  /**
+   * Cloud service scope (e.g. `ec2`) for the
+   * `/entities/cloud/{provider}/{service}` route. Requires
+   * `cloudProviderScope`. Narrows the slice to that service.
+   */
+  readonly cloudServiceScope?: string;
 }
 
-export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) => {
+export const AllEntitiesView = ({
+  categoryScope,
+  cloudProviderScope,
+  cloudServiceScope,
+}: AllEntitiesViewProps = {}) => {
   const router = useStreamsAppRouter();
   const {
-    core: { notifications },
+    core: { notifications, uiSettings },
     dependencies: {
       start: { agentBuilder, charts },
     },
   } = useKibana();
+  // Lab experience mode (Stack Management → Advanced Settings → Discover). The
+  // key is inlined to avoid a cross-plugin import of Discover internals; it is
+  // a stable public contract registered in `discover/server/ui_settings.ts`.
+  // In `infraShortTerm` mode we strip every "Manage entity types" affordance
+  // (toolbar button + flyout cog). `requiresPageReload: true`, so reading once
+  // is enough.
+  const isInfraShortTerm = useMemo(
+    () => uiSettings.get<string>('discover:labMode', 'off') === 'infraShortTerm',
+    [uiSettings]
+  );
   // URL-state-backed time range, shared with every other Streams page
   // through the same `rangeFrom`/`rangeTo` search params. The lab dataset
   // is static so the picked range doesn't actually filter the entities
@@ -329,19 +370,53 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
   // the same slice. Doing the filter here — rather than at each consumer —
   // keeps the rest of the component identical to the un-scoped All
   // entities page.
-  const scopedEntities = useMemo(
-    () =>
-      categoryScope
-        ? dataset.entities.filter((entity) => entity.category === categoryScope)
-        : dataset.entities,
-    [dataset.entities, categoryScope]
-  );
+  const scopedEntities = useMemo(() => {
+    let list = categoryScope
+      ? dataset.entities.filter((entity) => entity.category === categoryScope)
+      : dataset.entities;
+    if (cloudProviderScope) {
+      list = list.filter((entity) => entity.provider === cloudProviderScope);
+    }
+    if (cloudProviderScope && cloudServiceScope) {
+      const service = getCloudService(cloudProviderScope, cloudServiceScope);
+      if (service) {
+        list = list.filter((entity) => entity.type === service.entityType);
+      }
+    }
+    return list;
+  }, [dataset.entities, categoryScope, cloudProviderScope, cloudServiceScope]);
   // Tag facets must be computed from the visible slice. If we kept them
   // global, a scoped page would show filter options that always empty the
   // grid (e.g. "Application: ml-platform" on the Databases page when no
   // database is tagged with that application).
   const tagFacets = useMemo(() => getTagFacets(scopedEntities), [scopedEntities]);
   const categoryDescriptor = categoryScope ? getCategoryDescriptor(categoryScope) : undefined;
+  // Cloud provider / service descriptors resolved from the scope, used
+  // to swap the page header (icon + label) to the provider logo and
+  // "AWS · EC2" style breadcrumb label on the nested routes.
+  const cloudProvider = cloudProviderScope ? getCloudProvider(cloudProviderScope) : undefined;
+  const cloudService =
+    cloudProviderScope && cloudServiceScope
+      ? getCloudService(cloudProviderScope, cloudServiceScope)
+      : undefined;
+  const headerIcon = cloudProvider?.icon ?? categoryDescriptor?.icon;
+  const headerLabel = cloudService
+    ? `${cloudProvider?.label ?? ''} · ${cloudService.label}`
+    : cloudProvider?.label ?? categoryDescriptor?.label;
+  // Substring the Overview's Data streams block filters on so it reacts
+  // to the cloud tree: `aws.` on the provider page, `aws.ec2` on a
+  // service page (matches the seeded `metrics-aws.ec2-default` names).
+  const cloudStreamMatch = cloudProviderScope
+    ? cloudServiceScope
+      ? `${cloudProviderScope}.${cloudServiceScope}`
+      : `${cloudProviderScope}.`
+    : undefined;
+  // Discreet, persisted toggle: provider-grouped Cloud vs the flat
+  // legacy layout. Only surfaced on the Cloud category + provider pages
+  // (a single-service page has nothing to group).
+  const [cloudHierarchyEnabled, setCloudHierarchyEnabled] = useCloudHierarchyEnabled();
+  const isCloudScoped = categoryScope === 'cloud';
+  const showCloudHierarchyToggle = isCloudScoped && !cloudServiceScope;
   const [search, setSearch] = useState('');
   // Tag filters persist across left-nav walks between categories —
   // filtering by "team: payments" on Hosts and then jumping to
@@ -527,14 +602,37 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
     [router]
   );
 
+  // Kubernetes resources (pod, node, namespace, cluster, deployment) embed
+  // their matching "[Kubernetes OTel] … Detail" dashboard in the flyout's
+  // Overview tab, scoped to the clicked resource. The shared flyout package
+  // can't depend on the `dashboard` plugin, so Streams injects the renderer
+  // here; kinds without a matching dashboard return `null` and the Overview
+  // tab renders as before. Time range follows the page's picker.
+  const renderEntityDashboard = useCallback(
+    ({ entityName, entityType, kind }: EntityDashboardRenderContext) => {
+      const resolvedKind = kind ?? entityTypeToKind(entityType) ?? inferEntityKind(entityName);
+      const dashboardConfig = getK8sDetailDashboardConfig(resolvedKind);
+      if (!dashboardConfig) return null;
+      return (
+        <K8sDetailDashboard
+          config={dashboardConfig}
+          resourceName={entityName}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+        />
+      );
+    },
+    [rangeFrom, rangeTo]
+  );
+
   // `agentBuilder` is an *optional* start dep on Streams — when it's
   // available (most environments) the shared flyout's "Add to chat"
   // footer button lights up and the entity context is forwarded to the
   // AI chat with the same payload Discover uses. When it's missing the
   // button is hidden and the rest of the flyout keeps working.
   const flyoutServices = useMemo(
-    () => ({ agentBuilder, notifications, charts }),
-    [agentBuilder, notifications, charts]
+    () => ({ agentBuilder, notifications, charts, renderEntityDashboard }),
+    [agentBuilder, notifications, charts, renderEntityDashboard]
   );
 
   // Snapshot of everything that makes up a "view" — feeds both the
@@ -594,9 +692,9 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
       <StreamsAppPageTemplate.Header
         pageTitle={
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            {categoryDescriptor?.icon ? (
+            {headerIcon ? (
               <EuiFlexItem grow={false}>
-                <EuiIcon type={categoryDescriptor.icon} size="l" aria-hidden />
+                <EuiIcon type={headerIcon} size="l" aria-hidden />
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>
@@ -606,8 +704,8 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
                 the per-category and cross-category pages, so duplicating
                 it in the page title just noise.
               */}
-              {categoryDescriptor
-                ? categoryDescriptor.label
+              {headerLabel
+                ? headerLabel
                 : i18n.translate('xpack.streams.entityCentricLab.entities.title', {
                     defaultMessage: 'All entities',
                   })}
@@ -647,143 +745,189 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
             'data-test-subj': 'entityCentricLabInventoryTab',
           },
         ]}
-        rightSideItems={[
-          <EuiButton
-            key="manage"
-            iconType="gear"
-            onClick={() => {
-              router.push('/manage-entity-types', { path: {}, query: {} });
-            }}
-            data-test-subj="entityCentricLabManageEntityTypesButton"
-          >
-            {i18n.translate('xpack.streams.entityCentricLab.entities.manageButton', {
-              defaultMessage: 'Manage entity types',
-            })}
-          </EuiButton>,
-        ]}
+        rightSideItems={
+          isInfraShortTerm
+            ? []
+            : [
+                <EuiButton
+                  key="manage"
+                  iconType="gear"
+                  onClick={() => {
+                    router.push('/manage-entity-types', { path: {}, query: {} });
+                  }}
+                  data-test-subj="entityCentricLabManageEntityTypesButton"
+                >
+                  {i18n.translate('xpack.streams.entityCentricLab.entities.manageButton', {
+                    defaultMessage: 'Manage entity types',
+                  })}
+                </EuiButton>,
+              ]
+        }
       />
       <StreamsAppPageTemplate.Body>
-        {showOverviewTab ? (
-          categoryScope ? (
-            <MonitoringAssetsView category={categoryScope} onSelectEntity={openEntity} />
-          ) : (
-            <AllEntitiesOverviewView onSelectEntity={openEntity} />
-          )
-        ) : (
-          <>
-            {/*
+        <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
+          {isCloudScoped ? (
+            <EuiFlexItem grow={false} css={CLOUD_SIDE_NAV_COLUMN}>
+              <CloudSideNav providerScope={cloudProviderScope} serviceScope={cloudServiceScope} />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem>
+            {showOverviewTab ? (
+              categoryScope ? (
+                <MonitoringAssetsView
+                  category={categoryScope}
+                  onSelectEntity={openEntity}
+                  scopeLabel={cloudProviderScope ? headerLabel : undefined}
+                  dataStreamNameIncludes={cloudStreamMatch}
+                />
+              ) : (
+                <AllEntitiesOverviewView onSelectEntity={openEntity} />
+              )
+            ) : (
+              <>
+                {/*
               Saved views: a compact toolbar row above the search/filters
               row. Lets the user snapshot the current category + tab +
               view mode + tag filters + search under a name, and re-load
               it later (potentially on a different category, in which
               case the apply handler routes to the target page).
             */}
-            <SavedViewsBar
-              currentState={currentViewState}
-              onApplyView={handleApplyView}
-              savedViews={savedViewsApi}
-            />
-            <EuiSpacer size="s" />
-            {/*
+                <SavedViewsBar
+                  currentState={currentViewState}
+                  onApplyView={handleApplyView}
+                  savedViews={savedViewsApi}
+                />
+                <EuiSpacer size="s" />
+                {/*
           Search, tag filters and time picker share one row to keep the
           page top compact. `NO_GROW` is applied to the wrapper so the row
           stays at content height when the body shrinks (same trick as the
           toolbar below — see the `NO_GROW` definition for the rationale).
         */}
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={NO_GROW}>
-              <EuiFlexItem>
-                <EuiFieldSearch
-                  fullWidth
-                  incremental
-                  placeholder={i18n.translate(
-                    'xpack.streams.entityCentricLab.entities.searchPlaceholder',
-                    { defaultMessage: 'Filter entities by name' }
-                  )}
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  data-test-subj="entityCentricLabEntitiesSearch"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EntitiesTagFilters
-                  facets={tagFacets}
-                  activeFilters={activeTagFilters}
-                  onChange={setActiveTagFilters}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSuperDatePicker
-                  start={rangeFrom}
-                  end={rangeTo}
-                  onTimeChange={handleTimeChange}
-                  onRefresh={handleTimeRefresh}
-                  showUpdateButton="iconOnly"
-                  width="auto"
-                  data-test-subj="entityCentricLabEntitiesTimePicker"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap css={NO_GROW}>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs">
-                  <h3>
-                    {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
-                      defaultMessage: '{entities} Entities · {groups} Groups',
-                      values: {
-                        entities: filteredEntities.length.toLocaleString(),
-                        // On the cross-category page the dataset-wide group
-                        // total is the right summary. When scoped to one
-                        // category the grid only ever renders that single
-                        // section, so collapse the count to 1 (or 0 if the
-                        // category is empty).
-                        groups: categoryScope
-                          ? filteredEntities.length > 0
-                            ? 1
-                            : 0
-                          : dataset.totalGroups,
-                      },
-                    })}
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem />
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  legend={i18n.translate(
-                    'xpack.streams.entityCentricLab.entities.viewMode.legend',
-                    {
-                      defaultMessage: 'View mode',
-                    }
-                  )}
-                  options={VIEW_MODE_OPTIONS}
-                  idSelected={viewMode}
-                  onChange={(id) => setViewMode(id as ViewMode)}
-                  isIconOnly
-                  data-test-subj="entityCentricLabEntitiesViewModeToggle"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiHorizontalRule margin="m" />
-            {viewMode === 'grid' ? (
-              <GroupedGridView entities={filteredEntities} onSelectEntity={openEntity} />
-            ) : viewMode === 'geomap' ? (
-              <GeomapView
-                entities={filteredEntities}
-                onSelectEntity={openEntity}
-                onSelectRegion={handleSelectRegion}
-              />
-            ) : (
-              <EntitiesListView entities={filteredEntities} onSelectEntity={openEntity} />
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={NO_GROW}>
+                  <EuiFlexItem>
+                    <EuiFieldSearch
+                      fullWidth
+                      incremental
+                      placeholder={i18n.translate(
+                        'xpack.streams.entityCentricLab.entities.searchPlaceholder',
+                        { defaultMessage: 'Filter entities by name' }
+                      )}
+                      value={search}
+                      onChange={(event) => setSearch(event.target.value)}
+                      data-test-subj="entityCentricLabEntitiesSearch"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EntitiesTagFilters
+                      facets={tagFacets}
+                      activeFilters={activeTagFilters}
+                      onChange={setActiveTagFilters}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiSuperDatePicker
+                      start={rangeFrom}
+                      end={rangeTo}
+                      onTimeChange={handleTimeChange}
+                      onRefresh={handleTimeRefresh}
+                      showUpdateButton="iconOnly"
+                      width="auto"
+                      data-test-subj="entityCentricLabEntitiesTimePicker"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="m" />
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="m"
+                  responsive={false}
+                  wrap
+                  css={NO_GROW}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xxs">
+                      <h3>
+                        {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
+                          defaultMessage: '{entities} Entities · {groups} Groups',
+                          values: {
+                            entities: filteredEntities.length.toLocaleString(),
+                            // On the cross-category page the dataset-wide group
+                            // total is the right summary. When scoped to one
+                            // category the grid only ever renders that single
+                            // section, so collapse the count to 1 (or 0 if the
+                            // category is empty).
+                            groups: categoryScope
+                              ? filteredEntities.length > 0
+                                ? 1
+                                : 0
+                              : dataset.totalGroups,
+                          },
+                        })}
+                      </h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem />
+                  {showCloudHierarchyToggle ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiSwitch
+                        compressed
+                        label={i18n.translate(
+                          'xpack.streams.entityCentricLab.entities.cloudHierarchyToggle',
+                          { defaultMessage: 'Group by provider' }
+                        )}
+                        checked={cloudHierarchyEnabled}
+                        onChange={(event) => setCloudHierarchyEnabled(event.target.checked)}
+                        data-test-subj="entityCentricLabCloudHierarchyToggle"
+                      />
+                    </EuiFlexItem>
+                  ) : null}
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonGroup
+                      legend={i18n.translate(
+                        'xpack.streams.entityCentricLab.entities.viewMode.legend',
+                        {
+                          defaultMessage: 'View mode',
+                        }
+                      )}
+                      options={VIEW_MODE_OPTIONS}
+                      idSelected={viewMode}
+                      onChange={(id) => setViewMode(id as ViewMode)}
+                      isIconOnly
+                      data-test-subj="entityCentricLabEntitiesViewModeToggle"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiHorizontalRule margin="m" />
+                {viewMode === 'grid' ? (
+                  <GroupedGridView
+                    entities={filteredEntities}
+                    onSelectEntity={openEntity}
+                    groupCloudByProvider={cloudHierarchyEnabled}
+                  />
+                ) : viewMode === 'geomap' ? (
+                  <GeomapView
+                    entities={filteredEntities}
+                    onSelectEntity={openEntity}
+                    onSelectRegion={handleSelectRegion}
+                  />
+                ) : (
+                  <EntitiesListView
+                    entities={filteredEntities}
+                    onSelectEntity={openEntity}
+                    groupCloudByProvider={cloudHierarchyEnabled}
+                  />
+                )}
+              </>
             )}
-          </>
-        )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </StreamsAppPageTemplate.Body>
       {selectedEntityName ? (
         <EntityFlyoutServicesProvider services={flyoutServices}>
           <EntityFlyout
             session="start"
-            size="m"
+            size="l"
             entityName={selectedEntityName}
             entityType={selectedEntityType}
             entityHealth={selectedEntityHealth}
@@ -791,7 +935,9 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
             onClose={closeEntity}
             onSelectEntity={openChildEntity}
             onNavigateEntity={openEntity}
-            onManageEntityType={() => manageEntityType(selectedEntity)}
+            onManageEntityType={
+              isInfraShortTerm ? undefined : () => manageEntityType(selectedEntity)
+            }
           />
           {childEntityName ? (
             <EntityFlyout
@@ -804,7 +950,9 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
               onClose={closeChildEntity}
               onSelectEntity={openChildEntity}
               onNavigateEntity={openChildEntity}
-              onManageEntityType={() => manageEntityType(childEntity)}
+              onManageEntityType={
+                isInfraShortTerm ? undefined : () => manageEntityType(childEntity)
+              }
             />
           ) : null}
         </EntityFlyoutServicesProvider>

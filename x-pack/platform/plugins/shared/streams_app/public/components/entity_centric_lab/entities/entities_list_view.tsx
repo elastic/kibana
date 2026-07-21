@@ -28,6 +28,7 @@ import {
 } from '@kbn/entity-centric-lab-flyout';
 import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
 import { ENTITY_CATEGORIES, HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
+import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
 import {
   KUBERNETES_CLUSTER_FILTER_ALL,
   KUBERNETES_SUB_TYPE_ORDER,
@@ -39,6 +40,12 @@ import {
 interface Props {
   readonly entities: readonly Entity[];
   readonly onSelectEntity: (entityName: string) => void;
+  /**
+   * When true, Cloud entities are grouped by provider (AWS / GCP /
+   * Azure) then by service; when false, Cloud groups flat by type.
+   * Driven by the discreet toolbar toggle (`useCloudHierarchyEnabled`).
+   */
+  readonly groupCloudByProvider?: boolean;
 }
 
 const HEALTH_BADGE_COLOR: Record<EntityHealth, 'success' | 'warning' | 'danger'> = {
@@ -210,6 +217,28 @@ const CategorySectionHeader = ({
   );
 };
 
+const CloudProviderSectionHeader = ({
+  provider,
+  total,
+}: {
+  provider: CloudProviderDescriptor;
+  total: number;
+}) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiIcon type={provider.icon} size="m" aria-hidden />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiTitle size="xxs">
+        <h4>{provider.label}</h4>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 const SectionHeader = ({
   category,
   subTypeLabel,
@@ -344,7 +373,8 @@ type ListItem =
       rows: Entity[];
     }
   | { kind: 'kubernetes-header'; total: number }
-  | { kind: 'category-header'; category: EntityCategoryId; total: number };
+  | { kind: 'category-header'; category: EntityCategoryId; total: number }
+  | { kind: 'cloud-provider-header'; provider: CloudProviderDescriptor; total: number };
 
 const KubernetesSectionHeader = ({
   total,
@@ -391,7 +421,11 @@ const KubernetesSectionHeader = ({
   );
 };
 
-export const EntitiesListView = ({ entities, onSelectEntity }: Props) => {
+export const EntitiesListView = ({
+  entities,
+  onSelectEntity,
+  groupCloudByProvider = false,
+}: Props) => {
   const columns = useColumns(onSelectEntity);
 
   // Subscribe to chaos-mode flips so PayFlow storyline rows can swap
@@ -463,6 +497,29 @@ export const EntitiesListView = ({ entities, onSelectEntity }: Props) => {
         }
         continue;
       }
+      if (descriptor.id === 'cloud' && groupCloudByProvider) {
+        // Cloud provider hierarchy: one header per provider (AWS / GCP
+        // / Azure) followed by one table panel per service, in the
+        // canonical descriptor order. Empty providers/services are
+        // skipped so a filtered slice stays compact.
+        for (const provider of CLOUD_PROVIDERS) {
+          const providerRows = rows.filter((entity) => entity.provider === provider.id);
+          if (providerRows.length === 0) continue;
+          result.push({ kind: 'cloud-provider-header', provider, total: providerRows.length });
+          for (const service of provider.services) {
+            const serviceRows = providerRows.filter((entity) => entity.type === service.entityType);
+            if (serviceRows.length === 0) continue;
+            result.push({
+              kind: 'panel',
+              category: 'cloud',
+              subTypeLabel: service.label,
+              nested: true,
+              rows: serviceRows,
+            });
+          }
+        }
+        continue;
+      }
       // Non-K8s: group by `.type` so categories with more than one
       // entity type (Hosts → Bare-metal + VM, Cloud → region + EC2 +
       // Lambda + S3, Middlewares → Kafka + RabbitMQ, LLMs → OpenAI +
@@ -486,7 +543,7 @@ export const EntitiesListView = ({ entities, onSelectEntity }: Props) => {
       }
     }
     return result;
-  }, [effectiveEntities, clusterFilter, clusterNames]);
+  }, [effectiveEntities, clusterFilter, clusterNames, groupCloudByProvider]);
 
   if (effectiveEntities.length === 0) {
     return (
@@ -531,6 +588,13 @@ export const EntitiesListView = ({ entities, onSelectEntity }: Props) => {
           return (
             <EuiFlexItem key={`${item.category}-header-${index}`} grow={false}>
               <CategorySectionHeader category={item.category} total={item.total} />
+            </EuiFlexItem>
+          );
+        }
+        if (item.kind === 'cloud-provider-header') {
+          return (
+            <EuiFlexItem key={`cloud-${item.provider.id}-header-${index}`} grow={false}>
+              <CloudProviderSectionHeader provider={item.provider} total={item.total} />
             </EuiFlexItem>
           );
         }

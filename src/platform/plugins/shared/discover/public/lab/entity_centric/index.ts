@@ -9,4 +9,5 @@
 
 export { EntityCentricLabProvider, useEntityCentricLab } from './entity_centric_lab_provider';
 export { EntityCentricLabPanel, FakeLogsPanel } from './fake_logs_panel';
-export { ENTITY_CENTRIC_LAB_SETTING } from './constants';
+export { LAB_MODE_SETTING } from './constants';
+export type { LabMode } from './constants';

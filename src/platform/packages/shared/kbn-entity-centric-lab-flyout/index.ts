@@ -9,7 +9,7 @@
 
 export { EntityFlyout } from './src/entity_flyout';
 export { EntityFlyoutServicesProvider, useEntityFlyoutServices } from './src/services_context';
-export type { EntityFlyoutServices } from './src/services_context';
+export type { EntityFlyoutServices, EntityDashboardRenderContext } from './src/services_context';
 
 export { buildFakeEntityOverview, formatGoldenSignalValue } from './src/fake_entity_overview';
 export type {

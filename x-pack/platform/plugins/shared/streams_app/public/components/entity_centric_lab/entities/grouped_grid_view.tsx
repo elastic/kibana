@@ -40,6 +40,7 @@ import {
 } from '@kbn/entity-centric-lab-flyout';
 import type { Entity, EntityCategoryId } from './fake_entities';
 import { ENTITY_CATEGORIES, getCategoryDescriptor } from './fake_entities';
+import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
 import {
   STAT_OPTIONS,
   bucketKeyFor,
@@ -69,6 +70,13 @@ import {
 interface Props {
   readonly entities: readonly Entity[];
   readonly onSelectEntity: (entityName: string) => void;
+  /**
+   * When true, Cloud entities are grouped by provider (AWS / GCP /
+   * Azure) then by service, matching the nested left-nav. When false,
+   * Cloud falls back to the flat "group by type" card. Driven by the
+   * discreet toolbar toggle (`useCloudHierarchyEnabled`).
+   */
+  readonly groupCloudByProvider?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -1101,6 +1109,123 @@ const MultiTypeCategoryCard = ({
 };
 
 // ---------------------------------------------------------------------------
+// Cloud provider card (Cloud > provider > service)
+// ---------------------------------------------------------------------------
+
+const CloudProviderHeader = ({
+  provider,
+  total,
+}: {
+  provider: CloudProviderDescriptor;
+  total: number;
+}) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiIcon type={provider.icon} size="m" aria-hidden />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiTitle size="xxs">
+        <h4>{provider.label}</h4>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+/**
+ * One panel per cloud provider, with a `SubTypeRow` per service in the
+ * canonical descriptor order. Services with no entities in the current
+ * (filtered) slice are skipped so the panel stays compact. Bucket keys
+ * reuse the entity `.type` so AWS keeps its per-service metric catalogs
+ * and GCP/Azure fall back to the shared Cloud catalog.
+ */
+const CloudProviderCard = ({
+  provider,
+  entities,
+  onSelectEntity,
+}: {
+  provider: CloudProviderDescriptor;
+  entities: readonly Entity[];
+  onSelectEntity: (entityName: string) => void;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const subRowClass = css`
+    padding: ${euiTheme.size.s} 0;
+    border-top: ${euiTheme.border.thin};
+  `;
+
+  const serviceGroups = useMemo(
+    () =>
+      provider.services
+        .map((service) => ({
+          service,
+          rows: entities.filter((entity) => entity.type === service.entityType),
+        }))
+        .filter((group) => group.rows.length > 0),
+    [provider.services, entities]
+  );
+
+  if (serviceGroups.length === 0) {
+    return null;
+  }
+
+  return (
+    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+      <CloudProviderHeader provider={provider} total={entities.length} />
+      <EuiSpacer size="m" />
+      {serviceGroups.map((group, index) => (
+        <div key={group.service.id} className={index === 0 ? undefined : subRowClass}>
+          <SubTypeRow
+            bucketKey={bucketKeyFor('cloud', group.service.entityType)}
+            label={group.service.label}
+            entities={group.rows}
+            onSelectEntity={onSelectEntity}
+          />
+          {index === 0 ? <EuiSpacer size="s" /> : null}
+        </div>
+      ))}
+    </EuiPanel>
+  );
+};
+
+/**
+ * Renders one {@link CloudProviderCard} per provider present in the
+ * (already category-scoped) cloud slice, in canonical provider order.
+ */
+const CloudGroupedCards = ({
+  entities,
+  onSelectEntity,
+}: {
+  entities: readonly Entity[];
+  onSelectEntity: (entityName: string) => void;
+}) => {
+  const providerGroups = useMemo(
+    () =>
+      CLOUD_PROVIDERS.map((provider) => ({
+        provider,
+        rows: entities.filter((entity) => entity.provider === provider.id),
+      })).filter((group) => group.rows.length > 0),
+    [entities]
+  );
+
+  return (
+    <>
+      {providerGroups.map((group) => (
+        <EuiFlexItem key={group.provider.id} grow={false}>
+          <CloudProviderCard
+            provider={group.provider}
+            entities={group.rows}
+            onSelectEntity={onSelectEntity}
+          />
+        </EuiFlexItem>
+      ))}
+    </>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Non-Kubernetes category card
 // ---------------------------------------------------------------------------
 
@@ -1211,7 +1336,11 @@ const CategoryCardInner = ({
 // Public entry
 // ---------------------------------------------------------------------------
 
-export const GroupedGridView = ({ entities, onSelectEntity }: Props) => {
+export const GroupedGridView = ({
+  entities,
+  onSelectEntity,
+  groupCloudByProvider = false,
+}: Props) => {
   // Subscribe to chaos-mode flips so PayFlow storyline tiles can
   // swap colour the moment the user rolls back. `getEffectiveEntityHealth`
   // is a no-op for everything outside the storyline, so the rest of
@@ -1265,15 +1394,23 @@ export const GroupedGridView = ({ entities, onSelectEntity }: Props) => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {grouped.map((section) => (
-        <EuiFlexItem key={section.category} grow={false}>
-          <CategoryCard
-            category={section.category}
+      {grouped.map((section) =>
+        section.category === 'cloud' && groupCloudByProvider ? (
+          <CloudGroupedCards
+            key={section.category}
             entities={section.rows}
             onSelectEntity={onSelectEntity}
           />
-        </EuiFlexItem>
-      ))}
+        ) : (
+          <EuiFlexItem key={section.category} grow={false}>
+            <CategoryCard
+              category={section.category}
+              entities={section.rows}
+              onSelectEntity={onSelectEntity}
+            />
+          </EuiFlexItem>
+        )
+      )}
     </EuiFlexGroup>
   );
 };

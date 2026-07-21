@@ -38,10 +38,39 @@ import {
 } from './discover_features';
 import { StreamsTelemetryService } from './telemetry/service';
 import { StreamsAppLocatorDefinition } from '../common/locators';
+import { CLOUD_PROVIDERS } from './components/entity_centric_lab/entities/cloud_providers';
 
 const StreamsApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.StreamsApplication }))
 );
+
+const toPascalCase = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
+
+/**
+ * Deep links for the nested Cloud hierarchy, derived from the
+ * {@link CLOUD_PROVIDERS} taxonomy so provider/service additions only
+ * need a single edit. Produces one link per provider
+ * (`entitiesCloudAws` -> `/entities/cloud/aws`) and one per service
+ * (`entitiesCloudAwsEc2` -> `/entities/cloud/aws/ec2`). The navigation
+ * tree in the Observability plugin references these ids explicitly.
+ */
+const cloudEntityDeepLinks = CLOUD_PROVIDERS.flatMap((provider) => {
+  const providerId = `entitiesCloud${toPascalCase(provider.id)}`;
+  return [
+    {
+      id: providerId,
+      title: provider.label,
+      path: `/entities/cloud/${provider.id}`,
+      visibleIn: [] as [],
+    },
+    ...provider.services.map((service) => ({
+      id: `${providerId}${toPascalCase(service.id)}`,
+      title: service.label,
+      path: `/entities/cloud/${provider.id}/${service.id}`,
+      visibleIn: [] as [],
+    })),
+  ];
+});
 
 export const renderApp = ({
   appMountParameters,
@@ -190,6 +219,7 @@ export class StreamsAppPlugin
           path: '/entities/cloud',
           visibleIn: [],
         },
+        ...cloudEntityDeepLinks,
         {
           id: 'entitiesMiddlewares',
           title: i18n.translate('xpack.streams.deepLinks.entitiesMiddlewaresTitle', {

@@ -132,6 +132,20 @@ interface Props {
    * accordion header, so per-category intros would just add noise.
    */
   readonly hideIntro?: boolean;
+  /**
+   * Overrides the label used in the intro and every section title
+   * (e.g. `AWS`, `AWS · EC2`). Lets the Cloud provider / service pages
+   * reuse the category overview while reading as scoped to the picked
+   * provider/service. Falls back to the category label when omitted.
+   */
+  readonly scopeLabel?: string;
+  /**
+   * When set, narrows the Data streams block to rows whose name
+   * contains this substring (e.g. `aws.` for the AWS page, `aws.ec2`
+   * for the EC2 page). Alerts / SLOs / assets are category-level mock
+   * data with no provider dimension, so only the streams block scopes.
+   */
+  readonly dataStreamNameIncludes?: string;
 }
 
 const AssetTypeBadge = ({ type }: { type: MonitoringAssetType }) => {
@@ -952,6 +966,8 @@ export const MonitoringAssetsView = ({
   onSelectEntity,
   sectionVariant = 'collapsible',
   hideIntro = false,
+  scopeLabel,
+  dataStreamNameIncludes,
 }: Props) => {
   const { integration, installed, recommended } = useMemo(
     () => getCategoryMonitoringAssets(category),
@@ -961,7 +977,21 @@ export const MonitoringAssetsView = ({
     () => getCategorySignals(category),
     [category]
   );
-  const categoryLabel = getCategoryDescriptor(category)?.label ?? category;
+  // Prefer the caller-supplied scope label (e.g. `AWS · EC2`) so the
+  // Cloud provider/service pages read as scoped; fall back to the
+  // category label for the plain per-category pages.
+  const categoryLabel = scopeLabel ?? getCategoryDescriptor(category)?.label ?? category;
+  // Narrow the (category-level) data streams to the active provider /
+  // service when a match hint is supplied. GCP / Azure have no seeded
+  // streams, so their pages fall through to the empty state — which is
+  // the honest signal for the mock dataset.
+  const scopedDataStreams = useMemo(
+    () =>
+      dataStreamNameIncludes
+        ? dataStreams.filter((row) => row.name.includes(dataStreamNameIncludes))
+        : dataStreams,
+    [dataStreams, dataStreamNameIncludes]
+  );
   const {
     core: {
       http: { basePath },
@@ -1022,7 +1052,7 @@ export const MonitoringAssetsView = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <DataStreamsSection
-            streams={dataStreams}
+            streams={scopedDataStreams}
             categoryLabel={categoryLabel}
             prependBasePath={prependBasePath}
           />

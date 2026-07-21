@@ -17,7 +17,8 @@ import {
 } from '@kbn/entity-centric-lab-flyout';
 import type { EntitySelectionContext } from '@kbn/entity-centric-lab-flyout';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { ENTITY_CENTRIC_LAB_SETTING } from './constants';
+import type { LabMode } from './constants';
+import { LAB_MODE_SETTING } from './constants';
 
 interface EntityCentricLabContextValue {
   readonly enabled: boolean;
@@ -33,8 +34,10 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
   // Space-scoped advanced setting; lives in Stack Management → Advanced Settings
   // under the Discover category. `requiresPageReload: true`, so we don't need to
   // subscribe to live updates here — a fresh page render will pick up changes.
+  // Only the `entityCentric` mode drives Discover's customization; `off` and
+  // `infraShortTerm` both leave Discover untouched.
   const enabled = useMemo(
-    () => uiSettings.get<boolean>(ENTITY_CENTRIC_LAB_SETTING, false),
+    () => uiSettings.get<LabMode>(LAB_MODE_SETTING, 'off') === 'entityCentric',
     [uiSettings]
   );
 

@@ -8,4 +8,8 @@
 export { ManageEntityTypesView } from './manage_entity_types_view';
 export { SignificantEventsView } from './significant_events_view';
 export { AllEntitiesView } from './entities/all_entities_view';
-export { CategoryEntitiesView } from './entities/category_entities_view';
+export {
+  CategoryEntitiesView,
+  CloudProviderView,
+  CloudServiceView,
+} from './entities/category_entities_view';
