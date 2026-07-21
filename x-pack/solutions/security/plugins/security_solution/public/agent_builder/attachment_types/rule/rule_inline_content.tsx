@@ -248,7 +248,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
         <>
           <EuiSpacer size="s" />
           <EuiAccordion
-            id="rule-diff-accordion"
+            id={`rule-diff-accordion-${attachment.id}`}
             buttonContent={DIFF_ACCORDION_LABEL}
             paddingSize="none"
           >
