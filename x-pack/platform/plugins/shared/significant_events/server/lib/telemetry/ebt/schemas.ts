@@ -477,8 +477,7 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
   alerting_engine: {
     type: 'keyword',
     _meta: {
-      description:
-        'Resolved alerting engine backing the read: `v2` reads `.rule-events`, `v1` reads `.alerts-*`',
+      description: 'Alerting engine backing the read; Significant Events always uses v2',
     },
   },
   alerts_source_index: {
