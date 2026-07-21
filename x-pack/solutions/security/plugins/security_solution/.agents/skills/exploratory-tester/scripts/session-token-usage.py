@@ -43,13 +43,8 @@ def resolve_transcript(explicit_path=None):
     if transcript.is_file():
         return transcript
 
-    # Fallback: newest *.jsonl in the projects/<cwd-slug> directory
-    project_dir = Path.home() / '.claude' / 'projects' / cwd_slug
-    if project_dir.is_dir():
-        candidates = sorted(project_dir.glob('*.jsonl'), key=lambda p: p.stat().st_mtime)
-        if candidates:
-            return candidates[-1]
-
+    # Session ID was set but the specific file wasn't found — don't guess with a
+    # different session's transcript; return None so the caller writes "not available".
     return None
 
 
