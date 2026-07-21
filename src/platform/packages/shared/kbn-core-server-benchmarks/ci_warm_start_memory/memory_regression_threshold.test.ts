@@ -26,7 +26,7 @@ describe('getAllowedRegressionDeltaBytes', () => {
     );
   });
 
-  it('uses 0.05% of the baseline median when that exceeds 50 MiB', () => {
+  it('uses 5% of the baseline median when that exceeds 50 MiB', () => {
     const baselineMedianRssBytes = 200 * 1024 * 1024 * 1024;
 
     expect(getAllowedRegressionDeltaBytes(baselineMedianRssBytes)).toBe(
