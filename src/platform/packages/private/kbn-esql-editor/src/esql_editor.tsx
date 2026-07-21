@@ -873,7 +873,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
                     const lineCount = editor.getModel()?.getLineCount() || 1;
                     const contentHeight =
-                      editor.getTopForLineNumber(lineCount + 1) + lineHeight * 1.25;
+                      editor.getTopForLineNumber(lineCount + 1) + lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical
                     setEditorHeight((currentHeight) => {
                       if (contentHeight > currentHeight) {
                         return Math.min(contentHeight, EDITOR_MAX_HEIGHT);
