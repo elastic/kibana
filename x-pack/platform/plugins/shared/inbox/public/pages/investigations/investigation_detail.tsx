@@ -162,7 +162,7 @@ export const InvestigationDetailFlyout: React.FC<InvestigationDetailFlyoutProps>
   const watch = getWatchProvenance(proposal?.source_watch_id ?? investigation.source_watch_id);
 
   const chatUrl =
-    services.application?.getUrlForApp('agentBuilder', {
+    services.application?.getUrlForApp('agent_builder', {
       path: `/conversations/${investigation.conversation_id}`,
     }) ?? '#';
 

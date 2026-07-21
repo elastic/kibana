@@ -31,7 +31,7 @@ export const InvestigationRow: React.FC<InvestigationRowProps> = ({ investigatio
   const watch = getWatchProvenance(investigation.source_watch_id);
   const summary = summarizeText(investigation.summary ?? investigation.title);
   const chatUrl =
-    services.application?.getUrlForApp('agentBuilder', {
+    services.application?.getUrlForApp('agent_builder', {
       path: `/conversations/${investigation.conversation_id}`,
     }) ?? '#';
 
