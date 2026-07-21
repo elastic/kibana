@@ -104,6 +104,15 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             `Duplicate idempotency key detected, returning existing execution ${executionId}`
           );
 
+          // Repairs executions left in `scheduled` when the original delivery
+          // failed before scheduling the task.
+          const existing = await executionClient.peek(executionId);
+          if (existing?.status === ExecutionStatus.scheduled) {
+            await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
+              request,
+            });
+          }
+
           return {
             executionId,
             events$: this.followExecution(executionId),
@@ -175,6 +184,17 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /**
    * Execute on a TM node: schedule the task and return the followExecution polling observable.
    */
+  private buildRunAgentTask(executionId: string) {
+    return {
+      id: `agent-${executionId}`,
+      taskType: taskTypes.runAgent,
+      params: { executionId },
+      scope: ['agent-builder'],
+      enabled: true,
+      state: {},
+    };
+  }
+
   private async executeWithScheduledTask({
     executionId,
     agentId,
@@ -184,17 +204,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     agentId: string;
     request: ExecuteAgentParams['request'];
   }): Promise<ExecuteAgentResult> {
-    await this.deps.taskManager.schedule(
-      {
-        id: `agent-${executionId}`,
-        taskType: taskTypes.runAgent,
-        params: { executionId },
-        scope: ['agent-builder'],
-        enabled: true,
-        state: {},
-      },
-      { request }
-    );
+    await this.deps.taskManager.schedule(this.buildRunAgentTask(executionId), { request });
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
 

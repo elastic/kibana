@@ -63,6 +63,7 @@ jest.mock('./task/heartbeat_reporter', () => ({
 }));
 
 const mockTaskManagerSchedule = jest.fn();
+const mockTaskManagerEnsureScheduled = jest.fn();
 
 import { createAgentExecutionService } from './execution_service';
 
@@ -71,6 +72,7 @@ describe('AgentExecutionService', () => {
   const elasticsearch = elasticsearchServiceMock.createStart();
   const taskManager = {
     schedule: mockTaskManagerSchedule,
+    ensureScheduled: mockTaskManagerEnsureScheduled,
   } as any;
 
   const uiSettings = {
@@ -504,14 +506,40 @@ describe('AgentExecutionService', () => {
         useTaskManager: true,
       });
 
-    it('returns the existing execution without scheduling a task on replay', async () => {
+    it('returns the existing execution without scheduling a new task on replay', async () => {
       mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.completed,
+        eventCount: 3,
+      });
 
       const result = await executeWithKey('Ev123');
 
       expect(result.executionId).toBe('exec-1');
       expect(result.events$).toBeDefined();
       expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+    });
+
+    it('re-issues the schedule on replay when the existing execution never got a task', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.scheduled,
+        eventCount: 0,
+      });
+
+      const result = await executeWithKey('Ev123');
+
+      expect(result.executionId).toBe('exec-1');
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'agent-exec-1',
+          taskType: 'agent-builder:run-agent',
+          params: { executionId: 'exec-1' },
+        }),
+        expect.anything()
+      );
     });
 
     it('rethrows create errors that are not duplicate-execution errors', async () => {
