@@ -145,6 +145,9 @@ export async function createFleetAgent(
         access_api_key_id: 'api-key-3',
         active: true,
         policy_id: agentPolicyId,
+        policy_base_id: agentPolicyId.includes('#')
+          ? agentPolicyId.substring(0, agentPolicyId.indexOf('#'))
+          : agentPolicyId,
         policy_revision_idx: 1,
         last_checkin_status: 'online',
         type: 'PERMANENT',

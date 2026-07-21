@@ -124,6 +124,9 @@ export async function generateAgent(
       enrolled_at: new Date().toISOString(),
       last_checkin: new Date().toISOString(),
       policy_id: policyId,
+      policy_base_id: policyId.includes('#')
+        ? policyId.substring(0, policyId.indexOf('#'))
+        : policyId,
       policy_revision: 1,
       agent: {
         id,

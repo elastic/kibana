@@ -82,18 +82,21 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policy1#9.3',
+        policy_base_id: 'policy1',
       },
       {
         data: {
           inputs: [],
         },
         policy_id: 'policy1#9.2',
+        policy_base_id: 'policy1',
       },
       {
         data: {
           inputs: [],
         },
         policy_id: 'policy1#8.9',
+        policy_base_id: 'policy1',
       },
     ]);
   });
@@ -126,12 +129,14 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policy1#9.4',
+        policy_base_id: 'policy1',
       },
       {
         data: {
           inputs: [],
         },
         policy_id: 'policy1#9.1',
+        policy_base_id: 'policy1',
       },
     ]);
   });
@@ -151,6 +156,7 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policy1#9.3',
+        policy_base_id: 'policy1',
       },
       {
         data: {
@@ -161,12 +167,14 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policy1#9.2',
+        policy_base_id: 'policy1',
       },
       {
         data: {
           inputs: [],
         },
         policy_id: 'policy1#8.9',
+        policy_base_id: 'policy1',
       },
     ]);
   });
@@ -188,6 +196,7 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policy1#9.4',
+        policy_base_id: 'policy1',
       },
       {
         data: {
@@ -198,6 +207,7 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policy1#9.1',
+        policy_base_id: 'policy1',
       },
     ]);
   });
@@ -225,6 +235,7 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policyBothConditions#9.3',
+        policy_base_id: 'policyBothConditions',
       },
       {
         data: {
@@ -235,12 +246,14 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policyBothConditions#9.2',
+        policy_base_id: 'policyBothConditions',
       },
       {
         data: {
           inputs: [],
         },
         policy_id: 'policyBothConditions#8.9',
+        policy_base_id: 'policyBothConditions',
       },
     ]);
   });
