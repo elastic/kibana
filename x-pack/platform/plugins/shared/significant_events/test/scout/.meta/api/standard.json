@@ -189,7 +189,7 @@
     },
     {
       "id": "0d69f0f4d0e3e1c-bd7a1e3fc467957",
-      "title": "Managed workflows system-streams-memory-synthesis: is installed and valid",
+      "title": "Managed workflows system-significant-events-memory-synthesis: is installed and valid",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -205,7 +205,7 @@
     },
     {
       "id": "0d69f0f4d0e3e1c-95274bd98778fe9",
-      "title": "Managed workflows system-streams-memory-consolidation: is installed and valid",
+      "title": "Managed workflows system-significant-events-memory-consolidation: is installed and valid",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -221,7 +221,7 @@
     },
     {
       "id": "0d69f0f4d0e3e1c-2bf3bba1a03f16b",
-      "title": "Managed workflows system-streams-memory-conversation-scraper: is installed and valid",
+      "title": "Managed workflows system-significant-events-memory-conversation-scraper: is installed and valid",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
