@@ -1694,6 +1694,25 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should set agent.features.include_tags_in_events.enabled from advanced_settings', async () => {
+    mockAgentPolicy({
+      advanced_settings: {
+        agent_features_include_tags_in_events_enabled: true,
+      },
+    });
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      agent: {
+        features: {
+          include_tags_in_events: {
+            enabled: true,
+          },
+        },
+      },
+    });
+  });
+
   it('should have ssl options in outputs when fleet server host has es ssl options', async () => {
     const fleetServerHostWithSSL = {
       name: 'default Fleet Server',
@@ -2749,6 +2768,39 @@ ssl.test: 123
       }
     `);
   });
+
+  it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
+    const proxy = {
+      id: 'proxy-1',
+      name: 'proxy1',
+      url: 'https://proxy.fr',
+      certificate_authorities: '/tmp/ssl/ca.crt',
+      proxy_headers: { Authorization: 'Bearer SECRET' },
+      certificate: 'my-cert',
+      certificate_key: 'PRIVATE_KEY',
+      is_preconfigured: false,
+    } as any;
+
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        proxy_id: 'proxy-1',
+        hosts: ['http://host.fr'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'elasticsearch',
+      } as any,
+      proxy,
+      false,
+      true // redactProxySecrets
+    );
+
+    expect(policyOutput.proxy_url).toBe('https://proxy.fr');
+    expect(policyOutput).not.toHaveProperty('proxy_headers');
+    expect(policyOutput.ssl?.certificate).toBe('my-cert');
+    expect(policyOutput.ssl).not.toHaveProperty('key');
+  });
 });
 
 describe('generateFleetConfig', () => {
@@ -2902,6 +2954,49 @@ describe('generateFleetConfig', () => {
         },
       },
     });
+  });
+
+  it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
+    const res = generateFleetConfig(
+      {
+        host_urls: ['https://test.fr'],
+        proxy_id: 'proxy-1',
+      } as any,
+      [
+        {
+          id: 'proxy-1',
+          url: 'https://proxy.fr',
+          certificate_authorities: ['/tmp/ssl/ca.crt'],
+          proxy_headers: { Authorization: 'Bearer SECRET' },
+          certificate: 'my-cert',
+          certificate_key: 'PRIVATE_KEY',
+        } as any,
+      ],
+      true // redactProxySecrets
+    );
+
+    expect(res).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "https://test.fr",
+        ],
+        "proxy_url": "https://proxy.fr",
+        "ssl": Object {
+          "certificate": "my-cert",
+          "certificate_authorities": Array [
+            Array [
+              "/tmp/ssl/ca.crt",
+            ],
+          ],
+          "renegotiation": "never",
+          "verification_mode": "",
+        },
+      }
+    `);
+    expect(res).not.toHaveProperty('proxy_headers');
+    if (res && 'hosts' in res) {
+      expect(res.ssl).not.toHaveProperty('key');
+    }
   });
 });
 
@@ -3227,6 +3322,20 @@ describe('getBinarySourceSettings', () => {
           key: 'PROXY_KEY1',
         },
       });
+    });
+
+    it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
+      const result = getBinarySourceSettings(downloadSource, proxy, true);
+      expect(result).toEqual({
+        proxy_url: 'http://proxy_uri.it',
+        sourceURI: 'http://custom-registry-test',
+        ssl: {
+          certificate: 'proxy_cert',
+          certificate_authorities: ['PROXY_CA'],
+        },
+      });
+      expect(result).not.toHaveProperty('proxy_headers');
+      expect(result.ssl).not.toHaveProperty('key');
     });
   });
 
