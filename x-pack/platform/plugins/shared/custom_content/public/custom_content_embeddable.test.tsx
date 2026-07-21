@@ -11,19 +11,25 @@ import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
 
+let capturedOnTemplateChange: ((t: string) => void) | undefined;
+
 jest.mock('./components/custom_content_component', () => ({
   CustomContentComponent: (props: {
-    prompt: string;
+    prompt: string | undefined;
     savedTemplate: string | undefined;
     generationVersion: number;
-  }) => (
-    <div
-      data-test-subj="mockCustomContentComponent"
-      data-prompt={props.prompt}
-      data-saved-template={props.savedTemplate ?? ''}
-      data-generation-version={props.generationVersion}
-    />
-  ),
+    onTemplateChange: (t: string) => void;
+  }) => {
+    capturedOnTemplateChange = props.onTemplateChange;
+    return (
+      <div
+        data-test-subj="mockCustomContentComponent"
+        data-prompt={props.prompt ?? ''}
+        data-saved-template={props.savedTemplate ?? ''}
+        data-generation-version={props.generationVersion}
+      />
+    );
+  },
 }));
 
 const baseState: CustomContentEmbeddableState = {
@@ -119,8 +125,15 @@ describe('customContentEmbeddableFactory', () => {
   describe('template caching', () => {
     it('writes back template when onTemplateChange is called from the component', async () => {
       const { embeddable } = await buildEmbeddable({ prompt: 'Test', template: undefined });
+      await act(async () => render(<embeddable.Component />));
 
       expect(embeddable.api.serializeState().template).toBeUndefined();
+
+      act(() => {
+        capturedOnTemplateChange!('<div>generated</div>');
+      });
+
+      expect(embeddable.api.serializeState().template).toBe('<div>generated</div>');
     });
   });
 });
