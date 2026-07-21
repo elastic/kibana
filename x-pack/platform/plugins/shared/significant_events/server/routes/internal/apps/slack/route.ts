@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { badGateway } from '@hapi/boom';
+import { RelayRequestError } from '@kbn/actions-plugin/server';
 import { createServerRoute } from '../../../create_server_route';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type {
@@ -15,7 +16,6 @@ import type {
   SlackAppStatusResponse,
 } from '../../../../../common/slack_app/types';
 import { SlackAppService } from '../../../../lib/slack_app/service';
-import { RelayRequestError } from '../../../../lib/slack_app/relay_error';
 
 const connectSlackAppRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/apps/slack/connect',
