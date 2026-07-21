@@ -525,6 +525,5 @@ describe('Scripts library schemas', () => {
         ).toThrow();
       });
     });
-
   });
 });
