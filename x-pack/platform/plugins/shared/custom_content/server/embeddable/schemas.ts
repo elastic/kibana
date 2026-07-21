@@ -10,8 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 
 export const customContentStateSchema = schema.object({
-  prompt: schema.maybe(schema.string()),
-  template: schema.maybe(schema.string()),
+  prompt: schema.maybe(schema.string({ maxLength: 2000 })),
+  template: schema.maybe(schema.string({ maxLength: 500_000 })),
 });
 
 export const customContentEmbeddableSchema = schema.allOf([
