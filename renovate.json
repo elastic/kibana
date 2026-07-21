@@ -2400,21 +2400,6 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "Serve swagger docs",
-      "matchDepNames": [
-        "@types/express",
-        "express",
-        "swagger-jsdoc",
-        "swagger-ui-express",
-        "zod-to-json-schema"
-      ],
-      "reviewers": ["team:obs-entities"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["team:obs-entities"],
-      "enabled": true,
-      "minimumReleaseAge": "14 days"
-    },
-    {
       "groupName": "dotenv",
       "matchDepNames": ["dotenv"],
       "reviewers": ["team:kibana-operations"],
