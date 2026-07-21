@@ -53,6 +53,28 @@ const SEARCH_INPUT_NAME = 'actions-menu-search';
 
 const REQUEST_ACTION_URL = 'https://github.com/elastic/workflows';
 
+const LIST_SLIDE_MS = 220;
+
+function getNavDirection(fromPath: string[], toPath: string[]): 'forward' | 'back' {
+  const isPrefix =
+    fromPath.length <= toPath.length && fromPath.every((id, i) => id === toPath[i]);
+  if (isPrefix) {
+    return 'forward';
+  }
+  const isAncestor =
+    toPath.length < fromPath.length && toPath.every((id, i) => id === fromPath[i]);
+  if (isAncestor) {
+    return 'back';
+  }
+  return toPath.length >= fromPath.length ? 'forward' : 'back';
+}
+
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+}
+
 export interface ActionsMenuProps {
   onActionSelected: (action: ActionOptionData) => void;
   commands?: EditorCommand[];
@@ -114,6 +136,9 @@ export function ActionsMenu({
   const { euiTheme } = useEuiTheme();
   const { workflowsExtensions } = useKibana().services;
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const listViewportRef = useRef<HTMLDivElement | null>(null);
+  const listPaneRef = useRef<HTMLDivElement | null>(null);
+  const isSlidingRef = useRef(false);
   const defaultOptions = useMemo(
     () => getActionOptions(euiTheme, workflowsExtensions),
     [euiTheme, workflowsExtensions]
@@ -216,22 +241,90 @@ export function ActionsMenu({
 
   const navigateToPath = useCallback(
     (nextPath: string[]) => {
-      let nextOptions: ActionOptionData[] = defaultOptions;
-      for (const id of nextPath) {
-        const nextOption = nextOptions.find((option) => option.id === id);
-        if (nextOption && isActionGroup(nextOption)) {
-          nextOptions = nextOption.options;
-        } else {
-          nextOptions = [];
+      const applyNavigation = () => {
+        let nextOptions: ActionOptionData[] = defaultOptions;
+        for (const id of nextPath) {
+          const nextOption = nextOptions.find((option) => option.id === id);
+          if (nextOption && isActionGroup(nextOption)) {
+            nextOptions = nextOption.options;
+          } else {
+            nextOptions = [];
+          }
         }
+        setCurrentPath(nextPath);
+        setOptions(nextOptions);
+        setPinnedOption(null);
+        setHoveredOption(null);
+        setHoveredJumpEntry(null);
+      };
+
+      const pathUnchanged =
+        nextPath.length === currentPath.length &&
+        nextPath.every((id, i) => id === currentPath[i]);
+      if (pathUnchanged) {
+        applyNavigation();
+        return;
       }
-      setCurrentPath(nextPath);
-      setOptions(nextOptions);
-      setPinnedOption(null);
-      setHoveredOption(null);
-      setHoveredJumpEntry(null);
+
+      const viewport = listViewportRef.current;
+      const pane = listPaneRef.current;
+      // Skip when reduced-motion is on, a slide is in flight, or layout isn't ready (e.g. jsdom)
+      if (
+        !viewport ||
+        !pane ||
+        prefersReducedMotion() ||
+        isSlidingRef.current ||
+        viewport.clientWidth === 0
+      ) {
+        applyNavigation();
+        return;
+      }
+
+      const direction = getNavDirection(currentPath, nextPath);
+      isSlidingRef.current = true;
+
+      const outgoing = pane.cloneNode(true) as HTMLElement;
+      outgoing.setAttribute('aria-hidden', 'true');
+      outgoing.style.position = 'absolute';
+      outgoing.style.inset = '0';
+      outgoing.style.width = '100%';
+      outgoing.style.height = '100%';
+      outgoing.style.zIndex = '1';
+      outgoing.style.pointerEvents = 'none';
+      outgoing.style.backgroundColor = euiTheme.colors.backgroundBasePlain;
+      viewport.appendChild(outgoing);
+
+      // Park the incoming pane off-screen before React swaps the list content
+      pane.style.transition = 'none';
+      pane.style.transform =
+        direction === 'forward' ? 'translateX(100%)' : 'translateX(-100%)';
+
+      applyNavigation();
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const transition = `transform ${LIST_SLIDE_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
+          outgoing.style.transition = transition;
+          pane.style.transition = transition;
+          outgoing.style.transform =
+            direction === 'forward' ? 'translateX(-100%)' : 'translateX(100%)';
+          pane.style.transform = 'translateX(0)';
+
+          let cleaned = false;
+          const cleanup = () => {
+            if (cleaned) return;
+            cleaned = true;
+            outgoing.remove();
+            pane.style.transition = '';
+            pane.style.transform = '';
+            isSlidingRef.current = false;
+          };
+          outgoing.addEventListener('transitionend', cleanup, { once: true });
+          window.setTimeout(cleanup, LIST_SLIDE_MS + 80);
+        });
+      });
     },
-    [defaultOptions]
+    [currentPath, defaultOptions, euiTheme.colors.backgroundBasePlain]
   );
 
   const handleStepOrGroupSelected = useCallback(
@@ -801,7 +894,11 @@ export function ActionsMenu({
                   </EuiButton>
                 </div>
               ) : (
-                list
+                <div ref={listViewportRef} css={styles.listViewport}>
+                  <div ref={listPaneRef} css={styles.listPane}>
+                    {list}
+                  </div>
+                </div>
               )}
             </EuiFlexItem>
 
@@ -885,6 +982,25 @@ const componentStyles = {
       flexDirection: 'column',
       overflow: 'hidden',
       borderRight: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+    }),
+  listViewport: css({
+    flex: 1,
+    minHeight: 0,
+    position: 'relative',
+    overflow: 'hidden',
+  }),
+  listPane: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      height: '100%',
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      willChange: 'transform',
+      '& > *': {
+        flex: 1,
+        minHeight: 0,
+      },
     }),
   breadcrumbRow: ({ euiTheme }: UseEuiTheme) =>
     css({
