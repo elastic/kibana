@@ -96,12 +96,23 @@ export const updateConversation$ = ({
           ? roundCompletedEvent.data.workspace_id
           : undefined;
 
+      // Merge agent-managed state (prompt, dynamic_tool_ids, …) onto existing conversation
+      // state. A wholesale replace drops POC keys like daybreak_proposal and removes the
+      // conversation from the investigations queue. Long-term: #15192 typed metadata.
+      const mergedState =
+        conversation_state !== undefined || conversation.state !== undefined
+          ? {
+              ...(conversation.state ?? {}),
+              ...(conversation_state ?? {}),
+            }
+          : undefined;
+
       return conversationClient.update(
         {
           id: conversation.id,
           title,
           rounds: updatedRound,
-          state: conversation_state,
+          ...(mergedState !== undefined ? { state: mergedState } : {}),
           status: round.status,
           read: false,
           ...(roundCompletedEvent.data.attachments !== undefined

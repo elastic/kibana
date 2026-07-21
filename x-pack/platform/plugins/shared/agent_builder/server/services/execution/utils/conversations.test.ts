@@ -6,7 +6,7 @@
  */
 
 import { of } from 'rxjs';
-import type { RoundCompleteEvent } from '@kbn/agent-builder-common';
+import type { Conversation, RoundCompleteEvent } from '@kbn/agent-builder-common';
 import { ChatEventType, ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import {
   createEmptyConversation,
@@ -232,6 +232,66 @@ describe('conversations utils', () => {
             rounds: [existingRound, newRound],
             read: false,
             status: newRound.status,
+          }),
+          { access: 'converse' }
+        );
+      });
+
+      it('merges conversation_state onto existing state so daybreak_proposal survives', async () => {
+        const conversationClient = createConversationClientMock();
+        const existingRound = createRound({ id: 'round-1', input: { message: 'original' } });
+        // POC: daybreak_proposal is stored in conversation.state but is not a typed
+        // ConversationInternalState field — cast for the wipe-regression assertion.
+        const conversation = createEmptyConversation({
+          rounds: [existingRound],
+          state: {
+            daybreak_proposal: {
+              title: 'Keep me',
+              summary: 'Investigation envelope',
+              severity: 'true_positive',
+              status: 'proposed',
+              source_watch_id: 'system-inbox-watch-floor',
+              watch_execution_id: 'exec-1',
+            },
+            prompt: { legacy: true },
+          } as Conversation['state'],
+        });
+
+        const newRound = createRound({ id: 'round-2', input: { message: 'follow up' } });
+        const roundCompleteEvent: RoundCompleteEvent = {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: newRound,
+            resumed: false,
+            conversation_state: {
+              prompt: { current: true },
+              dynamic_tool_ids: ['tool-a'],
+            },
+          },
+        };
+
+        conversationClient.update.mockResolvedValue(conversation);
+
+        const result$ = updateConversation$({
+          conversationClient,
+          conversation,
+          title$: of('Test Title'),
+          roundCompletedEvents$: of(roundCompleteEvent),
+        });
+
+        await new Promise<void>((resolve) => {
+          result$.subscribe({
+            complete: resolve,
+          });
+        });
+
+        expect(conversationClient.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            state: {
+              daybreak_proposal: expect.objectContaining({ title: 'Keep me' }),
+              prompt: { current: true },
+              dynamic_tool_ids: ['tool-a'],
+            },
           }),
           { access: 'converse' }
         );

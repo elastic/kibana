@@ -184,23 +184,28 @@ export function registerConversationRoutes({
         const { title, state, status, read, workspace_id: workspaceId } = request.body;
 
         const client = await conversationsService.getScopedClient({ request });
+        // converse access: public investigations may be owned by workflow/test users while
+        // operators restore or rematerialize envelopes as a different Kibana user.
         const existing = await client.get(conversationId);
 
-        const updatedConversation = await client.update({
-          id: conversationId,
-          ...(title !== undefined ? { title } : {}),
-          ...(status !== undefined ? { status: status as typeof existing.status } : {}),
-          ...(read !== undefined ? { read } : {}),
-          ...(workspaceId !== undefined ? { workspace_id: workspaceId } : {}),
-          ...(state !== undefined
-            ? {
-                state: {
-                  ...existing.state,
-                  ...state,
-                },
-              }
-            : {}),
-        });
+        const updatedConversation = await client.update(
+          {
+            id: conversationId,
+            ...(title !== undefined ? { title } : {}),
+            ...(status !== undefined ? { status: status as typeof existing.status } : {}),
+            ...(read !== undefined ? { read } : {}),
+            ...(workspaceId !== undefined ? { workspace_id: workspaceId } : {}),
+            ...(state !== undefined
+              ? {
+                  state: {
+                    ...existing.state,
+                    ...state,
+                  },
+                }
+              : {}),
+          },
+          { access: 'converse' }
+        );
 
         return response.ok({
           body: updatedConversation,
