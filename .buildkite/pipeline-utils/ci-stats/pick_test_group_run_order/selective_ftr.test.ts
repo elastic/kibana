@@ -24,15 +24,27 @@ describe('FTR_EXCLUDED_MODULES', () => {
     }
   });
 
-  it('includes Scout ecosystem modules', () => {
+  it('does not include Scout packages used by FTR runtime', () => {
+    // Imported by FTR configs / ScoutFTRReporter in @kbn/test
+    expect(FTR_EXCLUDED_MODULES.has('@kbn/scout-info')).toBe(false);
+    expect(FTR_EXCLUDED_MODULES.has('@kbn/scout-reporting')).toBe(false);
+  });
+
+  it('includes Playwright-only Scout helpers', () => {
     expect(FTR_EXCLUDED_MODULES.has('@kbn/scout')).toBe(true);
-    expect(FTR_EXCLUDED_MODULES.has('@kbn/scout-info')).toBe(true);
     expect(FTR_EXCLUDED_MODULES.has('@kbn/content-list-scout')).toBe(true);
   });
 
   it('includes Jest / Cypress helpers', () => {
     expect(FTR_EXCLUDED_MODULES.has('@kbn/test-jest-helpers')).toBe(true);
     expect(FTR_EXCLUDED_MODULES.has('@kbn/cypress-test-helper')).toBe(true);
+    expect(FTR_EXCLUDED_MODULES.has('@kbn/osquery-plugin-cypress')).toBe(true);
+    expect(FTR_EXCLUDED_MODULES.has('@kbn/fleet-plugin-cypress')).toBe(true);
+  });
+
+  it('includes evals packages', () => {
+    expect(FTR_EXCLUDED_MODULES.has('@kbn/evals')).toBe(true);
+    expect(FTR_EXCLUDED_MODULES.has('@kbn/evals-plugin')).toBe(true);
   });
 });
 
@@ -47,6 +59,14 @@ describe('shouldSkipFtrTests', () => {
         'src/platform/packages/shared/kbn-scout/src/index.ts',
       ])
     ).toBe(true);
+  });
+
+  it('returns false when scout-info is affected (FTR runtime dep)', () => {
+    expect(
+      shouldSkipFtrTests(new Set(['@kbn/scout-info']), [
+        'src/platform/packages/private/kbn-scout-info/src/index.ts',
+      ])
+    ).toBe(false);
   });
 
   it('returns false when any affected module is not excluded', () => {
@@ -83,6 +103,10 @@ describe('shouldSkipFtrTests', () => {
     ).toBe(true);
   });
 
+  it('returns true for i18nrc-only diffs', () => {
+    expect(shouldSkipFtrTests(new Set(), ['x-pack/.i18nrc.json', '.i18nrc.json'])).toBe(true);
+  });
+
   it('returns false for uncategorized diffs that are not irrelevant noise', () => {
     expect(shouldSkipFtrTests(new Set(), ['some_random_root_script.sh'])).toBe(false);
   });
@@ -93,5 +117,9 @@ describe('shouldSkipFtrTests', () => {
         '.buildkite/ftr-manifests/ftr_security_stateful_configs.yml',
       ])
     ).toBe(false);
+  });
+
+  it('returns false for config/serverless.yml (can affect FTR feature flags)', () => {
+    expect(shouldSkipFtrTests(new Set(), ['config/serverless.yml'])).toBe(false);
   });
 });

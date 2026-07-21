@@ -22,27 +22,30 @@ import { allChangedFilesInScope, touchedCriticalFiles } from '../../affected-pac
  * - `@kbn/test`, `@kbn/test-suites-*`, `@kbn/ftr-*`, `@kbn/journeys`, or other
  *   FTR framework / suite packages
  * - Build toolchain that ships into the Kibana bundle (`@kbn/babel-*`, optimizer)
+ * - `@kbn/scout-info` / `@kbn/scout-reporting` — imported by FTR configs and the
+ *   FTR mocha reporter (`ScoutFTRReporter`)
  */
 
 export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
-  // Scout ecosystem
+  // Scout ecosystem (Playwright-only helpers — not FTR runtime deps)
   '@kbn/scout',
-  '@kbn/scout-info',
   '@kbn/scout-oblt',
   '@kbn/scout-search',
   '@kbn/scout-security',
   '@kbn/scout-synthtrace',
-  '@kbn/scout-reporting',
   '@kbn/scout-release-testing',
   '@kbn/content-list-scout',
 
   // Jest-only helpers
   '@kbn/test-jest-helpers',
   '@kbn/test-eui-helpers',
+  '@kbn/jest-serializers',
 
   // Cypress
   '@kbn/cypress-config',
   '@kbn/cypress-test-helper',
+  '@kbn/osquery-plugin-cypress',
+  '@kbn/fleet-plugin-cypress',
 
   // Storybook / stubs / LLM eval harness
   '@kbn/storybook',
@@ -51,6 +54,8 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/evals',
   '@kbn/evals-extensions',
   '@kbn/evals-phoenix-executor',
+  '@kbn/evals-plugin',
+  '@kbn/performance-testing-dataset-extractor',
 
   // Lint / static analysis (does not affect FTR runtime)
   '@kbn/eslint-config',
@@ -107,6 +112,22 @@ export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   '**/.prettierrc*',
   '.mise.toml',
   '.river/**',
+  // i18n namespace registration / license / renovate noise
+  '**/.i18nrc.json',
+  '.i18nrc.json',
+  'renovate.json',
+  'catalog-info.yaml',
+  'NOTICE.txt',
+  'LICENSE',
+  'LICENSE.txt',
+  '.backportrc.json',
+  // static assets
+  '**/*.png',
+  '**/*.svg',
+  '**/*.gif',
+  '**/*.jpg',
+  '**/*.jpeg',
+  '**/*.webp',
 ];
 
 /**
