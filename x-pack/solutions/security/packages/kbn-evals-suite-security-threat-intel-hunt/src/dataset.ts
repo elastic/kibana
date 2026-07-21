@@ -128,3 +128,4 @@ export const threatIntelHuntDataset: HuntExample[] = [
     },
   },
 ];
+export const REPORTS = threatIntelHuntDataset;

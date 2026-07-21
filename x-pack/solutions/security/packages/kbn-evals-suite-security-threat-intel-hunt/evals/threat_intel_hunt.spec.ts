@@ -66,20 +66,20 @@ const toQuestion = (report: (typeof REPORTS)[number]): string =>
   `For each technique, provide: technique_id, technique_name, a hunt hypothesis ` +
   `(evidence_quote from the report), severity (low/medium/high/critical), ` +
   `confidence (0-1), risk_score (0-100), and a proposed ES|QL detection rule.\n\n` +
-  `Report title: ${report.title}\n${report.body}`;
+  `Report title: ${report.input.title}\n${report.input.body_text}`;
 
 const buildExamples = (): HuntEvalExample[] =>
   REPORTS.map((report) => ({
-    id: `hunt-${report.id}`,
+    id: `hunt-${report.input.report_id}`,
     input: { question: toQuestion(report) },
     output: {
-      expectedTechniques: report.techniques,
+      expectedTechniques: report.output.techniques,
       minBehaviors: 1,
-      maxBehaviors: report.techniques.length + 2, // allow some leniency
+      maxBehaviors: report.output.techniques.length + 2, // allow some leniency
     },
     metadata: {
-      report_id: report.id,
-      category: report.category,
+      report_id: report.input.report_id,
+      category: 'threat-report',
     },
   }));
 
