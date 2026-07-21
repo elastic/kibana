@@ -94,6 +94,9 @@ export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
   '@elastic/ems-client@8.7.0': ['Elastic License 2.0'],
+  '@elastic/esql-grammar': ['Elastic License 2.0'],
+  '@elastic/esql-promql-grammar': ['Elastic License 2.0'],
+  '@elastic/esql-types': ['Elastic License 2.0'],
   '@elastic/esql': ['Elastic License 2.0'],
   '@elastic/esql-definitions': ['Elastic License 2.0'],
   '@elastic/pretty-printer': ['Elastic License 2.0'],

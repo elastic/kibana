@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiFilterGroup, useEuiTheme } from '@elastic/eui';
 import { mergeWith, isEqual } from 'lodash';
 import { css } from '@emotion/react';
@@ -27,6 +27,8 @@ import { DateRangeFilter } from '../../../all_cases/date_range_filter';
 import type { CasesColumnSelection } from '../types';
 import { ColumnsPopover } from './columns_popover';
 import { SortFilter } from './sort_filter';
+import { useCasesConfig } from '../../../../common/lib/kibana';
+import { useCasesToast } from '../../../../common/use_cases_toast';
 
 export interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -87,14 +89,28 @@ const CasesTableFiltersComponent = ({
     isFetching: isLoadingCasesConfiguration,
   } = useGetCaseConfiguration();
 
+  const { euiTheme } = useEuiTheme();
+  const { templatesEnabled } = useCasesConfig();
+  const { showInfoToast } = useCasesToast();
+  const hasShownHiddenFieldsSearchToast = useRef(false);
+
   const onFilterOptionsChange = useCallback(
     (partialFilterOptions: Partial<FilterOptions>) => {
       const newFilterOptions = mergeWith({}, filterOptions, partialFilterOptions, mergeCustomizer);
       if (!isEqual(newFilterOptions, filterOptions)) {
+        if (
+          templatesEnabled &&
+          !hasShownHiddenFieldsSearchToast.current &&
+          typeof partialFilterOptions.search === 'string' &&
+          partialFilterOptions.search.trim() !== ''
+        ) {
+          hasShownHiddenFieldsSearchToast.current = true;
+          showInfoToast(i18n.SEARCH_HIDDEN_FIELDS_INFO_TITLE, i18n.SEARCH_HIDDEN_FIELDS_INFO_TEXT);
+        }
         onFilterChanged(newFilterOptions);
       }
     },
-    [filterOptions, onFilterChanged]
+    [filterOptions, onFilterChanged, showInfoToast, templatesEnabled]
   );
 
   const isLoadingFilters =
@@ -128,8 +144,6 @@ const CasesTableFiltersComponent = ({
     customFields,
     isLoading: isLoadingFilters,
   });
-
-  const { euiTheme } = useEuiTheme();
 
   const handleOnCreateCasePressed = useCallback(() => {
     if (onCreateCasePressed) {
