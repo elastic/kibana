@@ -62456,7 +62456,7 @@ paths:
           description: List of queries linked to the stream.
       summary: Get stream queries
       tags:
-        - significant_events
+        - streams
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -62572,7 +62572,7 @@ paths:
           description: Bulk operation completed successfully.
       summary: Bulk update queries
       tags:
-        - significant_events
+        - streams
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -62627,7 +62627,7 @@ paths:
           description: The query was removed successfully.
       summary: Remove a query from a stream
       tags:
-        - significant_events
+        - streams
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -62715,7 +62715,7 @@ paths:
           description: The query was added or updated successfully.
       summary: Upsert a query to a stream
       tags:
-        - significant_events
+        - streams
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -62829,7 +62829,7 @@ paths:
           description: Significant events for the stream.
       summary: Read the significant events
       tags:
-        - significant_events
+        - streams
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
