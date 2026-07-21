@@ -737,7 +737,7 @@ describe('actions schemas', () => {
         parameters: { pid: 1234 },
       });
 
-      expect('kill_descendants' in result.parameters).toBe(false);
+      expect('kill_descendents' in result.parameters).toBe(false);
     });
 
     it('should reject `kill_descendents` when agent_type is crowdstrike', () => {
