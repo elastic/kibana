@@ -86,23 +86,12 @@ export const useFeaturedItems = ({
             });
 
             if (compatible) {
-              const [chatMenuItem] = getMenuItems(
-                [chatAction as FeaturedAddPanelAction],
-                dashboardApi,
-                {
+              menuItems.unshift(
+                ...getMenuItems([chatAction as FeaturedAddPanelAction], dashboardApi, {
                   ...context,
                   trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
-                }
+                })
               );
-              menuItems.unshift({
-                ...chatMenuItem,
-                executeWithMessage: (initialMessage?: string) => {
-                  chatAction.execute({
-                    ...(initialMessage !== undefined ? { initialMessage } : {}),
-                    trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
-                  });
-                },
-              });
             }
           } catch {
             // An unavailable Chat action should not block featured panel items.

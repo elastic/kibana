@@ -49,9 +49,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
     loading: isLoadingGroups,
     error: loadGroupsError,
   } = useMenuItemGroups({ dashboardApi });
-  const { featuredItems, loading: isLoadingFeaturedItems } = useFeaturedItems({
-    dashboardApi,
-  });
+  const { featuredItems, loading: isLoadingFeaturedItems } = useFeaturedItems({ dashboardApi });
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredGroups, setFilteredGroups] = useState<MenuItemGroup[]>([]);

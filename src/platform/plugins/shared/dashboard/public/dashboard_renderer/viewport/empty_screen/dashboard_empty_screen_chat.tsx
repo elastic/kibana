@@ -21,6 +21,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { uiActionsService } from '../../../services/kibana_services';
+import {
+  OPEN_DASHBOARD_CHAT_ACTION_ID,
+  type OpenDashboardChatActionContext,
+} from './dashboard_empty_screen_chat_action';
 
 const metricsPrompt = i18n.translate('dashboard.emptyScreen.metricsPromptButtonLabel', {
   defaultMessage: 'Create a dashboard for my metrics',
@@ -41,11 +47,18 @@ const promptSuggestions = [
   },
 ] as const;
 
-export const DashboardEmptyScreenChat = ({
-  onOpenChat,
-}: {
-  onOpenChat: (initialMessage?: string) => void;
-}) => (
+const openDashboardChat = async (initialMessage?: string): Promise<void> => {
+  const action = (await uiActionsService.getAction(
+    OPEN_DASHBOARD_CHAT_ACTION_ID
+  )) as Action<OpenDashboardChatActionContext>;
+
+  await action.execute({
+    ...(initialMessage !== undefined ? { initialMessage } : {}),
+    trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
+  });
+};
+
+export const DashboardEmptyScreenChat = () => (
   <EuiPanel hasBorder paddingSize="none" css={styles.panel}>
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -82,7 +95,9 @@ export const DashboardEmptyScreenChat = ({
                     minWidth={false}
                     contentProps={{ css: styles.promptButtonContent }}
                     css={styles.promptButton}
-                    onClick={() => onOpenChat(prompt)}
+                    onClick={() => {
+                      void openDashboardChat(prompt);
+                    }}
                     data-test-subj={testSubject}
                   >
                     {prompt}
@@ -97,7 +112,9 @@ export const DashboardEmptyScreenChat = ({
               size="s"
               color="text"
               flush="both"
-              onClick={() => onOpenChat('')}
+              onClick={() => {
+                void openDashboardChat('');
+              }}
               data-test-subj="dashboardCreateWithChatOpenChat"
             >
               {i18n.translate('dashboard.emptyScreen.openChatButtonLabel', {

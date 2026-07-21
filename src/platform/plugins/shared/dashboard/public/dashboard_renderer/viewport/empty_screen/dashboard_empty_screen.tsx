@@ -43,9 +43,7 @@ export function DashboardEmptyScreen() {
   const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = viewMode === 'edit';
-  const hasChatItem = featuredItems.some(
-    (item) => item.id === OPEN_DASHBOARD_CHAT_ACTION_ID && item.executeWithMessage
-  );
+  const hasChatItem = featuredItems.some((item) => item.id === OPEN_DASHBOARD_CHAT_ACTION_ID);
 
   const styles = useMemoCss(emptyScreenStyles);
 
@@ -105,9 +103,7 @@ export function DashboardEmptyScreen() {
       return (
         <EuiFlexGroup gutterSize="s" wrap css={styles.actionsWrapper}>
           {featuredItems.map((item) => {
-            const { executeWithMessage } = item;
-            const isChatCard =
-              item.id === OPEN_DASHBOARD_CHAT_ACTION_ID && executeWithMessage != null;
+            const isChatCard = item.id === OPEN_DASHBOARD_CHAT_ACTION_ID;
 
             return (
               <EuiFlexItem
@@ -115,11 +111,7 @@ export function DashboardEmptyScreen() {
                 grow={hasChatItem}
                 css={isChatCard ? styles.chatItem : styles.featuredItem}
               >
-                {isChatCard ? (
-                  <DashboardEmptyScreenChat onOpenChat={executeWithMessage} />
-                ) : (
-                  <FeaturedItemCard item={item} />
-                )}
+                {isChatCard ? <DashboardEmptyScreenChat /> : <FeaturedItemCard item={item} />}
               </EuiFlexItem>
             );
           })}

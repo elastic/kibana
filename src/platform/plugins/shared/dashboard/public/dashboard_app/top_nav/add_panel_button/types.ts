@@ -26,11 +26,6 @@ export interface MenuItem extends Pick<CommonProps, 'data-test-subj'> {
   isDisabled?: boolean;
   isDeprecated?: boolean;
   isAiButton?: boolean;
-  /**
-   * Optional Chat helper for entry points that prefill the conversation
-   * (e.g. empty-dashboard prompt pills) instead of using the default onClick.
-   */
-  executeWithMessage?: (initialMessage?: string) => void;
   order: number;
   MenuItem?: ReactNode;
 }

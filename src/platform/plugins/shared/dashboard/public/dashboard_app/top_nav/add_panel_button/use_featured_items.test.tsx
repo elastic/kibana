@@ -106,7 +106,7 @@ describe('useFeaturedItems', () => {
     );
   });
 
-  it('includes the open-dashboard-chat action first by order when available', async () => {
+  it('includes the open-dashboard-chat action when available', async () => {
     mockHasAction.mockReturnValue(true);
     mockGetAction.mockResolvedValue(chatAction);
 
@@ -123,24 +123,7 @@ describe('useFeaturedItems', () => {
     expect(result.current.featuredItems[0]['data-test-subj']).toBe(
       'create-action-Create with chat'
     );
-    expect(result.current.featuredItems[0].executeWithMessage).toEqual(expect.any(Function));
-  });
-
-  it('executes Chat with an initial message via executeWithMessage', async () => {
-    mockHasAction.mockReturnValue(true);
-    mockGetAction.mockResolvedValue(chatAction);
-
-    const { result } = renderHook(() => useFeaturedItems({ dashboardApi }));
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-
-    result.current.featuredItems[0].executeWithMessage?.('Create a dashboard for my metrics');
-
-    expect(dashboardApi.clearOverlays).toHaveBeenCalled();
-    expect(chatAction.execute).toHaveBeenCalledWith({
-      initialMessage: 'Create a dashboard for my metrics',
-      trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
-    });
+    expect(result.current.featuredItems[0].onClick).toEqual(expect.any(Function));
   });
 
   it('omits Chat when the action is incompatible', async () => {
