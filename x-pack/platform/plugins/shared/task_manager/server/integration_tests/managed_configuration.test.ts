@@ -80,7 +80,7 @@ describe('managed configuration', () => {
       interval: '5m',
       removalDelay: '1h',
     },
-    poll_interval: 300,
+    poll_interval: 500,
     allow_reading_invalid_state: false,
     version_conflict_threshold: 80,
     monitored_aggregated_stats_refresh_rate: 60000,
@@ -180,7 +180,7 @@ describe('managed configuration', () => {
       clock.tick(100000);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 300 to 61000 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
+        'Poll interval configuration changing from 500 to 61000 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
       );
       expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 61000ms');
     });
@@ -201,9 +201,9 @@ describe('managed configuration', () => {
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 300 to 360 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
+        'Poll interval configuration changing from 500 to 600 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
       );
-      expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 360ms');
+      expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 600ms');
     });
 
     test('should increase poll interval when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {
@@ -217,11 +217,10 @@ describe('managed configuration', () => {
       );
 
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 300 to 360 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
+        'Poll interval configuration changing from 500 to 600 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
       );
-      expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 360ms');
+      expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 600ms');
     });
 
     test('should increase poll interval TM utilization is low', async () => {
@@ -248,9 +247,9 @@ describe('managed configuration', () => {
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 300 to 500 after a change in the average task load: 0.'
+        'Poll interval configuration changing from 500 to 3000 after a change in the average task load: 0.'
       );
-      expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 500ms');
+      expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 3000ms');
     });
   });
 
