@@ -31,7 +31,7 @@ Explore a Kibana Security Solution feature area through a real browser, collect 
 **The entire invocation block below is optional.** If `Area` or `Flows` is missing, the agent runs a short guided intake.
 
 ```
-Read and follow exploratory-tester/SKILL.md [in parallel mode] [for issue/PR #N]
+Read and follow x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/SKILL.md [in parallel mode] [for issue/PR #N]
 Area: <feature area>
 Flows:
   - <flow name>
@@ -46,6 +46,8 @@ Session-dir: .exploratory-session/entity-analytics-20260714-093022  # optional �
 Environment: profile <name>  # optional — or just: Environment: <name> if the profile file exists
 Session-config: <path>       # optional — read all inputs from a YAML file instead of this block
 ```
+
+Claude Code users who set up the symlink from Prerequisites (`ln -s "$(pwd)/x-pack/…/exploratory-tester" ~/.claude/skills/exploratory-tester`) can use the short form `exploratory-tester/SKILL.md` instead. Cursor and other IDEs use the full path above.
 
 Guided intake: if `Area`/`Flows` missing, the agent asks interactively with defaults (`phases/0-setup.md`). Environment profiles: `Environment: profile <name>` loads a saved profile; the agent offers to save a new profile after validating a user-provided environment (`phases/0-setup.md`). Session-config: `Session-config: <path>` reads all inputs from YAML; copy `templates/session.example.yaml` as a template.
 

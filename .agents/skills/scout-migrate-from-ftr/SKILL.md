@@ -44,6 +44,7 @@ Then surface a short **chat-side summary** of the items the user should not miss
 
 - **Downgrades**: tests the plan reclassifies away from a UI test (to API or RTL/Jest), with one-line reasoning each.
 - **`NEEDS VERIFICATION`**: anything the planner could not determine and flagged for human input.
+- **Stateful/serverless mirrors**: duplicate FTR variants found outside the primary source path, especially any planned merge/delete decisions.
 - **Cloud portability blockers**: hardcoded paths, custom server args, or feature flags that prevent running on Elastic Cloud out-of-the-box.
 - **High-impact FTR smells**: anti-patterns that change behavior on migration (try/catch swallowing, hardcoded timeouts, shared mutable state, over-privileged execution, missing cleanup). Skip cosmetic ones — only call out what would surprise the user later.
 
