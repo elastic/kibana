@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux-v7';
-import { useHistory } from 'react-router-dom';
-import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import React, { lazy, useCallback, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useKibana } from '../../../common/lib/kibana';
-import { flyoutProviders } from '../components/flyout_provider';
-import { FlyoutLoading } from '../components/flyout_loading';
+import type { FlyoutOrigin } from '../../../common/lib/telemetry';
+import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TOOL } from '../../../common/lib/telemetry';
 import { defaultToolsFlyoutProperties } from '../hooks/use_default_flyout_properties';
+import { useOpenFlyout } from '../hooks/use_open_flyout';
 import { formatFlyoutTitle, NOTES_TITLE } from '../constants/flyout_titles';
 import { getDocumentTitle } from '../../document/main/utils/get_header_title';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
+import { useFlyoutSessionContext } from '../../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the shared tool graph into their
 // bundle; the chunk only loads when the tool is actually opened.
@@ -26,6 +22,8 @@ const NotesDetails = lazy(() => import('./notes').then((m) => ({ default: m.Note
 export interface OpenNotesParams {
   /** The document record whose notes should be shown. */
   hit: DataTableRecord;
+  /** Telemetry origin indicating where the notes flyout was opened from. */
+  origin?: FlyoutOrigin;
 }
 
 export interface SharedToolsFlyoutApi {
@@ -47,39 +45,27 @@ export interface SharedToolsFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
-  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
-
-  const open = useCallback(
-    (children: ReactNode, properties: OverlaySystemFlyoutOpenOptions) => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <FlyoutSessionContextProvider value={{ session: sessionMode, historyKey }}>
-              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
-            </FlyoutSessionContextProvider>
-          ),
-        }),
-        properties
-      );
-    },
-    [overlays, services, store, history, historyKey, sessionMode]
-  );
+  const { historyKey } = useFlyoutSessionContext();
+  const open = useOpenFlyout();
 
   const openNotes = useCallback(
-    ({ hit }: OpenNotesParams) => {
-      open(<NotesDetails hit={hit} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-        title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
-      });
+    ({ hit, origin }: OpenNotesParams) => {
+      open(
+        <NotesDetails hit={hit} />,
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
+        },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.NOTES,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
+      );
     },
     [open, historyKey]
   );
