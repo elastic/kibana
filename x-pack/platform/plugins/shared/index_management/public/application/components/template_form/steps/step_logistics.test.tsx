@@ -10,18 +10,12 @@ import { render, screen, within, fireEvent, waitFor } from '@testing-library/rea
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { StepLogistics } from './step_logistics';
-import { AppContextProvider } from '../../../app_context';
-import type { AppDependencies } from '../../../app_context';
-
-const ctx = {
-  config: { enableIndexMode: true },
-} as unknown as AppDependencies;
 
 let mockIsServerless = false;
 
 jest.mock('../../../app_context', () => ({
   useAppContext: () => ({
-    config: { isServerless: mockIsServerless },
+    config: { isServerless: mockIsServerless, enableIndexMode: true },
     plugins: { cloud: undefined },
     core: {
       application: { capabilities: { management: { stack: { license_management: true } } } },
@@ -70,14 +64,12 @@ describe('StepLogistics', () => {
     it('SHOULD disable the name field', async () => {
       render(
         <I18nProvider>
-          <AppContextProvider value={ctx}>
-            <StepLogistics
-              defaultValue={baseDefaultValue}
-              isEditing={true}
-              onChange={jest.fn()}
-              isLegacy={false}
-            />
-          </AppContextProvider>
+          <StepLogistics
+            defaultValue={baseDefaultValue}
+            isEditing={true}
+            onChange={jest.fn()}
+            isLegacy={false}
+          />
         </I18nProvider>
       );
 
@@ -91,14 +83,12 @@ describe('StepLogistics', () => {
     it('SHOULD enable the name field', async () => {
       render(
         <I18nProvider>
-          <AppContextProvider value={ctx}>
-            <StepLogistics
-              defaultValue={baseDefaultValue}
-              isEditing={false}
-              onChange={jest.fn()}
-              isLegacy={false}
-            />
-          </AppContextProvider>
+          <StepLogistics
+            defaultValue={baseDefaultValue}
+            isEditing={false}
+            onChange={jest.fn()}
+            isLegacy={false}
+          />
         </I18nProvider>
       );
 
