@@ -24,36 +24,11 @@ import {
   getAlertEventNotFoundMessage,
   getCannotActivateEpisodeMessage,
 } from '../../lib/errors/alert_error_messages';
-import { jsonExample } from '../json_oas_example';
+import { jsonExample, type AlertingV2OasOperationObject } from '../json_oas_example';
 import {
   ALERT_EVENT_NOT_FOUND_DESCRIPTION,
   INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
 } from '../route_response_descriptions';
-
-/**
- * Concrete OAS fragment shape used by examples/tests.
- * Narrower than the OpenAPI `ReferenceObject | MediaTypeObject` union so
- * callers can read `content` without casts.
- */
-export interface AlertOasOperationObject {
-  requestBody?: {
-    content?: {
-      'application/json'?: {
-        examples?: Record<string, { summary?: string; value?: unknown }>;
-      };
-    };
-  };
-  responses?: Record<
-    string,
-    {
-      content?: {
-        'application/json'?: {
-          examples?: Record<string, { summary?: string; value?: unknown }>;
-        };
-      };
-    }
-  >;
-}
 
 type RouteErrorStatus = 400 | 404;
 
@@ -166,8 +141,8 @@ const buildAlertOas = ({
   requestBody?: { name: string; summary: string; value: unknown };
   responses?: Record<number, { name: string; summary: string; value: unknown }>;
   errors?: RouteErrorStatus[];
-}): AlertOasOperationObject => {
-  const operation: AlertOasOperationObject = {};
+}): AlertingV2OasOperationObject => {
+  const operation: AlertingV2OasOperationObject = {};
 
   if (requestBody) {
     operation.requestBody = jsonExample(requestBody.name, requestBody.summary, requestBody.value);
@@ -187,7 +162,7 @@ const buildAlertOas = ({
   return operation;
 };
 
-export const createAckAlertActionOasExamples = (): AlertOasOperationObject =>
+export const createAckAlertActionOasExamples = (): AlertingV2OasOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createAckAlertActionRequest',
@@ -197,7 +172,7 @@ export const createAckAlertActionOasExamples = (): AlertOasOperationObject =>
     errors: [400, 404],
   });
 
-export const createUnackAlertActionOasExamples = (): AlertOasOperationObject =>
+export const createUnackAlertActionOasExamples = (): AlertingV2OasOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createUnackAlertActionRequest',
@@ -207,7 +182,7 @@ export const createUnackAlertActionOasExamples = (): AlertOasOperationObject =>
     errors: [400, 404],
   });
 
-export const createAssignAlertActionOasExamples = (): AlertOasOperationObject =>
+export const createAssignAlertActionOasExamples = (): AlertingV2OasOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createAssignAlertActionRequest',
@@ -217,7 +192,7 @@ export const createAssignAlertActionOasExamples = (): AlertOasOperationObject =>
     errors: [400, 404],
   });
 
-export const createTagAlertActionOasExamples = (): AlertOasOperationObject =>
+export const createTagAlertActionOasExamples = (): AlertingV2OasOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createTagAlertActionRequest',
@@ -227,7 +202,7 @@ export const createTagAlertActionOasExamples = (): AlertOasOperationObject =>
     errors: [400, 404],
   });
 
-export const createSnoozeAlertActionOasExamples = (): AlertOasOperationObject =>
+export const createSnoozeAlertActionOasExamples = (): AlertingV2OasOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createSnoozeAlertActionRequest',
@@ -237,7 +212,7 @@ export const createSnoozeAlertActionOasExamples = (): AlertOasOperationObject =>
     errors: [400, 404],
   });
 
-export const createUnsnoozeAlertActionOasExamples = (): AlertOasOperationObject =>
+export const createUnsnoozeAlertActionOasExamples = (): AlertingV2OasOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createUnsnoozeAlertActionRequest',
@@ -247,7 +222,7 @@ export const createUnsnoozeAlertActionOasExamples = (): AlertOasOperationObject 
     errors: [400, 404],
   });
 
-export const createActivateAlertActionOasExamples = (): AlertOasOperationObject =>
+export const createActivateAlertActionOasExamples = (): AlertingV2OasOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createActivateAlertActionRequest',
@@ -257,7 +232,7 @@ export const createActivateAlertActionOasExamples = (): AlertOasOperationObject 
     errors: [400, 404],
   });
 
-export const createDeactivateAlertActionOasExamples = (): AlertOasOperationObject =>
+export const createDeactivateAlertActionOasExamples = (): AlertingV2OasOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createDeactivateAlertActionRequest',
@@ -267,7 +242,7 @@ export const createDeactivateAlertActionOasExamples = (): AlertOasOperationObjec
     errors: [400, 404],
   });
 
-export const bulkCreateAlertActionOasExamples = (): AlertOasOperationObject =>
+export const bulkCreateAlertActionOasExamples = (): AlertingV2OasOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'bulkCreateAlertActionRequest',

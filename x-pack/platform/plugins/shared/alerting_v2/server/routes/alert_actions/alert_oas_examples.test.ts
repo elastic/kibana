@@ -16,10 +16,10 @@ import {
 } from '../route_response_descriptions';
 import {
   CREATE_ACK_ALERT_ACTION_SUMMARY,
-  type AlertOasOperationObject,
   bulkCreateAlertActionOasExamples,
   createAckAlertActionOasExamples,
 } from './alert_oas_examples';
+import type { AlertingV2OasOperationObject } from '../json_oas_example';
 import { CreateAckAlertActionRoute } from './create_ack_alert_action_route';
 
 describe('alert OAS examples', () => {
@@ -83,7 +83,7 @@ describe('alert OAS examples', () => {
       throw new Error('expected oasOperationObject');
     }
 
-    const oas = (await oasOperationObject()) as AlertOasOperationObject;
+    const oas = (await oasOperationObject()) as AlertingV2OasOperationObject;
     expect(typeof oas).not.toBe('string');
 
     expect(
