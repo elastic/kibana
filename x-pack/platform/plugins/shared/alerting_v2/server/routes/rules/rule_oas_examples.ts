@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
 import type {
   BulkGetRulesParams,
   BulkGetRulesResponse,
@@ -27,7 +26,7 @@ import {
   getRuleNotFoundMessage,
   getRuleVersionConflictMessage,
 } from '../../lib/errors/rule_error_messages';
-import { jsonExample } from '../json_oas_example';
+import { jsonExample, type AlertingV2OasOperationObject } from '../json_oas_example';
 import {
   INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
   RULE_NOT_FOUND_DESCRIPTION,
@@ -35,11 +34,6 @@ import {
   RULE_VERSION_CONFLICT_DESCRIPTION,
   RULES_NOT_FOUND_DESCRIPTION,
 } from '../route_response_descriptions';
-
-type OASOperationObject = Exclude<
-  Awaited<ReturnType<NonNullable<RouteConfigOptions<RouteMethod>['oasOperationObject']>>>,
-  string
->;
 
 type RouteErrorStatus = 400 | 404 | 409;
 
@@ -198,8 +192,8 @@ const buildRuleOas = ({
   requestBody?: { name: string; summary: string; value: unknown };
   responses?: Record<number, { name: string; summary: string; value: unknown }>;
   errors?: RouteErrorStatus[];
-}): OASOperationObject => {
-  const operation: OASOperationObject = {};
+}): AlertingV2OasOperationObject => {
+  const operation: AlertingV2OasOperationObject = {};
 
   if (requestBody) {
     operation.requestBody = jsonExample(requestBody.name, requestBody.summary, requestBody.value);
@@ -229,7 +223,7 @@ const ruleResponse = (
   value: { ...RULE_RESPONSE, ...overrides },
 });
 
-export const createRuleOasExamples = (): OASOperationObject =>
+export const createRuleOasExamples = (): AlertingV2OasOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'createRuleRequest',
@@ -242,7 +236,7 @@ export const createRuleOasExamples = (): OASOperationObject =>
     errors: [400],
   });
 
-export const upsertRuleOasExamples = (): OASOperationObject =>
+export const upsertRuleOasExamples = (): AlertingV2OasOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'upsertRuleRequest',
@@ -257,7 +251,7 @@ export const upsertRuleOasExamples = (): OASOperationObject =>
     errors: [400, 404],
   });
 
-export const updateRuleOasExamples = (): OASOperationObject =>
+export const updateRuleOasExamples = (): AlertingV2OasOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'updateRuleRequest',
@@ -276,7 +270,7 @@ export const updateRuleOasExamples = (): OASOperationObject =>
     errors: [400, 404, 409],
   });
 
-export const getRuleOasExamples = (): OASOperationObject =>
+export const getRuleOasExamples = (): AlertingV2OasOperationObject =>
   buildRuleOas({
     responses: {
       200: ruleResponse('getRuleResponse', GET_RULE_SUMMARY),
@@ -284,7 +278,7 @@ export const getRuleOasExamples = (): OASOperationObject =>
     errors: [404],
   });
 
-export const listRulesOasExamples = (): OASOperationObject =>
+export const listRulesOasExamples = (): AlertingV2OasOperationObject =>
   buildRuleOas({
     responses: {
       200: {
@@ -296,12 +290,12 @@ export const listRulesOasExamples = (): OASOperationObject =>
     errors: [400],
   });
 
-export const deleteRuleOasExamples = (): OASOperationObject =>
+export const deleteRuleOasExamples = (): AlertingV2OasOperationObject =>
   buildRuleOas({
     errors: [404],
   });
 
-export const bulkGetRulesOasExamples = (): OASOperationObject =>
+export const bulkGetRulesOasExamples = (): AlertingV2OasOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'bulkGetRulesRequest',
@@ -319,7 +313,7 @@ export const bulkGetRulesOasExamples = (): OASOperationObject =>
     errors: [400],
   });
 
-export const ruleTagsOasExamples = (): OASOperationObject =>
+export const ruleTagsOasExamples = (): AlertingV2OasOperationObject =>
   buildRuleOas({
     responses: {
       200: {
@@ -331,7 +325,7 @@ export const ruleTagsOasExamples = (): OASOperationObject =>
     errors: [400],
   });
 
-export const bulkDeleteRulesOasExamples = (): OASOperationObject =>
+export const bulkDeleteRulesOasExamples = (): AlertingV2OasOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'bulkDeleteRulesRequest',
@@ -348,7 +342,7 @@ export const bulkDeleteRulesOasExamples = (): OASOperationObject =>
     errors: [400],
   });
 
-export const bulkEnableRulesOasExamples = (): OASOperationObject =>
+export const bulkEnableRulesOasExamples = (): AlertingV2OasOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'bulkEnableRulesRequest',
@@ -365,7 +359,7 @@ export const bulkEnableRulesOasExamples = (): OASOperationObject =>
     errors: [400],
   });
 
-export const bulkDisableRulesOasExamples = (): OASOperationObject =>
+export const bulkDisableRulesOasExamples = (): AlertingV2OasOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'bulkDisableRulesRequest',

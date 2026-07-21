@@ -13,6 +13,7 @@ import {
   getRuleNotFoundMessage,
   getRuleVersionConflictMessage,
 } from '../../lib/errors/rule_error_messages';
+import type { AlertingV2OasOperationObject } from '../json_oas_example';
 import {
   INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
   RULE_NOT_FOUND_DESCRIPTION,
@@ -26,6 +27,15 @@ import {
   ruleTagsOasExamples,
   upsertRuleOasExamples,
 } from './rule_oas_examples';
+
+const getValidateResponseDescription = (status: number): string | undefined => {
+  const { validate } = CreateRuleRoute;
+  if (typeof validate !== 'object' || validate === null || !('response' in validate)) {
+    return undefined;
+  }
+  const response = (validate as { response?: Record<number, { description?: string }> }).response;
+  return response?.[status]?.description;
+};
 
 describe('rule OAS examples', () => {
   it('includes request, success, and route-error examples for create', () => {
@@ -52,9 +62,7 @@ describe('rule OAS examples', () => {
         }),
       })
     );
-    expect(CreateRuleRoute.validate.response?.[400]?.description).toBe(
-      INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION
-    );
+    expect(getValidateResponseDescription(400)).toBe(INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION);
   });
 
   it('includes 404 examples for get', () => {
@@ -90,11 +98,14 @@ describe('rule OAS examples', () => {
   it('is exposed on CreateRuleRoute.options', async () => {
     expect(CreateRuleRoute.options.oasOperationObject).toBe(createRuleOasExamples);
 
-    const oas = await CreateRuleRoute.options.oasOperationObject!();
-    expect(typeof oas).not.toBe('string');
-    if (typeof oas === 'string') {
-      throw new Error('expected object OAS fragment');
+    const oasOperationObject = CreateRuleRoute.options.oasOperationObject;
+    expect(oasOperationObject).toBeDefined();
+    if (!oasOperationObject) {
+      throw new Error('expected oasOperationObject');
     }
+
+    const oas = (await oasOperationObject()) as AlertingV2OasOperationObject;
+    expect(typeof oas).not.toBe('string');
 
     expect(
       oas.requestBody?.content?.['application/json']?.examples?.createRuleRequest
