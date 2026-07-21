@@ -303,6 +303,7 @@ export const LOCAL_STORAGE_KEYS = {
   casesUtilityBarHideMaxLimitWarning: 'cases.utilityBar.hideMaxLimitWarning',
   caseViewSidebarOpen: 'cases.caseView.sidebarOpen',
   caseViewSidebarAccordions: 'cases.caseView.sidebarAccordions',
+  showLegacyCustomFields: 'cases.showLegacyCustomFields',
 };
 
 /**

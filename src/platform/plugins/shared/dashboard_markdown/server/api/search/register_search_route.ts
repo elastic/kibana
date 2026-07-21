@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
+import { pick } from 'lodash';
 
 import { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
@@ -45,7 +45,7 @@ export function registerSearchRoute(
       validate: {
         request: {
           query: schema.object({
-            ...omit(asCodeSearchRequestSchema.getPropSchemas(), ['tags', 'excluded_tags']),
+            ...pick(asCodeSearchRequestSchema.getPropSchemas(), ['page', 'per_page', 'query']),
           }),
         },
         response: {
