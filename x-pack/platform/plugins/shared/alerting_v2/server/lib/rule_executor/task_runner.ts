@@ -21,7 +21,7 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 
-type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
+type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal' | 'executionUuid'>;
 
 @injectable()
 export class RuleExecutorTaskRunner {
@@ -30,8 +30,8 @@ export class RuleExecutorTaskRunner {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  public async run({ taskInstance, signal }: TaskRunParams): Promise<RunResult> {
-    const input = this.createRuleExecutionInput(taskInstance, signal);
+  public async run({ taskInstance, signal, executionUuid }: TaskRunParams): Promise<RunResult> {
+    const input = this.createRuleExecutionInput(taskInstance, signal, executionUuid);
 
     const result = await this.pipeline.execute(input);
 
@@ -43,7 +43,8 @@ export class RuleExecutorTaskRunner {
    */
   private createRuleExecutionInput(
     taskInstance: TaskRunParams['taskInstance'],
-    signal: AbortSignal
+    signal: AbortSignal,
+    executionUuid: string
   ): RuleExecutionPipelineInput {
     const params = taskInstance.params as RuleExecutorTaskParams;
     const scheduledAt = taskInstance.scheduledAt;
@@ -53,6 +54,7 @@ export class RuleExecutorTaskRunner {
       spaceId: params.spaceId,
       scheduledAt: this.getScheduledAtISOString(scheduledAt, taskInstance.startedAt),
       abortSignal: signal,
+      executionUuid,
     };
   }
 
