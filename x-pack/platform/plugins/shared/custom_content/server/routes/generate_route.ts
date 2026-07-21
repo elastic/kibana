@@ -105,14 +105,9 @@ export function registerGenerateRoute(
 
       const { prompt, colorMode } = request.body;
 
-      const connector = await (async () => {
-        try {
-          const defaultConnector = await inference.getDefaultConnector(request);
-          if (defaultConnector) return defaultConnector;
-        } catch {}
-        const connectors = await inference.getConnectorList(request).catch(() => []);
-        return connectors[0] ?? null;
-      })();
+      const defaultConnector = await inference.getDefaultConnector(request).catch(() => null);
+      const connector =
+        defaultConnector ?? (await inference.getConnectorList(request).catch(() => []))[0] ?? null;
 
       const passThrough = new PassThrough();
       const abortController = new AbortController();
