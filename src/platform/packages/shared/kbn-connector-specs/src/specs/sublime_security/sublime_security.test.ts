@@ -75,6 +75,7 @@ describe('SublimeSecurityConnector', () => {
       expect(actions.getAttackScore.isTool).toBe(true);
       expect(actions.getAsaVerdict.isTool).toBe(true);
       expect(actions.getTask.isTool).toBe(true);
+      expect(actions.listMailboxes.isTool).toBe(true);
       expect(actions.quarantineMessageGroups.isTool).toBe(false);
       expect(actions.trashMessageGroups.isTool).toBe(false);
       expect(actions.restoreMessageGroups.isTool).toBe(false);
@@ -303,6 +304,46 @@ describe('SublimeSecurityConnector', () => {
       expect(mockClient.post).toHaveBeenCalledWith(`${BASE_URL}/v0/message-groups/${apiPath}`, {
         message_group_ids: ['grp-1'],
       });
+    });
+  });
+
+  describe('listMailboxes', () => {
+    it('lists mailboxes with trimmed fields', async () => {
+      (mockClient.get as jest.Mock).mockResolvedValue({
+        data: {
+          total: 2,
+          count: 2,
+          active: 1,
+          mailboxes: [
+            {
+              id: 'mbx-1',
+              email_address: 'user@corp.example',
+              active: true,
+              subscription_error_status: '',
+              internal_field: 'x',
+            },
+            { id: 'mbx-2', email_address: 'shared@corp.example', active: false },
+          ],
+        },
+      });
+
+      const result = (await SublimeSecurityConnector.actions.listMailboxes.handler(mockContext, {
+        search: 'corp',
+        limit: 20,
+        offset: 0,
+      })) as { total: number; mailboxes: Array<Record<string, unknown>> };
+
+      expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/v0/mailboxes`, {
+        params: { active: undefined, search: 'corp', limit: 20, offset: 0 },
+      });
+      expect(result.total).toBe(2);
+      expect(result.mailboxes[0]).toEqual({
+        id: 'mbx-1',
+        email_address: 'user@corp.example',
+        active: true,
+        subscription_error_status: '',
+      });
+      expect(result.mailboxes[0].internal_field).toBeUndefined();
     });
   });
 

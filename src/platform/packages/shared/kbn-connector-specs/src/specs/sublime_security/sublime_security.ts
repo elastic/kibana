@@ -14,6 +14,7 @@ import type {
   GetMessageGroupInput,
   GetMessageInput,
   GetTaskInput,
+  ListMailboxesInput,
   MessageGroupActionInput,
   SearchMessageGroupsInput,
   SublimeMessageGroupSummary,
@@ -23,12 +24,13 @@ import {
   GetMessageGroupInputSchema,
   GetMessageInputSchema,
   GetTaskInputSchema,
+  ListMailboxesInputSchema,
   MessageGroupActionInputSchema,
   SearchMessageGroupsInputSchema,
 } from './types';
 
 interface SublimeConfig {
-  baseUrl: string;
+  baseUrl?: string;
 }
 
 /**
@@ -37,7 +39,10 @@ interface SublimeConfig {
  * Trailing slashes are trimmed so path concatenation stays predictable.
  */
 const getBaseUrl = (ctx: ActionContext): string => {
-  const { baseUrl } = ctx.config as unknown as SublimeConfig;
+  const { baseUrl } = ctx.config as SublimeConfig;
+  if (!baseUrl) {
+    throw new Error('Sublime Security connector is missing the API base URL configuration');
+  }
   return baseUrl.replace(/\/+$/, '');
 };
 
@@ -143,8 +148,6 @@ export const SublimeSecurityConnector: ConnectorSpec = {
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
-    docsUrl:
-      'https://www.elastic.co/docs/reference/kibana/connectors-kibana/sublime-security-action-type',
   },
 
   auth: {
@@ -156,6 +159,14 @@ export const SublimeSecurityConnector: ConnectorSpec = {
           label: i18n.translate('core.kibanaConnectorSpecs.sublimeSecurity.auth.bearer.label', {
             defaultMessage: 'API key',
           }),
+          meta: {
+            token: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.sublimeSecurity.auth.bearer.tokenLabel',
+                { defaultMessage: 'API key' }
+              ),
+            },
+          },
         },
       },
     ],
@@ -167,7 +178,6 @@ export const SublimeSecurityConnector: ConnectorSpec = {
   schema: lazySchema(() =>
     z.object({
       baseUrl: z
-        .string()
         .url()
         .max(1024)
         .describe(
@@ -187,19 +197,16 @@ export const SublimeSecurityConnector: ConnectorSpec = {
     })
   ),
 
-  skill: `Sublime Security detects and remediates email threats (phishing, BEC, malware). Messages are deduplicated into message groups (campaign-like clusters); response actions operate on groups, and quarantining a group also catches late-arriving copies of the same message.
+  skill: `Sublime Security detects and remediates email threats (phishing, BEC, malware). Messages are deduplicated into message groups (campaign-like clusters); response actions operate on groups.
 
 Typical response flow:
-1. searchMessageGroups to find the campaign (by sender, domain, recipient, attachment hash, verdict, or time window).
+1. searchMessageGroups to find the campaign (by sender, domain, recipient, attachment hash, verdict, or time window). Use listMailboxes first if you need to scope by protected mailbox.
 2. getMessageGroup / getMessage / getAttackScore / getAsaVerdict to confirm the verdict.
 3. quarantineMessageGroups or trashMessageGroups with a classification and review comment (workflow steps only, not agent tools).
-4. getTask with the returned task_id to verify the action succeeded (state becomes succeeded or failed).
+4. getTask with the returned task_id to verify the action succeeded before reporting the outcome.
 
 Gotchas:
-- Timestamps are UTC ISO 8601 (2026-07-14T15:09:26Z); relative expressions like now-7d are not supported.
 - searchMessageGroups paginates with limit/offset; total in the response is the full match count.
-- restoreMessageGroups is the undo for both quarantine and trash.
-- Quarantine requires a Sublime Enterprise plan; free-tier tenants get HTTP 403 on it.
 - Message body content is not returned by any action here; responses carry metadata, verdicts, and rule matches only.`,
 
   actions: {
@@ -291,7 +298,7 @@ Gotchas:
           const message = response.data as RawMessage & {
             canonical_id?: string;
             external_id?: string;
-            recipients?: unknown[];
+            recipients?: Array<{ email?: string }>;
             forward_recipients?: string[];
             landed_in_spam?: boolean;
           };
@@ -301,7 +308,9 @@ Gotchas:
             external_id: message.external_id,
             subject: message.subject,
             sender: message.sender,
-            recipients: message.recipients,
+            recipients: (message.recipients ?? []).map((recipient) => ({
+              email: recipient.email,
+            })),
             forward_recipients: message.forward_recipients,
             mailbox_email: message.mailbox?.email,
             created_at: message.created_at,
@@ -370,6 +379,50 @@ Gotchas:
       },
     },
 
+    listMailboxes: {
+      isTool: true,
+      description:
+        'List the mailboxes protected by Sublime Security, with active state and subscription health. ' +
+        'The orientation tool: use it to discover which mailboxes Sublime covers or to resolve a mailbox email before filtering searches.',
+      input: ListMailboxesInputSchema,
+      handler: async (ctx, input: ListMailboxesInput) => {
+        try {
+          const response = await ctx.client.get(`${getBaseUrl(ctx)}/v0/mailboxes`, {
+            params: {
+              active: input.active,
+              search: input.search,
+              limit: input.limit,
+              offset: input.offset,
+            },
+          });
+          const data = response.data as {
+            total?: number;
+            count?: number;
+            active?: number;
+            mailboxes?: Array<{
+              id?: string;
+              email_address?: string;
+              active?: boolean;
+              subscription_error_status?: string;
+            }>;
+          };
+          return {
+            total: data.total,
+            count: data.count,
+            active: data.active,
+            mailboxes: (data.mailboxes ?? []).map((mailbox) => ({
+              id: mailbox.id,
+              email_address: mailbox.email_address,
+              active: mailbox.active,
+              subscription_error_status: mailbox.subscription_error_status,
+            })),
+          };
+        } catch (error) {
+          throwWithApiError(error);
+        }
+      },
+    },
+
     quarantineMessageGroups: {
       // Deliberately not a tool: destructive mailbox mutation, workflow steps only.
       isTool: false,
@@ -396,7 +449,8 @@ Gotchas:
       // Deliberately not a tool: destructive mailbox mutation, workflow steps only.
       isTool: false,
       description:
-        'Move all messages in one or more message groups to trash in the affected mailboxes. ' +
+        'Move all messages in one or more message groups to trash in the affected mailboxes, ' +
+        'and keep auto-trashing late-arriving copies of the same messages. ' +
         'Optionally records a classification, report label, and review comment. ' +
         `Reversible with restoreMessageGroups. ${TASK_RESULT_DESCRIPTION}`,
       input: MessageGroupActionInputSchema,
@@ -418,7 +472,8 @@ Gotchas:
       // Deliberately not a tool: mailbox mutation (the undo), workflow steps only.
       isTool: false,
       description:
-        'Restore one or more previously quarantined or trashed message groups back to user mailboxes. ' +
+        'Restore one or more previously quarantined or trashed message groups back to user mailboxes, ' +
+        'and turn off automatic trashing of late-arriving copies. ' +
         'The undo for quarantineMessageGroups and trashMessageGroups; use it to recover from a false positive. ' +
         TASK_RESULT_DESCRIPTION,
       input: MessageGroupActionInputSchema,

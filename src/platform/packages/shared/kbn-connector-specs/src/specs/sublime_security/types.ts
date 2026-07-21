@@ -55,6 +55,19 @@ export const REPORT_LABELS = [
 const ISO_DATE_DESCRIPTION =
   'UTC datetime in ISO 8601 format, e.g. 2026-07-14T15:09:26Z. Relative dates are not supported.';
 
+/**
+ * Sublime IDs are UUID-shaped. Restricting the charset also keeps IDs from
+ * forming dot path segments ('.', '..') that URL normalization would collapse
+ * onto a different endpoint.
+ */
+const idSchema = (description: string) =>
+  z
+    .string()
+    .min(1)
+    .max(200)
+    .regex(/^[A-Za-z0-9_-]+$/, 'IDs contain only letters, numbers, hyphens, and underscores')
+    .describe(description);
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -77,22 +90,26 @@ export const SearchMessageGroupsInputSchema = lazySchema(() =>
       .string()
       .max(320)
       .optional()
-      .describe('Exact sender email address to filter by, e.g. attacker@evil.example'),
+      .describe(
+        'Exact sender email address to filter by, e.g. attacker@evil.example. One value per call'
+      ),
     senderDomain: z
       .string()
       .max(253)
       .optional()
-      .describe('Exact sender domain to filter by, e.g. evil.example'),
+      .describe('Exact sender domain to filter by, e.g. evil.example. One value per call'),
     recipientEmail: z
       .string()
       .max(320)
       .optional()
-      .describe('Exact recipient email address to filter by'),
+      .describe('Exact recipient email address to filter by. One value per call'),
     attachmentSha256: z
       .string()
       .max(64)
       .optional()
-      .describe('SHA-256 hash of an attachment to filter by (64 hex characters)'),
+      .describe(
+        'SHA-256 hash of an attachment to filter by (64 hex characters). One value per call'
+      ),
     attackScoreVerdict: z
       .enum(ATTACK_SCORE_VERDICTS)
       .optional()
@@ -117,7 +134,9 @@ export const SearchMessageGroupsInputSchema = lazySchema(() =>
       .min(1)
       .max(500)
       .default(20)
-      .describe('Maximum number of message groups to return (1-500, default 20)'),
+      .describe(
+        'Maximum number of message groups to return (1-500, default 20). Prefer 50 or less and page with offset; large pages can exceed the response size limit'
+      ),
     offset: z
       .number()
       .int()
@@ -130,30 +149,53 @@ export type SearchMessageGroupsInput = z.infer<typeof SearchMessageGroupsInputSc
 
 export const GetMessageGroupInputSchema = lazySchema(() =>
   z.object({
-    messageGroupId: z
-      .string()
-      .min(1)
-      .max(200)
-      .describe('Canonical ID of the message group, as returned by searchMessageGroups'),
+    messageGroupId: idSchema(
+      'Canonical ID of the message group, as returned by searchMessageGroups'
+    ),
   })
 );
 export type GetMessageGroupInput = z.infer<typeof GetMessageGroupInputSchema>;
 
 export const GetMessageInputSchema = lazySchema(() =>
   z.object({
-    messageId: z
-      .string()
-      .min(1)
-      .max(200)
-      .describe('ID of the message, as returned by searchMessageGroups or getMessageGroup'),
+    messageId: idSchema('ID of the message, as returned by searchMessageGroups or getMessageGroup'),
   })
 );
 export type GetMessageInput = z.infer<typeof GetMessageInputSchema>;
 
+export const ListMailboxesInputSchema = lazySchema(() =>
+  z.object({
+    active: z
+      .boolean()
+      .optional()
+      .describe('Only return mailboxes that are actively protected by Sublime'),
+    search: z
+      .string()
+      .max(320)
+      .optional()
+      .describe('Search across mailbox names and email addresses'),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(20)
+      .describe('Maximum number of mailboxes to return (1-100, default 20)'),
+    offset: z.number().int().min(0).default(0).describe('Zero-based offset for pagination'),
+  })
+);
+export type ListMailboxesInput = z.infer<typeof ListMailboxesInputSchema>;
+
 export const MessageGroupActionInputSchema = lazySchema(() =>
   z.object({
     messageGroupIds: z
-      .array(z.string().min(1).max(200))
+      .array(
+        z
+          .string()
+          .min(1)
+          .max(200)
+          .regex(/^[A-Za-z0-9_-]+$/, 'IDs contain only letters, numbers, hyphens, and underscores')
+      )
       .min(1)
       .max(500)
       .describe('Canonical IDs of the message groups to act on (1-500 per call)'),
@@ -176,13 +218,9 @@ export type MessageGroupActionInput = z.infer<typeof MessageGroupActionInputSche
 
 export const GetTaskInputSchema = lazySchema(() =>
   z.object({
-    taskId: z
-      .string()
-      .min(1)
-      .max(200)
-      .describe(
-        'Task ID returned by quarantineMessageGroups, trashMessageGroups, or restoreMessageGroups'
-      ),
+    taskId: idSchema(
+      'Task ID returned by quarantineMessageGroups, trashMessageGroups, or restoreMessageGroups'
+    ),
   })
 );
 export type GetTaskInput = z.infer<typeof GetTaskInputSchema>;

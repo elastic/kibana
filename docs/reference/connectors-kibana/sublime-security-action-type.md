@@ -57,6 +57,12 @@ Get ASA verdict
 :   Retrieve the verdict from Sublime's Autonomous Security Analyst for a message.
     - `messageId` (required): ID of the message.
 
+List mailboxes
+:   List the mailboxes protected by Sublime Security, with active state and subscription health.
+    - `active` (optional): Only return actively protected mailboxes.
+    - `search` (optional): Search across mailbox names and email addresses.
+    - `limit` (optional): Maximum mailboxes to return (1-100, default 20). `offset` (optional): Zero-based pagination offset.
+
 Quarantine message groups
 :   Quarantine one or more message groups, removing the messages from user mailboxes and catching late-arriving copies. Requires a Sublime Enterprise plan. Returns a `task_id`.
     - `messageGroupIds` (required): Canonical IDs of the groups to quarantine (1-500).
