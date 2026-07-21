@@ -13,7 +13,7 @@ import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import type { CPSProject } from '../../../../types';
 import { ProjectPickerList, getProjectPickerListContextMenuConfig } from './list';
-import { ProjectPickerProvider, type ProjectPickerProviderProps } from '../../state';
+import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from '../../state';
 import type { useProjectPickerActions } from '../../state';
 import type { ProjectPickerState } from '../../state/reducers';
 
@@ -37,7 +37,7 @@ const createMenuState = (overrides: Partial<ProjectPickerState> = {}): ProjectPi
   ...overrides,
 });
 
-const defaultProps: Pick<ProjectPickerProviderProps, 'availableProjects'> = {
+const defaultProps: Pick<ProjectPickerStateProviderProps, 'availableProjects'> = {
   availableProjects: Array.from({ length: 10 }, () => ({
     _id: faker.string.uuid(),
     _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
@@ -49,12 +49,12 @@ const defaultProps: Pick<ProjectPickerProviderProps, 'availableProjects'> = {
 };
 
 const renderComponent = (
-  props: Partial<Pick<ProjectPickerProviderProps, 'availableProjects'>> = {}
+  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects'>> = {}
 ) => {
   return render(
-    <ProjectPickerProvider {...Object.assign(defaultProps, props)}>
+    <ProjectPickerStateProvider {...Object.assign(defaultProps, props)}>
       <ProjectPickerList />
-    </ProjectPickerProvider>
+    </ProjectPickerStateProvider>
   );
 };
 

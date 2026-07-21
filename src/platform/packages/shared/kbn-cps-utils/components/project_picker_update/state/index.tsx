@@ -20,7 +20,7 @@ interface ProjectPickerContext {
   actions: ActionsFromReducers<ReturnType<typeof createStoreReducers>>;
 }
 
-export interface ProjectPickerProviderProps {
+export interface ProjectPickerStateProviderProps {
   children: React.ReactNode;
   availableProjects: Array<CPSProject>;
 }
@@ -47,10 +47,10 @@ export const useProjectPickerState = () => {
   return ctx.state;
 };
 
-export const ProjectPickerProvider = ({
+export const ProjectPickerStateProvider = ({
   children,
   availableProjects,
-}: PropsWithChildren<ProjectPickerProviderProps>) => {
+}: PropsWithChildren<ProjectPickerStateProviderProps>) => {
   const ProjectPickerContext = useMemo(() => createProjectPickerContext(), []);
   const projectPickerReducers = useMemo(() => createStoreReducers(), []);
 

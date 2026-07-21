@@ -9,14 +9,16 @@
 
 import React from 'react';
 import { ProjectPickerFrame, ProjectPickerList } from './blocks';
-import { ProjectPickerProvider, type ProjectPickerProviderProps } from './state';
+import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from './state';
 
-export function ProjectPicker({ availableProjects }: Omit<ProjectPickerProviderProps, 'children'>) {
+export function ProjectPicker({
+  availableProjects,
+}: Omit<ProjectPickerStateProviderProps, 'children'>) {
   return (
-    <ProjectPickerProvider availableProjects={availableProjects}>
+    <ProjectPickerStateProvider availableProjects={availableProjects}>
       <ProjectPickerFrame>
         <ProjectPickerList />
       </ProjectPickerFrame>
-    </ProjectPickerProvider>
+    </ProjectPickerStateProvider>
   );
 }

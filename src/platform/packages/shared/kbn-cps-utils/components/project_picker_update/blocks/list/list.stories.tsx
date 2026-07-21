@@ -11,7 +11,7 @@ import React, { type ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { faker } from '@faker-js/faker';
 import { ProjectPickerList } from './list';
-import { ProjectPickerProvider, type ProjectPickerProviderProps } from '../../state';
+import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from '../../state';
 
 export default {
   title: 'Project Picker/Blocks/List',
@@ -19,7 +19,8 @@ export default {
 } satisfies Meta<typeof ProjectPickerList>;
 
 export const ProjectPickerListItemStory: StoryObj<
-  Pick<ProjectPickerProviderProps, 'availableProjects'> & ComponentProps<typeof ProjectPickerList>
+  Pick<ProjectPickerStateProviderProps, 'availableProjects'> &
+    ComponentProps<typeof ProjectPickerList>
 > = {
   name: 'ProjectPickerListItem',
   args: {
@@ -33,8 +34,8 @@ export const ProjectPickerListItemStory: StoryObj<
     })),
   },
   render: ({ availableProjects, ...props }) => (
-    <ProjectPickerProvider availableProjects={availableProjects}>
+    <ProjectPickerStateProvider availableProjects={availableProjects}>
       <ProjectPickerList {...props} />
-    </ProjectPickerProvider>
+    </ProjectPickerStateProvider>
   ),
 };
