@@ -105,7 +105,8 @@ apiTest.describe(
         const allMessageContent = firstAgentRequest!.messages
           .map((m: { content?: unknown }) => String(m.content ?? ''))
           .join('\n');
-        expect(allMessageContent).toContain('some text content');
+        expect(allMessageContent).toContain('<conversation-attachments count="1">');
+        expect(allMessageContent).toContain('<attachment');
       });
 
       apiTest(`[${mode}] rejects attachment without data or origin`, async ({ asAdmin }) => {
@@ -172,7 +173,7 @@ apiTest.describe(
           const allMessageContent = firstAgentRequest!.messages
             .map((m: { content?: unknown }) => String(m.content ?? ''))
             .join('\n');
-          expect(allMessageContent).toContain('inline-payload-for-model');
+          expect(allMessageContent).toContain('<conversation-attachments count="1">');
         }
       );
 
