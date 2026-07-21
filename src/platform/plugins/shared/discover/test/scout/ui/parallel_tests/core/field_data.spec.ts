@@ -47,11 +47,13 @@ spaceTest.describe('Discover field data', { tag: '@local-stateful-classic' }, ()
     expect(await pageObjects.discover.getHitCountInt()).toBe(11156);
   });
 
-  spaceTest('highlights search terms in field data', async ({ page, pageObjects }) => {
+  spaceTest('highlights search terms in field data', async ({ pageObjects }) => {
     await pageObjects.discover.writeAndSubmitKqlQuery('php');
     await pageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
 
-    await expect(page.locator('mark').filter({ hasText: 'php' })).not.toHaveCount(0);
+    await expect(
+      pageObjects.discover.getSearchTermHighlights().filter({ hasText: 'php' })
+    ).not.toHaveCount(0);
   });
 
   spaceTest('shows a KQL syntax error callout', async ({ pageObjects }) => {
@@ -80,7 +82,7 @@ spaceTest.describe('Discover field data', { tag: '@local-stateful-classic' }, ()
       await expect(pageObjects.dataGrid.getCell(0, 'relatedContent')).toContainText(
         'relatedContent.url'
       );
-      await expect(page.locator('mark')).not.toHaveCount(0);
+      await expect(pageObjects.discover.getSearchTermHighlights()).not.toHaveCount(0);
 
       const relatedContentUrl = new URL(page.url());
       const sourceColumnHash = setColumnsInHash(relatedContentUrl.hash, ['_source']).replace(
@@ -97,7 +99,7 @@ spaceTest.describe('Discover field data', { tag: '@local-stateful-classic' }, ()
       expect(gridHeader).toContain('@timestamp');
       expect(gridHeader).toContain('Summary');
       expect(gridHeader).not.toContain('_source');
-      await expect(page.locator('mark')).not.toHaveCount(0);
+      await expect(pageObjects.discover.getSearchTermHighlights()).not.toHaveCount(0);
     }
   );
 
