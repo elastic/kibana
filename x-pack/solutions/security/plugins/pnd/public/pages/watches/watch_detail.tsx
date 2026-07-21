@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiLoadingSpinner,
-  EuiPageSection,
   EuiPanel,
   EuiRange,
   EuiSpacer,
@@ -37,7 +36,7 @@ import {
   type WatchCallableRef,
   type WatchSchedule,
 } from '@kbn/pnd-common';
-import { PND_FAB_CONTENT_OFFSET } from '../../components/layout/constants';
+import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useWatch } from '../../hooks/use_watches_api';
@@ -46,7 +45,10 @@ import { AutonomyMeter } from './components/autonomy_meter';
 import { RecentRunsTable } from './components/recent_runs_table';
 import { RunSparkline } from './components/run_sparkline';
 import { SchedulePanel } from './components/schedule_panel';
-import { WatchesSectionLayout } from './components/watches_section_layout';
+import {
+  WatchesSectionLayout,
+  WatchesSubnavExpandControl,
+} from './components/watches_section_layout';
 import * as i18n from './translations';
 
 const SCOPE_COLOR: Record<string, string> = {
@@ -134,13 +136,13 @@ export const WatchDetailPage: React.FC = () => {
 
   if (!hasCurrentWatch && isLoading) {
     return (
-      <EuiPageSection paddingSize="l">
+      <PndPageSection>
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 240 }}>
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" aria-label={i18n.LOADING_WATCH} />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageSection>
+      </PndPageSection>
     );
   }
 
@@ -149,7 +151,7 @@ export const WatchDetailPage: React.FC = () => {
     const body = isNotFound ? i18n.WATCH_NOT_FOUND_BODY : i18n.WATCH_LOAD_ERROR_BODY;
     return (
       <WatchesSectionLayout active="watches">
-        <EuiPageSection paddingSize="l">
+        <PndPageSection>
           <EuiEmptyPrompt
             iconType={isNotFound ? 'search' : 'error'}
             title={<h2>{title}</h2>}
@@ -169,7 +171,7 @@ export const WatchDetailPage: React.FC = () => {
               </EuiFlexGroup>
             }
           />
-        </EuiPageSection>
+        </PndPageSection>
       </WatchesSectionLayout>
     );
   }
@@ -178,13 +180,12 @@ export const WatchDetailPage: React.FC = () => {
 
   return (
     <WatchesSectionLayout active="watches">
-      <EuiPageSection
-        paddingSize="l"
-        css={css`
-          padding-top: ${euiTheme.size.l};
-          padding-bottom: ${PND_FAB_CONTENT_OFFSET}px;
-          --wt: ${watch.color};
-        `}
+      <PndPageSection
+        contentProps={{
+          css: {
+            ['--wt' as string]: watch.color,
+          },
+        }}
       >
         <PndPageHeader
           title={
@@ -202,6 +203,7 @@ export const WatchDetailPage: React.FC = () => {
             </EuiFlexGroup>
           }
           subtitle={watch.mandate}
+          leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
           backTo={{ path: '/watches', label: i18n.BACK_TO_WATCHES }}
           rightSideItems={[
             <EuiButton key="save" fill onClick={stubToast}>
@@ -408,7 +410,7 @@ export const WatchDetailPage: React.FC = () => {
         <EuiPanel hasBorder paddingSize="m">
           <RecentRunsTable runs={watch.recentRuns} />
         </EuiPanel>
-      </EuiPageSection>
+      </PndPageSection>
     </WatchesSectionLayout>
   );
 };

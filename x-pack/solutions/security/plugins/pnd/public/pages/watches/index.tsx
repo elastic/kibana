@@ -12,25 +12,25 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPageSection,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PND_FAB_CONTENT_OFFSET } from '../../components/layout/constants';
+import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useWatches } from '../../hooks/use_watches_api';
 import { CoverageStrip } from './components/coverage_strip';
 import { WatchCardGrid } from './components/watch_card_grid';
-import { WatchesSectionLayout } from './components/watches_section_layout';
+import {
+  WatchesSectionLayout,
+  WatchesSubnavExpandControl,
+} from './components/watches_section_layout';
 import * as i18n from './translations';
 
 export const WatchesPage: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const { services } = useKibana();
   const { data, isLoading, error, refetch } = useWatches();
@@ -57,13 +57,11 @@ export const WatchesPage: React.FC = () => {
 
   return (
     <WatchesSectionLayout active="watches">
-      <EuiPageSection
-        paddingSize="l"
-        css={{ paddingTop: euiTheme.size.l, paddingBottom: PND_FAB_CONTENT_OFFSET }}
-      >
+      <PndPageSection>
         <PndPageHeader
           title={i18n.PAGE_TITLE}
           subtitle={i18n.PAGE_SUBTITLE}
+          leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
           rightSideItems={[
             <EuiButton
               key="new-watch"
@@ -123,7 +121,7 @@ export const WatchesPage: React.FC = () => {
             />
           </>
         ) : null}
-      </EuiPageSection>
+      </PndPageSection>
     </WatchesSectionLayout>
   );
 };

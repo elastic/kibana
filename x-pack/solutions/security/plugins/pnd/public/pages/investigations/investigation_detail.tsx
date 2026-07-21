@@ -14,17 +14,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPageSection,
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Proposal, ProposalStatus } from '@kbn/pnd-common';
-import { PND_FAB_CONTENT_OFFSET } from '../../components/layout/constants';
+import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigation, useInvestigationProposals } from '../../hooks/use_investigations_api';
@@ -63,7 +61,6 @@ const ProposalRow: React.FC<{
 );
 
 export const InvestigationDetailPage: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
   const { id, proposalId } = useParams<{ id: string; proposalId?: string }>();
   const { data, isLoading, error } = useInvestigation(id);
@@ -101,24 +98,18 @@ export const InvestigationDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <EuiPageSection
-        paddingSize="l"
-        css={{ paddingTop: euiTheme.size.l, paddingBottom: PND_FAB_CONTENT_OFFSET }}
-      >
+      <PndPageSection>
         <EuiLoadingSpinner size="xl" aria-label={i18n.LOADING} />
-      </EuiPageSection>
+      </PndPageSection>
     );
   }
 
   if (error || !data?.investigation) {
     return (
-      <EuiPageSection
-        paddingSize="l"
-        css={{ paddingTop: euiTheme.size.l, paddingBottom: PND_FAB_CONTENT_OFFSET }}
-      >
+      <PndPageSection>
         <PndPageHeader title={i18n.PAGE_TITLE} backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }} />
         <EuiEmptyPrompt iconType="alert" title={<h2>{i18n.NOT_FOUND}</h2>} />
-      </EuiPageSection>
+      </PndPageSection>
     );
   }
 
@@ -171,10 +162,7 @@ export const InvestigationDetailPage: React.FC = () => {
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
 
   return (
-    <EuiPageSection
-      paddingSize="l"
-      css={{ paddingTop: euiTheme.size.l, paddingBottom: PND_FAB_CONTENT_OFFSET }}
-    >
+    <PndPageSection>
       <PndPageHeader
         title={investigation.title}
         subtitle={investigation.affectedSurface}
@@ -186,6 +174,6 @@ export const InvestigationDetailPage: React.FC = () => {
         onTabClick={(tab) => setSelectedTabId(tab.id)}
         autoFocus="selected"
       />
-    </EuiPageSection>
+    </PndPageSection>
   );
 };

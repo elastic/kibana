@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { PND_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
 import * as i18n from '../translations';
@@ -48,9 +55,10 @@ const NAV_ITEMS: NavItem[] = [
 
 interface PndWatchesNavProps {
   active: WatchesSectionId;
+  onCollapse: () => void;
 }
 
-export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({ active }) => {
+export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({ active, onCollapse }) => {
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
 
@@ -67,9 +75,28 @@ export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({ active }) => {
         background: ${euiTheme.colors.emptyShade};
       `}
     >
-      <EuiTitle size="xs">
-        <h2>{i18n.PAGE_TITLE}</h2>
-      </EuiTitle>
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>{i18n.PAGE_TITLE}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="menuLeft"
+            aria-label={i18n.SUBNAV_COLLAPSE}
+            color="text"
+            display="base"
+            data-test-subj="pndWatchesSubnavCollapse"
+            onClick={onCollapse}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiFlexGroup
         direction="column"
         gutterSize="xs"

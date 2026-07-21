@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiPageSection, useEuiTheme } from '@elastic/eui';
-import { PND_FAB_CONTENT_OFFSET } from '../../components/layout/constants';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
-import { WatchesSectionLayout } from './components/watches_section_layout';
 import type { WatchesSectionId } from './components/pnd_watches_nav';
+import {
+  WatchesSectionLayout,
+  WatchesSubnavExpandControl,
+} from './components/watches_section_layout';
 import * as i18n from './translations';
 
 interface WatchesSectionStubPageProps {
@@ -30,23 +33,23 @@ const SECTION_COPY: Record<
 };
 
 export const WatchesSectionStubPage: React.FC<WatchesSectionStubPageProps> = ({ section }) => {
-  const { euiTheme } = useEuiTheme();
   const copy = SECTION_COPY[section];
   usePndDocTitle(copy.title);
 
   return (
     <WatchesSectionLayout active={section}>
-      <EuiPageSection
-        paddingSize="l"
-        css={{ paddingTop: euiTheme.size.l, paddingBottom: PND_FAB_CONTENT_OFFSET }}
-      >
-        <PndPageHeader title={copy.title} subtitle={copy.subtitle} />
+      <PndPageSection>
+        <PndPageHeader
+          title={copy.title}
+          subtitle={copy.subtitle}
+          leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
+        />
         <EuiEmptyPrompt
           iconType="aggregate"
           title={<h2>{i18n.STUB_EMPTY_TITLE}</h2>}
           body={<p>{i18n.STUB_EMPTY_BODY}</p>}
         />
-      </EuiPageSection>
+      </PndPageSection>
     </WatchesSectionLayout>
   );
 };

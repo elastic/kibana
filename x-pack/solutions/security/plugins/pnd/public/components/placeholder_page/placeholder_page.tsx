@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiPageSection, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
-import { PND_FAB_CONTENT_OFFSET } from '../layout/constants';
+import { PndPageSection } from '../layout/pnd_page_section';
 import { PndPageHeader } from '../pnd_page_header';
 import * as i18n from './translations';
 
@@ -24,15 +24,11 @@ export const PlaceholderPage: React.FC<PlaceholderPageProps> = ({
   description,
   showBackToBrief = true,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const history = useHistory();
   usePndDocTitle(title);
 
   return (
-    <EuiPageSection
-      paddingSize="l"
-      css={{ paddingTop: euiTheme.size.l, paddingBottom: PND_FAB_CONTENT_OFFSET }}
-    >
+    <PndPageSection>
       <PndPageHeader title={title} />
       <EuiEmptyPrompt
         iconType="aggregate"
@@ -49,6 +45,6 @@ export const PlaceholderPage: React.FC<PlaceholderPageProps> = ({
           ) : undefined
         }
       />
-    </EuiPageSection>
+    </PndPageSection>
   );
 };

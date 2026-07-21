@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLoadingSpinner,
-  EuiPageSection,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -27,7 +26,8 @@ import {
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import type { Investigation, RecommendedAction } from '@kbn/pnd-common';
-import { PND_FAB_CONTENT_OFFSET } from '../../components/layout/constants';
+import { PndPageSection } from '../../components/layout/pnd_page_section';
+import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import * as i18n from './translations';
@@ -255,28 +255,24 @@ export const BriefPage: React.FC = () => {
   };
 
   return (
-    <EuiPageSection
-      paddingSize="l"
-      css={{ paddingTop: euiTheme.size.xl, paddingBottom: PND_FAB_CONTENT_OFFSET }}
-    >
-      <EuiTitle size="l">
-        <h1>
-          {i18n.GREETING_PREFIX}{' '}
-          <span
-            css={css`
-              font-weight: 700;
-            `}
-          >
-            {i18n.greetingEmphasis(queueRows.length)}
-          </span>
-        </h1>
-      </EuiTitle>
-      <EuiText color="subdued">
-        <p>
-          {autoResolvedCount > 0 ? i18n.autonomousSubline(autoResolvedCount) : i18n.CLEAR_SUBLINE}
-        </p>
-      </EuiText>
-      <EuiSpacer size="l" />
+    <PndPageSection>
+      <PndPageHeader
+        title={
+          <>
+            {i18n.GREETING_PREFIX}{' '}
+            <span
+              css={css`
+                font-weight: 700;
+              `}
+            >
+              {i18n.greetingEmphasis(queueRows.length)}
+            </span>
+          </>
+        }
+        subtitle={
+          autoResolvedCount > 0 ? i18n.autonomousSubline(autoResolvedCount) : i18n.CLEAR_SUBLINE
+        }
+      />
 
       <EuiFlexGroup gutterSize="s" wrap responsive={false}>
         <EuiFlexItem grow={false}>
@@ -390,6 +386,6 @@ export const BriefPage: React.FC = () => {
             </div>
           ))
         : null}
-    </EuiPageSection>
+    </PndPageSection>
   );
 };

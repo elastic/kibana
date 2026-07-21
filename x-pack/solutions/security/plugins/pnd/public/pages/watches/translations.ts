@@ -327,6 +327,14 @@ export const SUBNAV_ARIA_LABEL = i18n.translate('xpack.pnd.watches.subnav.ariaLa
   defaultMessage: 'Watches section',
 });
 
+export const SUBNAV_COLLAPSE = i18n.translate('xpack.pnd.watches.subnav.collapse', {
+  defaultMessage: 'Collapse Watches navigation',
+});
+
+export const SUBNAV_EXPAND = i18n.translate('xpack.pnd.watches.subnav.expand', {
+  defaultMessage: 'Expand Watches navigation',
+});
+
 export const SUBNAV_WATCHES = i18n.translate('xpack.pnd.watches.subnav.watches', {
   defaultMessage: 'Watches',
 });
