@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,6 +15,7 @@ import {
   EuiPageTemplate,
   EuiPanel,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -392,45 +393,55 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
   );
 };
 
+const SHOW_CLASSIC_RULE_TYPES_LABEL = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.showClassicRuleTypesLabel',
+  { defaultMessage: 'Show classic rule types' }
+);
+
 const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ items }) => {
+  const [showClassicTypes, setShowClassicTypes] = useState(false);
+
   if (items.length === 0) return null;
 
   return (
     <>
       <EuiSpacer size="l" />
-      <EuiTitle size="xs">
-        <h3>
-          <FormattedMessage
-            id="xpack.alertingV2.ruleCreateOptionsPanel.legacyRuleTypesTitle"
-            defaultMessage="Classic rule types"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {items.map((item) => (
-          <EuiFlexItem key={item.id} grow={false}>
-            <EuiPanel
-              element="button"
-              hasBorder={false}
-              hasShadow={false}
-              color="transparent"
-              paddingSize="xs"
-              onClick={item.onClick}
-              data-test-subj={item['data-test-subj']}
-            >
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="bell" size="m" color="subdued" aria-hidden={true} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">{item.label}</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+      <EuiSwitch
+        label={SHOW_CLASSIC_RULE_TYPES_LABEL}
+        checked={showClassicTypes}
+        onChange={(e) => setShowClassicTypes(e.target.checked)}
+        compressed
+        data-test-subj="showClassicRuleTypesSwitch"
+      />
+      {showClassicTypes && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {items.map((item) => (
+              <EuiFlexItem key={item.id} grow={false}>
+                <EuiPanel
+                  element="button"
+                  hasBorder={false}
+                  hasShadow={false}
+                  color="transparent"
+                  paddingSize="xs"
+                  onClick={item.onClick}
+                  data-test-subj={item['data-test-subj']}
+                >
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="bell" size="m" color="subdued" aria-hidden={true} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">{item.label}</EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 };
