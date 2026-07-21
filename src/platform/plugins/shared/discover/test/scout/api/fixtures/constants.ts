@@ -16,3 +16,12 @@ export const COMMON_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
   'elastic-api-version': DISCOVER_SESSION_API_VERSION,
 } as const;
+
+/** Existing Discover session archive used by Scout API tests */
+export const KBN_ARCHIVES = {
+  SESSION_WITH_CONTROL:
+    'src/platform/test/functional/fixtures/kbn_archiver/discover/session_with_control.json',
+} as const;
+
+/** Discover session ID loaded by {@link KBN_ARCHIVES.SESSION_WITH_CONTROL} */
+export const TEST_DISCOVER_SESSION_ID = 'c48fccf3-c6b1-412e-8a79-0ee36f836f98';

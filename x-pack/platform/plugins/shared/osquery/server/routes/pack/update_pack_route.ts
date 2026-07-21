@@ -21,7 +21,7 @@ import {
   isEmpty,
   keyBy,
 } from 'lodash';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';

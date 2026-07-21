@@ -40,6 +40,12 @@ interface ChangeAppliedTemplateArgs {
   caseData: CaseUI;
   /** Pass null to remove the applied template. `settings` are the template's raw definition values. */
   newTemplate: NewAppliedTemplate;
+  /**
+   * Pre-validated extended field values (snake_case keys) collected from the fields form.
+   * When provided, used directly instead of computing carry-over values via
+   * `computeNewExtendedFields`. Only meaningful when `newTemplate` is non-null.
+   */
+  extendedFields?: Record<string, string>;
 }
 
 /**
@@ -82,9 +88,10 @@ export const useChangeAppliedTemplate = () => {
   const { showErrorToast } = useCasesToast();
 
   return useMutation(
-    ({ caseData, newTemplate }: ChangeAppliedTemplateArgs) => {
+    ({ caseData, newTemplate, extendedFields }: ChangeAppliedTemplateArgs) => {
       const newExtendedFields = newTemplate
-        ? computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {})
+        ? extendedFields ??
+          computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {})
         : {};
       return patchCase({
         caseId: caseData.id,

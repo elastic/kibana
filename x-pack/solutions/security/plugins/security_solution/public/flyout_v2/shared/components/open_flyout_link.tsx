@@ -9,7 +9,7 @@ import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { flyoutProviders } from './flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
