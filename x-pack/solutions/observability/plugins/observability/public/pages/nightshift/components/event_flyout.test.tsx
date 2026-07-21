@@ -99,7 +99,7 @@ describe('EventFlyout', () => {
     renderFlyout();
 
     expect(screen.getByText(mockEvent.title)).toBeInTheDocument();
-    expect(screen.getByText('Significant event')).toBeInTheDocument();
+    expect(screen.getByText('Significant Event')).toBeInTheDocument();
     expect(screen.getByText('Needs action')).toBeInTheDocument();
     expect(screen.getByText('Investigating')).toBeInTheDocument();
   });

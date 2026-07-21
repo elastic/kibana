@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export type NightshiftChatAttachmentType = 'Detection' | 'Entity' | 'Significant event';
+export type NightshiftChatAttachmentType = 'Detection' | 'Entity' | 'Significant Event';
 
 /** Shown in Agent Builder as "Attachment added: {description}". */
 export const formatChatAttachmentDescription = (

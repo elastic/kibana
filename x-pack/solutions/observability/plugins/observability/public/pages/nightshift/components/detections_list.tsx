@@ -123,7 +123,7 @@ function DetectionCard({
           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="s" textAlign="left">
-                <strong>{detection.rule_name ?? detection.detection_id}</strong>
+                <strong>{detection.rule_name}</strong>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

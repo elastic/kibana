@@ -8,15 +8,12 @@
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { Feature } from '@kbn/significant-events-schema';
 
-export const SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE = 'platform.sig_event_feature' as const;
+export const KI_FEATURE_ATTACHMENT_TYPE = 'platform.ki_feature' as const;
 
-export type SignificantEventFeatureAttachment = Attachment<
-  typeof SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
-  Feature
->;
+export type KiFeatureAttachment = Attachment<typeof KI_FEATURE_ATTACHMENT_TYPE, Feature>;
 
-export type PendingSignificantEventFeatureAttachment = AttachmentInput<
-  typeof SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
+export type PendingKiFeatureAttachment = AttachmentInput<
+  typeof KI_FEATURE_ATTACHMENT_TYPE,
   Feature
 >;
 

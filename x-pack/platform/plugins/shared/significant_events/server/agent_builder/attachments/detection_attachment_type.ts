@@ -21,26 +21,29 @@ interface CreateSignificantEventDetectionAttachmentTypeOptions {
   getScopedClients: GetScopedClients;
 }
 
-const toLifecycleDetection = (detection: Detection): LifecycleDetection => ({
-  '@timestamp': detection['@timestamp'],
-  detection_id: detection.detection_id,
-  rule_name: detection.rule_name,
-  rule_uuid: detection.rule_uuid,
-  stream_name: detection.stream_name,
-  change_point_type: detection.change_point_type,
-});
+const toLifecycleDetection = (detection: Detection): LifecycleDetection | undefined => {
+  if (!detection.rule_name) {
+    return undefined;
+  }
+
+  return {
+    '@timestamp': detection['@timestamp'],
+    detection_id: detection.detection_id,
+    rule_name: detection.rule_name,
+    rule_uuid: detection.rule_uuid,
+    stream_name: detection.stream_name,
+    change_point_type: detection.change_point_type,
+  };
+};
 
 export const formatDetectionAsText = (detection: LifecycleDetection): string => {
-  const title = detection.rule_name ?? detection.detection_id;
   return [
-    `Significant Events detection "${title}"`,
+    `Significant Events detection "${detection.rule_name}"`,
     `Detection ID: ${detection.detection_id}`,
-    detection.stream_name ? `Stream: ${detection.stream_name}` : undefined,
-    detection.change_point_type ? `Change point: ${detection.change_point_type}` : undefined,
+    `Stream: ${detection.stream_name}`,
+    `Change point: ${detection.change_point_type}`,
     `Timestamp: ${detection['@timestamp']}`,
-  ]
-    .filter((line): line is string => Boolean(line))
-    .join('\n');
+  ].join('\n');
 };
 
 export const createSignificantEventDetectionAttachmentType = ({

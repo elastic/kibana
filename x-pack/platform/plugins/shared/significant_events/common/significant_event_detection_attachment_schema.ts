@@ -11,8 +11,8 @@ import { z } from '@kbn/zod/v4';
 export const lifecycleDetectionAttachmentSchema = z.object({
   '@timestamp': z.string(),
   detection_id: z.string(),
-  rule_name: z.string().optional(),
+  rule_name: z.string(),
   rule_uuid: z.string().optional(),
-  stream_name: z.string().optional(),
-  change_point_type: z.enum(CHANGE_POINT_TYPES).optional(),
+  stream_name: z.string(),
+  change_point_type: z.enum(CHANGE_POINT_TYPES),
 });

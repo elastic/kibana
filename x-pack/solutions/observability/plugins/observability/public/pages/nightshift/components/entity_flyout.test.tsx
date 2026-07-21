@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { Feature } from '@kbn/significant-events-schema';
 import {
   encodeFeatureAttachmentOrigin,
-  SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
+  KI_FEATURE_ATTACHMENT_TYPE,
 } from '@kbn/significant-events-plugin/common';
 import { EntityFlyout } from './entity_flyout';
 
@@ -122,7 +122,7 @@ describe('EntityFlyout', () => {
       attachments: [
         {
           id: mockFeature.uuid,
-          type: SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
+          type: KI_FEATURE_ATTACHMENT_TYPE,
           origin: encodeFeatureAttachmentOrigin(mockFeature.stream_name, mockFeature.id),
           description: '[Entity] synthetics-task-manager',
           data: mockFeature,

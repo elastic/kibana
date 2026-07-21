@@ -88,7 +88,7 @@ export function EventFlyout({ event, onClose, onChatClick }: EventFlyoutProps): 
           <EuiFlexItem grow={false}>
             <EuiBadge color="default">
               {i18n.translate('xpack.observability.nightshift.flyout.badge.significantEventLabel', {
-                defaultMessage: 'Significant event',
+                defaultMessage: 'Significant Event',
               })}
             </EuiBadge>
           </EuiFlexItem>

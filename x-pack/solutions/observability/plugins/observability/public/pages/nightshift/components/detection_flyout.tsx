@@ -95,7 +95,7 @@ export function DetectionFlyout({
     setSelectedEntity(undefined);
   };
 
-  const title = detection.rule_name ?? detection.detection_id;
+  const title = detection.rule_name;
   const changePointLabel = getChangePointLabel(detection.change_point_type);
   const summary = signal?.description;
   const esqlQuery = signal?.evidence?.esql_query;
@@ -114,8 +114,8 @@ export function DetectionFlyout({
       newConversation: true,
       autoSendInitialMessage: true,
       initialMessage: i18n.translate('xpack.observability.nightshift.detectionFlyout.chatPrompt', {
-        defaultMessage: 'Tell me about {detectionName}',
-        values: { detectionName: title },
+        defaultMessage: 'Tell me about the {ruleName} detection',
+        values: { ruleName: title },
       }),
       attachments: [
         {

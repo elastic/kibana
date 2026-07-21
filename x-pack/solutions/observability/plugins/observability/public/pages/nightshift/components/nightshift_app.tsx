@@ -84,7 +84,7 @@ export function NightshiftApp(): React.ReactElement {
             id: event.event_uuid,
             type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
             origin: event.event_id,
-            description: formatChatAttachmentDescription('Significant event', event.title),
+            description: formatChatAttachmentDescription('Significant Event', event.title),
             data: event,
           },
         ],
@@ -319,7 +319,7 @@ export function NightshiftApp(): React.ReactElement {
                 iconType="warning"
                 size="s"
                 title={i18n.translate('xpack.observability.nightshift.eventNotFoundTitle', {
-                  defaultMessage: 'Significant event not found',
+                  defaultMessage: 'Significant Event not found',
                 })}
               >
                 <EuiText size="s">

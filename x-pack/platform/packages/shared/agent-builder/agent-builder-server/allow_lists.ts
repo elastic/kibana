@@ -255,7 +255,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Streams (significant events)
   'platform.sig_event',
-  'platform.sig_event_feature',
+  'platform.ki_feature',
   'platform.sig_event_detection',
 
   // Platform – Discover

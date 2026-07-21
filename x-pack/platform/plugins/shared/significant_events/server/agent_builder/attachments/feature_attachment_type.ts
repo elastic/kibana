@@ -12,10 +12,7 @@ import type {
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/core/server';
 import { featureSchema, type Feature } from '@kbn/significant-events-schema';
-import {
-  decodeFeatureAttachmentOrigin,
-  SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
-} from '../../../common';
+import { decodeFeatureAttachmentOrigin, KI_FEATURE_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients } from '../../routes/types';
 
 interface CreateSignificantEventFeatureAttachmentTypeOptions {
@@ -41,7 +38,7 @@ export const createSignificantEventFeatureAttachmentType = ({
   logger,
   getScopedClients,
 }: CreateSignificantEventFeatureAttachmentTypeOptions): AttachmentTypeDefinition<
-  typeof SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
+  typeof KI_FEATURE_ATTACHMENT_TYPE,
   Feature
 > => {
   const fetchFeature = async (
@@ -65,7 +62,7 @@ export const createSignificantEventFeatureAttachmentType = ({
   };
 
   return {
-    id: SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
+    id: KI_FEATURE_ATTACHMENT_TYPE,
     isReadonly: true,
     validate: (input) => {
       const parseResult = featureSchema.safeParse(input);
@@ -76,7 +73,7 @@ export const createSignificantEventFeatureAttachmentType = ({
     },
     resolve: async (origin, context) => fetchFeature(origin, context),
     isStale: async (
-      attachment: VersionedAttachment<typeof SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE, Feature>,
+      attachment: VersionedAttachment<typeof KI_FEATURE_ATTACHMENT_TYPE, Feature>,
       context
     ): Promise<boolean> => {
       if (!attachment.origin) {

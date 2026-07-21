@@ -122,12 +122,6 @@ describe('DetectionFlyout', () => {
     expect(screen.getByText('Spike')).toBeInTheDocument();
   });
 
-  it('falls back to the detection id when the rule name is missing', () => {
-    renderFlyout({ detection: { ...mockDetection, rule_name: undefined } });
-
-    expect(screen.getByRole('heading', { name: 'det-1' })).toBeInTheDocument();
-  });
-
   it('formats the detection timestamp with the @ separator', () => {
     renderFlyout();
 
@@ -200,7 +194,7 @@ describe('DetectionFlyout', () => {
   });
 
   it('hides the associated entities section without a stream name', () => {
-    renderFlyout({ detection: { ...mockDetection, stream_name: undefined } });
+    renderFlyout({ detection: { ...mockDetection, stream_name: '' } });
 
     expect(screen.queryByText('Associated entities')).not.toBeInTheDocument();
   });
@@ -247,7 +241,7 @@ describe('DetectionFlyout', () => {
     expect(mockOpenChat).toHaveBeenCalledWith({
       newConversation: true,
       autoSendInitialMessage: true,
-      initialMessage: 'Tell me about latency-p95-spike',
+      initialMessage: 'Tell me about the latency-p95-spike detection',
       attachments: [
         {
           id: mockDetection.detection_id,

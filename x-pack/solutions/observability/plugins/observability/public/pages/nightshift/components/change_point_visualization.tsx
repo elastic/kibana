@@ -206,7 +206,7 @@ export function ChangePointTrendChart({
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
         {i18n.translate('xpack.observability.nightshift.detectionFlyout.trend.placeholderNote', {
-          defaultMessage: 'Illustrative preview — not measured occurrence data.',
+          defaultMessage: 'Illustrative preview — not based on actual occurrence data.',
         })}
       </EuiText>
       <EuiSpacer size="s" />

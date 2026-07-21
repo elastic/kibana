@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/significant-events-schema';
 import {
   encodeFeatureAttachmentOrigin,
-  SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
+  KI_FEATURE_ATTACHMENT_TYPE,
 } from '@kbn/significant-events-plugin/common';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '../../../utils/kibana_react';
@@ -160,7 +160,7 @@ export function EntityFlyout({
       attachments: [
         {
           id: feature.uuid,
-          type: SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
+          type: KI_FEATURE_ATTACHMENT_TYPE,
           origin: encodeFeatureAttachmentOrigin(feature.stream_name, feature.id),
           description: formatChatAttachmentDescription('Entity', title),
           data: feature,

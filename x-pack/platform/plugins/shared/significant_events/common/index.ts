@@ -43,12 +43,12 @@ export {
 } from './significant_event_attachment';
 
 export {
-  SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
+  KI_FEATURE_ATTACHMENT_TYPE,
   decodeFeatureAttachmentOrigin,
   encodeFeatureAttachmentOrigin,
-  type SignificantEventFeatureAttachment,
-  type PendingSignificantEventFeatureAttachment,
-} from './significant_event_feature_attachment';
+  type KiFeatureAttachment,
+  type PendingKiFeatureAttachment,
+} from './ki_feature_attachment';
 
 export {
   SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
