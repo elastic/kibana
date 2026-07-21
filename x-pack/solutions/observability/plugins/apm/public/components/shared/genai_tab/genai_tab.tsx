@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { GenAiFields } from './get_genai_fields';
@@ -32,6 +33,21 @@ interface Props {
 }
 
 export function GenAiTab({ genAi }: Props) {
+  const { euiTheme } = useEuiTheme();
+
+  const detailsListCss = css`
+    dt,
+    dd {
+      border-bottom: ${euiTheme.border.thin};
+      padding-top: ${euiTheme.size.xs};
+      padding-bottom: ${euiTheme.size.xs};
+    }
+    dt:last-of-type,
+    dd:last-of-type {
+      border-bottom: none;
+    }
+  `;
+
   const {
     operationName,
     requestModel,
@@ -177,6 +193,7 @@ export function GenAiTab({ genAi }: Props) {
               compressed
               listItems={extraParams}
               data-test-subj="genAiDetails"
+              css={detailsListCss}
             />
           </GenAiSection>
         </>
