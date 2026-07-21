@@ -9,6 +9,7 @@ import type { RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
 import type { ErrorResponse, GetRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
 import { RULE_EXECUTIONS_MAX_RESULT_WINDOW } from '@kbn/alerting-v2-schemas';
 import { jsonExample } from '../json_oas_example';
+import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
 
 type OASOperationObject = Exclude<
   Awaited<ReturnType<NonNullable<RouteConfigOptions<RouteMethod>['oasOperationObject']>>>,
@@ -52,6 +53,10 @@ export const getRuleExecutionsOasExamples = (): OASOperationObject => ({
       GET_RULE_EXECUTIONS_SUMMARY,
       RULE_EXECUTIONS_RESPONSE
     ),
-    400: jsonExample('invalidRuleExecutionsQuery', 'Invalid query parameters', INVALID_QUERY_ERROR),
+    400: jsonExample(
+      'invalidRuleExecutionsQuery',
+      INVALID_QUERY_PARAMETERS_DESCRIPTION,
+      INVALID_QUERY_ERROR
+    ),
   },
 });

@@ -6,6 +6,7 @@
  */
 
 import { RULE_EXECUTIONS_MAX_RESULT_WINDOW } from '@kbn/alerting-v2-schemas';
+import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
 import {
   GET_RULE_EXECUTIONS_SUMMARY,
   getRuleExecutionsOasExamples,
@@ -37,11 +38,15 @@ describe('execution history OAS examples', () => {
       oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRuleExecutionsQuery
     ).toEqual(
       expect.objectContaining({
+        summary: INVALID_QUERY_PARAMETERS_DESCRIPTION,
         value: expect.objectContaining({
           code: 'BAD_REQUEST',
           message: `page * perPage cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`,
         }),
       })
+    );
+    expect(GetRuleExecutionsRoute.validate.response?.[400]?.description).toBe(
+      INVALID_QUERY_PARAMETERS_DESCRIPTION
     );
   });
 
