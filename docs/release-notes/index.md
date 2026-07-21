@@ -709,6 +709,7 @@ For the Elastic Observability 9.3.8 release information, refer to [Elastic Obser
 ### Fixes [kibana-9.3.8-fixes]
 
 **Alerting**:
+* Prevents the Task Manager invalidate task from invalidating an API key that is still shared by other live tasks, which caused those tasks to fail with a security exception [#275157]({{kib-pull}}275157).
 * Defaults a missing reporting job `version` parameter to the current {{kib}} version instead of showing a hardcoded `7.14.0` value [#275469]({{kib-pull}}275469).
 * Fixes **Save and return** for Lens visualizations embedded from the Cases editor so the comment updates correctly [#275117]({{kib-pull}}275117).
 * Preserves `context.sourceFields` from the active alert in {{es}} query rule recovery actions so recovery templates can still reference those field values [#274686]({{kib-pull}}274686).
