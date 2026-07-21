@@ -5,9 +5,10 @@ Reads the Claude Code session transcript and prints token usage totals.
 Output (on success):
     input=N output=N cache_create=N cache_read=N total=N
 
-Exit 0: transcript found and parsed; totals printed to stdout.
-Exit 1: transcript not found or unreadable (not Claude Code, wrong harness, etc.)
-        — prints nothing; caller should write "not available".
+Exit 0: transcript found, parsed, and contains at least one usage block; totals printed to stdout.
+Exit 1: transcript not found, unreadable, or contains no usage blocks (not Claude Code,
+        wrong harness, unrecognised format, or session ended before any exchange) —
+        prints nothing; caller should write "not available".
 
 Transcript location:
     ~/.claude/projects/<cwd-slug>/<session-id>.jsonl
@@ -62,6 +63,7 @@ def sum_tokens(transcript_path):
         'cache_creation_input_tokens': 0,
         'cache_read_input_tokens': 0,
     }
+    usage_blocks = 0
 
     with open(transcript_path, encoding='utf-8') as fh:
         for raw in fh:
@@ -84,12 +86,13 @@ def sum_tokens(transcript_path):
             if not isinstance(usage, dict):
                 continue
 
+            usage_blocks += 1
             for key in totals:
                 v = usage.get(key, 0)
                 if isinstance(v, (int, float)):
                     totals[key] += int(v)
 
-    return totals
+    return totals, usage_blocks
 
 
 def main():
@@ -101,8 +104,14 @@ def main():
         sys.exit(1)
 
     try:
-        t = sum_tokens(transcript)
+        t, usage_blocks = sum_tokens(transcript)
     except OSError:
+        sys.exit(1)
+
+    if usage_blocks == 0:
+        # Transcript exists but contains no usage blocks — format unrecognised or
+        # session ended before any exchange was recorded. Treat as unreadable so
+        # the caller writes "not available" rather than a misleading "total 0".
         sys.exit(1)
 
     total = sum(t.values())
