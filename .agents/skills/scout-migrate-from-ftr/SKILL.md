@@ -95,4 +95,4 @@ Address `blocker` and `major` findings before considering the migration done. Su
 - Step 3 (execution) workflow: file placement, FTR-to-Scout mapping, typecheck/run: [`references/execute-plan.md`](references/execute-plan.md)
 - Test-type downgrade catalog (UI vs API vs RTL/Jest): [`references/pick-correct-test-type.md`](references/pick-correct-test-type.md)
 - Step 4 run commands and iteration patterns: [`docs/extend/testing/run-scout-tests.md`](../../../docs/extend/testing/run-scout-tests.md)
-- Migrating the new Scout test onto the published EUI test helpers (`page.components.*`): [`eui-test-helpers-migration/SKILL.md`](../eui-test-helpers-migration/SKILL.md) — judge the test vs. 1:1-mapping an old wrapper; request helper additions from DevEx rather than self-extending.
+- Migrating the new Scout test onto the published EUI test helpers (`page.components.*`): [`scout-eui-test-helpers-migration/SKILL.md`](../scout-eui-test-helpers-migration/SKILL.md) — judge the test vs. 1:1-mapping an old wrapper; request helper additions from DevEx rather than self-extending.
