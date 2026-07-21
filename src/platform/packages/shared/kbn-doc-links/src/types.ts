@@ -174,7 +174,6 @@ export interface DocLinks {
     readonly ingestPipelines: string;
     readonly knnSearch: string;
     readonly knnSearchCombine: string;
-    readonly knnSearchTuneForSpeedAccuracy: string;
     readonly languageAnalyzers: string;
     readonly languageClients: string;
     readonly licenseManagement: string;
@@ -191,12 +190,14 @@ export interface DocLinks {
     readonly semanticSearchGetStarted: string;
     readonly searchTemplates: string;
     readonly semanticTextField: string;
+    readonly semanticTextFieldSetupConfiguration: string;
+    readonly semanticTextSearchRetrieval: string;
+    readonly hybridSemanticText: string;
     readonly esAsVectorDatabase: string;
     readonly vectorSearch: string;
-    readonly vectorSearchEmbeddingModels: string;
+    readonly vectorSearchDenseVector: string;
+    readonly jinaEmbeddingModels: string;
     readonly vectorSearchBringOwnVectors: string;
-    readonly vectorSearchStorageOptimization: string;
-    readonly vectorSearchVectorsAndEmbeddings: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
