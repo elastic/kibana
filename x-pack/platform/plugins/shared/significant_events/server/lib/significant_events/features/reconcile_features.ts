@@ -99,6 +99,8 @@ const indexFeatureCandidate = (
   { byExactId, byAlias, byNormalizedId }: FeatureCandidateIndexes
 ): void => {
   const { feature } = candidate;
+  // Slug-only on purpose: the uuid is v5(stream, slug) with no type, so same-slug features
+  // share one storage slot. A type-scoped miss here would write a "new" doc over that slot.
   addFeatureCandidate(byExactId, normalizeFeatureSlug(feature.id), candidate);
   addFeatureCandidate(
     byNormalizedId,
@@ -126,7 +128,34 @@ const pickLatestCandidate = (
   );
 };
 
-const findFeatureMatch = (
+const pickSurvivorCandidate = (
+  candidates: ReadonlyArray<FeatureCandidate>,
+  normalizedId: string
+): FeatureCandidate | undefined => {
+  const unversioned = candidates.filter(
+    ({ feature }) => normalizeFeatureSlug(feature.id) === normalizedId
+  );
+  return pickLatestCandidate(unversioned.length > 0 ? unversioned : candidates);
+};
+
+// Every match lands on one survivor per family (type + version-stripped slug). Otherwise the
+// prompt inventory keeps legacy versioned ids alive: the model re-emits them verbatim and the
+// exact tier resets their TTL forever.
+const routeToFamilySurvivor = (
+  match: FeatureMatch,
+  byNormalizedId: Map<string, FeatureCandidate[]>
+): FeatureMatch => {
+  const { feature } = match.candidate;
+  const normalizedId = normalizeFeatureSlugForMatching(feature.id);
+  const family = byNormalizedId.get(getTypedFeatureKey(feature.type, normalizedId));
+  if (!family || family.length < 2) {
+    return match;
+  }
+  const survivor = pickSurvivorCandidate(family, normalizedId);
+  return survivor && survivor !== match.candidate ? { ...match, candidate: survivor } : match;
+};
+
+const findDirectMatch = (
   raw: BaseFeature,
   candidates: ReadonlyArray<FeatureCandidate>,
   { byExactId, byAlias, byNormalizedId }: FeatureCandidateIndexes
@@ -156,6 +185,15 @@ const findFeatureMatch = (
     candidates.filter(({ feature }) => hasSameFingerprint(feature, raw))
   );
   return fingerprintMatch ? { candidate: fingerprintMatch, tier: 'fingerprint' } : undefined;
+};
+
+const findFeatureMatch = (
+  raw: BaseFeature,
+  candidates: ReadonlyArray<FeatureCandidate>,
+  indexes: FeatureCandidateIndexes
+): FeatureMatch | undefined => {
+  const match = findDirectMatch(raw, candidates, indexes);
+  return match ? routeToFamilySurvivor(match, indexes.byNormalizedId) : undefined;
 };
 
 function filterExcluded(
@@ -247,7 +285,8 @@ export function reconcileInferredFeatures({
     const match = findFeatureMatch(raw, candidates, indexes);
 
     if (match) {
-      if (match.tier !== 'exact') {
+      // Remap = stored id differs from what the model wrote (fuzzy tiers + rerouted exact hits).
+      if (normalizeFeatureSlug(match.candidate.feature.id) !== normalizeFeatureSlug(raw.id)) {
         remappedCount++;
       }
 

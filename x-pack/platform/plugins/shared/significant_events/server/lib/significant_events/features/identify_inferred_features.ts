@@ -211,17 +211,19 @@ export const findSimilarFeatures = async ({
   streamName: string;
   args: SearchSimilarFeaturesArguments;
 }): Promise<SimilarFeatureHit[]> => {
+  // Fetch wide then filter: a 5-hit window shared across types can crowd out same-type hits.
   const { hits } = await kiClient.findFeatures(
     streamName,
     `${args.title} ${args.description}`.trim(),
     {
       searchMode: 'semantic',
-      limit: 5,
+      limit: 20,
     }
   );
 
   return hits
     .filter((feature) => feature.type === args.type)
+    .slice(0, 5)
     .map((feature) => ({
       id: feature.id,
       title: feature.title ?? feature.id,

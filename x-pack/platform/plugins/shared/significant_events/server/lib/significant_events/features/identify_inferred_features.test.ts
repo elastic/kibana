@@ -258,7 +258,7 @@ describe('findSimilarFeatures', () => {
 
     expect(findFeatures).toHaveBeenCalledWith('logs.test', 'Okta SDK Okta client technology', {
       searchMode: 'semantic',
-      limit: 5,
+      limit: 20,
     });
     expect(result).toEqual([
       {
@@ -268,6 +268,34 @@ describe('findSimilarFeatures', () => {
         confidence: 80,
       },
     ]);
+  });
+
+  it('caps same-type hits at 5 after over-fetching across types', async () => {
+    const findFeatures = jest.fn().mockResolvedValue({
+      hits: [
+        createFeature({ id: 'other-service', type: 'entity' }),
+        ...Array.from({ length: 7 }, (_, i) =>
+          createFeature({ id: `tech-${i}`, type: 'technology' })
+        ),
+      ],
+    });
+    const kiClient = {
+      findFeatures,
+    } as Parameters<typeof findSimilarFeatures>[0]['kiClient'];
+
+    const result = await findSimilarFeatures({
+      kiClient,
+      streamName: 'logs.test',
+      args: {
+        candidate_id: 'tech-x',
+        title: 'Tech X',
+        description: 'some technology',
+        type: 'technology',
+      },
+    });
+
+    expect(result).toHaveLength(5);
+    expect(result.map((hit) => hit.id)).toEqual(['tech-0', 'tech-1', 'tech-2', 'tech-3', 'tech-4']);
   });
 
   it('propagates semantic search errors for the reasoning-agent boundary to handle', async () => {

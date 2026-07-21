@@ -406,6 +406,89 @@ describe('reconcileInferredFeatures', () => {
     expect(result.updatedFeatures).toEqual([]);
   });
 
+  it('routes an exact hit on a versioned sibling to the family survivor', () => {
+    const older = createStoredFeature({
+      id: 'okta-3.14.1',
+      properties: { name: 'okta', version: '3.14.1' },
+      updated_at: '2026-01-01T00:00:00.000Z',
+    });
+    const newer = createStoredFeature({
+      id: 'okta-3.15.0',
+      properties: { name: 'okta', version: '3.15.0' },
+      updated_at: '2026-02-01T00:00:00.000Z',
+    });
+    // Verbatim re-emission of a legacy versioned id must land on the survivor, not reset the sibling's TTL.
+    const raw = createRawFeature({
+      id: 'okta-3.14.1',
+      properties: { name: 'okta', version: '3.14.1' },
+    });
+
+    const result = reconcile({
+      rawFeatures: [raw],
+      allKnownFeatures: [older, newer],
+    });
+
+    expect(result.newFeatures).toEqual([]);
+    expect(result.updatedFeatures).toHaveLength(1);
+    expect(result.updatedFeatures[0].id).toBe('okta-3.15.0');
+    expect(result.remappedCount).toBe(1);
+  });
+
+  it('prefers an unversioned family member as survivor over a newer versioned sibling', () => {
+    const unversioned = createStoredFeature({
+      id: 'okta',
+      properties: { name: 'okta', version: '3.15.0' },
+      updated_at: '2026-01-01T00:00:00.000Z',
+    });
+    const versioned = createStoredFeature({
+      id: 'okta-3.15.0',
+      properties: { name: 'okta', version: '3.15.0' },
+      updated_at: '2026-02-01T00:00:00.000Z',
+    });
+    const raw = createRawFeature({
+      id: 'okta-3.15.0',
+      properties: { name: 'okta', version: '3.15.0' },
+    });
+
+    const result = reconcile({
+      rawFeatures: [raw],
+      allKnownFeatures: [unversioned, versioned],
+    });
+
+    expect(result.newFeatures).toEqual([]);
+    expect(result.updatedFeatures).toHaveLength(1);
+    expect(result.updatedFeatures[0].id).toBe('okta');
+    expect(result.remappedCount).toBe(1);
+  });
+
+  it('does not route across families with the same base name but different types', () => {
+    const technology = createStoredFeature({
+      id: 'kafka-3.7.0',
+      type: 'technology',
+      properties: { name: 'kafka', version: '3.7.0' },
+    });
+    const entity = createStoredFeature({
+      id: 'kafka-cluster-1.2',
+      type: 'entity',
+      subtype: 'service',
+      properties: { name: 'kafka-cluster' },
+    });
+    const raw = createRawFeature({
+      id: 'kafka-3.7.0',
+      type: 'technology',
+      properties: { name: 'kafka', version: '3.7.0' },
+    });
+
+    const result = reconcile({
+      rawFeatures: [raw],
+      allKnownFeatures: [technology, entity],
+    });
+
+    expect(result.updatedFeatures).toHaveLength(1);
+    expect(result.updatedFeatures[0].id).toBe('kafka-3.7.0');
+    expect(result.remappedCount).toBe(0);
+  });
+
   it('keeps excluded-feature filtering unchanged', () => {
     const excluded = createStoredFeature({ id: 'okta', excluded: true });
 
