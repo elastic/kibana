@@ -36,6 +36,24 @@ export interface AppMenuItemsProps {
 
 export type AppMenuBreakpointSource = 'application' | 'viewport';
 
+type AppMenuLayout = 'collapsed' | 'minimal' | 'expanded';
+
+const APPLICATION_LAYOUTS: Record<EuiBreakpointSize, AppMenuLayout> = {
+  xs: 'collapsed',
+  s: 'minimal',
+  m: 'expanded',
+  l: 'expanded',
+  xl: 'expanded',
+};
+
+const VIEWPORT_LAYOUTS: Record<EuiBreakpointSize, AppMenuLayout> = {
+  xs: 'collapsed',
+  s: 'collapsed',
+  m: 'minimal',
+  l: 'minimal',
+  xl: 'expanded',
+};
+
 const hasNoItems = (config: AppMenuConfig) =>
   !config.items?.length && !config?.primaryActionItem && !config?.switch;
 
@@ -51,33 +69,23 @@ const AppMenuHeaderLinks = ({ children }: { children: React.ReactNode }) => (
 );
 
 interface AppMenuResponsiveContentProps {
-  collapsedContent: React.ReactNode;
-  mediumContent: React.ReactNode;
-  wideContent: React.ReactNode;
+  content: Record<AppMenuLayout, React.ReactNode>;
 }
 
 type AppMenuResolvedResponsiveContentProps = AppMenuResponsiveContentProps & {
   breakpoint: EuiBreakpointSize | undefined;
-  usesApplicationBreakpoint: boolean;
+  source: AppMenuBreakpointSource;
 };
 
 const AppMenuResponsiveContent = ({
-  collapsedContent,
-  mediumContent,
-  wideContent,
+  content,
   breakpoint,
-  usesApplicationBreakpoint,
+  source,
 }: AppMenuResolvedResponsiveContentProps) => {
-  // Preserve the previous viewport behavior for Classic and legacy Project Chrome.
-  const isWide = usesApplicationBreakpoint
-    ? breakpoint === 'm' || breakpoint === 'l' || breakpoint === 'xl'
-    : breakpoint === 'xl';
-  const isMedium = usesApplicationBreakpoint
-    ? breakpoint === 's'
-    : breakpoint === 'm' || breakpoint === 'l';
-  const content = isWide ? wideContent : isMedium ? mediumContent : collapsedContent;
+  const layouts = source === 'application' ? APPLICATION_LAYOUTS : VIEWPORT_LAYOUTS;
+  const layout = breakpoint ? layouts[breakpoint] : 'collapsed';
 
-  return <AppMenuHeaderLinks>{content}</AppMenuHeaderLinks>;
+  return <AppMenuHeaderLinks>{content[layout]}</AppMenuHeaderLinks>;
 };
 
 const AppMenuApplicationResponsiveContent = (props: AppMenuResponsiveContentProps) => {
@@ -88,7 +96,7 @@ const AppMenuApplicationResponsiveContent = (props: AppMenuResponsiveContentProp
     <AppMenuResponsiveContent
       {...props}
       breakpoint={applicationBreakpoint ?? viewportBreakpoint}
-      usesApplicationBreakpoint={applicationBreakpoint !== undefined}
+      source={applicationBreakpoint === undefined ? 'viewport' : 'application'}
     />
   );
 };
@@ -96,13 +104,7 @@ const AppMenuApplicationResponsiveContent = (props: AppMenuResponsiveContentProp
 const AppMenuViewportResponsiveContent = (props: AppMenuResponsiveContentProps) => {
   const breakpoint = useCurrentEuiBreakpoint();
 
-  return (
-    <AppMenuResponsiveContent
-      {...props}
-      breakpoint={breakpoint}
-      usesApplicationBreakpoint={false}
-    />
-  );
+  return <AppMenuResponsiveContent {...props} breakpoint={breakpoint} source="viewport" />;
 };
 
 export const AppMenuComponent = ({
@@ -133,25 +135,13 @@ export const AppMenuComponent = ({
   const primaryActionItem = config?.primaryActionItem;
   const switchConfig = config?.switch;
   const showMoreButtonId = 'show-more';
-
-  const {
-    displayedItems,
-    overflowItems,
-    shouldOverflow: shouldOverflowBase,
-  } = getAppMenuItems({
-    config,
-    hasStaticItems: hasVisibleStaticItems,
-  });
-
   const processedStaticItems = processStaticItems(staticItems);
+  const hasStaticItems = processedStaticItems.length > 0;
 
-  const allOverflowItems = [...overflowItems];
-  const shouldOverflow = shouldOverflowBase || processedStaticItems.length > 0;
-  const hasSecondaryActions =
-    Boolean(switchConfig) ||
-    displayedItems.length > 0 ||
-    allOverflowItems.length > 0 ||
-    processedStaticItems.length > 0;
+  const { displayedItems, overflowItems } = getAppMenuItems({
+    config,
+    hasStaticItems,
+  });
 
   const handlePopoverToggle = (id: string) => {
     setOpenPopoverId((prev) => (prev === id ? null : id));
@@ -174,7 +164,7 @@ export const AppMenuComponent = ({
 
   const collapsedComponent = (
     <AppMenuOverflowButton
-      items={[...displayedItems, ...allOverflowItems]}
+      items={[...displayedItems, ...overflowItems]}
       staticItems={processedStaticItems}
       isPopoverOpen={openPopoverId === showMoreButtonId}
       primaryActionItem={primaryActionItem}
@@ -184,63 +174,53 @@ export const AppMenuComponent = ({
     />
   );
 
-  const mediumContent = (
-    <>
-      {hasSecondaryActions && (
-        <div css={secondaryActionsCss}>
-          {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
-          <AppMenuOverflowButton
-            items={[...displayedItems, ...allOverflowItems]}
-            staticItems={processedStaticItems}
-            isPopoverOpen={openPopoverId === showMoreButtonId}
-            onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-            onPopoverClose={handleOnPopoverClose}
-          />
-        </div>
-      )}
-      {primaryActionComponent}
-    </>
-  );
+  const renderInlineContent = (inlineItemLimit: number) => {
+    const inlineItems = displayedItems.slice(0, inlineItemLimit);
+    const responsiveOverflowItems = [...displayedItems.slice(inlineItemLimit), ...overflowItems];
+    const shouldShowOverflow = responsiveOverflowItems.length > 0 || hasStaticItems;
+    const hasSecondaryActions =
+      Boolean(switchConfig) || inlineItems.length > 0 || shouldShowOverflow;
 
-  const wideContent = (
-    <>
-      {hasSecondaryActions && (
-        <div css={secondaryActionsCss}>
-          {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
-          {displayedItems.map((menuItem) => (
-            <AppMenuItem
-              key={menuItem.id}
-              {...menuItem}
-              isPopoverOpen={openPopoverId === menuItem.id}
-              onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
-              onPopoverClose={handleOnPopoverClose}
-            />
-          ))}
-          {shouldOverflow && (
-            <AppMenuOverflowButton
-              items={allOverflowItems}
-              staticItems={processedStaticItems}
-              isPopoverOpen={openPopoverId === showMoreButtonId}
-              onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-              onPopoverClose={handleOnPopoverClose}
-            />
-          )}
-        </div>
-      )}
-      {primaryActionComponent}
-    </>
-  );
+    return (
+      <>
+        {hasSecondaryActions && (
+          <div css={secondaryActionsCss}>
+            {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
+            {inlineItems.map((menuItem) => (
+              <AppMenuItem
+                key={menuItem.id}
+                {...menuItem}
+                isPopoverOpen={openPopoverId === menuItem.id}
+                onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
+                onPopoverClose={handleOnPopoverClose}
+              />
+            ))}
+            {shouldShowOverflow && (
+              <AppMenuOverflowButton
+                items={responsiveOverflowItems}
+                staticItems={processedStaticItems}
+                isPopoverOpen={openPopoverId === showMoreButtonId}
+                onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+                onPopoverClose={handleOnPopoverClose}
+              />
+            )}
+          </div>
+        )}
+        {primaryActionComponent}
+      </>
+    );
+  };
+
+  const content: Record<AppMenuLayout, React.ReactNode> = {
+    collapsed: collapsedComponent,
+    minimal: renderInlineContent(0),
+    expanded: renderInlineContent(displayedItems.length),
+  };
 
   const ResponsiveContent =
     breakpointSource === 'application'
       ? AppMenuApplicationResponsiveContent
       : AppMenuViewportResponsiveContent;
 
-  return (
-    <ResponsiveContent
-      collapsedContent={collapsedComponent}
-      mediumContent={mediumContent}
-      wideContent={wideContent}
-    />
-  );
+  return <ResponsiveContent content={content} />;
 };
