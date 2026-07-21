@@ -16,7 +16,7 @@ Explore a Kibana Security Solution feature area through a real browser, collect 
 **Execute phases 0 → 1 → 2 → 3 in strict order. Read each phase file before executing it.**
 
 **Your goal:** Surface genuine issues that would affect real users.
-**Your anti-goal:** Do not produce findings to fill a report — if you explored thoroughly and found nothing, that is a valid and useful result. Precision over volume: one confirmed Level 1 bug is worth more than ten uncertain Level 2 observations.
+**Your anti-goal:** Do not produce findings to fill a report — if you explored thoroughly and found nothing, that is a valid and useful result. Precision over volume: one confirmed Level 1 bug is worth more than ten uncertain Level 2 flags.
 
 ## Quick Reference
 
