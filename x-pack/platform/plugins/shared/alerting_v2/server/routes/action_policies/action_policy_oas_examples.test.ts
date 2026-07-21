@@ -13,6 +13,7 @@ import {
 } from '../../lib/errors/action_policy_error_messages';
 import { CreateActionPolicyRoute } from './create_action_policy_route';
 import {
+  actionPolicyTagsOasExamples,
   createActionPolicyOasExamples,
   getActionPolicyOasExamples,
   upsertActionPolicyOasExamples,
@@ -88,4 +89,16 @@ describe('action policy OAS examples', () => {
       oas.responses?.[400]?.content?.['application/json']?.examples?.invalidActionPolicyData
     ).toBeDefined();
   });
+  it('includes success examples for action policy tags', () => {
+    const oas = actionPolicyTagsOasExamples();
+
+    expect(
+      oas.responses?.[200]?.content?.['application/json']?.examples?.actionPolicyTagsResponse
+    ).toEqual(
+      expect.objectContaining({
+        value: expect.arrayContaining(['production']),
+      })
+    );
+  });
+
 });

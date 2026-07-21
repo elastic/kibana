@@ -17,6 +17,8 @@ import type {
   ListPolicyExecutionHistoryResponse,
   MatchActionPoliciesForRuleBody,
   MatchActionPoliciesForRuleResponse,
+  ActionPolicyTagsResponse,
+  MatcherDataFieldsResponse,
   SnoozeActionPolicyBody,
   UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
@@ -46,11 +48,6 @@ const jsonExample = <T>(name: string, summary: string, value: T) => ({
     },
   },
 });
-
-/**
- * Typed OAS example payloads. Annotated against @kbn/alerting-v2-schemas so
- * schema changes fail typecheck until these examples are updated.
- */
 
 const CREATE_REQUEST: CreateActionPolicyDataInput = {
   name: 'Notify on host alerts',
@@ -148,12 +145,13 @@ const EXECUTION_HISTORY_COUNT_RESPONSE: CountPolicyExecutionEventsResponse = {
   count: 3,
 };
 
-/** Local route schema is `z.array(z.string())` — no shared package type. */
-const MATCHER_DATA_FIELDS_RESPONSE: string[] = [
+const MATCHER_DATA_FIELDS_RESPONSE: MatcherDataFieldsResponse = [
   'host.name',
   'host.ip',
   'kibana.alert.rule.name',
 ];
+
+const ACTION_POLICY_TAGS_RESPONSE: ActionPolicyTagsResponse = ['production', 'critical', 'hosts'];
 
 const SAMPLE_ACTION_POLICY_ID = ACTION_POLICY_RESPONSE.id;
 
@@ -425,5 +423,12 @@ export const matcherDataFieldsOasExamples = (): OASOperationObject =>
 
 export const actionPolicyTagsOasExamples = (): OASOperationObject =>
   buildActionPolicyOas({
+    responses: {
+      200: {
+        name: 'actionPolicyTagsResponse',
+        summary: 'Suggested action policy tags',
+        value: ACTION_POLICY_TAGS_RESPONSE,
+      },
+    },
     errors: [400],
   });

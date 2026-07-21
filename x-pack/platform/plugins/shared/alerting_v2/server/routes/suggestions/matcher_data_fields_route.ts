@@ -7,8 +7,12 @@
 
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
-import { z } from '@kbn/zod/v4';
+import {
+  errorResponseSchema,
+  matcherDataFieldsQuerySchema,
+  matcherDataFieldsResponseSchema,
+  type MatcherDataFieldsQuery,
+} from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
@@ -16,14 +20,6 @@ import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { matcherDataFieldsOasExamples } from '../action_policies/action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
-
-const matcherDataFieldsQuerySchema = z.object({
-  matcher: z.string().min(1).max(2048).optional(),
-});
-
-const matcherDataFieldsResponseSchema = z
-  .array(z.string())
-  .describe('The list of available matcher data field names');
 
 @injectable()
 export class MatcherDataFieldsRoute extends BaseAlertingRoute {
@@ -60,11 +56,7 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<
-      unknown,
-      z.infer<typeof matcherDataFieldsQuerySchema>,
-      unknown
-    >,
+    private readonly request: KibanaRequest<unknown, MatcherDataFieldsQuery, unknown>,
     @inject(MatcherSuggestionsService)
     private readonly suggestionsService: MatcherSuggestionsService
   ) {
