@@ -28,7 +28,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   const form = useForm({
     defaultValues: {
       [CASE_EXTENDED_FIELDS]:
-        initialValue !== undefined ? { requires_escalation_as_keyword: initialValue } : {},
+        initialValue !== undefined ? { requires_escalation_as_boolean: initialValue } : {},
     },
   });
 
@@ -46,7 +46,7 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
       <Toggle
         name="requires_escalation"
         control="TOGGLE"
-        type="keyword"
+        type="boolean"
         label="Requires escalation"
         isRequired={isRequired}
         metadata={defaultValue !== undefined ? { default: defaultValue } : undefined}
@@ -93,7 +93,7 @@ describe('Toggle', () => {
 
     const { data } = onSubmitResult.mock.calls[0][0];
     const submitted = (data as Record<string, Record<string, unknown>>)[CASE_EXTENDED_FIELDS]
-      ?.requires_escalation_as_keyword;
+      ?.requires_escalation_as_boolean;
     expect(submitted).toBe('true');
   });
 
@@ -110,7 +110,7 @@ describe('Toggle', () => {
 
     const { data } = onSubmitResult.mock.calls[0][0];
     const submitted = (data as Record<string, Record<string, unknown>>)[CASE_EXTENDED_FIELDS]
-      ?.requires_escalation_as_keyword;
+      ?.requires_escalation_as_boolean;
     expect(submitted).toBe('false');
   });
 
@@ -126,7 +126,7 @@ describe('Toggle', () => {
 
     const { isValid, data } = onSubmitResult.mock.calls[0][0];
     const submitted = (data as Record<string, Record<string, unknown>>)[CASE_EXTENDED_FIELDS]
-      ?.requires_escalation_as_keyword;
+      ?.requires_escalation_as_boolean;
     expect(isValid).toBe(true);
     expect(submitted).toBe('false');
   });

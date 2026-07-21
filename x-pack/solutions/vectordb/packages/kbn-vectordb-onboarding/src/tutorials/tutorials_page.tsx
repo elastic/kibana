@@ -79,6 +79,7 @@ export const TutorialsPage = () => {
               isLoading={isCredentialsLoading}
               showLabel={false}
               isCompact
+              telemetryPage="gettingStarted"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
