@@ -58,6 +58,7 @@ const renderOpenFlyoutLink = (props: Partial<React.ComponentProps<typeof OpenFly
 describe('<OpenFlyoutLink />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
   });
 
   describe('when the field is supported', () => {

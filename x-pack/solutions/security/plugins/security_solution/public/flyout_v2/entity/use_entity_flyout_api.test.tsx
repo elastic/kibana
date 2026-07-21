@@ -38,12 +38,17 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
 }));
 
 const mockOpenSystemFlyout = jest.fn();
+const mockReportEvent = jest.fn();
 
 describe('useEntityFlyoutApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     (useKibana as jest.Mock).mockReturnValue({
-      services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } },
+      services: {
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        telemetry: { reportEvent: mockReportEvent },
+      },
     });
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
   });
