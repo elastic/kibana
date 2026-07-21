@@ -100,8 +100,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     } catch (err) {
       if (err?.meta?.statusCode === 409) {
         if (metadata?.idempotency_key) {
-          // Replay of an already-accepted idempotency key: return the existing
-          // execution instead of scheduling a new one.
           this.logger.debug(
             `Duplicate idempotency key detected, returning existing execution ${executionId}`
           );

@@ -59,10 +59,7 @@ const fromEs = (source: AgentExecutionProperties): AgentExecution => {
  * Client for agent execution documents.
  */
 export interface AgentExecutionClient {
-  /**
-   * Create a new execution document. The create is atomic (`op_type: create`) and rejects
-   * with a 409 when a document with the same id already exists.
-   */
+  /** Create a new execution document. */
   create(execution: CreateExecutionParams): Promise<AgentExecution>;
 
   /** Get an execution document by id (real-time GET). Returns undefined if not found. */

@@ -416,9 +416,9 @@ export function registerChatRoutes({
 
       if (idempotencyKey) {
         // The idempotency key deterministically owns the execution id, scoped to the
-        // space and origin conversation, so a replayed delivery of the same surface
+        // space and origin conversation, so a replayed delivery of the same origin
         // event maps to the same execution document while keys reused across spaces
-        // or threads cannot collide.
+        // or conversations cannot collide.
         executionId = createHash('sha256')
           .update([spaceId, originRest.external_conversation_id, idempotencyKey].join('\u0000'))
           .digest('hex');
@@ -435,19 +435,15 @@ export function registerChatRoutes({
     };
   };
 
-  /**
-   * Default execution options for public converse requests, which may opt into
-   * local or Task Manager execution with _execution_mode.
-   */
   const defaultExecutionOptions = (payload: ChatRequestBodyPayload): ResolvedExecutionOptions => {
-    const { _execution_mode: executionMode } = payload;
+    const { _execution_mode: executionMode, execution_id: executionId } = payload;
 
     return {
       useTaskManager:
         executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined,
       origin: undefined,
       callback: undefined,
-      executionId: payload.execution_id,
+      executionId,
       metadata: undefined,
     };
   };
