@@ -79,7 +79,13 @@ describe('FTR_EXCLUDED_MODULES invariants', () => {
   });
 });
 
-const SKIPPED_DIRS = new Set(['node_modules', 'target', '__snapshots__', '__mocks__', '__fixtures__']);
+const SKIPPED_DIRS = new Set([
+  'node_modules',
+  'target',
+  '__snapshots__',
+  '__mocks__',
+  '__fixtures__',
+]);
 
 function walkSourceFiles(dir: string): string[] {
   const out: string[] = [];

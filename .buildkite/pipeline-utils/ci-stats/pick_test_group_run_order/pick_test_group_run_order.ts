@@ -90,15 +90,10 @@ export async function pickTestGroupRunOrder() {
       return null;
     });
 
-    if (
-      directlyAffected !== null &&
-      shouldSkipFtrTests(directlyAffected, selectiveChangedFiles)
-    ) {
+    if (directlyAffected !== null && shouldSkipFtrTests(directlyAffected, selectiveChangedFiles)) {
       console.log(
         `Skipping FTR configs — diff cannot affect FTR: ${
-          directlyAffected.size
-            ? [...directlyAffected].join(', ')
-            : '(irrelevant paths only)'
+          directlyAffected.size ? [...directlyAffected].join(', ') : '(irrelevant paths only)'
         }`
       );
       bk.setAnnotation(
