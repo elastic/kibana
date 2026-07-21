@@ -15,6 +15,7 @@ import {
   SECRET_FIELDS_BY_TYPE,
   UI_MANAGED_SECRET_FIELDS_BY_TYPE,
   getDataSourceByIdApiPath,
+  validateIndexNameRules,
   type DataSource,
 } from '../common';
 
@@ -108,6 +109,11 @@ export class DataSourcesClient {
           defaultMessage: 'Name is required.',
         })
       );
+    }
+
+    const nameValidation = validateIndexNameRules(nameTrimmed);
+    if (nameValidation) {
+      throw new Error(nameValidation.message);
     }
 
     const withoutName = omit(dataSource, 'name');

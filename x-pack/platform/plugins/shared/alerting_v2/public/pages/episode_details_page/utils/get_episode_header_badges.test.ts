@@ -106,7 +106,7 @@ describe('getEpisodeHeaderBadges', () => {
         ruleId: 'rule-1',
         lastDeactivateAction: null,
         lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snoozeExpiry: '2026-05-08T12:00:00.000Z',
+        snoozeExpiry: '3035-05-08T12:00:00.000Z',
         tags: [],
         lastSnoozeActor: null,
         lastDeactivateActor: null,
@@ -126,7 +126,7 @@ describe('getEpisodeHeaderBadges', () => {
         }),
       ])
     );
-    expect(badges.find((badge) => badge.label === 'Snoozed')?.tooltip).toContain('2026');
+    expect(badges.find((badge) => badge.label === 'Snoozed')?.tooltip).toContain('3035');
   });
 
   it('does not render tags as header badges (tags live in the episode details section)', () => {
