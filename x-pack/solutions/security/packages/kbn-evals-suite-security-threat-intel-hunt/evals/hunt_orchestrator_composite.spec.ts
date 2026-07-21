@@ -10,7 +10,7 @@
  *
  * Seeds synthetic endpoint events into ES, drives the threat-intelligence skill
  * through the Agent Builder default agent, and asserts that the full pipeline
- * executes:  report → orchestrator → findings → persistence.
+ * executes: report → orchestrator → findings → persistence.
  *
  * Uses REAL `@kbn/evals` Playwright fixtures (`agentBuilderClient`, `esClient`).
  */
@@ -18,9 +18,8 @@
 import expect from '@kbn/expect';
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
-import { evaluate } from '@kbn/evals';
-import { getToolCallSteps } from '@kbn/evals';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { evaluate, getToolCallSteps } from '@kbn/evals';
+import { agentBuilderDefaultAgentId } from '../src/constants';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 // ── Constants ─────────────────────────────────────────────────────────────────

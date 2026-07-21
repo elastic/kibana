@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { agentBuilderDefaultAgentId } from '../src/constants';
 import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 
 /**
  * L0 Routing Smoke — verifies that the Agent Builder router correctly invokes
