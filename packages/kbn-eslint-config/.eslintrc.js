@@ -478,7 +478,7 @@ module.exports = {
     '@elastic/eui/tooltip-no-interactive-content': 'error',
     '@elastic/eui/require-table-caption': 'error',
   },
-ss
+
   overrides: [
     {
       files: [
