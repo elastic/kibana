@@ -92,12 +92,9 @@ function mapResponseToDatatable(
   body: ESQLSearchResponse,
   query: string,
   input: Input,
-<<<<<<< HEAD
-  warning?: string
-=======
+  warning?: string,
   partialRows?: boolean,
   timeField?: string
->>>>>>> 9f0c01288169 (more features)
 ): Datatable {
   // all_columns in the response means that there is a separation between
   // columns with data and empty columns
@@ -471,11 +468,14 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           .ok({ json: { rawResponse }, requestParams });
 
         // Map to Datatable
-<<<<<<< HEAD
-        return mapResponseToDatatable(rawResponse as any, query, input, warning);
-=======
-        return mapResponseToDatatable(rawResponse as any, query, input, partialRows, timeField);
->>>>>>> 9f0c01288169 (more features)
+        return mapResponseToDatatable(
+          rawResponse as any,
+          query,
+          input,
+          warning,
+          partialRows,
+          timeField
+        );
       } catch (error) {
         // Inspector logging on error
         logInspectorRequest()

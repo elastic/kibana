@@ -30,15 +30,12 @@ import { i18n } from '@kbn/i18n';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
-<<<<<<< HEAD
 import {
   useStateFromPublishingSubject,
   apiPublishesApproximation,
 } from '@kbn/presentation-publishing';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-=======
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
->>>>>>> 42bf0a04283f (basic poc)
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
