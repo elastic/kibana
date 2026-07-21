@@ -26,6 +26,7 @@ import {
   nullCheckOperators,
 } from '../../definitions/all_operators';
 import type { ICommandCallbacks } from '../types';
+import { FULL_TEXT_SEARCH_DEFINITIONS } from '../../definitions/constants';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../definitions/types';
 import { getDateLiterals } from '../../definitions/utils';
 import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
@@ -252,7 +253,13 @@ describe('WHERE Autocomplete', () => {
         `from a | where CASE(doubleField < 1 AND doubleField > 2 OR doubleField == 3 AND `,
         [
           ...getFieldNamesByType('any'),
-          ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
+          ...getFunctionSignaturesByReturnType(
+            Location.WHERE,
+            'any',
+            { scalar: true },
+            undefined,
+            FULL_TEXT_SEARCH_DEFINITIONS
+          ),
         ]
       );
     });

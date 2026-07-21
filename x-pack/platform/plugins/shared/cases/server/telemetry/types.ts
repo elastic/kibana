@@ -219,6 +219,15 @@ export interface CustomFieldsSolutionTelemetry {
   customFields: CustomFieldsTelemetry;
 }
 
+export type CasesTelemetryConnectorKeys =
+  | 'itsm'
+  | 'sir'
+  | 'jira'
+  | 'resilient'
+  | 'swimlane'
+  | 'thehive'
+  | 'caseswebhook';
+
 export interface CasesTelemetry {
   cases: {
     all: Count &
@@ -251,13 +260,8 @@ export interface CasesTelemetry {
     main: Count & { maxOnACase: number };
   };
   connectors: {
-    all: {
+    all: Record<CasesTelemetryConnectorKeys, { totalAttached: number }> & {
       all: { totalAttached: number };
-      itsm: { totalAttached: number };
-      sir: { totalAttached: number };
-      jira: { totalAttached: number };
-      resilient: { totalAttached: number };
-      swimlane: { totalAttached: number };
       maxAttachedToACase: number;
     };
   };

@@ -7,6 +7,7 @@
 
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
 import { BlastRadiusEntities, type BlastRadiusEntity } from './blast_radius_entities';
+import { EventFlyout } from './event_flyout';
 import { NightshiftTitle } from './nightshift_title';
 import { SignificantEventList } from './significant_event_list';
 import { SignificantEventStatuses } from './significant_event_statuses';
@@ -34,6 +36,9 @@ import {
   getResolvedEvents,
 } from '../significant_event_status';
 
+// Kept in the URL so a refresh or a shared link restores the open flyout.
+const SELECTED_EVENT_QUERY_PARAM = 'eventUuid';
+
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder, application } = useKibana().services;
@@ -45,6 +50,19 @@ export function NightshiftApp(): React.ReactElement {
 
   const events = useMemo(() => data?.hits ?? [], [data]);
   const totalCount = data?.total;
+
+  // Derived from the freshest fetched list (not a click-time snapshot), so
+  // background refetches keep the open flyout current.
+  const history = useHistory();
+  const { search } = useLocation();
+  const selectedEventUuid = useMemo(
+    () => new URLSearchParams(search).get(SELECTED_EVENT_QUERY_PARAM) ?? undefined,
+    [search]
+  );
+  const selectedEvent = useMemo(
+    () => events.find(({ event_uuid: eventUuid }) => eventUuid === selectedEventUuid),
+    [events, selectedEventUuid]
+  );
 
   const showAllEventsHref = application.getUrlForApp('streams', {
     deepLinkId: 'significantEventsEvents',
@@ -72,6 +90,21 @@ export function NightshiftApp(): React.ReactElement {
     [agentBuilder]
   );
   const onChatClick = agentBuilder ? handleChatClick : undefined;
+
+  const handleEventClick = useCallback(
+    (event: SignificantEvent) => {
+      const params = new URLSearchParams(history.location.search);
+      params.set(SELECTED_EVENT_QUERY_PARAM, event.event_uuid);
+      history.replace({ search: params.toString() });
+    },
+    [history]
+  );
+
+  const handleFlyoutClose = useCallback(() => {
+    const params = new URLSearchParams(history.location.search);
+    params.delete(SELECTED_EVENT_QUERY_PARAM);
+    history.replace({ search: params.toString() });
+  }, [history]);
 
   // Highest-severity events first so critical items are never buried below older, lower-impact ones.
   const needsActionEvents = useMemo(
@@ -272,6 +305,7 @@ export function NightshiftApp(): React.ReactElement {
                   <SignificantEventList
                     events={visibleNeedsActionEvents}
                     onChatClick={onChatClick}
+                    onEventClick={handleEventClick}
                     sectionRef={needsActionSectionRef}
                     statusColor="danger"
                     title={i18n.translate('xpack.observability.nightshift.list.needsActionTitle', {
@@ -285,6 +319,7 @@ export function NightshiftApp(): React.ReactElement {
                   <SignificantEventList
                     events={visibleResolvedEvents}
                     onChatClick={onChatClick}
+                    onEventClick={handleEventClick}
                     sectionRef={resolvedSectionRef}
                     statusColor="success"
                     title={i18n.translate('xpack.observability.nightshift.list.resolvedTitle', {
@@ -296,6 +331,16 @@ export function NightshiftApp(): React.ReactElement {
             </EuiFlexGroup>
           </EuiFlexItem>
         </>
+      )}
+
+      {selectedEvent && (
+        <EventFlyout
+          // Remount when switching events so per-event UI state never leaks between them.
+          key={selectedEvent.event_uuid}
+          event={selectedEvent}
+          onClose={handleFlyoutClose}
+          onChatClick={onChatClick}
+        />
       )}
     </EuiFlexGroup>
   );

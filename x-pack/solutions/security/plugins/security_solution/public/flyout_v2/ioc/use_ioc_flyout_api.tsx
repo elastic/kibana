@@ -7,18 +7,24 @@
 
 import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
+import {
+  type Indicator,
+  RawIndicatorFieldId,
+} from '../../../common/threat_intelligence/types/indicator';
+import { getIndicatorFieldAndValue } from '../../threat_intelligence/modules/indicators/utils/field_value';
 import { useKibana } from '../../common/lib/kibana';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context'; // Lazy-loaded so consumers of this hook don't statically pull the IOC flyout graph into their
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
+import { formatFlyoutTitle, IOC_TITLE } from '../shared/constants/flyout_titles';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the IOC flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
@@ -68,11 +74,16 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
   // here so callers never have to reason about it: they pick `openIocFlyout` (main) or
   // `openIocFlyoutAsChild` (child) and this helper maps that to the right session.
   const open = useCallback(
-    (children: ReactNode, session: OverlaySystemFlyoutOpenOptions['session']) => {
+    (
+      children: ReactNode,
+      session: OverlaySystemFlyoutOpenOptions['session'],
+      title: OverlaySystemFlyoutOpenOptions['title']
+    ) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
+        title,
       };
       overlays.openSystemFlyout(
         flyoutProviders({
@@ -110,14 +121,24 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
     []
   );
 
+  const getTitle = useCallback(
+    ({ indicator }: OpenIocFlyoutParams) =>
+      formatFlyoutTitle(
+        IOC_TITLE,
+        getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Name).value
+      ),
+    []
+  );
+
   const openIocFlyout = useCallback(
-    (params: OpenIocFlyoutParams) => open(buildContent(params), sessionMode),
-    [open, buildContent, sessionMode]
+    (params: OpenIocFlyoutParams) => open(buildContent(params), sessionMode, getTitle(params)),
+    [open, buildContent, sessionMode, getTitle]
   );
 
   const openIocFlyoutAsChild = useCallback(
-    (params: OpenIocFlyoutParams) => open(buildContent(params), 'inherit'),
-    [open, buildContent]
+    (params: OpenIocFlyoutParams) =>
+      open(buildContent(params), 'inherit', buildFlyoutNavTitle(getTitle(params))),
+    [open, buildContent, getTitle]
   );
 
   return useMemo(

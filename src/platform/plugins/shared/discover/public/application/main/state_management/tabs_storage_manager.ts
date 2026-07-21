@@ -32,6 +32,8 @@ import type { TabsUrlState } from '../../../../common/types';
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 
+const LOCALLY_PERSISTED_PROFILE_STATE_TYPES = [ProfileStateType.Persistent, ProfileStateType.Url];
+
 export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   internalState: TabState['initialInternalState'] | undefined;
   attributes: TabState['attributes'] | undefined;
@@ -194,7 +196,7 @@ export const createTabsStorageManager = ({
       attributes: tabState.attributes,
       appState: tabState.appState,
       globalState: tabState.globalState,
-      profileState: getPersistentProfileState(tabState.profileState),
+      profileState: getLocallyPersistedProfileState(tabState.profileState),
     };
   };
 
@@ -215,11 +217,12 @@ export const createTabsStorageManager = ({
     return state;
   };
 
-  const getPersistentProfileState = (profileState: TabState['profileState'] | undefined) =>
+  const getLocallyPersistedProfileState = (profileState: TabState['profileState'] | undefined) =>
     getDefinedStateOnly(
       profileStateRegistry.pickStateByType({
-        profileState,
-        stateType: ProfileStateType.Persistent,
+        profileStateMap: profileState,
+        stateTypes: LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
+        defaultsHandling: 'expand',
       })
     );
 
@@ -235,9 +238,9 @@ export const createTabsStorageManager = ({
     );
     const profileState = getDefinedStateOnly(
       profileStateRegistry.pickStateByType({
-        profileState: tabStateInStorage.profileState,
-        stateType: ProfileStateType.Persistent,
-        shouldMergeDefaults: true,
+        profileStateMap: tabStateInStorage.profileState,
+        stateTypes: LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
+        defaultsHandling: 'strip',
       })
     );
 
@@ -395,7 +398,7 @@ export const createTabsStorageManager = ({
             attributes: tabStatePartial.attributes,
             appState: tabStatePartial.appState,
             globalState: tabStatePartial.globalState,
-            profileState: getPersistentProfileState(tabStatePartial.profileState),
+            profileState: getLocallyPersistedProfileState(tabStatePartial.profileState),
           };
         }
         return tab;

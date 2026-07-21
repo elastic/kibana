@@ -1,5 +1,5 @@
 {
-  "sha1": "618bf2d837717539eb69264fd4ae92223b766efd",
+  "sha1": "9265cce4cb809914ce58b9071ae6fea5805500b8",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -155,7 +155,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 62,
+        "line": 59,
         "column": 7
       }
     },
@@ -169,7 +169,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 81,
+        "line": 75,
         "column": 7
       }
     },
@@ -183,7 +183,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 100,
+        "line": 94,
         "column": 7
       }
     },
