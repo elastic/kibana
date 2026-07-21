@@ -169,10 +169,7 @@ export const buildShareOptions = async ({
                 }),
                 // Resolved variable values so the reporting server can bind named params (e.g. ?crew_id).
                 ...(currentTab.esqlVariables?.length
-                  ? {
-                      esqlVariables:
-                        currentTab.esqlVariables as DiscoverAppLocatorParams['esqlVariables'],
-                    }
+                  ? { esqlVariables: currentTab.esqlVariables }
                   : {}),
               }
             : params,

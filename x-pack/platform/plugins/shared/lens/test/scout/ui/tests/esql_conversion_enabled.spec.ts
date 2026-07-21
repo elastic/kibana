@@ -33,17 +33,12 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     });
   });
 
-  test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
     const { dashboard } = pageObjects;
 
-    await dashboard.goto();
-    await pageObjects.listingTable.waitUntilTableIsLoaded();
-    await page
-      .getByTestId(testData.DATA_TEST_SUBJECTS.ESQL_CONVERSION_DASHBOARD_TITLE_LINK)
-      .click();
+    await dashboard.openDashboardWithIdInEditMode(testData.ESQL_CONVERSION_DASHBOARD_ID);
     await dashboard.waitForPanelsToLoad(2);
-    await dashboard.switchToEditMode();
   });
 
   test.afterAll(async ({ kbnClient, uiSettings, apiServices }) => {

@@ -57,6 +57,7 @@ const discoveryExecuteRoute = createServerRoute({
       const { executionId, isNew } = await significantEventsDiscoveryClient.run({
         request,
         spaceId,
+        agentBuilder: server.agentBuilder,
       });
       if (isNew) {
         telemetry.trackSignificantEventsDiscoveryTriggered({
