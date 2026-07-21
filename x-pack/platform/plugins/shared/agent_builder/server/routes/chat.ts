@@ -306,6 +306,14 @@ export const conversePayloadSchema = schema.object({
 });
 
 export const callbackConversePayloadSchema = conversePayloadSchema.extends({
+  idempotency_key: schema.string({
+    minLength: 1,
+    maxLength: 256,
+    meta: {
+      description:
+        'Opaque key that deduplicates repeated deliveries of the same surface event (e.g. a Slack event_id). A request replaying an already-accepted key returns the existing execution instead of starting a new one. When execution_id is also provided, it takes precedence as the execution id.',
+    },
+  }),
   origin: schema.maybe(
     schema.object({
       type: schema.literal(ConversationOriginType.Slack),
@@ -315,16 +323,6 @@ export const callbackConversePayloadSchema = conversePayloadSchema.extends({
           id: schema.string({ minLength: 1, maxLength: 1024 }),
           username: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
           full_name: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
-        })
-      ),
-      idempotency_key: schema.maybe(
-        schema.string({
-          minLength: 1,
-          maxLength: 256,
-          meta: {
-            description:
-              'Opaque key that deduplicates repeated deliveries of the same surface event (e.g. a Slack event_id). A request replaying an already-accepted key returns the existing execution instead of starting a new one. Mutually exclusive with execution_id.',
-          },
         })
       ),
     })
@@ -399,39 +397,32 @@ export function registerChatRoutes({
 
   /**
    * Derives execution options for callback converse requests, which always use
-   * Task Manager and carry the callback, origin, and idempotency-derived execution id.
+   * Task Manager and carry the callback and origin. The execution id is the
+   * caller-provided one, or is derived from the idempotency key scoped to the
+   * space and target conversation so replayed deliveries map to the same execution.
    */
   const resolveExecutionOptions = (
     payload: ChatCallbackRequestBodyPayload,
     spaceId: string
   ): ResolvedExecutionOptions => {
-    let origin: ExecutionConversationOrigin | undefined;
-    let executionId = payload.execution_id;
-    let metadata: Record<string, string> | undefined;
+    const {
+      idempotency_key: idempotencyKey,
+      conversation_id: conversationId,
+      execution_id: providedExecutionId,
+      origin,
+    } = payload;
 
-    if (payload.origin) {
-      const { idempotency_key: idempotencyKey, ...originRest } = payload.origin;
-
-      origin = originRest;
-
-      if (idempotencyKey) {
-        // The idempotency key deterministically owns the execution id, scoped to the
-        // space and origin conversation, so a replayed delivery of the same origin
-        // event maps to the same execution document while keys reused across spaces
-        // or conversations cannot collide.
-        executionId = createHash('sha256')
-          .update([spaceId, originRest.external_conversation_id, idempotencyKey].join('\u0000'))
-          .digest('hex');
-        metadata = { idempotency_key: idempotencyKey };
-      }
-    }
+    const scopeId = conversationId ?? origin?.external_conversation_id ?? '';
+    const executionId =
+      providedExecutionId ??
+      createHash('sha256').update([spaceId, scopeId, idempotencyKey].join('\u0000')).digest('hex');
 
     return {
       useTaskManager: true,
       origin,
       callback: payload.callback,
       executionId,
-      metadata,
+      metadata: { idempotency_key: idempotencyKey },
     };
   };
 
@@ -646,10 +637,6 @@ export function registerChatRoutes({
           callbackDeliveryService.validateCallbackUrl(payload.callback.url);
         } catch (error) {
           throw createBadRequestError(error instanceof Error ? error.message : String(error));
-        }
-
-        if (payload.origin?.idempotency_key && payload.execution_id) {
-          throw createBadRequestError('idempotency_key and execution_id are mutually exclusive');
         }
 
         await validateConfigurationOverrides({ payload, request });

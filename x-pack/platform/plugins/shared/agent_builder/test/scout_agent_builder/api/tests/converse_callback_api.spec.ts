@@ -119,6 +119,7 @@ apiTest.describe(
         body: {
           input: 'Hello callback Agent Builder',
           connector_id: connectorId,
+          idempotency_key: 'Ev-callback-success',
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-success',
@@ -175,6 +176,7 @@ apiTest.describe(
           body: {
             input: 'Hello from Slack',
             connector_id: connectorId,
+            idempotency_key: 'Ev-callback-authorship',
             access_control: {
               access_mode: ConversationAccessControlMode.Public,
             },
@@ -261,6 +263,7 @@ apiTest.describe(
         body: {
           input: 'Hello callback failure',
           connector_id: connectorId,
+          idempotency_key: 'Ev-callback-failure',
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-failure',
@@ -302,6 +305,7 @@ apiTest.describe(
         body: {
           input: 'Hello callback abort',
           connector_id: connectorId,
+          idempotency_key: 'Ev-callback-abort',
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-abort',
@@ -353,10 +357,10 @@ apiTest.describe(
         const requestBody = {
           input: 'Hello idempotent callback',
           connector_id: connectorId,
+          idempotency_key: idempotencyKey,
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-idempotency',
-            idempotency_key: idempotencyKey,
           },
           callback: {
             url: `${callbackServerUrl}/callback?token=idempotency`,
@@ -443,10 +447,10 @@ apiTest.describe(
         const requestBody = {
           input: 'Hello concurrent idempotent callback',
           connector_id: connectorId,
+          idempotency_key: 'Ev-callback-concurrent',
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:callback-concurrency',
-            idempotency_key: 'Ev-callback-concurrent',
           },
           callback: {
             url: `${callbackServerUrl}/callback?token=concurrency`,
@@ -511,10 +515,10 @@ apiTest.describe(
             body: {
               input: 'Hello cross origin idempotent callback',
               connector_id: connectorId,
+              idempotency_key: idempotencyKey,
               origin: {
                 type: ConversationOriginType.Slack,
                 external_conversation_id: `team:T123/channel:C123/thread:${thread}`,
-                idempotency_key: idempotencyKey,
               },
               callback: {
                 url: `${callbackServerUrl}/callback?token=cross-origin`,
@@ -545,32 +549,47 @@ apiTest.describe(
     );
 
     apiTest(
-      'rejects requests providing both an idempotency key and an execution id',
+      'prefers a caller-provided execution id over the idempotency key',
       async ({ apiClient }) => {
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          title: 'Callback Execution Id Precedence Title',
+          response: 'Execution id precedence response',
+        });
+
+        const executionId = '5c48249e-28e9-4711-b9c8-0a09a1a35c02';
+
         const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
           headers: internalHeaders(),
           body: {
-            input: 'Hello invalid idempotent callback',
+            input: 'Hello execution id precedence callback',
             connector_id: connectorId,
-            execution_id: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+            execution_id: executionId,
+            idempotency_key: 'Ev-callback-precedence',
             origin: {
               type: ConversationOriginType.Slack,
-              external_conversation_id: 'team:T123/channel:C123/thread:callback-invalid',
-              idempotency_key: 'Ev-callback-invalid',
+              external_conversation_id: 'team:T123/channel:C123/thread:callback-precedence',
             },
             callback: {
-              url: `${callbackServerUrl}/callback?token=invalid`,
+              url: `${callbackServerUrl}/callback?token=precedence`,
             },
           },
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(400);
-        expect(response.body).toMatchObject({
-          message: expect.stringContaining(
-            'idempotency_key and execution_id are mutually exclusive'
-          ),
-        });
+        expect(response).toHaveStatusCode(202);
+
+        const accepted = response.body as ChatCallbackAcceptedResponse;
+        expect(accepted.execution_id).toBe(executionId);
+
+        const callbackPayload = (await callbackServer.waitForRequest())
+          .body as ChatCallbackSuccessPayload;
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        expect(callbackPayload.execution_id).toBe(executionId);
+
+        conversationIds.add(callbackPayload.response.conversation_id);
       }
     );
 
@@ -593,6 +612,7 @@ apiTest.describe(
           body: {
             input: 'Start callback thread',
             connector_id: connectorId,
+            idempotency_key: 'Ev-callback-continuation-first',
             origin,
             callback: {
               url: `${callbackServerUrl}/callback?token=continuation-first`,
@@ -628,6 +648,7 @@ apiTest.describe(
           body: {
             input: 'Continue callback thread',
             connector_id: connectorId,
+            idempotency_key: 'Ev-callback-continuation-second',
             origin,
             callback: {
               url: `${callbackServerUrl}/callback?token=continuation-second`,

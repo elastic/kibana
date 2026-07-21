@@ -15,10 +15,10 @@ import type {
 import type { ChatRequestBodyPayload, ChatResponse } from './chat';
 
 export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
+  idempotency_key: string;
   origin?: ConversationOrigin & {
     type: ConversationOriginType;
     author?: ConversationRoundAuthor;
-    idempotency_key?: string;
   };
   callback: {
     url: string;

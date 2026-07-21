@@ -87,6 +87,7 @@ describe('callbackConversePayloadSchema', () => {
   const basePayload = {
     agent_id: 'agent-1',
     input: 'Hello',
+    idempotency_key: 'Ev0PV23K4AB1',
     origin: {
       type: ConversationOriginType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -185,38 +186,29 @@ describe('callbackConversePayloadSchema', () => {
     ).toThrow(/url/);
   });
 
-  it('accepts an origin idempotency key', () => {
+  it('requires an idempotency key', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
-        origin: {
-          ...basePayload.origin,
-          idempotency_key: 'Ev0PV23K4AB1',
-        },
-      })
-    ).not.toThrow();
-  });
-
-  it('rejects an empty origin idempotency key', () => {
-    expect(() =>
-      callbackConversePayloadSchema.validate({
-        ...basePayload,
-        origin: {
-          ...basePayload.origin,
-          idempotency_key: '',
-        },
+        idempotency_key: undefined,
       })
     ).toThrow(/idempotency_key/);
   });
 
-  it('limits origin idempotency key length', () => {
+  it('rejects an empty idempotency key', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
-        origin: {
-          ...basePayload.origin,
-          idempotency_key: 'x'.repeat(257),
-        },
+        idempotency_key: '',
+      })
+    ).toThrow(/idempotency_key/);
+  });
+
+  it('limits idempotency key length', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        idempotency_key: 'x'.repeat(257),
       })
     ).toThrow(/idempotency_key/);
   });
@@ -326,6 +318,7 @@ describe('registerChatRoutes', () => {
         body: {
           agent_id: 'agent-1',
           input: 'Hello',
+          idempotency_key: 'Ev0PV23K4AB1',
           origin,
           callback: {
             url: 'https://relay.example.com/events?token=abc',
@@ -413,10 +406,10 @@ describe('registerChatRoutes', () => {
         body: {
           agent_id: 'agent-1',
           input: 'Hello',
+          idempotency_key: 'Ev0PV23K4AB1',
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-            idempotency_key: 'Ev0PV23K4AB1',
           },
           callback: {
             url: 'https://relay.example.com/events?token=abc',
@@ -451,11 +444,14 @@ describe('registerChatRoutes', () => {
     );
   });
 
-  it('rejects callback converse when both an idempotency key and an execution id are provided', async () => {
+  it('prefers a caller-provided execution id over the idempotency key', async () => {
     const callbackPath = `${internalApiPath}/converse/callback`;
     let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const validateCallbackUrl = jest.fn();
-    const executeAgent = jest.fn();
+    const executeAgent = jest.fn().mockResolvedValue({
+      executionId: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+      events$: of(),
+    });
 
     const router = {
       versioned: {
@@ -488,7 +484,7 @@ describe('registerChatRoutes', () => {
     } as never);
 
     const response = {
-      accepted: jest.fn(),
+      accepted: jest.fn(({ body }) => ({ status: 202, payload: body })),
       forbidden: jest.fn(),
       customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
       notFound: jest.fn(),
@@ -509,10 +505,10 @@ describe('registerChatRoutes', () => {
           agent_id: 'agent-1',
           input: 'Hello',
           execution_id: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+          idempotency_key: 'Ev0PV23K4AB1',
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-            idempotency_key: 'Ev0PV23K4AB1',
           },
           callback: {
             url: 'https://relay.example.com/events?token=abc',
@@ -523,13 +519,18 @@ describe('registerChatRoutes', () => {
     );
 
     expect(result).toEqual({
-      status: 400,
+      status: 202,
       payload: {
-        attributes: {},
-        message: 'idempotency_key and execution_id are mutually exclusive',
+        execution_id: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+        status: ExecutionStatus.scheduled,
       },
     });
-    expect(executeAgent).not.toHaveBeenCalled();
+    expect(executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionId: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+        metadata: { idempotency_key: 'Ev0PV23K4AB1' },
+      })
+    );
   });
 
   it('rejects callback converse when the callback URL is not allowlisted', async () => {
