@@ -14,6 +14,10 @@ const filterExpressionPattern = /^([^:]*):([^:]*):(.*)$/;
 export const FilterOperator = {
   EQUALS: 'is',
   NOT_EQUALS: 'not',
+  ONE_OF: 'oneOf',
+  NOT_ONE_OF: 'notOneOf',
+  EXISTS: 'exists',
+  NOT_EXISTS: 'notExists',
 } as const;
 
 export type FilterOperatorLiteral = (typeof FilterOperator)[keyof typeof FilterOperator];

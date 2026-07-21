@@ -30,6 +30,7 @@ export interface ProjectPickerListItemProps {
   project: CPSProject;
   onContextMenu: (project: CPSProject, evt: React.MouseEvent<HTMLAnchorElement>) => void;
   onToggle: (project: CPSProject, checked: boolean) => void;
+  onLabelClick: (project: CPSProject, evt: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export function ProjectPickerListItem({
@@ -39,21 +40,12 @@ export function ProjectPickerListItem({
   project,
   onContextMenu,
   onToggle,
+  onLabelClick,
 }: ProjectPickerListItemProps) {
   const contextMenuTooltipId = useGeneratedHtmlId();
   const toggleTooltipId = useGeneratedHtmlId();
 
   const projectTags = getProjectTags(project);
-
-  const projectTagsTooltipContent = (
-    <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-      {projectTags.map((tag) => (
-        <EuiFlexItem key={tag} grow={false}>
-          <EuiBadge color="subdued">{tag}</EuiBadge>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
 
   const switchControl = (
     <EuiSwitch
@@ -62,6 +54,7 @@ export function ProjectPickerListItem({
       onChange={(evt) => onToggle(project, evt.target.checked)}
       label={null}
       data-test-subj={`projectPickerListItemSwitch-${project._id}`}
+      compressed
     />
   );
 
@@ -85,15 +78,20 @@ export function ProjectPickerListItem({
               </EuiFlexItem>
               {Boolean(projectTags.length) && (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={projectTagsTooltipContent}>
-                    <EuiBadge
-                      tabIndex={0}
-                      iconType="tag"
-                      data-test-subj="projectPickerListItemTags"
-                    >
-                      {projectTags.length}
-                    </EuiBadge>
-                  </EuiToolTip>
+                  <EuiBadge
+                    tabIndex={0}
+                    iconType="tag"
+                    data-test-subj="projectPickerListItemTags"
+                    onClick={onLabelClick.bind(null, project)}
+                    onClickAriaLabel={i18n.translate(
+                      'cpsUtils.projectPicker.listItem.tagsClickAriaLabel',
+                      {
+                        defaultMessage: 'Click to view project tags',
+                      }
+                    )}
+                  >
+                    {projectTags.length}
+                  </EuiBadge>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
@@ -112,7 +110,7 @@ export function ProjectPickerListItem({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup responsive={false}>
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             {isToggleDisabled ? (
               <EuiToolTip id={toggleTooltipId} content={toggleDisabledMessage}>

@@ -10,6 +10,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiContextMenuItemProps } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -23,6 +24,7 @@ import { ProjectPickerListItem, type ProjectPickerListItemProps } from './list_i
 import { useProjectPickerActions, useProjectPickerState } from '../../state';
 import { getIncludedVisibleProjectIds } from '../../state/derivatives';
 import { projectPickerListStyles } from './list.styles';
+import { getProjectTags } from '../../../utils';
 
 interface ProjectPickerListClickActionContext {
   activeProject: CPSProject;
@@ -35,6 +37,11 @@ interface ProjectPickerListContextMenuItemProps
   onClick: (props: Pick<ProjectPickerListClickActionContext, 'activeProject'>) => void;
   isDisabled: (props: ProjectPickerListClickActionContext) => boolean;
 }
+
+type ActivePopover =
+  | { kind: 'contextMenu'; project: CPSProject }
+  | { kind: 'tags'; project: CPSProject }
+  | null;
 
 export const getProjectPickerListContextMenuConfig = (
   actions: ReturnType<typeof useProjectPickerActions>
@@ -73,8 +80,8 @@ export const getProjectPickerListContextMenuConfig = (
 };
 
 export function ProjectPickerList() {
-  const projectContextMenuButtonRef = useRef<HTMLElement | null>(null);
-  const [activeProject, setActiveProject] = useState<CPSProject | null>(null);
+  const buttonRef = useRef<HTMLElement | null>(null);
+  const [activePopover, setActivePopover] = useState<ActivePopover>(null);
   const actions = useProjectPickerActions();
   const state = useProjectPickerState();
   const { euiTheme } = useEuiTheme();
@@ -94,20 +101,36 @@ export function ProjectPickerList() {
     [state.visibleProjectIds, state.availableProjects]
   );
 
-  const onContextMenu = useCallback<ProjectPickerListItemProps['onContextMenu']>(
-    (project, evt) => {
-      evt.preventDefault();
+  const closePopover = useCallback(() => {
+    buttonRef.current = null;
+    setActivePopover(null);
+  }, []);
 
-      if (activeProject?._id === project._id) {
-        setActiveProject(null);
-        projectContextMenuButtonRef.current = null;
-        return;
-      }
+  const getWrappingPopoverTrigger = useCallback(
+    (kind: 'contextMenu' | 'tags') => {
+      return (project: CPSProject, evt: React.MouseEvent<unknown>) => {
+        evt.preventDefault();
 
-      projectContextMenuButtonRef.current = evt.currentTarget;
-      setActiveProject(project);
+        if (activePopover?.kind === kind && activePopover.project._id === project._id) {
+          closePopover();
+          return;
+        }
+
+        buttonRef.current = evt.currentTarget as HTMLElement;
+        setActivePopover({ kind, project });
+      };
     },
-    [activeProject, setActiveProject, projectContextMenuButtonRef]
+    [activePopover, closePopover]
+  );
+
+  const onContextMenu = useMemo<ProjectPickerListItemProps['onContextMenu']>(
+    () => getWrappingPopoverTrigger('contextMenu'),
+    [getWrappingPopoverTrigger]
+  );
+
+  const onLabelClick = useMemo<ProjectPickerListItemProps['onLabelClick']>(
+    () => getWrappingPopoverTrigger('tags'),
+    [getWrappingPopoverTrigger]
   );
 
   const onToggle = useCallback(
@@ -132,23 +155,26 @@ export function ProjectPickerList() {
   );
 
   const toggleDisabledMessage = useMemo(() => {
-    return i18n.translate('kbn.cps.projectPickerListItem.lastIncludedProject', {
+    return i18n.translate('cpsUtils.projectPicker.listItem.lastIncludedProject', {
       defaultMessage: 'You must be searching a minimum of one project.',
     });
   }, []);
 
+  const activeProject = activePopover?.project ?? null;
+
   return (
     <>
-      {activeProject ? (
+      {activePopover?.kind === 'contextMenu' && activeProject && buttonRef.current ? (
         <EuiWrappingPopover
-          button={projectContextMenuButtonRef.current!}
-          isOpen={activeProject !== null}
+          key={`contextMenu-${activeProject._id}`}
+          button={buttonRef.current}
+          isOpen={true}
           panelPaddingSize="none"
           anchorPosition="downLeft"
           aria-label={i18n.translate('cpsUtils.projectPicker.list.contextMenu.ariaLabel', {
             defaultMessage: 'Project context menu',
           })}
-          closePopover={() => setActiveProject(null)}
+          closePopover={closePopover}
         >
           <EuiContextMenuPanel
             items={projectPickerListContextMenuConfig.map((item) => (
@@ -166,6 +192,44 @@ export function ProjectPickerList() {
           />
         </EuiWrappingPopover>
       ) : null}
+      {activePopover?.kind === 'tags' && activeProject && buttonRef.current ? (
+        <EuiWrappingPopover
+          key={`tags-${activeProject._id}`}
+          button={buttonRef.current}
+          isOpen={true}
+          css={styles.projectTagsBadgeContainer}
+          panelPaddingSize="s"
+          anchorPosition="downLeft"
+          aria-label={i18n.translate('cpsUtils.projectPicker.list.projectTags.ariaLabel', {
+            defaultMessage: 'Project tags',
+          })}
+          closePopover={closePopover}
+        >
+          <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
+            {getProjectTags(activeProject).map((tag) => (
+              <EuiFlexItem key={tag} grow={false}>
+                <EuiBadge
+                  css={styles.projectTagsBadge}
+                  color="hollow"
+                  iconType="plusCircle"
+                  iconSide="right"
+                  onClick={() => {
+                    actions.addFilterExpression({ expression: `is:${tag}` });
+                  }}
+                  onClickAriaLabel={i18n.translate(
+                    'cpsUtils.projectPicker.list.projectTags.addFilterAriaLabel',
+                    {
+                      defaultMessage: 'Add filter to project',
+                    }
+                  )}
+                >
+                  {tag}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiWrappingPopover>
+      ) : null}
       <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="projectPickerList">
         {visibleProjects.map((project) => (
           <EuiFlexItem key={project._id} css={styles.listItemContainer}>
@@ -179,6 +243,7 @@ export function ProjectPickerList() {
               project={project}
               onContextMenu={onContextMenu}
               onToggle={onToggle}
+              onLabelClick={onLabelClick}
             />
           </EuiFlexItem>
         ))}

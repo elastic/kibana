@@ -10,8 +10,10 @@
 import React from 'react';
 import { faker } from '@faker-js/faker';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ProjectPickerProviderProps } from '../../../../../state';
-import { ProjectPickerProvider } from '../../../../../state';
+import {
+  ProjectPickerStateProvider,
+  type ProjectPickerStateProviderProps,
+} from '../../../../../state';
 import { ProjectPickerFilterForm, type ProjectPickerFilterFormProps } from './filter_form';
 
 export default {
@@ -20,7 +22,7 @@ export default {
 } satisfies Meta<typeof ProjectPickerFilterForm>;
 
 export const ProjectPickerFilterBoxStory: StoryObj<
-  Pick<ProjectPickerProviderProps, 'availableProjects'> & ProjectPickerFilterFormProps
+  Pick<ProjectPickerStateProviderProps, 'availableProjects'> & ProjectPickerFilterFormProps
 > = {
   name: 'ProjectPickerFilterBox',
   args: {
@@ -34,8 +36,8 @@ export const ProjectPickerFilterBoxStory: StoryObj<
     })),
   },
   render: ({ availableProjects, ...props }) => (
-    <ProjectPickerProvider availableProjects={availableProjects}>
+    <ProjectPickerStateProvider availableProjects={availableProjects}>
       <ProjectPickerFilterForm {...props} />
-    </ProjectPickerProvider>
+    </ProjectPickerStateProvider>
   ),
 };

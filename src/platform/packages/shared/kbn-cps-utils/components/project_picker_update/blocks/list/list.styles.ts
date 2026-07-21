@@ -11,6 +11,14 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const projectPickerListStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
+  projectTagsBadgeContainer: css({
+    maxWidth: '200px',
+    maxHeight: '268px',
+    overflowY: 'auto',
+  }),
+  projectTagsBadge: css({
+    maxWidth: 'max-content',
+  }),
   listItemContainer: css({
     padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
     borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,

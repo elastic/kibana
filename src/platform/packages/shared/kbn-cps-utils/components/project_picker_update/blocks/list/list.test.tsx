@@ -17,13 +17,14 @@ import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from
 import type { useProjectPickerActions } from '../../state';
 import type { ProjectPickerState } from '../../state/reducers';
 
-const createProject = (id: string): CPSProject => ({
+const createProject = (id: string, tags: Record<string, string> = {}): CPSProject => ({
   _id: id,
   _alias: id,
   _type: 'security',
   _organisation: 'org',
   _region: 'us-east-1',
   _provider: 'AWS',
+  ...tags,
 });
 
 const createMenuState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
@@ -52,7 +53,7 @@ const renderComponent = (
   props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects'>> = {}
 ) => {
   return render(
-    <ProjectPickerStateProvider {...Object.assign(defaultProps, props)}>
+    <ProjectPickerStateProvider {...defaultProps} {...props}>
       <ProjectPickerList />
     </ProjectPickerStateProvider>
   );
@@ -99,6 +100,91 @@ describe('ProjectPickerList', () => {
     } finally {
       expect(lastIncludedProjectSwitchElement).toHaveAttribute('aria-checked', 'true');
     }
+  });
+
+  describe('project popovers', () => {
+    const taggedProjects = [
+      createProject('project-a', { env: 'prod-a' }),
+      createProject('project-b', { env: 'prod-b' }),
+    ];
+
+    const renderTaggedList = () => renderComponent({ availableProjects: taggedProjects });
+
+    it('replaces an open context menu with tags from a different project', async () => {
+      const user = userEvent.setup();
+      renderTaggedList();
+
+      await user.click(screen.getByTestId('projectPickerListItemContextMenu-project-a'));
+      expect(screen.getByLabelText('Project context menu')).toBeInTheDocument();
+
+      const projectB = screen.getAllByTestId('projectPickerListItem')[1];
+      await user.click(within(projectB).getByTestId('projectPickerListItemTags'));
+
+      expect(screen.queryByLabelText('Project context menu')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Project tags')).toBeInTheDocument();
+      expect(screen.getByText('env:prod-b')).toBeInTheDocument();
+      expect(screen.queryByText('env:prod-a')).not.toBeInTheDocument();
+    });
+
+    it('replaces open tags with the context menu from a different project', async () => {
+      const user = userEvent.setup();
+      renderTaggedList();
+
+      const projectA = screen.getAllByTestId('projectPickerListItem')[0];
+      await user.click(within(projectA).getByTestId('projectPickerListItemTags'));
+      expect(screen.getByLabelText('Project tags')).toBeInTheDocument();
+      expect(screen.getByText('env:prod-a')).toBeInTheDocument();
+
+      await user.click(screen.getByTestId('projectPickerListItemContextMenu-project-b'));
+
+      expect(screen.queryByLabelText('Project tags')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Project context menu')).toBeInTheDocument();
+      expect(screen.queryByText('env:prod-a')).not.toBeInTheDocument();
+    });
+
+    it('keeps a single context menu when switching between projects', async () => {
+      const user = userEvent.setup();
+      renderTaggedList();
+
+      await user.click(screen.getByTestId('projectPickerListItemContextMenu-project-a'));
+      expect(screen.getByLabelText('Project context menu')).toBeInTheDocument();
+
+      await user.click(screen.getByTestId('projectPickerListItemContextMenu-project-b'));
+
+      expect(screen.getAllByLabelText('Project context menu')).toHaveLength(1);
+      expect(screen.queryByLabelText('Project tags')).not.toBeInTheDocument();
+
+      await user.click(screen.getByText('Exclude all other visible projects'));
+
+      expect(screen.getByTestId('projectPickerListItemSwitch-project-a')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
+      expect(screen.getByTestId('projectPickerListItemSwitch-project-b')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+    });
+
+    it('closes the popover when the same control is clicked twice', async () => {
+      const user = userEvent.setup();
+      renderTaggedList();
+
+      const contextMenuButton = screen.getByTestId('projectPickerListItemContextMenu-project-a');
+      await user.click(contextMenuButton);
+      expect(screen.getByLabelText('Project context menu')).toBeInTheDocument();
+
+      await user.click(contextMenuButton);
+      expect(screen.queryByLabelText('Project context menu')).not.toBeInTheDocument();
+
+      const projectA = screen.getAllByTestId('projectPickerListItem')[0];
+      const tagsBadge = within(projectA).getByTestId('projectPickerListItemTags');
+      await user.click(tagsBadge);
+      expect(screen.getByLabelText('Project tags')).toBeInTheDocument();
+
+      await user.click(tagsBadge);
+      expect(screen.queryByLabelText('Project tags')).not.toBeInTheDocument();
+    });
   });
 });
 

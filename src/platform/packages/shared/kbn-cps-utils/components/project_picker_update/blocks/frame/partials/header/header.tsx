@@ -42,7 +42,7 @@ const getContextMenuItems = (
     {
       icon: 'eraser',
       label: i18n.translate('cpsUtils.projectPicker.frameHeader.clearProjectFilters', {
-        defaultMessage: 'Clear project filters',
+        defaultMessage: 'Clear project tag filters',
       }),
       onClick: () => {
         actions.clearProjectFilters();
@@ -60,7 +60,7 @@ const getContextMenuItems = (
         actions.revertToSpaceDefaults();
       },
       isDisabled: ({ state }) => {
-        return state.filterExpressions.size === 0;
+        return state.filterExpressions.size === 0 && state.excludedOverrides.length === 0;
       },
     },
   ],
@@ -90,8 +90,8 @@ export function ProjectPickerFrameHeader() {
   // TODO: this definition of space defaults is not correct but suffices for now,
   // it should be based on the space defaults set in the space picker
   const isUsingSpaceDefaults = useMemo(
-    () => state.filterExpressions.size === 0,
-    [state.filterExpressions]
+    () => state.filterExpressions.size === 0 && state.excludedOverrides.length === 0,
+    [state.filterExpressions, state.excludedOverrides]
   );
 
   const closePopover = useCallback(() => setIsOpen(false), []);

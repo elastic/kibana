@@ -51,9 +51,10 @@ interface FilterSelectProps {
   name: string;
   options: { label: string; value: string }[];
   disabled?: boolean;
+  placeholder?: string;
 }
 
-function FilterSelect({ options, control, name, disabled }: FilterSelectProps) {
+function FilterSelect({ options, control, name, disabled, placeholder }: FilterSelectProps) {
   const filterPopoverId = useGeneratedHtmlId();
   const [isOpen, setIsOpen] = useState(false);
   const { field } = useController({
@@ -89,12 +90,7 @@ function FilterSelect({ options, control, name, disabled }: FilterSelectProps) {
           disabled={disabled}
           onClick={() => setIsOpen(true)}
         >
-          <EuiText>
-            {selectedLabel ??
-              i18n.translate('cpsUtils.projectPicker.filterBox.selectDimension', {
-                defaultMessage: 'Select dimension',
-              })}
-          </EuiText>
+          <EuiText>{selectedLabel ?? placeholder}</EuiText>
         </EuiFilterButton>
       }
       isOpen={isOpen}
@@ -122,12 +118,33 @@ function toSelectableOptions(
 }
 
 const operatorDisplayMap: Record<FilterOperatorLiteral, string> = {
-  [FilterOperator.EQUALS]: i18n.translate('projectPicker.filterBox.operator.equals', {
+  [FilterOperator.EQUALS]: i18n.translate('cpsUtils.projectPicker.filterBox.operator.equals', {
     defaultMessage: 'is',
   }),
-  [FilterOperator.NOT_EQUALS]: i18n.translate('projectPicker.filterBox.operator.notEquals', {
-    defaultMessage: 'is not',
+  [FilterOperator.NOT_EQUALS]: i18n.translate(
+    'cpsUtils.projectPicker.filterBox.operator.notEquals',
+    {
+      defaultMessage: 'is not',
+    }
+  ),
+  [FilterOperator.ONE_OF]: i18n.translate('cpsUtils.projectPicker.filterBox.operator.oneOf', {
+    defaultMessage: 'is one of',
   }),
+  [FilterOperator.NOT_ONE_OF]: i18n.translate(
+    'cpsUtils.projectPicker.filterBox.operator.notOneOf',
+    {
+      defaultMessage: 'is not one of',
+    }
+  ),
+  [FilterOperator.EXISTS]: i18n.translate('cpsUtils.projectPicker.filterBox.operator.exists', {
+    defaultMessage: 'exists',
+  }),
+  [FilterOperator.NOT_EXISTS]: i18n.translate(
+    'cpsUtils.projectPicker.filterBox.operator.notExists',
+    {
+      defaultMessage: 'does not exist',
+    }
+  ),
 };
 
 export function ProjectPickerFilterForm({
@@ -261,30 +278,42 @@ export function ProjectPickerFilterForm({
             }
             fullWidth
           >
-            <EuiFlexGroup alignItems="center" responsive={false}>
+            <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
               <EuiFlexItem>
                 <EuiFilterGroup css={styles.filterFormSelectGroup} fullWidth>
                   <FilterSelect
                     options={filteringDimensionsOptions}
                     control={form.control}
                     name="tagName"
+                    placeholder={i18n.translate(
+                      'cpsUtils.projectPicker.filterBox.selectDimension',
+                      {
+                        defaultMessage: 'Select a tag',
+                      }
+                    )}
                   />
                   <FilterSelect
                     options={filterOperators}
                     control={form.control}
                     name="operator"
                     disabled={!anchoringFilteringTagName}
+                    placeholder={i18n.translate('cpsUtils.projectPicker.filterBox.selectOperator', {
+                      defaultMessage: 'Select an operator',
+                    })}
                   />
                   <FilterSelect
                     options={filterValues}
                     control={form.control}
                     name="tagValue"
+                    placeholder={i18n.translate('cpsUtils.projectPicker.filterBox.selectValue', {
+                      defaultMessage: 'Select a value',
+                    })}
                     disabled={!anchoringFilteringTagName || !filteringOperator}
                   />
                 </EuiFilterGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup responsive={false}>
+                <EuiFlexGroup responsive={false} gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       id="createFilterTooltip"
@@ -294,7 +323,7 @@ export function ProjectPickerFilterForm({
                       position="top"
                     >
                       <EuiButtonIcon
-                        size="m"
+                        size="s"
                         iconType="check"
                         display="base"
                         color="success"
@@ -313,7 +342,7 @@ export function ProjectPickerFilterForm({
                       position="top"
                     >
                       <EuiButtonIcon
-                        size="m"
+                        size="s"
                         iconType="cross"
                         display="base"
                         color="danger"

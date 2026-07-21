@@ -259,6 +259,14 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
     []
   );
 
+  const handleFilterBadgeIconClick = useCallback(
+    (filterId: string, evt: React.MouseEvent<HTMLButtonElement>) => {
+      evt.preventDefault();
+      actions.removeFilterExpression({ filterId });
+    },
+    [actions]
+  );
+
   const handleFilterCreateClick = useCallback(() => {
     onEditFilter(null);
   }, [onEditFilter]);
@@ -305,6 +313,15 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
                           defaultMessage: 'Click to view filter actions',
                         }
                       )}
+                      iconOnClick={handleFilterBadgeIconClick.bind(null, id)}
+                      iconOnClickAriaLabel={i18n.translate(
+                        'cpsUtils.projectPicker.filterDisplay.filterBadgeIconClickAriaLabel',
+                        {
+                          defaultMessage: 'Click to remove filter',
+                        }
+                      )}
+                      iconSide="right"
+                      iconType="cross"
                     >
                       {entry.expression}
                     </EuiBadge>
