@@ -27,6 +27,7 @@ import { ALERT_DELAYED_DATA_RESULTS } from '../../../common/constants/alerts';
 import type { JobAuditMessagesService } from '../../models/job_audit_messages/job_audit_messages';
 import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 import { DELAYED_DATA_THRESHOLD_TYPE } from '@kbn/ml-common-types/alerts';
+import { ANNOTATION_TYPE, type Annotation } from '@kbn/ml-common-types/annotations';
 
 const MOCK_DATE_NOW = 1487076708000;
 
@@ -56,6 +57,15 @@ function getDefaultExecutorOptions(
     ...overrides,
   } as unknown as JobsHealthExecutorOptions;
 }
+
+const createDelayedDataAnnotation = (jobId: string, annotation: string): Annotation => ({
+  job_id: jobId,
+  annotation,
+  modified_time: 1627660295141,
+  timestamp: 1627653000000,
+  end_timestamp: 1627653300000,
+  type: ANNOTATION_TYPE.ANNOTATION,
+});
 
 const createBucketsResponse = (jobId: string, eventCount: number): MlGetBucketsResponse => ({
   count: 1,
@@ -219,17 +229,14 @@ describe('JobsHealthService', () => {
   const annotationService = {
     getDelayedDataAnnotations: jest.fn().mockImplementation(({ jobIds }: { jobIds: string[] }) => {
       return Promise.resolve(
-        jobIds.map((jobId) => {
-          return {
-            job_id: jobId,
-            annotation: `Datafeed has missed ${
+        jobIds.map((jobId) =>
+          createDelayedDataAnnotation(
+            jobId,
+            `Datafeed has missed ${
               jobId === 'test_job_01' ? 11 : 8
-            } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`,
-            modified_time: 1627660295141,
-            timestamp: 1627653000000,
-            end_timestamp: 1627653300000,
-          };
-        })
+            } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`
+          )
+        )
       );
     }),
   } as unknown as jest.Mocked<AnnotationService>;
@@ -281,18 +288,18 @@ describe('JobsHealthService', () => {
   beforeEach(() => {
     dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => MOCK_DATE_NOW);
 
-    annotationService.getDelayedDataAnnotations.mockImplementation(({ jobIds }: { jobIds: string[] }) =>
-      Promise.resolve(
-        jobIds.map((jobId) => ({
-          job_id: jobId,
-          annotation: `Datafeed has missed ${
-            jobId === 'test_job_01' ? 11 : 8
-          } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`,
-          modified_time: 1627660295141,
-          timestamp: 1627653000000,
-          end_timestamp: 1627653300000,
-        }))
-      )
+    annotationService.getDelayedDataAnnotations.mockImplementation(
+      ({ jobIds }: { jobIds: string[] }) =>
+        Promise.resolve(
+          jobIds.map((jobId) =>
+            createDelayedDataAnnotation(
+              jobId,
+              `Datafeed has missed ${
+                jobId === 'test_job_01' ? 11 : 8
+              } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`
+            )
+          )
+        )
     );
 
     mlClient.getBuckets.mockResolvedValue({ count: 0, buckets: [] });
@@ -563,14 +570,12 @@ describe('JobsHealthService', () => {
     annotationService.getDelayedDataAnnotations.mockImplementation(
       ({ jobIds }: { jobIds: string[] }) =>
         Promise.resolve(
-          jobIds.map((jobId) => ({
-            job_id: jobId,
-            annotation:
-              'Datafeed has missed 100 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
-            modified_time: 1627660295141,
-            timestamp: 1627653000000,
-            end_timestamp: 1627653300000,
-          }))
+          jobIds.map((jobId) =>
+            createDelayedDataAnnotation(
+              jobId,
+              'Datafeed has missed 100 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay'
+            )
+          )
         )
     );
 
@@ -665,14 +670,12 @@ describe('JobsHealthService', () => {
     annotationService.getDelayedDataAnnotations.mockImplementation(
       ({ jobIds }: { jobIds: string[] }) =>
         Promise.resolve(
-          jobIds.map((jobId) => ({
-            job_id: jobId,
-            annotation:
-              'Datafeed has missed 0 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
-            modified_time: 1627660295141,
-            timestamp: 1627653000000,
-            end_timestamp: 1627653300000,
-          }))
+          jobIds.map((jobId) =>
+            createDelayedDataAnnotation(
+              jobId,
+              'Datafeed has missed 0 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay'
+            )
+          )
         )
     );
 
@@ -692,14 +695,12 @@ describe('JobsHealthService', () => {
     annotationService.getDelayedDataAnnotations.mockImplementation(
       ({ jobIds }: { jobIds: string[] }) =>
         Promise.resolve(
-          jobIds.map((jobId) => ({
-            job_id: jobId,
-            annotation:
-              'Datafeed has missed 10 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
-            modified_time: 1627660295141,
-            timestamp: 1627653000000,
-            end_timestamp: 1627653300000,
-          }))
+          jobIds.map((jobId) =>
+            createDelayedDataAnnotation(
+              jobId,
+              'Datafeed has missed 10 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay'
+            )
+          )
         )
     );
 
