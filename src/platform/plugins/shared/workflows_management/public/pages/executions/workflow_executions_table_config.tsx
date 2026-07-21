@@ -40,25 +40,25 @@ export const WORKFLOW_EXECUTIONS_TABLE_COLUMN_SETTINGS: Record<
     display: i18n.translate('workflowsManagement.executionsPage.column.tags', {
       defaultMessage: 'Tags',
     }),
-    width: 180,
+    width: 250,
   },
   triggers: {
     display: i18n.translate('workflowsManagement.executionsPage.column.trigger', {
       defaultMessage: 'Trigger',
     }),
-    width: 120,
+    width: 250,
   },
   startedAt: {
     display: i18n.translate('workflowsManagement.executionsPage.column.started', {
       defaultMessage: 'Started',
     }),
-    width: 160,
+    width: 250,
   },
   duration: {
     display: i18n.translate('workflowsManagement.executionsPage.column.duration', {
       defaultMessage: 'Duration',
     }),
-    width: 60,
+    width: 250,
   },
 };
 
