@@ -111,7 +111,7 @@ export const DashboardEmptyScreenChat = () => (
               color="text"
               flush="both"
               onClick={() => {
-                openDashboardChat('');
+                openDashboardChat();
               }}
               data-test-subj="dashboardCreateWithChatOpenChat"
             >

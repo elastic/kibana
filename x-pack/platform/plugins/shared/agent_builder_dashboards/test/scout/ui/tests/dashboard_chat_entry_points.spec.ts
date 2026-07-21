@@ -44,12 +44,14 @@ test.describe(
       await expect(pageObjects.dashboardChat.roundResponses).toHaveCount(0);
     });
 
-    test('prefills Chat from the add-panel flyout without sending', async ({ pageObjects }) => {
+    test('opens Chat from the add-panel flyout without a prefilled prompt', async ({
+      pageObjects,
+    }) => {
       await pageObjects.dashboard.openAddPanelFlyout();
       await pageObjects.dashboardChat.openFromAddPanelFlyout();
 
       await expect(pageObjects.dashboardChat.conversationInputForm).toBeVisible();
-      await expect(pageObjects.dashboardChat.conversationInputEditor).not.toBeEmpty();
+      await expect(pageObjects.dashboardChat.conversationInputEditor).toBeEmpty();
       await expect(pageObjects.dashboardChat.roundResponses).toHaveCount(0);
     });
   }

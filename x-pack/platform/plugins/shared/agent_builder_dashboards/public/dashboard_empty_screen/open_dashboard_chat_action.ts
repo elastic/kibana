@@ -14,13 +14,6 @@ import {
 } from '@kbn/dashboard-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 
-const defaultPrompt = i18n.translate(
-  'xpack.agentBuilderDashboards.addPanelFlyout.defaultPromptDetail',
-  {
-    defaultMessage: 'Create a time series chart to see my logs over time',
-  }
-);
-
 export const createOpenDashboardChatAction = (
   openChat: AgentBuilderPluginStart['openChat']
 ): ActionDefinition<OpenDashboardChatActionContext, AddPanelActionExtension> => ({
@@ -41,7 +34,8 @@ export const createOpenDashboardChatAction = (
   execute: async ({ initialMessage }) => {
     openChat({
       newConversation: true,
-      initialMessage: initialMessage ?? defaultPrompt,
+      // Omit / undefined / empty all open a blank editor. Prompt pills pass an explicit message.
+      initialMessage: initialMessage ?? '',
       autoSendInitialMessage: false,
       sessionTag: 'dashboard',
     });

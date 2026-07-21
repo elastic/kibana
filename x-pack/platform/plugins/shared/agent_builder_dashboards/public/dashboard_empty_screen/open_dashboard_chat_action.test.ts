@@ -57,7 +57,7 @@ describe('createOpenDashboardChatAction', () => {
     });
   });
 
-  it('prefills chat with the default chart prompt when none is provided', async () => {
+  it('opens Chat with an empty editor when no prompt is provided', async () => {
     const action = createOpenDashboardChatAction(openChat);
 
     await action.execute({
@@ -66,7 +66,7 @@ describe('createOpenDashboardChatAction', () => {
 
     expect(openChat).toHaveBeenCalledWith({
       newConversation: true,
-      initialMessage: 'Create a time series chart to see my logs over time',
+      initialMessage: '',
       autoSendInitialMessage: false,
       sessionTag: 'dashboard',
     });

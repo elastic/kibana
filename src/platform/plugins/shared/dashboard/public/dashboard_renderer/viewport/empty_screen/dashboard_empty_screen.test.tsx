@@ -126,7 +126,6 @@ describe('DashboardEmptyScreen', () => {
 
     await waitFor(() => {
       expect(mockExecute).toHaveBeenCalledWith({
-        initialMessage: '',
         trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
       });
     });
