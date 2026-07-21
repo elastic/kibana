@@ -19,8 +19,8 @@ jest.mock('../shared/utils/build_flyout_nav_title', () => ({
   buildFlyoutNavTitle: jest.fn((title: string) => `NAV:${title}`),
 }));
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useStore: jest.fn(() => ({})),
 }));
 jest.mock('react-router-dom', () => ({
@@ -38,12 +38,17 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
 }));
 
 const mockOpenSystemFlyout = jest.fn();
+const mockReportEvent = jest.fn();
 
 describe('useEntityFlyoutApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     (useKibana as jest.Mock).mockReturnValue({
-      services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } },
+      services: {
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        telemetry: { reportEvent: mockReportEvent },
+      },
     });
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
   });

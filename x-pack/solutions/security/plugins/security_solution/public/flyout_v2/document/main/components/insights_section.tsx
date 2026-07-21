@@ -24,6 +24,7 @@ import { EntitiesOverview } from './entities_overview';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { INSIGHTS_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
@@ -58,6 +59,7 @@ export const InsightsSection = memo(
       openDocumentCorrelations,
       openDocumentThreatIntelligence,
       openDocumentPrevalence,
+      openAttackFlyoutAsChild,
     } = useFlyoutApi();
 
     const expanded = useExpandSection({
@@ -84,7 +86,7 @@ export const InsightsSection = memo(
     );
 
     const onShowThreatIntelligenceDetails = useCallback(() => {
-      openDocumentThreatIntelligence({ hit });
+      openDocumentThreatIntelligence({ hit, origin: FLYOUT_ORIGIN.INSIGHTS_THREAT_INTEL });
     }, [openDocumentThreatIntelligence, hit]);
 
     const onShowAlert = useCallback(
@@ -94,19 +96,34 @@ export const InsightsSection = memo(
           indexName,
           renderCellActions,
           onAlertUpdated,
+          origin: FLYOUT_ORIGIN.CORRELATIONS_ALERT,
           title,
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
 
     const onShowEntitiesDetails = useCallback(
-      () => openDocumentEntities({ hit }),
+      () => openDocumentEntities({ hit, origin: FLYOUT_ORIGIN.INSIGHTS_ENTITIES }),
       [openDocumentEntities, hit]
     );
 
+    const onShowAttack = useCallback(
+      (id: string, indexName: string, title?: string) =>
+        openAttackFlyoutAsChild({ attackId: id, indexName, attackTitle: title }),
+      [openAttackFlyoutAsChild]
+    );
+
     const onShowCorrelationsDetails = useCallback(
-      () => openDocumentCorrelations({ hit, scopeId: '', isRulePreview: false, onShowAlert }),
-      [openDocumentCorrelations, hit, onShowAlert]
+      () =>
+        openDocumentCorrelations({
+          hit,
+          scopeId: '',
+          isRulePreview: false,
+          onShowAlert,
+          onShowAttack,
+          origin: FLYOUT_ORIGIN.INSIGHTS_CORRELATIONS,
+        }),
+      [openDocumentCorrelations, hit, onShowAlert, onShowAttack]
     );
 
     const renderFlyoutLink = useCallback(
@@ -120,6 +137,7 @@ export const InsightsSection = memo(
         investigationFields,
         scopeId: '',
         columns: getColumns(renderCellActions, isInSecurityApp, '', renderFlyoutLink),
+        origin: FLYOUT_ORIGIN.INSIGHTS_PREVALENCE,
       });
     }, [
       openDocumentPrevalence,

@@ -155,6 +155,7 @@
     "@kbn/app-header",
     "@kbn/use-observable",
     "@kbn/core-security-server",
+    "@kbn/core-http-server",
   ],
   "exclude": ["target/**/*"]
 }
