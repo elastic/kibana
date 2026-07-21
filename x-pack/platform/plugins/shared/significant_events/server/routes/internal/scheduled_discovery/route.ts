@@ -254,6 +254,13 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
         const spaceId = await getSpaceId(request);
         if (nextEnabled && server.agentBuilder) {
           await installDiscoveryAgents({ agentBuilder: server.agentBuilder, spaceId });
+        if (nextEnabled) {
+          if (!server.agentBuilder) {
+            throw new Error(
+              'Agent Builder is required to enable significant events scheduled discovery'
+            );
+          }
+          await installDiscoveryAgents({ agentBuilder: server.agentBuilder, spaceId });
         }
         await workflowService.ensureWorkflow({
           enabled: nextEnabled,
