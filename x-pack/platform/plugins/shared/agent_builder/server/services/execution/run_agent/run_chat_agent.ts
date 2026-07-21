@@ -77,7 +77,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   {
     nextInput,
     conversation,
-    source,
+    origin,
     agentConfiguration,
     capabilities,
     runId = uuidv4(),
@@ -334,7 +334,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
-      source,
+      origin,
       getConversationState: () =>
         getConversationState({
           promptManager,
