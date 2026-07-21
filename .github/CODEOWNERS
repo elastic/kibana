@@ -2634,6 +2634,9 @@ src/platform/packages/shared/kbn-connector-specs/src/lib/ears_experimental_utils
 src/platform/packages/shared/kbn-connector-specs/src/lib/generate_secrets_schema_from_spec.ts @elastic/workchat-eng @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs/src/lib/generate_secrets_schema_from_spec.test.ts @elastic/workchat-eng @elastic/response-ops
 
+## Relay
+x-pack/platform/plugins/shared/actions/server/lib/relay @elastic/nightshift-context-and-research-team
+
 
 # Connector Specs
 src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
