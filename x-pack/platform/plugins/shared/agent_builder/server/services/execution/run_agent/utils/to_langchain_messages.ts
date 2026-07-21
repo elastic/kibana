@@ -101,12 +101,7 @@ export const convertPreviousRounds = async ({
   }
 
   for (const round of rounds) {
-    messages.push(
-      ...(await roundToLangchain(round, {
-        resultTransformer,
-        ignoreSteps,
-      }))
-    );
+    messages.push(...(await roundToLangchain(round, { resultTransformer, ignoreSteps })));
   }
 
   messages.push(formatRoundInput({ input, timestamp: inputTimestamp }));

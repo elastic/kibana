@@ -45,11 +45,6 @@ export interface RoundInput {
   attachment_refs?: AttachmentVersionRef[];
   /**
    * Pre-rendered, immutable prompt context for attachments created/updated in this round
-   * (metadata + update notices). Computed once when the round completes and never
-   * recomputed afterward, so historical rounds' prompt content stays byte-stable even if
-   * the underlying attachment is later updated (e.g. its description changes). Per-type
-   * instructions are NOT included here — those are safe to compute live from the
-   * (immutable) attachment type, since type identity and type descriptions never change.
    */
   attachment_context?: string;
 }

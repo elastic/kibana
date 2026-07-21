@@ -42,7 +42,6 @@ export interface ProcessedConversation {
   previousRounds: ProcessedConversationRound[];
   nextInput: ProcessedRoundInput;
   attachmentTypes: ProcessedAttachmentType[];
-  // attachments: ProcessedAttachment[];
   attachmentStateManager: AttachmentStateManager;
   /** Compaction summary covering older rounds that were replaced by this summary */
   compactionSummary?: CompactionSummary;
@@ -136,12 +135,12 @@ const mergeInputAttachmentsIntoAttachmentState = async (
   return attachmentTypes;
 };
 
-const getNewAttachmentTypesFromRefs = async (
+const getNewAttachmentTypesFromRefs = (
   attachmentStateManager: AttachmentStateManager,
   attachmentContextProvider: AttachmentContextProvider,
   attachmentsService: AttachmentsService,
   attachmentRefs: AttachmentVersionRef[]
-): Promise<ProcessedAttachmentType[]> => {
+): ProcessedAttachmentType[] => {
   const attachmentTypes: ProcessedAttachmentType[] = [];
   const typeInstructionsNeeded: string[] = [];
   for (const ref of attachmentRefs) {
@@ -239,7 +238,7 @@ export const prepareConversation = async ({
       );
     }
     if (round.input.attachment_refs) {
-      const newTypes = await getNewAttachmentTypesFromRefs(
+      const newTypes = getNewAttachmentTypesFromRefs(
         attachmentStateManager,
         attachmentContextProvider,
         attachmentsService,
@@ -283,7 +282,7 @@ export const prepareConversation = async ({
     }
   );
   if (effectiveNextInput.attachment_refs) {
-    const newRefTypes = await getNewAttachmentTypesFromRefs(
+    const newRefTypes = getNewAttachmentTypesFromRefs(
       attachmentStateManager,
       attachmentContextProvider,
       attachmentsService,
@@ -357,7 +356,7 @@ const prepareRoundInput = async ({
 
   return {
     message: input.message ?? '',
-    // attachments are always stripped before this function. this is hear to satisfy the type
+    // attachments are always stripped before this function. this is here to satisfy the type
     // for legacy compatibility
     attachments: [],
     ...inputAttachments,
