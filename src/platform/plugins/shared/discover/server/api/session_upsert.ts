@@ -25,10 +25,20 @@ export const upsertDiscoverSession = async (
 }> => {
   const { core } = await requestContext.resolve(['core']);
   const { attributes, references } = transformDiscoverSessionIn(data);
+  let resolvedId = id;
 
   // Check whether the session exists (standard or legacy) so the ID is validated only when creating it.
   try {
-    await core.savedObjects.client.get<DiscoverSessionAttributes>(SavedSearchType, id);
+    const result = await core.savedObjects.client.resolve<DiscoverSessionAttributes>(
+      SavedSearchType,
+      id
+    );
+
+    if (result.outcome === 'conflict') {
+      throw SavedObjectsErrorHelpers.createConflictError(SavedSearchType, id);
+    }
+
+    resolvedId = result.saved_object.id;
   } catch (error) {
     // Only a missing session indicates creation; propagate all other lookup errors.
     if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
@@ -41,7 +51,7 @@ export const upsertDiscoverSession = async (
 
   const updateResponse = await core.savedObjects.client.update<DiscoverSessionAttributes>(
     SavedSearchType,
-    id,
+    resolvedId,
     attributes,
     {
       upsert: attributes,
