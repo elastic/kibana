@@ -90,6 +90,7 @@ function createAlertingContext(
   return {
     alertsReader: ALERTS_READER_V2,
     rulesClient: rulesManagementClient,
+    alertingV2RulesClient: {} as SignificantEventsAlertingContext['alertingV2RulesClient'],
   };
 }
 
