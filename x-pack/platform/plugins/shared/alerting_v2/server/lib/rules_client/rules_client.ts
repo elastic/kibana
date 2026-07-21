@@ -448,17 +448,6 @@ export class RulesClient {
     this.ruleEventPublisher.emitRuleDeleted(this.request, [{ id, spaceId: this.spaceId }]);
   }
 
-  /**
-   * Manually triggers an immediate run of an enabled rule's executor task
-   * ("run rule now"). This is the recovery path for the no-catch-up scheduling
-   * model: a run missed while Kibana was down is not replayed automatically, so
-   * an operator kicks it here.
-   *
-   * Wraps Task Manager's `runSoon`, which reschedules the per-rule executor task
-   * to run as soon as possible. A disabled rule has no executor task (it is
-   * removed on disable), so we reject before calling `runSoon` rather than
-   * surfacing a confusing not-found from the task store.
-   */
   @withApm
   public async runRuleNow({ id }: { id: string }): Promise<void> {
     const { spaceId } = this.getSpaceContext();

@@ -1185,7 +1185,7 @@ describe('RulesClient', () => {
         references: [],
       });
       getRuleExecutorTaskIdMock.mockReturnValueOnce('task:run');
-      taskManager.runSoon.mockResolvedValueOnce({ id: 'task:run' });
+      taskManager.runSoon.mockResolvedValueOnce({ id: 'task:run', forced: false });
 
       await client.runRuleNow({ id: 'rule-id-run-1' });
 
@@ -1256,6 +1256,7 @@ describe('RulesClient', () => {
       });
       taskManager.runSoon.mockResolvedValueOnce({
         id: 'task:run',
+        forced: false,
         conflict: true,
       });
 
