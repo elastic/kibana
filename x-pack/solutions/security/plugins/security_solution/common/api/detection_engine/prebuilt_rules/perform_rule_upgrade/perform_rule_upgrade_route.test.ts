@@ -163,7 +163,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         const result = RuleFieldsToUpgrade.safeParse(input);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"required_fields.resolved_value.0.type: Invalid input: expected string, received undefined"`
+          `"required_fields.resolved_value.0.type: Required"`
         );
       });
 
