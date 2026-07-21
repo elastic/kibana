@@ -7,7 +7,7 @@ applies_to:
 
 # GraphQL connector [graphql-action-type]
 
-The GraphQL connector lets AI agents and workflows execute queries and introspect the schema of any GraphQL API endpoint.
+The GraphQL connector lets AI agents and workflows run queries and introspect the schema of any GraphQL API endpoint.
 
 ## Create connectors in {{kib}} [define-graphql-ui]
 
@@ -58,7 +58,7 @@ Query
     - **Operation name** (optional): The name of the operation to execute when the document contains multiple named operations.
 
 Mutation (available in Workflows)
-:   Executes a GraphQL mutation. Use this to create, update, or delete data. Available in workflows; not exposed as an agent tool. Returns the `data` field from the GraphQL response. Throws if the server returns any GraphQL `errors`.
+:   Runs a GraphQL mutation to create, update, or delete data. Available in workflows only and not exposed as an agent tool. Returns the `data` field from the GraphQL response. Throws if the server returns any GraphQL `errors`.
     - **Mutation** (required): The GraphQL mutation document string. Example: `mutation CreateUser($name: String!) { createUser(name: $name) { id name } }`.
     - **Variables** (optional): A key/value map of variables to pass to the mutation. Example: `{ "name": "Alice" }`.
     - **Operation name** (optional): The name of the operation to execute when the mutation document contains multiple named operations.

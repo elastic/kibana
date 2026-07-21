@@ -214,6 +214,22 @@ describe('GraphQLConnector', () => {
       const body = mockClient.post.mock.calls[0][1] as Record<string, unknown>;
       expect(body.variables).toBeUndefined();
     });
+
+    it('rejects mutation operation documents', async () => {
+      await expect(
+        GraphQLConnector.actions.query.handler(mockContext, {
+          query: 'mutation CreateUser($name: String!) { createUser(name: $name) { id } }',
+        })
+      ).rejects.toThrow('Only query operations are allowed');
+    });
+
+    it('rejects subscription operation documents', async () => {
+      await expect(
+        GraphQLConnector.actions.query.handler(mockContext, {
+          query: 'subscription { onUserCreated { id } }',
+        })
+      ).rejects.toThrow('Only query operations are allowed');
+    });
   });
 
   // ---------------------------------------------------------------------------

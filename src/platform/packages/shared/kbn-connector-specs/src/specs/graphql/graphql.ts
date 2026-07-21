@@ -156,8 +156,7 @@ export const GraphQLConnector: ConnectorSpec = {
     id: '.graphql',
     displayName: 'GraphQL',
     description: i18n.translate('connectorSpecs.graphQL.metadata.description', {
-      defaultMessage:
-        'Execute queries, run mutations, and introspect schemas on any GraphQL endpoint',
+      defaultMessage: 'Run queries and mutations, and introspect schemas on any GraphQL endpoint',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -358,6 +357,13 @@ export const GraphQLConnector: ConnectorSpec = {
         'Throws if the server returns any GraphQL errors.',
       input: QueryInputSchema,
       handler: async (ctx, input: QueryInput) => {
+        // Reject mutation and subscription operation types to enforce the read-only boundary.
+        // The isTool:false on `mutation` only prevents agent exposure, not direct misuse.
+        if (/\b(mutation|subscription)\b/.test(input.query)) {
+          throw new Error(
+            'Only query operations are allowed in this action. Use the mutation action for mutations.'
+          );
+        }
         return executeGraphQL(ctx, input.query, input.variables, input.operationName);
       },
     },
