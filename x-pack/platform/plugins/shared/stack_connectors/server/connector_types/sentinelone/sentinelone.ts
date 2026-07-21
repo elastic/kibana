@@ -385,6 +385,8 @@ export class SentinelOneConnector extends SubActionConnector<
         method: 'get',
         responseType: 'stream',
         responseSchema: SentinelOneDownloadRemoteScriptResultsResponseSchema,
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
       },
       connectorUsageCollector
     );
