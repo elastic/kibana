@@ -7,14 +7,13 @@
 
 import {
   EuiBadge,
+  EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiTable,
-  EuiTableBody,
-  EuiTableRow,
-  EuiTableRowCell,
+  EuiText,
 } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -43,8 +42,11 @@ interface DetailRow {
   content: React.ReactNode;
 }
 
-// Match Discover's result-panel table: row separators only, no border on first/last row.
+// Match Discover's result-panel table style: row separators only, no border on first/last row.
 const detailTableCss = css`
+  thead {
+    display: none;
+  }
   tr:first-child td {
     border-top: none;
   }
@@ -52,6 +54,24 @@ const detailTableCss = css`
     border-bottom: none;
   }
 `;
+
+const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
+  {
+    field: 'label' as const,
+    name: 'Field',
+    width: '160px',
+    render: (label: React.ReactNode) => (
+      <EuiText size="xs">
+        <strong>{label}</strong>
+      </EuiText>
+    ),
+  },
+  {
+    field: 'content' as const,
+    name: 'Value',
+    render: (content: React.ReactNode) => content,
+  },
+];
 
 interface Props {
   genAi: GenAiFields;
@@ -195,18 +215,14 @@ export function GenAiTab({ genAi }: Props) {
               defaultMessage: 'Details',
             })}
           >
-            <EuiTable compressed data-test-subj="genAiDetails" css={detailTableCss}>
-              <EuiTableBody>
-                {detailRows.map(({ id, label, content }) => (
-                  <EuiTableRow key={id}>
-                    <EuiTableRowCell style={{ whiteSpace: 'nowrap', width: 160 }}>
-                      <strong>{label}</strong>
-                    </EuiTableRowCell>
-                    <EuiTableRowCell>{content}</EuiTableRowCell>
-                  </EuiTableRow>
-                ))}
-              </EuiTableBody>
-            </EuiTable>
+            <EuiBasicTable
+              tableLayout="auto"
+              compressed
+              items={detailRows}
+              columns={DETAIL_COLUMNS}
+              data-test-subj="genAiDetails"
+              css={detailTableCss}
+            />
           </GenAiSection>
         </>
       )}
