@@ -89,6 +89,7 @@ export interface ObservabilityServiceFlyoutFeatureRenderDeps {
   rangeFrom: string;
   rangeTo: string;
   onClose: () => void;
+  flyoutHistoryKey?: symbol;
 }
 
 export interface ObservabilityServiceFlyoutFeature {

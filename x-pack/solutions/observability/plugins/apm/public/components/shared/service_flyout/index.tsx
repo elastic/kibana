@@ -52,9 +52,17 @@ interface ServiceFlyoutProps {
   };
   onView?: (params: { tabId: ServiceFlyoutTabId }) => void;
   onClose: () => void;
+  historyKey?: symbol;
 }
 
-export function ServiceFlyout({ deps, service, filters, onView, onClose }: ServiceFlyoutProps) {
+export function ServiceFlyout({
+  deps,
+  service,
+  filters,
+  onView,
+  onClose,
+  historyKey,
+}: ServiceFlyoutProps) {
   const { core, share, lens, dataViews, alerting } = deps;
   const { environment, rangeFrom, rangeTo, transactionType } = filters;
   const title = service.name;
@@ -122,6 +130,7 @@ export function ServiceFlyout({ deps, service, filters, onView, onClose }: Servi
             resizable
             minWidth={660}
             session="start"
+            historyKey={historyKey}
             flyoutMenuProps={{ title }}
             aria-labelledby={titleId}
           >

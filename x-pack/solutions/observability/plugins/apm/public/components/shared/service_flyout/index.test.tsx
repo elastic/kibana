@@ -26,8 +26,16 @@ jest.mock('@elastic/eui', () => {
 });
 
 jest.mock('../responsive_flyout', () => ({
-  ResponsiveFlyout: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
-    <section data-test-subj="responsiveFlyoutMock">
+  ResponsiveFlyout: ({
+    children,
+    onClose,
+    historyKey,
+  }: {
+    children: React.ReactNode;
+    onClose: () => void;
+    historyKey?: symbol;
+  }) => (
+    <section data-test-subj="responsiveFlyoutMock" data-history-key={historyKey?.toString()}>
       <button data-test-subj="responsiveFlyoutCloseButton" onClick={onClose}>
         close
       </button>
@@ -267,5 +275,39 @@ describe('ServiceFlyout local filter state', () => {
     );
 
     expect(screen.getByTestId('serviceFlyoutOverviewReadout')).toHaveTextContent('staging:');
+  });
+});
+
+describe('ServiceFlyout historyKey', () => {
+  it('forwards historyKey to ResponsiveFlyout when provided', () => {
+    const historyKey = Symbol('test-history-key');
+
+    render(
+      <ServiceFlyout
+        {...contextProps}
+        service={service}
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
+        onClose={jest.fn()}
+        historyKey={historyKey}
+      />
+    );
+
+    expect(screen.getByTestId('responsiveFlyoutMock')).toHaveAttribute(
+      'data-history-key',
+      historyKey.toString()
+    );
+  });
+
+  it('renders without historyKey when not provided', () => {
+    render(
+      <ServiceFlyout
+        {...contextProps}
+        service={service}
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('responsiveFlyoutMock')).not.toHaveAttribute('data-history-key');
   });
 });

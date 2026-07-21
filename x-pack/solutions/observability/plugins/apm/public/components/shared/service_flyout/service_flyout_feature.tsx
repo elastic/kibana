@@ -47,6 +47,7 @@ export function createServiceFlyoutRenderer({
         rangeFrom: deps.rangeFrom,
         rangeTo: deps.rangeTo,
       }}
+      historyKey={deps.flyoutHistoryKey}
       onClose={deps.onClose}
     />
   );
