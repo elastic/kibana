@@ -24,6 +24,10 @@ export const RULE_EXECUTIONS_MAX_RESULT_WINDOW = 10_000;
  */
 export const RULE_EXECUTIONS_MAX_RULE_ID_FILTER = 10;
 
+/** Zod refine / OAS example message when `page * perPage` exceeds the result window. */
+export const getRuleExecutionsPagePerPageExceedsMaxMessage = (): string =>
+  `page * perPage cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`;
+
 /**
  * Coarse ECS-aligned outcome (`event.outcome`) for a single rule execution.
  *
@@ -88,7 +92,7 @@ export const getRuleExecutionsQuerySchema = z
       .describe(`Number of results per page.`),
   })
   .refine(({ page, perPage }) => page * perPage <= RULE_EXECUTIONS_MAX_RESULT_WINDOW, {
-    message: `page * perPage cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`,
+    message: getRuleExecutionsPagePerPageExceedsMaxMessage(),
     path: ['page'],
   });
 export type GetRuleExecutionsQuery = z.infer<typeof getRuleExecutionsQuerySchema>;

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { RULE_EXECUTIONS_MAX_RESULT_WINDOW } from '@kbn/alerting-v2-schemas';
+import {
+  RULE_EXECUTIONS_MAX_PER_PAGE,
+  RULE_EXECUTIONS_MAX_RESULT_WINDOW,
+  getRuleExecutionsPagePerPageExceedsMaxMessage,
+  getRuleExecutionsQuerySchema,
+} from '@kbn/alerting-v2-schemas';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
 import {
   GET_RULE_EXECUTIONS_SUMMARY,
@@ -41,10 +47,23 @@ describe('execution history OAS examples', () => {
         summary: INVALID_QUERY_PARAMETERS_DESCRIPTION,
         value: expect.objectContaining({
           code: 'BAD_REQUEST',
-          message: `page * perPage cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`,
+          message: expect.stringContaining(getRuleExecutionsPagePerPageExceedsMaxMessage()),
         }),
       })
     );
+
+    const invalidQueryParse = getRuleExecutionsQuerySchema.safeParse({
+      page: RULE_EXECUTIONS_MAX_RESULT_WINDOW / RULE_EXECUTIONS_MAX_PER_PAGE + 1,
+      perPage: RULE_EXECUTIONS_MAX_PER_PAGE,
+    });
+    expect(invalidQueryParse.success).toBe(false);
+    if (invalidQueryParse.success) {
+      throw new Error('expected invalid query parse to fail');
+    }
+    expect(
+      oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRuleExecutionsQuery
+        ?.value.message
+    ).toBe(stringifyZodError(invalidQueryParse.error));
     expect(GetRuleExecutionsRoute.validate.response?.[400]?.description).toBe(
       INVALID_QUERY_PARAMETERS_DESCRIPTION
     );

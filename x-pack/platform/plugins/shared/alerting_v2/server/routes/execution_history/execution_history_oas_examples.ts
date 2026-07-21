@@ -7,7 +7,13 @@
 
 import type { RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
 import type { ErrorResponse, GetRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
-import { RULE_EXECUTIONS_MAX_RESULT_WINDOW } from '@kbn/alerting-v2-schemas';
+import {
+  RULE_EXECUTIONS_MAX_PER_PAGE,
+  RULE_EXECUTIONS_MAX_RESULT_WINDOW,
+  getRuleExecutionsQuerySchema,
+} from '@kbn/alerting-v2-schemas';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import { treeifyError } from '@kbn/zod/v4';
 import { jsonExample } from '../json_oas_example';
 import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
 
@@ -37,13 +43,20 @@ const RULE_EXECUTIONS_RESPONSE: GetRuleExecutionsResponse = {
   perPage: 20,
 };
 
+const invalidQueryParse = getRuleExecutionsQuerySchema.safeParse({
+  page: RULE_EXECUTIONS_MAX_RESULT_WINDOW / RULE_EXECUTIONS_MAX_PER_PAGE + 1,
+  perPage: RULE_EXECUTIONS_MAX_PER_PAGE,
+});
+
+if (invalidQueryParse.success) {
+  throw new Error('expected getRuleExecutionsQuerySchema parse to fail for OAS example');
+}
+
 const INVALID_QUERY_ERROR: ErrorResponse = {
   code: 'BAD_REQUEST',
   error: 'Bad Request',
-  message: `page * perPage cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`,
-  details: {
-    errors: { page: [`page * perPage cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`] },
-  },
+  message: stringifyZodError(invalidQueryParse.error),
+  details: { errors: treeifyError(invalidQueryParse.error) },
 };
 
 export const getRuleExecutionsOasExamples = (): OASOperationObject => ({
