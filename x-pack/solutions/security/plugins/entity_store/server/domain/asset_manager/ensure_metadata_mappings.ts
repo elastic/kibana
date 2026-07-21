@@ -53,10 +53,7 @@ const isMappingConflict = (error: unknown): boolean =>
 // that were upgraded from a version that pre-dates the metadata data stream:
 // if a write arrived after the upgrade but before the index template was
 // installed, ES auto-created a regular index instead of a data stream.
-const detectPlainIndex = async (
-  esClient: ElasticsearchClient,
-  name: string
-): Promise<boolean> => {
+const detectPlainIndex = async (esClient: ElasticsearchClient, name: string): Promise<boolean> => {
   try {
     await esClient.indices.getDataStream({ name });
     return false; // name resolves to a real data stream
