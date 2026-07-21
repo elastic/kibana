@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('adding a filter that excludes all data', () => {
       before(async function () {
         // hook takes longer than the default 2 minutes
-        this.timeout(240_000);
+        this.timeout(300_000);
         await populateDashboard();
         await addFilterAndRefresh();
       });
