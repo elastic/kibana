@@ -31,6 +31,7 @@ interface CreateAlertActionRouteForTypeOptions<
 > {
   actionType: TAction;
   pathSuffix: string;
+  summary: string;
   bodySchema: z.ZodType<
     Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>
   >;
@@ -42,6 +43,7 @@ export const createAlertActionRouteForType = <
 >({
   actionType,
   pathSuffix,
+  summary,
   bodySchema,
   oasOperationObject,
 }: CreateAlertActionRouteForTypeOptions<TAction>): RouteDefinition<
@@ -62,7 +64,7 @@ export const createAlertActionRouteForType = <
       },
     };
     static routeOptions = {
-      summary: `Create an alert ${pathSuffix} action`,
+      summary,
       description: 'Create an action for a specific alert group.',
       oasOperationObject,
     } as const;

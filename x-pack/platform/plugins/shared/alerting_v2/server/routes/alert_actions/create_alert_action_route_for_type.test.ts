@@ -12,20 +12,24 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import type { AlertActionsClient } from '../../lib/alert_actions_client';
 import { createAlertActionsClientMock } from '../../lib/alert_actions_client/alert_actions_client.mock';
+import { getCreateAlertActionSummary } from './alert_oas_examples';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 import { createRouteDependencies } from '../test_utils';
 
 describe('createAlertActionRouteForType', () => {
   it('creates a route class with expected static metadata', () => {
     const suffix = '_tag';
+    const summary = getCreateAlertActionSummary(suffix);
     const RouteClass = createAlertActionRouteForType({
       actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       pathSuffix: suffix,
+      summary,
       bodySchema: createTagAlertActionBodySchema,
     });
 
     expect(RouteClass.method).toBe('post');
     expect(RouteClass.path).toBe(`/api/alerting/v2/alerts/{group_hash}/${suffix}`);
+    expect(RouteClass.options.summary).toBe(summary);
     expect(RouteClass.validate).toBeDefined();
   });
 
@@ -33,6 +37,7 @@ describe('createAlertActionRouteForType', () => {
     const RouteClass = createAlertActionRouteForType({
       actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       pathSuffix: '_tag',
+      summary: getCreateAlertActionSummary('_tag'),
       bodySchema: createTagAlertActionBodySchema,
     });
     const { ctx } = createRouteDependencies();
@@ -59,6 +64,7 @@ describe('createAlertActionRouteForType', () => {
     const RouteClass = createAlertActionRouteForType({
       actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       pathSuffix: '_tag',
+      summary: getCreateAlertActionSummary('_tag'),
       bodySchema: createTagAlertActionBodySchema,
     });
     const { ctx } = createRouteDependencies();

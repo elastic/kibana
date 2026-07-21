@@ -11,6 +11,7 @@ import {
   getCannotActivateEpisodeMessage,
 } from '../../lib/errors/alert_error_messages';
 import {
+  CREATE_ACK_ALERT_ACTION_SUMMARY,
   bulkCreateAlertActionOasExamples,
   createAckAlertActionOasExamples,
 } from './alert_oas_examples';
@@ -20,9 +21,10 @@ describe('alert OAS examples', () => {
   it('includes request and route-error examples for ack', () => {
     const oas = createAckAlertActionOasExamples();
 
+    expect(CreateAckAlertActionRoute.options.summary).toBe(CREATE_ACK_ALERT_ACTION_SUMMARY);
     expect(
       oas.requestBody?.content?.['application/json']?.examples?.createAckAlertActionRequest
-    ).toBeDefined();
+    ).toEqual(expect.objectContaining({ summary: CREATE_ACK_ALERT_ACTION_SUMMARY }));
     expect(
       oas.responses?.[400]?.content?.['application/json']?.examples?.invalidAlertAction
     ).toEqual(

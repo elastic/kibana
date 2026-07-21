@@ -33,6 +33,20 @@ type OASOperationObject = Exclude<
 
 type RouteErrorStatus = 400 | 404;
 
+/** Shared with each typed alert-action route's `routeOptions.summary`. */
+export const getCreateAlertActionSummary = (pathSuffix: string): string =>
+  `Create an alert ${pathSuffix} action`;
+
+export const CREATE_ACK_ALERT_ACTION_SUMMARY = getCreateAlertActionSummary('_ack');
+export const CREATE_UNACK_ALERT_ACTION_SUMMARY = getCreateAlertActionSummary('_unack');
+export const CREATE_ASSIGN_ALERT_ACTION_SUMMARY = getCreateAlertActionSummary('_assign');
+export const CREATE_TAG_ALERT_ACTION_SUMMARY = getCreateAlertActionSummary('_tag');
+export const CREATE_SNOOZE_ALERT_ACTION_SUMMARY = getCreateAlertActionSummary('_snooze');
+export const CREATE_UNSNOOZE_ALERT_ACTION_SUMMARY = getCreateAlertActionSummary('_unsnooze');
+export const CREATE_ACTIVATE_ALERT_ACTION_SUMMARY = getCreateAlertActionSummary('_activate');
+export const CREATE_DEACTIVATE_ALERT_ACTION_SUMMARY = getCreateAlertActionSummary('_deactivate');
+export const BULK_CREATE_ALERT_ACTION_SUMMARY = 'Bulk create alert actions';
+
 const SAMPLE_GROUP_HASH = 'group-hash-1';
 const SAMPLE_EPISODE_ID = 'episode-1';
 
@@ -149,7 +163,7 @@ export const createAckAlertActionOasExamples = (): OASOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createAckAlertActionRequest',
-      summary: 'Acknowledge an alert episode',
+      summary: CREATE_ACK_ALERT_ACTION_SUMMARY,
       value: ACK_REQUEST,
     },
     errors: [400, 404],
@@ -159,7 +173,7 @@ export const createUnackAlertActionOasExamples = (): OASOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createUnackAlertActionRequest',
-      summary: 'Remove acknowledgement from an alert episode',
+      summary: CREATE_UNACK_ALERT_ACTION_SUMMARY,
       value: UNACK_REQUEST,
     },
     errors: [400, 404],
@@ -169,7 +183,7 @@ export const createAssignAlertActionOasExamples = (): OASOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createAssignAlertActionRequest',
-      summary: 'Assign an alert episode',
+      summary: CREATE_ASSIGN_ALERT_ACTION_SUMMARY,
       value: ASSIGN_REQUEST,
     },
     errors: [400, 404],
@@ -179,7 +193,7 @@ export const createTagAlertActionOasExamples = (): OASOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createTagAlertActionRequest',
-      summary: 'Add tags to an alert',
+      summary: CREATE_TAG_ALERT_ACTION_SUMMARY,
       value: TAG_REQUEST,
     },
     errors: [400, 404],
@@ -189,7 +203,7 @@ export const createSnoozeAlertActionOasExamples = (): OASOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createSnoozeAlertActionRequest',
-      summary: 'Snooze an alert',
+      summary: CREATE_SNOOZE_ALERT_ACTION_SUMMARY,
       value: SNOOZE_REQUEST,
     },
     errors: [400, 404],
@@ -199,7 +213,7 @@ export const createUnsnoozeAlertActionOasExamples = (): OASOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createUnsnoozeAlertActionRequest',
-      summary: 'Remove snooze from an alert',
+      summary: CREATE_UNSNOOZE_ALERT_ACTION_SUMMARY,
       value: UNSNOOZE_REQUEST,
     },
     errors: [400, 404],
@@ -209,7 +223,7 @@ export const createActivateAlertActionOasExamples = (): OASOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createActivateAlertActionRequest',
-      summary: 'Activate an alert episode',
+      summary: CREATE_ACTIVATE_ALERT_ACTION_SUMMARY,
       value: ACTIVATE_REQUEST,
     },
     errors: [400, 404],
@@ -219,7 +233,7 @@ export const createDeactivateAlertActionOasExamples = (): OASOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'createDeactivateAlertActionRequest',
-      summary: 'Deactivate an alert episode',
+      summary: CREATE_DEACTIVATE_ALERT_ACTION_SUMMARY,
       value: DEACTIVATE_REQUEST,
     },
     errors: [400, 404],
@@ -229,13 +243,13 @@ export const bulkCreateAlertActionOasExamples = (): OASOperationObject =>
   buildAlertOas({
     requestBody: {
       name: 'bulkCreateAlertActionRequest',
-      summary: 'Create alert actions in bulk',
+      summary: BULK_CREATE_ALERT_ACTION_SUMMARY,
       value: BULK_REQUEST,
     },
     responses: {
       200: {
         name: 'bulkCreateAlertActionResponse',
-        summary: 'Bulk create result',
+        summary: BULK_CREATE_ALERT_ACTION_SUMMARY,
         value: BULK_RESPONSE,
       },
     },

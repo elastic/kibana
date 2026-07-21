@@ -9,12 +9,13 @@ import {
   ALERT_EPISODE_ACTION_TYPE,
   createSnoozeAlertActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
-import { createSnoozeAlertActionOasExamples } from './alert_oas_examples';
+import { CREATE_SNOOZE_ALERT_ACTION_SUMMARY, createSnoozeAlertActionOasExamples } from './alert_oas_examples';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateSnoozeAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
   pathSuffix: '_snooze',
+  summary: CREATE_SNOOZE_ALERT_ACTION_SUMMARY,
   bodySchema: createSnoozeAlertActionBodySchema,
   oasOperationObject: createSnoozeAlertActionOasExamples,
 });
