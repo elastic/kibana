@@ -32,11 +32,11 @@ export const useApplicationConnections = () => {
     const nonOwnedRows = Object.entries(byClient)
       .filter(([clientId]) => !ownedClientIds.has(clientId))
       .map(([clientId, clientConnections]) => {
-        const [firstConnection] = clientConnections;
+        const [{ client_name, resource }] = clientConnections;
         const client: OAuthClient = {
           id: clientId,
-          client_name: firstConnection.client_name,
-          resource: firstConnection.resource,
+          client_name,
+          resource,
         };
         return { client, connections: clientConnections };
       });
