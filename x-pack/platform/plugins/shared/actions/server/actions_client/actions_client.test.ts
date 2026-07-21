@@ -2285,6 +2285,7 @@ describe('update()', () => {
         expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
           connectorId: 'my-action',
           authMode: 'per-user',
+          skipRevocation: true,
         });
       });
     });
@@ -2324,6 +2325,7 @@ describe('update()', () => {
         expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
           connectorId: 'my-action',
           authMode: 'shared',
+          skipRevocation: true,
         });
       });
     });
