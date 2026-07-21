@@ -65,9 +65,9 @@ export const DiffableFieldsToOmit = NON_UPGRADEABLE_DIFFABLE_FIELDS.reduce((acc,
  * are omitted because they are handled under the hood by endpoint logic.
  * See: https://github.com/elastic/kibana/issues/186544
  *
- * These schemas validate each field's `resolved_value` on input, so
- * `required_fields` uses `RequiredFieldInput` (no `ecs`): `ecs` is computed by
- * the server and only present in responses.
+ * `required_fields` uses `RequiredFieldInput` instead of `RequiredField` so
+ * `ecs` isn't required on input: the server computes `ecs`, so callers don't
+ * send it.
  */
 export type DiffableUpgradableFields = z.infer<typeof DiffableUpgradableFields>;
 export const DiffableUpgradableFields = DiffableAllFields.omit(DiffableFieldsToOmit).extend({
