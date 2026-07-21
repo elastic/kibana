@@ -5,12 +5,28 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { LIST_BREADCRUMB, PLUGIN_ID, PLUGIN_NAME } from '../common';
-import type { SetupDependencies, StartDependencies } from './types';
+import type { CreateEditEsqlViewFlyoutProps } from './create_edit_view_flyout';
+import type { EsqlViewsPublicStart, SetupDependencies, StartDependencies } from './types';
 
-export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies, StartDependencies> {
+const LazyCreateEsqlViewFlyout = React.lazy(() =>
+  import('./create_edit_view_flyout_v2').then((module) => ({
+    default: module.CreateEditEsqlViewFlyoutV2,
+  }))
+);
+
+const CreateEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlViewFlyoutProps> = (props) => (
+  <React.Suspense fallback={null}>
+    <LazyCreateEsqlViewFlyout {...props} />
+  </React.Suspense>
+);
+
+export class EsqlViewsPlugin
+  implements Plugin<void, EsqlViewsPublicStart, SetupDependencies, StartDependencies>
+{
   public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
     management.sections.section.kibana.registerApp({
       id: PLUGIN_ID,
@@ -37,5 +53,7 @@ export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies, St
     });
   }
 
-  public start() {}
+  public start(): EsqlViewsPublicStart {
+    return { CreateEsqlViewFlyout };
+  }
 }

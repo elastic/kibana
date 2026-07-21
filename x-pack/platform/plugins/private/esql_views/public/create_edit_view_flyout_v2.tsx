@@ -19,6 +19,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiLink,
   EuiNotificationBadge,
   EuiSpacer,
   EuiText,
@@ -27,6 +28,8 @@ import {
 } from '@elastic/eui';
 import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '@kbn/esql/public';
@@ -90,6 +93,9 @@ const childFlyoutMockStyles = css`
 export const CreateEditEsqlViewFlyoutV2: React.FunctionComponent<CreateEditEsqlViewFlyoutProps> = ({
   mode,
   initialView,
+  initialQuery,
+  manageViewsUrl,
+  core,
   http,
   data,
   notifications,
@@ -102,7 +108,7 @@ export const CreateEditEsqlViewFlyoutV2: React.FunctionComponent<CreateEditEsqlV
   const [nameError, setNameError] = useState<string>();
   const [description, setDescription] = useState(initialView?.description ?? '');
   const [query, setQuery] = useState<AggregateQuery>({
-    esql: initialView?.query ?? DEFAULT_QUERY,
+    esql: initialView?.query ?? initialQuery ?? DEFAULT_QUERY,
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -184,7 +190,7 @@ export const CreateEditEsqlViewFlyoutV2: React.FunctionComponent<CreateEditEsqlV
         i18n.translate('esqlViews.flyout.currentUserLabel', { defaultMessage: 'You' });
       setLocalViewMetadata(name, { description, createdBy, lastUpdated, query: esqlText });
 
-      notifications.toasts.addSuccess(
+      const successToastTitle =
         mode === 'create'
           ? i18n.translate('esqlViews.flyout.createSuccessToast', {
               defaultMessage: 'View "{name}" was created.',
@@ -193,8 +199,27 @@ export const CreateEditEsqlViewFlyoutV2: React.FunctionComponent<CreateEditEsqlV
           : i18n.translate('esqlViews.flyout.updateSuccessToast', {
               defaultMessage: 'View "{name}" was updated.',
               values: { name },
-            })
-      );
+            });
+
+      // The link is only wired up by callers outside Stack Management (e.g. Discover) that pass
+      // both `manageViewsUrl` and `core` -- Stack Management's own list page is already the
+      // destination the link would point to, so it omits both and gets the plain-string toast.
+      if (manageViewsUrl && core) {
+        notifications.toasts.addSuccess({
+          title: successToastTitle,
+          text: toMountPoint(
+            <EuiLink href={manageViewsUrl} data-test-subj="esqlViewsManageViewsToastLink">
+              <FormattedMessage
+                id="esqlViews.flyout.manageViewsToastLink"
+                defaultMessage="Manage ES|QL views"
+              />
+            </EuiLink>,
+            core
+          ),
+        });
+      } else {
+        notifications.toasts.addSuccess(successToastTitle);
+      }
 
       onSaved({
         name,
@@ -217,7 +242,19 @@ export const CreateEditEsqlViewFlyoutV2: React.FunctionComponent<CreateEditEsqlV
     } finally {
       setIsSaving(false);
     }
-  }, [description, esqlText, http, initialView, mode, name, notifications, onClose, onSaved]);
+  }, [
+    core,
+    description,
+    esqlText,
+    http,
+    initialView,
+    manageViewsUrl,
+    mode,
+    name,
+    notifications,
+    onClose,
+    onSaved,
+  ]);
 
   return (
     <>

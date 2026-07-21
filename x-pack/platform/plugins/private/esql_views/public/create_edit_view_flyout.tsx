@@ -26,7 +26,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HttpStart, NotificationsStart } from '@kbn/core/public';
+import type { CoreStart, HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -43,6 +43,21 @@ const DEFAULT_QUERY = 'FROM kibana_sample_data_ecommerce | WHERE KQL("term")';
 export interface CreateEditEsqlViewFlyoutProps {
   mode: 'create' | 'edit';
   initialView?: EsqlView;
+  /**
+   * Used only in `create` mode, as a lower-priority fallback to `initialView`'s query, to seed
+   * the editor with a query the caller already has in hand (e.g. Discover's current ES|QL query)
+   * instead of the flyout's own placeholder `DEFAULT_QUERY`. Only honored by the V2 flyout today
+   * -- see `create_edit_view_flyout_v2.tsx`.
+   */
+  initialQuery?: string;
+  /**
+   * When set (together with `core`), the success toast shown after a save includes a link to
+   * this URL (e.g. Discover linking back to the ES|QL Views list in Stack Management). Only
+   * honored by the V2 flyout today.
+   */
+  manageViewsUrl?: string;
+  /** Required to render `manageViewsUrl` as a link inside the (otherwise plain-string) toast. */
+  core?: CoreStart;
   http: HttpStart;
   data: DataPublicPluginStart;
   notifications: NotificationsStart;

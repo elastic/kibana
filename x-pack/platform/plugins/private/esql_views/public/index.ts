@@ -10,3 +10,6 @@ import { EsqlViewsPlugin } from './plugin';
 export function plugin() {
   return new EsqlViewsPlugin();
 }
+
+export type { EsqlViewsPublicStart } from './types';
+export type { CreateEditEsqlViewFlyoutProps } from './create_edit_view_flyout';

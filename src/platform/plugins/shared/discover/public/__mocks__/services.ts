@@ -332,6 +332,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
     alertingVTwo: {
       CreateRuleOptionsFlyout: jest.fn(() => null),
     },
+    esqlViews: {
+      CreateEsqlViewFlyout: jest.fn(() => null),
+    },
     trackUiMetric: jest.fn(),
     logger: { get: jest.fn(() => loggerMock.create()) },
   } as unknown as DiscoverServices;
