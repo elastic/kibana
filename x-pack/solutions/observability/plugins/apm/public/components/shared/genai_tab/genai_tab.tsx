@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { GenAiFields } from './get_genai_fields';
@@ -28,26 +35,35 @@ function Pill({ label, value, testSubj }: PillProps) {
   );
 }
 
+interface DetailRow {
+  id: string;
+  label: React.ReactNode;
+  content: React.ReactNode;
+}
+
+const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
+  {
+    field: 'label' as const,
+    name: i18n.translate('xpack.apm.genAi.details.columnField', { defaultMessage: 'Field' }),
+    width: '160px',
+    render: (label: React.ReactNode) => (
+      <EuiText size="xs">
+        <strong>{label}</strong>
+      </EuiText>
+    ),
+  },
+  {
+    field: 'content' as const,
+    name: i18n.translate('xpack.apm.genAi.details.columnValue', { defaultMessage: 'Value' }),
+    render: (content: React.ReactNode) => content,
+  },
+];
+
 interface Props {
   genAi: GenAiFields;
 }
 
 export function GenAiTab({ genAi }: Props) {
-  const { euiTheme } = useEuiTheme();
-
-  const detailsListCss = css`
-    dt,
-    dd {
-      border-bottom: ${euiTheme.border.thin};
-      padding-top: ${euiTheme.size.xs};
-      padding-bottom: ${euiTheme.size.xs};
-    }
-    dt:last-of-type,
-    dd:last-of-type {
-      border-bottom: none;
-    }
-  `;
-
   const {
     operationName,
     requestModel,
@@ -108,50 +124,48 @@ export function GenAiTab({ genAi }: Props) {
   }
 
   // ── Details rows ───────────────────────────────────────────────────────────
-  const extraParams: Array<{
-    title: NonNullable<React.ReactNode>;
-    description: NonNullable<React.ReactNode>;
-  }> = [];
+  const detailRows: DetailRow[] = [];
 
   if (responseModel) {
-    extraParams.push({
-      title: i18n.translate('xpack.apm.genAi.params.responseModel', {
+    detailRows.push({
+      id: 'responseModel',
+      label: i18n.translate('xpack.apm.genAi.params.responseModel', {
         defaultMessage: 'Response model',
       }),
-      description: <GenAiFieldValue value={responseModel} />,
+      content: <GenAiFieldValue value={responseModel} />,
     });
   }
   if (conversationId) {
-    extraParams.push({
-      title: i18n.translate('xpack.apm.genAi.params.conversationId', {
+    detailRows.push({
+      id: 'conversationId',
+      label: i18n.translate('xpack.apm.genAi.params.conversationId', {
         defaultMessage: 'Conversation ID',
       }),
-      description: <GenAiFieldValue value={conversationId} />,
+      content: <GenAiFieldValue value={conversationId} />,
     });
   }
   if (response.id) {
-    extraParams.push({
-      title: i18n.translate('xpack.apm.genAi.params.responseId', {
+    detailRows.push({
+      id: 'responseId',
+      label: i18n.translate('xpack.apm.genAi.params.responseId', {
         defaultMessage: 'Response ID',
       }),
-      description: <GenAiFieldValue value={response.id} />,
+      content: <GenAiFieldValue value={response.id} />,
     });
   }
   if (response.finish_reasons?.length) {
-    extraParams.push({
-      title: i18n.translate('xpack.apm.genAi.params.finishReasons', {
+    detailRows.push({
+      id: 'finishReasons',
+      label: i18n.translate('xpack.apm.genAi.params.finishReasons', {
         defaultMessage: 'Finish reasons',
       }),
-      description: <GenAiFieldValue value={response.finish_reasons} />,
+      content: <GenAiFieldValue value={response.finish_reasons} />,
     });
   }
   Object.entries(requestParams)
     .filter(([, v]) => v !== undefined)
     .forEach(([key, val]) => {
-      extraParams.push({
-        title: key,
-        description: <GenAiFieldValue value={val} />,
-      });
+      detailRows.push({ id: key, label: key, content: <GenAiFieldValue value={val} /> });
     });
 
   const hasConversation =
@@ -178,7 +192,7 @@ export function GenAiTab({ genAi }: Props) {
       )}
 
       {/* ── Section 2: Details ─────────────────────────────────────────── */}
-      {extraParams.length > 0 && (
+      {detailRows.length > 0 && (
         <>
           <EuiSpacer size="m" />
           <GenAiSection
@@ -187,13 +201,12 @@ export function GenAiTab({ genAi }: Props) {
               defaultMessage: 'Details',
             })}
           >
-            <EuiDescriptionList
-              type="column"
-              columnWidths={[1, 3]}
+            <EuiBasicTable
+              tableLayout="auto"
               compressed
-              listItems={extraParams}
+              items={detailRows}
+              columns={DETAIL_COLUMNS}
               data-test-subj="genAiDetails"
-              css={detailsListCss}
             />
           </GenAiSection>
         </>
