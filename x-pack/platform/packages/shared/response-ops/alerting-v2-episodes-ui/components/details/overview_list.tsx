@@ -16,6 +16,7 @@ import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_groupi
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
 import { EMPTY_VALUE } from '../../constants';
 import { formatDateTime } from '../../utils/format_date_time';
+import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
 import * as i18n from './translations';
 
 /**
@@ -54,7 +55,7 @@ export const AlertEpisodeOverviewList = ({
   const { euiTheme } = useEuiTheme();
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isResolved = groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
-  const isSnoozed = groupAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE;
+  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
 
   return (
     <EuiDescriptionList

@@ -54,6 +54,12 @@ async function getTooltipText(): Promise<string | null | undefined> {
   return document.querySelector('.euiToolTipPopover')?.textContent;
 }
 
+function getBadgeHrefParts(): [string, string] {
+  const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
+  const [pathname, search] = href!.split('?');
+  return [pathname, search];
+}
+
 describe('AnomaliesBadge', () => {
   it('names the anomalous detector in the tooltip when a detectorType is provided', async () => {
     renderBadge(
@@ -98,7 +104,7 @@ describe('AnomaliesBadge', () => {
   it('shows the none tooltip when the anomaly score is zero', async () => {
     renderBadge(<AnomaliesBadge score={0} detectorType={AnomalyDetectorType.txLatency} />);
 
-    expect(await getTooltipText()).toBe('No anomalies detected for the selected time range.');
+    expect(await getTooltipText()).toBe('No anomalies detected.');
   });
 
   it('renders as non-interactive when the anomaly score is zero', () => {
@@ -113,7 +119,7 @@ describe('AnomaliesBadge', () => {
     expect(screen.getByTestId('apmAnomaliesBadge').closest('a')).toBeNull();
   });
 
-  it('links to the regular service overview with proper params', () => {
+  it('links to the regular service overview from outside with proper params', async () => {
     renderBadge(
       <AnomaliesBadge
         score={CRITICAL_SEVERITY}
@@ -125,18 +131,20 @@ describe('AnomaliesBadge', () => {
       />
     );
 
-    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
-    const [pathname, search] = href!.split('?');
+    const [pathname, search] = getBadgeHrefParts();
 
     expect(pathname).toContain('/services/opbeans-java/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
       kuery: '',
       anomalyThreshold: 'critical',
       environment: 'production',
+      comparisonEnabled: 'true',
+      offset: 'expected_bounds',
     });
+    expect(await getTooltipText()).toContain('Click to view more.');
   });
 
-  it('links to the mobile service overview for a mobile agent with proper params', () => {
+  it('links to the mobile service overview for a mobile agent from outside with proper params', async () => {
     renderBadge(
       <AnomaliesBadge
         score={MAJOR_SEVERITY}
@@ -145,20 +153,68 @@ describe('AnomaliesBadge', () => {
       />
     );
 
-    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
-    const [pathname, search] = href!.split('?');
+    const [pathname, search] = getBadgeHrefParts();
 
     expect(pathname).toContain('/mobile-services/opbeans-android/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
       kuery: '',
       anomalyThreshold: 'major',
       environment: 'mobile',
+      comparisonEnabled: 'true',
+      offset: 'expected_bounds',
     });
+    expect(await getTooltipText()).toContain('Click to view more.');
   });
 
   it('renders as non-interactive when interactionProps is not provided', () => {
     renderBadge(<AnomaliesBadge score={CRITICAL_SEVERITY} detectorType={undefined} />);
 
     expect(screen.getByTestId('apmAnomaliesBadge').closest('a')).toBeNull();
+  });
+
+  it('links to service overview without expected bounds when rendered in service overview and comparisonEnabled is false', async () => {
+    renderBadge(
+      <AnomaliesBadge
+        score={CRITICAL_SEVERITY}
+        detectorType={AnomalyDetectorType.txLatency}
+        navigationProps={{
+          ...regularClickProps,
+          isInServiceOverview: true,
+          comparisonEnabled: false,
+        }}
+      />
+    );
+
+    const [pathname, search] = getBadgeHrefParts();
+
+    expect(pathname).toContain('/services/opbeans-java/overview');
+    expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
+      comparisonEnabled: 'false',
+      offset: 'expected_bounds',
+    });
+    expect(await getTooltipText()).toContain('Click to hide expected bounds.');
+  });
+
+  it('links to service overview with expected bounds when rendered in service overview and comparisonEnabled is true', async () => {
+    renderBadge(
+      <AnomaliesBadge
+        score={CRITICAL_SEVERITY}
+        detectorType={AnomalyDetectorType.txLatency}
+        navigationProps={{
+          ...regularClickProps,
+          isInServiceOverview: true,
+          comparisonEnabled: true,
+        }}
+      />
+    );
+
+    const [pathname, search] = getBadgeHrefParts();
+
+    expect(pathname).toContain('/services/opbeans-java/overview');
+    expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
+      comparisonEnabled: 'true',
+      offset: 'expected_bounds',
+    });
+    expect(await getTooltipText()).toContain('Click to view expected bounds.');
   });
 });
