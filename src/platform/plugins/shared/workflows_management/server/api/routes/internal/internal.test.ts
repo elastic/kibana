@@ -236,15 +236,15 @@ describe('Internal Routes', () => {
   });
 
   it('should register the executions fields route handler', () => {
-    expect(routeHandlers[`GET:/internal/workflows/executions/fields`]).toBeDefined();
-    expect(routeHandlers[`GET:/internal/workflows/executions/fields`].handler).toEqual(
+    expect(routeHandlers[`GET:/api/workflows/workflow/executions/fields`]).toBeDefined();
+    expect(routeHandlers[`GET:/api/workflows/workflow/executions/fields`].handler).toEqual(
       expect.any(Function)
     );
   });
 
   it('should register the executions search route handler', () => {
-    expect(routeHandlers[`GET:/internal/workflows/executions`]).toBeDefined();
-    expect(routeHandlers[`GET:/internal/workflows/executions`].handler).toEqual(
+    expect(routeHandlers[`GET:/api/workflows/workflow/executions`]).toBeDefined();
+    expect(routeHandlers[`GET:/api/workflows/workflow/executions`].handler).toEqual(
       expect.any(Function)
     );
   });
@@ -256,7 +256,7 @@ describe('Internal Routes', () => {
     const response = httpServerMock.createResponseFactory();
     const request = createExecutionReadRequest();
 
-    await routeHandlers[`GET:/internal/workflows/executions/fields`].handler(
+    await routeHandlers[`GET:/api/workflows/workflow/executions/fields`].handler(
       mockContext,
       request,
       response
@@ -283,7 +283,7 @@ describe('Internal Routes', () => {
       }
     );
 
-    await routeHandlers[`GET:/internal/workflows/executions/fields`].handler(
+    await routeHandlers[`GET:/api/workflows/workflow/executions/fields`].handler(
       mockContext,
       request,
       response
@@ -310,7 +310,7 @@ describe('Internal Routes', () => {
       },
     });
 
-    await routeHandlers[`GET:/internal/workflows/executions`].handler(
+    await routeHandlers[`GET:/api/workflows/workflow/executions`].handler(
       mockContext,
       request,
       response
@@ -340,7 +340,7 @@ describe('Internal Routes', () => {
       },
     });
 
-    await routeHandlers[`GET:/internal/workflows/executions`].handler(
+    await routeHandlers[`GET:/api/workflows/workflow/executions`].handler(
       mockContext,
       request,
       response
@@ -366,7 +366,7 @@ describe('Internal Routes', () => {
       }
     );
 
-    await routeHandlers[`GET:/internal/workflows/executions`].handler(
+    await routeHandlers[`GET:/api/workflows/workflow/executions`].handler(
       mockContext,
       request,
       response

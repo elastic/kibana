@@ -339,8 +339,8 @@ describe('Execution Routes', () => {
     });
   });
 
-  describe('GET /api/workflows/executions (search_executions)', () => {
-    const path = '/api/workflows/executions';
+  describe('GET /api/workflows/workflow/executions (search_executions)', () => {
+    const path = '/api/workflows/workflow/executions';
 
     it('should register the route handler', () => {
       expect(handler('GET', path)).toBeDefined();

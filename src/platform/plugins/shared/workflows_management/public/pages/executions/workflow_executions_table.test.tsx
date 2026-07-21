@@ -66,9 +66,9 @@ describe('WorkflowExecutionsTable', () => {
     });
 
     expect(services.http.get).toHaveBeenCalledWith(
-      '/internal/workflows/executions',
+      '/api/workflows/workflow/executions',
       expect.objectContaining({
-        version: '1',
+        version: '2023-10-31',
         query: expect.objectContaining({
           from: 0,
           size: 25,

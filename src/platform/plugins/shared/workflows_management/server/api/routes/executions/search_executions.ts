@@ -12,8 +12,10 @@ import { schema } from '@kbn/config-schema';
 import type { SearchExecutionsViewParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import {
-  INTERNAL_API_VERSION,
+  API_VERSION,
+  AVAILABILITY,
   MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH,
+  OAS_TAG,
 } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
@@ -67,13 +69,19 @@ const parseJsonParam = <T>(value: string | undefined, paramName: string): T | un
 export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .get({
-      path: '/internal/workflows/executions',
-      access: 'internal',
+      path: '/api/workflows/workflow/executions',
+      access: 'public',
       security: WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
+      summary: 'Search workflow executions',
+      description: 'Search across all workflow executions using Elasticsearch query DSL.',
+      options: {
+        tags: [OAS_TAG],
+        availability: AVAILABILITY,
+      },
     })
     .addVersion(
       {
-        version: INTERNAL_API_VERSION,
+        version: API_VERSION,
         options: {
           oasOperationObject: () => path.join(__dirname, '../examples/search_executions.yaml'),
         },

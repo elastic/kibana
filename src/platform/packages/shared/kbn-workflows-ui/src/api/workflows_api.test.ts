@@ -310,7 +310,7 @@ describe('WorkflowApi', () => {
   });
 
   describe('searchExecutions', () => {
-    it('should call GET /internal/workflows/executions with query', async () => {
+    it('should call GET /api/workflows/workflow/executions with query', async () => {
       const params = {
         query: JSON.stringify({ match_all: {} }),
         from: 0,
@@ -320,9 +320,9 @@ describe('WorkflowApi', () => {
       };
       await api.searchExecutions(params);
 
-      expect(http.get).toHaveBeenCalledWith('/internal/workflows/executions', {
+      expect(http.get).toHaveBeenCalledWith('/api/workflows/workflow/executions', {
         query: params,
-        version: INTERNAL_VERSION,
+        version: VERSION,
       });
     });
   });
