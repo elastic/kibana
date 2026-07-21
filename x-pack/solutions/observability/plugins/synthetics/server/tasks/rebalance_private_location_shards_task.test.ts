@@ -14,6 +14,9 @@ import {
   RebalancePrivateLocationShardsTask,
   STALE_CHECKIN_MS,
 } from './rebalance_private_location_shards_task';
+import { shardCapacityMib } from '../synthetics_service/private_location/assign_shards';
+
+const MIB = 1024 * 1024;
 
 jest.mock('../synthetics_service/get_private_locations');
 
@@ -37,20 +40,28 @@ describe('Rebalance private location shards tasks', () => {
 
   let listAgents: jest.Mock;
   let getAgentStatusForAgentPolicy: jest.Mock;
+  let esSearch: jest.Mock;
   let rebalanceShards: jest.Mock;
   let server: SyntheticsServerSetup;
   let monitorClient: SyntheticsMonitorClient;
 
   // Per-shard max last_checkin (epoch ms), or null for a shard with no agents.
+  // The check-in query passes `aggregations`; the memory helper's agent lookup
+  // does not — return no agents there so it short-circuits (no host RAM data).
   const setCheckins = (checkins: Record<string, number | null>) => {
-    listAgents.mockResolvedValue({
-      aggregations: {
-        by_policy: {
-          buckets: Object.entries(checkins)
-            .filter(([, value]) => value != null)
-            .map(([key, value]) => ({ key, last_checkin: { value } })),
-        },
-      },
+    listAgents.mockImplementation(async (params?: { aggregations?: unknown }) => {
+      if (params?.aggregations) {
+        return {
+          aggregations: {
+            by_policy: {
+              buckets: Object.entries(checkins)
+                .filter(([, value]) => value != null)
+                .map(([key, value]) => ({ key, last_checkin: { value } })),
+            },
+          },
+        };
+      }
+      return { agents: [] };
     });
   };
 
@@ -58,6 +69,7 @@ describe('Rebalance private location shards tasks', () => {
     jest.spyOn(Date, 'now').mockReturnValue(NOW);
     listAgents = jest.fn();
     getAgentStatusForAgentPolicy = jest.fn();
+    esSearch = jest.fn().mockResolvedValue({ aggregations: { by_agent: { buckets: [] } } });
     rebalanceShards = jest.fn().mockResolvedValue({ total: 10, moved: 0 });
 
     getPrivateLocationsMock.mockResolvedValue([scalableLocation] as never);
@@ -66,6 +78,7 @@ describe('Rebalance private location shards tasks', () => {
       logger: loggerMock.create(),
       coreStart: {
         savedObjects: { createInternalRepository: () => ({}) },
+        elasticsearch: { client: { asInternalUser: { search: esSearch } } },
       },
       fleet: {
         agentService: {
@@ -100,9 +113,51 @@ describe('Rebalance private location shards tasks', () => {
 
       await runTask();
 
-      expect(listAgents).toHaveBeenCalledTimes(1);
+      // A single aggregation query covers every shard's check-in (the memory
+      // helper makes a separate, non-aggregation agent lookup).
+      const aggCalls = listAgents.mock.calls.filter(([params]) => params?.aggregations);
+      expect(aggCalls).toHaveLength(1);
       expect(rebalanceShards).toHaveBeenCalledTimes(1);
       expect(healthyShardsArg()).toEqual(['s1', 's2', 's3']);
+    });
+
+    it('derives per-shard capacity from host memory and passes it to rebalance', async () => {
+      listAgents.mockImplementation(async (params?: { aggregations?: unknown }) => {
+        if (params?.aggregations) {
+          return {
+            aggregations: {
+              by_policy: {
+                buckets: SHARDS.map((key) => ({ key, last_checkin: { value: FRESH } })),
+              },
+            },
+          };
+        }
+        return {
+          agents: [
+            { id: 'a1', policy_id: 's1' },
+            { id: 'a2', policy_id: 's2' },
+            { id: 'a3', policy_id: 's3' },
+          ],
+        };
+      });
+      // s3 has no memory bucket → System integration not shipping metrics for it.
+      esSearch.mockResolvedValue({
+        aggregations: {
+          by_agent: {
+            buckets: [
+              { key: 'a1', total: { value: 2048 * MIB } },
+              { key: 'a2', total: { value: 4096 * MIB } },
+            ],
+          },
+        },
+      });
+
+      await runTask();
+
+      const { capacities } = rebalanceShards.mock.calls[0][0];
+      expect(capacities.get('s1')).toBe(shardCapacityMib(2048, false));
+      expect(capacities.get('s2')).toBe(shardCapacityMib(4096, false));
+      expect(capacities.has('s3')).toBe(false);
     });
 
     it('evicts a shard whose last check-in is older than the stale window', async () => {

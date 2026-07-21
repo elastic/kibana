@@ -52506,7 +52506,6 @@
     "xpack.synthetics.monitorManagement.agents": "代理：",
     "xpack.synthetics.monitorManagement.agentsLabel": "代理：",
     "xpack.synthetics.monitorManagement.alreadyExists": "位置名称已存在。",
-    "xpack.synthetics.monitorManagement.anotherPrivateLocation": "此代理策略已附加到以下位置：{locationName}。",
     "xpack.synthetics.monitorManagement.apiKey.label": "API 密钥",
     "xpack.synthetics.monitorManagement.apiKeyWarning.label": "此 API 密钥仅显示一次。请保留副本作为您自己的记录。",
     "xpack.synthetics.monitorManagement.areYouSure": "是否确定要删除此位置？",

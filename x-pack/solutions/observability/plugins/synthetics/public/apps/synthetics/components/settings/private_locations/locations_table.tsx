@@ -10,9 +10,11 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -29,6 +31,8 @@ import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './e
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useLocationMonitors } from './hooks/use_location_monitors';
+import { useShardStats } from './hooks/use_shard_stats';
+import { LocationShardDetails } from './location_shard_details';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
 import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
@@ -66,8 +70,22 @@ export const PrivateLocationsTable = ({
     useMonitorIntegrationHealth();
 
   const [locationPendingDelete, setLocationPendingDelete] = useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const { locationMonitors, loading } = useLocationMonitors();
+  const { byLocation: shardStatsByLocation, loading: shardStatsLoading } = useShardStats();
+
+  const toggleRow = (id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
 
@@ -103,7 +121,28 @@ export const PrivateLocationsTable = ({
     {
       field: 'agentPolicyId',
       name: AGENT_POLICY_LABEL,
-      render: (agentPolicyId: string) => <PolicyName agentPolicyId={agentPolicyId} />,
+      render: (agentPolicyId: string, item: ListItem) => {
+        const shardPool = item.agentPolicyIds ?? [];
+        if (shardPool.length > 1) {
+          return (
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <span>
+                  <EuiBadge color="primary" iconType="shard">
+                    {SCALABLE_SHARDS_LABEL(shardPool.length)}
+                  </EuiBadge>
+                </span>
+              </EuiFlexItem>
+              {shardPool.map((policyId) => (
+                <EuiFlexItem grow={false} key={policyId}>
+                  <PolicyName agentPolicyId={policyId} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          );
+        }
+        return <PolicyName agentPolicyId={agentPolicyId} />;
+      },
     },
     {
       name: TAGS_LABEL,
@@ -203,12 +242,45 @@ export const PrivateLocationsTable = ({
         },
       ],
     },
+    {
+      align: 'right',
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>{EXPAND_ROW_LABEL}</span>
+        </EuiScreenReaderOnly>
+      ),
+      render: (item: ListItem) => {
+        const isExpanded = expandedIds.has(item.id);
+        return (
+          <EuiButtonIcon
+            data-test-subj="syntheticsLocationExpandRow"
+            onClick={() => toggleRow(item.id)}
+            aria-label={isExpanded ? COLLAPSE_ROW_LABEL : EXPAND_ROW_LABEL}
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+          />
+        );
+      },
+    },
   ];
 
   const items = privateLocations.map((location) => ({
     ...location,
     monitors: locationMonitors?.find((l) => l.id === location.id)?.count ?? 0,
   }));
+
+  const itemIdToExpandedRowMap = items.reduce<Record<string, React.ReactNode>>((acc, item) => {
+    if (expandedIds.has(item.id)) {
+      acc[item.id] = (
+        <LocationShardDetails
+          stats={shardStatsByLocation.get(item.id)}
+          loading={shardStatsLoading}
+        />
+      );
+    }
+    return acc;
+  }, {});
 
   const openFlyout = () => dispatch(setIsPrivateLocationFlyoutVisible(true));
 
@@ -245,6 +317,7 @@ export const PrivateLocationsTable = ({
         tableCaption={PRIVATE_LOCATIONS}
         items={items}
         columns={columns}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         childrenBetween={
           <TableTitle
             total={items.length}
@@ -320,6 +393,12 @@ export const AGENT_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorManage
   defaultMessage: 'Agent Policy',
 });
 
+const SCALABLE_SHARDS_LABEL = (count: number) =>
+  i18n.translate('xpack.synthetics.monitorManagement.scalableShards', {
+    defaultMessage: 'Scalable · {count} shards',
+    values: { count },
+  });
+
 const DELETE_LOCATION = i18n.translate(
   'xpack.synthetics.settingsRoute.privateLocations.deleteLabel',
   {
@@ -351,5 +430,19 @@ const RESET_MONITORS_LABEL = i18n.translate(
   'xpack.synthetics.settingsRoute.privateLocations.resetMonitors',
   {
     defaultMessage: 'Reset monitors',
+  }
+);
+
+const EXPAND_ROW_LABEL = i18n.translate(
+  'xpack.synthetics.settingsRoute.privateLocations.expandRow',
+  {
+    defaultMessage: 'Expand shard details',
+  }
+);
+
+const COLLAPSE_ROW_LABEL = i18n.translate(
+  'xpack.synthetics.settingsRoute.privateLocations.collapseRow',
+  {
+    defaultMessage: 'Collapse shard details',
   }
 );

@@ -42,7 +42,7 @@ import {
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { PackagePolicyService } from './package_policy_service';
-import { assignShard, getShardPool } from './assign_shards';
+import { assignShard, balanceShardsByCost, getMonitorCostMib, getShardPool } from './assign_shards';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -538,18 +538,23 @@ export class SyntheticsPrivateLocation {
    *  - steady state (nothing on a stale shard, every healthy shard has work) →
    *    no document fetch, no write;
    *  - failover (a configured shard is unhealthy) → fetches and moves only that
-   *    shard's monitors — rendezvous hashing leaves monitors on healthy shards
-   *    untouched;
-   *  - recovery (a healthy shard is empty) → full scan, since the monitors that
-   *    should migrate onto the recovered shard live on the other shards and can't
-   *    be targeted by a query.
+   *    shard's monitors via count-based rendezvous ({@link assignShard}), which
+   *    leaves monitors on healthy shards untouched (locality over perfect
+   *    balance, since we only see the stale shard's monitors here);
+   *  - recovery (a healthy shard is empty) → full scan, so we have every
+   *    monitor's cost and can redistribute memory-fairly with
+   *    {@link balanceShardsByCost} (browser ≈ 50× a lightweight check), instead
+   *    of count-based hashing that could pile browsers onto one agent.
    */
   async rebalanceShards({
     location,
     healthyShards,
+    capacities,
   }: {
     location: { id: string; label?: string; agentPolicyIds?: string[] };
     healthyShards: string[];
+    /** Optional per-shard weight (usable MiB from agent RAM) for cost balancing. */
+    capacities?: ReadonlyMap<string, number>;
   }): Promise<{ total: number; moved: number }> {
     const configuredShards = location.agentPolicyIds ?? healthyShards;
     const healthySet = new Set(healthyShards);
@@ -573,6 +578,21 @@ export class SyntheticsPrivateLocation {
       : await this.packagePolicyService.listByShards({ shardIds: staleShards });
 
     const suffixLength = location.id.length + 1; // strip trailing `-${locationId}`
+
+    // On the full-scan (recovery) path we see every monitor's cost, so redistribute
+    // memory-fairly. Failover only sees the stale shard's monitors, so it keeps the
+    // cheaper, locality-preserving count-based rendezvous.
+    const costBalanced = hasRecoveryWork
+      ? balanceShardsByCost(
+          pkgPolicies.flatMap((pp) => {
+            const id = pp.id.slice(0, pp.id.length - suffixLength);
+            return id ? [{ id, cost: getMonitorCostMib(monitorTypeOfPolicy(pp)) }] : [];
+          }),
+          healthyShards,
+          capacities
+        )
+      : undefined;
+
     const updatesBySpace = new Map<string, UpdatePackagePolicyWithId[]>();
 
     for (const pp of pkgPolicies) {
@@ -581,7 +601,9 @@ export class SyntheticsPrivateLocation {
         continue;
       }
 
-      const desired = assignShard(monitorId, healthyShards);
+      const desired = costBalanced
+        ? costBalanced.get(monitorId)
+        : assignShard(monitorId, healthyShards);
       if (!desired) {
         continue;
       }
@@ -708,6 +730,16 @@ export class SyntheticsPrivateLocation {
  * recomputes on update, so the compiled config stays identical and only the
  * agent-policy association changes.
  */
+/**
+ * Monitor type of a synthetics package policy, read from its single enabled
+ * input (`synthetics/${type}`). Only `browser` vs. lightweight matters for the
+ * memory cost model, so anything non-browser is treated as lightweight.
+ */
+const monitorTypeOfPolicy = (pp: PackagePolicy): 'browser' | 'http' =>
+  pp.inputs?.some((input) => input.enabled && input.type === 'synthetics/browser')
+    ? 'browser'
+    : 'http';
+
 const toShardUpdate = (pp: PackagePolicy, shardId: string): UpdatePackagePolicyWithId => ({
   id: pp.id,
   name: pp.name,

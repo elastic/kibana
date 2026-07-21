@@ -103,7 +103,7 @@ describe('GettingStartedPage', () => {
     expect(getByText('No agent policies found')).toBeInTheDocument();
     expect(getByRole('button', { name: 'Create agent policy' })).not.toBeEnabled();
     expect(queryByLabelText('Location name')).not.toBeInTheDocument();
-    expect(queryByLabelText('Agent policy')).not.toBeInTheDocument();
+    expect(queryByLabelText('Agent policies')).not.toBeInTheDocument();
   });
 
   it('shows add location flyout when isAddingNewPrivateLocation is true and agentPolicies.length > 0', async () => {
@@ -129,7 +129,7 @@ describe('GettingStartedPage', () => {
     expect(getByRole('heading', { name: 'Create private location', level: 2 }));
     expect(queryByText('No agent policies found')).not.toBeInTheDocument();
     expect(getByLabelText('Location name')).toBeInTheDocument();
-    expect(getByLabelText('Agent policy')).toBeInTheDocument();
+    expect(getByLabelText('Agent policies')).toBeInTheDocument();
   });
 
   it('shows permissions tooltip when the user does not have permissions', async () => {
@@ -168,7 +168,7 @@ describe('GettingStartedPage', () => {
 
     expect(getByRole('heading', { name: 'Create private location', level: 2 }));
     expect(queryByLabelText('Location name')).toBeInTheDocument();
-    expect(queryByLabelText('Agent policy')).toBeInTheDocument();
+    expect(queryByLabelText('Agent policies')).toBeInTheDocument();
     expect(queryByRole('button', { name: 'Save' })).toBeInTheDocument();
     expect(queryByRole('button', { name: 'Save' })).toBeDisabled();
     fireEvent.mouseOver(getByRole('button', { name: 'Save' }));

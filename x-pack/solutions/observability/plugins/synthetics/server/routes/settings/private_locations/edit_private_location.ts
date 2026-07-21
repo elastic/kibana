@@ -13,6 +13,7 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
+import { getShardPool } from '../../../synthetics_service/private_location/assign_shards';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
@@ -30,15 +31,21 @@ const EditPrivateLocationSchema = schema.object({
     })
   ),
   tags: schema.maybe(schema.arrayOf(schema.string())),
+  // POC: scalable private locations shard monitors across a pool of agent
+  // policies. `agentPolicyId` remains the primary/first shard for backwards
+  // compatibility (spaces filtering, classic single-shard locations).
+  agentPolicyId: schema.maybe(schema.string({ maxLength: 1024 })),
+  agentPolicyIds: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100 })
+  ),
 });
 
 const EditPrivateLocationQuery = schema.object({
   locationId: schema.string(),
 });
 
-export type EditPrivateLocationAttributes = Pick<
-  PrivateLocationAttributes,
-  keyof TypeOf<typeof EditPrivateLocationSchema>
+export type EditPrivateLocationAttributes = Partial<
+  Pick<PrivateLocationAttributes, keyof TypeOf<typeof EditPrivateLocationSchema>>
 >;
 
 const isPrivateLocationLabelChanged = (oldLabel: string, newLabel?: string): newLabel is string => {
@@ -116,7 +123,11 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   handler: async (routeContext) => {
     const { response, request, savedObjectsClient } = routeContext;
     const { locationId } = request.params;
-    const { label: newLocationLabel, tags: newTags } = request.body;
+    const {
+      label: newLocationLabel,
+      tags: newTags,
+      agentPolicyIds: newAgentPolicyIds,
+    } = request.body;
 
     const repo = new PrivateLocationRepository(routeContext);
 
@@ -132,16 +143,33 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         }),
       ]);
 
+      const existingPool = getShardPool(existingLocation.attributes);
+      const requestedPool = newAgentPolicyIds?.filter(Boolean);
+      const isPoolChanged = requestedPool !== undefined && !isEqual(existingPool, requestedPool);
+
+      if (isPoolChanged && requestedPool!.length === 0) {
+        return response.badRequest({
+          body: {
+            message: i18n.translate('xpack.synthetics.editPrivateLocation.emptyPool', {
+              defaultMessage: 'A private location must have at least one agent policy.',
+            }),
+          },
+        });
+      }
+
+      const labelChanged = isPrivateLocationLabelChanged(
+        existingLocation.attributes.label,
+        newLocationLabel
+      );
+
       let newLocation: Awaited<ReturnType<typeof repo.editPrivateLocation>> | undefined;
 
       if (
-        isPrivateLocationChanged({ privateLocation: existingLocation, newParams: request.body })
+        isPrivateLocationChanged({ privateLocation: existingLocation, newParams: request.body }) ||
+        isPoolChanged
       ) {
         // This privileges check is done only when changing the label, because changing the label will update also the monitors in that location
-        if (
-          isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel) &&
-          monitorsInLocation.length
-        ) {
+        if (labelChanged && monitorsInLocation.length) {
           await checkPrivileges({
             routeContext,
             monitorsSpaces: monitorsInLocation.map(({ namespaces }) => namespaces![0]),
@@ -151,12 +179,18 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         newLocation = await repo.editPrivateLocation(locationId, {
           label: newLocationLabel || existingLocation.attributes.label,
           tags: newTags || existingLocation.attributes.tags,
+          ...(isPoolChanged
+            ? { agentPolicyId: requestedPool![0], agentPolicyIds: requestedPool }
+            : {}),
         });
 
-        if (isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel)) {
+        // Re-sync monitors when the label OR the shard pool changed: the label is
+        // denormalized onto each monitor, and a pool change re-shards the monitors'
+        // package policies across the new pool via rendezvous hashing.
+        if (labelChanged || isPoolChanged) {
           await updatePrivateLocationMonitors({
             locationId,
-            newLocationLabel,
+            newLocationLabel: newLocationLabel || existingLocation.attributes.label,
             allPrivateLocations: await getPrivateLocations(savedObjectsClient),
             routeContext,
             monitorsInLocation,

@@ -7,10 +7,14 @@
 
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
 import type { ConcreteTaskInstance, IntervalSchedule } from '@kbn/task-manager-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
-import { isScalableLocation } from '../synthetics_service/private_location/assign_shards';
+import {
+  isScalableLocation,
+  shardCapacityMib,
+} from '../synthetics_service/private_location/assign_shards';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
 
@@ -67,6 +71,88 @@ export const getShardLastCheckins = async (
   }
 
   return checkins;
+};
+
+const BYTES_PER_MIB = 1024 * 1024;
+
+/**
+ * Total host RAM (MiB) per shard policy, sourced from `system.memory.total` in
+ * `metrics-system.memory-*`. Correlated to policies through `agent.id`, since
+ * the metrics docs carry the agent id but not the policy id. When a policy has
+ * several agents we take the max (a shard runs on one agent; the largest is the
+ * safest capacity estimate).
+ *
+ * This only returns a value when the System integration ships memory metrics for
+ * the agent. Policies without it are simply absent from the map — callers treat
+ * that as "unknown" (uniform capacity for sharding, "N/A" in the UI) rather than
+ * assuming zero.
+ *
+ * `esClient` must be able to read `metrics-system.memory-*`. The Kibana internal
+ * user (`kibana_system`) has no `read` on those data streams, so the UI route
+ * passes the request user's client; the background task has only the internal
+ * user and thus legitimately gets an empty map (falls back to uniform capacity).
+ */
+export const getShardTotalMemoryMib = async (
+  server: SyntheticsServerSetup,
+  shardIds: string[],
+  esClient: ElasticsearchClient
+): Promise<Map<string, number>> => {
+  const memoryByPolicy = new Map<string, number>();
+  if (shardIds.length === 0) {
+    return memoryByPolicy;
+  }
+
+  const { agents } = await server.fleet.agentService.asInternalUser.listAgents({
+    showInactive: false,
+    perPage: 1000,
+    kuery: `policy_id:(${shardIds.map((id) => `"${id}"`).join(' or ')})`,
+  });
+
+  const policyByAgent = new Map<string, string>();
+  for (const agent of agents) {
+    if (agent.policy_id) {
+      policyByAgent.set(agent.id, agent.policy_id);
+    }
+  }
+  if (policyByAgent.size === 0) {
+    return memoryByPolicy;
+  }
+
+  const res = await esClient.search<
+    unknown,
+    { by_agent: { buckets: Array<{ key: string; total?: { value?: number | null } }> } }
+  >({
+    index: 'metrics-system.memory-*',
+    // The data stream may not exist (System integration disabled) — don't error.
+    ignore_unavailable: true,
+    allow_no_indices: true,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { terms: { 'agent.id': [...policyByAgent.keys()] } },
+          { range: { '@timestamp': { gte: 'now-10m' } } },
+        ],
+      },
+    },
+    aggregations: {
+      by_agent: {
+        terms: { field: 'agent.id', size: policyByAgent.size },
+        aggregations: { total: { max: { field: 'system.memory.total' } } },
+      },
+    },
+  });
+
+  for (const bucket of res.aggregations?.by_agent?.buckets ?? []) {
+    const bytes = bucket.total?.value;
+    const policyId = policyByAgent.get(bucket.key);
+    if (policyId && typeof bytes === 'number' && bytes > 0) {
+      const mib = Math.round(bytes / BYTES_PER_MIB);
+      memoryByPolicy.set(policyId, Math.max(memoryByPolicy.get(policyId) ?? 0, mib));
+    }
+  }
+
+  return memoryByPolicy;
 };
 
 /**
@@ -132,6 +218,23 @@ export class RebalancePrivateLocationShardsTask {
         );
       }
 
+      // Per-shard host RAM (from the System integration) → capacity weight, so
+      // bigger agents take proportionally more monitor memory. The background task
+      // only has the internal user (`kibana_system`), which can't read
+      // `metrics-system.memory-*`, so in practice this returns empty here and the
+      // rebalance falls back to uniform (cost-only) capacity — the UI route, which
+      // runs as the request user, is what surfaces real RAM.
+      let memoryByPolicy = new Map<string, number>();
+      try {
+        memoryByPolicy = await getShardTotalMemoryMib(
+          this.serverSetup,
+          allShardIds,
+          coreStart.elasticsearch.client.asInternalUser
+        );
+      } catch (e) {
+        this.debugLog(`Host memory query failed; sharding uniformly by cost: ${e.message}`);
+      }
+
       for (const location of scalableLocations) {
         const shardIds = location.agentPolicyIds ?? [];
         const healthyShards = checkins
@@ -152,11 +255,20 @@ export class RebalancePrivateLocationShardsTask {
           continue;
         }
 
+        const capacities = new Map<string, number>();
+        for (const shardId of healthyShards) {
+          const mib = memoryByPolicy.get(shardId);
+          if (mib !== undefined) {
+            capacities.set(shardId, shardCapacityMib(mib, false));
+          }
+        }
+
         // Idempotent: only monitors whose assigned shard changed are rewritten.
         // Steady state (all shards healthy) performs zero writes.
         const { total, moved } = await privateLocationAPI.rebalanceShards({
           location,
           healthyShards,
+          capacities: capacities.size > 0 ? capacities : undefined,
         });
 
         this.debugLog(

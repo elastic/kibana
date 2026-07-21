@@ -52324,7 +52324,6 @@
     "xpack.synthetics.monitorManagement.agents": "Agenten:",
     "xpack.synthetics.monitorManagement.agentsLabel": "Agenten",
     "xpack.synthetics.monitorManagement.alreadyExists": "Der Standortname existiert bereits.",
-    "xpack.synthetics.monitorManagement.anotherPrivateLocation": "Diese Agent-Richtlinie ist bereits an den Speicherort {locationName} angehängt.",
     "xpack.synthetics.monitorManagement.apiKey.label": "API-Schlüssel",
     "xpack.synthetics.monitorManagement.apiKeyWarning.label": "Dieser API-Schlüssel wird nur einmal angezeigt. Bitte bewahren Sie eine Kopie für Ihre eigenen Unterlagen auf.",
     "xpack.synthetics.monitorManagement.areYouSure": "Sind Sie sicher, dass Sie diesen Standort löschen möchten?",

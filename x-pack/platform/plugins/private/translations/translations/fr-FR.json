@@ -52158,7 +52158,6 @@
     "xpack.synthetics.monitorManagement.agents": "Agents :",
     "xpack.synthetics.monitorManagement.agentsLabel": "Agents :",
     "xpack.synthetics.monitorManagement.alreadyExists": "Le nom d’emplacement existe déjà.",
-    "xpack.synthetics.monitorManagement.anotherPrivateLocation": "Cette politique d'agent est déjà associée à l'emplacement {locationName}.",
     "xpack.synthetics.monitorManagement.apiKey.label": "Clé d'API",
     "xpack.synthetics.monitorManagement.apiKeyWarning.label": "Cette clé d'API ne sera affichée qu'une seule fois. Veuillez en conserver une copie pour vos propres dossiers.",
     "xpack.synthetics.monitorManagement.areYouSure": "Voulez-vous vraiment supprimer cet emplacement ?",

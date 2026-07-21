@@ -6,6 +6,7 @@
  */
 
 import type { EditPrivateLocationAttributes } from '../../../../../server/routes/settings/private_locations/edit_private_location';
+import type { LocationShardStats } from '../../../../../server/routes/settings/private_locations/get_shard_stats';
 import type { NewLocation } from '../../components/settings/private_locations/add_or_edit_location_flyout';
 import type { AgentPolicyInfo } from '../../../../../common/types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
@@ -48,6 +49,10 @@ export const getSyntheticsPrivateLocations = async (): Promise<SyntheticsPrivate
   return await apiService.get(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS, {
     version: INITIAL_REST_VERSION,
   });
+};
+
+export const getPrivateLocationShardStats = async (): Promise<LocationShardStats[]> => {
+  return await apiService.get(SYNTHETICS_API_URLS.PRIVATE_LOCATION_SHARD_STATS);
 };
 
 export const deleteSyntheticsPrivateLocation = async (
