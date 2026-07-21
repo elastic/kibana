@@ -95,9 +95,9 @@ Choose the strategy (or combination) that fits the data source and question type
 | **Selective / Outlier** | One KI per significant document | Log streams, event feeds where most records are noise but outliers matter. |
 | **Atomic Facts** | Many KIs per document | Very information-dense documents (contracts, research papers) where one KI per document loses precision. |
 | **Cumulative / Wiki-style** | One KI per entity, updated over time | Entities recurring across many documents (customers, products, hosts). |
-| **Detection / Feature (Observability)** | One detection KI per named condition; one feature KI per entity/dependency | Observability indices (logs, APM, metrics) where you need named, runnable detection conditions and structured feature extractions rather than per-document KIs. |
+| **Detection / Feature ** | One detection KI per named condition; one feature KI per entity/dependency | Observability indices (logs, APM, metrics) where you need named, runnable detection conditions and structured feature extractions rather than per-document KIs. |
 
-Quick guide: logs/events/metrics → Index Metadata + Selective/Outlier; Observability indices with detection needs → Detection / Feature; knowledge base / article corpus → Bottom-Up; dense docs → Atomic Facts; recurring entities → Cumulative/Wiki-style; multiple indices/tables → Metadata for all, then add a deeper strategy for the most important one; unsure → Index/Table Metadata.
+Quick guide: logs/events/metrics → Index Metadata + Selective/Outlier + Detection/Feature; knowledge base / article corpus → Bottom-Up; dense docs → Atomic Facts; recurring entities → Cumulative/Wiki-style; multiple indices/tables → Metadata for all, then add a deeper strategy for the most important one; unsure → Index/Table Metadata.
 
 ## Available tools
 
@@ -247,7 +247,7 @@ The AI Index schema has these base fields (all required unless noted):
 | `@timestamp` | date | When this KI was last profiled; enables recency guards on scheduled runs |
 | `confidence` | float (0–1) | Coverage score from `profile_index`; agents prefer higher-confidence KIs when routing |
 
-**Extended fields for Detection / Feature KIs (sig-events schema):** Declare all of the following in `ensure_target_index` — the AI Index templates use `dynamic: strict`, so undeclared fields (including the nested `query.*` / `feature.*` sub-fields) are rejected at index time.
+**Extended fields for Detection / Feature KIs:** Declare all of the following in `ensure_target_index` — the AI Index templates use `dynamic: strict`, so undeclared fields (including the nested `query.*` / `feature.*` sub-fields) are rejected at index time.
 
 | Field | Type | Purpose |
 |---|---|---|
@@ -378,10 +378,8 @@ to upsert. Put domain-specific categorical fields (status, record_type, owner, t
 into `attributes` so they remain filterable after ingestion. Note that any of the above strategies
 can be used with connectors.
 
-**Detection / Feature (Observability):**
+**Detection / Feature:**
 Targets Observability indices (logs, APM, metrics). It runs **two complementary profiling passes** in a single workflow — one for detection (query) KIs, one for feature (knowledge) KIs — so the two concerns stay independent and either can be tuned without disturbing the other.
-
-*Target index:* Use a user-owned `.ai-index-ds-*` index.
 
 *Pre-analysis grounding (before either `ai.prompt`):* These feed the profiler real distributions so it sets **data-driven thresholds instead of guessing**.
 1. `sample_error_logs` — `elasticsearch.search` with `function_score` + `random_score`, filtered to error records (e.g. `attributes.processor.event == "error"`, or `log.level == "error"` for log streams), size 20. Use `FROM <index> METADATA _id, _source` so the sample carries doc identity.
