@@ -6,7 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { EuiSuperSelectWrapper, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { EuiSuperSelectWrapper } from '@kbn/scout';
 
 export class ComposeDiscoverPage {
   public readonly flyout: Locator;
@@ -58,11 +58,9 @@ export class ComposeDiscoverPage {
   /** Callout shown after Apply when the query is empty. */
   public readonly emptyQueryCallout: Locator;
 
-  private readonly codeEditor: KibanaCodeEditorWrapper;
   private readonly modeSuperSelect: EuiSuperSelectWrapper;
 
   constructor(private readonly page: ScoutPage) {
-    this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.modeSuperSelect = new EuiSuperSelectWrapper(page, 'composeDiscoverModeSelect');
 
     this.flyout = this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]');
@@ -130,12 +128,42 @@ export class ComposeDiscoverPage {
   }
 
   /**
-   * Types an ES|QL query into the sandbox's single unified code editor (Monaco
-   * index 0). In the create flow the editor holds the whole pipeline (base +
-   * alert condition); the heuristic split runs on Apply.
+   * Types an ES|QL query into the sandbox's editable code editor.
+   *
+   * Targets the editable (non-read-only) Monaco editor rather than a fixed model
+   * index: in the edit flow the read-only `QuerySummary` editor is also mounted
+   * behind the sandbox and can occupy `getModels()[0]`, so setting index 0 would
+   * write to the summary instead of the sandbox — leaving `sandboxQuery` stale
+   * and committing the previous query on Apply. Setting the model value fires the
+   * editor's `onChange`, which propagates the new query into the sandbox state.
    */
   async setSandboxQuery(query: string) {
-    await this.codeEditor.setCodeEditorValue(query, 0);
+    await this.page.evaluate((value: string) => {
+      const monacoEnv = (window as unknown as { MonacoEnvironment?: any }).MonacoEnvironment;
+      const editorApi = monacoEnv?.monaco?.editor;
+      if (!editorApi) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+
+      const editors = editorApi.getEditors() as Array<{
+        getModel(): { setValue(v: string): void } | null;
+        getRawOptions(): { readOnly?: boolean };
+      }>;
+      const editable = editors.find((e) => !e.getRawOptions()?.readOnly && e.getModel());
+
+      if (editable) {
+        editable.getModel()!.setValue(value);
+        return;
+      }
+
+      // Fallback: no editable editor found — update the last model (the sandbox
+      // editor is created after any read-only summary editors).
+      const models = editorApi.getModels() as Array<{ setValue(v: string): void }>;
+      if (!models.length) {
+        throw new Error('No Monaco editor models found');
+      }
+      models[models.length - 1].setValue(value);
+    }, query);
   }
 
   async clickNext() {
