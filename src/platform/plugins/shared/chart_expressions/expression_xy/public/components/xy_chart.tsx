@@ -1030,7 +1030,6 @@ export function XYChart({
                   domain={getYAxisDomain(axis)}
                   showOverlappingLabels={axis.showOverlappingLabels}
                   showDuplicatedTicks={axis.showDuplicates}
-                  tickLabelMaxLength={axis.truncate}
                   {...getOverridesFor(
                     overrides,
                     /left/i.test(axis.groupId) ? 'axisLeft' : 'axisRight'
