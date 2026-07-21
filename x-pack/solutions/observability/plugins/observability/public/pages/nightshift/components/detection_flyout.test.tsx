@@ -253,6 +253,7 @@ describe('DetectionFlyout', () => {
           id: mockDetection.detection_id,
           type: SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
           origin: mockDetection.detection_id,
+          description: '[Detection] latency-p95-spike',
           data: mockDetection,
         },
       ],

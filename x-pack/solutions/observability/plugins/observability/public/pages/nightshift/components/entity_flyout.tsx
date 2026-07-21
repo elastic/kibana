@@ -34,6 +34,7 @@ import { getConfidenceColor } from '../get_confidence_color';
 import { useKibana } from '../../../utils/kibana_react';
 import { FlyoutSectionTitle } from './flyout_section_title';
 import { TruncatableSummary } from './truncatable_summary';
+import { formatEntityChatAttachmentDescription } from '../chat_attachment_description';
 
 export interface EntityFlyoutProps {
   feature: Feature;
@@ -163,6 +164,7 @@ export function EntityFlyout({
           id: feature.uuid,
           type: SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
           origin: encodeFeatureAttachmentOrigin(feature.stream_name, feature.id),
+          description: formatEntityChatAttachmentDescription(title),
           data: feature,
         },
       ],

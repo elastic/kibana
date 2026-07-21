@@ -124,6 +124,7 @@ describe('EntityFlyout', () => {
           id: mockFeature.uuid,
           type: SIGNIFICANT_EVENT_FEATURE_ATTACHMENT_TYPE,
           origin: encodeFeatureAttachmentOrigin(mockFeature.stream_name, mockFeature.id),
+          description: '[Entity] synthetics-task-manager',
           data: mockFeature,
         },
       ],

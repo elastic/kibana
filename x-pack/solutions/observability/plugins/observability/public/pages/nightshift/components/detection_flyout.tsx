@@ -49,6 +49,7 @@ import {
   resolveEntityFeature,
   type DetectionEntityRef,
 } from '../get_detection_entities';
+import { formatDetectionChatAttachmentDescription } from '../chat_attachment_description';
 
 export interface DetectionFlyoutProps {
   detection: LifecycleDetection;
@@ -121,6 +122,7 @@ export function DetectionFlyout({
           id: detection.detection_id,
           type: SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
           origin: detection.detection_id,
+          description: formatDetectionChatAttachmentDescription(title),
           data: detection,
         },
       ],
