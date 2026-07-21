@@ -342,7 +342,7 @@ describe('ManagementService', () => {
               roles: canManageSecurity,
               role_mappings: canManageSecurity,
               api_keys: canManageSecurity,
-              [applicationConnectionsManagementApp.id]: canManageSecurity,
+              [applicationConnectionsManagementApp.id]: true,
             },
           },
           navLinks: {},
@@ -519,16 +519,6 @@ describe('ManagementService', () => {
 
         updateUiamOAuthClientManagement(false);
         expect(app.enabled).toBe(false);
-      });
-
-      it('is disabled when the user lacks management capability, even with UIAM and the UIAM OAuth client management setting on', () => {
-        const { mockApps } = startService({
-          initialFeatures: { showLinks: true, showRoleMappingsManagement: true },
-          canManageSecurity: false,
-          isUIAMEnabled: true,
-          initialUiamOAuthClientManagement: true,
-        });
-        expect(mockApps.get(applicationConnectionsManagementApp.id)!.enabled).toBe(false);
       });
     });
   });

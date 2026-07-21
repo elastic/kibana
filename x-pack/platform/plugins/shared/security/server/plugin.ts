@@ -246,6 +246,10 @@ export class SecurityPlugin
       features.registerElasticsearchFeature(securityFeature)
     );
 
+    core.capabilities.registerProvider(() => ({
+      management: { security: { application_connections: true } },
+    }));
+
     if (cloud?.cloudId) {
       this.elasticsearchUrl = this.decodeElasticsearchUrlFromCloudId(cloud.cloudId);
     }
