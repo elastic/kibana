@@ -49,6 +49,8 @@ import {
   DIFF_AI_DESCRIPTION,
 } from './translations';
 import { RuleDiffTab } from '../../../detection_engine/rule_management/components/rule_details/rule_diff_tab';
+import { stripServerFields } from '../../../detection_engine/common/ai_rule_creation_handler';
+import { useRule } from '../../../detection_engine/rule_management/logic/use_rule';
 
 const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiText size="s">
@@ -120,11 +122,13 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
-  const originalRule = useMemo(() => {
-    const prevText = attachment.versionData?.previousVersionData?.text;
-    if (!prevText) return null;
-    return parseRuleFromAttachment({ ...attachment, data: { ...attachment.data, text: prevText } });
-  }, [attachment]);
+  const { data: savedRule } = useRule(attachment.origin ?? '', false, {
+    enabled: Boolean(attachment.origin),
+  });
+  const originalRule = useMemo(
+    () => (savedRule ? (stripServerFields(savedRule) as RuleResponse) : null),
+    [savedRule]
+  );
 
   if (!rule) {
     return null;
