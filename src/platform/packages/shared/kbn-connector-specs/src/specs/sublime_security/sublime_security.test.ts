@@ -163,6 +163,38 @@ describe('SublimeSecurityConnector', () => {
       expect(group.user_reports).toBeUndefined();
     });
 
+    it('defaults flagged=true and a 30-day time anchor when neither is provided', async () => {
+      (mockClient.get as jest.Mock).mockResolvedValue({
+        data: { total: 0, count: 0, message_groups: [] },
+      });
+
+      await SublimeSecurityConnector.actions.searchMessageGroups.handler(mockContext, {
+        limit: 20,
+        offset: 0,
+      });
+
+      const [, options] = (mockClient.get as jest.Mock).mock.calls[0];
+      expect(options.params.flagged).toBe(true);
+      expect(options.params.created_at__gte).toEqual(expect.any(String));
+      expect(new Date(options.params.created_at__gte).getTime()).toBeLessThan(Date.now());
+    });
+
+    it('does not force flagged when userReported is set', async () => {
+      (mockClient.get as jest.Mock).mockResolvedValue({
+        data: { total: 0, count: 0, message_groups: [] },
+      });
+
+      await SublimeSecurityConnector.actions.searchMessageGroups.handler(mockContext, {
+        userReported: true,
+        limit: 20,
+        offset: 0,
+      });
+
+      const [, options] = (mockClient.get as jest.Mock).mock.calls[0];
+      expect(options.params.flagged).toBeUndefined();
+      expect(options.params.user_reported).toBe(true);
+    });
+
     it('surfaces the vendor error payload and request id', async () => {
       (mockClient.get as jest.Mock).mockRejectedValue({
         response: {
@@ -260,7 +292,7 @@ describe('SublimeSecurityConnector', () => {
   });
 
   describe('getAsaVerdict', () => {
-    it('returns the verdict', async () => {
+    it('returns the verdict when ASA has triaged the message', async () => {
       (mockClient.get as jest.Mock).mockResolvedValue({ data: { verdict: 'malicious' } });
 
       const result = await SublimeSecurityConnector.actions.getAsaVerdict.handler(mockContext, {
@@ -268,7 +300,29 @@ describe('SublimeSecurityConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/v0/messages/msg-1/asa_verdict`);
-      expect(result).toEqual({ verdict: 'malicious' });
+      expect(result).toEqual({ triaged: true, verdict: 'malicious' });
+    });
+
+    it('returns triaged: false instead of throwing on 404', async () => {
+      (mockClient.get as jest.Mock).mockRejectedValue({
+        response: { status: 404, data: { error: { type: 'not_found' } }, headers: {} },
+      });
+
+      const result = await SublimeSecurityConnector.actions.getAsaVerdict.handler(mockContext, {
+        messageId: 'msg-1',
+      });
+
+      expect(result).toEqual({ triaged: false, verdict: null });
+    });
+
+    it('still throws on non-404 errors', async () => {
+      (mockClient.get as jest.Mock).mockRejectedValue({
+        response: { status: 500, data: 'boom', headers: {} },
+      });
+
+      await expect(
+        SublimeSecurityConnector.actions.getAsaVerdict.handler(mockContext, { messageId: 'msg-1' })
+      ).rejects.toThrow('Sublime Security API error (500): boom');
     });
   });
 

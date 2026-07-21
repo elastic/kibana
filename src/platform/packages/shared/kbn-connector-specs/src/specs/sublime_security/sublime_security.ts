@@ -95,6 +95,7 @@ interface RawMessageGroup {
 
 const MAX_MESSAGES_IN_SUMMARY = 5;
 const MAX_MESSAGES_IN_DETAIL = 50;
+const THIRTY_DAYS_IN_MS = 30 * 24 * 60 * 60 * 1000;
 
 const trimMessage = (message: RawMessage): SublimeMessageSummary => ({
   id: message.id,
@@ -215,15 +216,23 @@ Gotchas:
       description:
         'Search Sublime Security message groups (campaign-like clusters of deduplicated email). ' +
         'Filter by sender, domain, recipient, attachment SHA-256, Attack Score verdict, rule severity, review state, or time window. ' +
+        'Searches flagged groups by default; set userReported instead to search the user-reported queue. ' +
+        'The time window defaults to the last 30 days when createdAtGte is omitted. ' +
         'Use this first to find the group IDs that other actions operate on. ' +
         'Returns id, state, classification, review fields, flagged rule names, message count, and up to 5 sample messages per group, plus the total match count for pagination.',
       input: SearchMessageGroupsInputSchema,
       handler: async (ctx, input: SearchMessageGroupsInput) => {
         try {
+          // The live API requires a time anchor (created_at__gte) and at least one
+          // of flagged/user_reported to be true, so both get sensible defaults.
+          const flagged = input.flagged ?? (input.userReported ? undefined : true);
+          const createdAtGte =
+            input.createdAtGte ?? new Date(Date.now() - THIRTY_DAYS_IN_MS).toISOString();
+
           // Sublime's `__is`/`__gte`/`__lt` param names violate the object-literal
           // naming-convention lint rule, so they are assigned via member access.
           const params: Record<string, string | number | boolean | undefined> = {
-            flagged: input.flagged,
+            flagged,
             user_reported: input.userReported,
             reviewed: input.reviewed,
             limit: input.limit,
@@ -235,7 +244,7 @@ Gotchas:
           params.attachment_sha256__is = input.attachmentSha256;
           params.attack_score_verdict__is = input.attackScoreVerdict;
           params.flagged_rule_severity__is = input.flaggedRuleSeverity;
-          params.created_at__gte = input.createdAtGte;
+          params.created_at__gte = createdAtGte;
           params.created_at__lt = input.createdAtLt;
 
           const response = await ctx.client.get(`${getBaseUrl(ctx)}/v0/message-groups`, {
@@ -364,7 +373,7 @@ Gotchas:
       description:
         "Get the verdict from Sublime's Autonomous Security Analyst (ASA) for a message: " +
         'malicious, spam, graymail, likely_benign, benign, or unknown. ' +
-        'ASA triages user-reported and low-confidence flagged messages automatically; use this to branch on whether Sublime already triaged the message.',
+        'ASA only triages user-reported and low-confidence flagged messages; for a message ASA has not triaged, this returns triaged: false with a null verdict instead of an error.',
       input: GetMessageInputSchema,
       handler: async (ctx, input: GetMessageInput) => {
         try {
@@ -372,8 +381,13 @@ Gotchas:
             `${getBaseUrl(ctx)}/v0/messages/${encodeURIComponent(input.messageId)}/asa_verdict`
           );
           const data = response.data as { verdict?: string };
-          return { verdict: data.verdict };
+          return { triaged: true, verdict: data.verdict };
         } catch (error) {
+          // ASA not having triaged a message is the common case, not a failure.
+          const axiosError = error as { response?: { status?: number } };
+          if (axiosError.response?.status === 404) {
+            return { triaged: false, verdict: null };
+          }
           throwWithApiError(error);
         }
       },

@@ -77,11 +77,15 @@ export const SearchMessageGroupsInputSchema = lazySchema(() =>
     flagged: z
       .boolean()
       .optional()
-      .describe('Only return message groups with at least one message flagged by a detection rule'),
+      .describe(
+        'Only return message groups with at least one message flagged by a detection rule. Defaults to true unless userReported is set (the API requires flagged or userReported)'
+      ),
     userReported: z
       .boolean()
       .optional()
-      .describe('Only return message groups with at least one user-reported message'),
+      .describe(
+        'Only return message groups with at least one user-reported message (the abuse-mailbox queue)'
+      ),
     reviewed: z
       .boolean()
       .optional()
@@ -122,7 +126,9 @@ export const SearchMessageGroupsInputSchema = lazySchema(() =>
       .string()
       .max(64)
       .optional()
-      .describe(`Inclusive start of the creation-time window. ${ISO_DATE_DESCRIPTION}`),
+      .describe(
+        `Inclusive start of the creation-time window; defaults to 30 days ago when omitted (the API requires a start time). ${ISO_DATE_DESCRIPTION}`
+      ),
     createdAtLt: z
       .string()
       .max(64)
