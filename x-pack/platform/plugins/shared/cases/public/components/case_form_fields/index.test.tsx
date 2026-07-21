@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-import { renderWithTestingProviders } from '../../common/mock';
+import { noCasesSettingsPermission, renderWithTestingProviders } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { customFieldsConfigurationMock } from '../../containers/mock';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
@@ -435,6 +435,38 @@ describe('CaseFormFields', () => {
       expect(screen.getByTestId('legacy-custom-fields-view-new-link')).toBeInTheDocument();
       expect(screen.getByTestId('legacy-custom-fields-view-settings-link')).toBeInTheDocument();
       expect(screen.getByTestId('legacy-custom-fields-divider')).toBeInTheDocument();
+    });
+
+    it('shows the administrator message in the deprecation callout when the user lacks settings permission', async () => {
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+      localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
+
+      renderWithTestingProviders(
+        <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+          <CaseFormFields
+            isLoading={false}
+            configurationCustomFields={customFieldsConfigurationMock}
+          />
+        </FormTestComponent>,
+        {
+          wrapperProps: { permissions: noCasesSettingsPermission() },
+        }
+      );
+
+      expect(
+        await screen.findByTestId('legacy-custom-fields-deprecation-callout')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('legacy-custom-fields-view-new-link')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('legacy-custom-fields-view-settings-link')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByText(/Contact your administrator to confirm the fields have been migrated/i)
+      ).toBeInTheDocument();
     });
 
     it('forces legacy custom fields visible when required fields lack defaults', async () => {
