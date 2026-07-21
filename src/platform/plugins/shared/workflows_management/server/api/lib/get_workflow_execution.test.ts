@@ -9,20 +9,20 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
 import {
   createMockGetExecutionsByIdsResponse,
-  createMockStepExecutionsDataAccess,
-  createMockWorkflowExecutionsDataAccess,
+  createMockStepDataClient,
+  createMockWorkflowDataClient,
 } from '@kbn/workflows-execution-engine/server/mocks';
 import { getWorkflowExecution } from './get_workflow_execution';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 
 describe('getWorkflowExecution', () => {
-  let mockWorkflowExecutionsDataAccess: jest.Mocked<WorkflowExecutionsDataAccess>;
-  let mockStepExecutionsDataAccess: jest.Mocked<StepExecutionsDataAccess>;
+  let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let mockStepDataClient: jest.Mocked<StepExecutionsDataClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
 
   const baseParams = {
@@ -47,18 +47,18 @@ describe('getWorkflowExecution', () => {
     });
 
   beforeEach(() => {
-    mockWorkflowExecutionsDataAccess = createMockWorkflowExecutionsDataAccess();
-    mockStepExecutionsDataAccess = createMockStepExecutionsDataAccess();
+    mockWorkflowDataClient = createMockWorkflowDataClient();
+    mockStepDataClient = createMockStepDataClient();
     mockLogger = loggerMock.create();
     jest.clearAllMocks();
   });
 
   describe('source excludes with mget (stepExecutionIds present)', () => {
     beforeEach(() => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([baseExecutionDoc] as any)
       );
-      mockStepExecutionsDataAccess.getByIds.mockResolvedValue(
+      mockStepDataClient.getByIds.mockResolvedValue(
         mockStepGetByIds([
           { stepId: 's1', status: 'completed', globalExecutionIndex: 0 },
           { stepId: 's2', status: 'completed', globalExecutionIndex: 1 },
@@ -69,111 +69,98 @@ describe('getWorkflowExecution', () => {
     it('should not pass _source_excludes when both includeInput and includeOutput are true', async () => {
       await getWorkflowExecution({
         ...baseParams,
-        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-        stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
         includeInput: true,
         includeOutput: true,
       });
 
-      expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(
-        baseExecutionDoc.stepExecutionIds,
-        { sourceExcludes: [] }
-      );
+      expect(mockStepDataClient.getByIds).toHaveBeenCalledWith(baseExecutionDoc.stepExecutionIds, {
+        sourceExcludes: [],
+      });
     });
 
     it('should pass _source_excludes: ["input", "output"] when both are false', async () => {
       await getWorkflowExecution({
         ...baseParams,
-        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-        stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
         includeInput: false,
         includeOutput: false,
       });
 
-      expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(
-        baseExecutionDoc.stepExecutionIds,
-        {
-          sourceExcludes: ['input', 'output'],
-        }
-      );
+      expect(mockStepDataClient.getByIds).toHaveBeenCalledWith(baseExecutionDoc.stepExecutionIds, {
+        sourceExcludes: ['input', 'output'],
+      });
     });
 
     it('should pass _source_excludes: ["input"] when only includeInput is false', async () => {
       await getWorkflowExecution({
         ...baseParams,
-        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-        stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
         includeInput: false,
         includeOutput: true,
       });
 
-      expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(
-        baseExecutionDoc.stepExecutionIds,
-        {
-          sourceExcludes: ['input'],
-        }
-      );
+      expect(mockStepDataClient.getByIds).toHaveBeenCalledWith(baseExecutionDoc.stepExecutionIds, {
+        sourceExcludes: ['input'],
+      });
     });
 
     it('should pass _source_excludes: ["output"] when only includeOutput is false', async () => {
       await getWorkflowExecution({
         ...baseParams,
-        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-        stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
         includeInput: true,
         includeOutput: false,
       });
 
-      expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(
-        baseExecutionDoc.stepExecutionIds,
-        {
-          sourceExcludes: ['output'],
-        }
-      );
+      expect(mockStepDataClient.getByIds).toHaveBeenCalledWith(baseExecutionDoc.stepExecutionIds, {
+        sourceExcludes: ['output'],
+      });
     });
 
     it('should default includeInput and includeOutput to false when omitted', async () => {
       await getWorkflowExecution({
         ...baseParams,
-        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-        stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
       });
 
-      expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(
-        baseExecutionDoc.stepExecutionIds,
-        {
-          sourceExcludes: ['input', 'output'],
-        }
-      );
+      expect(mockStepDataClient.getByIds).toHaveBeenCalledWith(baseExecutionDoc.stepExecutionIds, {
+        sourceExcludes: ['input', 'output'],
+      });
     });
   });
 
   describe('source excludes with search fallback (no stepExecutionIds)', () => {
     beforeEach(() => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([
           { ...baseExecutionDoc, stepExecutionIds: undefined },
         ] as any)
       );
-      mockStepExecutionsDataAccess.search.mockResolvedValue({ hits: { hits: [] } } as any);
+      mockStepDataClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
     });
 
     it('should pass _source excludes to search when includeInput/includeOutput are false', async () => {
       await getWorkflowExecution({
         ...baseParams,
-        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-        stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
         includeInput: false,
         includeOutput: false,
       });
 
-      expect(mockStepExecutionsDataAccess.search).toHaveBeenCalledWith(
+      expect(mockStepDataClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           _source: { excludes: ['input', 'output'] },
         })
@@ -183,14 +170,14 @@ describe('getWorkflowExecution', () => {
     it('should not pass _source excludes when both flags are true', async () => {
       await getWorkflowExecution({
         ...baseParams,
-        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-        stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
         includeInput: true,
         includeOutput: true,
       });
 
-      expect(mockStepExecutionsDataAccess.search).toHaveBeenCalledWith(
+      expect(mockStepDataClient.search).toHaveBeenCalledWith(
         expect.not.objectContaining({
           _source: expect.anything(),
         })
@@ -200,14 +187,12 @@ describe('getWorkflowExecution', () => {
 
   describe('basic behavior', () => {
     it('should return null when document is not found', async () => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
-        createMockGetExecutionsByIdsResponse([])
-      );
+      mockWorkflowDataClient.getByIds.mockResolvedValue(createMockGetExecutionsByIdsResponse([]));
 
       const result = await getWorkflowExecution({
         ...baseParams,
-        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-        stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
       });
 
@@ -215,7 +200,7 @@ describe('getWorkflowExecution', () => {
     });
 
     it('should return null when spaceId does not match', async () => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([
           { ...baseExecutionDoc, spaceId: 'other-space' },
         ] as any)
@@ -223,8 +208,8 @@ describe('getWorkflowExecution', () => {
 
       const result = await getWorkflowExecution({
         ...baseParams,
-        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-        stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
       });
 
@@ -232,10 +217,10 @@ describe('getWorkflowExecution', () => {
     });
 
     it('should return the execution DTO with step executions', async () => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([baseExecutionDoc] as any)
       );
-      mockStepExecutionsDataAccess.getByIds.mockResolvedValue(
+      mockStepDataClient.getByIds.mockResolvedValue(
         mockStepGetByIds([
           {
             stepId: 's1',
@@ -254,8 +239,8 @@ describe('getWorkflowExecution', () => {
 
       const result = await getWorkflowExecution({
         ...baseParams,
-        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-        stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
       });
 
@@ -267,15 +252,15 @@ describe('getWorkflowExecution', () => {
     });
 
     it('should include workflow document version when present on the execution', async () => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([{ ...baseExecutionDoc, version: 7 }] as any)
       );
-      mockStepExecutionsDataAccess.getByIds.mockResolvedValue(mockStepGetByIds([]));
+      mockStepDataClient.getByIds.mockResolvedValue(mockStepGetByIds([]));
 
       const result = await getWorkflowExecution({
         ...baseParams,
-        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-        stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
       });
 
@@ -283,15 +268,15 @@ describe('getWorkflowExecution', () => {
     });
 
     it('should omit workflow document version when absent on legacy executions', async () => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([baseExecutionDoc] as any)
       );
-      mockStepExecutionsDataAccess.getByIds.mockResolvedValue(mockStepGetByIds([]));
+      mockStepDataClient.getByIds.mockResolvedValue(mockStepGetByIds([]));
 
       const result = await getWorkflowExecution({
         ...baseParams,
-        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-        stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
       });
 

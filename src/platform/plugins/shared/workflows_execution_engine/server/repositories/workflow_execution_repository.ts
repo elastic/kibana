@@ -14,10 +14,10 @@ import {
   ExecutionStatus,
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
-import type { WorkflowExecutionsDataAccess } from './data_access_layer';
+import type { WorkflowExecutionsDataClient } from './data_access_layer';
 
 export class WorkflowExecutionRepository {
-  constructor(private workflowExecutionsDataAccess: WorkflowExecutionsDataAccess) {}
+  constructor(private workflowExecutionsDataClient: WorkflowExecutionsDataClient) {}
 
   /**
    * Retrieves a workflow execution by its ID from Elasticsearch.
@@ -33,7 +33,7 @@ export class WorkflowExecutionRepository {
     workflowExecutionId: string,
     spaceId: string
   ): Promise<EsWorkflowExecution | null> {
-    const { items } = await this.workflowExecutionsDataAccess.getByIds([workflowExecutionId]);
+    const { items } = await this.workflowExecutionsDataClient.getByIds([workflowExecutionId]);
     const doc = items[0]?.document;
 
     // Verify spaceId matches for security/multi-tenancy
@@ -63,7 +63,7 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for creation');
     }
 
-    await this.workflowExecutionsDataAccess.bulk({
+    await this.workflowExecutionsDataClient.bulk({
       items: [
         {
           operation: 'create',
@@ -97,7 +97,7 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    const bulkResponse = await this.workflowExecutionsDataAccess.bulk({
+    const bulkResponse = await this.workflowExecutionsDataClient.bulk({
       items: executions.map((execution) => ({
         operation: 'create',
         document: execution as Partial<EsWorkflowExecution> & { id: string },
@@ -134,7 +134,7 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for update');
     }
 
-    await this.workflowExecutionsDataAccess.bulk({
+    await this.workflowExecutionsDataClient.bulk({
       items: [
         {
           operation: 'update',
@@ -166,7 +166,7 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    await this.workflowExecutionsDataAccess.bulk({
+    await this.workflowExecutionsDataClient.bulk({
       items: updates.map((update) => ({
         operation: 'update',
         document: update as Partial<EsWorkflowExecution> & { id: string },
@@ -183,7 +183,7 @@ export class WorkflowExecutionRepository {
    * @returns A promise that resolves to the list of search hits.
    */
   public async searchWorkflowExecutions(query: Record<string, unknown>, size: number = 10) {
-    const response = await this.workflowExecutionsDataAccess.search({
+    const response = await this.workflowExecutionsDataClient.search({
       query: query as estypes.QueryDslQueryContainer,
       size,
     });
@@ -226,7 +226,7 @@ export class WorkflowExecutionRepository {
       filterClauses.push({ term: { triggeredBy } });
     }
 
-    const response = await this.workflowExecutionsDataAccess.search({
+    const response = await this.workflowExecutionsDataClient.search({
       size: 0, // Don't need the document, just checking existence
       terminate_after: 1, // Stop after finding 1 match
       track_total_hits: true,
@@ -275,7 +275,7 @@ export class WorkflowExecutionRepository {
       filterClauses.push({ term: { triggeredBy } });
     }
 
-    const response = await this.workflowExecutionsDataAccess.search({
+    const response = await this.workflowExecutionsDataClient.search({
       size: 1,
       terminate_after: 1, // Stop after finding 1 match
       query: {
@@ -330,7 +330,7 @@ export class WorkflowExecutionRepository {
       });
     }
 
-    const response = await this.workflowExecutionsDataAccess.search({
+    const response = await this.workflowExecutionsDataClient.search({
       query: {
         bool: {
           filter: filterClauses, // Filter context = no scoring = faster
@@ -371,7 +371,7 @@ export class WorkflowExecutionRepository {
       });
     }
 
-    const response = await this.workflowExecutionsDataAccess.count({
+    const response = await this.workflowExecutionsDataClient.count({
       query: {
         bool: {
           filter: filterClauses,
@@ -389,7 +389,7 @@ export class WorkflowExecutionRepository {
     concurrencyGroupKey: string,
     spaceId: string
   ): Promise<string | null> {
-    const response = await this.workflowExecutionsDataAccess.search({
+    const response = await this.workflowExecutionsDataClient.search({
       size: 1,
       query: {
         bool: {
@@ -415,7 +415,7 @@ export class WorkflowExecutionRepository {
     workflowExecutionId: string;
     spaceId: string;
   }): Promise<boolean> {
-    const workflowExecutions = await this.workflowExecutionsDataAccess
+    const workflowExecutions = await this.workflowExecutionsDataClient
       .search({
         query: {
           term: {
@@ -435,7 +435,7 @@ export class WorkflowExecutionRepository {
       return false;
     }
 
-    await this.workflowExecutionsDataAccess.bulk({
+    await this.workflowExecutionsDataClient.bulk({
       items: queuedWorkflowExecutions.map((workflowExecution) => ({
         operation: 'upsert',
         document: {
@@ -482,7 +482,7 @@ export class WorkflowExecutionRepository {
 
     const pageSize = Math.min(size, 10000); // Cap at ES default max_result_window
 
-    const response = await this.workflowExecutionsDataAccess.search({
+    const response = await this.workflowExecutionsDataClient.search({
       query: {
         bool: {
           filter: filterClauses,

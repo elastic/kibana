@@ -55,11 +55,8 @@ import {
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
-import {
-  createExecutionsDataAccess,
-  type ExecutionsDataAccessBundle,
-} from './repositories/data_access_layer';
-import { DeferredExecutionsDataAccess } from './repositories/deferred_executions_data_access';
+import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
+import { DeferredDataClient } from './repositories/deferred_data_client';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -149,21 +146,21 @@ export class WorkflowsExecutionEnginePlugin
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
 
-  private executionsDataAccessBundle!: ExecutionsDataAccessBundle;
+  private dataClientBundle!: DataClientBundle;
 
   private createScopedRepositories(): {
     workflowExecutionRepository: WorkflowExecutionRepository;
     stepExecutionRepository: StepExecutionRepository;
   } {
-    const workflowExecutionsDataAccess = new DeferredExecutionsDataAccess<EsWorkflowExecution>(() =>
-      this.executionsDataAccessBundle.createWorkflowExecutionsDataAccess()
+    const workflowExecutionsDataClient = new DeferredDataClient<EsWorkflowExecution>(() =>
+      this.dataClientBundle.createWorkflowDataClient()
     );
-    const stepExecutionsDataAccess = new DeferredExecutionsDataAccess<EsWorkflowStepExecution>(() =>
-      this.executionsDataAccessBundle.createStepExecutionsDataAccess()
+    const stepExecutionsDataClient = new DeferredDataClient<EsWorkflowStepExecution>(() =>
+      this.dataClientBundle.createStepDataClient()
     );
     return {
-      workflowExecutionRepository: new WorkflowExecutionRepository(workflowExecutionsDataAccess),
-      stepExecutionRepository: new StepExecutionRepository(stepExecutionsDataAccess),
+      workflowExecutionRepository: new WorkflowExecutionRepository(workflowExecutionsDataClient),
+      stepExecutionRepository: new StepExecutionRepository(stepExecutionsDataClient),
     };
   }
 
@@ -189,12 +186,12 @@ export class WorkflowsExecutionEnginePlugin
     initializeLogsRepositoryDataStream(core.dataStreams);
     initializeTriggerEventsDataStream(core.dataStreams);
 
-    this.executionsDataAccessBundle = createExecutionsDataAccess({
+    this.dataClientBundle = createDataClientBundle({
       source: 'system_index',
       coreSetup: core,
       logger: this.logger,
     });
-    void this.executionsDataAccessBundle.initSetup();
+    void this.dataClientBundle.initSetup();
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -707,7 +704,7 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
 
-    void this.executionsDataAccessBundle.initStart();
+    void this.dataClientBundle.initStart();
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
@@ -1441,11 +1438,11 @@ export class WorkflowsExecutionEnginePlugin
       resumeWorkflowExecution,
       triggerEvents,
       __internalStorage: {
-        workflowExecutionsDataAccess: new DeferredExecutionsDataAccess<EsWorkflowExecution>(() =>
-          this.executionsDataAccessBundle.createWorkflowExecutionsDataAccess()
+        workflowExecutionsDataClient: new DeferredDataClient<EsWorkflowExecution>(() =>
+          this.dataClientBundle.createWorkflowDataClient()
         ),
-        stepExecutionsDataAccess: new DeferredExecutionsDataAccess<EsWorkflowStepExecution>(() =>
-          this.executionsDataAccessBundle.createStepExecutionsDataAccess()
+        stepExecutionsDataClient: new DeferredDataClient<EsWorkflowStepExecution>(() =>
+          this.dataClientBundle.createStepDataClient()
         ),
       },
     };

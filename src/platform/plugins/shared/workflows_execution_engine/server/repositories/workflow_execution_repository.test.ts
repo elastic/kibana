@@ -12,36 +12,36 @@ import {
   ExecutionStatus,
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
-import type { WorkflowExecutionsDataAccess } from './data_access_layer';
+import type { WorkflowExecutionsDataClient } from './data_access_layer';
 import {
   createMockGetExecutionsByIdsResponse,
-  createMockWorkflowExecutionsDataAccess,
+  createMockWorkflowDataClient,
 } from './data_access_layer/mocks';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 
 const asBulkResponse = (value: unknown) =>
-  value as Awaited<ReturnType<WorkflowExecutionsDataAccess['bulk']>>;
+  value as Awaited<ReturnType<WorkflowExecutionsDataClient['bulk']>>;
 
 const asSearchResponse = (value: unknown) =>
-  value as Awaited<ReturnType<WorkflowExecutionsDataAccess['search']>>;
+  value as Awaited<ReturnType<WorkflowExecutionsDataClient['search']>>;
 
 const asCountResponse = (value: unknown) =>
-  value as Awaited<ReturnType<WorkflowExecutionsDataAccess['count']>>;
+  value as Awaited<ReturnType<WorkflowExecutionsDataClient['count']>>;
 
 describe('WorkflowExecutionRepository', () => {
   let repository: WorkflowExecutionRepository;
-  let workflowExecutionsDataAccess: jest.Mocked<WorkflowExecutionsDataAccess>;
+  let workflowExecutionsDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
 
   beforeEach(() => {
-    workflowExecutionsDataAccess = createMockWorkflowExecutionsDataAccess();
-    repository = new WorkflowExecutionRepository(workflowExecutionsDataAccess);
+    workflowExecutionsDataClient = createMockWorkflowDataClient();
+    repository = new WorkflowExecutionRepository(workflowExecutionsDataClient);
   });
 
   describe('createWorkflowExecution', () => {
     it('should create a workflow execution', async () => {
       const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'default' };
       await repository.createWorkflowExecution(workflowExecution);
-      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith({
         items: [{ operation: 'create', document: workflowExecution }],
         refresh: false,
       });
@@ -58,11 +58,11 @@ describe('WorkflowExecutionRepository', () => {
     it('returns an empty array and skips ES when no executions are provided', async () => {
       const result = await repository.bulkCreateWorkflowExecutions([]);
       expect(result).toEqual([]);
-      expect(workflowExecutionsDataAccess.bulk).not.toHaveBeenCalled();
+      expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
     });
 
     it('issues a single _bulk create call with provided docs and refresh option', async () => {
-      workflowExecutionsDataAccess.bulk.mockResolvedValue(
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
         asBulkResponse({
           errors: false,
           items: [{ id: 'e1' }, { id: 'e2' }],
@@ -78,8 +78,8 @@ describe('WorkflowExecutionRepository', () => {
         refresh: 'wait_for',
       });
 
-      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledTimes(1);
-      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledTimes(1);
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith({
         refresh: 'wait_for',
         items: [
           { operation: 'create', document: executions[0] },
@@ -91,7 +91,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('defaults refresh to false when not provided', async () => {
-      workflowExecutionsDataAccess.bulk.mockResolvedValue(
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
         asBulkResponse({
           errors: false,
           items: [{ id: 'e1' }],
@@ -100,13 +100,13 @@ describe('WorkflowExecutionRepository', () => {
 
       await repository.bulkCreateWorkflowExecutions([{ id: 'e1' }]);
 
-      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({ refresh: undefined })
       );
     });
 
     it('maps per-doc bulk errors back to per-item results in input order', async () => {
-      workflowExecutionsDataAccess.bulk.mockResolvedValue(
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
         asBulkResponse({
           errors: true,
           items: [
@@ -137,14 +137,14 @@ describe('WorkflowExecutionRepository', () => {
       await expect(repository.bulkCreateWorkflowExecutions([{ id: 'e1' }, {}])).rejects.toThrow(
         'Workflow execution ID is required for bulk create'
       );
-      expect(workflowExecutionsDataAccess.bulk).not.toHaveBeenCalled();
+      expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
     });
 
     it('should respect space isolation when getting workflow execution by ID', async () => {
       const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
       await repository.createWorkflowExecution(workflowExecution);
 
-      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           items: [
             expect.objectContaining({
@@ -157,7 +157,7 @@ describe('WorkflowExecutionRepository', () => {
         })
       );
 
-      workflowExecutionsDataAccess.getByIds.mockResolvedValueOnce(
+      workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
         createMockGetExecutionsByIdsResponse([
           { id: '1', workflowId: 'test-workflow', spaceId: 'space1' } as any,
         ])
@@ -165,24 +165,24 @@ describe('WorkflowExecutionRepository', () => {
 
       const result = await repository.getWorkflowExecutionById('1', 'space2');
 
-      expect(workflowExecutionsDataAccess.getByIds).toHaveBeenCalledWith(['1']);
+      expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledWith(['1']);
       expect(result).toBeNull();
     });
 
     it('should return document when spaceId matches', async () => {
       const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
-      workflowExecutionsDataAccess.getByIds.mockResolvedValueOnce(
+      workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
         createMockGetExecutionsByIdsResponse([workflowExecution as any])
       );
 
       const result = await repository.getWorkflowExecutionById('1', 'space1');
 
-      expect(workflowExecutionsDataAccess.getByIds).toHaveBeenCalledWith(['1']);
+      expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledWith(['1']);
       expect(result).toEqual(workflowExecution);
     });
 
     it('should return null when document is not found', async () => {
-      workflowExecutionsDataAccess.getByIds.mockResolvedValueOnce(
+      workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
         createMockGetExecutionsByIdsResponse([])
       );
 
@@ -193,7 +193,7 @@ describe('WorkflowExecutionRepository', () => {
 
     it('should throw error for non-404 errors', async () => {
       const serverError = new Error('Internal Server Error');
-      workflowExecutionsDataAccess.getByIds.mockRejectedValueOnce(serverError);
+      workflowExecutionsDataClient.getByIds.mockRejectedValueOnce(serverError);
 
       await expect(repository.getWorkflowExecutionById('1', 'space1')).rejects.toThrow(
         'Internal Server Error'
@@ -205,7 +205,7 @@ describe('WorkflowExecutionRepository', () => {
     it('should update a workflow execution', async () => {
       const workflowExecution = { id: '1', status: ExecutionStatus.RUNNING };
       await repository.updateWorkflowExecution(workflowExecution);
-      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith({
         items: [{ operation: 'update', document: workflowExecution }],
         refresh: false,
       });
@@ -224,7 +224,7 @@ describe('WorkflowExecutionRepository', () => {
         { _source: { id: '1', workflowId: 'workflow-1' } },
         { _source: { id: '2', workflowId: 'workflow-1' } },
       ];
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: mockHits, total: { value: 2, relation: 'eq' } },
         })
@@ -233,7 +233,7 @@ describe('WorkflowExecutionRepository', () => {
       const query = { term: { workflowId: 'workflow-1' } };
       const result = await repository.searchWorkflowExecutions(query);
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         query,
         size: 10,
       });
@@ -242,7 +242,7 @@ describe('WorkflowExecutionRepository', () => {
 
     it('should search workflow executions with custom size', async () => {
       const mockHits = [{ _source: { id: '1', workflowId: 'workflow-1' } }];
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: mockHits, total: { value: 1, relation: 'eq' } },
         })
@@ -251,7 +251,7 @@ describe('WorkflowExecutionRepository', () => {
       const query = { term: { workflowId: 'workflow-1' } };
       const result = await repository.searchWorkflowExecutions(query, 5);
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         query,
         size: 5,
       });
@@ -260,7 +260,7 @@ describe('WorkflowExecutionRepository', () => {
 
     it('should handle complex queries', async () => {
       const mockHits: unknown[] = [];
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: mockHits, total: { value: 0, relation: 'eq' } },
         })
@@ -273,7 +273,7 @@ describe('WorkflowExecutionRepository', () => {
       };
       const result = await repository.searchWorkflowExecutions(query, 20);
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         query,
         size: 20,
       });
@@ -283,7 +283,7 @@ describe('WorkflowExecutionRepository', () => {
 
   describe('hasRunningExecution', () => {
     it('should return true when running execution exists', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: { value: 1, relation: 'eq' } },
         })
@@ -291,7 +291,7 @@ describe('WorkflowExecutionRepository', () => {
 
       const result = await repository.hasRunningExecution('workflow-1', 'default');
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         size: 0,
         terminate_after: 1,
         track_total_hits: true,
@@ -314,7 +314,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should return false when no running execution exists', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: { value: 0, relation: 'eq' } },
         })
@@ -326,7 +326,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should filter by triggeredBy when provided', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: { value: 1, relation: 'eq' } },
         })
@@ -334,7 +334,7 @@ describe('WorkflowExecutionRepository', () => {
 
       const result = await repository.hasRunningExecution('workflow-1', 'default', 'scheduled');
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         size: 0,
         terminate_after: 1,
         track_total_hits: true,
@@ -358,7 +358,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should handle total as number', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: 5 },
         })
@@ -382,7 +382,7 @@ describe('WorkflowExecutionRepository', () => {
           },
         },
       ];
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: mockHits, total: { value: 1, relation: 'eq' } },
         })
@@ -390,7 +390,7 @@ describe('WorkflowExecutionRepository', () => {
 
       const result = await repository.getRunningExecutionsByWorkflowId('workflow-1', 'default');
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         size: 1,
         terminate_after: 1,
         query: {
@@ -422,7 +422,7 @@ describe('WorkflowExecutionRepository', () => {
           },
         },
       ];
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: mockHits, total: { value: 1, relation: 'eq' } },
         })
@@ -434,7 +434,7 @@ describe('WorkflowExecutionRepository', () => {
         'scheduled'
       );
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         size: 1,
         terminate_after: 1,
         query: {
@@ -456,7 +456,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should return empty array when no running executions exist', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: { value: 0, relation: 'eq' } },
         })
@@ -468,7 +468,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should use filter context for better performance', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: { value: 0, relation: 'eq' } },
         })
@@ -476,7 +476,7 @@ describe('WorkflowExecutionRepository', () => {
 
       await repository.getRunningExecutionsByWorkflowId('workflow-1', 'default');
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           query: expect.objectContaining({
             bool: expect.objectContaining({
@@ -488,7 +488,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should respect space isolation', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: { value: 0, relation: 'eq' } },
         })
@@ -496,7 +496,7 @@ describe('WorkflowExecutionRepository', () => {
 
       await repository.getRunningExecutionsByWorkflowId('workflow-1', 'space-1');
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           query: expect.objectContaining({
             bool: expect.objectContaining({
@@ -525,7 +525,7 @@ describe('WorkflowExecutionRepository', () => {
         },
       ];
 
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: mockExecutions, total: { value: 2, relation: 'eq' } },
         })
@@ -533,7 +533,7 @@ describe('WorkflowExecutionRepository', () => {
 
       const result = await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default');
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         query: {
           bool: {
             filter: [
@@ -567,7 +567,7 @@ describe('WorkflowExecutionRepository', () => {
         },
       ];
 
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: mockExecutions, total: { value: 1, relation: 'eq' } },
         })
@@ -575,7 +575,7 @@ describe('WorkflowExecutionRepository', () => {
 
       await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default', 'exec-1');
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         query: {
           bool: {
             filter: [
@@ -622,7 +622,7 @@ describe('WorkflowExecutionRepository', () => {
         },
       ];
 
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: mockExecutions, total: { value: 3, relation: 'eq' } },
         })
@@ -638,7 +638,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should return empty array when no running executions found', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: { value: 0, relation: 'eq' } },
         })
@@ -650,7 +650,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should use default size of 5000 when not provided', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: { value: 0, relation: 'eq' } },
         })
@@ -658,7 +658,7 @@ describe('WorkflowExecutionRepository', () => {
 
       await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default');
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           size: 5000,
         })
@@ -671,7 +671,7 @@ describe('WorkflowExecutionRepository', () => {
         _source: { id: `exec-${i + 1}` },
       }));
 
-      workflowExecutionsDataAccess.search.mockImplementation((params: any) => {
+      workflowExecutionsDataClient.search.mockImplementation((params: any) => {
         const size = params.size || 5000;
         return Promise.resolve(
           asSearchResponse({
@@ -690,7 +690,7 @@ describe('WorkflowExecutionRepository', () => {
         3
       );
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           size: 3,
         })
@@ -699,7 +699,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should cap size at 10000 (ES max_result_window)', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: { value: 0, relation: 'eq' } },
         })
@@ -712,7 +712,7 @@ describe('WorkflowExecutionRepository', () => {
         15000
       );
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           size: 10000, // Capped at ES max_result_window
         })
@@ -722,7 +722,7 @@ describe('WorkflowExecutionRepository', () => {
 
   describe('bulkUpdateWorkflowExecutions', () => {
     it('should successfully bulk update multiple workflow executions', async () => {
-      workflowExecutionsDataAccess.bulk.mockResolvedValue(
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
         asBulkResponse({
           errors: false,
           items: [{ id: 'exec-1' }, { id: 'exec-2' }],
@@ -742,7 +742,7 @@ describe('WorkflowExecutionRepository', () => {
         },
       ]);
 
-      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith({
         refresh: true,
         items: [
           {
@@ -768,7 +768,7 @@ describe('WorkflowExecutionRepository', () => {
     it('should handle empty array without making ES call', async () => {
       await repository.bulkUpdateWorkflowExecutions([]);
 
-      expect(workflowExecutionsDataAccess.bulk).not.toHaveBeenCalled();
+      expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
     });
 
     it('should throw error if execution ID is missing', async () => {
@@ -781,11 +781,11 @@ describe('WorkflowExecutionRepository', () => {
         ])
       ).rejects.toThrow('Workflow execution ID is required for bulk update');
 
-      expect(workflowExecutionsDataAccess.bulk).not.toHaveBeenCalled();
+      expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
     });
 
     it('delegates bulk updates to the DAL without checking bulk errors', async () => {
-      workflowExecutionsDataAccess.bulk.mockResolvedValue(
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
         asBulkResponse({
           errors: true,
           items: [
@@ -811,7 +811,7 @@ describe('WorkflowExecutionRepository', () => {
         ])
       ).resolves.toBeUndefined();
 
-      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalled();
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalled();
     });
   });
 
@@ -836,7 +836,7 @@ describe('WorkflowExecutionRepository', () => {
     };
 
     it('should search without search_after on the first page', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: {
             hits: [
@@ -857,7 +857,7 @@ describe('WorkflowExecutionRepository', () => {
         size: 10,
       });
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         ...baseSearchExpectation,
         size: 10,
       });
@@ -869,7 +869,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should cap size at 10000 for ES max_result_window', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: { value: 0, relation: 'eq' } },
         })
@@ -881,14 +881,14 @@ describe('WorkflowExecutionRepository', () => {
         size: 50_000,
       });
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         ...baseSearchExpectation,
         size: 10000,
       });
     });
 
     it('should pass search_after when continuing pagination', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: { value: 0, relation: 'eq' } },
         })
@@ -903,7 +903,7 @@ describe('WorkflowExecutionRepository', () => {
         searchAfter: [...searchAfter],
       });
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         ...baseSearchExpectation,
         size: 10,
         search_after: [...searchAfter],
@@ -911,7 +911,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should omit search_after when searchAfter is an empty array', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: { value: 0, relation: 'eq' } },
         })
@@ -924,7 +924,7 @@ describe('WorkflowExecutionRepository', () => {
         searchAfter: [],
       });
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         ...baseSearchExpectation,
         size: 10,
       });
@@ -932,7 +932,7 @@ describe('WorkflowExecutionRepository', () => {
 
     it('should return nextSearchAfter when the page is full', async () => {
       const lastSort = ['2024-01-02T00:00:00.000Z', 'exec-b'] as const;
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: {
             hits: [
@@ -964,7 +964,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should not return nextSearchAfter when the page is not full', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: {
             hits: [
@@ -990,7 +990,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should fall back to _id when _source.id is missing', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: {
             hits: [
@@ -1015,7 +1015,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should parse total when returned as a number', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [], total: 0 },
         })
@@ -1031,7 +1031,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should default total to 0 when total is missing', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: { hits: [] },
         })
@@ -1047,7 +1047,7 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should not set nextSearchAfter when the last hit has no sort values', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: {
             hits: [
@@ -1072,7 +1072,7 @@ describe('WorkflowExecutionRepository', () => {
 
   describe('countExecutionsByConcurrencyGroupAndStatuses', () => {
     it('issues _count with the same bool filter query and returns count', async () => {
-      workflowExecutionsDataAccess.count.mockResolvedValue(
+      workflowExecutionsDataClient.count.mockResolvedValue(
         asCountResponse({ count: 4, _shards: { total: 1, successful: 1, failed: 0 } })
       );
 
@@ -1083,7 +1083,7 @@ describe('WorkflowExecutionRepository', () => {
         'exclude-id'
       );
 
-      expect(workflowExecutionsDataAccess.count).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.count).toHaveBeenCalledWith({
         query: {
           bool: {
             filter: [
@@ -1099,14 +1099,14 @@ describe('WorkflowExecutionRepository', () => {
           },
         },
       });
-      expect(workflowExecutionsDataAccess.search).not.toHaveBeenCalled();
+      expect(workflowExecutionsDataClient.search).not.toHaveBeenCalled();
       expect(result).toBe(4);
     });
   });
 
   describe('getOldestQueuedExecutionIdByConcurrencyGroup', () => {
     it('searches for the oldest queued execution with stable FIFO sort', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: {
             hits: [{ _id: 'exec-oldest', _source: { id: 'exec-oldest' } }],
@@ -1119,7 +1119,7 @@ describe('WorkflowExecutionRepository', () => {
         'default'
       );
 
-      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         size: 1,
         query: {
           bool: {
@@ -1139,7 +1139,7 @@ describe('WorkflowExecutionRepository', () => {
 
   describe('tryCasPromoteQueuedWorkflowExecutionToPending', () => {
     it('uses refresh wait_for so search-based slot counts observe pending before the next drain iteration', async () => {
-      workflowExecutionsDataAccess.search.mockResolvedValue(
+      workflowExecutionsDataClient.search.mockResolvedValue(
         asSearchResponse({
           hits: {
             hits: [{ _source: { id: 'exec-1', status: ExecutionStatus.QUEUED } }],
@@ -1147,7 +1147,7 @@ describe('WorkflowExecutionRepository', () => {
           },
         })
       );
-      workflowExecutionsDataAccess.bulk.mockResolvedValue(
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
         asBulkResponse({ errors: false, items: [{ id: 'exec-1' }] })
       );
 
@@ -1156,7 +1156,7 @@ describe('WorkflowExecutionRepository', () => {
         spaceId: 'default',
       });
 
-      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           refresh: 'wait_for',
           items: [

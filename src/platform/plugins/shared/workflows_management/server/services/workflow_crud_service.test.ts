@@ -12,8 +12,8 @@ import type { CoreStart } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflow } from '@kbn/workflows';
 import type {
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
 
 import type { WorkflowCrudDeps } from './types';
@@ -99,12 +99,12 @@ const makeDeps = (
       safeParse: (v: unknown) => ({ success: true, data: v }),
     }),
   } as unknown as WorkflowValidationService;
-  const workflowExecutionsDataAccess = {
+  const workflowExecutionsDataClient = {
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
-  } as unknown as WorkflowExecutionsDataAccess;
-  const stepExecutionsDataAccess = {
+  } as unknown as WorkflowExecutionsDataClient;
+  const stepExecutionsDataClient = {
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
-  } as unknown as StepExecutionsDataAccess;
+  } as unknown as StepExecutionsDataClient;
   const deps: WorkflowCrudDeps = {
     logger: loggerMock.create(),
     workflowStorage: { getClient: () => client } as any,
@@ -119,8 +119,8 @@ const makeDeps = (
       asScoped: jest.fn(),
       asSystemUser: jest.fn(),
     } as any,
-    workflowExecutionsDataAccess,
-    stepExecutionsDataAccess,
+    workflowExecutionsDataClient,
+    stepExecutionsDataClient,
     ...depsOverrides,
   };
   return { deps, client };

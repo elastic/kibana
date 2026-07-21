@@ -16,8 +16,8 @@ import type {
 import type {
   BulkRequestOptions,
   BulkResponse,
+  DataClient,
   ExecutionsCountRequest,
-  ExecutionsDataAccess,
   ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,
   GetExecutionsByIdsOptions,
@@ -26,26 +26,26 @@ import type {
   ScriptUpdateResponse,
 } from './data_access_layer';
 
-export class DeferredExecutionsDataAccess<TExecution extends { id: string }>
-  implements ExecutionsDataAccess<TExecution>
+export class DeferredDataClient<TExecution extends { id: string }>
+  implements DataClient<TExecution>
 {
-  private executionsDataAccessPromise: Promise<ExecutionsDataAccess<TExecution>>;
+  private dataClientPromise: Promise<DataClient<TExecution>>;
 
-  constructor(executionsDataAccessFactory: () => Promise<ExecutionsDataAccess<TExecution>>) {
-    this.executionsDataAccessPromise = executionsDataAccessFactory();
+  constructor(dataClientFactory: () => Promise<DataClient<TExecution>>) {
+    this.dataClientPromise = dataClientFactory();
   }
 
   search(
     request: ExecutionsSearchRequest
   ): Promise<SearchResponse<TExecution, Record<string, AggregationsAggregate>>> {
-    return this.executionsDataAccessPromise.then((executionsDataAccess) =>
-      executionsDataAccess.search(request)
+    return this.dataClientPromise.then((dataClient) =>
+      dataClient.search(request)
     );
   }
 
   count(request: ExecutionsCountRequest): Promise<CountResponse> {
-    return this.executionsDataAccessPromise.then((executionsDataAccess) =>
-      executionsDataAccess.count(request)
+    return this.dataClientPromise.then((dataClient) =>
+      dataClient.count(request)
     );
   }
 
@@ -53,26 +53,26 @@ export class DeferredExecutionsDataAccess<TExecution extends { id: string }>
     ids: (string | { id: string; index: string })[],
     options?: GetExecutionsByIdsOptions<TExecution> | undefined
   ): Promise<GetExecutionsByIdsResponse<TExecution>> {
-    return this.executionsDataAccessPromise.then((executionsDataAccess) =>
-      executionsDataAccess.getByIds(ids, options)
+    return this.dataClientPromise.then((dataClient) =>
+      dataClient.getByIds(ids, options)
     );
   }
 
   bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
-    return this.executionsDataAccessPromise.then((executionsDataAccess) =>
-      executionsDataAccess.bulk(request)
+    return this.dataClientPromise.then((dataClient) =>
+      dataClient.bulk(request)
     );
   }
 
   scriptUpdate(request: ScriptUpdateRequest): Promise<ScriptUpdateResponse> {
-    return this.executionsDataAccessPromise.then((executionsDataAccess) =>
-      executionsDataAccess.scriptUpdate(request)
+    return this.dataClientPromise.then((dataClient) =>
+      dataClient.scriptUpdate(request)
     );
   }
 
   deleteByQuery(request: ExecutionsDeleteByQueryRequest): Promise<DeleteByQueryResponse> {
-    return this.executionsDataAccessPromise.then((executionsDataAccess) =>
-      executionsDataAccess.deleteByQuery(request)
+    return this.dataClientPromise.then((dataClient) =>
+      dataClient.deleteByQuery(request)
     );
   }
 }

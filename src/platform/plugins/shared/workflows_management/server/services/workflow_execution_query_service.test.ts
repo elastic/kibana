@@ -13,12 +13,12 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionType } from '@kbn/workflows';
 import type {
   IWorkflowEventLoggerService,
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
 import {
-  createMockStepExecutionsDataAccess,
-  createMockWorkflowExecutionsDataAccess,
+  createMockStepDataClient,
+  createMockWorkflowDataClient,
 } from '@kbn/workflows-execution-engine/server/mocks';
 
 import { WorkflowExecutionQueryService } from './workflow_execution_query_service';
@@ -30,8 +30,8 @@ import {
 
 describe('WorkflowExecutionQueryService', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockWorkflowExecutionsDataAccess: jest.Mocked<WorkflowExecutionsDataAccess>;
-  let mockStepExecutionsDataAccess: jest.Mocked<StepExecutionsDataAccess>;
+  let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let mockStepDataClient: jest.Mocked<StepExecutionsDataClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockEventLoggerService: jest.Mocked<IWorkflowEventLoggerService>;
   let service: WorkflowExecutionQueryService;
@@ -43,14 +43,14 @@ describe('WorkflowExecutionQueryService', () => {
       mget: jest.fn(),
       update: jest.fn(),
     } as any;
-    mockWorkflowExecutionsDataAccess = {
-      ...createMockWorkflowExecutionsDataAccess(),
+    mockWorkflowDataClient = {
+      ...createMockWorkflowDataClient(),
       search: jest.fn((request) =>
         mockEsClient.search({ index: WORKFLOWS_EXECUTIONS_INDEX, ...request })
       ),
     };
-    mockStepExecutionsDataAccess = {
-      ...createMockStepExecutionsDataAccess(),
+    mockStepDataClient = {
+      ...createMockStepDataClient(),
       search: jest.fn((request) =>
         mockEsClient.search({ index: WORKFLOWS_STEP_EXECUTIONS_INDEX, ...request })
       ),
@@ -64,8 +64,8 @@ describe('WorkflowExecutionQueryService', () => {
     service = new WorkflowExecutionQueryService({
       logger: mockLogger,
       esClient: mockEsClient,
-      workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-      stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+      workflowExecutionsDataClient: mockWorkflowDataClient,
+      stepExecutionsDataClient: mockStepDataClient,
       workflowEventLoggerService: mockEventLoggerService,
     });
   });

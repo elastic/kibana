@@ -33,7 +33,7 @@ export type ExecutionsDeleteByQueryRequest = Omit<estypes.DeleteByQueryRequest, 
 /** Partial document with required id. */
 export type UpsertDocument<TDoc extends { id: string }> = Partial<TDoc> & { id: string };
 
-export interface CreateExecutionsDataAccessDeps {
+export interface CreateDataClientDeps {
   source: ExecutionStorageSource;
   coreSetup: CoreSetup;
   logger: Logger;
@@ -65,7 +65,7 @@ export interface GetExecutionsByIdsResponse<TExecution extends { id: string }> {
   missing: string[];
 }
 
-export interface ReadonlyExecutionsDataAccess<TExecution extends { id: string }> {
+export interface ReadonlyDataClient<TExecution extends { id: string }> {
   search(request: ExecutionsSearchRequest): Promise<estypes.SearchResponse<TExecution>>;
   count(request: ExecutionsCountRequest): Promise<estypes.CountResponse>;
   getByIds(
@@ -74,24 +74,24 @@ export interface ReadonlyExecutionsDataAccess<TExecution extends { id: string }>
   ): Promise<GetExecutionsByIdsResponse<TExecution>>;
 }
 
-export interface WritableExecutionsDataAccess<TExecution extends { id: string }> {
+export interface WritableDataClient<TExecution extends { id: string }> {
   bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse>;
   scriptUpdate(request: ScriptUpdateRequest): Promise<ScriptUpdateResponse>;
   deleteByQuery(request: ExecutionsDeleteByQueryRequest): Promise<estypes.DeleteByQueryResponse>;
 }
 
-export type ExecutionsDataAccess<TExecution extends { id: string }> =
-  ReadonlyExecutionsDataAccess<TExecution> & WritableExecutionsDataAccess<TExecution>;
+export type DataClient<TExecution extends { id: string }> = ReadonlyDataClient<TExecution> &
+  WritableDataClient<TExecution>;
 
-export type WorkflowExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowExecution>;
-export type StepExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowStepExecution>;
+export type WorkflowExecutionsDataClient = DataClient<EsWorkflowExecution>;
+export type StepExecutionsDataClient = DataClient<EsWorkflowStepExecution>;
 
-/** Pair of workflow/step data access instances plus lifecycle hooks from `createExecutionsDataAccess`. */
-export interface ExecutionsDataAccessBundle {
+/** Pair of workflow/step data access instances plus lifecycle hooks from `createDataClientBundle`. */
+export interface DataClientBundle {
   initSetup: () => Promise<void>;
   initStart: () => Promise<void>;
-  createWorkflowExecutionsDataAccess: () => Promise<WorkflowExecutionsDataAccess>;
-  createStepExecutionsDataAccess: () => Promise<StepExecutionsDataAccess>;
+  createWorkflowDataClient: () => Promise<WorkflowExecutionsDataClient>;
+  createStepDataClient: () => Promise<StepExecutionsDataClient>;
 }
 
 export type WorkflowExecutionsSearchRequest = ExecutionsSearchRequest;

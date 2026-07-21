@@ -8,10 +8,10 @@
  */
 
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import type { GetStepExecutionsByIdsOptions, StepExecutionsDataAccess } from '../types';
+import type { GetStepExecutionsByIdsOptions, StepExecutionsDataClient } from '../types';
 
 export interface GetStepExecutionsByWorkflowExecutionParams {
-  stepExecutionsDataAccess: StepExecutionsDataAccess;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   workflowExecutionId: string;
   stepExecutionIds?: string[];
   sourceExcludes?: GetStepExecutionsByIdsOptions['sourceExcludes'];
@@ -23,17 +23,17 @@ export interface GetStepExecutionsByWorkflowExecutionParams {
  * falls back to search for backward compatibility with older executions.
  */
 export const getStepExecutionsByWorkflowExecution = async ({
-  stepExecutionsDataAccess,
+  stepExecutionsDataClient,
   workflowExecutionId,
   stepExecutionIds,
   sourceExcludes,
 }: GetStepExecutionsByWorkflowExecutionParams): Promise<EsWorkflowStepExecution[]> => {
   if (stepExecutionIds?.length) {
-    const { items } = await stepExecutionsDataAccess.getByIds(stepExecutionIds, { sourceExcludes });
+    const { items } = await stepExecutionsDataClient.getByIds(stepExecutionIds, { sourceExcludes });
     return items.map(({ document }) => document);
   }
 
-  const response = await stepExecutionsDataAccess.search({
+  const response = await stepExecutionsDataClient.search({
     query: {
       match: { workflowRunId: workflowExecutionId },
     },

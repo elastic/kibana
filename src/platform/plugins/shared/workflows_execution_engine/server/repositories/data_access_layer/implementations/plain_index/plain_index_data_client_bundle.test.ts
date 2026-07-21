@@ -10,14 +10,14 @@
 import { coreMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { PlainIndexExecutionsDataAccessBundle } from './create_plain_index_executions_data_access';
-import { PlainIndexExecutionsDataAccess } from './plain_index_executions_data_access';
+import { PlainIndexDataClientBundle } from './plain_index_data_client_bundle';
+import { PlainIndexDataClient } from './plain_index_data_client';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../constants/execution_indexes';
 
-describe('PlainIndexExecutionsDataAccessBundle', () => {
+describe('PlainIndexDataClientBundle', () => {
   it('creates workflow and step DAL instances backed by their system indices', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
@@ -33,20 +33,20 @@ describe('PlainIndexExecutionsDataAccessBundle', () => {
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}] as never);
 
     const logger = loggerMock.create();
-    const bundle = new PlainIndexExecutionsDataAccessBundle({
+    const bundle = new PlainIndexDataClientBundle({
       source: 'system_index',
       coreSetup,
       logger,
     });
 
-    const workflowExecutionsDataAccess = await bundle.createWorkflowExecutionsDataAccess();
-    const stepExecutionsDataAccess = await bundle.createStepExecutionsDataAccess();
+    const workflowExecutionsDataClient = await bundle.createWorkflowDataClient();
+    const stepExecutionsDataClient = await bundle.createStepDataClient();
 
-    expect(workflowExecutionsDataAccess).toBeInstanceOf(PlainIndexExecutionsDataAccess);
-    expect(stepExecutionsDataAccess).toBeInstanceOf(PlainIndexExecutionsDataAccess);
+    expect(workflowExecutionsDataClient).toBeInstanceOf(PlainIndexDataClient);
+    expect(stepExecutionsDataClient).toBeInstanceOf(PlainIndexDataClient);
 
-    await workflowExecutionsDataAccess.search({ query: { match_all: {} } });
-    await stepExecutionsDataAccess.search({ query: { match_all: {} } });
+    await workflowExecutionsDataClient.search({ query: { match_all: {} } });
+    await stepExecutionsDataClient.search({ query: { match_all: {} } });
 
     expect(esClient.search).toHaveBeenNthCalledWith(1, {
       index: WORKFLOWS_EXECUTIONS_INDEX,

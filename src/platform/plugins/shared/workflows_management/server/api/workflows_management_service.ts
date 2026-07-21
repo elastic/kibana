@@ -51,7 +51,7 @@ import type {
 } from '@kbn/workflows/types/v1';
 import type {
   LogSearchResult,
-  WorkflowExecutionsDataAccess,
+  WorkflowExecutionsDataClient,
   WorkflowsExecutionEnginePluginStart,
 } from '@kbn/workflows-execution-engine/server';
 import type {
@@ -137,7 +137,7 @@ export class WorkflowsService {
   private workflowStorage!: WorkflowStorage;
   private taskScheduler!: WorkflowTaskScheduler;
   private esClient!: ElasticsearchClient;
-  private workflowExecutionsDataAccess!: WorkflowExecutionsDataAccess;
+  private workflowExecutionsDataClient!: WorkflowExecutionsDataClient;
   private validationService!: WorkflowValidationService;
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
@@ -202,15 +202,15 @@ export class WorkflowsService {
       getActionsClientWithRequest: this.getActionsClientWithRequest,
     });
 
-    const { workflowExecutionsDataAccess, stepExecutionsDataAccess } =
+    const { workflowExecutionsDataClient, stepExecutionsDataClient } =
       this.workflowsExecutionEngine.__internalStorage;
-    this.workflowExecutionsDataAccess = workflowExecutionsDataAccess;
+    this.workflowExecutionsDataClient = workflowExecutionsDataClient;
 
     this.executionQueryService = new WorkflowExecutionQueryService({
       logger: this.logger,
       esClient: this.esClient,
-      workflowExecutionsDataAccess: this.workflowExecutionsDataAccess,
-      stepExecutionsDataAccess,
+      workflowExecutionsDataClient: this.workflowExecutionsDataClient,
+      stepExecutionsDataClient,
       workflowEventLoggerService: this.workflowsExecutionEngine.workflowEventLoggerService,
     });
 
@@ -218,7 +218,7 @@ export class WorkflowsService {
       logger: this.logger,
       workflowStorage: this.workflowStorage,
       esClient: this.esClient,
-      workflowExecutionsDataAccess: this.workflowExecutionsDataAccess,
+      workflowExecutionsDataClient: this.workflowExecutionsDataClient,
     });
 
     await this.initializeChangeHistoryService(coreStart);
@@ -233,8 +233,8 @@ export class WorkflowsService {
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
       changeHistoryService: this.changeHistoryService,
-      workflowExecutionsDataAccess: this.workflowExecutionsDataAccess,
-      stepExecutionsDataAccess,
+      workflowExecutionsDataClient: this.workflowExecutionsDataClient,
+      stepExecutionsDataClient,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -260,9 +260,9 @@ export class WorkflowsService {
     return this.coreStart;
   }
 
-  public async getWorkflowExecutionsDataAccess(): Promise<WorkflowExecutionsDataAccess> {
+  public async getWorkflowDataClient(): Promise<WorkflowExecutionsDataClient> {
     await this.ensureInitialized();
-    return this.workflowExecutionsDataAccess;
+    return this.workflowExecutionsDataClient;
   }
 
   public async getPluginsStart(): Promise<WorkflowsServerPluginStartDeps> {

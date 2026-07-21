@@ -9,12 +9,12 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
-import { PlainIndexExecutionsDataAccess } from './plain_index_executions_data_access';
+import { PlainIndexDataClient } from './plain_index_data_client';
 
-describe('PlainIndexExecutionsDataAccess', () => {
+describe('PlainIndexDataClient', () => {
   const createDataAccess = () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    const dataAccess = new PlainIndexExecutionsDataAccess<{ id: string }>({
+    const dataAccess = new PlainIndexDataClient<{ id: string }>({
       esClient,
       indexName: '.workflows-executions',
       mappings: { properties: {} },

@@ -10,7 +10,7 @@
 import type { ExecutionStorageSource } from '../types';
 
 export const createUnsupportedStorageSourceError = (
-  entity: 'WorkflowExecutionsDataAccess' | 'StepExecutionsDataAccess' | 'ExecutionsDataAccess',
+  entity: 'WorkflowExecutionsDataClient' | 'StepExecutionsDataClient' | 'DataClient',
   source: ExecutionStorageSource
 ): Error => {
   return new Error(`${entity} for source "${source}" is not implemented yet`);

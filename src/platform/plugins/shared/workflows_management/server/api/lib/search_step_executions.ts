@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import type { StepExecutionsDataAccess } from '@kbn/workflows-execution-engine/server';
+import type { StepExecutionsDataClient } from '@kbn/workflows-execution-engine/server';
 
 import { buildTimeRangeFilter } from './build_time_range_filter';
 
@@ -23,7 +23,7 @@ export interface StepExecutionListResult {
 }
 
 export interface SearchStepExecutionsParams {
-  stepExecutionsDataAccess: StepExecutionsDataAccess;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   logger: Logger;
   /** When set, search steps for a single workflow run (existing behavior). */
   workflowExecutionId?: string;
@@ -85,7 +85,7 @@ function getTotalFromResponse(
 }
 
 export const searchStepExecutions = async ({
-  stepExecutionsDataAccess,
+  stepExecutionsDataClient,
   logger,
   workflowExecutionId,
   workflowId,
@@ -119,7 +119,7 @@ export const searchStepExecutions = async ({
     const pageSize = size ?? (isPaginated ? 100 : 1000);
     const from = isPaginated && page !== undefined ? (page - 1) * pageSize : 0;
 
-    const response = await stepExecutionsDataAccess.search({
+    const response = await stepExecutionsDataClient.search({
       query: { bool: { must: mustQueries } },
       ...(sourceExcludes?.length ? { _source: { excludes: sourceExcludes } } : {}),
       sort: 'startedAt:desc',

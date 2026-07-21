@@ -19,12 +19,12 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type {
-  ExecutionsDataAccess,
+  DataClient,
   GetStepExecutionsByIdsOptions,
   GetWorkflowExecutionsByIdsOptions,
-  StepExecutionsDataAccess,
+  StepExecutionsDataClient,
   TriggerEventsContract,
-  WorkflowExecutionsDataAccess,
+  WorkflowExecutionsDataClient,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
 } from './types';

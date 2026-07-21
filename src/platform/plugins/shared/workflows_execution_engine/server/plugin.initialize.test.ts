@@ -13,18 +13,18 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { WorkflowsExecutionEnginePlugin } from './plugin';
 import {
-  mockExecutionsDataAccessInitSetup,
-  mockExecutionsDataAccessInitStart,
-} from './test_utils/executions_data_access_jest_mock';
+  mockDataClientBundleInitSetup,
+  mockDataClientBundleInitStart,
+} from './test_utils/data_client_jest_mock';
 
 jest.mock('./repositories/data_access_layer', () => {
   const actual = jest.requireActual('./repositories/data_access_layer');
-  const { createExecutionsDataAccessJestMock: createDataAccessMock } = jest.requireActual(
-    './test_utils/executions_data_access_jest_mock'
+  const { createDataClientJestMock: createDataAccessMock } = jest.requireActual(
+    './test_utils/data_client_jest_mock'
   );
   return {
     ...actual,
-    createExecutionsDataAccess: jest.fn(() => createDataAccessMock()),
+    createDataClientBundle: jest.fn(() => createDataAccessMock()),
   };
 });
 
@@ -39,8 +39,8 @@ const createPlugin = (): WorkflowsExecutionEnginePlugin => {
 describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockExecutionsDataAccessInitSetup.mockResolvedValue(undefined);
-    mockExecutionsDataAccessInitStart.mockResolvedValue(undefined);
+    mockDataClientBundleInitSetup.mockResolvedValue(undefined);
+    mockDataClientBundleInitStart.mockResolvedValue(undefined);
   });
 
   it('calls initSetup during setup', () => {
@@ -51,8 +51,8 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
     });
 
-    expect(mockExecutionsDataAccessInitSetup).toHaveBeenCalledTimes(1);
-    expect(mockExecutionsDataAccessInitStart).not.toHaveBeenCalled();
+    expect(mockDataClientBundleInitSetup).toHaveBeenCalledTimes(1);
+    expect(mockDataClientBundleInitStart).not.toHaveBeenCalled();
   });
 
   it('calls initStart and exposes the execution data access during start', () => {
@@ -71,8 +71,8 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
       licensing: licensingMock.createStart(),
     });
 
-    expect(mockExecutionsDataAccessInitStart).toHaveBeenCalledTimes(1);
-    expect(startContract.__internalStorage.workflowExecutionsDataAccess).toBeDefined();
-    expect(startContract.__internalStorage.stepExecutionsDataAccess).toBeDefined();
+    expect(mockDataClientBundleInitStart).toHaveBeenCalledTimes(1);
+    expect(startContract.__internalStorage.workflowExecutionsDataClient).toBeDefined();
+    expect(startContract.__internalStorage.stepExecutionsDataClient).toBeDefined();
   });
 });

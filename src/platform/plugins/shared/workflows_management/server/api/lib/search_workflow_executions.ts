@@ -16,10 +16,10 @@ import type { Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { EsWorkflowExecution, WorkflowExecutionListDto } from '@kbn/workflows';
 import { pickWorkflowDocumentVersion } from '@kbn/workflows';
-import type { WorkflowExecutionsDataAccess } from '@kbn/workflows-execution-engine/server';
+import type { WorkflowExecutionsDataClient } from '@kbn/workflows-execution-engine/server';
 
 interface SearchWorkflowExecutionsParams {
-  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   logger: Logger;
   query: QueryDslQueryContainer;
   sort?: Sort;
@@ -48,7 +48,7 @@ export const WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES = [
 ] as const;
 
 export const searchWorkflowExecutions = async ({
-  workflowExecutionsDataAccess,
+  workflowExecutionsDataClient,
   logger,
   query,
   sort = [{ createdAt: 'desc' }],
@@ -59,7 +59,7 @@ export const searchWorkflowExecutions = async ({
 }: SearchWorkflowExecutionsParams): Promise<WorkflowExecutionListDto> => {
   try {
     logger.debug('Searching workflow executions');
-    const response = await workflowExecutionsDataAccess.search({
+    const response = await workflowExecutionsDataClient.search({
       query,
       _source: { includes: [...WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES] },
       sort,

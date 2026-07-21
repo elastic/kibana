@@ -12,8 +12,8 @@ import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import { buildWorkflowFilters } from '@kbn/workflows/server';
 import type {
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
 
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
@@ -100,8 +100,8 @@ const restoreDisabledWorkflows = async (
 const purgeWorkflowRelatedData = async (
   workflowIds: string[],
   spaceId: string,
-  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess,
-  stepExecutionsDataAccess: StepExecutionsDataAccess,
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient,
+  stepExecutionsDataClient: StepExecutionsDataClient,
   logger: Logger
 ): Promise<void> => {
   if (workflowIds.length === 0) {
@@ -121,12 +121,12 @@ const purgeWorkflowRelatedData = async (
   } as const;
 
   const deleteOps = [
-    workflowExecutionsDataAccess.deleteByQuery(deleteByQueryRequest).catch((error) => {
+    workflowExecutionsDataClient.deleteByQuery(deleteByQueryRequest).catch((error) => {
       logger.warn(
         `Failed to purge executions for workflows [${workflowIds.join(', ')}]: ${error.message}`
       );
     }),
-    stepExecutionsDataAccess.deleteByQuery(deleteByQueryRequest).catch((error) => {
+    stepExecutionsDataClient.deleteByQuery(deleteByQueryRequest).catch((error) => {
       logger.warn(
         `Failed to purge step executions for workflows [${workflowIds.join(', ')}]: ${
           error.message
@@ -145,8 +145,8 @@ const hardDeleteWorkflows = async (
   spaceId: string,
   failures: Array<{ id: string; error: string }>,
   deps: {
-    workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
-    stepExecutionsDataAccess: StepExecutionsDataAccess;
+    workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+    stepExecutionsDataClient: StepExecutionsDataClient;
     taskScheduler: WorkflowTaskScheduler | null;
     logger: Logger;
     getWorkflowExecutions: (
@@ -156,8 +156,8 @@ const hardDeleteWorkflows = async (
   }
 ): Promise<DeleteWorkflowsResponse> => {
   const {
-    workflowExecutionsDataAccess,
-    stepExecutionsDataAccess,
+    workflowExecutionsDataClient,
+    stepExecutionsDataClient,
     taskScheduler,
     logger,
     getWorkflowExecutions,
@@ -208,8 +208,8 @@ const hardDeleteWorkflows = async (
   await purgeWorkflowRelatedData(
     successfulIds,
     spaceId,
-    workflowExecutionsDataAccess,
-    stepExecutionsDataAccess,
+    workflowExecutionsDataClient,
+    stepExecutionsDataClient,
     logger
   );
 
@@ -288,8 +288,8 @@ export const deleteWorkflows = async (params: {
   spaceId: string;
   force: boolean;
   storage: WorkflowStorage;
-  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
-  stepExecutionsDataAccess: StepExecutionsDataAccess;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
   getWorkflowExecutions: (
@@ -302,8 +302,8 @@ export const deleteWorkflows = async (params: {
     spaceId,
     force,
     storage,
-    workflowExecutionsDataAccess,
-    stepExecutionsDataAccess,
+    workflowExecutionsDataClient,
+    stepExecutionsDataClient,
     taskScheduler,
     logger,
     getWorkflowExecutions,
@@ -325,8 +325,8 @@ export const deleteWorkflows = async (params: {
 
   if (force) {
     return hardDeleteWorkflows(ids, hits, client, spaceId, failures, {
-      workflowExecutionsDataAccess,
-      stepExecutionsDataAccess,
+      workflowExecutionsDataClient,
+      stepExecutionsDataClient,
       taskScheduler,
       logger,
       getWorkflowExecutions,

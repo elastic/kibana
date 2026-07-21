@@ -16,14 +16,14 @@ import type {
 } from '@kbn/workflows';
 import type {
   GetWorkflowExecutionsByIdsOptions,
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows-execution-engine/server';
 
 interface GetChildWorkflowExecutionsParams {
-  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
-  stepExecutionsDataAccess: StepExecutionsDataAccess;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   parentExecutionId: string;
   spaceId: string;
 }
@@ -58,11 +58,11 @@ const extractChildRefs = (steps: EsWorkflowStepExecution[]): ChildRef[] =>
     }));
 
 const fetchChildDocs = async (
-  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess,
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient,
   childIds: string[],
   spaceId: string
 ): Promise<Map<string, EsWorkflowExecution>> => {
-  const { items } = await workflowExecutionsDataAccess.getByIds(childIds, {
+  const { items } = await workflowExecutionsDataClient.getByIds(childIds, {
     sourceIncludes: CHILD_SOURCE_INCLUDES,
   });
 
@@ -89,12 +89,12 @@ const groupStepsByWorkflowRunId = (
 };
 
 export const getChildWorkflowExecutions = async ({
-  workflowExecutionsDataAccess,
-  stepExecutionsDataAccess,
+  workflowExecutionsDataClient,
+  stepExecutionsDataClient,
   parentExecutionId,
   spaceId,
 }: GetChildWorkflowExecutionsParams): Promise<ChildWorkflowExecutionItem[]> => {
-  const { items: parentItems } = await workflowExecutionsDataAccess.getByIds([parentExecutionId], {
+  const { items: parentItems } = await workflowExecutionsDataClient.getByIds([parentExecutionId], {
     sourceIncludes: [...PARENT_SOURCE_INCLUDES],
   });
   const parentDoc = parentItems[0]?.document;
@@ -104,7 +104,7 @@ export const getChildWorkflowExecutions = async ({
   }
 
   const parentStepExecutions = await getStepExecutionsByWorkflowExecution({
-    stepExecutionsDataAccess,
+    stepExecutionsDataClient,
     workflowExecutionId: parentExecutionId,
     stepExecutionIds: parentDoc.stepExecutionIds,
     sourceExcludes: STEP_SOURCE_EXCLUDES,
@@ -116,7 +116,7 @@ export const getChildWorkflowExecutions = async ({
   }
 
   const childDocMap = await fetchChildDocs(
-    workflowExecutionsDataAccess,
+    workflowExecutionsDataClient,
     childRefs.map((ref) => ref.childExecutionId),
     spaceId
   );
@@ -128,7 +128,7 @@ export const getChildWorkflowExecutions = async ({
   const childStepExecutions =
     allChildStepExecutionIds.length > 0
       ? await getStepExecutionsByWorkflowExecution({
-          stepExecutionsDataAccess,
+          stepExecutionsDataClient,
           workflowExecutionId: '',
           stepExecutionIds: allChildStepExecutionIds,
           sourceExcludes: STEP_SOURCE_EXCLUDES,

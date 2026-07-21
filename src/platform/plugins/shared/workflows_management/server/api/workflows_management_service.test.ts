@@ -188,8 +188,8 @@ describe('WorkflowsService (facade)', () => {
         '9.0.0'
       );
 
-      await expect(service.getWorkflowExecutionsDataAccess()).resolves.toBe(
-        pluginsStart.workflowsExecutionEngine.__internalStorage.workflowExecutionsDataAccess
+      await expect(service.getWorkflowDataClient()).resolves.toBe(
+        pluginsStart.workflowsExecutionEngine.__internalStorage.workflowExecutionsDataClient
       );
     });
 

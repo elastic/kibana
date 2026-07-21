@@ -23,8 +23,8 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type {
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
 } from './repositories/data_access_layer';
 import type {
   SearchTriggerEventLogParams,
@@ -34,11 +34,11 @@ import type { EmitEvent } from './trigger_events/trigger_event_handler';
 import type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
 export type {
-  ExecutionsDataAccess,
+  DataClient,
   GetStepExecutionsByIdsOptions,
   GetWorkflowExecutionsByIdsOptions,
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
 } from './repositories/data_access_layer';
 
 export interface ExecuteWorkflowResponse {
@@ -71,8 +71,8 @@ export interface TriggerEventsContract {
 
 export interface WorkflowsExecutionEnginePluginStart {
   __internalStorage: {
-    workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
-    stepExecutionsDataAccess: StepExecutionsDataAccess;
+    workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+    stepExecutionsDataClient: StepExecutionsDataClient;
   };
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;

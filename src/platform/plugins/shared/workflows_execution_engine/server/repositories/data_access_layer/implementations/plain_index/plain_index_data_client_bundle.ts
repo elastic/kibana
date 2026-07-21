@@ -9,7 +9,7 @@
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { createOrUpdateIndex } from './helpers';
-import { PlainIndexExecutionsDataAccess } from './plain_index_executions_data_access';
+import { PlainIndexDataClient } from './plain_index_data_client';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
@@ -17,14 +17,14 @@ import {
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/step_executions_mappings';
 import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/workflow_executions_mappings';
 import type {
-  CreateExecutionsDataAccessDeps,
-  ExecutionsDataAccessBundle,
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
+  CreateDataClientDeps,
+  DataClientBundle,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
 } from '../../types';
 
-export class PlainIndexExecutionsDataAccessBundle implements ExecutionsDataAccessBundle {
-  constructor(private readonly deps: CreateExecutionsDataAccessDeps) {}
+export class PlainIndexDataClientBundle implements DataClientBundle {
+  constructor(private readonly deps: CreateDataClientDeps) {}
 
   async initSetup(): Promise<void> {
     const esClient = await this.deps.coreSetup
@@ -56,11 +56,11 @@ export class PlainIndexExecutionsDataAccessBundle implements ExecutionsDataAcces
     return Promise.resolve();
   }
 
-  async createWorkflowExecutionsDataAccess(): Promise<WorkflowExecutionsDataAccess> {
+  async createWorkflowDataClient(): Promise<WorkflowExecutionsDataClient> {
     const esClient = await this.deps.coreSetup
       .getStartServices()
       .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
-    return new PlainIndexExecutionsDataAccess<EsWorkflowExecution>({
+    return new PlainIndexDataClient<EsWorkflowExecution>({
       esClient,
       logger: this.deps.logger,
       indexName: WORKFLOWS_EXECUTIONS_INDEX,
@@ -68,11 +68,11 @@ export class PlainIndexExecutionsDataAccessBundle implements ExecutionsDataAcces
     });
   }
 
-  async createStepExecutionsDataAccess(): Promise<StepExecutionsDataAccess> {
+  async createStepDataClient(): Promise<StepExecutionsDataClient> {
     const esClient = await this.deps.coreSetup
       .getStartServices()
       .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
-    return new PlainIndexExecutionsDataAccess<EsWorkflowStepExecution>({
+    return new PlainIndexDataClient<EsWorkflowStepExecution>({
       esClient,
       logger: this.deps.logger,
       indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,

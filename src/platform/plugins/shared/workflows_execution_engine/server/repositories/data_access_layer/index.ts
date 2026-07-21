@@ -22,25 +22,21 @@ export { createUnsupportedStorageSourceError } from './lib/validate_factory_para
 export { getStepExecutionsByWorkflowExecution } from './lib/get_step_executions_by_workflow_execution';
 export type { GetStepExecutionsByWorkflowExecutionParams } from './lib/get_step_executions_by_workflow_execution';
 
-export type {
-  ExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
-  StepExecutionsDataAccess,
-} from './types';
-export type { PlainIndexExecutionsDataAccessDeps } from './implementations/plain_index/plain_index_executions_data_access';
-export { PlainIndexExecutionsDataAccess } from './implementations/plain_index/plain_index_executions_data_access';
-export { createExecutionsDataAccess } from './implementations/create_executions_data_access';
+export type { DataClient, WorkflowExecutionsDataClient, StepExecutionsDataClient } from './types';
+export type { PlainIndexDataClientDeps } from './implementations/plain_index/plain_index_data_client';
+export { PlainIndexDataClient } from './implementations/plain_index/plain_index_data_client';
+export { createDataClientBundle } from './implementations/create_data_client_bundle';
 
 export type {
   BulkItem,
   BulkItemResponse,
   BulkRequestOptions,
   BulkResponse,
-  CreateExecutionsDataAccessDeps,
+  CreateDataClientDeps,
   ExecutionDataStreamClient,
   ExecutionSourceProjectionField,
   ExecutionStorageSource,
-  ExecutionsDataAccessBundle,
+  DataClientBundle,
   ExecutionsCountRequest,
   ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,

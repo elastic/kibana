@@ -9,8 +9,8 @@
 
 import {
   createMockGetExecutionsByIdsResponse,
-  createMockStepExecutionsDataAccess,
-  createMockWorkflowExecutionsDataAccess,
+  createMockStepDataClient,
+  createMockWorkflowDataClient,
 } from './repositories/data_access_layer/mocks';
 import type {
   WorkflowsExecutionEnginePluginSetup,
@@ -20,16 +20,16 @@ import { createMockWorkflowEventLoggerService } from './workflow_event_logger/mo
 
 export {
   createMockGetExecutionsByIdsResponse,
-  createMockStepExecutionsDataAccess,
-  createMockWorkflowExecutionsDataAccess,
+  createMockStepDataClient,
+  createMockWorkflowDataClient,
 };
 
 export const workflowsExecutionEngineMock = {
   createSetup: jest.fn().mockReturnValue({} as jest.Mocked<WorkflowsExecutionEnginePluginSetup>),
   createStart: jest.fn().mockReturnValue({
     __internalStorage: {
-      workflowExecutionsDataAccess: createMockWorkflowExecutionsDataAccess(),
-      stepExecutionsDataAccess: createMockStepExecutionsDataAccess(),
+      workflowExecutionsDataClient: createMockWorkflowDataClient(),
+      stepExecutionsDataClient: createMockStepDataClient(),
     },
     workflowEventLoggerService: createMockWorkflowEventLoggerService(),
     executeWorkflow: jest.fn(),

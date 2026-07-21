@@ -17,8 +17,8 @@ import { sharedBulk } from '../../lib/shared_bulk';
 import type {
   BulkRequestOptions,
   BulkResponse,
+  DataClient,
   ExecutionsCountRequest,
-  ExecutionsDataAccess,
   ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,
   GetExecutionsByIdsOptions,
@@ -27,17 +27,17 @@ import type {
   ScriptUpdateResponse,
 } from '../../types';
 
-export interface PlainIndexExecutionsDataAccessDeps {
+export interface PlainIndexDataClientDeps {
   esClient: ElasticsearchClient;
   indexName: string;
   mappings: MappingTypeMapping;
   logger?: Logger;
 }
 
-export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
-  implements ExecutionsDataAccess<TExecution>
+export class PlainIndexDataClient<TExecution extends { id: string }>
+  implements DataClient<TExecution>
 {
-  constructor(private readonly deps: PlainIndexExecutionsDataAccessDeps) {}
+  constructor(private readonly deps: PlainIndexDataClientDeps) {}
 
   public async search(
     request: ExecutionsSearchRequest

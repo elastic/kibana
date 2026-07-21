@@ -980,8 +980,8 @@ export class WorkflowCrudService {
       spaceId,
       force: options?.force ?? false,
       storage: this.deps.workflowStorage,
-      workflowExecutionsDataAccess: this.deps.workflowExecutionsDataAccess,
-      stepExecutionsDataAccess: this.deps.stepExecutionsDataAccess,
+      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       taskScheduler: this.deps.getTaskScheduler(),
       logger: this.deps.logger,
       getWorkflowExecutions: (params, sp) =>

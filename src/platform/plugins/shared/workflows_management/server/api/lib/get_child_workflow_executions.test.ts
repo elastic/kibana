@@ -8,20 +8,20 @@
  */
 
 import type {
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
 import {
   createMockGetExecutionsByIdsResponse,
-  createMockStepExecutionsDataAccess,
-  createMockWorkflowExecutionsDataAccess,
+  createMockStepDataClient,
+  createMockWorkflowDataClient,
 } from '@kbn/workflows-execution-engine/server/mocks';
 import { getChildWorkflowExecutions } from './get_child_workflow_executions';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 
 describe('getChildWorkflowExecutions', () => {
-  let mockWorkflowExecutionsDataAccess: jest.Mocked<WorkflowExecutionsDataAccess>;
-  let mockStepExecutionsDataAccess: jest.Mocked<StepExecutionsDataAccess>;
+  let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let mockStepDataClient: jest.Mocked<StepExecutionsDataClient>;
 
   const mockWorkflowGetByIds = (documents: unknown[]) =>
     createMockGetExecutionsByIdsResponse(documents as any);
@@ -75,70 +75,70 @@ describe('getChildWorkflowExecutions', () => {
   });
 
   beforeEach(() => {
-    mockWorkflowExecutionsDataAccess = createMockWorkflowExecutionsDataAccess();
-    mockStepExecutionsDataAccess = createMockStepExecutionsDataAccess();
+    mockWorkflowDataClient = createMockWorkflowDataClient();
+    mockStepDataClient = createMockStepDataClient();
     jest.clearAllMocks();
   });
 
   it('should return empty array when parent execution is not found', async () => {
-    mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(mockWorkflowGetByIds([]));
+    mockWorkflowDataClient.getByIds.mockResolvedValue(mockWorkflowGetByIds([]));
 
     const result = await getChildWorkflowExecutions({
       ...baseParams,
-      workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-      stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+      workflowExecutionsDataClient: mockWorkflowDataClient,
+      stepExecutionsDataClient: mockStepDataClient,
     });
 
     expect(result).toEqual([]);
   });
 
   it('should return empty array when spaceId does not match', async () => {
-    mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+    mockWorkflowDataClient.getByIds.mockResolvedValue(
       mockWorkflowGetByIds([{ ...parentDoc, spaceId: 'other-space' }])
     );
 
     const result = await getChildWorkflowExecutions({
       ...baseParams,
-      workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-      stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+      workflowExecutionsDataClient: mockWorkflowDataClient,
+      stepExecutionsDataClient: mockStepDataClient,
     });
 
     expect(result).toEqual([]);
   });
 
   it('should return empty array when no workflow.execute steps exist', async () => {
-    mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(mockWorkflowGetByIds([parentDoc]));
-    mockStepExecutionsDataAccess.getByIds.mockResolvedValue(
+    mockWorkflowDataClient.getByIds.mockResolvedValue(mockWorkflowGetByIds([parentDoc]));
+    mockStepDataClient.getByIds.mockResolvedValue(
       mockStepGetByIds([createRegularStep('step-1'), createRegularStep('step-2')])
     );
 
     const result = await getChildWorkflowExecutions({
       ...baseParams,
-      workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-      stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+      workflowExecutionsDataClient: mockWorkflowDataClient,
+      stepExecutionsDataClient: mockStepDataClient,
     });
 
     expect(result).toEqual([]);
-    expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledTimes(1);
+    expect(mockStepDataClient.getByIds).toHaveBeenCalledTimes(1);
   });
 
   it('should skip workflow.execute steps that are not in terminal status', async () => {
-    mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(mockWorkflowGetByIds([parentDoc]));
-    mockStepExecutionsDataAccess.getByIds.mockResolvedValue(
+    mockWorkflowDataClient.getByIds.mockResolvedValue(mockWorkflowGetByIds([parentDoc]));
+    mockStepDataClient.getByIds.mockResolvedValue(
       mockStepGetByIds([createWorkflowExecuteStep('step-1', 'child-exec-1', 'running')])
     );
 
     const result = await getChildWorkflowExecutions({
       ...baseParams,
-      workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-      stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+      workflowExecutionsDataClient: mockWorkflowDataClient,
+      stepExecutionsDataClient: mockStepDataClient,
     });
 
     expect(result).toEqual([]);
   });
 
   it('should fetch child executions and their steps', async () => {
-    mockWorkflowExecutionsDataAccess.getByIds
+    mockWorkflowDataClient.getByIds
       .mockResolvedValueOnce(mockWorkflowGetByIds([parentDoc]))
       .mockResolvedValueOnce(
         mockWorkflowGetByIds([
@@ -152,7 +152,7 @@ describe('getChildWorkflowExecutions', () => {
           },
         ])
       );
-    mockStepExecutionsDataAccess.getByIds
+    mockStepDataClient.getByIds
       .mockResolvedValueOnce(
         mockStepGetByIds([createWorkflowExecuteStep('step-1', 'child-exec-1')])
       )
@@ -177,8 +177,8 @@ describe('getChildWorkflowExecutions', () => {
 
     const result = await getChildWorkflowExecutions({
       ...baseParams,
-      workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-      stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+      workflowExecutionsDataClient: mockWorkflowDataClient,
+      stepExecutionsDataClient: mockStepDataClient,
     });
 
     expect(result).toHaveLength(1);
@@ -196,27 +196,23 @@ describe('getChildWorkflowExecutions', () => {
   });
 
   it('should use sourceIncludes for parent and child workflow execution lookups', async () => {
-    mockWorkflowExecutionsDataAccess.getByIds
+    mockWorkflowDataClient.getByIds
       .mockResolvedValueOnce(mockWorkflowGetByIds([parentDoc]))
       .mockResolvedValueOnce(mockWorkflowGetByIds([]));
-    mockStepExecutionsDataAccess.getByIds.mockResolvedValue(
+    mockStepDataClient.getByIds.mockResolvedValue(
       mockStepGetByIds([createWorkflowExecuteStep('step-1', 'child-exec-1')])
     );
 
     await getChildWorkflowExecutions({
       ...baseParams,
-      workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-      stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+      workflowExecutionsDataClient: mockWorkflowDataClient,
+      stepExecutionsDataClient: mockStepDataClient,
     });
 
-    expect(mockWorkflowExecutionsDataAccess.getByIds).toHaveBeenNthCalledWith(
-      1,
-      ['parent-exec-1'],
-      {
-        sourceIncludes: ['spaceId', 'stepExecutionIds'],
-      }
-    );
-    expect(mockWorkflowExecutionsDataAccess.getByIds).toHaveBeenNthCalledWith(2, ['child-exec-1'], {
+    expect(mockWorkflowDataClient.getByIds).toHaveBeenNthCalledWith(1, ['parent-exec-1'], {
+      sourceIncludes: ['spaceId', 'stepExecutionIds'],
+    });
+    expect(mockWorkflowDataClient.getByIds).toHaveBeenNthCalledWith(2, ['child-exec-1'], {
       sourceIncludes: expect.arrayContaining([
         'id',
         'spaceId',
@@ -228,7 +224,7 @@ describe('getChildWorkflowExecutions', () => {
   });
 
   it('should filter out child executions from a different space', async () => {
-    mockWorkflowExecutionsDataAccess.getByIds
+    mockWorkflowDataClient.getByIds
       .mockResolvedValueOnce(mockWorkflowGetByIds([parentDoc]))
       .mockResolvedValueOnce(
         mockWorkflowGetByIds([
@@ -241,14 +237,14 @@ describe('getChildWorkflowExecutions', () => {
           },
         ])
       );
-    mockStepExecutionsDataAccess.getByIds.mockResolvedValue(
+    mockStepDataClient.getByIds.mockResolvedValue(
       mockStepGetByIds([createWorkflowExecuteStep('step-1', 'child-exec-1')])
     );
 
     const result = await getChildWorkflowExecutions({
       ...baseParams,
-      workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
-      stepExecutionsDataAccess: mockStepExecutionsDataAccess,
+      workflowExecutionsDataClient: mockWorkflowDataClient,
+      stepExecutionsDataClient: mockStepDataClient,
     });
 
     expect(result).toEqual([]);

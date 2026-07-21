@@ -16,15 +16,15 @@ import type {
 import { pickWorkflowDocumentVersion } from '@kbn/workflows';
 import type {
   GetStepExecutionsByIdsOptions,
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows-execution-engine/server';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 
 interface GetWorkflowExecutionParams {
-  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
-  stepExecutionsDataAccess: StepExecutionsDataAccess;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   logger: Logger;
   workflowExecutionId: string;
   spaceId: string;
@@ -33,8 +33,8 @@ interface GetWorkflowExecutionParams {
 }
 
 export const getWorkflowExecution = async ({
-  workflowExecutionsDataAccess,
-  stepExecutionsDataAccess,
+  workflowExecutionsDataClient,
+  stepExecutionsDataClient,
   logger,
   workflowExecutionId,
   spaceId,
@@ -44,7 +44,7 @@ export const getWorkflowExecution = async ({
   try {
     // Use mget by id for O(1) lookup performance instead of search
     // This is critical for reducing ES CPU load from frequent UI polling
-    const { items } = await workflowExecutionsDataAccess.getByIds([workflowExecutionId]);
+    const { items } = await workflowExecutionsDataClient.getByIds([workflowExecutionId]);
     const doc = items[0]?.document;
 
     // Verify spaceId matches for security/multi-tenancy
@@ -57,7 +57,7 @@ export const getWorkflowExecution = async ({
     if (!includeOutput) sourceExcludes.push('output');
 
     const stepExecutions = await getStepExecutionsByWorkflowExecution({
-      stepExecutionsDataAccess,
+      stepExecutionsDataClient,
       workflowExecutionId,
       stepExecutionIds: doc.stepExecutionIds,
       sourceExcludes: sourceExcludes as GetStepExecutionsByIdsOptions['sourceExcludes'],

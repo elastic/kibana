@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PlainIndexExecutionsDataAccessBundle } from './plain_index/create_plain_index_executions_data_access';
+import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_client_bundle';
 import { createUnsupportedStorageSourceError } from '../lib/validate_factory_params';
-import type { CreateExecutionsDataAccessDeps, ExecutionsDataAccessBundle } from '../types';
+import type { CreateDataClientDeps, DataClientBundle } from '../types';
 
-export function createExecutionsDataAccess(
-  deps: CreateExecutionsDataAccessDeps
-): ExecutionsDataAccessBundle {
+export function createDataClientBundle(
+  deps: CreateDataClientDeps
+): DataClientBundle {
   switch (deps.source) {
     case 'system_index':
-      return new PlainIndexExecutionsDataAccessBundle(deps);
+      return new PlainIndexDataClientBundle(deps);
     default: {
-      throw createUnsupportedStorageSourceError('ExecutionsDataAccess', deps.source);
+      throw createUnsupportedStorageSourceError('DataClient', deps.source);
     }
   }
 }

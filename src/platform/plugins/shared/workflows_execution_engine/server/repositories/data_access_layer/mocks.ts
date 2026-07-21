@@ -9,8 +9,8 @@
 
 import type {
   GetExecutionsByIdsResponse,
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
 } from './types';
 
 export const createMockGetExecutionsByIdsResponse = <TExecution extends { id: string }>(
@@ -27,9 +27,9 @@ export const createMockGetExecutionsByIdsResponse = <TExecution extends { id: st
   missing: options.missing ?? [],
 });
 
-export const createMockWorkflowExecutionsDataAccess = (
-  overrides: Partial<jest.Mocked<WorkflowExecutionsDataAccess>> = {}
-): jest.Mocked<WorkflowExecutionsDataAccess> =>
+export const createMockWorkflowDataClient = (
+  overrides: Partial<jest.Mocked<WorkflowExecutionsDataClient>> = {}
+): jest.Mocked<WorkflowExecutionsDataClient> =>
   ({
     search: jest.fn(),
     count: jest.fn(),
@@ -38,11 +38,11 @@ export const createMockWorkflowExecutionsDataAccess = (
     scriptUpdate: jest.fn(),
     deleteByQuery: jest.fn(),
     ...overrides,
-  } as jest.Mocked<WorkflowExecutionsDataAccess>);
+  } as jest.Mocked<WorkflowExecutionsDataClient>);
 
-export const createMockStepExecutionsDataAccess = (
-  overrides: Partial<jest.Mocked<StepExecutionsDataAccess>> = {}
-): jest.Mocked<StepExecutionsDataAccess> =>
+export const createMockStepDataClient = (
+  overrides: Partial<jest.Mocked<StepExecutionsDataClient>> = {}
+): jest.Mocked<StepExecutionsDataClient> =>
   ({
     search: jest.fn(),
     count: jest.fn(),
@@ -51,4 +51,4 @@ export const createMockStepExecutionsDataAccess = (
     scriptUpdate: jest.fn(),
     deleteByQuery: jest.fn(),
     ...overrides,
-  } as jest.Mocked<StepExecutionsDataAccess>);
+  } as jest.Mocked<StepExecutionsDataClient>);
