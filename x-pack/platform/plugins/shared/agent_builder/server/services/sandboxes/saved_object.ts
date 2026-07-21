@@ -8,7 +8,6 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import type {
   SandboxConnection,
-  SandboxGithubAppConfig,
   SandboxPolicy,
   SandboxProviderId,
   SandboxRuntimeConfig,
@@ -34,8 +33,6 @@ export interface SandboxProfileAttributes {
   connection: SandboxConnection;
   runtime_config: SandboxRuntimeConfig;
   policy: SandboxPolicy;
-  /** GitHub App credential config (non-secret ids); the key is in `secrets`. */
-  github_app?: SandboxGithubAppConfig;
   created_at: string;
   updated_at: string;
   /** Encrypted secret connection material (empty for local-k8s). */

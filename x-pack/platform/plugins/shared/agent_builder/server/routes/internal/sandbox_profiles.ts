@@ -57,13 +57,6 @@ const piRuntimeConfigSchema = schema.object({
 
 const runtimeConfigSchema = schema.oneOf([opencodeRuntimeConfigSchema, piRuntimeConfigSchema]);
 
-// GitHub App credential config (non-secret ids). The App private key travels in
-// `secrets` under GITHUB_APP_PRIVATE_KEY_SECRET_KEY, never in this block.
-const githubAppSchema = schema.object({
-  clientId: schema.maybe(schema.string()),
-  appId: schema.maybe(schema.string()),
-});
-
 const policySchema = schema.object({
   // Capability tier (named preset over the axes below); axes may override it.
   tier: schema.maybe(
@@ -117,7 +110,6 @@ const createBodySchema = schema.object({
   connection: connectionSchema,
   runtimeConfig: runtimeConfigSchema,
   policy: policySchema,
-  githubApp: schema.maybe(githubAppSchema),
   secrets: schema.maybe(schema.recordOf(schema.string(), schema.string())),
 });
 
@@ -127,7 +119,6 @@ const updateBodySchema = schema.object({
   connection: schema.maybe(connectionSchema),
   runtimeConfig: schema.maybe(runtimeConfigSchema),
   policy: schema.maybe(policySchema),
-  githubApp: schema.maybe(githubAppSchema),
   secrets: schema.maybe(schema.recordOf(schema.string(), schema.string())),
 });
 

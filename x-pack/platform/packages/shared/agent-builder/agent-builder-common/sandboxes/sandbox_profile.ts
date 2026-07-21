@@ -215,23 +215,6 @@ export interface PiRuntimeConfig {
 
 export type SandboxRuntimeConfig = OpencodeRuntimeConfig | PiRuntimeConfig;
 
-/**
- * GitHub App configuration for a sandbox profile — the git credential layer.
- * Non-secret identifiers live here; the App private key is stored in the
- * profile's `secrets` (under {@link GITHUB_APP_PRIVATE_KEY_SECRET_KEY}), like the
- * GCP service-account key. This is per-profile (not global Kibana config) so each
- * sandbox brings its own credential story:
- *
- * - `clientId` enables the OAuth Device Flow ("act as the user") so the sandbox
- *   can read private repos the user has access to (e.g. `elastic/*`).
- * - `appId` (+ the private key secret) enables minting short-lived, repo-scoped
- *   *installation* tokens for push/PR on a fork.
- */
-export interface SandboxGithubAppConfig {
-  clientId?: string;
-  appId?: string;
-}
-
 /** A profile as returned to the UI (no secrets). */
 export interface SandboxProfile {
   id: string;
@@ -242,8 +225,6 @@ export interface SandboxProfile {
   connection: SandboxConnection;
   runtimeConfig: SandboxRuntimeConfig;
   policy: SandboxPolicy;
-  /** Optional GitHub App credential config for git operations in the sandbox. */
-  githubApp?: SandboxGithubAppConfig;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -270,6 +251,3 @@ export const DEFAULT_SANDBOX_POLICY: SandboxPolicy = {
 
 /** Well-known secret key holding a GCP service-account JSON for Cloud Run. */
 export const CLOUD_RUN_SA_SECRET_KEY = 'gcpServiceAccountKey';
-
-/** Well-known secret key holding a GitHub App private key PEM for a profile. */
-export const GITHUB_APP_PRIVATE_KEY_SECRET_KEY = 'githubAppPrivateKey';

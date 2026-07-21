@@ -19,7 +19,6 @@ export type {
   SandboxGitPolicy,
   OpencodeRuntimeConfig,
   SandboxRuntimeConfig,
-  SandboxGithubAppConfig,
   SandboxProfile,
   SandboxProfileCreateRequest,
   SandboxProfileUpdateRequest,
@@ -27,7 +26,6 @@ export type {
 export {
   DEFAULT_SANDBOX_POLICY,
   CLOUD_RUN_SA_SECRET_KEY,
-  GITHUB_APP_PRIVATE_KEY_SECRET_KEY,
   SANDBOX_TIER_PRESETS,
   resolveSandboxCapabilities,
 } from './sandbox_profile';

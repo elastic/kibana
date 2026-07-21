@@ -38,7 +38,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   CLOUD_RUN_SA_SECRET_KEY,
-  GITHUB_APP_PRIVATE_KEY_SECRET_KEY,
   DEFAULT_SANDBOX_POLICY,
   SANDBOX_TIER_PRESETS,
   type SandboxConnection,
@@ -316,14 +315,6 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
   const initialPi = profile?.runtimeConfig.type === 'pi' ? profile.runtimeConfig : undefined;
   const [piModel, setPiModel] = useState(initialPi?.model ?? RUNTIME_DEFAULTS.piModel);
 
-  // GitHub App credential config (git layer). clientId enables the Device Flow
-  // "act as the user" read credential; appId (+ the private-key secret) enables
-  // minting scoped installation tokens for push/PR. Non-secret ids persist on the
-  // profile; the private key is a secret (set on create, like the GCP SA key).
-  const [githubClientId, setGithubClientId] = useState(profile?.githubApp?.clientId ?? '');
-  const [githubAppId, setGithubAppId] = useState(profile?.githubApp?.appId ?? '');
-  const [githubPrivateKey, setGithubPrivateKey] = useState('');
-
   // policy
   const [idleTtlMin, setIdleTtlMin] = useState(
     (profile?.policy.idleTtlMs ?? DEFAULT_SANDBOX_POLICY.idleTtlMs) / 60000
@@ -395,17 +386,7 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
     if (provider === 'cloud-run' && saKey.trim()) {
       secretEntries[CLOUD_RUN_SA_SECRET_KEY] = saKey.trim();
     }
-    if (githubPrivateKey.trim()) {
-      secretEntries[GITHUB_APP_PRIVATE_KEY_SECRET_KEY] = githubPrivateKey.trim();
-    }
     const secrets = Object.keys(secretEntries).length > 0 ? secretEntries : undefined;
-    const githubApp =
-      githubClientId.trim() || githubAppId.trim()
-        ? {
-            clientId: githubClientId.trim() || undefined,
-            appId: githubAppId.trim() || undefined,
-          }
-        : undefined;
     const policy = {
       tier,
       idleTtlMs: idleTtlMin * 60000,
@@ -433,7 +414,6 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
             connection,
             runtimeConfig,
             policy,
-            githubApp,
           },
         });
         notifications.toasts.addSuccess(
@@ -451,7 +431,6 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
           connection,
           runtimeConfig,
           policy,
-          githubApp,
           secrets,
         };
         await createProfile(body);
@@ -766,81 +745,6 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
               <EuiFieldText value={piModel} onChange={(e) => setPiModel(e.target.value)} />
             </EuiFormRow>
           )}
-
-          {/* ---- GitHub App credential (git layer) ---- */}
-          <EuiHorizontalRule margin="l" />
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.agentBuilder.sandboxes.section.githubApp', {
-                defaultMessage: 'GitHub App (optional)',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.agentBuilder.sandboxes.section.githubAppHint', {
-              defaultMessage:
-                'Lets the sandbox authenticate to GitHub. Client ID enables "act as the user" (Device Flow) to read private repos you can access; App ID + private key mint short-lived, repo-scoped tokens for push/PR.',
-            })}
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiFormRow
-            label={
-              <LabelWithHelp
-                label={i18n.translate('xpack.agentBuilder.sandboxes.field.githubClientId', {
-                  defaultMessage: 'OAuth Client ID',
-                })}
-                help={i18n.translate('xpack.agentBuilder.sandboxes.field.githubClientIdHelp', {
-                  defaultMessage:
-                    'The GitHub App client ID (Iv...). Enables the Device Flow so the sandbox reads GitHub as you. Requires "Enable Device Flow" on the App.',
-                })}
-              />
-            }
-          >
-            <EuiFieldText
-              placeholder="Iv23li..."
-              value={githubClientId}
-              onChange={(e) => setGithubClientId(e.target.value)}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={
-              <LabelWithHelp
-                label={i18n.translate('xpack.agentBuilder.sandboxes.field.githubAppId', {
-                  defaultMessage: 'App ID',
-                })}
-                help={i18n.translate('xpack.agentBuilder.sandboxes.field.githubAppIdHelp', {
-                  defaultMessage:
-                    'Numeric GitHub App ID. Used with the private key to mint scoped installation tokens for push/PR on a fork.',
-                })}
-              />
-            }
-          >
-            <EuiFieldText
-              placeholder="4286449"
-              value={githubAppId}
-              onChange={(e) => setGithubAppId(e.target.value)}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={
-              <LabelWithHelp
-                label={i18n.translate('xpack.agentBuilder.sandboxes.field.githubPrivateKey', {
-                  defaultMessage: 'App private key (PEM)',
-                })}
-                help={i18n.translate('xpack.agentBuilder.sandboxes.field.githubPrivateKeyHelp', {
-                  defaultMessage:
-                    'Stored encrypted, never returned to the browser. Only needed for installation tokens (push/PR). Set on create; leave blank to keep the existing key.',
-                })}
-              />
-            }
-          >
-            <EuiTextArea
-              placeholder="-----BEGIN RSA PRIVATE KEY-----"
-              value={githubPrivateKey}
-              onChange={(e) => setGithubPrivateKey(e.target.value)}
-              rows={4}
-            />
-          </EuiFormRow>
 
           {/* ---- Capabilities (permission tier + advanced axes) ---- */}
           <EuiHorizontalRule margin="l" />

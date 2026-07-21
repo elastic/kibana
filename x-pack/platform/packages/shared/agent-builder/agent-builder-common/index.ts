@@ -309,13 +309,11 @@ export {
   type SandboxGitPolicy,
   type OpencodeRuntimeConfig,
   type SandboxRuntimeConfig,
-  type SandboxGithubAppConfig,
   type SandboxProfile,
   type SandboxProfileCreateRequest,
   type SandboxProfileUpdateRequest,
   DEFAULT_SANDBOX_POLICY,
   CLOUD_RUN_SA_SECRET_KEY,
-  GITHUB_APP_PRIVATE_KEY_SECRET_KEY,
   SANDBOX_TIER_PRESETS,
   resolveSandboxCapabilities,
 } from './sandboxes';

@@ -31,7 +31,6 @@ const toProfile = (id: string, attrs: SandboxProfileAttributes): SandboxProfile 
   connection: attrs.connection,
   runtimeConfig: attrs.runtime_config,
   policy: attrs.policy,
-  githubApp: attrs.github_app,
   createdAt: attrs.created_at,
   updatedAt: attrs.updated_at,
 });
@@ -60,7 +59,6 @@ export class SandboxProfileClient {
       connection: request.connection,
       runtime_config: request.runtimeConfig,
       policy: request.policy ?? DEFAULT_SANDBOX_POLICY,
-      github_app: request.githubApp,
       created_at: now,
       updated_at: now,
       secrets: request.secrets ?? {},
@@ -111,7 +109,6 @@ export class SandboxProfileClient {
         connection: request.connection,
         runtime_config: request.runtimeConfig,
         policy: request.policy,
-        github_app: request.githubApp,
         updated_at: new Date().toISOString(),
       },
       [...SANDBOX_PROFILE_ATTRIBUTES_TO_ENCRYPT, ...SANDBOX_PROFILE_ATTRIBUTES_IN_AAD]
