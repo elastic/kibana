@@ -12,6 +12,9 @@ const mockValidateQuery = jest.fn();
 jest.mock('@kbn/esql-language', () => ({
   __esModule: true,
   validateQuery: (...args: unknown[]) => mockValidateQuery(...args),
+  // @kbn/monaco's Console ES|QL lexer reads this eagerly at module-load time to build its
+  // keyword list, so it needs a stub here even though this suite doesn't exercise highlighting.
+  esqlCommandRegistry: { getAllCommandNames: () => [] },
 }));
 
 // eslint-disable-next-line import/no-nodejs-modules

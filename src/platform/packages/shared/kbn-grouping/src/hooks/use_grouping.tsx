@@ -173,12 +173,12 @@ export const useGrouping = <T,>({
         <GroupingComponent
           {...componentProps}
           {...props}
-          groupSelector={groupSelector}
+          groupSelector={settings?.hideGroupSelector ? null : groupSelector}
           groupingId={groupingId}
           tracker={tracker}
         />
       ),
-    [componentProps, groupSelector, groupingId, tracker]
+    [componentProps, groupSelector, groupingId, settings?.hideGroupSelector, tracker]
   );
 
   return useMemo(

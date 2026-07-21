@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
-import { rangeRt } from '../../default_api_types';
+import { rangeSchema } from '../../default_api_types';
 
 export interface SuggestionsResponse {
   terms: string[];
@@ -14,14 +14,13 @@ export interface SuggestionsResponse {
 
 export const suggestionsRoute = defineRoute<SuggestionsResponse>()({
   endpoint: 'GET /internal/apm/suggestions',
-  params: t.type({
-    query: t.intersection([
-      t.type({
-        fieldName: t.string,
-        fieldValue: t.string,
-      }),
-      rangeRt,
-      t.partial({ serviceName: t.string }),
-    ]),
+  params: z.object({
+    query: z
+      .object({
+        fieldName: z.string(),
+        fieldValue: z.string(),
+      })
+      .merge(rangeSchema)
+      .extend({ serviceName: z.string().optional() }),
   }),
 });

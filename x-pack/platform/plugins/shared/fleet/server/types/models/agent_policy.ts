@@ -359,6 +359,23 @@ export const AgentPolicySchemaV6 = AgentPolicySchemaV5.extends(
   { meta: { id: 'agent_policy_v6' } }
 );
 
+export const AgentPolicySchemaV7 = AgentPolicySchemaV6.extends(
+  {
+    is_preconfigured: schema.maybe(schema.boolean()),
+    revision: schema.maybe(schema.number()),
+    schema_version: schema.maybe(schema.string()),
+    status: schema.maybe(
+      schema.oneOf([
+        schema.literal(agentPolicyStatuses.Active),
+        schema.literal(agentPolicyStatuses.Inactive),
+      ])
+    ),
+    updated_at: schema.maybe(schema.string()),
+    updated_by: schema.maybe(schema.string()),
+  },
+  { meta: { id: 'agent_policy_v7' } }
+);
+
 export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
   {
     supports_agentless: schema.maybe(
@@ -368,7 +385,7 @@ export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
           defaultValue: false,
           meta: {
             description:
-              'Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet agentless policies API.',
+              'Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet managed integrations API.',
             deprecated: true,
           },
         }),

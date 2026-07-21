@@ -216,7 +216,7 @@ describe('extractPipelineValidationData', () => {
   });
 
   describe('deduplication accounting via persist step', () => {
-    it('subtracts duplicates_dropped_count from validated_discoveries when there are duplicates', () => {
+    it('returns persisted_discoveries as-is (already the net-new set) even when duplicates were dropped', () => {
       const execution = {
         ...baseExecution,
         stepExecutions: [
@@ -227,9 +227,11 @@ describe('extractPipelineValidationData', () => {
             stepType: 'security.attack-discovery.defaultValidation',
           },
           {
+            // persisted_discoveries holds ONLY the net-new discovery; the pre-existing
+            // duplicate was dropped on write and is reflected in duplicates_dropped_count.
             output: {
               duplicates_dropped_count: 1,
-              persisted_discoveries: [mockValidatedDiscovery],
+              persisted_discoveries: [mockValidatedDiscoveryTwo],
             },
             stepType: 'security.attack-discovery.persistDiscoveries',
           },
@@ -238,7 +240,7 @@ describe('extractPipelineValidationData', () => {
 
       const result = extractPipelineValidationData({ execution });
 
-      expect(result).toHaveLength(1);
+      expect(result).toEqual([mockValidatedDiscoveryTwo]);
     });
 
     it('returns empty array when all validated_discoveries are duplicates', () => {
@@ -291,7 +293,7 @@ describe('extractPipelineValidationData', () => {
       expect(result).toEqual([mockValidatedDiscovery, mockValidatedDiscoveryTwo]);
     });
 
-    it('clamps to empty array when duplicates_dropped_count exceeds validated_discoveries length', () => {
+    it('returns empty array when persisted_discoveries is empty regardless of duplicates_dropped_count', () => {
       const execution = {
         ...baseExecution,
         stepExecutions: [

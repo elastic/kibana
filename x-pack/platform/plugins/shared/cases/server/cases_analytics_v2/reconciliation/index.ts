@@ -122,7 +122,7 @@ export function registerReconciliationTask({
           const deps = await getRunnerDeps();
 
           // Cases first (the dimension table). A `LOOKUP JOIN .cases
-          // ON cases.id` from any post-fact-table walk consumer then
+          // ON case.id` from any post-fact-table walk consumer then
           // always sees the joined case row at least as up-to-date as
           // the activity / attachment row that referenced it.
           let casesError: unknown;
@@ -331,8 +331,12 @@ export async function resetReconciliationTask({
   intervalMinutes,
   initialState = {},
 }: ResetReconciliationTaskArgs): Promise<void> {
-  await scheduleReconciliationTask({ taskManager, logger, intervalMinutes });
+  // Keep both steps inside the try as a self-contained "never throws" guard. Today
+  // `scheduleReconciliationTask` already swallows its own errors, so in practice this catch only
+  // fires on the `bulkUpdateState` path — scoping the schedule call in too is defensive
+  // future-proofing so a later change that lets it throw can't break this contract.
   try {
+    await scheduleReconciliationTask({ taskManager, logger, intervalMinutes });
     await taskManager.bulkUpdateState([RECONCILIATION_TASK_ID], () => initialState);
   } catch (err) {
     logger.warn(

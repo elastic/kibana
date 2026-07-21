@@ -41,6 +41,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const securityService = getService('security');
   const kbnServer = getService('kibanaServer');
 
+  /**
+   * Purpose: Verify lens and vis by-value work when user does not have library permissions
+   *
+   * Migration: Migrate to scout
+   */
   describe('dashboard time to visualize security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(

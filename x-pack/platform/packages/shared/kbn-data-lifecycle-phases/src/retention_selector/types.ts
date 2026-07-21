@@ -9,13 +9,6 @@ export interface RetentionOption {
   /** Unique identifier and display title for the row. */
   name: string;
   /**
-   * Optional method/category key used by `RetentionSelector`'s `methodFilter`.
-   *
-   * The selector itself is agnostic to what the key means (e.g. "ilm", "dlm",
-   * "hot", "warm", etc.) — callers define the semantics.
-   */
-  method?: string;
-  /**
    * Optional category prefix, rendered as:
    * `${descriptionCategory}: ${descriptionParts.join(' · ')}`
    */

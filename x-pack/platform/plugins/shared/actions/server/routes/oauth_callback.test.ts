@@ -439,7 +439,7 @@ describe('oauthCallbackRoute', () => {
     });
   });
 
-  it('redirects with error on token exchange failure', async () => {
+  it('redirects with error surfacing the underlying message on token exchange failure', async () => {
     const mockOAuthState = {
       id: 'state-id',
       state: 'valid-state',

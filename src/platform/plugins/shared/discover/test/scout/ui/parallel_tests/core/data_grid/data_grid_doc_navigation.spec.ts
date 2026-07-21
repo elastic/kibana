@@ -12,7 +12,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '@kbn/scout';
+import { spaceTest } from '../../../fixtures';
 import { testData } from '../../../fixtures/common';
 
 spaceTest.describe(
@@ -42,7 +42,7 @@ spaceTest.describe(
     spaceTest(
       'opens the single-document view from the selected row',
       async ({ page, pageObjects }) => {
-        await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+        await pageObjects.docViewer.openAndWaitForFlyout({ rowIndex: 0 });
         await page.testSubj.locator('docViewerFlyout').getByLabel('View single document').click();
 
         const docHit = page.testSubj.locator('doc-hit');
@@ -54,11 +54,8 @@ spaceTest.describe(
     spaceTest(
       'creates an exists filter from the selected document flyout',
       async ({ pageObjects }) => {
-        await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
-        await pageObjects.dataGrid.clickFieldActionInDocViewer(
-          '@timestamp',
-          'addExistsFilterButton'
-        );
+        await pageObjects.docViewer.openAndWaitForFlyout({ rowIndex: 0 });
+        await pageObjects.docViewer.clickFieldActionInTable('@timestamp', 'addExistsFilterButton');
         await pageObjects.dataGrid.waitForLoad();
 
         expect(

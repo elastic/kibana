@@ -93,6 +93,7 @@ export const getWorkflowExecutionsTracking = async ({
     foundAnyValidEvent: boolean;
     generation: WorkflowExecutionsTracking['generation'];
     mergedAlertRetrieval: Map<string, WorkflowExecutionTracking>;
+    mergedGate: Map<string, WorkflowExecutionTracking>;
     providedAlerts: string[] | undefined;
     validation: WorkflowExecutionsTracking['validation'];
   }
@@ -102,6 +103,7 @@ export const getWorkflowExecutionsTracking = async ({
     foundAnyValidEvent,
     generation,
     mergedAlertRetrieval,
+    mergedGate,
     providedAlerts,
     validation,
   } = hits.reduce<TrackingAccumulator>(
@@ -131,6 +133,17 @@ export const getWorkflowExecutionsTracking = async ({
           for (const ref of alertRetrievalArray) {
             if (!acc.mergedAlertRetrieval.has(ref.workflowRunId)) {
               acc.mergedAlertRetrieval.set(ref.workflowRunId, ref);
+            }
+          }
+        }
+
+        // Merge gate entries into the shared Map (dedup by workflowRunId)
+        const gateArray = parsed.gate as WorkflowExecutionTracking[] | null | undefined;
+
+        if (Array.isArray(gateArray)) {
+          for (const ref of gateArray) {
+            if (!acc.mergedGate.has(ref.workflowRunId)) {
+              acc.mergedGate.set(ref.workflowRunId, ref);
             }
           }
         }
@@ -171,6 +184,7 @@ export const getWorkflowExecutionsTracking = async ({
       foundAnyValidEvent: false,
       generation: null,
       mergedAlertRetrieval: new Map<string, WorkflowExecutionTracking>(),
+      mergedGate: new Map<string, WorkflowExecutionTracking>(),
       providedAlerts: undefined,
       validation: null,
     }
@@ -183,6 +197,7 @@ export const getWorkflowExecutionsTracking = async ({
   const base: WorkflowExecutionsTracking = {
     alertRetrieval:
       mergedAlertRetrieval.size > 0 ? Array.from(mergedAlertRetrieval.values()) : null,
+    gate: mergedGate.size > 0 ? Array.from(mergedGate.values()) : null,
     generation,
     validation,
   };

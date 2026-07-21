@@ -42,6 +42,9 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   },
   [SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
     detectionIntervalMinutes: 30,
+    detectionBucketIntervalMinutes: 1,
+    detectionLookbackMinutes: 40,
+    targetCoverageMinutes: 30,
   },
   [SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID]: {
     reviewIntervalMinutes: 10,

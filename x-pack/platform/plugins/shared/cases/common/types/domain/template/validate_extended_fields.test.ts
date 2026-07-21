@@ -68,6 +68,25 @@ const makeUserPickerField = (overrides: Partial<FieldSchemaType> = {}): FieldSch
     ...overrides,
   } as FieldSchemaType);
 
+const makeToggleField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaType =>
+  ({
+    name: 'requires_escalation',
+    label: 'Requires escalation',
+    type: 'boolean',
+    control: FieldType.TOGGLE,
+    ...overrides,
+  } as FieldSchemaType);
+
+const makeMarkdownField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaType =>
+  ({
+    name: 'instructions',
+    label: 'Instructions',
+    type: 'keyword',
+    control: FieldType.MARKDOWN,
+    metadata: { content: 'Follow these steps.' },
+    ...overrides,
+  } as FieldSchemaType);
+
 describe('validateExtendedFields', () => {
   describe('valid payload', () => {
     it('returns empty array for valid payload', () => {
@@ -123,6 +142,28 @@ describe('validateExtendedFields', () => {
       ];
       const errors = validateExtendedFields({}, fields);
       expect(errors).toContain('Field "summary" is required');
+    });
+  });
+
+  describe('display-only (MARKDOWN) fields', () => {
+    it('does not enforce required on a display-only field', () => {
+      const fields: FieldSchemaType[] = [makeMarkdownField({ validation: { required: true } })];
+      const errors = validateExtendedFields({}, fields);
+      expect(errors).toEqual([]);
+    });
+
+    it('does not enforce required_on_close on a display-only field', () => {
+      const fields: FieldSchemaType[] = [
+        makeMarkdownField({ validation: { required_on_close: true } }),
+      ];
+      const errors = validateExtendedFields({}, fields, { onClose: true });
+      expect(errors).toEqual([]);
+    });
+
+    it('treats a value submitted for a display-only field as an unknown key', () => {
+      const fields: FieldSchemaType[] = [makeMarkdownField()];
+      const errors = validateExtendedFields({ instructions_as_keyword: 'value' }, fields);
+      expect(errors).toContain('Unknown extended field key: "instructions_as_keyword"');
     });
   });
 
@@ -481,6 +522,26 @@ describe('validateExtendedFields', () => {
         fields
       );
       expect(errors).toEqual([]);
+    });
+  });
+
+  describe('TOGGLE validation', () => {
+    it('accepts true/false string values', () => {
+      const fields: FieldSchemaType[] = [makeToggleField()];
+
+      expect(validateExtendedFields({ requires_escalation_as_boolean: 'true' }, fields)).toEqual(
+        []
+      );
+      expect(validateExtendedFields({ requires_escalation_as_boolean: 'false' }, fields)).toEqual(
+        []
+      );
+    });
+
+    it('rejects values other than true/false', () => {
+      const fields: FieldSchemaType[] = [makeToggleField()];
+      const errors = validateExtendedFields({ requires_escalation_as_boolean: 'yes' }, fields);
+
+      expect(errors).toContain('Field "Requires escalation" must be either true or false');
     });
   });
 

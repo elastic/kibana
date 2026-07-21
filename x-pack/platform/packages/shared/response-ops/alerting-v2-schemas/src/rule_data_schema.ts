@@ -10,6 +10,7 @@ import {
   DEFAULT_ARTIFACT_VALUE_LIMIT,
   ARTIFACT_VALUE_LIMITS,
   MAX_ARTIFACT_VALUE_LIMIT,
+  DEFAULT_TIME_FIELD,
 } from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
 import { durationSchema, tagsSchema } from './common';
@@ -372,7 +373,7 @@ export const createRuleDataBaseSchema = z
       .string()
       .min(1)
       .max(128)
-      .default('@timestamp')
+      .default(DEFAULT_TIME_FIELD)
       .describe('Time field used for the lookback window range filter.'),
     schedule: scheduleSchema,
     query: querySchema,
@@ -390,7 +391,7 @@ export const createRuleDataBaseSchema = z
     grouping: groupingSchema.optional(),
     artifacts: z.array(artifactSchema).max(100).optional(),
   })
-  .strip();
+  .strict();
 
 /** Cross-field validation predicates — shared between the CRUD API and the manage_rule tool. */
 
@@ -539,7 +540,7 @@ export const updateRuleDataSchema = z
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
-  .strip()
+  .strict()
   .check((ctx) => {
     if (ctx.value.no_data_strategy === noDataStrategy.emit) {
       ctx.issues.push({
