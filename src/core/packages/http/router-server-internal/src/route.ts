@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { once } from 'lodash';
 import {
   type RouteMethod,
   type SafeRouteMethod,
@@ -72,7 +73,10 @@ export function buildRoute({
   method,
 }: Dependencies): InternalRouterRoute {
   route = prepareRouteConfigValidation(route);
-  const routeSchemas = routeSchemasFromRouteConfig(route, method);
+  // Defer schema construction to first request so that lazily-declared
+  // validate thunks (e.g. () => RouteValidator) are not materialized during
+  // plugin.setup(). once() ensures the cost is paid exactly once.
+  const getRouteSchemas = once(() => routeSchemasFromRouteConfig(route, method));
   return {
     handler: async (req) => {
       return await handle(req, {
@@ -81,7 +85,7 @@ export function buildRoute({
         method,
         route,
         router,
-        routeSchemas,
+        routeSchemas: getRouteSchemas(),
       });
     },
     method,
