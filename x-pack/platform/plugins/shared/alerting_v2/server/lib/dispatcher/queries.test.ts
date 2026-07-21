@@ -217,7 +217,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(getAlertEpisodeSuppressionsQueries([])).toEqual([]);
   });
 
-  it('uses CONCAT + IN to filter by (rule_id, group_hash) pairs', () => {
+  it('uses CONCAT + IN to filter by (subject, group_hash) pairs', () => {
     const episodes = [
       createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1' }),
       createAlertEpisode({ rule_id: 'rule-2', group_hash: 'hash-2' }),
@@ -226,7 +226,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     const requests = getAlertEpisodeSuppressionsQueries(episodes);
 
     expect(requests).toHaveLength(1);
-    expect(requests[0].query).toContain('CONCAT(rule_id, "::", group_hash)');
+    expect(requests[0].query).toContain('CONCAT(subject, "::", group_hash)');
     expect(requests[0].query).toContain('rule-1::hash-1');
     expect(requests[0].query).toContain('rule-2::hash-2');
   });
@@ -316,11 +316,11 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(requests[0].query).toContain('last_deactivate_action == "deactivate", TRUE');
   });
 
-  it('keeps the expected output columns', () => {
+  it('keeps the expected output columns including source', () => {
     const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
 
     expect(requests[0].query).toContain(
-      'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action'
+      'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source'
     );
   });
 
@@ -341,7 +341,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     const requests = getAlertEpisodeSuppressionsQueries(episodes);
 
     expect(requests).toHaveLength(1);
-    expect(requests[0].query).toContain('CONCAT(rule_id, "::", group_hash)');
+    expect(requests[0].query).toContain('CONCAT(subject, "::", group_hash)');
     expect(requests[0].query).toContain('rule-0::hash-0');
     expect(requests[0].query).toContain('rule-499::hash-499');
   });
@@ -381,6 +381,61 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     for (const request of requests) {
       expect(request.query).toContain('expiry > "2026-03-01T00:00:00.000Z"::DATETIME');
     }
+  });
+
+  it('computes subject via CASE to distinguish internal from external episodes', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain(
+      'subject = CASE(source IS NULL OR source == "internal", rule_id, source)'
+    );
+  });
+
+  it('builds _pair_key from subject (not rule_id directly)', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain('CONCAT(subject, "::", group_hash)');
+    expect(requests[0].query).not.toContain('CONCAT(rule_id, "::", group_hash)');
+  });
+
+  it('groups INLINE STATS BY subject, group_hash', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain('BY subject, group_hash');
+  });
+
+  it('groups STATS BY subject, group_hash, episode_id', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain('BY subject, group_hash, episode_id');
+  });
+
+  it('projects source via LAST aggregation in STATS', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain('source = LAST(source, @timestamp)');
+  });
+
+  it('uses episodeSubject for pair key construction (internal episode uses rule_id)', () => {
+    const episodes = [
+      createAlertEpisode({ source: 'internal', rule_id: 'rule-abc', group_hash: 'hash-abc' }),
+    ];
+
+    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+
+    // For internal episodes, episodeSubject returns rule_id
+    expect(requests[0].query).toContain('rule-abc::hash-abc');
+  });
+
+  it('uses episodeSubject for pair key construction (external episode uses source)', () => {
+    const episodes = [
+      createAlertEpisode({ source: 'pagerduty', rule_id: null, group_hash: 'hash-pd' }),
+    ];
+
+    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+
+    // For external episodes, episodeSubject returns source
+    expect(requests[0].query).toContain('pagerduty::hash-pd');
   });
 });
 

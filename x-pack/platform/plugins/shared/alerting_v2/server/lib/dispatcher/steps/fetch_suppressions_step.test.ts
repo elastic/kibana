@@ -63,6 +63,46 @@ describe('FetchSuppressionsStep', () => {
     expect(result.data?.suppressions).toHaveLength(0);
   });
 
+  it('parses external suppressions (source != internal, null rule_id) correctly', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchSuppressionsStep(queryService);
+
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createAlertEpisodeSuppressionsResponse([
+        {
+          rule_id: null,
+          source: 'pagerduty',
+          group_hash: 'pd-hash',
+          episode_id: 'pd-ep-1',
+          should_suppress: true,
+          last_ack_action: 'ack',
+        },
+      ])
+    );
+
+    const state = createDispatcherPipelineState({
+      episodes: [
+        createAlertEpisode({
+          source: 'pagerduty',
+          rule_id: null,
+          group_hash: 'pd-hash',
+          episode_id: 'pd-ep-1',
+        }),
+      ],
+    });
+
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.suppressions).toHaveLength(1);
+    const suppression = result.data?.suppressions?.[0];
+    expect(suppression?.source).toBe('pagerduty');
+    expect(suppression?.rule_id).toBeNull();
+    expect(suppression?.should_suppress).toBe(true);
+    expect(suppression?.last_ack_action).toBe('ack');
+  });
+
   it('issues multiple ES|QL requests and concatenates results when input exceeds the size budget', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchSuppressionsStep(queryService);

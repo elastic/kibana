@@ -68,7 +68,7 @@ export const deactivateHandler: ActionHandler<DeactivateAlertActionBody> = {
 
     const ruleEvent = buildRuleEventDocument({
       '@timestamp': new Date().toISOString(),
-      rule: { id: alertEvent.rule_id, version: alertEvent.rule_version ?? 1 },
+      rule: { id: alertEvent.rule_id ?? undefined, version: alertEvent.rule_version ?? 1 },
       group_hash: alertEvent.group_hash,
       data: alertEvent.data_json,
       status: alertEventStatus.recovered,

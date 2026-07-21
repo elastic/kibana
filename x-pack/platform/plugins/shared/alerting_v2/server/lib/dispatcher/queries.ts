@@ -12,6 +12,7 @@ import {
   type AlertEventType,
 } from '../../resources/datastreams/alert_events';
 import type { AlertEpisode, ActionGroupId } from './types';
+import { episodeSubject } from './steps/utils/subject';
 
 // Field-based discrimination (type / action_type IS NULL) instead of `_index LIKE` works around
 // an ES|QL regression where `WHERE _index LIKE` before `STATS` returns 0 rows.
@@ -106,14 +107,15 @@ export const getAlertEpisodeSuppressionsQueries = (
     }, undefined) ?? new Date(0).toISOString();
 
   const uniquePairKeys = [
-    ...new Set(alertEpisodes.map((ep) => `${ep.rule_id ?? ''}${PAIR_SEPARATOR}${ep.group_hash}`)),
+    ...new Set(alertEpisodes.map((ep) => `${episodeSubject(ep)}${PAIR_SEPARATOR}${ep.group_hash}`)),
   ];
 
   return chunkInClauseLiterals(uniquePairKeys).map((chunk) => {
     const pairValues = chunk.map((key) => esql.str(key));
 
     return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
-        | EVAL _pair_key = CONCAT(rule_id, ${PAIR_SEPARATOR}, group_hash)
+        | EVAL subject = CASE(source IS NULL OR source == "internal", rule_id, source)
+        | EVAL _pair_key = CONCAT(subject, ${PAIR_SEPARATOR}, group_hash)
         | WHERE _pair_key IN (${pairValues})
         | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
         | EVAL _snooze_action = CASE(
@@ -123,19 +125,20 @@ export const getAlertEpisodeSuppressionsQueries = (
           )
         | INLINE STATS
             last_snooze_action = LAST(_snooze_action, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
-            BY rule_id, group_hash
+            BY subject, group_hash
         | STATS
             last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
             last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-            last_snooze_action = MAX(last_snooze_action)
-          BY rule_id, group_hash, episode_id
+            last_snooze_action = MAX(last_snooze_action),
+            source = LAST(source, @timestamp)
+          BY subject, group_hash, episode_id
         | EVAL should_suppress = CASE(
             last_snooze_action == "snooze", true,
             last_ack_action == "ack", true,
             last_deactivate_action == "deactivate", true,
             false
           )
-        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action`.toRequest();
+        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source`.toRequest();
   });
 };
 

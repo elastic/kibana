@@ -43,17 +43,23 @@ export const createAlertEpisodeSuppressionsResponse = (
   return {
     columns: [
       { name: 'rule_id', type: 'keyword' },
-      { name: 'source', type: 'keyword' },
       { name: 'group_hash', type: 'keyword' },
       { name: 'episode_id', type: 'keyword' },
       { name: 'should_suppress', type: 'boolean' },
+      { name: 'last_ack_action', type: 'keyword' },
+      { name: 'last_deactivate_action', type: 'keyword' },
+      { name: 'last_snooze_action', type: 'keyword' },
+      { name: 'source', type: 'keyword' },
     ],
     values: suppressions.map((suppression) => [
       suppression.rule_id,
-      suppression.source,
       suppression.group_hash,
       suppression.episode_id,
       suppression.should_suppress,
+      suppression.last_ack_action ?? null,
+      suppression.last_deactivate_action ?? null,
+      suppression.last_snooze_action ?? null,
+      suppression.source,
     ]),
   };
 };

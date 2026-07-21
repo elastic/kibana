@@ -6,6 +6,7 @@
  */
 
 import type { ActionGroup, AlertEpisode } from '../types';
+import { episodeSubject } from './utils/subject';
 
 export function getUnmatchedEpisodes(
   dispatchable: readonly AlertEpisode[],
@@ -22,5 +23,5 @@ export function getUnmatchedEpisodes(
 }
 
 function episodeKey(episode: AlertEpisode): string {
-  return `${episode.rule_id}:${episode.group_hash}:${episode.episode_id}`;
+  return `${episodeSubject(episode)}:${episode.group_hash}:${episode.episode_id}`;
 }
