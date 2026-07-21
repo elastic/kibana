@@ -15,6 +15,7 @@ import {
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { GenAiFields } from './get_genai_fields';
@@ -41,6 +42,16 @@ interface DetailRow {
   label: React.ReactNode;
   content: React.ReactNode;
 }
+
+// Match Discover's result-panel table: row separators only, no border on first/last row.
+const detailTableCss = css`
+  tr:first-child td {
+    border-top: none;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+`;
 
 interface Props {
   genAi: GenAiFields;
@@ -184,7 +195,7 @@ export function GenAiTab({ genAi }: Props) {
               defaultMessage: 'Details',
             })}
           >
-            <EuiTable compressed data-test-subj="genAiDetails">
+            <EuiTable compressed data-test-subj="genAiDetails" css={detailTableCss}>
               <EuiTableBody>
                 {detailRows.map(({ id, label, content }) => (
                   <EuiTableRow key={id}>
