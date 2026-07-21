@@ -14,10 +14,14 @@ import {
   allThreatIntelSourceIds,
   buildPackArticleDataUrl,
   buildPackRssDataUrl,
+  buildPackRssReportItemsForScenario,
   collectPackJoinFieldValues,
   PACK_TI_SCENARIOS,
+  reportTimestampRatiosForPack,
+  reportTimestampsForWindow,
   resolveThreatIntelPackIds,
   scenarioRssMustContain,
+  THREAT_INTEL_REPORTS_PER_PACK,
   THREAT_INTEL_SUBSCRIPTION_ID,
 } from './threat_intel_fixtures';
 
@@ -70,9 +74,15 @@ describe('PACK_TI_SCENARIOS', () => {
 
   it('embeds join IOCs, narrative anchors, and the HTML article data URL in the RSS payload', () => {
     for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+      const reportItems = buildPackRssReportItemsForScenario({
+        packIndex: 0,
+        packCount: 4,
+        startMs: Date.parse('2026-01-01T00:00:00.000Z'),
+        endMs: Date.parse('2026-07-01T00:00:00.000Z'),
+      });
       const url = buildPackRssDataUrl({
         scenario,
-        reportTimestamp: '2026-07-16T12:00:00.000Z',
+        reportItems,
       });
       expect(url.startsWith('data:application/rss+xml')).toBe(true);
       const xml = decodeURIComponent(url.replace(/^data:application\/rss\+xml;charset=utf-8,/, ''));
@@ -85,6 +95,7 @@ describe('PACK_TI_SCENARIOS', () => {
       expect(xml).not.toContain('elastic.co/security-labs');
       expect(xml.toLowerCase()).not.toContain('data-generator');
       expect(xml.toLowerCase()).not.toContain('data generator');
+      expect(xml.match(/<item>/g)?.length).toEqual(THREAT_INTEL_REPORTS_PER_PACK);
     }
   });
 
@@ -111,6 +122,28 @@ describe('PACK_TI_SCENARIOS', () => {
     expect(k8s.joinIocs.some((ioc) => ioc.type === 'user' && ioc.value === 'compromised-sa')).toBe(
       false
     );
+  });
+});
+
+describe('threat intel report timestamps', () => {
+  it('returns six sorted ratios per pack inside the open interval', () => {
+    const ratios = reportTimestampRatiosForPack(1, 4);
+    expect(ratios).toHaveLength(THREAT_INTEL_REPORTS_PER_PACK);
+    expect(ratios).toEqual([...ratios].sort((a, b) => a - b));
+    for (const ratio of ratios) {
+      expect(ratio).toBeGreaterThan(0.02);
+      expect(ratio).toBeLessThan(0.98);
+    }
+  });
+
+  it('offsets timestamps by pack index across the generator window', () => {
+    const startMs = Date.parse('2025-01-01T00:00:00.000Z');
+    const endMs = Date.parse('2025-07-01T00:00:00.000Z');
+    const ratiosA = reportTimestampRatiosForPack(0, 4);
+    const ratiosB = reportTimestampRatiosForPack(3, 4);
+    const timestampsA = reportTimestampsForWindow(startMs, endMs, ratiosA);
+    const timestampsB = reportTimestampsForWindow(startMs, endMs, ratiosB);
+    expect(timestampsA).not.toEqual(timestampsB);
   });
 });
 

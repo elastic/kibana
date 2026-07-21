@@ -139,7 +139,7 @@ Then confirm in Alerts UI that `kibana.alert.rule.name` / severity / MITRE / rea
 
 ## Threat intel RSS (mustard demo)
 
-`--threat-intel` seeds **one enabled RSS source per selected pack** into `.kibana-threat-intel-sources`, plus a digest subscription in `.kibana-threat-intel-subscriptions`. Each feed is a `data:application/rss+xml,...` URL whose article text embeds that pack’s observables so mustard `source_ingestion` + `nl_extraction_behavioral` can extract IOCs and hunt into the pack indices.
+`--threat-intel` seeds **one enabled RSS source per selected pack** into `.kibana-threat-intel-sources`, plus a digest subscription in `.kibana-threat-intel-subscriptions`. Each feed is a `data:application/rss+xml,...` URL with **six dated RSS items** whose `pubDate` values are spread across `--start-date` / `--end-date` (per-pack phase offset) so Intelligence Hub period presets can show different current vs prior report counts. Article text embeds that pack’s observables so mustard `source_ingestion` + `nl_extraction_behavioral` can extract IOCs and hunt into the pack indices.
 
 Observable contract in `lib/threat_intel_fixtures.ts` (`PACK_TI_SCENARIOS`):
 
@@ -155,8 +155,10 @@ Environment telemetry is the Technology Watch packs (`logs-okta.system.*`, `logs
 `--threat-intel` with no `--packs` selects all four packs. Use `--alert-mode preview` so pack hunts mint Detection Engine alerts (needed for non-zero Env. hits via `hit_provenance_backfill`).
 
 ```bash
-# On generate-cli-data-quality (this branch)
-yarn data:generate --clean -n 50 --episodes ep1 \
+# Wider window + more pack telemetry for hub 24h/7d/30d/90d current vs prior counts
+yarn data:generate --clean -n 120 --episodes ep1 \
+  --start-date 180d --end-date now \
+  --packs okta,aws-iam,kubernetes,github-actions \
   --threat-intel \
   --alert-mode preview \
   --kibanaUrl http://127.0.0.1:5601/kbn
@@ -177,7 +179,7 @@ Restart Kibana after flag changes (`iocIndicatorSyncEnabled` syncs extracted IOC
 **A. Seed + pipeline (workflows)**
 
 1. Generate once with the command above (packs + TI RSS + preview alerts).
-2. Run `threat-intel.source_ingestion` → pending reports from the four `ti-rss-*` sources.
+2. Run `threat-intel.source_ingestion` → pending reports from the four `ti-rss-*` sources (six dated items per feed).
 3. Run `threat-intel.nl_extraction_behavioral` → IOCs, behaviors, categories, regions on those reports.
 4. Run `threat-intel.digest_delivery` → seeded `threat-intel-digest` subscription produces a digest row.
 5. Run `threat-intel.hit_provenance_backfill` → updates `provenance.environment_hits*` from **Detection Engine alerts** (Indicator Match / technique overlap), not from raw pack `logs-*`. Expect non-zero Env. hits after preview alerts + indicator sync.

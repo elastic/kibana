@@ -278,6 +278,60 @@ const cdata = (value: string): string =>
 const timestampAt = (startMs: number, endMs: number, ratio: number): string =>
   new Date(Math.round(startMs + (endMs - startMs) * ratio)).toISOString();
 
+/** RSS items seeded per pack feed so hub period presets can compare current vs prior counts. */
+export const THREAT_INTEL_REPORTS_PER_PACK = 6;
+
+export interface PackRssReportItem {
+  /** Stable suffix for RSS guid (`ti-report-<pack>-<itemKey>`). */
+  itemKey: string;
+  reportTimestamp: string;
+}
+
+/**
+ * Spread report pubDates across the generator window. Each pack gets a different phase
+ * so aggregate counts differ between current and prior hub presets (24h / 7d / 30d / 90d).
+ */
+export const reportTimestampRatiosForPack = (
+  packIndex: number,
+  packCount: number,
+  reportsPerPack: number = THREAT_INTEL_REPORTS_PER_PACK
+): number[] => {
+  const ratios: number[] = [];
+  for (let itemIndex = 0; itemIndex < reportsPerPack; itemIndex++) {
+    const slot = (itemIndex + 1) / (reportsPerPack + 1);
+    const packPhase = (packIndex / Math.max(packCount, 1)) * 0.45;
+    const wave = Math.sin((itemIndex / reportsPerPack) * Math.PI * 2 + packPhase) * 0.11;
+    ratios.push(Math.min(0.97, Math.max(0.03, slot + wave)));
+  }
+  return ratios.sort((a, b) => a - b);
+};
+
+export const reportTimestampsForWindow = (
+  startMs: number,
+  endMs: number,
+  ratios: readonly number[]
+): string[] => ratios.map((ratio) => timestampAt(startMs, endMs, ratio));
+
+export const buildPackRssReportItemsForScenario = ({
+  packIndex,
+  packCount,
+  startMs,
+  endMs,
+  reportsPerPack = THREAT_INTEL_REPORTS_PER_PACK,
+}: {
+  packIndex: number;
+  packCount: number;
+  startMs: number;
+  endMs: number;
+  reportsPerPack?: number;
+}): PackRssReportItem[] => {
+  const ratios = reportTimestampRatiosForPack(packIndex, packCount, reportsPerPack);
+  return reportTimestampsForWindow(startMs, endMs, ratios).map((reportTimestamp, itemIndex) => ({
+    itemKey: String(itemIndex + 1).padStart(2, '0'),
+    reportTimestamp,
+  }));
+};
+
 /**
  * Offline mock "upstream article" for Intelligence Hub's external link.
  * Becomes report `source.url` after mustard RSS ingestion. Requires mustard
@@ -312,28 +366,38 @@ export const buildPackArticleDataUrl = (scenario: PackTiScenario): string => {
 
 export const buildPackRssDataUrl = ({
   scenario,
-  reportTimestamp,
+  reportItems,
 }: {
   scenario: PackTiScenario;
-  reportTimestamp: string;
+  reportItems: PackRssReportItem[];
 }): string => {
-  const guid = `ti-report-${scenario.packId}`;
+  if (reportItems.length === 0) {
+    throw new Error('buildPackRssDataUrl requires at least one report item');
+  }
   const mitreLine = scenario.mitre.length ? ` Techniques: ${scenario.mitre.join(', ')}.` : '';
   const description = `${scenario.body}${mitreLine}`;
   const articleLink = xmlEscape(buildPackArticleDataUrl(scenario));
+  const itemsXml = reportItems
+    .map((item, index) => {
+      const guid = `ti-report-${scenario.packId}-${item.itemKey}`;
+      const title =
+        index === 0 ? scenario.title : `${scenario.title} (${item.reportTimestamp.slice(0, 10)})`;
+      return `    <item>
+      <title>${xmlEscape(title)}</title>
+      <guid isPermaLink="false">${xmlEscape(guid)}</guid>
+      <link>${articleLink}</link>
+      <pubDate>${new Date(item.reportTimestamp).toUTCString()}</pubDate>
+      <description>${cdata(description)}</description>
+    </item>`;
+    })
+    .join('\n');
   const feedBody = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
     <title>${xmlEscape(scenario.name)}</title>
     <link>${articleLink}</link>
     <language>en</language>
-    <item>
-      <title>${xmlEscape(scenario.title)}</title>
-      <guid isPermaLink="false">${xmlEscape(guid)}</guid>
-      <link>${articleLink}</link>
-      <pubDate>${new Date(reportTimestamp).toUTCString()}</pubDate>
-      <description>${cdata(description)}</description>
-    </item>
+${itemsXml}
   </channel>
 </rss>`;
 
@@ -450,7 +514,7 @@ export const seedThreatIntelForPacks = async ({
   startMs: number;
   endMs: number;
   spaceId: string;
-}): Promise<{ sourceCount: number }> => {
+}): Promise<{ sourceCount: number; reportItemCount: number }> => {
   const resolved = resolveThreatIntelPackIds(packIds);
   const scenarios = resolved.map((id) => {
     const scenario = PACK_TI_SCENARIOS[id];
@@ -466,12 +530,21 @@ export const seedThreatIntelForPacks = async ({
   await ensurePlainIndex({ esClient, index: THREAT_INTEL_SUBSCRIPTIONS_INDEX, log });
   await cleanThreatIntelFixtures({ esClient, log, packIds: resolved });
 
-  const reportTimestamp = timestampAt(startMs, endMs, 0.7);
+  const sourceTimestamp = new Date(endMs).toISOString();
   const allTags = new Set<string>(['threat-intel']);
+  let reportItemCount = 0;
 
-  for (const scenario of scenarios) {
+  for (let packIndex = 0; packIndex < scenarios.length; packIndex++) {
+    const scenario = scenarios[packIndex];
     for (const tag of scenario.tags) allTags.add(tag);
-    const url = buildPackRssDataUrl({ scenario, reportTimestamp });
+    const reportItems = buildPackRssReportItemsForScenario({
+      packIndex,
+      packCount: scenarios.length,
+      startMs,
+      endMs,
+    });
+    reportItemCount += reportItems.length;
+    const url = buildPackRssDataUrl({ scenario, reportItems });
     await esClient.index({
       index: THREAT_INTEL_SOURCES_INDEX,
       id: scenario.sourceId,
@@ -483,8 +556,8 @@ export const seedThreatIntelForPacks = async ({
         config: { url },
         tags: scenario.tags,
         space_id: spaceId,
-        created_at: reportTimestamp,
-        updated_at: reportTimestamp,
+        created_at: sourceTimestamp,
+        updated_at: sourceTimestamp,
       },
     });
   }
@@ -502,16 +575,19 @@ export const seedThreatIntelForPacks = async ({
       human_summary: 'Daily digest of medium+ severity reports tagged for Technology Watch packs.',
       template_id: 'threat-intel',
       space_id: spaceId,
-      created_at: reportTimestamp,
-      updated_at: reportTimestamp,
+      created_at: sourceTimestamp,
+      updated_at: sourceTimestamp,
     },
   });
 
   log.info(
-    `Seeded ${scenarios.length} threat-intel RSS source(s) and 1 digest subscription. ` +
-      `Environment telemetry is the Technology Watch pack indices (not logs-aws.local). ` +
+    `Seeded ${scenarios.length} threat-intel RSS source(s) (${reportItemCount} dated RSS item(s) ` +
+      `across [${new Date(startMs).toISOString()}, ${new Date(
+        endMs
+      ).toISOString()}]) and 1 digest ` +
+      `subscription. Environment telemetry is the Technology Watch pack indices (not logs-aws.local). ` +
       `On mustard Kibana: run threat-intel.source_ingestion, then threat-intel.nl_extraction_behavioral.`
   );
 
-  return { sourceCount: scenarios.length };
+  return { sourceCount: scenarios.length, reportItemCount };
 };
