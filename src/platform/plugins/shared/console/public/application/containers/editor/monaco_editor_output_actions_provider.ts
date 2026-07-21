@@ -9,6 +9,7 @@
 
 import type { CSSProperties } from 'react';
 import { debounce } from 'lodash';
+import type { DebouncedFunc } from 'lodash';
 import { monaco } from '@kbn/monaco';
 import { createOutputParser } from '@kbn/monaco/src/languages/console/output_parser';
 
@@ -21,6 +22,8 @@ const OFFSET_EDITOR_ACTIONS = 1;
 
 export class MonacoEditorOutputActionsProvider {
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
+  private readonly debouncedHighlightRequests: DebouncedFunc<() => Promise<void>>;
+
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
     private setEditorActionsCss: (css: CSSProperties) => void,
@@ -28,12 +31,12 @@ export class MonacoEditorOutputActionsProvider {
   ) {
     this.highlightedLines = this.editor.createDecorationsCollection();
 
-    const debouncedHighlightRequests = debounce(
+    this.debouncedHighlightRequests = debounce(
       async () => {
         if (editor.hasTextFocus()) {
           await this.highlightRequests(this.highlightedLinesClassName);
         } else {
-          this.clearEditorDecorations();
+          this.resetOutputActions();
         }
       },
       DEBOUNCE_HIGHLIGHT_WAIT_MS,
@@ -44,16 +47,16 @@ export class MonacoEditorOutputActionsProvider {
 
     // init all listeners
     editor.onDidChangeCursorPosition(async () => {
-      await debouncedHighlightRequests();
+      await this.debouncedHighlightRequests();
     });
     editor.onDidScrollChange(async () => {
-      await debouncedHighlightRequests();
+      await this.debouncedHighlightRequests();
     });
     editor.onDidChangeCursorSelection(async () => {
-      await debouncedHighlightRequests();
+      await this.debouncedHighlightRequests();
     });
     editor.onDidContentSizeChange(async () => {
-      await debouncedHighlightRequests();
+      await this.debouncedHighlightRequests();
     });
 
     editor.onDidBlurEditorText(() => {
@@ -61,12 +64,13 @@ export class MonacoEditorOutputActionsProvider {
       // the clearing of the editor decorations to ensure that the actions buttons
       // are not hidden.
       setTimeout(() => {
-        this.clearEditorDecorations();
+        this.resetOutputActions();
       }, 100);
     });
   }
 
-  private clearEditorDecorations() {
+  public resetOutputActions() {
+    this.debouncedHighlightRequests.cancel();
     // remove the highlighted lines
     this.highlightedLines.clear();
     // hide action buttons
@@ -84,11 +88,19 @@ export class MonacoEditorOutputActionsProvider {
     } else {
       // if a request is selected, the actions buttons are placed at lineNumberOffset - scrollOffset
       const offset = this.editor.getTopForLineNumber(lineNumber) - this.editor.getScrollTop();
+      // The offset can be negative when the selected request's start line has scrolled
+      // above the current viewport (e.g. due to the debounced recalculation lagging behind
+      // a scroll or selection change). A negative offset renders the actions buttons above
+      // the editor's own visible area, where they can end up hidden behind, or overlapping
+      // the click target of, unrelated page chrome (e.g. the Console tab bars) -- silently
+      // swallowing clicks intended for the buttons. Clamp to the editor's own top edge so the
+      // buttons never escape its visible bounds. See https://github.com/elastic/kibana/issues/266698.
+      const clampedOffset = Math.max(offset, 0);
       this.setEditorActionsCss({
         visibility: 'visible',
         // Add a little bit of padding to the top of the actions buttons so that
         // it doesnt overlap with the selected request delimiter
-        top: offset + OFFSET_EDITOR_ACTIONS,
+        top: clampedOffset + OFFSET_EDITOR_ACTIONS,
       });
     }
   }

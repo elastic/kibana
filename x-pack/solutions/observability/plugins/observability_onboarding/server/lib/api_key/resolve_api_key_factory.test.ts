@@ -31,6 +31,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: true,
         isServerless: false,
         managedOtlpPrwEndpointEnabled: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');
@@ -44,6 +45,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: false,
         isServerless: false,
         managedOtlpPrwEndpointEnabled: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');
@@ -59,6 +61,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: true,
         isServerless: true,
         managedOtlpPrwEndpointEnabled: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');
@@ -72,6 +75,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: false,
         isServerless: false,
         managedOtlpPrwEndpointEnabled: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');
@@ -85,6 +89,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: true,
         isServerless: false,
         managedOtlpPrwEndpointEnabled: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');
@@ -98,6 +103,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: true,
         isServerless: false,
         managedOtlpPrwEndpointEnabled: true,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');
@@ -108,11 +114,27 @@ describe('resolveApiKeyFactory', () => {
   });
 
   describe('Elasticsearch', () => {
+    it('creates a managed OTLP service key when the managed Elasticsearch-compatible endpoint is available', async () => {
+      const context = {
+        isManagedOtlpServiceAvailable: true,
+        isServerless: false,
+        managedOtlpPrwEndpointEnabled: false,
+        isManagedElasticsearchBulkEndpointAvailable: true,
+      };
+      const factory = resolveApiKeyFactory(ApiEndpointId.Elasticsearch, context);
+
+      await factory(esClient, 'name');
+
+      expect(createManagedOtlpServiceApiKey).toHaveBeenCalledWith(esClient, 'name');
+      expect(createShipperApiKey).not.toHaveBeenCalled();
+    });
+
     it('creates a shipper key that includes APM (traces) privileges', async () => {
       const factory = resolveApiKeyFactory(ApiEndpointId.Elasticsearch, {
         isManagedOtlpServiceAvailable: false,
         isServerless: false,
         managedOtlpPrwEndpointEnabled: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');

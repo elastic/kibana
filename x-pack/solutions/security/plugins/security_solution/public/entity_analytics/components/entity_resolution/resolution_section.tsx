@@ -41,6 +41,8 @@ interface ResolutionSectionProps {
     entityId: string;
     entityName: string | undefined;
   }) => void;
+  /** When true, hides the chevron icon in the resolution group header. Used by the v2 flyout. */
+  hideHeaderIcons?: boolean;
 }
 
 export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
@@ -49,6 +51,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
   scopeId,
   openDetailsPanel,
   onShowEntity,
+  hideHeaderIcons = false,
 }) => {
   const {
     data: group,
@@ -116,13 +119,13 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
       <ExpandablePanel
         header={{
           title: RESOLUTION_GROUP_LINK_TITLE,
-          // link + arrow only when navigation is wired up
+          // link only when navigation is wired up; arrow icon hidden for the v2 flyout
           ...(openDetailsPanel && {
             link: {
               callback: handleOpenResolutionTab,
               tooltip: RESOLUTION_GROUP_LINK_TOOLTIP,
             },
-            iconType: 'arrowStart',
+            iconType: hideHeaderIcons ? undefined : 'arrowStart',
           }),
         }}
         expand={{ expandable: false }}

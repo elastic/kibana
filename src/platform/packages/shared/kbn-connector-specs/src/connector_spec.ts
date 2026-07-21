@@ -259,13 +259,29 @@ export interface Transformations {
 // TESTING
 // ============================================================================
 
+export const TEST_CONNECTOR_SUB_ACTION = '_test';
+
+/**
+ * Success = return data; failure = throw (mapped to error by the executor).
+ *
+ * Transitional union: new handlers return arbitrary data (`Record<string, unknown>`,
+ * use `{}` when there's nothing to report), while not-yet-migrated handlers may still
+ * return the legacy `{ ok, message }` shape. Once every handler follows the
+ * throw-on-failure contract this can be narrowed to `Record<string, unknown>`.
+ */
+export type ConnectorTestHandlerResult =
+  | Record<string, unknown>
+  | { ok: boolean; message?: string };
+
 export interface ConnectorTest {
-  handler: (ctx: ActionContext) => Promise<{
-    ok: boolean;
-    message?: string;
-    [key: string]: unknown;
-  }>;
+  /**
+   * Test-tab handler. Return data (use `{}` when there's nothing to report); throw on failure.
+   * A resolved value is treated as success by the executor.
+   */
+  handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
+  /** Flag to opt-in for testing */
+  enabled?: boolean;
 }
 
 // ============================================================================

@@ -7,8 +7,8 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect, useDispatch } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
 import { type EuiDataGridControlColumn } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -27,6 +27,8 @@ import {
   DocumentDetailsRightPanelKey,
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import {
   AttackDetailsLeftPanelKey,
   AttackDetailsRightPanelKey,
@@ -106,6 +108,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const {
     query: { filterManager: timelineFilterManager },
   } = timelineDataService;
+
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openNotes } = useFlyoutApi();
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
@@ -232,7 +237,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       const indexName =
         (isAttackRow ? eventData.ecs._index : undefined) ?? selectedPatterns.join(',');
 
-      if (isAttackRow) {
+      if (enableNewFlyout && eventData) {
+        openNotes({ hit: eventData });
+      } else if (isAttackRow) {
         openFlyout({
           right: {
             id: AttackDetailsRightPanelKey,
@@ -283,7 +290,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         panel: 'left',
       });
     },
-    [openFlyout, selectedPatterns, telemetry, timelineId]
+    [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
   const leadingControlColumns = useTimelineControlColumn({

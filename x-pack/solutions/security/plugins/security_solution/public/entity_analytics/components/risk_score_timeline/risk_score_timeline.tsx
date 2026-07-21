@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   AnnotationDomainType,
   Axis,
@@ -21,7 +21,6 @@ import {
   type ProjectedValues,
 } from '@elastic/charts';
 import {
-  EuiButtonGroup,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -29,16 +28,23 @@ import {
   EuiIcon,
   EuiLoadingChart,
   EuiSpacer,
+  EuiSuperDatePicker,
   EuiText,
   EuiTitle,
   useEuiTheme,
+  type EuiSuperDatePickerRecentRange,
+  type OnTimeChangeProps,
 } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
+import { isEmpty, take } from 'lodash/fp';
 import dateMath from '@kbn/datemath';
+import { parseInterval } from '@kbn/data-plugin/common';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { RiskScoreHistoryEntry } from '../../../../common/api/entity_analytics';
 import { RISK_LEVEL_RANGES } from '../../../../common/entity_analytics/risk_engine';
+import { DEFAULT_DATE_FORMAT, DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
+import { useUiSetting$ } from '../../../common/lib/kibana';
 import { useRiskScoreHistory } from '../../api/hooks/use_risk_score_history';
 
 export interface RiskScoreTimelineProps {
@@ -49,43 +55,23 @@ export interface RiskScoreTimelineProps {
   scoreType?: RiskScoreHistoryEntry['score_type'];
   selectedTimestamp?: string;
   onPointSelect: (timestamp: string | undefined) => void;
-  onRangeChange: (from: string) => void;
+  onRangeChange: (range: { from: string; to: string }) => void;
 }
 
 const CHART_HEIGHT = 180;
-const CHART_PAGE_SIZE = 1000;
 const X_DOMAIN_RIGHT_PADDING = 0.03;
+const MAX_RECENTLY_USED_RANGES = 9;
 
-export const RANGE_PRESETS = [
-  {
-    id: 'now-7d',
-    label: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.riskScoreTimeline.rangePreset7d',
-      { defaultMessage: '7d' }
-    ),
-  },
-  {
-    id: 'now-30d',
-    label: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.riskScoreTimeline.rangePreset30d',
-      { defaultMessage: '30d' }
-    ),
-  },
-  {
-    id: 'now-90d',
-    label: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.riskScoreTimeline.rangePreset90d',
-      { defaultMessage: '90d' }
-    ),
-  },
-  {
-    id: 'now-1y',
-    label: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.riskScoreTimeline.rangePreset1y',
-      { defaultMessage: '1y' }
-    ),
-  },
-];
+interface QuickRange {
+  from: string;
+  to: string;
+  display: string;
+}
+
+// Used only to floor the chart's x-domain `minInterval` so buckets keep a
+// sensible minimum spacing; moment's calendar-unit approximations are fine here.
+const intervalToMs = (interval: string | undefined): number | undefined =>
+  interval === undefined ? undefined : parseInterval(interval)?.asMilliseconds();
 
 export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
   entityType,
@@ -103,10 +89,40 @@ export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
     from,
     to,
     scoreType,
-    pageSize: CHART_PAGE_SIZE,
   });
 
   const entries = useMemo(() => data?.entries ?? [], [data?.entries]);
+  const minInterval = useMemo(() => intervalToMs(data?.interval), [data?.interval]);
+
+  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>([]);
+  const [quickRanges] = useUiSetting$<QuickRange[]>(DEFAULT_TIMEPICKER_QUICK_RANGES);
+  const [dateFormat] = useUiSetting$<string>(DEFAULT_DATE_FORMAT);
+
+  const commonlyUsedRanges = useMemo(
+    () =>
+      isEmpty(quickRanges)
+        ? []
+        : quickRanges.map(({ from: rangeFrom, to: rangeTo, display }) => ({
+            start: rangeFrom,
+            end: rangeTo,
+            label: display,
+          })),
+    [quickRanges]
+  );
+
+  const onTimeChange = ({ start, end, isInvalid }: OnTimeChangeProps) => {
+    if (isInvalid) {
+      return;
+    }
+    onRangeChange({ from: start, to: end });
+    setRecentlyUsedRanges((ranges) => [
+      { start, end },
+      ...take(
+        MAX_RECENTLY_USED_RANGES,
+        ranges.filter((range) => !(range.start === start && range.end === end))
+      ),
+    ]);
+  };
 
   return (
     <div
@@ -127,16 +143,17 @@ export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            buttonSize="compressed"
-            legend={i18n.translate(
-              'xpack.securitySolution.entityAnalytics.riskScoreTimeline.rangeLegend',
-              { defaultMessage: 'Risk score history time range' }
-            )}
-            options={RANGE_PRESETS}
-            idSelected={from}
-            // EuiButtonGroup invokes onChange with (id, value); normalize arity for onRangeChange
-            onChange={(id) => onRangeChange(id)}
+          <EuiSuperDatePicker
+            start={from}
+            end={to}
+            onTimeChange={onTimeChange}
+            commonlyUsedRanges={commonlyUsedRanges}
+            recentlyUsedRanges={recentlyUsedRanges}
+            dateFormat={dateFormat}
+            isAutoRefreshOnly={false}
+            showUpdateButton="iconOnly"
+            compressed
+            width="auto"
             data-test-subj="riskScoreTimeline-RangeSelect"
           />
         </EuiFlexItem>
@@ -148,6 +165,7 @@ export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
         isError={error !== undefined}
         from={from}
         to={to}
+        minInterval={minInterval}
         selectedTimestamp={selectedTimestamp}
         onPointSelect={onPointSelect}
       />
@@ -163,6 +181,7 @@ interface TimelineBodyProps {
   isError: boolean;
   from: string;
   to: string;
+  minInterval?: number;
   selectedTimestamp?: string;
   onPointSelect: (timestamp: string | undefined) => void;
 }
@@ -173,6 +192,7 @@ const TimelineBody: React.FC<TimelineBodyProps> = ({
   isError,
   from,
   to,
+  minInterval,
   selectedTimestamp,
   onPointSelect,
 }) => {
@@ -225,6 +245,7 @@ const TimelineBody: React.FC<TimelineBodyProps> = ({
       entries={entries}
       from={from}
       to={to}
+      minInterval={minInterval}
       selectedTimestamp={selectedTimestamp}
       onPointSelect={onPointSelect}
     />
@@ -237,6 +258,7 @@ interface TimelineChartProps {
   entries: RiskScoreHistoryEntry[];
   from: string;
   to: string;
+  minInterval?: number;
   selectedTimestamp?: string;
   onPointSelect: (timestamp: string | undefined) => void;
 }
@@ -245,6 +267,7 @@ const TimelineChart: React.FC<TimelineChartProps> = ({
   entries,
   from,
   to,
+  minInterval,
   selectedTimestamp,
   onPointSelect,
 }) => {
@@ -259,8 +282,12 @@ const TimelineChart: React.FC<TimelineChartProps> = ({
     }
     // points at the domain boundary (`to` is usually `now`) get half-clipped and
     // are hard to click, so pad the right edge past the newest scores
-    return { min, max: max + (max - min) * X_DOMAIN_RIGHT_PADDING };
-  }, [from, to]);
+    return {
+      min,
+      max: max + (max - min) * X_DOMAIN_RIGHT_PADDING,
+      ...(minInterval !== undefined && { minInterval }),
+    };
+  }, [from, to, minInterval]);
 
   const timeFormatter = useMemo(() => {
     const first = toEpochMs(entries[0]['@timestamp']);

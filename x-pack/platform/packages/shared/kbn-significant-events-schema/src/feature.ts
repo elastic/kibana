@@ -76,7 +76,7 @@ export const ignoredFeatureSchema = z.object({
 
 export type IgnoredFeature = z.infer<typeof ignoredFeatureSchema>;
 
-// Creation/write payload. `uuid` is derived from (id, stream_name, type) at the
+// Creation/write payload. `uuid` is derived from (id, stream_name) at the
 // storage boundary (see `computeFeatureUuid` / `toStoredFeature`), so it is not
 // part of the input — callers never supply it.
 export const featureUpsertSchema = baseFeatureSchema.and(
@@ -113,15 +113,12 @@ export function normalizeFeatureSlug(id: string): string {
 
 /**
  * Computes a deterministic, stable uuid for a feature from its identifying
- * triple (slug, stream_name, type). The slug is normalized via
- * `normalizeFeatureSlug`. Used as the storage document id and for
- * delete/exclude/restore operations.
+ * pair (slug, stream_name). The slug is normalized via `normalizeFeatureSlug`.
+ * Used as the storage document id and for delete/exclude/restore operations.
  */
-export function computeFeatureUuid(
-  feature: Pick<BaseFeature, 'id' | 'stream_name' | 'type'>
-): string {
+export function computeFeatureUuid(feature: Pick<BaseFeature, 'id' | 'stream_name'>): string {
   const slug = normalizeFeatureSlug(feature.id);
-  return v5(objectHash([feature.stream_name, feature.type, slug]), v5.DNS);
+  return v5(objectHash([feature.stream_name, slug]), v5.DNS);
 }
 
 export function isFeature(feature: unknown): feature is Feature {

@@ -8,10 +8,13 @@
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import type { InferenceTracingLangfuseExportConfig } from '@kbn/inference-tracing-config';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { memoize, omit, partition } from 'lodash';
+import { memoize } from 'lodash';
 import { diag } from '@opentelemetry/api';
 import { BaseInferenceSpanProcessor } from '../base_inference_span_processor';
-import { unflattenAttributes } from '../util/unflatten_attributes';
+import { parseJsonAttr } from '../util/parse_json_attr';
+import { isTextPart, isToolCallPart } from '../util/message_parts';
+import type { GenAIInputMessage, GenAIOutputMessage, GenAITextPart } from '../types';
+import { GenAISemanticConventions } from '../types';
 
 export class LangfuseSpanProcessor extends BaseInferenceSpanProcessor {
   private getProjectId: () => Promise<string | undefined>;
@@ -49,30 +52,63 @@ export class LangfuseSpanProcessor extends BaseInferenceSpanProcessor {
   }
 
   override processInferenceSpan(span: tracing.ReadableSpan): tracing.ReadableSpan {
-    // Langfuse doesn't understand fully semconv-compliant span events
-    // yet, so we translate to a format it does understand. see
-    // https://github.com/langfuse/langfuse/blob/c1c22a9b9b684bd45ca9436556c2599d5a23271d/web/src/features/otel/server/index.ts#L476
     if (span.attributes['gen_ai.operation.name'] === 'chat') {
-      const [inputEvents, outputEvents] = partition(
-        span.events,
-        (event) => event.name !== 'gen_ai.choice'
+      const inputMessages = parseJsonAttr<GenAIInputMessage[]>(
+        span.attributes[GenAISemanticConventions.GenAIInputMessages]
+      );
+      const outputMessages = parseJsonAttr<GenAIOutputMessage[]>(
+        span.attributes[GenAISemanticConventions.GenAIOutputMessages]
+      );
+      const systemInstructions = parseJsonAttr<GenAITextPart[]>(
+        span.attributes[GenAISemanticConventions.GenAISystemInstructions]
       );
 
-      span.attributes['input.value'] = JSON.stringify(
-        inputEvents.map((event) => {
-          return unflattenAttributes(event.attributes ?? {});
-        })
-      );
+      const inputForDisplay: Array<Record<string, string>> = [];
 
-      span.attributes['output.value'] = JSON.stringify(
-        outputEvents.map((event) => {
-          const { message, ...rest } = unflattenAttributes(event.attributes ?? {});
-          return {
-            ...omit(rest, 'finish_reason', 'index'),
-            ...message,
-          };
-        })[0]
-      );
+      if (systemInstructions) {
+        inputForDisplay.push({
+          role: 'system',
+          content: systemInstructions.map((p) => p.content).join('\n'),
+        });
+      }
+
+      if (inputMessages) {
+        for (const msg of inputMessages) {
+          const textContent = msg.parts
+            .filter(isTextPart)
+            .map((p) => p.content)
+            .join('\n');
+          inputForDisplay.push({
+            role: msg.role,
+            content: textContent || JSON.stringify(msg.parts),
+          });
+        }
+      }
+
+      span.attributes['input.value'] = JSON.stringify(inputForDisplay);
+
+      if (outputMessages?.length) {
+        const firstOutput = outputMessages[0];
+        const textContent = firstOutput.parts
+          .filter(isTextPart)
+          .map((p) => p.content)
+          .join('');
+        const toolCalls = firstOutput.parts.filter(isToolCallPart);
+
+        span.attributes['output.value'] = JSON.stringify({
+          content: textContent || null,
+          role: 'assistant',
+          ...(toolCalls.length
+            ? {
+                tool_calls: toolCalls.map((tc) => ({
+                  function: { name: tc.name, arguments: tc.arguments },
+                  id: tc.id,
+                  type: 'function',
+                })),
+              }
+            : {}),
+        });
+      }
     }
 
     if (span.attributes['gen_ai.operation.name'] === 'execute_tool') {

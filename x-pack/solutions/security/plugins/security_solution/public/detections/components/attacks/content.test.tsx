@@ -12,7 +12,11 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 import { TestProviders } from '../../../common/mock';
-import { AttacksPageContent, SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID } from './content';
+import {
+  AttacksPageContent,
+  ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID,
+  SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID,
+} from './content';
 import { KPIS_SECTION } from './kpis/kpis_section';
 import { TABLE_SECTION_TEST_ID } from './table/table_section';
 import { useKibana } from '../../../common/lib/kibana';
@@ -61,6 +65,14 @@ jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn().mockReturnValue({ data: undefined }),
 }));
 
+jest.mock('./generations_control_center', () => ({
+  GenerationsControlCenterFlyout: () => (
+    <div data-test-subj="generationsControlCenterFlyout">
+      {'Mock GenerationsControlCenterFlyout'}
+    </div>
+  ),
+}));
+
 jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
   ...jest.requireActual('../../../attack_discovery/pages/use_find_attack_discoveries'),
   useFindAttackDiscoveries: jest.fn().mockReturnValue({ data: undefined }),
@@ -79,6 +91,11 @@ describe('AttacksPageContent', () => {
             get: jest.fn(),
             get$: jest.fn().mockReturnValue(of(undefined)),
             getUpdate$: jest.fn().mockReturnValue(of()),
+          },
+        },
+        notifications: {
+          tours: {
+            isEnabled: jest.fn().mockReturnValue(false),
           },
         },
         telemetry: {
@@ -187,6 +204,66 @@ describe('AttacksPageContent', () => {
 
     expect(onGenerateMock).toHaveBeenCalled();
     expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.GenerateClicked, {
+      source: 'attacks_page_header',
+    });
+  });
+
+  it('should render the `Generations` button', async () => {
+    render(
+      <TestProviders>
+        <AttacksPageContent dataView={dataView} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId(ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
+    });
+  });
+
+  it('should not render the control center flyout before the `Generations` button is clicked', async () => {
+    render(
+      <TestProviders>
+        <AttacksPageContent dataView={dataView} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId(ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('generationsControlCenterFlyout')).not.toBeInTheDocument();
+  });
+
+  it('should open the control center flyout when the `Generations` button is clicked', async () => {
+    render(
+      <TestProviders>
+        <AttacksPageContent dataView={dataView} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId(ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId(ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID));
+
+    expect(screen.getByTestId('generationsControlCenterFlyout')).toBeInTheDocument();
+  });
+
+  it('should report telemetry when the `Generations` button is clicked', async () => {
+    render(
+      <TestProviders>
+        <AttacksPageContent dataView={dataView} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId(ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId(ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID));
+
+    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.GenerationsControlCenterOpened, {
       source: 'attacks_page_header',
     });
   });

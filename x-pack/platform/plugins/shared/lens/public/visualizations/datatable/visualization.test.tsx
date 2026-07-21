@@ -14,6 +14,7 @@ import type { DatasourceMock } from '../../mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { getDatatableVisualization } from './visualization';
 import {
+  type ColumnState,
   type Operation,
   type DataType,
   type OperationDescriptor,
@@ -39,11 +40,7 @@ import type {
 import { CUSTOM_PALETTE, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DATATABLE_COLOR_MISMATCH } from '../../user_messages_ids';
-import type {
-  ColumnState,
-  DatatableColumnFn,
-  DatatableExpressionFunction,
-} from '../../../common/expressions';
+import type { DatatableColumnFn, DatatableExpressionFunction } from '../../../common/expressions';
 import { getPaletteDisplayColors } from '../../shared_components/coloring';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 
@@ -568,6 +565,33 @@ describe('Datatable Visualization', () => {
             params.state.columns[0].colorMode = colorMode;
             expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
               { columnId: 'b' },
+            ]);
+          }
+        );
+
+        it('shows a single color swatch (no palette) for a single-fill progress bar', () => {
+          params.state.columns[0].colorMode = 'progress';
+          params.state.columns[0].fillStyle = { fillMode: 'single', color: '#abcdef' };
+          expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+            { columnId: 'b', triggerIconType: 'color', color: '#abcdef' },
+          ]);
+        });
+
+        it('falls back to the default progress color when a single fill has no color', () => {
+          params.state.columns[0].colorMode = 'progress';
+          params.state.columns[0].fillStyle = { fillMode: 'single' };
+          const [accessor] = datatableVisualization.getConfiguration(params).groups[2].accessors;
+          expect(accessor).toMatchObject({ columnId: 'b', triggerIconType: 'color' });
+          expect((accessor as { color?: string }).color).toBeDefined();
+        });
+
+        it.each<'solid' | 'gradient'>(['solid', 'gradient'])(
+          'shows the palette preview for a %s-fill progress bar',
+          (fillMode) => {
+            params.state.columns[0].colorMode = 'progress';
+            params.state.columns[0].fillStyle = { fillMode };
+            expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+              { columnId: 'b', palette: mockStops, triggerIconType: 'colorBy' },
             ]);
           }
         );
@@ -1269,6 +1293,26 @@ describe('Datatable Visualization', () => {
         const result = callOnDatasourceUpdate(state);
         expect(result.columns[0].palette).toBeUndefined();
         expect(result.columns[0].colorMapping).toEqual(defaultColorMapping);
+      });
+
+      it('drops a progress decoration when the column becomes categorical', () => {
+        mockOperation({ dataType: 'string', isBucketed: true, label: 'Category' });
+
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              colorMode: 'progress',
+              fillStyle: { fillMode: 'single', color: '#abc', valueRange: { mode: 'auto' } },
+            },
+          ],
+        };
+
+        const result = callOnDatasourceUpdate(state);
+        expect(result.columns[0].fillStyle).toBeUndefined();
+        expect(result.columns[0].colorMode).toBe('cell');
+        expect(result.columns[0].colorMapping).toEqual(DEFAULT_COLOR_MAPPING_CONFIG);
       });
 
       it('strips colorMapping and computes value-based palette for numeric column with colorMapping but no palette', () => {

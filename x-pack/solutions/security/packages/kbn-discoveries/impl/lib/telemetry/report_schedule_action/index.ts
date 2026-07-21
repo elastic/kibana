@@ -7,14 +7,31 @@
 
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 
-// Stub: real telemetry reporting lands in PR5. No-op when the feature flag
-// is OFF (schedule routes are FF-gated and never invoke this).
-export const reportScheduleAction = (_params: {
+import { ATTACK_DISCOVERY_SCHEDULE_ACTION_EVENT } from '../event_based_telemetry';
+
+export const reportScheduleAction = ({
+  action,
+  analytics,
+  hasActions,
+  interval,
+  logger,
+}: {
   action: string;
   analytics: AnalyticsServiceSetup;
   hasActions?: boolean;
   interval?: string;
   logger: Logger;
 }): void => {
-  // Intentionally empty.
+  try {
+    analytics.reportEvent(ATTACK_DISCOVERY_SCHEDULE_ACTION_EVENT.eventType, {
+      action,
+      has_actions: hasActions,
+      interval,
+    });
+  } catch (error) {
+    logger.debug(
+      () =>
+        `Failed to report ${ATTACK_DISCOVERY_SCHEDULE_ACTION_EVENT.eventType} telemetry: ${error.message}`
+    );
+  }
 };

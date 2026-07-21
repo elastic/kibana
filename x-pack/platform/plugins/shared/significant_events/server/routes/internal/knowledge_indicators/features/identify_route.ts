@@ -61,6 +61,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         maxExcludedFeaturesInPrompt: z.number().optional(),
         maxPreviouslyIdentifiedFeatures: z.number().optional(),
         diverseOffset: z.number().min(0).optional(),
+        samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
       })
       .nullable()
       .optional(),
@@ -74,10 +75,9 @@ const identifyInferredFeaturesRoute = createServerRoute({
       soClient,
       tuningConfig,
       licensing,
-      uiSettingsClient,
     } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { streamName } = params.path;
     const routeLogger = logger.get('features_identification', 'inferred', streamName);
@@ -95,6 +95,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
       diverseOffset,
+      samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
     } = params.body ?? {};
 
     const [connectorId, stream, kiClient] = await Promise.all([
@@ -143,6 +144,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
           max_entity_filters: maxEntityFilters,
           max_excluded_features_in_prompt: maxExcludedFeaturesInPrompt,
           maxPreviouslyIdentifiedFeatures,
+          sampling_timeout_ms: samplingTimeoutMs,
         },
         diverseOffset,
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
@@ -217,9 +219,9 @@ const identifyComputedFeaturesRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, streamsClient, licensing, uiSettingsClient } = scopedClients;
+    const { scopedClusterClient, streamsClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { streamName } = params.path;
     const routeLogger = logger.get('features_identification', 'computed', streamName);
@@ -291,9 +293,9 @@ const shouldIdentifyRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, uiSettingsClient } = scopedClients;
+    const { licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     return shouldIdentifyFeatures({

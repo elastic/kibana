@@ -11,6 +11,12 @@ export type { PaginatedResponse } from '../../../common/pagination';
 
 export interface BulkCreateOptions {
   throwOnFail?: boolean;
+  /**
+   * Elasticsearch bulk `refresh` param. Defaults to `false` (no refresh). Pass `'wait_for'` when
+   * the caller needs a subsequent read to see this write (e.g. a manual, user-triggered update
+   * that immediately re-fetches).
+   */
+  refresh?: 'wait_for' | boolean;
 }
 
 export class BulkCreateOperationError extends Error {

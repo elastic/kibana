@@ -17,7 +17,7 @@ import {
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -226,7 +226,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     if (!entityStoreV2Enabled || noEntityInStore) {
       return legacyFilters;
     }
-    const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnDocument(
+    const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnEntityRecord(
       EntityType.host,
       entityFromStoreResult.entityRecord
     );
@@ -253,6 +253,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     startDate: from,
     hostName: detailName,
     entityId: entityStoreV2Enabled ? entityFromStoreResult.entityRecord?.entity?.id : undefined,
+    entityRecord: entityStoreV2Enabled ? entityFromStoreResult.entityRecord : undefined,
+    entityStoreInitialLoading: entityStoreV2Enabled && entityFromStoreResult.isInitialLoading,
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });

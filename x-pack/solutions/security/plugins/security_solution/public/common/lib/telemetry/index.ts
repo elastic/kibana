@@ -11,6 +11,11 @@ export { telemetryMiddleware } from './middleware';
 // (e.g. `useAttackDiscovery`) reference the enum before the full telemetry
 // wiring lands (PR5). FF-off safe — it's a pure enum.
 export { AttackDiscoveryEventTypes } from './events/attack_discovery/types';
+export type {
+  AttackDiscoveryPipelineStepType,
+  AttackDiscoveryScheduleSource,
+  AttackDiscoverySettingsTab,
+} from './events/attack_discovery/types';
 
 export * from './constants';
 export * from './telemetry_service';

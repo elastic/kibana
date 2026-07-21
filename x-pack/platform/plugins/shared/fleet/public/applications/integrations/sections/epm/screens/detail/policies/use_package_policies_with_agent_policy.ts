@@ -38,7 +38,7 @@ type GetPackagePoliciesWithAgentPolicy = Omit<GetPackagePoliciesResponse, 'items
 export const usePackagePoliciesWithAgentPolicy = (
   query: Parameters<typeof useGetPackagePolicies>[0],
   // `enabled: false` skips both requests; the agentless deployments table uses this to keep the
-  // legacy source mounted-but-idle while the agentless policies API is the active source.
+  // legacy source mounted-but-idle while the managed integrations API is the active source.
   options: { enabled?: boolean } = {}
 ): {
   isLoading: boolean;

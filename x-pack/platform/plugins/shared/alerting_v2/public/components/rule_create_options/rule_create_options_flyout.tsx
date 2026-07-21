@@ -36,7 +36,7 @@ export interface RuleCreateOptionsFlyoutProps {
    * prerequisite). Shown on hover/focus regardless of whether the option is disabled.
    */
   createWithAgentTooltipText?: string;
-  onCreateThresholdAlert?: () => void;
+  onCreateThresholdRule?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
 
@@ -46,7 +46,7 @@ export const RuleCreateOptionsFlyout = ({
   onCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
-  onCreateThresholdAlert,
+  onCreateThresholdRule,
   legacyRuleTypes,
 }: RuleCreateOptionsFlyoutProps) => {
   return (
@@ -98,7 +98,7 @@ export const RuleCreateOptionsFlyout = ({
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentDisabled={createWithAgentDisabled}
           createWithAgentTooltipText={createWithAgentTooltipText}
-          onCreateThresholdAlert={onCreateThresholdAlert}
+          onCreateThresholdRule={onCreateThresholdRule}
           legacyRuleTypes={legacyRuleTypes}
         />
       </EuiFlyoutBody>

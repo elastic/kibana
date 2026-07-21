@@ -127,16 +127,16 @@ describe('buildAttachmentDoc', () => {
       expect(doc.space_id).toBe('default');
     });
 
-    it('denormalizes cases.id from the case reference', () => {
+    it('denormalizes case.id from the case reference', () => {
       const doc = buildAttachmentDoc(makeSO(CASE_COMMENT_SAVED_OBJECT, fullUserAttrs));
-      expect(doc.cases.id).toBe('case-1');
+      expect(doc.case.id).toBe('case-1');
     });
 
-    it('emits an empty cases.id when the case reference is missing (keeps the strict mapping happy)', () => {
+    it('emits an empty case.id when the case reference is missing (keeps the strict mapping happy)', () => {
       const doc = buildAttachmentDoc(
         makeSO(CASE_COMMENT_SAVED_OBJECT, fullUserAttrs, { references: [] })
       );
-      expect(doc.cases.id).toBe('');
+      expect(doc.case.id).toBe('');
     });
 
     it('projects updated_by / pushed_by when present and nulls them when absent', () => {

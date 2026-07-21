@@ -128,17 +128,25 @@ export class KnowledgeIndicatorClient {
       ruleUnbacked?: RuleUnbackedFilter;
       queryIds?: string[];
       minSeverityScore?: number;
+      includeExpired?: boolean;
     }
   ): Promise<QueryLink[]> {
     return this.reader.getQueryLinks(streamNames, filters);
   }
 
-  getStreamToQueryLinksMap(streamNames: string[]): Promise<Record<string, QueryLink[]>> {
-    return this.reader.getStreamToQueryLinksMap(streamNames);
+  getStreamToQueryLinksMap(
+    streamNames: string[],
+    options?: { includeExpired?: boolean }
+  ): Promise<Record<string, QueryLink[]>> {
+    return this.reader.getStreamToQueryLinksMap(streamNames, options);
   }
 
-  bulkGetQueriesByIds(stream: string, ids: string[]): Promise<QueryLink[]> {
-    return this.reader.bulkGetQueriesByIds(stream, ids);
+  bulkGetQueriesByIds(
+    stream: string,
+    ids: string[],
+    options?: { includeExpired?: boolean }
+  ): Promise<QueryLink[]> {
+    return this.reader.bulkGetQueriesByIds(stream, ids, options);
   }
 
   getPromotableUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<QueryLink[]> {
@@ -213,6 +221,13 @@ export class KnowledgeIndicatorClient {
     return this.orchestrator.deleteQuery(definition, queryId);
   }
 
+  deleteQueries(
+    definition: Streams.all.Definition,
+    queryIds: string[]
+  ): Promise<{ deleted: number }> {
+    return this.orchestrator.deleteQueries(definition, queryIds);
+  }
+
   deleteAllQueries(streamName: string): Promise<void> {
     return this.orchestrator.deleteAllQueries(streamName);
   }
@@ -237,5 +252,11 @@ export class KnowledgeIndicatorClient {
     queryIds: string[]
   ): Promise<{ demoted: number }> {
     return this.orchestrator.demoteQueries(definition, queryIds);
+  }
+
+  reconcileStream(
+    definition: Streams.all.Definition
+  ): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
+    return this.orchestrator.reconcileStream(definition);
   }
 }

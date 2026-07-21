@@ -10,21 +10,23 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { noop } from 'lodash/fp';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { EventKind } from '../../document/main/constants/event_kinds';
-import { getDocumentTitle } from '../../document/main/utils/get_header_title';
+import {
+  getDocumentHistoryTitle,
+  getDocumentTitle,
+} from '../../document/main/utils/get_header_title';
 import { useKibana } from '../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import type { CellActionRenderer } from '../components/cell_actions';
 import { noopCellActionRenderer } from '../components/cell_actions';
 import { flyoutProviders } from '../components/flyout_provider';
 import { DocumentFlyout } from '../../document/main';
 import { useDefaultDocumentFlyoutProperties } from './use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../constants/flyout_history';
+import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
 import { DocumentSeverity } from '../../document/main/components/severity';
 import { Timestamp } from '../components/timestamp';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
 
 export interface UseDocumentFlyoutTitleOptions {
   /** The source document to derive display values from. */
@@ -60,8 +62,7 @@ export const useDocumentFlyoutTitle = ({
   const store = useStore();
   const history = useHistory();
   const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { historyKey } = useFlyoutSessionContext();
 
   const isAlert = useMemo(
     () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -69,6 +70,7 @@ export const useDocumentFlyoutTitle = ({
   );
 
   const label = useMemo(() => getDocumentTitle(hit), [hit]);
+  const sessionTitle = useMemo(() => getDocumentHistoryTitle(hit), [hit]);
   const iconType = isAlert ? 'warning' : 'analyzeEvent';
 
   const onTitleClick = useCallback(() => {
@@ -78,14 +80,21 @@ export const useDocumentFlyoutTitle = ({
         store,
         history,
         children: (
-          <DocumentFlyout
-            hit={hit}
-            renderCellActions={renderCellActions}
-            onAlertUpdated={onAlertUpdated}
-          />
+          <FlyoutSessionContextProvider value={{ session: 'inherit', historyKey }}>
+            <DocumentFlyout
+              hit={hit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
+          </FlyoutSessionContextProvider>
         ),
       }),
-      { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+      {
+        ...defaultFlyoutProperties,
+        historyKey,
+        session: 'inherit',
+        title: buildFlyoutNavTitle(sessionTitle),
+      }
     );
   }, [
     defaultFlyoutProperties,
@@ -95,6 +104,7 @@ export const useDocumentFlyoutTitle = ({
     onAlertUpdated,
     renderCellActions,
     services,
+    sessionTitle,
     store,
   ]);
 

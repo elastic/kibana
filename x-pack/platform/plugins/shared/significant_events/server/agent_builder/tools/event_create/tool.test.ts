@@ -10,15 +10,15 @@ import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import { createEventToolHandler } from './handler';
+import { eventsWriteHandler } from '../event_write/handler';
 import { createEventTool, SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID } from './tool';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
 }));
 
-jest.mock('./handler', () => ({
-  createEventToolHandler: jest.fn(),
+jest.mock('../event_write/handler', () => ({
+  eventsWriteHandler: jest.fn(),
 }));
 
 describe('event_create tool', () => {
@@ -37,7 +37,12 @@ describe('event_create tool', () => {
 
   it('returns success result', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    (createEventToolHandler as jest.Mock).mockResolvedValue({ event_id: 'e1', acknowledged: true });
+    (eventsWriteHandler as jest.Mock).mockResolvedValue({
+      event_uuid: 'e1',
+      event_id: 'agent-event-abcd1234',
+      status: 'open',
+      written: true,
+    });
 
     const getScopedClients = jest.fn().mockResolvedValue({
       getEventClient: jest.fn().mockReturnValue({}),
@@ -56,12 +61,11 @@ describe('event_create tool', () => {
       tool as never,
       {
         title: 'T',
+        symptom_hypothesis: 'Requests fail because the upstream dependency is unavailable.',
         summary: 'S',
-        root_cause: 'R',
         stream_names: ['logs.a'],
-        criticality: 40,
+        severity: '60-high',
         confidence: 0.8,
-        recommendations: ['open incident'],
       },
       createMockToolContext()
     );

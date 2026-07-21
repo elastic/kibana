@@ -197,19 +197,37 @@ describe('ES|QL async search strategy', () => {
         expect(request).toHaveProperty('keep_alive');
       });
 
-      it('calls asyncQueryStop with the given ID when using options.returnIntermediateResults: true', async () => {
+      it('calls asyncQueryStop with expected request and transport options when returnIntermediateResults is true', async () => {
         mockAsyncQueryStop.mockResolvedValueOnce(mockAsyncResponse);
 
         const id = 'FlBvQU5CS3BKVEdPcWM1V2lkYXNUbXccVmNhQl9wcWFRdG1WYzE4N2tsOFNNdzozNjMzOQ==';
         const params = { query: 'from logs* | limit 10' };
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
+        const abortController = new AbortController();
         await esSearch
-          .search({ id, params }, { returnIntermediateResults: true }, mockDeps)
+          .search(
+            { id, params },
+            {
+              returnIntermediateResults: true,
+              transport: { maxRetries: 1 },
+              abortSignal: abortController.signal,
+            },
+            mockDeps
+          )
           .toPromise();
 
         expect(mockAsyncQueryStop).toBeCalled();
-        const request = mockAsyncQueryStop.mock.calls[0][0];
-        expect(request.id).toEqual(id);
+        expect(mockAsyncQueryStop).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ id }),
+          expect.objectContaining({
+            maxRetries: 1,
+            signal: undefined,
+            meta: true,
+            asStream: undefined,
+            requestTimeout: 10_000,
+          })
+        );
       });
 
       it('should delete when aborted', async () => {

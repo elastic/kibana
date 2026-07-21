@@ -10,7 +10,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { has, map, mapKeys } from 'lodash';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import produce from 'immer';
+import produce from 'immer-v9';
 import { convertShardsToObject } from '../routes/utils';
 import { packSavedObjectType } from '../../common/types';
 import type { OsqueryAppContextService } from './osquery_app_context_services';
@@ -88,6 +88,7 @@ export const updateGlobalPacksCreateCallback = async (
         set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
           shard: 100,
           pack_id: pack.saved_object_id,
+          pack_name: pack.name,
           ...packDefaults,
           queries,
         });

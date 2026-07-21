@@ -120,7 +120,7 @@ test.describe(
       await pageObjects.streams.clickEditRoutingRule('logs.otel.edit-test-2');
 
       // Should now be editing the second rule
-      expect(await pageObjects.streams.conditionEditorValueComboBox.getSelectedValue()).toBe(
+      expect((await pageObjects.streams.conditionEditorValueComboBox.getSelectedOptions())[0]).toBe(
         'info'
       );
 

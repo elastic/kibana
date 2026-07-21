@@ -10,7 +10,6 @@ import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
-import { resolveConnectorForSignificantEventsDiscovery } from '../../utils/resolve_connector_for_feature';
 
 const discoveryExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
@@ -47,22 +46,18 @@ const discoveryExecuteRoute = createServerRoute({
       );
     }
 
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const spaceId = await getSpaceId(request);
     const { body } = params;
 
     if (body.action === 'trigger') {
-      const connectorId = await resolveConnectorForSignificantEventsDiscovery({
-        searchInferenceEndpoints: server.searchInferenceEndpoints,
-        request,
-      });
       const { executionId, isNew } = await significantEventsDiscoveryClient.run({
         request,
         spaceId,
-        inputs: { agentConnectorId: connectorId },
+        agentBuilder: server.agentBuilder,
       });
       if (isNew) {
         telemetry.trackSignificantEventsDiscoveryTriggered({
@@ -103,9 +98,9 @@ const discoveryStatusRoute = createServerRoute({
     if (!significantEventsDiscoveryClient) {
       throw new FeatureNotEnabledError('Significant events discovery is not available');
     }
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const spaceId = await getSpaceId(request);
     return significantEventsDiscoveryClient.getStatus({ spaceId });

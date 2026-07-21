@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/scout-security';
+import type { KbnClient, KibanaRole } from '@kbn/scout-security';
 import {
   ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG,
   COMMON_HEADERS,
@@ -41,6 +41,40 @@ export const enableWorkflowsFeatureFlag = async (
     },
   });
 };
+
+/**
+ * Least-privilege role for exercising the internal schedule CRUD routes
+ * (create / get / find / update / delete / enable / disable).
+ *
+ * Using this scoped role instead of `admin` documents the minimum privileges
+ * the routes actually need and surfaces accidental privilege drift that a
+ * cluster-admin would silently satisfy. The privileges map to the route
+ * `requiredPrivileges`:
+ * - `securitySolutionAttackDiscovery: ['all']` grants both
+ *   `securitySolution-attackDiscoveryAll` and the write action
+ *   `securitySolution-updateAttackDiscoverySchedule` (the `update_schedule`
+ *   sub-feature privilege is `includeIn: 'all'`).
+ * - `securitySolutionAlertsV1: ['read']` grants `alerts-read`.
+ * - `workflowsManagement: ['all']` grants `workflowsManagement:read` +
+ *   `workflowsManagement:execute`.
+ */
+export const getScheduleAdminRoleDescriptor = (): KibanaRole => ({
+  elasticsearch: {
+    cluster: [],
+    indices: [],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        securitySolutionAlertsV1: ['read'],
+        securitySolutionAttackDiscovery: ['all'],
+        workflowsManagement: ['all'],
+      },
+      spaces: ['*'],
+    },
+  ],
+});
 
 /**
  * API client shape required by schedule test helpers.

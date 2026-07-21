@@ -6,8 +6,9 @@
  */
 
 import { esql } from '@elastic/esql';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryLink } from '@kbn/significant-events-schema';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { toEsqlRequest } from '../../streams/esql';
 import {
   RULES_BUCKET_SIZE,
@@ -16,6 +17,7 @@ import {
 } from './change_point_scan_shared';
 import type {
   ChangePointRuleBucket,
+  ChangePointTypeMap,
   ChangePointScanParams,
   CountDetectionAlertsParams,
   RuleMetadata,
@@ -26,13 +28,17 @@ import {
   buildRuleMetadataMap,
 } from './alerts_reader';
 
+const EMPTY_CHANGE_POINT_TYPE: ChangePointTypeMap = {};
+
+interface RawSignalCountAggregation {
+  value?: number;
+}
+
 interface RawRuleBucket {
   key: string;
   doc_count: number;
-  signal_count?: { value?: number };
-  change_points?: { type?: Record<string, { p_value: number }> };
-  last_5m?: { doc_count?: number; signal_count?: { value?: number } };
-  last_floor_window?: { doc_count?: number; signal_count?: { value?: number } };
+  signal_count?: RawSignalCountAggregation;
+  change_points?: { type?: ChangePointTypeMap };
 }
 
 export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlertsReader {
@@ -56,10 +62,10 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
   }
 
   async countAlerts(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     { lookback, spaceId, ruleUuid }: CountDetectionAlertsParams
   ): Promise<number> {
-    const filter: Array<Record<string, unknown>> = [
+    const filter: QueryDslQueryContainer[] = [
       { term: { type: 'signal' } },
       { term: { space_id: spaceId } },
       { range: { '@timestamp': { gte: lookback } } },
@@ -68,10 +74,11 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       filter.push({ term: { 'rule.id': ruleUuid } });
     }
 
-    const response = await esClient.search({
+    const response = await esClient.search('significant_events_alerts_v2_count_alerts', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       query: { bool: { filter } },
       aggs: {
         signal_count: {
@@ -80,19 +87,20 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       },
     });
 
-    return (response.aggregations?.signal_count as { value?: number } | undefined)?.value ?? 0;
+    return response.aggregations?.signal_count?.value ?? 0;
   }
 
   async runChangePointScan(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     params: ChangePointScanParams,
     queryLinks: QueryLink[]
   ) {
     const ruleMetadata = buildRuleMetadataMap(queryLinks);
-    const response = await esClient.search({
+    const response = await esClient.search('significant_events_alerts_v2_change_point_scan', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       // Drop the per-bucket `over_time` series from the response: it can be large and is only
       // needed server-side as the buckets_path input for the change_point pipeline agg, not in
       // the payload the Detection workflow consumes.
@@ -111,142 +119,25 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     };
   }
 
-  async runRuleChangePoint(
-    esClient: ElasticsearchClient,
-    {
-      ruleUuid,
-      lookback,
-      bucketInterval,
-      spaceId,
-    }: Parameters<ISignificantEventsAlertsReader['runRuleChangePoint']>[1]
-  ) {
-    const response = await esClient.search({
-      index: this.index,
-      ignore_unavailable: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { type: 'signal' } },
-            { term: { space_id: spaceId } },
-            { term: { 'rule.id': ruleUuid } },
-            { range: { '@timestamp': { gte: lookback } } },
-          ],
-        },
-      },
-      aggs: buildChangePointTimeSeriesAggs(bucketInterval, {
-        useDistinctSignalCount: true,
-        extendedBounds: { min: lookback, max: 'now' },
-      }),
-    });
+  private buildChangePointScanBody({
+    lookback,
+    bucketInterval,
+    spaceId,
+    ruleIds,
+  }: ChangePointScanParams) {
+    const filter: Array<Record<string, unknown>> = [
+      { term: { type: 'signal' } },
+      { term: { space_id: spaceId } },
+      { range: { '@timestamp': { gte: lookback } } },
+    ];
+    if (ruleIds?.length) {
+      filter.push({ terms: { 'rule.id': ruleIds } });
+    }
 
-    return { aggregations: response.aggregations ?? {} };
-  }
-
-  async runRuleActivity(
-    esClient: ElasticsearchClient,
-    {
-      ruleUuid,
-      lookback,
-      windowInterval,
-      spaceId,
-    }: Parameters<ISignificantEventsAlertsReader['runRuleActivity']>[1]
-  ) {
-    const response = await esClient.search({
-      index: this.index,
-      ignore_unavailable: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { type: 'signal' } },
-            { term: { space_id: spaceId } },
-            { term: { 'rule.id': ruleUuid } },
-            { range: { '@timestamp': { gte: lookback } } },
-          ],
-        },
-      },
-      aggs: {
-        activity_windows: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: windowInterval,
-            min_doc_count: 0,
-          },
-          aggs: {
-            signal_count: {
-              cardinality: { field: 'group_hash' },
-            },
-          },
-        },
-        peak: {
-          max_bucket: { buckets_path: 'activity_windows>signal_count' },
-        },
-      },
-    });
-
-    return { aggregations: this.normalizeActivityAggregations(response.aggregations ?? {}) };
-  }
-
-  async runRuleAlertWindows(
-    esClient: ElasticsearchClient,
-    {
-      ruleUuid,
-      currentLookback,
-      referenceLookbackGte,
-      referenceLookbackLt,
-      spaceId,
-    }: Parameters<ISignificantEventsAlertsReader['runRuleAlertWindows']>[1]
-  ) {
-    const response = await esClient.search({
-      index: this.index,
-      ignore_unavailable: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { type: 'signal' } },
-            { term: { space_id: spaceId } },
-            { term: { 'rule.id': ruleUuid } },
-          ],
-        },
-      },
-      aggs: {
-        current_window: {
-          filter: { range: { '@timestamp': { gte: currentLookback } } },
-          aggs: {
-            signal_count: {
-              cardinality: { field: 'group_hash' },
-            },
-          },
-        },
-        reference_window: {
-          filter: {
-            range: {
-              '@timestamp': { gte: referenceLookbackGte, lt: referenceLookbackLt },
-            },
-          },
-          aggs: {
-            signal_count: {
-              cardinality: { field: 'group_hash' },
-            },
-          },
-        },
-      },
-    });
-
-    return { aggregations: this.normalizeWindowAggregations(response.aggregations ?? {}) };
-  }
-
-  private buildChangePointScanBody({ lookback, bucketInterval, spaceId }: ChangePointScanParams) {
     return {
       query: {
         bool: {
-          filter: [
-            { term: { type: 'signal' } },
-            { term: { space_id: spaceId } },
-            { range: { '@timestamp': { gte: lookback } } },
-          ],
+          filter,
         },
       },
       aggs: {
@@ -257,8 +148,6 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
               cardinality: { field: 'group_hash' },
             },
             ...buildChangePointTimeSeriesAggs(bucketInterval, {
-              useDistinctSignalCount: true,
-              includeFloorWindow: true,
               extendedBounds: buildChangePointHistogramBounds(lookback, bucketInterval),
             }),
           },
@@ -276,7 +165,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     const streamName = meta?.streamName ?? 'unknown';
     const changePoints = bucket.change_points?.type
       ? { type: bucket.change_points.type }
-      : { type: {} as Record<string, { p_value: number }> };
+      : { type: EMPTY_CHANGE_POINT_TYPE };
 
     return {
       key: bucket.key,
@@ -284,57 +173,6 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       rule_name: { top: [{ metrics: { 'kibana.alert.rule.name': ruleName } }] },
       stream: { buckets: [{ key: streamName }] },
       change_points: changePoints,
-      last_5m: { doc_count: this.distinctSignalCount(bucket.last_5m) },
-      last_floor_window: { doc_count: this.distinctSignalCount(bucket.last_floor_window) },
-    };
-  }
-
-  private distinctSignalCount(window?: {
-    doc_count?: number;
-    signal_count?: { value?: number };
-  }): number {
-    return window?.signal_count?.value ?? window?.doc_count ?? 0;
-  }
-
-  private normalizeWindowAggregations(
-    aggregations: Record<string, unknown>
-  ): Record<string, unknown> {
-    const normalizeWindow = (window: unknown) => {
-      const typedWindow = window as
-        | { doc_count?: number; signal_count?: { value?: number } }
-        | undefined;
-      if (!typedWindow) {
-        return window;
-      }
-      return { doc_count: typedWindow.signal_count?.value ?? typedWindow.doc_count ?? 0 };
-    };
-
-    return {
-      ...aggregations,
-      current_window: normalizeWindow(aggregations.current_window),
-      reference_window: normalizeWindow(aggregations.reference_window),
-    };
-  }
-
-  private normalizeActivityAggregations(
-    aggregations: Record<string, unknown>
-  ): Record<string, unknown> {
-    const activityWindows = aggregations.activity_windows as
-      | { buckets?: Array<{ key: string; signal_count?: { value?: number } }> }
-      | undefined;
-
-    if (!activityWindows?.buckets) {
-      return aggregations;
-    }
-
-    return {
-      ...aggregations,
-      activity_windows: {
-        buckets: activityWindows.buckets.map((bucket) => ({
-          key: bucket.key,
-          doc_count: bucket.signal_count?.value ?? 0,
-        })),
-      },
     };
   }
 }

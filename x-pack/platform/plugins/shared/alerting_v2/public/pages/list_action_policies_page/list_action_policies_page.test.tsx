@@ -26,36 +26,48 @@ const mockSettingsClientGet = jest.fn();
 const mockUseFetchWorkflow = jest.fn();
 const mockBulkGet = jest.fn();
 
+const WRITE_CAPABILITIES = { alerting_v2_action_policies: { read: true, all: true } };
+const READ_ONLY_CAPABILITIES = { alerting_v2_action_policies: { read: true, all: false } };
+let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
+
 jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
 }));
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
-    }
-    if (token === 'chrome') {
-      return { docTitle: { change: jest.fn() } };
-    }
-    if (token === 'http') {
-      return { basePath: { prepend: (path: string) => path } };
-    }
-    if (token === 'settings') {
-      return {
-        client: {
-          get: mockSettingsClientGet,
-        },
-      };
-    }
-    if (token === 'userProfile') {
-      return { bulkGet: mockBulkGet };
-    }
+jest.mock('@kbn/core-di-browser', () => {
+  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
+    '../../services/user_capabilities'
+  );
+  return {
+    useService: (token: unknown) => {
+      if (token === ActualUserCapabilities) {
+        return new ActualUserCapabilities({ capabilities: mockCapabilities });
+      }
+      if (token === 'application') {
+        return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
+      }
+      if (token === 'chrome') {
+        return { docTitle: { change: jest.fn() } };
+      }
+      if (token === 'http') {
+        return { basePath: { prepend: (path: string) => path } };
+      }
+      if (token === 'settings') {
+        return {
+          client: {
+            get: mockSettingsClientGet,
+          },
+        };
+      }
+      if (token === 'userProfile') {
+        return { bulkGet: mockBulkGet };
+      }
 
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
 
 jest.mock('../../hooks/use_fetch_action_policies', () => ({
   useFetchActionPolicies: (...args: unknown[]) => mockUseFetchActionPolicies(...args),
@@ -183,6 +195,7 @@ const renderPage = () =>
 describe('ListActionPoliciesPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCapabilities = WRITE_CAPABILITIES;
 
     mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
@@ -293,5 +306,49 @@ describe('ListActionPoliciesPage', () => {
     renderPage();
 
     expect(screen.queryByTestId('mockedDetailsFlyout')).toBeNull();
+  });
+
+  describe('when the user has write privilege', () => {
+    it('renders the create button and the snooze popover', () => {
+      renderPage();
+
+      expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument();
+      expect(screen.getByText('Snooze popover')).toBeInTheDocument();
+    });
+  });
+
+  describe('when the user only has read privilege', () => {
+    beforeEach(() => {
+      mockCapabilities = READ_ONLY_CAPABILITIES;
+    });
+
+    it('hides the create button', () => {
+      renderPage();
+
+      expect(screen.queryByTestId('createActionPolicyButton')).toBeNull();
+    });
+
+    it('hides the snooze popover in the notify column', () => {
+      renderPage();
+
+      expect(screen.queryByText('Snooze popover')).toBeNull();
+    });
+
+    it('does not render row selection checkboxes', () => {
+      renderPage();
+
+      expect(screen.queryByTestId('checkboxSelectAll')).toBeNull();
+    });
+
+    it('still opens the details flyout from the policy name link', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await user.click(screen.getByTestId('actionPolicyDetailsLink-policy-1'));
+
+      expect(screen.getByTestId('mockedDetailsFlyout')).toHaveTextContent(
+        'Details flyout for policy-1'
+      );
+    });
   });
 });

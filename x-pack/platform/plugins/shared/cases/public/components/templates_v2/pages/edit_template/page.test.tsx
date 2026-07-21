@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { EditTemplatePage } from './page';
 import * as i18n from '../../translations';
 
@@ -20,13 +20,14 @@ jest.mock('../../../../common/navigation', () => ({
   }),
 }));
 
+const mockMutateAsync = jest.fn();
 const mockUseGetTemplate = jest.fn();
 jest.mock('../../hooks/use_get_template', () => ({
   useGetTemplate: () => mockUseGetTemplate(),
 }));
 
 jest.mock('../../hooks/use_update_template', () => ({
-  useUpdateTemplate: () => ({ mutateAsync: jest.fn(), isLoading: false }),
+  useUpdateTemplate: () => ({ mutateAsync: mockMutateAsync, isLoading: false }),
 }));
 
 jest.mock('../../components/template_form', () => ({
@@ -45,15 +46,33 @@ jest.mock('../../../use_breadcrumbs', () => ({
   useCasesTemplatesBreadcrumbs: jest.fn(),
 }));
 
+const capturedTemplateFormLayoutProps: {
+  onCreate?: (
+    data: { definition: string },
+    metadata: { name: string; description: string; tags: string[] },
+    isEnabled: boolean
+  ) => Promise<void>;
+} = {};
 const mockTemplateFormLayout = jest.fn();
 jest.mock('../../components/template_form_layout', () => ({
-  TemplateFormLayout: (props: { title: string; isLoading?: boolean }) =>
-    mockTemplateFormLayout(props),
+  TemplateFormLayout: (props: {
+    title: string;
+    isLoading?: boolean;
+    onCreate: (
+      data: { definition: string },
+      metadata: { name: string; description: string; tags: string[] },
+      isEnabled: boolean
+    ) => Promise<void>;
+  }) => {
+    capturedTemplateFormLayoutProps.onCreate = props.onCreate;
+    return mockTemplateFormLayout(props);
+  },
 }));
 
 describe('EditTemplatePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockMutateAsync.mockResolvedValue(undefined);
     mockTemplateFormLayout.mockImplementation(({ title, isLoading }) => (
       <div>
         <div data-test-subj="layout-title">{title}</div>
@@ -94,5 +113,90 @@ describe('EditTemplatePage', () => {
     const { container } = render(<EditTemplatePage />);
 
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('sends empty description and empty tags when metadata is cleared', async () => {
+    mockUseTemplateViewParams.mockReturnValue({ templateId: 'template-123' });
+    mockUseGetTemplate.mockReturnValue({
+      data: {
+        templateId: 'template-123',
+        name: 'Test Template',
+        description: 'Existing template description',
+        tags: ['existing-tag'],
+        owner: 'cases',
+        definition: { name: 'Test Template', fields: [] },
+        definitionString: 'name: Test Template\nfields: []',
+        templateVersion: 2,
+        deletedAt: null,
+        isLatest: true,
+        latestVersion: 2,
+        isEnabled: true,
+      },
+      isLoading: false,
+    });
+
+    render(<EditTemplatePage />);
+
+    await capturedTemplateFormLayoutProps.onCreate?.(
+      { definition: 'name: Updated\nfields: []' },
+      { name: 'Test Template', description: '', tags: [] },
+      true
+    );
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        templateId: 'template-123',
+        template: {
+          name: 'Test Template',
+          description: '',
+          tags: [],
+          definition: 'name: Updated\nfields: []',
+          isEnabled: true,
+        },
+      });
+    });
+  });
+
+  it('sends undefined description/tags on a no-op save of a template that never had them', async () => {
+    mockUseTemplateViewParams.mockReturnValue({ templateId: 'template-123' });
+    mockUseGetTemplate.mockReturnValue({
+      data: {
+        templateId: 'template-123',
+        name: 'Test Template',
+        // No description / tags on the stored template.
+        owner: 'cases',
+        definition: { name: 'Test Template', fields: [] },
+        definitionString: 'name: Test Template\nfields: []',
+        templateVersion: 2,
+        deletedAt: null,
+        isLatest: true,
+        latestVersion: 2,
+        isEnabled: true,
+      },
+      isLoading: false,
+    });
+
+    render(<EditTemplatePage />);
+
+    // The metadata form folds undefined identity fields to '' / []. A no-op Save must NOT coerce
+    // those into a persisted '' / [] via the PATCH `?? existing` fallback.
+    await capturedTemplateFormLayoutProps.onCreate?.(
+      { definition: 'name: Test Template\nfields: []' },
+      { name: 'Test Template', description: '', tags: [] },
+      true
+    );
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        templateId: 'template-123',
+        template: {
+          name: 'Test Template',
+          description: undefined,
+          tags: undefined,
+          definition: 'name: Test Template\nfields: []',
+          isEnabled: true,
+        },
+      });
+    });
   });
 });

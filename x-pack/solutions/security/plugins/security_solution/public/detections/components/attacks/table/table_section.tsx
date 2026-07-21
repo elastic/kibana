@@ -169,7 +169,11 @@ export const TableSection = React.memo(
         const attack = getAttack(selectedGroup, bucket);
         if (attack) {
           if (enableNewFlyout) {
-            openAttackFlyout({ attackId: attack.id, indexName: dataView.getIndexPattern() });
+            openAttackFlyout({
+              attackId: attack.id,
+              indexName: dataView.getIndexPattern(),
+              attackTitle: attack.title,
+            });
           } else {
             openFlyout({
               right: {

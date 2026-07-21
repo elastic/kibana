@@ -13,7 +13,7 @@ import classnames from 'classnames';
 import throttle from 'lodash/throttle';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type YAML from 'yaml';
 import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
@@ -340,25 +340,13 @@ export const WorkflowYAMLEditor = ({
   }, [validationErrors, dispatch]);
 
   // Agent Builder integration for AI-assisted editing
-  const { openAgentChat, isAgentBuilderAvailable } = useAgentBuilderIntegration({
+  const { isAgentBuilderAvailable } = useAgentBuilderIntegration({
     editorRef,
     isEditorMounted,
     workflowId: workflow?.id,
     workflowName: workflow?.name ?? workflowDefinition?.name,
     validationErrors,
   });
-
-  const hasAutoOpenedAgentChatRef = useRef(false);
-  const openAgentChatRef = useRef(openAgentChat);
-  openAgentChatRef.current = openAgentChat;
-
-  useEffect(() => {
-    if (!isEditorMounted || !isAgentBuilderAvailable || hasAutoOpenedAgentChatRef.current) {
-      return;
-    }
-    hasAutoOpenedAgentChatRef.current = true;
-    openAgentChatRef.current();
-  }, [isEditorMounted, isAgentBuilderAvailable]);
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {

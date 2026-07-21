@@ -9,7 +9,16 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { installDiscoveryAgents } from '../../agent_builder/agents/discovery';
 import { SignificantEventsDiscoveryClient } from './significant_events_discovery_client';
+
+jest.mock('../../agent_builder/agents/discovery', () => ({
+  installDiscoveryAgents: jest.fn().mockResolvedValue(undefined),
+}));
+
+const installDiscoveryAgentsMock = installDiscoveryAgents as jest.MockedFunction<
+  typeof installDiscoveryAgents
+>;
 
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => ({
   getWorkflow: jest.fn().mockResolvedValue({
@@ -32,23 +41,37 @@ const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   return { client, managementApi };
 };
 
+const createAgentBuilder = () => ({ agents: { ensure: jest.fn() } } as never);
+
 describe('SignificantEventsDiscoveryClient', () => {
+  beforeEach(() => {
+    installDiscoveryAgentsMock.mockClear();
+  });
+
   describe('run', () => {
     it('starts a new execution when none exist', async () => {
       const { client, managementApi } = createClient();
       const request = httpServerMock.createKibanaRequest();
+      const agentBuilder = createAgentBuilder();
 
       const result = await client.run({
         request,
         spaceId: 'space-a',
-        inputs: { agentConnectorId: 'connector-1' },
+        agentBuilder,
       });
 
       expect(result).toEqual({ executionId: 'execution-id', isNew: true });
+      expect(installDiscoveryAgentsMock).toHaveBeenCalledWith({
+        agentBuilder,
+        spaceId: 'space-a',
+      });
+      expect(installDiscoveryAgentsMock.mock.invocationCallOrder[0]).toBeLessThan(
+        managementApi.runWorkflow.mock.invocationCallOrder[0]
+      );
       expect(managementApi.runWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({ id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID }),
         'space-a',
-        { agentConnectorId: 'connector-1' },
+        {},
         request
       );
     });
@@ -59,14 +82,19 @@ describe('SignificantEventsDiscoveryClient', () => {
           .fn()
           .mockResolvedValue({ results: [{ id: 'old', status: ExecutionStatus.COMPLETED }] }),
       });
+      const agentBuilder = createAgentBuilder();
 
       const result = await client.run({
         request: httpServerMock.createKibanaRequest(),
         spaceId: 'space-a',
-        inputs: { agentConnectorId: 'connector-1' },
+        agentBuilder,
       });
 
       expect(result).toEqual({ executionId: 'execution-id', isNew: true });
+      expect(installDiscoveryAgentsMock).toHaveBeenCalledWith({
+        agentBuilder,
+        spaceId: 'space-a',
+      });
       expect(managementApi.runWorkflow).toHaveBeenCalled();
     });
 
@@ -80,10 +108,25 @@ describe('SignificantEventsDiscoveryClient', () => {
       const result = await client.run({
         request: httpServerMock.createKibanaRequest(),
         spaceId: 'space-a',
-        inputs: { agentConnectorId: 'connector-1' },
+        agentBuilder: createAgentBuilder(),
       });
 
       expect(result).toEqual({ executionId: 'in-flight', isNew: false });
+      expect(installDiscoveryAgentsMock).not.toHaveBeenCalled();
+      expect(managementApi.runWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('throws when agentBuilder is omitted instead of starting without agents', async () => {
+      const { client, managementApi } = createClient();
+
+      await expect(
+        client.run({
+          request: httpServerMock.createKibanaRequest(),
+          spaceId: 'space-a',
+        })
+      ).rejects.toThrow('Agent Builder is required to run significant events discovery');
+
+      expect(installDiscoveryAgentsMock).not.toHaveBeenCalled();
       expect(managementApi.runWorkflow).not.toHaveBeenCalled();
     });
   });

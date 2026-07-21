@@ -6,6 +6,7 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { manageRuleTool } from '../tools/manage_rule';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
@@ -23,6 +24,8 @@ export const createRuleManagementSkill = (deps: ManageActionPolicyToolDeps) =>
     basePath: 'skills/platform/alerting',
     description:
       'Compose, discover, and modify alerting V2 rules and action policies (notification policies) within a conversation.',
+    experimental: true,
+    uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     referencedContent: [
       {
         name: 'concepts',
@@ -185,7 +188,7 @@ When a user asks about existing rules:
 - For a broad listing, use \`keywords: ["*"]\`.
 - Summarize matches in plain language: name, kind, schedule, and query snippet.
 - Do **not** attach rules by default when only listing or comparing.
-- To inspect or edit a saved rule, attach it with \`platform.core.sml_attach\` using the \`chunk_id\` from the search result.
+- To inspect or edit a saved rule, attach it with \`platform.core.sml_attach\` using the \`entry_id\` from the search result.
 - After attaching, use the returned \`attachment_id\` for subsequent ${alertingTools.manageRule} calls.
 
 ## Composing and Modifying Rules
@@ -323,7 +326,7 @@ Action policies control how alert episodes are matched, grouped, throttled, and 
 When a user asks about existing action policies:
 - Search with \`platform.core.sml_search\`, using keywords like the policy name, matcher, or destination.
 - Summarize matches: name, enabled/disabled, destination count, matcher snippet, grouping mode.
-- To inspect or edit a saved policy, attach it with \`platform.core.sml_attach\` using the \`chunk_id\`.
+- To inspect or edit a saved policy, attach it with \`platform.core.sml_attach\` using the \`entry_id\`.
 - After attaching, use the returned \`attachment_id\` for subsequent ${alertingTools.manageActionPolicy} calls.
 
 ## Composing and Modifying Action Policies
