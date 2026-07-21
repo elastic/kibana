@@ -8,10 +8,13 @@
 import { stringify as yamlStringify } from 'yaml';
 import {
   applyRefFieldOverride,
+  buildExtendedFieldsBackfill,
   buildExtendedFieldsDefaults,
   getFieldCamelKey,
   getFieldSnakeKey,
+  getV2FieldType,
   getYamlDefaultAsString,
+  mergeCustomFieldsIntoExtendedFields,
   parseFieldDefinitionsToInlineFields,
   resolveTemplateFields,
 } from './template_fields';
@@ -223,6 +226,193 @@ describe('template field key utils', () => {
 
       expect(defaults).toEqual({ summary_as_keyword: 'hi' });
       expect(defaults).not.toHaveProperty('instructions_as_keyword');
+    });
+  });
+});
+
+describe('customFields → extended_fields adapter utilities', () => {
+  describe('getV2FieldType', () => {
+    it('maps number to integer', () => {
+      expect(getV2FieldType('number')).toBe('integer');
+    });
+
+    it('maps text to keyword', () => {
+      expect(getV2FieldType('text')).toBe('keyword');
+    });
+
+    it('maps toggle to boolean', () => {
+      expect(getV2FieldType('toggle')).toBe('boolean');
+    });
+
+    it('maps unknown types to keyword', () => {
+      expect(getV2FieldType('date')).toBe('keyword');
+      expect(getV2FieldType('')).toBe('keyword');
+    });
+  });
+
+  describe('buildExtendedFieldsBackfill', () => {
+    it('returns an empty object when customFields is undefined or empty', () => {
+      expect(buildExtendedFieldsBackfill(undefined, {})).toEqual({});
+      expect(buildExtendedFieldsBackfill([], {})).toEqual({});
+    });
+
+    it('derives storage keys using <key>_as_<v2type>', () => {
+      const result = buildExtendedFieldsBackfill(
+        [
+          { key: 'priority', type: 'text', value: 'high' },
+          { key: 'count', type: 'number', value: 42 },
+          { key: 'enabled', type: 'toggle', value: true },
+        ],
+        {}
+      );
+
+      expect(result).toEqual({
+        priority_as_keyword: 'high',
+        count_as_integer: '42',
+        enabled_as_boolean: 'true',
+      });
+    });
+
+    it('skips null and undefined values', () => {
+      const result = buildExtendedFieldsBackfill(
+        [
+          { key: 'filled', type: 'text', value: 'yes' },
+          { key: 'empty_null', type: 'text', value: null },
+          { key: 'empty_undef', type: 'text', value: undefined },
+        ],
+        {}
+      );
+
+      expect(result).toEqual({ filled_as_keyword: 'yes' });
+    });
+
+    it('never overwrites a key already present in existingExtendedFields', () => {
+      // FAILURE SCENARIO: adapter called twice on same case — second call must not
+      // overwrite the value set by the first (existing-wins semantics).
+      const result = buildExtendedFieldsBackfill(
+        [{ key: 'priority', type: 'text', value: 'low' }],
+        { priority_as_keyword: 'high' }
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('only returns the additions, not the full merged map', () => {
+      const result = buildExtendedFieldsBackfill(
+        [
+          { key: 'priority', type: 'text', value: 'low' }, // already in existing — skipped
+          { key: 'severity', type: 'text', value: 'medium' }, // new — added
+        ],
+        { priority_as_keyword: 'high' }
+      );
+
+      expect(result).toEqual({ severity_as_keyword: 'medium' });
+      expect(result).not.toHaveProperty('priority_as_keyword');
+    });
+
+    it('treats null existingExtendedFields as empty', () => {
+      const result = buildExtendedFieldsBackfill([{ key: 'x', type: 'text', value: 'v' }], null);
+
+      expect(result).toEqual({ x_as_keyword: 'v' });
+    });
+  });
+
+  describe('mergeCustomFieldsIntoExtendedFields', () => {
+    it('adds a new key when no existing map is present', () => {
+      const result = mergeCustomFieldsIntoExtendedFields(
+        [{ key: 'priority', type: 'text', value: 'high' }],
+        { existing_key_as_keyword: 'value' }
+      );
+
+      expect(result).toEqual({
+        existing_key_as_keyword: 'value',
+        priority_as_keyword: 'high',
+      });
+    });
+
+    it('overrides an existing key when the customField value changes', () => {
+      const result = mergeCustomFieldsIntoExtendedFields(
+        [{ key: 'priority', type: 'text', value: 'low' }],
+        { priority_as_keyword: 'high' }
+      );
+
+      expect(result).toEqual({ priority_as_keyword: 'low' });
+    });
+
+    it('overrides existing keys and adds new ones simultaneously', () => {
+      const result = mergeCustomFieldsIntoExtendedFields(
+        [
+          { key: 'kept', type: 'text', value: 'updated' }, // customFields-win — overrides
+          { key: 'new', type: 'number', value: 7 }, // added
+        ],
+        { kept_as_keyword: 'original' }
+      );
+
+      expect(result).toEqual({
+        kept_as_keyword: 'updated', // overridden
+        new_as_integer: '7', // added
+      });
+    });
+
+    it('returns existingExtendedFields unchanged (same reference) when every value is identical', () => {
+      // FAILURE SCENARIO: adapter returns a new object reference on every call even when
+      // nothing changed — would trigger spurious SO writes and user-action entries.
+      const existing = { priority_as_keyword: 'high' };
+      const result = mergeCustomFieldsIntoExtendedFields(
+        [{ key: 'priority', type: 'text', value: 'high' }], // same value — no-op
+        existing
+      );
+
+      expect(result).toBe(existing); // same reference
+    });
+
+    it('returns undefined unchanged when customFields is empty and existing is undefined', () => {
+      const result = mergeCustomFieldsIntoExtendedFields(undefined, undefined);
+      expect(result).toBeUndefined();
+    });
+
+    it('returns null unchanged when customFields is empty and existing is null', () => {
+      const result = mergeCustomFieldsIntoExtendedFields([], null);
+      expect(result).toBeNull();
+    });
+
+    it('clears a mirror key when the customField value is null', () => {
+      const result = mergeCustomFieldsIntoExtendedFields(
+        [{ key: 'priority', type: 'text', value: null }],
+        { priority_as_keyword: 'high', other_as_keyword: 'keep' }
+      );
+
+      expect(result).toEqual({ other_as_keyword: 'keep' });
+      expect(result).not.toHaveProperty('priority_as_keyword');
+    });
+
+    it('clears a mirror key when the customField value is undefined', () => {
+      const result = mergeCustomFieldsIntoExtendedFields(
+        [{ key: 'priority', type: 'text', value: undefined }],
+        { priority_as_keyword: 'high' }
+      );
+
+      expect(result).toEqual({});
+      expect(result).not.toHaveProperty('priority_as_keyword');
+    });
+
+    it('is a no-op (same reference) when a null customField key is not present in existing', () => {
+      const existing = { other_as_keyword: 'keep' };
+      const result = mergeCustomFieldsIntoExtendedFields(
+        [{ key: 'priority', type: 'text', value: null }], // key absent — nothing to delete
+        existing
+      );
+
+      expect(result).toBe(existing); // same reference — no spurious write
+    });
+
+    it('produces a new map from undefined existing when customFields have values', () => {
+      const result = mergeCustomFieldsIntoExtendedFields(
+        [{ key: 'x', type: 'toggle', value: false }],
+        undefined
+      );
+
+      expect(result).toEqual({ x_as_boolean: 'false' });
     });
   });
 });
