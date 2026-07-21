@@ -208,7 +208,8 @@ Typical response flow:
 
 Gotchas:
 - searchMessageGroups paginates with limit/offset; total in the response is the full match count.
-- Message body content is not returned by any action here; responses carry metadata, verdicts, and rule matches only.`,
+- Message body content is not returned by any action here; responses carry metadata, verdicts, and rule matches only.
+- A mutation can occasionally return a server_timeout error while still completing server-side. Check the group state with getMessageGroup before assuming it failed; retrying the same mutation is safe (same target state).`,
 
   actions: {
     searchMessageGroups: {
