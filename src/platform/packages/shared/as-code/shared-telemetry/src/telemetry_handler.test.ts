@@ -11,7 +11,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { telemetryHandler } from './telemetry_handler';
+import { telemetryHandler, ELASTIC_AGENTIC_USER_AGENT } from './telemetry_handler';
 
 describe('dashboard api telemetry handler', () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -93,7 +93,7 @@ describe('dashboard api telemetry handler', () => {
         method: 'post',
         path: '/api/dashboards',
         routePath: '/api/dashboards',
-        headers: { 'user-agent': 'elastic-agentic' },
+        headers: { 'user-agent': ELASTIC_AGENTIC_USER_AGENT },
       });
 
       const response = { status: 201 } as IKibanaResponse<any>;
@@ -129,7 +129,7 @@ describe('dashboard api telemetry handler', () => {
         routePath,
         headers: {
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-          'user-agent': 'elastic-agentic',
+          'user-agent': ELASTIC_AGENTIC_USER_AGENT,
         },
       });
 
@@ -159,7 +159,7 @@ describe('dashboard api telemetry handler', () => {
         method: 'get',
         path: actualPath,
         routePath,
-        headers: { 'user-agent': 'elastic-agentic' },
+        headers: { 'user-agent': ELASTIC_AGENTIC_USER_AGENT },
       });
 
       const response = { status: 200 } as IKibanaResponse<any>;
