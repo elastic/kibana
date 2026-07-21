@@ -13,6 +13,7 @@ import { exampleTemplateDefinition } from '../../field_types/constants';
 import { TemplateFormLayout } from '../../components/template_form_layout';
 import { useCreateTemplate } from '../../hooks/use_create_template';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
+import { useCasesFeatures } from '../../../../common/use_cases_features';
 import { useAvailableCasesOwners } from '../../../app/use_available_owners';
 import { getOwnerDefaultValue } from '../../../create/utils';
 import { useCasesEditTemplateNavigation } from '../../../../common/navigation';
@@ -44,15 +45,18 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   const availableOwners = useAvailableCasesOwners();
   const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
   const { navigateToCasesEditTemplate } = useCasesEditTemplateNavigation();
+  const { isExtractObservablesEnabled } = useCasesFeatures();
 
-  // Defaults for a new template: extract observables on for every solution; sync alerts on only for
-  // Security (elsewhere the sync-alerts toggle is hidden and the value stays off).
+  // Defaults for a new template mirror toggle visibility: extract observables on only where the
+  // solution enables it, sync alerts on only for Security (the toggles are hidden otherwise).
+  // Gated on the (synchronous) feature config rather than license, since the license loads async
+  // and the panel seeds these defaults once at mount.
   const initialSettings = useMemo<TemplateSettings>(
     () => ({
       syncAlerts: defaultOwnerValue === SECURITY_SOLUTION_OWNER,
-      extractObservables: true,
+      extractObservables: isExtractObservablesEnabled,
     }),
-    [defaultOwnerValue]
+    [defaultOwnerValue, isExtractObservablesEnabled]
   );
 
   const handleCreate = useCallback(
