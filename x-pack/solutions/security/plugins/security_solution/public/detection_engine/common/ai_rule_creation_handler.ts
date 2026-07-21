@@ -106,7 +106,6 @@ export const createAiRuleCreationHandler = ({
             data: {
               text: JSON.stringify(stripServerFields(saved)),
               attachmentLabel: saved.name,
-              originalText: JSON.stringify(stripServerFields(saved)),
             },
           });
 

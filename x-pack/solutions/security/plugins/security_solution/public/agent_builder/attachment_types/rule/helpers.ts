@@ -28,8 +28,6 @@ export type RuleAttachment = Attachment<
   {
     text: string;
     attachmentLabel?: string;
-    /** Original text of the rule, used to compare with the current text to detect changes. */
-    originalText?: string;
   }
 >;
 
@@ -41,7 +39,7 @@ export const getRuleIdFromAttachment = (
 export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent =>
   attachment.origin ? 'update' : 'create';
 
-export const parseRuleJson = (text: string): RuleResponse | null => {
+const parseRuleJson = (text: string): RuleResponse | null => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);

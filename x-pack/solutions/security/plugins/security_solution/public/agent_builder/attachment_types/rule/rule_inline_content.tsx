@@ -7,6 +7,8 @@
 
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useRule } from '../../../detection_engine/rule_management/logic/use_rule';
+import { stripServerFields } from '../../../detection_engine/common/ai_rule_creation_handler';
 import {
   EuiAccordion,
   EuiBadge,
@@ -27,7 +29,7 @@ import { toSimpleRuleSchedule } from '../../../../common/api/detection_engine/mo
 import { FiltersDisplay } from './filters_display';
 import { MitreAttackDisplay } from './mitre_display';
 import { RuleTypeDetails } from './rule_type_details';
-import { parseRuleFromAttachment, parseRuleJson, getRuleTypeLabel, getQueryLabel } from './helpers';
+import { parseRuleFromAttachment, getRuleTypeLabel, getQueryLabel } from './helpers';
 import type { RuleAttachment } from './helpers';
 import {
   INDEX_FIELD_LABEL,
@@ -120,16 +122,19 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
+  const { data: savedRule } = useRule(attachment.origin ?? '', false, {
+    enabled: Boolean(attachment.origin),
+  });
   const originalRule = useMemo(
-    () => (attachment.data?.originalText ? parseRuleJson(attachment.data.originalText) : null),
-    [attachment]
+    () => (savedRule ? (stripServerFields(savedRule) as RuleResponse) : null),
+    [savedRule]
   );
 
   if (!rule) {
     return null;
   }
 
-  const hasDiff = originalRule != null && attachment.data?.originalText !== attachment.data?.text;
+  const hasDiff = originalRule != null;
 
   const { query, index, filters, interval, from } = getRuleDisplayFields(rule);
   const schedule = interval
