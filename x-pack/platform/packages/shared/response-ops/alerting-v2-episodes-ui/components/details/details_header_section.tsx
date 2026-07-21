@@ -49,13 +49,11 @@ export const AlertEpisodeDetailsHeaderSection = ({
 
   const episodeAction = episodeActionsMap?.get(episodeId);
   const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
-  const tags = groupAction?.tags ?? [];
 
   return (
     <AlertEpisodeDetailsHeader
       isLoadingEpisode={isLoadingEpisode}
       ruleState={ruleState}
-      tags={tags}
       status={lastStatus}
       severity={severity}
       episodeAction={episodeAction}

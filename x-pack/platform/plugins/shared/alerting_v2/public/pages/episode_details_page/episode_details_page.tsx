@@ -122,7 +122,6 @@ export function EpisodeDetailsPage() {
 
   const episodeAction = episodeId ? episodeActionsMap?.get(episodeId) : undefined;
   const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
-  const tags = useMemo(() => groupAction?.tags ?? [], [groupAction]);
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
@@ -219,12 +218,11 @@ export function EpisodeDetailsPage() {
       getEpisodeHeaderBadges({
         status: episode?.['episode.status'],
         severity: episode?.severity,
-        tags,
         episodeAction,
         groupAction,
         isFlapping,
       }),
-    [episode, tags, episodeAction, groupAction, isFlapping]
+    [episode, episodeAction, groupAction, isFlapping]
   );
 
   const headerMenu = useMemo(

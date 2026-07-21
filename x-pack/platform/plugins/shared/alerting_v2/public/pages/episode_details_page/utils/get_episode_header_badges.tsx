@@ -31,7 +31,6 @@ import * as i18n from '../translations';
 export interface EpisodeHeaderBadgesArgs {
   status: AlertEpisodeStatus | undefined;
   severity: string | undefined | null;
-  tags: string[];
   episodeAction: EpisodeActionState | undefined;
   groupAction: AlertEpisodeGroupAction | undefined;
   isFlapping?: boolean;
@@ -127,10 +126,12 @@ const renderFilledBadge =
 
 const renderFlappingBadge = (_props: { badgeText: string }) => <FlappingBadge />;
 
+// Tags intentionally live in the "Episode details" section (see AlertEpisodeOverviewList)
+// rather than here: the app header caps badges at three, so status/severity/action badges
+// would otherwise be crowded out by a variable number of tag badges.
 export const getEpisodeHeaderBadges = ({
   status,
   severity,
-  tags,
   episodeAction,
   groupAction,
   isFlapping = false,
@@ -198,14 +199,6 @@ export const getEpisodeHeaderBadges = ({
         severityColor,
         `alertingV2EpisodeSeverityBadge-${normalized}`
       ),
-    });
-  }
-
-  for (const tag of tags) {
-    badges.push({
-      label: tag,
-      color: 'hollow',
-      'data-test-subj': `alertingV2EpisodeDetailsHeaderTagBadge-${tag}`,
     });
   }
 
