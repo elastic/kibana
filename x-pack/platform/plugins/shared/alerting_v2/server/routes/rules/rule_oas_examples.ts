@@ -142,11 +142,11 @@ const SAMPLE_RULE_ID = RULE_RESPONSE.id;
  * via `buildRouteValidationWithZod` before `execute()` / `BaseAlertingRoute.onError`,
  * so clients see Boom's default `{ statusCode, error, message }` — not `errorResponseSchema`.
  */
-type CoreRequestValidationError = {
+interface CoreRequestValidationError {
   statusCode: 400;
   error: string;
   message: string;
-};
+}
 
 const coreRequestValidationExample = (
   name: string,
@@ -185,7 +185,9 @@ const INVALID_UPDATE_REQUEST_EXAMPLE = coreRequestValidationExample(
 
 const INVALID_LIST_QUERY_EXAMPLE = coreRequestValidationExample(
   'invalidRequest',
-  stringifyZodError(requireZodFailure(findRulesParamsSchema.safeParse({ page: 0 }), 'findRulesParamsSchema'))
+  stringifyZodError(
+    requireZodFailure(findRulesParamsSchema.safeParse({ page: 0 }), 'findRulesParamsSchema')
+  )
 );
 
 const INVALID_RULE_TAGS_QUERY_EXAMPLE = coreRequestValidationExample(
@@ -197,7 +199,9 @@ const INVALID_RULE_TAGS_QUERY_EXAMPLE = coreRequestValidationExample(
 
 const INVALID_BULK_GET_REQUEST_EXAMPLE = coreRequestValidationExample(
   'invalidRequest',
-  stringifyZodError(requireZodFailure(bulkGetRulesParamsSchema.safeParse({}), 'bulkGetRulesParamsSchema'))
+  stringifyZodError(
+    requireZodFailure(bulkGetRulesParamsSchema.safeParse({}), 'bulkGetRulesParamsSchema')
+  )
 );
 
 const INVALID_BULK_OPERATION_REQUEST_EXAMPLE = coreRequestValidationExample(

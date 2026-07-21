@@ -130,7 +130,9 @@ describe('rule OAS examples', () => {
     expect(
       oas.responses?.[201]?.content?.['application/json']?.examples?.createRuleResponse
     ).toBeDefined();
-    expect(oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRequest).toBeDefined();
+    expect(
+      oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRequest
+    ).toBeDefined();
   });
 
   it('includes success examples for rule tags', () => {
