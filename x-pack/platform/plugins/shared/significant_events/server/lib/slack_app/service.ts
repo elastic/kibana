@@ -353,7 +353,7 @@ export class SlackAppService {
       );
     }
     if (connection?.status !== RELAY_APP_CONNECTION_STATUS.connected || !connection.tenantKey) {
-      throw new Error('Connection is not in a connected state');
+      throw new SlackAppUnavailableError('Connection is not in a connected state');
     }
     return { relayClient, tenantKey: connection.tenantKey };
   }
