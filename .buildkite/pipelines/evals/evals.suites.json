@@ -268,6 +268,19 @@
       ]
     },
     {
+      "id": "security-threat-intel-hunt",
+      "name": "Security Threat Intelligence Hunt",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-threat-intel-hunt/playwright.config.ts",
+      "tags": [
+        "security",
+        "threat-intel-hunt"
+      ],
+      "ciLabels": [
+        "evals:security-threat-intel-hunt"
+      ]
+    },
+    {
       "id": "agent-builder-dashboards",
       "name": "Agent Builder Dashboards",
       "slackChannel": "#kibana-presentation-reminders",
