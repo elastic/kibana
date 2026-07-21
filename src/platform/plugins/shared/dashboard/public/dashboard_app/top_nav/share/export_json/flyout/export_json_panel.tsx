@@ -367,9 +367,11 @@ export const ExportJsonPanel = <State extends object, SanitizedState extends obj
         <EuiFlexItem grow css={{ minHeight: 0 }}>
           {status === 'loading' ? (
             <LoadingState />
-          ) : status === 'success' && jsonValue ? (
+          ) : status === 'error' ? (
+            <ErrorState error={error} onRetry={onRetry} />
+          ) : jsonValue ? (
             <SuccessState openInConsoleRequest={openInConsoleRequest} jsonValue={jsonValue} />
-          ) : !jsonValue ? (
+          ) : (
             <ErrorState
               error={
                 new Error(
@@ -379,8 +381,6 @@ export const ExportJsonPanel = <State extends object, SanitizedState extends obj
                 )
               }
             />
-          ) : (
-            <ErrorState error={error} onRetry={onRetry} />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
