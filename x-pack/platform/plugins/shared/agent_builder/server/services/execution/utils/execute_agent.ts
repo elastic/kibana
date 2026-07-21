@@ -35,6 +35,7 @@ export const executeAgent$ = ({
   abortSignal,
   defaultConnectorId,
   telemetryMetadata,
+  maxContentLength,
   browserApiTools,
   configurationOverrides,
   action,
@@ -53,6 +54,7 @@ export const executeAgent$ = ({
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  maxContentLength?: number;
   browserApiTools?: BrowserApiToolMetadata[];
   configurationOverrides?: AgentConfigurationOverrides;
   action?: ConversationAction;
@@ -66,6 +68,7 @@ export const executeAgent$ = ({
       abortSignal,
       defaultConnectorId,
       telemetryMetadata,
+      maxContentLength,
       executionMode,
       agentParams: {
         nextInput,
