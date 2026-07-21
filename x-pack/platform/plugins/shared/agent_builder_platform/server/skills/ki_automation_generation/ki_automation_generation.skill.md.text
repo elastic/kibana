@@ -114,31 +114,92 @@ A reference workflow YAML for the Index Metadata strategy is available in the
 
 Follow these phases in order. Do not skip ahead.
 
+### Phase 0 — Validate AI Index
+
+Before calling any tool or asking any question, check whether the conversation contains a valid
+AI Index definition.
+
+A valid AI Index definition is a JSON object that matches the schema in the `ai-index-schema`
+resource attached to this skill. It must have at minimum:
+- `id` (string)
+- `name` (string)
+- `dest` object with `type` (`"data_stream"` or `"index"`) and `value` (string)
+- `sources` array of objects each with `type: "esql"` and `value` (string)
+- `automations` array of objects each with `type: "workflow"` and `value` (string)
+- `date_created` and `date_modified` (strings)
+
+**If no AI Index definition is present:**
+
+Respond with:
+
+> "To set up the Context Engine, I need an AI Index definition. An AI Index defines the destination
+> index, data sources, and automations for the Context Engine. You can create one using the
+> Context Engine UI or the AI Index API (`PUT /api/context_engine/ai_index/{id}`), then paste the
+> full JSON definition here and I'll get started."
+
+Do not call any tools. Do not proceed.
+
+**If something is provided but it is not a valid AI Index definition:**
+
+Compare the provided value against the `ai-index-schema` resource. Identify specifically what is
+missing or wrong (e.g. "The `dest` field is missing", "The `sources` array is empty",
+"`foobar` is not a valid AI Index definition — it is not a JSON object with the required fields").
+Explain what a valid definition looks like. Do not proceed until a valid one is provided.
+
+**If a valid AI Index definition is provided:**
+
+Extract and hold these values for the rest of the conversation:
+- `dest.value` — the target index/data stream where KIs will be written
+- `dest.type` — whether it is a data stream or index
+- `sources[]` — the declared data sources (ES|QL queries or future connector sources)
+- `name` and `description` — the AI Index's stated purpose
+
+Proceed to Phase 1.
+
 ### Phase 1 — Discover
 
-Before asking the user anything, silently gather context:
+Using the validated AI Index definition, gather context about the declared sources:
 
-1. Call `platform.core.list_indices` to list Elasticsearch indices.
-2. Call `platform.core.get_index_mapping` on 3–5 of the most interesting indices
-   (skip system indices starting with `.`).
-3. Call `platform.workflows.get_connectors` to list configured connectors.
+1. Parse the index or data stream names referenced in each `sources[]` entry whose `type` is
+   `"esql"`. Extract them from the `FROM` clause of each ES|QL query (e.g.
+   `FROM my-index-* | WHERE ...` → `my-index-*`).
+2. Call `platform.core.get_index_mapping` for each of those index/data stream names.
+3. Call `platform.workflows.get_connectors` to list configured connectors. (Connector source
+   types will appear in `sources[]` as the API matures — handle them here when present.)
 
-Then ask the user one focused question:
+Do **not** call `platform.core.list_indices` to broadly explore all indices. The AI Index
+already declares which sources matter.
 
-> "I can see your environment. Before I suggest how to set up the Context Engine, can you tell
-> me a bit about your use case — what kinds of questions do you want AI agents to answer, and
-> which data sources do you think matter most?"
+Do **not** ask the user what data sources they care about — the AI Index already answers that.
 
-Wait for their answer before continuing.
+After gathering mappings, proceed directly to Phase 2.
 
-### Phase 2 — Suggest sources and strategies
+### Phase 2 — Suggest strategies
 
-Based on indices, connectors, and the user's goal, present per-source recommendations. Example:
+Based on the declared sources (from `sources[]`), their mappings, and the AI Index's
+`name` and `description`, propose a coherent set of KI generation strategies that serves the
+AI Index's stated purpose as a whole.
 
-> **`customer_support_tickets`** — Support case records with status, priority, description.
-> Recommended: **Bottom-Up** — agents will want to retrieve specific case facts.
+A single AI Index may warrant one strategy spanning all sources, or several complementary
+strategies — let the data and stated purpose guide the choice. For example:
 
-Ask the user to confirm which sources to include and whether to adjust any strategy.
+- A support-ticket AI Index with one `sources[]` ES|QL entry → single Bottom-Up strategy
+- A mixed AI Index with multiple sources (logs + a case system) → Index Metadata for all sources
+  plus Selective/Outlier for the log stream
+
+Present your recommendation like this:
+
+> **Sources declared in the AI Index:**
+> - `my-cases-index` (from ES|QL source): support case records with status, priority, description
+>
+> **Recommended strategy:** **Bottom-Up** — each case becomes one KI; agents retrieve specific
+> case facts by case number or status.
+>
+> **Target index:** `<dest.value>` (from the AI Index `dest` field)
+>
+> Does this look right? Would you like to adjust the strategy before I draft the workflow?
+
+Wait for confirmation before proceeding to Phase 3.
 
 ### Phase 3 — Agree on a corpus filter
 
