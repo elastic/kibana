@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-plugin",
-  "owner": ["@elastic/obs-signals-traces"],
+  "owner": ["@elastic/obs-signals-traces-team"],
   "group": "observability",
   "visibility": "private",
   "description": "The user interface for Elastic APM",

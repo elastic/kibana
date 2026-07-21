@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.19>>
 * <<release-notes-8.19.18>>
 * <<release-notes-8.19.17>>
 * <<release-notes-8.19.16>>
@@ -124,6 +125,48 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.19]]
+== {kib} 8.19.19
+
+The 8.19.19 release includes the following enhancements and fixes.
+
+[float]
+[[enhancement-v8.19.19]]
+=== Enhancements
+Elastic Observability solution::
+* Ensures APM integration policy updates retain API keys when clients omit them ({kibana-pull}274647[#274647]).
+* Speeds up loading Synthetics journey screenshots and step details ({kibana-pull}273513[#273513]).
+* Honors the `observability:searchExcludedDataTiers` advanced setting in Synthetics searches so operators can exclude slow data tiers such as `data_frozen` ({kibana-pull}273418[#273418]).
+Elasticsearch solution::
+* Adds a MongoDB connector `datetime_conversion` setting so syncs can clamp, convert, or error on dates outside the supported range instead of always aborting ({kibana-pull}277685[#277685]).
+
+[float]
+[[fixes-v8.19.19]]
+=== Fixes
+Alerting::
+* Defaults a missing reporting job `version` parameter to the current {kib} version instead of showing a hardcoded `7.14.0` value ({kibana-pull}275469[#275469]).
+Dashboards and Visualizations::
+* Limits the Canvas `createTable` expression `rowCount` to a maximum of `10000`, matching the default {es} `index.max_result_window` ({kibana-pull}276502[#276502]).
+Data ingestion and Fleet::
+* Fixes resetting preconfigured agent policies aborting with a 404 on deployments where space awareness is disabled ({kibana-pull}276742[#276742]).
+Developer tools::
+* Fixes Console autocomplete so nested object fields and multi-fields in index mapping bodies suggest mapping options again ({kibana-pull}278508[#278508]).
+* Fixes Console requests that combine comments with triple-quote strings failing with `x_content_e_o_f_exception` ({kibana-pull}277259[#277259]).
+* Fixes a Windows-specific code editor issue that could corrupt multi-line edited text after refresh ({kibana-pull}277007[#277007]).
+* Fixes the Console **Copy** button silently failing to copy response output ({kibana-pull}276365[#276365]).
+* Fixes Console autocomplete matching an incorrect API endpoint when a URL matches both a literal path and a parameterized path ({kibana-pull}276239[#276239]).
+* Improves Console {esql} source autocomplete by reusing a fresh source list instead of refetching it on every keystroke ({kibana-pull}275535[#275535]).
+Elastic Observability solution::
+* Fixes Synthetics monitor updates ignoring `retest_on_failure: false`, which left retests enabled on existing monitors ({kibana-pull}277701[#277701]).
+Elastic Security solution::
+For the Elastic Security 8.19.19 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Kibana platform::
+* Fixes `kibana-frontend` page-load transaction names to use low-cardinality `/app/{appId}` labels instead of raw URLs ({kibana-pull}275650[#275650]).
+Machine Learning::
+* Prevents removing all spaces from a {ml} job or trained model through the spaces update APIs ({kibana-pull}276490[#276490]).
+* Restricts the clear audit messages API so users can only clear messages for jobs they can access, and only against valid notification indices ({kibana-pull}276419[#276419]).
+* Adds request size limits to the file upload and `index_exists` endpoints ({kibana-pull}274566[#274566]).
 
 [[release-notes-8.19.18]]
 == {kib} 8.19.18
