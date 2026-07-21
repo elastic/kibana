@@ -1,0 +1,485 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { i18n } from '@kbn/i18n';
+import { z, lazySchema } from '@kbn/zod/v4';
+import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import type {
+  GetMessageGroupInput,
+  GetMessageInput,
+  GetTaskInput,
+  MessageGroupActionInput,
+  SearchMessageGroupsInput,
+  SublimeMessageGroupSummary,
+  SublimeMessageSummary,
+} from './types';
+import {
+  GetMessageGroupInputSchema,
+  GetMessageInputSchema,
+  GetTaskInputSchema,
+  MessageGroupActionInputSchema,
+  SearchMessageGroupsInputSchema,
+} from './types';
+
+interface SublimeConfig {
+  baseUrl: string;
+}
+
+/**
+ * Sublime deployments are region- or customer-specific (six cloud regions plus
+ * self-hosted instances), so the base URL comes from connector config.
+ * Trailing slashes are trimmed so path concatenation stays predictable.
+ */
+const getBaseUrl = (ctx: ActionContext): string => {
+  const { baseUrl } = ctx.config as unknown as SublimeConfig;
+  return baseUrl.replace(/\/+$/, '');
+};
+
+/**
+ * Surface Sublime's error payload and request ID (Sublime support correlates on
+ * X-Request-ID) instead of a bare axios message.
+ */
+const throwWithApiError = (error: unknown): never => {
+  const axiosError = error as {
+    response?: { status?: number; data?: unknown; headers?: Record<string, unknown> };
+    message?: string;
+  };
+  if (axiosError.response?.data !== undefined) {
+    const detail =
+      typeof axiosError.response.data === 'string'
+        ? axiosError.response.data
+        : JSON.stringify(axiosError.response.data);
+    const requestId = axiosError.response.headers?.['x-request-id'];
+    const requestIdSuffix = requestId ? ` (request id: ${String(requestId)})` : '';
+    throw new Error(
+      `Sublime Security API error (${axiosError.response.status}): ${detail}${requestIdSuffix}`
+    );
+  }
+  throw error;
+};
+
+interface RawMessage {
+  id?: string;
+  subject?: string;
+  sender?: { email?: string; display_name?: string };
+  created_at?: string;
+  mailbox?: { email?: string };
+  read_at?: string | null;
+  forwarded_at?: string | null;
+  replied_at?: string | null;
+}
+
+interface RawMessageGroup {
+  id?: string;
+  state?: string;
+  classification?: string | null;
+  review_status?: string | null;
+  review_label?: string | null;
+  review_comment?: string | null;
+  flagged_rules?: Array<{ id?: string; name?: string }>;
+  messages?: RawMessage[];
+  user_reports?: unknown[];
+  message_links_clicked?: unknown[];
+}
+
+const MAX_MESSAGES_IN_SUMMARY = 5;
+const MAX_MESSAGES_IN_DETAIL = 50;
+
+const trimMessage = (message: RawMessage): SublimeMessageSummary => ({
+  id: message.id,
+  subject: message.subject,
+  sender: message.sender
+    ? { email: message.sender.email, display_name: message.sender.display_name }
+    : undefined,
+  created_at: message.created_at,
+  mailbox_email: message.mailbox?.email,
+  read_at: message.read_at,
+  forwarded_at: message.forwarded_at,
+  replied_at: message.replied_at,
+});
+
+const trimMessageGroup = (
+  group: RawMessageGroup,
+  maxMessages: number
+): SublimeMessageGroupSummary => {
+  const messages = group.messages ?? [];
+  return {
+    id: group.id,
+    state: group.state,
+    classification: group.classification,
+    review_status: group.review_status,
+    review_label: group.review_label,
+    review_comment: group.review_comment,
+    flagged_rules: (group.flagged_rules ?? []).map((rule) => ({ id: rule.id, name: rule.name })),
+    message_count: messages.length,
+    messages: messages.slice(0, maxMessages).map(trimMessage),
+  };
+};
+
+const buildActionBody = (input: MessageGroupActionInput) => ({
+  message_group_ids: input.messageGroupIds,
+  ...(input.classification && { classification: input.classification }),
+  ...(input.reportLabel && { report_label: input.reportLabel }),
+  ...(input.reviewComment && { review_comment: input.reviewComment }),
+});
+
+const TASK_RESULT_DESCRIPTION =
+  'Returns a task_id. The action runs asynchronously in Sublime; use getTask to confirm it succeeded before reporting success.';
+
+export const SublimeSecurityConnector: ConnectorSpec = {
+  metadata: {
+    id: '.sublime_security',
+    displayName: 'Sublime Security',
+    description: i18n.translate('core.kibanaConnectorSpecs.sublimeSecurity.metadata.description', {
+      defaultMessage:
+        'Search flagged email, get verdicts, and quarantine, trash, or restore message groups in Sublime Security',
+    }),
+    minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    docsUrl:
+      'https://www.elastic.co/docs/reference/kibana/connectors-kibana/sublime-security-action-type',
+  },
+
+  auth: {
+    types: [
+      {
+        type: 'bearer',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.sublimeSecurity.auth.bearer.label', {
+            defaultMessage: 'API key',
+          }),
+        },
+      },
+    ],
+    headers: {
+      'User-Agent': 'ElasticKibana',
+    },
+  },
+
+  schema: lazySchema(() =>
+    z.object({
+      baseUrl: z
+        .string()
+        .url()
+        .max(1024)
+        .describe(
+          'Sublime Platform API base URL. Shown under Automate > API in the Sublime dashboard'
+        )
+        .meta({
+          label: i18n.translate('core.kibanaConnectorSpecs.sublimeSecurity.config.baseUrl', {
+            defaultMessage: 'API base URL',
+          }),
+          helpText: i18n.translate('core.kibanaConnectorSpecs.sublimeSecurity.config.baseUrlHelp', {
+            defaultMessage:
+              'Region-specific for Sublime Cloud (for example https://platform.sublime.security or https://eu.platform.sublime.security) or the host of a self-hosted instance. Find it under Automate > API in the Sublime dashboard.',
+          }),
+          placeholder: 'https://platform.sublime.security',
+          validate: { allowedHosts: true },
+        }),
+    })
+  ),
+
+  skill: `Sublime Security detects and remediates email threats (phishing, BEC, malware). Messages are deduplicated into message groups (campaign-like clusters); response actions operate on groups, and quarantining a group also catches late-arriving copies of the same message.
+
+Typical response flow:
+1. searchMessageGroups to find the campaign (by sender, domain, recipient, attachment hash, verdict, or time window).
+2. getMessageGroup / getMessage / getAttackScore / getAsaVerdict to confirm the verdict.
+3. quarantineMessageGroups or trashMessageGroups with a classification and review comment (workflow steps only, not agent tools).
+4. getTask with the returned task_id to verify the action succeeded (state becomes succeeded or failed).
+
+Gotchas:
+- Timestamps are UTC ISO 8601 (2026-07-14T15:09:26Z); relative expressions like now-7d are not supported.
+- searchMessageGroups paginates with limit/offset; total in the response is the full match count.
+- restoreMessageGroups is the undo for both quarantine and trash.
+- Quarantine requires a Sublime Enterprise plan; free-tier tenants get HTTP 403 on it.
+- Message body content is not returned by any action here; responses carry metadata, verdicts, and rule matches only.`,
+
+  actions: {
+    searchMessageGroups: {
+      isTool: true,
+      description:
+        'Search Sublime Security message groups (campaign-like clusters of deduplicated email). ' +
+        'Filter by sender, domain, recipient, attachment SHA-256, Attack Score verdict, rule severity, review state, or time window. ' +
+        'Use this first to find the group IDs that other actions operate on. ' +
+        'Returns id, state, classification, review fields, flagged rule names, message count, and up to 5 sample messages per group, plus the total match count for pagination.',
+      input: SearchMessageGroupsInputSchema,
+      handler: async (ctx, input: SearchMessageGroupsInput) => {
+        try {
+          // Sublime's `__is`/`__gte`/`__lt` param names violate the object-literal
+          // naming-convention lint rule, so they are assigned via member access.
+          const params: Record<string, string | number | boolean | undefined> = {
+            flagged: input.flagged,
+            user_reported: input.userReported,
+            reviewed: input.reviewed,
+            limit: input.limit,
+            offset: input.offset,
+          };
+          params.sender_email__is = input.senderEmail;
+          params.sender_domain__is = input.senderDomain;
+          params.recipient_email__is = input.recipientEmail;
+          params.attachment_sha256__is = input.attachmentSha256;
+          params.attack_score_verdict__is = input.attackScoreVerdict;
+          params.flagged_rule_severity__is = input.flaggedRuleSeverity;
+          params.created_at__gte = input.createdAtGte;
+          params.created_at__lt = input.createdAtLt;
+
+          const response = await ctx.client.get(`${getBaseUrl(ctx)}/v0/message-groups`, {
+            params,
+          });
+          const data = response.data as {
+            total?: number;
+            count?: number;
+            message_groups?: RawMessageGroup[];
+          };
+          return {
+            total: data.total,
+            count: data.count,
+            message_groups: (data.message_groups ?? []).map((group) =>
+              trimMessageGroup(group, MAX_MESSAGES_IN_SUMMARY)
+            ),
+          };
+        } catch (error) {
+          throwWithApiError(error);
+        }
+      },
+    },
+
+    getMessageGroup: {
+      isTool: true,
+      description:
+        'Get one Sublime Security message group by its canonical ID, including flagged rules, review state, ' +
+        'user report count, link click count, and up to 50 member messages with sender, subject, and read/forward/reply telemetry. ' +
+        'Use after searchMessageGroups to inspect a group before acting on it.',
+      input: GetMessageGroupInputSchema,
+      handler: async (ctx, input: GetMessageGroupInput) => {
+        try {
+          const response = await ctx.client.get(
+            `${getBaseUrl(ctx)}/v0/message-groups/${encodeURIComponent(input.messageGroupId)}`
+          );
+          const group = response.data as RawMessageGroup;
+          return {
+            ...trimMessageGroup(group, MAX_MESSAGES_IN_DETAIL),
+            user_report_count: (group.user_reports ?? []).length,
+            link_click_count: (group.message_links_clicked ?? []).length,
+          };
+        } catch (error) {
+          throwWithApiError(error);
+        }
+      },
+    },
+
+    getMessage: {
+      isTool: true,
+      description:
+        'Get metadata for a single message by its ID: subject, sender, recipients, mailbox, timestamps ' +
+        '(created, read, forwarded, replied), and whether it landed in spam. ' +
+        'Returns metadata only, not the message body.',
+      input: GetMessageInputSchema,
+      handler: async (ctx, input: GetMessageInput) => {
+        try {
+          const response = await ctx.client.get(
+            `${getBaseUrl(ctx)}/v0/messages/${encodeURIComponent(input.messageId)}`
+          );
+          const message = response.data as RawMessage & {
+            canonical_id?: string;
+            external_id?: string;
+            recipients?: unknown[];
+            forward_recipients?: string[];
+            landed_in_spam?: boolean;
+          };
+          return {
+            id: message.id,
+            canonical_id: message.canonical_id,
+            external_id: message.external_id,
+            subject: message.subject,
+            sender: message.sender,
+            recipients: message.recipients,
+            forward_recipients: message.forward_recipients,
+            mailbox_email: message.mailbox?.email,
+            created_at: message.created_at,
+            read_at: message.read_at,
+            forwarded_at: message.forwarded_at,
+            replied_at: message.replied_at,
+            landed_in_spam: message.landed_in_spam,
+          };
+        } catch (error) {
+          throwWithApiError(error);
+        }
+      },
+    },
+
+    getAttackScore: {
+      isTool: true,
+      description:
+        'Get the Sublime Attack Score for a message: a 0-100 machine-learning score, a verdict ' +
+        '(malicious, suspicious, spam, graymail, likely_benign, or unknown), a graymail score, and the ranked top signals explaining the verdict. ' +
+        'Use to enrich a case or decide whether a message needs remediation.',
+      input: GetMessageInputSchema,
+      handler: async (ctx, input: GetMessageInput) => {
+        try {
+          const response = await ctx.client.get(
+            `${getBaseUrl(ctx)}/v0/messages/${encodeURIComponent(input.messageId)}/attack_score`
+          );
+          const data = response.data as {
+            score?: number;
+            verdict?: string;
+            graymail_score?: number;
+            top_signals?: Array<{ category?: string; description?: string; rank?: number }>;
+          };
+          return {
+            score: data.score,
+            verdict: data.verdict,
+            graymail_score: data.graymail_score,
+            top_signals: (data.top_signals ?? []).map((signal) => ({
+              category: signal.category,
+              description: signal.description,
+              rank: signal.rank,
+            })),
+          };
+        } catch (error) {
+          throwWithApiError(error);
+        }
+      },
+    },
+
+    getAsaVerdict: {
+      isTool: true,
+      description:
+        "Get the verdict from Sublime's Autonomous Security Analyst (ASA) for a message: " +
+        'malicious, spam, graymail, likely_benign, benign, or unknown. ' +
+        'ASA triages user-reported and low-confidence flagged messages automatically; use this to branch on whether Sublime already triaged the message.',
+      input: GetMessageInputSchema,
+      handler: async (ctx, input: GetMessageInput) => {
+        try {
+          const response = await ctx.client.get(
+            `${getBaseUrl(ctx)}/v0/messages/${encodeURIComponent(input.messageId)}/asa_verdict`
+          );
+          const data = response.data as { verdict?: string };
+          return { verdict: data.verdict };
+        } catch (error) {
+          throwWithApiError(error);
+        }
+      },
+    },
+
+    quarantineMessageGroups: {
+      // Deliberately not a tool: destructive mailbox mutation, workflow steps only.
+      isTool: false,
+      description:
+        'Quarantine one or more message groups: removes the messages from user mailboxes and holds them, ' +
+        'and also quarantines late-arriving copies of the same messages. Optionally records a classification, report label, and review comment. ' +
+        `Reversible with restoreMessageGroups. Requires a Sublime Enterprise plan. ${TASK_RESULT_DESCRIPTION}`,
+      input: MessageGroupActionInputSchema,
+      handler: async (ctx, input: MessageGroupActionInput) => {
+        try {
+          const response = await ctx.client.post(
+            `${getBaseUrl(ctx)}/v0/message-groups/quarantine`,
+            buildActionBody(input)
+          );
+          const data = response.data as { task_id?: string };
+          return { task_id: data.task_id };
+        } catch (error) {
+          throwWithApiError(error);
+        }
+      },
+    },
+
+    trashMessageGroups: {
+      // Deliberately not a tool: destructive mailbox mutation, workflow steps only.
+      isTool: false,
+      description:
+        'Move all messages in one or more message groups to trash in the affected mailboxes. ' +
+        'Optionally records a classification, report label, and review comment. ' +
+        `Reversible with restoreMessageGroups. ${TASK_RESULT_DESCRIPTION}`,
+      input: MessageGroupActionInputSchema,
+      handler: async (ctx, input: MessageGroupActionInput) => {
+        try {
+          const response = await ctx.client.post(
+            `${getBaseUrl(ctx)}/v0/message-groups/trash`,
+            buildActionBody(input)
+          );
+          const data = response.data as { task_id?: string };
+          return { task_id: data.task_id };
+        } catch (error) {
+          throwWithApiError(error);
+        }
+      },
+    },
+
+    restoreMessageGroups: {
+      // Deliberately not a tool: mailbox mutation (the undo), workflow steps only.
+      isTool: false,
+      description:
+        'Restore one or more previously quarantined or trashed message groups back to user mailboxes. ' +
+        'The undo for quarantineMessageGroups and trashMessageGroups; use it to recover from a false positive. ' +
+        TASK_RESULT_DESCRIPTION,
+      input: MessageGroupActionInputSchema,
+      handler: async (ctx, input: MessageGroupActionInput) => {
+        try {
+          const response = await ctx.client.post(
+            `${getBaseUrl(ctx)}/v0/message-groups/restore`,
+            buildActionBody(input)
+          );
+          const data = response.data as { task_id?: string };
+          return { task_id: data.task_id };
+        } catch (error) {
+          throwWithApiError(error);
+        }
+      },
+    },
+
+    getTask: {
+      isTool: true,
+      description:
+        'Get the status of an asynchronous Sublime task by ID: pending, started, succeeded, failed, or retrying, plus an error message when failed. ' +
+        'Quarantine, trash, and restore return a task_id; poll this until the state is succeeded or failed before reporting the outcome.',
+      input: GetTaskInputSchema,
+      handler: async (ctx, input: GetTaskInput) => {
+        try {
+          const response = await ctx.client.get(
+            `${getBaseUrl(ctx)}/v0/tasks/${encodeURIComponent(input.taskId)}`
+          );
+          const data = response.data as {
+            id?: string;
+            state?: string;
+            error?: string;
+            created_at?: string;
+          };
+          return {
+            id: data.id,
+            state: data.state,
+            error: data.error,
+            created_at: data.created_at,
+          };
+        } catch (error) {
+          throwWithApiError(error);
+        }
+      },
+    },
+  },
+
+  test: {
+    enabled: true,
+    description: i18n.translate('core.kibanaConnectorSpecs.sublimeSecurity.test.description', {
+      defaultMessage: 'Verifies the Sublime Security connection by listing one protected mailbox',
+    }),
+    handler: async (ctx) => {
+      try {
+        await ctx.client.get(`${getBaseUrl(ctx)}/v0/mailboxes`, {
+          params: { limit: 1 },
+        });
+        return { ok: true, message: 'Successfully connected to the Sublime Platform API' };
+      } catch (error) {
+        return throwWithApiError(error);
+      }
+    },
+  },
+};
