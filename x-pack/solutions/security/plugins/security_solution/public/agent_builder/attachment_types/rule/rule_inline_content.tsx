@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
   EuiBadge,
@@ -43,6 +42,11 @@ import {
   LOOKBACK_LABEL,
   LIMITATIONS_TITLE,
   LIMITATIONS_BODY,
+  DIFF_ACCORDION_LABEL,
+  DIFF_SAVED_LABEL,
+  DIFF_AI_LABEL,
+  DIFF_SAVED_DESCRIPTION,
+  DIFF_AI_DESCRIPTION,
 } from './translations';
 import { RuleDiffTab } from '../../../detection_engine/rule_management/components/rule_details/rule_diff_tab';
 
@@ -249,31 +253,16 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
           <EuiSpacer size="s" />
           <EuiAccordion
             id="rule-diff-accordion"
-            buttonContent={i18n.translate(
-              'xpack.securitySolution.agentBuilder.ruleAttachment.diffAccordionLabel',
-              { defaultMessage: 'Changes from saved rule' }
-            )}
+            buttonContent={DIFF_ACCORDION_LABEL}
             paddingSize="none"
           >
             <RuleDiffTab
               oldRule={originalRule as unknown as RuleResponse}
               newRule={rule}
-              leftDiffSideLabel={i18n.translate(
-                'xpack.securitySolution.agentBuilder.ruleAttachment.diffSavedLabel',
-                { defaultMessage: 'Saved' }
-              )}
-              rightDiffSideLabel={i18n.translate(
-                'xpack.securitySolution.agentBuilder.ruleAttachment.diffAiLabel',
-                { defaultMessage: 'AI suggested' }
-              )}
-              leftDiffSideDescription={i18n.translate(
-                'xpack.securitySolution.agentBuilder.ruleAttachment.diffSavedDescription',
-                { defaultMessage: 'The rule as it was when added to chat' }
-              )}
-              rightDiffSideDescription={i18n.translate(
-                'xpack.securitySolution.agentBuilder.ruleAttachment.diffAiDescription',
-                { defaultMessage: 'The rule as suggested by the AI assistant' }
-              )}
+              leftDiffSideLabel={DIFF_SAVED_LABEL}
+              rightDiffSideLabel={DIFF_AI_LABEL}
+              leftDiffSideDescription={DIFF_SAVED_DESCRIPTION}
+              rightDiffSideDescription={DIFF_AI_DESCRIPTION}
             />
           </EuiAccordion>
         </>
