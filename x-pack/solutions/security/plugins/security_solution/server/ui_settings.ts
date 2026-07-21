@@ -90,11 +90,15 @@ type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
  * by the current management UI), so registering it here — rather than via a
  * deferred continuation — is what keeps it in the expected position.
  *
- * The toggle is always visible and defaults to `false`. Behavior is gated by the
- * global `attackDiscoveryWorkflowsEnabled` feature flag AND this per-space setting
- * (`FF && setting`) at every server and client read site (see
- * `isWorkflowsEnabledForSpace`), so when the feature flag is off this setting has
- * no effect regardless of its value.
+ * The toggle is always visible and defaults to `false`. Ideally it would be
+ * hidden when the global `attackDiscoveryWorkflowsEnabled` feature flag is off,
+ * but two platform constraints prevent that: (1) UI settings must be registered
+ * synchronously during plugin setup, and feature-flag evaluation requires
+ * `FeatureFlagsStart` (only available after setup completes); (2) the Advanced
+ * Settings page has no API to show/hide individual settings based on feature
+ * flags. The FF is only ever `false` when an administrator disables it globally;
+ * in that case the toggle is a harmless noop. Behavior is gated by `FF &&
+ * setting` at every server and client read site (see `isWorkflowsEnabledForSpace`).
  *
  * @security_note This setting is enforced server-side: `assertWorkflowsEnabled`
  * (which calls `isWorkflowsEnabledForSpace`) returns 404 on every internal AD
@@ -112,7 +116,7 @@ export const attackDiscoveryWorkflowsSetting: UiSettingsParams<boolean> = {
     'xpack.securitySolution.uiSettings.enableAttackDiscoveryWorkflows.description',
     {
       defaultMessage:
-        'Enable Attack Discovery Workflows for this space. When enabled, Attack Discovery uses orchestrated workflows for alert retrieval and analysis.',
+        'Enable Attack Discovery Workflows for this space. When enabled, Attack Discovery uses orchestrated workflows for alert retrieval and analysis. Has no effect when Attack Discovery Workflows are disabled at the deployment level.',
     }
   ),
   type: 'boolean',

@@ -105,8 +105,12 @@ export class SecuritySolutionServerlessPlugin
     const projectSettings = [...SECURITY_PROJECT_SETTINGS];
 
     // Registered unconditionally in ESS (`security_solution/server/ui_settings.ts`), so it
-    // must be allowlisted unconditionally here too, otherwise the Attack Discovery Workflows
-    // toggle would not appear in serverless Advanced Settings.
+    // must be allowlisted unconditionally here too. Ideally this would be conditional on the
+    // `attackDiscoveryWorkflowsEnabled` feature flag, but two platform constraints prevent
+    // that: (1) feature-flag evaluation requires `FeatureFlagsStart`, which is unavailable
+    // during synchronous plugin setup; (2) the Advanced Settings page has no API to show/hide
+    // individual settings based on feature flags. The FF is only ever `false` when an
+    // administrator disables it globally; in that case the toggle is a harmless noop.
     projectSettings.push(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING);
 
     // This setting is only registered when `enableAlertsAndAttacksAlignment` is enabled
