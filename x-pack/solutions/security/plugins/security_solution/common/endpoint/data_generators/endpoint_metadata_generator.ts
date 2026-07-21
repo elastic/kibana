@@ -168,7 +168,7 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
     }
 
     // v9.6.0 introduced Kill-Process descendents
-    if (gte(agentVersion, '9.5.0')) {
+    if (gte(agentVersion, '9.6.0')) {
       capabilities.push('kill_process_descendents');
     }
 

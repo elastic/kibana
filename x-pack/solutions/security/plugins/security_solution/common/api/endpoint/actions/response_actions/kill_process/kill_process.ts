@@ -22,16 +22,16 @@ export const KillProcessRouteRequestSchema = {
         schema.object({
           pid: schema.number({ min: 1 }),
           // `kill_descendents` applies only to the Elastic Defend Endpoint (validated below)
-          kill_descendents: schema.boolean({ defaultValue: false }),
+          kill_descendents: schema.maybe(schema.boolean()),
         }),
         schema.object({
-          entity_id: schema.string({ minLength: 1 }),
+          entity_id: schema.string({ minLength: 1, maxLength: 256 }),
           // `kill_descendents` applies only to the Elastic Defend Endpoint (validated below)
-          kill_descendents: schema.boolean({ defaultValue: false }),
+          kill_descendents: schema.maybe(schema.boolean()),
         }),
 
         // Process Name currently applies only to SentinelOne (validated below)
-        schema.object({ process_name: schema.string({ minLength: 1 }) }),
+        schema.object({ process_name: schema.string({ minLength: 1, maxLength: 256 }) }),
       ]),
     },
     {

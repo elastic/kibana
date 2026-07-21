@@ -730,15 +730,14 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it('should default `kill_descendents` to false when not provided', () => {
+    it('should allow request without kill_descendents', () => {
       const result = KillProcessRouteRequestSchema.body.validate({
         endpoint_ids: ['ABC-XYZ-000'],
         agent_type: 'endpoint',
         parameters: { pid: 1234 },
       });
 
-      // @ts-expect-error TS2339: Property kill_descendents does not exist on type
-      expect(result.parameters.kill_descendents).toBe(false);
+      expect('kill_descendants' in result.parameters).toBe(false);
     });
 
     it('should reject `kill_descendents` when agent_type is crowdstrike', () => {
@@ -761,6 +760,16 @@ describe('actions schemas', () => {
       }).toThrow(
         '[parameters.kill_descendents]: is not valid with agent type of microsoft_defender_endpoint'
       );
+    });
+
+    it('should allow request without kill_descendents for non-endpoint agentType', () => {
+      expect(() => {
+        KillProcessRouteRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          agent_type: 'microsoft_defender_endpoint',
+          parameters: { pid: 1234 },
+        });
+      }).not.toThrow();
     });
   });
 
