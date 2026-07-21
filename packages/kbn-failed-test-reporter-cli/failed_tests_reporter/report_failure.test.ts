@@ -320,6 +320,9 @@ describe('updateFailureIssue()', () => {
         ],
       }
     `);
+    // without a failure object there is no message to compare, so the comment
+    // history is not fetched at all
+    expect(api.getIssueComments).not.toHaveBeenCalled();
   });
 
   it('includes new error message in FTR comment when the failure is new', async () => {
@@ -362,11 +365,135 @@ describe('updateFailureIssue()', () => {
     );
 
     const comment = api.addIssueComment.mock.calls[0][1] as string;
-    expect(comment).toContain('New failure: [kibana-on-merge - main](https://build-url)');
-    expect(comment).toContain('New error message:');
-    expect(comment).toContain('Error: expected 200 "OK", got 503 "Service Unavailable"');
+    // pin down the exact comment format: build link, blank line, message in a code block
+    expect(comment).toBe(
+      dedent`
+        New failure: [kibana-on-merge - main](https://build-url)
+
+        New error message:
+        \`\`\`
+        Error: expected 200 "OK", got 503 "Service Unavailable"
+        \`\`\`
+      `
+    );
     // only the message is posted, not the stack trace
     expect(comment).not.toContain('at Test._assertStatus');
+  });
+
+  it('keeps FTR comment link-only when the failure text is empty', async () => {
+    const api = createGithubApi();
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname: 'foo',
+        name: 'test',
+        github: {
+          htmlUrl: 'https://github.com/issues/1234',
+          number: 1234,
+          nodeId: 'abcd',
+          body: '# existing issue body',
+        },
+      },
+      api,
+      'main',
+      'kibana-on-merge',
+      {
+        classname: 'foo',
+        name: 'test',
+        failure: '',
+        time: '1.000',
+        likelyIrrelevant: false,
+      }
+    );
+
+    // nothing to compare: no message block and no "already reported" claim
+    expect(api.addIssueComment.mock.calls[0][1]).toBe(
+      'New failure: [kibana-on-merge - main](https://build-url)'
+    );
+  });
+
+  it('matches an error message reported in a later code block, not just the first one', async () => {
+    const api = createGithubApi();
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname: 'foo',
+        name: 'test',
+        github: {
+          htmlUrl: 'https://github.com/issues/1234',
+          number: 1234,
+          nodeId: 'abcd',
+          body: dedent`
+            # existing issue body
+
+            \`\`\`
+            Error: the original failure
+            \`\`\`
+
+            Edited by a human to add another observed error:
+
+            \`\`\`
+            Error: expected 200 "OK", got 503 "Service Unavailable"
+            \`\`\`
+
+            <!-- kibanaCiData = {"failed-test":{"test.failCount":10}} -->"
+          `,
+        },
+      },
+      api,
+      'main',
+      'kibana-on-merge',
+      {
+        classname: 'foo',
+        name: 'test',
+        failure:
+          'Error: expected 200 "OK", got 503 "Service Unavailable"\n  at Test._assertStatus (/node_modules/supertest/lib/test.js:252:14)',
+        time: '1.000',
+        likelyIrrelevant: false,
+      }
+    );
+
+    expect(api.addIssueComment.mock.calls[0][1]).toBe(
+      'New failure: [kibana-on-merge - main](https://build-url)\n\n' +
+        'Error message matches a failure already reported on this issue.'
+    );
+  });
+
+  it('redacts sensitive hosts and emails in the posted error message', async () => {
+    const api = createGithubApi();
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname: 'foo',
+        name: 'test',
+        github: {
+          htmlUrl: 'https://github.com/issues/1234',
+          number: 1234,
+          nodeId: 'abcd',
+          body: '# existing issue body',
+        },
+      },
+      api,
+      'main',
+      'kibana-on-merge',
+      {
+        classname: 'foo',
+        name: 'test',
+        failure:
+          'Error: fixture-user@elastic.co could not reach https://fixture-depl.kb.aws.qa.elastic.cloud\n  at login (login.ts:1:1)',
+        time: '1.000',
+        likelyIrrelevant: false,
+      }
+    );
+
+    const comment = api.addIssueComment.mock.calls[0][1] as string;
+    expect(comment).toContain('<redacted>@elastic.co');
+    expect(comment).toContain('<redacted>.qa.elastic.cloud');
+    expect(comment).not.toContain('fixture-user@elastic.co');
+    expect(comment).not.toContain('fixture-depl');
   });
 
   it('notes an already reported error message when it matches the issue body', async () => {
@@ -659,10 +786,17 @@ describe('updateFailureIssue()', () => {
       }
     );
 
-    const comment = api.addIssueComment.mock.calls[0][1] as string;
-    expect(comment).toContain('New failure for "local-serverless-observability_complete" target');
-    expect(comment).toContain('New error message');
-    expect(comment).toContain('TimeoutError: locator.click: Timeout 10000ms exceeded.');
+    // pin down the exact comment format: target line, blank line, message in a code block
+    expect(api.addIssueComment.mock.calls[0][1]).toBe(
+      dedent`
+        New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://build-url)
+
+        New error message:
+        \`\`\`
+        TimeoutError: locator.click: Timeout 10000ms exceeded.
+        \`\`\`
+      `
+    );
   });
 
   it('notes an already reported error message when it was posted in a previous Scout comment', async () => {
