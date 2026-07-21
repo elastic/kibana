@@ -16,6 +16,7 @@ import type {
   ESQLCallbacks,
   EsqlView,
   EsqlDataset,
+  LookupIndicesAutocompleteResult,
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -201,7 +202,7 @@ export interface ICommandCallbacks {
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
   getColumnsForQuery?: (query: string) => Promise<ESQLColumnData[]>;
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
-  getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getJoinIndices?: () => Promise<LookupIndicesAutocompleteResult>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
   getKqlSuggestions?: ESQLCallbacks['getKqlSuggestions'];
@@ -212,6 +213,7 @@ export interface ICommandContext {
   columns: Map<string, ESQLColumnData>;
   sources?: ESQLSourceResult[];
   joinSources?: IndexAutocompleteItem[];
+  coordinatorJoinSources?: IndexAutocompleteItem[];
   timeSeriesSources?: IndexAutocompleteItem[];
   inferenceEndpoints?: InferenceEndpointAutocompleteItem[];
   policies?: Map<string, ESQLPolicy>;

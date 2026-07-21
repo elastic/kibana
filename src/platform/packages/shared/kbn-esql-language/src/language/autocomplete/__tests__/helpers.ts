@@ -384,7 +384,10 @@ export function createCustomCallbackMocks(
     }),
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
-    getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
+    getJoinIndices: jest.fn(async () => ({
+      indices: joinIndices,
+      coordinatorIndices: joinIndices,
+    })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getViews: jest.fn(async () => ({ views })),
     getDatasets: jest.fn(async () => ({ datasets })),

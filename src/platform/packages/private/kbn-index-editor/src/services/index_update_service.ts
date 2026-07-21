@@ -58,7 +58,7 @@ import {
   LOOKUP_INDEX_PRIVILEGES_ROUTE,
   LOOKUP_INDEX_RECREATE_ROUTE,
   LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE,
-  type IndicesAutocompleteResult,
+  type LookupIndicesAutocompleteResult,
 } from '@kbn/esql-types';
 import { isDocDelete, isDocUpdate, isPlaceholderColumn } from '../utils';
 import type {
@@ -1190,7 +1190,7 @@ export class IndexUpdateService {
   }
 
   public async doesIndexExist(indexName: string): Promise<boolean> {
-    const lookupIndexesResult = await this.http.get<IndicesAutocompleteResult>(
+    const lookupIndexesResult = await this.http.get<LookupIndicesAutocompleteResult>(
       '/internal/esql/autocomplete/join/indices'
     );
 

@@ -8,7 +8,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { IndicesAutocompleteResult } from '@kbn/esql-types';
+import type { LookupIndicesAutocompleteResult } from '@kbn/esql-types';
 import { cacheParametrizedAsyncFunction } from './utils/cache';
 import { getRemoteClustersFromESQLQuery } from '../query_parsing_helpers';
 
@@ -16,7 +16,7 @@ const getLookupIndices = cacheParametrizedAsyncFunction(
   async (http: HttpStart, remoteClusters?: string) => {
     const query = remoteClusters ? { remoteClusters } : {};
 
-    const result = await http.get<IndicesAutocompleteResult>(
+    const result = await http.get<LookupIndicesAutocompleteResult>(
       '/internal/esql/autocomplete/join/indices',
       { query }
     );
@@ -33,7 +33,7 @@ const getLookupIndices = cacheParametrizedAsyncFunction(
  * @param query The ESQL query string to extract remote clusters from.
  * @param http The HTTP service to use for the request.
  * @param cacheOptions Optional cache options to control cache behavior.
- * @returns A promise that resolves to an IndicesAutocompleteResult object.
+ * @returns The lookup indices available to JOIN.
  */
 export const getJoinIndices = async (
   query: string,

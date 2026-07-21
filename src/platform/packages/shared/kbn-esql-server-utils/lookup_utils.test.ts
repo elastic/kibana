@@ -7,16 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getListOfCCSIndices } from './lookup_utils';
+import { getCoordinatorIndices, getListOfCCSIndices } from './lookup_utils';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 
-describe('getListOfCCSIndices', () => {
-  const createLookupItem = (indexName: string, aliases?: string[]): IndexAutocompleteItem => ({
-    name: indexName,
-    mode: 'lookup',
-    aliases: aliases || [],
-  });
+const createLookupItem = (indexName: string, aliases?: string[]): IndexAutocompleteItem => ({
+  name: indexName,
+  mode: 'lookup',
+  aliases: aliases || [],
+});
 
+describe('getCoordinatorIndices', () => {
+  it('returns coordinator indices and preserves their metadata', () => {
+    const coordinatorIndex = createLookupItem('coordinator-index', ['coordinator-alias']);
+    const closedCoordinatorIndex = {
+      ...createLookupItem('closed-coordinator-index'),
+      isClosed: true,
+    };
+
+    expect(
+      getCoordinatorIndices([
+        coordinatorIndex,
+        createLookupItem('remote-a:remote-index'),
+        closedCoordinatorIndex,
+        createLookupItem('remote-b:another-remote-index'),
+      ])
+    ).toEqual([coordinatorIndex, closedCoordinatorIndex]);
+  });
+});
+
+describe('getListOfCCSIndices', () => {
   it('should return empty array when no clusters are provided', () => {
     const clusters: string[] = [];
     const lookupIndices = [
