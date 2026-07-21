@@ -7,7 +7,11 @@
 
 import { uniq } from 'lodash';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import {
+  AGENTS_INDEX,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  buildPolicyIdsOrVariantsKuery,
+} from '@kbn/fleet-plugin/common';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import type { OsqueryAppContext } from './osquery_app_context_services';
@@ -157,7 +161,7 @@ export const parseAgentSelection = async (
       esClient,
       context
     );
-    kueryFragments.push(`policy_id:(${uniq(osqueryPolicies).join(' or ')})`);
+    kueryFragments.push(buildPolicyIdsOrVariantsKuery(osqueryPolicies));
     if (allAgentsSelected) {
       const kuery = kueryFragments.join(' and ');
       const fetchedAgents = await aggregateResults(
@@ -193,7 +197,7 @@ export const parseAgentSelection = async (
         }
 
         if (policiesSelected.length) {
-          groupFragments.push(`policy_id:(${policiesSelected.join(' or ')})`);
+          groupFragments.push(buildPolicyIdsOrVariantsKuery(policiesSelected));
         }
 
         kueryFragments.push(`(${groupFragments.join(' or ')})`);

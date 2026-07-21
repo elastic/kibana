@@ -278,6 +278,7 @@ export const InsightsTabCsp = memo(
             value={value}
             entityId={entityId}
             onShowAlert={onShowAlert}
+            scopeId={scopeId}
           />
         )}
       </>

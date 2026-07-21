@@ -84,7 +84,7 @@ describe('scoreContinuationStability', () => {
     expect(result.emptyCycles).toBe(2);
   });
 
-  it('skips leading empty cycles so the first producing cycle establishes the episode', () => {
+  it('skips leading empty cycles so the first producing cycle establishes the event', () => {
     const result = scoreContinuationStability([
       { producedSlugs: [] },
       { producedSlugs: ['svc__cascade-aaaa1111'] }, // establishing

@@ -9,7 +9,7 @@ import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData, convertToLensByTitle, createOpenInLensSuiteSetup } from '../../../fixtures';
 
-spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
     archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.GOAL,
     dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.GOAL,

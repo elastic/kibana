@@ -13,16 +13,18 @@ import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ConversationSource } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   createBadRequestError,
   AgentExecutionMode,
   ConversationAccessControlMode,
-  ConversationSourceType,
+  ConversationOriginType,
   ExecutionStatus,
 } from '@kbn/agent-builder-common';
-import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import type {
+  AgentExecutionService,
+  ExecutionConversationOrigin,
+} from '@kbn/agent-builder-server/execution';
 import {
   ConnectorOrInferenceIdConflictError,
   resolveConnectorOrInferenceId,
@@ -296,10 +298,17 @@ export const conversePayloadSchema = schema.object({
 });
 
 export const callbackConversePayloadSchema = conversePayloadSchema.extends({
-  source: schema.maybe(
+  origin: schema.maybe(
     schema.object({
-      type: schema.literal(ConversationSourceType.Slack),
+      type: schema.literal(ConversationOriginType.Slack),
       external_conversation_id: schema.string({ minLength: 1, maxLength: 1024 }),
+      author: schema.maybe(
+        schema.object({
+          id: schema.string({ minLength: 1, maxLength: 1024 }),
+          name: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
+          handle: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
+        })
+      ),
     })
   ),
   callback: schema.object({
@@ -373,22 +382,20 @@ export function registerChatRoutes({
   /**
    * Derives execution options shared by all converse routes.
    * Public requests may opt into local or Task Manager execution with _execution_mode,
-   * while callback requests always use Task Manager and carry callback metadata/source.
+   * while callback requests always use Task Manager and carry the callback and origin.
    */
   const resolveExecutionOptions = (
     payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload
   ): {
     useTaskManager: boolean | undefined;
-    metadata: Record<string, string> | undefined;
-    source: ConversationSource | undefined;
+    origin: ExecutionConversationOrigin | undefined;
+    callback: { url: string } | undefined;
   } => {
     if (isChatCallbackRequestBodyPayload(payload)) {
       return {
         useTaskManager: true,
-        metadata: {
-          callback_url: payload.callback.url,
-        },
-        source: payload.source,
+        origin: payload.origin,
+        callback: payload.callback,
       };
     }
 
@@ -397,8 +404,8 @@ export function registerChatRoutes({
     return {
       useTaskManager:
         executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined,
-      metadata: undefined,
-      source: undefined,
+      origin: undefined,
+      callback: undefined,
     };
   };
 
@@ -426,21 +433,21 @@ export function registerChatRoutes({
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
-    const { useTaskManager, metadata, source } = resolveExecutionOptions(payload);
+    const { useTaskManager, origin, callback } = resolveExecutionOptions(payload);
 
     return executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
       request,
       executionId,
       useTaskManager,
-      metadata,
       params: {
         agentId,
         connectorId,
         conversationId,
         autoCreateConversationWithId: true,
         accessControl,
-        source,
+        origin,
+        callback,
         capabilities,
         browserApiTools,
         configurationOverrides,

@@ -25,6 +25,7 @@ import type {
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EsqlResponseError } from '../../../common/errors/esql_response_error';
+import { DEFAULT_METRICS_SORT } from '../../../common/constants';
 import {
   ExternalServicesProvider,
   type ExternalServices,
@@ -293,6 +294,8 @@ describe('MetricsExperienceGrid', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: DEFAULT_METRICS_SORT,
+      onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
       onGridSettingsChange: jest.fn(),
@@ -470,6 +473,8 @@ describe('MetricsExperienceGrid', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: DEFAULT_METRICS_SORT,
+      onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
       onGridSettingsChange: jest.fn(),
@@ -518,6 +523,8 @@ describe('MetricsExperienceGrid', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: DEFAULT_METRICS_SORT,
+      onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
       onGridSettingsChange: jest.fn(),
@@ -561,6 +568,8 @@ describe('MetricsExperienceGrid', () => {
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
+        metricsSort: DEFAULT_METRICS_SORT,
+        onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         onGridSettingsChange: jest.fn(),
@@ -603,6 +612,8 @@ describe('MetricsExperienceGrid', () => {
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
+        metricsSort: DEFAULT_METRICS_SORT,
+        onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         onGridSettingsChange: jest.fn(),
@@ -650,6 +661,8 @@ describe('MetricsExperienceGrid', () => {
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
+        metricsSort: DEFAULT_METRICS_SORT,
+        onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         onGridSettingsChange: jest.fn(),
@@ -699,6 +712,8 @@ describe('MetricsExperienceGrid', () => {
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         onGridSettingsChange,
+        metricsSort: DEFAULT_METRICS_SORT,
+        onMetricsSortChange: jest.fn(),
       });
 
       const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {

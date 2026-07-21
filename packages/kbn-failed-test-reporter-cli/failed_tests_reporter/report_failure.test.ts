@@ -65,7 +65,116 @@ describe('redactSensitiveGithubFailureText()', () => {
 });
 
 describe('createFailureIssue()', () => {
-  it('creates new github issue with failure text, link to issue, and valid metadata', async () => {
+  it('creates new github issue with a details table, failure text, link to issue, and valid metadata', async () => {
+    const api = new GithubApi();
+
+    await createFailureIssue(
+      'https://build-url',
+      {
+        classname:
+          'Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js',
+        failure: 'this is the failure text',
+        name: 'maps app maps loaded from sample data',
+        time: '154.378',
+        likelyIrrelevant: false,
+        commandLine:
+          'node scripts/functional_tests --config=x-pack/platform/test/functional/config.ts',
+        owners: 'elastic/kibana-presentation',
+        testType: 'ftr',
+      },
+      api,
+      'main',
+      'kibana-on-merge'
+    );
+
+    expect(api.createIssue).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "Failing test: Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js - maps app maps loaded from sample data",
+            "A test failed on a tracked branch
+
+      **Test Details:**
+
+      | Field | Value |
+      |-------|-------|
+      | Report name | Chrome X-Pack UI Functional Tests |
+      | Location | x-pack/platform/test/functional/apps/maps/sample_data.js |
+      | Duration | 154.38s |
+      | Config path | x-pack/platform/test/functional/config.ts |
+      | Code Owners | elastic/kibana-presentation |
+
+      \`\`\`
+      this is the failure text
+      \`\`\`
+
+      First failure: [kibana-on-merge - main](https://build-url)
+
+      <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js\\",\\"test.name\\":\\"maps app maps loaded from sample data\\",\\"test.failCount\\":1,\\"test.type\\":\\"ftr\\"}} -->",
+            Array [
+              "failed-test",
+            ],
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    `);
+  });
+
+  it('uses an explicit file location without changing the failure identity', async () => {
+    const api = new GithubApi();
+    const classname = 'Jest Tests.x-pack/platform/example/tests';
+
+    await createFailureIssue(
+      'https://build-url',
+      {
+        classname,
+        location: 'x-pack/platform/example/tests/example.test.ts',
+        failure: 'this is the failure text',
+        name: 'test name',
+        time: '1.000',
+        likelyIrrelevant: false,
+        testType: 'jest',
+      },
+      api,
+      'main',
+      'kibana-on-merge'
+    );
+
+    const [title, body] = api.createIssue.mock.calls[0];
+    expect(title).toContain(classname);
+    expect(body).toContain('| Location | x-pack/platform/example/tests/example.test.ts |');
+    expect(body).toContain(`"test.class":"${classname}"`);
+  });
+
+  it('normalizes multiple code owners in the details table', async () => {
+    const api = new GithubApi();
+
+    await createFailureIssue(
+      'https://build-url',
+      {
+        classname: 'Jest Tests.x-pack/platform/example',
+        failure: 'this is the failure text',
+        name: 'test name',
+        time: '1.000',
+        likelyIrrelevant: false,
+        owners: 'elastic/team-a,elastic/team-b',
+      },
+      api,
+      'main',
+      'kibana-on-merge'
+    );
+
+    const [, body] = api.createIssue.mock.calls[0];
+    expect(body).toContain('| Code Owners | elastic/team-a, elastic/team-b |');
+  });
+
+  it('renders N/A for missing details and omits test.type when unknown', async () => {
     const api = new GithubApi();
 
     await createFailureIssue(
@@ -88,6 +197,16 @@ describe('createFailureIssue()', () => {
           Array [
             "Failing test: some.classname - test name",
             "A test failed on a tracked branch
+
+      **Test Details:**
+
+      | Field | Value |
+      |-------|-------|
+      | Report name | some |
+      | Location | classname |
+      | Duration | N/A |
+      | Config path | N/A |
+      | Code Owners | N/A |
 
       \`\`\`
       this is the failure text
@@ -129,33 +248,9 @@ describe('createFailureIssue()', () => {
       '[MKI][QA]'
     );
 
-    expect(api.createIssue).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            "Failing test: [MKI][QA] some.classname - test name",
-            "A test failed on a tracked branch
-
-      \`\`\`
-      this is the failure text
-      \`\`\`
-
-      First failure: [kibana-on-merge - main](https://build-url)
-
-      <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"some.classname\\",\\"test.name\\":\\"test name\\",\\"test.failCount\\":1}} -->",
-            Array [
-              "failed-test",
-            ],
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      }
-    `);
+    const [title, body] = api.createIssue.mock.calls[0];
+    expect(title).toBe('Failing test: [MKI][QA] some.classname - test name');
+    expect(body).toContain('**Test Details:**');
   });
 });
 

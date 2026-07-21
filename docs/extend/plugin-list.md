@@ -19,6 +19,7 @@ mapped_pages:
 | --- | --- |
 | [advancedSettings](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/advanced_settings/README.md) | This plugin registers the management settings application allowing users to configure their advanced settings, also known as uiSettings within the code. |
 | [aiAssistantManagementSelection](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/ai_assistant_management/selection/README.md) | The aiAssistantManagementSelection plugin manages the Ai Assistant management section. |
+| [apmShared](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/apm_shared/README.md) | A UI-only Kibana plugin that provides ready-to-use APM UI components with data-fetching dependencies pre-bound. |
 | [charts](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/charts/README.md) | The Charts plugin is a way to create easier integration of shared colors, themes, types and other utilities across all Kibana charts and visualizations. |
 | [console](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/README.md) | Console provides the user with tools for storing and executing requests against Elasticsearch. |
 | [contentManagement](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/content_management/README.md) | The content management plugin provides functionality to manage content in Kibana. |
@@ -138,6 +139,7 @@ mapped_pages:
 | [cloudLinks](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/cloud_integrations/cloud_links/README.md) | Adds all the links to the Elastic Cloud console. |
 | [cloudSecurityPosture](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/cloud_security_posture/README.md) | Cloud Posture automates the identification and remediation of risks across cloud infrastructures |
 | [contentConnectors](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/content_connectors/README.mdx) | This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins. |
+| [contextEngine](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/context_engine/README.md) | Server-side plugin for the Context Engine. |
 | [crossClusterReplication](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/cross_cluster_replication/README.md) | You can run a local cluster and simulate a remote cluster within a single Kibana directory. |
 | [customBranding](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/custom_branding/README.md) | This is a plugin to configure custom branding. Plugin server-side only. Plugin has three main functions: |
 | [dataFederation](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/data_federation/README.md) | Management UI for ES\|QL data federation — the Elasticsearch feature that lets you query external object storage directly from ES\|QL without ingesting data first. |

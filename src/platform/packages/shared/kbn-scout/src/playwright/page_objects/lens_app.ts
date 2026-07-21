@@ -8,7 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
-import { EuiComboBoxWrapper, expect } from '..';
+import { expect } from '..';
 
 const normalizeComputedColor = (color: string | undefined): string | undefined => {
   if (!color) {
@@ -34,7 +34,9 @@ export class LensApp {
   private readonly confirmSaveButton;
   private readonly closeDimensionEditorButton;
   public readonly applyChangesButton;
-  private readonly dimensionFieldComboBox;
+  private readonly goBackToAppButton;
+  private readonly discardChangesModal;
+  private readonly confirmModalConfirmButton;
 
   constructor(private readonly page: ScoutPage) {
     this.lensApp = this.page.testSubj.locator('lnsApp');
@@ -49,7 +51,9 @@ export class LensApp {
       'lns-indexPattern-dimensionContainerClose'
     );
     this.applyChangesButton = this.page.testSubj.locator('lnsApplyChanges__apply');
-    this.dimensionFieldComboBox = new EuiComboBoxWrapper(this.page, 'indexPattern-dimension-field');
+    this.goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
+    this.discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');
+    this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
   }
 
   async waitForLensApp() {
@@ -65,9 +69,23 @@ export class LensApp {
   async switchToVisualization(visType: string, options?: { search?: string }) {
     await this.openChartSwitchPopover();
     if (options?.search) {
-      await this.page.testSubj.locator('lnsChartSwitchSearch').fill(options.search);
+      const searchInput = this.page.testSubj.locator('lnsChartSwitchSearch');
+      await searchInput.waitFor({ state: 'visible' });
+      await searchInput.fill(options.search);
     }
     await this.page.testSubj.locator(`lnsChartSwitchPopover_${visType}`).click();
+  }
+
+  async applyFlyoutChanges() {
+    const applyFlyoutButton = this.getApplyFlyoutButton();
+    await applyFlyoutButton.scrollIntoViewIfNeeded();
+    await applyFlyoutButton.click();
+    await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'hidden' });
+  }
+
+  async cancelFlyoutChanges() {
+    await this.getCancelFlyoutButton().click();
+    await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'hidden' });
   }
 
   async applyChanges() {
@@ -84,6 +102,15 @@ export class LensApp {
     await this.saveAndReturnButton.click();
     await expect(this.lensApp).toBeHidden();
     await expect(this.page.testSubj.locator('dshDashboardViewport')).toBeVisible();
+  }
+
+  async goBackToPreviousApp() {
+    await this.goBackToAppButton.click();
+  }
+
+  async confirmDiscardChangesModal() {
+    await this.discardChangesModal.waitFor({ state: 'visible' });
+    await this.confirmModalConfirmButton.click();
   }
 
   /**
@@ -303,9 +330,7 @@ export class LensApp {
   }
 
   private async selectField(field: string) {
-    await this.dimensionFieldComboBox.selectSingleOption(field, {
-      optionTestSubj: `lns-fieldOption-${field}`,
-    });
+    await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
   }
 
   private async openChartSwitchPopover() {
@@ -440,13 +465,10 @@ export class LensApp {
   /** Reads the selected donut hole size from the style settings flyout. */
   async getDonutHoleSize(): Promise<string> {
     await this.openStyleSettingsFlyout();
-    const comboBox = new EuiComboBoxWrapper(this.page, 'lnsEmptySizeRatioOption');
-    const selectedOptions = await comboBox.getSelectedMultiOptions();
-    if (selectedOptions.length > 0) {
-      return selectedOptions[0];
-    }
-
-    return comboBox.getSelectedValue();
+    const selectedOptions = await this.page.components
+      .comboBox('lnsEmptySizeRatioOption')
+      .getSelectedOptions();
+    return selectedOptions[0] ?? '';
   }
 
   /**

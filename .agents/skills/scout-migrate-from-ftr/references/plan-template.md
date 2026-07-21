@@ -223,6 +223,14 @@ FTR helpers that contain assertions internally (page objects should return state
 | `feature_controls_viewer.spec.ts` | everywhere | Feature exists in stateful and all serverless projects |
 | `cluster_settings.spec.ts` | stateful only | Cluster-level settings API not available in serverless |
 
+### Stateful/serverless mirror FTR files
+
+Duplicate or near-duplicate FTR files found outside the primary source directory. If none were found, write `None found after searching by basename, test titles, comments, and loadTestFile references.`
+
+| Primary FTR file | Mirror FTR file | Similarity | Current tags/skips | Decision | Notes |
+|------------------|-----------------|------------|--------------------|----------|-------|
+| `<stateful-or-primary FTR file>` | `<serverless-or-mirror FTR file>` | `<identical / near-identical / divergent>` | `<tags/skips on either side>` | `<merge / keep separate / drop one side>` | `<tagging and cleanup notes>` |
+
 ### Coverage gaps (omit if none)
 
 - `<test>` currently runs only in `<env>` but the feature also exists in `<env>` (should be expanded)

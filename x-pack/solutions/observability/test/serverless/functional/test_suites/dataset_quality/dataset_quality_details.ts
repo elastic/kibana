@@ -303,9 +303,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await firstDashboardButton.click();
 
-        const breadcrumbText = await testSubjects.getVisibleText('breadcrumb last');
+        await retry.tryForTime(30 * 1000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const parsedUrl = new URL(currentUrl);
+          const breadcrumbText = await testSubjects.getVisibleText('breadcrumb last');
 
-        expect(breadcrumbText).to.eql(dashboardText);
+          expect(parsedUrl.pathname).to.contain('/app/dashboards');
+          expect(breadcrumbText).to.eql(dashboardText);
+        });
       });
     });
 

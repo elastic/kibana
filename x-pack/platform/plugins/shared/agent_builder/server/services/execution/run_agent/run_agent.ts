@@ -16,6 +16,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
+import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import { runDefaultAgentMode } from './run_chat_agent';
 
 export interface RunAgentParams {
@@ -27,6 +28,11 @@ export interface RunAgentParams {
    * Current conversation.
    */
   conversation?: Conversation;
+  /**
+   * External origin that initiated this execution, when it originated outside Kibana.
+   * Persisted as authorship on the completed round.
+   */
+  origin?: ExecutionConversationOrigin;
   /**
    * Configuration of the agent to run
    */

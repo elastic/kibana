@@ -9,8 +9,9 @@
 
 import React, { useCallback } from 'react';
 import { createContext } from 'react';
-import type { Dimension, MetricsGridSettings } from '../../../../../types';
+import type { Dimension, MetricsGridSettings, MetricsSort } from '../../../../../types';
 import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../../../flyout/metrics_grid_settings_flyout/constants';
+import { DEFAULT_METRICS_SORT } from '../../../../../common/constants';
 import {
   type FlyoutState,
   type FlyoutTabId,
@@ -24,6 +25,7 @@ export interface MetricsExperienceStateContextValue extends MetricsExperienceRes
   onPageChange: (value: number) => void;
   onDimensionsChange: (value: Dimension[]) => void;
   onSearchTermChange: (value: string) => void;
+  onMetricsSortChange: (value: MetricsSort) => void;
   onToggleFullscreen: () => void;
   onFlyoutStateChange: (value: FlyoutState | undefined) => void;
   onFlyoutSelectedTabChange: (value: FlyoutTabId) => void;
@@ -49,6 +51,7 @@ export function MetricsExperienceStateProvider({
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
   const [flyoutState, setFlyoutState] = useRestorableState('flyoutState', undefined);
+  const [metricsSort, setMetricsSort] = useRestorableState('metricsSort', DEFAULT_METRICS_SORT);
 
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
@@ -74,6 +77,20 @@ export function MetricsExperienceStateProvider({
       });
     },
     [setSearchTerm, setCurrentPage]
+  );
+
+  const onMetricsSortChange = useCallback(
+    (nextSort: MetricsSort) => {
+      setMetricsSort((prevSort) => {
+        const [prevSortBy, prevDirection] = prevSort;
+        const [nextSortBy, nextDirection] = nextSort;
+        if (prevSortBy !== nextSortBy || prevDirection !== nextDirection) {
+          setCurrentPage(0);
+        }
+        return nextSort;
+      });
+    },
+    [setMetricsSort, setCurrentPage]
   );
 
   const onToggleFullscreen = useCallback(() => {
@@ -110,10 +127,12 @@ export function MetricsExperienceStateProvider({
         isFullscreen,
         searchTerm,
         selectedDimensions,
+        metricsSort,
         flyoutState,
         onPageChange,
         onDimensionsChange,
         onSearchTermChange,
+        onMetricsSortChange,
         onToggleFullscreen,
         onFlyoutStateChange,
         onFlyoutSelectedTabChange,

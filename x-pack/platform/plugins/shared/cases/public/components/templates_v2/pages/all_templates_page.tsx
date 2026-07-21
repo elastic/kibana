@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { AppHeader } from '@kbn/app-header';
 import { EuiBasicTable, EuiSkeletonText } from '@elastic/eui';
 import type { TemplateListItem } from '../../../../common/types/api/template/v1';
 import { PAGE_TITLE } from '../../../common/translations';
@@ -32,10 +31,14 @@ import { TemplatesInfoPanel } from '../components/templates_info_panel';
 import { TemplatesTableSettings } from '../components/templates_table_settings';
 import { TemplatesTableEmptyPrompt } from '../components/templates_table_empty_prompt';
 import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
+import { CasesAppHeader } from '../../app/cases_app_header';
+import { CasesPageBody } from '../../app/cases_page_body';
+import { useKibana } from '../../../common/lib/kibana';
 
 export const AllTemplatesPage: React.FC = () => {
   useCasesTemplatesBreadcrumbs();
   const { owner } = useCasesContext();
+  const { docLinks } = useKibana().services;
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
@@ -148,68 +151,72 @@ export const AllTemplatesPage: React.FC = () => {
 
   return (
     <>
-      <AppHeader
+      <CasesAppHeader
         title={i18n.TEMPLATE_TITLE}
         back={templatesListBack}
         menu={templatesListMenu}
-        sticky={false}
+        // Native "Documentation" item in the header overflow menu, linking to the case-templates
+        // guide via the doclinks service (kept consistent with the template editor header).
+        docLink={docLinks.links.cases.manageCaseTemplates}
       />
-      <TemplatesInfoPanel />
-      <TemplatesTableFilters
-        queryParams={queryParams}
-        onQueryParamsChange={setQueryParams}
-        onRefresh={refetch}
-        isLoading={isLoading}
-        availableTags={tags}
-        availableCreatedBy={creators}
-        isLoadingTags={isLoadingTags}
-        isLoadingCreators={isLoadingCreators}
-      />
-      {isInitialLoading ? (
-        <EuiSkeletonText data-test-subj="templates-table-loading" lines={10} />
-      ) : (
-        <>
-          <TemplatesTableSettings
-            rangeStart={rangeStart}
-            rangeEnd={rangeEnd}
-            totalTemplates={totalTemplates}
-            selectedTemplates={selectedTemplates}
-            onBulkActionSuccess={handleBulkActionSuccess}
-            hasFilters={hasFilters}
-            onClearFilters={handleClearFilters}
-          />
-          <EuiBasicTable
-            columns={columns}
-            data-test-subj="templates-table"
-            itemId="templateId"
-            items={data?.templates ?? []}
-            loading={isLoading}
-            tableCaption={i18n.TEMPLATE_TITLE}
-            noItemsMessage={
-              <TemplatesTableEmptyPrompt
-                hasFilters={hasFilters}
-                onClearFilters={handleClearFilters}
-                onCreateTemplate={navigateToCasesCreateTemplate}
-                createTemplateUrl={getCasesCreateTemplateUrl()}
-              />
-            }
-            onChange={onTableChange}
-            pagination={pagination}
-            rowProps={tableRowProps}
-            selection={selection}
-            sorting={sorting}
-          />
-        </>
-      )}
-      {templateToDelete && (
-        <DeleteConfirmationModal
-          title={i18n.DELETE_TITLE(templateToDelete.name)}
-          message={i18n.DELETE_MESSAGE(templateToDelete.name)}
-          onCancel={cancelDelete}
-          onConfirm={confirmDelete}
+      <CasesPageBody>
+        <TemplatesInfoPanel />
+        <TemplatesTableFilters
+          queryParams={queryParams}
+          onQueryParamsChange={setQueryParams}
+          onRefresh={refetch}
+          isLoading={isLoading}
+          availableTags={tags}
+          availableCreatedBy={creators}
+          isLoadingTags={isLoadingTags}
+          isLoadingCreators={isLoadingCreators}
         />
-      )}
-      {isFlyoutOpen && <TemplateFlyout onClose={closeFlyout} onImport={closeFlyout} />}
+        {isInitialLoading ? (
+          <EuiSkeletonText data-test-subj="templates-table-loading" lines={10} />
+        ) : (
+          <>
+            <TemplatesTableSettings
+              rangeStart={rangeStart}
+              rangeEnd={rangeEnd}
+              totalTemplates={totalTemplates}
+              selectedTemplates={selectedTemplates}
+              onBulkActionSuccess={handleBulkActionSuccess}
+              hasFilters={hasFilters}
+              onClearFilters={handleClearFilters}
+            />
+            <EuiBasicTable
+              columns={columns}
+              data-test-subj="templates-table"
+              itemId="templateId"
+              items={data?.templates ?? []}
+              loading={isLoading}
+              tableCaption={i18n.TEMPLATE_TITLE}
+              noItemsMessage={
+                <TemplatesTableEmptyPrompt
+                  hasFilters={hasFilters}
+                  onClearFilters={handleClearFilters}
+                  onCreateTemplate={navigateToCasesCreateTemplate}
+                  createTemplateUrl={getCasesCreateTemplateUrl()}
+                />
+              }
+              onChange={onTableChange}
+              pagination={pagination}
+              rowProps={tableRowProps}
+              selection={selection}
+              sorting={sorting}
+            />
+          </>
+        )}
+        {templateToDelete && (
+          <DeleteConfirmationModal
+            title={i18n.DELETE_TITLE(templateToDelete.name)}
+            message={i18n.DELETE_MESSAGE(templateToDelete.name)}
+            onCancel={cancelDelete}
+            onConfirm={confirmDelete}
+          />
+        )}
+        {isFlyoutOpen && <TemplateFlyout onClose={closeFlyout} onImport={closeFlyout} />}
+      </CasesPageBody>
     </>
   );
 };

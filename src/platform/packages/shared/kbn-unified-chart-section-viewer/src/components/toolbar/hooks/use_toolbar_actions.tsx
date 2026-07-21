@@ -14,7 +14,12 @@ import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
-import { MAX_DIMENSIONS_SELECTIONS, FEATURE_FLAGS } from '../../../common/constants';
+import { SortSelector } from '../sort_selector';
+import {
+  MAX_DIMENSIONS_SELECTIONS,
+  FEATURE_FLAGS,
+  FEATURE_FLAG_DEFAULTS,
+} from '../../../common/constants';
 import { useFeatureFlag } from './use_feature_flag';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
@@ -38,11 +43,24 @@ export const useToolbarActions = ({
   metricItems,
   onOpenGridSettings,
 }: UseToolbarActionsProps) => {
-  const { selectedDimensions, onDimensionsChange, isFullscreen, onToggleFullscreen } =
-    useMetricsExperienceState();
+  const {
+    selectedDimensions,
+    onDimensionsChange,
+    isFullscreen,
+    onToggleFullscreen,
+    metricsSort,
+    onMetricsSortChange,
+  } = useMetricsExperienceState();
   const onDimensionsSelectionChange = onDimensionsChangeProp ?? onDimensionsChange;
 
-  const isEditGridEnabled = useFeatureFlag(FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED, false);
+  const isEditGridEnabled = useFeatureFlag(
+    FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED,
+    FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]
+  );
+  const isSortingEnabled = useFeatureFlag(
+    FEATURE_FLAGS.IS_SORTING_ENABLED,
+    FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_SORTING_ENABLED]
+  );
 
   const isSmallScreen = useIsWithinMaxBreakpoint(isFullscreen ? 'm' : 'l');
 
@@ -64,6 +82,9 @@ export const useToolbarActions = ({
           metricItems={metricItems}
         />
       ),
+      isSortingEnabled ? (
+        <SortSelector sort={metricsSort} onChange={onMetricsSortChange} fullWidth={isSmallScreen} />
+      ) : null,
     ],
     [
       isSmallScreen,
@@ -73,6 +94,9 @@ export const useToolbarActions = ({
       hideDimensionsSelector,
       isLoading,
       metricItems,
+      metricsSort,
+      onMetricsSortChange,
+      isSortingEnabled,
     ]
   );
 

@@ -3,7 +3,15 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "packaging/**/*", "test/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "packaging/**/*",
+    "test/**/*",
+    // generated doc links data, not matched by the **/* globs above
+    "server/lib/spec_definitions/kibana_api_doc_links/*.json"
+  ],
   "kbn_references": [
     "@kbn/scout",
     "@kbn/test-es-server",
