@@ -24,11 +24,11 @@ describe('buildExtendedFieldsBackfill', () => {
       {}
     );
 
-    // text/toggle → _as_keyword, number → _as_integer (matches getV2FieldType / the field-def migration)
+    // text → _as_keyword, number → _as_integer, toggle → _as_boolean (matches getV2FieldType / the field-def migration)
     expect(result).toEqual({
       summary_as_keyword: 'hello',
       count_as_integer: '7',
-      flag_as_keyword: 'true',
+      flag_as_boolean: 'true',
     });
   });
 
@@ -37,7 +37,7 @@ describe('buildExtendedFieldsBackfill', () => {
       [{ key: 'flag', type: CustomFieldTypes.TOGGLE, value: false }],
       {}
     );
-    expect(result).toEqual({ flag_as_keyword: 'false' });
+    expect(result).toEqual({ flag_as_boolean: 'false' });
   });
 
   it('skips null and undefined values (the case left the field empty)', () => {
