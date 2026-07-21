@@ -39,16 +39,15 @@ export const CopyBinScripts: Task = {
         });
       } else {
         globbySync(['*'], {
-            ignore: ['*.bat'],
-            cwd: scriptsSrc,
-          })
-          .forEach((script) => {
-            const template = readFileSync(join(scriptsSrc, script), { encoding: 'utf-8' });
-            const output = Mustache.render(template, templateVars);
-            writeFileSync(join(scriptsDest, script), output, {
-              mode: '0755',
-            });
+          ignore: ['*.bat'],
+          cwd: scriptsSrc,
+        }).forEach((script) => {
+          const template = readFileSync(join(scriptsSrc, script), { encoding: 'utf-8' });
+          const output = Mustache.render(template, templateVars);
+          writeFileSync(join(scriptsDest, script), output, {
+            mode: '0755',
           });
+        });
       }
     }
   },

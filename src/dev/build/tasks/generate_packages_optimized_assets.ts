@@ -117,14 +117,13 @@ const getCategory = (relative: string) => {
 function categorizeAssets(assetDirs: string[]) {
   const assets = assetDirs.flatMap((assetDir) =>
     globbySync(['**/*'], {
-        cwd: assetDir,
-        ignore: ['*-manifest.json', '*.gz', '*.br'],
-        absolute: true,
-      })
-      .map((path): { path: string; category: Category } => ({
-        path,
-        category: getCategory(Path.relative(assetDir, path)),
-      }))
+      cwd: assetDir,
+      ignore: ['*-manifest.json', '*.gz', '*.br'],
+      absolute: true,
+    }).map((path): { path: string; category: Category } => ({
+      path,
+      category: getCategory(Path.relative(assetDir, path)),
+    }))
   );
 
   const groups = new Map<Category, string[]>();

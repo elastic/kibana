@@ -78,19 +78,18 @@ function getAllScreenshots(log: ToolingLog) {
 function findAllScreenshots(log: ToolingLog) {
   try {
     return globbySync(
-        [
-          'src/platform/test/functional/**/screenshots/failure/*.png',
-          'x-pack/platform/test/functional/**/screenshots/failure/*.png',
-        ],
-        {
-          cwd: REPO_ROOT,
-          absolute: true,
-        }
-      )
-      .map((path) => ({
-        path,
-        name: Path.basename(path, Path.extname(path)),
-      }));
+      [
+        'src/platform/test/functional/**/screenshots/failure/*.png',
+        'x-pack/platform/test/functional/**/screenshots/failure/*.png',
+      ],
+      {
+        cwd: REPO_ROOT,
+        absolute: true,
+      }
+    ).map((path) => ({
+      path,
+      name: Path.basename(path, Path.extname(path)),
+    }));
   } catch (error) {
     log.error(`Failed to find screenshots: ${error.message}`);
     return [];
