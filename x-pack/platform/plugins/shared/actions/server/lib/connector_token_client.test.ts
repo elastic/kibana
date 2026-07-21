@@ -596,6 +596,22 @@ describe('delete()', () => {
       );
     });
 
+    test('profileUid takes priority over authMode shared', async () => {
+      unsecuredSavedObjectsClient.delete.mockResolvedValue({});
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(userFindResult);
+
+      await connectorTokenClient.deleteConnectorTokens({
+        connectorId: '123',
+        profileUid: 'user-123',
+        authMode: 'shared',
+      });
+
+      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+        'user_connector_token',
+        'user-token-1'
+      );
+    });
+
     test('deleteConnectorTokens defaults to shared when no authMode', async () => {
       unsecuredSavedObjectsClient.delete.mockResolvedValue({});
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(sharedFindResult);

@@ -55,7 +55,7 @@ const createMockContext = (
       },
     },
     savedObjects: {
-      getClient: jest.fn().mockReturnValue({}),
+      getClient: jest.fn().mockReturnValue({ getCurrentNamespace: jest.fn() }),
     },
   }),
   actions: Promise.resolve({
@@ -198,6 +198,33 @@ describe('oauthDisconnectRoute', () => {
     await handler(context, req, res);
 
     expect(mockLogger.info).toHaveBeenCalledWith('OAuth tokens deleted for connector: connector-1');
+  });
+
+  it('passes authType from config when absent in secrets', async () => {
+    const mockDecryptedClient = {
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+        attributes: {
+          config: { authType: 'ears' },
+          secrets: { provider: 'google' },
+        },
+      }),
+    };
+    mockEncryptedSavedObjectsClient.getClient.mockReturnValue(mockDecryptedClient);
+    mockActionsClient.get.mockResolvedValue({ id: 'connector-1' });
+    mockConnectorTokenClientInstance.deleteConnectorTokens.mockResolvedValue(undefined);
+
+    const [, handler] = registerRoute();
+    const context = createMockContext();
+    const req = httpServerMock.createKibanaRequest({
+      params: { connectorId: 'connector-1' },
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(context, req, res);
+
+    expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalledWith(
+      expect.objectContaining({ authType: 'ears', provider: 'google' })
+    );
   });
 
   it('propagates the error when the connector is not found', async () => {

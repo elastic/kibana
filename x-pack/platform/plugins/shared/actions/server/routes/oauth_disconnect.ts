@@ -109,11 +109,12 @@ export const oauthDisconnectRoute = (
         let provider: string | undefined;
         try {
           const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<{
+            config: { authType?: string };
             secrets: { authType?: string; provider?: string };
           }>(ACTION_SAVED_OBJECT_TYPE, connectorId, {
             namespace: unsecuredSavedObjectsClient.getCurrentNamespace(),
           });
-          authType = rawAction.attributes.secrets.authType;
+          authType = rawAction.attributes.secrets.authType || rawAction.attributes.config?.authType;
           provider = rawAction.attributes.secrets.provider;
         } catch (err) {
           routeLogger.error(

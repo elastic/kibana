@@ -336,48 +336,33 @@ describe('UserConnectorTokenClient', () => {
     });
   });
 
-  describe('listOAuthTokensForConnector()', () => {
-    test('returns decrypted OAuth credentials for every user connected to the connector', async () => {
+  describe('deleteAllConnectorTokens()', () => {
+    const mockOAuthTokensFinder = (savedObjects: unknown[]) => {
+      (
+        encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock
+      ).mockResolvedValueOnce({
+        close: jest.fn(),
+        async *find() {
+          yield { saved_objects: savedObjects };
+        },
+      });
+    };
+
+    // No saved objects to delete; keeps the deletion half of deleteAllConnectorTokens a no-op.
+    const mockEmptyDeletion = () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 0,
+        per_page: 100,
+        page: 1,
+        saved_objects: [],
+      });
+    };
+
+    test('revokes EARS credentials for every user connected to the connector', async () => {
       const createdAt = new Date().toISOString();
 
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-        total: 2,
-        per_page: 20,
-        page: 1,
-        saved_objects: [
-          {
-            id: 'token-id-1',
-            type: 'user_connector_token',
-            attributes: {
-              profileUid: 'user-profile-1',
-              connectorId: '123',
-              credentialType: 'oauth',
-              credentials: {},
-              createdAt,
-              updatedAt: createdAt,
-            },
-            score: 1,
-            references: [],
-          },
-          {
-            id: 'token-id-2',
-            type: 'user_connector_token',
-            attributes: {
-              profileUid: 'user-profile-2',
-              connectorId: '123',
-              credentialType: 'oauth',
-              credentials: {},
-              createdAt,
-              updatedAt: createdAt,
-            },
-            score: 1,
-            references: [],
-          },
-        ],
-      });
-
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser
-        .mockResolvedValueOnce({
+      mockOAuthTokensFinder([
+        {
           id: 'token-id-1',
           type: 'user_connector_token',
           references: [],
@@ -389,8 +374,8 @@ describe('UserConnectorTokenClient', () => {
             createdAt,
             updatedAt: createdAt,
           },
-        })
-        .mockResolvedValueOnce({
+        },
+        {
           id: 'token-id-2',
           type: 'user_connector_token',
           references: [],
@@ -402,21 +387,32 @@ describe('UserConnectorTokenClient', () => {
             createdAt,
             updatedAt: createdAt,
           },
-        });
-
-      const result = await userClient.listOAuthTokensForConnector({ connectorId: '123' });
-
-      expect(result).toEqual([
-        {
-          profileUid: 'user-profile-1',
-          credentials: { accessToken: 'access-token-1', refreshToken: 'refresh-token-1' },
-        },
-        {
-          profileUid: 'user-profile-2',
-          credentials: { accessToken: 'access-token-2' },
         },
       ]);
-      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+      mockEmptyDeletion();
+
+      await userClient.deleteAllConnectorTokens({
+        connectorId: '123',
+        authType: 'ears',
+        provider: 'test-provider',
+      });
+
+      expect(mockRevokeEarsCredentials).toHaveBeenCalledTimes(2);
+      expect(mockRevokeEarsCredentials).toHaveBeenCalledWith(
+        expect.objectContaining({
+          provider: 'test-provider',
+          credentials: { accessToken: 'access-token-1', refreshToken: 'refresh-token-1' },
+        })
+      );
+      expect(mockRevokeEarsCredentials).toHaveBeenCalledWith(
+        expect.objectContaining({
+          provider: 'test-provider',
+          credentials: { accessToken: 'access-token-2' },
+        })
+      );
+      expect(
+        encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'user_connector_token',
           filter:
@@ -425,48 +421,57 @@ describe('UserConnectorTokenClient', () => {
       );
     });
 
-    test('skips records that fail to decrypt and logs the error', async () => {
+    test('skips records with invalid credentials shape and logs the error', async () => {
       const createdAt = new Date().toISOString();
 
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-        total: 1,
-        per_page: 20,
-        page: 1,
-        saved_objects: [
-          {
-            id: 'token-id-1',
-            type: 'user_connector_token',
-            attributes: {
-              profileUid: 'user-profile-1',
-              connectorId: '123',
-              credentialType: 'oauth',
-              credentials: {},
-              createdAt,
-              updatedAt: createdAt,
-            },
-            score: 1,
-            references: [],
+      mockOAuthTokensFinder([
+        {
+          id: 'token-id-1',
+          type: 'user_connector_token',
+          references: [],
+          attributes: {
+            profileUid: 'user-profile-1',
+            connectorId: '123',
+            credentialType: 'oauth',
+            credentials: 'not-an-object',
+            createdAt,
+            updatedAt: createdAt,
           },
-        ],
+        },
+      ]);
+      mockEmptyDeletion();
+
+      await userClient.deleteAllConnectorTokens({
+        connectorId: '123',
+        authType: 'ears',
+        provider: 'test-provider',
       });
 
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(
-        new Error('decrypt failed')
+      expect(mockRevokeEarsCredentials).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid OAuth credentials shape')
       );
-
-      const result = await userClient.listOAuthTokensForConnector({ connectorId: '123' });
-
-      expect(result).toEqual([]);
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to decrypt'));
     });
 
-    test('returns an empty array when the find call fails', async () => {
-      unsecuredSavedObjectsClient.find.mockRejectedValueOnce(new Error('find failed'));
+    test('logs when the finder throws but still completes deletion', async () => {
+      (
+        encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock
+      ).mockResolvedValueOnce({
+        close: jest.fn(),
+        async *find() {
+          throw new Error('find failed');
+        },
+      });
+      mockEmptyDeletion();
 
-      const result = await userClient.listOAuthTokensForConnector({ connectorId: '123' });
+      await userClient.deleteAllConnectorTokens({
+        connectorId: '123',
+        authType: 'ears',
+        provider: 'test-provider',
+      });
 
-      expect(result).toEqual([]);
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to fetch'));
+      expect(mockRevokeEarsCredentials).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to fetch/decrypt'));
     });
   });
 
@@ -770,13 +775,18 @@ describe('UserConnectorTokenClient', () => {
     });
 
     describe('EARS revocation (destructor semantics: revoke whenever a token is deleted)', () => {
-      const mockActionSecrets = (secrets: { authType?: string; provider?: string }) =>
+      const mockActionAttributes = (
+        secrets: { authType?: string; provider?: string },
+        config: { authType?: string } = {}
+      ) =>
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
           id: '123',
           type: 'action',
           references: [],
-          attributes: { secrets },
+          attributes: { config, secrets },
         });
+      const mockActionSecrets = (secrets: { authType?: string; provider?: string }) =>
+        mockActionAttributes(secrets);
 
       test('revokes the access and refresh token for a single user before deleting', async () => {
         unsecuredSavedObjectsClient.delete.mockResolvedValue({});
@@ -839,6 +849,43 @@ describe('UserConnectorTokenClient', () => {
       test('revokes tokens for every connected user when profileUid is omitted (connector deletion)', async () => {
         unsecuredSavedObjectsClient.delete.mockResolvedValue({});
         mockActionSecrets({ authType: 'ears', provider: 'google' });
+        (
+          encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock
+        ).mockResolvedValueOnce({
+          close: jest.fn(),
+          async *find() {
+            yield {
+              saved_objects: [
+                {
+                  id: 'token-user-a',
+                  type: 'user_connector_token',
+                  references: [],
+                  attributes: {
+                    profileUid: 'user-a',
+                    connectorId: '123',
+                    credentialType: 'oauth',
+                    credentials: { accessToken: 'Bearer token-a' },
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                  },
+                },
+                {
+                  id: 'token-user-b',
+                  type: 'user_connector_token',
+                  references: [],
+                  attributes: {
+                    profileUid: 'user-b',
+                    connectorId: '123',
+                    credentialType: 'oauth',
+                    credentials: { accessToken: 'Bearer token-b' },
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                  },
+                },
+              ],
+            };
+          },
+        });
         unsecuredSavedObjectsClient.find.mockResolvedValue({
           total: 2,
           per_page: 10,
@@ -874,33 +921,6 @@ describe('UserConnectorTokenClient', () => {
             },
           ],
         });
-        encryptedSavedObjectsClient.getDecryptedAsInternalUser
-          .mockResolvedValueOnce({
-            id: 'token-user-a',
-            type: 'user_connector_token',
-            references: [],
-            attributes: {
-              profileUid: 'user-a',
-              connectorId: '123',
-              credentialType: 'oauth',
-              credentials: { accessToken: 'Bearer token-a' },
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-          })
-          .mockResolvedValueOnce({
-            id: 'token-user-b',
-            type: 'user_connector_token',
-            references: [],
-            attributes: {
-              profileUid: 'user-b',
-              connectorId: '123',
-              credentialType: 'oauth',
-              credentials: { accessToken: 'Bearer token-b' },
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-          });
 
         await userClient.deleteAllConnectorTokens({ connectorId: '123' });
 
@@ -944,6 +964,54 @@ describe('UserConnectorTokenClient', () => {
         expect(mockRevokeEarsCredentials).not.toHaveBeenCalled();
         expect(logger.debug).toHaveBeenCalledWith(
           expect.stringContaining('No revoke endpoint available')
+        );
+      });
+
+      test('falls back to config.authType when secrets.authType is absent', async () => {
+        unsecuredSavedObjectsClient.delete.mockResolvedValue({});
+        mockActionAttributes({ provider: 'google' }, { authType: 'ears' });
+        unsecuredSavedObjectsClient.find.mockResolvedValue({
+          total: 1,
+          per_page: 10,
+          page: 1,
+          saved_objects: [
+            {
+              id: 'token-id-1',
+              type: 'user_connector_token',
+              attributes: {
+                profileUid: 'user-profile-123',
+                connectorId: '123',
+                credentialType: 'oauth',
+                credentials: {},
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+              score: 1,
+              references: [],
+            },
+          ],
+        });
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+          id: 'token-id-1',
+          type: 'user_connector_token',
+          references: [],
+          attributes: {
+            profileUid: 'user-profile-123',
+            connectorId: '123',
+            credentialType: 'oauth',
+            credentials: { accessToken: 'Bearer access-token-1' },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        });
+
+        await userClient.deleteConnectorTokens({
+          profileUid: 'user-profile-123',
+          connectorId: '123',
+        });
+
+        expect(mockRevokeEarsCredentials).toHaveBeenCalledWith(
+          expect.objectContaining({ provider: 'google' })
         );
       });
 
@@ -1058,6 +1126,46 @@ describe('UserConnectorTokenClient', () => {
           connectorId: '123',
         });
 
+        expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+          'user_connector_token',
+          'token-id-1'
+        );
+      });
+
+      test('skipRevocation: true deletes the local token without calling revokeEarsCredentials', async () => {
+        unsecuredSavedObjectsClient.delete.mockResolvedValue({});
+        unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+          total: 1,
+          per_page: 10,
+          page: 1,
+          saved_objects: [
+            {
+              id: 'token-id-1',
+              type: 'user_connector_token',
+              attributes: {
+                profileUid: 'user-profile-123',
+                connectorId: '123',
+                credentialType: 'oauth',
+                credentials: {},
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+              score: 1,
+              references: [],
+            },
+          ],
+        });
+
+        await userClient.deleteConnectorTokens({
+          profileUid: 'user-profile-123',
+          connectorId: '123',
+          authType: 'ears',
+          provider: 'google',
+          skipRevocation: true,
+        });
+
+        expect(mockRevokeEarsCredentials).not.toHaveBeenCalled();
+        expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
         expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
           'user_connector_token',
           'token-id-1'

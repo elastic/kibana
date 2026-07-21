@@ -122,19 +122,22 @@ export class UserConnectorTokenClient {
   }
 
   /**
-   * Connector's OAuth authType/provider, decrypted from its secrets. Best-effort.
+   * Connector's OAuth authType/provider, decrypted from its secrets and config. Best-effort.
    */
   private async getOAuthConnectorAuthInfo(
     connectorId: string
   ): Promise<{ authType?: string; provider?: string }> {
     try {
       const decryptedAction = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<{
+        config: { authType?: string };
         secrets: { authType?: string; provider?: string };
       }>(ACTION_SAVED_OBJECT_TYPE, connectorId, {
         namespace: this.unsecuredSavedObjectsClient.getCurrentNamespace(),
       });
       return {
-        authType: decryptedAction.attributes.secrets.authType,
+        authType:
+          decryptedAction.attributes.secrets.authType ||
+          decryptedAction.attributes.config?.authType,
         provider: decryptedAction.attributes.secrets.provider,
       };
     } catch (err) {
@@ -439,53 +442,40 @@ export class UserConnectorTokenClient {
   /**
    * Decrypted OAuth credentials for every user connected to a connector.
    */
-  public async listOAuthTokensForConnector({
+  private async listOAuthTokensForConnector({
     connectorId,
   }: {
     connectorId: string;
   }): Promise<Array<{ profileUid: string; credentials: OAuthPersonalCredentials }>> {
     const context = this.getContextString(undefined, connectorId, 'oauth');
+    const tokens: Array<{ profileUid: string; credentials: OAuthPersonalCredentials }> = [];
 
-    let connectorTokensResult;
-    try {
-      connectorTokensResult = (
-        await this.unsecuredSavedObjectsClient.find<UserConnectorToken>({
-          perPage: 10000,
+    const finder =
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<UserConnectorToken>(
+        {
           type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+          perPage: 100,
           filter: `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}" AND ${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.credentialType: "oauth"`,
-        })
-      ).saved_objects;
+        }
+      );
+
+    try {
+      for await (const page of finder.find()) {
+        for (const so of page.saved_objects) {
+          const parsedCredentials = this.parseOAuthPerUserCredentials(so.attributes.credentials);
+          if (!parsedCredentials) {
+            this.logger.error(`Invalid OAuth credentials shape for ${context}, id "${so.id}".`);
+            continue;
+          }
+          tokens.push({ profileUid: so.attributes.profileUid, credentials: parsedCredentials });
+        }
+      }
     } catch (err) {
       this.logger.error(
-        `Failed to fetch user_connector_token records for ${context}. Error: ${err.message}`
+        `Failed to fetch/decrypt user_connector_token records for ${context}. Error: ${err.message}`
       );
-      return [];
-    }
-
-    const tokens: Array<{ profileUid: string; credentials: OAuthPersonalCredentials }> = [];
-    for (const so of connectorTokensResult) {
-      try {
-        const decrypted =
-          await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<UserConnectorToken>(
-            USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-            so.id
-          );
-        const parsedCredentials = this.parseOAuthPerUserCredentials(
-          decrypted.attributes.credentials
-        );
-        if (!parsedCredentials) {
-          this.logger.error(`Invalid OAuth credentials shape for ${context}, id "${so.id}".`);
-          continue;
-        }
-        tokens.push({
-          profileUid: decrypted.attributes.profileUid,
-          credentials: parsedCredentials,
-        });
-      } catch (err) {
-        this.logger.error(
-          `Failed to decrypt user_connector_token for ${context}, id "${so.id}". Error: ${err.message}`
-        );
-      }
+    } finally {
+      await finder.close();
     }
 
     return tokens;
