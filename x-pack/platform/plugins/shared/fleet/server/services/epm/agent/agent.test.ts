@@ -258,7 +258,7 @@ interval: 24h
         username: { type: 'text', value: 'user"name' },
         password: { type: 'password', value: 'p@ss"word' },
       };
-      const output = compileTemplate(vars, getMockedMetaVariable(), template);
+      const output = compileTemplate(vars, template);
       expect(output).toEqual({
         username: 'user"name',
         password: 'p@ss"word',
