@@ -223,7 +223,6 @@ describe('usePaginatedFlyout', () => {
       const { result } = renderHook(() =>
         usePaginatedFlyout(makeOptions({ resolveDocument, rightPanelKey: 'my-panel-key' }))
       );
-      const id = result.current.paginationInstanceId;
 
       act(() => {
         result.current.openPaginatedFlyout(3);
@@ -236,7 +235,6 @@ describe('usePaginatedFlyout', () => {
             id: 'doc-1',
             indexName: 'idx',
             scopeId: 'my-scope',
-            paginationInstanceId: id,
           },
         },
       });
