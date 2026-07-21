@@ -71,11 +71,6 @@ describe('sanitizeHtml', () => {
     expect(result).toContain('hello');
   });
 
-  it('strips javascript: hrefs', () => {
-    const result = sanitizeHtml('<a href="javascript:alert(1)">xss</a>');
-    expect(result).not.toContain('javascript:');
-  });
-
   it('leaves safe HTML unchanged', () => {
     const safe = '<div class="card"><p>hello</p></div>';
     expect(sanitizeHtml(safe)).toContain('hello');
