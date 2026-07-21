@@ -134,7 +134,13 @@ export class WatchWorkflowProjectionService {
         })
       );
 
-      return GetWatchResponse.parse({ watch: { ...watch, recentRuns: enrichedRuns } });
+      return GetWatchResponse.parse({
+        watch: {
+          ...watch,
+          // Enrich the latest 5 with step detail; keep any additional projected runs.
+          recentRuns: [...enrichedRuns, ...watch.recentRuns.slice(5)],
+        },
+      });
     } catch (error) {
       this.logger.debug(
         `Failed to load executions for watch ${watchId}: ${
