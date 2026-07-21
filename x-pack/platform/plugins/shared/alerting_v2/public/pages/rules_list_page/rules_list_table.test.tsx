@@ -69,6 +69,7 @@ const defaultProps: RulesListTableProps = {
   sortField: undefined,
   sortDirection: undefined,
   isLoading: false,
+  canWrite: true,
   selectedCount: 0,
   isAllSelected: false,
   isPageSelected: false,
@@ -520,6 +521,45 @@ describe('RulesListTable', () => {
       fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
 
       expect(onNavigateToDetails).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+  });
+
+  describe('when the user only has read privilege (canWrite=false)', () => {
+    it('hides the selection checkboxes', () => {
+      renderTable({ canWrite: false });
+
+      expect(screen.queryByTestId('selectAllRulesOnPage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('checkboxSelectRow-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('hides the quick edit and actions menu affordances', () => {
+      renderTable({ canWrite: false });
+
+      expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('does not show the bulk action toolbar even when selectedCount > 0', () => {
+      renderTable({ canWrite: false, selectedCount: 1 });
+
+      expect(screen.queryByTestId('bulkActionsButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('clearSelectionButton')).not.toBeInTheDocument();
+    });
+
+    it('hides the enabled switch and shows a read-only status badge instead', () => {
+      renderTable({ canWrite: false });
+
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-2')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledBadge-rule-1')).toHaveTextContent('Enabled');
+      expect(screen.getByTestId('ruleEnabledBadge-rule-2')).toHaveTextContent('Disabled');
+    });
+
+    it('keeps read-only affordances (name link, expand) available', () => {
+      renderTable({ canWrite: false });
+
+      expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
+      expect(screen.getByTestId('expandRule-rule-1')).toBeInTheDocument();
     });
   });
 
