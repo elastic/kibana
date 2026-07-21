@@ -15,6 +15,7 @@
       "lenient": "__flag__",
       "preference": "",
       "routing": [],
+      "_slice": "",
       "_source": "__flag__",
       "_source_excludes": [],
       "_source_includes": [],

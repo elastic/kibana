@@ -8,7 +8,8 @@
 import React from 'react';
 import { ContainerModule } from 'inversify';
 import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
-import { CoreSetup, CoreStart } from '@kbn/core-di-browser';
+import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -36,6 +37,7 @@ import { UserCapabilities } from './services/user_capabilities';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { disableAlertingManagementUi } from './lib/disable_management_ui';
 import { setKibanaServices } from './kibana_services';
+import type { AlertingV2UIConfig } from './kibana_services';
 import type { AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 
@@ -160,6 +162,11 @@ export const module = new ContainerModule(({ bind }) => {
         ? (diContainer.get(cpsToken) as CPSPluginStart)
         : undefined;
 
+      const configAccessor = diContainer.get<
+        PluginInitializerContext<AlertingV2UIConfig>['config']
+      >(PluginInitializer('config'));
+      const { minimumScheduleInterval } = configAccessor.get<AlertingV2UIConfig>().rules;
+
       setKibanaServices({
         http: coreStart.http,
         notifications: coreStart.notifications,
@@ -172,6 +179,7 @@ export const module = new ContainerModule(({ bind }) => {
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
         dashboard,
         cps,
+        minimumScheduleInterval,
         container: diContainer,
       });
 

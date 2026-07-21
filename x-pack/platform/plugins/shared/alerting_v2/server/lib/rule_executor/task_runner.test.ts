@@ -27,6 +27,8 @@ describe('RuleExecutorTaskRunner', () => {
   let pipeline: jest.Mocked<RuleExecutionPipelineContract>;
   let abortController: AbortController;
 
+  const executionUuid = 'execution-uuid';
+
   // @ts-expect-error: not all fields are required
   const taskInstance: ConcreteTaskInstance = {
     id: 'task-1',
@@ -51,12 +53,13 @@ describe('RuleExecutorTaskRunner', () => {
         metrics: createEmptyMetricsSnapshot(),
       });
 
-      await runner.run({ taskInstance, abortController });
+      await runner.run({ taskInstance, abortController, executionUuid });
 
       expect(pipeline.execute).toHaveBeenCalledWith({
         ruleId: 'rule-1',
         spaceId: 'default',
         scheduledAt: taskInstance.scheduledAt?.toISOString(),
+        executionUuid,
         abortSignal: abortController.signal,
       });
     });
@@ -74,7 +77,7 @@ describe('RuleExecutorTaskRunner', () => {
       });
 
       // @ts-expect-error: testing the scheduledAt as a string
-      await runner.run({ taskInstance: taskWithDateScheduledAt, abortController });
+      await runner.run({ taskInstance: taskWithDateScheduledAt, abortController, executionUuid });
 
       expect(pipeline.execute).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -92,7 +95,7 @@ describe('RuleExecutorTaskRunner', () => {
         metrics: createEmptyMetricsSnapshot(),
       });
 
-      const result = await runner.run({ taskInstance, abortController });
+      const result = await runner.run({ taskInstance, abortController, executionUuid });
 
       expect(result).toEqual({ state: {} });
     });
@@ -105,7 +108,9 @@ describe('RuleExecutorTaskRunner', () => {
         metrics: createEmptyMetricsSnapshot(),
       });
 
-      const result = await runner.run({ taskInstance, abortController }).catch((error) => error);
+      const result = await runner
+        .run({ taskInstance, abortController, executionUuid })
+        .catch((error) => error);
 
       expect(result).toBeInstanceOf(Error);
       expect(isUnrecoverableError(result)).toBe(true);
@@ -119,7 +124,7 @@ describe('RuleExecutorTaskRunner', () => {
         metrics: createEmptyMetricsSnapshot(),
       });
 
-      const result = await runner.run({ taskInstance, abortController });
+      const result = await runner.run({ taskInstance, abortController, executionUuid });
 
       expect(result).toEqual({ state: { foo: 'bar' } });
     });
@@ -131,7 +136,9 @@ describe('RuleExecutorTaskRunner', () => {
         metrics: createEmptyMetricsSnapshot(),
       });
 
-      await expect(runner.run({ taskInstance, abortController })).resolves.toEqual({ state: {} });
+      await expect(runner.run({ taskInstance, abortController, executionUuid })).resolves.toEqual({
+        state: {},
+      });
     });
 
     it('returns empty state for unknown halt reasons', async () => {
@@ -142,7 +149,7 @@ describe('RuleExecutorTaskRunner', () => {
         metrics: createEmptyMetricsSnapshot(),
       });
 
-      const result = await runner.run({ taskInstance, abortController });
+      const result = await runner.run({ taskInstance, abortController, executionUuid });
 
       expect(result).toEqual({ state: {} });
     });
@@ -152,7 +159,7 @@ describe('RuleExecutorTaskRunner', () => {
     it('propagates pipeline errors', async () => {
       pipeline.execute.mockRejectedValue(new Error('Pipeline failed'));
 
-      await expect(runner.run({ taskInstance, abortController })).rejects.toThrow(
+      await expect(runner.run({ taskInstance, abortController, executionUuid })).rejects.toThrow(
         'Pipeline failed'
       );
     });
