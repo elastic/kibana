@@ -1226,64 +1226,62 @@ export type GetCaseTemplatesResponse = z.infer<typeof GetCaseTemplatesResponse>;
   */
 export const ApplicableFieldsResponse = lazySchema(() =>
   z.object({
-    fields: z
-      .array(
-        z.object({
-          /**
+    fields: z.array(
+      z.object({
+        /**
       * The storage key to write in the case `extended_fields` map. Follows the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`).
 
       */
-          key: z.string(),
-          /**
-           * The field name as authored in the field definition.
-           */
-          name: z.string(),
-          /**
-           * The human-readable label. Falls back to `name` when no label is authored.
-           */
-          label: z.string(),
-          /**
-           * The storage type: `keyword`, `integer`, `long`, `boolean`, or `date`.
-           */
-          type: z.string(),
-          /**
+        key: z.string(),
+        /**
+         * The field name as authored in the field definition.
+         */
+        name: z.string(),
+        /**
+         * The human-readable label. Falls back to `name` when no label is authored.
+         */
+        label: z.string(),
+        /**
+         * The storage type: `keyword`, `integer`, `long`, `boolean`, or `date`.
+         */
+        type: z.string(),
+        /**
       * The UI control for the field, such as `INPUT_TEXT`, `INPUT_NUMBER`, `SELECT_BASIC`, `TOGGLE`, or `MARKDOWN`.
 
       */
-          control: z.string(),
-          /**
-           * Whether a value must be supplied at write time.
-           */
-          required: z.boolean(),
-          /**
-           * Whether the field must be filled before the case can be closed.
-           */
-          requiredOnClose: z.boolean(),
-          /**
+        control: z.string(),
+        /**
+         * Whether a value must be supplied at write time.
+         */
+        required: z.boolean(),
+        /**
+         * Whether the field must be filled before the case can be closed.
+         */
+        requiredOnClose: z.boolean(),
+        /**
       * When `true` the field is display-only (for example a `MARKDOWN` block): it is returned so the full form shape is visible, but it holds no value and its `key` cannot be written to `extended_fields`.
 
       */
-          displayOnly: z.boolean(),
-          /**
-           * The allowed values for `SELECT_BASIC`, `RADIO_GROUP`, and `CHECKBOX_GROUP` fields.
-           */
-          options: z.array(z.string()).optional(),
-          /**
-           * The default value, as a string, when the field definition declares one.
-           */
-          defaultValue: z.string().optional(),
-          /**
+        displayOnly: z.boolean(),
+        /**
+         * The allowed values for `SELECT_BASIC`, `RADIO_GROUP`, and `CHECKBOX_GROUP` fields.
+         */
+        options: z.array(z.string()).optional(),
+        /**
+         * The default value, as a string, when the field definition declares one.
+         */
+        defaultValue: z.string().optional(),
+        /**
       * Where the field comes from: `global` for a library-wide (`isGlobal`) definition writable on any case, or `template` for a field contributed by the applied template.
 
       */
-          source: z.enum(['global', 'template']),
-          /**
-           * Whether the field is a global (library-wide) definition.
-           */
-          isGlobal: z.boolean(),
-        })
-      )
-      .optional(),
+        source: z.enum(['global', 'template']),
+        /**
+         * Whether the field is a global (library-wide) definition.
+         */
+        isGlobal: z.boolean(),
+      })
+    ),
   })
 );
 export type ApplicableFieldsResponse = z.infer<typeof ApplicableFieldsResponse>;

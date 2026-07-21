@@ -4,6 +4,8 @@ description: >
   the owner's global (library-wide) fields; when a template is applied, it also includes that
   template's fields. Migrated legacy custom fields appear here as `global` fields, so existing
   automations can look up the exact key to write.
+required:
+  - fields
 properties:
   fields:
     type: array

@@ -194,5 +194,23 @@ describe('applicable_fields', () => {
         })
       ).rejects.toThrow('Template missing not found');
     });
+
+    it('throws when the template has an invalid definition', async () => {
+      templatesService.getTemplate.mockResolvedValue(
+        makeTemplateSO([
+          // An unknown control fails FieldSchema validation in parseTemplate.
+          { name: 'broken', label: 'Broken', type: 'keyword', control: 'INVALID_CONTROL' },
+        ]) as never
+      );
+
+      await expect(
+        resolveApplicableFields({
+          owner: 'securitySolution',
+          templateId: 'tpl-1',
+          templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+        })
+      ).rejects.toThrow('Template tpl-1 has an invalid definition');
+    });
   });
 });

@@ -9,8 +9,19 @@ import expect from '@kbn/expect';
 import { stringify as yamlStringify } from 'yaml';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { deleteAllCaseItems, createCase } from '../../../../common/lib/api';
+import { deleteAllCaseItems, createCase, getSpaceUrlPrefix } from '../../../../common/lib/api';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
+import type { User } from '../../../../common/lib/authentication/types';
+import {
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  secOnly,
+  secOnlyManageTemplates,
+  secOnlyNoManageTemplates,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 
 const FIELD_DEFINITIONS_URL = '/internal/cases/field_definitions';
 const APPLICABLE_FIELDS_URL = `${CASES_URL}/fields`;
@@ -25,11 +36,20 @@ const buildFieldDef = (name: string, type = 'keyword', isGlobal = true) => ({
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
 
   const getPublic = (path: string) =>
     supertest
       .get(path)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'foo')
+      .set('elastic-api-version', '2023-10-31');
+
+  const getPublicAs = (path: string, auth: { user: User; space: string }) =>
+    supertestWithoutAuth
+      .get(`${getSpaceUrlPrefix(auth.space)}${path}`)
+      .auth(auth.user.username, auth.user.password)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'foo')
       .set('elastic-api-version', '2023-10-31');
@@ -136,6 +156,102 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns 404 for a missing case', async () => {
         await getPublic(`${CASES_URL}/does-not-exist/fields`).expect(404);
+      });
+    });
+
+    describe('rbac', () => {
+      describe('GET /api/cases/fields (pre-create discovery)', () => {
+        beforeEach(async () => {
+          await supertest
+            .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+            .set('kbn-xsrf', 'true')
+            .send(buildFieldDef('risk_score'))
+            .expect(200);
+        });
+
+        for (const user of [
+          secOnly,
+          secOnlyRead,
+          secOnlyManageTemplates,
+          secOnlyNoManageTemplates,
+        ]) {
+          it(`allows "${user.username}" to discover the owner's applicable fields`, async () => {
+            const { body } = await getPublicAs(`${APPLICABLE_FIELDS_URL}?owner=${OWNER}`, {
+              user,
+              space: 'space1',
+            }).expect(200);
+
+            const keys = body.fields.map((f: { key: string }) => f.key);
+            expect(keys).to.contain('risk_score_as_keyword');
+          });
+        }
+
+        it('returns 403 for a user with no Kibana privileges', async () => {
+          await getPublicAs(`${APPLICABLE_FIELDS_URL}?owner=${OWNER}`, {
+            user: noKibanaPrivileges,
+            space: 'space1',
+          }).expect(403);
+        });
+
+        it('is space-isolated: field definitions from space1 are not visible in space2', async () => {
+          const { body } = await getPublicAs(`${APPLICABLE_FIELDS_URL}?owner=${OWNER}`, {
+            user: secOnly,
+            space: 'space2',
+          }).expect(200);
+
+          const keys = body.fields.map((f: { key: string }) => f.key);
+          expect(keys).to.not.contain('risk_score_as_keyword');
+        });
+      });
+
+      describe('GET /api/cases/{case_id}/fields (existing-case discovery)', () => {
+        for (const user of [secOnly, secOnlyRead]) {
+          it(`allows "${user.username}" to discover a case's applicable fields`, async () => {
+            const createdCase = await createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: OWNER }),
+              200,
+              { user: secOnly, space: 'space1' }
+            );
+
+            const { body } = await getPublicAs(`${CASES_URL}/${createdCase.id}/fields`, {
+              user,
+              space: 'space1',
+            }).expect(200);
+
+            expect(body.fields).to.be.an('array');
+          });
+        }
+
+        it('returns 403 when the user does not have access to the case owner', async () => {
+          const createdCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: OWNER }),
+            200,
+            { user: secOnly, space: 'space1' }
+          );
+
+          for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
+            await getPublicAs(`${CASES_URL}/${createdCase.id}/fields`, {
+              user,
+              space: 'space1',
+            }).expect(403);
+          }
+        });
+
+        it('returns 403 when querying from a space the user has no access to', async () => {
+          const createdCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: OWNER }),
+            200,
+            { user: superUser, space: 'space2' }
+          );
+
+          await getPublicAs(`${CASES_URL}/${createdCase.id}/fields`, {
+            user: secOnly,
+            space: 'space2',
+          }).expect(403);
+        });
       });
     });
   });
