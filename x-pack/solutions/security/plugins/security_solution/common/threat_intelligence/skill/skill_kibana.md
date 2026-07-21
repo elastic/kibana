@@ -133,3 +133,40 @@ services these routes call:
 When invoked from inside Kibana, these tools merely re-execute the
 service the corresponding route uses. Inside Kibana orchestration, prefer
 the routes — the tools exist for portability.
+
+## Escalation to Deep Watch (Specialist Forensic Analysis)
+
+When Dark Watch identifies a **confirmed threat** that requires specialist-depth
+forensic reconstruction — timeline, IoC validation against live telemetry,
+persistence analysis, and evidence packaging for human review — escalate to
+**deep-watch-forensics**.
+
+### Escalation trigger
+
+Escalate when ALL of the following are true:
+
+1. `hunt_behavior` or `hunt_for_threat` has confirmed the threat is present in
+   the environment (not just a theoretical detection recommendation).
+2. The analyst needs **specialist-depth forensic reconstruction** — multi-host
+   timeline, evidence packaging with provenance, confidence levels, and
+   unresolved-questions documentation — beyond what a single-tool hunt provides.
+3. The incident may require containment (isolation, scanning), which needs a
+   draft specialist report + human approval gate before execution.
+
+### How to escalate
+
+Pass the following as the evidence package to `deep-watch-forensics`:
+
+- **IoCs**: file hashes, network destinations, domains extracted via
+  `threat_intel.extract_iocs` or from the threat report.
+- **MITRE techniques**: technique IDs extracted by `hunt_behavior` or
+  `coverage_gap`.
+- **Affected hosts**: host names surfaced by `hunt_for_threat` or
+  `threat_intel.analyse_environment`.
+- **Open questions**: unresolved questions from the Dark Watch analysis
+  (e.g., "entry vector unknown", "lateral movement scope unclear").
+- **Source reference**: the threat report name or ID.
+
+Deep Watch will package the evidence, produce a **draft** forensic specialist
+report (FR-082 — all outputs are drafts pending human review), and recommend
+containment actions — all behind a human approval gate.

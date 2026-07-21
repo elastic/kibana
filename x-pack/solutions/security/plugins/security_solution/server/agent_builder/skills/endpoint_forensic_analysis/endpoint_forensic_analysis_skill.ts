@@ -171,6 +171,16 @@ The forensic reconstruction is Phase 1 of a three-phase incident workflow. After
 
 3. **Never** execute response actions, run automated multi-host orchestration, or skip the analyst's explicit confirmation between phases.
 
+## Escalation to Deep Watch (Specialist Layer)
+
+When the incident requires **specialist-depth forensic analysis with evidence packaging** — beyond a single-host timeline — escalate to **deep-watch-forensics**:
+
+- Dark Watch (threat-intelligence) has identified a confirmed threat and needs a deep specialist forensic reconstruction with evidence packaging and draft report for human review.
+- The analyst explicitly requests a specialist-depth forensic draft with provenance, confidence levels, and unresolved-questions documentation.
+- The incident scope has expanded beyond a single host and requires structured evidence packaging per the Deep Watch FR-DP-01 requirements.
+
+To escalate: present the IoCs, timeline, hosts, and open questions from this skill's output as the evidence package, then hand off to **deep-watch-forensics**. That skill will package the evidence, produce a draft specialist report, and recommend containment — all behind a human approval gate.
+
 ## Tool Selection Guardrails
 
 - **Always** call \`osquery.check_integration\` before using any other \`osquery.*\` tool.

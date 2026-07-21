@@ -28,6 +28,7 @@ import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 import { threatIntelligenceSkill } from './threat_intelligence';
 import { endpointForensicAnalysisSkill } from './endpoint_forensic_analysis';
+import { deepWatchForensicsSkill } from './deep_watch_forensics';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -119,5 +120,13 @@ export const registerSkills = async ({
   // `threatIntelligenceSkillEnabled` so the feature ships dark until enabled.
   if (experimentalFeatures.threatIntelligenceSkillEnabled) {
     await agentBuilder.skills.register(threatIntelligenceSkill);
+  }
+
+  // Deep Watch forensic specialist skill. Gated behind
+  // `deepWatchSkillEnabled` — ships dark until enabled.
+  // Receives evidence packages from Dark Watch (threat-intelligence) escalations
+  // and produces draft forensic specialist reports for human review.
+  if (experimentalFeatures.deepWatchSkillEnabled) {
+    await agentBuilder.skills.register(deepWatchForensicsSkill);
   }
 };

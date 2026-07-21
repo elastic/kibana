@@ -353,6 +353,14 @@ export const allowedExperimentalValues = Object.freeze({
   threatIntelligenceSkillEnabled: true,
 
   /**
+   * Enables the Deep Watch forensic specialist skill.
+   * Receives evidence packages from Dark Watch escalations and produces
+   * draft forensic specialist reports for human review.
+   * Default true on this demo-only branch (do not merge).
+   */
+  deepWatchSkillEnabled: true,
+
+  /**
    * Enables Promote threat indicators background task.
    * Default true on this demo-only branch (do not merge).
    */
