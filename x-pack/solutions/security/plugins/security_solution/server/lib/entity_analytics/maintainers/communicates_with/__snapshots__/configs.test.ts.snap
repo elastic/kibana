@@ -147,7 +147,7 @@ FROM logs-system.auth-__namespace__
 | WHERE (MV_CONTAINS(TO_STRING(event.category), \\"authentication\\") OR MV_CONTAINS(TO_STRING(event.category), \\"session\\"))
     AND event.action == \\"ssh_login\\"
     AND event.outcome == \\"success\\"
-    AND ((TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != \\"failure\\") AND (TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" OR TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" OR TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\"))
+    AND ((\`user.email\` IS NOT NULL AND \`user.email\` != \\"\\") OR (\`user.name\` IS NOT NULL AND \`user.name\` != \\"\\"))
     AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\" OR TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
