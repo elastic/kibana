@@ -18229,6 +18229,7 @@ paths:
           required: true
           schema:
             example: ed518850-681a-4d60-bb98-e22640cae2a8
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -18332,6 +18333,7 @@ paths:
           name: package_policy_id
           required: true
           schema:
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -18367,6 +18369,7 @@ paths:
           name: package_policy_id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -18381,7 +18384,10 @@ paths:
               properties:
                 note:
                   description: The note content.
+                  maxLength: 10000
                   type: string
+              required:
+                - note
         required: true
       responses:
         '200':
@@ -18576,6 +18582,7 @@ paths:
           schema:
             description: The ID of the script entry to be deleted.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -18613,6 +18620,7 @@ paths:
           schema:
             description: The ID of the script entry.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -18660,6 +18668,7 @@ paths:
           schema:
             description: The ID of the script entry to be updated.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -18728,6 +18737,7 @@ paths:
           schema:
             description: The ID of the script entry.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -123008,6 +123018,7 @@ components:
         - data
     Security_Endpoint_Management_API_AgentId:
       description: Agent ID
+      maxLength: 256
       type: string
     Security_Endpoint_Management_API_AgentIds:
       description: A list of agent IDs. Max of 250.
@@ -123056,6 +123067,7 @@ components:
     Security_Endpoint_Management_API_ArchivePathToExecutableSchema:
       description: Used only for when the uploaded script is an archive (.zip file for example). This property defines the relative path to the file included in the archive that should be executed once its contents are extracted. The path should be relative to the root of the archive.
       example: ./bin/script.sh
+      maxLength: 4096
       type: string
     Security_Endpoint_Management_API_Cancel:
       allOf:
@@ -123185,9 +123197,11 @@ components:
       properties:
         description:
           description: Description of the script and its purpose/functionality
+          maxLength: 10000
           type: string
         example:
           description: Example usage of the script
+          maxLength: 10000
           type: string
         file:
           description: The script file upload
@@ -123197,10 +123211,10 @@ components:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptFileType'
         instructions:
           description: Instructions for using the script, including details around its supported input arguments
+          maxLength: 10000
           type: string
         name:
-          description: Name of the script
-          type: string
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_ScriptNameSchema'
         pathToExecutable:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_ArchivePathToExecutableSchema'
         platform:
@@ -123949,6 +123963,7 @@ components:
     Security_Endpoint_Management_API_Kuery:
       description: A KQL string.
       example: "united.endpoint.host.os.name : 'Windows'"
+      maxLength: 30000
       type: string
     Security_Endpoint_Management_API_MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
@@ -124317,9 +124332,11 @@ components:
       properties:
         description:
           description: Description of the script and its purpose/functionality
+          maxLength: 10000
           type: string
         example:
           description: Example usage of the script
+          maxLength: 10000
           type: string
         file:
           description: The script file upload
@@ -124329,10 +124346,10 @@ components:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptFileType'
         instructions:
           description: Instructions for using the script, including details around its supported input arguments
+          maxLength: 10000
           type: string
         name:
-          description: Name of the script
-          type: string
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_ScriptNameSchema'
         pathToExecutable:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_ArchivePathToExecutableSchema'
         platform:
@@ -124348,6 +124365,11 @@ components:
           items:
             $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptTags'
           type: array
+        version:
+          description: Version of the script
+          maxLength: 256
+          minLength: 1
+          type: string
     Security_Endpoint_Management_API_PendingActionDataType:
       description: Number of pending actions of this type.
       type: integer
@@ -124756,6 +124778,11 @@ components:
                 - path
           required:
             - parameters
+    Security_Endpoint_Management_API_ScriptNameSchema:
+      description: Name of the script
+      maxLength: 256
+      minLength: 1
+      type: string
     Security_Endpoint_Management_API_ScriptsApiResponse:
       example:
         data:
