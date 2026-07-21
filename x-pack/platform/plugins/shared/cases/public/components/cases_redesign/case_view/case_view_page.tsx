@@ -62,7 +62,7 @@ export const CaseViewPageRedesign = React.memo<CaseViewPageRedesignProps>(
             onUpdateField={onUpdateField}
           />
         </CasesPageBody>
-        <CaseDetailsTour />
+        <CaseDetailsTour caseData={caseData} />
       </>
     );
   }

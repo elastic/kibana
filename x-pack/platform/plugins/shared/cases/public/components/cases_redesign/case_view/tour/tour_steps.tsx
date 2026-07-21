@@ -23,6 +23,8 @@ export interface CaseDetailsTourConditions {
   canUpdate: boolean;
   /** Whether the current solution enables any case setting; gates the settings step. */
   hasCaseSettings: boolean;
+  /** Whether the "Add to chat" action is available; gates the chat step. */
+  isAddToChatAvailable: boolean;
   isTemplatesEnabled: boolean;
   isConnectorAuthorized: boolean;
 }
@@ -39,6 +41,7 @@ export const getCaseDetailsTourSteps = ({
   canCreateComment,
   canUpdate,
   hasCaseSettings,
+  isAddToChatAvailable,
   isTemplatesEnabled,
   isConnectorAuthorized,
 }: CaseDetailsTourConditions): CasesTourStep[] => {
@@ -51,6 +54,16 @@ export const getCaseDetailsTourSteps = ({
       anchor: '[data-test-subj="case-view-attach-button"]',
       anchorPosition: 'downCenter',
       content: wrap(i18n.STEP_ATTACH_DESCRIPTION),
+    });
+  }
+
+  if (isAddToChatAvailable) {
+    steps.push({
+      stepId: 'chat',
+      title: i18n.STEP_CHAT_TITLE,
+      anchor: '[data-test-subj="case-chat-actions"]',
+      anchorPosition: 'downLeft',
+      content: wrap(i18n.STEP_CHAT_DESCRIPTION),
     });
   }
 

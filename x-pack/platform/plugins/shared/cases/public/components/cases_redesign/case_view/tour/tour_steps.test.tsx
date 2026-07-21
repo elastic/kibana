@@ -11,6 +11,7 @@ const ALL_ENABLED = {
   canCreateComment: true,
   canUpdate: true,
   hasCaseSettings: true,
+  isAddToChatAvailable: true,
   isTemplatesEnabled: true,
   isConnectorAuthorized: true,
 };
@@ -20,6 +21,7 @@ describe('getCaseDetailsTourSteps', () => {
     const ids = getCaseDetailsTourSteps(ALL_ENABLED).map((s) => s.stepId);
     expect(ids).toEqual([
       'attach',
+      'chat',
       'pills',
       'settings',
       'attributes',
@@ -33,10 +35,18 @@ describe('getCaseDetailsTourSteps', () => {
       canCreateComment: false,
       canUpdate: false,
       hasCaseSettings: false,
+      isAddToChatAvailable: false,
       isTemplatesEnabled: false,
       isConnectorAuthorized: false,
     }).map((s) => s.stepId);
     expect(ids).toEqual(['pills', 'attributes']);
+  });
+
+  it('omits the chat step when add-to-chat is not available', () => {
+    const ids = getCaseDetailsTourSteps({ ...ALL_ENABLED, isAddToChatAvailable: false }).map(
+      (s) => s.stepId
+    );
+    expect(ids).not.toContain('chat');
   });
 
   it('omits the attach step without create-comment permission', () => {

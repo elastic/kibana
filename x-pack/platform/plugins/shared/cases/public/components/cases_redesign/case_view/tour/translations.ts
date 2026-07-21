@@ -18,6 +18,14 @@ export const STEP_ATTACH_DESCRIPTION = i18n.translate(
   }
 );
 
+export const STEP_CHAT_TITLE = i18n.translate('xpack.cases.caseView.tour.chat.title', {
+  defaultMessage: 'Add to chat',
+});
+
+export const STEP_CHAT_DESCRIPTION = i18n.translate('xpack.cases.caseView.tour.chat.description', {
+  defaultMessage: 'Add this case to a chat or ask the AI Assistant to summarize it.',
+});
+
 export const STEP_PILLS_TITLE = i18n.translate('xpack.cases.caseView.tour.pills.title', {
   defaultMessage: 'Status and severity',
 });
