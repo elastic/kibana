@@ -93,7 +93,7 @@ export class CasesActivityV2Writer implements CasesActivityV2WriterContract {
   }
 
   /**
-   * Cascade-delete every analytics activity doc whose `cases.id` matches
+   * Cascade-delete every analytics activity doc whose `case.id` matches
    * one of the supplied case ids. Called by `CasesService.bulkDelete*`
    * for case-level deletions. Fire-and-forget. The reconciliation
    * filter (`created_at > tracker`) won't re-emit a doc whose source SO
@@ -103,7 +103,7 @@ export class CasesActivityV2Writer implements CasesActivityV2WriterContract {
    * Implemented as `delete_by_query` rather than `_bulk`: the writer
    * doesn't know which user-action ids existed for the deleted cases,
    * and the SO service has already deleted the user-action SOs, so a
-   * `terms` query on `cases.id` is the cheapest correct path.
+   * `terms` query on `case.id` is the cheapest correct path.
    *
    * Known limitation: this is the ONLY path that drops cascade-orphaned
    * activity docs. Reconciliation walks forward on `created_at` and
@@ -215,7 +215,7 @@ export class CasesActivityV2Writer implements CasesActivityV2WriterContract {
         // re-emit anyway because the source SO is gone.
         conflicts: 'proceed',
         query: {
-          terms: { 'cases.id': caseIds },
+          terms: { 'case.id': caseIds },
         },
       });
     } catch (err) {

@@ -188,19 +188,22 @@ export const ALERT_SUMMARY_SYSTEM_PROMPT =
   'The response should look like this:\n' +
   '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
 
-export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate structured information for entity so a Security analyst can act. Your response should take all the important elements of the entity into consideration.
+export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate structured information for an entity so a Security analyst can act. Your response must take all important elements of the entity context into consideration.
 
-Generate a list of highlight items, each with a title and text. Only include highlights for which information is available in the context.
-  - Risk score: Summarize the entity's risk score and the main factors contributing to it. Don't mention any risk contribution scores.
-  - Criticality: Note the entity's criticality level and its impact on the risk score. Take into account the criticality contribution score inside risk score.
-  - Anomalies: Summarize unusual activities or anomalies detected for the entity and briefly explain why it is significant.
-  - Vulnerabilities: Summarize any significant Vulnerability and briefly explain why it is significant.
+Generate a list of highlight items, each with a title and text. Only include highlights for which information is available in the context. Keep each highlight to 1 sentence — at most 2, and only when an anomaly needs the extra clause for a MITRE ATT&CK / Kill Chain mapping. Aim to keep the highlights section under 600 characters total.
+  - Risk score: State the score and describe the dominant threat pattern — do not list individual rules or alerts. Only mention a specific rule if it clearly accounts for the majority of the score.
+  - Criticality: State the entity's criticality level and how it affects the overall risk.
+  - Anomalies: Identify the most significant pattern across anomalies rather than listing them. Only if one or more ML job results clearly correspond to a known attack technique, map it to the relevant MITRE ATT&CK tactic (e.g. \`Execution\`, \`Lateral Movement\`) or Lockheed Martin Kill Chain phase (e.g. \`Exploitation\`, \`Command & Control\`) in the same highlight. If the anomalies are ambiguous or look benign, omit the mapping rather than guessing.
+  - Vulnerabilities: State the most critical vulnerability present and why it matters.
 
-Additionally, provide a list of actionable recommendations for the security analyst if available.
+Additionally, provide up to 3 actionable recommendations for the security analyst, prioritised by urgency. Each must be 1 sentence.
 
 **Guidelines**:
   - Only include highlight items for which information is available in the context.
-  - Use must use inline code (backticks) for technical values like file paths, process names, arguments, scores, package versions, etc.
+  - Only use values that are explicitly present in the provided context. Do not infer, extrapolate, or fabricate any values, scores, CVEs, job names, or attack-technique mappings that are not present in the context.
+  - You must always use inline code (backticks) for all technical values — criticality levels, risk scores, job names, CVE IDs, CVSS scores, process names, file paths, package versions. Never use single quotes or plain text for these values.
+  - Round all numeric values to 2 decimal places (e.g. \`72.00\`, \`26.62\`).
+  - Synthesise — do not list. If multiple signals point to the same pattern, say what the pattern is.
   - **Do not** include any extra explanation, reasoning or text.
 `;
 

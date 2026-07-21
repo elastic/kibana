@@ -7,15 +7,18 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { agentPolicyService } from '../../services';
+import { agentPolicyService, appContextService } from '../../services';
 
 import type { FleetRequestHandlerContext } from '../..';
-import { xpackMocks } from '../../mocks';
+import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type { AgentClient } from '../../services/agents';
 import type { AgentPolicy } from '../../types';
+import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 
 import {
   bulkGetAgentPoliciesHandler,
+  copyAgentPolicyHandler,
+  createAgentPolicyHandler,
   GetListAgentPolicyOutputsHandler,
   populateAssignedAgentsCount,
 } from './handlers';
@@ -23,9 +26,17 @@ import {
 jest.mock('../../services/agent_policy', () => {
   return {
     agentPolicyService: {
+      get: jest.fn(),
       getByIds: jest.fn(),
+      copy: jest.fn(),
       listAllOutputsForPolicies: jest.fn(),
     },
+  };
+});
+
+jest.mock('../../services/agent_policy_create', () => {
+  return {
+    createAgentPolicyWithPackages: jest.fn(),
   };
 });
 
@@ -38,6 +49,128 @@ describe('Agent policy API handlers', () => {
   beforeEach(async () => {
     context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
     response = httpServerMock.createResponseFactory();
+  });
+
+  describe('createAgentPolicyHandler', () => {
+    const createdAgentPolicy = { id: 'new-policy', name: 'New policy' } as AgentPolicy;
+
+    beforeEach(() => {
+      (createAgentPolicyWithPackages as jest.Mock).mockResolvedValue(createdAgentPolicy);
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    it('should reject agentless agent policies when disableAgentlessLegacyAPI is enabled', async () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, false, undefined, {
+          disableAgentlessLegacyAPI: true,
+        })
+      );
+      const request = httpServerMock.createKibanaRequest({
+        body: { name: 'Agentless policy', namespace: 'default', supports_agentless: true },
+      });
+
+      await expect(createAgentPolicyHandler(context, request, response)).rejects.toThrow(
+        /To create managed integrations/
+      );
+      expect(createAgentPolicyWithPackages).not.toHaveBeenCalled();
+    });
+
+    it('should allow agentless agent policies when disableAgentlessLegacyAPI is disabled', async () => {
+      appContextService.start(createAppContextStartContractMock());
+      const request = httpServerMock.createKibanaRequest({
+        body: { name: 'Agentless policy', namespace: 'default', supports_agentless: true },
+      });
+
+      await createAgentPolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: createdAgentPolicy },
+      });
+      // Flag off: the legacy agentless write is allowed but logged so it stays
+      // measurable before the flag is flipped fleet-wide.
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
+    });
+
+    it('should not log the legacy agentless deprecation for non-agentless agent policies when the flag is disabled', async () => {
+      appContextService.start(createAppContextStartContractMock());
+      const request = httpServerMock.createKibanaRequest({
+        body: { name: 'Regular policy', namespace: 'default' },
+      });
+
+      await createAgentPolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(appContextService.getLogger().warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
+    });
+  });
+
+  describe('copyAgentPolicyHandler', () => {
+    const copiedAgentPolicy = { id: 'copied-policy', name: 'Copied policy' } as AgentPolicy;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      agentPolicyServiceMock.copy.mockResolvedValue(copiedAgentPolicy);
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    const getCopyRequest = () =>
+      httpServerMock.createKibanaRequest({
+        params: { agentPolicyId: 'source-policy' },
+        body: { name: 'Copied policy', description: '' },
+      });
+
+    it('should reject copying agentless agent policies when disableAgentlessLegacyAPI is enabled', async () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, false, undefined, {
+          disableAgentlessLegacyAPI: true,
+        })
+      );
+      agentPolicyServiceMock.get.mockResolvedValue({
+        id: 'source-policy',
+        supports_agentless: true,
+      } as AgentPolicy);
+
+      await expect(copyAgentPolicyHandler(context, getCopyRequest(), response)).rejects.toThrow(
+        /Managed integrations cannot be copied.*Offending ID: source-policy\./
+      );
+      expect(agentPolicyServiceMock.copy).not.toHaveBeenCalled();
+    });
+
+    it('should allow copying regular agent policies when disableAgentlessLegacyAPI is enabled', async () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, false, undefined, {
+          disableAgentlessLegacyAPI: true,
+        })
+      );
+      agentPolicyServiceMock.get.mockResolvedValue({ id: 'source-policy' } as AgentPolicy);
+
+      await copyAgentPolicyHandler(context, getCopyRequest(), response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: copiedAgentPolicy },
+      });
+    });
+
+    it('should allow copying agentless agent policies when disableAgentlessLegacyAPI is disabled', async () => {
+      appContextService.start(createAppContextStartContractMock());
+
+      await copyAgentPolicyHandler(context, getCopyRequest(), response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: copiedAgentPolicy },
+      });
+      expect(agentPolicyServiceMock.get).not.toHaveBeenCalled();
+    });
   });
 
   describe('GetListAgentPolicyOutputsHandler', () => {

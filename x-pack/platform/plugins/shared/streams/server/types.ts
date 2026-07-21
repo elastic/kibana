@@ -7,13 +7,16 @@
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type {
+  PluginStartContract as ActionsPluginStart,
+  RelayClientContract,
+} from '@kbn/actions-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
-} from '@kbn/agent-context-layer-plugin/server';
+  AgentBuilderSmlPluginSetup,
+  AgentBuilderSmlPluginStart,
+} from '@kbn/agent-builder-sml-plugin/server';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
@@ -66,6 +69,17 @@ export interface StreamsServer {
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
+  cloud?: CloudSetup;
+  /**
+   * The running Kibana's version, e.g. `9.2.0`. Populated by the
+   * significant_events plugin, which needs it to identify the connecting
+   * deployment to the Relay service.
+   */
+  kibanaVersion: string;
+  /**
+   * Singleton client for the Relay service, owned by the Actions plugin.
+   */
+  relayClient?: RelayClientContract;
 }
 
 export interface ElasticsearchAccessorOptions {
@@ -74,7 +88,7 @@ export interface ElasticsearchAccessorOptions {
 
 export interface StreamsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
-  agentContextLayer?: AgentContextLayerPluginSetup;
+  agentBuilderSml?: AgentBuilderSmlPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
@@ -102,7 +116,7 @@ export interface StreamsPluginStartDependencies {
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
   agentBuilder?: AgentBuilderPluginStart;
-  agentContextLayer?: AgentContextLayerPluginStart;
+  agentBuilderSml?: AgentBuilderSmlPluginStart;
   spaces?: SpacesPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;

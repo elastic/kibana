@@ -9,6 +9,10 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ShowEventButton } from './show_event_button';
 import { useCaseViewNavigation, useCaseViewParams } from '@kbn/cases-plugin/public';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
+import { casesCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 
 const props = {
   id: 'action-id',
@@ -34,16 +38,23 @@ jest.mock('@kbn/cases-plugin/public', () => ({
   useCaseViewParams: jest.fn(),
 }));
 
+jest.mock('../../../../flyout_v2/use_flyout_api');
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
+
 const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 
 describe('ShowEventButton', () => {
   const navigateToCaseView = jest.fn();
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     useCaseViewParamsMock.mockReturnValue({ detailName: 'case-id' });
     useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView });
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   it('renders the show event button', () => {
@@ -51,7 +62,7 @@ describe('ShowEventButton', () => {
     expect(screen.getByTestId('comment-action-show-event-action-id')).toBeInTheDocument();
   });
 
-  it('opens flyout directly when index is valid (events use hook, not cases routing)', () => {
+  it('opens the legacy expandable flyout when the new flyout is disabled', () => {
     render(<ShowEventButton {...props} />);
     const button = screen.getByTestId('comment-action-show-event-action-id');
     fireEvent.click(button);
@@ -65,6 +76,25 @@ describe('ShowEventButton', () => {
         },
       },
     });
+    expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+    expect(mockReportEvent).toHaveBeenCalled();
+    expect(navigateToCaseView).not.toHaveBeenCalled();
+  });
+
+  it('opens the new document flyout (from index) when the new flyout is enabled', () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+    render(<ShowEventButton {...props} />);
+    const button = screen.getByTestId('comment-action-show-event-action-id');
+    fireEvent.click(button);
+
+    expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
+      documentId: 'event-id',
+      indexName: 'event-index',
+      renderCellActions: casesCellActionRenderer,
+      title: 'Event',
+    });
+    expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(mockReportEvent).toHaveBeenCalled();
     expect(navigateToCaseView).not.toHaveBeenCalled();
   });

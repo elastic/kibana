@@ -50,6 +50,67 @@ import type { AggregationBucket } from '../../asset_inventory/telemetry/type';
 import type { EnrichedEntity } from '../enriched_entity';
 import { EnrichEntityService } from '../enriched_entity';
 
+/**
+ * Rounds a score to 2 decimal places for the LLM payload. The generated summary echoes
+ * whatever numbers it is given, so formatting the payload here keeps the summary
+ * consistent with the rest of Entity Analytics instead of surfacing raw values like
+ * `67.2175384208`. Returns an empty string for null/undefined to match the existing
+ * payload shape.
+ *
+ * NOTE: this intentionally duplicates the 2-decimal rounding of the UI's
+ * `formatRiskScore` (public/entity_analytics/common/utils.ts). That helper lives in
+ * `public` and cannot be imported by server code. Follow-up: extract `formatRiskScore`
+ * into `common/entity_analytics/risk_score` so the UI and server share one source of
+ * truth (kept out of this PR to avoid an unrelated cross-file refactor).
+ */
+const formatScoreForSummary = (score: number | null | undefined): string =>
+  score == null ? '' : (Math.round(score * 100) / 100).toFixed(2);
+
+/**
+ * Human-readable labels for the asset-criticality enum, so the generated summary matches
+ * the Entity Analytics UI (e.g. `extreme_impact` rendered as `Extreme Impact`) instead of
+ * echoing the raw enum value.
+ *
+ * NOTE: this intentionally duplicates the UI's `CRITICALITY_LEVEL_TITLE`
+ * (public/entity_analytics/components/asset_criticality/translations.ts). That map is
+ * built from `i18n.translate` and lives in `public`, so it cannot be imported by server
+ * code. Follow-up: extract the level labels into `common/entity_analytics/asset_criticality`
+ * so the UI and server share one source of truth (kept out of this PR to avoid an
+ * unrelated cross-file refactor).
+ */
+const CRITICALITY_LEVEL_SUMMARY_LABELS: Record<string, string> = {
+  unassigned: 'Unassigned',
+  low_impact: 'Low Impact',
+  medium_impact: 'Medium Impact',
+  high_impact: 'High Impact',
+  extreme_impact: 'Extreme Impact',
+};
+
+/**
+ * Rewrites the criticality-level values inside an anonymized asset-criticality record to
+ * their human-readable labels. The value lands in the record under `criticality_level`
+ * or the ECS field `asset.criticality` (optionally prefixed by the entity, e.g.
+ * `host.asset.criticality`); unknown values pass through unchanged so nothing is dropped
+ * if the enum ever grows.
+ */
+const formatCriticalityLevelsInRecord = (
+  record: Record<string, string[]>
+): Record<string, string[]> =>
+  Object.fromEntries(
+    Object.entries(record).map(([key, values]) => {
+      const isCriticalityKey =
+        key === 'criticality_level' ||
+        key === 'asset.criticality' ||
+        key.endsWith('.asset.criticality');
+      return [
+        key,
+        isCriticalityKey
+          ? values.map((value) => CRITICALITY_LEVEL_SUMMARY_LABELS[value] ?? value)
+          : values,
+      ];
+    })
+  );
+
 // Always return a new object to prevent mutation
 const getEmptyVulnerabilitiesTotal = (): Record<string, number> => ({
   [VULNERABILITIES_RESULT_EVALUATION.NONE]: 0,
@@ -135,16 +196,18 @@ export const entityDetailsHighlightsServiceFactory = ({
     const anonymizedRiskScore = latestRiskScore
       ? [
           {
-            score: [latestRiskScore.calculated_score_norm],
+            score: [formatScoreForSummary(latestRiskScore.calculated_score_norm)],
             id_field: [latestRiskScore.id_field],
             alert_inputs: latestRiskScore.inputs.map((input) => ({
-              risk_score: [input.risk_score?.toString() ?? ''],
-              contribution_score: [input.contribution_score?.toString() ?? ''],
+              risk_score: [formatScoreForSummary(input.risk_score)],
+              contribution_score: [formatScoreForSummary(input.contribution_score)],
               description: [input.description ?? ''],
               timestamp: [input.timestamp ?? ''],
             })),
             asset_criticality_contribution_score:
-              latestRiskScore.category_2_score?.toString() ?? '0',
+              latestRiskScore.category_2_score != null
+                ? formatScoreForSummary(latestRiskScore.category_2_score)
+                : '0',
           },
         ]
       : [];
@@ -168,13 +231,15 @@ export const entityDetailsHighlightsServiceFactory = ({
     });
 
     const assetCriticalityAnonymized = criticalitySearchResponse.hits.hits.map((hit) =>
-      transformRawDataToRecord({
-        anonymizationFields,
-        currentReplacements: localReplacements,
-        getAnonymizedValue,
-        onNewReplacements: localOnNewReplacements,
-        rawData: getRawDataOrDefault(omit(hit.fields, '_id')), // We need to exclude _id because asset criticality id contains user data
-      })
+      formatCriticalityLevelsInRecord(
+        transformRawDataToRecord({
+          anonymizationFields,
+          currentReplacements: localReplacements,
+          getAnonymizedValue,
+          onNewReplacements: localOnNewReplacements,
+          rawData: getRawDataOrDefault(omit(hit.fields, '_id')), // We need to exclude _id because asset criticality id contains user data
+        })
+      )
     );
 
     return assetCriticalityAnonymized;
@@ -325,27 +390,31 @@ export const entityDetailsHighlightsServiceFactory = ({
     const anonymizedRiskScore = enrichedEntity.riskScore
       ? [
           {
-            score: [enrichedEntity.riskScore.calculated_score_norm],
+            score: [formatScoreForSummary(enrichedEntity.riskScore.calculated_score_norm)],
             id_field: [enrichedEntity.riskScore.id_field],
             alert_inputs: enrichedEntity.riskScore.inputs.map((input) => ({
-              risk_score: [input.risk_score?.toString() ?? ''],
-              contribution_score: [input.contribution_score?.toString() ?? ''],
+              risk_score: [formatScoreForSummary(input.risk_score)],
+              contribution_score: [formatScoreForSummary(input.contribution_score)],
               description: [input.description ?? ''],
               timestamp: [input.timestamp ?? ''],
             })),
             asset_criticality_contribution_score:
-              enrichedEntity.riskScore.category_2_score?.toString() ?? '0',
+              enrichedEntity.riskScore.category_2_score != null
+                ? formatScoreForSummary(enrichedEntity.riskScore.category_2_score)
+                : '0',
           },
         ]
       : [];
 
-    const assetCriticalityAnonymized_ = transformRawDataToRecord({
-      anonymizationFields,
-      currentReplacements: localReplacements,
-      getAnonymizedValue,
-      onNewReplacements: localOnNewReplacements,
-      rawData: getRawDataOrDefault(omit(enrichedEntity.fields, '_id')), // We need to exclude _id because asset criticality id contains user data
-    });
+    const assetCriticalityAnonymized_ = formatCriticalityLevelsInRecord(
+      transformRawDataToRecord({
+        anonymizationFields,
+        currentReplacements: localReplacements,
+        getAnonymizedValue,
+        onNewReplacements: localOnNewReplacements,
+        rawData: getRawDataOrDefault(omit(enrichedEntity.fields, '_id')), // We need to exclude _id because asset criticality id contains user data
+      })
+    );
     const assetCriticalityAnonymized = assetCriticalityAnonymized_
       ? [assetCriticalityAnonymized_]
       : [];

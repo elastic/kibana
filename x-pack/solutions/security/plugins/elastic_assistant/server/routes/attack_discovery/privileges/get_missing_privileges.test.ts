@@ -8,12 +8,22 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from '@kbn/workflows';
 
 import { getMissingIndexPrivilegesInternalRoute } from './get_missing_privileges';
+import { getMissingWorkflowsPrivileges } from './get_missing_workflows_privileges';
 import * as helpers from '../../helpers';
 import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 import { mockAuthenticatedUser } from '../../../__mocks__/mock_authenticated_user';
 import { requestContextMock } from '../../../__mocks__/request_context';
+
+jest.mock('./get_missing_workflows_privileges', () => ({
+  getMissingWorkflowsPrivileges: jest.fn(),
+}));
+
+const mockGetMissingWorkflowsPrivileges = getMissingWorkflowsPrivileges as jest.MockedFunction<
+  typeof getMissingWorkflowsPrivileges
+>;
 
 const { context: mockContext } = requestContextMock.createTools();
 
@@ -59,6 +69,9 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
     };
     (mockContext.core.elasticsearch.client.asCurrentUser as unknown) = mockEsClient;
 
+    (mockContext.core.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(false);
+    mockGetMissingWorkflowsPrivileges.mockResolvedValue([]);
+
     addVersionMock = jest.fn();
     (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
     getMissingIndexPrivilegesInternalRoute(router as never);
@@ -91,7 +104,7 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
     await getHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockResponse.ok).toHaveBeenCalledWith({
-      body: [],
+      body: { feature_privileges: [], index_privileges: [] },
     });
   });
 
@@ -121,12 +134,15 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
     await getHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockResponse.ok).toHaveBeenCalledWith({
-      body: [
-        {
-          index_name: scheduledIndexPattern,
-          privileges: ['write', 'maintenance'],
-        },
-      ],
+      body: {
+        feature_privileges: [],
+        index_privileges: [
+          {
+            index_name: scheduledIndexPattern,
+            privileges: ['write', 'maintenance'],
+          },
+        ],
+      },
     });
   });
 
@@ -156,16 +172,92 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
     await getHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockResponse.ok).toHaveBeenCalledWith({
-      body: [
-        {
-          index_name: scheduledIndexPattern,
-          privileges: ['read', 'write'],
+      body: {
+        feature_privileges: [],
+        index_privileges: [
+          {
+            index_name: scheduledIndexPattern,
+            privileges: ['read', 'write'],
+          },
+          {
+            index_name: adhocIndexPattern,
+            privileges: ['view_index_metadata', 'maintenance'],
+          },
+        ],
+      },
+    });
+  });
+
+  describe('workflows feature privileges', () => {
+    const allIndexPrivilegesGranted: SecurityHasPrivilegesResponse = {
+      username: 'elastic',
+      has_all_requested: true,
+      cluster: {},
+      index: {
+        [scheduledIndexPattern]: {
+          read: true,
+          write: true,
+          view_index_metadata: true,
+          maintenance: true,
         },
-        {
-          index_name: adhocIndexPattern,
-          privileges: ['view_index_metadata', 'maintenance'],
+        [adhocIndexPattern]: {
+          read: true,
+          write: true,
+          view_index_metadata: true,
+          maintenance: true,
         },
-      ],
+      },
+      application: {},
+    };
+
+    beforeEach(() => {
+      mockEsClient.security.hasPrivileges.mockResolvedValue({ body: allIndexPrivilegesGranted });
+    });
+
+    it('does not evaluate workflows privileges when the workflows feature flag is OFF', async () => {
+      (mockContext.core.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(false);
+
+      await getHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockGetMissingWorkflowsPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('returns empty feature_privileges when the workflows feature flag is OFF', async () => {
+      (mockContext.core.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(false);
+
+      await getHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { feature_privileges: [], index_privileges: [] },
+      });
+    });
+
+    it('evaluates workflows privileges when the workflows feature flag is ON', async () => {
+      (mockContext.core.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(true);
+
+      await getHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockGetMissingWorkflowsPrivileges).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'default' })
+      );
+    });
+
+    it('returns missing workflows feature privileges when the workflows feature flag is ON', async () => {
+      (mockContext.core.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(true);
+      mockGetMissingWorkflowsPrivileges.mockResolvedValue([
+        { feature_id: WORKFLOWS_MANAGEMENT_FEATURE_ID, privileges: ['read', 'execute'] },
+      ]);
+
+      await getHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          feature_privileges: [
+            { feature_id: WORKFLOWS_MANAGEMENT_FEATURE_ID, privileges: ['read', 'execute'] },
+          ],
+          index_privileges: [],
+        },
+      });
     });
   });
 

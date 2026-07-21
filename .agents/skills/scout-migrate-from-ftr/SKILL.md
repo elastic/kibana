@@ -44,6 +44,7 @@ Then surface a short **chat-side summary** of the items the user should not miss
 
 - **Downgrades**: tests the plan reclassifies away from a UI test (to API or RTL/Jest), with one-line reasoning each.
 - **`NEEDS VERIFICATION`**: anything the planner could not determine and flagged for human input.
+- **Stateful/serverless mirrors**: duplicate FTR variants found outside the primary source path, especially any planned merge/delete decisions.
 - **Cloud portability blockers**: hardcoded paths, custom server args, or feature flags that prevent running on Elastic Cloud out-of-the-box.
 - **High-impact FTR smells**: anti-patterns that change behavior on migration (try/catch swallowing, hardcoded timeouts, shared mutable state, over-privileged execution, missing cleanup). Skip cosmetic ones — only call out what would surprise the user later.
 
@@ -59,7 +60,7 @@ If during execution you discover the plan was wrong about a specific file's test
 
 ## Step 4 — Run and iterate
 
-Once execution is complete, run the new Scout tests and fix failures until they pass. Refer to [`docs/extend/scout/run-tests.md`](../../../docs/extend/scout/run-tests.md) for run-tests commands (local stateful and the local serverless simulation).
+Once execution is complete, run the new Scout tests and fix failures until they pass. Refer to [`docs/extend/testing/run-scout-tests.md`](../../../docs/extend/testing/run-scout-tests.md) for run-tests commands (local stateful and the local serverless simulation).
 
 For faster feedback during the loop, start the test servers once and reuse them across iterations:
 
@@ -94,4 +95,4 @@ Address `blocker` and `major` findings before considering the migration done. Su
 - Step 1 (planning) workflow, inputs, output filename convention, Cloud portability questions: [`references/generate-plan.md`](references/generate-plan.md)
 - Step 3 (execution) workflow: file placement, FTR-to-Scout mapping, typecheck/run: [`references/execute-plan.md`](references/execute-plan.md)
 - Test-type downgrade catalog (UI vs API vs RTL/Jest): [`references/pick-correct-test-type.md`](references/pick-correct-test-type.md)
-- Step 4 run commands and iteration patterns: [`docs/extend/scout/run-tests.md`](../../../docs/extend/scout/run-tests.md)
+- Step 4 run commands and iteration patterns: [`docs/extend/testing/run-scout-tests.md`](../../../docs/extend/testing/run-scout-tests.md)

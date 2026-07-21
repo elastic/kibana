@@ -1,5 +1,5 @@
 {
-  "sha1": "e6bd670357b6e86363e27efc4b1d793dda9474be",
+  "sha1": "2e91b79dc54d0637b3f8eed93dfc3f672ba1e5b2",
   "tests": [
     {
       "id": "fbc74590a1185af-3e73699777c3b59",
@@ -61,7 +61,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 92,
+        "line": 99,
         "column": 9
       }
     },
@@ -77,7 +77,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 106,
+        "line": 113,
         "column": 9
       }
     },
@@ -93,7 +93,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 122,
+        "line": 129,
         "column": 9
       }
     },
@@ -109,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 136,
+        "line": 143,
         "column": 9
       }
     },
@@ -125,7 +125,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 155,
+        "line": 162,
         "column": 9
       }
     },
@@ -141,7 +141,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 167,
+        "line": 174,
         "column": 9
       }
     },
@@ -157,7 +157,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
-        "line": 20,
+        "line": 24,
         "column": 9
       }
     },
@@ -173,7 +173,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
-        "line": 32,
+        "line": 36,
         "column": 9
       }
     },
@@ -189,7 +189,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
-        "line": 42,
+        "line": 50,
         "column": 9
       }
     },

@@ -135,7 +135,11 @@ describe('Cases Ui Plugin', () => {
 
       expect(
         pluginsSetup.management.sections.section.insightsAndAlerting.registerApp
-      ).toHaveBeenCalled();
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mainPaddingSize: 'none',
+        })
+      );
     });
 
     it('should not register kibana feature when stack is disabled', async () => {
@@ -166,6 +170,7 @@ describe('Cases Ui Plugin', () => {
         config: {
           templatesEnabled: false,
           attachmentsEnabled: false,
+          chatEnabled: false,
           casesRedesign: { list: false, details: false, settings: false },
         },
         helpers: {

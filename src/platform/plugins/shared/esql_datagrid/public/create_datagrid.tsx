@@ -65,6 +65,7 @@ export const ESQLDataGrid = (props: ESQLDataGridProps) => {
             core={deps.core}
             share={deps.share}
             {...props}
+            isApproximate={props.isApproximate ?? false}
           />
         )}
       </CellActionsProvider>

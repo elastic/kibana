@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, filter, type Observable, of, Subject, type Subscription } from 'rxjs';
+import { combineLatest, filter, type Observable, Subject, type Subscription } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type {
   AppDeepLinkLocations,
@@ -22,6 +22,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
 import {
+  WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
   WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
 } from '@kbn/workflows/common/constants';
@@ -42,7 +43,6 @@ import type {
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
-import type { WorkflowsManagementConfig } from '../server/config';
 
 export class WorkflowsPlugin
   implements
@@ -61,14 +61,12 @@ export class WorkflowsPlugin
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
   private settingsSubscription?: Subscription;
   private appVisibilitySubscription?: Subscription;
-  private readonly pluginConfig: WorkflowsManagementConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('WorkflowsManagement');
     this.appUpdater$ = new Subject<AppUpdater>();
     this.telemetryService = new TelemetryService();
     this.availabilityService = new AvailabilityService();
-    this.pluginConfig = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
   public setup(
@@ -98,8 +96,6 @@ export class WorkflowsPlugin
 
     this.setupAgentBuilderStart(core);
 
-    const executionsViewEnabled = this.pluginConfig.globalExecutionsView.enabled;
-
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -109,7 +105,9 @@ export class WorkflowsPlugin
       category: DEFAULT_APP_CATEGORIES.management, // Only for the classic navigation
       order: 9015,
       updater$: this.appUpdater$,
-      deepLinks: getDeepLinks({ executionsViewEnabled }),
+      // Deep links are refined reactively in start() from global uiSettings; at bootstrap the
+      // executions link stays off (default) and the library link on, matching getDeepLinks defaults.
+      deepLinks: getDeepLinks(),
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
@@ -195,7 +193,10 @@ export class WorkflowsPlugin
         WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
         false
       ),
-      executionsViewEnabled: of(this.pluginConfig.globalExecutionsView.enabled),
+      executionsViewEnabled: core.settings.globalClient.get$<boolean>(
+        WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
+        false
+      ),
     });
 
     this.appVisibilitySubscription = combineLatest([isAvailable$, deepLinksFlags$]).subscribe(
@@ -270,7 +271,6 @@ export class WorkflowsPlugin
         availability: this.availabilityService,
         telemetry: this.telemetryService.getClient(),
         agentBuilder,
-        globalExecutionsView: this.pluginConfig.globalExecutionsView,
       },
     };
 

@@ -6,20 +6,26 @@
  */
 
 import type { z } from '@kbn/zod';
-import type { notificationSchema, ctaSchema } from './notification_schema';
+import type {
+  notificationWriteSchema,
+  notificationReadSchema,
+  ctaSchema,
+} from './notification_schema';
+
+/** A stored notification (read contract); the shape the app programs against. */
+export type Notification = z.infer<typeof notificationReadSchema>;
+
+/** Producer submit input; defaulted (`severity`) and optional (`cta`) fields may be omitted. */
+export type NotificationInput = z.input<typeof notificationWriteSchema>;
 
 /**
- * Notification document stored in the `.kibana-notification-center` data
- * stream. Derived from {@link notificationSchema} zod schema, which is the source of truth.
+ * The exact document shape in the NC index: validated write payload (`severity` resolved) plus
+ * the `@timestamp` generated during write by the NC plugin.
  */
-export type Notification = z.infer<typeof notificationSchema>;
+export type NotificationDocument = z.output<typeof notificationWriteSchema> & {
+  '@timestamp': string;
+};
 
-/**
- * Severity of a notification. Derived from {@link notificationSchema}.
- */
 export type Severity = Notification['severity'];
 
-/**
- * Call-to-action for a notification. Derived from {@link ctaSchema}.
- */
 export type Cta = z.infer<typeof ctaSchema>;

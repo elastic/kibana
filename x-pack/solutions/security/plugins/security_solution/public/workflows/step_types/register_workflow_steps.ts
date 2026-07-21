@@ -52,4 +52,12 @@ export const registerWorkflowSteps = (
       )
     );
   }
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./enable_rule_step/enable_rule_step').then((m) => m.enableRuleStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./disable_rule_step/disable_rule_step').then((m) => m.disableRuleStepDefinition)
+  );
 };

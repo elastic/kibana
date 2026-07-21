@@ -25,12 +25,15 @@ describe('config validation', () => {
             "resetTaskTimeoutMinutes": 60,
           },
           "attachments": Object {
-            "enabled": false,
+            "enabled": true,
           },
           "casesRedesign": Object {
             "details": false,
             "list": false,
             "settings": false,
+          },
+          "chat": Object {
+            "enabled": true,
           },
           "enabled": true,
           "files": Object {
@@ -143,9 +146,9 @@ describe('config validation', () => {
       `);
     });
 
-    it('sets attachments.enabled default to false', () => {
+    it('sets attachments.enabled default to true', () => {
       const config = ConfigSchema.validate({});
-      expect(config.attachments.enabled).toBe(false);
+      expect(config.attachments.enabled).toBe(true);
     });
 
     it('allows attachments.enabled to be set to true', () => {
@@ -156,6 +159,16 @@ describe('config validation', () => {
     it('allows attachments.enabled to be set to false explicitly', () => {
       const config = ConfigSchema.validate({ attachments: { enabled: false } });
       expect(config.attachments.enabled).toBe(false);
+    });
+
+    it('sets chat.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.chat.enabled).toBe(true);
+    });
+
+    it('allows chat.enabled to be set to false', () => {
+      const config = ConfigSchema.validate({ chat: { enabled: false } });
+      expect(config.chat.enabled).toBe(false);
     });
   });
 });

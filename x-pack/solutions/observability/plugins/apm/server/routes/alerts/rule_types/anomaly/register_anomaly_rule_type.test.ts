@@ -202,6 +202,8 @@ describe('Transaction duration anomaly alert', () => {
 
       services.alertsClient.report.mockReturnValue({ uuid: 'test-uuid' });
 
+      const anomalyTimestamp = '2026-07-16T09:30:00.000Z';
+
       const ml = {
         mlSystemProvider: () => ({
           mlAnomalySearch: () => ({
@@ -219,6 +221,7 @@ describe('Transaction duration anomaly alert', () => {
                             partition_field_value: 'foo',
                             by_field_value: 'type-foo',
                             detector_index: getAnomalyDetectorIndex(AnomalyDetectorType.txLatency),
+                            timestamp: anomalyTimestamp,
                           },
                         },
                       ],
@@ -285,6 +288,7 @@ describe('Transaction duration anomaly alert', () => {
         id: 'apm.anomaly_foo_development_type-foo',
         payload: {
           'anomaly.detector_type': 'txLatency',
+          'anomaly.timestamp': Date.parse(anomalyTimestamp),
           'kibana.alert.evaluation.threshold': 25,
           'kibana.alert.evaluation.value': 80,
           'kibana.alert.reason':

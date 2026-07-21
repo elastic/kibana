@@ -18,7 +18,7 @@ import {
 export const getMetadataComponentTemplateName = (namespace: string) =>
   `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V2}-security_${ENTITY_METADATA}_${namespace}@platform`;
 
-const getMetadataIndexMappings = (): MappingTypeMapping => ({
+export const getMetadataIndexMappings = (): MappingTypeMapping => ({
   dynamic_templates: [
     {
       relationship_target_keyword: {
@@ -40,6 +40,17 @@ const getMetadataIndexMappings = (): MappingTypeMapping => ({
     'Maintainer.kind': { type: 'keyword' },
     'Maintainer.scan_id': { type: 'keyword' },
     'Maintainer.lookback_window': { type: 'keyword' },
+    // AI summary fields — scoped under the capitalized Ai_summary.* prefix so they can
+    // never collide with ECS fields (always lowercase) or other doc types in the stream.
+    'entity.type': { type: 'keyword' },
+    'Ai_summary.generated_by': { type: 'keyword' },
+    'Ai_summary.generated_at': { type: 'date', format: 'epoch_millis' },
+    'Ai_summary.highlights': { type: 'object', enabled: false },
+    'Ai_summary.recommended_actions': { type: 'keyword', index: false, doc_values: false },
+    'Ai_summary.anomaly_job_ids': { type: 'keyword' },
+    'Ai_summary.variant_id': { type: 'keyword' },
+    'Ai_summary.staleness.enabled_signals': { type: 'keyword' },
+    'Ai_summary.staleness.snapshot.risk_score': { type: 'float' },
   },
 });
 

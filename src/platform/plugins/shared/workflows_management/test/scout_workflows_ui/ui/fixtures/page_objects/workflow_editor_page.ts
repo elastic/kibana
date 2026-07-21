@@ -303,7 +303,7 @@ export class WorkflowEditorPage {
    * Run the workflow and confirm if there are unsaved changes
    */
   async runWorkflowWithUnsavedChanges() {
-    await this.runButton.click();
+    await this.clickRunButton();
     await this.page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal', {
       state: 'visible',
     });

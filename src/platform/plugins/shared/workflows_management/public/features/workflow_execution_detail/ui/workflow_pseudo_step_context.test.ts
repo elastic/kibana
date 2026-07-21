@@ -221,4 +221,66 @@ describe('buildOverviewStepExecutionFromContext', () => {
     const input = overview.input as Record<string, unknown>;
     expect(input.skipReason).toBeUndefined();
   });
+
+  it('includes workflow.version in overview input when present on the execution', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      version: 4,
+      context: {
+        workflow: {
+          id: 'wf-1',
+          name: 'Test',
+          enabled: false,
+          spaceId: 'default',
+        },
+      },
+    });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.workflow).toEqual({
+      id: 'wf-1',
+      name: 'Test',
+      enabled: false,
+      spaceId: 'default',
+      version: 4,
+    });
+  });
+
+  it('omits workflow.version from overview input when absent on the execution', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      context: {
+        workflow: {
+          id: 'wf-1',
+          name: 'Test',
+          enabled: false,
+          spaceId: 'default',
+        },
+      },
+    });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.workflow).toEqual({
+      id: 'wf-1',
+      name: 'Test',
+      enabled: false,
+      spaceId: 'default',
+    });
+  });
+
+  it('preserves workflow.version already stored in execution context', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      version: 9,
+      context: {
+        workflow: {
+          id: 'wf-1',
+          name: 'Test',
+          enabled: false,
+          spaceId: 'default',
+          version: 2,
+        },
+      },
+    });
+    const input = overview.input as Record<string, unknown>;
+    expect((input.workflow as Record<string, unknown>).version).toBe(2);
+  });
 });

@@ -51,6 +51,10 @@ const emitSearchAttachments = async (
   return [id];
 };
 
+// Each alert ID fans out into a separate getCasesByAlertID request, so the
+// array must stay bounded to avoid resource exhaustion.
+const MAX_ALERT_IDS = 100;
+
 const casesSchema = z.object({
   mode: z
     .enum(['get', 'bulk_get', 'similar', 'by_alert', 'search'])
@@ -59,7 +63,7 @@ const casesSchema = z.object({
         '- get: case_id\n' +
         '- bulk_get: case_ids (keep ≤10)\n' +
         '- similar: similar_to_case_id (+ optional page, perPage)\n' +
-        '- by_alert: alert_ids (+ optional owner)\n' +
+        `- by_alert: alert_ids (max ${MAX_ALERT_IDS}) (+ optional owner)\n` +
         '- search: owner (required) + optional search, severity, status, tags, assignees, reporters, category, from, to, searchFields, sortField, sortOrder, page, perPage'
     ),
   ...getCaseStepCommonDefinition.inputSchema.omit({ include_comments: true }).partial().shape,
@@ -74,9 +78,10 @@ const casesSchema = z.object({
     ),
   alert_ids: z
     .array(z.string().min(1))
+    .max(MAX_ALERT_IDS)
     .optional()
     .describe(
-      'Array of alert IDs to find cases containing these alerts. Required for by_alert mode.'
+      `Array of alert IDs to find cases containing these alerts (max ${MAX_ALERT_IDS}). Required for by_alert mode.`
     ),
   // owner, assignees, from, to, search: descriptions inherited from step schemas
 });

@@ -13,7 +13,7 @@ export interface EditDetailsFormData {
   avatar_symbol: string;
   avatar_color: string;
   labels: string[];
-  access_control: AgentAccessControl;
+  access_control: Pick<AgentAccessControl, 'access_mode'>;
   configuration: {
     enable_elastic_capabilities: boolean;
     workflow_ids: string[];

@@ -50,6 +50,7 @@ describe('DataGrid', () => {
         query={query}
         isTableView
         columns={columns}
+        isApproximate={false}
       />
     );
 
@@ -72,6 +73,7 @@ describe('DataGrid', () => {
         query={query}
         isTableView
         columns={[column('b'), column('c')]}
+        isApproximate={false}
       />
     );
 
@@ -92,6 +94,7 @@ describe('DataGrid', () => {
         query={query}
         isTableView
         columns={[column('a'), column('b')]}
+        isApproximate={false}
       />
     );
 

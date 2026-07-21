@@ -92,3 +92,5 @@ export const jsonTab: AttackDetailsPanelTabType = {
   ),
   content: <JsonTabContent />,
 };
+
+export const allTabs: AttackDetailsPanelTabType[] = [overviewTab, tableTab, jsonTab];

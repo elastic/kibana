@@ -78,7 +78,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   app: [],
   category: DEFAULT_APP_CATEGORIES.management,
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
   },
   alerting: alertingFeatures,
   privileges: {
@@ -86,7 +86,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       app: [],
       catalogue: [],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       alerting: {
         rule: {
@@ -110,7 +110,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       app: [],
       catalogue: [],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       alerting: {
         rule: {
@@ -140,7 +140,7 @@ export const STACK_ALERTS_ONLY_FEATURE: KibanaFeatureConfig = {
   app: [],
   catalogue: [],
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['triggersActionsAlerts'],
   },
   alerting: alertingFeatures,
   privileges: {
@@ -148,7 +148,7 @@ export const STACK_ALERTS_ONLY_FEATURE: KibanaFeatureConfig = {
       app: [],
       catalogue: [],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsAlerts'],
       },
       alerting: {
         alert: { all: alertingFeatures },
@@ -162,7 +162,7 @@ export const STACK_ALERTS_ONLY_FEATURE: KibanaFeatureConfig = {
       app: [],
       catalogue: [],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsAlerts'],
       },
       alerting: {
         alert: { read: alertingFeatures },

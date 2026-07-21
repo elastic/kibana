@@ -112,6 +112,24 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       setSelectedCases([]);
     }, [setSelectedCases]);
 
+    const toggleCaseSelection = useCallback((theCase: CaseUI, isSelected: boolean) => {
+      setSelectedCases((currentSelectedCases) => {
+        if (isSelected) {
+          return currentSelectedCases.some((selectedCase) => selectedCase.id === theCase.id)
+            ? currentSelectedCases
+            : [...currentSelectedCases, theCase];
+        }
+
+        return currentSelectedCases.filter((selectedCase) => selectedCase.id !== theCase.id);
+      });
+    }, []);
+
+    const selectAllCasesOnPage = useCallback(() => {
+      setSelectedCases(data.cases);
+    }, [data.cases]);
+
+    const isSelectable = !isReadOnlyPermissions(permissions);
+
     const tableOnChangeCallback = useCallback(
       ({ page, sort }: EuiBasicTableOnChange) => {
         let newQueryParams = queryParams;
@@ -150,17 +168,17 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const onViewModeChange = useCallback(
       (mode: ViewToggleId) => {
-        deselectCases();
         setViewMode(mode);
       },
-      [deselectCases, setViewMode]
+      [setViewMode]
     );
 
     const onSortOrderChange = useCallback(
       (sortOrder: 'asc' | 'desc') => {
+        deselectCases();
         setQueryParams({ sortField: SortFieldCase.createdAt, sortOrder });
       },
-      [setQueryParams]
+      [deselectCases, setQueryParams]
     );
 
     const { columns, isLoadingColumns, rowHeader } = useCasesColumns({
@@ -188,9 +206,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       () => ({
         onSelectionChange: setSelectedCases,
         selected: selectedCases,
-        selectable: () => !isReadOnlyPermissions(permissions),
+        selectable: () => isSelectable,
       }),
-      [permissions, selectedCases]
+      [isSelectable, selectedCases]
     );
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
@@ -272,6 +290,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           deselectCases={deselectCases}
           onClearFilters={onClearFilters}
           showClearFiltersButton={showClearFiltersButton}
+          viewMode={viewMode}
+          onSelectAll={selectAllCasesOnPage}
+          totalOnPage={data.cases.length}
         />
         {viewMode === VIEW_TOGGLE_TABLE_ID ? (
           <>
@@ -301,6 +322,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             onChange={tableOnChangeCallback}
             disableActions={selectedCases.length > 0}
             selectedFields={selectedFields}
+            selectedCases={selectedCases}
+            onSelectionChange={toggleCaseSelection}
+            isSelectable={isSelectable}
           />
         )}
       </>

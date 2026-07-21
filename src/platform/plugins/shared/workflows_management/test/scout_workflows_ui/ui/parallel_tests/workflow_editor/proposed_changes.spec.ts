@@ -82,12 +82,6 @@ const ALL_STEPS_MODIFIED = INITIAL_YAML.replace(
   .replace('message: "Hello from step three"', 'message: "Modified three"');
 
 test.describe('Proposed changes accept and reject', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.set({
-      'agentBuilder:experimentalFeatures': true,
-    });
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.workflowEditor.gotoNewWorkflow();
@@ -96,7 +90,6 @@ test.describe('Proposed changes accept and reject', { tag: [...tags.stateful.cla
   });
 
   test.afterAll(async ({ scoutSpace, apiServices }) => {
-    await scoutSpace.uiSettings.unset('agentBuilder:experimentalFeatures');
     await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 

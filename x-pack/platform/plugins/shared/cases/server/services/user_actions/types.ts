@@ -365,6 +365,8 @@ export interface GetUserActionItemByDifference extends CommonUserActionArgs {
   field: string;
   originalValue: unknown;
   newValue: unknown;
+  /** Resolved name of a newly-applied template, recorded on the template user-action payload. */
+  templateName?: string;
 }
 
 export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {
@@ -384,6 +386,12 @@ export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (
 export interface BuildUserActionsDictParams {
   updatedCases: PatchCasesArgs;
   user: User;
+  /**
+   * Map of applied-template `id@version` → name, used to record the template name on its user
+   * action. Keyed by version (not just id) so the recorded name matches the exact version applied,
+   * since template names can change across versions.
+   */
+  templateNamesByKey?: Map<string, string>;
 }
 
 export type UserActionsDict = Record<string, UserActionEvent[]>;

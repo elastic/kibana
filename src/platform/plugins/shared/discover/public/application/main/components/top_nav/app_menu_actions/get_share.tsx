@@ -167,6 +167,10 @@ export const buildShareOptions = async ({
                   uiSettings: services.uiSettings,
                   query: currentTab.appState.query,
                 }),
+                // Resolved variable values so the reporting server can bind named params (e.g. ?crew_id).
+                ...(currentTab.esqlVariables?.length
+                  ? { esqlVariables: currentTab.esqlVariables }
+                  : {}),
               }
             : params,
         },

@@ -29,7 +29,11 @@ jest.mock('@kbn/code-editor', () => {
       editorDidMount?: (editor: unknown) => void;
     }) => {
       ReactActual.useEffect(() => {
-        editorDidMount?.({ getModel: () => ({ id: value }) });
+        editorDidMount?.({
+          getModel: () => ({ id: value }),
+          getContentHeight: () => 40,
+          onDidContentSizeChange: () => ({ dispose: () => {} }),
+        });
       }, [editorDidMount, value]);
 
       return (

@@ -9,6 +9,8 @@
 | Http status code            | Renders a badge with the HTTP status code, its description, and a color indicating its category.                                                        |
 | Span icon                   | Displays an icon based on the span type and subtype.                                                                                                    |
 | Timestamp                   | Displays the absolute date and time with timezone, and shows the relative date either as a tooltip or inline.                                           |
+| [TraceWaterfall / TraceWaterfallWithFetching](src/components/trace_waterfall/README.md) | Renders a full APM trace as a virtualized waterfall tree. `TraceWaterfallWithFetching` fetches trace data automatically; `TraceWaterfall` accepts pre-fetched `TraceItem[]` data. |
+| [FocusedTraceWaterfall / FocusedTraceWaterfallWithFetching](src/components/focused_trace_waterfall/README.md) | Renders a contextual subset of a trace centred on a specific document (root → parent → focused span → its descendants). `FocusedTraceWaterfallWithFetching` fetches data automatically; `FocusedTraceWaterfall` accepts pre-fetched data. |
 
 ## Utils
 

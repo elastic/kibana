@@ -86,7 +86,12 @@ const getAttachmentViewObject = (props: SecurityAlertViewProps) => {
         render: () => (
           <Suspense fallback={<EuiLoadingSpinner size="m" />}>
             {isSingleAlert && alertId && index ? (
-              <ShowAlertButton id={actionProps.savedObjectId} alertId={alertId} index={index} />
+              <ShowAlertButton
+                id={actionProps.savedObjectId}
+                alertId={alertId}
+                index={index}
+                ruleName={metadata?.rule?.name}
+              />
             ) : (
               <ShowTableButton tabId={CASE_VIEW_PAGE_TABS.ALERTS} />
             )}

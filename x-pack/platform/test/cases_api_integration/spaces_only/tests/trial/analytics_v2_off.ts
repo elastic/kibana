@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    it('case create / patch / delete succeeds and `.cases` is never bootstrapped', async () => {
+    it('case create / patch / delete succeeds and no v2 index is bootstrapped', async () => {
       // Create — exercises the analyticsV2Writer.upsertCase hook (noop
       // when v2 is off).
       const created = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, auth);
@@ -54,15 +54,23 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Delete — exercises `bulkDeleteCaseEntities`, which builds the
-      // per-entity status map and dispatches `analyticsV2Writer.bulkDeleteCases`
-      // (noop when v2 is off).
+      // per-entity status map and dispatches both
+      // `analyticsV2Writer.bulkDeleteCases` and the cascade-by-case-id
+      // calls into the activity + attachments writers (all noops when
+      // v2 is off).
       await deleteAllCaseItems(es);
 
-      // `.cases` is the v2 analytics index. With v2 off, plugin start
-      // skips the `ensureCaseIndex` bootstrap entirely — the index must
-      // never exist on this config.
-      const exists = await es.indices.exists({ index: '.cases' });
-      expect(exists).to.eql(false);
+      // None of the v2 analytics indices may exist on this config —
+      // with v2 off, plugin start skips every `ensure*Index` bootstrap.
+      // Asserted in parallel so a regression on any surface fails here.
+      const [casesExists, activityExists, attachmentsExists] = await Promise.all([
+        es.indices.exists({ index: '.cases' }),
+        es.indices.exists({ index: '.cases-activity' }),
+        es.indices.exists({ index: '.cases-attachments' }),
+      ]);
+      expect(casesExists).to.eql(false);
+      expect(activityExists).to.eql(false);
+      expect(attachmentsExists).to.eql(false);
     });
   });
 };

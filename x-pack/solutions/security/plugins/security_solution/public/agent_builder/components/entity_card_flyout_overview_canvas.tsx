@@ -63,11 +63,11 @@ import {
 } from '../../flyout/entity_details/shared/constants';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { EntityEventTypes } from '../../common/lib/telemetry';
-import { UserPanelContent } from '../../flyout/entity_details/user_right/content';
-import { UserPanelHeader } from '../../flyout/entity_details/user_right/header';
-import { useObservedUser } from '../../flyout/entity_details/user_right/hooks/use_observed_user';
+import { Content as UserPanelContent } from '../../flyout_v2/entity/user/main/content';
+import { Header as UserPanelHeader } from '../../flyout_v2/entity/user/main/header';
+import { useObservedUser } from '../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import { useManagedUser } from '../../flyout/entity_details/shared/hooks/use_managed_user';
-import { USER_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout/entity_details/user_right/constants';
+import { USER_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout_v2/entity/user/main/constants';
 import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
 import { ServicePanelContent } from '../../flyout/entity_details/service_right/content';
 import { ServicePanelHeader } from '../../flyout/entity_details/service_right/header';
@@ -93,6 +93,15 @@ import type { RiskScoreState } from '../../entity_analytics/api/hooks/use_risk_s
 import { entityAttachmentQueryClient } from '../attachment_types/entity_attachment/query_client';
 
 const AGENT_BUILDER_ENTITY_CARD_SCOPE = 'agent-builder-entity-card';
+
+/**
+ * Namespaced Inspect query ids for the Agent Builder entity Preview canvas.
+ * Must not collide with the Security entity flyout ids — both share one Redux store, and the
+ * flyout's `useQueryInspector` cleanup `deleteQuery` would otherwise disable Preview Inspect.
+ */
+const AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID = `agentBuilder${HOST_PANEL_RISK_SCORE_QUERY_ID}`;
+const AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID = `agentBuilder${USER_PANEL_RISK_SCORE_QUERY_ID}`;
+const AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID = `agentBuilder${SERVICE_PANEL_RISK_SCORE_QUERY_ID}`;
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
@@ -329,6 +338,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
     onSuccess: calculateEntityRiskScore,
+    refetchEntityRecord: entityFromStoreResult.refetch,
   });
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
@@ -360,7 +370,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     deleteQuery,
     inspect: hasEntityStoreRecord ? entityFromStoreResult?.inspect ?? null : inspect,
     loading: hasEntityStoreRecord ? entityFromStoreResult?.isLoading ?? false : loading,
-    queryId: HOST_PANEL_RISK_SCORE_QUERY_ID,
+    queryId: AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID,
     refetch: hasEntityStoreRecord ? entityFromStoreResult?.refetch ?? (() => {}) : refetch,
     setQuery,
   });
@@ -486,6 +496,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
+            riskScoreQueryId={AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>
@@ -673,6 +684,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
     onSuccess: calculateEntityRiskScore,
+    refetchEntityRecord: entityFromStoreResult.refetch,
   });
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
@@ -696,7 +708,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     deleteQuery,
     inspect: useEntityStoreInspectForRisk ? entityFromStoreResult?.inspect ?? null : inspect,
     loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
-    queryId: USER_PANEL_RISK_SCORE_QUERY_ID,
+    queryId: AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID,
     refetch: useEntityStoreInspectForRisk
       ? entityFromStoreResult?.refetch ?? (() => {})
       : riskScoreState.refetch,
@@ -828,6 +840,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
+            riskScoreQueryId={AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>
@@ -1028,13 +1041,14 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
     onSuccess: calculateEntityRiskScore,
+    refetchEntityRecord: entityFromStoreResult.refetch,
   });
 
   useQueryInspector({
     deleteQuery,
     inspect,
     loading,
-    queryId: SERVICE_PANEL_RISK_SCORE_QUERY_ID,
+    queryId: AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID,
     refetch: riskScoreState.refetch,
     setQuery,
   });
@@ -1117,6 +1131,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
             isPreviewMode={isPreviewMode}
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
+            riskScoreQueryId={AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>

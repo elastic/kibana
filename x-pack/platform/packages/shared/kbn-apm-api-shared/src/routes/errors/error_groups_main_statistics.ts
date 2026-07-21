@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema } from '../../default_api_types';
 
 export interface ErrorGroupMainStatisticsResponse {
   errorGroups: Array<{
@@ -26,18 +25,17 @@ export interface ErrorGroupMainStatisticsResponse {
 
 export const errorsMainStatisticsRoute = defineRoute<ErrorGroupMainStatisticsResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      t.partial({
-        sortField: t.string,
-        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-        searchQuery: t.string,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
+  params: z.object({
+    path: z.object({ serviceName: z.string() }),
+    query: z
+      .object({
+        sortField: z.string().optional(),
+        sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+        searchQuery: z.string().optional(),
+      })
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(rangeSchema),
   }),
 });
 
@@ -45,17 +43,16 @@ export const errorsMainStatisticsByTransactionNameRoute =
   defineRoute<ErrorGroupMainStatisticsResponse>()({
     endpoint:
       'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name',
-    params: t.type({
-      path: t.type({ serviceName: t.string }),
-      query: t.intersection([
-        t.type({
-          transactionType: t.string,
-          transactionName: t.string,
-          maxNumberOfErrorGroups: toNumberRt,
-        }),
-        environmentRt,
-        kueryRt,
-        rangeRt,
-      ]),
+    params: z.object({
+      path: z.object({ serviceName: z.string() }),
+      query: z
+        .object({
+          transactionType: z.string(),
+          transactionName: z.string(),
+          maxNumberOfErrorGroups: z.coerce.number(),
+        })
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(rangeSchema),
     }),
   });

@@ -137,7 +137,7 @@ export const AlertEpisodeDetailsFlyout = ({
           <AlertEpisodeDetailsHeaderSection
             episodeId={episodeId}
             services={services}
-            titleSize="m"
+            titleSize="s"
           />
           <EuiTabs bottomBorder={false}>
             <EuiTab

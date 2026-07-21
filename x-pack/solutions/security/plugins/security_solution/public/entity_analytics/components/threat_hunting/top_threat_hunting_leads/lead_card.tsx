@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import type { HuntingLead } from './types';
-import { MAX_VISIBLE_TAGS } from './utils';
-import { renderTextWithEntities, TagsPopover } from './shared_lead_components';
+import { renderTextWithEntities } from './shared_lead_components';
+import { THREAT_HUNTING_LEADS_SCOPE_ID } from './utils';
 
 interface LeadCardProps {
   lead: HuntingLead;
@@ -19,25 +19,9 @@ interface LeadCardProps {
 export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
   const renderedByline = useMemo(
-    () => renderTextWithEntities(lead.byline, lead.entities),
+    () => renderTextWithEntities(lead.byline, lead.entities, THREAT_HUNTING_LEADS_SCOPE_ID),
     [lead.byline, lead.entities]
   );
-
-  const tagsFooter =
-    lead.tags.length > 0 ? (
-      <EuiFlexGroup gutterSize="xs" responsive={false} wrap alignItems="center">
-        {lead.tags.slice(0, MAX_VISIBLE_TAGS).map((tag) => (
-          <EuiFlexItem grow={false} key={tag}>
-            <EuiBadge color="hollow">{tag}</EuiBadge>
-          </EuiFlexItem>
-        ))}
-        {lead.tags.length > MAX_VISIBLE_TAGS && (
-          <EuiFlexItem grow={false}>
-            <TagsPopover tags={lead.tags} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ) : undefined;
 
   return (
     <EuiCard
@@ -50,13 +34,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
       titleSize="xs"
       textAlign="left"
       hasBorder={false}
-      description={
-        <EuiText size="xs" color="subdued" css={{ overflowWrap: 'anywhere' }}>
-          {renderedByline}
-        </EuiText>
-      }
-      footer={tagsFooter}
-      paddingSize="l"
+      paddingSize="m"
       onClick={handleClick}
       data-test-subj={`leadCard-${lead.id}`}
       css={{
@@ -64,6 +42,23 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
         maxWidth: 480,
         '.euiCard__titleButton': { maxWidth: '100%' },
       }}
-    />
+    >
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="xs"
+            css={{
+              overflowWrap: 'anywhere',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {renderedByline}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiCard>
   );
 };

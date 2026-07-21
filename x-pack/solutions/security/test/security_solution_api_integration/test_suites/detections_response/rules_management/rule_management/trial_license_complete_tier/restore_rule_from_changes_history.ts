@@ -253,17 +253,68 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statuses.every((s: number) => s === 200 || s === 409)).toBe(true);
     });
 
+    it('returns 404 when the rule never existed and revision is not provided', async () => {
+      const missingRuleId = uuidv4();
+
+      const { body } = await detectionsApi
+        .restoreRuleFromHistory({
+          params: { ruleId: missingRuleId, changeId: uuidv4() },
+          body: {},
+        })
+        .expect(404);
+
+      expect(body.message).toContain(`ruleId: "${missingRuleId}" not found`);
+    });
+
+    it('returns 404 when the rule never existed and revision is provided', async () => {
+      const missingRuleId = uuidv4();
+
+      const { body } = await detectionsApi
+        .restoreRuleFromHistory({
+          params: { ruleId: missingRuleId, changeId: uuidv4() },
+          body: { revision: 1 },
+        })
+        .expect(404);
+
+      expect(body.message).toContain(`ruleId: "${missingRuleId}" not found`);
+    });
+
     it('returns 404 when the changeId does not exist for a valid rule', async () => {
       const { body: rule } = await detectionsApi
         .createRule({ body: getCustomQueryRuleParams() })
         .expect(200);
 
-      await detectionsApi
+      const missingChangeId = uuidv4();
+
+      const { body } = await detectionsApi
         .restoreRuleFromHistory({
-          params: { ruleId: rule.id, changeId: uuidv4() },
+          params: { ruleId: rule.id, changeId: missingChangeId },
           body: { revision: rule.revision },
         })
         .expect(404);
+
+      expect(body.message).toContain(`changeId: "${missingChangeId}" not found`);
+    });
+
+    it('returns 404 for changeId, not ruleId, when a deleted rule has history but not the requested changeId', async () => {
+      const { body: rule } = await detectionsApi
+        .createRule({ body: getCustomQueryRuleParams() })
+        .expect(200);
+
+      await refreshHistory();
+
+      await detectionsApi.deleteRule({ query: { id: rule.id } }).expect(200);
+
+      const missingChangeId = uuidv4();
+
+      const { body } = await detectionsApi
+        .restoreRuleFromHistory({
+          params: { ruleId: rule.id, changeId: missingChangeId },
+          body: {},
+        })
+        .expect(404);
+
+      expect(body.message).toContain(`changeId: "${missingChangeId}" not found`);
     });
 
     it('make zero side effect when restoring the state equals to the current state', async () => {
@@ -431,6 +482,35 @@ export default ({ getService }: FtrProviderContext): void => {
             body: {},
           })
           .expect(409);
+      });
+
+      it('returns 409 when trying to restore a deleted rule and another rule with the same rule_id already exists', async () => {
+        const { body: rule } = await detectionsApi
+          .createRule({ body: getCustomQueryRuleParams({ rule_id: 'restore-conflict-rule-id' }) })
+          .expect(200);
+
+        await refreshHistory();
+
+        const { body: historyBody } = await detectionsApi
+          .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+          .expect(200);
+
+        const changeId = historyBody.items[0].id;
+
+        await detectionsApi.deleteRule({ query: { id: rule.id } }).expect(200);
+
+        await detectionsApi
+          .createRule({ body: getCustomQueryRuleParams({ rule_id: 'restore-conflict-rule-id' }) })
+          .expect(200);
+
+        const { body } = await detectionsApi
+          .restoreRuleFromHistory({
+            params: { ruleId: rule.id, changeId },
+            body: {},
+          })
+          .expect(409);
+
+        expect(body.message).toContain('restore-conflict-rule-id');
       });
     });
 

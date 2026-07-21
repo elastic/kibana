@@ -1,5 +1,5 @@
 {
-  "sha1": "a62620024e99efe9f7facf0617e8307042e968c9",
+  "sha1": "13856acd307e1b5c02db8beefaa9eea9285e460e",
   "tests": [
     {
       "id": "2bb84514b03b333-1054e603e578b92",
@@ -73,6 +73,48 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/engine_status_management.spec.ts",
         "line": 37,
+        "column": 14
+      }
+    },
+    {
+      "id": "2cb41e0daf4ee37-56821f8e3bcf968",
+      "title": "Entity attachment cases – flyout add-to-case actions and Entities tab adds a host entity to a new case and the Entities tab shows the attached entity",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
+        "line": 92,
+        "column": 14
+      }
+    },
+    {
+      "id": "2cb41e0daf4ee37-fa57af88a08f22e",
+      "title": "Entity attachment cases – flyout add-to-case actions and Entities tab Entities tab renders the entity table when attachments were added via API",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
+        "line": 121,
+        "column": 14
+      }
+    },
+    {
+      "id": "2cb41e0daf4ee37-45a5507cb509b37",
+      "title": "Entity attachment cases – flyout add-to-case actions and Entities tab Entities tab renders the empty state when a case has no entity attachments",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
+        "line": 158,
         "column": 14
       }
     },

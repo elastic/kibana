@@ -908,6 +908,11 @@ describe('search embeddable transform utils', () => {
       const result = fromStoredSort(sort);
       expect(result).toEqual([{ name: 'field', direction: 'desc' }]);
     });
+
+    it('converts legacy flat sort [field, direction] to a single sort entry', () => {
+      const result = fromStoredSort(['@timestamp', 'desc']);
+      expect(result).toEqual([{ name: '@timestamp', direction: 'desc' }]);
+    });
   });
 
   describe('toStoredSort', () => {

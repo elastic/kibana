@@ -73,18 +73,17 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
         'xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.description',
         {
           defaultMessage:
-            'Internal gate for UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI. Not intended for end-user use.',
+            'Allows managing OAuth clients that external applications use to connect to Elastic Agent Builder over MCP.',
         }
       ),
       name: i18n.translate('xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.name', {
-        defaultMessage: 'UIAM OAuth client management',
+        defaultMessage: 'Manage OAuth clients for MCP',
       }),
       schema: schema.boolean(),
       value: false,
       technicalPreview: true,
       requiresPageReload: true,
-      readonly: true,
-      readonlyMode: 'strict',
+      readonly: false,
     },
     [AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.enabled.name', {
