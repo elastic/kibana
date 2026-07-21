@@ -6,7 +6,10 @@
  */
 
 import { RULE_EXECUTIONS_MAX_RESULT_WINDOW } from '@kbn/alerting-v2-schemas';
-import { getRuleExecutionsOasExamples } from './execution_history_oas_examples';
+import {
+  GET_RULE_EXECUTIONS_SUMMARY,
+  getRuleExecutionsOasExamples,
+} from './execution_history_oas_examples';
 import { GetRuleExecutionsRoute } from './get_rule_executions_route';
 
 describe('execution history OAS examples', () => {
@@ -17,6 +20,7 @@ describe('execution history OAS examples', () => {
       oas.responses?.[200]?.content?.['application/json']?.examples?.getRuleExecutionsResponse
     ).toEqual(
       expect.objectContaining({
+        summary: GET_RULE_EXECUTIONS_SUMMARY,
         value: expect.objectContaining({
           total: 1,
           items: expect.arrayContaining([
@@ -28,6 +32,7 @@ describe('execution history OAS examples', () => {
         }),
       })
     );
+    expect(GetRuleExecutionsRoute.options.summary).toBe(GET_RULE_EXECUTIONS_SUMMARY);
     expect(
       oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRuleExecutionsQuery
     ).toEqual(

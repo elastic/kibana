@@ -15,6 +15,9 @@ type OASOperationObject = Exclude<
   string
 >;
 
+/** Shared with {@link GetRuleExecutionsRoute.routeOptions.summary}. */
+export const GET_RULE_EXECUTIONS_SUMMARY = 'List rule executions';
+
 const RULE_EXECUTIONS_RESPONSE: GetRuleExecutionsResponse = {
   items: [
     {
@@ -38,14 +41,16 @@ const INVALID_QUERY_ERROR: ErrorResponse = {
   code: 'BAD_REQUEST',
   error: 'Bad Request',
   message: `page * perPage cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`,
-  details: { errors: { page: [`page * perPage cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`] } },
+  details: {
+    errors: { page: [`page * perPage cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`] },
+  },
 };
 
 export const getRuleExecutionsOasExamples = (): OASOperationObject => ({
   responses: {
     200: jsonExample(
       'getRuleExecutionsResponse',
-      'Paginated rule execution events',
+      GET_RULE_EXECUTIONS_SUMMARY,
       RULE_EXECUTIONS_RESPONSE
     ),
     400: jsonExample('invalidRuleExecutionsQuery', 'Invalid query parameters', INVALID_QUERY_ERROR),
