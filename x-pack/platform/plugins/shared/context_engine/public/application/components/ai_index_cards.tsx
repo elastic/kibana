@@ -25,6 +25,7 @@ import type { AiIndexHttpItem } from '../../../common/http_api/ai_indices';
 import { useListAiIndices } from '../hooks/use_list_ai_indices';
 import { useNavigation } from '../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../paths';
+import { CreateAiIndexButton } from './create_ai_index_button';
 
 const SKELETON_CARD_COUNT = 3;
 
@@ -143,6 +144,7 @@ export const AiIndexCards = () => {
             })}
           </p>
         }
+        actions={<CreateAiIndexButton />}
       />
     );
   }
@@ -150,12 +152,11 @@ export const AiIndexCards = () => {
   return (
     <EuiFlexGrid columns={3} gutterSize="l">
       {aiIndices.map((aiIndex) => (
-        <EuiFlexItem key={aiIndex.id}>
-          <AiIndexCard
-            aiIndex={aiIndex}
-            href={createContextEngineUrl(getAiIndexDetailPath(aiIndex.id))}
-          />
-        </EuiFlexItem>
+        <AiIndexCard
+          key={aiIndex.id}
+          aiIndex={aiIndex}
+          href={createContextEngineUrl(getAiIndexDetailPath(aiIndex.id))}
+        />
       ))}
     </EuiFlexGrid>
   );

@@ -13,11 +13,17 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 
-const Panel = ({ title, description }: { title: string; description: string }) => (
+const Panel = ({
+  title,
+  description,
+}: {
+  title: React.ReactNode;
+  description: React.ReactNode;
+}) => (
   <EuiPanel hasBorder paddingSize="l">
     <EuiTitle size="s">
       <h2>{title}</h2>
@@ -36,49 +42,56 @@ export const AiIndexDetailPage = () => {
     <KibanaPageTemplate data-test-subj="contextAiIndexDetailPage">
       <KibanaPageTemplate.Header
         pageTitle={
-          <>
-            {i18n.translate('xpack.contextEngine.aiIndexDetail.title', {
-              defaultMessage: 'My AI index',
-            })}
-          </>
+          <FormattedMessage id="xpack.contextEngine.aiIndexDetail.title" defaultMessage="My AI index" />
         }
       />
       <KibanaPageTemplate.Section>
         <Panel
-          title={i18n.translate('xpack.contextEngine.aiIndexDetail.description.title', {
-            defaultMessage: 'Description',
-          })}
-          description={i18n.translate('xpack.contextEngine.aiIndexDetail.description.description', {
-            defaultMessage:
-              'No sources yet — add a source and a summary will be generated automatically.',
-          })}
+          title={
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.description.title"
+              defaultMessage="Description"
+            />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.description.description"
+              defaultMessage="No sources yet — add a source and a summary will be generated automatically."
+            />
+          }
         />
         <EuiSpacer size="l" />
         <Panel
-          title={i18n.translate('xpack.contextEngine.aiIndexDetail.sources.title', {
-            defaultMessage: 'Sources',
-          })}
-          description={i18n.translate('xpack.contextEngine.aiIndexDetail.sources.description', {
-            defaultMessage:
-              'ES|QL views, indices, Connectors and stream signals feeding this AI index.',
-          })}
+          title={
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.sources.title"
+              defaultMessage="Sources"
+            />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.sources.description"
+              defaultMessage="ES|QL views, indices, Connectors and stream signals feeding this AI index."
+            />
+          }
         />
         <EuiSpacer size="l" />
         <EuiPanel hasBorder paddingSize="l">
           <EuiTitle size="s">
             <h2>
-              {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.title', {
-                defaultMessage: 'Automations',
-              })}
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.automations.title"
+                defaultMessage="Automations"
+              />
             </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             <p>
-              {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.description', {
-                defaultMessage:
-                  "Automations extract and refresh this AI index's Knowledge Indicators from its sources.",
-              })}
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.automations.description"
+                defaultMessage="Automations extract and refresh this AI index's Knowledge Indicators from its sources."
+              />
             </p>
           </EuiText>
           <EuiSpacer size="m" />
