@@ -8,9 +8,19 @@
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { createSpaces, deleteSpaces } from '../../../common/lib/authentication';
 
+/**
+ * Suite wrapper for the cases-analytics v2 flag-off regression guard. Runs
+ * under `config_analytics_v2_off.ts`, which pins
+ * `xpack.cases.analyticsV2.enabled=false`.
+ *
+ * The guard test authenticates as super user in `space1` (see
+ * `getAuthWithSuperUser`), so the spaces must be created here — this config
+ * does not load the main `tests/trial/index.ts` that would otherwise seed them.
+ */
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
-  describe('cases spaces only enabled: trial', function () {
+  describe('cases spaces only enabled: trial - analytics v2 off', function () {
     this.tags('skipFIPS');
+
     before(async () => {
       await createSpaces(getService);
     });
@@ -19,14 +29,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
       await deleteSpaces(getService);
     });
 
-    loadTestFile(require.resolve('../common'));
-
-    loadTestFile(require.resolve('./cases/push_case'));
-    loadTestFile(require.resolve('./configure'));
-    // NOTE: `./analytics_v2_off` is intentionally NOT loaded here. This config
-    // does not pin `xpack.cases.analyticsV2.enabled`, so it follows the plugin
-    // default (which may be ON). The flag-off regression guard instead runs
-    // under its own `config_analytics_v2_off.ts`, which forces the flag to
-    // `false` deterministically.
+    loadTestFile(require.resolve('./analytics_v2_off'));
   });
 };
