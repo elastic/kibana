@@ -72,8 +72,12 @@ describe('execution history OAS examples', () => {
     }
     expect(
       oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRuleExecutionsQuery
-        ?.value.message
-    ).toBe(stringifyZodError(invalidQueryParse.error));
+        ?.value
+    ).toEqual(
+      expect.objectContaining({
+        message: stringifyZodError(invalidQueryParse.error),
+      })
+    );
     expect(getValidateResponseDescription(400)).toBe(INVALID_QUERY_PARAMETERS_DESCRIPTION);
   });
 
