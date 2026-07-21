@@ -26,6 +26,7 @@ describe('useMigrationDashboardDetailsFlyout', () => {
   it('should not render flyout initially', () => {
     const { result } = renderHook(() =>
       useMigrationDashboardDetailsFlyout({
+        migrationDashboards: [migrationDashboardMock],
         getMigrationDashboardData,
       })
     );
@@ -36,6 +37,7 @@ describe('useMigrationDashboardDetailsFlyout', () => {
   it('should open and close flyout', () => {
     const { result, rerender } = renderHook(() =>
       useMigrationDashboardDetailsFlyout({
+        migrationDashboards: [migrationDashboardMock],
         getMigrationDashboardData,
       })
     );

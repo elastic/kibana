@@ -7,10 +7,12 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DashboardMigrationDashboard } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
+import type { MigrationFlyoutNavigation } from '../../common/components/details_flyout';
 import { DashboardMigrationDetailsFlyout } from '../components/dashboard_details_flyout';
 
 interface UseMigrationDashboardDetailsFlyoutParams {
   isLoading?: boolean;
+  migrationDashboards: DashboardMigrationDashboard[];
   getMigrationDashboardData: (dashboardId: string) =>
     | {
         migrationDashboard?: DashboardMigrationDashboard;
@@ -22,12 +24,21 @@ interface UseMigrationDashboardDetailsFlyoutParams {
   ) => React.ReactNode;
 }
 
+interface UseMigrationDashboardDetailsFlyoutResult {
+  migrationDashboardDetailsFlyout: React.ReactNode;
+  openMigrationDashboardDetails: (dashboard: DashboardMigrationDashboard) => void;
+  closeMigrationDashboardDetails: () => void;
+  openedMigrationDashboardId?: string;
+  navigation: MigrationFlyoutNavigation;
+}
+
 export function useMigrationDashboardDetailsFlyout({
   isLoading,
+  migrationDashboards,
   getMigrationDashboardData,
   dashboardActionsFactory,
-}: UseMigrationDashboardDetailsFlyoutParams) {
-  const [migrationDashboardId, setMigrationDashboardId] = useState<string | undefined>(undefined);
+}: UseMigrationDashboardDetailsFlyoutParams): UseMigrationDashboardDetailsFlyoutResult {
+  const [migrationDashboardId, setMigrationDashboardId] = useState<string | undefined>();
 
   const migrationDashboardData = useMemo(() => {
     if (migrationDashboardId) {
@@ -39,15 +50,44 @@ export function useMigrationDashboardDetailsFlyout({
     (dashboard: DashboardMigrationDashboard) => {
       setMigrationDashboardId(dashboard.id);
     },
-    [setMigrationDashboardId]
+    []
+  );
+  const closeMigrationDashboardDetails = useCallback(() => setMigrationDashboardId(undefined), []);
+
+  const openedDashboardIndex = useMemo(
+    () =>
+      migrationDashboardId
+        ? migrationDashboards.findIndex((d) => d.id === migrationDashboardId)
+        : -1,
+    [migrationDashboards, migrationDashboardId]
   );
 
-  const closeMigrationDashboardDetails = useCallback(
-    () => setMigrationDashboardId(undefined),
-    [setMigrationDashboardId]
+  const goToPrevious = useCallback(() => {
+    const prev = migrationDashboards[openedDashboardIndex - 1];
+    if (openedDashboardIndex > 0 && prev) {
+      setMigrationDashboardId(prev.id);
+    }
+  }, [migrationDashboards, openedDashboardIndex]);
+
+  const goToNext = useCallback(() => {
+    const next = migrationDashboards[openedDashboardIndex + 1];
+    if (openedDashboardIndex !== -1 && next) {
+      setMigrationDashboardId(next.id);
+    }
+  }, [migrationDashboards, openedDashboardIndex]);
+
+  const navigation = useMemo<MigrationFlyoutNavigation>(
+    () => ({
+      hasPrevious: openedDashboardIndex > 0,
+      hasNext:
+        openedDashboardIndex !== -1 && openedDashboardIndex < migrationDashboards.length - 1,
+      goToPrevious,
+      goToNext,
+    }),
+    [openedDashboardIndex, migrationDashboards.length, goToPrevious, goToNext]
   );
 
-  const dashboardActions = useCallback(
+  const dashboardActions = useMemo(
     () =>
       migrationDashboardData?.migrationDashboard &&
       dashboardActionsFactory?.(
@@ -57,25 +97,21 @@ export function useMigrationDashboardDetailsFlyout({
     [migrationDashboardData, dashboardActionsFactory, closeMigrationDashboardDetails]
   );
 
-  return useMemo(
-    () => ({
-      migrationDashboardDetailsFlyout: migrationDashboardData?.migrationDashboard ? (
-        <DashboardMigrationDetailsFlyout
-          migrationDashboard={migrationDashboardData.migrationDashboard}
-          closeFlyout={closeMigrationDashboardDetails}
-          isLoading={isLoading}
-          dashboardActions={dashboardActions()}
-        />
-      ) : null,
-      openMigrationDashboardDetails,
-      closeMigrationDashboardDetails,
-    }),
-    [
-      migrationDashboardData,
-      closeMigrationDashboardDetails,
-      isLoading,
-      dashboardActions,
-      openMigrationDashboardDetails,
-    ]
-  );
+  return {
+    migrationDashboardDetailsFlyout: migrationDashboardData?.migrationDashboard ? (
+      <DashboardMigrationDetailsFlyout
+        migrationDashboard={migrationDashboardData.migrationDashboard}
+        closeFlyout={closeMigrationDashboardDetails}
+        isLoading={isLoading}
+        dashboardActions={dashboardActions}
+        navigation={navigation}
+      />
+    ) : null,
+    openMigrationDashboardDetails,
+    closeMigrationDashboardDetails,
+    openedMigrationDashboardId: migrationDashboardData?.migrationDashboard
+      ? migrationDashboardId
+      : undefined,
+    navigation,
+  };
 }
