@@ -17,7 +17,11 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { getTimingBoundHelpText, type HelpTextBound } from '@kbn/data-lifecycle-phases';
+import {
+  BOUNDARY_VALIDATION_ERROR,
+  getTimingBoundHelpText,
+  type HelpTextBound,
+} from '@kbn/data-lifecycle-phases';
 import type { PreservedTimeUnit, TimeUnit } from '../types';
 import { formatDuration, getUnitSelectOptions } from '../../../shared';
 import { getStepIndexFromArrayItemPath, toMilliseconds } from '../utils';
@@ -110,19 +114,21 @@ const AfterFieldControl = ({
     upper = { neighbor: { type: 'phase', phase: 'delete' }, value: dataRetentionEsFormat };
   }
 
-  const helpText = getTimingBoundHelpText({
-    lower: lowerValue ? { neighbor: { type: 'previousStep' }, value: lowerValue } : undefined,
-    upper,
-  });
+  const lowerBound = lowerValue
+    ? ({ neighbor: { type: 'previousStep' as const }, value: lowerValue } satisfies HelpTextBound)
+    : undefined;
+  const helpText = getTimingBoundHelpText({ lower: lowerBound, upper });
+
+  const isBoundaryError = isInvalid && errorMessage === BOUNDARY_VALIDATION_ERROR;
 
   return (
     <EuiFormRow
       label={i18n.translate('xpack.streams.editDslStepsFlyout.afterLabel', {
         defaultMessage: 'Downsample after',
       })}
-      helpText={helpText}
+      helpText={isBoundaryError ? undefined : helpText}
       isInvalid={isInvalid}
-      error={isInvalid ? errorMessage : null}
+      error={isBoundaryError ? helpText : isInvalid ? errorMessage : null}
     >
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>

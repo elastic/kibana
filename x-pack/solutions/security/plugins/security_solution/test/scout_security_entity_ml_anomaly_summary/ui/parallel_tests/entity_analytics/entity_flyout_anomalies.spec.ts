@@ -51,6 +51,56 @@ spaceTest.describe(
           }),
         });
       });
+      // The anomaly table calls useGetInstalledJob to look up ML job detector descriptions.
+      // These EA security jobs are not installed in the test environment, so without this mock
+      // the endpoint 404s, triggering a "Security job fetch failure" toast that covers
+      // interactive elements and causes click timeouts.
+      await page.route('**/internal/ml/jobs/jobs', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([
+            {
+              job_id: 'auth_high_count_logon_events_ea',
+              analysis_config: { detectors: [] },
+              datafeed_config: { query: { match_all: {} }, indices: ['logs-*'] },
+            },
+            {
+              job_id: 'rare_process_by_host_linux_ea',
+              analysis_config: { detectors: [] },
+              datafeed_config: { query: { match_all: {} }, indices: ['logs-*'] },
+            },
+          ]),
+        });
+      });
+      // The entity risk contributions section (above the anomalies section in the right panel)
+      // calls the security solution search strategy for risk scores. Without this mock the call
+      // takes several seconds, keeping the section in a loading state that continuously shifts
+      // the anomalies section's Y position — preventing Playwright's stability check from
+      // passing before the test timeout.
+      await page.route('**/internal/search/securitySolutionSearchStrategy', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            isRunning: false,
+            isPartial: false,
+            totalCount: 0,
+            data: [],
+            rawResponse: {
+              took: 0,
+              timed_out: false,
+              _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+              hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+            },
+          }),
+        });
+      });
+      // The entity resolution group check triggers a second risk score search strategy call if
+      // a group is found. Return 404 (the expected "no group" response) to prevent that.
+      await page.route('**/api/security/entity_store/resolution/group**', async (route) => {
+        await route.fulfill({ status: 404 });
+      });
     });
 
     spaceTest.afterAll(async ({ apiServices }) => {
@@ -138,8 +188,11 @@ spaceTest.describe(
         await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
 
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeVisible();
+        // React Query retries failed requests 3 times with exponential backoff (~1s + 2s + 4s = ~7s)
+        // before setting isError, so we need more than the default 10s assertion timeout.
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesExpandablePanel).toContainText(
-          'Unable to load behavioral anomalies'
+          'Unable to load behavioral anomalies',
+          { timeout: 15000 }
         );
       }
     );
@@ -250,23 +303,6 @@ spaceTest.describe(
             body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
           });
         });
-        // Backs the table's detector-description lookup (useGetInstalledJob). Without it the
-        // call 404s and raises the "Security job fetch failure" toast, which overlays and
-        // blocks the row-actions button click.
-        await page.route('**/internal/ml/jobs/jobs', async (route) => {
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify([
-              {
-                job_id: 'auth_high_count_logon_events_ea',
-                analysis_config: { detectors: [] },
-                datafeed_config: { query: { match_all: {} }, indices: ['logs-*'] },
-              },
-            ]),
-          });
-        });
-
         await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
         await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
         await pageObjects.entityFlyoutAnomaliesPage.openRowActionsMenu();
