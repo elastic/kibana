@@ -24,6 +24,8 @@ import { allChangedFilesInScope, touchedCriticalFiles } from '../../affected-pac
  * - Build toolchain that ships into the Kibana bundle (`@kbn/babel-*`, optimizer)
  * - `@kbn/scout-info` / `@kbn/scout-reporting` — imported by FTR configs and the
  *   FTR mocha reporter (`ScoutFTRReporter`)
+ * - `@kbn/test-jest-helpers` — still imported by FTR services (e.g. `delay` in
+ *   `@kbn/ftr-common-functional-ui-services` / `@kbn/ftr-common-functional-services`)
  */
 
 export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
@@ -36,8 +38,7 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/scout-release-testing',
   '@kbn/content-list-scout',
 
-  // Jest-only helpers
-  '@kbn/test-jest-helpers',
+  // Jest-only helpers (not @kbn/test-jest-helpers — used by FTR services today)
   '@kbn/test-eui-helpers',
   '@kbn/jest-serializers',
 

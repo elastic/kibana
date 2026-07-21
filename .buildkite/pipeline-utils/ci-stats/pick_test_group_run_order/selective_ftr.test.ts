@@ -24,10 +24,12 @@ describe('FTR_EXCLUDED_MODULES', () => {
     }
   });
 
-  it('does not include Scout packages used by FTR runtime', () => {
+  it('does not include packages used by FTR runtime', () => {
     // Imported by FTR configs / ScoutFTRReporter in @kbn/test
     expect(FTR_EXCLUDED_MODULES.has('@kbn/scout-info')).toBe(false);
     expect(FTR_EXCLUDED_MODULES.has('@kbn/scout-reporting')).toBe(false);
+    // Imported by FTR find/retry services (`delay`)
+    expect(FTR_EXCLUDED_MODULES.has('@kbn/test-jest-helpers')).toBe(false);
   });
 
   it('includes Playwright-only Scout helpers', () => {
@@ -35,8 +37,8 @@ describe('FTR_EXCLUDED_MODULES', () => {
     expect(FTR_EXCLUDED_MODULES.has('@kbn/content-list-scout')).toBe(true);
   });
 
-  it('includes Jest / Cypress helpers', () => {
-    expect(FTR_EXCLUDED_MODULES.has('@kbn/test-jest-helpers')).toBe(true);
+  it('includes Jest / Cypress helpers that FTR does not import', () => {
+    expect(FTR_EXCLUDED_MODULES.has('@kbn/test-eui-helpers')).toBe(true);
     expect(FTR_EXCLUDED_MODULES.has('@kbn/cypress-test-helper')).toBe(true);
     expect(FTR_EXCLUDED_MODULES.has('@kbn/osquery-plugin-cypress')).toBe(true);
     expect(FTR_EXCLUDED_MODULES.has('@kbn/fleet-plugin-cypress')).toBe(true);
@@ -55,16 +57,26 @@ describe('shouldSkipFtrTests', () => {
 
   it('returns true when all affected modules are excluded', () => {
     expect(
-      shouldSkipFtrTests(new Set(['@kbn/scout', '@kbn/test-jest-helpers']), [
+      shouldSkipFtrTests(new Set(['@kbn/scout', '@kbn/test-eui-helpers']), [
         'src/platform/packages/shared/kbn-scout/src/index.ts',
       ])
     ).toBe(true);
   });
 
-  it('returns false when scout-info is affected (FTR runtime dep)', () => {
+  it('returns false when FTR runtime deps are affected', () => {
     expect(
       shouldSkipFtrTests(new Set(['@kbn/scout-info']), [
         'src/platform/packages/private/kbn-scout-info/src/index.ts',
+      ])
+    ).toBe(false);
+    expect(
+      shouldSkipFtrTests(new Set(['@kbn/scout-reporting']), [
+        'src/platform/packages/private/kbn-scout-reporting/src/index.ts',
+      ])
+    ).toBe(false);
+    expect(
+      shouldSkipFtrTests(new Set(['@kbn/test-jest-helpers']), [
+        'src/platform/packages/shared/kbn-test-jest-helpers/src/index.ts',
       ])
     ).toBe(false);
   });
