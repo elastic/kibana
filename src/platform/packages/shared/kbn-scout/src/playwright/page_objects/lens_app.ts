@@ -69,9 +69,23 @@ export class LensApp {
   async switchToVisualization(visType: string, options?: { search?: string }) {
     await this.openChartSwitchPopover();
     if (options?.search) {
-      await this.page.testSubj.locator('lnsChartSwitchSearch').fill(options.search);
+      const searchInput = this.page.testSubj.locator('lnsChartSwitchSearch');
+      await searchInput.waitFor({ state: 'visible' });
+      await searchInput.fill(options.search);
     }
     await this.page.testSubj.locator(`lnsChartSwitchPopover_${visType}`).click();
+  }
+
+  async applyFlyoutChanges() {
+    const applyFlyoutButton = this.getApplyFlyoutButton();
+    await applyFlyoutButton.scrollIntoViewIfNeeded();
+    await applyFlyoutButton.click();
+    await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'hidden' });
+  }
+
+  async cancelFlyoutChanges() {
+    await this.getCancelFlyoutButton().click();
+    await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'hidden' });
   }
 
   async applyChanges() {
