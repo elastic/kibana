@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ILicense } from "@kbn/licensing-types";
+import type { ILicense } from "@kbn/licensing-types";
 
 export function ensureApproximationLicense(license?: ILicense) {
   return Boolean(license && license.isActive && license.hasAtLeast('enterprise'));
