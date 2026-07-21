@@ -54,7 +54,6 @@ interface ConversationAttachment {
   type: string;
   origin?: string;
   versions?: unknown;
-  data?: Record<string, unknown>;
 }
 
 /** The conversation's rule card the form should track: the bound card when present, else the first rule card. */
@@ -117,13 +116,8 @@ export const useAgentBuilderRuleCreation = ({
   const isAiRuleUpdateRef = useRef(false);
   // Activated by explicit user actions only — never by merely visiting the page.
   const isSyncActive = useObservable(aiRuleCreation.formSyncActive$, false);
-  // Warn once per failure streak; re-armed by the next successful sync.
   const hasWarnedSyncFailureRef = useRef(false);
-  // Saved-rule id the sync targets (see resolveSyncRuleId). Present ⇔ the sync is an update.
   const syncRuleIdRef = useRef<string | undefined>(pageRuleId);
-  // Baseline JSON for the diff. Re-included on every addAttachment call (which replaces data)
-  // so the frozen baseline survives form syncs. Restored from storedOriginalText on page reload.
-  const originalTextRef = useRef<string | undefined>(undefined);
   // Last conversation id seen below, to tell a real conversation switch apart from an update
   // within the same conversation (e.g. our own draft gaining an origin once saved).
   const lastConversationIdRef = useRef<string | undefined>(undefined);
@@ -156,17 +150,9 @@ export const useAgentBuilderRuleCreation = ({
       const boundId = aiRuleCreation.getBoundAttachmentId();
       const ruleAttachment = findRuleAttachment(attachments, boundId);
       if (!ruleAttachment) {
-        originalTextRef.current = undefined;
         return;
       }
       const cardRuleId = resolveSyncRuleId(ruleAttachment, pageRuleId);
-      const storedOriginalText =
-        typeof ruleAttachment.data?.originalText === 'string'
-          ? ruleAttachment.data.originalText
-          : undefined;
-      if (storedOriginalText) {
-        originalTextRef.current = storedOriginalText;
-      }
 
       if (pageRuleId) {
         // Edit page: identity is fixed to the URL's rule.
@@ -201,13 +187,9 @@ export const useAgentBuilderRuleCreation = ({
       if (!agentBuilder?.addAttachment) {
         return;
       }
-      // `origin` links the card to its saved rule; include it so form syncs never drop the link.
       const ruleId = savedRuleId ?? syncRuleIdRef.current;
       const targetId = aiRuleCreation.getBoundAttachmentId() ?? SECURITY_RULE_ATTACHMENT_ID;
       const ruleJson = JSON.stringify(ruleData);
-      if (ruleId && !originalTextRef.current) {
-        originalTextRef.current = ruleJson;
-      }
       const attachment: AttachmentInput = {
         id: targetId,
         type: SecurityAgentBuilderAttachments.rule,
@@ -217,7 +199,6 @@ export const useAgentBuilderRuleCreation = ({
         data: {
           text: ruleJson,
           attachmentLabel: label,
-          ...(originalTextRef.current ? { originalText: originalTextRef.current } : {}),
         },
       };
       agentBuilder.addAttachment(attachment);
