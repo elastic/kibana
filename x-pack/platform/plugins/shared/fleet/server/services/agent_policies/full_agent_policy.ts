@@ -982,19 +982,20 @@ export function getBinarySourceSettings(
  * composed (e.g. retrieved verbatim from the .fleet-policies index via ?revision=N).
  * Mutates in place and returns the policy for convenience.
  *
- * Note on ssl.key: the stored doc does not preserve whether a key was sourced from a
- * proxy's certificate_key or from the entity's own TLS config. For outputs, ssl.key is
- * always proxy-derived (outputs have no own-key concept), so it is safe to redact whenever
- * proxy_url is present. For fleet and agent.download, the entity may have its own ssl.key
- * (fleet host agent_key, download source key) independent of any proxy — we leave those
- * untouched to avoid over-redaction, accepting that proxy.certificate_key on those sections
- * is not redacted on the revision path.
+ * proxyUrlsWithCertKey: URLs of proxies that have a certificate_key. When provided,
+ * ssl.key is redacted on fleet/agent.download sections only if their proxy_url is in this
+ * set — distinguishing proxy-derived keys from the entity's own TLS keys. Without this
+ * set, ssl.key on fleet/agent.download is left untouched (conservative: avoids
+ * over-redaction but may miss proxy keys).
  */
-export function redactProxySecretsFromPolicy(policy: FullAgentPolicy): FullAgentPolicy {
+export function redactProxySecretsFromPolicy(
+  policy: FullAgentPolicy,
+  proxyUrlsWithCertKey?: Set<string>
+): FullAgentPolicy {
   if (policy.outputs) {
     for (const output of Object.values(policy.outputs)) {
       delete output.proxy_headers;
-      // Output ssl.key is always proxy-derived; only present when proxy_url is set
+      // Output ssl.key is always proxy-derived; safe to redact whenever proxy_url is present
       if (output.proxy_url && output.ssl) {
         delete output.ssl.key;
       }
@@ -1002,11 +1003,25 @@ export function redactProxySecretsFromPolicy(policy: FullAgentPolicy): FullAgent
   }
   if (policy.fleet && 'hosts' in policy.fleet) {
     delete policy.fleet.proxy_headers;
-    // fleet ssl.key may be the host's own agent_key — leave it to avoid over-redaction
+    // Only redact ssl.key if we can confirm it came from a proxy with a certificate_key
+    if (
+      policy.fleet.proxy_url &&
+      proxyUrlsWithCertKey?.has(policy.fleet.proxy_url) &&
+      policy.fleet.ssl
+    ) {
+      delete policy.fleet.ssl.key;
+    }
   }
   if (policy.agent?.download) {
     delete policy.agent.download.proxy_headers;
-    // agent.download ssl.key may be the source's own key — leave it to avoid over-redaction
+    // Only redact ssl.key if we can confirm it came from a proxy with a certificate_key
+    if (
+      policy.agent.download.proxy_url &&
+      proxyUrlsWithCertKey?.has(policy.agent.download.proxy_url) &&
+      policy.agent.download.ssl
+    ) {
+      delete (policy.agent.download.ssl as Record<string, unknown>).key;
+    }
   }
   return policy;
 }

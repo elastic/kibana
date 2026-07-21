@@ -21,6 +21,7 @@ import {
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { redactProxySecretsFromPolicy } from '../../services/agent_policies/full_agent_policy';
+import { listFleetProxies } from '../../services/fleet_proxies';
 import {
   appContextService,
   agentPolicyService,
@@ -786,9 +787,15 @@ export const getFullAgentPolicy: FleetRequestHandler<
       });
     }
     const item = fleetServerPolicy.data as unknown as FullAgentPolicy;
-    const body: GetFullAgentPolicyResponse = {
-      item: canReadSettings ? item : redactProxySecretsFromPolicy(item),
-    };
+    let redactedItem = item;
+    if (!canReadSettings) {
+      const { items: proxies } = await listFleetProxies(soClient);
+      const proxyUrlsWithCertKey = new Set(
+        proxies.filter((p) => p.certificate_key).map((p) => p.url)
+      );
+      redactedItem = redactProxySecretsFromPolicy(item, proxyUrlsWithCertKey);
+    }
+    const body: GetFullAgentPolicyResponse = { item: redactedItem };
     return response.ok({ body });
   }
 
@@ -869,10 +876,15 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       });
     }
     const storedPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
-    const body = fullAgentPolicyToYaml(
-      canReadSettings ? storedPolicy : redactProxySecretsFromPolicy(storedPolicy),
-      yaml
-    );
+    let policyToSerialize = storedPolicy;
+    if (!canReadSettings) {
+      const { items: proxies } = await listFleetProxies(soClient);
+      const proxyUrlsWithCertKey = new Set(
+        proxies.filter((p) => p.certificate_key).map((p) => p.url)
+      );
+      policyToSerialize = redactProxySecretsFromPolicy(storedPolicy, proxyUrlsWithCertKey);
+    }
+    const body = fullAgentPolicyToYaml(policyToSerialize, yaml);
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,
