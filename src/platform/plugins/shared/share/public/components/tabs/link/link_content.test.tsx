@@ -215,6 +215,49 @@ describe('LinkContent', () => {
     expect(copyButton.getAttribute('data-share-url')).toBe(shortURL);
   });
 
+  it('shows an error and allows retrying when short URL creation fails', async () => {
+    const user = userEvent.setup();
+    const error = new Error('Unable to create short URL');
+    const onUrlGenerationError = jest.fn();
+    const shortURL = 'http://localhost:5601/xyz/r/s/yellow-orange-tomato';
+    const createFromLongUrlSpy = jest.spyOn(BrowserShortUrlClient.prototype, 'createFromLongUrl');
+
+    createFromLongUrlSpy.mockReset();
+    createFromLongUrlSpy
+      .mockRejectedValueOnce(error)
+      .mockResolvedValueOnce({
+        // @ts-expect-error we only return url property, as that's all we need for this test
+        url: shortURL,
+      });
+
+    renderComponent(
+      {
+        objectType: 'dashboard',
+        isDirty: false,
+        shareableUrl,
+        shortUrlService,
+        allowShortUrl: true,
+      },
+      { ...mockShareContext, onUrlGenerationError }
+    );
+
+    const copyButton = screen.getByTestId('copyShareUrlButton');
+
+    await user.click(copyButton);
+
+    await waitFor(() => {
+      expect(onUrlGenerationError).toHaveBeenCalledWith(error);
+      expect(copyButton).not.toBeDisabled();
+    });
+
+    await user.click(copyButton);
+
+    await waitFor(() => {
+      expect(copyButton.getAttribute('data-share-url')).toBe(shortURL);
+    });
+    expect(createFromLongUrlSpy).toHaveBeenCalledTimes(2);
+  });
+
   it('renders a draft mode callout when dirty and triggers its save button', async () => {
     const user = userEvent.setup();
     const onSave = jest.fn();

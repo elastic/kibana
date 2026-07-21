@@ -15,6 +15,7 @@ export interface IShareContext extends Omit<ShowShareMenuOptions, 'onClose'> {
   onClose: () => void;
   shareMenuItems: ShareConfigs[];
   isSaving?: boolean;
+  onUrlGenerationError?: (error: Error) => void;
 }
 
 const ShareContext = createContext<IShareContext | null>(null);
