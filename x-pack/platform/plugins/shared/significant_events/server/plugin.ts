@@ -463,9 +463,6 @@ export class SignificantEventsPlugin
         telemetry,
         streamsKIsOnboardingClient: this.streamsKIsOnboardingClient,
         maintenanceService: this.maintenanceService,
-        getWorkflowApi: () => this.server?.workflowsManagement?.management,
-        getSpaceId: (request: KibanaRequest) =>
-          plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
         memoryToolsOptions,
         logger: this.logger,
         isAvailable: () => isSignificantEventsAvailable(core.featureFlags),

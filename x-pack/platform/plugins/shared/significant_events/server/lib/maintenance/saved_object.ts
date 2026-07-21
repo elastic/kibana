@@ -12,17 +12,15 @@ export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE = 'significant-events-
 
 /**
  * A single, deployment-wide document recording the maintenance state of
- * Significant Events background activity (see the state machine in
- * `common/maintenance/state_machine.ts`). It is a global (not per-space)
- * control, so a fixed id + `agnostic` namespace is used.
+ * Significant Events background activity (`enabled` / `paused`). It is a
+ * global (not per-space) control, so a fixed id + `agnostic` namespace is used.
  *
  * `state` is stored as a free-form string (keyword) rather than a closed enum
  * so a newer node can persist a state an older node does not yet know about;
  * readers normalise unknown values back to the default. The document also
- * stores the exact set of workflows and rules that were disabled, so the
- * inverse transition (resume) can re-enable precisely what was turned off (and
- * nothing that was already off). No data other than these enablement flags is
- * affected.
+ * stores the exact set of workflows and rules that were disabled, so resume
+ * can re-enable precisely what was turned off (and nothing that was already
+ * off). No data other than these enablement flags is affected.
  *
  * The id intentionally matches the type name: there is only ever one document.
  */

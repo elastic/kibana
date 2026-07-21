@@ -11,16 +11,16 @@ import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/me
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
-import { STREAMS_INVESTIGATION_MANAGEMENT_SKILL_ID } from '../../memory_and_investigation/skills/investigation_management';
+import { streamsInvestigationManagementSkill } from '../../memory_and_investigation/skills/investigation_management';
 import { registerSignificantEventsSkills } from './register_skills';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
 
 const KI_IDENTIFICATION_SKILL_ID = 'ki-identification-management';
-const INVESTIGATION_SKILL_ID = STREAMS_INVESTIGATION_MANAGEMENT_SKILL_ID;
+const INVESTIGATION_SKILL_ID = streamsInvestigationManagementSkill.id;
 
-// Skills registered whenever the feature is available with maintenance + workflows wired.
+// Skills registered whenever the feature is available.
 // `ki-identification-management` is only added when a KI onboarding client is present.
 const CORE_SKILL_IDS = [
   knowledgeIndicatorsManagementSkill.id,
@@ -35,8 +35,6 @@ const telemetry = {} as EbtTelemetryClient;
 const memoryToolsOptions = {} as MemoryToolsOptions;
 const streamsKIsOnboardingClient = {} as SignificantEventsKIsOnboardingClient;
 const maintenanceService = {} as SignificantEventsMaintenanceService;
-const getWorkflowApi = () => undefined;
-const getSpaceId = () => 'default';
 
 const createOptions = (
   overrides: Partial<Parameters<typeof registerSignificantEventsSkills>[0]> = {}
@@ -47,8 +45,6 @@ const createOptions = (
     telemetry,
     memoryToolsOptions,
     maintenanceService,
-    getWorkflowApi,
-    getSpaceId,
     logger: loggerMock.create(),
     isAvailable: jest.fn().mockResolvedValue(true),
     ...overrides,
@@ -81,16 +77,14 @@ describe('registerSignificantEventsSkills', () => {
     expect(registeredIds).toHaveLength(CORE_SKILL_IDS.length);
   });
 
-  it('does not register investigation when maintenance or workflow deps are missing', async () => {
+  it('registers the investigation skill as part of core skills when available', async () => {
     const { agentBuilder, options } = createOptions({
       maintenanceService: undefined,
-      getWorkflowApi: undefined,
-      getSpaceId: undefined,
     });
 
     await registerSignificantEventsSkills(options);
 
-    expect(getRegisteredIds(agentBuilder)).not.toContain(INVESTIGATION_SKILL_ID);
+    expect(getRegisteredIds(agentBuilder)).toContain(INVESTIGATION_SKILL_ID);
   });
 
   it('includes the KI identification skill only when onboarding client and maintenance service are provided', async () => {
@@ -115,14 +109,6 @@ describe('registerSignificantEventsSkills', () => {
     await registerSignificantEventsSkills(options);
 
     expect(getRegisteredIds(agentBuilder)).not.toContain(KI_IDENTIFICATION_SKILL_ID);
-  });
-
-  it('registers the investigation skill when maintenance and workflow deps are provided', async () => {
-    const { agentBuilder, options } = createOptions();
-
-    await registerSignificantEventsSkills(options);
-
-    expect(getRegisteredIds(agentBuilder)).toContain(INVESTIGATION_SKILL_ID);
   });
 
   it('is idempotent: a second ensureRegistered call does not re-register the core skills', async () => {

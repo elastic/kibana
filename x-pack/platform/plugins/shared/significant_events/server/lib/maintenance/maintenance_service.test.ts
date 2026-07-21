@@ -149,8 +149,8 @@ function makeService(params?: {
   ruleBackedRuleIds?: string[];
   v2RulesClient?: ReturnType<typeof makeV2RulesClient> | null;
   spacesGetAllThrows?: boolean;
-  internalSpacesFindThrows?: boolean;
-  internalSpaceIds?: string[];
+  /** Space ids returned by SpacesClient.getAll (default: default only). */
+  spaceIds?: string[];
   /** Global continuous-onboarding toggle before pause (default: off). */
   continuousOnboardingEnabled?: boolean;
   /** Per-space scheduled-discovery toggle before pause (default: off). */
@@ -167,18 +167,6 @@ function makeService(params?: {
   const getRuleBackedQueryLinks = jest.fn(async () =>
     (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({ rule_id }))
   );
-
-  const createInternalRepository = jest.fn(() => ({
-    find: jest.fn(async () => {
-      if (params?.internalSpacesFindThrows) {
-        throw new Error('internal spaces unavailable');
-      }
-      const ids = params?.internalSpaceIds ?? ['default'];
-      return {
-        saved_objects: ids.map((id) => ({ id, type: 'space', attributes: { name: id } })),
-      };
-    }),
-  }));
 
   const globalUiSettingsClient = makeUiSettingsClient(
     {
@@ -203,7 +191,6 @@ function makeService(params?: {
     core: {
       savedObjects: {
         getScopedClient: jest.fn(() => soClient),
-        createInternalRepository,
       },
       uiSettings: {
         asScopedToClient: jest.fn(() => spaceUiSettingsClient),
@@ -217,7 +204,7 @@ function makeService(params?: {
             if (params?.spacesGetAllThrows) {
               throw new Error('spaces unavailable');
             }
-            return [{ id: 'default' }];
+            return (params?.spaceIds ?? ['default']).map((id) => ({ id }));
           }),
         })),
       },
@@ -518,7 +505,6 @@ describe('SignificantEventsMaintenanceService', () => {
       const { api } = makeManagementApi();
       const { service } = makeService({
         management: api,
-        internalSpacesFindThrows: true,
         spacesGetAllThrows: true,
       });
 
@@ -531,11 +517,11 @@ describe('SignificantEventsMaintenanceService', () => {
       });
     });
 
-    it('enumerates spaces via the internal repository when available', async () => {
+    it('enumerates spaces via SpacesClient.getAll', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service } = makeService({
         management: api,
-        internalSpaceIds: ['default', 'space-a'],
+        spaceIds: ['default', 'space-a'],
       });
 
       await service.pause({ request: REQUEST });
@@ -879,7 +865,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(v2RulesClient?.bulkEnableRules).not.toHaveBeenCalled();
     });
 
-    it('stays paused and keeps the workflow recorded when it cannot be re-enabled', async () => {
+    it('flips to enabled with warnings when a workflow cannot be re-enabled', async () => {
       const { api } = makeManagementApi({
         failEnableFor: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       });
@@ -888,24 +874,22 @@ describe('SignificantEventsMaintenanceService', () => {
       await service.pause({ request: REQUEST });
       const summary = await service.resume({ request: REQUEST });
 
-      expect(summary.state).toBe('paused');
+      expect(summary.state).toBe('enabled');
       expect(summary.partialFailures.length).toBeGreaterThan(0);
-      // The still-disabled workflow is preserved so a later resume can retry it.
       const lastWrite = soClient.create.mock.calls.at(-1);
       expect(lastWrite?.[1]).toEqual(
         expect.objectContaining({
-          state: 'paused',
-          disabledWorkflows: expect.arrayContaining([
-            expect.objectContaining({ id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID }),
-          ]),
+          state: 'enabled',
+          disabledWorkflows: [],
+          disabledRuleIds: [],
         })
       );
       await expect(service.getStatus({ request: REQUEST })).resolves.toEqual(
-        expect.objectContaining({ state: 'paused' })
+        expect.objectContaining({ state: 'enabled' })
       );
     });
 
-    it('stays paused and keeps the rule recorded when it cannot be re-enabled', async () => {
+    it('flips to enabled with warnings when a rule cannot be re-enabled', async () => {
       const { api } = makeManagementApi();
       const v2RulesClient = makeV2RulesClient({
         enableErrors: [{ id: 'rule-1', error: { statusCode: 500, message: 'boom' } }],
@@ -919,15 +903,15 @@ describe('SignificantEventsMaintenanceService', () => {
       await service.pause({ request: REQUEST });
       const summary = await service.resume({ request: REQUEST });
 
-      expect(summary.state).toBe('paused');
+      expect(summary.state).toBe('enabled');
       expect(summary.partialFailures).toContainEqual({ target: 'rule:rule-1', error: 'boom' });
       const lastWrite = soClient.create.mock.calls.at(-1);
       expect(lastWrite?.[1]).toEqual(
-        expect.objectContaining({ state: 'paused', disabledRuleIds: ['rule-1'] })
+        expect.objectContaining({ state: 'enabled', disabledRuleIds: [] })
       );
     });
 
-    it('reports remaining disabled counts in lastSummary when resume is incomplete', async () => {
+    it('reports partialFailures but clears inventory when resume has warnings', async () => {
       const { api } = makeManagementApi({
         failEnableFor: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       });
@@ -942,14 +926,13 @@ describe('SignificantEventsMaintenanceService', () => {
 
       const resumeSummary = await service.resume({ request: REQUEST });
 
-      expect(resumeSummary.state).toBe('paused');
-      // Only the workflow that failed to re-enable remains; the rule was restored.
-      expect(resumeSummary.workflowsDisabled).toBe(1);
+      expect(resumeSummary.state).toBe('enabled');
+      expect(resumeSummary.workflowsDisabled).toBe(0);
       expect(resumeSummary.rulesDisabled).toBe(0);
       expect(resumeSummary.partialFailures.length).toBeGreaterThan(0);
     });
 
-    it('re-disables settings-backed workflows and stays paused when settings restore fails', async () => {
+    it('flips to enabled with warnings when settings restore fails (no workflow rollback)', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service, soClient, globalUiSettingsClient } = makeService({
         management: api,
@@ -960,7 +943,6 @@ describe('SignificantEventsMaintenanceService', () => {
       await service.pause({ request: REQUEST });
       updateWorkflow.mockClear();
 
-      // Workflows/rules succeed; continuous setting restore fails afterward.
       globalUiSettingsClient.set.mockImplementation(async (key: string) => {
         if (key === OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED) {
           throw new Error('set failed for continuous');
@@ -969,7 +951,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
       const summary = await service.resume({ request: REQUEST });
 
-      expect(summary.state).toBe('paused');
+      expect(summary.state).toBe('enabled');
       expect(summary.partialFailures).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -979,7 +961,6 @@ describe('SignificantEventsMaintenanceService', () => {
         ])
       );
 
-      // Continuous workflow was re-enabled, then put back off after settings failed.
       const continuousEnableCalls = updateWorkflow.mock.calls.filter(
         (call) =>
           call[0] === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID &&
@@ -991,27 +972,26 @@ describe('SignificantEventsMaintenanceService', () => {
           call[1]?.enabled === false
       );
       expect(continuousEnableCalls.length).toBeGreaterThan(0);
-      expect(continuousDisableCalls.length).toBeGreaterThan(0);
+      // No compensating disable after settings failure.
+      expect(continuousDisableCalls.length).toBe(0);
 
       const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {
         state: string;
         disabledWorkflows: Array<{ id: string }>;
         pausedSettings?: { continuousOnboardingWasEnabled: boolean };
       };
-      expect(lastWrite.state).toBe('paused');
-      expect(lastWrite.pausedSettings?.continuousOnboardingWasEnabled).toBe(true);
-      expect(lastWrite.disabledWorkflows.map((workflow) => workflow.id)).toContain(
-        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID
-      );
+      expect(lastWrite.state).toBe('enabled');
+      expect(lastWrite.pausedSettings).toBeUndefined();
+      expect(lastWrite.disabledWorkflows).toEqual([]);
     });
 
-    it('re-disables the matching scheduled workflow when scheduled-discovery restore fails', async () => {
+    it('flips to enabled with warnings when scheduled-discovery restore fails', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service, soClient, spaceUiSettingsClient } = makeService({
         management: api,
         continuousOnboardingEnabled: false,
         scheduledDiscoveryEnabled: true,
-        internalSpaceIds: ['default', 'space-a'],
+        spaceIds: ['default', 'space-a'],
       });
 
       await service.pause({ request: REQUEST });
@@ -1025,7 +1005,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
       const summary = await service.resume({ request: REQUEST });
 
-      expect(summary.state).toBe('paused');
+      expect(summary.state).toBe('enabled');
       expect(summary.partialFailures).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -1043,17 +1023,17 @@ describe('SignificantEventsMaintenanceService', () => {
         (call) => call[0] === scheduledDocId && call[1]?.enabled === false
       );
       expect(scheduledEnableCalls.length).toBeGreaterThan(0);
-      expect(scheduledDisableCalls.length).toBeGreaterThan(0);
+      expect(scheduledDisableCalls.length).toBe(0);
 
       const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {
         state: string;
         disabledWorkflows: Array<{ id: string; spaceId: string }>;
       };
-      expect(lastWrite.state).toBe('paused');
-      expect(lastWrite.disabledWorkflows.map((workflow) => workflow.id)).toContain(scheduledDocId);
+      expect(lastWrite.state).toBe('enabled');
+      expect(lastWrite.disabledWorkflows).toEqual([]);
     });
 
-    it('rolls runtime back toward paused when resume persist fails after re-enabling', async () => {
+    it('does not roll runtime back when resume persist fails after re-enabling', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service, soClient } = makeService({
         management: api,
@@ -1064,18 +1044,18 @@ describe('SignificantEventsMaintenanceService', () => {
       await service.pause({ request: REQUEST });
       updateWorkflow.mockClear();
 
-      // First create after pause is the resume write — reject it.
       soClient.create.mockRejectedValueOnce(new Error('so write failed on resume'));
 
       await expect(service.resume({ request: REQUEST })).rejects.toThrow(
         'so write failed on resume'
       );
 
-      // Compensating disable after the failed write.
+      // Best-effort re-enable happened; no compensating disable after the failed write.
       const disableAfterResume = updateWorkflow.mock.calls.filter(
         (call) => call[1]?.enabled === false
       );
-      expect(disableAfterResume.length).toBeGreaterThan(0);
+      expect(disableAfterResume.length).toBe(0);
+      // SO write failed, so the persisted state is still paused.
       await expect(service.getState({ request: REQUEST })).resolves.toBe('paused');
     });
   });

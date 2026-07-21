@@ -44,8 +44,13 @@ const PAUSE_PARTIAL_TOAST_TITLE = i18n.translate(
   { defaultMessage: 'Paused, but some items could not be stopped' }
 );
 
-const RESUME_PARTIAL_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.maintenance.resumePartialToastTitle',
+const RESUME_WARNINGS_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.maintenance.resumeWarningsToastTitle',
+  { defaultMessage: 'Resumed Significant Events activity with warnings' }
+);
+
+const RESUME_STILL_PAUSED_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.maintenance.resumeStillPausedToastTitle',
   { defaultMessage: 'Resume did not complete; Significant Events activity is still paused' }
 );
 
@@ -153,14 +158,17 @@ export const useSignificantEventsMaintenanceActions = () => {
         signal: null,
       }),
     onSuccess: (summary) => {
-      // Resume is only fully done when it returns to `enabled`; a lingering
-      // `paused` state means some items could not be re-enabled.
-      if (summary.state !== 'enabled' || summary.partialFailures.length > 0) {
+      if (summary.state !== 'enabled') {
         toasts.addWarning({
-          title: RESUME_PARTIAL_TOAST_TITLE,
+          title: RESUME_STILL_PAUSED_TOAST_TITLE,
           ...(summary.partialFailures.length > 0
             ? { text: partialFailuresText(summary.partialFailures.length) }
             : {}),
+        });
+      } else if (summary.partialFailures.length > 0) {
+        toasts.addWarning({
+          title: RESUME_WARNINGS_TOAST_TITLE,
+          text: partialFailuresText(summary.partialFailures.length),
         });
       } else {
         toasts.addSuccess({ title: RESUME_SUCCESS_TOAST_TITLE });

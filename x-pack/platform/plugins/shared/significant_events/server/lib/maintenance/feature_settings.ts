@@ -31,7 +31,7 @@ export interface PausedFeatureSettings {
 const toMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-/** Failure targets for the settings step, shared by producers and the resume revert. */
+/** Failure targets for the settings step. */
 const CONTINUOUS_SETTING_TARGET = 'settings:continuous-onboarding';
 const SCHEDULED_SETTING_TARGET_PREFIX = 'settings:scheduled-discovery@';
 const scheduledSettingTarget = (spaceId: string): string =>
@@ -60,45 +60,6 @@ export const shouldRestoreSettingsBackedWorkflow = (
   // Not gated by the Settings toggles — always eligible for resume.
   return true;
 };
-
-/** Settings restores that failed during Resume, grouped for the workflow revert. */
-export interface FailedSettingsRestores {
-  continuousOnboarding: boolean;
-  scheduledDiscoverySpaceIds: Set<string>;
-}
-
-/** Parse resume failures back into the settings whose restore did not succeed. */
-export const parseFailedSettingsRestores = (
-  failures: SignificantEventsMaintenanceFailure[]
-): FailedSettingsRestores => {
-  const scheduledDiscoverySpaceIds = new Set<string>();
-  let continuousOnboarding = false;
-  for (const { target } of failures) {
-    if (target === CONTINUOUS_SETTING_TARGET) {
-      continuousOnboarding = true;
-    } else if (target.startsWith(SCHEDULED_SETTING_TARGET_PREFIX)) {
-      scheduledDiscoverySpaceIds.add(target.slice(SCHEDULED_SETTING_TARGET_PREFIX.length));
-    }
-  }
-  return { continuousOnboarding, scheduledDiscoverySpaceIds };
-};
-
-export const hasFailedSettingsRestore = ({
-  continuousOnboarding,
-  scheduledDiscoverySpaceIds,
-}: FailedSettingsRestores): boolean => continuousOnboarding || scheduledDiscoverySpaceIds.size > 0;
-
-/**
- * Whether Resume must turn this (just re-enabled) settings-backed workflow back
- * off because its backing setting failed to restore — so it does not run while
- * the setting is off.
- */
-export const shouldRevertSettingsBackedWorkflow = (
-  workflow: { id: string; spaceId: string },
-  { continuousOnboarding, scheduledDiscoverySpaceIds }: FailedSettingsRestores
-): boolean =>
-  (isContinuousOnboardingWorkflowId(workflow.id) && continuousOnboarding) ||
-  (isScheduledDiscoveryWorkflowId(workflow.id) && scheduledDiscoverySpaceIds.has(workflow.spaceId));
 
 const requestForSpace = (request: KibanaRequest, spaceId: string): KibanaRequest => {
   const fakeRawRequest: FakeRawRequest = {

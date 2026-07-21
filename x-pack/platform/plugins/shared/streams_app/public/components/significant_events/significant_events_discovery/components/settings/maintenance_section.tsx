@@ -69,7 +69,7 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
         <p data-test-subj="streams-settings-maintenance-partial-failures">
           <FormattedMessage
             id="xpack.streams.significantEventsDiscovery.settings.maintenance.partialFailures"
-            defaultMessage="{failureCount, plural, one {# maintenance operation} other {# maintenance operations}} could not be completed. Check the Kibana server logs for details. Resume retries incomplete resume work; Pause again while paused re-sweeps disable/cancel."
+            defaultMessage="{failureCount, plural, one {# maintenance operation} other {# maintenance operations}} could not be completed. Check the Kibana server logs for details. Pause again while paused re-sweeps disable/cancel."
             values={{ failureCount }}
           />
         </p>

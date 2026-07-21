@@ -30,10 +30,7 @@ import {
 } from './saved_object';
 import {
   createFeatureSettingsController,
-  hasFailedSettingsRestore,
-  parseFailedSettingsRestores,
   shouldRestoreSettingsBackedWorkflow,
-  shouldRevertSettingsBackedWorkflow,
   type PausedFeatureSettings,
 } from './feature_settings';
 import {
@@ -239,37 +236,6 @@ export const createSignificantEventsMaintenanceService = ({
     request: KibanaRequest,
     failures: SignificantEventsMaintenanceFailure[]
   ): Promise<string[]> => {
-    // Prefer the internal repository so pause/reassert are deployment-wide even
-    // when the request is synthetic (no user) or space-scoped privileges would
-    // under-enumerate spaces the caller cannot see. Paginate: a single page
-    // would silently skip per-space targets on large deployments.
-    try {
-      const repository = server.core.savedObjects.createInternalRepository(['space']);
-      const ids: string[] = [];
-      const perPage = 1_000;
-      for (let page = 1; ; page++) {
-        const { saved_objects: spaces } = await repository.find({
-          type: 'space',
-          page,
-          perPage,
-        });
-        ids.push(...spaces.map((space) => space.id));
-        if (spaces.length < perPage) {
-          break;
-        }
-      }
-      if (ids.length > 0) {
-        return [...new Set([DEFAULT_SPACE_ID, ...ids])];
-      }
-    } catch (error) {
-      // Fall through to the request-scoped spaces client.
-      log.debug(
-        `Significant Events maintenance: internal space enumeration failed, falling back to request-scoped client: ${toMessage(
-          error
-        )}`
-      );
-    }
-
     const spacesClient = server.spaces?.spacesService.createSpacesClient(request);
     if (!spacesClient) {
       failures.push({
@@ -280,6 +246,7 @@ export const createSignificantEventsMaintenanceService = ({
       return [DEFAULT_SPACE_ID];
     }
     try {
+      // SpacesClient.getAll already loads every space SO (up to xpack.spaces.maxSpaces).
       const spaces = await spacesClient.getAll();
       const ids = spaces.map((space) => space.id);
       return ids.length > 0 ? [...new Set([DEFAULT_SPACE_ID, ...ids])] : [DEFAULT_SPACE_ID];
@@ -821,15 +788,11 @@ export const createSignificantEventsMaintenanceService = ({
         const mgmt = server.workflowsManagement?.management;
         const recordedWorkflows = existing?.disabledWorkflows ?? [];
         const recordedRuleIds = existing?.disabledRuleIds ?? [];
-        const previousSummary = normalizeSummary(existing?.lastSummary);
         const pausedSettings = normalizePausedSettings(existing?.pausedSettings);
 
-        // Resume phases:
-        // 1) Re-enable recorded workflows/rules (settings toggles stay off).
-        // 2) Restore settings only if every workflow/rule restore succeeded.
-        // 3) If settings restore fails, put matching settings-backed workflows back off.
-        // 4) Persist; on write failure, roll runtime back toward paused.
-        const stillDisabledWorkflows: MaintenanceWorkflowTarget[] = [];
+        // Best-effort restore: re-enable inventory, restore settings, then flip the
+        // control plane to enabled. Partial failures are reported as warnings —
+        // no compensating rollback (rollback can fail too).
         let workflowsToggled = 0;
         if (mgmt) {
           for (const workflow of recordedWorkflows) {
@@ -837,9 +800,7 @@ export const createSignificantEventsMaintenanceService = ({
               continue;
             }
             const outcome = await reEnableWorkflow(mgmt, workflow, request, failures);
-            if (outcome === 'failed') {
-              stillDisabledWorkflows.push(workflow);
-            } else if (outcome === 'toggled') {
+            if (outcome === 'toggled') {
               workflowsToggled += 1;
             }
           }
@@ -852,120 +813,38 @@ export const createSignificantEventsMaintenanceService = ({
             target: 'workflows',
             error: 'Workflows management plugin is not available',
           });
-          stillDisabledWorkflows.push(
-            ...recordedWorkflows.filter((workflow) =>
-              shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings)
-            )
-          );
         }
 
-        const { failedIds: stillDisabledRuleIds, toggledCount: rulesToggled } = await reEnableRules(
+        const { toggledCount: rulesToggled } = await reEnableRules(
           request,
           recordedRuleIds,
           failures
         );
 
-        const workflowsAndRulesOk =
-          stillDisabledWorkflows.length === 0 && stillDisabledRuleIds.length === 0;
+        await featureSettings.resumeFeatureSettings({ request, pausedSettings, failures });
 
-        if (workflowsAndRulesOk) {
-          await featureSettings.resumeFeatureSettings({ request, pausedSettings, failures });
-        }
-
-        const failedRestores = parseFailedSettingsRestores(failures);
-        const settingsRestoreFailed = hasFailedSettingsRestore(failedRestores);
-
-        // Settings restore failed after workflows were re-enabled — put only the
-        // matching settings-backed workflows back off so we don't leave
-        // workflow-on / setting-off while paused.
-        if (workflowsAndRulesOk && settingsRestoreFailed && mgmt && pausedSettings) {
-          for (const workflow of recordedWorkflows) {
-            if (!shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings)) {
-              continue;
-            }
-            if (!shouldRevertSettingsBackedWorkflow(workflow, failedRestores)) {
-              continue;
-            }
-            await disableWorkflow(mgmt, workflow, request, failures);
-            stillDisabledWorkflows.push(workflow);
-          }
-        }
-
-        const fullyResumed =
-          stillDisabledWorkflows.length === 0 &&
-          stillDisabledRuleIds.length === 0 &&
-          !settingsRestoreFailed;
-        const nextState = fullyResumed ? 'enabled' : 'paused';
-
-        // Incomplete resume reports what is still recorded as disabled after the
-        // attempt (not the original pause snapshot totals).
-        const summary: SignificantEventsMaintenanceSummary = fullyResumed
-          ? { ...emptySummary('enabled'), partialFailures: failures }
-          : {
-              state: 'paused',
-              executionsCancelled: previousSummary?.executionsCancelled ?? 0,
-              workflowsDisabled: stillDisabledWorkflows.length,
-              rulesDisabled: stillDisabledRuleIds.length,
-              partialFailures: failures,
-            };
+        const summary: SignificantEventsMaintenanceSummary = {
+          ...emptySummary('enabled'),
+          partialFailures: failures,
+        };
 
         try {
           await writeState(soClient, {
-            state: nextState,
+            state: 'enabled',
             updatedAt: new Date().toISOString(),
             updatedBy,
-            disabledWorkflows: stillDisabledWorkflows,
-            disabledRuleIds: stillDisabledRuleIds,
-            // Clear restore flags only when fully resumed; otherwise keep them for retry.
-            ...(fullyResumed ? {} : { pausedSettings: pausedSettings ?? existing?.pausedSettings }),
+            disabledWorkflows: [],
+            disabledRuleIds: [],
             lastSummary: summary,
           });
         } catch (writeError) {
-          // Runtime may already be partially resumed while the SO still says paused.
-          // Roll workflows/rules/settings back toward paused so assertNotPaused and
-          // background activity agree, then surface the write failure.
           failures.push({
             target: 'resume',
             error: `Failed to persist resume state: ${toMessage(writeError)}`,
           });
-          if (mgmt) {
-            for (const workflow of recordedWorkflows) {
-              if (!shouldRestoreSettingsBackedWorkflow(workflow, pausedSettings)) {
-                continue;
-              }
-              await disableWorkflow(mgmt, workflow, request, failures);
-            }
-          }
-          const rulesReEnabled = recordedRuleIds.filter((id) => !stillDisabledRuleIds.includes(id));
-          if (rulesReEnabled.length > 0) {
-            try {
-              const { getSignificantEventsAlertingContext } = await getScopedClients({ request });
-              const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
-              if (alertingV2RulesClient) {
-                const { failures: ruleFailures } = await setV2RulesEnabled(
-                  alertingV2RulesClient,
-                  rulesReEnabled,
-                  false
-                );
-                failures.push(...ruleFailures);
-              }
-            } catch (ruleError) {
-              failures.push({ target: 'rules', error: toMessage(ruleError) });
-            }
-          }
-          if (workflowsAndRulesOk && pausedSettings) {
-            await featureSettings.reassertFeatureSettingsOff({
-              request,
-              // Continuous onboarding is reasserted inside reassertFeatureSettingsOff
-              // via the global client; only previously-on scheduled spaces need a
-              // per-space pass here (same restore set Pause recorded).
-              spaceIds: pausedSettings.scheduledDiscoveryEnabledSpaceIds,
-              failures,
-            });
-          }
           logFailures(
             log,
-            `Significant Events resume persist failed; rolled runtime back toward paused: ${toMessage(
+            `Significant Events resume persist failed after best-effort re-enable: ${toMessage(
               writeError
             )}`,
             failures
@@ -973,12 +852,8 @@ export const createSignificantEventsMaintenanceService = ({
           throw writeError;
         }
 
-        const message = `Significant Events resume ${
-          fullyResumed ? 'completed' : 'incomplete (still paused)'
-        }: toggled on ${workflowsToggled} workflow(s) and ${rulesToggled} rule(s), ${
-          failures.length
-        } failure(s)`;
-        if (fullyResumed) {
+        const message = `Significant Events resume completed: toggled on ${workflowsToggled} workflow(s) and ${rulesToggled} rule(s), ${failures.length} failure(s)`;
+        if (failures.length === 0) {
           log.info(message);
         } else {
           logFailures(log, message, failures);
