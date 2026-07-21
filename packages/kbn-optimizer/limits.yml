@@ -30,10 +30,12 @@ pageLoadAssetSize:
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
+  contextEngine: 5837
   controls: 10300
   core: 606422
   cps: 9209
   crossClusterReplication: 12662
+  customContent: 4765
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8613
@@ -170,7 +172,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79863
-  securitySolution: 189500
+  securitySolution: 210408
   securitySolutionEss: 42592
   securitySolutionServerless: 57112
   serverless: 7412
