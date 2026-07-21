@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import { noop } from 'lodash/fp';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
@@ -21,7 +21,15 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context'; // Lazy-loaded so consumers of this hook don't statically pull the attack flyout graph into their
+import {
+  ATTACK_CORRELATIONS_TITLE,
+  ATTACK_ENTITIES_TITLE,
+  ATTACK_TITLE,
+  formatFlyoutTitle,
+} from '../shared/constants/flyout_titles';
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
+import { getAttackTitleValue } from './utils/get_attack_title';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the attack flyout graph into their
 // bundle; the chunk only loads when the flyout (or one of its tools) is actually opened.
@@ -42,6 +50,12 @@ export interface OpenAttackFlyoutParams {
   indexName: string;
   /** Invoked after the attack is mutated inside the flyout, to let the caller refresh. Defaults to a no-op. */
   onAttackUpdated?: () => void;
+  /**
+   * Display title of the attack, if already known by the caller (e.g. from a list/table row).
+   * Used to build the flyout-history title; when omitted, the history entry falls back to the
+   * bare "Attack" label.
+   */
+  attackTitle?: string;
   /** Renderer for cell actions in nested alert flyouts. Defaults to the standard `cellActionRenderer`. */
   renderCellActions?: CellActionRenderer;
 }
@@ -52,7 +66,7 @@ export interface OpenAttackCorrelationsParams {
   /** Ids of the alerts correlated to the attack. */
   alertIds: string[];
   /** Optional callback to open one of the correlated alerts. */
-  onShowAlert?: (id: string, indexName: string) => void;
+  onShowAlert?: (id: string, indexName: string, title?: string) => void;
 }
 
 export interface OpenAttackEntitiesParams {
@@ -130,6 +144,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
       attackId,
       indexName,
       onAttackUpdated = noop,
+      attackTitle,
       renderCellActions = cellActionRenderer,
     }: OpenAttackFlyoutParams) => {
       open(
@@ -139,7 +154,12 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           onAttackUpdated={onAttackUpdated}
           renderCellActions={renderCellActions}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode }
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: sessionMode,
+          title: formatFlyoutTitle(ATTACK_TITLE, attackTitle),
+        }
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey, sessionMode]
@@ -150,6 +170,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
       attackId,
       indexName,
       onAttackUpdated = noop,
+      attackTitle,
       renderCellActions = cellActionRenderer,
     }: OpenAttackFlyoutParams) => {
       open(
@@ -159,7 +180,12 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           onAttackUpdated={onAttackUpdated}
           renderCellActions={renderCellActions}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' },
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: 'inherit',
+          title: buildFlyoutNavTitle(formatFlyoutTitle(ATTACK_TITLE, attackTitle)),
+        },
         'inherit'
       );
     },
@@ -170,7 +196,12 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
     ({ hit, alertIds, onShowAlert }: OpenAttackCorrelationsParams) => {
       open(
         <CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(ATTACK_CORRELATIONS_TITLE, getAttackTitleValue(hit)),
+        },
         'inherit'
       );
     },
@@ -181,7 +212,12 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
     ({ hit, alertIds }: OpenAttackEntitiesParams) => {
       open(
         <EntitiesDetails hit={hit} alertIds={alertIds} />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(ATTACK_ENTITIES_TITLE, getAttackTitleValue(hit)),
+        },
         'inherit'
       );
     },

@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import {
+  MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
@@ -119,6 +120,14 @@ export const TemplateSchema = z.object({
    * Whether this template is enabled. Disabled templates are not shown in the case creation flow.
    */
   isEnabled: z.boolean().optional(),
+
+  /**
+   * The originating v1 template `key`, recorded only on templates created by the v1 -> v2 templates
+   * migration. v1 templates were identified by `key` (their `name` was not unique), so this
+   * preserves the exact lineage that a rule's stored legacy key needs to resolve back to the correct
+   * migrated template. Absent on templates created directly in v2.
+   */
+  legacyKey: z.string().min(1).max(MAX_TEMPLATE_KEY_LENGTH).optional(),
 });
 
 export type Template = z.infer<typeof TemplateSchema>;
@@ -138,9 +147,11 @@ export const ParsedTemplateDefinitionSchema = z.object({
    * canonicalized to `name` before validation — see normalize_template_case_defaults). Every case
    * default here is optional — the only thing required to create a template is the template identity
    * name, which lives on the saved-object attributes (edited in "Template details"), not in this
-   * YAML. An empty/`null` value parses to `undefined`.
+   * YAML. Like the other case defaults below, `name` stays lenient and accepts `null` (an empty YAML
+   * value, e.g. `name:` with no value): a cleared title must behave like the other cleared case
+   * defaults and not fail validation. A provided string must still be non-empty (`.min(1)`).
    */
-  name: z.string().min(1).max(MAX_TITLE_LENGTH).optional(),
+  name: z.string().min(1).max(MAX_TITLE_LENGTH).nullable().optional(),
   // Case-default values are optional. The runtime schema intentionally stays lenient and still
   // accepts `null` (an empty YAML value / legacy "no default"): it validates migrated and
   // already-stored definitions, not just newly-authored editor YAML. `buildTemplateYaml` emits

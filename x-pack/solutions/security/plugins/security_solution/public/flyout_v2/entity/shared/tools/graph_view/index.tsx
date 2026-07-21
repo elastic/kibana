@@ -7,10 +7,9 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
 import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import {
   GraphGroupedNodePreviewPanel,
   type GraphGroupedNodePreviewPanelProps,
@@ -19,15 +18,19 @@ import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
+import { buildFlyoutNavTitle } from '../../../../shared/utils/build_flyout_nav_title';
+import {
+  ENTITIES_TITLE,
+  ENTITY_GRAPH_VIEW_TITLE,
+  EVENT_TITLE,
+} from '../../../../shared/constants/flyout_titles';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { GraphVisualization } from '../../../../document/tools/graph/components/graph_visualization';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../../../session_context';
 
-const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.graphView.title', {
-  defaultMessage: 'Graph',
-});
+const TITLE = ENTITY_GRAPH_VIEW_TITLE;
 
 export interface GraphViewProps {
   /** Entity Store v2 id (`entity.id`) to center the graph on. */
@@ -62,12 +65,13 @@ export const GraphView = memo(
     const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
 
     const onShowDocument = useCallback(
-      (documentId: string, indexName?: string) =>
+      (documentId: string, indexName?: string, isEvent?: boolean) =>
         openDocumentFlyoutFromIndexAsChild({
           documentId,
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
+          title: isEvent ? EVENT_TITLE : undefined,
         }),
       [openDocumentFlyoutFromIndexAsChild]
     );
@@ -100,7 +104,14 @@ export const GraphView = memo(
               </FlyoutSessionContextProvider>
             ),
           }),
-          { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            historyKey,
+            session: 'inherit',
+            title: buildFlyoutNavTitle(
+              params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE
+            ),
+          }
         ),
       [
         overlays,
