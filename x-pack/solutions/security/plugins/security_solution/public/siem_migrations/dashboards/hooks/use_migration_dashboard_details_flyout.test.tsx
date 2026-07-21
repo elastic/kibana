@@ -49,9 +49,10 @@ describe('useMigrationDashboardDetailsFlyout', () => {
     rerender();
 
     expect(result.current.migrationDashboardDetailsFlyout).not.toBeNull();
-    expect(result.current.migrationDashboardDetailsFlyout?.props.migrationDashboard).toEqual(
-      migrationDashboardMock
-    );
+    expect(
+      (result.current.migrationDashboardDetailsFlyout as React.ReactElement).props
+        .migrationDashboard
+    ).toEqual(migrationDashboardMock);
 
     act(() => {
       result.current.closeMigrationDashboardDetails();
