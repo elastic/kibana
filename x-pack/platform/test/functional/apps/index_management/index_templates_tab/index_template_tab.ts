@@ -233,8 +233,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.click('advancedOptionsTab');
 
-        // Modify timestamp format
-        await testSubjects.click('comboBoxClearButton');
+        // Modify timestamp format. Clear the pre-populated default date formats first,
+        // retrying until the clear button is gone (i.e. no selected options remain) so a
+        // mid-interaction re-render can't leave the defaults in place before `basic_date` is added.
+        await retry.try(async () => {
+          if (await testSubjects.exists('comboBoxClearButton', { timeout: 2000 })) {
+            await testSubjects.click('comboBoxClearButton');
+          }
+          expect(await testSubjects.exists('comboBoxClearButton', { timeout: 2000 })).to.be(false);
+        });
         await testSubjects.setValue('comboBoxInput', 'basic_date');
         await testSubjects.pressEnter('comboBoxInput');
 

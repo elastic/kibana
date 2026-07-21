@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { DiagnosticResult, estypes } from '@elastic/elasticsearch';
+import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { AiIndexService } from './service';
 import { InvalidAiIndexDestError, AiIndexConflictError, AiIndexNotFoundError } from './errors';
@@ -50,22 +50,12 @@ const createConflictError = () =>
     statusCode: 409,
   });
 
-const buildDataStream = (
-  overrides: Partial<estypes.IndicesDataStream> = {}
-): estypes.IndicesDataStream =>
-  ({
-    name: '.ai-index-ds-customer_support',
-    hidden: false,
-    system: false,
-    ...overrides,
-  } as estypes.IndicesDataStream);
-
 const aiIndexDocument: AiIndexDocument = {
   name: 'customer_support',
   description: 'KIs representing previously answered, commonly asked questions',
-  dest: { type: 'data_stream', value: '.ai-index-ds-customer_support*' },
+  dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
   automations: [{ type: 'workflow', value: 'nightly-refresh' }],
-  sources: [{ type: 'esql', value: 'FROM .ai-index-customer_support | LIMIT 10' }],
+  sources: [{ type: 'esql', value: 'FROM ai-index-customer_support | LIMIT 10' }],
   date_created: '2026-07-08T12:10:30.000Z',
   date_modified: '2026-07-08T12:10:30.000Z',
 };
@@ -78,15 +68,16 @@ describe('AiIndexService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    // Default: a data_stream dest resolves to a visible, user data stream.
-    esClient.indices.getDataStream.mockResponse({
-      data_streams: [buildDataStream()],
-    });
-    // Default: an index dest resolves to a visible, user index.
     esClient.indices.resolveIndex.mockResponse({
-      indices: [{ name: '.ai-index-idx-logs-app', attributes: ['open'] }],
+      indices: [],
       aliases: [],
-      data_streams: [],
+      data_streams: [
+        {
+          name: 'ai-index-ds-customer_support',
+          backing_indices: [],
+          timestamp_field: '@timestamp',
+        },
+      ],
     });
 
     storageClient = {
@@ -107,9 +98,9 @@ describe('AiIndexService', () => {
     const properties = {
       name: 'customer_support',
       description: 'KIs representing previously answered, commonly asked questions',
-      dest: { type: 'data_stream' as const, value: '.ai-index-ds-customer_support*' },
+      dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
       automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
-      sources: [{ type: 'esql' as const, value: 'FROM .ai-index-customer_support | LIMIT 10' }],
+      sources: [{ type: 'esql' as const, value: 'FROM ai-index-customer_support | LIMIT 10' }],
     };
 
     it('creates an AI index with op_type create when none exists', async () => {
@@ -178,62 +169,57 @@ describe('AiIndexService', () => {
       );
     });
 
-    it('rejects a data_stream dest that does not resolve to a data stream', async () => {
-      esClient.indices.getDataStream.mockResponse({ data_streams: [] });
-
-      await expect(service.put('customer_support', properties)).rejects.toBeInstanceOf(
-        InvalidAiIndexDestError
-      );
-      expect(storageClient.index).not.toHaveBeenCalled();
-    });
-
-    it('rejects a data_stream dest that does not exist (404 from get data stream)', async () => {
-      esClient.indices.getDataStream.mockRejectedValue(createNotFoundError());
-
-      await expect(
-        service.put('customer_support', {
-          ...properties,
-          dest: { type: 'data_stream', value: '.ai-index-ds-customer_support' },
-        })
-      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
-      expect(storageClient.index).not.toHaveBeenCalled();
-    });
-
-    it('rejects a system data stream dest', async () => {
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [buildDataStream({ system: true })],
-      });
-
-      await expect(service.put('customer_support', properties)).rejects.toBeInstanceOf(
-        InvalidAiIndexDestError
-      );
-      expect(storageClient.index).not.toHaveBeenCalled();
-    });
-
-    it('allows a hidden but non-system data stream dest', async () => {
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [buildDataStream({ hidden: true, system: false })],
-      });
+    it('allows a data_stream dest with no matches yet (lazy creation)', async () => {
+      esClient.indices.resolveIndex.mockResponse({ indices: [], aliases: [], data_streams: [] });
       storageClient.get.mockRejectedValue(createNotFoundError());
 
       await expect(service.put('customer_support', properties)).resolves.toBe('created');
       expect(storageClient.index).toHaveBeenCalled();
     });
 
-    it('rejects a data_stream dest value not prefixed with .ai-index-ds- without resolving it', async () => {
+    it('allows a data_stream dest when resolveIndex returns 404', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(createNotFoundError());
+      storageClient.get.mockRejectedValue(createNotFoundError());
+
+      await expect(service.put('customer_support', properties)).resolves.toBe('created');
+      expect(storageClient.index).toHaveBeenCalled();
+    });
+
+    it('rejects a data_stream dest when a plain index exists at that name', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [{ name: 'ai-index-ds-customer_support', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+
+      await expect(service.put('customer_support', properties)).rejects.toBeInstanceOf(
+        InvalidAiIndexDestError
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects a data_stream dest value not prefixed with ai-index-ds- without resolving it', async () => {
       await expect(
         service.put('customer_support', {
           ...properties,
           dest: { type: 'data_stream', value: 'customer_support*' },
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
-      expect(esClient.indices.getDataStream).not.toHaveBeenCalled();
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
       expect(storageClient.index).not.toHaveBeenCalled();
     });
 
-    it('rejects a data_stream dest not prefixed with .ai-index-ds-', async () => {
-      esClient.indices.getDataStream.mockResponse({
-        data_streams: [buildDataStream({ name: '.ai-index-idx-customer_support' })],
+    it('rejects a data_stream dest not prefixed with ai-index-ds-', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: 'ai-index-idx-customer_support',
+            backing_indices: [],
+            timestamp_field: '@timestamp',
+          },
+        ],
       });
 
       await expect(service.put('customer_support', properties)).rejects.toBeInstanceOf(
@@ -244,21 +230,40 @@ describe('AiIndexService', () => {
 
     const indexProperties = {
       ...properties,
-      dest: { type: 'index' as const, value: '.ai-index-idx-logs-*' },
+      dest: { type: 'index' as const, value: 'ai-index-idx-logs-*' },
     };
 
     it('creates an index AI index when the value matches an index', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [{ name: 'ai-index-idx-logs-app', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
       storageClient.get.mockRejectedValue(createNotFoundError());
 
       await expect(service.put('logs', indexProperties)).resolves.toBe('created');
       expect(storageClient.index).toHaveBeenCalled();
     });
 
-    it('rejects an index dest that matches no index', async () => {
+    it('allows an index dest that matches no index yet (lazy creation)', async () => {
       esClient.indices.resolveIndex.mockResponse({
         indices: [],
         aliases: [],
-        data_streams: [{ name: 'logs', backing_indices: [], timestamp_field: '@t' }],
+        data_streams: [],
+      });
+      storageClient.get.mockRejectedValue(createNotFoundError());
+
+      await expect(service.put('logs', indexProperties)).resolves.toBe('created');
+      expect(storageClient.index).toHaveBeenCalled();
+    });
+
+    it('rejects an index dest when a data stream exists at that name', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          { name: 'ai-index-idx-logs', backing_indices: [], timestamp_field: '@timestamp' },
+        ],
       });
 
       await expect(service.put('logs', indexProperties)).rejects.toBeInstanceOf(
@@ -269,7 +274,7 @@ describe('AiIndexService', () => {
 
     it('rejects a system index dest', async () => {
       esClient.indices.resolveIndex.mockResponse({
-        indices: [{ name: '.ai-index-idx-security', attributes: ['open', 'hidden', 'system'] }],
+        indices: [{ name: 'ai-index-idx-security', attributes: ['open', 'hidden', 'system'] }],
         aliases: [],
         data_streams: [],
       });
@@ -282,7 +287,7 @@ describe('AiIndexService', () => {
 
     it('allows a hidden but non-system index dest', async () => {
       esClient.indices.resolveIndex.mockResponse({
-        indices: [{ name: '.ai-index-idx-sml-data', attributes: ['open', 'hidden'] }],
+        indices: [{ name: 'ai-index-idx-sml-data', attributes: ['open', 'hidden'] }],
         aliases: [],
         data_streams: [],
       });
@@ -299,7 +304,7 @@ describe('AiIndexService', () => {
 
     it('allows a closed hidden but non-system index dest', async () => {
       esClient.indices.resolveIndex.mockResponse({
-        indices: [{ name: '.ai-index-idx-sml-data', attributes: ['closed', 'hidden'] }],
+        indices: [{ name: 'ai-index-idx-sml-data', attributes: ['closed', 'hidden'] }],
         aliases: [],
         data_streams: [],
       });
@@ -317,8 +322,8 @@ describe('AiIndexService', () => {
     it('rejects a mixed expression that includes a system index', async () => {
       esClient.indices.resolveIndex.mockResponse({
         indices: [
-          { name: '.ai-index-idx-logs-app', attributes: ['open'] },
-          { name: '.ai-index-idx-kibana', attributes: ['open', 'hidden', 'system'] },
+          { name: 'ai-index-idx-logs-app', attributes: ['open'] },
+          { name: 'ai-index-idx-kibana', attributes: ['open', 'hidden', 'system'] },
         ],
         aliases: [],
         data_streams: [],
@@ -327,13 +332,13 @@ describe('AiIndexService', () => {
       await expect(
         service.put('logs', {
           ...indexProperties,
-          dest: { type: 'index', value: '.ai-index-idx-logs-*,.ai-index-idx-kibana*' },
+          dest: { type: 'index', value: 'ai-index-idx-logs-*,ai-index-idx-kibana*' },
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
       expect(storageClient.index).not.toHaveBeenCalled();
     });
 
-    it('rejects an index dest value not prefixed with .ai-index-idx- without resolving it', async () => {
+    it('rejects an index dest value not prefixed with ai-index-idx- without resolving it', async () => {
       await expect(
         service.put('logs', {
           ...indexProperties,
@@ -348,16 +353,16 @@ describe('AiIndexService', () => {
       await expect(
         service.put('logs', {
           ...indexProperties,
-          dest: { type: 'index', value: '.ai-index-idx-logs-*,.kibana*' },
+          dest: { type: 'index', value: 'ai-index-idx-logs-*,.kibana*' },
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
       expect(storageClient.index).not.toHaveBeenCalled();
     });
 
-    it('rejects an index dest not prefixed with .ai-index-idx-', async () => {
+    it('rejects an index dest not prefixed with ai-index-idx-', async () => {
       esClient.indices.resolveIndex.mockResponse({
-        indices: [{ name: '.ai-index-logs-app', attributes: ['open'] }],
+        indices: [{ name: 'ai-index-logs-app', attributes: ['open'] }],
         aliases: [],
         data_streams: [],
       });
