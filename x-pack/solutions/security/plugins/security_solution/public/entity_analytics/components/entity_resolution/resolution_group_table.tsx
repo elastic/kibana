@@ -25,6 +25,8 @@ import {
   getEntitySource,
   getEntityRiskScore,
   truncatedCellCss,
+  truncatedContainerCss,
+  truncatedFlexItemCss,
   type TableEntityRow,
 } from './helpers';
 import {
@@ -143,16 +145,20 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
 
           const nameContent =
             onEntityNameClick && !isCurrentEntity && !showActions ? (
-              <EuiToolTip content={name}>
-                <EuiText size="xs" css={truncatedCellCss}>
-                  <EuiLink onClick={() => onEntityNameClick(entity)}>{name}</EuiLink>
-                </EuiText>
-              </EuiToolTip>
+              <EuiLink css={truncatedCellCss} onClick={() => onEntityNameClick(entity)}>
+                {name}
+              </EuiLink>
             ) : (
               <EuiText size="xs" css={truncatedCellCss}>
                 {name}
               </EuiText>
             );
+
+          const nameWithTooltip = (
+            <EuiToolTip display="block" content={name} anchorProps={{ css: truncatedContainerCss }}>
+              {nameContent}
+            </EuiToolTip>
+          );
 
           if (isTarget) {
             return (
@@ -160,11 +166,9 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
                 gutterSize="xs"
                 alignItems="center"
                 responsive={false}
-                css={truncatedCellCss}
+                css={truncatedContainerCss}
               >
-                <EuiFlexItem grow={false} css={truncatedCellCss}>
-                  {nameContent}
-                </EuiFlexItem>
+                <EuiFlexItem css={truncatedFlexItemCss}>{nameWithTooltip}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
                     content={TARGET_ENTITY_TOOLTIP}
@@ -177,7 +181,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
             );
           }
 
-          return nameContent;
+          return nameWithTooltip;
         },
       },
       {

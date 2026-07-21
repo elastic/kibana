@@ -101,7 +101,6 @@
     "@kbn/core-user-profile-server",
     "@kbn/core-user-profile-server-mocks",
     "@kbn/logging",
-    "@kbn/management-settings-ids",
     "@kbn/agent-context-layer-plugin",
     "@kbn/std",
     "@kbn/use-observable",

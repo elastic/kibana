@@ -13,8 +13,6 @@ import { v4 } from 'uuid';
 import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat/events';
 import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { setAiAssisted } from '../../../../entities/workflows/store/workflow_detail/slice';
 import {
@@ -69,9 +67,6 @@ export const useAgentBuilderIntegration = ({
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
   const { workflowsManagement } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
-  const isExperimentalEnabled = useUiSetting<boolean>(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-  );
   const telemetry = useTelemetry();
   const dispatch = useDispatch();
   const proposalManagerRef = useRef<ProposalManager | null>(null);
@@ -92,7 +87,7 @@ export const useAgentBuilderIntegration = ({
 
   useEffect(() => {
     const editor = editorRef.current;
-    if (!isEditorMounted || !editor || !agentBuilder || !isExperimentalEnabled) {
+    if (!isEditorMounted || !editor || !agentBuilder) {
       return;
     }
 
@@ -294,20 +289,11 @@ export const useAgentBuilderIntegration = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (window as any).__wfTestBridge;
     };
-  }, [
-    isEditorMounted,
-    editorRef,
-    agentBuilder,
-    isExperimentalEnabled,
-    attachmentId,
-    workflowId,
-    telemetry,
-    dispatch,
-  ]);
+  }, [isEditorMounted, editorRef, agentBuilder, attachmentId, workflowId, telemetry, dispatch]);
 
   const openAgentChat = useCallback(
     (options?: OpenAgentChatOptions) => {
-      if (!agentBuilder || !isExperimentalEnabled) {
+      if (!agentBuilder) {
         return;
       }
 
@@ -343,33 +329,30 @@ export const useAgentBuilderIntegration = ({
         chatOpenedReportedRef.current = true;
       }
     },
-    [
-      agentBuilder,
-      isExperimentalEnabled,
-      editorRef,
-      attachmentId,
-      workflowId,
-      workflowName,
-      validationErrors,
-      telemetry,
-    ]
+    [agentBuilder, editorRef, attachmentId, workflowId, workflowName, validationErrors, telemetry]
   );
 
   // Auto-open only on /workflows/create, or on a saved workflow whose sidebar
   // the save thunk requested we restore. Never on an existing workflow the
   // user navigated to directly. Guarded per-mount so a manual close stays.
   useEffect(() => {
-    if (!isEditorMounted || !agentBuilder || !isExperimentalEnabled) return;
-    if (hasAutoOpenedRef.current) return;
+    if (!isEditorMounted || !agentBuilder) {
+      return;
+    }
+    if (hasAutoOpenedRef.current) {
+      return;
+    }
 
     const shouldRestoreForSavedWorkflow =
       workflowId != null && consumeSidebarRestoreFor(workflowId);
 
-    if (workflowId != null && !shouldRestoreForSavedWorkflow) return;
+    if (workflowId != null && !shouldRestoreForSavedWorkflow) {
+      return;
+    }
 
     hasAutoOpenedRef.current = true;
     openAgentChat({ isAutoOpen: true });
-  }, [isEditorMounted, agentBuilder, isExperimentalEnabled, workflowId, openAgentChat]);
+  }, [isEditorMounted, agentBuilder, workflowId, openAgentChat]);
 
   // Close the sidebar on unmount (leaving the workflow scope). Empty deps so
   // it does not fire on prop changes. `application.navigateToApp` remounts
@@ -385,7 +368,7 @@ export const useAgentBuilderIntegration = ({
 
   return {
     openAgentChat,
-    isAgentBuilderAvailable: agentBuilder != null && isExperimentalEnabled,
+    isAgentBuilderAvailable: agentBuilder != null,
     proposalManager: proposalManagerRef.current,
   };
 };
