@@ -209,7 +209,7 @@ const RulesPage = () => {
         tabs={tabs}
         menu={appMenu}
         docLink={docLinks.links.alerting.guide}
-        padding={{ bleed: 'm' }}
+        spacing="bleed"
         back={{
           href: backButtonHref,
           label: i18n.translate('xpack.triggersActionsUI.rulesPage.backButtonLabel', {

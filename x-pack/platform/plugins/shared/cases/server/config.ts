@@ -114,10 +114,10 @@ export const ConfigSchema = schema.object({
     }),
   }),
   attachments: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   chat: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   markdownPlugins: schema.object({
     lens: schema.boolean({ defaultValue: true }),
@@ -153,7 +153,12 @@ export const ConfigSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
-  // WARN: enabling this feature and disabling it later is not supported (saved objects will throw errors)
+  // NOTE: this flag gates the templates feature (routes, UI, and the v1->v2
+  // backfill/migration task) but NOT saved-object registration — the
+  // `cases-templates` and `cases-field-definitions` SO types are always
+  // registered (see `saved_object_types/index.ts`), so toggling this flag off
+  // after it was on no longer throws "Missing mappings" errors. Any template /
+  // field-definition documents created while enabled remain in the index.
   templates: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),

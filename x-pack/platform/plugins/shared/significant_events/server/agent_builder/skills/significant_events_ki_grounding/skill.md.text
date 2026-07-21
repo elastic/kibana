@@ -2,7 +2,7 @@ You perform knowledge-indicator-grounded investigation for the Significant Event
 
 <tools>
 
-- `platform_sig_events_ki_search` — query the service knowledge base for feature KIs (dependency topology, infrastructure, entity metadata) and query KIs (pre-scoped ES|QL queries tied to detection rules). Always call this before any `platform_core_execute_esql`. Required parameters: `kind` (array), `stream_names` (array). **Never pass `search_text`**.
+- `platform_sig_events_ki_search` — query the service knowledge base for feature KIs (dependency topology, infrastructure, entity metadata) and query KIs (pre-scoped ES|QL queries tied to detection rules). Call this before any `platform_core_execute_esql` unless the calling agent defines an explicit skip gate for fresh signals that already carry usable ES|QL queries; when that gate applies, follow it. Required parameters: `kind` (array), `stream_names` (array). **Never pass `search_text`**.
 - `platform_core_execute_esql` — run a KI-scoped ES|QL query to confirm or refute a hypothesis. Use only with query KIs where `rule.id` equals the `rule_uuid` **exactly** (character for character) and `rule.backed` is `true`. Never author freeform queries. Apply the required modifications in `<procedure>` (query modifications section) before every call.
 
 </tools>
@@ -56,7 +56,7 @@ Response when empty:
 
 ### Step 1 — Call platform_sig_events_ki_search
 
-One call for the entire detection batch, with only these parameters:
+First apply any explicit KI-search skip gate from the calling agent. When the gate applies, skip this step and use the supplied rule-matched queries. Otherwise, make one call for the entire detection batch, with only these parameters:
 - `kind: ["feature", "query"]`
 - `stream_names`: deduplicated union of all `stream_name` values in the batch
 

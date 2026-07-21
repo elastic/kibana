@@ -12,7 +12,8 @@ import React from 'react';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
-import { ABOUT_SECTION_TEST_ID, ABOUT_SECTION_TITLE, AboutSection } from './about_section';
+import { ABOUT_SECTION_TEST_ID, AboutSection } from './about_section';
+import { ABOUT_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 
 jest.mock('../../../use_flyout_api');
 
@@ -63,6 +64,7 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
 const alertHit = createMockHit({
   'event.kind': 'signal',
   'kibana.alert.rule.uuid': 'rule-uuid-123',
+  'kibana.alert.rule.name': 'My Rule',
 });
 
 describe('AboutSection', () => {
@@ -135,7 +137,10 @@ describe('AboutSection', () => {
     });
 
     expect(flyoutApi.openRuleFlyout).toHaveBeenCalledTimes(1);
-    expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({ ruleId: 'rule-uuid-123' });
+    expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({
+      ruleId: 'rule-uuid-123',
+      title: 'Rule: My Rule',
+    });
   });
 
   it('renders EventCategoryDescription and EventRenderer for event.kind === event', async () => {

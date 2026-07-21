@@ -117,8 +117,8 @@ describe('callbackConversePayloadSchema', () => {
           ...basePayload.origin,
           author: {
             id: 'U123',
-            name: 'Jane Doe',
-            handle: 'jane',
+            full_name: 'Jane Doe',
+            username: 'jane',
           },
         },
       })
@@ -132,7 +132,7 @@ describe('callbackConversePayloadSchema', () => {
         origin: {
           ...basePayload.origin,
           author: {
-            name: 'Jane Doe',
+            full_name: 'Jane Doe',
           },
         },
       })
@@ -271,8 +271,8 @@ describe('registerChatRoutes', () => {
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       author: {
         id: 'U123',
-        name: 'Jane Doe',
-        handle: 'jane',
+        full_name: 'Jane Doe',
+        username: 'jane',
       },
     };
 

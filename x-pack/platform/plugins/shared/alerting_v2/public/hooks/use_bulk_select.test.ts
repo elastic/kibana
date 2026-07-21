@@ -6,16 +6,16 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
+import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import { useBulkSelect } from './use_bulk_select';
 
 const pageItems = [{ id: 'rule-1' }];
 
 describe('useBulkSelect', () => {
-  it('caps selectedCount at BULK_FILTER_MAX_RULES when select-all and total exceeds cap', () => {
+  it('reports the full logical count in select-all mode without an artificial cap', () => {
     const { result } = renderHook(() =>
       useBulkSelect({
-        totalItemCount: BULK_FILTER_MAX_RULES + 500,
+        totalItemCount: BULK_FILTER_MAX_RESOURCES + 500,
         items: pageItems,
       })
     );
@@ -25,13 +25,13 @@ describe('useBulkSelect', () => {
     });
 
     expect(result.current.isAllSelected).toBe(true);
-    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RULES);
+    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RESOURCES + 500);
   });
 
-  it('does not cap selectedCount when total is at or below BULK_FILTER_MAX_RULES', () => {
+  it('reports the logical count when total is at or below BULK_FILTER_MAX_RESOURCES', () => {
     const { result } = renderHook(() =>
       useBulkSelect({
-        totalItemCount: BULK_FILTER_MAX_RULES,
+        totalItemCount: BULK_FILTER_MAX_RESOURCES,
         items: pageItems,
       })
     );
@@ -40,13 +40,13 @@ describe('useBulkSelect', () => {
       result.current.onSelectAll();
     });
 
-    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RULES);
+    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RESOURCES);
   });
 
-  it('uses logical count when exclusions bring match set below bulk cap', () => {
+  it('subtracts exclusions from the select-all logical count', () => {
     const { result } = renderHook(() =>
       useBulkSelect({
-        totalItemCount: BULK_FILTER_MAX_RULES + 1000,
+        totalItemCount: BULK_FILTER_MAX_RESOURCES + 1000,
         items: pageItems,
       })
     );
@@ -54,7 +54,7 @@ describe('useBulkSelect', () => {
     act(() => {
       result.current.onSelectAll();
     });
-    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RULES);
+    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RESOURCES + 1000);
 
     act(() => {
       for (let i = 0; i < 1500; i++) {
@@ -62,18 +62,30 @@ describe('useBulkSelect', () => {
       }
     });
 
-    const logical = BULK_FILTER_MAX_RULES + 1000 - 1500;
+    const logical = BULK_FILTER_MAX_RESOURCES + 1000 - 1500;
     expect(result.current.selectedCount).toBe(logical);
   });
 
-  it('returns match_all params when select-all with no filter or search', () => {
+  it('returns by-query match_all params when select-all with no filter or search', () => {
     const { result } = renderHook(() => useBulkSelect({ totalItemCount: 10, items: pageItems }));
 
     act(() => {
       result.current.onSelectAll();
     });
 
-    expect(result.current.getBulkParams()).toEqual({ match_all: true });
+    expect(result.current.getBulkParams()).toEqual({ mode: 'by_query', match_all: true });
+  });
+
+  it('returns by-ids params when explicit selection is used', () => {
+    const { result } = renderHook(() =>
+      useBulkSelect({ totalItemCount: 10, items: pageItems, filter: 'enabled: true' })
+    );
+
+    act(() => {
+      result.current.onSelectRow('rule-1');
+    });
+
+    expect(result.current.getBulkParams()).toEqual({ mode: 'by_ids', ids: ['rule-1'] });
   });
 
   it('scopes select-all bulk params to filter', () => {
@@ -89,7 +101,10 @@ describe('useBulkSelect', () => {
       result.current.onSelectAll();
     });
 
-    expect(result.current.getBulkParams()).toEqual({ filter: '(enabled: true)' });
+    expect(result.current.getBulkParams()).toEqual({
+      mode: 'by_query',
+      filter: '(enabled: true)',
+    });
   });
 
   it('passes search as a separate field in bulk params', () => {
@@ -105,7 +120,7 @@ describe('useBulkSelect', () => {
       result.current.onSelectAll();
     });
 
-    expect(result.current.getBulkParams()).toEqual({ search: 'prod' });
+    expect(result.current.getBulkParams()).toEqual({ mode: 'by_query', search: 'prod' });
   });
 
   it('passes filter and search as separate fields with exclusions', () => {
@@ -126,6 +141,7 @@ describe('useBulkSelect', () => {
     });
 
     expect(result.current.getBulkParams()).toEqual({
+      mode: 'by_query',
       filter: '(enabled: true) AND NOT (id: "rule-1")',
       search: 'x',
     });
@@ -148,6 +164,7 @@ describe('useBulkSelect', () => {
     });
 
     expect(result.current.getBulkParams()).toEqual({
+      mode: 'by_query',
       filter: 'NOT (id: "rule-1")',
       search: 'prod',
     });
