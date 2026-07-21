@@ -43,6 +43,11 @@ const initEntityMaintainersRequest: HttpFetchOptionsWithPath = {
   query: { apiVersion: '2' },
 };
 
+const getPreferencesRequest: HttpFetchOptionsWithPath = {
+  path: ENTITY_STORE_ROUTES.internal.PREFERENCES,
+  query: { apiVersion: '2' },
+};
+
 // Detects whether the legacy v1 Entity Store was installed in this space by
 // looking up the legacy `entity-engine-status` saved object. Used to decide
 // whether to auto-install v2 in non-default spaces (only for users who had v1).
@@ -81,6 +86,10 @@ export const useInstallEntityStoreV2 = (services: Services) => {
           if (!hadV1) return;
         }
 
+        const { autoInstall } = await services.http.get<{ autoInstall: boolean }>(
+          getPreferencesRequest
+        );
+        if (!autoInstall) return;
         // Entity store not installed → install entity store (init entity maintainers is already done by the install API).
         await services.http.post(installAllEntitiesRequest);
       } catch (e) {

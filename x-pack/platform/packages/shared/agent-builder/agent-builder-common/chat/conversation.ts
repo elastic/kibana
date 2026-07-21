@@ -331,6 +331,10 @@ export interface ConversationRound {
   pending_prompts?: PromptRequest[];
   /** The user input that initiated the round */
   input: RoundInput;
+  /** Origin metadata for the user input that initiated this round. */
+  origin?: ConversationRoundOrigin;
+  /** Author attribution for the round input, when known (an external system like Slack or GitHub, or a Kibana user). */
+  author?: ConversationRoundAuthor;
   /** List of intermediate steps before the end result, such as tool calls */
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
@@ -347,6 +351,30 @@ export interface ConversationRound {
   trace_id?: string | string[];
   /** Runtime configuration overrides that were applied to this round */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
+}
+
+export interface ConversationOrigin {
+  /** Stable external conversation key, for example a Slack team/channel/thread identifier. */
+  external_conversation_id: string;
+}
+
+export interface ConversationRoundAuthor {
+  /** Stable author identifier (from the external system like Slack or GitHub, or the Kibana user). */
+  id: string;
+  /** Optional username / handle. */
+  username?: string;
+  /** Optional display name. */
+  full_name?: string;
+}
+
+/** External system the message comes from, for example Slack or GitHub. */
+export enum ConversationOriginType {
+  Slack = 'slack',
+}
+
+export interface ConversationRoundOrigin {
+  /** External system the round input came from. */
+  type: ConversationOriginType;
 }
 
 export interface RoundModelUsageStats {
@@ -418,6 +446,8 @@ export interface Conversation {
   workspace_id?: string;
   /** Access mode for the conversation. Missing values are treated as private. */
   access_control?: ConversationAccessControl;
+  /** External origin used to resolve conversations submitted from an external system like Slack or GitHub. */
+  origin?: ConversationOrigin;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

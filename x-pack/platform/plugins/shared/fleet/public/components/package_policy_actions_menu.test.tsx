@@ -7,12 +7,19 @@
 
 import React from 'react';
 
-import { waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 
-import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
+import type { Agent, AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
-import { useMultipleAgentPolicies, useLink, useGetOneAgentPolicy } from '../hooks';
+import {
+  useMultipleAgentPolicies,
+  useLink,
+  useGetOneAgentPolicy,
+  sendBulkUpgradeAgentlessPolicies,
+} from '../hooks';
+import { allowedExperimentalValues } from '../../common/experimental_features';
+import { ExperimentalFeaturesService } from '../services';
 
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 
@@ -21,12 +28,13 @@ jest.mock('../hooks', () => {
     ...jest.requireActual('../hooks'),
     useMultipleAgentPolicies: jest.fn(),
     useGetOneAgentPolicy: jest.fn().mockReturnValue({ data: undefined, isLoading: false }),
+    sendBulkUpgradeAgentlessPolicies: jest.fn(),
     useStartServices: jest.fn().mockReturnValue({
       application: {
         navigateToApp: jest.fn(),
       },
       notifications: {
-        toasts: { addSuccess: jest.fn() },
+        toasts: { addSuccess: jest.fn(), addWarning: jest.fn(), addError: jest.fn() },
       },
       cloud: {
         isCloudEnabled: true,
@@ -86,11 +94,15 @@ function renderMenu({
   packagePolicy,
   showAddAgent = false,
   defaultIsOpen = true,
+  onUpgraded,
+  agent,
 }: {
   agentPolicies: AgentPolicy[];
   packagePolicy: InMemoryPackagePolicy;
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
+  onUpgraded?: () => void;
+  agent?: Agent;
 }) {
   const renderer = createIntegrationsTestRendererMock();
 
@@ -101,11 +113,28 @@ function renderMenu({
       showAddAgent={showAddAgent}
       upgradePackagePolicyHref="/test/upgrade-link"
       defaultIsOpen={defaultIsOpen}
+      onUpgraded={onUpgraded}
+      agent={agent}
       key="test1"
     />
   );
 
   return { utils };
+}
+
+function createMockAgent(props: Partial<Agent> = {}): Agent {
+  return {
+    id: 'agent-uuid',
+    status: 'online',
+    policy_id: 'some-uuid1',
+    last_checkin: new Date().toISOString(),
+    type: 'PERMANENT',
+    active: true,
+    enrolled_at: new Date().toISOString(),
+    local_metadata: {},
+    user_provided_metadata: {},
+    ...props,
+  } as Agent;
 }
 
 function createMockAgentPolicies(props: Partial<AgentPolicy> = {}): AgentPolicy[] {
@@ -176,6 +205,70 @@ describe('PackagePolicyActionsMenu', () => {
       const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
       expect(upgradeButton).not.toBeDisabled();
     });
+  });
+
+  describe('agentless upgrade (disableAgentlessLegacyAPI enabled)', () => {
+    beforeEach(() => {
+      jest.mocked(sendBulkUpgradeAgentlessPolicies).mockReset();
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        ...allowedExperimentalValues,
+        disableAgentlessLegacyAPI: true,
+      });
+    });
+
+    afterEach(() => {
+      jest.mocked(ExperimentalFeaturesService.get).mockRestore();
+    });
+
+    it('upgrades an agentless policy through the agentless API and refreshes on confirm', async () => {
+      jest
+        .mocked(sendBulkUpgradeAgentlessPolicies)
+        .mockResolvedValue([
+          { id: 'some-uuid2', name: 'mock-package-policy', success: true },
+        ] as any);
+      const onUpgraded = jest.fn();
+      const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+      const packagePolicy = createMockPackagePolicy({ hasUpgrade: true, supports_agentless: true });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy, onUpgraded });
+
+      const upgradeButton = await utils.findByTestId('PackagePolicyActionsUpgradeItem');
+      // With the legacy API disabled, the agentless upgrade opens a confirm modal instead of
+      // linking to the (now-blocked) legacy edit route.
+      expect(upgradeButton).not.toHaveAttribute('href');
+
+      await act(async () => {
+        fireEvent.click(upgradeButton);
+      });
+
+      const confirmButton = await utils.findByTestId('confirmModalConfirmButton');
+      await act(async () => {
+        fireEvent.click(confirmButton);
+      });
+
+      await waitFor(() => {
+        expect(sendBulkUpgradeAgentlessPolicies).toHaveBeenCalledWith(['some-uuid2']);
+      });
+      expect(onUpgraded).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the legacy upgrade link for a non-agentless policy', async () => {
+      const agentPolicies = createMockAgentPolicies();
+      const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+
+      const upgradeButton = await utils.findByTestId('PackagePolicyActionsUpgradeItem');
+      expect(upgradeButton).toHaveAttribute('href', '/test/upgrade-link');
+    });
+  });
+
+  it('keeps the legacy upgrade link for an agentless policy while disableAgentlessLegacyAPI is off', async () => {
+    const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true, supports_agentless: true });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+
+    const upgradeButton = await utils.findByTestId('PackagePolicyActionsUpgradeItem');
+    // Flag off (default): the legacy edit-page upgrade still works, so the link is untouched.
+    expect(upgradeButton).toHaveAttribute('href', '/test/upgrade-link');
   });
 
   it('Should not be able to delete integration from a managed policy', async () => {
@@ -264,11 +357,35 @@ describe('PackagePolicyActionsMenu', () => {
       expect(jest.mocked(useLink().getHref)).toHaveBeenCalledWith('integration_policy_edit', {
         packagePolicyId: 'some-uuid2',
       });
+      // Agentless edit links carry the detect-before-read hint so the edit page uses the
+      // agentless API instead of the package-policy API.
+      expect(editButton).toHaveAttribute(
+        'href',
+        '/mock/app/integrations/edit-integration/some-uuid2?isAgentless=true'
+      );
+    });
+  });
+
+  it('Should not append the isAgentless hint to agentless edit links when the agentless policies UI is disabled', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      ...allowedExperimentalValues,
+      enableAgentlessPoliciesUI: false,
+    });
+    const agentPolicies = createMockAgentPolicies({});
+    const packagePolicy = createMockPackagePolicy({
+      supports_agentless: true,
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
+      // Route target is unchanged; only the hint is suppressed so the edit page falls
+      // back to the legacy package-policy APIs.
       expect(editButton).toHaveAttribute(
         'href',
         '/mock/app/integrations/edit-integration/some-uuid2'
       );
     });
+    jest.mocked(ExperimentalFeaturesService.get).mockRestore();
   });
 
   it('Should show Edit integration with correct href when there is no agent policy', async () => {
@@ -466,6 +583,33 @@ describe('PackagePolicyActionsMenu', () => {
       });
     });
 
+    it('should fall back to useGetOneAgentPolicy for cluster_id when the agent policy is a minimal synthesized one', async () => {
+      useGetOneAgentPolicyMock.mockReturnValue({
+        data: {
+          item: {
+            id: 'policy-uuid',
+            agentless: { cluster_id: 'fetched-cluster' },
+          },
+        },
+        isLoading: false,
+      } as any);
+      // The agentless deployments table synthesizes agent policies without `agentless` details.
+      const agentPolicies = [
+        { id: 'policy-uuid', name: 'Test Policy', supports_agentless: true },
+      ] as AgentPolicy[];
+      const packagePolicy = createMockPackagePolicy({
+        supports_agentless: true,
+        policy_ids: ['policy-uuid'],
+        package: { name: 'cloud_security_posture', version: '1.0.0', title: 'CSPM' },
+      });
+      renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(capturedCopyText).toEqual(
+          'elastic-support-bundle\ndeployment_id=abc123def456\ncluster_id=fetched-cluster\npolicy_id=policy-uuid\nintegration=cloud_security_posture'
+        );
+      });
+    });
+
     it('should use project_id instead of deployment_id on serverless', async () => {
       const { useStartServices } = jest.requireMock('../hooks');
       const serverlessReturnValue = {
@@ -503,6 +647,56 @@ describe('PackagePolicyActionsMenu', () => {
           isServerlessEnabled: false,
           deploymentId: 'abc123def456',
         },
+      });
+    });
+  });
+
+  describe('"Details" action', () => {
+    it('should not render for non-agentless policies', async () => {
+      const agentPolicies = createMockAgentPolicies();
+      const packagePolicy = createMockPackagePolicy({ supports_agentless: false });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(utils.queryByTestId('PackagePolicyActionsDetailsItem')).toBeNull();
+      });
+    });
+
+    it('should render and be disabled for agentless policies when no agent is enrolled', async () => {
+      const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+      const packagePolicy = createMockPackagePolicy({ supports_agentless: true });
+      // No `agent` prop — not yet enrolled
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        const detailsItem = utils.getByTestId('PackagePolicyActionsDetailsItem');
+        expect(detailsItem).not.toBeNull();
+        expect(detailsItem).toBeDisabled();
+      });
+    });
+
+    it('should render and be enabled for agentless policies when an agent is enrolled', async () => {
+      const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+      const packagePolicy = createMockPackagePolicy({ supports_agentless: true });
+      const agent = createMockAgent();
+      const { utils } = renderMenu({ agentPolicies, packagePolicy, agent });
+      await waitFor(() => {
+        const detailsItem = utils.getByTestId('PackagePolicyActionsDetailsItem');
+        expect(detailsItem).not.toBeDisabled();
+      });
+    });
+
+    it('should open the status details flyout when clicked', async () => {
+      const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+      const packagePolicy = createMockPackagePolicy({ supports_agentless: true });
+      const agent = createMockAgent();
+      const { utils } = renderMenu({ agentPolicies, packagePolicy, agent });
+
+      const detailsItem = await utils.findByTestId('PackagePolicyActionsDetailsItem');
+      await act(async () => {
+        fireEvent.click(detailsItem);
+      });
+
+      await waitFor(() => {
+        expect(utils.getByTestId('agentlessStatusDetailsFlyout')).not.toBeNull();
       });
     });
   });

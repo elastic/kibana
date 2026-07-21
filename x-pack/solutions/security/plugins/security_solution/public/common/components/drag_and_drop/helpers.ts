@@ -6,7 +6,7 @@
  */
 import { keyBy } from 'lodash/fp';
 import type { DropResult } from '@hello-pangea/dnd';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import type { ActionCreator } from 'typescript-fsa';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 

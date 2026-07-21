@@ -1194,6 +1194,56 @@ describe('execute()', () => {
       }
     );
 
+    test('serializes a non-string response body message instead of logging [object Object]', async () => {
+      const config: ConnectorTypeConfigType = {
+        url: 'https://abc.def/my-webhook',
+        method: WebhookMethods.POST,
+        headers: {
+          aheader: 'a value',
+        },
+        authType: AuthType.Basic,
+        hasAuth: true,
+      };
+
+      requestMock.mockRejectedValueOnce(
+        createTaskRunError(
+          {
+            tag: 'err',
+            isAxiosError: true,
+            response: {
+              status: 404,
+              statusText: 'Not Found',
+              data: { message: { code: 'invalid', detail: 'bad request' } },
+            },
+          } as unknown as Error,
+          TaskErrorSource.USER
+        )
+      );
+
+      const result = await connectorType.executor({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: {
+          user: 'abc',
+          password: '123',
+          key: null,
+          crt: null,
+          pfx: null,
+          clientSecret: null,
+          secretHeaders: null,
+        },
+        params: { body: 'some data' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result.serviceMessage).toBe(
+        '[404] Not Found: {"code":"invalid","detail":"bad request"}'
+      );
+    });
+
     it('should log an error if refreshing access token fails', async () => {
       const errorMessage = 'Invalid client or Invalid client credentials';
       (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValueOnce(

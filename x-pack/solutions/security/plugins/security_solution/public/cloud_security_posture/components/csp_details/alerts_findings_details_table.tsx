@@ -38,7 +38,7 @@ import {
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import type { ESBoolQuery } from '../../../../common/typed_json';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_time_range';
 import { useUiSetting } from '../../../common/lib/kibana';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
@@ -92,6 +92,7 @@ export const AlertsDetailsTable = memo(
     entityId,
     entityType,
     onShowAlert,
+    scopeId,
   }: {
     field: CloudPostureEntityIdentifier;
     value: string;
@@ -99,7 +100,13 @@ export const AlertsDetailsTable = memo(
     entityId?: string;
     entityType?: 'host' | 'user';
     /** Callback executed after opening the alert details for a row. */
-    onShowAlert: (eventId: string, indexName: string) => void;
+    onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void;
+    /**
+     * Scope ID of the table or panel that opened this flyout. When the scope has
+     * a registered time-range override in {@link SCOPE_ALERT_TIME_RANGE_OVERRIDES}
+     * that window is used for the alerts query instead of the global time range.
+     */
+    scopeId?: string;
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -141,7 +148,7 @@ export const AlertsDetailsTable = memo(
       };
     };
 
-    const { to, from } = useGlobalTime();
+    const { from, to } = useAlertTimeRange(scopeId);
     const timerange = encode({
       global: {
         [URL_PARAM_KEY.timerange]: {
@@ -333,7 +340,7 @@ export const AlertsDetailsTable = memo(
         name: '',
         width: '5%',
         render: (id: string, alert: ContextualFlyoutAlertsField) => (
-          <EuiLink onClick={() => onShowAlert(id, alert.index)}>
+          <EuiLink onClick={() => onShowAlert(id, alert.index, alert[KIBANA_ALERTS.RULE_NAME])}>
             <EuiIcon type={'expand'} aria-hidden={true} />
           </EuiLink>
         ),

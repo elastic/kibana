@@ -388,9 +388,11 @@ describe('Stack Alerts Only Feature Privileges', () => {
     expect(readPrivilege?.api).toContain('rac');
   });
 
-  test('both privileges grant access to triggers/actions management', () => {
-    expect(allPrivilege?.management?.insightsAndAlerting).toContain('triggersActions');
-    expect(readPrivilege?.management?.insightsAndAlerting).toContain('triggersActions');
+  test('both privileges grant access to the Alerts management link but not Rules', () => {
+    expect(allPrivilege?.management?.insightsAndAlerting).toContain('triggersActionsAlerts');
+    expect(readPrivilege?.management?.insightsAndAlerting).toContain('triggersActionsAlerts');
+    expect(allPrivilege?.management?.insightsAndAlerting).not.toContain('triggersActionsRules');
+    expect(readPrivilege?.management?.insightsAndAlerting).not.toContain('triggersActionsRules');
   });
 
   test('"all" privilege grants the "write" UI capability for alert-modify actions', () => {

@@ -26,6 +26,8 @@ import {
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import { DETECTION_RULE_DUPLICATE_EVENT } from '../../../../../telemetry/event_based/events';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 import { validateRuleResponseActions as _validateRuleResponseActions } from '../../../../../../endpoint/services';
 import { duplicateExceptions as _duplicateExceptions } from '../../../logic/actions/duplicate_exceptions';
@@ -840,6 +842,8 @@ describe('Perform bulk action route', () => {
         },
       ];
       duplicateExceptionsMock.mockResolvedValue(clonedExceptions);
+      const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
+      context.securitySolution.getAnalytics.mockReturnValue(analytics);
 
       const request = requestMock.create({
         method: 'post',
@@ -865,6 +869,10 @@ describe('Perform bulk action route', () => {
         })
       );
       expect(clients.rulesClient.update).not.toHaveBeenCalled();
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        DETECTION_RULE_DUPLICATE_EVENT.eventType,
+        expect.objectContaining({ ruleType: 'query' })
+      );
     });
 
     it('creates the duplicate rule with empty exceptions when include_exceptions is false', async () => {

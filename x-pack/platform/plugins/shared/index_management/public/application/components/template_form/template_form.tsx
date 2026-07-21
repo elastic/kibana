@@ -277,7 +277,7 @@ export const TemplateForm = ({
       <AppHeader
         title={title}
         back="/app/management/data/index_management/templates"
-        padding={{ bleed: 'l' }}
+        spacing="bleed"
       />
 
       <EuiPageSection restrictWidth style={{ width: '100%' }} paddingSize="none">

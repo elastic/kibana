@@ -233,24 +233,29 @@ export class AssetManagerClient {
       }
       await this.stop(type);
 
+      // Per-type saved objects — always safe to remove for this type alone.
       await Promise.all([
         this.engineDescriptorClient.delete(type),
         this.remoteLogExtractionStateClient.delete(type),
-        uninstallElasticsearchAssets({
-          esClient: this.esClient,
-          logger: this.logger.get(type),
-          namespace: this.namespace,
-        }),
-        deleteEuidStoredScripts({
-          esClient: this.esClient,
-          logger: this.logger,
-        }),
       ]);
 
+      // The ES indices/data streams and the EUID stored scripts are shared across all
+      // entity types in the namespace (their names carry the namespace, not the type).
+      // Only remove them once no engine remains — otherwise the surviving engines lose
+      // the read/write targets and scripts their extraction queries still depend on.
       const remainingEngines = await this.engineDescriptorClient.getAll();
       if (remainingEngines.length === 0) {
-        this.logger.debug(`Deleting global state because last engine was uninstalled`);
+        this.logger.debug(`Removing shared assets because last engine was uninstalled`);
         await Promise.all([
+          uninstallElasticsearchAssets({
+            esClient: this.esClient,
+            logger: this.logger.get(type),
+            namespace: this.namespace,
+          }),
+          deleteEuidStoredScripts({
+            esClient: this.esClient,
+            logger: this.logger,
+          }),
           this.globalStateClient.delete(),
           stopStatusReportTask({
             taskManager: this.taskManager,
@@ -501,7 +506,6 @@ export class AssetManagerClient {
         installed: true,
         resource: 'task',
         status: task.state.status ?? null,
-        remainingLogsToExtract: await this.logsExtractionClient.getRemainingLogsCount(type),
         runs: task.state.runs ?? 0,
         lastError: task.state.lastError ?? null,
       };

@@ -9,11 +9,7 @@ import React from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { QuickSnoozePanel } from './quick_snooze_panel';
 import { ConditionalSnoozePanel } from './conditional_snooze_panel';
-import type {
-  ConditionalSnoozeSchedule,
-  DataConditionTypeDescriptor,
-  SnoozePanelTab,
-} from './types';
+import type { ConditionalSnoozeSchedule, SnoozePanelTab } from './types';
 import * as i18n from './translations';
 
 /** Fixed width so the panel doesn't resize when switching between tabs. */
@@ -29,7 +25,9 @@ export interface SnoozeFormBodyProps {
   onTabChange: (tab: SnoozePanelTab) => void;
   onQuickScheduleChange: (endDate: string | null | undefined) => void;
   onConditionalScheduleChange: (schedule: ConditionalSnoozeSchedule | undefined) => void;
-  dataConditionTypes?: readonly DataConditionTypeDescriptor[];
+  /** Leaf-level scalar alert field names for the `field_change` condition dropdown. */
+  fieldOptions?: string[];
+  isLoadingFields?: boolean;
 }
 
 /**
@@ -42,7 +40,8 @@ export const SnoozeFormBody = ({
   onTabChange,
   onQuickScheduleChange,
   onConditionalScheduleChange,
-  dataConditionTypes,
+  fieldOptions,
+  isLoadingFields,
 }: SnoozeFormBodyProps) => (
   <div style={{ width: SNOOZE_PANEL_WIDTH, padding: '12px 16px 0' }}>
     <EuiButtonGroup
@@ -59,7 +58,8 @@ export const SnoozeFormBody = ({
     {activeTab === 'conditional' && (
       <ConditionalSnoozePanel
         onScheduleChange={onConditionalScheduleChange}
-        dataConditionTypes={dataConditionTypes}
+        fieldOptions={fieldOptions}
+        isLoadingFields={isLoadingFields}
       />
     )}
   </div>

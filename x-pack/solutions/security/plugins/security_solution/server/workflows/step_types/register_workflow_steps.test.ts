@@ -16,6 +16,8 @@ import { setAttackTagsStepDefinition } from './set_attack_tags_step/set_attack_t
 import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
 import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_step';
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
+import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
+import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
@@ -27,7 +29,7 @@ describe('registerWorkflowSteps (server)', () => {
       publicAttacksApiEnabled: true,
     } as ExperimentalFeatures);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(8);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(10);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );
@@ -52,6 +54,12 @@ describe('registerWorkflowSteps (server)', () => {
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       setAttackTagsStepDefinition
     );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      enableRuleStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      disableRuleStepDefinition
+    );
   });
 
   it('does not register the attack steps when publicAttacksApiEnabled is false', () => {
@@ -61,7 +69,7 @@ describe('registerWorkflowSteps (server)', () => {
       publicAttacksApiEnabled: false,
     } as ExperimentalFeatures);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(5);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
     const registeredSteps = workflowsExtensions.registerStepDefinition.mock.calls.map(
       ([arg]) => arg
     );

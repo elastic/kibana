@@ -58,6 +58,7 @@ function createMockDeps() {
   const coreStart = {
     savedObjects: {
       createInternalRepository: mockCreateInternalRepository.mockReturnValue({}),
+      getScopedClient: jest.fn().mockReturnValue({}),
     },
     elasticsearch: {
       client: {

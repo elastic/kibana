@@ -26,6 +26,8 @@ export interface LifecycleBarProps {
   editedPhaseName?: string;
   canManageLifecycle: boolean;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
   frozenPhaseCallouts?: FrozenPhaseCallouts;
 }
 
@@ -41,6 +43,7 @@ const renderLifecyclePhase = (
   editedPhaseName?: string,
   canManageLifecycle?: boolean,
   isEditLifecycleFlyoutOpen?: boolean,
+  disableInteractions?: boolean,
   testSubjPrefix?: string,
   frozenPhaseCallouts?: FrozenPhaseCallouts
 ) => {
@@ -68,6 +71,7 @@ const renderLifecyclePhase = (
     isBeingEdited: Boolean(editedPhaseName && editedPhaseName === phase.label),
     canManageLifecycle: canManageLifecycle ?? false,
     isEditLifecycleFlyoutOpen,
+    disableInteractions,
   };
 
   const isFrozenPhase = phase.name === 'frozen';
@@ -101,6 +105,7 @@ export const LifecycleBar: React.FC<LifecycleBarProps> = ({
   editedPhaseName,
   canManageLifecycle,
   isEditLifecycleFlyoutOpen,
+  disableInteractions,
   frozenPhaseCallouts,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -129,7 +134,6 @@ export const LifecycleBar: React.FC<LifecycleBarProps> = ({
           responsive={false}
           css={{
             gridTemplateColumns,
-            paddingInline: euiTheme.size.xxs,
             boxSizing: 'border-box',
             height: '100%',
           }}
@@ -161,6 +165,7 @@ export const LifecycleBar: React.FC<LifecycleBarProps> = ({
                 editedPhaseName,
                 canManageLifecycle,
                 isEditLifecycleFlyoutOpen,
+                disableInteractions,
                 testSubjPrefix,
                 frozenPhaseCallouts
               )}

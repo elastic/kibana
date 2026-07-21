@@ -6,19 +6,20 @@
  */
 
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import {
-  API_VERSIONS,
-  ATTACK_DISCOVERY_GENERATE,
-  PostAttackDiscoveryGenerateResponse,
-} from '@kbn/elastic-assistant-common';
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useState } from 'react';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
 import { useKibana } from '../../../common/lib/kibana';
+import { AttackDiscoveryEventTypes } from '../../../common/lib/telemetry';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { getErrorToastText } from '../helpers';
-import { getRequestBody } from './helpers';
-import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../translations';
+import { callInternalGenerateApi, callPublicGenerateApi, getRequestBody } from './helpers';
+import {
+  ALERTS_INDEX_PATTERN_ERROR,
+  CONNECTOR_ERROR,
+  ERROR_GENERATING_ATTACK_DISCOVERIES,
+} from '../translations';
 import * as i18n from './translations';
 import { useInvalidateGetAttackDiscoveryGenerations } from '../use_get_attack_discovery_generations';
 
@@ -33,6 +34,7 @@ interface FetchAttackDiscoveriesOptions {
   overrideStart?: string;
   size?: number;
   start?: string;
+  trigger?: 'manual' | 'save_and_run';
 }
 
 export interface UseAttackDiscovery {
@@ -53,9 +55,14 @@ export const useAttackDiscovery = ({
 }): UseAttackDiscovery => {
   // get Kibana services and connectors
   const {
+    featureFlags,
     http,
     notifications: { toasts },
+    telemetry,
   } = useKibana().services;
+
+  // Get current space ID for workflow configuration
+  const spaceId = useSpaceId();
 
   // loading boilerplate:
   const [isLoading, setIsLoading] = useState(false);
@@ -78,6 +85,7 @@ export const useAttackDiscovery = ({
           options?.overrideFilter ?? (!isEmpty(options?.filter) ? options?.filter : undefined);
         const effectiveStart = options?.overrideStart ?? options?.start;
         const effectiveConnectorId = options?.overrideConnectorId ?? connectorId;
+        const effectiveTrigger = options?.trigger ?? 'manual';
 
         if (!effectiveConnectorId) {
           throw new Error(CONNECTOR_ERROR);
@@ -101,21 +109,53 @@ export const useAttackDiscovery = ({
         };
         setLoadingConnectorId?.(effectiveConnectorId ?? null);
 
-        // call the API to generate attack discoveries:
-        const rawResponse = await http.post(ATTACK_DISCOVERY_GENERATE, {
-          body: JSON.stringify(bodyWithOverrides),
-          version: API_VERSIONS.public.v1,
-        });
+        // Check if workflow integration feature flag is enabled
+        const attackDiscoveryWorkflowsEnabled = await featureFlags.getBooleanValue(
+          'securitySolution.attackDiscoveryWorkflowsEnabled',
+          false
+        );
 
-        const parsedResponse = PostAttackDiscoveryGenerateResponse.safeParse(rawResponse);
+        // Call appropriate API based on feature flag
+        if (attackDiscoveryWorkflowsEnabled) {
+          if (!alertsIndexPattern) {
+            throw new Error(ALERTS_INDEX_PATTERN_ERROR);
+          }
 
-        if (!parsedResponse.success) {
-          throw new Error('Failed to parse the response');
+          telemetry.reportEvent(AttackDiscoveryEventTypes.GenerationStarted, {
+            execution_mode: 'workflow',
+            trigger: effectiveTrigger,
+          });
+
+          await callInternalGenerateApi({
+            alertsIndexPattern,
+            apiConfig: {
+              actionTypeId: bodyWithOverrides.apiConfig.actionTypeId,
+              connectorId: bodyWithOverrides.apiConfig.connectorId,
+              model: bodyWithOverrides.apiConfig.model,
+            },
+            end: effectiveEnd,
+            filter: effectiveFilter,
+            http,
+            size: effectiveSize,
+            spaceId: spaceId ?? null,
+            start: effectiveStart,
+          });
+        } else {
+          telemetry.reportEvent(AttackDiscoveryEventTypes.GenerationStarted, {
+            execution_mode: 'legacy',
+            trigger: effectiveTrigger,
+          });
+
+          await callPublicGenerateApi({
+            body: bodyWithOverrides,
+            http,
+          });
         }
 
+        // Show success toast
         toasts?.addSuccess({
-          title: i18n.GENERATION_STARTED_TITLE,
           text: i18n.GENERATION_STARTED_TEXT(options?.overrideConnectorName ?? connectorName),
+          title: i18n.GENERATION_STARTED_TITLE,
         });
       } catch (error) {
         setIsLoading(false);
@@ -132,10 +172,13 @@ export const useAttackDiscovery = ({
       anonymizationFields,
       connectorId,
       connectorName,
+      featureFlags,
       http,
       invalidateGetAttackDiscoveryGenerations,
       setLoadingConnectorId,
       size,
+      spaceId,
+      telemetry,
       toasts,
       traceOptions,
     ]

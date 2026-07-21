@@ -133,6 +133,28 @@ describe('findUserActions', () => {
       );
     });
 
+    it('matches comment content stored in the unified `data.content` shape', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          payload: {
+            comment: {
+              type: 'user',
+              data: { content: 'Unified schema comment' },
+              owner: 'securitySolution',
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'unified schema' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+    });
+
     it('search is case-insensitive', async () => {
       const result = await find(
         { caseId: 'test-case', params: { search: 'hello' } },
@@ -419,6 +441,201 @@ describe('findUserActions', () => {
       expect(result.total).toBe(1);
     });
 
+    it('matches file names on unified file attachments', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          payload: {
+            comment: {
+              type: 'file',
+              owner: 'securitySolution',
+              attachmentId: 'attachment-1',
+              metadata: {
+                files: [
+                  {
+                    name: 'screenshot-error.png',
+                    extension: 'png',
+                    mimeType: 'image/png',
+                    created: '2024-01-01T00:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'screenshot-error' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+    });
+
+    it('matches file names on legacy externalReference file attachments', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          payload: {
+            comment: {
+              type: 'externalReference',
+              owner: 'securitySolution',
+              externalReferenceAttachmentTypeId: '.files',
+              externalReferenceId: 'file-1',
+              externalReferenceStorage: { type: 'savedObject', soType: 'file' },
+              externalReferenceMetadata: {
+                files: [
+                  {
+                    name: 'legacy-attachment.pdf',
+                    extension: 'pdf',
+                    mimeType: 'application/pdf',
+                    created: '2024-01-01T00:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'legacy-attachment' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+    });
+
+    it('matches any file name when a legacy attachment holds multiple files', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          payload: {
+            comment: {
+              type: 'externalReference',
+              owner: 'securitySolution',
+              externalReferenceAttachmentTypeId: '.files',
+              externalReferenceId: 'file-1',
+              externalReferenceStorage: { type: 'savedObject', soType: 'file' },
+              externalReferenceMetadata: {
+                files: [
+                  {
+                    name: 'first-file.txt',
+                    extension: 'txt',
+                    mimeType: 'text/plain',
+                    created: '2024-01-01T00:00:00Z',
+                  },
+                  {
+                    name: 'second-file.csv',
+                    extension: 'csv',
+                    mimeType: 'text/csv',
+                    created: '2024-01-01T00:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'second-file' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+    });
+
+    it('does not throw when a file entry is missing a name', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          payload: {
+            comment: {
+              type: 'file',
+              owner: 'securitySolution',
+              attachmentId: 'attachment-1',
+              metadata: {
+                files: [{ extension: 'png', mimeType: 'image/png', created: '2024-01-01' }],
+              },
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'anything' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(0);
+    });
+
+    it('does not throw when file metadata is missing or malformed', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          payload: {
+            comment: {
+              type: 'file',
+              owner: 'securitySolution',
+              attachmentId: 'attachment-1',
+              metadata: { files: null },
+            },
+          },
+        }),
+        createMockUserActionSO({
+          payload: {
+            comment: {
+              type: 'file',
+              owner: 'securitySolution',
+              attachmentId: 'attachment-2',
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'anything' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(0);
+    });
+
+    it('does not match unrelated file names', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          payload: {
+            comment: {
+              type: 'file',
+              owner: 'securitySolution',
+              attachmentId: 'attachment-1',
+              metadata: {
+                files: [
+                  {
+                    name: 'screenshot-error.png',
+                    extension: 'png',
+                    mimeType: 'image/png',
+                    created: '2024-01-01T00:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'nonexistent-file' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(0);
+    });
+
     it('matches assignee profile uids', async () => {
       clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
         createMockUserActionSO({
@@ -447,11 +664,23 @@ describe('findUserActions', () => {
       });
     });
 
-    it('passes author to the finder service', async () => {
-      await find({ caseId: 'test-case', params: { author: 'testuser' } }, client, clientArgs);
+    it('passes authors to the finder service', async () => {
+      await find({ caseId: 'test-case', params: { authors: ['testuser'] } }, client, clientArgs);
 
       expect(clientArgs.services.userActionService.finder.find).toHaveBeenCalledWith(
-        expect.objectContaining({ author: 'testuser' })
+        expect.objectContaining({ authors: ['testuser'] })
+      );
+    });
+
+    it('passes multiple authors to the finder service', async () => {
+      await find(
+        { caseId: 'test-case', params: { authors: ['testuser', 'otheruser'] } },
+        client,
+        clientArgs
+      );
+
+      expect(clientArgs.services.userActionService.finder.find).toHaveBeenCalledWith(
+        expect.objectContaining({ authors: ['testuser', 'otheruser'] })
       );
     });
   });

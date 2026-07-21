@@ -51,6 +51,7 @@ export type { ToolResultStore, WritableToolResultStore, ToolResultWithMeta } fro
 export type { AttachmentsService } from './attachments_service';
 export type { SkillsService, SkillRegistryListOptions } from './skills_service';
 export type { PluginsService } from './plugins_service';
+export type { RenderersService } from './renderers_service';
 export type { ToolManager } from './tool_manager';
 export { ToolManagerToolType } from './tool_manager';
 export type { SkillsStore, WritableSkillsStore } from './skills_store';

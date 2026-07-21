@@ -27,7 +27,7 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
           defaultMessage: 'Create enrich policy',
         })}
         back="/app/management/data/index_management/enrich_policies"
-        padding={{ bleed: 'l' }}
+        spacing="bleed"
         docLink={documentationService.getCreateEnrichPolicyLink()}
       />
       <EuiSpacer size="l" />

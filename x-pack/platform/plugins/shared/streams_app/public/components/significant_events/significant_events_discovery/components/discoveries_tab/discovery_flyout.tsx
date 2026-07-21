@@ -24,35 +24,35 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Discovery } from '@kbn/significant-events-schema';
+import { getSeverityLabel, type Discovery } from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { CHANGE_TYPE_LABELS, DISCOVERY_KIND_LABELS } from '../shared/translations';
 import { DISCOVERY_KIND_COLORS } from '../shared/constants';
 
 const timelineLabel = (entry: Discovery, prev: Discovery | undefined): string => {
-  const criticality = entry.criticality ?? '-';
+  const severity = getSeverityLabel(entry.severity);
   switch (entry.kind) {
     case 'discovery':
       if (prev?.kind === 'clearance') {
         return i18n.translate('xpack.streams.discoveryFlyout.transition.reopened', {
-          defaultMessage: 'Re-opened — Criticality {criticality}',
-          values: { criticality },
+          defaultMessage: 'Re-opened — Severity: {severity}',
+          values: { severity },
         });
       }
       if (prev?.kind === 'discovery') {
         return i18n.translate('xpack.streams.discoveryFlyout.transition.updated', {
-          defaultMessage: 'Updated — Criticality {criticality}',
-          values: { criticality },
+          defaultMessage: 'Updated — Severity: {severity}',
+          values: { severity },
         });
       }
       return i18n.translate('xpack.streams.discoveryFlyout.transition.found', {
-        defaultMessage: 'Found — Criticality {criticality}',
-        values: { criticality },
+        defaultMessage: 'Found — Severity: {severity}',
+        values: { severity },
       });
     case 'clearance':
       return i18n.translate('xpack.streams.discoveryFlyout.transition.cleared', {
-        defaultMessage: 'Cleared — Criticality {criticality}',
-        values: { criticality },
+        defaultMessage: 'Cleared — Severity: {severity}',
+        values: { severity },
       });
     default:
       return entry.kind;
@@ -75,27 +75,24 @@ export const DiscoveryFlyout = ({
   const titleId = useGeneratedHtmlId();
 
   const streams = useMemo(() => {
-    const names = [
-      ...new Set(
-        (discovery.detections ?? []).map((d) => d.stream_name).filter((s): s is string => !!s)
-      ),
-    ];
+    const names = [...new Set((discovery.stream_names ?? []).filter((s): s is string => !!s))];
     return names.join(', ') || '-';
   }, [discovery]);
 
   const diagnostics = useMemo(
     () => [
       {
-        title: i18n.translate('xpack.streams.discoveryFlyout.criticality', {
-          defaultMessage: 'Criticality',
+        title: i18n.translate('xpack.streams.discoveryFlyout.severity', {
+          defaultMessage: 'Severity',
         }),
-        description: discovery.criticality != null ? String(discovery.criticality) : '-',
+        description: getSeverityLabel(discovery.severity),
       },
       {
         title: i18n.translate('xpack.streams.discoveryFlyout.confidence', {
           defaultMessage: 'Confidence',
         }),
-        description: discovery.confidence != null ? `${discovery.confidence}%` : '-',
+        description:
+          discovery.confidence != null ? `${Math.round(discovery.confidence * 100)}%` : '-',
       },
       {
         title: i18n.translate('xpack.streams.discoveryFlyout.streams', {
@@ -122,7 +119,7 @@ export const DiscoveryFlyout = ({
           <h2 id={titleId}>{discovery.title}</h2>
         </EuiTitle>
         <EuiText size="s" color="subdued">
-          {discovery.discovery_slug}
+          {discovery.event_id}
         </EuiText>
       </EuiFlyoutHeader>
 
@@ -150,55 +147,38 @@ export const DiscoveryFlyout = ({
 
         <EuiTitle size="xs">
           <h3>
-            {i18n.translate('xpack.streams.discoveryFlyout.rootCause', {
-              defaultMessage: 'Root Cause',
-            })}
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s">{discovery.root_cause}</EuiText>
-
-        <EuiSpacer size="l" />
-
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('xpack.streams.discoveryFlyout.detectionsSection', {
-              defaultMessage: 'Detections',
+            {i18n.translate('xpack.streams.discoveryFlyout.signalsSection', {
+              defaultMessage: 'Signals',
             })}
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiListGroup maxWidth={false}>
-          {(discovery.detections ?? []).map((det, idx) => (
+          {(discovery.signals ?? []).map((signal, idx) => (
             <EuiFlexGroup
-              key={det.detection_id ?? idx}
+              key={signal.metadata?.detection_id ?? idx}
               gutterSize="s"
               alignItems="flexStart"
               responsive={false}
               style={{ padding: '4px 0' }}
             >
-              <EuiFlexItem grow={false} style={{ paddingTop: 2 }}>
-                <EuiBadge color="hollow">
-                  {CHANGE_TYPE_LABELS[det.change_point_type ?? ''] ?? det.change_point_type ?? '-'}
-                </EuiBadge>
-              </EuiFlexItem>
+              {signal.metadata?.change_point_type && (
+                <EuiFlexItem grow={false} style={{ paddingTop: 2 }}>
+                  <EuiBadge color="hollow">
+                    {CHANGE_TYPE_LABELS[signal.metadata.change_point_type] ??
+                      signal.metadata.change_point_type}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem>
                 <EuiText size="s">
-                  <strong>{det.rule_name}</strong>
+                  <strong>{signal.metadata?.rule_name ?? signal.type}</strong>
                 </EuiText>
-                <EuiText size="xs" color="subdued">
-                  {[
-                    det.stream_name,
-                    det.alert_count != null
-                      ? i18n.translate('xpack.streams.discoveryFlyout.alertCount', {
-                          defaultMessage: '{count} alerts',
-                          values: { count: det.alert_count },
-                        })
-                      : null,
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </EuiText>
+                {signal.stream_name && (
+                  <EuiText size="xs" color="subdued">
+                    {signal.stream_name}
+                  </EuiText>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           ))}

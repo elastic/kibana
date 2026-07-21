@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FieldTypesProvider } from '../../../threat_intelligence/containers/field_types_provider';
@@ -16,8 +16,9 @@ import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
-import { useTabs } from './hooks/use_tabs';
-import { getTabsDisplayed } from './tabs';
+import { useTabs } from '../../shared/hooks/use_tabs';
+import { getTabsDisplayed, type RightPanelPaths, validTabIds } from './tabs';
+import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
 
 /**
  * Styles applied to the EuiFlyoutBody so the JSON tab's Monaco editor
@@ -53,7 +54,10 @@ export const IOCDetails: FC<IOCDetailsProps> = memo(({ hit, renderCellActions })
     [hit]
   );
 
-  const { selectedTabId, setSelectedTabId } = useTabs({});
+  const { selectedTabId, setSelectedTabId } = useTabs<RightPanelPaths>({
+    validTabIds,
+    storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
+  });
 
   const onViewAllFieldsInTable = useCallback(() => {
     setSelectedTabId('table');

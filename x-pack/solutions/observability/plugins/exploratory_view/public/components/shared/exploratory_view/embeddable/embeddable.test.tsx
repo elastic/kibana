@@ -173,6 +173,24 @@ describe('Embeddable', () => {
     );
   });
 
+  it('disables the built-in cases action to avoid a duplicate "Add to case" entry', () => {
+    render(
+      <Embeddable
+        caseOwner={mockOwner}
+        customTimeRange={mockTimeRange}
+        dataViewState={mockDataViews}
+        lens={mockLens}
+        reportType={mockReportType}
+        withActions={mockActions}
+        attributes={[]}
+      />
+    );
+
+    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].disabledActions).toEqual([
+      'embeddable_addToExistingCase',
+    ]);
+  });
+
   it('renders AddToCaseAction', () => {
     render(
       <Embeddable

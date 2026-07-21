@@ -137,6 +137,7 @@ const StatefulDlmPhasesSelector = ({ defaultValue, onChange }: DlmPhasesSelector
       hasEnterpriseLicense={isAtLeastEnterprise()}
       hasDefaultSnapshotRepository={Boolean(snapshotRepositories?.hasDefaultRepository)}
       canCreateDefaultSnapshotRepository={Boolean(snapshotRepositories?.canCreateRepository)}
+      hasExistingRepositories={Boolean(snapshotRepositories?.hasRepositories)}
       defaultSnapshotRepository={snapshotRepositories?.defaultRepository}
       manageRepositoriesUrl={manageRepositoriesUrl}
       createDefaultRepositoryUrl={createDefaultRepositoryUrl}

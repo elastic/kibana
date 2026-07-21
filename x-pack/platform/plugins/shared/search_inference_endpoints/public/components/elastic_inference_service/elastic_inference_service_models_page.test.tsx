@@ -7,24 +7,34 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { ElasticInferenceServiceModelsPage } from './elastic_inference_service_models_page';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { useEisModels } from '../../hooks/use_eis_models';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
+import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../../../common/constants';
 
 jest.mock('../../hooks/use_eis_models');
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(() => ({
-    services: {
-      notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
-      application: {
-        capabilities: { searchInferenceEndpoints: { show: true, manage: true } },
-      },
-    },
-  })),
+jest.mock('../../hooks/use_kibana');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useUiSetting: jest.fn((key: string, defaultValue?: unknown) => defaultValue),
 }));
 
-const mockUseKibana = jest.requireMock('../../hooks/use_kibana').useKibana as jest.Mock;
+const mockUseUiSetting = useUiSetting as jest.Mock;
+
+const { useKibana } = jest.requireMock('../../hooks/use_kibana');
+const mockUseKibana = useKibana as jest.Mock;
+
+const mockKibanaReturn = ({ manage = true }: { manage?: boolean } = {}) => ({
+  services: {
+    notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
+    application: {
+      capabilities: { searchInferenceEndpoints: { show: true, manage } },
+    },
+  },
+});
+
 jest.mock('@kbn/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
 }));
@@ -36,6 +46,11 @@ const endpoints = InferenceEndpoints.filter((ep) => ep.service === 'elastic');
 describe('ElasticInferenceServiceModelsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+      if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return false;
+      return defaultValue;
+    });
+    mockUseKibana.mockReturnValue(mockKibanaReturn());
   });
 
   it('renders a loading spinner when data is loading', () => {
@@ -143,14 +158,7 @@ describe('ElasticInferenceServiceModelsPage', () => {
 
   describe('read-only mode (manage: false)', () => {
     beforeEach(() => {
-      mockUseKibana.mockReturnValue({
-        services: {
-          notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
-          application: {
-            capabilities: { searchInferenceEndpoints: { show: true, manage: false } },
-          },
-        },
-      });
+      mockUseKibana.mockReturnValue(mockKibanaReturn({ manage: false }));
     });
 
     it('does not render the Add endpoint button inside the model detail flyout', () => {

@@ -7,14 +7,17 @@
 
 import type { NewPackagePolicy, PackageInfo } from '../../server/types';
 import { PackagePolicyValidationError } from '../errors';
+import type { AgentlessPolicy } from '../types/models/agentless_policy';
 
 import nginxPackageInfo from '../../server/services/package_policies/fixtures/package_info/nginx_1.5.0.json';
+import agentlessHelloWorldPackageInfo from '../../server/services/package_policies/fixtures/package_info/agentless_hello_world_0.5.0.json';
 
 import {
   simplifiedPackagePolicytoNewPackagePolicy,
   packagePolicyToSimplifiedPackagePolicy,
   generateInputId,
   toNewAgentlessPolicy,
+  agentlessPolicyToPackagePolicy,
 } from './simplified_package_policy_helper';
 
 jest.mock('./cloud_connectors', () => ({
@@ -768,6 +771,250 @@ describe('toNewAgentlessPolicy', () => {
       toNewAgentlessPolicy(policy, varGroups);
 
       expect(detectTargetCsp).toHaveBeenCalledWith(policy, varGroups);
+    });
+  });
+});
+
+describe('agentlessPolicyToPackagePolicy', () => {
+  const baseAgentlessPolicy = (overrides: Partial<AgentlessPolicy> = {}): AgentlessPolicy =>
+    ({
+      id: 'agentless-1',
+      name: 'my-agentless',
+      namespace: 'default',
+      description: 'a description',
+      package: { name: 'agentless_hello_world', title: 'Agentless Hello World', version: '0.5.0' },
+      inputs: {},
+      created_at: '2026-06-30T00:00:00.000Z',
+      created_by: 'elastic',
+      updated_at: '2026-06-30T00:00:00.000Z',
+      updated_by: 'elastic',
+      ...overrides,
+    } as AgentlessPolicy);
+
+  it('expands the agentless policy into the full package policy form shape', () => {
+    const result = agentlessPolicyToPackagePolicy(
+      baseAgentlessPolicy(),
+      agentlessHelloWorldPackageInfo as unknown as PackageInfo
+    );
+
+    expect(result.id).toBe('agentless-1');
+    expect(result.name).toBe('my-agentless');
+    expect(result.namespace).toBe('default');
+    expect(result.description).toBe('a description');
+    expect(result.supports_agentless).toBe(true);
+    // No user-managed agent policy is attached to an agentless deployment.
+    expect(result.policy_ids).toEqual([]);
+    // Inputs are expanded back to the array shape the form components expect.
+    expect(Array.isArray(result.inputs)).toBe(true);
+    expect(result.package).toEqual({
+      name: 'agentless_hello_world',
+      title: 'Agentless Hello World',
+      version: '0.5.0',
+    });
+  });
+
+  it('defaults the namespace when the policy has none', () => {
+    const result = agentlessPolicyToPackagePolicy(
+      baseAgentlessPolicy({ namespace: undefined }),
+      agentlessHelloWorldPackageInfo as unknown as PackageInfo
+    );
+
+    expect(result.namespace).toBe('default');
+  });
+
+  it('preserves global_data_tags and additional_datastreams_permissions', () => {
+    const result = agentlessPolicyToPackagePolicy(
+      baseAgentlessPolicy({
+        global_data_tags: [{ name: 'team', value: 'fleet' }],
+        additional_datastreams_permissions: ['logs-test-123'],
+      }),
+      agentlessHelloWorldPackageInfo as unknown as PackageInfo
+    );
+
+    expect(result.global_data_tags).toEqual([{ name: 'team', value: 'fleet' }]);
+    expect(result.additional_datastreams_permissions).toEqual(['logs-test-123']);
+  });
+
+  describe('cloud_connector', () => {
+    it('maps an enabled connector to supports_cloud_connector + cloud_connector_id', () => {
+      const result = agentlessPolicyToPackagePolicy(
+        baseAgentlessPolicy({ cloud_connector: { enabled: true, cloud_connector_id: 'cc-1' } }),
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
+      );
+
+      expect(result.supports_cloud_connector).toBe(true);
+      expect(result.cloud_connector_id).toBe('cc-1');
+    });
+
+    it('treats a null connector as disabled', () => {
+      const result = agentlessPolicyToPackagePolicy(
+        baseAgentlessPolicy({ cloud_connector: null }),
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
+      );
+
+      expect(result.supports_cloud_connector).toBe(false);
+      expect(result.cloud_connector_id).toBeNull();
+    });
+
+    it('treats an absent connector as disabled', () => {
+      const result = agentlessPolicyToPackagePolicy(
+        baseAgentlessPolicy(),
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
+      );
+
+      expect(result.supports_cloud_connector).toBe(false);
+    });
+  });
+
+  describe('multi-template packages', () => {
+    const findInput = (
+      packagePolicy: ReturnType<typeof agentlessPolicyToPackagePolicy>,
+      policyTemplate: string,
+      type: string
+    ) =>
+      packagePolicy.inputs.find(
+        (input) => input.policy_template === policyTemplate && input.type === type
+      );
+
+    const multiTemplateAgentlessPolicy = (inputs: Record<string, { enabled?: boolean }>) =>
+      baseAgentlessPolicy({
+        package: { name: 'good_v3', title: 'Good v3', version: '1.0.0' },
+        inputs,
+      });
+
+    it('derives the active template and keeps the full-inputs contract a no-op', () => {
+      // Full GET payload: every input present, only the active template's input enabled.
+      const result = agentlessPolicyToPackagePolicy(
+        multiTemplateAgentlessPolicy({
+          'apache-agentless-aws/s3': { enabled: true },
+          'otel-otelcol': { enabled: false },
+          'mixed-httpjson': { enabled: false },
+          'mixed-cel': { enabled: false },
+        }),
+        multiTemplatePkgInfo
+      );
+
+      expect(findInput(result, 'apache-agentless', 'aws/s3')?.enabled).toBe(true);
+      expect(findInput(result, 'otel', 'otelcol')?.enabled).toBe(false);
+      expect(findInput(result, 'mixed', 'httpjson')?.enabled).toBe(false);
+      expect(findInput(result, 'mixed', 'cel')?.enabled).toBe(false);
+    });
+
+    it('does not leak other templates default-enabled inputs on a partial-inputs response', () => {
+      // Partial GET payload: only the active template's input is present. Other templates'
+      // default-enabled inputs (otel-otelcol, mixed-httpjson) must not leak in as enabled.
+      const result = agentlessPolicyToPackagePolicy(
+        multiTemplateAgentlessPolicy({ 'apache-agentless-aws/s3': { enabled: true } }),
+        multiTemplatePkgInfo
+      );
+
+      expect(findInput(result, 'apache-agentless', 'aws/s3')?.enabled).toBe(true);
+      expect(findInput(result, 'otel', 'otelcol')?.enabled).toBe(false);
+      expect(findInput(result, 'mixed', 'httpjson')?.enabled).toBe(false);
+      expect(findInput(result, 'mixed', 'cel')?.enabled).toBe(false);
+    });
+
+    it('honors an explicit policyTemplate over the derived one', () => {
+      const result = agentlessPolicyToPackagePolicy(
+        multiTemplateAgentlessPolicy({ 'apache-agentless-aws/s3': { enabled: true } }),
+        multiTemplatePkgInfo,
+        { policyTemplate: 'otel' }
+      );
+
+      // Forcing `otel` keeps otel's default-enabled input on, even though the response's only
+      // enabled input belongs to `apache-agentless` (which derivation would have selected,
+      // disabling otel-otelcol instead).
+      expect(findInput(result, 'otel', 'otelcol')?.enabled).toBe(true);
+    });
+  });
+
+  describe('round trip with toNewAgentlessPolicy (load then save is a no-op)', () => {
+    // Build a realistic simplified GET payload by running the create-side
+    // converters first, so the fixture matches the actual wire format rather
+    // than being hand-authored.
+    // Shared simplified GET/create input for both the built GET payload and the expected PUT body,
+    // so any divergence is produced by the converters under test, not by hand-authored drift.
+    const simplifiedInputs = {
+      'agentless_hello_world-cel': {
+        streams: {
+          'agentless_hello_world.generic': { vars: { url: 'https://custom.example.com' } },
+        },
+      },
+    };
+
+    const buildGetResponse = (): AgentlessPolicy => {
+      const fullPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'hello_world-1',
+          namespace: 'default',
+          policy_ids: [],
+          supports_agentless: true,
+          inputs: simplifiedInputs,
+        },
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
+      );
+
+      const requestBody = toNewAgentlessPolicy(
+        { ...fullPackagePolicy, id: 'agentless-1' },
+        undefined,
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
+      );
+
+      return {
+        id: 'agentless-1',
+        name: requestBody.name,
+        namespace: requestBody.namespace,
+        description: requestBody.description,
+        package: { ...requestBody.package, title: 'Agentless Hello World' },
+        inputs: requestBody.inputs,
+        vars: requestBody.vars,
+        global_data_tags: requestBody.global_data_tags,
+        cloud_connector: null,
+        created_at: '2026-06-30T00:00:00.000Z',
+        created_by: 'elastic',
+        updated_at: '2026-06-30T00:00:00.000Z',
+        updated_by: 'elastic',
+      } as AgentlessPolicy;
+    };
+
+    it('round-trips the agentless-relevant fields unchanged', () => {
+      const getResponse = buildGetResponse();
+
+      // Same request body produced when the GET payload is mapped to the form
+      // and immediately mapped back to a PUT body without edits.
+      const expectedRequestBody = toNewAgentlessPolicy(
+        {
+          ...simplifiedPackagePolicytoNewPackagePolicy(
+            {
+              name: 'hello_world-1',
+              namespace: 'default',
+              policy_ids: [],
+              supports_agentless: true,
+              inputs: simplifiedInputs,
+            },
+            agentlessHelloWorldPackageInfo as unknown as PackageInfo
+          ),
+          id: 'agentless-1',
+        },
+        undefined,
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
+      );
+
+      const roundTripped = toNewAgentlessPolicy(
+        agentlessPolicyToPackagePolicy(
+          getResponse,
+          agentlessHelloWorldPackageInfo as unknown as PackageInfo
+        ),
+        undefined,
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
+      );
+
+      expect(roundTripped.inputs).toEqual(expectedRequestBody.inputs);
+      expect(roundTripped.vars).toEqual(expectedRequestBody.vars);
+      expect(roundTripped.name).toBe(expectedRequestBody.name);
+      expect(roundTripped.namespace).toBe(expectedRequestBody.namespace);
+      expect(roundTripped.package).toEqual(expectedRequestBody.package);
+      expect(roundTripped.id).toBe('agentless-1');
     });
   });
 });

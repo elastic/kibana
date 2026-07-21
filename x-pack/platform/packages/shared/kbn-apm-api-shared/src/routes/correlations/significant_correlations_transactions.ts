@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
 import type { LatencyCorrelation } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema } from '../../default_api_types';
 
 export interface SignificantCorrelationsResponse {
   latencyCorrelations: LatencyCorrelation[];
@@ -21,26 +20,25 @@ export interface SignificantCorrelationsResponse {
 export const significantCorrelationsTransactionsRoute =
   defineRoute<SignificantCorrelationsResponse>()({
     endpoint: 'POST /internal/apm/correlations/significant_correlations/transactions',
-    params: t.type({
-      body: t.intersection([
-        t.partial({
-          serviceName: t.string,
-          transactionName: t.string,
-          transactionType: t.string,
-          durationMin: toNumberRt,
-          durationMax: toNumberRt,
-        }),
-        environmentRt,
-        kueryRt,
-        rangeRt,
-        t.type({
-          fieldValuePairs: t.array(
-            t.type({
-              fieldName: t.string,
-              fieldValue: t.union([t.string, toNumberRt]),
+    params: z.object({
+      body: z
+        .object({
+          serviceName: z.string().optional(),
+          transactionName: z.string().optional(),
+          transactionType: z.string().optional(),
+          durationMin: z.coerce.number().optional(),
+          durationMax: z.coerce.number().optional(),
+        })
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(rangeSchema)
+        .extend({
+          fieldValuePairs: z.array(
+            z.object({
+              fieldName: z.string(),
+              fieldValue: z.union([z.string(), z.coerce.number()]),
             })
           ),
         }),
-      ]),
     }),
   });

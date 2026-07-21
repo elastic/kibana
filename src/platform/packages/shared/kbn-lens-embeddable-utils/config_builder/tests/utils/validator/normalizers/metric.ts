@@ -32,7 +32,7 @@ import {
 } from './common';
 import { getMetricAccessor } from '../../../../transforms/charts/utils';
 import { iconCompat } from '../../../../transforms/charts/metric';
-import { getContinuity, getRangeValue } from '../../../../transforms/coloring';
+import { getRangeValue } from '../../../../transforms/coloring';
 
 type MetricAttributes = Extract<LensAttributes, { visualizationType: 'lnsMetric' }>;
 
@@ -83,6 +83,17 @@ const canonicalMetricColumns = new Set([
   `${ACCESSOR}_breakdown_trendline`,
   'x_date_histogram',
 ]);
+
+/**
+ * Named metric palettes reconstruct `rangeType` deterministically from the chart shape: `number`
+ * for a single value (no breakdown AND no max/bar background), `percent` otherwise (a breakdown or
+ * max provides the data range to color against). This mirrors `useNumericRangeForPalette` in the
+ * metric transform (`!layer.breakdown_by && primaryMetric.background_chart?.type !== 'bar'`).
+ */
+const isSingleValueMetric = (attributes: MetricAttributes): boolean => {
+  const viz = attributes.state.visualization;
+  return !viz.breakdownByAccessor && !viz.maxAccessor;
+};
 
 function getColumnRemapping(viz: MetricVisualizationState): IdRemapping {
   // Legacy SOs may store the primary accessor under `accessor` instead of `metricAccessor`.
@@ -300,16 +311,16 @@ const alignFormBasedAdHocReferencesNormalizer: NormalizerConfig<MetricAttributes
 };
 
 /**
- * The metric API only keeps a color-by-value palette when there is a breakdown or the range is
- * absolute (`rangeType: 'number'`); otherwise it falls back to AUTO and the palette is dropped.
- * When kept, the palette's `continuity` is always re-derived from the range bounds.
+ * Metric-specific palette alignment beyond what the shared `getPaletteNormalizer` handles
+ * (`rangeType`, `continuity`, and the numeric bounds are already normalized there):
  *
- * For custom palettes the API stores each band's upper bound (lte) in `stops`, while `colorStops`
- * carries the lower bound. The transform re-derives `colorStops` from the normalized `stops`: each
- * band opens at the previous band's upper bound (the first opens at `rangeMin`).
- *
- * All of this only applies to the original (legacy) side, since the transform already emits the
- * dropped palette, the re-derived `continuity`, and the re-derived `colorStops`.
+ * 1. Drop: the metric API keeps a color-by-value palette only when it has a data range to color
+ *    against — a breakdown, a max (bar background), or an absolute range (`rangeType: 'number'`). A
+ *    single value with a percentage palette has none, so the transform falls back to AUTO and drops
+ *    the palette.
+ * 2. Custom `colorStops`: the API stores each band's upper bound (lte) in `stops`, while `colorStops`
+ *    carries the lower bound. The transform re-derives `colorStops` from the normalized `stops`:
+ *    each band opens at the previous band's upper bound (the first opens at `rangeMin`).
  */
 const alignMetricPaletteNormalizer: NormalizerConfig<MetricAttributes> = {
   original: (attributes) => {
@@ -320,19 +331,13 @@ const alignMetricPaletteNormalizer: NormalizerConfig<MetricAttributes> = {
     }
 
     const isAbsoluteRange = palette.params.rangeType === 'number';
-    if (!viz.breakdownByAccessor && !isAbsoluteRange) {
+    if (!viz.breakdownByAccessor && !viz.maxAccessor && !isAbsoluteRange) {
       delete viz.palette;
-      delete viz.applyColorTo;
       return attributes;
     }
-
-    const params = palette.params;
-    params.continuity = getContinuity(
-      getRangeValue(params.rangeMin),
-      getRangeValue(params.rangeMax)
-    );
-
+    // There are 4 metric tests that were failing because of this, since they had the same values stored in both `stops` and `colorStops`.
     if (palette.name === 'custom') {
+      const params = palette.params;
       const stops = params.stops as Array<{ color: string; stop: number | null }> | undefined;
       const colorStops = params.colorStops as
         | Array<{ color: string; stop: number | null }>
@@ -466,7 +471,7 @@ export const normalizeMetric = mergeNormalizers([
     ],
     columnRemapping: getColumnRemapping(visualization),
   })),
-  getPaletteNormalizer<MetricAttributes>('state.visualization.palette'),
+  getPaletteNormalizer<MetricAttributes>('state.visualization.palette', isSingleValueMetric),
   alignIds,
   alignStaticValueMax,
   alignEmptyLinkedLayers,

@@ -11,7 +11,7 @@
     "configPath": ["xpack", "agentBuilderVisualizations"],
     "requiredPlugins": [
       "agentBuilder",
-      "agentContextLayer",
+      "agentBuilderSml",
       "lens",
       "data",
       "dataViews",

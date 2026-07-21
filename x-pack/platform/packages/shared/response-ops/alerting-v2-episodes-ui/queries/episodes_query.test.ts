@@ -119,15 +119,26 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain('SORT _severity_sort DESC');
   });
 
-  it('should filter on episode.status when status filter is set', () => {
+  it('should filter on episode.status when a single status filter is set', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { status: 'active' }
+      { status: ['active'] }
     );
     const queryString = query.print('basic');
 
     expect(queryString).toMatch(/\| WHERE `episode\.status` == "active"/);
+  });
+
+  it('should filter on episode.status with IN when multiple statuses are set', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { status: ['active', 'pending'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE `episode.status` IN ("active", "pending")');
   });
 
   it('should not filter on episode.status when no status filter is set', () => {
@@ -139,6 +150,18 @@ describe('buildEpisodesQuery', () => {
     const queryString = query.print('basic');
 
     expect(queryString).not.toMatch(/\| WHERE `episode\.status` ==/);
+  });
+
+  it('should not filter on episode.status when the status array is empty', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { status: [] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).not.toMatch(/\| WHERE `episode\.status` ==/);
+    expect(queryString).not.toContain('`episode.status` IN');
   });
 
   it('should apply ruleId filter', () => {
@@ -208,7 +231,7 @@ describe('buildEpisodesQuery', () => {
       { sortField: '@timestamp', sortDirection: 'desc' },
       {
         queryString: 'alert.name: "test"',
-        status: 'active',
+        status: ['active'],
         ruleId: 'rule-123',
       }
     );
@@ -382,7 +405,7 @@ describe('buildEpisodesQuery', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { assigneeUid: 'user-123', status: 'active', ruleId: 'rule-456' }
+      { assigneeUid: 'user-123', status: ['active'], ruleId: 'rule-456' }
     );
     const queryString = query.print('basic');
 
@@ -475,7 +498,7 @@ describe('buildEpisodesKpisQuery', () => {
   });
 
   it('applies status filter when provided', () => {
-    const output = buildEpisodesKpisQuery(SPACE, UID, { status: 'active' });
+    const output = buildEpisodesKpisQuery(SPACE, UID, { status: ['active'] });
     expect(output).toMatch(/\| WHERE `episode\.status` == "active"/);
   });
 
@@ -509,7 +532,7 @@ describe('buildEpisodesHistogramQuery', () => {
   });
 
   it('includes the status filter when filterState.status is provided', () => {
-    const output = buildEpisodesHistogramQuery('default', { status: 'active' }).print('basic');
+    const output = buildEpisodesHistogramQuery('default', { status: ['active'] }).print('basic');
     expect(output).toMatch(/\| WHERE `episode\.status` == "active"/);
   });
 
