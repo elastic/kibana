@@ -9,7 +9,6 @@ import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import {
   getActionPolicyNotFoundMessage,
   getActionPolicyVersionConflictMessage,
-  getInvalidActionPolicyDataMessage,
 } from '../../lib/errors/action_policy_error_messages';
 import { CreateActionPolicyRoute } from './create_action_policy_route';
 import {
