@@ -578,5 +578,4 @@ describe('Internal Routes', () => {
       'page must be an integer'
     );
   });
-
 });
