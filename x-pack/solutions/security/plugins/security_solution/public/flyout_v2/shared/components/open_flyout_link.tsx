@@ -9,10 +9,7 @@ import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../hooks/use_default_flyout_properties';
+import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../hooks/use_open_flyout';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
 import {
@@ -96,13 +93,10 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   const onClick = useCallback(() => {
     if (flyoutContent) {
       const resolvedSession = asParent ? FLYOUT_SESSION_KIND.START : sessionMode;
-      const baseFlyoutProperties = asParent
-        ? defaultToolsFlyoutProperties
-        : defaultDocumentFlyoutProperties;
       open(
         flyoutContent,
         {
-          ...baseFlyoutProperties,
+          ...defaultDocumentFlyoutProperties,
           historyKey,
           session: resolvedSession,
           outsideClickCloses: resolvedSession === FLYOUT_SESSION_KIND.START,
