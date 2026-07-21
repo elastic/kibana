@@ -285,7 +285,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       const onClose = buildOnClose(parentDescriptor);
       open(
         <Host {...props} />,
-        { ...mainProperties(FLYOUT_SESSION_KIND.INHERIT, buildFlyoutNavTitle(childTitle)), onClose },
+        {
+          ...mainProperties(FLYOUT_SESSION_KIND.INHERIT, buildFlyoutNavTitle(childTitle)),
+          onClose,
+        },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.HOST,
@@ -336,7 +339,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       const onClose = buildOnClose(parentDescriptor);
       open(
         <User {...props} />,
-        { ...mainProperties(FLYOUT_SESSION_KIND.INHERIT, buildFlyoutNavTitle(childTitle)), onClose },
+        {
+          ...mainProperties(FLYOUT_SESSION_KIND.INHERIT, buildFlyoutNavTitle(childTitle)),
+          onClose,
+        },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.USER,
@@ -387,7 +393,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       const onClose = buildOnClose(parentDescriptor);
       open(
         <Service {...props} />,
-        { ...mainProperties(FLYOUT_SESSION_KIND.INHERIT, buildFlyoutNavTitle(childTitle)), onClose },
+        {
+          ...mainProperties(FLYOUT_SESSION_KIND.INHERIT, buildFlyoutNavTitle(childTitle)),
+          onClose,
+        },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.SERVICE,
@@ -443,7 +452,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       const onClose = buildOnClose(parentDescriptor);
       open(
         <GenericEntity {...props} />,
-        { ...mainProperties(FLYOUT_SESSION_KIND.INHERIT, buildFlyoutNavTitle(childTitle)), onClose },
+        {
+          ...mainProperties(FLYOUT_SESSION_KIND.INHERIT, buildFlyoutNavTitle(childTitle)),
+          onClose,
+        },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.GENERIC,
@@ -489,7 +501,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       const childTitle = title ?? entityName ?? entityId;
       open(
         children,
-        { ...mainProperties(FLYOUT_SESSION_KIND.INHERIT, buildFlyoutNavTitle(childTitle)), onClose },
+        {
+          ...mainProperties(FLYOUT_SESSION_KIND.INHERIT, buildFlyoutNavTitle(childTitle)),
+          onClose,
+        },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType:
@@ -646,7 +661,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       const onClose = buildOnClose(null);
       open(
         <GraphView {...props} />,
-        { ...toolProperties(title ?? formatFlyoutTitle(ENTITY_GRAPH_VIEW_TITLE, entityName)), onClose },
+        {
+          ...toolProperties(title ?? formatFlyoutTitle(ENTITY_GRAPH_VIEW_TITLE, entityName)),
+          onClose,
+        },
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.GRAPH_VIEW,

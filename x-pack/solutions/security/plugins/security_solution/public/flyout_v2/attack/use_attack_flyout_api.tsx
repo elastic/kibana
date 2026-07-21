@@ -179,14 +179,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
         }
       );
     },
-    [
-      open,
-      defaultDocumentFlyoutProperties,
-      historyKey,
-      sessionMode,
-      writeOnOpen,
-      buildOnClose,
-    ]
+    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode, writeOnOpen, buildOnClose]
   );
 
   const openAttackFlyoutAsChild = useCallback(

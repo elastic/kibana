@@ -77,13 +77,7 @@ export const useDocumentFlyoutTitle = ({
       title: sessionTitle,
       origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
     });
-  }, [
-    openDocumentFlyoutFromIndexAsChild,
-    hit,
-    renderCellActions,
-    onAlertUpdated,
-    sessionTitle,
-  ]);
+  }, [openDocumentFlyoutFromIndexAsChild, hit, renderCellActions, onAlertUpdated, sessionTitle]);
 
   const badge = <DocumentSeverity hit={hit} />;
   const timestamp = <Timestamp hit={hit} size="xs" />;

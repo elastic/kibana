@@ -119,14 +119,7 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
       );
       return { close: () => ref.close(), onClose: ref.onClose };
     },
-    [
-      open,
-      defaultDocumentFlyoutProperties,
-      historyKey,
-      sessionMode,
-      writeOnOpen,
-      buildOnClose,
-    ]
+    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode, writeOnOpen, buildOnClose]
   );
 
   const openMisconfigurationFindingAsChild = useCallback(
@@ -195,14 +188,7 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
       );
       return { close: () => ref.close(), onClose: ref.onClose };
     },
-    [
-      open,
-      defaultDocumentFlyoutProperties,
-      historyKey,
-      sessionMode,
-      writeOnOpen,
-      buildOnClose,
-    ]
+    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode, writeOnOpen, buildOnClose]
   );
 
   const openVulnerabilityFindingAsChild = useCallback(
