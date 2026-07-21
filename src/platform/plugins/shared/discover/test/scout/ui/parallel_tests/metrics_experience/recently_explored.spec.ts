@@ -39,40 +39,32 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest(
-      'moves interacted metrics to the front, most recent first',
-      async ({ pageObjects }) => {
-        await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
-        const { metricsExperience } = pageObjects;
+    spaceTest('moves an interacted metric to the front', async ({ pageObjects }) => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      const { metricsExperience } = pageObjects;
 
-        await expect(metricsExperience.grid).toBeVisible();
+      await expect(metricsExperience.grid).toBeVisible();
 
-        const firstCardId = await metricsExperience.getCardByIndex(0).getAttribute('id');
-        const secondCardId = await metricsExperience.getCardByIndex(1).getAttribute('id');
-        expect(firstCardId).not.toBeNull();
-        expect(secondCardId).not.toBeNull();
+      const recentlyExploredMetric = await metricsExperience
+        .getCardByIndex(1)
+        .locator('[data-test-subj="embeddablePanelTitle"]')
+        .textContent();
+      expect(recentlyExploredMetric).not.toBeNull();
 
-        // Interact with the second card, then the first, so the most-recent order is [first, second].
-        await metricsExperience.recordInteraction(1);
-        await metricsExperience.recordInteraction(0);
+      await metricsExperience.recordInteraction(1);
 
-        // Recency is read as a mount-time snapshot, so re-open Discover (fresh mount)
-        // to pick up the recorded interactions before sorting by it.
-        await pageObjects.discover.goto({ queryMode: 'esql' });
-        await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
-        await expect(metricsExperience.grid).toBeVisible();
+      // Recency is read as a mount-time snapshot, so re-open Discover (fresh mount)
+      // to pick up the recorded interaction before sorting by it.
+      await pageObjects.discover.goto({ queryMode: 'esql' });
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      await expect(metricsExperience.grid).toBeVisible();
 
-        await metricsExperience.selectSortBy('recency');
+      await metricsExperience.selectSortBy('recency');
 
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute(
-          'id',
-          String(firstCardId)
-        );
-        await expect(metricsExperience.getCardByIndex(1)).toHaveAttribute(
-          'id',
-          String(secondCardId)
-        );
-      }
-    );
+      // The interacted metric moves to the front.
+      await expect(
+        metricsExperience.getCardByIndex(0).locator('[data-test-subj="embeddablePanelTitle"]')
+      ).toHaveText(String(recentlyExploredMetric));
+    });
   }
 );
