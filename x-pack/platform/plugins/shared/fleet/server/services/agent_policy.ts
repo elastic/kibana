@@ -252,8 +252,10 @@ class AgentPolicyService {
       `Starting update of agent policy [${id}] with soClient scoped to [${soClient.getCurrentNamespace()}]`
     );
 
-    const savedObjectType = await getAgentPolicySavedObjectType();
-    const existingAgentPolicy = await this.get(soClient, id, true);
+    const [savedObjectType, existingAgentPolicy] = await Promise.all([
+      getAgentPolicySavedObjectType(),
+      this.get(soClient, id, true),
+    ]);
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',

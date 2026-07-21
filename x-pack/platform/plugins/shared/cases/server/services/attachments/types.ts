@@ -72,6 +72,12 @@ export interface BulkOptionalAttributes<T>
 
 export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs & {
   owner: string;
+  /**
+   * Extra unified attachment `type` values (e.g. `security.entity`) to include in the
+   * query alongside the alert/event types. Used by the "already attached" dedup check so
+   * non-alert unified attachments can participate.
+   */
+  unifiedAttachmentTypes?: string[];
 };
 
 export interface AlertIdsAggsResult {
