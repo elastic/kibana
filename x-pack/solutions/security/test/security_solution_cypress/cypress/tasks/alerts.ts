@@ -467,6 +467,17 @@ export const waitForAlerts = () => {
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
+  // Do NOT add a `cy.get(LOADING_INDICATOR).should('not.exist')` check here (`globalLoadingIndicator`,
+  // the chrome-level `EuiLoadingSpinner` driven by `http.getLoadingCount$()`). It reflects ALL in-flight
+  // HTTP requests app-wide (telemetry, capabilities, session pings, etc.), not just the alerts search.
+  // `waitForAlertsToPopulate()` calls `refreshPage()` in a retry loop, which piles up unrelated network
+  // requests and can keep that spinner mounted indefinitely, exhausting the 150s Cypress retry window
+  // long before those unrelated chrome requests settle. This exact assertion caused a wave of "before
+  // each" hook timeouts across many specs sharing this helper, all with the same symptom: "Expected
+  // <span.euiLoadingSpinner...> not to exist in the DOM, but it was continuously found." — see #274408
+  // (removal fix) and #264641, #272791, #274536, #274543, #274544, #274608, #274616 (tracked failures).
+  // The checks above (page filters, refresh button, datagrid, table loading) plus the network-idle wait
+  // below already guarantee the alerts table itself is fully settled.
   cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
 };
 
