@@ -103,14 +103,18 @@ export const esqlAsyncSearchStrategyProvider = (
   async function submitEsqlSearch(
     request: IKibanaSearchRequest<ESQLQueryRequest>,
     options: IAsyncSearchOptions,
-    { esClient }: SearchStrategyDependencies
+    { esClient, licensing }: SearchStrategyDependencies
   ) {
     if (!request.params) throw new Error('Missing request params');
     const { dropNullColumns, ...requestParams } = request.params;
 
+    const license = await licensing?.getLicense();
+    const validLicense = Boolean(license && license.isActive && license.hasAtLeast('enterprise'));
+
     const params = {
       ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
-      ...(options.approximation !== undefined && { approximation: options.approximation }),
+      ...(validLicense &&
+        options.approximation !== undefined && { approximation: options.approximation }),
       ...requestParams,
     };
 
