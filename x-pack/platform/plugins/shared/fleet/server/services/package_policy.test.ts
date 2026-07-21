@@ -13803,6 +13803,54 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       })
     ).not.toThrow();
   });
+
+  it('should throw if package name is changed', () => {
+    const oldPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'custom_logs.logs',
+    });
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: {
+          ...oldPackagePolicy,
+          package: { name: 'different_package', title: 'Different', version: '1.0.0' },
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot change the package of an existing integration policy. Create a new policy with the desired package."`
+    );
+  });
+
+  it('should not throw if package name is unchanged', () => {
+    const oldPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'custom_logs.logs',
+    });
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: {
+          ...oldPackagePolicy,
+          package: { name: 'custom_logs', title: 'Custom Logs', version: '2.0.0' },
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('should not throw if package is omitted from update', () => {
+    const oldPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'custom_logs.logs',
+    });
+    const { package: _pkg, ...updateWithoutPackage } = oldPackagePolicy;
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: updateWithoutPackage,
+      })
+    ).not.toThrow();
+  });
 });
 
 describe('_normalizePackagePolicyKuery', () => {

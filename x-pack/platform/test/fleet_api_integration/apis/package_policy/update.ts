@@ -889,6 +889,52 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('Package name immutability', () => {
+      it('should return 400 when package name is changed', async function () {
+        const response = await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [],
+            package: {
+              name: 'with_required_variables',
+              title: 'With Required Variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(400);
+
+        expect(response.body.message).to.eql(
+          'Cannot change the package of an existing integration policy. Delete this policy and create a new one with the desired package.'
+        );
+      });
+
+      it('should return 200 when package name is unchanged', async function () {
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-1',
+            description: 'updated description',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+      });
+    });
+
     describe('Input Packages', () => {
       it('should install index templates when upgrading from input package to integration package', async () => {
         const { body: packagePolicyResponse } = await supertest
