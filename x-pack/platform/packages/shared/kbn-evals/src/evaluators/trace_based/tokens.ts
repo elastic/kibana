@@ -22,6 +22,7 @@ export function createOutputTokensEvaluator({
     log,
     config: {
       name: 'Output Tokens',
+      // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
         | STATS 
@@ -49,6 +50,7 @@ export function createInputTokensEvaluator({
     log,
     config: {
       name: 'Input Tokens',
+      // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
         | STATS 
@@ -76,6 +78,7 @@ export function createCachedTokensEvaluator({
     log,
     config: {
       name: 'Cached Tokens',
+      // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
         | STATS 
