@@ -37,10 +37,12 @@ components:
     AgentId:
       type: string
       description: Agent ID
+      maxLength: 256
     Kuery:
       type: string
       description: A KQL string.
       example: "united.endpoint.host.os.name : 'Windows'"
+      maxLength: 30000
     HostStatuses:
       type: array
       description: A set of agent health statuses to filter by.
