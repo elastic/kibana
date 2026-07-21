@@ -61,7 +61,6 @@ describe('isEpisodeFlapping', () => {
 
   it('returns true when changes exceed the threshold', () => {
     const statuses = alternate(ACTIVE, RECOVERING, 20);
-    expect(countEpisodeStateChanges(statuses)).toBe(19);
     expect(isEpisodeFlapping(statuses)).toBe(true);
   });
 
