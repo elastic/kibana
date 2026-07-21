@@ -1,5 +1,5 @@
 {
-  "sha1": "5a2a4386c9c481e6e37930bc64c2915c01ed36fe",
+  "sha1": "588e83d3451e15ffb7c81f7e119032d86e1c76ec",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -79,7 +79,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 65,
+        "line": 103,
         "column": 9
       }
     },
@@ -92,7 +92,59 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 140,
+        "line": 188,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-1899347aefdfa01",
+      "title": "ComposeDiscoverFlyout — create and edit flows edit flow (sad path): a rule with no resolvable time field triggers validation and blocks Next",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 253,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-ae0b63e156b2b3a",
+      "title": "ComposeDiscoverFlyout — create and edit flows edit flow (sad path): broken standalone alert can select timestamp and save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 311,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-0c425fb80a2c090",
+      "title": "ComposeDiscoverFlyout — create and edit flows create flow (sad path): time field populates when base and alert condition cannot be determined",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 367,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-e637125d8c52fd6",
+      "title": "ComposeDiscoverFlyout — create and edit flows create flow: signal (standalone) mode can select timestamp and create",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 406,
         "column": 9
       }
     },
@@ -105,7 +157,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 205,
+        "line": 449,
         "column": 9
       }
     },
@@ -118,7 +170,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 269,
+        "line": 513,
         "column": 9
       }
     },
@@ -131,7 +183,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 299,
+        "line": 543,
         "column": 9
       }
     },
@@ -144,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 320,
+        "line": 564,
         "column": 9
       }
     },
@@ -157,7 +209,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 349,
+        "line": 593,
         "column": 9
       }
     },
@@ -170,7 +222,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 371,
+        "line": 615,
         "column": 9
       }
     },
