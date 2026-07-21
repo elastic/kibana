@@ -30,12 +30,33 @@ describe('kiAutomationGenerationSkill', () => {
     expect(kiAutomationGenerationSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('has exactly one referencedContent entry for the index-selection reference workflow', () => {
-    expect(kiAutomationGenerationSkill.referencedContent).toHaveLength(1);
+  it('has exactly two referencedContent entries', () => {
+    expect(kiAutomationGenerationSkill.referencedContent).toHaveLength(2);
+  });
+
+  it('first referencedContent entry is the index-selection reference workflow', () => {
     const ref = kiAutomationGenerationSkill.referencedContent![0];
     expect(ref.name).toBe('index-selection-reference-workflow');
     expect(ref.relativePath).toBe('.');
     expect(ref.content.length).toBeGreaterThan(0);
+  });
+
+  it('second referencedContent entry is the AI Index JSON Schema with required fields', () => {
+    const ref = kiAutomationGenerationSkill.referencedContent![1];
+    expect(ref.name).toBe('ai-index-schema');
+    expect(ref.relativePath).toBe('.');
+
+    const schema = JSON.parse(ref.content) as Record<string, unknown>;
+    expect(schema.type).toBe('object');
+
+    const properties = schema.properties as Record<string, unknown>;
+    expect(properties).toBeDefined();
+    expect(properties).toHaveProperty('id');
+    expect(properties).toHaveProperty('dest');
+    expect(properties).toHaveProperty('sources');
+    expect(properties).toHaveProperty('automations');
+    expect(properties).toHaveProperty('date_created');
+    expect(properties).toHaveProperty('date_modified');
   });
 
   it('binds all required registry tools including getConnectors', async () => {
