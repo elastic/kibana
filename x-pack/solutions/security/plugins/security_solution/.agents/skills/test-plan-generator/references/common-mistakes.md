@@ -34,7 +34,7 @@ Writing scenarios that are already covered in a sub-issue test plan. Always cros
 
 ## Speculative optional sections
 
-Including RBAC, CCS, multi-space, or multi-tenant sections when the issue does not explicitly warrant them. Each optional section has a clear inclusion criterion in [`optional-scenarios.md`](optional-scenarios.md#optional-section-templates) — if the criterion is not met, omit the section entirely. Upgrade, CRUD, and dependency-data lifecycle are **not** optional; they are always evaluated (see the next three anti-patterns and the [Always-evaluated coverage](optional-scenarios.md#always-evaluated-coverage) table).
+Including RBAC, CCS, multi-space, or multi-tenant sections when the issue does not explicitly warrant them. Each optional section has a clear inclusion criterion in [`optional-scenarios.md`](optional-scenarios.md#optional-section-templates) — if the criterion is not met, omit the section entirely. Upgrade, CRUD, and dependency-data lifecycle are **not** optional; they are always evaluated (see [Scoping out coverage by feature-flag state](#scoping-out-coverage-by-feature-flag-state), [Silent CRUD gaps](#silent-crud-gaps), and [Ignoring dependency data lifecycle](#ignoring-dependency-data-lifecycle), and the [Always-evaluated coverage](optional-scenarios.md#always-evaluated-coverage) table).
 
 ❌ **Bad** — Adding a 6-scenario RBAC matrix because the user said *"be thorough"*, even though the issue body mentions no roles or permissions.
 
