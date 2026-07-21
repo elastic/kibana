@@ -27,7 +27,7 @@ import { toSimpleRuleSchedule } from '../../../../common/api/detection_engine/mo
 import { FiltersDisplay } from './filters_display';
 import { MitreAttackDisplay } from './mitre_display';
 import { RuleTypeDetails } from './rule_type_details';
-import { parseRuleFromAttachment, getRuleTypeLabel, getQueryLabel } from './helpers';
+import { parseRuleFromAttachment, parseRuleJson, getRuleTypeLabel, getQueryLabel } from './helpers';
 import type { RuleAttachment } from './helpers';
 import {
   INDEX_FIELD_LABEL,
@@ -120,19 +120,10 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
-  // Parse the frozen baseline snapshot for the diff view. Present only on edit-intent
-  // attachments; absent on create-intent attachments (new rules) — no diff shown there.
-  const originalRule = useMemo(() => {
-    const originalText = attachment.data?.originalText;
-    if (!originalText) return null;
-    try {
-      const parsed = JSON.parse(originalText);
-      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
-      return parsed as RuleResponse;
-    } catch {
-      return null;
-    }
-  }, [attachment]);
+  const originalRule = useMemo(
+    () => (attachment.data?.originalText ? parseRuleJson(attachment.data.originalText) : null),
+    [attachment]
+  );
 
   if (!rule) {
     return null;

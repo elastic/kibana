@@ -41,11 +41,7 @@ export const getRuleIdFromAttachment = (
 export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent =>
   attachment.origin ? 'update' : 'create';
 
-export const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
-  const text = attachment?.data?.text;
-  if (!text) {
-    return null;
-  }
+export const parseRuleJson = (text: string): RuleResponse | null => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
@@ -56,6 +52,11 @@ export const parseRuleFromAttachment = (attachment: RuleAttachment): RuleRespons
     return null;
   }
   return parsed as RuleResponse;
+};
+
+export const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
+  const text = attachment?.data?.text;
+  return text ? parseRuleJson(text) : null;
 };
 
 export const getRuleName = (attachment: RuleAttachment): string | undefined => {
