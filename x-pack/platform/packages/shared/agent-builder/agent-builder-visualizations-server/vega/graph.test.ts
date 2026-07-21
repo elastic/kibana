@@ -330,6 +330,45 @@ describe('createVegaGraph', () => {
       expect(state.error).toBeNull();
       expect(state.spec).not.toBeNull();
     });
+
+    it('retries when the warning review introduces an unsupported nested data source', async () => {
+      invoke
+        .mockResolvedValueOnce(asCodeBlock({ mark: 'bar' }))
+        .mockResolvedValueOnce(
+          asCodeBlock({
+            transform: [
+              {
+                lookup: 'OriginCountry',
+                from: {
+                  data: { url: { '%type%': 'esql', query: PROVIDED_ESQL } },
+                  key: 'OriginCountry',
+                },
+              },
+            ],
+            mark: 'bar',
+          })
+        )
+        .mockResolvedValueOnce(asCodeBlock({ mark: 'point' }));
+      mockedValidateVegaSpec
+        .mockResolvedValueOnce({
+          warnings: ['Infinite extent for field "count": [Infinity, -Infinity]'],
+        })
+        .mockResolvedValueOnce({
+          error:
+            'Nested or external data loading is not supported; use only the top-level ES|QL data source.',
+          warnings: [],
+        })
+        .mockResolvedValueOnce({ warnings: [] });
+
+      const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+      expect(invoke).toHaveBeenCalledTimes(3);
+      expect(JSON.stringify(invoke.mock.calls[2][0])).toContain(
+        'Nested or external data loading is not supported'
+      );
+      expect(state.error).toBeNull();
+      expect(JSON.parse(state.spec!).mark).toBe('point');
+    });
   });
 
   it('rejects an authored spec with no renderable view and retries', async () => {

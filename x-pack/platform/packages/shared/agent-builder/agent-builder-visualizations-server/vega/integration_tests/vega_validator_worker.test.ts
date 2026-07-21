@@ -110,7 +110,32 @@ describe('vega validator worker', () => {
     expect(result.error).toMatch(/Invalid field type/);
   });
 
-  it('does not fetch external lookup data during validation', async () => {
+  it('rejects a nested ES|QL lookup data source', async () => {
+    const result = await validate({
+      transform: [
+        {
+          lookup: 'OriginCountry',
+          from: {
+            data: {
+              url: {
+                '%type%': 'esql',
+                query: 'FROM logs-* | STATS count = COUNT() BY OriginCountry',
+              },
+            },
+            key: 'OriginCountry',
+            fields: ['OriginCountry'],
+          },
+        },
+      ],
+      mark: 'bar',
+      encoding: { x: { field: 'OriginCountry', type: 'nominal' } },
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toContain('Nested or external data loading is not supported');
+  });
+
+  it('rejects nested external lookup data without fetching it', async () => {
     const server: Server = createServer((_request, response) => response.end('[]'));
     await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
     const requestedUrls: string[] = [];
@@ -136,12 +161,8 @@ describe('vega validator worker', () => {
         },
       });
 
-      expect(result.ok).toBe(true);
-      expect(result.warnings).toEqual(
-        expect.arrayContaining([
-          expect.stringContaining('external loading disabled during validation'),
-        ])
-      );
+      expect(result.ok).toBe(false);
+      expect(result.error).toContain('Nested or external data loading is not supported');
       expect(requestedUrls).toEqual([]);
     } finally {
       await new Promise<void>((resolve) => server.close(() => resolve()));

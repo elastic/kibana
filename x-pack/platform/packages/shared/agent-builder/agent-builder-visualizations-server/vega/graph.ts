@@ -287,7 +287,7 @@ export const createVegaGraph = async (
       .join('\n');
 
     const additionalContext = previousContext
-      ? `Previous attempts:\n${previousContext}\n\nReturn a single valid JSON object matching the response schema ("title" and "spec"). Fix any error above. For each warning, decide for yourself whether it signals a real authoring mistake (for example, an encoding or property Vega dropped or ignored) and fix it, or whether it is harmless or unavoidable and can be left as-is. Validation runs against empty sample data, so warnings about empty or infinite extents and disabled external data loading are expected. If a warning needs no change, keep that part of the spec unchanged.`
+      ? `Previous attempts:\n${previousContext}\n\nReturn a single valid JSON object matching the response schema ("title" and "spec"). Fix any error above. For each warning, decide for yourself whether it signals a real authoring mistake (for example, an encoding or property Vega dropped or ignored) and fix it, or whether it is harmless or unavoidable and can be left as-is. Validation runs against empty sample data, so warnings about empty or infinite extents are expected. If a warning needs no change, keep that part of the spec unchanged.`
       : undefined;
 
     const prompt = createAuthorVegaSpecPrompt({

@@ -38,6 +38,8 @@ interface ValidationRequest {
 
 type LoadVegaLibs = () => Promise<VegaLibs>;
 
+const EXTERNAL_LOADING_DISABLED_REASON = 'external loading disabled during validation';
+
 const inlineData = (spec: Record<string, unknown>): Record<string, unknown> => ({
   ...spec,
   data: { values: [] },
@@ -48,7 +50,7 @@ const inlineData = (spec: Record<string, unknown>): Record<string, unknown> => (
  * URL cannot cause an SSRF request or local-file read from the Kibana server.
  */
 const createRejectingLoader = (): VegaLoader => {
-  const reject = () => Promise.reject(new Error('external loading disabled during validation'));
+  const reject = () => Promise.reject(new Error(EXTERNAL_LOADING_DISABLED_REASON));
   return { load: reject, sanitize: reject };
 };
 
@@ -95,6 +97,12 @@ const validate = async (
     await view.runAsync();
   } finally {
     view.finalize();
+  }
+
+  if (warnings.some((warning) => warning.includes(EXTERNAL_LOADING_DISABLED_REASON))) {
+    throw new Error(
+      'Nested or external data loading is not supported; use only the top-level ES|QL data source.'
+    );
   }
 
   return warnings;
