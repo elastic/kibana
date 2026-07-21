@@ -8,8 +8,8 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-import { AGENT_POLICY_VERSION_SEPARATOR } from '../../../common/constants';
 import { AGENTS_INDEX } from '../../../common';
+import { buildPolicyIdOrVariantsEsFilter } from '../../../common/services/version_specific_policies_utils';
 
 /**
  * Given a list of Agent Policy IDs (parent policy ids), returns the count of active agents
@@ -27,15 +27,7 @@ export const getAgentCountForAgentPolicies = async (
 
   const filters: Record<string, QueryDslQueryContainer> = {};
   for (const policyId of agentPolicyIds) {
-    filters[policyId] = {
-      bool: {
-        should: [
-          { term: { policy_id: policyId } },
-          { prefix: { policy_id: `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}` } },
-        ],
-        minimum_should_match: 1,
-      },
-    };
+    filters[policyId] = buildPolicyIdOrVariantsEsFilter(policyId);
   }
 
   const searchPromise = esClient.search<

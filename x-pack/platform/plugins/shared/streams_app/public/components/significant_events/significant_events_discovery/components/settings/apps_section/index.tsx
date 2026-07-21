@@ -34,7 +34,7 @@ interface AppsSectionProps {
  * external apps (GitHub, Teams) in the future. Only rendered by the caller (`tab.tsx`)
  * when the `streams.significantEventsAppsEnabled` feature flag is on; additionally
  * renders nothing here when the Slack App is not available on this deployment
- * (`xpack.significant_events.relayService` unset, or Agent Builder absent).
+ * (`xpack.actions.relay` unset, or Agent Builder absent).
  */
 export function AppsSection({ canEdit }: AppsSectionProps) {
   const { isLoading, available, status, error, isMutating, connect, disconnect } =
