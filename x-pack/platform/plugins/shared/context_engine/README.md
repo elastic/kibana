@@ -21,9 +21,9 @@ Notes:
   (disabled by default). All routes return 404 while the setting is off.
 - The backing store is set via `dest`, an object of the form
   `{ "type": "data_stream" | "index", "value": "<data stream or index>" }`.
-  `dest.value` must already exist and match `dest.type`. Every expression in
-  `dest.value` must start with `.ai-index-ds-` for data streams or
-  `.ai-index-idx-` for indices (e.g. `.ai-index-ds-foo`, `.ai-index-idx-foo*`);
+  `dest.value` must match `dest.type`. Every
+  expression in `dest.value` must start with `ai-index-ds-` for data streams or
+  `ai-index-idx-` for indices (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`);
   system indices are not allowed.
 - `automations` is an array of `{ "type": "workflow", "value": "<name>" }`
   objects, and `sources` is an array of

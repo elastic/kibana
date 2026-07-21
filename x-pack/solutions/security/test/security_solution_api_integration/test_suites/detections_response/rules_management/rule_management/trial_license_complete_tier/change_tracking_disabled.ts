@@ -12,6 +12,9 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams } from '../../../utils';
 
 const CHANGE_HISTORY_DATA_STREAM = '.kibana_change_history';
+const CHANGE_HISTORY_ES_OPTIONS = {
+  headers: { 'x-elastic-product-origin': 'kibana' },
+};
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -21,12 +24,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const clearHistory = async () => {
     try {
-      await es.deleteByQuery({
-        index: CHANGE_HISTORY_DATA_STREAM,
-        query: { match_all: {} },
-        conflicts: 'proceed',
-        refresh: true,
-      });
+      await es.deleteByQuery(
+        {
+          index: CHANGE_HISTORY_DATA_STREAM,
+          query: { match_all: {} },
+          conflicts: 'proceed',
+          refresh: true,
+        },
+        CHANGE_HISTORY_ES_OPTIONS
+      );
     } catch {
       // Change history index may not exist yet
     }
@@ -67,12 +73,18 @@ export default ({ getService }: FtrProviderContext): void => {
     it('writes no records to the change history data stream on rule create', async () => {
       await detectionsApi.createRule({ body: getCustomQueryRuleParams() }).expect(200);
 
-      await es.indices.refresh({ index: CHANGE_HISTORY_DATA_STREAM, ignore_unavailable: true });
+      await es.indices.refresh(
+        { index: CHANGE_HISTORY_DATA_STREAM, ignore_unavailable: true },
+        CHANGE_HISTORY_ES_OPTIONS
+      );
 
-      const { count } = await es.count({
-        index: CHANGE_HISTORY_DATA_STREAM,
-        ignore_unavailable: true,
-      });
+      const { count } = await es.count(
+        {
+          index: CHANGE_HISTORY_DATA_STREAM,
+          ignore_unavailable: true,
+        },
+        CHANGE_HISTORY_ES_OPTIONS
+      );
 
       expect(count).toBe(0);
     });
