@@ -69,19 +69,13 @@ export interface BuildkiteRetry {
   automatic: BuildkiteAutomaticRetryRule[];
 }
 
-/**
- * Retry only on infra loss (spot preemption / lost agent), never on job timeouts.
- * A timed-out job reports `exit_status: -1` with `signal_reason: 'cancel'` — the same
- * exit code as a preemption — so keying retries on exit_status alone re-runs doomed
- * (hanging) suites up to `limit` extra times, each burning a full timeout. Matching by
- * signal_reason lets timeouts fail immediately while still recovering preempted agents.
- */
-export const RETRY_ON_PREEMPTION_ONLY: BuildkiteRetry = {
+// Retry on spot preemption / lost agent, never on timeouts
+export const retryOnPreemption = (limit: number): BuildkiteRetry => ({
   automatic: [
-    { signal_reason: 'agent_stop', limit: 2 },
-    { exit_status: '-1', signal_reason: 'none', limit: 2 },
+    { signal_reason: 'agent_stop', limit },
+    { exit_status: '-1', signal_reason: 'none', limit },
   ],
-};
+});
 
 export interface BuildkiteGroupStep {
   group: string;

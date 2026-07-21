@@ -14,11 +14,9 @@ import {
   expandAgentQueue,
   collectEnvFromLabels,
   getTrackedBranch,
-  RETRY_ON_PREEMPTION_ONLY,
+  retryOnPreemption,
 } from '#pipeline-utils';
 
-// Test-execution steps run a single config repeated `count` times; a hung suite otherwise
-// wastes `count` x this budget before failing. Kept well under the full-CI ceiling.
 const TEST_STEP_TIMEOUT_MINUTES = 80;
 
 /**
@@ -316,7 +314,7 @@ if (hasScoutSuites) {
       SCOUT_FLAKY_RESERVED_JOBS: String(reservedJobsForPlanner),
       SCOUT_DISCOVERY_TARGET: scoutDiscoveryTarget,
     },
-    retry: RETRY_ON_PREEMPTION_ONLY,
+    retry: retryOnPreemption(2),
   });
 }
 
@@ -343,7 +341,7 @@ for (const testSuite of testSuites) {
         agents: expandAgentQueue('n2-4-spot'),
         depends_on: 'build',
         timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
-        retry: RETRY_ON_PREEMPTION_ONLY,
+        retry: retryOnPreemption(2),
       });
       break;
 
@@ -369,7 +367,7 @@ for (const testSuite of testSuites) {
         concurrency,
         concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
-        retry: RETRY_ON_PREEMPTION_ONLY,
+        retry: retryOnPreemption(2),
         env: {
           FLAKY_TEST_WORKING_DIRECTORY: testSuite.workingDirectory,
           FLAKY_TEST_COMMAND: testSuite.command,
@@ -405,7 +403,7 @@ for (const testSuite of testSuites) {
             concurrency,
             concurrency_group: process.env.UUID,
             concurrency_method: 'eager',
-            retry: RETRY_ON_PREEMPTION_ONLY,
+            retry: retryOnPreemption(2),
             env: {
               // disable split of test cases between parallel jobs when running them in flaky test runner
               // by setting chunks vars to value 1, which means all test will run in one job
@@ -441,7 +439,7 @@ pipeline.steps.push({
   label: 'Post results on Github pull request',
   agents: expandAgentQueue('n2-4-spot'),
   timeout_in_minutes: 15,
-  retry: RETRY_ON_PREEMPTION_ONLY,
+  retry: retryOnPreemption(2),
 });
 
 console.log(JSON.stringify(pipeline, null, 2));
