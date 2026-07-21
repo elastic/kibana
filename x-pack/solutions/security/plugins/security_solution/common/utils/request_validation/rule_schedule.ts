@@ -7,6 +7,7 @@
 
 import { calcDateMathDiff } from '@kbn/securitysolution-utils/date_math';
 import { TimeDuration } from '@kbn/securitysolution-utils/time_duration';
+import { DEFAULT_RULE_SCHEDULE } from '../../api/detection_engine/model/rule_schema/rule_schedule';
 
 interface RuleScheduleValidationPayload {
   interval?: string;
@@ -14,17 +15,20 @@ interface RuleScheduleValidationPayload {
   to?: string;
 }
 
-export const validateRuleSchedule = ({
-  interval,
-  from,
-  to,
-}: RuleScheduleValidationPayload): string[] => {
-  if (interval == null || from == null || to == null) {
+export const validateRuleSchedule = (
+  { interval, from, to }: RuleScheduleValidationPayload,
+  defaults?: RuleScheduleValidationPayload
+): string[] => {
+  const effectiveInterval = interval ?? defaults?.interval;
+  const effectiveFrom = from ?? defaults?.from;
+  const effectiveTo = to ?? defaults?.to;
+
+  if (effectiveInterval == null || effectiveFrom == null || effectiveTo == null) {
     return [];
   }
 
-  const intervalDuration = TimeDuration.parse(interval);
-  const timeRangeDuration = calcDateMathDiff(from, to);
+  const intervalDuration = TimeDuration.parse(effectiveInterval);
+  const timeRangeDuration = calcDateMathDiff(effectiveFrom, effectiveTo);
 
   if (intervalDuration == null || timeRangeDuration == null) {
     return [];
@@ -38,3 +42,7 @@ export const validateRuleSchedule = ({
 
   return [];
 };
+
+export const validateRuleScheduleWithDefaults = (
+  schedule: RuleScheduleValidationPayload
+): string[] => validateRuleSchedule(schedule, DEFAULT_RULE_SCHEDULE);

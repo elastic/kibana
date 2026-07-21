@@ -85,6 +85,19 @@ describe('Create rule request schema, additional validation', () => {
     expect(validateCreateRuleProps(schema)).toEqual(expectedErrors);
   });
 
+  test('validates the effective default time range when schedule fields are omitted', () => {
+    const schema: RuleCreateProps = {
+      ...getCreateRulesSchemaMock(),
+      interval: '10m',
+    };
+    delete schema.from;
+    delete schema.to;
+
+    expect(validateCreateRuleProps(schema)).toEqual([
+      'the time range defined by "from" and "to" must be greater than or equal to "interval"',
+    ]);
+  });
+
   test('validates that both "items_per_search" and "concurrent_searches" works when together', () => {
     const schema: RuleCreateProps = {
       ...getCreateThreatMatchRulesSchemaMock(),

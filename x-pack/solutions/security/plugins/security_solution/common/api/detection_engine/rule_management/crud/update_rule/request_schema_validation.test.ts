@@ -73,13 +73,45 @@ describe('Update rule request schema, additional validation', () => {
     expect(errors).toEqual(['either "id" or "rule_id" must be set']);
   });
 
-  test('validates that the searched time range is not shorter than the rule interval', () => {
+  test.each([
+    {
+      name: 'shorter than the rule interval',
+      from: 'now-7m',
+      to: 'now-5m',
+      expectedErrors: [
+        'the time range defined by "from" and "to" must be greater than or equal to "interval"',
+      ],
+    },
+    {
+      name: 'equal to the rule interval',
+      from: 'now-10m',
+      to: 'now-5m',
+      expectedErrors: [],
+    },
+    {
+      name: 'longer than the rule interval',
+      from: 'now-10m',
+      to: 'now',
+      expectedErrors: [],
+    },
+  ])('validates a time range that is $name', ({ from, to, expectedErrors }) => {
     const schema: RuleUpdateProps = {
       ...getUpdateRulesSchemaMock(),
       interval: '5m',
-      from: 'now-7m',
-      to: 'now-5m',
+      from,
+      to,
     };
+
+    expect(validateUpdateRuleProps(schema)).toEqual(expectedErrors);
+  });
+
+  test('validates the effective default time range when schedule fields are omitted', () => {
+    const schema: RuleUpdateProps = {
+      ...getUpdateRulesSchemaMock(),
+      interval: '10m',
+    };
+    delete schema.from;
+    delete schema.to;
 
     expect(validateUpdateRuleProps(schema)).toEqual([
       'the time range defined by "from" and "to" must be greater than or equal to "interval"',
