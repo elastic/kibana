@@ -9,10 +9,8 @@
 
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import {
-  COMMON_HEADERS,
-  type DiscoverCapabilitiesResponse,
-} from '../../fixtures/feature_controls/constants';
+import { BASE_HEADERS } from '../../fixtures/constants';
+import { type DiscoverCapabilitiesResponse } from '../../fixtures/feature_controls/constants';
 
 apiTest.describe(
   'POST /s/<space>/api/core/capabilities - Discover space feature controls',
@@ -35,7 +33,7 @@ apiTest.describe(
 
         const adminCredentials = await requestAuth.getApiKeyForAdmin();
         const response = await apiClient.post(`/s/${spaceId}/api/core/capabilities`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...BASE_HEADERS, ...adminCredentials.apiKeyHeader },
           body: { applications: ['discover', 'kibana'] },
           responseType: 'json',
         });
@@ -61,7 +59,7 @@ apiTest.describe(
 
         const adminCredentials = await requestAuth.getApiKeyForAdmin();
         const response = await apiClient.post(`/s/${spaceId}/api/core/capabilities`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...BASE_HEADERS, ...adminCredentials.apiKeyHeader },
           body: { applications: ['discover', 'kibana'] },
           responseType: 'json',
         });
@@ -86,7 +84,7 @@ apiTest.describe(
 
         const adminCredentials = await requestAuth.getApiKeyForAdmin();
         const response = await apiClient.post(`/s/${spaceId}/api/core/capabilities`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...BASE_HEADERS, ...adminCredentials.apiKeyHeader },
           body: { applications: ['discover', 'kibana'] },
           responseType: 'json',
         });

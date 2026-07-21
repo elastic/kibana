@@ -11,9 +11,14 @@ import { DISCOVER_SESSION_API_VERSION } from '../../../../common/constants';
 
 export { DISCOVER_SESSION_API_BASE_PATH } from '../../../../common/constants';
 
-export const COMMON_HEADERS = {
+/** Headers shared by all Discover Scout API requests (no versioned API bound). */
+export const BASE_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
+} as const;
+
+export const COMMON_HEADERS = {
+  ...BASE_HEADERS,
   'elastic-api-version': DISCOVER_SESSION_API_VERSION,
 } as const;
 

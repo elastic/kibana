@@ -16,11 +16,6 @@ export {
   DISCOVER_READ_URL_CREATE_ROLE,
 } from '../../../common/feature_controls/roles';
 
-export const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
-} as const;
-
 export const DISCOVER_VISUALIZE_READ_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [LOGSTASH_READ_INDEX_PRIVILEGE] },
   kibana: [{ base: [], feature: { discover: ['read'], visualize: ['read'] }, spaces: ['*'] }],

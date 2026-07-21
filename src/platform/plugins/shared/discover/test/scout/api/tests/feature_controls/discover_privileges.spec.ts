@@ -9,8 +9,8 @@
 
 import { apiTest, tags, type ApiClientFixture, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { BASE_HEADERS } from '../../fixtures/constants';
 import {
-  COMMON_HEADERS,
   DISCOVER_ALL_ROLE,
   DISCOVER_READ_ROLE,
   DISCOVER_READ_URL_CREATE_ROLE,
@@ -43,7 +43,7 @@ apiTest.describe(
 
     const getCapabilities = (apiClient: ApiClientFixture, credentials: RoleApiCredentials) =>
       apiClient.post('/api/core/capabilities', {
-        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+        headers: { ...BASE_HEADERS, ...credentials.apiKeyHeader },
         body: { applications: ['discover', 'kibana'] },
         responseType: 'json',
       });
