@@ -116,5 +116,10 @@ export const createAlertActionRouteForType = <
     }
   }
 
-  return CreateTypedAlertActionRoute;
+  return CreateTypedAlertActionRoute as RouteDefinition<
+    CreateAlertActionParams,
+    unknown,
+    ActionBody,
+    'post'
+  >;
 };

@@ -16,6 +16,7 @@ import {
 } from '../route_response_descriptions';
 import {
   CREATE_ACK_ALERT_ACTION_SUMMARY,
+  type AlertOasOperationObject,
   bulkCreateAlertActionOasExamples,
   createAckAlertActionOasExamples,
 } from './alert_oas_examples';
@@ -25,7 +26,7 @@ describe('alert OAS examples', () => {
   it('includes request and route-error examples for ack', () => {
     const oas = createAckAlertActionOasExamples();
 
-    expect(CreateAckAlertActionRoute.options.summary).toBe(CREATE_ACK_ALERT_ACTION_SUMMARY);
+    expect(CreateAckAlertActionRoute.options?.summary).toBe(CREATE_ACK_ALERT_ACTION_SUMMARY);
     expect(
       oas.requestBody?.content?.['application/json']?.examples?.createAckAlertActionRequest
     ).toEqual(expect.objectContaining({ summary: CREATE_ACK_ALERT_ACTION_SUMMARY }));
@@ -72,15 +73,18 @@ describe('alert OAS examples', () => {
   });
 
   it('is exposed on CreateAckAlertActionRoute.options', async () => {
-    expect(CreateAckAlertActionRoute.options.oasOperationObject).toBe(
+    expect(CreateAckAlertActionRoute.options?.oasOperationObject).toBe(
       createAckAlertActionOasExamples
     );
 
-    const oas = await CreateAckAlertActionRoute.options.oasOperationObject!();
-    expect(typeof oas).not.toBe('string');
-    if (typeof oas === 'string') {
-      throw new Error('expected object OAS fragment');
+    const oasOperationObject = CreateAckAlertActionRoute.options?.oasOperationObject;
+    expect(oasOperationObject).toBeDefined();
+    if (!oasOperationObject) {
+      throw new Error('expected oasOperationObject');
     }
+
+    const oas = (await oasOperationObject()) as AlertOasOperationObject;
+    expect(typeof oas).not.toBe('string');
 
     expect(
       oas.requestBody?.content?.['application/json']?.examples?.createAckAlertActionRequest

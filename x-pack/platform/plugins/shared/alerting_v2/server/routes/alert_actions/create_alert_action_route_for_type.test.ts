@@ -29,7 +29,7 @@ describe('createAlertActionRouteForType', () => {
 
     expect(RouteClass.method).toBe('post');
     expect(RouteClass.path).toBe(`/api/alerting/v2/alerts/{group_hash}/${suffix}`);
-    expect(RouteClass.options.summary).toBe(summary);
+    expect(RouteClass.options?.summary).toBe(summary);
     expect(RouteClass.validate).toBeDefined();
   });
 
