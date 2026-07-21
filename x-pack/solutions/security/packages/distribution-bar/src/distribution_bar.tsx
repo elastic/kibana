@@ -240,8 +240,6 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
                           'securitySolutionPackages.distributionBar.removeFilterAriaLabel',
                           { defaultMessage: 'Remove filter' }
                         )}
-                          defaultMessage: 'Remove filter',
-                        })}
                       />
                     </EuiFlexItem>
                   )}
