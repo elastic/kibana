@@ -15828,7 +15828,6 @@
     "xpack.cases.create.confirmModalButton": "Quitter sans enregistrer",
     "xpack.cases.create.createCaseFlyoutAriaLabel": "Créer un cas",
     "xpack.cases.create.defaultEmptyTemplateName": "Aucun modèle sélectionné",
-    "xpack.cases.create.extendedFieldsTitle": "Champs étendus",
     "xpack.cases.create.invalidAssignees": "Vous ne pouvez pas affecter plus de {maxAssignees} utilisateurs à un cas.",
     "xpack.cases.create.modalTitle": "Abandonner le cas ?",
     "xpack.cases.create.solutionSelectorLabel": "Créer un cas sous :",
