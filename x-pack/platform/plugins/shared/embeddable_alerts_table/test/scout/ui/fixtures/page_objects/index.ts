@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_integration_node',
-  rootDir: '../../../../../..',
-  roots: [
-    '<rootDir>/x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations-server',
-  ],
-};
+export { EmbeddableAlertsTablePage } from './embeddable_alerts_table';

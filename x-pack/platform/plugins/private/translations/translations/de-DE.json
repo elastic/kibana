@@ -15850,7 +15850,6 @@
     "xpack.cases.create.confirmModalButton": "Beenden ohne zu speichern",
     "xpack.cases.create.createCaseFlyoutAriaLabel": "Ticket erstellen",
     "xpack.cases.create.defaultEmptyTemplateName": "Keine Vorlage ausgewählt",
-    "xpack.cases.create.extendedFieldsTitle": "Erweiterte Felder",
     "xpack.cases.create.invalidAssignees": "Sie können einem Fall nicht mehr als {maxAssignees} Zuständige zuweisen.",
     "xpack.cases.create.modalTitle": "Fall verwerfen?",
     "xpack.cases.create.solutionSelectorLabel": "Fall erstellen unter:",

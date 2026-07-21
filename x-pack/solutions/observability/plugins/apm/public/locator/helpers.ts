@@ -7,6 +7,7 @@
 import * as t from 'io-ts';
 import { isRight } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { anomalyThresholdRt } from '@kbn/apm-types';
 import type { Environment } from '../../common/environment_rt';
 import { environmentRt } from '../../common/environment_rt';
 import { apmRouter } from '../components/routing/apm_route_config';
@@ -46,7 +47,14 @@ export const APMLocatorPayloadValidator = t.union([
     t.type({
       query: t.intersection([
         environmentRt,
-        t.partial({ kuery: t.string, rangeFrom: t.string, rangeTo: t.string }),
+        t.partial({
+          kuery: t.string,
+          rangeFrom: t.string,
+          rangeTo: t.string,
+          anomalyThreshold: anomalyThresholdRt,
+          comparisonEnabled: t.boolean,
+          offset: t.string,
+        }),
       ]),
     }),
   ]),
