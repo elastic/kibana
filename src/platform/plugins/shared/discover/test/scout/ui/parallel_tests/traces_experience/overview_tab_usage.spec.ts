@@ -57,22 +57,25 @@ spaceTest.describe(
     // ── About section ──────────────────────────────────────────────────
 
     spaceTest(
-      'About section - service name link navigates to APM service overview',
-      async ({ pageObjects, page }) => {
+      'About section - service name link opens service flyout in-place',
+      async ({ pageObjects }) => {
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('filter for span and open overview tab', async () => {
           await openOverviewTab(pageObjects, `span.name == "${RICH_TRACE.INTERNAL_SPAN_NAME}"`);
         });
 
-        await spaceTest.step('click service name link and verify APM service page', async () => {
-          await flyout.about.serviceNameLink.click();
-          const serviceHeader = page.testSubj.locator('apmMainTemplateHeaderServiceName');
-          await expect(serviceHeader).toHaveText(RICH_TRACE.SERVICE_NAME);
-          await expect(page.testSubj.locator('overviewTab')).toHaveAttribute(
-            'aria-selected',
-            'true'
-          );
+        await spaceTest.step(
+          'click service name link and verify service flyout opens',
+          async () => {
+            await flyout.about.serviceNameLink.click();
+            await expect(flyout.serviceFlyout.container).toBeVisible();
+          }
+        );
+
+        await spaceTest.step('click back button and verify service flyout closes', async () => {
+          await flyout.serviceFlyout.backButton.click();
+          await expect(flyout.serviceFlyout.container).toBeHidden();
         });
       }
     );

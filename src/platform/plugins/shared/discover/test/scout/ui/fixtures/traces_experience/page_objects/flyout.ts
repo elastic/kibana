@@ -52,6 +52,11 @@ export interface TracesFlyout {
     readonly openInDiscoverButton: Locator;
   };
 
+  readonly serviceFlyout: {
+    readonly container: Locator;
+    readonly backButton: Locator;
+  };
+
   readonly waterfallFlyout: {
     readonly container: Locator;
     readonly backButton: Locator;
@@ -151,6 +156,14 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
       section: page.testSubj.locator('unifiedDocViewerSpanLinksAccordion'),
       openInDiscoverButton: page.testSubj.locator('docViewerSpanLinksOpenInDiscoverButton'),
     },
+
+    serviceFlyout: (() => {
+      const container = page.testSubj.locator('serviceFlyout');
+      return {
+        container,
+        backButton: container.locator('[data-test-subj="euiFlyoutMenuBackButton"]'),
+      };
+    })(),
 
     waterfallFlyout: (() => {
       const timelineFlyout = page.testSubj.locator('traceWaterfallFlyout');
