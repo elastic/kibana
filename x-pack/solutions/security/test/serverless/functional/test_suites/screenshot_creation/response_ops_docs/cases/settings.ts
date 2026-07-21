@@ -17,6 +17,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   const svlCommonScreenshots = getService('svlCommonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'security_cases'];
   const testSubjects = getService('testSubjects');
+  const cases = getService('cases');
   const owner = SECURITY_SOLUTION_OWNER;
 
   describe('security case settings', function () {
@@ -28,12 +29,17 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       await pageObjects.svlCommonPage.loginWithRole('admin');
     });
 
-    it('case settings screenshot', async () => {
+    it('case settings screenshot', async function () {
       // With the templates feature flag enabled (the default), custom fields and
       // templates are managed on the dedicated v2 templates / field-library pages
       // rather than inline on the Case Settings page. Capture the settings page,
       // the templates list, and the create-template editor for the docs.
       await navigateToCasesApp(getPageObject, getService, owner);
+      // The redesigned settings page drops the custom fields and templates management these
+      // screenshots document, so skip while the redesign is on.
+      if (await cases.common.isRedesignEnabled()) {
+        return this.skip();
+      }
       await retry.waitFor('configure-case-button exist', async () => {
         return await testSubjects.exists('configure-case-button');
       });

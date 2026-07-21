@@ -50,11 +50,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Closure options', function () {
       it('defaults the closure option correctly', async () => {
-        await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
+        await cases.common.assertClosureOption('close-by-user');
       });
 
       it('change closure option successfully', async () => {
-        await cases.common.selectRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
+        await cases.common.selectClosureOption('close-by-pushing');
         const toast = await toasts.getElementByIndex(1);
         expect(await toast.getVisibleText()).to.be('Settings successfully updated');
         await toasts.dismissAll();

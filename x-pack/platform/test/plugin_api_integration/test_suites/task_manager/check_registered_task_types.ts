@@ -32,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     'sampleRecurringTaskDisablesItself',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
+    'sampleRecurringTaskWhichOverrunsRetryAt',
     'sampleRecurringTaskThatDeletesItself',
     'sampleTask',
     'sampleRecurringTask',
