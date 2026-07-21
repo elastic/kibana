@@ -257,7 +257,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
             paddingSize="none"
           >
             <RuleDiffTab
-              oldRule={originalRule as unknown as RuleResponse}
+              oldRule={originalRule}
               newRule={rule}
               leftDiffSideLabel={DIFF_SAVED_LABEL}
               rightDiffSideLabel={DIFF_AI_LABEL}
