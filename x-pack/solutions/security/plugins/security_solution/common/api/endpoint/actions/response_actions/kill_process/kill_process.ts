@@ -31,7 +31,7 @@ export const KillProcessRouteRequestSchema = {
         }),
 
         // Process Name currently applies only to SentinelOne (validated below)
-        schema.object({ process_name: schema.string({ minLength: 1, maxLength: 256 }) }),
+        schema.object({ process_name: schema.string({ minLength: 1, maxLength: 1024 }) }),
       ]),
     },
     {

@@ -18,6 +18,8 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/context_engine
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-http-browser'
+  - '@kbn/react-query'
   - '@kbn/scout'
   - '@kbn/logging'
   - '@kbn/config-schema'
@@ -27,6 +29,10 @@ dependsOn:
   - '@kbn/storage-adapter'
   - '@kbn/es-errors'
   - '@kbn/management-settings-ids'
+  - '@kbn/shared-ux-router'
+  - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/i18n-react'
+  - '@kbn/kibana-react-plugin'
 tags:
   - plugin
   - prod
@@ -36,6 +42,7 @@ tags:
 fileGroups:
   src:
     - common/**/*
+    - public/**/*
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'

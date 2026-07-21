@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Good permissions tests. This is an area that is easy to regress and not notice.
+ */
+
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';

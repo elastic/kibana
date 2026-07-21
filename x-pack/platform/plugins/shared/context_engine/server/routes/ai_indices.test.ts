@@ -131,9 +131,9 @@ describe('ai indices routes', () => {
       params: { aiIndexId: 'customer_support' },
       body: {
         name: 'customer_support',
-        dest: { type: 'data_stream', value: '.ai-index-ds-customer_support*' },
+        dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
         automations: [{ type: 'workflow', value: 'nightly-refresh' }],
-        sources: [{ type: 'esql', value: 'FROM .ai-index-ds-customer_support | LIMIT 10' }],
+        sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
       },
     };
 
@@ -187,11 +187,9 @@ describe('ai indices routes', () => {
       const aiIndex = {
         id: 'customer_support',
         name: 'customer_support',
-        dest: { type: 'data_stream' as const, value: '.ai-index-ds-customer_support*' },
+        dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
         automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
-        sources: [
-          { type: 'esql' as const, value: 'FROM .ai-index-ds-customer_support | LIMIT 10' },
-        ],
+        sources: [{ type: 'esql' as const, value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
         date_created: '2026-07-08T12:10:30.000Z',
         date_modified: '2026-07-08T12:10:30.000Z',
       };
@@ -257,9 +255,9 @@ describe('ai indices routes', () => {
   describe('PUT body validation', () => {
     const validBody = {
       name: 'customer_support',
-      dest: { type: 'data_stream', value: '.ai-index-ds-customer_support' },
+      dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
       automations: [{ type: 'workflow', value: 'nightly-refresh' }],
-      sources: [{ type: 'esql', value: 'FROM .ai-index-ds-customer_support | LIMIT 10' }],
+      sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
     };
 
     const validateBody = (body: Record<string, unknown>) => {
@@ -290,7 +288,7 @@ describe('ai indices routes', () => {
 
     it('rejects a disallowed dest type', () => {
       expect(() =>
-        validateBody({ ...validBody, dest: { type: 'view', value: '.ai-index-idx-foo' } })
+        validateBody({ ...validBody, dest: { type: 'view', value: 'ai-index-idx-foo' } })
       ).toThrow();
     });
 
