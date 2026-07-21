@@ -183,7 +183,6 @@ export function GenAiTab({ genAi }: Props) {
             title={i18n.translate('xpack.apm.genAi.section.details', {
               defaultMessage: 'Details',
             })}
-            bordered={false}
           >
             <EuiTable compressed data-test-subj="genAiDetails">
               <EuiTableBody>

@@ -13,12 +13,11 @@ interface Props {
   title: string;
   /** Whether the accordion is open on first render. Defaults to true. */
   initialIsOpen?: boolean;
-  /** Wrap children in a bordered panel. Set to false for table content to avoid double borders. */
   bordered?: boolean;
   children: React.ReactNode;
 }
 
-export function GenAiSection({ id, title, initialIsOpen = true, bordered = true, children }: Props) {
+export function GenAiSection({ id, title, initialIsOpen = true, bordered = false, children }: Props) {
   return (
     <EuiAccordion
       id={`genAiSection-${id}`}
