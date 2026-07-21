@@ -42,7 +42,10 @@ export const AiIndexDetailPage = () => {
     <KibanaPageTemplate data-test-subj="contextAiIndexDetailPage">
       <KibanaPageTemplate.Header
         pageTitle={
-          <FormattedMessage id="xpack.contextEngine.aiIndexDetail.title" defaultMessage="My AI index" />
+          <FormattedMessage
+            id="xpack.contextEngine.aiIndexDetail.title"
+            defaultMessage="My AI index"
+          />
         }
       />
       <KibanaPageTemplate.Section>
