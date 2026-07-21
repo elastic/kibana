@@ -61,10 +61,10 @@ describe('RuleCreateOptionsPanel', () => {
     expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
   });
 
-  it('renders the "Threshold rule" card', () => {
+  it('renders the "Threshold" card', () => {
     renderPanel();
 
-    expect(screen.getByText('Threshold rule')).toBeInTheDocument();
+    expect(screen.getByText('Threshold')).toBeInTheDocument();
   });
 
   it('calls onCreateThresholdRule when the "Threshold rule" card is clicked', () => {

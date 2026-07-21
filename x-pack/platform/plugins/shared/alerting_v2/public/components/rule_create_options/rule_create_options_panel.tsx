@@ -117,11 +117,11 @@ interface RuleCreateOptionItem {
 
 const ESQL_RULE_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createEsqlRuleTitle',
-  { defaultMessage: 'Create alert rule' }
+  { defaultMessage: 'Create with ESQL' }
 );
 const ESQL_RULE_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
-  { defaultMessage: 'Create an ES|QL rule with live preview. YAML editor available.' }
+  { defaultMessage: 'Create as an ES|QL query with live preview. YAML available.' }
 );
 const AI_AGENT_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle',
@@ -175,12 +175,37 @@ export const getCreateWithAgentTooltipText = ({
 };
 const THRESHOLD_RULE_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleTitle',
-  { defaultMessage: 'Threshold rule' }
+  { defaultMessage: 'Threshold' }
 );
 const THRESHOLD_RULE_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleDescription',
   {
-    defaultMessage: 'Monitor metrics against one or more threshold conditions.',
+    defaultMessage:
+      'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',
+  }
+);
+
+const MATCH_RULE_TITLE = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.matchRuleTitle',
+  { defaultMessage: 'Match' }
+);
+const MATCH_RULE_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.matchRuleDescription',
+  {
+    defaultMessage:
+      'Track occurrences of specific events or log patterns and alert when counts exceed a defined limit.',
+  }
+);
+
+const CORRELATION_RULE_TITLE = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.correlationRuleTitle',
+  { defaultMessage: 'Correlation' }
+);
+const CORRELATION_RULE_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.correlationRuleDescription',
+  {
+    defaultMessage:
+      'Alert when two or more metrics from different sources exhibit related behavior within a given timeframe.',
   }
 );
 
@@ -390,7 +415,7 @@ const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ ite
   );
 };
 
-/** Create-rule flyout — original card layout. */
+/** Create-rule flyout — card layout matching design spec. */
 const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
@@ -403,16 +428,11 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   const hasAgentTooltip = createWithAgentTooltipText !== undefined;
   const agentCard = (
     <EuiCard
-      layout="horizontal"
+      layout="vertical"
       display="plain"
       titleElement="h3"
       titleSize="xs"
       hasBorder={true}
-      // Convey the disabled state with `aria-disabled` + styling and a guarded click rather than
-      // EuiCard's native `isDisabled` (which renders a `disabled` <button>). A native disabled
-      // control drops out of the tab order and suppresses the hover events EuiToolTip needs, so the
-      // explanatory tooltip would be unreachable — defeating the goal of signalling how to gain
-      // access. Keeping it focusable lets the tooltip surface on both hover and keyboard focus.
       aria-disabled={isAgentDisabled || undefined}
       css={isAgentDisabled ? actionPanelDisabledStyle : undefined}
       title={AI_AGENT_TITLE}
@@ -423,12 +443,39 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
     />
   );
 
+  const builderOptions: RuleCreateOptionItem[] = [
+    {
+      id: 'create-threshold-rule',
+      iconType: 'chartThreshold',
+      title: THRESHOLD_RULE_TITLE,
+      description: THRESHOLD_RULE_DESCRIPTION,
+      onClick: onCreateThresholdRule ?? noop,
+      'data-test-subj': 'createThresholdRuleCard',
+    },
+    {
+      id: 'create-match-rule',
+      iconType: 'chartBarVertical',
+      title: MATCH_RULE_TITLE,
+      description: MATCH_RULE_DESCRIPTION,
+      onClick: noop,
+      'data-test-subj': 'createMatchRuleCard',
+    },
+    {
+      id: 'create-correlation-rule',
+      iconType: 'heatmap',
+      title: CORRELATION_RULE_TITLE,
+      description: CORRELATION_RULE_DESCRIPTION,
+      onClick: noop,
+      'data-test-subj': 'createCorrelationRuleCard',
+    },
+  ];
+
   return (
     <>
-      <EuiFlexGroup direction="column" gutterSize="l">
+      <EuiFlexGroup direction="row" gutterSize="s">
         <EuiFlexItem>
           <EuiCard
-            layout="horizontal"
+            layout="vertical"
             display="plain"
             titleElement="h3"
             titleSize="xs"
@@ -436,7 +483,7 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
             title={ESQL_RULE_TITLE}
             description={ESQL_RULE_DESCRIPTION}
             onClick={onCreateEsqlRule}
-            icon={<EuiIcon type="productDiscover" color="text" size="l" aria-hidden={true} />}
+            icon={<EuiIcon type="code" color="text" size="l" aria-hidden={true} />}
             data-test-subj="createEsqlRuleCard"
           />
         </EuiFlexItem>
@@ -451,17 +498,28 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <RuleBuilderSectionDivider />
-      <EuiCard
-        layout="horizontal"
-        display="plain"
-        titleElement="h3"
-        titleSize="xs"
-        hasBorder={true}
-        title={THRESHOLD_RULE_TITLE}
-        description={THRESHOLD_RULE_DESCRIPTION}
-        onClick={onCreateThresholdRule ?? noop}
-        icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
-      />
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {builderOptions.map((item) => (
+          <EuiFlexItem key={item.id} grow={false}>
+            <EuiCard
+              layout="horizontal"
+              display="plain"
+              titleElement="h3"
+              titleSize="xxs"
+              hasBorder={true}
+              title={item.title}
+              description={
+                <EuiText size="xs" color="subdued">
+                  {item.description}
+                </EuiText>
+              }
+              onClick={item.onClick}
+              icon={<EuiIcon type={item.iconType} color="text" size="l" aria-hidden={true} />}
+              data-test-subj={item['data-test-subj']}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
       {legacyRuleTypes && <LegacyRuleTypesSection items={legacyRuleTypes} />}
     </>
   );

@@ -766,7 +766,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('createRuleButton'));
 
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
-    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
+    expect(screen.getByText('Create with ESQL')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
