@@ -67,7 +67,7 @@ run(
     }
 
     function updateBaselineFile() {
-      Fs.writeFileSync(baselineFile, JSON.stringify(severityCounts, null, 2));
+      Fs.writeFileSync(baselineFile, JSON.stringify(severityCounts, null, 2) + '\n');
       log.success('Baseline file updated.');
     }
 
