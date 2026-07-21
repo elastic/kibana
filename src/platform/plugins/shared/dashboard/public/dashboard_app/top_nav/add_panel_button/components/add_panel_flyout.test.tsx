@@ -193,7 +193,7 @@ describe('AddPanelFlyout', () => {
       });
     });
 
-    test('renders AiButton featured items with AiButton styling', async () => {
+    test('renders AI featured items with AiButton styling', async () => {
       mockUseFeaturedItems.mockReturnValue({
         featuredItems: [
           {
@@ -203,7 +203,7 @@ describe('AddPanelFlyout', () => {
             'data-test-subj': 'aiButtonItem',
             onClick: onClickMock,
             order: 100,
-            isAiButton: true,
+            isAiAction: true,
           },
         ],
         loading: false,

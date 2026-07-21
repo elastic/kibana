@@ -120,7 +120,7 @@ export function getMenuItems(
         'data-test-subj': `create-action-${actionName}`,
         description: action?.getDisplayNameTooltip?.(context),
         isDisabled: action?.isDisabled?.(context),
-        isAiButton: action.extension?.isAiButton,
+        isAiAction: action.extension?.isAiAction,
         order: action.order ?? 0,
         MenuItem: action.MenuItem ? action.MenuItem({ context }) : undefined,
       };

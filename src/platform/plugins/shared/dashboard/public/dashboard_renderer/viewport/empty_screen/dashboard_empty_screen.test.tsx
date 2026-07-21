@@ -34,7 +34,7 @@ jest.mock('../../../dashboard_app/top_nav/add_panel_button/use_featured_items', 
                 icon: 'productAgent',
                 onClick: jest.fn(),
                 order: 100,
-                isAiButton: true,
+                isAiAction: true,
                 ['data-test-subj']: 'create-action-Create with chat',
               },
             ]

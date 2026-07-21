@@ -47,10 +47,8 @@ const promptSuggestions = [
   },
 ] as const;
 
-const openDashboardChat = async (initialMessage?: string): Promise<void> => {
-  const action = (await uiActionsService.getAction(
-    OPEN_DASHBOARD_CHAT_ACTION_ID
-  )) as Action<OpenDashboardChatActionContext>;
+const openDashboardChat = async (initialMessage?: string) => {
+  const action: Action<OpenDashboardChatActionContext> = await uiActionsService.getAction(OPEN_DASHBOARD_CHAT_ACTION_ID);
 
   await action.execute({
     ...(initialMessage !== undefined ? { initialMessage } : {}),
@@ -96,7 +94,7 @@ export const DashboardEmptyScreenChat = () => (
                     contentProps={{ css: styles.promptButtonContent }}
                     css={styles.promptButton}
                     onClick={() => {
-                      void openDashboardChat(prompt);
+                      openDashboardChat(prompt);
                     }}
                     data-test-subj={testSubject}
                   >
@@ -113,7 +111,7 @@ export const DashboardEmptyScreenChat = () => (
               color="text"
               flush="both"
               onClick={() => {
-                void openDashboardChat('');
+                openDashboardChat('');
               }}
               data-test-subj="dashboardCreateWithChatOpenChat"
             >

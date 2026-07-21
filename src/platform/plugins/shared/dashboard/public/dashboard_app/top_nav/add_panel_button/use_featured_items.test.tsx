@@ -52,7 +52,7 @@ describe('useFeaturedItems', () => {
   const chatAction = {
     id: OPEN_DASHBOARD_CHAT_ACTION_ID,
     order: 100,
-    extension: { isAiButton: true },
+    extension: { isAiAction: true },
     getDisplayName: () => 'Create with chat',
     getIconType: () => 'productAgent',
     getDisplayNameTooltip: () => 'Let the agent build any panel for you.',
@@ -119,7 +119,7 @@ describe('useFeaturedItems', () => {
       'addLensPanelAction',
       'ACTION_CREATE_ESQL_CHART',
     ]);
-    expect(result.current.featuredItems[0].isAiButton).toBe(true);
+    expect(result.current.featuredItems[0].isAiAction).toBe(true);
     expect(result.current.featuredItems[0]['data-test-subj']).toBe(
       'create-action-Create with chat'
     );

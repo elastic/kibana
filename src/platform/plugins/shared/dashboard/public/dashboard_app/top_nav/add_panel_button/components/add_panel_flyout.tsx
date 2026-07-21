@@ -126,7 +126,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                 return null;
               }
 
-              if (item.isAiButton) {
+              if (item.isAiAction) {
                 return (
                   <AiButton
                     key={item.id}
