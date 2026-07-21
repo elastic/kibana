@@ -97,53 +97,6 @@ const buildConnectorContext = (attachments: AttachmentStateManager): ConnectorCo
   return { catalog, connectorIds };
 };
 
-/**
- * Compose git/PR guidance for the sub-agent's system prompt from the profile's
- * git policy. When the profile allows push+PR, tell the agent exactly how to
- * clone, branch, commit, push, and open a PR on the allowed repo(s) — the
- * sandbox already has a scoped, short-lived credential injected into git + gh.
- */
-const buildGitGuidance = (
-  profile: SandboxProfile,
-  credentials?: { github?: { repository?: string; access?: 'read' | 'push-pr' } }
-): string => {
-  if (!credentials?.github) return '';
-  const git = profile.policy?.git;
-  if (!git || git.mode === 'none') return '';
-  const repos = [credentials.github.repository, ...(git.repos ?? [])].filter(
-    (repo): repo is string => Boolean(repo)
-  );
-  const repoLine =
-    repos.length > 0
-      ? `You may operate on these repositories only: ${repos.join(', ')}.`
-      : 'Operate only on the repository named in the task.';
-
-  if (git.mode === 'clone-ro') {
-    return [
-      '## Git access (read-only)',
-      '',
-      repoLine,
-      'git and the `gh` CLI are pre-authenticated in this sandbox with a short-lived,',
-      'repo-scoped token. You may `git clone` and read, but do NOT push or open PRs.',
-    ].join('\n');
-  }
-
-  // push-pr
-  return [
-    '## Git access (push + open PR)',
-    '',
-    repoLine,
-    'git and the `gh` CLI are pre-authenticated in this sandbox with a short-lived,',
-    'repo-scoped GitHub App token (contents + pull_requests). To deliver a fix:',
-    '1. `git clone https://github.com/<owner>/<repo>.git` and investigate.',
-    '2. Create a branch, make the minimal fix, and commit with a clear message.',
-    '3. `git push` the branch.',
-    '4. Open a pull request with `gh pr create --fill` (or the GitHub API) and',
-    '   return the PR URL in your final answer.',
-    'Keep the change focused and small. Do not modify unrelated files.',
-  ].join('\n');
-};
-
 const accessSchema = z.enum(['read', 'write']);
 
 const buildElasticCliGuidance = (credentials?: {
@@ -171,46 +124,14 @@ const buildElasticCliGuidance = (credentials?: {
   ].join('\n');
 };
 
-const buildGcpCliGuidance = (credentials?: {
-  gcp?: {
-    projectId?: string;
-    access?: 'read' | 'write';
-    services?: string[];
-    regions?: string[];
-  };
-}): string => {
-  if (!credentials?.gcp) return '';
-  const serviceLine = credentials.gcp.services?.length
-    ? `Requested services: ${credentials.gcp.services.join(', ')}.`
-    : 'Use only the Google Cloud services required by the task.';
-  const regionLine = credentials.gcp.regions?.length
-    ? `Requested regions: ${credentials.gcp.regions.join(', ')}.`
-    : undefined;
-  return [
-    '## Google Cloud CLI access',
-    '',
-    `The sandbox is prepared with Google Cloud CLI credentials for project ${
-      credentials.gcp.projectId ?? 'the configured project'
-    }.`,
-    `Access level requested: ${credentials.gcp.access ?? 'read'}.`,
-    serviceLine,
-    regionLine,
-    '`CLOUDSDK_CONFIG`, `CLOUDSDK_AUTH_ACCESS_TOKEN_FILE`, and `CLOUDSDK_CORE_PROJECT`',
-    'are configured for this run. Use the `gcloud` command directly.',
-  ]
-    .filter(Boolean)
-    .join('\n');
-};
-
 const buildCredentialGuidance = (): string =>
   [
     '## Sandbox credential grants',
     '',
     'Request only the credentials this coding task actually needs:',
-    '- `credentials.github`: use only for GitHub clone, push, or PR operations.',
+    '- `credentials.cli`: connector-owned sandbox CLI credentials. Use this for git/gh, gcloud, and any CLI connector by specifying the connector id or action type id plus connector-defined mint input.',
     '- `credentials.elastic.kibana`: REQUIRED when the user asks the sandbox to use ECLI, Elastic CLI, the `elastic` command, Kibana APIs, workflows, saved objects, cases, or other Kibana resources.',
     '- `credentials.elastic.elasticsearch`: REQUIRED when the user asks the sandbox to use ECLI/Elastic CLI for Elasticsearch APIs, indices, mappings, documents, search, or ES|QL.',
-    '- `credentials.gcp`: REQUIRED when the user asks the sandbox to use Google Cloud CLI, `gcloud`, Cloud Run, Cloud Logging, GCS, or generic GCP project resources.',
     'Use `read` unless the task must create, update, delete, push, or open a PR.',
   ].join('\n');
 
@@ -226,21 +147,26 @@ const schema = z.object({
     ),
   credentials: z
     .object({
-      github: z
-        .object({
-          repository: z
-            .string()
-            .optional()
-            .describe(
-              'Repository to grant GitHub credentials for, as owner/repo or github.com URL.'
-            ),
-          access: z
-            .enum(['read', 'push-pr'])
-            .optional()
-            .describe('Use read for clone-only; use push-pr only when pushing/opening a PR.'),
-        })
+      cli: z
+        .array(
+          z.object({
+            connectorId: z
+              .string()
+              .optional()
+              .describe('Specific connector id to mint sandbox CLI credentials from.'),
+            actionTypeId: z
+              .string()
+              .optional()
+              .describe('Connector action type id, such as .github or .gcp_cli.'),
+            label: z.string().optional().describe('Human-readable credential label.'),
+            input: z
+              .record(z.string(), z.unknown())
+              .optional()
+              .describe('Connector-owned mint input described by the connector sandbox CLI skill.'),
+          })
+        )
         .optional()
-        .describe('Request GitHub credentials only when the sandbox needs git/gh access.'),
+        .describe('Generic sandbox CLI credentials to mint through connector-owned sandboxCli.'),
       elastic: z
         .object({
           kibana: accessSchema
@@ -256,30 +182,6 @@ const schema = z.object({
         })
         .optional()
         .describe('Request Elastic CLI credentials only for products the sandbox must access.'),
-      gcp: z
-        .object({
-          connectorId: z
-            .string()
-            .optional()
-            .describe('Optional Google Cloud CLI connector id to use for this run.'),
-          projectId: z
-            .string()
-            .optional()
-            .describe('GCP project id to configure as the default gcloud project.'),
-          access: accessSchema
-            .optional()
-            .describe('Use read for inspection; use write only for mutating gcloud tasks.'),
-          services: z
-            .array(z.string())
-            .optional()
-            .describe('Google Cloud services needed by the task, such as logging or cloud_run.'),
-          regions: z
-            .array(z.string())
-            .optional()
-            .describe('GCP regions needed by the task, such as us-central1.'),
-        })
-        .optional()
-        .describe('Request Google Cloud CLI credentials only when the sandbox must use gcloud.'),
     })
     .optional()
     .describe(
@@ -316,11 +218,15 @@ Elastic CLI / ECLI credential rule:
 - Without credentials.elastic, the sandbox will not install/configure Elastic
   CLI credentials.
 
-Google Cloud CLI / gcloud credential rule:
-- If the user asks to use Google Cloud CLI / gcloud / Cloud Run / Cloud Logging /
-  GCS / generic GCP project resources, you MUST request credentials.gcp.
-- Without credentials.gcp, the sandbox will not install/configure Google Cloud
-  CLI credentials.
+Connector-owned CLI credential rule:
+- If the user asks to use git/gh, gcloud, or any external CLI backed by a
+  connector, request credentials.cli with the relevant connectorId or actionTypeId
+  and connector-defined mint input.
+- If the relevant connector is unclear, call list_sandbox_cli_connectors first,
+  show the available connector names/descriptions/options to the user, and ask
+  which one to use. Do not stop after saying a connector ID is required.
+- Without credentials.cli, the sandbox will not receive that connector's CLI
+  files, environment, setup commands, or cleanup paths.
 
 Because it is wired back into Agent Builder over MCP, the OpenCode sub-agent can
 call the SAME Kibana-aware tools you have (ES|QL, index mappings, cases,
@@ -330,11 +236,7 @@ connectors, workflows, ...) WHILE it writes and runs code.
 
 Brief it like a smart engineer who just joined:
 - State the goal and why it matters.
-- Set the structured repository field when the task needs GitHub clone, push, or PR access.
-- If GitHub access is needed and the repository is unclear, incomplete, or ownerless
-  (for example "kibana" instead of "elastic/kibana" or "example/kibana"), ask
-  the user which repo to use before calling this tool. Do not guess the owner.
-- Set the structured credentials field for only the products and access levels the sandbox needs.
+- Set credentials.cli only for connector-owned CLI access the sandbox needs.
 - Name any specific files/areas if you know them.
 - Share what you've already learned (e.g. the failing behaviour, relevant index
   or log data you found via your own tools).
@@ -372,15 +274,12 @@ export const createOpencodeSubagentTool = ({
         // separate session. The catalog goes into the system prompt; the ids
         // scope the run's tool access (broker/runtime).
         const { catalog, connectorIds } = buildConnectorContext(attachments);
-        const effectiveCredentials = credentials ?? (repository ? { github: { repository } } : {});
-        const gitGuidance = buildGitGuidance(profile, effectiveCredentials);
+        const effectiveCredentials = credentials;
         const elasticCliGuidance = buildElasticCliGuidance(effectiveCredentials);
-        const gcpCliGuidance = buildGcpCliGuidance(effectiveCredentials);
         const credentialGuidance = buildCredentialGuidance();
         const systemPrompt =
-          [catalog, gitGuidance, elasticCliGuidance, gcpCliGuidance, credentialGuidance]
-            .filter(Boolean)
-            .join('\n\n') || undefined;
+          [catalog, elasticCliGuidance, credentialGuidance].filter(Boolean).join('\n\n') ||
+          undefined;
         const fullPrompt = `${description}\n\n${prompt}`;
 
         const agentCtx = getAgentFromRunContext(runContext);

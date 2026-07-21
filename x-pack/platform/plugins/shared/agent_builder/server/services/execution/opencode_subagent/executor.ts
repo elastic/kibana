@@ -8,11 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SandboxProfile } from '@kbn/agent-builder-common';
-import { GITHUB_APP_PRIVATE_KEY_SECRET_KEY } from '@kbn/agent-builder-common';
 import { SandboxManager } from './sandbox_manager';
 import { SandboxRegistry } from './sandbox_registry';
 import { OpenCodeAcpRuntime } from './opencode_acp_runtime';
-import type { CodingRuntime, GitCredentials } from './coding_runtime';
+import type { CodingRuntime } from './coding_runtime';
 import type {
   Sandbox,
   SandboxSpec,
@@ -22,91 +21,17 @@ import type {
 import type { OpencodeRunProgress } from './types';
 import type { OpencodeRunClient } from './persistence/run_client';
 import type { McpAuthMinter } from './mcp_auth_minter';
-import type { GithubTokenResolver, GitHubTokenAccess } from './github_token_resolver';
 import type {
-  ElasticCliAccess,
   ElasticCliCredentials as MintedElasticCliCredentials,
   ElasticCliCredentialMinter,
 } from './elastic_cli_credential_minter';
-import type {
-  GcpCliCredentialRequest,
-  GcpCliCredentials as ResolvedGcpCliCredentials,
-  GcpCliCredentialResolver,
-} from './gcp_cli_credential_resolver';
-import { GithubUserCredentialSource } from './github_user_credential_source';
-import { GithubAppTokenMinter } from './github_app_token_minter';
 import { ProfileRuntimeResolver } from './profile_runtime_resolver';
-
-/** A profile as it arrives at the executor: resolved with decrypted secrets. */
-type ProfileWithSecrets = SandboxProfile & { secrets?: Record<string, string> };
-
-const normalizeGithubRepo = (owner: string, repo: string): string =>
-  `${owner}/${repo.replace(/\.git$/i, '')}`;
-
-const normalizeGithubRepoInput = (repository: string): string | undefined => {
-  const trimmed = repository.trim();
-  const urlMatch = trimmed.match(
-    /github\.com[:/]([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:\.git)?(?:[/?#\s`'")]|$)/i
-  );
-  if (urlMatch?.[1] && urlMatch[2]) {
-    return normalizeGithubRepo(urlMatch[1], urlMatch[2]);
-  }
-
-  const shorthandMatch = trimmed.match(/^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:\.git)?$/);
-  if (shorthandMatch?.[1] && shorthandMatch[2]) {
-    return normalizeGithubRepo(shorthandMatch[1], shorthandMatch[2]);
-  }
-};
-
-const extractGithubRepoFromPrompt = (prompt: string): string | undefined => {
-  const urlMatch = prompt.match(
-    /github\.com[:/]([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:\.git)?(?:[/?#\s`'")]|$)/i
-  );
-  if (urlMatch?.[1] && urlMatch[2]) {
-    return normalizeGithubRepo(urlMatch[1], urlMatch[2]);
-  }
-
-  const prefixedShorthandMatch = prompt.match(
-    /\b(?:github\s+repo(?:sitory)?|repo(?:sitory)?|clone)\s+([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:[\s`'",.)]|$)/i
-  );
-  if (prefixedShorthandMatch?.[1] && prefixedShorthandMatch[2]) {
-    return normalizeGithubRepo(prefixedShorthandMatch[1], prefixedShorthandMatch[2]);
-  }
-
-  const suffixedShorthandMatch = prompt.match(
-    /\b([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:\.git)?\s+(?:github\s+)?repo(?:sitory)?\b/i
-  );
-  if (suffixedShorthandMatch?.[1] && suffixedShorthandMatch[2]) {
-    return normalizeGithubRepo(suffixedShorthandMatch[1], suffixedShorthandMatch[2]);
-  }
-};
-
-const gitAccessFromPrompt = (
-  prompt: string,
-  requestedRepo?: string
-): GitHubTokenAccess | undefined => {
-  if (!requestedRepo) return undefined;
-  if (
-    /\b(gh\s+pr\s+create|open\s+(a\s+)?pr|open\s+(a\s+)?pull request|pull request|push|commit)\b/i.test(
-      prompt
-    )
-  ) {
-    return 'push-pr';
-  }
-  return 'read';
-};
-
-const gitAccessForRun = (
-  profile: SandboxProfile | undefined,
-  prompt: string,
-  requestedRepo?: string
-): GitHubTokenAccess | undefined => {
-  const mode = profile?.policy?.git?.mode;
-  if (mode === 'clone-ro') return 'read';
-  if (mode === 'push-pr') return 'push-pr';
-  if (mode === 'none') return undefined;
-  return gitAccessFromPrompt(prompt, requestedRepo);
-};
+import type {
+  SandboxCliConnectorOption,
+  ResolvedSandboxCliCredential,
+  SandboxCliCredentialResolver,
+} from './sandbox_cli_credential_resolver';
+import type { SandboxCredentialRequest } from './sandbox_cli_credential_requests';
 
 const kibanaUrlFromMcpUrl = (mcpUrl: string): string => {
   const url = new URL(mcpUrl);
@@ -116,14 +41,10 @@ const kibanaUrlFromMcpUrl = (mcpUrl: string): string => {
   return url.toString().replace(/\/$/, '');
 };
 
-const githubCredentialFailureMessage = (diagnostics: string[]): string =>
-  diagnostics.length > 0
-    ? diagnostics.join('; ')
-    : 'GitHub credentials were requested, but Agent Builder could not resolve a usable token. Ask the user to clarify the repository or update the GitHub connector allowed repositories.';
-
 // Re-export shared types for existing importers.
 export type { OpencodePhase, OpencodeItemStatus, OpencodeTodo, OpencodeRunProgress } from './types';
 export type { SandboxProviderMetadata } from './sandbox_provider';
+export type { SandboxCredentialRequest } from './sandbox_cli_credential_requests';
 
 export interface OpencodeLitellmConfig {
   baseUrl: string;
@@ -210,18 +131,6 @@ export interface ExecuteOpencodeParams {
   profile?: SandboxProfile;
 }
 
-export interface SandboxCredentialRequest {
-  github?: {
-    repository?: string;
-    access?: GitHubTokenAccess;
-  };
-  elastic?: {
-    kibana?: ElasticCliAccess;
-    elasticsearch?: ElasticCliAccess;
-  };
-  gcp?: GcpCliCredentialRequest;
-}
-
 /**
  * Orchestrates a coding sub-agent turn by wiring the three layers together:
  *
@@ -241,22 +150,13 @@ export class OpencodeSubagentExecutor {
   private readonly runtime: CodingRuntime;
   private readonly profileResolver: ProfileRuntimeResolver;
 
-  /**
-   * Per-profile GitHub user-token credential source (Device Flow), built from the
-   * profile's own `githubApp` config + private-key secret. Cached by profile id
-   * so the acquired user token survives across turns of a conversation. This is
-   * per-sandbox config, not global Kibana config.
-   */
-  private readonly userCredentialSources = new Map<string, GithubUserCredentialSource>();
-
   constructor(
     private readonly config: OpencodeSubagentConfig,
     private readonly logger: Logger,
     private readonly runClient?: OpencodeRunClient,
     private readonly mcpAuthMinter?: McpAuthMinter,
-    private readonly gitTokenResolver?: GithubTokenResolver,
-    private readonly elasticCliCredentialMinter?: ElasticCliCredentialMinter,
-    private readonly gcpCliCredentialResolver?: GcpCliCredentialResolver
+    private readonly sandboxCliCredentialResolver?: SandboxCliCredentialResolver,
+    private readonly elasticCliCredentialMinter?: ElasticCliCredentialMinter
   ) {
     this.provider = new SandboxManager(
       {
@@ -280,102 +180,6 @@ export class OpencodeSubagentExecutor {
       logger.get('profiles'),
       () => this.config.litellm.apiKey
     );
-  }
-
-  /**
-   * Build (or reuse) the GitHub user-token credential source for a profile. The
-   * OAuth client id + App private key come from the profile itself (not global
-   * config), so each sandbox carries its own git credential story. Returns
-   * `undefined` when the profile has no App client id configured.
-   */
-  private getUserCredentialSource(
-    profile?: ProfileWithSecrets
-  ): GithubUserCredentialSource | undefined {
-    const clientId = profile?.githubApp?.clientId;
-    if (!profile || !GithubUserCredentialSource.isConfigured(clientId)) {
-      return undefined;
-    }
-    const cached = this.userCredentialSources.get(profile.id);
-    if (cached) return cached;
-    const source = new GithubUserCredentialSource(
-      clientId,
-      this.logger.get(`githubUser.${profile.id}`)
-    );
-    this.userCredentialSources.set(profile.id, source);
-    return source;
-  }
-
-  /**
-   * Mint an ephemeral, repo-scoped GitHub App *installation token* for the git
-   * operations (clone/push/PR) this run needs — the least-privilege machine
-   * credential. Requires the profile to carry an App id + private-key secret.
-   * Repos are taken from the profile's git policy (falling back to the owner the
-   * App is installed on). Emits a green `credential` timeline item. Returns
-   * `undefined` when the profile has no App configured or minting fails.
-   */
-  private async resolveInstallToken(
-    profile: ProfileWithSecrets | undefined,
-    onProgress?: (progress: OpencodeRunProgress) => void
-  ): Promise<{ token: string; connectorId: string } | undefined> {
-    const appId = profile?.githubApp?.appId;
-    const privateKey = profile?.secrets?.[GITHUB_APP_PRIVATE_KEY_SECRET_KEY];
-    if (!appId || !privateKey) return undefined;
-
-    // Repos this run may touch (owner/repo). Scope the token to just these; the
-    // account login is derived from the first repo's owner.
-    const repos = profile?.policy?.git?.repos ?? [];
-    const owner = repos[0]?.split('/')[0];
-    const repoNames = repos.map((r) => r.split('/')[1]).filter(Boolean);
-    if (!owner) {
-      this.logger.warn(
-        `Profile ${profile?.id} has a GitHub App but no git repos in policy; cannot scope an installation token`
-      );
-      return undefined;
-    }
-
-    const itemId = 'github-install-token';
-    onProgress?.({
-      id: itemId,
-      phase: 'credential',
-      label: 'Minting scoped GitHub token',
-      status: 'in_progress',
-      detail: `Requesting a short-lived token scoped to ${repos.join(', ')} (push + PR).`,
-    });
-
-    try {
-      const minter = new GithubAppTokenMinter(
-        { appId, privateKeyPem: privateKey },
-        this.logger.get(`githubApp.${profile?.id}`)
-      );
-      const minted = await minter.mintForAccount(owner, {
-        repositories: repoNames.length > 0 ? repoNames : undefined,
-        permissions: { contents: 'write', pull_requests: 'write' },
-      });
-      const perms = Object.entries(minted.permissions)
-        .map(([k, v]) => `${k}:${v}`)
-        .join(', ');
-      onProgress?.({
-        id: itemId,
-        phase: 'credential',
-        label: 'Minted scoped GitHub token',
-        status: 'completed',
-        detail: `${repos.join(', ')} · ${perms} · expires ${new Date(
-          minted.expiresAt
-        ).toLocaleTimeString()}`,
-      });
-      return { token: minted.token, connectorId: `github-app:${appId}` };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(`Failed to mint GitHub App installation token: ${message}`);
-      onProgress?.({
-        id: itemId,
-        phase: 'credential',
-        label: 'Could not mint GitHub token',
-        status: 'failed',
-        detail: message,
-      });
-      return undefined;
-    }
   }
 
   /** Reap sandbox pods orphaned by a prior process (e.g. a dev hot-reload). */
@@ -404,6 +208,19 @@ export class OpencodeSubagentExecutor {
   /** Provider metadata for a specific profile (Sandboxes page). */
   getProfileMetadata(profile: SandboxProfile): Promise<SandboxProviderMetadata> {
     return this.profileResolver.getMetadata(profile);
+  }
+
+  listSandboxCliConnectors({
+    request,
+    allowedConnectors,
+  }: {
+    request: KibanaRequest;
+    allowedConnectors?: string[];
+  }): Promise<SandboxCliConnectorOption[]> {
+    if (!this.sandboxCliCredentialResolver) {
+      return Promise.resolve([]);
+    }
+    return this.sandboxCliCredentialResolver.listAvailable({ request, allowedConnectors });
   }
 
   /**
@@ -539,30 +356,14 @@ export class OpencodeSubagentExecutor {
           revoke: async () => {},
         };
 
-    // Resolve GitHub credentials for real git operations (clone/push/PR) from the
-    // run's allowed connectors. The token is a deliberate, scoped exception to
-    // "no secrets in sandbox": raw git needs a git-usable credential in the pod.
-    // Injected + scrubbed by the runtime; rely on short PAT expiry as backstop.
-    // A user-token (Device Flow) source is resolved lazily inside `try` so its
-    // interactive "authorize" step can stream into the timeline.
-    const credentialRepository = credentials?.github?.repository ?? repository;
-    const requestedGitRepo =
-      (credentialRepository ? normalizeGithubRepoInput(credentialRepository) : undefined) ??
-      extractGithubRepoFromPrompt(prompt);
-    const requestedGitAccess =
-      credentials?.github?.access ?? gitAccessForRun(profile, prompt, requestedGitRepo);
-    const shouldResolveGitCredentials = Boolean(credentials?.github ?? repository);
+    const sandboxCliCredentialRequests = credentials?.cli ?? [];
     const elasticAccess = credentials?.elastic;
     const shouldResolveElasticCliCredentials = Boolean(
       elasticAccess?.kibana || elasticAccess?.elasticsearch
     );
-    const gcpAccess = credentials?.gcp;
-    const shouldResolveGcpCliCredentials = Boolean(gcpAccess);
-    let gitCredentials: GitCredentials | undefined;
     let elasticCliCredentials: MintedElasticCliCredentials | undefined;
-    let gcpCliCredentials: ResolvedGcpCliCredentials | undefined;
-    const gitCredentialDiagnostics: string[] = [];
-    const gcpCredentialDiagnostics: string[] = [];
+    let resolvedSandboxCliCredentials: ResolvedSandboxCliCredential[] = [];
+    const sandboxCliCredentialDiagnostics: string[] = [];
 
     const persist = this.runClient && runContext;
 
@@ -647,129 +448,43 @@ export class OpencodeSubagentExecutor {
         }
       }
 
-      if (shouldResolveGcpCliCredentials && this.gcpCliCredentialResolver && gcpAccess) {
-        gcpCliCredentials = await this.gcpCliCredentialResolver.resolve({
+      if (sandboxCliCredentialRequests.length > 0 && this.sandboxCliCredentialResolver) {
+        resolvedSandboxCliCredentials = await this.sandboxCliCredentialResolver.resolveAll({
           request,
           allowedConnectors,
-          spaceId: runContext?.spaceId,
-          requested: gcpAccess,
-          onDiagnostic: (message) => gcpCredentialDiagnostics.push(message),
+          requested: sandboxCliCredentialRequests,
+          onDiagnostic: (message) => sandboxCliCredentialDiagnostics.push(message),
         });
+      } else if (sandboxCliCredentialRequests.length > 0) {
+        sandboxCliCredentialDiagnostics.push('Sandbox CLI credential resolver unavailable');
       }
 
-      if (shouldResolveGcpCliCredentials) {
-        const gcpCredentialFailure = !gcpCliCredentials
-          ? gcpCredentialDiagnostics.length > 0
-            ? gcpCredentialDiagnostics.join('; ')
-            : 'Unable to resolve a Google Cloud CLI connector for this run'
-          : undefined;
+      if (sandboxCliCredentialRequests.length > 0) {
+        const missingCredentialCount =
+          sandboxCliCredentialRequests.length - resolvedSandboxCliCredentials.length;
+        const sandboxCliCredentialFailure =
+          missingCredentialCount > 0
+            ? sandboxCliCredentialDiagnostics.length > 0
+              ? sandboxCliCredentialDiagnostics.join('; ')
+              : `Unable to resolve ${missingCredentialCount} sandbox CLI credential request(s)`
+            : undefined;
         recordProgress({
-          id: 'gcp-cli-credentials',
+          id: 'sandbox-cli-credentials',
           phase: 'credential',
-          label: gcpCliCredentials
-            ? 'Prepared Google Cloud CLI credentials'
-            : 'No Google Cloud CLI credentials prepared',
-          status: gcpCliCredentials ? 'completed' : 'failed',
-          iconType: 'logoGCP',
+          label: sandboxCliCredentialFailure
+            ? 'No sandbox CLI credentials prepared'
+            : 'Prepared sandbox CLI credentials',
+          status: sandboxCliCredentialFailure ? 'failed' : 'completed',
           credentialIconVariant: 'secured',
-          detail: gcpCliCredentials
-            ? `source: ${gcpCliCredentials.source}; project: ${
-                gcpCliCredentials.projectId
-              }; expires: ${new Date(gcpCliCredentials.expiresAt).toISOString()}`
-            : gcpCredentialDiagnostics.length > 0
-            ? gcpCredentialDiagnostics.join('; ')
-            : 'Unable to resolve a Google Cloud CLI connector for this run',
+          detail: sandboxCliCredentialFailure
+            ? sandboxCliCredentialFailure
+            : resolvedSandboxCliCredentials
+                .map((credential) => credential.label ?? credential.actionTypeId)
+                .join(', '),
         });
-        if (gcpCredentialFailure) {
+        if (sandboxCliCredentialFailure) {
           throw new Error(
-            `Google Cloud CLI credentials are required for this sandbox run, but could not be prepared: ${gcpCredentialFailure}`
-          );
-        }
-      }
-
-      if (shouldResolveGitCredentials && this.gitTokenResolver) {
-        gitCredentials = await this.gitTokenResolver.resolve({
-          request,
-          allowedConnectors,
-          spaceId: runContext?.spaceId,
-          gitRepos: profile?.policy?.git?.repos,
-          requestedRepo: requestedGitRepo,
-          access: requestedGitAccess,
-          requireRequestedRepo: true,
-          onDiagnostic: (message) => gitCredentialDiagnostics.push(message),
-        });
-      }
-
-      // If no connector PAT was found and the profile configures a GitHub App
-      // Device Flow, obtain a short-lived user token ("act as me") so the sandbox
-      // can read private repos the user has access to (e.g. elastic/*). The
-      // interactive "open URL + enter code" step streams into the timeline as a
-      // `credential` item. Cached per space, so the user approves at most once.
-      const profileWithSecrets = profile as ProfileWithSecrets | undefined;
-      const userCredentialSource = this.getUserCredentialSource(profileWithSecrets);
-      if (shouldResolveGitCredentials && !gitCredentials && userCredentialSource) {
-        // The visible "authorize as me" gesture: confirms the human authorized
-        // this run and identifies them in the UI (green credential card).
-        const userCred = await userCredentialSource.resolve({
-          cacheKey: runContext?.spaceId ?? 'default',
-          onProgress: recordProgress,
-          abortSignal,
-        });
-        if (userCred) {
-          gitCredentials = {
-            token: userCred.token,
-            connectorId: userCred.login ? `github-user:${userCred.login}` : 'github-user',
-          };
-        }
-      }
-
-      // Prefer an ephemeral, repo-scoped App *installation* token for the actual
-      // git operations (clone/push/PR): least-privilege, auto-expiring, scoped to
-      // just the policy's repos. Overrides the user token when available so the
-      // sandbox operates with the minimal machine credential, not a broad one.
-      if (shouldResolveGitCredentials) {
-        const installCred = await this.resolveInstallToken(profileWithSecrets, recordProgress);
-        if (installCred) {
-          gitCredentials = installCred;
-        }
-      }
-
-      if (shouldResolveGitCredentials) {
-        const githubCredentialsReady = Boolean(gitCredentials && requestedGitRepo);
-        const gitCredentialFailure = !gitCredentials
-          ? githubCredentialFailureMessage(gitCredentialDiagnostics)
-          : !requestedGitRepo
-          ? githubCredentialFailureMessage([
-              'GitHub credentials were requested, but no specific owner/repo was provided. Ask the user which repository to use.',
-              ...gitCredentialDiagnostics,
-            ])
-          : undefined;
-        recordProgress({
-          id: 'github-credentials',
-          phase: 'credential',
-          label: githubCredentialsReady
-            ? 'Resolved GitHub credentials'
-            : 'No GitHub credentials resolved',
-          status: githubCredentialsReady ? 'completed' : 'failed',
-          iconType: 'logoGithub',
-          credentialIconVariant: 'secured',
-          detail: githubCredentialsReady
-            ? `${requestedGitRepo ?? 'GitHub'} · ${requestedGitAccess ?? 'unknown access'}`
-            : gitCredentialDiagnostics.length > 0
-            ? gitCredentialDiagnostics.join('; ')
-            : [
-                !this.gitTokenResolver ? 'Git token resolver unavailable' : undefined,
-                !requestedGitRepo ? 'No GitHub repository was found in the task prompt' : undefined,
-                !requestedGitAccess
-                  ? 'No git access level could be derived for this run'
-                  : undefined,
-              ]
-                .filter(Boolean)
-                .join('; '),
-        });
-        if (gitCredentialFailure) {
-          throw new Error(
-            `GitHub credentials are required for this sandbox run, but could not be prepared: ${gitCredentialFailure}`
+            `Sandbox CLI credentials are required for this run, but could not be prepared: ${sandboxCliCredentialFailure}`
           );
         }
       }
@@ -835,9 +550,8 @@ export class OpencodeSubagentExecutor {
           mcpAuthHeader: mcpAuth.header,
           allowedConnectors,
         },
-        gitCredentials,
         elasticCliCredentials,
-        gcpCliCredentials,
+        sandboxCliCredentials: resolvedSandboxCliCredentials,
         timeoutMs: stack.maxRunSeconds * 1000,
         onProgress: recordProgress,
         abortSignal,
@@ -888,6 +602,13 @@ export class OpencodeSubagentExecutor {
       // Revoke the per-run MCP credential so it dies with the (short-lived) config.
       await mcpAuth.revoke();
       await elasticCliCredentials?.revoke();
+      if (resolvedSandboxCliCredentials.length > 0 && this.sandboxCliCredentialResolver) {
+        await this.sandboxCliCredentialResolver
+          .revokeAll({ request, credentials: resolvedSandboxCliCredentials })
+          .catch((e) =>
+            this.logger.warn(`Failed to revoke sandbox CLI credentials: ${(e as Error).message}`)
+          );
+      }
       // Model C: keep the sandbox warm for the next turn; release the lease so the
       // idle reaper takes over. Discard only if a fatal error left it unusable.
       if (sandboxAcquired) {

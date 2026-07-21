@@ -341,20 +341,18 @@ const GH_HOSTS_PATH = `${GH_CONFIG_DIR}/hosts.yml`;
 const GITHUB_ENV_PATH = `${WORKSPACE}/.github-env`;
 const ELASTIC_CLI_CONFIG_PATH = `${WORKSPACE}/.elasticrc.yml`;
 const ELASTIC_CLI_ENV_PATH = `${WORKSPACE}/.elastic-cli-env`;
+const SANDBOX_CLI_ENV_PATH = `${WORKSPACE}/.sandbox-cli-env`;
 const ELASTIC_CLI_PREFIX = `${WORKSPACE}/.elastic-cli-npm`;
 const ELASTIC_CLI_BIN_DIR = `${ELASTIC_CLI_PREFIX}/bin`;
-const GCP_CLI_CONFIG_DIR = `${WORKSPACE}/.gcloud`;
-const GCP_CLI_CREDENTIAL_DIR = `${WORKSPACE}/.gcp`;
-const GCP_CLI_ACCESS_TOKEN_PATH = `${GCP_CLI_CREDENTIAL_DIR}/access-token`;
-const GCP_CLI_ENV_PATH = `${WORKSPACE}/.gcp-cli-env`;
-const GCP_CLI_BIN_DIR = `${WORKSPACE}/google-cloud-sdk/bin`;
-const GCP_CLI_BUNDLED_PYTHON = `${WORKSPACE}/google-cloud-sdk/platform/bundledpythonunix/bin/python3`;
-const GCP_CLI_UV_BIN_DIR = `${WORKSPACE}/.uv-bin`;
-const GCP_CLI_PYTHON_INSTALL_DIR = `${WORKSPACE}/.gcp-python`;
-const GCP_CLI_PYTHON_PATH = `${GCP_CLI_PYTHON_INSTALL_DIR}/python3`;
-const GCP_CLI_ARCHIVE_BASE_URL = 'https://dl.google.com/dl/cloudsdk/channels/rapid/downloads';
-
 const shSingleQuote = (value: string): string => `'${value.replace(/'/g, `'\\''`)}'`;
+
+const parentDir = (path: string): string => {
+  const lastSlash = path.lastIndexOf('/');
+  if (lastSlash <= 0) {
+    return WORKSPACE;
+  }
+  return path.slice(0, lastSlash);
+};
 
 /**
  * OpenCode coding runtime, driven over ACP (LAYER 2).
@@ -421,7 +419,7 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
     systemPrompt,
     gitCredentials,
     elasticCliCredentials,
-    gcpCliCredentials,
+    sandboxCliCredentials,
     timeoutMs,
     onProgress,
     abortSignal,
@@ -486,30 +484,15 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
         abortSignal?.throwIfAborted?.();
       }
 
-      if (gcpCliCredentials) {
-        upsert('gcp-cli-install', {
-          phase: 'credential',
-          label: 'Preparing Google Cloud CLI',
-          status: 'in_progress',
-          iconType: 'logoGCP',
-          credentialIconVariant: 'compute',
-        });
-        await this.ensureGcpCliInstalled(sandbox);
-        await this.injectGcpCliCredentials(sandbox, gcpCliCredentials);
-        upsert('gcp-cli-install', {
-          phase: 'credential',
-          label: 'Google Cloud CLI ready',
-          status: 'completed',
-          iconType: 'logoGCP',
-          credentialIconVariant: 'compute',
-        });
+      if (sandboxCliCredentials?.length) {
+        await this.injectSandboxCliCredentials(sandbox, sandboxCliCredentials);
         abortSignal?.throwIfAborted?.();
       }
 
       const envFiles = [
         gitCredentials ? GITHUB_ENV_PATH : undefined,
         elasticCliCredentials ? ELASTIC_CLI_ENV_PATH : undefined,
-        gcpCliCredentials ? GCP_CLI_ENV_PATH : undefined,
+        sandboxCliCredentials?.length ? SANDBOX_CLI_ENV_PATH : undefined,
       ].filter(Boolean);
       const credentialEnv = envFiles.map((path) => `. ${path}`).join(' && ');
       const credentialPrefix = credentialEnv ? `${credentialEnv} && ` : '';
@@ -674,9 +657,9 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
           this.logger.warn(`Failed to scrub Elastic CLI credentials: ${(e as Error).message}`)
         );
       }
-      if (gcpCliCredentials) {
-        await this.scrubGcpCliCredentials(sandbox).catch((e) =>
-          this.logger.warn(`Failed to scrub Google Cloud CLI credentials: ${(e as Error).message}`)
+      if (sandboxCliCredentials?.length) {
+        await this.scrubSandboxCliCredentials(sandbox, sandboxCliCredentials).catch((e) =>
+          this.logger.warn(`Failed to scrub sandbox CLI credentials: ${(e as Error).message}`)
         );
       }
     }
@@ -800,117 +783,61 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
     });
   }
 
-  private async injectGcpCliCredentials(
+  private async injectSandboxCliCredentials(
     sandbox: Sandbox,
-    creds: NonNullable<CodingRunParams['gcpCliCredentials']>
+    credentials: NonNullable<CodingRunParams['sandboxCliCredentials']>
   ): Promise<void> {
-    await sandbox.exec(`mkdir -p ${GCP_CLI_CONFIG_DIR} ${GCP_CLI_CREDENTIAL_DIR}`, {
-      timeoutMs: 10_000,
-    });
+    const files = credentials.flatMap((credential) => credential.token.files ?? []);
+    const env = credentials.reduce<Record<string, string>>(
+      (acc, credential) => ({ ...acc, ...(credential.token.env ?? {}) }),
+      {}
+    );
+    const dirs = [...new Set([...files.map((file) => parentDir(file.path)), WORKSPACE])];
+    await sandbox.exec(`mkdir -p ${dirs.map(shSingleQuote).join(' ')}`, { timeoutMs: 10_000 });
     await sandbox.putFiles([
-      { path: GCP_CLI_ACCESS_TOKEN_PATH, contents: creds.accessToken },
+      ...files.map((file) => ({ path: file.path, contents: file.contents })),
       {
-        path: GCP_CLI_ENV_PATH,
+        path: SANDBOX_CLI_ENV_PATH,
         contents: [
-          `export CLOUDSDK_CONFIG=${shSingleQuote(GCP_CLI_CONFIG_DIR)}`,
-          `export CLOUDSDK_AUTH_ACCESS_TOKEN_FILE=${shSingleQuote(GCP_CLI_ACCESS_TOKEN_PATH)}`,
-          `export CLOUDSDK_CORE_PROJECT=${shSingleQuote(creds.projectId)}`,
-          `if [ -x ${shSingleQuote(
-            GCP_CLI_BUNDLED_PYTHON
-          )} ]; then export CLOUDSDK_PYTHON=${shSingleQuote(GCP_CLI_BUNDLED_PYTHON)}; fi`,
-          `if [ -x ${shSingleQuote(
-            GCP_CLI_PYTHON_PATH
-          )} ]; then export CLOUDSDK_PYTHON=${shSingleQuote(GCP_CLI_PYTHON_PATH)}; fi`,
-          `export PATH=${shSingleQuote(GCP_CLI_BIN_DIR)}:$PATH`,
+          ...Object.entries(env).map(([key, value]) => `export ${key}=${shSingleQuote(value)}`),
           '',
         ].join('\n'),
       },
     ]);
-    const result = await sandbox.exec(
-      [
-        `. ${GCP_CLI_ENV_PATH}`,
-        `chmod 700 ${GCP_CLI_CONFIG_DIR} ${GCP_CLI_CREDENTIAL_DIR}`,
-        `chmod 600 ${GCP_CLI_ACCESS_TOKEN_PATH} ${GCP_CLI_ENV_PATH}`,
-        `gcloud config set auth/access_token_file ${shSingleQuote(
-          GCP_CLI_ACCESS_TOKEN_PATH
-        )} --quiet`,
-        `gcloud config set project ${shSingleQuote(creds.projectId)} --quiet`,
-      ].join(' && '),
-      { timeoutMs: 60_000 }
-    );
-    if (result.exitCode !== 0) {
-      throw new Error(
-        `Failed to configure Google Cloud CLI in sandbox (exit ${result.exitCode}): ${
-          result.stderr || result.stdout
-        }`
-      );
+    const commands = [
+      ...files
+        .filter((file) => file.mode)
+        .map((file) => `chmod ${file.mode} ${shSingleQuote(file.path)}`),
+      `chmod 600 ${shSingleQuote(SANDBOX_CLI_ENV_PATH)}`,
+      ...credentials.flatMap((credential) => credential.token.setupCommands ?? []),
+    ];
+    if (commands.length > 0) {
+      const result = await sandbox.exec(commands.join(' && '), { timeoutMs: 60_000 });
+      if (result.exitCode !== 0) {
+        throw new Error(
+          `Failed to configure sandbox CLI credentials (exit ${result.exitCode}): ${
+            result.stderr || result.stdout
+          }`
+        );
+      }
     }
     this.logger.info(
-      `Injected Google Cloud CLI config (${creds.source}) into sandbox ${sandbox.id}`
+      `Injected sandbox CLI credentials (${credentials
+        .map((credential) => credential.token.source)
+        .join(', ')}) into sandbox ${sandbox.id}`
     );
   }
 
-  private async ensureGcpCliInstalled(sandbox: Sandbox): Promise<void> {
-    const result = await sandbox.exec(
-      [
-        `export PATH=${shSingleQuote(GCP_CLI_BIN_DIR)}:$PATH`,
-        `if command -v python3 >/dev/null 2>&1; then export CLOUDSDK_PYTHON="$(command -v python3)"; fi`,
-        `if [ -x ${shSingleQuote(
-          GCP_CLI_BUNDLED_PYTHON
-        )} ]; then export CLOUDSDK_PYTHON=${shSingleQuote(GCP_CLI_BUNDLED_PYTHON)}; fi`,
-        `if [ -x ${shSingleQuote(
-          GCP_CLI_PYTHON_PATH
-        )} ]; then export CLOUDSDK_PYTHON=${shSingleQuote(GCP_CLI_PYTHON_PATH)}; fi`,
-        `if ! command -v gcloud >/dev/null 2>&1 || ! gcloud --version >/dev/null 2>&1; then ` +
-          `case "$(uname -m)" in ` +
-          `x86_64|amd64) gcloud_archive="google-cloud-cli-linux-x86_64.tar.gz" ;; ` +
-          `aarch64|arm64) gcloud_archive="google-cloud-cli-linux-arm.tar.gz" ;; ` +
-          `*) echo "Unsupported sandbox architecture for Google Cloud CLI: $(uname -m)" >&2; exit 1 ;; ` +
-          `esac && ` +
-          `rm -rf ${shSingleQuote(`${WORKSPACE}/google-cloud-sdk`)} && ` +
-          `curl -fsSL "${GCP_CLI_ARCHIVE_BASE_URL}/$gcloud_archive" -o /tmp/google-cloud-cli.tar.gz && ` +
-          `tar -C ${shSingleQuote(WORKSPACE)} -xzf /tmp/google-cloud-cli.tar.gz && ` +
-          `rm -f /tmp/google-cloud-cli.tar.gz; ` +
-          `fi`,
-        `if [ -x ${shSingleQuote(
-          GCP_CLI_BUNDLED_PYTHON
-        )} ]; then export CLOUDSDK_PYTHON=${shSingleQuote(GCP_CLI_BUNDLED_PYTHON)}; fi`,
-        `if [ -z "$CLOUDSDK_PYTHON" ]; then ` +
-          `mkdir -p ${shSingleQuote(GCP_CLI_UV_BIN_DIR)} ${shSingleQuote(
-            GCP_CLI_PYTHON_INSTALL_DIR
-          )} && ` +
-          `curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=${shSingleQuote(
-            GCP_CLI_UV_BIN_DIR
-          )} sh && ` +
-          `UV_PYTHON_INSTALL_DIR=${shSingleQuote(GCP_CLI_PYTHON_INSTALL_DIR)} ${shSingleQuote(
-            `${GCP_CLI_UV_BIN_DIR}/uv`
-          )} python install 3.12 && ` +
-          `ln -sf "$(UV_PYTHON_INSTALL_DIR=${shSingleQuote(
-            GCP_CLI_PYTHON_INSTALL_DIR
-          )} ${shSingleQuote(`${GCP_CLI_UV_BIN_DIR}/uv`)} python find 3.12)" ${shSingleQuote(
-            GCP_CLI_PYTHON_PATH
-          )} && ` +
-          `export CLOUDSDK_PYTHON=${shSingleQuote(GCP_CLI_PYTHON_PATH)}; ` +
-          `fi`,
-        'gcloud --version',
-      ].join(' && '),
-      { timeoutMs: 180_000 }
-    );
-    if (result.exitCode !== 0) {
-      throw new Error(
-        `Failed to install Google Cloud CLI in sandbox (exit ${result.exitCode}): ${
-          result.stderr || result.stdout
-        }`
-      );
-    }
-  }
-
-  private async scrubGcpCliCredentials(sandbox: Sandbox): Promise<void> {
-    await sandbox.exec(
-      `rm -rf ${GCP_CLI_CONFIG_DIR} ${GCP_CLI_CREDENTIAL_DIR} ${GCP_CLI_ENV_PATH}`,
-      {
-        timeoutMs: 10_000,
-      }
-    );
+  private async scrubSandboxCliCredentials(
+    sandbox: Sandbox,
+    credentials: NonNullable<CodingRunParams['sandboxCliCredentials']>
+  ): Promise<void> {
+    const cleanupPaths = [
+      SANDBOX_CLI_ENV_PATH,
+      ...credentials.flatMap((credential) => credential.token.cleanupPaths ?? []),
+    ];
+    await sandbox.exec(cleanupPaths.map((path) => `rm -rf ${path}`).join('; '), {
+      timeoutMs: 10_000,
+    });
   }
 }

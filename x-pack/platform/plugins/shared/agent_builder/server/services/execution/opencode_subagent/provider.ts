@@ -7,14 +7,12 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { OpencodeSubagentExecutor, type OpencodeSubagentConfig } from './executor';
 import { OpencodeRunClient } from './persistence/run_client';
 import { McpAuthMinter } from './mcp_auth_minter';
-import { GithubTokenResolver } from './github_token_resolver';
 import { ElasticCliCredentialMinter } from './elastic_cli_credential_minter';
-import { GcpCliCredentialResolver } from './gcp_cli_credential_resolver';
+import { SandboxCliCredentialResolver } from './sandbox_cli_credential_resolver';
 
 /**
  * PoC provider for the OpenCode sub-agent executor.
@@ -34,7 +32,6 @@ export const initOpencodeSubagentExecutor = ({
   esClient,
   security,
   getActions,
-  encryptedSavedObjects,
 }: {
   config: OpencodeSubagentConfig;
   logger: Logger;
@@ -42,10 +39,8 @@ export const initOpencodeSubagentExecutor = ({
   esClient: ElasticsearchClient;
   /** Used to mint/revoke the per-run scoped MCP loopback credential. */
   security: SecurityServiceStart;
-  /** Actions start, to resolve a GitHub connector's PAT for git operations. */
+  /** Actions start, to resolve connector-owned sandbox credentials. */
   getActions: () => Promise<ActionsPluginStart>;
-  /** ESO start, to decrypt the connector's bearer secret server-side. */
-  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }): void => {
   runClient = new OpencodeRunClient(esClient, logger.get('runs'));
   const mcpAuthMinter = new McpAuthMinter(security, logger.get('mcpAuth'));
@@ -53,23 +48,17 @@ export const initOpencodeSubagentExecutor = ({
     security,
     logger.get('elasticCli')
   );
-  const gitTokenResolver = new GithubTokenResolver(
+  const sandboxCliCredentialResolver = new SandboxCliCredentialResolver(
     getActions,
-    encryptedSavedObjects,
-    logger.get('gitToken')
+    logger.get('sandboxCliCredentials')
   );
-  const gcpCliCredentialResolver = new GcpCliCredentialResolver(getActions, logger.get('gcpCli'));
-  // The GitHub App credential source is built per-profile inside the executor
-  // (from each profile's own githubApp config + private-key secret), not from
-  // global config — a profile brings its own git credential story.
   executor = new OpencodeSubagentExecutor(
     config,
     logger,
     runClient,
     mcpAuthMinter,
-    gitTokenResolver,
-    elasticCliCredentialMinter,
-    gcpCliCredentialResolver
+    sandboxCliCredentialResolver,
+    elasticCliCredentialMinter
   );
   // Reap any sandbox pods orphaned by a previous process (e.g. a hot-reload that
   // killed the runtime mid-run). Fire-and-forget; never blocks startup.

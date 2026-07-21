@@ -7,6 +7,7 @@
 
 import type { Sandbox } from './sandbox_provider';
 import type { OpencodeRunProgress } from './types';
+import type { ResolvedSandboxCliCredential } from './sandbox_cli_credential_resolver';
 
 /**
  * Coding runtime abstraction — LAYER 2 of the coding sub-agent stack.
@@ -75,10 +76,11 @@ export interface CodingRunParams {
    */
   elasticCliCredentials?: ElasticCliCredentials;
   /**
-   * Google Cloud CLI config for connector-backed sandbox access. Injected as
-   * per-run files and scrubbed afterwards.
+   * Generic connector-owned CLI credential material. Injected as per-run files,
+   * env vars, and setup commands; scrubbed afterwards using connector-provided
+   * cleanup paths.
    */
-  gcpCliCredentials?: GcpCliCredentials;
+  sandboxCliCredentials?: ResolvedSandboxCliCredential[];
   /** Max wall-clock for the agent turn. */
   timeoutMs: number;
   /** Streaming activity for the parent agent/UI. */
@@ -97,17 +99,6 @@ export interface GitCredentials {
 export interface ElasticCliCredentials {
   /** Contents of `.elasticrc.yml`. */
   configYml: string;
-  /** Human-readable source for logging/timeline diagnostics. */
-  source: string;
-}
-
-export interface GcpCliCredentials {
-  /** Short-lived IAM Credentials access token for gcloud. */
-  accessToken: string;
-  /** Epoch millis when the token expires. */
-  expiresAt: number;
-  /** GCP project configured as the default gcloud project. */
-  projectId: string;
   /** Human-readable source for logging/timeline diagnostics. */
   source: string;
 }

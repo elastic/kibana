@@ -29,6 +29,3 @@ export type { CodingRuntime } from './coding_runtime';
 export type { OpencodeRun, OpencodeRunSummary } from './persistence/run_client';
 export { McpAuthMinter } from './mcp_auth_minter';
 export type { MintedMcpAuth } from './mcp_auth_minter';
-export { GithubUserTokenMinter } from './github_user_token_minter';
-export { GithubUserCredentialSource } from './github_user_credential_source';
-export { GithubAppTokenMinter } from './github_app_token_minter';

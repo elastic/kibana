@@ -17,6 +17,7 @@ import type { ScopedRunner } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import { createSubagentTool } from './run_subagent';
 import { createOpencodeSubagentTool } from './run_opencode_subagent';
+import { createListSandboxCliConnectorsTool } from './list_sandbox_cli_connectors';
 import { getOpencodeSubagentExecutor } from '../../opencode_subagent';
 import { resolveProfileWithSecrets } from '../../../sandboxes';
 import { createSleepTool } from './sleep';
@@ -127,6 +128,7 @@ export const registerInternalTools = async ({
           // The executor mints a per-run, privilege-scoped API key (on behalf of
           // the requesting user) for the sandbox's MCP loopback, so no static
           // credential is threaded here. See McpAuthMinter.
+          tools.push(createListSandboxCliConnectorsTool({ executor: opencodeExecutor }));
           tools.push(createOpencodeSubagentTool({ executor: opencodeExecutor, profile }));
         } else {
           logger.warn(

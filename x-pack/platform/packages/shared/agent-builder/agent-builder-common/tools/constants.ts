@@ -91,6 +91,7 @@ export const attachmentTools = {
 export const internalTools = {
   runSubagent: 'run_subagent',
   runOpencodeSubagent: 'run_opencode_subagent',
+  listSandboxCliConnectors: 'list_sandbox_cli_connectors',
   sleep: 'sleep',
   writeTodos: 'write_todos',
   loadSkill: 'load_skill',
