@@ -93,7 +93,7 @@ const mockScopedLogger = { __sentinel: 'scopedLogger' };
 const mockLogger = { __sentinel: 'logger', get: jest.fn(() => mockScopedLogger) };
 const mockFeatureFlags = { __sentinel: 'featureFlags' };
 const mockStorage = {
-  get: jest.fn(() => null),
+  get: jest.fn((): unknown => null),
   set: jest.fn(),
   remove: jest.fn(),
   clear: jest.fn(),
@@ -270,16 +270,17 @@ describe('MetricsExperienceGridWrapper', () => {
     });
   });
 
-  it('records explored metrics and surfaces them via recentlyExploredMetrics', () => {
+  it('surfaces the persisted recently explored snapshot and records new interactions', () => {
+    mockStorage.get.mockReturnValueOnce(['metrics-*::cpu']);
+
     renderChartSection();
 
-    expect(unifiedGridProps?.recentlyExploredMetrics).toEqual([]);
+    expect(unifiedGridProps?.recentlyExploredMetrics).toEqual(['metrics-*::cpu']);
 
     act(() => {
-      unifiedGridProps?.onMetricExplored?.('metrics-*::cpu');
+      unifiedGridProps?.onMetricExplored?.('metrics-*::memory');
     });
 
     expect(mockStorage.set).toHaveBeenCalled();
-    expect(unifiedGridProps?.recentlyExploredMetrics).toEqual(['metrics-*::cpu']);
   });
 });

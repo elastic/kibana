@@ -67,10 +67,9 @@ const MetricsExperienceGridWrapper = (
     [core.http.basePath, storage]
   );
 
-  const recentlyExploredMetrics = useObservable(
-    recentMetricsStorage.get$(),
-    recentMetricsStorage.get()
-  );
+  const recentlyExploredMetrics = useMemo(() => {
+    return recentMetricsStorage.get();
+  }, [recentMetricsStorage]);
 
   const onMetricExplored = useCallback(
     (metricUniqueKey: string) => recentMetricsStorage.add(metricUniqueKey),
