@@ -216,6 +216,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'find-security-rules',
   'pci-compliance',
   'endpoint-forensic-analysis',
+  'deep-watch-forensics',
   'investigate-rule',
   'siem-readiness',
   'endpoint-response-actions',
@@ -305,6 +306,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
   'security.rule.preview',
+
+  // Security Solution – Threat Intelligence
+  'threat-intel-mitre-heatmap',
 
   // Security Solution – Attack Discovery (discoveries plugin)
   // gated behind the workflows feature flag
