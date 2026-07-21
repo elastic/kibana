@@ -424,18 +424,29 @@ describe('resolveExtendedFieldFilters', () => {
 });
 
 describe('parseDateFilterToRange', () => {
-  it('parses YYYY-MM-DD to a full-day UTC range', () => {
+  it('parses YYYY-MM-DD to a full-day range with bare-date bounds', () => {
     expect(parseDateFilterToRange('2024-01-01')).toEqual({
-      gte: '2024-01-01T00:00:00.000Z',
-      lt: '2024-01-02T00:00:00.000Z',
+      gte: '2024-01-01',
+      lt: '2024-01-02',
     });
   });
 
   it('parses ISO 8601 string by truncating to the day', () => {
     expect(parseDateFilterToRange('2024-01-01T00:00:00.000Z')).toEqual({
-      gte: '2024-01-01T00:00:00.000Z',
-      lt: '2024-01-02T00:00:00.000Z',
+      gte: '2024-01-01',
+      lt: '2024-01-02',
     });
+  });
+
+  it('returns bare-date bounds that lexicographically bracket a full ISO timestamp stored for the same day', () => {
+    // The flattened/keyword field can hold either a bare date or a full ISO timestamp
+    // depending on how the value was stored, and range queries on it compare lexicographically.
+    // A full-ISO `gte` bound (e.g. "2024-01-01T00:00:00.000Z") would sort *after* a bare-date
+    // stored value ("2024-01-01") and never match it. Bare-date bounds match both.
+    const { gte, lt } = parseDateFilterToRange('2024-01-01')!;
+    expect('2024-01-01' >= gte && '2024-01-01' < lt).toBe(true);
+    expect('2024-01-01T13:45:00.000Z' >= gte && '2024-01-01T13:45:00.000Z' < lt).toBe(true);
+    expect('2024-01-02T00:00:00.000Z' >= gte && '2024-01-02T00:00:00.000Z' < lt).toBe(false);
   });
 
   it('returns undefined for unrecognised formats', () => {
@@ -465,8 +476,8 @@ describe('parseDateFilterToRange', () => {
 
   it('accepts valid leap day in February (leap year)', () => {
     expect(parseDateFilterToRange('2024-02-29')).toEqual({
-      gte: '2024-02-29T00:00:00.000Z',
-      lt: '2024-03-01T00:00:00.000Z',
+      gte: '2024-02-29',
+      lt: '2024-03-01',
     });
   });
 
@@ -479,23 +490,23 @@ describe('parseDateFilterToRange', () => {
 
   it('accepts valid last day of 30-day months', () => {
     expect(parseDateFilterToRange('2024-04-30')).toEqual({
-      gte: '2024-04-30T00:00:00.000Z',
-      lt: '2024-05-01T00:00:00.000Z',
+      gte: '2024-04-30',
+      lt: '2024-05-01',
     });
     expect(parseDateFilterToRange('2024-11-30')).toEqual({
-      gte: '2024-11-30T00:00:00.000Z',
-      lt: '2024-12-01T00:00:00.000Z',
+      gte: '2024-11-30',
+      lt: '2024-12-01',
     });
   });
 
   it('accepts valid day 31 in 31-day months', () => {
     expect(parseDateFilterToRange('2024-01-31')).toEqual({
-      gte: '2024-01-31T00:00:00.000Z',
-      lt: '2024-02-01T00:00:00.000Z',
+      gte: '2024-01-31',
+      lt: '2024-02-01',
     });
     expect(parseDateFilterToRange('2024-12-31')).toEqual({
-      gte: '2024-12-31T00:00:00.000Z',
-      lt: '2025-01-01T00:00:00.000Z',
+      gte: '2024-12-31',
+      lt: '2025-01-01',
     });
   });
 });
@@ -1014,8 +1025,8 @@ describe('buildExtendedFieldFilterClauses', () => {
             {
               range: {
                 'cases.extended_fields.start_date_as_date': {
-                  gte: '2024-01-01T00:00:00.000Z',
-                  lt: '2024-01-02T00:00:00.000Z',
+                  gte: '2024-01-01',
+                  lt: '2024-01-02',
                 },
               },
             },

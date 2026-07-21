@@ -196,7 +196,13 @@ export const parseDateFilterToRange = (value: string): { gte: string; lt: string
   }
 
   const end = new Date(start.getTime() + 86_400_000);
-  return { gte: start.toISOString(), lt: end.toISOString() };
+  // Both bounds are sliced to bare YYYY-MM-DD: the flattened/keyword field can hold either a
+  // bare date or a full ISO timestamp depending on how it was stored, and range queries on it
+  // compare lexicographically, not chronologically. A bare-date bound still correctly brackets a
+  // full timestamp within the same day (e.g. "2026-08-01" <= "2026-08-01T13:45:00.000Z" < "2026-08-02"
+  // holds lexicographically), whereas a full ISO `gte` bound would sort *after* a bare-date value
+  // for the same day and never match it.
+  return { gte: start.toISOString().slice(0, 10), lt: end.toISOString().slice(0, 10) };
 };
 
 /** Builds ES runtime field mappings only for filters that can't use the flattened mapping directly. */
