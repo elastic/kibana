@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { MlAnomalyDetectionJobsHealthRuleParams } from '@kbn/ml-common-types/alerts';
+import { DELAYED_DATA_THRESHOLD_TYPE } from '@kbn/ml-common-types/alerts';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 import { validateLookbackInterval } from '../validators';
@@ -70,9 +71,12 @@ export function registerJobsHealthAlertingRule(
         );
       }
 
-      if (resultTestConfig.delayedData.thresholdType === 'percentage') {
+      if (
+        resultTestConfig.delayedData.enabled &&
+        resultTestConfig.delayedData.thresholdType === DELAYED_DATA_THRESHOLD_TYPE.PERCENTAGE
+      ) {
         const pct = resultTestConfig.delayedData.docsCountPercentage;
-        if (pct === null || pct === undefined || pct < 1 || pct > 100) {
+        if (pct < 1 || pct > 100) {
           validationResult.errors.delayedData.push(
             i18n.translate(
               'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.docsCountPercentageErrorMessage',
@@ -82,7 +86,10 @@ export function registerJobsHealthAlertingRule(
             )
           );
         }
-      } else if (resultTestConfig.delayedData.docsCount === 0) {
+      } else if (
+        resultTestConfig.delayedData.enabled &&
+        resultTestConfig.delayedData.docsCount === 0
+      ) {
         validationResult.errors.delayedData.push(
           i18n.translate(
             'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.docsCountErrorMessage',

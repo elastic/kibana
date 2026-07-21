@@ -6,7 +6,11 @@
  */
 
 import type { JobsHealthService } from './jobs_health_service';
-import { jobsHealthServiceProvider } from './jobs_health_service';
+import {
+  DELAYED_DATA_BUCKETS_PAGE_SIZE,
+  jobsHealthServiceProvider,
+  MAX_DELAYED_DATA_BUCKET_PAGES,
+} from './jobs_health_service';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import type { Logger } from '@kbn/core/server';
 import type { DeepPartial } from '@kbn/utility-types';
@@ -22,6 +26,7 @@ import type {
 import { ALERT_DELAYED_DATA_RESULTS } from '../../../common/constants/alerts';
 import type { JobAuditMessagesService } from '../../models/job_audit_messages/job_audit_messages';
 import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
+import { DELAYED_DATA_THRESHOLD_TYPE } from '@kbn/ml-common-types/alerts';
 
 const MOCK_DATE_NOW = 1487076708000;
 
@@ -69,6 +74,54 @@ const createBucketsResponse = (jobId: string, eventCount: number): MlGetBucketsR
     },
   ],
 });
+
+const createMultiBucketResponse = (
+  jobId: string,
+  bucketCount: number,
+  eventCountPerBucket: number
+): MlGetBucketsResponse => ({
+  count: bucketCount,
+  buckets: Array.from({ length: bucketCount }, (_, index) => ({
+    anomaly_score: 0,
+    bucket_influencers: [],
+    bucket_span: 3600,
+    event_count: eventCountPerBucket,
+    initial_anomaly_score: 0,
+    is_interim: false,
+    job_id: jobId,
+    processing_time_ms: 0,
+    result_type: 'bucket',
+    timestamp: index,
+  })),
+});
+
+const getDelayedDataOnlyExecutorOptions = (
+  overrides: DeepPartial<JobsHealthExecutorOptions> = {}
+): JobsHealthExecutorOptions => {
+  const { params: paramsOverrides, ...restOverrides } = overrides;
+
+  return getDefaultExecutorOptions({
+    ...restOverrides,
+    params: {
+      testsConfig: {
+        delayedData: {
+          enabled: true,
+          thresholdType: DELAYED_DATA_THRESHOLD_TYPE.PERCENTAGE,
+          docsCountPercentage: 10,
+          docsCount: null,
+          timeInterval: '4h',
+        },
+        behindRealtime: { enabled: false, timeInterval: null },
+        mml: { enabled: false },
+        datafeed: { enabled: false },
+        errorMessages: { enabled: false },
+      },
+      includeJobs: { jobIds: ['test_job_01'], groupIds: [] },
+      excludeJobs: null,
+      ...paramsOverrides,
+    },
+  });
+};
 
 const getDelayedDataPayloadResults = (
   payload: AnomalyDetectionJobHealthAlertPayload
@@ -227,6 +280,22 @@ describe('JobsHealthService', () => {
 
   beforeEach(() => {
     dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => MOCK_DATE_NOW);
+
+    annotationService.getDelayedDataAnnotations.mockImplementation(({ jobIds }: { jobIds: string[] }) =>
+      Promise.resolve(
+        jobIds.map((jobId) => ({
+          job_id: jobId,
+          annotation: `Datafeed has missed ${
+            jobId === 'test_job_01' ? 11 : 8
+          } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`,
+          modified_time: 1627660295141,
+          timestamp: 1627653000000,
+          end_timestamp: 1627653300000,
+        }))
+      )
+    );
+
+    mlClient.getBuckets.mockResolvedValue({ count: 0, buckets: [] });
   });
 
   afterEach(() => {
@@ -299,6 +368,35 @@ describe('JobsHealthService', () => {
         name: 'Errors in job messages',
       },
     ]);
+  });
+
+  test('count mode: alerts without calling getBuckets', async () => {
+    const executionResult = await jobHealthService.getTestsResults(
+      getDefaultExecutorOptions({
+        rule: { name: 'testRule_count' },
+        params: {
+          testsConfig: {
+            delayedData: {
+              enabled: true,
+              thresholdType: DELAYED_DATA_THRESHOLD_TYPE.COUNT,
+              docsCount: 10,
+              timeInterval: '4h',
+            },
+            behindRealtime: { enabled: false, timeInterval: null },
+            mml: { enabled: false },
+            datafeed: { enabled: false },
+            errorMessages: { enabled: false },
+          },
+          includeJobs: { jobIds: [], groupIds: ['test_group'] },
+          excludeJobs: { jobIds: ['test_job_03'], groupIds: [] },
+        },
+      })
+    );
+
+    expect(mlClient.getBuckets).not.toHaveBeenCalled();
+    expect(executionResult).toHaveLength(1);
+    expect(executionResult[0].isHealthy).toBe(false);
+    expect(executionResult[0].name).toBe('Data delay has occurred');
   });
 
   test('takes into account delayed data params', async () => {
@@ -381,7 +479,7 @@ describe('JobsHealthService', () => {
           testsConfig: {
             delayedData: {
               enabled: true,
-              thresholdType: 'percentage',
+              thresholdType: DELAYED_DATA_THRESHOLD_TYPE.PERCENTAGE,
               docsCountPercentage: 10,
               docsCount: null,
               timeInterval: '4h',
@@ -431,7 +529,7 @@ describe('JobsHealthService', () => {
           testsConfig: {
             delayedData: {
               enabled: true,
-              thresholdType: 'percentage',
+              thresholdType: DELAYED_DATA_THRESHOLD_TYPE.PERCENTAGE,
               docsCountPercentage: 20,
               docsCount: null,
               timeInterval: '4h',
@@ -459,6 +557,167 @@ describe('JobsHealthService', () => {
     expect(
       payloadResults.find((r) => r.job_id === 'test_job_02')?.missed_docs_percentage
     ).toBeCloseTo(8, 1);
+  });
+
+  test('percentage mode: paginates getBuckets across multiple pages', async () => {
+    annotationService.getDelayedDataAnnotations.mockImplementation(
+      ({ jobIds }: { jobIds: string[] }) =>
+        Promise.resolve(
+          jobIds.map((jobId) => ({
+            job_id: jobId,
+            annotation:
+              'Datafeed has missed 100 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
+            modified_time: 1627660295141,
+            timestamp: 1627653000000,
+            end_timestamp: 1627653300000,
+          }))
+        )
+    );
+
+    mlClient.getBuckets.mockImplementation(async ({ page }) => {
+      const pageFrom = page?.from ?? 0;
+
+      if (pageFrom === 0) {
+        return {
+          count: DELAYED_DATA_BUCKETS_PAGE_SIZE,
+          buckets: Array.from({ length: DELAYED_DATA_BUCKETS_PAGE_SIZE }, (_, index) => ({
+            anomaly_score: 0,
+            bucket_influencers: [],
+            bucket_span: 3600,
+            event_count: index < 900 ? 1 : 0,
+            initial_anomaly_score: 0,
+            is_interim: false,
+            job_id: 'test_job_01',
+            processing_time_ms: 0,
+            result_type: 'bucket',
+            timestamp: index,
+          })),
+        };
+      }
+
+      if (pageFrom === DELAYED_DATA_BUCKETS_PAGE_SIZE) {
+        return createMultiBucketResponse('test_job_01', 500, 2);
+      }
+
+      return { count: 0, buckets: [] };
+    });
+
+    const executionResult = await jobHealthService.getTestsResults(
+      getDelayedDataOnlyExecutorOptions({
+        rule: { name: 'testRule_pct_pagination' },
+      })
+    );
+
+    expect(mlClient.getBuckets).toHaveBeenCalledTimes(2);
+    expect(mlClient.getBuckets).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        page: { from: 0, size: DELAYED_DATA_BUCKETS_PAGE_SIZE },
+      })
+    );
+    expect(mlClient.getBuckets).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        page: { from: DELAYED_DATA_BUCKETS_PAGE_SIZE, size: DELAYED_DATA_BUCKETS_PAGE_SIZE },
+      })
+    );
+
+    expect(executionResult).toHaveLength(1);
+    expect(executionResult[0].isHealthy).toBe(true);
+  });
+
+  test('percentage mode: skips alert when bucket page limit is reached', async () => {
+    mlClient.getBuckets.mockImplementation(async () =>
+      createMultiBucketResponse('test_job_01', DELAYED_DATA_BUCKETS_PAGE_SIZE, 1)
+    );
+
+    const executionResult = await jobHealthService.getTestsResults(
+      getDelayedDataOnlyExecutorOptions({
+        rule: { name: 'testRule_pct_max_pages' },
+      })
+    );
+
+    expect(mlClient.getBuckets).toHaveBeenCalledTimes(MAX_DELAYED_DATA_BUCKET_PAGES);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(`${MAX_DELAYED_DATA_BUCKET_PAGES}-page bucket limit`)
+    );
+    expect(executionResult).toHaveLength(1);
+    expect(executionResult[0].isHealthy).toBe(true);
+  });
+
+  test('percentage mode: skips alert when getBuckets fails', async () => {
+    mlClient.getBuckets.mockRejectedValueOnce(new Error('ML API unavailable'));
+
+    const executionResult = await jobHealthService.getTestsResults(
+      getDelayedDataOnlyExecutorOptions({
+        rule: { name: 'testRule_pct_error' },
+      })
+    );
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to fetch buckets for job test_job_01')
+    );
+    expect(executionResult).toHaveLength(1);
+    expect(executionResult[0].isHealthy).toBe(true);
+  });
+
+  test('percentage mode: skips alert when total document count is zero', async () => {
+    annotationService.getDelayedDataAnnotations.mockImplementation(
+      ({ jobIds }: { jobIds: string[] }) =>
+        Promise.resolve(
+          jobIds.map((jobId) => ({
+            job_id: jobId,
+            annotation:
+              'Datafeed has missed 0 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
+            modified_time: 1627660295141,
+            timestamp: 1627653000000,
+            end_timestamp: 1627653300000,
+          }))
+        )
+    );
+
+    mlClient.getBuckets.mockResolvedValueOnce({ count: 0, buckets: [] });
+
+    const executionResult = await jobHealthService.getTestsResults(
+      getDelayedDataOnlyExecutorOptions({
+        rule: { name: 'testRule_pct_zero_total' },
+      })
+    );
+
+    expect(executionResult).toHaveLength(1);
+    expect(executionResult[0].isHealthy).toBe(true);
+  });
+
+  test('percentage mode: alerts when missed docs are exactly at the threshold', async () => {
+    annotationService.getDelayedDataAnnotations.mockImplementation(
+      ({ jobIds }: { jobIds: string[] }) =>
+        Promise.resolve(
+          jobIds.map((jobId) => ({
+            job_id: jobId,
+            annotation:
+              'Datafeed has missed 10 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
+            modified_time: 1627660295141,
+            timestamp: 1627653000000,
+            end_timestamp: 1627653300000,
+          }))
+        )
+    );
+
+    mlClient.getBuckets.mockImplementation(async ({ job_id: jobId }) =>
+      createBucketsResponse(jobId, 90)
+    );
+
+    const executionResult = await jobHealthService.getTestsResults(
+      getDelayedDataOnlyExecutorOptions({
+        rule: { name: 'testRule_pct_boundary' },
+      })
+    );
+
+    expect(executionResult).toHaveLength(1);
+    expect(executionResult[0].isHealthy).toBe(false);
+
+    const payloadResults = getDelayedDataPayloadResults(executionResult[0].payload);
+    expect(payloadResults[0].missed_docs_percentage).toBe(10);
   });
 
   test('returns results based on provided selection', async () => {

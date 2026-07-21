@@ -19,7 +19,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '@kbn/ml-common-types/alerts';
+import type {
+  DelayedDataThresholdType,
+  JobsHealthRuleTestsConfig,
+  JobsHealthTests,
+} from '@kbn/ml-common-types/alerts';
+import { DELAYED_DATA_THRESHOLD_TYPE } from '@kbn/ml-common-types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 import { HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
 import { TimeIntervalControl } from '../time_interval_control';
@@ -30,11 +35,8 @@ interface TestsSelectionControlProps {
   errors?: string[];
 }
 
-type DelayedDataThresholdType = 'count' | 'percentage';
-
-const isDelayedDataThresholdType = (id: string): id is DelayedDataThresholdType => {
-  return id === 'count' || id === 'percentage';
-};
+const isDelayedDataThresholdType = (id: string): id is DelayedDataThresholdType =>
+  id === DELAYED_DATA_THRESHOLD_TYPE.COUNT || id === DELAYED_DATA_THRESHOLD_TYPE.PERCENTAGE;
 
 export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
   ({ config, onChange, errors }) => {
@@ -93,7 +95,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                       )}
                       options={[
                         {
-                          id: 'count',
+                          id: DELAYED_DATA_THRESHOLD_TYPE.COUNT,
                           label: (
                             <FormattedMessage
                               id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.thresholdTypeCount"
@@ -102,7 +104,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                           ),
                         },
                         {
-                          id: 'percentage',
+                          id: DELAYED_DATA_THRESHOLD_TYPE.PERCENTAGE,
                           label: (
                             <FormattedMessage
                               id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.thresholdTypePercentage"
@@ -126,7 +128,8 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
 
                     <EuiSpacer size="m" />
 
-                    {uiConfig.delayedData.thresholdType === 'percentage' ? (
+                    {uiConfig.delayedData.thresholdType ===
+                    DELAYED_DATA_THRESHOLD_TYPE.PERCENTAGE ? (
                       <EuiFormRow
                         label={
                           <>

@@ -16,6 +16,10 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 
 import type { DatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed_stats';
 import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
+import {
+  DELAYED_DATA_THRESHOLD_TYPE,
+  type DelayedDataThresholdType,
+} from '@kbn/ml-common-types/alerts';
 import type { MlClient } from '../ml_client';
 import type { JobSelection } from '../../routes/schemas/alerting_schema';
 import { datafeedsProvider, type DatafeedsService } from '../../models/job_service/datafeeds';
@@ -60,6 +64,15 @@ export interface TestResult {
 
 type TestsResults = TestResult[];
 
+export const DELAYED_DATA_BUCKETS_PAGE_SIZE = 1000;
+export const MAX_DELAYED_DATA_BUCKET_PAGES = 10;
+
+// Keeps the annotation in the within-threshold partition when percentage cannot be computed reliably.
+const NON_ALERTING_DOCS_THRESHOLD = Number.POSITIVE_INFINITY;
+
+// Round to 1 decimal so alert context and action messages stay readable.
+const roundMissedDocsPercentage = (percentage: number): number => Math.round(percentage * 10) / 10;
+
 interface DelayedDataAnnotation {
   job_id: string;
   annotation: string;
@@ -69,7 +82,7 @@ interface DelayedDataAnnotation {
 }
 
 interface DelayedDataConfig {
-  thresholdType: 'count' | 'percentage';
+  thresholdType: DelayedDataThresholdType;
   docsCount: number | null;
   docsCountPercentage: number | null;
 }
@@ -208,49 +221,90 @@ export function jobsHealthServiceProvider(
     };
   };
 
-/**
- * Resolves the missed-docs threshold for each delayed-data annotation.
- * Count mode reuses the configured doc count. Percentage mode derives the
- * threshold from the annotation range's analyzed event count.
- */
+  /**
+   * Resolves the missed-docs threshold for each delayed-data annotation.
+   * Count mode reuses the configured doc count. Percentage mode derives the
+   * threshold from the annotation range's analyzed event count.
+   */
   const resolveDelayedDataThresholds = async (
     annotations: DelayedDataAnnotation[],
     delayedDataConfig: DelayedDataConfig
   ): Promise<DelayedDataThreshold[]> => {
-    if (delayedDataConfig.thresholdType !== 'percentage') {
+    if (delayedDataConfig.thresholdType !== DELAYED_DATA_THRESHOLD_TYPE.PERCENTAGE) {
       const docsCountThreshold = delayedDataConfig.docsCount ?? 0;
       return annotations.map(() => ({ effectiveDocsThreshold: docsCountThreshold }));
     }
 
-// Use the full annotation range as the denominator; it may include clean buckets,
     const pct = delayedDataConfig.docsCountPercentage ?? 0;
-    const bucketsPageSize = 1000;
-    return Promise.all(
-      annotations.map(async (v) => {
-        try {
-          const bucketsResp = await mlClient.getBuckets({
-            job_id: v.job_id,
-            start: String(v.timestamp),
-            end: String(v.end_timestamp),
-            page: { from: 0, size: bucketsPageSize },
-          });
-          const eventCountSum = (bucketsResp.buckets ?? []).reduce(
-            (sum: number, bucket) => sum + (Number(bucket.event_count) || 0),
-            0
-          );
-          const total = eventCountSum + v.missed_docs_count;
-          if (total > 0) {
-            return {
-              effectiveDocsThreshold: (pct / 100) * total,
-              missedDocsPercentage: (v.missed_docs_count / total) * 100,
-            };
-          }
-        } catch (err) {
-          logger.warn(
-            `Failed to fetch buckets for job ${v.job_id} during delayed data percentage check: ${err?.message}`
-          );
+
+    const sumEventCountForAnnotation = async (
+      annotation: DelayedDataAnnotation
+    ): Promise<number | null> => {
+      let eventCountSum = 0;
+
+      for (let pageIndex = 0; pageIndex < MAX_DELAYED_DATA_BUCKET_PAGES; pageIndex++) {
+        const pageFrom = pageIndex * DELAYED_DATA_BUCKETS_PAGE_SIZE;
+
+        // getBuckets returns at most 1000 buckets per page; paginate so the
+        // denominator is not undercounted (which would inflate missed %).
+        const bucketsResp = await mlClient.getBuckets({
+          job_id: annotation.job_id,
+          start: String(annotation.timestamp),
+          end: String(annotation.end_timestamp),
+          page: { from: pageFrom, size: DELAYED_DATA_BUCKETS_PAGE_SIZE },
+        });
+
+        const buckets = bucketsResp.buckets ?? [];
+        eventCountSum += buckets.reduce(
+          (sum: number, bucket) => sum + (Number(bucket.event_count) || 0),
+          0
+        );
+
+        if (buckets.length < DELAYED_DATA_BUCKETS_PAGE_SIZE) {
+          return eventCountSum;
         }
-        return { effectiveDocsThreshold: 0 };
+      }
+
+      // Cap pagination to bound ML API load on pathological annotation ranges.
+      logger.warn(
+        `Delayed data percentage check for job ${annotation.job_id} exceeded the ${MAX_DELAYED_DATA_BUCKET_PAGES}-page bucket limit; skipping alert for this annotation.`
+      );
+      return null;
+    };
+
+    return Promise.all(
+      annotations.map(async (annotation) => {
+        try {
+          const eventCountSum = await sumEventCountForAnnotation(annotation);
+
+          if (eventCountSum === null) {
+            return { effectiveDocsThreshold: NON_ALERTING_DOCS_THRESHOLD };
+          }
+
+          // Missed docs are not included in analyzed bucket counts.
+          const total = eventCountSum + annotation.missed_docs_count;
+
+          // Prefer skipping the alert over firing when there is no usable denominator.
+          if (total <= 0) {
+            return { effectiveDocsThreshold: NON_ALERTING_DOCS_THRESHOLD };
+          }
+
+          const missedDocsPercentage = roundMissedDocsPercentage(
+            (annotation.missed_docs_count / total) * 100
+          );
+
+          return {
+            effectiveDocsThreshold: (pct / 100) * total,
+            missedDocsPercentage,
+          };
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          logger.warn(
+            `Failed to fetch buckets for job ${annotation.job_id} during delayed data percentage check: ${errorMessage}`
+          );
+          // Prefer skipping the alert over firing on incomplete bucket data.
+          return { effectiveDocsThreshold: NON_ALERTING_DOCS_THRESHOLD };
+        }
       })
     );
   };
