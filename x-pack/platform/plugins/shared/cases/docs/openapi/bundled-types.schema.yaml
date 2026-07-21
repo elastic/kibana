@@ -946,7 +946,7 @@ paths:
   /api/cases/fields:
     get:
       summary: Get the fields applicable to a case
-      operationId: getCaseApplicableFieldsDefaultSpace
+      operationId: getApplicableFieldsDefaultSpace
       description: |
         Returns the fields a caller may write to a case's `extended_fields` when creating a case for the given owner. Includes the owner's global (library-wide) fields and, when `templateId` is supplied, that template's fields. Migrated legacy custom fields appear as `global` fields. Requires the Cases feature to be enabled in the space.
       tags:
@@ -958,7 +958,7 @@ paths:
           required: true
           schema:
             type: string
-            maxLength: 50
+            maxLength: 30
           example: cases
         - in: query
           name: templateId
@@ -1020,7 +1020,7 @@ paths:
   /api/cases/{caseId}/fields:
     get:
       summary: Get the fields applicable to an existing case
-      operationId: getExistingCaseApplicableFieldsDefaultSpace
+      operationId: getCaseApplicableFieldsDefaultSpace
       description: |
         Returns the fields a caller may write to the case's `extended_fields`. The owner and any applied template are derived from the case itself, so the response includes the owner's global (library-wide) fields and, when the case has a template applied, that template's fields. Requires the Cases feature to be enabled in the space.
       tags:

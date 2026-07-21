@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { ApplicableFieldsResponse } from '../../../../common/types/domain/template/applicable_field';
-import { CASE_APPLICABLE_FIELDS_URL } from '../../../../common/constants';
+import { CASE_APPLICABLE_FIELDS_URL, MAX_CASE_ID_LENGTH } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
@@ -28,7 +28,7 @@ export const getCaseApplicableFieldsRoute = createCasesRoute({
   },
   params: {
     params: schema.object({
-      case_id: schema.string({ maxLength: 36 }),
+      case_id: schema.string({ maxLength: MAX_CASE_ID_LENGTH }),
     }),
   },
   handler: async ({ context, request, response }) => {

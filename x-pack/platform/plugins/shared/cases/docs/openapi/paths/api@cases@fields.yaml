@@ -1,6 +1,6 @@
 get:
   summary: Get the fields applicable to a case
-  operationId: getCaseApplicableFieldsDefaultSpace
+  operationId: getApplicableFieldsDefaultSpace
   description: >
     Returns the fields a caller may write to a case's `extended_fields` when creating a case for the
     given owner. Includes the owner's global (library-wide) fields and, when `templateId` is
@@ -15,7 +15,7 @@ get:
       required: true
       schema:
         type: string
-        maxLength: 50
+        maxLength: 30
       example: cases
     - in: query
       name: templateId

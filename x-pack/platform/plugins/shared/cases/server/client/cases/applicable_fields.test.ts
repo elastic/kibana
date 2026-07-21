@@ -7,6 +7,7 @@
 
 import { stringify as yamlStringify } from 'yaml';
 import type { InlineField } from '../../../common/types/domain/template/fields';
+import { getFieldSnakeKey } from '../../../common/utils';
 import type { TemplatesService } from '../../services/templates';
 import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { resolveApplicableFields, toApplicableField } from './applicable_fields';
@@ -149,9 +150,27 @@ describe('applicable_fields', () => {
       expect(result[0].field.name).toBe('priority');
     });
 
+    it('fetches field definitions only once, reusing the result for globals and template $ref resolution', async () => {
+      fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          makeFieldDef('priority', { label: 'Priority', type: 'keyword', control: 'INPUT_TEXT' }),
+        ],
+        total: 1,
+      });
+      templatesService.getTemplate.mockResolvedValue(makeTemplateSO([]) as never);
+
+      await resolveApplicableFields({
+        owner: 'securitySolution',
+        templateId: 'tpl-1',
+        templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+      });
+
+      expect(fieldDefinitionsService.getFieldDefinitions).toHaveBeenCalledTimes(1);
+      expect(fieldDefinitionsService.getFieldDefinitions).toHaveBeenCalledWith('securitySolution');
+    });
+
     it('merges global and template fields, global wins on key collision', async () => {
-      // getFieldDefinitions is called twice: with {isGlobal:true} for globals, and without for
-      // template $ref resolution. Return globals both times for simplicity.
       fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
         fieldDefinitions: [
           makeFieldDef('priority', { label: 'Priority', type: 'keyword', control: 'INPUT_TEXT' }),
@@ -180,6 +199,39 @@ describe('applicable_fields', () => {
       expect(byKey.priority_as_keyword).toBe('global');
       expect(byKey.rollout_as_keyword).toBe('template');
       expect(result).toHaveLength(2);
+    });
+
+    it('flags a MARKDOWN template field as display-only alongside a global field', async () => {
+      fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          makeFieldDef('global_tag', {
+            label: 'global_tag',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+          }),
+        ],
+        total: 1,
+      });
+      templatesService.getTemplate.mockResolvedValue(
+        makeTemplateSO([
+          { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', label: 'Summary' },
+          { name: 'instructions', control: 'MARKDOWN', metadata: { content: '# Read me' } },
+        ]) as never
+      );
+
+      const result = await resolveApplicableFields({
+        owner: 'securitySolution',
+        templateId: 'tpl-1',
+        templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+      });
+
+      const byKey = Object.fromEntries(
+        result.map((r) => [getFieldSnakeKey(r.field.name, r.field.type), r])
+      );
+      expect(byKey.global_tag_as_keyword).toBeDefined();
+      expect(byKey.summary_as_keyword).toBeDefined();
+      expect(byKey.instructions_as_keyword.field.control).toBe('MARKDOWN');
     });
 
     it('throws when the template is not found', async () => {

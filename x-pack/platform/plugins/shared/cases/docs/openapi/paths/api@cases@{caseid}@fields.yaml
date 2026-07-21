@@ -1,6 +1,6 @@
 get:
   summary: Get the fields applicable to an existing case
-  operationId: getExistingCaseApplicableFieldsDefaultSpace
+  operationId: getCaseApplicableFieldsDefaultSpace
   description: >
     Returns the fields a caller may write to the case's `extended_fields`. The owner and any applied
     template are derived from the case itself, so the response includes the owner's global

@@ -16,6 +16,7 @@ import { isDisplayOnlyField } from '../../../common/types/domain/template/fields
 import {
   getFieldSnakeKey,
   getYamlDefaultAsString,
+  parseFieldDefinitionsToInlineFields,
   resolveTemplateFields,
 } from '../../../common/utils';
 import type { TemplatesService } from '../../services/templates';
@@ -23,8 +24,6 @@ import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
-import { createCaseError } from '../../common/error';
-import { resolveGlobalFields } from './validators';
 
 interface TaggedField {
   field: InlineField;
@@ -79,7 +78,13 @@ export const resolveApplicableFields = async ({
   templatesService: TemplatesService;
   fieldDefinitionsService: FieldDefinitionsService;
 }): Promise<TaggedField[]> => {
-  const globalFields = await resolveGlobalFields(owner, fieldDefinitionsService);
+  // Fetched once, unfiltered: template `$ref` resolution needs the full set anyway, and
+  // `isGlobal` filtering happens client-side in the service — a second, `isGlobal`-filtered
+  // call would just repeat the identical SO `find`.
+  const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner);
+  const globalFields = parseFieldDefinitionsToInlineFields(
+    fieldDefinitions.filter((fd) => fd.isGlobal)
+  );
 
   const byKey = new Map<string, TaggedField>();
   for (const field of globalFields) {
@@ -105,7 +110,6 @@ export const resolveApplicableFields = async ({
       throw Boom.badRequest(`Template ${templateId} has an invalid definition`);
     }
 
-    const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner);
     const templateFields = resolveTemplateFields(
       parsedTemplate.definition.fields,
       fieldDefinitions
@@ -122,19 +126,28 @@ export const resolveApplicableFields = async ({
   return Array.from(byKey.values());
 };
 
-export interface GetApplicableFieldsParams {
-  /** Required for pre-create discovery. Ignored when `caseId` is provided (owner is read off the case). */
-  owner?: string;
-  /** Optional template to scope discovery to. Ignored when `caseId` is provided. */
+/** Pre-create discovery: owner is required, template is optional. */
+interface OwnerScopedParams {
+  owner: string;
   templateId?: string;
-  /** When provided, owner + applied template are derived from the case. */
-  caseId?: string;
 }
+
+/** Existing-case discovery: owner + applied template are derived from the case. */
+interface CaseScopedParams {
+  caseId: string;
+}
+
+/**
+ * Either `owner` (+ optional `templateId`) for a prospective case, or `caseId` for an existing
+ * one — never both, so the invalid combination is unrepresentable at the type level (no runtime
+ * "owner is required" guard needed).
+ */
+export type GetApplicableFieldsParams = OwnerScopedParams | CaseScopedParams;
 
 /**
  * Returns the fully-formed `extended_fields` a caller may apply, either for a prospective case
  * (`owner` [+ optional `templateId`]) or for an existing case (`caseId`). Authorization is enforced
- * here because `resolveGlobalFields` uses the unsecured SO client.
+ * here because `resolveApplicableFields` uses the unsecured SO/field-definitions clients.
  */
 export const getApplicableFields = async (
   params: GetApplicableFieldsParams,
@@ -142,46 +155,35 @@ export const getApplicableFields = async (
 ): Promise<ApplicableFieldsResponse> => {
   const {
     services: { caseService, templatesService, fieldDefinitionsService },
-    logger,
     authorization,
   } = clientArgs;
 
-  try {
-    let owner: string;
-    let templateId: string | null | undefined = params.templateId;
+  let owner: string;
+  let templateId: string | null | undefined;
 
-    if (params.caseId) {
-      const theCase = await caseService.getCase({ id: params.caseId });
-      await authorization.ensureAuthorized({
-        operation: Operations.getCase,
-        entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
-      });
-      owner = theCase.attributes.owner;
-      templateId = theCase.attributes.template?.id;
-    } else {
-      if (!params.owner) {
-        throw Boom.badRequest('owner is required');
-      }
-      owner = params.owner;
-      await authorization.ensureAuthorized({
-        operation: Operations.getFieldDefinitions,
-        entities: [{ owner, id: owner }],
-      });
-    }
-
-    const resolved = await resolveApplicableFields({
-      owner,
-      templateId,
-      templatesService,
-      fieldDefinitionsService,
+  if ('caseId' in params) {
+    const theCase = await caseService.getCase({ id: params.caseId });
+    await authorization.ensureAuthorized({
+      operation: Operations.getCase,
+      entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
     });
-
-    return { fields: resolved.map(({ field, source }) => toApplicableField(field, source)) };
-  } catch (error) {
-    throw createCaseError({
-      message: `Failed to get applicable fields: ${error}`,
-      error,
-      logger,
+    owner = theCase.attributes.owner;
+    templateId = theCase.attributes.template?.id;
+  } else {
+    owner = params.owner;
+    templateId = params.templateId;
+    await authorization.ensureAuthorized({
+      operation: Operations.getFieldDefinitions,
+      entities: [{ owner, id: owner }],
     });
   }
+
+  const resolved = await resolveApplicableFields({
+    owner,
+    templateId,
+    templatesService,
+    fieldDefinitionsService,
+  });
+
+  return { fields: resolved.map(({ field, source }) => toApplicableField(field, source)) };
 };
