@@ -27,7 +27,7 @@ export const CaseDetailsTour: React.FC = () => {
   const isTourEnabled = notifications.tours.isEnabled();
 
   const { permissions } = useCasesContext();
-  const { pushToServiceAuthorized } = useCasesFeatures();
+  const { pushToServiceAuthorized, hasCaseSettings } = useCasesFeatures();
   const isTemplatesEnabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
 
   const { isNew, markSeen } = useNewFeatureSeen(LOCAL_STORAGE_KEYS.caseDetailsTourSeen);
@@ -37,10 +37,17 @@ export const CaseDetailsTour: React.FC = () => {
       getCaseDetailsTourSteps({
         canCreateComment: permissions.createComment,
         canUpdate: permissions.update,
+        hasCaseSettings,
         isTemplatesEnabled,
         isConnectorAuthorized: pushToServiceAuthorized,
       }),
-    [permissions.createComment, permissions.update, isTemplatesEnabled, pushToServiceAuthorized]
+    [
+      permissions.createComment,
+      permissions.update,
+      hasCaseSettings,
+      isTemplatesEnabled,
+      pushToServiceAuthorized,
+    ]
   );
 
   if (!isTourEnabled) {

@@ -10,6 +10,7 @@ import { getCaseDetailsTourSteps } from './tour_steps';
 const ALL_ENABLED = {
   canCreateComment: true,
   canUpdate: true,
+  hasCaseSettings: true,
   isTemplatesEnabled: true,
   isConnectorAuthorized: true,
 };
@@ -31,6 +32,7 @@ describe('getCaseDetailsTourSteps', () => {
     const ids = getCaseDetailsTourSteps({
       canCreateComment: false,
       canUpdate: false,
+      hasCaseSettings: false,
       isTemplatesEnabled: false,
       isConnectorAuthorized: false,
     }).map((s) => s.stepId);
@@ -46,6 +48,13 @@ describe('getCaseDetailsTourSteps', () => {
 
   it('omits the settings step without update permission', () => {
     const ids = getCaseDetailsTourSteps({ ...ALL_ENABLED, canUpdate: false }).map((s) => s.stepId);
+    expect(ids).not.toContain('settings');
+  });
+
+  it('omits the settings step when the solution enables no case settings', () => {
+    const ids = getCaseDetailsTourSteps({ ...ALL_ENABLED, hasCaseSettings: false }).map(
+      (s) => s.stepId
+    );
     expect(ids).not.toContain('settings');
   });
 

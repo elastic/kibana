@@ -13,6 +13,7 @@ import type { CaseUI } from '../../../../../../../common';
 import type { OnUpdateFields } from '../../../../../case_view/types';
 import { useAllCasesNavigation } from '../../../../../../common/navigation';
 import { useCasesContext } from '../../../../../cases_context/use_cases_context';
+import { useCasesFeatures } from '../../../../../../common/use_cases_features';
 import { useCasesToast } from '../../../../../../common/use_cases_toast';
 import { useDateFormat, useTimeZone } from '../../../../../../common/lib/kibana';
 import { useRefreshCaseViewPage } from '../../../../../case_view/use_on_refresh_case_view_page';
@@ -44,6 +45,7 @@ export const useCaseViewHeader = ({
   onUpdateField,
 }: UseCaseViewHeaderArgs) => {
   const { permissions } = useCasesContext();
+  const { hasCaseSettings } = useCasesFeatures();
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { showSuccessToast, showErrorToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
@@ -158,6 +160,7 @@ export const useCaseViewHeader = ({
     () =>
       getMenu({
         permissions,
+        hasCaseSettings,
         caseId: caseData.id,
         chat: {
           addToChat,
@@ -175,6 +178,7 @@ export const useCaseViewHeader = ({
       summarizeCase,
       isAddToChatAvailable,
       permissions,
+      hasCaseSettings,
       caseData.id,
       currentExternalIncident,
       refreshCaseViewPage,

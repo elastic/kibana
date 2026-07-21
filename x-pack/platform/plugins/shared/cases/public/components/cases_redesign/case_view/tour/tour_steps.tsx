@@ -21,6 +21,8 @@ const wrap = (text: string) => (
 export interface CaseDetailsTourConditions {
   canCreateComment: boolean;
   canUpdate: boolean;
+  /** Whether the current solution enables any case setting; gates the settings step. */
+  hasCaseSettings: boolean;
   isTemplatesEnabled: boolean;
   isConnectorAuthorized: boolean;
 }
@@ -36,6 +38,7 @@ export interface CaseDetailsTourConditions {
 export const getCaseDetailsTourSteps = ({
   canCreateComment,
   canUpdate,
+  hasCaseSettings,
   isTemplatesEnabled,
   isConnectorAuthorized,
 }: CaseDetailsTourConditions): CasesTourStep[] => {
@@ -60,7 +63,7 @@ export const getCaseDetailsTourSteps = ({
     content: wrap(i18n.STEP_PILLS_DESCRIPTION),
   });
 
-  if (canUpdate) {
+  if (canUpdate && hasCaseSettings) {
     steps.push({
       stepId: 'settings',
       title: i18n.STEP_SETTINGS_TITLE,
