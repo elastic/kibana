@@ -40,8 +40,6 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
-        - exit_status: '*'
-          limit: 1
 
   - label: 'LLM Evals: Post Fresh Baseline Comparison'
     key: kbn-evals-fresh-compare

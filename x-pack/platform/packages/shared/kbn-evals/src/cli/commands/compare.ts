@@ -110,8 +110,7 @@ export const compareCmd: Command<void> = {
 
       // In CI the positional may be a base build ID (e.g. "bk-BUILD_ID"). Resolve it to the
       // full composite (e.g. "bk-BUILD_ID::suite::model") so the server's exact-term query
-      // on metadata.execution_id finds the scores. Build IDs are globally unique so omitting
-      // a branch filter is safe.
+      // on metadata.execution_id finds the scores.
       if (!firstExperimentId.includes('::')) {
         const resolved = await evalsClient.findLatestExperimentForBuild({
           suiteId,

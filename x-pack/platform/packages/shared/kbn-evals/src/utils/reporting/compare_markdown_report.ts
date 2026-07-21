@@ -143,13 +143,17 @@ export function formatMarkdownCompareReport({
     tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
     rows.forEach((r) => {
       const delta = r.meanA - r.meanB;
-      tableLines.push(
-        `| ${escapeTableCell(r.datasetName)} | ${escapeTableCell(r.evaluatorName)} | ${
-          r.sampleSize
-        } | ${formatNumber(r.meanA)} | ${formatNumber(r.meanB)} | ${formatDifference(
-          delta
-        )} | ${formatPValue(r.pValue)} | ${formatSig(r.pValue, significanceThreshold)} |`
-      );
+      const cols = [
+        escapeTableCell(r.datasetName),
+        escapeTableCell(r.evaluatorName),
+        String(r.sampleSize),
+        formatNumber(r.meanA),
+        formatNumber(r.meanB),
+        formatDifference(delta),
+        formatPValue(r.pValue),
+        formatSig(r.pValue, significanceThreshold),
+      ];
+      tableLines.push(`| ${cols.join(' | ')} |`);
     });
     return tableLines.join('\n');
   };
