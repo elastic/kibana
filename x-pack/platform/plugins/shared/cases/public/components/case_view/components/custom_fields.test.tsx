@@ -85,24 +85,12 @@ describe('Case View Page files tab', () => {
 
     expect(customFields.length).toBe(6);
 
-    expect(await within(customFields[0]).findByRole('heading')).toHaveTextContent(
-      'My test label 1'
-    );
-    expect(await within(customFields[1]).findByRole('heading')).toHaveTextContent(
-      'My test label 2'
-    );
-    expect(await within(customFields[2]).findByRole('heading')).toHaveTextContent(
-      'My test label 3'
-    );
-    expect(await within(customFields[3]).findByRole('heading')).toHaveTextContent(
-      'My test label 4'
-    );
-    expect(await within(customFields[4]).findByRole('heading')).toHaveTextContent(
-      'My test label 5'
-    );
-    expect(await within(customFields[5]).findByRole('heading')).toHaveTextContent(
-      'My test label 6'
-    );
+    expect(await within(customFields[0]).findByText('My test label 1')).toBeInTheDocument();
+    expect(await within(customFields[1]).findByText('My test label 2')).toBeInTheDocument();
+    expect(await within(customFields[2]).findByText('My test label 3')).toBeInTheDocument();
+    expect(await within(customFields[3]).findByText('My test label 4')).toBeInTheDocument();
+    expect(await within(customFields[4]).findByText('My test label 5')).toBeInTheDocument();
+    expect(await within(customFields[5]).findByText('My test label 6')).toBeInTheDocument();
   });
 
   it('pass the permissions to custom fields correctly', async () => {
@@ -112,13 +100,14 @@ describe('Case View Page files tab', () => {
         customFields={customFieldsMock}
         customFieldsConfiguration={customFieldsConfigurationMock}
         onSubmit={onSubmit}
+        editVariant="inline"
       />,
       { wrapperProps: { permissions: readCasesPermissions() } }
     );
 
     expect(
-      screen.queryByTestId('case-text-custom-field-edit-button-test_key_1')
-    ).not.toBeInTheDocument();
+      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
+    ).toBeDisabled();
   });
 
   it('removes extra custom fields', async () => {
@@ -191,11 +180,8 @@ describe('Case View Page files tab', () => {
         customFields={customFieldsMock}
         customFieldsConfiguration={customFieldsConfigurationMock}
         onSubmit={onSubmit}
+        editVariant="inline"
       />
-    );
-
-    await userEvent.click(
-      await screen.findByTestId(`case-text-custom-field-edit-button-${customFieldsMock[0].key}`)
     );
 
     await userEvent.click(
@@ -204,7 +190,7 @@ describe('Case View Page files tab', () => {
     await userEvent.paste('!!!');
 
     await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
+      await screen.findByTestId(`template-field-confirm-${customFieldsMock[0].key}`)
     );
 
     await waitFor(() => {
@@ -222,24 +208,23 @@ describe('Case View Page files tab', () => {
         customFields={[]}
         customFieldsConfiguration={customFieldsConfigurationMock}
         onSubmit={onSubmit}
+        editVariant="inline"
       />
     );
 
-    await userEvent.click(
-      await screen.findByTestId(`case-text-custom-field-edit-button-${customFieldsMock[0].key}`)
-    );
-
+    const textFormField = await screen.findByTestId('case-text-custom-field-form-field-test_key_1');
+    expect(textFormField).toHaveValue(customFieldsConfigurationMock[0].defaultValue as string);
     expect(
-      await screen.findByText('This field is populated with the default value.')
+      within(await screen.findByTestId('case-text-custom-field-test_key_1')).getByText(
+        'This field is populated with the default value.'
+      )
     ).toBeInTheDocument();
 
-    await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
-    );
+    await userEvent.click(textFormField);
     await userEvent.paste(' updated!!');
 
     await userEvent.click(
-      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
+      await screen.findByTestId(`template-field-confirm-${customFieldsMock[0].key}`)
     );
 
     await waitFor(() => {

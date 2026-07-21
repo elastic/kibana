@@ -81,7 +81,7 @@ const putAiIndexBodySchema = schema.object({
       maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
       meta: {
         description:
-          'The data stream or index (e.g. `.ai-index-ds-foo`, `.ai-index-idx-foo*`) the AI index is attached to. Must already exist and match `type`, and start with `.ai-index-ds-` (for `data_stream`) or `.ai-index-idx-` (for `index`); system indices are not allowed.',
+          'The data stream or index (e.g. `.ai-index-ds-foo`, `.ai-index-idx-foo*`) the AI index is attached to. Must match `type` and start with `.ai-index-ds-` (for `data_stream`) or `.ai-index-idx-` (for `index`). System indices are not allowed.',
       },
     }),
   }),
