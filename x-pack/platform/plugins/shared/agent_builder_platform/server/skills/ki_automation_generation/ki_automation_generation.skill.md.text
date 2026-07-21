@@ -1,0 +1,366 @@
+## When to Use This Skill
+
+Load this skill when the user wants to make their Elasticsearch data or connector sources
+discoverable and answerable by an AI agent — i.e. to **generate Knowledge Indicators (KIs)**
+for the Context Engine.
+
+You produce Kibana Workflows that build KIs; you do not answer the underlying data questions here.
+
+## What a KI is
+
+A **Knowledge Indicator (KI)** is a structured fact stored in a searchable AI Index index or datastream.
+Use `.ai-index-ds-*` for timeseries KIs, `.ai-index-idx-*` otherwise.
+See the index templates for those prefixes for field details.
+
+AI agents retrieve KIs at query time instead of scanning raw data — reducing token cost and
+improving answer consistency.
+
+Each KI:
+1. **Orients** — describes a class of information (purpose, when-to-use, what it does/doesn't
+   contain, joins to related data).
+2. **Provides access patterns** — parameterized queries the agent fills in at ask-time to reach
+   the live documents. For Elasticsearch sources these are ES|QL templates; for connector
+   sources these are `execute_connector_sub_action` tool call descriptions.
+
+## First principles
+
+Apply these when deciding what KIs to generate and what each one should contain.
+
+1. **Choose the right granularity.** A KI can represent an index, a theme, an entity class,
+   a single document, or even something else. Prefer the coarsest granularity that still answers a whole class of
+   questions. A few high-leverage KIs beat many thin ones.
+
+2. **Precompute the path, not the value.** Cache stable things — themes, when-to-use, joins,
+   and query templates. The agent traverses at ask-time for fresh values. Materialize a literal
+   answer inside a KI **only for immutable facts** (e.g. a resolved case's root cause). Never
+   materialize volatile facts (status, priority, counts, dates) — they rot and produce confidently
+   wrong answers. For those, provide an access pattern that reads live data.
+
+3. **Access patterns must be grounded and validated.** Build every query from the index's real
+   mapping and sample documents — never invented field names. 
+
+4. **The Context Engine is more like a cache than a database.** Avoid generating KIs for the entire corpus
+   eagerly. Prefer data views. Best practice is to apply a filter before starting: a time window (e.g. last 90 days), a status
+   condition (e.g. resolved cases only), or a numeric cap (e.g. max 1,000 KIs). Always agree
+   on the filter with the user before drafting the workflow.
+
+5. **Keep a fallback.** A finite set of KIs cannot anticipate every question. If no KI fits,
+   the agent falls back and queries raw data directly. KIs accelerate retrieval; they do not
+   replace it.
+
+## Access patterns
+
+Access patterns live in the `content` field of the KI. Format by source type:
+
+**Elasticsearch sources — ES|QL template:**
+```
+Access patterns:
+  Q: Status of a specific support case
+  ESQL: FROM raw-cases-all | WHERE case_number == ?case_number | KEEP status, priority | LIMIT 1
+  params: case_number (keyword, e.g. "02115676")
+  returns: status, priority for one case
+```
+
+Keep example queries cheap: end with a small `| LIMIT n`.
+
+**Connector sources — execute_connector_sub_action call:**
+```
+Access patterns:
+  Q: Files in a specific Google Drive folder
+  Tool: execute_connector_sub_action
+  connector_id: <connector_id>
+  sub_action: listFiles
+  params: { folderId: "<folder_id>" }
+  returns: list of file metadata objects
+```
+
+## Strategy catalog
+
+Choose the strategy (or combination) that fits the data source and question type.
+
+| Strategy | Granularity | When to use |
+|---|---|---|
+| **Index/Table Metadata** | One KI per index/table | Always start here. Tells the agent which index/table to query, when, and how to reach it. |
+| **Bottom-Up (full corpus)** | One KI per document | Dense, bounded corpora: knowledge bases, case records, articles, product docs. |
+| **Selective / Outlier** | One KI per significant document | Log streams, event feeds where most records are noise but outliers matter. |
+| **Atomic Facts** | Many KIs per document | Very information-dense documents (contracts, research papers) where one KI per document loses precision. |
+| **Cumulative / Wiki-style** | One KI per entity, updated over time | Entities recurring across many documents (customers, products, hosts). |
+
+Quick guide: logs/events/metrics → Index Metadata + Selective/Outlier; knowledge base / article corpus → Bottom-Up; dense docs → Atomic Facts; recurring entities → Cumulative/Wiki-style; multiple indices/tables → Metadata for all, then add a deeper strategy for the most important one; unsure → Index/Table Metadata.
+
+## Available tools
+
+Do **not** hand-write or persist workflow YAML yourself. Use these tools:
+
+- **platform.core.generate_workflow** — create or edit a workflow from a natural-language description.
+  Pass this skill's workflow shape descriptions as the spec (include target index, source indices,
+  the `ai.prompt` profile + access pattern requirements, the validation step, and the KI doc shape).
+  It emits a diff card and workflow attachment; it does NOT save the workflow.
+- **platform.core.execute_workflow** — run a workflow after the user has saved it.
+- **platform.core.execute_esql** — run an ES|QL query. Use it to validate that "example queries" are functional and correct.
+- **platform.core.generate_esql** — author or repair a single ES|QL query. Use it to hand-craft
+  a tricky access pattern template, or re-write queries that failed to execute.
+- **platform.workflows.validate_workflow** — validate a complete YAML string before presenting it.
+- **platform.workflows.get_step_definitions** / **platform.workflows.get_examples** — confirm
+  a step's `with` params or find a pattern.
+- **platform.workflows.get_connectors** — list configured connectors and their types.
+
+For deep workflow YAML syntax, Liquid templating, and debugging, defer to the `workflow-authoring` skill.
+
+A reference workflow YAML for the Index Metadata strategy is available in the
+`index-selection-reference-workflow` resource file attached to this skill.
+
+## Phased workflow
+
+Follow these phases in order. Do not skip ahead.
+
+### Phase 1 — Discover
+
+Before asking the user anything, silently gather context:
+
+1. Call `platform.core.list_indices` to list Elasticsearch indices.
+2. Call `platform.core.get_index_mapping` on 3–5 of the most interesting indices
+   (skip system indices starting with `.`).
+3. Call `platform.workflows.get_connectors` to list configured connectors.
+
+Then ask the user one focused question:
+
+> "I can see your environment. Before I suggest how to set up the Context Engine, can you tell
+> me a bit about your use case — what kinds of questions do you want AI agents to answer, and
+> which data sources do you think matter most?"
+
+Wait for their answer before continuing.
+
+### Phase 2 — Suggest sources and strategies
+
+Based on indices, connectors, and the user's goal, present per-source recommendations. Example:
+
+> **`customer_support_tickets`** — Support case records with status, priority, description.
+> Recommended: **Bottom-Up** — agents will want to retrieve specific case facts.
+
+Ask the user to confirm which sources to include and whether to adjust any strategy.
+
+### Phase 3 — Agree on a corpus filter
+
+Before drafting, agree on a filter:
+
+- **Time window:** e.g. "only cases modified in the last 90 days"
+- **Status/condition:** e.g. "only resolved cases", "only ERROR-class log entries"
+- **Numeric cap:** e.g. "at most 1,000 KIs per source"
+
+If the user says "no filter", note the risk (cost, index bloat) and proceed.
+
+### Phase 4 — Draft a pilot workflow (1–3 items only)
+
+Once the user has confirmed sources, strategies, and filter, call `platform.core.generate_workflow`
+to draft a pilot workflow. Important constraints:
+
+- **LIMIT results to 1–3 KIs**
+- Use `ai.prompt` instead of `ai.agent` wherever possible.
+- Set `triggers: [{type: manual}]`.
+
+Present the generated diff card and summarize what the workflow does in 2–3 sentences. Tell the
+user to review and Save from the card — saving is a UI action you cannot perform.
+
+**Approval gate:** Only call `platform.core.execute_workflow` when the user gives an unambiguous
+affirmative ("yes", "looks good", "run it") with no change requests. Handle edits first by
+calling `generate_workflow` with the existing `attachmentId`, then return to this phase.
+
+### Phase 5 — Run pilot and inspect results
+
+After the user saves and approves, call `platform.core.execute_workflow(attachmentId)`.
+
+Retrieve the 1–3 generated KIs by running `FROM <target_index> | LIMIT 3` with `platform.core.execute_esql`
+
+Ask yourself:
+- Is the output the expected structure?
+- are the access patterns correct?
+- would I, as an Agent, find this context useful?
+
+If not, repeat this step, adjusting the pilot workflow accordingly.
+Use `generate_workflow` with the existing `attachmentId` to edit.
+
+Once satisfied, show the generated KIs to the user.
+
+Ask:
+> "Here are the KIs that were generated. Do they look useful? Are the summaries accurate and
+> specific? Are the access patterns correct?"
+
+If results are poor, diagnose before proposing a fix:
+1. **Insufficient data fetched:** Check whether the fetched text is too short or missing key
+   fields. Adjust: fetch more fields, increase the body limit, add a second query for related
+   records.
+2. **Insufficient prompt:** If data looks rich but KIs are generic, improve the prompt: add a
+   domain-specific system prompt, be more explicit about what to include, or show an example KI.
+
+Also note: you can influence which model generates KIs by setting `connector-id` on the `ai.prompt`
+step. Use `platform.workflows.get_connectors` (filter by step type `inference.completion`) to see
+which AI connectors are available. Lighter connectors reduce cost but may produce lower-quality KIs;
+review a pilot sample before expanding.
+
+### Phase 6 — Expand to full corpus
+
+Only after the user approves the pilot results, offer to expand.
+
+**For small, fixed, item count**: raise the LIMIT or remove it, rerun with the
+same sequential workflow.
+
+**For larger scale**: switch to a **parent/child fan-out pair** using `workflow.executeAsync`.
+
+- **Child workflow** (`<strategy>_process_item`): processes one item's identifier, does the
+  per-item work (fetch → `ai.prompt` → `elasticsearch.index`), and finishes.
+- **Parent workflow** (`<strategy>_dispatch`): queries the full corpus (with any agreed filter,
+  pagination, etc), loops with a `foreach` whose body calls `workflow.executeAsync` with
+  the child's workflow ID and the item as input — without waiting. After dispatching, polls for
+  completion with a `while` loop using `platform.core.get_workflow_execution_status`.
+
+Generate the child workflow first (capture its workflow ID), then generate the parent referencing
+that ID. Apply the same approval gate before running.
+
+**Large corpus (> 10,000 documents):** Warn the user about the ES|QL 10,000-row cap. Use
+`platform.workflows.get_examples` and search for `"esql_to_index"` for the offset-based
+pagination pattern.
+
+## KI document shape
+
+The AI Index schema has these base fields (all required unless noted):
+
+| Field | Type | Purpose |
+|---|---|---|
+| `type` | keyword | Useful for categorization and grouping |
+| `title` | text + semantic | Short display name; primary semantic surface |
+| `description` | text + semantic | Routing heuristic — what the index/source does NOT contain, key fields, joins |
+| `content` | text + semantic | Free-text for semantic retrieval: purpose, questions answered, access patterns |
+| `tags` | keyword[] | Filter facets |
+| `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on |
+
+**Rule**: structured facts belong in both `content` and `attributes`, to facilitate exact-match and filter queries, as well as semantic searches.
+
+- `content` (text + semantic) — include structured values as prose so they're semantically searchable ("themes: authentication, rate-limiting").
+- `attributes` (flattened) — repeat the same values as structured fields so they're exact-match and filter-queryable.(`"themes": ["authentication", "rate-limiting"]`)
+
+`attributes` is a `flattened` mapping — any string, number, or boolean nested inside it becomes keyword-queryable without explicit mappings.
+Use it for strategy-specific structured output: status, severity, themes, product mentions, version strings, entity names, etc.
+
+```yaml
+id:          <index name or connector_id>
+type:        <type>
+title:       <display_name>
+tags:        [...]
+attributes:
+  # Repeat structured values here for exact-match / filter queries.
+  # Index Metadata example:
+  key_fields:      [case_number, status, priority]
+  when_to_use:     "Use for support case lookups by case number or status"
+  # Bottom-Up / Connector example:
+  severity:        "P1"
+  status:          "open"
+  themes:          [authentication, rate-limiting]
+  product_mentions: [agent-builder, fleet]
+content: |
+  <purpose>
+  <summary>
+  Questions answered: ...
+  When to use: ...
+
+  # Repeat structured values as prose so they're semantically searchable:
+  Themes: authentication, rate-limiting
+  Product mentions: agent-builder, fleet
+  Severity: P1
+  Status: open
+
+  Access patterns:
+    Q: <question type>
+    ESQL: FROM <index> | WHERE <field> == ?param | LIMIT 1
+    params: param (type, e.g. "value")
+    returns: <columns>
+description: |
+  <Shorter description/summary of the KI>
+```
+
+## Workflow quality checklist
+
+Before presenting any workflow to the user:
+
+- [ ] Uses `ai.prompt` instead of `ai.agent` (unless tool use is truly required)
+- [ ] Steps ordered logically within foreach: reads before AI step
+- [ ] Pilot LIMIT is set to 1–3 outputs
+- [ ] Structured, filterable fields (status, severity, themes, entity names, etc.) appear in both `attributes` (for exact/filter queries) and as prose in `content` (for semantic retrieval)
+- [ ] `id` on `elasticsearch.index` is set to a stable unique value for idempotent upserts
+- [ ] `triggers: [{type: manual}]`
+- [ ] Corpus filter (Phase 3) is applied
+
+## Workflow shapes for each strategy
+
+Use these descriptions as input to `platform.core.generate_workflow`. Do not submit YAML directly
+to the tool — describe the workflow in natural language using these shapes as the spec.
+
+**Index Metadata:**
+A `foreach` loop over a hardcoded list of index names. Per iteration: `GET /<index>/_mapping`,
+`elasticsearch.search` size 20 for sample docs, `ai.prompt` producing display_name, purpose,
+answers_questions, does_not_contain, key_fields, joins, when_to_use, and access_patterns (each
+with question_type, esql_template, esql_example, params, returns). Then `elasticsearch.index`
+writing the KI document.
+Put key_fields, when_to_use, and joins into `attributes`; put purpose, answers_questions, and
+access patterns into `content`. A complete reference YAML is in the `index-selection-reference-workflow` resource.
+
+**Bottom-Up (full corpus):**
+An `elasticsearch.esql.query` pulling docs with id, title, and body fields;
+truncate body to 12,000 chars with `EVAL body = SUBSTRING(body_field, 1, 12000)`. A `foreach`
+over the results. Per iteration: `ai.prompt` producing title, summary, answers_questions,
+key_entities, topics, and access_patterns. Then `elasticsearch.index` with `id` set to
+`<index>/<doc_id>` (stable, for idempotent upserts).
+Put structured fields (key_entities, topics, any domain-specific categorical
+values like status, severity, product_mentions) into `attributes`; put summary, answers_questions,
+and access_patterns into `content`.
+
+**Selective / Outlier:**
+An `elasticsearch.esql.query` pulling candidate docs filtered to notable records
+(e.g. `WHERE status == "ERROR" OR severity >= 7`). A `foreach` over the results. Per iteration:
+`ai.prompt` with a significance-check prompt returning `{ is_significant: bool, reason: string,
+ki: {...} }`. An `if` step that only calls `elasticsearch.index` when `is_significant == true`.
+Put filterable fields (severity, error_type, affected_component) into `attributes`.
+
+**Atomic Facts:**
+An `elasticsearch.esql.query` pulling docs, full text truncated to 24,000 chars. An
+`ai.prompt` extracting a list of discrete atomic claims: `{ facts: [{ claim, entities, topics }] }`.
+A `foreach` over the facts. Per iteration: `elasticsearch.index` with `id` set to
+`<index>/<doc_id>-fact-<n>`.
+Put entities and topics into `attributes` on each fact KI.
+
+**Cumulative / Wiki-style:**
+A top-level `foreach` over a hardcoded list of 1–2 entity IDs (pilot). Per entity: an
+`elasticsearch.esql.query` finding all documents referencing that entity (`LIMIT 10` for pilot).
+An `ai.prompt` synthesizing them into an entity profile: entity_name, summary, key_facts,
+open_questions, related_indices, and access_patterns. `elasticsearch.index` with `id` set to
+the entity ID — re-runs upsert to enrich the same KI over time. Put entity_name, entity_type, and related_indices into `attributes`.
+
+**Connector:**
+Call `platform.workflows.get_step_definitions` with the connector type to get correct step params.
+A connector step to list/query documents. A `foreach` over the results. Per
+iteration: a second connector step to fetch the full document body. An `ai.prompt` extracting a
+KI including access_patterns using `execute_connector_sub_action` syntax. `elasticsearch.index`
+to upsert. Put domain-specific categorical fields (status, record_type, owner, tags from the source system)
+into `attributes` so they remain filterable after ingestion. Note that any of the above strategies
+can be used with connectors.
+
+## Handling edge cases
+
+**No Elasticsearch indices or connectors:**
+"I don't see any user data indices or connectors. Do you have data elsewhere (e.g. Google Drive,
+Confluence, Salesforce)? I can help you set up a Connector."
+
+**User unsure which strategy:**
+Default to Index/Table Metadata. It is cheap, fast, and always useful. Add other strategies once the
+user understands their data better.
+
+**Very large corpus (> 10,000 documents):**
+The ES|QL cap is 10,000 rows per query. Use `platform.workflows.get_examples` to find the
+`esql_to_index` pagination pattern (offset-based batching). Adapt it by replacing the index
+step with `ai.prompt` + `elasticsearch.index`.
+
+**Poor pilot results (generic, inaccurate, or empty KIs):**
+Ask: "The KIs look [generic / inaccurate / sparse]. Does the source data actually contain the
+detail we'd want in a KI?" Then diagnose: insufficient data fetched (adjust the workflow) vs.
+insufficient prompt (improve the `ai.prompt` instructions). Do not expand to the full corpus
+until the pilot quality is acceptable.

@@ -103,33 +103,47 @@ describe('scheduled Significant Events managed workflows', () => {
     });
   });
 
-  it('wires the detection interval into both the trigger cadence and the lookback, clamped to a 40m floor', () => {
-    const belowFloor = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+  it('wires the detection interval into the trigger cadence and the tuning values into the detect inputs', () => {
+    const defaults = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
       detectionIntervalMinutes: 5,
+      detectionBucketIntervalMinutes: 1,
+      detectionLookbackMinutes: 40,
       targetCoverageMinutes: 10,
     });
-    const aboveFloor = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+    const tuned = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
       detectionIntervalMinutes: 45,
+      detectionBucketIntervalMinutes: 5,
+      detectionLookbackMinutes: 150,
       targetCoverageMinutes: 10,
     });
 
-    expect(belowFloor.enabled).toBe(false);
-    expect(belowFloor.triggers).toEqual(
+    expect(defaults.enabled).toBe(false);
+    expect(defaults.triggers).toEqual(
       expect.arrayContaining([{ type: 'scheduled', with: { every: '5m' } }])
     );
-    const belowFloorStep = findStep(belowFloor.steps, 'detect');
-    expect(belowFloorStep?.with).toEqual({
+    const defaultsStep = findStep(defaults.steps, 'detect');
+    expect(defaultsStep?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-      inputs: { lookback: 'now-40m', detectionIntervalMinutes: 5, targetCoverageMinutes: 10 },
+      inputs: {
+        lookback: 'now-40m',
+        bucketInterval: '1m',
+        detectionIntervalMinutes: 5,
+        targetCoverageMinutes: 10,
+      },
     });
 
-    expect(aboveFloor.triggers).toEqual(
+    expect(tuned.triggers).toEqual(
       expect.arrayContaining([{ type: 'scheduled', with: { every: '45m' } }])
     );
-    const aboveFloorStep = findStep(aboveFloor.steps, 'detect');
-    expect(aboveFloorStep?.with).toEqual({
+    const tunedStep = findStep(tuned.steps, 'detect');
+    expect(tunedStep?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-      inputs: { lookback: 'now-45m', detectionIntervalMinutes: 45, targetCoverageMinutes: 10 },
+      inputs: {
+        lookback: 'now-150m',
+        bucketInterval: '5m',
+        detectionIntervalMinutes: 45,
+        targetCoverageMinutes: 10,
+      },
     });
   });
 
@@ -269,7 +283,9 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 30,
-        targetCoverageMinutes: 10,
+        detectionBucketIntervalMinutes: 1,
+        detectionLookbackMinutes: 40,
+        targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         triageBatchSize: 5,
@@ -284,7 +300,12 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       {
         spaceId: 'space-a',
         workflowIdSuffix: 'space-a',
-        values: { detectionIntervalMinutes: 30, targetCoverageMinutes: 10 },
+        values: {
+          detectionIntervalMinutes: 30,
+          detectionBucketIntervalMinutes: 1,
+          detectionLookbackMinutes: 40,
+          targetCoverageMinutes: 30,
+        },
       }
     );
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
@@ -332,7 +353,9 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 60,
-        targetCoverageMinutes: 10,
+        detectionBucketIntervalMinutes: 2,
+        detectionLookbackMinutes: 60,
+        targetCoverageMinutes: 30,
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 10,
         triageBatchSize: 12,
@@ -367,7 +390,9 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 30,
-        targetCoverageMinutes: 10,
+        detectionBucketIntervalMinutes: 1,
+        detectionLookbackMinutes: 40,
+        targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         triageBatchSize: 5,

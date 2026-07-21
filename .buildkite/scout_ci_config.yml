@@ -15,6 +15,7 @@ plugins:
     - console
     - contentManagementExamples
     - content_management
+    - context_engine
     - cross_cluster_replication
     - custom_branding
     - dashboard

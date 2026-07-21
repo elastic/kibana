@@ -19,8 +19,8 @@ jest.mock('../shared/utils/build_flyout_nav_title', () => ({
   buildFlyoutNavTitle: jest.fn((title: string) => `NAV:${title}`),
 }));
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useStore: jest.fn(() => ({})),
 }));
 jest.mock('react-router-dom', () => ({

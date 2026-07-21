@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo, type FC, type PropsWithChildren } from 'react';
-import { configureStore } from '@reduxjs/toolkit';
-import { Provider } from 'react-redux';
+import { configureStore } from 'redux-toolkit-v1';
+import { Provider } from 'react-redux-v7';
 import useMount from 'react-use/lib/useMount';
 
 import { streamSlice } from '@kbn/ml-response-stream/client';

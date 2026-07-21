@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-/** Maximum length of a single tag (label) */
-export const MAX_TAG_LENGTH = 64;
+/** Maximum length of a single tag (label). Matches the server's `tagsSchema`. */
+export const MAX_TAG_LENGTH = 128;
 
-/** Maximum number of tags that can be saved on an alert episode */
-export const MAX_TAGS_PER_EPISODE = 25;
+/** Maximum number of tags allowed on a single resource. Matches the server's `tagsSchema`. */
+export const MAX_TAGS = 20;

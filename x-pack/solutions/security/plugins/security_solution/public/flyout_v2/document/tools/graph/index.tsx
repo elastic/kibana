@@ -16,7 +16,7 @@ import {
 } from '@kbn/cloud-security-posture-graph';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import { GRAPH_TITLE } from '../../../shared/constants/flyout_titles';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
