@@ -23,6 +23,7 @@ import {
 } from './action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { INVALID_REQUEST_BODY_DESCRIPTION } from '../route_response_descriptions';
 
 @injectable()
 export class BulkActionActionPoliciesRoute extends BaseAlertingRoute {
@@ -49,7 +50,7 @@ export class BulkActionActionPoliciesRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid request body.',
+        description: INVALID_REQUEST_BODY_DESCRIPTION,
       },
     },
   };

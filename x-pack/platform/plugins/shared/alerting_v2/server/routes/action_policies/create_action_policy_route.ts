@@ -23,6 +23,7 @@ import {
 } from './action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION } from '../route_response_descriptions';
 
 @injectable()
 export class CreateActionPolicyRoute extends BaseAlertingRoute {
@@ -53,7 +54,7 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid request parameters or body.',
+        description: INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
       },
     },
   };

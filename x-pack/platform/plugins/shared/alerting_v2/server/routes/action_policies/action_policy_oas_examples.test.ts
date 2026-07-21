@@ -10,6 +10,11 @@ import {
   getActionPolicyNotFoundMessage,
   getActionPolicyVersionConflictMessage,
 } from '../../lib/errors/action_policy_error_messages';
+import {
+  ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+  ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
+  INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
+} from '../route_response_descriptions';
 import { CreateActionPolicyRoute } from './create_action_policy_route';
 import {
   CREATE_ACTION_POLICY_SUMMARY,
@@ -34,10 +39,14 @@ describe('action policy OAS examples', () => {
       oas.responses?.[400]?.content?.['application/json']?.examples?.invalidActionPolicyData
     ).toEqual(
       expect.objectContaining({
+        summary: INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
         value: expect.objectContaining({
           code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
         }),
       })
+    );
+    expect(CreateActionPolicyRoute.validate.response?.[400]?.description).toBe(
+      INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION
     );
   });
 
@@ -48,6 +57,7 @@ describe('action policy OAS examples', () => {
       oas.responses?.[404]?.content?.['application/json']?.examples?.actionPolicyNotFound
     ).toEqual(
       expect.objectContaining({
+        summary: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
         value: expect.objectContaining({
           code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
           message: getActionPolicyNotFoundMessage('action-policy-1'),
@@ -63,6 +73,7 @@ describe('action policy OAS examples', () => {
       oas.responses?.[409]?.content?.['application/json']?.examples?.actionPolicyVersionConflict
     ).toEqual(
       expect.objectContaining({
+        summary: ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
         value: expect.objectContaining({
           code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
           message: getActionPolicyVersionConflictMessage('action-policy-1'),

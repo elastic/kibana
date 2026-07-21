@@ -29,7 +29,14 @@ import {
   getInvalidActionPolicyDataMessage,
 } from '../../lib/errors/action_policy_error_messages';
 import { jsonExample } from '../json_oas_example';
-import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
+import {
+  ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+  ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
+  ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
+  INVALID_QUERY_PARAMETERS_DESCRIPTION,
+  INVALID_REQUEST_BODY_DESCRIPTION,
+  INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
+} from '../route_response_descriptions';
 
 type OASOperationObject = Exclude<
   Awaited<ReturnType<NonNullable<RouteConfigOptions<RouteMethod>['oasOperationObject']>>>,
@@ -195,17 +202,17 @@ const INVALID_QUERY_PARAMETERS_ERROR: ErrorResponse = {
 const ERROR_EXAMPLES: Record<RouteErrorStatus, ReturnType<typeof jsonExample<ErrorResponse>>> = {
   400: jsonExample(
     'invalidActionPolicyData',
-    'Invalid action policy request',
+    INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
     INVALID_ACTION_POLICY_DATA_ERROR
   ),
   404: jsonExample(
     'actionPolicyNotFound',
-    'Action policy does not exist',
+    ACTION_POLICY_NOT_FOUND_DESCRIPTION,
     ACTION_POLICY_NOT_FOUND_ERROR
   ),
   409: jsonExample(
     'actionPolicyVersionConflict',
-    'Concurrent update conflict',
+    ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
     ACTION_POLICY_VERSION_CONFLICT_ERROR
   ),
 };
@@ -214,6 +221,18 @@ const INVALID_QUERY_PARAMETERS_EXAMPLE = {
   name: 'invalidQueryParameters',
   summary: INVALID_QUERY_PARAMETERS_DESCRIPTION,
   value: INVALID_QUERY_PARAMETERS_ERROR,
+};
+
+const INVALID_REQUEST_BODY_EXAMPLE = {
+  name: 'invalidActionPolicyData',
+  summary: INVALID_REQUEST_BODY_DESCRIPTION,
+  value: INVALID_ACTION_POLICY_DATA_ERROR,
+};
+
+const ACTION_POLICY_UPSERT_CONFLICT_EXAMPLE = {
+  name: 'actionPolicyVersionConflict',
+  summary: ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
+  value: ACTION_POLICY_VERSION_CONFLICT_ERROR,
 };
 
 const buildActionPolicyOas = ({
@@ -278,8 +297,9 @@ export const upsertActionPolicyOasExamples = (): OASOperationObject =>
     responses: {
       200: policyResponse('upsertActionPolicyReplacedResponse', UPSERT_ACTION_POLICY_SUMMARY),
       201: policyResponse('upsertActionPolicyCreatedResponse', UPSERT_ACTION_POLICY_SUMMARY),
+      409: ACTION_POLICY_UPSERT_CONFLICT_EXAMPLE,
     },
-    errors: [400, 404, 409],
+    errors: [400, 404],
   });
 
 export const updateActionPolicyOasExamples = (): OASOperationObject =>
@@ -386,8 +406,8 @@ export const bulkActionActionPoliciesOasExamples = (): OASOperationObject =>
         summary: BULK_ACTION_ACTION_POLICIES_SUMMARY,
         value: BULK_RESPONSE,
       },
+      400: INVALID_REQUEST_BODY_EXAMPLE,
     },
-    errors: [400],
   });
 
 export const matchActionPoliciesForRuleOasExamples = (): OASOperationObject =>
@@ -403,8 +423,8 @@ export const matchActionPoliciesForRuleOasExamples = (): OASOperationObject =>
         summary: MATCH_ACTION_POLICIES_FOR_RULE_SUMMARY,
         value: MATCH_RESPONSE,
       },
+      400: INVALID_REQUEST_BODY_EXAMPLE,
     },
-    errors: [400],
   });
 
 export const listActionPolicyExecutionHistoryOasExamples = (): OASOperationObject =>

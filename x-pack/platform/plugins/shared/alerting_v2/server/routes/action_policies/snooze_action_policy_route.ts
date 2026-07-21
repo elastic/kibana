@@ -25,6 +25,11 @@ import {
 } from './action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import {
+  ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+  ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
+  INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
+} from '../route_response_descriptions';
 
 const snoozeActionPolicyParamsSchema = z.object({
   id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
@@ -56,15 +61,15 @@ export class SnoozeActionPolicyRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid request parameters or body.',
+        description: INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates an action policy with the given ID does not exist.',
+        description: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
       },
       409: {
         body: () => errorResponseSchema,
-        description: 'Indicates the action policy was concurrently updated by another caller.',
+        description: ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
       },
     },
   };

@@ -19,6 +19,7 @@ import {
 } from './action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { ACTION_POLICY_NOT_FOUND_DESCRIPTION } from '../route_response_descriptions';
 
 const deleteActionPolicyParamsSchema = z.object({
   id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
@@ -48,7 +49,7 @@ export class DeleteActionPolicyRoute extends BaseAlertingRoute {
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates an action policy with the given ID does not exist.',
+        description: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
       },
     },
   };
