@@ -10,7 +10,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 56591
+  alertingVTwo: 62370
   apm: 53172
   apmShared: 5985
   apmSourcesAccess: 2747
@@ -30,6 +30,7 @@ pageLoadAssetSize:
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
+  contextEngine: 5837
   controls: 10300
   core: 606422
   cps: 9209
