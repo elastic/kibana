@@ -20,9 +20,9 @@ import { createAiIndexStorageClient } from './storage';
 
 /**
  * Backing data streams and indices follow type-specific naming conventions,
- * both sharing the common `.ai-index-` base.
+ * both sharing the common `ai-index-` base.
  */
-const DEST_INDEX_PREFIX = '.ai-index-';
+const DEST_INDEX_PREFIX = 'ai-index-';
 const DATA_STREAM_PREFIX = `${DEST_INDEX_PREFIX}ds-`;
 const INDEX_PREFIX = `${DEST_INDEX_PREFIX}idx-`;
 
