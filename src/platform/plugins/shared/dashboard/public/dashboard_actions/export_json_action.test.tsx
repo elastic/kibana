@@ -105,22 +105,22 @@ describe('Export JSON action', () => {
       };
     });
 
-    it('uses getSerializedStateByValue when supportsByReference and forceExportByValue is false', async () => {
+    it('uses serializeState when supportsByReference and forceExportByValue is false', async () => {
       await action.execute({ embeddable: embeddableWithLibrary });
       const { getExportJson } = await renderFlyoutContent();
 
       getExportJson();
-      expect(getSerializedStateByValueMock).toHaveBeenCalledTimes(1);
-      expect(embeddableWithLibrary.serializeState).not.toHaveBeenCalled();
+      expect(getSerializedStateByValueMock).not.toHaveBeenCalled();
+      expect(embeddableWithLibrary.serializeState).toHaveBeenCalledTimes(1);
     });
 
-    it('uses serializeState when supportsByReference but forceExportByValue is true', async () => {
+    it('uses getSerializedStateByValue when supportsByReference but forceExportByValue is true', async () => {
       await action.execute({ embeddable: embeddableWithLibrary });
       const { getExportJson } = await renderFlyoutContent();
 
       getExportJson(true);
-      expect(getSerializedStateByValueMock).not.toHaveBeenCalled();
-      expect(embeddableWithLibrary.serializeState).toHaveBeenCalledTimes(1);
+      expect(getSerializedStateByValueMock).toHaveBeenCalledTimes(1);
+      expect(embeddableWithLibrary.serializeState).not.toHaveBeenCalled();
     });
 
     it('uses serializeState when embeddable does not support library transforms', async () => {
@@ -128,7 +128,8 @@ describe('Export JSON action', () => {
       const { getExportJson } = await renderFlyoutContent();
 
       getExportJson();
-      expect(context.embeddable.serializeState).toHaveBeenCalledTimes(1);
+      expect(getSerializedStateByValueMock).not.toHaveBeenCalled();
+      expect(embeddableWithLibrary.serializeState).toHaveBeenCalledTimes(1);
     });
   });
 });
