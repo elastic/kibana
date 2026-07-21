@@ -99,7 +99,7 @@ export function toStoredFieldFormats(
       if ('format' in subField && subField.format) {
         fieldFormats[`${name}.${subName}`] = {
           id: subField.format.type,
-          params: subField.format.params,
+          ...(subField.format.params ? { params: subField.format.params } : {}),
         };
       }
     }
@@ -109,8 +109,8 @@ export function toStoredFieldFormats(
 
 /**
  * Convert as-code `field_settings` to the `fieldAttrs` entry of a DataViewSpec.
- * Indexed field settings without attrs are skipped. Runtime fields and composite runtime subfields
- * always produce an entry (possibly empty) to preserve current stored shape.
+ * Only fields with at least one attribute (`customLabel`, `customDescription`, or `count`) produce
+ * an entry.
  * Composite subfields are written under the fully-qualified `parent.child` key.
  *
  * @param fieldSettings Map of field name → indexed overrides or inline runtime definition
@@ -123,26 +123,35 @@ export function toStoredFieldAttributes(
   for (const [name, field] of Object.entries(fieldSettings)) {
     if (isRuntimeField(field)) {
       if (!isCompositeRuntimeField(field)) {
-        fieldAttrs[name] = {
+        const attrs = {
           ...(field.custom_label && { customLabel: field.custom_label }),
           ...(field.custom_description && { customDescription: field.custom_description }),
           ...getPopularity(field),
         };
+        if (Object.keys(attrs).length > 0) {
+          fieldAttrs[name] = attrs;
+        }
       } else {
         for (const [subName, subField] of Object.entries(field.fields)) {
-          fieldAttrs[`${name}.${subName}`] = {
+          const attrs = {
             ...(subField.custom_label && { customLabel: subField.custom_label }),
             ...(subField.custom_description && { customDescription: subField.custom_description }),
             ...getPopularity(subField),
           };
+          if (Object.keys(attrs).length > 0) {
+            fieldAttrs[`${name}.${subName}`] = attrs;
+          }
         }
       }
     } else if ('custom_label' in field || 'custom_description' in field || 'popularity' in field) {
-      fieldAttrs[name] = {
+      const attrs = {
         ...(field.custom_label && { customLabel: field.custom_label }),
         ...(field.custom_description && { customDescription: field.custom_description }),
         ...getPopularity(field),
       };
+      if (Object.keys(attrs).length > 0) {
+        fieldAttrs[name] = attrs;
+      }
     }
   }
   return fieldAttrs;

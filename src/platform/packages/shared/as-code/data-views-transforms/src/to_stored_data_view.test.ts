@@ -47,9 +47,6 @@ describe('toStoredDataView', () => {
       fieldFormats: {
         rt: { id: 'string', params: undefined },
       },
-      fieldAttrs: {
-        rt: {},
-      },
       runtimeFieldMap: {
         rt: {
           type: 'keyword',
@@ -133,9 +130,6 @@ describe('toStoredDataView', () => {
       },
       fieldFormats: {
         rt: { id: 'string', params: undefined },
-      },
-      fieldAttrs: {
-        rt: {},
       },
     });
   });
