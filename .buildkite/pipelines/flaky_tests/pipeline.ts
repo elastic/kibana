@@ -10,7 +10,16 @@
 import { groups } from './groups.json';
 import { TestSuiteType } from './constants';
 import type { BuildkiteStep } from '#pipeline-utils';
-import { expandAgentQueue, collectEnvFromLabels, getTrackedBranch } from '#pipeline-utils';
+import {
+  expandAgentQueue,
+  collectEnvFromLabels,
+  getTrackedBranch,
+  RETRY_ON_PREEMPTION_ONLY,
+} from '#pipeline-utils';
+
+// Test-execution steps run a single config repeated `count` times; a hung suite otherwise
+// wastes `count` x this budget before failing. Kept well under the full-CI ceiling.
+const TEST_STEP_TIMEOUT_MINUTES = 80;
 
 /**
  * Flaky runner JSON is passed on the Buildkite build via env vars set at trigger time (ci-stats UI,
@@ -307,9 +316,7 @@ if (hasScoutSuites) {
       SCOUT_FLAKY_RESERVED_JOBS: String(reservedJobsForPlanner),
       SCOUT_DISCOVERY_TARGET: scoutDiscoveryTarget,
     },
-    retry: {
-      automatic: [{ exit_status: '-1', limit: 3 }],
-    },
+    retry: RETRY_ON_PREEMPTION_ONLY,
   });
 }
 
@@ -335,10 +342,8 @@ for (const testSuite of testSuites) {
         concurrency_method: 'eager',
         agents: expandAgentQueue('n2-4-spot'),
         depends_on: 'build',
-        timeout_in_minutes: 150,
-        retry: {
-          automatic: [{ exit_status: '-1', limit: 3 }],
-        },
+        timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
+        retry: RETRY_ON_PREEMPTION_ONLY,
       });
       break;
 
@@ -359,14 +364,12 @@ for (const testSuite of testSuites) {
         agents: expandAgentQueue(agentQueue, diskSizeGb),
         key: `${TestSuiteType.COMMAND}-${suiteIndex++}`,
         depends_on: 'build',
-        timeout_in_minutes: 150,
+        timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
         parallelism: testSuite.count,
         concurrency,
         concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
-        retry: {
-          automatic: [{ exit_status: '-1', limit: 3 }],
-        },
+        retry: RETRY_ON_PREEMPTION_ONLY,
         env: {
           FLAKY_TEST_WORKING_DIRECTORY: testSuite.workingDirectory,
           FLAKY_TEST_COMMAND: testSuite.command,
@@ -397,14 +400,12 @@ for (const testSuite of testSuites) {
             agents: expandAgentQueue(agentQueue, diskSizeGb),
             key: `${TestSuiteType.CYPRESS}-${suiteIndex++}`,
             depends_on: 'build',
-            timeout_in_minutes: 150,
+            timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
             parallelism: testSuite.count,
             concurrency,
             concurrency_group: process.env.UUID,
             concurrency_method: 'eager',
-            retry: {
-              automatic: [{ exit_status: '-1', limit: 3 }],
-            },
+            retry: RETRY_ON_PREEMPTION_ONLY,
             env: {
               // disable split of test cases between parallel jobs when running them in flaky test runner
               // by setting chunks vars to value 1, which means all test will run in one job
@@ -440,9 +441,7 @@ pipeline.steps.push({
   label: 'Post results on Github pull request',
   agents: expandAgentQueue('n2-4-spot'),
   timeout_in_minutes: 15,
-  retry: {
-    automatic: [{ exit_status: '-1', limit: 3 }],
-  },
+  retry: RETRY_ON_PREEMPTION_ONLY,
 });
 
 console.log(JSON.stringify(pipeline, null, 2));

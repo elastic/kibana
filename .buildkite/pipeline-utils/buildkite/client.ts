@@ -50,17 +50,45 @@ export interface BuildkiteAgentTargetingRule {
   diskSizeGb?: number;
 }
 
+export type BuildkiteSignalReason =
+  | 'none'
+  | 'agent_stop'
+  | 'agent_refused'
+  | 'cancel'
+  | 'process_run_error'
+  | 'signature_rejected'
+  | '*';
+
+export interface BuildkiteAutomaticRetryRule {
+  exit_status?: string | number;
+  signal_reason?: BuildkiteSignalReason;
+  limit: number;
+}
+
+export interface BuildkiteRetry {
+  automatic: BuildkiteAutomaticRetryRule[];
+}
+
+/**
+ * Retry only on infra loss (spot preemption / lost agent), never on job timeouts.
+ * A timed-out job reports `exit_status: -1` with `signal_reason: 'cancel'` — the same
+ * exit code as a preemption — so keying retries on exit_status alone re-runs doomed
+ * (hanging) suites up to `limit` extra times, each burning a full timeout. Matching by
+ * signal_reason lets timeouts fail immediately while still recovering preempted agents.
+ */
+export const RETRY_ON_PREEMPTION_ONLY: BuildkiteRetry = {
+  automatic: [
+    { signal_reason: 'agent_stop', limit: 2 },
+    { exit_status: '-1', signal_reason: 'none', limit: 2 },
+  ],
+};
+
 export interface BuildkiteGroupStep {
   group: string;
   steps: BuildkiteStep[];
   key?: string;
   depends_on?: string | string[];
-  retry?: {
-    automatic: Array<{
-      exit_status: string;
-      limit: number;
-    }>;
-  };
+  retry?: BuildkiteRetry;
   env?: { [key: string]: string | number };
 }
 
@@ -75,12 +103,7 @@ export interface BuildkiteCommandStep {
   timeout_in_minutes?: number;
   key?: string;
   depends_on?: string | string[];
-  retry?: {
-    automatic: Array<{
-      exit_status: string;
-      limit: number;
-    }>;
-  };
+  retry?: BuildkiteRetry;
   env?: { [key: string]: string | number };
 }
 
@@ -119,12 +142,7 @@ export interface BuildkiteInputStep {
   timeout_in_minutes?: number;
   key?: string;
   depends_on?: string | string[];
-  retry?: {
-    automatic: Array<{
-      exit_status: string;
-      limit: number;
-    }>;
-  };
+  retry?: BuildkiteRetry;
   env?: { [key: string]: string | number };
 }
 
