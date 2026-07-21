@@ -8,185 +8,151 @@
  */
 
 import type { ActionContext } from '../../../connector_spec';
+import { getConnectorSpec } from '../../../..';
 import { ConfluenceCloudConnector } from './confluence';
 
-describe('ConfluenceCloudConnector', () => {
-  const mockClient = {
-    get: jest.fn(),
-  };
+const mockCallTool = jest.fn();
+const mockListTools = jest.fn();
 
+jest.mock('../../../lib/mcp/with_mcp_client', () => ({
+  withMcpClient: jest.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
+    return fn({ callTool: mockCallTool, listTools: mockListTools });
+  }),
+}));
+
+describe('ConfluenceCloudConnector', () => {
   const mockContext = {
-    client: mockClient,
+    client: {},
     log: { debug: jest.fn() },
-    config: { subdomain: 'mycompany' },
+    config: { serverUrl: 'https://mcp.atlassian.com/v1/sse' },
   } as unknown as ActionContext;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCallTool.mockResolvedValue({
+      content: [{ type: 'text', text: '{}' }],
+    });
+    mockListTools.mockResolvedValue({
+      tools: [{ name: 'confluence_list_pages' }, { name: 'confluence_get_page' }],
+    });
+  });
+
+  describe('auth', () => {
+    it('supports only oauth_authorization_code', () => {
+      expect(ConfluenceCloudConnector.auth?.types).toHaveLength(1);
+      expect(ConfluenceCloudConnector.auth?.types[0]).toMatchObject({
+        type: 'oauth_authorization_code',
+      });
+    });
+
+    it('uses Atlassian OAuth endpoints', () => {
+      expect(ConfluenceCloudConnector.auth?.types[0]).toMatchObject({
+        defaults: {
+          authorizationUrl: 'https://auth.atlassian.com/authorize',
+          tokenUrl: 'https://auth.atlassian.com/oauth/token',
+        },
+      });
+    });
+  });
+
+  describe('schema', () => {
+    it('has a serverUrl field defaulting to the Atlassian MCP server', () => {
+      if (!ConfluenceCloudConnector.schema) throw new Error('schema not defined');
+      const parsed = ConfluenceCloudConnector.schema.parse({});
+      expect((parsed as { serverUrl?: string }).serverUrl).toBe('https://mcp.atlassian.com/v1/sse');
+    });
+  });
+
+  it('is discoverable via getConnectorSpec', () => {
+    const spec = getConnectorSpec('.confluence-cloud');
+    expect(spec).toBe(ConfluenceCloudConnector);
   });
 
   describe('listPages action', () => {
-    it('should list pages and return response data', async () => {
-      const mockResponse = {
-        data: {
-          results: [{ id: '123', title: 'Welcome', spaceId: '456' }],
-          _links: { base: '/wiki/api/v2' },
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await ConfluenceCloudConnector.actions.listPages.handler(mockContext, {});
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/wiki/api/v2/pages',
-        { params: { limit: 25 } }
-      );
-      expect(result).toEqual(mockResponse.data);
+    it('is exposed as a tool', () => {
+      expect(ConfluenceCloudConnector.actions.listPages.isTool).toBe(true);
     });
 
-    it('should include optional limit, cursor, spaceId, title as params', async () => {
-      const mockResponse = { data: { results: [], _links: {} } };
-      mockClient.get.mockResolvedValue(mockResponse);
-
+    it('calls confluence_list_pages with mapped parameters', async () => {
       await ConfluenceCloudConnector.actions.listPages.handler(mockContext, {
         limit: 10,
         cursor: 'abc',
         spaceId: '789',
         title: 'test',
+        status: 'current',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/wiki/api/v2/pages',
-        {
-          params: {
-            limit: 10,
-            cursor: 'abc',
-            'space-id': ['789'],
-            title: 'test',
-          },
-        }
-      );
-    });
-
-    it('should build base URL from config subdomain', async () => {
-      const mockResponse = { data: { results: [], _links: {} } };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const contextWithSubdomain = {
-        ...mockContext,
-        config: { subdomain: 'acme' },
-      } as unknown as ActionContext;
-
-      await ConfluenceCloudConnector.actions.listPages.handler(contextWithSubdomain, {});
-
-      expect(mockClient.get).toHaveBeenCalledWith('https://acme.atlassian.net/wiki/api/v2/pages', {
-        params: { limit: 25 },
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'confluence_list_pages',
+        arguments: {
+          limit: 10,
+          cursor: 'abc',
+          space_id: '789',
+          title: 'test',
+          status: 'current',
+        },
       });
     });
   });
 
   describe('getPage action', () => {
-    it('should get page by id and return response data', async () => {
-      const mockResponse = {
-        data: {
-          id: '123',
-          title: 'My Page',
-          spaceId: '456',
-          status: 'current',
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await ConfluenceCloudConnector.actions.getPage.handler(mockContext, {
-        id: '123',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/wiki/api/v2/pages/123',
-        undefined
-      );
-      expect(result).toEqual(mockResponse.data);
+    it('is exposed as a tool', () => {
+      expect(ConfluenceCloudConnector.actions.getPage.isTool).toBe(true);
     });
 
-    it('should include optional bodyFormat as param', async () => {
-      const mockResponse = { data: { id: '123', body: {} } };
-      mockClient.get.mockResolvedValue(mockResponse);
+    it('calls confluence_get_page with page_id mapped from id', async () => {
+      await ConfluenceCloudConnector.actions.getPage.handler(mockContext, { id: '123456' });
 
-      await ConfluenceCloudConnector.actions.getPage.handler(mockContext, {
-        id: '123',
-        bodyFormat: 'storage',
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'confluence_get_page',
+        arguments: { page_id: '123456' },
       });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/wiki/api/v2/pages/123',
-        { params: { 'body-format': 'storage' } }
-      );
     });
   });
 
   describe('listSpaces action', () => {
-    it('should list spaces and return response data', async () => {
-      const mockResponse = {
-        data: {
-          results: [{ id: '456', key: 'DEMO', name: 'Demo Space' }],
-          _links: { base: '/wiki/api/v2' },
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await ConfluenceCloudConnector.actions.listSpaces.handler(mockContext, {});
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/wiki/api/v2/spaces',
-        { params: { limit: 25 } }
-      );
-      expect(result).toEqual(mockResponse.data);
+    it('is exposed as a tool', () => {
+      expect(ConfluenceCloudConnector.actions.listSpaces.isTool).toBe(true);
     });
 
-    it('should include optional limit, cursor, keys as params', async () => {
-      const mockResponse = { data: { results: [], _links: {} } };
-      mockClient.get.mockResolvedValue(mockResponse);
-
+    it('calls confluence_list_spaces with limit and type', async () => {
       await ConfluenceCloudConnector.actions.listSpaces.handler(mockContext, {
         limit: 20,
-        cursor: 'xyz',
-        keys: 'DEMO',
+        type: 'global',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/wiki/api/v2/spaces',
-        {
-          params: {
-            limit: 20,
-            cursor: 'xyz',
-            keys: ['DEMO'],
-          },
-        }
-      );
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'confluence_list_spaces',
+        arguments: { limit: 20, type: 'global' },
+      });
     });
   });
 
   describe('getSpace action', () => {
-    it('should get space by id and return response data', async () => {
-      const mockResponse = {
-        data: {
-          id: '456',
-          key: 'DEMO',
-          name: 'Demo Space',
-          type: 'global',
-          status: 'current',
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
+    it('is exposed as a tool', () => {
+      expect(ConfluenceCloudConnector.actions.getSpace.isTool).toBe(true);
+    });
 
-      const result = await ConfluenceCloudConnector.actions.getSpace.handler(mockContext, {
-        id: '456',
+    it('calls confluence_get_space with space_key mapped from id', async () => {
+      await ConfluenceCloudConnector.actions.getSpace.handler(mockContext, { id: 'DEMO' });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'confluence_get_space',
+        arguments: { space_key: 'DEMO' },
       });
+    });
+  });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/wiki/api/v2/spaces/456'
-      );
-      expect(result).toEqual(mockResponse.data);
+  describe('test handler', () => {
+    it('returns ok with tool count on successful connection', async () => {
+      if (!ConfluenceCloudConnector.test) throw new Error('test handler not defined');
+      const result = await ConfluenceCloudConnector.test.handler(mockContext);
+
+      expect(mockListTools).toHaveBeenCalled();
+      expect(result).toEqual({
+        ok: true,
+        message: 'Connected to Atlassian MCP server. 2 tools available.',
+      });
     });
   });
 });
