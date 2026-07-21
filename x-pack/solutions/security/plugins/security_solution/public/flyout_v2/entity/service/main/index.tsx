@@ -313,7 +313,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={false}
             entityStoreEntityId={entityStoreEntityId}
-            onShowEntity={onShowRelatedEntityFromResolution}
+            onShowEntity={onShowRelatedEntity}
+            riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>

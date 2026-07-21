@@ -445,6 +445,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
+            riskScoreQueryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </EuiFlyoutBody>
