@@ -599,7 +599,7 @@ describe('#httpRequestEvent', () => {
         },
         "message": "User is requesting [/path] endpoint",
         "url": Object {
-          "original": "http://localhost/original/path",
+          "original": "http://localhost/path",
           "domain": "localhost",
           "path": "/path",
           "port": undefined,
