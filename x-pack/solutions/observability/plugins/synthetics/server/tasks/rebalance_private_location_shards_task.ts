@@ -11,10 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
-import {
-  isScalableLocation,
-  shardCapacityMib,
-} from '../synthetics_service/private_location/assign_shards';
+import { isScalableLocation } from '../synthetics_service/private_location/assign_shards';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
 
@@ -255,20 +252,14 @@ export class RebalancePrivateLocationShardsTask {
           continue;
         }
 
-        const capacities = new Map<string, number>();
-        for (const shardId of healthyShards) {
-          const mib = memoryByPolicy.get(shardId);
-          if (mib !== undefined) {
-            capacities.set(shardId, shardCapacityMib(mib, false));
-          }
-        }
-
         // Idempotent: only monitors whose assigned shard changed are rewritten.
-        // Steady state (all shards healthy) performs zero writes.
+        // Steady state (all shards healthy) performs zero writes. rebalanceShards
+        // converts raw RAM into a usable-capacity weight (reserving browser
+        // runtime headroom when the location runs browser monitors).
         const { total, moved } = await privateLocationAPI.rebalanceShards({
           location,
           healthyShards,
-          capacities: capacities.size > 0 ? capacities : undefined,
+          agentRamMibByShard: memoryByPolicy.size > 0 ? memoryByPolicy : undefined,
         });
 
         this.debugLog(

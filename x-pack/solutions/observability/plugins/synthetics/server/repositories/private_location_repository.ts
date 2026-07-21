@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
 import { getAgentPoliciesAsInternalUser } from '../routes/settings/private_locations/get_agent_policies';
+import { getShardPool } from '../synthetics_service/private_location/assign_shards';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
 import type { PrivateLocationObject } from '../routes/settings/private_locations/add_private_location';
 import type { RouteContext } from '../routes/types';
@@ -127,9 +128,17 @@ export class PrivateLocationRepository {
       );
     }
 
-    const agentPolicy = agentPolicies?.find((policy) => policy.id === location.agentPolicyId);
-    if (!agentPolicy) {
-      errorMessages = `Agent policy with id ${location.agentPolicyId} does not exist`;
+    // Validate every shard in the pool exists, not just the primary — a scalable
+    // location that points at a missing policy would silently shard monitors onto
+    // a non-existent shard.
+    const poolIds = getShardPool(location);
+    const missingPolicyIds = poolIds.filter(
+      (id) => !agentPolicies?.some((policy) => policy.id === id)
+    );
+    if (missingPolicyIds.length > 0) {
+      errorMessages = `Agent ${
+        missingPolicyIds.length > 1 ? 'policies' : 'policy'
+      } with id ${missingPolicyIds.join(', ')} does not exist`;
     }
     if (errorMessages) {
       return response.badRequest({

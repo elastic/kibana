@@ -14,7 +14,6 @@ import {
   RebalancePrivateLocationShardsTask,
   STALE_CHECKIN_MS,
 } from './rebalance_private_location_shards_task';
-import { shardCapacityMib } from '../synthetics_service/private_location/assign_shards';
 
 const MIB = 1024 * 1024;
 
@@ -121,7 +120,7 @@ describe('Rebalance private location shards tasks', () => {
       expect(healthyShardsArg()).toEqual(['s1', 's2', 's3']);
     });
 
-    it('derives per-shard capacity from host memory and passes it to rebalance', async () => {
+    it('passes per-shard host RAM (raw MiB) to rebalance', async () => {
       listAgents.mockImplementation(async (params?: { aggregations?: unknown }) => {
         if (params?.aggregations) {
           return {
@@ -154,10 +153,10 @@ describe('Rebalance private location shards tasks', () => {
 
       await runTask();
 
-      const { capacities } = rebalanceShards.mock.calls[0][0];
-      expect(capacities.get('s1')).toBe(shardCapacityMib(2048, false));
-      expect(capacities.get('s2')).toBe(shardCapacityMib(4096, false));
-      expect(capacities.has('s3')).toBe(false);
+      const { agentRamMibByShard } = rebalanceShards.mock.calls[0][0];
+      expect(agentRamMibByShard.get('s1')).toBe(2048);
+      expect(agentRamMibByShard.get('s2')).toBe(4096);
+      expect(agentRamMibByShard.has('s3')).toBe(false);
     });
 
     it('evicts a shard whose last check-in is older than the stale window', async () => {

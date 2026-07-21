@@ -19,6 +19,10 @@ import {
   type MonitorsHealthResponse,
 } from '../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
+import {
+  getShardPool,
+  isScalableLocation,
+} from '../synthetics_service/private_location/assign_shards';
 import { PackagePolicyService } from '../synthetics_service/private_location/package_policy_service';
 import { getPrivateLocationsForNamespaces } from '../synthetics_service/get_private_locations';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
@@ -88,8 +92,11 @@ export class MonitorIntegrationHealthApi {
       allPrivateLocations.map((loc) => [loc.id, loc])
     );
 
+    // Include every shard in a scalable location's pool, not just the primary
+    // agentPolicyId — a monitor may be assigned to any shard, and its health must
+    // be judged against the agent policy it actually runs on.
     const referencedAgentPolicyIds = [
-      ...new Set(allPrivateLocations.map((loc) => loc.agentPolicyId)),
+      ...new Set(allPrivateLocations.flatMap((loc) => getShardPool(loc))),
     ];
     const [existingPackagePoliciesMap, existingAgentPoliciesMap, agentStatusMap] =
       await Promise.all([
@@ -130,16 +137,6 @@ export class MonitorIntegrationHealthApi {
           );
         }
 
-        if (!existingAgentPoliciesMap.has(existingPrivateLocation.agentPolicyId)) {
-          return MonitorIntegrationHealthApi.buildLocationStatus(
-            loc.id,
-            existingPrivateLocation.label,
-            PrivateLocationHealthStatusValue.MissingAgentPolicy,
-            newFormatPolicyId,
-            existingPrivateLocation.agentPolicyId
-          );
-        }
-
         const { hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds } =
           privateLocationAPI.getPolicyIdFormatInfo(
             { id: monitorPolicyId },
@@ -148,18 +145,40 @@ export class MonitorIntegrationHealthApi {
             allSpaces
           );
 
+        const resolvedPolicyId = hasNewFormatPolicyId ? newFormatPolicyId : legacyPolicyIds[0];
+        // Scalable locations shard a monitor onto one agent policy from the pool,
+        // recorded on the package policy's `policy_ids`, so judge health against
+        // that shard rather than the location's primary agentPolicyId. Classic
+        // (single-shard) locations keep the primary: a legacy package policy can
+        // legitimately point at a different agent and must still read healthy.
+        const resolvedPkg = resolvedPolicyId
+          ? existingPackagePoliciesMap.get(resolvedPolicyId)
+          : undefined;
+        const expectedAgentPolicyId = isScalableLocation(existingPrivateLocation)
+          ? resolvedPkg?.policy_ids?.[0] ??
+            resolvedPkg?.policy_id ??
+            existingPrivateLocation.agentPolicyId
+          : existingPrivateLocation.agentPolicyId;
+
+        if (!existingAgentPoliciesMap.has(expectedAgentPolicyId)) {
+          return MonitorIntegrationHealthApi.buildLocationStatus(
+            loc.id,
+            existingPrivateLocation.label,
+            PrivateLocationHealthStatusValue.MissingAgentPolicy,
+            newFormatPolicyId,
+            expectedAgentPolicyId
+          );
+        }
+
         if (!hasNewFormatPolicyId && !hasAnyLegacyPolicyId) {
           return MonitorIntegrationHealthApi.buildLocationStatus(
             loc.id,
             existingPrivateLocation.label,
             PrivateLocationHealthStatusValue.MissingPackagePolicy,
             newFormatPolicyId,
-            existingPrivateLocation.agentPolicyId
+            expectedAgentPolicyId
           );
         }
-
-        const resolvedPolicyId = hasNewFormatPolicyId ? newFormatPolicyId : legacyPolicyIds[0];
-        const expectedAgentPolicyId = existingPrivateLocation.agentPolicyId;
 
         const agentStatus = agentStatusMap.get(expectedAgentPolicyId);
         if (agentStatus !== undefined) {

@@ -676,6 +676,67 @@ describe('MonitorIntegrationHealthApi', () => {
     });
   });
 
+  describe('scalable locations (multi-shard pool)', () => {
+    const scalableLocation = (id: string, pool: string[]): PrivateLocationAttributes => ({
+      id,
+      label: `Scalable ${id}`,
+      agentPolicyId: pool[0],
+      agentPolicyIds: pool,
+      isServiceManaged: false,
+    });
+
+    it('judges health against the assigned shard, not the primary agent policy', async () => {
+      const privateLoc = scalableLocation('priv-loc-1', ['shard-1', 'shard-2']);
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
+
+      // Monitor is sharded onto the secondary shard (shard-2), which is offline;
+      // the primary (shard-1) is online. Health must follow shard-2.
+      const packagePolicy = createPackagePolicy('mon-1-priv-loc-1', ['shard-2']);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
+      const fleetGetAgentStatusForAgentPolicy = jest.fn(async (policyId: string) =>
+        policyId === 'shard-2' ? { all: 1, active: 1, online: 0 } : { all: 1, active: 1, online: 1 }
+      );
+
+      const api = buildApi({
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
+        fleetGetAgentStatusForAgentPolicy,
+      });
+
+      const locStatus = (await api.getHealth(['mon-1'])).monitors[0].privateLocations[0];
+      expect(locStatus.status).toBe(PrivateLocationHealthStatusValue.UnhealthyAgent);
+      expect(locStatus.agentPolicyId).toBe('shard-2');
+    });
+
+    it('reports healthy when the assigned shard is online even if another shard is down', async () => {
+      const privateLoc = scalableLocation('priv-loc-1', ['shard-1', 'shard-2']);
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
+
+      const packagePolicy = createPackagePolicy('mon-1-priv-loc-1', ['shard-1']);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
+      // Primary shard (shard-1) online, secondary (shard-2) down — monitor is on shard-1.
+      const fleetGetAgentStatusForAgentPolicy = jest.fn(async (policyId: string) =>
+        policyId === 'shard-2' ? { all: 1, active: 1, online: 0 } : { all: 1, active: 1, online: 1 }
+      );
+
+      const api = buildApi({
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
+        fleetGetAgentStatusForAgentPolicy,
+      });
+
+      const locStatus = (await api.getHealth(['mon-1'])).monitors[0].privateLocations[0];
+      expect(locStatus.status).toBe(PrivateLocationHealthStatusValue.Healthy);
+      expect(locStatus.agentPolicyId).toBe('shard-1');
+    });
+  });
+
   describe('missing agents', () => {
     it('returns MissingAgents when no agents are enrolled in the agent policy', async () => {
       const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');

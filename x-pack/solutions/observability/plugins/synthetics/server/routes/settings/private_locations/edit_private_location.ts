@@ -14,6 +14,8 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import { getShardPool } from '../../../synthetics_service/private_location/assign_shards';
+import { runRebalanceShardsTaskSoon } from '../../../tasks/rebalance_private_location_shards_task';
+import { getAgentPoliciesAsInternalUser } from './get_agent_policies';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
@@ -157,6 +159,29 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         });
       }
 
+      // Reject a pool that references agent policies that don't exist, otherwise
+      // monitors would be sharded onto a non-existent shard and silently fail.
+      if (isPoolChanged) {
+        const agentPolicies = await getAgentPoliciesAsInternalUser({
+          server: routeContext.server,
+          spaceId: routeContext.spaceId,
+        });
+        const missingPolicyIds = requestedPool!.filter(
+          (id) => !agentPolicies?.some((policy) => policy.id === id)
+        );
+        if (missingPolicyIds.length > 0) {
+          return response.badRequest({
+            body: {
+              message: i18n.translate('xpack.synthetics.editPrivateLocation.missingAgentPolicies', {
+                defaultMessage:
+                  'Agent {count, plural, one {policy} other {policies}} with id {ids} does not exist.',
+                values: { count: missingPolicyIds.length, ids: missingPolicyIds.join(', ') },
+              }),
+            },
+          });
+        }
+      }
+
       const labelChanged = isPrivateLocationLabelChanged(
         existingLocation.attributes.label,
         newLocationLabel
@@ -168,8 +193,10 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         isPrivateLocationChanged({ privateLocation: existingLocation, newParams: request.body }) ||
         isPoolChanged
       ) {
-        // This privileges check is done only when changing the label, because changing the label will update also the monitors in that location
-        if (labelChanged && monitorsInLocation.length) {
+        // Both a label change and a pool change rewrite the monitors in this
+        // location (label denormalization / re-sharding of package policies), so
+        // require monitor bulk-update rights in every affected space for either.
+        if ((labelChanged || isPoolChanged) && monitorsInLocation.length) {
           await checkPrivileges({
             routeContext,
             monitorsSpaces: monitorsInLocation.map(({ namespaces }) => namespaces![0]),
@@ -195,6 +222,13 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
             routeContext,
             monitorsInLocation,
           });
+        }
+
+        // A pool change can shard monitors onto an offline agent policy; kick the
+        // rebalance task now (instead of waiting up to a scheduled tick) so they
+        // land on a healthy shard promptly. Fire-and-forget: it retries internally.
+        if (isPoolChanged) {
+          void runRebalanceShardsTaskSoon({ server: routeContext.server });
         }
       }
 

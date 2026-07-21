@@ -42,7 +42,15 @@ import {
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { PackagePolicyService } from './package_policy_service';
-import { assignShard, balanceShardsByCost, getMonitorCostMib, getShardPool } from './assign_shards';
+import {
+  assignShard,
+  balanceShardsByCost,
+  getMonitorCostMib,
+  getShardPool,
+  isScalableLocation,
+  shardCapacityMib,
+} from './assign_shards';
+import { runRebalanceShardsTaskSoon } from '../../tasks/rebalance_private_location_shards_task';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -273,6 +281,7 @@ export class SyntheticsPrivateLocation {
     }
     const newPolicies: NewPackagePolicyWithId[] = [];
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
+    let touchedScalableLocation = false;
 
     for (const { config, globalParams } of configs) {
       try {
@@ -285,6 +294,9 @@ export class SyntheticsPrivateLocation {
             throw new Error(
               `Unable to find Synthetics private location for agentId ${privateLocation.id}`
             );
+          }
+          if (isScalableLocation(location)) {
+            touchedScalableLocation = true;
           }
 
           const newPolicy = await this.generateNewPolicy(
@@ -334,6 +346,13 @@ export class SyntheticsPrivateLocation {
       if (result?.created && result?.created?.length > 0 && testRunId) {
         // ignore await here, we don't want to wait for this to finish
         void scheduleCleanUpTask(this.server);
+      }
+      // New monitors are sharded across the full pool (stable rendezvous), so one
+      // may land on a currently-offline shard. For real (non-test) monitors on a
+      // scalable location, kick the rebalance now to relocate those onto healthy
+      // shards promptly rather than waiting for the scheduled tick.
+      if (!testRunId && !runOnce && touchedScalableLocation) {
+        void runRebalanceShardsTaskSoon({ server: this.server });
       }
       return result;
     } catch (e) {
@@ -549,12 +568,14 @@ export class SyntheticsPrivateLocation {
   async rebalanceShards({
     location,
     healthyShards,
-    capacities,
+    agentRamMibByShard,
   }: {
     location: { id: string; label?: string; agentPolicyIds?: string[] };
     healthyShards: string[];
-    /** Optional per-shard weight (usable MiB from agent RAM) for cost balancing. */
-    capacities?: ReadonlyMap<string, number>;
+    /** Optional per-shard host RAM (MiB). Converted to a usable-capacity weight
+     * for cost balancing, reserving browser runtime headroom when the location
+     * runs browser monitors. */
+    agentRamMibByShard?: ReadonlyMap<string, number>;
   }): Promise<{ total: number; moved: number }> {
     const configuredShards = location.agentPolicyIds ?? healthyShards;
     const healthySet = new Set(healthyShards);
@@ -582,16 +603,32 @@ export class SyntheticsPrivateLocation {
     // On the full-scan (recovery) path we see every monitor's cost, so redistribute
     // memory-fairly. Failover only sees the stale shard's monitors, so it keeps the
     // cheaper, locality-preserving count-based rendezvous.
-    const costBalanced = hasRecoveryWork
-      ? balanceShardsByCost(
-          pkgPolicies.flatMap((pp) => {
-            const id = pp.id.slice(0, pp.id.length - suffixLength);
-            return id ? [{ id, cost: getMonitorCostMib(monitorTypeOfPolicy(pp)) }] : [];
-          }),
-          healthyShards,
-          capacities
-        )
-      : undefined;
+    let costBalanced: Map<string, string> | undefined;
+    if (hasRecoveryWork) {
+      // A browser monitor forces a ~200 MiB runtime reservation per shard that
+      // runs one; reserve it across the pool when the location has any browser
+      // so we don't overstate usable RAM and overpack heavy monitors.
+      const locationHasBrowser = pkgPolicies.some((pp) => monitorTypeOfPolicy(pp) === 'browser');
+      const capacities =
+        agentRamMibByShard && agentRamMibByShard.size > 0
+          ? new Map<string, number>(
+              healthyShards.flatMap((id) => {
+                const ram = agentRamMibByShard.get(id);
+                return ram !== undefined
+                  ? [[id, shardCapacityMib(ram, locationHasBrowser)] as const]
+                  : [];
+              })
+            )
+          : undefined;
+      costBalanced = balanceShardsByCost(
+        pkgPolicies.flatMap((pp) => {
+          const id = pp.id.slice(0, pp.id.length - suffixLength);
+          return id ? [{ id, cost: getMonitorCostMib(monitorTypeOfPolicy(pp)) }] : [];
+        }),
+        healthyShards,
+        capacities
+      );
+    }
 
     const updatesBySpace = new Map<string, UpdatePackagePolicyWithId[]>();
 
