@@ -20,6 +20,11 @@ describe('createAnomalyDetectionSkill', () => {
     expect(skill.name).toBe('anomaly-detection');
   });
 
+  it('is marked experimental so it requires agentBuilder:experimentalFeatures', () => {
+    const skill = createAnomalyDetectionSkill();
+    expect(skill.experimental).toBe(true);
+  });
+
   it('uses the correct basePath for the anomaly_detection subdirectory', () => {
     const skill = createAnomalyDetectionSkill();
     expect(skill.basePath).toBe('skills/ml/anomaly_detection');

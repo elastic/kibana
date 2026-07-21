@@ -181,6 +181,7 @@ export const createAdUpdateJobConfigTool = (
   tags: ['ml', 'anomaly-detection'],
   description:
     'Update ML job config: memory limit, datafeed query_delay, delayed data check config, or create a calendar event. For create_calendar_event: ensures the calendar exists (PUT), posts only missing events, then associates all job_ids with the calendar. Pass every job that should share the calendar in one call.',
+  experimental: true,
   schema,
   handler: async (
     {

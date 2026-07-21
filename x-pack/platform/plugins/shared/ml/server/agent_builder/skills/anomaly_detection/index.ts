@@ -26,6 +26,7 @@ export const createAnomalyDetectionSkill = () =>
     name: 'anomaly-detection',
     basePath: 'skills/ml/anomaly_detection',
     description,
+    experimental: true,
     content: skillContent,
     referencedContent: [
       { name: 'esql-read-queries', relativePath: './references', content: esqlReadQueries },

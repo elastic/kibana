@@ -82,6 +82,7 @@ export const createAdGetJobInfoTool = (
   tags: ['ml', 'anomaly-detection'],
   description:
     'Read ML job and datafeed state, config, messages, snapshots, calendar events, and available metadata. Run with operation=validate_permissions first if results look empty.',
+  experimental: true,
   schema,
   handler: async ({ operation, job_id: jobId }, { esClient, request }) => {
     const hasMlCapabilities = hasMlCapabilitiesProvider(
