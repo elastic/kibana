@@ -6432,6 +6432,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/custom-content-plugin@link:x-pack/platform/plugins/shared/custom_content":
+  version "0.0.0"
+  uid ""
+
 "@kbn/custom-icons@link:src/platform/packages/shared/kbn-custom-icons":
   version "0.0.0"
   uid ""
