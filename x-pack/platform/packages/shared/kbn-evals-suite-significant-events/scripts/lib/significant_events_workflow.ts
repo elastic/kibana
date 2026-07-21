@@ -18,6 +18,7 @@ import {
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
 import { withTempSuperuser } from './user_utils';
@@ -74,22 +75,24 @@ export async function enableSignificantEvents(
   log: ToolingLog
 ): Promise<void> {
   log.info('Enabling significant events...');
-  const { status, data } = await kibanaRequest(
-    config,
-    'POST',
-    '/api/kibana/settings/observability:streamsEnableSignificantEvents',
-    { value: true }
-  );
+  const { status, data } = await kibanaRequest(config, 'PUT', '/internal/core/_settings', {
+    'feature_flags.overrides': {
+      [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+    },
+  });
 
   if (status >= 200 && status < 300) {
     log.info('Significant events enabled');
     return;
   }
 
-  // If the setting is overridden in kibana.yml, skip and return
-  const message = (data as Record<string, unknown>)?.message;
-  if (status === 400 && typeof message === 'string' && message.includes('overridden')) {
-    log.info('Significant events setting is overridden in kibana.yml — skipping');
+  // The dynamic config override route is only registered when coreApp.allowDynamicConfigOverrides is
+  // enabled. When it isn't (e.g. a cloud deployment), the availability flag has to come from
+  // kibana.yml instead, so treat a missing route as already-handled and skip.
+  if (status === 404) {
+    log.info(
+      'Dynamic config overrides are disabled — set the significant events availability flag via kibana.yml; skipping'
+    );
     return;
   }
 

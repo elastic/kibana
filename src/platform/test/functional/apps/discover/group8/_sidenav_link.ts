@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT - good integration test
+ */
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 

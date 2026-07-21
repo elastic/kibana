@@ -24,6 +24,7 @@ interface GetExpressionRendererPropsParams {
     query?: Query | AggregateQuery;
   };
   projectRouting?: ProjectRouting;
+  isApproximate: boolean;
   timeRange?: TimeRange;
   disableTriggers?: boolean;
   settings: {
@@ -47,6 +48,7 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
 }> = async ({
   unifiedSearch: { query, filters },
   projectRouting,
+  isApproximate,
   settings: { syncColors = true, syncCursor = true, syncTooltips = false },
   disableTriggers = false,
   parentExecutionContext,
@@ -85,6 +87,7 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
       filters,
       disableWarningToasts: true,
       projectRouting,
+      isApproximate,
     },
     variables: {
       embeddableTitle: vis.title,

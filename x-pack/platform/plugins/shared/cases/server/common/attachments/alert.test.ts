@@ -59,7 +59,7 @@ describe('alert attachment transformer', () => {
       });
     });
 
-    it('normalizes single-item arrays to scalar values', () => {
+    it('preserves single-item arrays so alert id and index round-trip to the same shape', () => {
       const payload = alertAttachmentTransformer.toUnifiedPayload({
         type: AttachmentType.alert,
         owner: SECURITY_SOLUTION_OWNER,
@@ -70,9 +70,9 @@ describe('alert attachment transformer', () => {
 
       expect(payload).toEqual({
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
-        attachmentId: 'alert-1',
+        attachmentId: ['alert-1'],
         metadata: {
-          index: 'index-1',
+          index: ['index-1'],
           rule: { id: 'rule-1', name: 'Test Rule' },
         },
         owner: SECURITY_SOLUTION_OWNER,

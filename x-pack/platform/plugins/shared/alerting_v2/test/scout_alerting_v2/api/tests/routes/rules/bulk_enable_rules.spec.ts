@@ -243,6 +243,20 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
   );
 
   apiTest(
+    'validation: should reject unknown top-level body fields (strict)',
+    async ({ apiClient, apiServices }) => {
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'bulk-strict-top-level' } })
+      );
+      const response = await apiClient.post(BULK_ENABLE_URL, {
+        headers: writerHeaders,
+        body: { ids: [rule.id], unknownField: 'x' },
+      });
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
     'authorization: should return 200 for a user with full alerting_v2 privileges',
     async ({ apiClient, apiServices }) => {
       const rule = await apiServices.alertingV2.rules.create(

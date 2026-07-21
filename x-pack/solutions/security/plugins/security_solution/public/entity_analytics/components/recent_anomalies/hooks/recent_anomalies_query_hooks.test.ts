@@ -16,7 +16,6 @@ import {
 } from './recent_anomalies_esql_source_query_hooks';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
-import { useEsqlTimeRangeFilter } from '../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSecurityMlModuleJobIds } from '../../../../common/components/ml/hooks/use_security_ml_module_job_ids';
 
@@ -34,9 +33,6 @@ jest.mock('../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('../../../../common/hooks/use_global_filter_query', () => ({
   useGlobalFilterQuery: jest.fn(),
 }));
-jest.mock('../../../../common/hooks/esql/use_esql_global_filter', () => ({
-  useEsqlTimeRangeFilter: jest.fn(),
-}));
 jest.mock('../../../../common/containers/use_global_time', () => ({ useGlobalTime: jest.fn() }));
 jest.mock('../../../../common/components/ml/hooks/use_security_ml_module_job_ids', () => ({
   useSecurityMlModuleJobIds: jest.fn(),
@@ -50,13 +46,11 @@ const mockTopRowsSource = useRecentAnomaliesTopRowsEsqlSource as jest.Mock;
 const mockDataSource = useRecentAnomaliesDataEsqlSource as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseGlobalFilterQuery = useGlobalFilterQuery as jest.Mock;
-const mockUseEsqlTimeRangeFilter = useEsqlTimeRangeFilter as jest.Mock;
 const mockUseGlobalTime = useGlobalTime as jest.Mock;
 const mockUseSecurityJobIds = useSecurityMlModuleJobIds as jest.Mock;
 
 const TOP_ROWS_SQL = 'TOP_ROWS_SQL';
 const DATA_SQL = 'DATA_SQL';
-const TIME_FILTER = 'TIME_FILTER';
 const EMPTY_BOOL = { bool: { must: [], filter: [], should: [], must_not: [] } };
 const ACTIVE_BOOL = {
   bool: {
@@ -107,7 +101,6 @@ describe('useRecentAnomaliesQuery', () => {
     });
     mockUseGlobalTime.mockReturnValue({ from: 'global-from', to: 'global-to' });
     mockUseSecurityJobIds.mockReturnValue({ jobIds: ['security-job-01'], loading: false });
-    mockUseEsqlTimeRangeFilter.mockReturnValue(TIME_FILTER);
     mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: EMPTY_BOOL });
     mockGetLatestEntitiesIndexName.mockReturnValue('entities-latest-default');
     mockTopRowsSource.mockReturnValue(TOP_ROWS_SQL);
@@ -139,18 +132,26 @@ describe('useRecentAnomaliesQuery', () => {
     });
   });
 
-  describe('time range filter', () => {
-    it('uses the fixed time range when one is provided', () => {
+  describe('time range', () => {
+    it('passes the fixed time range to the query as named params input', async () => {
       renderHook(() => useRecentAnomaliesQuery(baseParams));
-      expect(mockUseEsqlTimeRangeFilter).toHaveBeenCalledWith('now-30d', 'now');
+
+      await topRowsCall()![1]({ signal: undefined });
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ timeRange: { from: 'now-30d', to: 'now' } })
+      );
     });
 
-    it('falls back to the global date picker range when no time range is provided', () => {
+    it('falls back to the global date picker range when no time range is provided', async () => {
       renderHook(() => useRecentAnomaliesQuery({ ...baseParams, timeRange: undefined }));
-      expect(mockUseEsqlTimeRangeFilter).toHaveBeenCalledWith('global-from', 'global-to');
+
+      await topRowsCall()![1]({ signal: undefined });
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ timeRange: { from: 'global-from', to: 'global-to' } })
+      );
     });
 
-    it('applies only the time filter to the anomaly query, not the search bar filters', async () => {
+    it('does not send a request-level filter with the anomaly queries (elastic/kibana#277613)', async () => {
       mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: ACTIVE_BOOL });
       resolvedEntityIds = ['host:test_host_01'];
       topRowsRecords = [{ entity_id: 'host:test_host_01', entity_name: 'h1', entity_type: 'host' }];
@@ -158,9 +159,8 @@ describe('useRecentAnomaliesQuery', () => {
       renderHook(() => useRecentAnomaliesQuery(baseParams));
 
       await topRowsCall()![1]({ signal: undefined });
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
-        expect.objectContaining({ filter: TIME_FILTER })
-      );
+      const callArgs = mockGetESQLResults.mock.calls.at(-1)![0];
+      expect(callArgs.filter).toBeUndefined();
     });
   });
 

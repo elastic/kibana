@@ -15,6 +15,14 @@ export const CASE_DETAILS_TITLE = i18n.translate('xpack.cases.casesRedesign.deta
   defaultMessage: 'Case Details (Redesign)',
 });
 
+export const CASE_SETTINGS_TITLE = i18n.translate('xpack.cases.casesRedesign.settings.title', {
+  defaultMessage: 'Cases settings',
+});
+
+export const BACK_TO_CASES = i18n.translate('xpack.cases.casesRedesign.settings.backToCases', {
+  defaultMessage: 'Cases',
+});
+
 export const VIEWING_CASE = (caseId: string) =>
   i18n.translate('xpack.cases.casesRedesign.details.viewingCase', {
     defaultMessage: 'Viewing case: {caseId}. This page is under construction.',

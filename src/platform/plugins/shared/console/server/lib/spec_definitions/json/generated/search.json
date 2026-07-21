@@ -46,7 +46,7 @@
         "query_then_fetch",
         "dfs_query_then_fetch"
       ],
-      "stats": "",
+      "stats": [],
       "stored_fields": [],
       "suggest_field": "",
       "suggest_mode": [

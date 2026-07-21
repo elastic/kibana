@@ -83,6 +83,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     console: {
       guide: `${ELASTIC_DOCS}explore-analyze/query-filter/tools/console`,
+      kibanaApiReference: isServerless ? `${KIBANA_SERVERLESS_APIS}` : `${KIBANA_APIS}`,
     },
     dashboard: {
       guide: `${ELASTIC_DOCS}explore-analyze/dashboards`,
@@ -1111,6 +1112,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       limitationsKnownIssues: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/limitations-known-issues`,
       learnMore: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-agent-or-ai-assistant`,
     },
+    applicationConnections: {
+      oauthClients: `${ELASTIC_DOCS}deploy-manage/app-connections/oauth-clients`,
+    },
     inferenceManagement: {
       inferenceAPIDocumentation: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
@@ -1139,6 +1143,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     cases: {
       casesPermissions: `${ELASTIC_DOCS}solutions/security/investigate/cases-requirements`,
       configureCaseSettings: `${ELASTIC_DOCS}explore-analyze/cases/configure-case-settings`,
+      manageCaseTemplates: `${ELASTIC_DOCS}explore-analyze/cases/manage-case-templates`,
     },
   });
 };

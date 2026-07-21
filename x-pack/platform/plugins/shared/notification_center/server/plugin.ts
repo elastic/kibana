@@ -14,6 +14,8 @@ import type {
 } from '@kbn/core/server';
 import type { NotificationCenterConfig } from './config';
 import { registerNotificationDataStream } from './data_stream/notification_data_stream';
+import { buildSubmitNotification } from './submit';
+import { registerNotificationUserStorage } from './user_storage';
 import type {
   NotificationCenterPluginSetup,
   NotificationCenterPluginStart,
@@ -39,12 +41,15 @@ export class NotificationCenterPlugin
   public setup(
     core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>
   ): NotificationCenterPluginSetup {
-    // core gates the plugin on xpack.notificationCenter.enabled; setup runs only when enabled
+    // core gates the plugin on xpack.notificationCenter.enabled;
     this.logger.debug('Setting up Notification Center plugin');
 
     registerNotificationDataStream(core.dataStreams);
+    registerNotificationUserStorage(core.userStorage);
 
-    return {};
+    return {
+      submitNotification: buildSubmitNotification(core),
+    };
   }
 
   public start(core: CoreStart): NotificationCenterPluginStart {

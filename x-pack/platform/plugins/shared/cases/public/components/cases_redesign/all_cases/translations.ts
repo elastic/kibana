@@ -97,3 +97,23 @@ export const BULK_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Bulk actions popover',
   }
 );
+
+export const SELECT_CASE_ARIA_LABEL = (title: string) =>
+  i18n.translate('xpack.cases.casesRedesign.listView.selectCaseAriaLabel', {
+    values: { title },
+    defaultMessage: 'Select case {title}',
+  });
+
+export const SELECT_ALL_CASES = i18n.translate('xpack.cases.casesRedesign.listView.selectAll', {
+  defaultMessage: 'Select all',
+});
+
+export const CLEAR_SELECTION = i18n.translate('xpack.cases.casesRedesign.listView.clearSelection', {
+  defaultMessage: 'Clear selection',
+});
+
+export const LIST_CASE_META_LINK_ARIA = (title: string) =>
+  i18n.translate('xpack.cases.casesRedesign.listView.caseMetaLinkAriaLabel', {
+    values: { title },
+    defaultMessage: 'View case details for {title}',
+  });

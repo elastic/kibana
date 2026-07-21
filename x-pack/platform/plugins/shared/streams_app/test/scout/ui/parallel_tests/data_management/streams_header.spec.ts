@@ -48,7 +48,7 @@ test.describe(
 
         await pageObjects.streams.verifyLifecycleBadge(
           TEST_STREAM_NAME,
-          isServerless ? 'Indefinite' : 'ILM Policy: logs'
+          isServerless ? '∞' : 'ILM Policy: logs'
         );
       });
 

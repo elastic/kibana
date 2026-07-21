@@ -465,6 +465,71 @@ describe('LoadingCallout', () => {
     });
   });
 
+  describe('onViewDetails delegation', () => {
+    const enableWorkflows = () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              workflowsManagement: {
+                readWorkflow: true,
+              },
+            },
+          },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(true),
+          },
+          http: {},
+          telemetry: { reportEvent: jest.fn() },
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+    };
+
+    it('calls onViewDetails with the executionUuid when the Details button is clicked', async () => {
+      enableWorkflows();
+      const onViewDetails = jest.fn();
+
+      render(
+        <TestProviders>
+          <LoadingCallout
+            {...defaultProps}
+            executionUuid="uuid-abc"
+            onViewDetails={onViewDetails}
+            workflowId="workflow-123"
+            workflowRunId="run-456"
+          />
+        </TestProviders>
+      );
+
+      await waitFor(() => screen.getByTestId('detailsButton'));
+      await userEvent.click(screen.getByTestId('detailsButton'));
+
+      expect(onViewDetails).toHaveBeenCalledWith('uuid-abc');
+    });
+
+    it('does NOT render the nested flyout when onViewDetails is provided', async () => {
+      enableWorkflows();
+      const onViewDetails = jest.fn();
+
+      render(
+        <TestProviders>
+          <LoadingCallout
+            {...defaultProps}
+            executionUuid="uuid-abc"
+            onViewDetails={onViewDetails}
+            workflowId="workflow-123"
+            workflowRunId="run-456"
+          />
+        </TestProviders>
+      );
+
+      await waitFor(() => screen.getByTestId('detailsButton'));
+      await userEvent.click(screen.getByTestId('detailsButton'));
+
+      expect(screen.queryByTestId('workflowExecutionDetailsFlyout')).not.toBeInTheDocument();
+    });
+  });
+
   describe('prop forwarding to WorkflowExecutionDetailsFlyout', () => {
     const flyoutProps = {
       ...defaultProps,

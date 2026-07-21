@@ -46,7 +46,6 @@ import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared
 import type { inputsModel } from '../../../../common/store';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButton } from '../../../../common/components/inspect';
-import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EmptyComponent } from '../../../../common/lib/cell_actions/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -196,7 +195,6 @@ export const EntitiesDataTable = ({
   } = state;
 
   const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
-  const { investigateInTimeline } = useInvestigateInTimeline();
   const {
     timelinePrivileges: { read: canUseTimeline },
     alertsPrivileges: {
@@ -515,7 +513,6 @@ export const EntitiesDataTable = ({
 
   const leadingControlColumns = useLeadingControlColumns({
     canUseTimeline,
-    investigateInTimeline,
     tableId,
   });
 

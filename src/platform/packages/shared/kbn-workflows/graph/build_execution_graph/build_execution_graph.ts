@@ -281,13 +281,15 @@ function createLeafStepGraph(
 ): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
+  // `nodeType`/`configuration` are runtime-polymorphic across leaf step types, so this
+  // object can't be narrowed to a single `GraphNodeUnion` member statically.
   graph.setNode(stepId, {
     id: stepId,
     type: nodeType,
     stepId,
     stepType: currentStep.type,
     configuration: { ...currentStep },
-  });
+  } as GraphNodeUnion);
   return graph;
 }
 
@@ -692,9 +694,9 @@ function handleTimeout(
   stepId: string,
   stepType: 'workflow_level_timeout' | 'step_level_timeout',
   timeout: string,
-  innerGraph: graphlib.Graph<GraphNodeUnion>,
+  innerGraph: WorkflowGraphType,
   context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> {
+): WorkflowGraphType {
   const enterTimeoutZone: EnterTimeoutZoneNode = {
     id: `enterTimeoutZone_${stepId}`,
     type: 'enter-timeout-zone',
@@ -708,7 +710,7 @@ function handleTimeout(
     stepId,
     stepType,
   };
-  const graph = new graphlib.Graph<GraphNodeUnion>({ directed: true });
+  const graph = createTypedGraph({ directed: true });
   graph.setNode(enterTimeoutZone.id, enterTimeoutZone);
   graph.setNode(exitTimeoutZone.id, exitTimeoutZone);
   context.stack.push(enterTimeoutZone);
@@ -720,7 +722,7 @@ function handleTimeout(
 function handleStepLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> | null {
+): WorkflowGraphType | null {
   const stackEntry: GraphNodeUnion = {
     id: `stepLevelOnFailure_${getStepId(step, context)}`,
     type: 'step-level-on-failure',
@@ -740,7 +742,7 @@ function handleStepLevelOnFailure(
 function handleWorkflowLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> | null {
+): WorkflowGraphType | null {
   const onFailureConfiguration = context.settings?.['on-failure'];
   if (
     flowControlStepTypes.has(step.type) ||
@@ -940,13 +942,10 @@ function createFallback(
   return graph;
 }
 
-function createStepsSequence(
-  steps: BaseStep[],
-  context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> {
+function createStepsSequence(steps: BaseStep[], context: GraphBuildContext): WorkflowGraphType {
   const graph = createTypedGraph({ directed: true });
 
-  let previousGraph: graphlib.Graph<GraphNodeUnion> | null = null;
+  let previousGraph: WorkflowGraphType | null = null;
 
   for (let i = 0; i < steps.length; i++) {
     const currentGraph = visitAbstractStep(steps[i], context);
@@ -1307,7 +1306,7 @@ function visitLoopContinueStep(
 export function convertToWorkflowGraph(
   workflowSchema: WorkflowYaml,
   defaultSettings?: WorkflowSettings
-): graphlib.Graph<GraphNodeUnion> {
+): WorkflowGraphType {
   const resolvedSettings = resolveWorklfowSettings(workflowSchema.settings, defaultSettings);
   const context: GraphBuildContext = {
     settings: resolvedSettings,

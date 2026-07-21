@@ -541,4 +541,138 @@ describe('Grouping', () => {
       expect(screen.getByTestId('is-loading-grouping-table')).toBeInTheDocument();
     });
   });
+
+  describe('progressive group pagination', () => {
+    it('does not show the limit message away from the last revealed page', () => {
+      const manyGroupsProps = {
+        ...testProps,
+        activePage: 0,
+        data: { ...testProps.data, groupsCount: { value: 15000 } },
+      };
+
+      render(
+        <I18nProvider>
+          <Grouping {...manyGroupsProps} />
+        </I18nProvider>
+      );
+
+      expect(
+        screen.queryByTestId('grouping-level-0-pagination-limit-warning')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows the limit message and "Show more" only once the last revealed page is reached', () => {
+      const manyGroupsProps = {
+        ...testProps,
+        // itemsPerPage is 25, first batch is 20 pages (indices 0-19) => 500 groups revealed
+        activePage: 19,
+        data: { ...testProps.data, groupsCount: { value: 15000 } },
+      };
+
+      render(
+        <I18nProvider>
+          <Grouping {...manyGroupsProps} />
+        </I18nProvider>
+      );
+
+      expect(screen.getByText('Showing 500 of 15,000 groups.')).toBeInTheDocument();
+      expect(screen.getByTestId('grouping-level-0-pagination-show-more')).toBeInTheDocument();
+    });
+
+    it('reveals another batch of pages when "Show more" is clicked, moving the last page further out', () => {
+      const manyGroupsProps = {
+        ...testProps,
+        activePage: 19,
+        data: { ...testProps.data, groupsCount: { value: 15000 } },
+      };
+
+      const { rerender } = render(
+        <I18nProvider>
+          <Grouping {...manyGroupsProps} />
+        </I18nProvider>
+      );
+
+      fireEvent.click(screen.getByTestId('grouping-level-0-pagination-show-more'));
+
+      // clicking "Show more" doesn't navigate the user off the page they were on, and page 19
+      // is no longer the last page, so the message disappears until they page forward
+      expect(
+        screen.queryByTestId('grouping-level-0-pagination-limit-warning')
+      ).not.toBeInTheDocument();
+
+      // the new last page (39, i.e. 2 batches of 20 pages) reflects the larger reveal window
+      rerender(
+        <I18nProvider>
+          <Grouping {...manyGroupsProps} activePage={39} />
+        </I18nProvider>
+      );
+
+      expect(screen.getByText('Showing 1,000 of 15,000 groups.')).toBeInTheDocument();
+    });
+
+    it('stops offering "Show more" once the hard 10,000 group query cap is reached', () => {
+      const baseProps = {
+        ...testProps,
+        itemsPerPage: 100,
+        data: { ...testProps.data, groupsCount: { value: 20000 } },
+      };
+
+      // batch size is 20 pages; with itemsPerPage=100 the hard cap (10,000) is 100 pages,
+      // i.e. 5 batches. The last page moves from 19 -> 39 -> 59 -> 79 -> 99 as each batch reveals.
+      const lastPageAfterBatch = [19, 39, 59, 79, 99];
+
+      const { rerender } = render(
+        <I18nProvider>
+          <Grouping {...baseProps} activePage={lastPageAfterBatch[0]} />
+        </I18nProvider>
+      );
+
+      for (let i = 0; i < lastPageAfterBatch.length - 1; i++) {
+        expect(screen.getByTestId('grouping-level-0-pagination-show-more')).toBeInTheDocument();
+        fireEvent.click(screen.getByTestId('grouping-level-0-pagination-show-more'));
+        rerender(
+          <I18nProvider>
+            <Grouping {...baseProps} activePage={lastPageAfterBatch[i + 1]} />
+          </I18nProvider>
+        );
+      }
+
+      expect(screen.queryByTestId('grouping-level-0-pagination-show-more')).not.toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Search results are limited to 10,000 groups. Add filters to narrow your search.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('does not show the limit warning when all groups fit within the current reveal window', () => {
+      render(
+        <I18nProvider>
+          <Grouping {...testProps} />
+        </I18nProvider>
+      );
+
+      expect(
+        screen.queryByTestId('grouping-level-0-pagination-limit-warning')
+      ).not.toBeInTheDocument();
+    });
+
+    it('resets an out-of-range activePage once the real (capped) pageCount is known', () => {
+      const onChangeGroupsPage = jest.fn();
+      const smallGroupsProps = {
+        ...testProps,
+        activePage: 999,
+        onChangeGroupsPage,
+        data: { ...testProps.data, groupsCount: { value: 3 } },
+      };
+
+      render(
+        <I18nProvider>
+          <Grouping {...smallGroupsProps} />
+        </I18nProvider>
+      );
+
+      expect(onChangeGroupsPage).toHaveBeenCalledWith(0);
+    });
+  });
 });

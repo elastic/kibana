@@ -32,7 +32,6 @@ export function createSignificantEventsDiscoveryAgent({
         const availability = await getSignificantEventsAvailability({
           server,
           licensing: server.licensing,
-          uiSettingsClient: context.uiSettings,
         });
 
         return availability.available

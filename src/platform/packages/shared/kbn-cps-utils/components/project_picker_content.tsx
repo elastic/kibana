@@ -68,7 +68,7 @@ export const ProjectPickerContent = ({
       <EuiFlexItem grow={false}>
         <EuiButtonGroup
           isFullWidth
-          legend={strings.getProjectPickerButtonAriaLabel()}
+          legend={strings.projectPickerButtonAriaLabel}
           idSelected={projectRouting ?? PROJECT_ROUTING.ALL}
           options={projectPickerOptions}
           onChange={(optionId: string) => {

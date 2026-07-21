@@ -8,7 +8,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { EuiThemeProvider } from '@elastic/eui';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { FlyoutWithTabs, type NonEmptyFlyoutTabs } from './flyout_with_tabs';
 
 type TestTabId = 'summary' | 'json';
@@ -81,5 +81,11 @@ describe('FlyoutWithTabs', () => {
     fireEvent.click(screen.getByTestId('flyoutWithTabsBackButton'));
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('moves focus into the push flyout when it opens (push flyouts get no EUI focus trap)', async () => {
+    renderFlyout();
+
+    await waitFor(() => expect(screen.getByTestId('flyoutWithTabs')).toHaveFocus());
   });
 });

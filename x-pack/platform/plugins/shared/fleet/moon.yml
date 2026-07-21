@@ -131,6 +131,7 @@ dependsOn:
   - '@kbn/human-readable-id'
   - '@kbn/elastic-agent-condition-language'
   - '@kbn/app-header'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

@@ -46,9 +46,9 @@ const discoveryExecuteRoute = createServerRoute({
       );
     }
 
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const spaceId = await getSpaceId(request);
     const { body } = params;
@@ -97,9 +97,9 @@ const discoveryStatusRoute = createServerRoute({
     if (!significantEventsDiscoveryClient) {
       throw new FeatureNotEnabledError('Significant events discovery is not available');
     }
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const spaceId = await getSpaceId(request);
     return significantEventsDiscoveryClient.getStatus({ spaceId });

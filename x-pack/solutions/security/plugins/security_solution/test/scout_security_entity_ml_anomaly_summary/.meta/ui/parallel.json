@@ -1,5 +1,5 @@
 {
-  "sha1": "c35d611b5f4ec0b57729ef6f7dff744e8914900b",
+  "sha1": "b62e4eccc40e5ec37731ec80e84747229d8e659d",
   "tests": [
     {
       "id": "eb8cdfd32189cb5-7013af4c42fe438",
@@ -29,8 +29,8 @@
       }
     },
     {
-      "id": "ef75c9d696662a7-b9a7d632e183895",
-      "title": "Entity flyout anomalies host right panel does not show anomalies section when the entity has no anomalies",
+      "id": "ef75c9d696662a7-c63ba58eadef6aa",
+      "title": "Entity flyout anomalies host right panel shows anomalies section with an empty state when the entity has no anomalies",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -56,13 +56,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 98,
+        "line": 99,
         "column": 14
       }
     },
     {
-      "id": "ef75c9d696662a7-6a30e4e90eb1f28",
-      "title": "Entity flyout anomalies host right panel does not show anomalies section when the anomaly overview API returns an error",
+      "id": "ef75c9d696662a7-71eadf7c9f15422",
+      "title": "Entity flyout anomalies host right panel shows an error state in the anomalies section when the anomaly overview API returns an error",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -72,13 +72,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 132,
+        "line": 133,
         "column": 14
       }
     },
     {
-      "id": "ef75c9d696662a7-67a7c5f13161462",
-      "title": "Entity flyout anomalies host entity details left panel does not show anomalies tab when the entity has no anomalies",
+      "id": "ef75c9d696662a7-c80864d1ff26932",
+      "title": "Entity flyout anomalies host entity details left panel shows anomalies tab with an empty state when the entity has no anomalies",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -88,7 +88,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 145,
+        "line": 147,
         "column": 14
       }
     },
@@ -104,7 +104,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 164,
+        "line": 185,
         "column": 14
       }
     },
@@ -120,7 +120,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 190,
+        "line": 211,
         "column": 14
       }
     },
@@ -136,7 +136,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 215,
+        "line": 236,
         "column": 14
       }
     },
@@ -152,7 +152,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 249,
+        "line": 286,
         "column": 14
       }
     },
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_entity_ml_anomaly_summary/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 322,
+        "line": 359,
         "column": 14
       }
     }

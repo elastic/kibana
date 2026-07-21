@@ -10,6 +10,7 @@ import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
@@ -21,11 +22,13 @@ import {
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
+  DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
 } from '@kbn/significant-events-plugin/common';
 
 export interface ScheduledDiscoveryState {
   enabled: boolean;
   detectionIntervalMinutes: number;
+  targetCoverageMinutes: number;
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
   triageBatchSize: number;
@@ -40,6 +43,10 @@ const readSettingsFromClient = (client: IUiSettingsClient): ScheduledDiscoverySt
   detectionIntervalMinutes: client.get<number>(
     OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
     DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES
+  ),
+  targetCoverageMinutes: client.get<number>(
+    OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
+    DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES
   ),
   reviewIntervalMinutes: client.get<number>(
     OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
@@ -73,6 +80,7 @@ export const useScheduledDiscoverySettings = ({
     () =>
       draft.enabled !== saved.enabled ||
       draft.detectionIntervalMinutes !== saved.detectionIntervalMinutes ||
+      draft.targetCoverageMinutes !== saved.targetCoverageMinutes ||
       draft.reviewIntervalMinutes !== saved.reviewIntervalMinutes ||
       draft.discoveryBatchSize !== saved.discoveryBatchSize ||
       draft.triageBatchSize !== saved.triageBatchSize ||
@@ -97,6 +105,10 @@ export const useScheduledDiscoverySettings = ({
       client.set(
         OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
         draft.detectionIntervalMinutes
+      ),
+      client.set(
+        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
+        draft.targetCoverageMinutes
       ),
       client.set(
         OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,

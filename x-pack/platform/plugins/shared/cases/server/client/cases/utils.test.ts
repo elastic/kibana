@@ -2243,14 +2243,14 @@ describe('enrichCasesWithFieldLabels', () => {
       definition: '',
       templateVersion: 1,
       deletedAt: null,
-      fieldNames: [
+      fieldDefinitions: [
         { name: 'priority', label: 'Priority Level', type: 'keyword', control: 'INPUT_TEXT' },
         { name: 'effort', label: 'Effort Points', type: 'integer', control: 'INPUT_NUMBER' },
       ],
     },
   };
 
-  it('populates extended_fields_labels from the matched template fieldNames', () => {
+  it('populates extended_fields_labels from the matched template fieldDefinitions', () => {
     const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO]);
 
     expect(result[0].extended_fields_labels).toEqual({
@@ -2304,7 +2304,7 @@ describe('enrichCasesWithFieldLabels', () => {
       attributes: {
         ...templateSO.attributes,
         templateVersion: 2,
-        fieldNames: [
+        fieldDefinitions: [
           { name: 'priority', label: 'Priority Level v2', type: 'keyword', control: 'INPUT_TEXT' },
         ],
       },
@@ -2338,7 +2338,7 @@ describe('enrichCasesWithFieldLabels', () => {
         ...templateSO.attributes,
         templateId: 'template-id-2',
         templateVersion: 1,
-        fieldNames: [
+        fieldDefinitions: [
           { name: 'severity', label: 'Severity Label', type: 'keyword', control: 'SELECT_BASIC' },
         ],
       },

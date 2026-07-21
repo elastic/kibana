@@ -17,6 +17,7 @@ import {
   ALERT_SNOOZED,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_DELAYED,
 } from '@kbn/rule-data-utils';
 import { get, isEmpty } from 'lodash';
 import type {
@@ -275,12 +276,8 @@ export class AlertsClient<
   }
 
   public isTrackedAlert(id: string) {
-    const alert = this.trackedAlerts.getById(id);
-    const uuid = alert?.[ALERT_UUID];
-    if (uuid) {
-      return !!this.trackedAlerts.active[uuid];
-    }
-    return false;
+    const status = get(this.trackedAlerts.getById(id), ALERT_STATUS);
+    return status === ALERT_STATUS_ACTIVE || status === ALERT_STATUS_DELAYED;
   }
 
   public hasReachedAlertLimit(): boolean {

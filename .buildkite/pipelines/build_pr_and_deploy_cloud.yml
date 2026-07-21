@@ -59,7 +59,7 @@ steps:
           provider: gcp
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
-          diskSizeGb: 125
+          diskSizeGb: 130
           machineType: c4d-standard-16
           diskType: hyperdisk-balanced
           zones: us-central1-a,us-central1-b,us-central1-c

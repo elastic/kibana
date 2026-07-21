@@ -23,6 +23,7 @@ import { AttributesFields } from './attributes_fields';
 import { EditConnector } from '../../../../edit_connector';
 import { CustomFields } from '../../../../case_view/components/custom_fields';
 import { TemplateFields } from '../../../../case_view/components/template_fields';
+import { GlobalCaseFields } from '../../../../case_view/components/global_case_fields';
 import * as redesignI18n from '../../../translations';
 import { SidebarAccordionSection } from './sidebar_accordion_section';
 import { TemplateSettingsPopover } from './template_settings_popover';
@@ -53,7 +54,9 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
     useGetSupportedActionConnectors();
   const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
 
-  const { data: templateData } = useGetTemplate(caseData.template?.id, caseData.template?.version);
+  const { data: templateData } = useGetTemplate(caseData.template?.id, caseData.template?.version, {
+    includeDeleted: true,
+  });
   const templateFieldsTitle = templateData?.name ?? redesignI18n.TEMPLATE_FIELDS_TITLE;
 
   const { onUpdateField, onSubmitCustomField, isCustomFieldsLoading } = useTemplateFieldsActions({
@@ -125,6 +128,9 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
                   customFieldsConfiguration={casesConfiguration.customFields}
                   onSubmit={onSubmitCustomField}
                 />
+                {/* Global (isGlobal) fields apply to every case regardless of the template. Renders
+                    nothing when there are none; self-labels when no template owns the heading. */}
+                <GlobalCaseFields caseData={caseData} onUpdateField={onUpdateField} />
                 {caseData.template?.id ? (
                   <TemplateFields
                     caseData={caseData}

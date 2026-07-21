@@ -428,7 +428,7 @@ describe('RulesClient', () => {
       ).resolves.not.toThrow();
     });
 
-    it('allows setting stateTransition to null on a signal rule (removing it)', async () => {
+    it('allows setting state_transition to null on a signal rule (removing it)', async () => {
       const client = createClient();
 
       const existingAttributes: RuleSavedObjectAttributes = {
@@ -446,7 +446,7 @@ describe('RulesClient', () => {
 
       await client.updateRule({
         id: 'rule-id-signal-null',
-        data: { stateTransition: null } as unknown as UpdateRuleData,
+        data: { state_transition: null },
       });
     });
 

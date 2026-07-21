@@ -7,10 +7,16 @@
 
 import type { ConverseStep } from '@kbn/evals';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common';
-import { getToolCallCount, extractToolCallIds, summarizeEsqlGrounding } from './tool_usage';
+import {
+  getToolCallCount,
+  extractToolCallIds,
+  summarizeEsqlGrounding,
+  extractEventSearchCandidateCount,
+} from './tool_usage';
 
 const TOOL_ID_EXECUTE_ESQL = platformCoreTools.executeEsql;
 const TOOL_ID_KI_SEARCH = platformSignificantEventsTools.searchKnowledgeIndicators;
+const TOOL_ID_EVENT_SEARCH = platformSignificantEventsTools.searchEvent;
 
 const steps: ConverseStep[] = [
   { type: 'reasoning', reasoning: 'plan' },
@@ -69,5 +75,51 @@ describe('summarizeEsqlGrounding', () => {
       noOfToolCalls: 0,
       noOfToolCallsWithResults: 0,
     });
+  });
+});
+
+describe('extractEventSearchCandidateCount', () => {
+  it('returns null when event_search was never called', () => {
+    expect(extractEventSearchCandidateCount(steps)).toBeNull();
+  });
+
+  it('reads the candidate count from data.total when present', () => {
+    const withEventSearch: ConverseStep[] = [
+      ...steps,
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENT_SEARCH,
+        tool_call_id: 'event-search-1',
+        params: { state: 'open', stream_names: ['logs'] },
+        results: [{ type: 'other', data: { events: [{ event_id: 'a' }], total: 1 } }],
+      },
+    ];
+    expect(extractEventSearchCandidateCount(withEventSearch)).toBe(1);
+  });
+
+  it('falls back to events.length when data.total is absent', () => {
+    const withEventSearch: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENT_SEARCH,
+        tool_call_id: 'event-search-1',
+        params: { state: 'open', stream_names: ['logs'] },
+        results: [{ type: 'other', data: { events: [{ event_id: 'a' }, { event_id: 'b' }] } }],
+      },
+    ];
+    expect(extractEventSearchCandidateCount(withEventSearch)).toBe(2);
+  });
+
+  it('returns 0 when event_search was called and found no candidates', () => {
+    const withEventSearch: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENT_SEARCH,
+        tool_call_id: 'event-search-1',
+        params: { state: 'open', stream_names: ['logs'] },
+        results: [{ type: 'other', data: { events: [], total: 0 } }],
+      },
+    ];
+    expect(extractEventSearchCandidateCount(withEventSearch)).toBe(0);
   });
 });
