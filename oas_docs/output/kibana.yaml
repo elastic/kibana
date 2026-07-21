@@ -98,7 +98,7 @@ tags:
     x-displayName: Connectors
   - name: Dashboards
     description: |
-      > **Technical preview** — The Dashboards API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+      > This documentation is temporarily hosted at a separate location.
       >
       > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
     externalDocs:
@@ -402,7 +402,7 @@ tags:
       Enables you to invalidate user sessions for security and session management purposes.
   - name: Visualizations
     description: |
-      > **Technical preview** — The Visualizations API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+      > This documentation is temporarily hosted at a separate location.
       >
       > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
     externalDocs:
@@ -13618,7 +13618,7 @@ paths:
       summary: Get dashboards
       operationId: get-dashboards-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -13630,7 +13630,7 @@ paths:
       summary: Create a dashboard
       operationId: create-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -13643,7 +13643,7 @@ paths:
       summary: Get a dashboard
       operationId: get-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -13655,7 +13655,7 @@ paths:
       summary: Update a dashboard
       operationId: update-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -13667,7 +13667,7 @@ paths:
       summary: Delete a dashboard
       operationId: delete-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -20196,6 +20196,8 @@ paths:
           required: true
           schema:
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '200':
@@ -20243,6 +20245,8 @@ paths:
           name: action_id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
         - description: |
             The file identifier is constructed in one of two ways:
@@ -20253,6 +20257,8 @@ paths:
           name: file_id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '200':
@@ -20337,6 +20343,8 @@ paths:
           name: action_id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
         - description: |
             The file identifier is constructed in one of two ways:
@@ -20347,6 +20355,8 @@ paths:
           name: file_id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '200':
@@ -20612,6 +20622,7 @@ paths:
                     - alert-id-1
                     - alert-id-2
                   items:
+                    maxLength: 256
                     minLength: 1
                     type: string
                   maxItems: 50
@@ -20623,6 +20634,7 @@ paths:
                     - case-id-1
                     - case-id-2
                   items:
+                    maxLength: 256
                     minLength: 1
                     type: string
                   maxItems: 50
@@ -21177,6 +21189,7 @@ paths:
                     - alert-id-1
                     - alert-id-2
                   items:
+                    maxLength: 256
                     minLength: 1
                     type: string
                   maxItems: 50
@@ -21188,6 +21201,7 @@ paths:
                     - case-id-1
                     - case-id-2
                   items:
+                    maxLength: 256
                     minLength: 1
                     type: string
                   maxItems: 50
@@ -45886,6 +45900,26 @@ paths:
               type: string
             maxItems: 100
             type: array
+        - description: A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are included. If the same name is shared by multiple tags, items matching any of those tags are included.
+          in: query
+          name: tag_names
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+            x-state: Generally available; added in 9.6.0
+        - description: A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are excluded. If the same name is shared by multiple tags, items matching any of those tags are excluded.
+          in: query
+          name: excluded_tag_names
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+            x-state: Generally available; added in 9.6.0
       responses:
         '200':
           content:
@@ -50146,7 +50180,7 @@ paths:
           description: forbidden
         '404':
           description: not found
-      summary: Delete a markdown library item.
+      summary: Delete a markdown library item
       tags:
         - Markdowns
       x-codeSamples:
@@ -50298,7 +50332,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The unique ID of the markdown library item to be created or updated
+        - description: The unique ID of the markdown library item to be created or updated.
           in: path
           name: id
           required: true
@@ -50511,7 +50545,7 @@ paths:
           description: invalid request
         '403':
           description: forbidden
-      summary: Upsert markdown library item
+      summary: Upsert a markdown library item
       tags:
         - Markdowns
       x-codeSamples:
@@ -52981,15 +53015,6 @@ paths:
               - propagated
               - resolution
             type: string
-        - description: Maximum number of history entries to return per request.
-          in: query
-          name: page_size
-          required: false
-          schema:
-            default: 100
-            maximum: 1000
-            minimum: 1
-            type: integer
         - description: When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.
           in: query
           name: include_contributions
@@ -53084,17 +53109,21 @@ paths:
                       nullable: true
                     type: object
                   coreMigrationVersion:
+                    maxLength: 256
                     type: string
                   id:
+                    maxLength: 512
                     type: string
                   initialNamespaces:
                     items:
+                      maxLength: 512
                       type: string
                     maxItems: 100
                     minItems: 1
                     type: array
                   migrationVersion:
                     additionalProperties:
+                      maxLength: 256
                       type: string
                     type: object
                   references:
@@ -53103,10 +53132,13 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         name:
+                          maxLength: 1024
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - name
@@ -53115,10 +53147,13 @@ paths:
                     maxItems: 1000
                     type: array
                   type:
+                    maxLength: 256
                     type: string
                   typeMigrationVersion:
+                    maxLength: 256
                     type: string
                   version:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53228,8 +53263,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53328,17 +53365,21 @@ paths:
                 properties:
                   fields:
                     items:
+                      maxLength: 1024
                       type: string
                     maxItems: 100
                     type: array
                   id:
+                    maxLength: 512
                     type: string
                   namespaces:
                     items:
+                      maxLength: 512
                       type: string
                     maxItems: 100
                     type: array
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53442,8 +53483,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53565,8 +53608,10 @@ paths:
                       nullable: true
                     type: object
                   id:
+                    maxLength: 512
                     type: string
                   namespace:
+                    maxLength: 512
                     minLength: 1
                     type: string
                   references:
@@ -53575,10 +53620,13 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         name:
+                          maxLength: 1024
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - name
@@ -53587,8 +53635,10 @@ paths:
                     maxItems: 1000
                     type: array
                   type:
+                    maxLength: 256
                     type: string
                   version:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53703,8 +53753,10 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - type
@@ -53714,8 +53766,10 @@ paths:
                         type: object
                         properties:
                           id:
+                            maxLength: 512
                             type: string
                           type:
+                            maxLength: 256
                             type: string
                         required:
                           - type
@@ -53733,8 +53787,10 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - type
@@ -53743,11 +53799,14 @@ paths:
                   type: array
                 search:
                   description: Search for documents to export using the Elasticsearch Simple Query String syntax.
+                  maxLength: 10000
                   type: string
                 type:
                   anyOf:
-                    - type: string
+                    - maxLength: 256
+                      type: string
                     - items:
+                        maxLength: 256
                         type: string
                       maxItems: 100
                       type: array
@@ -53850,6 +53909,7 @@ paths:
           required: true
           schema:
             items:
+              maxLength: 256
               type: string
             maxItems: 100
             type: array
@@ -53858,6 +53918,7 @@ paths:
           name: search
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: The boolean operator to use when combining multiple values.
           in: query
@@ -53875,6 +53936,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -53883,6 +53945,7 @@ paths:
           name: sort_field
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Return only saved objects that have a reference to the specified saved object(s).
           in: query
@@ -53894,8 +53957,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53905,8 +53970,10 @@ paths:
                   type: object
                   properties:
                     id:
+                      maxLength: 512
                       type: string
                     type:
+                      maxLength: 256
                       type: string
                   required:
                     - type
@@ -53933,8 +54000,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53944,8 +54013,10 @@ paths:
                   type: object
                   properties:
                     id:
+                      maxLength: 512
                       type: string
                     type:
+                      maxLength: 256
                       type: string
                   required:
                     - type
@@ -53968,6 +54039,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -53976,12 +54048,14 @@ paths:
           name: filter
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: Aggregations as a JSON string.
           in: query
           name: aggs
           required: false
           schema:
+            maxLength: 100000
             type: string
         - description: The namespaces (spaces) to search in.
           in: query
@@ -53989,6 +54063,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 512
               type: string
             maxItems: 100
             type: array
@@ -54259,8 +54334,10 @@ paths:
                       createNewCopy:
                         type: boolean
                       destinationId:
+                        maxLength: 512
                         type: string
                       id:
+                        maxLength: 512
                         type: string
                       ignoreMissingReferences:
                         type: boolean
@@ -54274,10 +54351,13 @@ paths:
                           type: object
                           properties:
                             from:
+                              maxLength: 512
                               type: string
                             to:
+                              maxLength: 512
                               type: string
                             type:
+                              maxLength: 256
                               type: string
                           required:
                             - type
@@ -54286,6 +54366,7 @@ paths:
                         maxItems: 100
                         type: array
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - type
@@ -54369,6 +54450,7 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: Overwrite an existing saved object.
           in: query
@@ -54396,15 +54478,18 @@ paths:
                     nullable: true
                   type: object
                 coreMigrationVersion:
+                  maxLength: 256
                   type: string
                 initialNamespaces:
                   items:
+                    maxLength: 512
                     type: string
                   maxItems: 100
                   minItems: 1
                   type: array
                 migrationVersion:
                   additionalProperties:
+                    maxLength: 256
                     type: string
                   type: object
                 references:
@@ -54413,10 +54498,13 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       name:
+                        maxLength: 1024
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - name
@@ -54425,6 +54513,7 @@ paths:
                   maxItems: 1000
                   type: array
                 typeMigrationVersion:
+                  maxLength: 256
                   type: string
               required:
                 - attributes
@@ -54506,12 +54595,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
         - description: When true, force deletion of multi-namespace objects from all namespaces.
           in: query
@@ -54576,12 +54667,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -54656,12 +54749,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
         - description: Overwrite an existing saved object.
           in: query
@@ -54689,15 +54784,18 @@ paths:
                     nullable: true
                   type: object
                 coreMigrationVersion:
+                  maxLength: 256
                   type: string
                 initialNamespaces:
                   items:
+                    maxLength: 512
                     type: string
                   maxItems: 100
                   minItems: 1
                   type: array
                 migrationVersion:
                   additionalProperties:
+                    maxLength: 256
                     type: string
                   type: object
                 references:
@@ -54706,10 +54804,13 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       name:
+                        maxLength: 1024
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - name
@@ -54718,6 +54819,7 @@ paths:
                   maxItems: 1000
                   type: array
                 typeMigrationVersion:
+                  maxLength: 256
                   type: string
               required:
                 - attributes
@@ -54798,12 +54900,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       requestBody:
         content:
@@ -54829,10 +54933,13 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       name:
+                        maxLength: 1024
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - name
@@ -54845,6 +54952,7 @@ paths:
                     nullable: true
                   type: object
                 version:
+                  maxLength: 256
                   type: string
               required:
                 - attributes
@@ -54930,12 +55038,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -72236,7 +72346,7 @@ paths:
       summary: Get visualizations
       operationId: get-visualizations-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -72248,7 +72358,7 @@ paths:
       summary: Create a visualization
       operationId: create-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -72261,7 +72371,7 @@ paths:
       summary: Get a visualization
       operationId: get-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -72273,7 +72383,7 @@ paths:
       summary: Update a visualization
       operationId: update-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -72285,7 +72395,7 @@ paths:
       summary: Delete a visualization
       operationId: delete-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -75656,6 +75766,105 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /s/{spaceId}/api/observability/slos/_bulk_snapshot:
+    post:
+      description: |
+        Compute the summary of multiple SLO instances at a given point in time. The endpoint is synchronous and returns results directly. Each result contains either a summary (on success) or a per-instance error. The list of requests is limited to 100 entries. When `instanceId` is omitted or set to `'*'`, the API returns a result for each matching instance (up to 1000 per SLO). You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: bulkSnapshotOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkSnapshotRequest:
+                summary: Compute snapshots for two SLO instances
+                value:
+                  at: '2025-01-12T10:00:00.000Z'
+                  requests:
+                    - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                      instanceId: '*'
+                    - id: d077e940-1515-11ee-9c50-9d096392f520
+                      instanceId: host.name:web-01
+            schema:
+              $ref: '#/components/schemas/SLOs_bulk_snapshot_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkSnapshotResponse:
+                  summary: Bulk snapshot response with mixed success and per-instance error
+                  value:
+                    at: '2025-01-12T10:00:00.000Z'
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        instanceId: '*'
+                        summary:
+                          errorBudget:
+                            consumed: 0.24
+                            initial: 0.01
+                            remaining: 0.76
+                          good: 9976
+                          sliValue: 0.9976
+                          status: HEALTHY
+                          total: 10000
+                      - error:
+                          message: SLO [d077e940-1515-11ee-9c50-9d096392f520] not found
+                          statusCode: 404
+                        id: d077e940-1515-11ee-9c50-9d096392f520
+                        instanceId: host.name:web-01
+              schema:
+                $ref: '#/components/schemas/SLOs_snapshot_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: '`requests` is limited to 100 entries'
+                    statusCode: 400
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    statusCode: 403
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Forbidden response
+      summary: Compute SLO instance summaries in bulk at a point in time
+      tags:
+        - slo
+      x-state: Generally available; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /s/{spaceId}/api/observability/slos/_delete_instances:
     post:
       description: |
@@ -76147,6 +76356,130 @@ paths:
       summary: Reset an SLO
       tags:
         - slo
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /s/{spaceId}/api/observability/slos/{sloId}/_snapshot:
+    get:
+      description: |
+        Compute the summary of an SLO at a given point in time. When `instanceId` is provided, returns that instance. When `instanceId` is omitted or set to `'*'`, returns all matching instances (up to 1000). The endpoint is synchronous and returns results directly. You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: getSnapshotOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+        - $ref: '#/components/parameters/SLOs_slo_id'
+        - description: The point in time at which to compute the SLO instance summary (ISO 8601 date-time)
+          in: query
+          name: at
+          required: true
+          schema:
+            example: '2025-01-12T10:00:00.000Z'
+            format: date-time
+            type: string
+        - description: |
+            The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value (for example `host.name:web-01`) to return that instance only.
+          in: query
+          name: instanceId
+          required: false
+          schema:
+            example: '*'
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSnapshotResponse:
+                  summary: Snapshot result for a healthy SLO instance
+                  value:
+                    at: '2025-01-12T10:00:00.000Z'
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        instanceId: '*'
+                        summary:
+                          errorBudget:
+                            consumed: 0.24
+                            initial: 0.01
+                            remaining: 0.76
+                          good: 9976
+                          sliValue: 0.9976
+                          status: HEALTHY
+                          total: 10000
+                getSnapshotResponseViolated:
+                  summary: Snapshot result for a violated SLO instance
+                  value:
+                    at: '2025-01-12T10:00:00.000Z'
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        instanceId: host.name:web-01
+                        summary:
+                          errorBudget:
+                            consumed: 5
+                            initial: 0.01
+                            remaining: -4
+                          good: 9500
+                          sliValue: 0.95
+                          status: VIOLATED
+                          total: 10000
+              schema:
+                $ref: '#/components/schemas/SLOs_snapshot_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: "Invalid value 'foo' supplied to: at"
+                    statusCode: 400
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    statusCode: 403
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Forbidden response
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found
+                    statusCode: 404
+              schema:
+                $ref: '#/components/schemas/SLOs_404_response'
+          description: Not found response
+      summary: Compute an SLO instance summary at a point in time
+      tags:
+        - slo
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -85137,6 +85470,8 @@ components:
             agent_download_timeout:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
+              nullable: true
+            agent_features_include_tags_in_events_enabled:
               nullable: true
             agent_internal:
               nullable: true
@@ -107887,6 +108222,8 @@ components:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
               nullable: true
+            agent_features_include_tags_in_events_enabled:
+              nullable: true
             agent_internal:
               nullable: true
             agent_limits_go_max_procs:
@@ -118973,6 +119310,8 @@ components:
             agent_download_timeout:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
+              nullable: true
+            agent_features_include_tags_in_events_enabled:
               nullable: true
             agent_internal:
               nullable: true
@@ -135757,12 +136096,14 @@ components:
       minLength: 1
       oneOf:
         - items:
+            maxLength: 256
             minLength: 1
             type: string
           maxItems: 250
           minItems: 1
           type: array
-        - minLength: 1
+        - maxLength: 256
+          minLength: 1
           type: string
     Security_Endpoint_Management_API_AgentTypes:
       description: List of agent types to retrieve. Defaults to `endpoint`.
@@ -135828,6 +136169,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -135839,6 +136181,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -135871,10 +136214,12 @@ components:
       properties:
         cloudFile:
           description: Script name in cloud storage.
+          maxLength: 4096
           minLength: 1
           type: string
         commandLine:
           description: Command line arguments.
+          maxLength: 8192
           minLength: 1
           type: string
         timeout:
@@ -135912,6 +136257,7 @@ components:
     Security_Endpoint_Management_API_Comment:
       description: Optional comment
       example: This is a comment
+      maxLength: 30000
       type: string
     Security_Endpoint_Management_API_CreateScriptRouteRequestBody:
       type: object
@@ -135967,6 +136313,7 @@ components:
     Security_Endpoint_Management_API_EndDate:
       description: An end date in ISO format or Date Math format.
       example: '2023-10-31T23:59:59.999Z'
+      maxLength: 64
       type: string
     Security_Endpoint_Management_API_EndpointIds:
       description: List of endpoint IDs (cannot contain empty strings). Max of 250.
@@ -135974,6 +136321,7 @@ components:
         - endpoint-id-1
         - endpoint-id-2
       items:
+        maxLength: 256
         minLength: 1
         type: string
       maxItems: 250
@@ -136077,10 +136425,12 @@ components:
       properties:
         scriptId:
           description: The script ID from the scripts library that will be executed.
+          maxLength: 256
           minLength: 1
           type: string
         scriptInput:
           description: The input parameter arguments (if any) for the script that will be executed.
+          maxLength: 8192
           minLength: 1
           type: string
       required:
@@ -136231,6 +136581,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136242,6 +136593,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136262,6 +136614,7 @@ components:
               properties:
                 command:
                   description: The shell command to execute on the endpoint.
+                  maxLength: 8192
                   minLength: 1
                   type: string
                 timeout:
@@ -136426,6 +136779,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136437,6 +136791,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136457,6 +136812,8 @@ components:
               properties:
                 path:
                   description: The full file path to retrieve from the endpoint.
+                  maxLength: 4096
+                  minLength: 1
                   type: string
               required:
                 - path
@@ -136473,6 +136830,7 @@ components:
             - alert-id-1
             - alert-id-2
           items:
+            maxLength: 256
             minLength: 1
             type: string
           maxItems: 50
@@ -136484,6 +136842,7 @@ components:
             - case-id-1
             - case-id-2
           items:
+            maxLength: 256
             minLength: 1
             type: string
           maxItems: 50
@@ -136502,10 +136861,12 @@ components:
       properties:
         commandLine:
           description: Command line arguments.
+          maxLength: 8192
           minLength: 1
           type: string
         hostPath:
           description: Absolute or relative path of script on host machine.
+          maxLength: 4096
           minLength: 1
           type: string
         timeout:
@@ -136609,6 +136970,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136620,6 +136982,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136649,6 +137012,7 @@ components:
                     entity_id:
                       description: The entity ID of the process to terminate.
                       example: abc123
+                      maxLength: 256
                       minLength: 1
                       type: string
                 - type: object
@@ -136656,6 +137020,7 @@ components:
                     process_name:
                       description: The name of the process to terminate. Valid for SentinelOne agent type only.
                       example: Elastic
+                      maxLength: 1024
                       minLength: 1
                       type: string
           required:
@@ -136676,10 +137041,12 @@ components:
       properties:
         args:
           description: Optional command line arguments for the script.
+          maxLength: 8192
           minLength: 1
           type: string
         scriptName:
           description: The name of the script to execute from the cloud storage.
+          maxLength: 256
           minLength: 1
           type: string
       required:
@@ -136765,6 +137132,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136776,6 +137144,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136818,6 +137187,8 @@ components:
                   type: object
                   properties:
                     entity_id:
+                      maxLength: 256
+                      minLength: 1
                       type: string
                     type:
                       enum:
@@ -137103,10 +137474,12 @@ components:
       properties:
         commandLine:
           description: Command line arguments.
+          maxLength: 8192
           minLength: 1
           type: string
         raw:
           description: Raw script content.
+          maxLength: 65536
           minLength: 1
           type: string
         timeout:
@@ -137349,6 +137722,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137360,6 +137734,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137419,6 +137794,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137430,6 +137806,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137451,6 +137828,8 @@ components:
                 path:
                   description: The folder or file's full path (including the file name).
                   example: /usr/my-file.txt
+                  maxLength: 4096
+                  minLength: 1
                   type: string
               required:
                 - path
@@ -137488,10 +137867,12 @@ components:
       properties:
         scriptId:
           description: The script ID from SentinelOne scripts library that will be executed.
+          maxLength: 256
           minLength: 1
           type: string
         scriptInput:
           description: The input parameter arguments for the script that was selected.
+          maxLength: 8192
           minLength: 1
           type: string
       required:
@@ -137522,6 +137903,7 @@ components:
     Security_Endpoint_Management_API_StartDate:
       description: A start date in ISO 8601 format or Date Math format.
       example: '2023-10-31T00:00:00.000Z'
+      maxLength: 64
       type: string
     Security_Endpoint_Management_API_SuccessResponse:
       description: A generic successful response.
@@ -137580,6 +137962,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137591,6 +137974,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137620,6 +138004,7 @@ components:
                     entity_id:
                       description: The entity ID of the process to suspend.
                       example: abc123
+                      maxLength: 256
                       minLength: 1
                       type: string
           required:
@@ -137698,6 +138083,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137709,6 +138095,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137747,12 +138134,14 @@ components:
         - user-id-2
       oneOf:
         - items:
+            maxLength: 256
             minLength: 1
             type: string
           maxItems: 50
           minItems: 1
           type: array
-        - minLength: 1
+        - maxLength: 256
+          minLength: 1
           type: string
     Security_Endpoint_Management_API_WithOutputs:
       description: A list of action IDs that should include the complete output of the action. Max of 50.
@@ -137761,12 +138150,14 @@ components:
         - action-id-2
       oneOf:
         - items:
+            maxLength: 256
             minLength: 1
             type: string
           maxItems: 50
           minItems: 1
           type: array
-        - minLength: 1
+        - maxLength: 256
+          minLength: 1
           type: string
     Security_Entity_Analytics_API_AssetCriticalityBulkUploadErrorItem:
       type: object
@@ -138340,9 +138731,14 @@ components:
           items:
             $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreHistoryEntry'
           type: array
+        interval:
+          description: The effective Elasticsearch `date_histogram` interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.
+          maxLength: 10
+          type: string
       required:
         - entity_id
         - entity_type
+        - interval
         - entries
     Security_Entity_Analytics_API_RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
@@ -143720,6 +144116,38 @@ components:
           type: string
       title: Bulk Purge Rollup data response
       type: object
+    SLOs_bulk_snapshot_request:
+      description: |
+        The bulk snapshot SLO request takes a point in time and a list of SLO instances to compute summaries for. The list is limited to 100 entries.
+      properties:
+        at:
+          description: The point in time at which to compute the SLO instance summaries
+          example: '2025-01-12T10:00:00.000Z'
+          format: date-time
+          type: string
+        requests:
+          description: The list of SLO instances to compute. Limited to 100 entries.
+          items:
+            type: object
+            properties:
+              id:
+                description: The SLO definition id
+                example: 8853df00-ae2e-11ed-90af-09bb6422b258
+                type: string
+              instanceId:
+                description: |
+                  The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value to return that instance only.
+                example: '*'
+                type: string
+            required:
+              - id
+          maxItems: 100
+          type: array
+      required:
+        - at
+        - requests
+      title: Bulk snapshot SLO request
+      type: object
     SLOs_create_slo_request:
       description: |
         The create SLO API request body varies depending on the type of indicator, time window and budgeting method.
@@ -143734,7 +144162,7 @@ components:
         groupBy:
           $ref: '#/components/schemas/SLOs_group_by'
         id:
-          description: A optional and unique identifier for the SLO. Must be between 8 and 36 chars
+          description: A optional and unique identifier for the SLO. Must be between 8 and 48 chars
           example: my-super-slo-id
           type: string
         indicator:
@@ -144714,6 +145142,110 @@ components:
         - createdAt
         - updatedAt
         - version
+    SLOs_snapshot_response:
+      description: |
+        The snapshot SLO response returns the point in time and the per-instance results. Each result contains either a summary (success) or an error (per-instance failure).
+      properties:
+        at:
+          description: The point in time at which the summaries were computed
+          example: '2025-01-12T10:00:00.000Z'
+          format: date-time
+          type: string
+        results:
+          description: The per-instance computation results
+          items:
+            $ref: '#/components/schemas/SLOs_snapshot_result'
+          type: array
+      required:
+        - at
+        - results
+      title: Snapshot SLO response
+      type: object
+    SLOs_snapshot_result:
+      description: |
+        The result of computing an SLO instance summary at a point in time. Contains either a summary (on success) or an error (on failure).
+      properties:
+        error:
+          description: Error information when the computation failed for this SLO instance. Present when the computation failed.
+          type: object
+          properties:
+            message:
+              description: The error message
+              example: SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found
+              type: string
+            statusCode:
+              description: The HTTP status code of the error
+              example: 404
+              type: number
+          required:
+            - statusCode
+            - message
+        id:
+          description: The SLO definition id
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+          type: string
+        instanceId:
+          description: The SLO instance id. '*' represents the default (ungrouped) instance.
+          example: '*'
+          type: string
+        summary:
+          description: The SLO instance summary at the requested point in time. Present when the computation succeeded.
+          type: object
+          properties:
+            errorBudget:
+              type: object
+              properties:
+                consumed:
+                  description: The error budget consumed, or null when no data is available
+                  example: 0.24
+                  nullable: true
+                  type: number
+                initial:
+                  description: The initial error budget, derived from the SLO objective
+                  example: 0.01
+                  type: number
+                remaining:
+                  description: The error budget remaining, or null when no data is available
+                  example: 0.76
+                  nullable: true
+                  type: number
+              required:
+                - initial
+                - consumed
+                - remaining
+            good:
+              description: The number of good events
+              example: 9976
+              type: number
+            sliValue:
+              description: The SLI value at the requested point in time, or null when no data is available
+              example: 0.9976
+              nullable: true
+              type: number
+            status:
+              description: The SLO health status
+              enum:
+                - NO_DATA
+                - HEALTHY
+                - DEGRADING
+                - VIOLATED
+              example: HEALTHY
+              type: string
+            total:
+              description: The total number of events
+              example: 10000
+              type: number
+          required:
+            - status
+            - sliValue
+            - errorBudget
+            - good
+            - total
+      required:
+        - id
+        - instanceId
+      title: Snapshot result
+      type: object
     SLOs_summary:
       description: The SLO computed data
       properties:

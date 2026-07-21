@@ -1,5 +1,9 @@
 {
-  "sha1": "4f59c565d21df4387d38c3993af41636d1c76705",
+  "sha1": "d3c64a8c92d544b29d9c883746ee662f489f2d7d",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "0e89de24e8ff3a8-faf07b914e53ca6",
@@ -2717,7 +2721,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/inspect_monitor.spec.ts",
-        "line": 68,
+        "line": 83,
         "column": 12
       }
     },
@@ -2731,7 +2735,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/inspect_monitor.spec.ts",
-        "line": 140,
+        "line": 157,
         "column": 12
       }
     },
@@ -2745,7 +2749,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/inspect_monitor.spec.ts",
-        "line": 211,
+        "line": 228,
         "column": 12
       }
     },
@@ -3306,6 +3310,110 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/migrate_legacy_policies.spec.ts",
         "line": 280,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-477aeb8cdb738c8",
+      "title": "Synthetics multi-space settings [GET] returns defaults anchored to the current space when no SO exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-00458ca127bf246",
+      "title": "Synthetics multi-space settings [PUT] creates exactly one SO and persists the requested attributes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 109,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-9fa1c56ac73b6ff",
+      "title": "Synthetics multi-space settings [PUT] remains a singleton even when the saves come from different spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 134,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-7e5b44173916c75",
+      "title": "Synthetics multi-space settings [GET] returns the SO from another space when shared via ALL_SPACES",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 164,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-3caffe79eda0863",
+      "title": "Synthetics multi-space settings [PUT] removing a space hides the settings from that space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 191,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-e804b1dc151bf2d",
+      "title": "Synthetics multi-space settings [PUT] from a space that does not own the SO still updates the singleton",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 230,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-18ff6a75d38b4ec",
+      "title": "Synthetics multi-space settings [PUT] collapses ALL_SPACES with specific spaces into [*]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 264,
+        "column": 12
+      }
+    },
+    {
+      "id": "3d277402bdac131-00a378f9346d5ef",
+      "title": "Synthetics multi-space settings [PUT] is forbidden for a role without uptime-write",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 279,
         "column": 12
       }
     },
