@@ -175,7 +175,9 @@ export const useDocumentSummary = ({
       setMessageAndReplacements({ message: userMessage.content ?? '', replacements });
     };
 
-    if (isFetchedAnonymizationFields && isSummaryFetched) fetchContext();
+    if (isFetchedAnonymizationFields && isSummaryFetched) {
+      void fetchContext();
+    }
   }, [
     anonymizationFields,
     isFetchedAnonymizationFields,
@@ -263,7 +265,6 @@ export const useDocumentSummary = ({
     messageAndReplacements,
     refetchSummary,
     sendMessage,
-    showAnonymizedValues,
   ]);
 
   useEffect(() => {
