@@ -140,7 +140,7 @@ describe('config validation', () => {
             "enabled": true,
           },
           "templates": Object {
-            "enabled": false,
+            "enabled": true,
           },
         }
       `);
@@ -171,9 +171,9 @@ describe('config validation', () => {
       expect(config.chat.enabled).toBe(false);
     });
 
-    it('sets templates.enabled default to false', () => {
+    it('sets templates.enabled default to true', () => {
       const config = ConfigSchema.validate({});
-      expect(config.templates.enabled).toBe(false);
+      expect(config.templates.enabled).toBe(true);
     });
 
     it('allows templates.enabled to be set to false explicitly', () => {
