@@ -20,32 +20,30 @@ import { useSpaceId } from './use_space_id';
 
 export interface UseFetchEpisodeFlappingQueryOptions {
   episodeId: string | undefined;
-  /** Number of most-recent statuses to fetch (the flapping look-back window). */
-  lookBackWindow: number;
   services: { data: DataPublicPluginStart; spaces: SpacesPluginStart };
 }
 
 /**
- * Loads the most recent `lookBackWindow` `.rule-events` statuses for an episode.
+ * Loads the most recent `.rule-events` statuses for an episode, bounded to the
+ * default flapping look-back window.
  *
  * The underlying query sorts `@timestamp` DESC with an explicit LIMIT; rows are
  * reversed here so callers receive them in chronological (oldest-first) order.
  */
 export const useFetchEpisodeFlappingQuery = ({
   episodeId,
-  lookBackWindow,
   services,
 }: UseFetchEpisodeFlappingQueryOptions) => {
   const { data } = services;
   const spaceId = useSpaceId(services.spaces);
 
   return useQuery({
-    queryKey: queryKeys.episodeFlapping(spaceId, episodeId ?? '', lookBackWindow),
+    queryKey: queryKeys.episodeFlapping(spaceId, episodeId ?? ''),
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({
         data,
         params: {
-          query: buildEpisodeFlappingEsqlQuery(spaceId, episodeId!, lookBackWindow).print('basic'),
+          query: buildEpisodeFlappingEsqlQuery(spaceId, episodeId!).print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,

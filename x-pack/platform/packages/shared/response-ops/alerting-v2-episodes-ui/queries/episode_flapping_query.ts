@@ -8,6 +8,7 @@
 import { esql } from '@elastic/esql';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
+import { DEFAULT_EPISODE_FLAPPING_SETTINGS } from '../utils/is_episode_flapping';
 
 export interface EpisodeFlappingRow {
   'episode.status': AlertEpisodeStatus;
@@ -28,10 +29,10 @@ const ALERT_EPISODE_FLAPPING_FIELDS = ['episode.status'] as const;
 export const buildEpisodeFlappingEsqlQuery = (
   spaceId: string,
   episodeId: string,
-  limit: number
+  limit: number = DEFAULT_EPISODE_FLAPPING_SETTINGS.lookBackWindow
 ) => {
   // prettier-ignore
-  return esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
+  return esql.from([ALERT_EVENTS_DATA_STREAM])
     .where`space_id == ${spaceId}`
     .where`type == "alert"`
     .where`episode.id == ${episodeId}`

@@ -36,7 +36,6 @@ export const useEpisodeFlapping = ({
 }: UseEpisodeFlappingOptions) => {
   const { data: events, isLoading } = useFetchEpisodeFlappingQuery({
     episodeId,
-    lookBackWindow: settings.lookBackWindow,
     services,
   });
 

@@ -46,7 +46,6 @@ export const AlertEpisodeDetailsHeader = ({
     ? ruleState.rule.metadata.name
     : i18n.HEADER_EPISODE_TITLE_FALLBACK;
   const description = isRuleLoaded(ruleState) ? ruleState.rule.metadata.description : undefined;
-  // Tags are shown in the "Episode details" section (see AlertEpisodeOverviewList), not here.
   const showBadgeRow = Boolean(status) || isSupportedEpisodeSeverity(severity);
 
   return (

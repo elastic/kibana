@@ -127,8 +127,7 @@ const renderFilledBadge =
 
 const renderFlappingBadge = (_props: { badgeText: string }) => <FlappingBadge />;
 
-// Tags intentionally live in the "Episode details" section (see AlertEpisodeOverviewList)
-// rather than here: the app header caps badges at three, so status/severity/action badges
+// The app header caps badges at three, so status/severity/action badges
 // would otherwise be crowded out by a variable number of tag badges.
 export const getEpisodeHeaderBadges = ({
   status,

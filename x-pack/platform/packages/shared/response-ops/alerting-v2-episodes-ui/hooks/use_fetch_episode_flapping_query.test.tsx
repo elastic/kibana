@@ -46,7 +46,6 @@ describe('useFetchEpisodeFlappingQuery', () => {
       () =>
         useFetchEpisodeFlappingQuery({
           episodeId,
-          lookBackWindow: 20,
           services: { data, spaces: mockSpaces },
         }),
       { wrapper }
@@ -58,7 +57,7 @@ describe('useFetchEpisodeFlappingQuery', () => {
       expect.objectContaining({
         data,
         params: expect.objectContaining({
-          query: buildEpisodeFlappingEsqlQuery(DEFAULT_SPACE_ID, episodeId, 20).print('basic'),
+          query: buildEpisodeFlappingEsqlQuery(DEFAULT_SPACE_ID, episodeId).print('basic'),
           time_zone: 'UTC',
         }),
       })
