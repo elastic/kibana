@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
@@ -29,7 +29,7 @@ export function SloEditPage() {
   const { initialValues, isLoading, isEditMode, slo } = useSloFormValues(sloId);
 
   const { data: permissions } = usePermissions();
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, isServerless } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
 
@@ -88,6 +88,24 @@ export function SloEditPage() {
       data-test-subj="sloEditPage"
     >
       <HeaderMenu />
+      {isServerless && (
+        <>
+          <EuiCallOut
+            data-test-subj="sloEditFormCpsReadinessBanner"
+            title={i18n.translate('xpack.slo.sloEditPage.cpsReadinessBanner.title', {
+              defaultMessage: 'Cross-Project Search settings',
+            })}
+            color="primary"
+            iconType="info"
+          >
+            {i18n.translate('xpack.slo.sloEditPage.cpsReadinessBanner.body', {
+              defaultMessage:
+                'Use the "Prevent cross-project search" option in Advanced settings to restrict this SLO to data from this project only.',
+            })}
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {isLoading ? (
         <EuiLoadingSpinner size="xl" data-test-subj="sloEditLoadingSpinner" />
       ) : (
