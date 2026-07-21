@@ -80,16 +80,22 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
       ?.replace('myapp', INSTRUMENTED_APP_NAME)
       ?.replace('my-namespace', INSTRUMENTED_APP_CONTAINER_NAMESPACE);
     /**
-     * Wait for the OTel operator AND the daemon-collector DaemonSet before
-     * annotating and restarting the java-app.
+     * Wait for the OTel operator, the gateway collector, AND the
+     * daemon-collector DaemonSet before annotating and restarting the
+     * java-app.
      *
      * Operator readiness gates the mutating webhook (instrumentation
-     * injection). Daemon-collector readiness ensures its OTLP endpoint
+     * injection). Gateway readiness matters because ALL data (logs, metrics,
+     * traces) is exported daemon -> gateway -> Elastic; if the gateway never
+     * becomes ready (e.g. its 2x500Mi replicas are unschedulable on a small
+     * cluster), no data reaches Elasticsearch at all while the daemon still
+     * looks healthy. Daemon-collector readiness ensures its OTLP endpoint
      * (port 4318) is up before the java-app starts: on cold nodes the image
      * pull takes ~6 min, and the OTel Java agent will not automatically
      * reconnect if the endpoint was unavailable at its own startup.
      */
     const sleepSnippet = `kubectl rollout status --watch --timeout=300s deployment/opentelemetry-kube-stack-opentelemetry-operator --namespace opentelemetry-operator-system
+kubectl rollout status --watch --timeout=300s deployment/opentelemetry-kube-stack-gateway-collector --namespace opentelemetry-operator-system
 kubectl rollout status --watch --timeout=660s daemonset/opentelemetry-kube-stack-daemon-collector --namespace opentelemetry-operator-system`;
 
     codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}\n${sleepSnippet}\n${annotateAllResourceSnippet}\n${restartDeploymentSnippet}`;
