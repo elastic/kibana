@@ -26,7 +26,12 @@ import {
 } from '@elastic/eui';
 
 import { MAX_FLYOUT_WIDTH } from '../constants';
-import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices, useAuthz } from '../hooks';
+import {
+  useGetOneAgentPolicyFull,
+  useGetOneAgentPolicy,
+  useStartServices,
+  useAuthz,
+} from '../hooks';
 
 import { agentPolicyRouteService, getYamlFormatters } from '../services';
 import type { YamlFormatters } from '../../../services/yaml_formatters';
