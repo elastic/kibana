@@ -973,7 +973,11 @@ describe('Agent policy', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: AGENT_POLICY_INDEX,
-          query: { term: { policy_base_id: 'mocked' } },
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([{ term: { policy_base_id: 'mocked' } }]),
+            }),
+          }),
         })
       );
     });

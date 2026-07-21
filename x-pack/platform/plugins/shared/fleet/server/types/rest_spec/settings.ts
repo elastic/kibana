@@ -217,7 +217,7 @@ export const SettingsSchemaV9 = SettingsSchemaV8.extends({
 });
 
 export const SettingsResponseSchema = schema.object({
-  item: SettingsSchemaV8,
+  item: SettingsSchemaV9,
 });
 
 export const PutSpaceSettingsRequestSchema = {

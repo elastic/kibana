@@ -861,7 +861,15 @@ describe('getAgentVersionsForAgentPolicyIds', () => {
       expect.objectContaining({
         query: {
           bool: {
-            filter: [{ terms: { policy_base_id: ['policy-a', 'policy-b'] } }],
+            filter: [
+              expect.objectContaining({
+                bool: expect.objectContaining({
+                  should: expect.arrayContaining([
+                    { terms: { policy_base_id: ['policy-a', 'policy-b'] } },
+                  ]),
+                }),
+              }),
+            ],
           },
         },
       })

@@ -19,7 +19,8 @@ import { appContextService, settingsService } from '.';
 // Skips documents that already have policy_base_id set (idempotent).
 // The separator character is passed via params.separator to avoid hard-coding it.
 const BACKFILL_SCRIPT = `
-  if (ctx._source.policy_id == null || ctx._source.containsKey('policy_base_id')) {
+  if (ctx._source.policy_id == null ||
+      (ctx._source.containsKey('policy_base_id') && ctx._source.policy_base_id != null)) {
     ctx.op = 'noop';
     return;
   }
@@ -52,7 +53,11 @@ async function runBackfill(esClient: ElasticsearchClient, index: string, label: 
       } noops)`
     );
   } catch (err) {
-    logger.warn(`Failed to backfill policy_base_id on ${label}: ${err.message}`);
+    logger.warn(
+      `Failed to backfill policy_base_id on ${label}: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
     throw err;
   }
 }
