@@ -9,6 +9,7 @@ export const CUSTOM_CONTENT_EMBEDDABLE_TYPE = 'custom_content';
 export const CUSTOM_CONTENT_APP_NAME = 'Custom content';
 
 export const CUSTOM_CONTENT_MAX_PROMPT_LENGTH = 10_000;
+export const CUSTOM_CONTENT_MAX_TEMPLATE_BYTES = 500_000;
 
 // injectCsp() in template_fill.ts de-dupes on an exact string match of this value.
 export const CUSTOM_CONTENT_CSP_META =

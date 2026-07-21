@@ -16,11 +16,11 @@ import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import {
   CUSTOM_CONTENT_CSP_META,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
+  CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_ENABLED_FLAG_KEY,
 } from '../../common/constants';
 
 const SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
-const MAX_HTML_BYTES = 500_000;
 
 type ColorMode = 'LIGHT' | 'DARK';
 
@@ -150,7 +150,7 @@ export function registerGenerateRoute(
           if (sizeLimitExceeded) return;
           if (event.type === ChatCompletionEventType.ChatCompletionChunk && event.content) {
             accHtmlBytes += Buffer.byteLength(event.content, 'utf8');
-            if (accHtmlBytes > MAX_HTML_BYTES) {
+            if (accHtmlBytes > CUSTOM_CONTENT_MAX_TEMPLATE_BYTES) {
               sizeLimitExceeded = true;
               abortController.abort();
               abortSub.unsubscribe();
