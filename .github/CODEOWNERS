@@ -1440,10 +1440,11 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 ##  https://help.github.com/articles/about-codeowners/
 ####
 
-# limits.yml changes frequently as bundle sizes shift; no owner means the ops
-# team isn't auto-requested as reviewer on every bump. A GitHub Actions workflow
-# (bundle-size-limits-comment.yml) flags increases ≥15% instead.
+# limits.yml files change frequently as bundle sizes shift; no owner means the
+# ops team isn't auto-requested as reviewer on every bump. A GitHub Actions
+# workflow (bundle-size-limits-comment.yml) flags increases ≥15% instead.
 packages/kbn-optimizer/limits.yml
+packages/kbn-rspack-optimizer/limits.yml
 
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
@@ -2768,7 +2769,8 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/reindex_service @elastic/kibana-management
 /x-pack/platform/test/upgrade_assistant_integration @elastic/kibana-management
 /src/platform/test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
-/src/platform/test/functional/page_objects/management/*.ts @elastic/kibana-management
+/src/platform/test/functional/page_objects/management/indexpattern_field_editor_page.ts @elastic/kibana-data-discovery
+/src/platform/test/functional/page_objects/management/saved_objects_page.ts @elastic/kibana-core
 /src/platform/test/functional/page_objects/embedded_console.ts @elastic/kibana-management
 /src/platform/test/functional/page_objects/console_page.ts @elastic/kibana-management
 /src/platform/test/functional/firefox/console.config.ts @elastic/kibana-management
