@@ -217,7 +217,7 @@ export const WorkflowDetailHeader = React.memo(
     const executionsToggleItem = useMemo<AppMenuItemType>(
       () => ({
         id: 'toggleExecutions',
-        order: 1,
+        order: 0,
         label: i18n.translate('workflows.workflowDetailHeader.executionsButton', {
           defaultMessage: 'Executions',
         }),
@@ -253,7 +253,7 @@ export const WorkflowDetailHeader = React.memo(
 
       return {
         id: 'workflowHistory',
-        order: 0,
+        order: 2,
         label: i18n.translate('workflows.workflowDetailHeader.historyButton', {
           defaultMessage: 'History',
         }),
@@ -353,7 +353,7 @@ export const WorkflowDetailHeader = React.memo(
       if (!isVisualEditorEnabled) {
         items.push({
           id: 'runWorkflow',
-          order: 2,
+          order: 1,
           label: Translations.runWorkflow,
           iconType: 'play',
           run: handleRunClick,
