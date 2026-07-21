@@ -24,7 +24,8 @@ export type WorkflowExecutionsTableColumnId =
 
 export interface WorkflowExecutionsGridColumnSettings {
   display: string;
-  width?: number;
+  isResizable?: boolean;
+  initialWidth?: number;
 }
 
 export const WORKFLOW_EXECUTIONS_TABLE_COLUMN_SETTINGS: Record<
@@ -35,30 +36,31 @@ export const WORKFLOW_EXECUTIONS_TABLE_COLUMN_SETTINGS: Record<
     display: i18n.translate('workflowsManagement.executionsPage.column.workflow', {
       defaultMessage: 'Workflow',
     }),
+    isResizable: false,
   },
   tags: {
     display: i18n.translate('workflowsManagement.executionsPage.column.tags', {
       defaultMessage: 'Tags',
     }),
-    width: 250,
+    initialWidth: 250,
   },
   triggers: {
     display: i18n.translate('workflowsManagement.executionsPage.column.trigger', {
       defaultMessage: 'Trigger',
     }),
-    width: 250,
+    initialWidth: 250,
   },
   startedAt: {
     display: i18n.translate('workflowsManagement.executionsPage.column.started', {
       defaultMessage: 'Started',
     }),
-    width: 250,
+    initialWidth: 250,
   },
   duration: {
     display: i18n.translate('workflowsManagement.executionsPage.column.duration', {
       defaultMessage: 'Duration',
     }),
-    width: 250,
+    initialWidth: 250,
   },
 };
 
@@ -82,7 +84,8 @@ export const buildWorkflowExecutionsGridColumns = (
       id: columnId,
       displayAsText: settings.display,
       isSortable: SORTABLE_COLUMNS.has(columnId),
-      initialWidth: columnWidths[columnId] ?? settings.width,
+      initialWidth: columnWidths[columnId] ?? settings.initialWidth,
+      isResizable: settings.isResizable,
     };
 
     return column;

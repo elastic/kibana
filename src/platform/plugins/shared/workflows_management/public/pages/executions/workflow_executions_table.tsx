@@ -83,8 +83,8 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     const [columnWidths, setColumnWidths] = useState<Partial<Record<string, number>>>(() =>
       Object.fromEntries(
         Object.entries(WORKFLOW_EXECUTIONS_TABLE_GRID_SETTINGS.columns)
-          .filter(([, settings]) => settings.width != null)
-          .map(([columnId, settings]) => [columnId, settings.width as number])
+          .filter(([, settings]) => settings.initialWidth != null)
+          .map(([columnId, settings]) => [columnId, settings.initialWidth as number])
       )
     );
     const [sort, setSort] = useState<ExecutionTableSortOrder>(EXECUTION_TABLE_DEFAULT_SORT);
