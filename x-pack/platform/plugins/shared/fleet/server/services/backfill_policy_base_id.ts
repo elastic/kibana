@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import {
   AGENT_POLICY_INDEX,
@@ -13,7 +13,7 @@ import {
   AGENT_POLICY_VERSION_SEPARATOR,
 } from '../../common/constants';
 
-import { appContextService } from '.';
+import { appContextService, settingsService } from '.';
 
 // Painless: strip version suffix from policy_id and store as policy_base_id.
 // Skips documents that already have policy_base_id set (idempotent).
@@ -62,4 +62,22 @@ export async function backfillPolicyBaseId(esClient: ElasticsearchClient) {
     runBackfill(esClient, AGENTS_INDEX, 'fleet-agents'),
     runBackfill(esClient, AGENT_POLICY_INDEX, 'fleet-policies'),
   ]);
+}
+
+const MIGRATION_KEY = 'policy_base_id_backfill';
+
+export async function runPolicyBaseIdBackfillIfNeeded(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+) {
+  const logger = appContextService.getLogger();
+  const settings = await settingsService.getSettings(soClient);
+  if (settings.completed_migrations?.includes(MIGRATION_KEY)) {
+    return;
+  }
+  logger.debug('Backfilling policy_base_id on fleet-agents and fleet-policies');
+  await backfillPolicyBaseId(esClient);
+  await settingsService.saveSettings(soClient, {
+    completed_migrations: [...(settings.completed_migrations ?? []), MIGRATION_KEY],
+  });
 }

@@ -61,7 +61,7 @@ import {
   getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig,
 } from './preconfiguration/delete_unenrolled_agent_setting';
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
-import { backfillPolicyBaseId } from './backfill_policy_base_id';
+import { runPolicyBaseIdBackfillIfNeeded } from './backfill_policy_base_id';
 import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_component_templates';
 import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
@@ -307,14 +307,7 @@ async function createSetupSideEffects(
   }
 
   try {
-    const settings = await settingsService.getSettings(soClient);
-    if (!settings.completed_migrations?.includes('policy_base_id_backfill')) {
-      logger.debug('Backfilling policy_base_id on fleet-agents and fleet-policies');
-      await backfillPolicyBaseId(esClient);
-      await settingsService.saveSettings(soClient, {
-        completed_migrations: [...(settings.completed_migrations ?? []), 'policy_base_id_backfill'],
-      });
-    }
+    await runPolicyBaseIdBackfillIfNeeded(esClient, soClient);
   } catch (_error) {
     // Non-fatal: runBackfill already logged the per-index warning before rethrowing.
   }
