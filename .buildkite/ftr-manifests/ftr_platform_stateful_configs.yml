@@ -218,6 +218,7 @@ enabled:
   - x-pack/platform/test/functional_execution_context/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/cases/group1/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/cases/group2/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/cases/group2/config_legacy.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/cases/basic/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts
