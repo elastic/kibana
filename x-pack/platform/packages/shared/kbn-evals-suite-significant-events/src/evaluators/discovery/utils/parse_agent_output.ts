@@ -11,34 +11,35 @@ import type { Discovery, SignificantEvent } from '@kbn/significant-events-schema
 
 interface DiscoveryWriteToolResult {
   data?: {
-    results?: Array<
-      Pick<Discovery, 'event_id' | 'discovery_id'> & {
-        index: number;
-        written: boolean;
-        reason?: 'duplicate_within_window' | 'bulk_error';
-      }
-    >;
-    event_id?: string;
+    results?: DiscoveryWriteItemResult[];
   };
 }
 
 interface EventsWriteToolResult {
   data?: {
-    results?: Array<{
-      index: number;
-      event_uuid?: string;
-      event_id: string;
-      written: boolean;
-      reason?: 'bulk_error';
-    }>;
-    event_uuid?: string;
-    written?: boolean;
+    results?: EventsWriteItemResult[];
   };
 }
 
-interface BulkToolParams {
-  items?: Array<Record<string, unknown>>;
-}
+type DiscoveryWriteItemResult = Pick<Discovery, 'event_id' | 'discovery_id'> & {
+  index: number;
+  written: boolean;
+  reason?: 'duplicate_within_window' | 'bulk_error';
+};
+
+type EventsWriteItemResult =
+  | {
+      index: number;
+      event_uuid: string;
+      event_id: string;
+      written: true;
+    }
+  | {
+      index: number;
+      event_id: string;
+      written: false;
+      reason: 'bulk_error';
+    };
 
 interface IndexedResult {
   index: number;
@@ -47,36 +48,22 @@ interface IndexedResult {
 const toolCallSteps = (steps: ConverseStep[], toolId: string) =>
   steps.filter((step) => step.type === 'tool_call' && step.tool_id === toolId && step.params);
 
-const alignBulkResults = <T extends IndexedResult>(
+const getBulkItems = <T>(params: Record<string, unknown> | undefined, toolId: string): T[] => {
+  if (!Array.isArray(params?.items)) {
+    throw new Error(`${toolId} input and result arrays are not aligned`);
+  }
+  return params.items as T[];
+};
+
+const validateAlignedResults = <T extends IndexedResult>(
   results: T[],
   itemCount: number,
   toolId: string
 ): T[] => {
-  const misaligned = () => new Error(`${toolId} input and result arrays are not aligned`);
-  if (results.length !== itemCount) {
-    throw misaligned();
+  if (results.length !== itemCount || results.some((result, index) => result.index !== index)) {
+    throw new Error(`${toolId} input and result arrays are not aligned`);
   }
-
-  const resultsByIndex = new Map<number, T>();
-  for (const result of results) {
-    if (
-      !Number.isInteger(result.index) ||
-      result.index < 0 ||
-      result.index >= itemCount ||
-      resultsByIndex.has(result.index)
-    ) {
-      throw misaligned();
-    }
-    resultsByIndex.set(result.index, result);
-  }
-
-  return Array.from({ length: itemCount }, (_, index) => {
-    const result = resultsByIndex.get(index);
-    if (result === undefined) {
-      throw misaligned();
-    }
-    return result;
-  });
+  return results;
 };
 
 /**
@@ -84,67 +71,46 @@ const alignBulkResults = <T extends IndexedResult>(
  */
 export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Discovery[] =>
   toolCallSteps(steps, platformSignificantEventsTools.discoveryWrite).flatMap((step) => {
-    const params = step.params as BulkToolParams;
+    const items = getBulkItems<Partial<Discovery>>(step.params, 'discovery_write');
     const toolResult = (step.results?.[0] as DiscoveryWriteToolResult | undefined)?.data;
-    if (!Array.isArray(params.items)) {
-      return [
-        {
-          ...step.params,
-          ...(toolResult?.event_id ? { event_id: toolResult.event_id } : {}),
-        } as Discovery,
-      ];
-    }
     const results = toolResult?.results;
     if (!Array.isArray(results)) {
       throw new Error('discovery_write input and result arrays are not aligned');
     }
-    const alignedResults = alignBulkResults(results, params.items.length, 'discovery_write');
-    return params.items.flatMap((item, index) => {
-      const result = alignedResults[index];
-      if (result.reason === 'bulk_error') return [];
-      return [
-        {
-          ...item,
-          event_id: result.event_id,
-          discovery_id: result.discovery_id,
-          written: result.written,
-        } as unknown as Discovery,
-      ];
-    });
+    return validateAlignedResults(results, items.length, 'discovery_write')
+      .map((result, index) =>
+        result.reason === 'bulk_error'
+          ? undefined
+          : ({
+              ...items[index],
+              event_id: result.event_id,
+              discovery_id: result.discovery_id,
+            } as Discovery)
+      )
+      .filter((discovery): discovery is Discovery => discovery !== undefined);
   });
 
 /**
  * Extract significant events from `events_write` tool call steps.
- * Merges `event_uuid` and `written` from the tool result so evaluators can inspect dedup outcomes.
+ * Merges generated identifiers from successful tool results into their corresponding inputs.
  */
 export const extractSignificantEventsFromToolCall = (steps: ConverseStep[]): SignificantEvent[] =>
   toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
-    const params = step.params as BulkToolParams;
+    const items = getBulkItems<Partial<SignificantEvent>>(step.params, 'events_write');
     const toolResult = (step.results?.[0] as EventsWriteToolResult | undefined)?.data;
-    if (!Array.isArray(params.items)) {
-      return [
-        {
-          ...step.params,
-          ...(toolResult?.event_uuid != null ? { event_uuid: toolResult.event_uuid } : {}),
-          ...(toolResult?.written != null ? { written: toolResult.written } : {}),
-        } as SignificantEvent,
-      ];
-    }
     const results = toolResult?.results;
     if (!Array.isArray(results)) {
       throw new Error('events_write input and result arrays are not aligned');
     }
-    const alignedResults = alignBulkResults(results, params.items.length, 'events_write');
-    return params.items.flatMap((item, index) => {
-      const result = alignedResults[index];
-      if (!result.written) return [];
-      return [
-        {
-          ...item,
-          event_id: result.event_id,
-          event_uuid: result.event_uuid,
-          written: true,
-        } as unknown as SignificantEvent,
-      ];
-    });
+    return validateAlignedResults(results, items.length, 'events_write')
+      .map((result, index) =>
+        result.written
+          ? ({
+              ...items[index],
+              event_id: result.event_id,
+              event_uuid: result.event_uuid,
+            } as SignificantEvent)
+          : undefined
+      )
+      .filter((event): event is SignificantEvent => event !== undefined);
   });

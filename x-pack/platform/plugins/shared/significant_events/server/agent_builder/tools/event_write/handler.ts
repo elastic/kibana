@@ -13,6 +13,7 @@ import {
   assertValidBulkWriteSize,
   createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
+  extractCreateResults,
   type CompactBulkError,
   toCompactBulkError,
 } from '../bulk_write';
@@ -22,7 +23,7 @@ import {
  * schema.
  *
  * `event_id` is optional. When absent (chat-initiated path), a synthetic ID is generated
- * (`agent-event-<uuid8>`) and the dedup lookup is skipped.
+ * (`agent-event-<uuid8>`) and the latest-version lookup is skipped.
  *
  * `conversation_id` is the only addition not in the base schema — passed through for traceability.
  */
@@ -125,19 +126,10 @@ export async function eventsWriteBulkHandler({
     throw createBulkWriteOutcomeUnknownError(`Event bulk write outcome is unknown: ${message}`);
   }
 
-  if (response.items.length !== prepared.length || response.items.some((item) => !item.create)) {
-    throw createBulkWriteOutcomeUnknownError(
-      `Event bulk response did not align with the ${prepared.length} submitted documents`
-    );
-  }
+  const createResults = extractCreateResults(response, prepared.length, 'Event');
 
   return prepared.map(({ index, eventId, eventUuid, status }, responseIndex) => {
-    const detail = response.items[responseIndex].create;
-    if (detail === undefined) {
-      throw createBulkWriteOutcomeUnknownError(
-        `Event bulk response item ${responseIndex} did not contain a create result`
-      );
-    }
+    const detail = createResults[responseIndex];
     if (detail.error) {
       return {
         index,

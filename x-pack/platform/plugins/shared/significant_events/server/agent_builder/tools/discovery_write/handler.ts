@@ -13,8 +13,8 @@ import type { DiscoveryClient } from '../../../lib/significant_events/discoverie
 import {
   assertUniqueBulkWriteKeys,
   assertValidBulkWriteSize,
-  createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
+  extractCreateResults,
   type CompactBulkError,
   toCompactBulkError,
 } from '../bulk_write';
@@ -133,8 +133,6 @@ export const mergeSignalsLatestPerRule = (
 interface PreparedInput {
   index: number;
   input: DiscoveryWriteInput;
-  isExplicitEventId: boolean;
-  windowMs?: number;
   cutoffMs?: number;
   fingerprint?: string;
 }
@@ -149,15 +147,12 @@ const prepareInputs = (inputs: DiscoveryWriteInput[], now: Date): PreparedInput[
   );
 
   const prepared = inputs.map((input, index) => {
-    const isExplicitEventId = input.event_id !== undefined;
     const windowMs = input.dedup_window ? parseDateMathToMs(input.dedup_window, now) : undefined;
     const isDedupEligible =
-      !isExplicitEventId && input.kind === 'discovery' && windowMs !== undefined;
+      input.event_id === undefined && input.kind === 'discovery' && windowMs !== undefined;
     return {
       index,
       input,
-      isExplicitEventId,
-      windowMs,
       cutoffMs: isDedupEligible ? now.getTime() - windowMs : undefined,
       fingerprint: isDedupEligible
         ? makeFingerprint(input.stream_names, extractRuleUuids(input.signals))
@@ -200,15 +195,15 @@ export async function discoveryWriteBulkHandler({
 }): Promise<DiscoveryWriteBulkResult[]> {
   const now = new Date();
   const preparedInputs = prepareInputs(inputs, now);
-  const eligibleWindows = preparedInputs.flatMap(({ windowMs, fingerprint }) =>
-    windowMs === undefined || fingerprint === undefined ? [] : [windowMs]
+  const cutoffs = preparedInputs.flatMap(({ cutoffMs }) =>
+    cutoffMs === undefined ? [] : [cutoffMs]
   );
   const recentDiscoveries =
-    eligibleWindows.length === 0
+    cutoffs.length === 0
       ? []
       : (
           await discoveryClient.findLatest({
-            from: new Date(now.getTime() - Math.max(...eligibleWindows)).toISOString(),
+            from: new Date(Math.min(...cutoffs)).toISOString(),
           })
         ).hits;
 
@@ -246,7 +241,7 @@ export async function discoveryWriteBulkHandler({
   const priorDocsByEventId = new Map<string, Discovery[]>();
   await Promise.all(
     inputsToCreate
-      .filter(({ isExplicitEventId, input }) => isExplicitEventId && input.kind !== 'handled')
+      .filter(({ input }) => input.event_id !== undefined && input.kind !== 'handled')
       .map(async ({ eventId }) => {
         const { hits } = await discoveryClient.findByEventId(eventId);
         priorDocsByEventId.set(
@@ -257,15 +252,16 @@ export async function discoveryWriteBulkHandler({
   );
 
   const timestamp = new Date().toISOString();
-  const created = inputsToCreate.map((prepared) => {
+  const pendingWrites = inputsToCreate.map((prepared) => {
     const { dedup_window: _dedupWindow, event_id: _eventId, ...rest } = prepared.input;
-    const signals = prepared.isExplicitEventId
-      ? mergeSignalsLatestPerRule(
-          priorDocsByEventId.get(prepared.eventId) ?? [],
-          prepared.input.signals ?? [],
-          timestamp
-        )
-      : prepared.input.signals ?? [];
+    const signals =
+      prepared.input.event_id !== undefined
+        ? mergeSignalsLatestPerRule(
+            priorDocsByEventId.get(prepared.eventId) ?? [],
+            prepared.input.signals ?? [],
+            timestamp
+          )
+        : prepared.input.signals ?? [];
     return {
       ...prepared,
       document: {
@@ -280,11 +276,11 @@ export async function discoveryWriteBulkHandler({
     };
   });
 
-  if (created.length > 0) {
+  if (pendingWrites.length > 0) {
     let response;
     try {
       response = await discoveryClient.bulkCreate(
-        created.map(({ document }) => document),
+        pendingWrites.map(({ document }) => document),
         { throwOnFail: false }
       );
     } catch (error) {
@@ -295,19 +291,10 @@ export async function discoveryWriteBulkHandler({
       );
     }
 
-    if (response.items.length !== created.length || response.items.some((item) => !item.create)) {
-      throw createBulkWriteOutcomeUnknownError(
-        `Discovery bulk response did not align with the ${created.length} submitted documents`
-      );
-    }
+    const createResults = extractCreateResults(response, pendingWrites.length, 'Discovery');
 
-    created.forEach(({ index, discoveryId, eventId, input }, responseIndex) => {
-      const detail = response.items[responseIndex].create;
-      if (detail === undefined) {
-        throw createBulkWriteOutcomeUnknownError(
-          `Discovery bulk response item ${responseIndex} did not contain a create result`
-        );
-      }
+    pendingWrites.forEach(({ index, discoveryId, eventId, input }, responseIndex) => {
+      const detail = createResults[responseIndex];
       results[index] = detail.error
         ? {
             index,
@@ -338,21 +325,4 @@ export async function discoveryWriteBulkHandler({
     alignedResults.push(result);
   }
   return alignedResults;
-}
-
-export async function discoveryWriteHandler({
-  discoveryClient,
-  input,
-}: {
-  discoveryClient: DiscoveryClient;
-  input: DiscoveryWriteInput;
-}): Promise<DiscoveryWriteResult> {
-  const [result] = await discoveryWriteBulkHandler({ discoveryClient, inputs: [input] });
-  if (result === undefined) {
-    throw createBulkWriteOutcomeUnknownError('Discovery bulk write did not return a result');
-  }
-  if ('reason' in result && result.reason === 'bulk_error') {
-    throw createBulkWriteItemError(result.error);
-  }
-  return result;
 }

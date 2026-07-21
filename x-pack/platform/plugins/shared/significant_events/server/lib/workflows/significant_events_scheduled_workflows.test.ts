@@ -191,13 +191,13 @@ describe('scheduled Significant Events managed workflows', () => {
       'discovery',
       SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
       'output_no_detections',
-      'compute_confirmed_queue_stats.output',
+      'compute_confirmed_queue_sizes.output.processedCount',
     ],
     [
       'triage',
       SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
       'output_no_discoveries',
-      'compute_confirmed_queue_stats.output',
+      'compute_confirmed_queue_sizes.output.processedCount',
     ],
   ])(
     '%s always completes no-work runs as success and reports queue stats, so the scheduled drain loop can rely on hasRemaining instead of run status',

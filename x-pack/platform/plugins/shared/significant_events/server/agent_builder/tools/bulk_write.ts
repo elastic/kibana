@@ -75,25 +75,39 @@ export const assertUniqueBulkWriteKeys = (
   entries: Array<{ index: number; key: string }>,
   keyName: string
 ): void => {
-  const indicesByKey = new Map<string, number[]>();
+  const firstIndexByKey = new Map<string, number>();
   for (const { index, key } of entries) {
-    const indices = indicesByKey.get(key) ?? [];
-    indices.push(index);
-    indicesByKey.set(key, indices);
+    const firstIndex = firstIndexByKey.get(key);
+    if (firstIndex !== undefined) {
+      throw createBulkWriteValidationError(
+        `Duplicate bulk write key: ${keyName} ${JSON.stringify(
+          key
+        )} at items[${firstIndex}] and items[${index}]`
+      );
+    }
+    firstIndexByKey.set(key, index);
+  }
+};
+
+export const extractCreateResults = (
+  response: { items: Array<{ create?: BulkResponseItem }> },
+  expectedCount: number,
+  entityLabel: string
+): BulkResponseItem[] => {
+  if (response.items.length !== expectedCount) {
+    throw createBulkWriteOutcomeUnknownError(
+      `${entityLabel} bulk response did not align with the ${expectedCount} submitted documents`
+    );
   }
 
-  const duplicates = [...indicesByKey.entries()].filter(([, indices]) => indices.length > 1);
-  if (duplicates.length === 0) {
-    return;
-  }
-
-  const details = duplicates
-    .map(
-      ([key, indices]) =>
-        `${keyName} ${JSON.stringify(key)} at ${indices.map((i) => `items[${i}]`).join(', ')}`
-    )
-    .join('; ');
-  throw createBulkWriteValidationError(`Duplicate bulk write keys: ${details}`);
+  return response.items.map(({ create }, index) => {
+    if (create === undefined) {
+      throw createBulkWriteOutcomeUnknownError(
+        `${entityLabel} bulk response item ${index} did not contain a create result`
+      );
+    }
+    return create;
+  });
 };
 
 export const toCompactBulkError = (detail: BulkResponseItem): CompactBulkError => ({

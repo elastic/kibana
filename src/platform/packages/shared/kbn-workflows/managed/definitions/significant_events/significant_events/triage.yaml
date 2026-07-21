@@ -399,20 +399,12 @@ steps:
           | size
           | default: 0 }}
 
-  - name: compute_confirmed_queue_stats
-    type: data.set
-    with:
-      processedCount: '${{ steps.compute_confirmed_queue_sizes.output.processedCount }}'
-      remainingCount: '${{ steps.compute_queue_stats.output.candidateCount | minus: steps.compute_confirmed_queue_sizes.output.processedCount | at_least: 0 }}'
-      hasRemaining: '${{ steps.compute_queue_stats.output.candidateCount > steps.compute_confirmed_queue_sizes.output.processedCount }}'
-      queueEmpty: '${{ steps.compute_queue_stats.output.candidateCount <= steps.compute_confirmed_queue_sizes.output.processedCount }}'
-
   - name: output_result
     type: workflow.output
     with:
       candidateCount: '${{ steps.compute_queue_stats.output.candidateCount }}'
-      processedCount: '${{ steps.compute_confirmed_queue_stats.output.processedCount }}'
-      remainingCount: '${{ steps.compute_confirmed_queue_stats.output.remainingCount }}'
-      hasRemaining: '${{ steps.compute_confirmed_queue_stats.output.hasRemaining }}'
-      queueEmpty: '${{ steps.compute_confirmed_queue_stats.output.queueEmpty }}'
+      processedCount: '${{ steps.compute_confirmed_queue_sizes.output.processedCount }}'
+      remainingCount: '${{ steps.compute_queue_stats.output.candidateCount | minus: steps.compute_confirmed_queue_sizes.output.processedCount | at_least: 0 }}'
+      hasRemaining: '${{ steps.compute_queue_stats.output.candidateCount > steps.compute_confirmed_queue_sizes.output.processedCount }}'
+      queueEmpty: '${{ steps.compute_queue_stats.output.candidateCount <= steps.compute_confirmed_queue_sizes.output.processedCount }}'
       noWork: false

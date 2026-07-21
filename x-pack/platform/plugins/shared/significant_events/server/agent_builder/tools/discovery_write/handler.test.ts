@@ -8,7 +8,6 @@
 import type { DiscoveryWriteInput } from './handler';
 import {
   discoveryWriteBulkHandler,
-  discoveryWriteHandler,
   generateEventId,
   makeFingerprint,
   mergeSignalsLatestPerRule,
@@ -63,14 +62,28 @@ const signalsByRule = (
       .map((s) => [s.metadata.rule_uuid!, s])
   );
 
-describe('discoveryWriteHandler', () => {
+const writeOne = async ({
+  discoveryClient,
+  input,
+}: {
+  discoveryClient: Parameters<typeof discoveryWriteBulkHandler>[0]['discoveryClient'];
+  input: DiscoveryWriteInput;
+}) => {
+  const [result] = await discoveryWriteBulkHandler({ discoveryClient, inputs: [input] });
+  if (result === undefined) {
+    throw new Error('Expected one discovery write result');
+  }
+  return result;
+};
+
+describe('discoveryWriteBulkHandler with one item', () => {
   it('writes a new discovery and returns event_id', async () => {
     const discoveryClient = {
       findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    const result = await discoveryWriteHandler({
+    const result = await writeOne({
       discoveryClient: discoveryClient as never,
       input: baseInput,
     });
@@ -89,7 +102,7 @@ describe('discoveryWriteHandler', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    const result = await discoveryWriteHandler({
+    const result = await writeOne({
       discoveryClient: discoveryClient as never,
       input: { ...baseInput, event_id: 'checkout-write-api-connection-refused' },
     });
@@ -105,7 +118,7 @@ describe('discoveryWriteHandler', () => {
 
     const signals = [createSignal('rule-uuid-1')];
 
-    const result = await discoveryWriteHandler({
+    const result = await writeOne({
       discoveryClient: discoveryClient as never,
       input: { ...baseInput, signals },
     });
@@ -128,7 +141,7 @@ describe('discoveryWriteHandler', () => {
       bulkCreate: jest.fn(),
     };
 
-    const result = await discoveryWriteHandler({
+    const result = await writeOne({
       discoveryClient: discoveryClient as never,
       input: { ...baseInput, dedup_window: 'now-1h' },
     });
@@ -136,11 +149,10 @@ describe('discoveryWriteHandler', () => {
     expect(discoveryClient.findLatest).toHaveBeenCalledWith({ from: expect.any(String) });
     expect(discoveryClient.bulkCreate).not.toHaveBeenCalled();
     expect(result.written).toBe(false);
-    if (result.written) {
+    if (result.written || result.reason !== 'duplicate_within_window') {
       throw new Error('Expected the discovery write to be skipped');
     }
     expect(result.skipped).toBe(true);
-    expect(result.reason).toBe('duplicate_within_window');
     expect(result.existing_discovery_id).toBe('existing-disc-id');
   });
 
@@ -160,7 +172,7 @@ describe('discoveryWriteHandler', () => {
       bulkCreate: jest.fn(),
     };
 
-    const result = await discoveryWriteHandler({
+    const result = await writeOne({
       discoveryClient: discoveryClient as never,
       input: { ...baseInput, stream_names: streamNames, dedup_window: 'now-1h' },
     });
@@ -190,7 +202,7 @@ describe('discoveryWriteHandler', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    const result = await discoveryWriteHandler({
+    const result = await writeOne({
       discoveryClient: discoveryClient as never,
       input: { ...baseInput, dedup_window: 'now-1h' },
     });
@@ -214,7 +226,7 @@ describe('discoveryWriteHandler', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    const result = await discoveryWriteHandler({
+    const result = await writeOne({
       discoveryClient: discoveryClient as never,
       input: { ...baseInput, dedup_window: 'now-1h' },
     });
@@ -231,7 +243,7 @@ describe('discoveryWriteHandler', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    const result = await discoveryWriteHandler({
+    const result = await writeOne({
       discoveryClient: discoveryClient as never,
       input: {
         ...baseInput,
@@ -254,7 +266,7 @@ describe('discoveryWriteHandler', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    const result = await discoveryWriteHandler({
+    const result = await writeOne({
       discoveryClient: discoveryClient as never,
       input: {
         ...baseInput,
@@ -278,7 +290,7 @@ describe('discoveryWriteHandler', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    const result = await discoveryWriteHandler({
+    const result = await writeOne({
       discoveryClient: discoveryClient as never,
       input: { ...baseInput, dedup_window: 'now-1h' },
     });
@@ -296,7 +308,7 @@ describe('discoveryWriteHandler', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    const result = await discoveryWriteHandler({
+    const result = await writeOne({
       discoveryClient: discoveryClient as never,
       input: { ...baseInput, event_id: 'checkout-event-id', dedup_window: 'invalid' },
     });
@@ -314,7 +326,7 @@ describe('discoveryWriteHandler', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    await discoveryWriteHandler({
+    await writeOne({
       discoveryClient: discoveryClient as never,
       input: {
         ...baseInput,
@@ -335,7 +347,7 @@ describe('discoveryWriteHandler', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    const result = await discoveryWriteHandler({
+    const result = await writeOne({
       discoveryClient: discoveryClient as never,
       input: baseInput,
     });
@@ -350,7 +362,7 @@ describe('discoveryWriteHandler', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    await discoveryWriteHandler({
+    await writeOne({
       discoveryClient: discoveryClient as never,
       input: baseInput,
     });
@@ -466,7 +478,7 @@ describe('mergeSignalsLatestPerRule', () => {
   });
 });
 
-describe('discoveryWriteHandler — continuation snapshot merge', () => {
+describe('discoveryWriteBulkHandler — continuation snapshot merge', () => {
   it('persists the full episode signal set (prior event_id docs ∪ submitted, latest per rule)', async () => {
     const discoveryClient = {
       findByEventId: jest.fn().mockResolvedValue({
@@ -484,7 +496,7 @@ describe('discoveryWriteHandler — continuation snapshot merge', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    await discoveryWriteHandler({
+    await writeOne({
       discoveryClient: discoveryClient as never,
       input: {
         ...baseInput,
@@ -517,7 +529,7 @@ describe('discoveryWriteHandler — continuation snapshot merge', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    await discoveryWriteHandler({
+    await writeOne({
       discoveryClient: discoveryClient as never,
       input: {
         ...baseInput,
@@ -536,7 +548,7 @@ describe('discoveryWriteHandler — continuation snapshot merge', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    await discoveryWriteHandler({
+    await writeOne({
       discoveryClient: discoveryClient as never,
       input: {
         ...baseInput,
@@ -560,7 +572,7 @@ describe('discoveryWriteHandler — continuation snapshot merge', () => {
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
-    await discoveryWriteHandler({
+    await writeOne({
       discoveryClient: discoveryClient as never,
       input: { ...baseInput, signals: [createSignal('ruleA')] },
     });

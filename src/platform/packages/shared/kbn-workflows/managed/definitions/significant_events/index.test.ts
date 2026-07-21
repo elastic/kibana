@@ -52,10 +52,13 @@ describe('significant events persistence workflow contracts', () => {
       'variables.written_rule_uuids contains'
     );
     expect(requireStep(discovery, 'output_result').with).toMatchObject({
-      processedCount: '${{ steps.compute_confirmed_queue_stats.output.processedCount }}',
-      remainingCount: '${{ steps.compute_confirmed_queue_stats.output.remainingCount }}',
-      hasRemaining: '${{ steps.compute_confirmed_queue_stats.output.hasRemaining }}',
-      queueEmpty: '${{ steps.compute_confirmed_queue_stats.output.queueEmpty }}',
+      processedCount: '${{ steps.compute_confirmed_queue_sizes.output.processedCount }}',
+      remainingCount:
+        '${{ steps.compute_queue_stats.output.candidateCount | minus: steps.compute_confirmed_queue_sizes.output.processedCount | at_least: 0 }}',
+      hasRemaining:
+        '${{ steps.compute_queue_stats.output.candidateCount > steps.compute_confirmed_queue_sizes.output.processedCount }}',
+      queueEmpty:
+        '${{ steps.compute_queue_stats.output.candidateCount <= steps.compute_confirmed_queue_sizes.output.processedCount }}',
     });
   });
 
@@ -76,10 +79,13 @@ describe('significant events persistence workflow contracts', () => {
       '| default: []'
     );
     expect(requireStep(triage, 'output_result').with).toMatchObject({
-      processedCount: '${{ steps.compute_confirmed_queue_stats.output.processedCount }}',
-      remainingCount: '${{ steps.compute_confirmed_queue_stats.output.remainingCount }}',
-      hasRemaining: '${{ steps.compute_confirmed_queue_stats.output.hasRemaining }}',
-      queueEmpty: '${{ steps.compute_confirmed_queue_stats.output.queueEmpty }}',
+      processedCount: '${{ steps.compute_confirmed_queue_sizes.output.processedCount }}',
+      remainingCount:
+        '${{ steps.compute_queue_stats.output.candidateCount | minus: steps.compute_confirmed_queue_sizes.output.processedCount | at_least: 0 }}',
+      hasRemaining:
+        '${{ steps.compute_queue_stats.output.candidateCount > steps.compute_confirmed_queue_sizes.output.processedCount }}',
+      queueEmpty:
+        '${{ steps.compute_queue_stats.output.candidateCount <= steps.compute_confirmed_queue_sizes.output.processedCount }}',
     });
   });
 });

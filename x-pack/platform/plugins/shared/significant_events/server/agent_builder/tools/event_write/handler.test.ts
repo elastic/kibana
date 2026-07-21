@@ -49,7 +49,7 @@ describe('eventsWriteHandler', () => {
     expect(typeof result.event_uuid).toBe('string');
   });
 
-  it('skips dedup lookup when event_id is absent', async () => {
+  it('skips latest-version lookup when event_id is absent', async () => {
     const eventClient = {
       findLatestByEventIds: jest.fn(),
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
@@ -226,6 +226,20 @@ describe('eventsWriteBulkHandler', () => {
     const eventClient = {
       findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
       bulkCreate: jest.fn().mockResolvedValue({ errors: false, items: [] }),
+    };
+
+    await expect(
+      eventsWriteBulkHandler({
+        eventClient: eventClient as never,
+        inputs: [{ ...baseInput, event_id: 'event-1' }],
+      })
+    ).rejects.toMatchObject({ code: 'outcome_unknown' });
+  });
+
+  it('classifies a response without a create result as outcome unknown', async () => {
+    const eventClient = {
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      bulkCreate: jest.fn().mockResolvedValue({ errors: false, items: [{}] }),
     };
 
     await expect(
