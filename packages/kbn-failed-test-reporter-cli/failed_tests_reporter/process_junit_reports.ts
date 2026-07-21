@@ -10,27 +10,20 @@
 import { addMessagesToReport } from './add_messages_to_report';
 import { getFailures } from './get_failures';
 import type { ProcessReportsParams } from './process_reports_types';
-import {
-  createFailureIssue,
-  createSystemicFailureIssue,
-  updateFailureIssue,
-} from './report_failure';
+import { createFailureIssue, updateFailureIssue } from './report_failure';
 import { reportFailuresToEs } from './report_failures_to_es';
 import { reportFailuresToFile } from './report_failures_to_file';
 import { getReportMessageIter } from './report_metadata';
 import { getRootMetadata, readTestReport } from './test_report';
 
-// A single config that would open more than this many unique *new* issues in one report is
-// treated as a systemic/environmental failure (e.g. out of disk space) rather than a set
-// of genuine test regressions. `--bail` used to implicitly cap this by stopping a config
-// at its first failure; removing it (behind FTR_SMART_RETRY_ENABLED) let a broken config
-// open an issue per test. When the cap is exceeded we skip mass new-issue creation while
-// still updating existing tracked issues, indexing to ES, and writing failure files
-// (all real signal). See https://github.com/elastic/kibana/issues/278308.
-const MAX_NEW_ISSUES_PER_REPORT = 1;
-
-const getFailureIssueKey = (failure: { classname: string; name: string }) =>
-  `${failure.classname}\n${failure.name}`;
+// At most one NEW GitHub issue is opened per report. `--bail` used to stop a config at its first
+// failure, so at most one new failure per run reached the reporter; removing it (behind
+// FTR_SMART_RETRY_ENABLED) let a broken config open an issue per test. Multiple distinct new
+// failures in one run usually indicate a systemic/environmental failure (e.g. out of disk space),
+// so we cap new issue creation at one per report. Existing tracked issues are always updated
+// regardless (cheap: just a counter bump and a build link, and they carry real signal). Duplicate
+// classname+name entries (e.g. retry artifacts) are deduplicated and do not consume the slot.
+// See https://github.com/elastic/kibana/issues/278308.
 
 export async function processJUnitReports(
   reportPaths: string[],
@@ -61,43 +54,9 @@ export async function processJUnitReports(
       await reportFailuresToEs(log, failures);
     }
 
-    const seenNewIssueFailures = new Set<string>();
-    const newIssueFailures = failures.filter((failure) => {
-      if (failure.likelyIrrelevant || existingIssues.getForFailure(failure)) {
-        return false;
-      }
-
-      const key = getFailureIssueKey(failure);
-      if (seenNewIssueFailures.has(key)) {
-        return false;
-      }
-
-      seenNewIssueFailures.add(key);
-      return true;
-    });
-    const skipNewIssues = newIssueFailures.length > MAX_NEW_ISSUES_PER_REPORT;
-    let systemicIssueUrl: string | undefined;
-    if (skipNewIssues) {
-      log.warning(
-        `Report would open ${newIssueFailures.length} new issues (cap is ${MAX_NEW_ISSUES_PER_REPORT}), ` +
-          `treating as a systemic failure and skipping new-issue creation for ${reportPath}. ` +
-          `Existing tracked issues are still updated and failures are still indexed and written to file.`
-      );
-
-      const systemicIssue = await createSystemicFailureIssue(
-        buildUrl,
-        newIssueFailures,
-        githubApi,
-        branch,
-        pipeline,
-        MAX_NEW_ISSUES_PER_REPORT,
-        prependTitle
-      );
-      if (updateGithub) {
-        systemicIssueUrl = systemicIssue.html_url;
-        log.info(`Created systemic failure issue: ${systemicIssueUrl}`);
-      }
-    }
+    const seenNewIssueKeys = new Set<string>();
+    let newIssueCreated = false;
+    let skippedNewFailures = 0;
 
     for (const failure of failures) {
       const pushMessage = (msg: string) => {
@@ -115,6 +74,14 @@ export async function processJUnitReports(
         );
         continue;
       }
+
+      // Deduplicate by classname+name: retry artifacts can emit the same test twice in one XML.
+      const key = `${failure.classname}\n${failure.name}`;
+      if (seenNewIssueKeys.has(key)) {
+        failure.failureCount = 0;
+        continue;
+      }
+      seenNewIssueKeys.add(key);
 
       const existingIssue = existingIssues.getForFailure(failure);
       if (existingIssue) {
@@ -137,19 +104,17 @@ export async function processJUnitReports(
         continue;
       }
 
-      if (skipNewIssues) {
+      if (newIssueCreated) {
+        skippedNewFailures += 1;
         pushMessage(
-          `Skipped opening a new issue: this report exceeds the cap of ${MAX_NEW_ISSUES_PER_REPORT} ` +
-            `new issues (${newIssueFailures.length} new failures), likely a systemic failure` +
-            (systemicIssueUrl ? `. Tracked under systemic failure issue: ${systemicIssueUrl}` : '')
+          'Skipped opening a new issue: only the first new failure in a report opens a GitHub ' +
+            'issue, multiple new failures in one run usually indicate a systemic failure'
         );
-        if (systemicIssueUrl) {
-          failure.githubIssue = systemicIssueUrl;
-        }
         failure.failureCount = 0;
         continue;
       }
 
+      newIssueCreated = true;
       const newIssue = await createFailureIssue(
         buildUrl,
         failure,
@@ -165,6 +130,15 @@ export async function processJUnitReports(
         failure.githubIssue = newIssue.html_url;
       }
       failure.failureCount = updateGithub ? 1 : 0;
+    }
+
+    if (skippedNewFailures > 0) {
+      log.warning(
+        `Opened one new issue for the first new failure and skipped ${skippedNewFailures} ` +
+          `additional new failure(s) for ${reportPath}, likely a systemic failure. Existing ` +
+          `tracked issues were updated normally. All failures are still indexed to ES and ` +
+          `written to the failure report.`
+      );
     }
 
     // mutates report to include messages and writes updated report to disk

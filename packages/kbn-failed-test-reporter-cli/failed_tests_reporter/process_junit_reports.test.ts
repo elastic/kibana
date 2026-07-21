@@ -19,7 +19,6 @@ jest.mock('./get_failures', () => ({ getFailures: jest.fn() }));
 jest.mock('./report_metadata', () => ({ getReportMessageIter: jest.fn() }));
 jest.mock('./report_failure', () => ({
   createFailureIssue: jest.fn(),
-  createSystemicFailureIssue: jest.fn(),
   updateFailureIssue: jest.fn(),
 }));
 jest.mock('./report_failures_to_es', () => ({ reportFailuresToEs: jest.fn() }));
@@ -29,8 +28,7 @@ jest.mock('./add_messages_to_report', () => ({ addMessagesToReport: jest.fn() })
 const { readTestReport, getRootMetadata } = jest.requireMock('./test_report');
 const { getFailures } = jest.requireMock('./get_failures');
 const { getReportMessageIter } = jest.requireMock('./report_metadata');
-const { createFailureIssue, createSystemicFailureIssue, updateFailureIssue } =
-  jest.requireMock('./report_failure');
+const { createFailureIssue, updateFailureIssue } = jest.requireMock('./report_failure');
 const { reportFailuresToEs } = jest.requireMock('./report_failures_to_es');
 const { reportFailuresToFile } = jest.requireMock('./report_failures_to_file');
 
@@ -90,67 +88,80 @@ beforeEach(() => {
   getRootMetadata.mockReturnValue({});
   getReportMessageIter.mockReturnValue([]);
   createFailureIssue.mockResolvedValue({ html_url: 'https://github.com/issues/1' });
-  createSystemicFailureIssue.mockResolvedValue({ html_url: 'https://github.com/issues/999' });
   updateFailureIssue.mockResolvedValue({ newBody: 'body', newCount: 2 });
 });
 
-describe('processJUnitReports new-issue cap', () => {
-  it('creates one new issue when the report has a single unique new failure', async () => {
-    const failures = [makeFailure(0)];
-    getFailures.mockReturnValue(failures);
+describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
+  it('reports the single failure to GitHub as a new issue', async () => {
+    getFailures.mockReturnValue([makeFailure(0)]);
     const { params } = createParams();
 
     await processJUnitReports(['report.xml'], params);
 
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
-    expect(createSystemicFailureIssue).not.toHaveBeenCalled();
+    expect(updateFailureIssue).not.toHaveBeenCalled();
   });
 
-  it('skips new-issue creation and opens one systemic issue when more than one unique new failure would open an issue', async () => {
+  it('reports only the first failure and skips the rest when a report has multiple failures', async () => {
     const failures = [makeFailure(0), makeFailure(1)];
     getFailures.mockReturnValue(failures);
     const { params } = createParams();
 
     await processJUnitReports(['report.xml'], params);
 
-    expect(createFailureIssue).not.toHaveBeenCalled();
-    // A single umbrella issue is opened for the systemic failure.
-    expect(createSystemicFailureIssue).toHaveBeenCalledTimes(1);
-    // ES indexing and file reporting still run — that's real signal we keep.
+    // Only the first failure opens an issue, emulating `--bail`.
+    expect(createFailureIssue).toHaveBeenCalledTimes(1);
+    // ES indexing and file reporting still run over every failure — that's real signal we keep.
     expect(reportFailuresToEs).toHaveBeenCalledTimes(1);
+    expect(reportFailuresToEs.mock.calls[0][1]).toHaveLength(2);
     expect(reportFailuresToFile).toHaveBeenCalledTimes(1);
+    expect(reportFailuresToFile.mock.calls[0][1]).toHaveLength(2);
   });
 
-  it('still updates existing tracked issues when the cap is exceeded', async () => {
-    const failures = [makeFailure(0), makeFailure(1), makeFailure(2)];
+  it('updates a tracked failure and still creates an issue for the first new failure', async () => {
+    const failures = [makeFailure(0), makeFailure(1)];
     getFailures.mockReturnValue(failures);
 
+    // failure-0 is tracked; failure-1 is the first new failure and should still open an issue.
     const { params } = createParams([createExistingIssue(failures[0])]);
 
     await processJUnitReports(['report.xml'], params);
 
-    // 2 failures without an existing issue > cap of 1, so no new per-test issues are opened.
-    expect(createFailureIssue).not.toHaveBeenCalled();
-    // The one tracked failure is still updated.
     expect(updateFailureIssue).toHaveBeenCalledTimes(1);
+    expect(createFailureIssue).toHaveBeenCalledTimes(1);
   });
 
-  it('does not count failures with an existing issue toward the cap', async () => {
-    const failures = [makeFailure(0), makeFailure(1), makeFailure(2)];
+  it('updates a tracked failure even when a new issue was already created in the same report', async () => {
+    const failures = [makeFailure(0), makeFailure(1)];
     getFailures.mockReturnValue(failures);
 
-    // 2 already tracked -> only 1 new, which is within the cap of 1.
-    const { params } = createParams(failures.slice(0, 2).map(createExistingIssue));
+    // failure-0 is new (creates an issue); failure-1 is tracked and must still be updated.
+    const { params } = createParams([createExistingIssue(failures[1])]);
 
     await processJUnitReports(['report.xml'], params);
 
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
-    expect(updateFailureIssue).toHaveBeenCalledTimes(2);
+    expect(updateFailureIssue).toHaveBeenCalledTimes(1);
   });
 
-  it('does not count likely-irrelevant failures toward the cap', async () => {
+  it('does not count duplicate classname+name entries toward the new-issue cap', async () => {
+    const failures = [
+      makeFailure(0),
+      { ...makeFailure(0), failure: 'another failure entry for the same test' },
+    ];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    // The second entry is a duplicate (same classname+name); it is silently skipped.
+    expect(createFailureIssue).toHaveBeenCalledTimes(1);
+    expect(updateFailureIssue).not.toHaveBeenCalled();
+  });
+
+  it('does not consume the report slot on likely-irrelevant failures', async () => {
     const failures = [makeFailure(0), makeFailure(1)];
-    // Mark 1 as likely irrelevant -> only 1 real new failure, within the cap.
+    // The first failure is irrelevant, so the second failure is the first one reported to GitHub.
     failures[0].likelyIrrelevant = true;
     getFailures.mockReturnValue(failures);
     const { params } = createParams();
@@ -160,20 +171,12 @@ describe('processJUnitReports new-issue cap', () => {
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
   });
 
-  it('counts duplicate failures as one unique new issue', async () => {
-    const failures = [
-      makeFailure(0),
-      {
-        ...makeFailure(0),
-        failure: 'another failure entry for the same test',
-      },
-    ];
-    getFailures.mockReturnValue(failures);
+  it('resets the one-failure budget for each report path', async () => {
+    getFailures.mockReturnValueOnce([makeFailure(0)]).mockReturnValueOnce([makeFailure(1)]);
     const { params } = createParams();
 
-    await processJUnitReports(['report.xml'], params);
+    await processJUnitReports(['report-1.xml', 'report-2.xml'], params);
 
-    expect(createSystemicFailureIssue).not.toHaveBeenCalled();
-    expect(createFailureIssue).toHaveBeenCalledTimes(1);
+    expect(createFailureIssue).toHaveBeenCalledTimes(2);
   });
 });
