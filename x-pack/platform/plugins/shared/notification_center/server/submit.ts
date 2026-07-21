@@ -86,7 +86,7 @@ const writeNotification = async (
  * `state` kinds of notifications require an entity and state.
  * `timeseries` kinds of notifications require an event and epochMs.
  */
-const buildIdAndTimestamp = (
+export const buildIdAndTimestamp = (
   kind: NotificationKind,
   namespace: string,
   type: string,

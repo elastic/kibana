@@ -78,13 +78,15 @@ export const NOTIFICATION_TYPES = Object.fromEntries(
 export const joinNotificationTypeId = (namespace: string, type: string): string =>
   `${namespace}.${type}`;
 
+/** Narrow an arbitrary string to a registered namespace */
+const isNotificationNamespace = (value: string): value is NotificationNamespace =>
+  Object.hasOwn(NOTIFICATION_REGISTRY, value);
+
 /** True when `type` is registered under `namespace`.*/
 export const isRegisteredNotificationRef = (namespace: string, type: string): boolean => {
-  if (!Object.hasOwn(NOTIFICATION_REGISTRY, namespace)) {
+  if (!isNotificationNamespace(namespace)) {
     return false;
   }
-  const { types } = (NOTIFICATION_REGISTRY as Record<string, NotificationNamespaceDefinition>)[
-    namespace
-  ];
+  const { types } = NOTIFICATION_REGISTRY[namespace];
   return Object.hasOwn(types, type);
 };

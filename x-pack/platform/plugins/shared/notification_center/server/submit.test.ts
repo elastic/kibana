@@ -8,7 +8,7 @@
 import type { CoreSetup } from '@kbn/core/server';
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 import { NOTIFICATION_TYPES, SEVERITY } from '../common';
-import { buildForType, NotificationValidationError } from './submit';
+import { buildForType, buildIdAndTimestamp, NotificationValidationError } from './submit';
 import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from './types';
 
 const modelStatus = NOTIFICATION_TYPES.inference.modelStatus;
@@ -123,5 +123,47 @@ describe('buildForType', () => {
     });
 
     await expect(forType(modelStatus).submit(content)).rejects.toThrow('mapping conflict');
+  });
+});
+
+describe('buildIdAndTimestamp', () => {
+  it('builds a state id and carries no event_timestamp', () => {
+    const result = buildIdAndTimestamp('state', 'inference', 'modelStatus', {
+      entity: 'my-endpoint',
+      state: 'deprecated',
+    });
+
+    expect(result.notification_id).toBe('inference:modelStatus:my-endpoint:deprecated');
+    expect(result.event_timestamp).toBeUndefined();
+  });
+
+  it('builds a timeseries id and sets event_timestamp from epochMs', () => {
+    const epochMs = 1750118400000;
+
+    const result = buildIdAndTimestamp('timeseries', 'inference', 'modelStatus', {
+      event: 'memoryLimit',
+      epochMs,
+    });
+
+    expect(result.notification_id).toBe('inference:modelStatus:memoryLimit:1750118400000');
+    expect(result.event_timestamp).toBe(new Date(epochMs).toISOString());
+  });
+
+  it('rejects a timeseries submission missing event/epochMs', () => {
+    expect(() =>
+      buildIdAndTimestamp('timeseries', 'inference', 'modelStatus', {
+        entity: 'my-endpoint',
+        state: 'deprecated',
+      })
+    ).toThrow(NotificationValidationError);
+  });
+
+  it('rejects a state submission missing entity/state', () => {
+    expect(() =>
+      buildIdAndTimestamp('state', 'inference', 'modelStatus', {
+        event: 'memoryLimit',
+        epochMs: 1750118400000,
+      })
+    ).toThrow(NotificationValidationError);
   });
 });
