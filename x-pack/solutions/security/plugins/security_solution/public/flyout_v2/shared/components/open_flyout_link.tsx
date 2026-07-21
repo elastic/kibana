@@ -8,16 +8,18 @@
 import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux-v7';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { flyoutProviders } from './flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
-import { useKibana } from '../../../common/lib/kibana';
+import { useOpenFlyout } from '../hooks/use_open_flyout';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
-import { buildFlyoutContent, buildFlyoutTitleFromField } from '../utils/build_flyout_content';
+import {
+  buildFlyoutContent,
+  getFlyoutTypeForField,
+  buildFlyoutTitleFromField,
+} from '../utils/build_flyout_content';
 import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
+import { useFlyoutSessionContext } from '../../session_context';
+import { FLYOUT_ORIGIN, FLYOUT_SESSION_KIND, FLYOUT_SURFACE } from '../../../common/lib/telemetry';
 
 export interface OpenFlyoutLinkProps {
   /**
@@ -76,14 +78,12 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   children,
   'data-test-subj': dataTestSubj = OPEN_FLYOUT_LINK_TEST_ID,
 }) => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
+  const open = useOpenFlyout();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
+  const { historyKey, session: sessionMode } = useFlyoutSessionContext();
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
+  const flyoutType = useMemo(() => getFlyoutTypeForField(field), [field]);
   const titleValue = displayValue ?? value;
   const flyoutTitle = useMemo(
     () => buildFlyoutTitleFromField(field, titleValue) ?? titleValue,
@@ -92,38 +92,39 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
-      const resolvedSession = asParent ? 'start' : sessionMode;
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <FlyoutSessionContextProvider value={{ session: resolvedSession, historyKey }}>
-              {flyoutContent}
-            </FlyoutSessionContextProvider>
-          ),
-        }),
+      const resolvedSession = asParent ? FLYOUT_SESSION_KIND.START : sessionMode;
+      open(
+        flyoutContent,
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,
           session: resolvedSession,
-          outsideClickCloses: resolvedSession === 'start',
-          title: resolvedSession === 'inherit' ? buildFlyoutNavTitle(flyoutTitle) : flyoutTitle,
-        }
+          outsideClickCloses: resolvedSession === FLYOUT_SESSION_KIND.START,
+          title:
+            resolvedSession === FLYOUT_SESSION_KIND.INHERIT
+              ? buildFlyoutNavTitle(flyoutTitle)
+              : flyoutTitle,
+        },
+        flyoutType
+          ? {
+              surface: FLYOUT_SURFACE.FLYOUT,
+              flyoutType,
+              session: resolvedSession,
+              origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
+            }
+          : undefined,
+        resolvedSession
       );
     }
   }, [
     defaultDocumentFlyoutProperties,
-    history,
+    open,
     flyoutContent,
-    historyKey,
-    overlays,
-    services,
-    sessionMode,
-    store,
+    flyoutType,
     asParent,
+    historyKey,
     flyoutTitle,
+    sessionMode,
   ]);
 
   if (!flyoutContent) {

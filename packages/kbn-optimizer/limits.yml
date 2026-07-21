@@ -10,14 +10,14 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 56591
+  alertingVTwo: 62370
   apm: 53172
   apmShared: 5985
-  apmSourcesAccess: 2278
+  apmSourcesAccess: 2747
   automaticImport: 18629
   banners: 4006
   canvas: 14881
-  cases: 242617
+  cases: 310000
   charts: 40269
   cloud: 11743
   cloudConnect: 9149
@@ -30,15 +30,17 @@ pageLoadAssetSize:
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
+  contextEngine: 5837
   controls: 10300
   core: 606422
   cps: 9209
   crossClusterReplication: 12662
+  customContent: 4765
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8613
   data: 511931
-  dataFederation: 7106
+  dataFederation: 9029
   dataQuality: 11469
   datasetQuality: 49315
   dataUsage: 8743
@@ -170,7 +172,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79863
-  securitySolution: 189500
+  securitySolution: 210408
   securitySolutionEss: 42592
   securitySolutionServerless: 57112
   serverless: 7412
