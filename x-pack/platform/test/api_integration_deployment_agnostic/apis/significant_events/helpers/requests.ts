@@ -281,7 +281,7 @@ export async function getMaintenanceStatus(
   expectStatusCode: number = 200
 ) {
   return apiClient
-    .fetch('GET /internal/significant_events/maintenance/status')
+    .fetch('GET /internal/significant_events/maintenance/_status')
     .expect(expectStatusCode)
     .then((response) => response.body);
 }

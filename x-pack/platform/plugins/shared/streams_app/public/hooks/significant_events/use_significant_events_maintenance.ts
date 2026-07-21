@@ -76,7 +76,7 @@ export const useMaintenanceStatus = () => {
   return useQuery<SignificantEventsMaintenanceStatus, Error>({
     queryKey: MAINTENANCE_STATUS_QUERY_KEY,
     queryFn: ({ signal }: QueryFunctionContext) =>
-      streamsRepositoryClient.fetch('GET /internal/significant_events/maintenance/status', {
+      streamsRepositoryClient.fetch('GET /internal/significant_events/maintenance/_status', {
         signal: signal ?? null,
       }),
     refetchInterval: MAINTENANCE_STATUS_REFETCH_INTERVAL_MS,

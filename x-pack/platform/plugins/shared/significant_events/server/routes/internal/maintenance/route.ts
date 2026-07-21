@@ -73,7 +73,7 @@ const resumeRoute = createServerRoute({
 });
 
 const statusRoute = createServerRoute({
-  endpoint: 'GET /internal/significant_events/maintenance/status',
+  endpoint: 'GET /internal/significant_events/maintenance/_status',
   options: {
     access: 'internal',
     summary: 'Get Significant Events maintenance status',
