@@ -278,6 +278,13 @@ describe('TemplatesMigrationTaskManager', () => {
         name: 'My Template',
         owner: 'cases',
         isLatest: true,
+        fieldDefinitions: [
+          expect.objectContaining({
+            name: 'cf_text',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+          }),
+        ],
       });
 
       // The field/template phase writes those two flags together...
