@@ -26,6 +26,11 @@ export interface CustomFieldType<T extends CaseUICustomField> {
     onSubmit: (customField: T) => void;
     isLoading: boolean;
     canUpdate: boolean;
+    /**
+     * `classic` — pencil + view mode (legacy case view).
+     * `inline` — always-visible input with confirm/cancel (redesign case view).
+     */
+    editVariant?: 'classic' | 'inline';
   }>;
   Create: React.FC<{
     customFieldConfiguration: CasesConfigurationUICustomField;
