@@ -221,7 +221,7 @@ describe('prepareConversation', () => {
 
       // attachment_context should contain the 'were added' block with the attachment metadata
       expect(result.nextInput.attachment_context).toBeDefined();
-      expect(result.nextInput.attachment_context).toContain('<conversation-attachments count="1">');
+      expect(result.nextInput.attachment_context).toContain('<attachments count="1">');
       expect(result.nextInput.attachment_context).toContain('attachment_id="note-1"');
 
       // attachment_types should carry the type description for new types
@@ -551,7 +551,7 @@ describe('prepareConversation', () => {
               { attachment_id: 'a-1', version: 1, operation: 'created', actor: 'user' as const },
             ],
             attachment_context:
-              '<conversation-attachments count="1"><attachment attachment_id="a-1"/></conversation-attachments>',
+              '<attachments count="1"><attachment attachment_id="a-1"/></conversation-attachments>',
           },
         }),
       ];
@@ -566,7 +566,7 @@ describe('prepareConversation', () => {
         { attachment_id: 'a-1', version: 1, operation: 'created', actor: 'user' },
       ]);
       expect(result.previousRounds[0].input.attachment_context).toBe(
-        '<conversation-attachments count="1"><attachment attachment_id="a-1"/></conversation-attachments>'
+        '<attachments count="1"><attachment attachment_id="a-1"/></conversation-attachments>'
       );
     });
 

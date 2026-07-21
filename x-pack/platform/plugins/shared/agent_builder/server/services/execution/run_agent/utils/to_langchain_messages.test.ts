@@ -569,7 +569,7 @@ describe('convertPreviousRounds', () => {
   describe('with attachment_context', () => {
     const sampleContext =
       'The following attachment(s) were added this turn:\n\n' +
-      '<conversation-attachments count="1">' +
+      '<attachments count="1">' +
       '<attachment attachment_id="a-1" type="text" version="1" /></conversation-attachments>';
 
     it('renders attachment_context on the next-input message', async () => {
@@ -624,13 +624,12 @@ describe('convertPreviousRounds', () => {
   });
 
   describe('attachment content ordering and interaction', () => {
-    it('orders message → attachments XML → type instructions → attachment_context within a single message', async () => {
+    it('orders message → attachments XML → attachment_context within a single message → type instructions', async () => {
       const attachment = makeProcessedAttachment('att-1', 'text', { content: 'data' }, 'text data');
       const nextInput = makeRoundInput('user message', [attachment], {
         attachment_types: [{ type: 'text', description: 'Plain text.' }],
         attachment_context:
-          'The following attachment(s) were added this turn:\n\n' +
-          '<conversation-attachments count="1"><attachment attachment_id="att-1" /></conversation-attachments>',
+          '<attachment-context count="1"><attachment attachment_id="att-1" /></attachment-context>',
       });
 
       const result = await convertPreviousRounds({
@@ -640,13 +639,13 @@ describe('convertPreviousRounds', () => {
       const content = result[0].content as string;
       const msgIdx = content.indexOf('user message');
       const attachXmlIdx = content.indexOf('<attachments>');
+      const contextIdx = content.indexOf('<attachment-context');
       const typeIdx = content.indexOf('## ATTACHMENT TYPES');
-      const contextIdx = content.indexOf('added this turn');
 
       expect(msgIdx).toBeGreaterThanOrEqual(0);
       expect(msgIdx).toBeLessThan(attachXmlIdx);
-      expect(attachXmlIdx).toBeLessThan(typeIdx);
-      expect(typeIdx).toBeLessThan(contextIdx);
+      expect(attachXmlIdx).toBeLessThan(contextIdx);
+      expect(contextIdx).toBeLessThan(typeIdx);
     });
 
     it('timestamp prefix stays before type instructions and attachment_context', async () => {

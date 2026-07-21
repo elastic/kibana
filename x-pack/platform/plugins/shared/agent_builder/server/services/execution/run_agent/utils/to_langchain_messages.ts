@@ -188,13 +188,13 @@ const formatRoundInput = ({
 
     content += `\n\n${attachmentsXml}\n`;
   }
+  if (attachment_context) {
+    content += `\n\n${attachment_context}\n`;
+  }
   if (attachment_types && attachment_types.length > 0) {
     const attachmentsInstructions = attachmentTypeInstructions(attachment_types);
 
     content += `\n\n${attachmentsInstructions}\n`;
-  }
-  if (attachment_context) {
-    content += `\n\n${attachment_context}\n`;
   }
 
   if (timestamp && timestamp !== new Date(0).toISOString()) {

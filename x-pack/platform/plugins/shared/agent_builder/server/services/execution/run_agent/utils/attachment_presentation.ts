@@ -51,7 +51,7 @@ export const formatAttachmentsMetadata = (
 
   return generateXmlTree(
     {
-      tagName: 'conversation-attachments',
+      tagName: 'attachments',
       attributes: { count: attachments.length },
       children: [
         {

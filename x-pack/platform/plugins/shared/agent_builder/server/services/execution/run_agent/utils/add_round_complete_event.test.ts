@@ -200,7 +200,7 @@ describe('addRoundCompleteEvent', () => {
       { attachment_id: 'a-1', version: 1, operation: 'created', actor: 'user' },
     ]);
     expect(roundCompleteEvent?.data.round.input.attachment_context).toContain(
-      '<conversation-attachments count="1">'
+      '<attachments count="1">'
     );
     expect(roundCompleteEvent?.data.round.input.attachment_context).toContain(
       'attachment_id="a-1"'
@@ -259,7 +259,7 @@ describe('addRoundCompleteEvent', () => {
       { attachment_id: 'a-1', version: 2, operation: 'updated', actor: 'user' },
     ]);
     expect(roundCompleteEvent?.data.round.input.attachment_context).toContain(
-      '<conversation-attachments count="1">'
+      '<attachments count="1">'
     );
     expect(roundCompleteEvent?.data.round.input.attachment_context).toContain(
       'attachment_id="a-1"'
