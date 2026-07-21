@@ -151,7 +151,7 @@ Ground first: make sure the target index exists and every field you reference is
 
         if (renderer === 'vega') {
           const existingSpec = getExistingVegaSpec(existingData);
-          const { spec, esqlQuery } = await buildVegaConfig({
+          const { spec, title, esqlQuery } = await buildVegaConfig({
             nlQuery,
             index,
             esql,
@@ -165,7 +165,7 @@ Ground first: make sure the target index exists and every field you reference is
           visualizationData = {
             renderer: 'vega',
             query: nlQuery,
-            visualization: { spec },
+            visualization: { spec, ...(title ? { title } : {}) },
             esql: esqlQuery,
           };
         } else {

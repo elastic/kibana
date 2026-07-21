@@ -108,7 +108,7 @@ describe('initUiSettings', () => {
     expect(registeredSettings[ENABLE_NEW_FLYOUT_SETTING]).toEqual(
       expect.objectContaining({
         name: 'Enable new flyout',
-        value: false,
+        value: true,
         type: 'boolean',
         requiresPageReload: true,
       })

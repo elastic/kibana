@@ -11,7 +11,7 @@ import { createMemoryHistory } from 'history';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { Router } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { of } from 'rxjs';
 import type { StartServices } from '../../../types';

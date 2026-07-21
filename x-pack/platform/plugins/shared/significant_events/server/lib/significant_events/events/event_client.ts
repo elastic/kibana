@@ -9,7 +9,7 @@ import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql, type ComposerSortShorthand } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignificantEvent, Severity } from '@kbn/significant-events-schema';
 import {
   type BulkCreateOptions,
   type CommonSearchOptions,
@@ -43,6 +43,7 @@ export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, Sto
 
 export interface EventsFilterOptions {
   status?: SignificantEvent['status'][];
+  severity?: Severity[];
   stream?: string[];
   search?: string;
 }
@@ -130,6 +131,10 @@ export class EventClient {
       ? esql.exp`${esql.col('status')} IN (${options.status.map((s) => esql.str(s))})`
       : undefined;
 
+    const severityWhere = options.severity
+      ? esql.exp`${esql.col('severity')} IN (${options.severity.map((s) => esql.str(s))})`
+      : undefined;
+
     // ComposerQuery is mutable — each chaining call mutates the same object and returns `this`.
     // Build the base query twice via a factory so the data branch and count branch get independent
     // instances; sharing a single reference causes the count pipeline to corrupt the data query.
@@ -143,10 +148,11 @@ export class EventClient {
         from: options.from,
         to: options.to,
       });
-      // stream + search filters run pre-latest; state filter runs post-latest
+      // stream + search filters run pre-latest; status + severity filters run post-latest
       q = withWhere(q, this.buildWhere({ stream: options.stream, search: options.search }));
       q = pickLatestPerGroup(q, FIELD_EVENT_ID);
       q = withWhere(q, statusWhere);
+      q = withWhere(q, severityWhere);
       return q;
     };
 

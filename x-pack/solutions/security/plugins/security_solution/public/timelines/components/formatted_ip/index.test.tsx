@@ -24,8 +24,8 @@ import { createFlyoutApiMock } from '../../../flyout_v2/use_flyout_api.mock';
 jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
 jest.mock('../../../flyout_v2/use_flyout_api');
 
-jest.mock('react-redux', () => {
-  const origin = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const origin = jest.requireActual('react-redux-v7');
   return {
     ...origin,
     useDispatch: jest.fn().mockReturnValue(jest.fn()),
