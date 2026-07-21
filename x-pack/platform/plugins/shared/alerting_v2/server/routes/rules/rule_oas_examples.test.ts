@@ -9,7 +9,6 @@ import { createRuleDataSchema } from '@kbn/alerting-v2-schemas';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import {
-  getInvalidRuleDataMessage,
   getRuleNotFoundMessage,
   getRuleVersionConflictMessage,
 } from '../../lib/errors/rule_error_messages';
@@ -41,8 +40,13 @@ const getValidateResponseDescription = (status: number): string | undefined => {
 };
 
 describe('rule OAS examples', () => {
-  it('includes request, success, and route-error examples for create', () => {
+  it('includes request, success, and core request-validation 400 for create', () => {
     const oas = createRuleOasExamples();
+    const invalidCreateParse = createRuleDataSchema.safeParse({});
+    expect(invalidCreateParse.success).toBe(false);
+    if (invalidCreateParse.success) {
+      throw new Error('expected invalid create parse to fail');
+    }
 
     expect(CreateRuleRoute.options.summary).toBe(CREATE_RULE_SUMMARY);
     expect(oas.requestBody?.content?.['application/json']?.examples?.createRuleRequest).toEqual(
@@ -51,18 +55,14 @@ describe('rule OAS examples', () => {
     expect(
       oas.responses?.[201]?.content?.['application/json']?.examples?.createRuleResponse
     ).toEqual(expect.objectContaining({ summary: CREATE_RULE_SUMMARY }));
-    const invalidCreateParse = createRuleDataSchema.safeParse({});
-    expect(invalidCreateParse.success).toBe(false);
-    if (invalidCreateParse.success) {
-      throw new Error('expected invalid create parse to fail');
-    }
-    expect(oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRuleData).toEqual(
+    expect(oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRequest).toEqual(
       expect.objectContaining({
         summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-        value: expect.objectContaining({
-          code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
-          message: getInvalidRuleDataMessage('create', stringifyZodError(invalidCreateParse.error)),
-        }),
+        value: {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: stringifyZodError(invalidCreateParse.error),
+        },
       })
     );
     expect(getValidateResponseDescription(400)).toBe(INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION);
@@ -130,9 +130,7 @@ describe('rule OAS examples', () => {
     expect(
       oas.responses?.[201]?.content?.['application/json']?.examples?.createRuleResponse
     ).toBeDefined();
-    expect(
-      oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRuleData
-    ).toBeDefined();
+    expect(oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRequest).toBeDefined();
   });
 
   it('includes success examples for rule tags', () => {

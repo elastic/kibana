@@ -17,12 +17,17 @@ import type {
   RuleTagsResponse,
   UpdateRuleBody,
 } from '@kbn/alerting-v2-schemas';
-import { createRuleDataSchema } from '@kbn/alerting-v2-schemas';
+import {
+  bulkGetRulesParamsSchema,
+  bulkOperationParamsSchema,
+  createRuleDataSchema,
+  findRulesParamsSchema,
+  ruleTagsParamsSchema,
+  updateRuleBodySchema,
+} from '@kbn/alerting-v2-schemas';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
-import { treeifyError } from '@kbn/zod/v4';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import {
-  getInvalidRuleDataMessage,
   getRuleNotFoundMessage,
   getRuleVersionConflictMessage,
 } from '../../lib/errors/rule_error_messages';
@@ -36,7 +41,7 @@ import {
   RULES_NOT_FOUND_DESCRIPTION,
 } from '../route_response_descriptions';
 
-type RouteErrorStatus = 400 | 404 | 409;
+type RouteErrorStatus = 404 | 409;
 
 /** Shared with each rule route's `routeOptions.summary`. */
 export const CREATE_RULE_SUMMARY = 'Create a rule';
@@ -132,18 +137,75 @@ const RULE_TAGS_RESPONSE: RuleTagsResponse = {
 
 const SAMPLE_RULE_ID = RULE_RESPONSE.id;
 
-const invalidCreateParse = createRuleDataSchema.safeParse({});
-
-if (invalidCreateParse.success) {
-  throw new Error('expected createRuleDataSchema parse to fail for OAS example');
-}
-
-const INVALID_RULE_DATA_ERROR: ErrorResponse = {
-  code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
-  error: 'Bad Request',
-  message: getInvalidRuleDataMessage('create', stringifyZodError(invalidCreateParse.error)),
-  details: { context: 'create', errors: treeifyError(invalidCreateParse.error) },
+/**
+ * Kibana core request-validation 400 shape. Core rejects malformed params/query/body
+ * via `buildRouteValidationWithZod` before `execute()` / `BaseAlertingRoute.onError`,
+ * so clients see Boom's default `{ statusCode, error, message }` — not `errorResponseSchema`.
+ */
+type CoreRequestValidationError = {
+  statusCode: 400;
+  error: string;
+  message: string;
 };
+
+const coreRequestValidationExample = (
+  name: string,
+  message: string
+): { name: string; summary: string; value: CoreRequestValidationError } => ({
+  name,
+  summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  value: {
+    statusCode: 400,
+    error: 'Bad Request',
+    message,
+  },
+});
+
+const requireZodFailure = <TError>(
+  result: { success: true } | { success: false; error: TError },
+  label: string
+): TError => {
+  if (result.success) {
+    throw new Error(`expected ${label} parse to fail for OAS example`);
+  }
+  return result.error;
+};
+
+const INVALID_CREATE_REQUEST_EXAMPLE = coreRequestValidationExample(
+  'invalidRequest',
+  stringifyZodError(requireZodFailure(createRuleDataSchema.safeParse({}), 'createRuleDataSchema'))
+);
+
+const INVALID_UPDATE_REQUEST_EXAMPLE = coreRequestValidationExample(
+  'invalidRequest',
+  stringifyZodError(
+    requireZodFailure(updateRuleBodySchema.safeParse({ unknownField: 'x' }), 'updateRuleBodySchema')
+  )
+);
+
+const INVALID_LIST_QUERY_EXAMPLE = coreRequestValidationExample(
+  'invalidRequest',
+  stringifyZodError(requireZodFailure(findRulesParamsSchema.safeParse({ page: 0 }), 'findRulesParamsSchema'))
+);
+
+const INVALID_RULE_TAGS_QUERY_EXAMPLE = coreRequestValidationExample(
+  'invalidRequest',
+  stringifyZodError(
+    requireZodFailure(ruleTagsParamsSchema.safeParse({ filter: 1 }), 'ruleTagsParamsSchema')
+  )
+);
+
+const INVALID_BULK_GET_REQUEST_EXAMPLE = coreRequestValidationExample(
+  'invalidRequest',
+  stringifyZodError(requireZodFailure(bulkGetRulesParamsSchema.safeParse({}), 'bulkGetRulesParamsSchema'))
+);
+
+const INVALID_BULK_OPERATION_REQUEST_EXAMPLE = coreRequestValidationExample(
+  'invalidRequest',
+  stringifyZodError(
+    requireZodFailure(bulkOperationParamsSchema.safeParse({}), 'bulkOperationParamsSchema')
+  )
+);
 
 const RULE_NOT_FOUND_ERROR: ErrorResponse = {
   code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
@@ -160,11 +222,6 @@ const RULE_VERSION_CONFLICT_ERROR: ErrorResponse = {
 };
 
 const ERROR_EXAMPLES: Record<RouteErrorStatus, ReturnType<typeof jsonExample<ErrorResponse>>> = {
-  400: jsonExample(
-    'invalidRuleData',
-    INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-    INVALID_RULE_DATA_ERROR
-  ),
   404: jsonExample('ruleNotFound', RULE_NOT_FOUND_DESCRIPTION, RULE_NOT_FOUND_ERROR),
   409: jsonExample(
     'ruleVersionConflict',
@@ -240,8 +297,8 @@ export const createRuleOasExamples = (): AlertingV2OasOperationObject =>
     },
     responses: {
       201: ruleResponse('createRuleResponse', CREATE_RULE_SUMMARY),
+      400: INVALID_CREATE_REQUEST_EXAMPLE,
     },
-    errors: [400],
   });
 
 export const upsertRuleOasExamples = (): AlertingV2OasOperationObject =>
@@ -254,9 +311,10 @@ export const upsertRuleOasExamples = (): AlertingV2OasOperationObject =>
     responses: {
       200: ruleResponse('upsertRuleReplacedResponse', UPSERT_RULE_SUMMARY),
       201: ruleResponse('upsertRuleCreatedResponse', UPSERT_RULE_SUMMARY),
+      400: INVALID_CREATE_REQUEST_EXAMPLE,
       409: RULE_UPSERT_CONFLICT_EXAMPLE,
     },
-    errors: [400, 404],
+    errors: [404],
   });
 
 export const updateRuleOasExamples = (): AlertingV2OasOperationObject =>
@@ -274,8 +332,9 @@ export const updateRuleOasExamples = (): AlertingV2OasOperationObject =>
           description: UPDATE_REQUEST.metadata!.description,
         },
       }),
+      400: INVALID_UPDATE_REQUEST_EXAMPLE,
     },
-    errors: [400, 404, 409],
+    errors: [404, 409],
   });
 
 export const getRuleOasExamples = (): AlertingV2OasOperationObject =>
@@ -294,8 +353,8 @@ export const listRulesOasExamples = (): AlertingV2OasOperationObject =>
         summary: LIST_RULES_SUMMARY,
         value: LIST_RESPONSE,
       },
+      400: INVALID_LIST_QUERY_EXAMPLE,
     },
-    errors: [400],
   });
 
 export const deleteRuleOasExamples = (): AlertingV2OasOperationObject =>
@@ -316,9 +375,9 @@ export const bulkGetRulesOasExamples = (): AlertingV2OasOperationObject =>
         summary: BULK_GET_RULES_SUMMARY,
         value: BULK_GET_RESPONSE,
       },
+      400: INVALID_BULK_GET_REQUEST_EXAMPLE,
       404: RULES_NOT_FOUND_EXAMPLE,
     },
-    errors: [400],
   });
 
 export const ruleTagsOasExamples = (): AlertingV2OasOperationObject =>
@@ -329,8 +388,8 @@ export const ruleTagsOasExamples = (): AlertingV2OasOperationObject =>
         summary: GET_RULE_TAGS_SUMMARY,
         value: RULE_TAGS_RESPONSE,
       },
+      400: INVALID_RULE_TAGS_QUERY_EXAMPLE,
     },
-    errors: [400],
   });
 
 export const bulkDeleteRulesOasExamples = (): AlertingV2OasOperationObject =>
@@ -346,8 +405,8 @@ export const bulkDeleteRulesOasExamples = (): AlertingV2OasOperationObject =>
         summary: BULK_DELETE_RULES_SUMMARY,
         value: BULK_OPERATION_RESPONSE,
       },
+      400: INVALID_BULK_OPERATION_REQUEST_EXAMPLE,
     },
-    errors: [400],
   });
 
 export const bulkEnableRulesOasExamples = (): AlertingV2OasOperationObject =>
@@ -363,8 +422,8 @@ export const bulkEnableRulesOasExamples = (): AlertingV2OasOperationObject =>
         summary: BULK_ENABLE_RULES_SUMMARY,
         value: BULK_OPERATION_RESPONSE,
       },
+      400: INVALID_BULK_OPERATION_REQUEST_EXAMPLE,
     },
-    errors: [400],
   });
 
 export const bulkDisableRulesOasExamples = (): AlertingV2OasOperationObject =>
@@ -383,6 +442,6 @@ export const bulkDisableRulesOasExamples = (): AlertingV2OasOperationObject =>
           rules: [{ ...RULE_RESPONSE, enabled: false }],
         },
       },
+      400: INVALID_BULK_OPERATION_REQUEST_EXAMPLE,
     },
-    errors: [400],
   });
