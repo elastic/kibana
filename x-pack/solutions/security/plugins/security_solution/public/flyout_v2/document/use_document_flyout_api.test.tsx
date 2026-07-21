@@ -13,6 +13,14 @@ import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+  FLYOUT_TOOL,
+  FLYOUT_SESSION_KIND,
+} from '../../common/lib/telemetry';
 
 jest.mock('react-redux-v7', () => ({
   ...jest.requireActual('react-redux-v7'),
@@ -34,13 +42,18 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
 }));
 
 const mockOpenSystemFlyout = jest.fn();
+const mockReportEvent = jest.fn();
 const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTableRecord;
 
 describe('useDocumentFlyoutApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     (useKibana as jest.Mock).mockReturnValue({
-      services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } },
+      services: {
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        telemetry: { reportEvent: mockReportEvent },
+      },
     });
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
   });
@@ -56,6 +69,13 @@ describe('useDocumentFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 's', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: undefined,
+    });
   });
 
   it('openDocumentFlyoutFromIndexAsChild opens a system flyout that inherits the current session', () => {
@@ -71,6 +91,13 @@ describe('useDocumentFlyoutApi', () => {
         historyKey: documentFlyoutHistoryKey,
       })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.INHERIT,
+      origin: undefined,
+    });
   });
 
   it('openDocumentFlyoutFromPattern opens a system flyout with the document properties', () => {
@@ -83,6 +110,43 @@ describe('useDocumentFlyoutApi', () => {
     );
   });
 
+  it.each([
+    ['openDocumentFlyoutFromIndex', 'start'],
+    ['openDocumentFlyoutFromIndexAsChild', 'inherit'],
+  ] as const)('%s forwards the given origin', (method, session) => {
+    const { result } = renderHook(() => useDocumentFlyoutApi());
+    result.current[method]({
+      documentId: '1',
+      indexName: 'index',
+      origin: FLYOUT_ORIGIN.ALERTS_TABLE,
+    });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      tool: undefined,
+      session,
+      origin: FLYOUT_ORIGIN.ALERTS_TABLE,
+    });
+  });
+
+  it('openDocumentFlyoutFromPattern forwards the given origin', () => {
+    const { result } = renderHook(() => useDocumentFlyoutApi());
+    result.current.openDocumentFlyoutFromPattern({
+      documentId: '1',
+      indexName: 'logs-*,alerts-*',
+      origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
+    });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
+    });
+  });
+
   it('openAnalyzer opens a tools flyout as a new session', () => {
     const { result } = renderHook(() => useDocumentFlyoutApi());
     result.current.openAnalyzer({ hit });
@@ -91,6 +155,13 @@ describe('useDocumentFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 'm', session: 'start' })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.TOOL,
+      tool: FLYOUT_TOOL.ANALYZER,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: undefined,
+    });
   });
 
   it('openSessionView opens a tools flyout as a new session', () => {
@@ -159,11 +230,16 @@ describe('useDocumentFlyoutApi', () => {
   });
 
   it.each([
-    ['openDocumentResponse', () => ({ hit })],
-    ['openDocumentThreatIntelligence', () => ({ hit })],
-    ['openDocumentInvestigationGuide', () => ({ hit })],
-    ['openDocumentGraph', () => ({ hit })],
-  ] as const)('%s opens a tools flyout as a new session', (method, buildParams) => {
+    ['openDocumentResponse', 'response', () => ({ hit })],
+    ['openDocumentThreatIntelligence', 'threat_intelligence', () => ({ hit })],
+    ['openDocumentInvestigationGuide', 'investigation_guide', () => ({ hit })],
+    ['openDocumentGraph', 'graph', () => ({ hit })],
+    [
+      'openDocumentPrevalence',
+      'prevalence',
+      () => ({ hit, investigationFields: [], scopeId: '', columns: [] }),
+    ],
+  ] as const)('%s opens a tools flyout as a new session', (method, tool, buildParams) => {
     const { result } = renderHook(() => useDocumentFlyoutApi());
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (result.current[method] as (params: any) => void)(buildParams());
@@ -171,6 +247,51 @@ describe('useDocumentFlyoutApi', () => {
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 'm', session: 'start' })
+    );
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      FlyoutV2EventTypes.FlyoutOpened,
+      expect.objectContaining({ tool, origin: undefined })
+    );
+  });
+
+  it.each([
+    ['openAnalyzer', 'analyzer', 'visualizations_analyzer', () => ({ hit })],
+    ['openSessionView', 'session_view', 'visualizations_session_view', () => ({ hit })],
+    ['openDocumentEntities', 'entities', 'insights_entities', () => ({ hit })],
+    [
+      'openDocumentCorrelations',
+      'correlations',
+      'insights_correlations',
+      () => ({ hit, scopeId: '', isRulePreview: false, onShowAlert: jest.fn() }),
+    ],
+    ['openDocumentResponse', 'response', 'response_section', () => ({ hit })],
+    [
+      'openDocumentThreatIntelligence',
+      'threat_intelligence',
+      'insights_threat_intel',
+      () => ({ hit }),
+    ],
+    [
+      'openDocumentInvestigationGuide',
+      'investigation_guide',
+      'investigation_guide',
+      () => ({ hit }),
+    ],
+    ['openDocumentGraph', 'graph', 'visualizations_graph', () => ({ hit })],
+    [
+      'openDocumentPrevalence',
+      'prevalence',
+      'insights_prevalence',
+      () => ({ hit, investigationFields: [], scopeId: '', columns: [] }),
+    ],
+  ] as const)('%s forwards the given origin', (method, tool, origin, buildParams) => {
+    const { result } = renderHook(() => useDocumentFlyoutApi());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (result.current[method] as (params: any) => void)({ ...buildParams(), origin });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      FlyoutV2EventTypes.FlyoutOpened,
+      expect.objectContaining({ tool, origin })
     );
   });
 

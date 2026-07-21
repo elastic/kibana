@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-export {
-  createClient,
-  type UserPromptClient,
-  type UserPrompt,
-  type UserPromptCreateParams,
-  type UserPromptUpdateParams,
-  type FindUserPromptsParams,
-  type FindUserPromptsResult,
-} from './client';
+export { customContentEmbeddableFactory } from './custom_content_embeddable';
