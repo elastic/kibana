@@ -20,7 +20,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { listRulesOasExamples } from './rule_oas_examples';
+import { LIST_RULES_SUMMARY, listRulesOasExamples } from './rule_oas_examples';
 
 @injectable()
 export class GetRulesRoute extends BaseAlertingRoute {
@@ -32,7 +32,7 @@ export class GetRulesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'List rules',
+    summary: LIST_RULES_SUMMARY,
     oasOperationObject: listRulesOasExamples,
   } as const;
   static schemas = {

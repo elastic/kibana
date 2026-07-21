@@ -13,6 +13,7 @@ import {
 } from '../../lib/errors/rule_error_messages';
 import { CreateRuleRoute } from './create_rule_route';
 import {
+  CREATE_RULE_SUMMARY,
   createRuleOasExamples,
   getRuleOasExamples,
   ruleTagsOasExamples,
@@ -23,12 +24,13 @@ describe('rule OAS examples', () => {
   it('includes request, success, and route-error examples for create', () => {
     const oas = createRuleOasExamples();
 
-    expect(
-      oas.requestBody?.content?.['application/json']?.examples?.createRuleRequest
-    ).toBeDefined();
+    expect(CreateRuleRoute.options.summary).toBe(CREATE_RULE_SUMMARY);
+    expect(oas.requestBody?.content?.['application/json']?.examples?.createRuleRequest).toEqual(
+      expect.objectContaining({ summary: CREATE_RULE_SUMMARY })
+    );
     expect(
       oas.responses?.[201]?.content?.['application/json']?.examples?.createRuleResponse
-    ).toBeDefined();
+    ).toEqual(expect.objectContaining({ summary: CREATE_RULE_SUMMARY }));
     expect(oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRuleData).toEqual(
       expect.objectContaining({
         value: expect.objectContaining({

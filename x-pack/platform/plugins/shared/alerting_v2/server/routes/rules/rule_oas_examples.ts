@@ -33,6 +33,19 @@ type OASOperationObject = Exclude<
 
 type RouteErrorStatus = 400 | 404 | 409;
 
+/** Shared with each rule route's `routeOptions.summary`. */
+export const CREATE_RULE_SUMMARY = 'Create a rule';
+export const UPSERT_RULE_SUMMARY = 'Create or replace a rule';
+export const UPDATE_RULE_SUMMARY = 'Update a rule';
+export const GET_RULE_SUMMARY = 'Get a rule';
+export const LIST_RULES_SUMMARY = 'List rules';
+export const DELETE_RULE_SUMMARY = 'Delete a rule';
+export const BULK_GET_RULES_SUMMARY = 'Get rules in bulk';
+export const GET_RULE_TAGS_SUMMARY = 'Get rule tags';
+export const BULK_DELETE_RULES_SUMMARY = 'Delete rules in bulk';
+export const BULK_ENABLE_RULES_SUMMARY = 'Enable rules in bulk';
+export const BULK_DISABLE_RULES_SUMMARY = 'Disable rules in bulk';
+
 const CREATE_REQUEST: CreateRuleDataInput = {
   kind: 'alert',
   metadata: {
@@ -188,11 +201,11 @@ export const createRuleOasExamples = (): OASOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'createRuleRequest',
-      summary: 'Create a rule',
+      summary: CREATE_RULE_SUMMARY,
       value: CREATE_REQUEST,
     },
     responses: {
-      201: ruleResponse('createRuleResponse', 'Created rule'),
+      201: ruleResponse('createRuleResponse', CREATE_RULE_SUMMARY),
     },
     errors: [400],
   });
@@ -201,12 +214,12 @@ export const upsertRuleOasExamples = (): OASOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'upsertRuleRequest',
-      summary: 'Create or replace a rule',
+      summary: UPSERT_RULE_SUMMARY,
       value: CREATE_REQUEST,
     },
     responses: {
-      200: ruleResponse('upsertRuleReplacedResponse', 'Replaced rule'),
-      201: ruleResponse('upsertRuleCreatedResponse', 'Created rule'),
+      200: ruleResponse('upsertRuleReplacedResponse', UPSERT_RULE_SUMMARY),
+      201: ruleResponse('upsertRuleCreatedResponse', UPSERT_RULE_SUMMARY),
     },
     errors: [400, 404, 409],
   });
@@ -215,11 +228,11 @@ export const updateRuleOasExamples = (): OASOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'updateRuleRequest',
-      summary: 'Partially update a rule',
+      summary: UPDATE_RULE_SUMMARY,
       value: UPDATE_REQUEST,
     },
     responses: {
-      200: ruleResponse('updateRuleResponse', 'Updated rule', {
+      200: ruleResponse('updateRuleResponse', UPDATE_RULE_SUMMARY, {
         metadata: {
           ...RULE_RESPONSE.metadata,
           name: UPDATE_REQUEST.metadata!.name!,
@@ -233,7 +246,7 @@ export const updateRuleOasExamples = (): OASOperationObject =>
 export const getRuleOasExamples = (): OASOperationObject =>
   buildRuleOas({
     responses: {
-      200: ruleResponse('getRuleResponse', 'Requested rule'),
+      200: ruleResponse('getRuleResponse', GET_RULE_SUMMARY),
     },
     errors: [404],
   });
@@ -243,7 +256,7 @@ export const listRulesOasExamples = (): OASOperationObject =>
     responses: {
       200: {
         name: 'listRulesResponse',
-        summary: 'Paginated rules',
+        summary: LIST_RULES_SUMMARY,
         value: LIST_RESPONSE,
       },
     },
@@ -259,13 +272,13 @@ export const bulkGetRulesOasExamples = (): OASOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'bulkGetRulesRequest',
-      summary: 'Retrieve rules by id',
+      summary: BULK_GET_RULES_SUMMARY,
       value: BULK_GET_REQUEST,
     },
     responses: {
       200: {
         name: 'bulkGetRulesResponse',
-        summary: 'Requested rules',
+        summary: BULK_GET_RULES_SUMMARY,
         value: BULK_GET_RESPONSE,
       },
     },
@@ -277,7 +290,7 @@ export const ruleTagsOasExamples = (): OASOperationObject =>
     responses: {
       200: {
         name: 'ruleTagsResponse',
-        summary: 'Unique rule tags',
+        summary: GET_RULE_TAGS_SUMMARY,
         value: RULE_TAGS_RESPONSE,
       },
     },
@@ -288,13 +301,13 @@ export const bulkDeleteRulesOasExamples = (): OASOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'bulkDeleteRulesRequest',
-      summary: 'Delete rules by id',
+      summary: BULK_DELETE_RULES_SUMMARY,
       value: BULK_OPERATION_REQUEST,
     },
     responses: {
       200: {
         name: 'bulkDeleteRulesResponse',
-        summary: 'Bulk delete result',
+        summary: BULK_DELETE_RULES_SUMMARY,
         value: BULK_OPERATION_RESPONSE,
       },
     },
@@ -305,13 +318,13 @@ export const bulkEnableRulesOasExamples = (): OASOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'bulkEnableRulesRequest',
-      summary: 'Enable rules by id',
+      summary: BULK_ENABLE_RULES_SUMMARY,
       value: BULK_OPERATION_REQUEST,
     },
     responses: {
       200: {
         name: 'bulkEnableRulesResponse',
-        summary: 'Bulk enable result',
+        summary: BULK_ENABLE_RULES_SUMMARY,
         value: BULK_OPERATION_RESPONSE,
       },
     },
@@ -322,13 +335,13 @@ export const bulkDisableRulesOasExamples = (): OASOperationObject =>
   buildRuleOas({
     requestBody: {
       name: 'bulkDisableRulesRequest',
-      summary: 'Disable rules by id',
+      summary: BULK_DISABLE_RULES_SUMMARY,
       value: BULK_OPERATION_REQUEST,
     },
     responses: {
       200: {
         name: 'bulkDisableRulesResponse',
-        summary: 'Bulk disable result',
+        summary: BULK_DISABLE_RULES_SUMMARY,
         value: {
           ...BULK_OPERATION_RESPONSE,
           rules: [{ ...RULE_RESPONSE, enabled: false }],

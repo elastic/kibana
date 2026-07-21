@@ -20,7 +20,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { bulkDisableRulesOasExamples } from './rule_oas_examples';
+import { BULK_DISABLE_RULES_SUMMARY, bulkDisableRulesOasExamples } from './rule_oas_examples';
 
 @injectable()
 export class BulkDisableRulesRoute extends BaseAlertingRoute {
@@ -32,7 +32,7 @@ export class BulkDisableRulesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'Disable rules in bulk',
+    summary: BULK_DISABLE_RULES_SUMMARY,
     oasOperationObject: bulkDisableRulesOasExamples,
   } as const;
   static schemas = {

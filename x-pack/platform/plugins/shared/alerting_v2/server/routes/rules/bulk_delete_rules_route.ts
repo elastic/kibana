@@ -20,7 +20,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { bulkDeleteRulesOasExamples } from './rule_oas_examples';
+import { BULK_DELETE_RULES_SUMMARY, bulkDeleteRulesOasExamples } from './rule_oas_examples';
 
 @injectable()
 export class BulkDeleteRulesRoute extends BaseAlertingRoute {
@@ -32,7 +32,7 @@ export class BulkDeleteRulesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'Delete rules in bulk',
+    summary: BULK_DELETE_RULES_SUMMARY,
     oasOperationObject: bulkDeleteRulesOasExamples,
   } as const;
   static schemas = {
