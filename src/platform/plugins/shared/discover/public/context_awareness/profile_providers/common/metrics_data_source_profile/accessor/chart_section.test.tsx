@@ -46,7 +46,7 @@ type UnifiedGridProps = ChartSectionProps & {
   };
   gridSettings?: MetricsGridSettings;
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
-  recentlyExploredMetrics?: readonly string[];
+  getRecentlyExploredMetrics?: () => readonly string[];
   onMetricExplored?: (metricUniqueKey: string) => void;
 };
 
@@ -271,11 +271,11 @@ describe('MetricsExperienceGridWrapper', () => {
   });
 
   it('surfaces the persisted recently explored snapshot and records new interactions', () => {
-    mockStorage.get.mockReturnValueOnce(['metrics-*::cpu']);
+    mockStorage.get.mockReturnValue(['metrics-*::cpu']);
 
     renderChartSection();
 
-    expect(unifiedGridProps?.recentlyExploredMetrics).toEqual(['metrics-*::cpu']);
+    expect(unifiedGridProps?.getRecentlyExploredMetrics?.()).toEqual(['metrics-*::cpu']);
 
     act(() => {
       unifiedGridProps?.onMetricExplored?.('metrics-*::memory');

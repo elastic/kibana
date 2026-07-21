@@ -58,4 +58,16 @@ describe('RecentMetricsStorage', () => {
     expect(new RecentMetricsStorage('/s/one', storage).get()).toEqual(['a']);
     expect(new RecentMetricsStorage('/s/two', storage).get()).toEqual(['b']);
   });
+
+  it('does not lose entries when two tabs share the same storage', () => {
+    const storage = createFakeStorage();
+    const tabA = new RecentMetricsStorage(BASE_PATH, storage);
+    const tabB = new RecentMetricsStorage(BASE_PATH, storage);
+
+    tabA.add('a');
+    expect(tabB.get()).toEqual(['a']);
+
+    tabB.add('b');
+    expect(tabA.get()).toEqual(['b', 'a']);
+  });
 });

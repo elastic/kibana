@@ -52,13 +52,6 @@ spaceTest.describe(
       expect(recentlyExploredMetric).not.toBeNull();
 
       await metricsExperience.recordInteraction(1);
-
-      // Recency is read as a mount-time snapshot, so re-open Discover (fresh mount)
-      // to pick up the recorded interaction before sorting by it.
-      await pageObjects.discover.goto({ queryMode: 'esql' });
-      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
-      await expect(metricsExperience.grid).toBeVisible();
-
       await metricsExperience.selectSortBy('recency');
 
       // The interacted metric moves to the front.
