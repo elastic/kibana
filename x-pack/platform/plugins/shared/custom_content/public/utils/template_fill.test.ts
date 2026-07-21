@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-// DOMPurify requires a real DOM — pass-through in Jest (security is tested in the browser)
-jest.mock('dompurify', () => ({
-  __esModule: true,
-  default: { sanitize: (html: string) => html },
-}));
-
-import { stripMarkdownFences, containsScript, injectCsp } from './template_fill';
+import { stripMarkdownFences, containsScript, injectCsp, sanitizeHtml } from './template_fill';
 
 describe('injectCsp', () => {
   it('injects CSP into an existing <head>', () => {
@@ -62,5 +56,28 @@ describe('containsScript', () => {
 
   it('returns false for markup with no script tag', () => {
     expect(containsScript('<div class="script-like">no actual script here</div>')).toBe(false);
+  });
+});
+
+describe('sanitizeHtml', () => {
+  it('strips inline event handlers', () => {
+    const result = sanitizeHtml('<img src="x" onerror="alert(1)">');
+    expect(result).not.toContain('onerror');
+  });
+
+  it('removes <a> tags (FORBID_TAGS config)', () => {
+    const result = sanitizeHtml('<p>hello</p><a href="https://example.com">click</a>');
+    expect(result).not.toContain('<a');
+    expect(result).toContain('hello');
+  });
+
+  it('strips javascript: hrefs', () => {
+    const result = sanitizeHtml('<a href="javascript:alert(1)">xss</a>');
+    expect(result).not.toContain('javascript:');
+  });
+
+  it('leaves safe HTML unchanged', () => {
+    const safe = '<div class="card"><p>hello</p></div>';
+    expect(sanitizeHtml(safe)).toContain('hello');
   });
 });
