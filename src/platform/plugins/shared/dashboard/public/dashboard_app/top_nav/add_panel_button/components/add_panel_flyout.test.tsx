@@ -193,17 +193,17 @@ describe('AddPanelFlyout', () => {
       });
     });
 
-    test('renders highlighted featured items as an AiButton', async () => {
+    test('renders AiButton featured items with AiButton styling', async () => {
       mockUseFeaturedItems.mockReturnValue({
         featuredItems: [
           {
             icon: 'productAgent',
-            id: 'highlightedAction',
+            id: 'aiButtonAction',
             name: 'Create with chat',
-            'data-test-subj': 'highlightedItem',
+            'data-test-subj': 'aiButtonItem',
             onClick: onClickMock,
             order: 100,
-            isHighlighted: true,
+            isAiButton: true,
           },
         ],
         loading: false,
@@ -214,7 +214,7 @@ describe('AddPanelFlyout', () => {
       });
 
       await waitFor(async () => {
-        const button = screen.getByTestId('highlightedItem');
+        const button = screen.getByTestId('aiButtonItem');
         expect(button.tagName).toBe('BUTTON');
         expect(button).toHaveTextContent('Create with chat');
         await userEvent.click(button);

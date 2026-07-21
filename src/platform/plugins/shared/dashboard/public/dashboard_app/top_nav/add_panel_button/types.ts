@@ -12,9 +12,9 @@ import type { IconType, CommonProps } from '@elastic/eui';
 
 export interface AddPanelActionExtension {
   /**
-   * When true, the add-panel flyout renders this featured item as an AiButton.
+   * When true, the add-panel flyout renders this featured item with AiButton styling.
    */
-  isHighlighted?: boolean;
+  isAiButton?: boolean;
 }
 
 export interface MenuItem extends Pick<CommonProps, 'data-test-subj'> {
@@ -25,7 +25,12 @@ export interface MenuItem extends Pick<CommonProps, 'data-test-subj'> {
   description?: string;
   isDisabled?: boolean;
   isDeprecated?: boolean;
-  isHighlighted?: boolean;
+  isAiButton?: boolean;
+  /**
+   * Optional Chat helper for entry points that prefill the conversation
+   * (e.g. empty-dashboard prompt pills) instead of using the default onClick.
+   */
+  executeWithMessage?: (initialMessage?: string) => void;
   order: number;
   MenuItem?: ReactNode;
 }

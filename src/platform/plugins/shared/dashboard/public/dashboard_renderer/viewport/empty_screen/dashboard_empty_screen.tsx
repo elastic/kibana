@@ -30,10 +30,8 @@ import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { useFeaturedItems } from '../../../dashboard_app/top_nav/add_panel_button/use_featured_items';
 import { FeaturedItemCard } from '../../../dashboard_app/top_nav/add_panel_button/components/featured_item_card';
-import {
-  DashboardEmptyScreenChat,
-  useOpenDashboardChatAction,
-} from './dashboard_empty_screen_chat';
+import { DashboardEmptyScreenChat } from './dashboard_empty_screen_chat';
+import { OPEN_DASHBOARD_CHAT_ACTION_ID } from './dashboard_empty_screen_chat_action';
 
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {
@@ -42,11 +40,17 @@ export function DashboardEmptyScreen() {
 
   const dashboardApi = useDashboardApi();
   const { featuredItems, loading: featuredItemsLoading } = useFeaturedItems({ dashboardApi });
-  const { action: openDashboardChatAction, loading: dashboardChatActionLoading } =
-    useOpenDashboardChatAction();
   const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = viewMode === 'edit';
+
+  const { chatItem, panelItems } = useMemo(() => {
+    const chat = featuredItems.find((item) => item.id === OPEN_DASHBOARD_CHAT_ACTION_ID);
+    return {
+      chatItem: chat,
+      panelItems: featuredItems.filter((item) => item.id !== OPEN_DASHBOARD_CHAT_ACTION_ID),
+    };
+  }, [featuredItems]);
 
   const styles = useMemoCss(emptyScreenStyles);
 
@@ -58,7 +62,7 @@ export function DashboardEmptyScreen() {
   // If the user ends up in edit mode without write privileges, we shouldn't show the edit prompt.
   const showEditPrompt = showWriteControls && isEditMode;
 
-  if (showEditPrompt && (featuredItemsLoading || dashboardChatActionLoading)) {
+  if (showEditPrompt && featuredItemsLoading) {
     return <div css={emptyScreenStyles.parent} />;
   }
 
@@ -103,22 +107,18 @@ export function DashboardEmptyScreen() {
 
   const actions = (() => {
     if (showEditPrompt) {
-      const featuredItemPanels = featuredItems.map((item) => (
-        <EuiFlexItem
-          key={item.id}
-          grow={Boolean(openDashboardChatAction)}
-          css={styles.featuredItem}
-        >
+      const featuredItemPanels = panelItems.map((item) => (
+        <EuiFlexItem key={item.id} grow={Boolean(chatItem)} css={styles.featuredItem}>
           <FeaturedItemCard item={item} />
         </EuiFlexItem>
       ));
 
       return (
         <EuiFlexGroup direction="column" gutterSize="s" css={styles.actionsWrapper}>
-          {openDashboardChatAction ? (
+          {chatItem?.executeWithMessage ? (
             <>
               <EuiFlexItem grow={false}>
-                <DashboardEmptyScreenChat action={openDashboardChatAction} />
+                <DashboardEmptyScreenChat onOpenChat={chatItem.executeWithMessage} />
               </EuiFlexItem>
               {featuredItemPanels.length > 0 && (
                 <EuiFlexItem>

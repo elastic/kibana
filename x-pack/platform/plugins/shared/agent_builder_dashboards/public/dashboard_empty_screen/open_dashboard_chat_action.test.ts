@@ -16,10 +16,10 @@ describe('createOpenDashboardChatAction', () => {
     openChat.mockClear();
   });
 
-  it('declares the highlighted extension treatment', () => {
+  it('declares the AiButton extension treatment', () => {
     const action = createOpenDashboardChatAction(openChat);
 
-    expect(action.extension).toEqual({ isHighlighted: true });
+    expect(action.extension).toEqual({ isAiButton: true });
   });
 
   it('uses the agent icon and Create with chat label', () => {

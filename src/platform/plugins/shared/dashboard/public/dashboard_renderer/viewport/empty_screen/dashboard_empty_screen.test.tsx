@@ -8,24 +8,36 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
 import type { DashboardApi } from '../../../dashboard_api/types';
-import { coreServices, uiActionsService } from '../../../services/kibana_services';
+import { coreServices } from '../../../services/kibana_services';
 import { DashboardEmptyScreen } from './dashboard_empty_screen';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { OPEN_DASHBOARD_CHAT_ACTION_ID } from './dashboard_empty_screen_chat_action';
-
 let mockFeaturedItemsLoading = false;
-const execute = jest.fn();
-const isCompatible = jest.fn();
+let mockIncludeChatItem = true;
+const mockExecuteWithMessage = jest.fn();
 
 jest.mock('../../../dashboard_app/top_nav/add_panel_button/use_featured_items', () => {
   return {
     useFeaturedItems: () => ({
       featuredItems: [
+        ...(mockIncludeChatItem
+          ? [
+              {
+                id: 'openDashboardChat',
+                name: 'Create with chat',
+                icon: 'productAgent',
+                onClick: jest.fn(),
+                executeWithMessage: mockExecuteWithMessage,
+                order: 100,
+                isAiButton: true,
+                ['data-test-subj']: 'create-action-Create with chat',
+              },
+            ]
+          : []),
         {
           id: '1',
           name: 'Mock Add Panel',
@@ -55,20 +67,14 @@ describe('DashboardEmptyScreen', () => {
   }
 
   beforeEach(() => {
-    // Reset capabilities before each test
     (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
     mockFeaturedItemsLoading = false;
-    execute.mockClear();
-    isCompatible.mockReset().mockResolvedValue(true);
-    (uiActionsService.hasAction as jest.Mock).mockReturnValue(true);
-    (uiActionsService.getAction as jest.Mock).mockResolvedValue({
-      execute,
-      isCompatible,
-    });
+    mockIncludeChatItem = true;
+    mockExecuteWithMessage.mockClear();
   });
 
   test('renders correctly with view mode', () => {
-    (uiActionsService.hasAction as jest.Mock).mockReturnValue(false);
+    mockIncludeChatItem = false;
     renderComponent('view');
 
     expect(screen.getByTestId('dashboardEmptyReadWrite')).toBeInTheDocument();
@@ -76,73 +82,54 @@ describe('DashboardEmptyScreen', () => {
     expect(screen.queryByTestId('emptyDashboardWidget')).not.toBeInTheDocument();
   });
 
-  test('renders correctly with edit mode', async () => {
+  test('renders correctly with edit mode', () => {
+    mockIncludeChatItem = false;
     renderComponent('edit');
 
     expect(screen.queryByTestId('dashboardEmptyReadWrite')).not.toBeInTheDocument();
     expect(screen.queryByTestId('dashboardEmptyReadOnly')).not.toBeInTheDocument();
-    expect(await screen.findByTestId('emptyDashboardWidget')).toBeInTheDocument();
+    expect(screen.getByTestId('emptyDashboardWidget')).toBeInTheDocument();
     expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
   });
 
-  test('renders Chat when its action is registered and compatible', async () => {
+  test('renders Chat from featured items with the empty-screen layout', () => {
     renderComponent('edit');
 
-    expect(await screen.findByText('Create with chat')).toBeInTheDocument();
+    expect(screen.getByText('Create with chat')).toBeInTheDocument();
     expect(screen.getByTestId('dashboardCreateWithChatOpenChat')).toBeInTheDocument();
     expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
+    // Chat is rendered via the empty-screen panel, not as a featured card.
+    expect(screen.queryByTestId('create-action-Create with chat')).not.toBeInTheDocument();
   });
 
-  test('executes the Chat action with the selected prompt', async () => {
+  test('opens Chat with the selected prompt', () => {
     renderComponent('edit');
 
-    fireEvent.click(await screen.findByTestId('dashboardCreateWithChatMetricsPrompt'));
+    fireEvent.click(screen.getByTestId('dashboardCreateWithChatMetricsPrompt'));
 
-    expect(execute).toHaveBeenCalledWith({
-      initialMessage: 'Create a dashboard for my metrics',
-      trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
-    });
+    expect(mockExecuteWithMessage).toHaveBeenCalledWith('Create a dashboard for my metrics');
   });
 
-  test('opens Chat without a prefilled prompt from Open chat', async () => {
+  test('opens Chat without a prefilled prompt from Open chat', () => {
     renderComponent('edit');
 
-    fireEvent.click(await screen.findByTestId('dashboardCreateWithChatOpenChat'));
+    fireEvent.click(screen.getByTestId('dashboardCreateWithChatOpenChat'));
 
-    expect(execute).toHaveBeenCalledWith({
-      initialMessage: '',
-      trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
-    });
+    expect(mockExecuteWithMessage).toHaveBeenCalledWith('');
   });
 
-  test.each([
-    ['is not registered', false, true],
-    ['is incompatible', true, false],
-  ])('does not render Chat when its action %s', async (_label, isRegistered, compatible) => {
-    (uiActionsService.hasAction as jest.Mock).mockReturnValue(isRegistered);
-    isCompatible.mockResolvedValue(compatible);
-
+  test('does not render Chat when it is not among featured items', () => {
+    mockIncludeChatItem = false;
     renderComponent('edit');
 
-    await waitFor(() => expect(screen.getByTestId('emptyDashboardWidget')).toBeInTheDocument());
+    expect(screen.getByTestId('emptyDashboardWidget')).toBeInTheDocument();
     expect(screen.queryByTestId('dashboardCreateWithChatMetricsPrompt')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
     expect(screen.getByTestId('mockAddPanelAction').tagName).toBe('BUTTON');
   });
 
-  test('renders featured actions when loading the Chat action fails', async () => {
-    (uiActionsService.getAction as jest.Mock).mockRejectedValue(new Error('Unable to load action'));
-
-    renderComponent('edit');
-
-    expect(await screen.findByTestId('emptyDashboardWidget')).toBeInTheDocument();
-    expect(screen.queryByTestId('dashboardCreateWithChatMetricsPrompt')).not.toBeInTheDocument();
-    expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
-  });
-
   test('waits for featured items before rendering the edit empty screen', () => {
     mockFeaturedItemsLoading = true;
-    (uiActionsService.hasAction as jest.Mock).mockReturnValue(false);
 
     renderComponent('edit');
 
@@ -151,25 +138,16 @@ describe('DashboardEmptyScreen', () => {
     expect(screen.queryByTestId('mockAddPanelAction')).not.toBeInTheDocument();
   });
 
-  test('waits for Chat compatibility before rendering the edit empty screen', () => {
-    isCompatible.mockReturnValue(new Promise(() => {}));
-
+  test('renders empty-screen featured panels as buttons', () => {
+    mockIncludeChatItem = false;
     renderComponent('edit');
 
-    expect(screen.queryByTestId('emptyDashboardWidget')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('dashboardCreateWithChatMetricsPrompt')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mockAddPanelAction')).not.toBeInTheDocument();
-  });
-
-  test('renders empty-screen featured panels as buttons', async () => {
-    renderComponent('edit');
-
-    expect((await screen.findByTestId('mockAddPanelAction')).tagName).toBe('BUTTON');
+    expect(screen.getByTestId('mockAddPanelAction').tagName).toBe('BUTTON');
   });
 
   test('renders correctly with readonly mode', () => {
     (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
-    (uiActionsService.hasAction as jest.Mock).mockReturnValue(false);
+    mockIncludeChatItem = false;
 
     renderComponent('view');
 
@@ -180,7 +158,7 @@ describe('DashboardEmptyScreen', () => {
 
   test('renders correctly with readonly and edit mode', () => {
     (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
-    (uiActionsService.hasAction as jest.Mock).mockReturnValue(false);
+    mockIncludeChatItem = false;
 
     renderComponent('edit');
 

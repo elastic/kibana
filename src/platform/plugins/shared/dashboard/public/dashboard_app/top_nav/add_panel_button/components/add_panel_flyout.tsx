@@ -51,7 +51,6 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
   } = useMenuItemGroups({ dashboardApi });
   const { featuredItems, loading: isLoadingFeaturedItems } = useFeaturedItems({
     dashboardApi,
-    includeOpenDashboardChat: true,
   });
 
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -129,7 +128,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                 return null;
               }
 
-              if (item.isHighlighted) {
+              if (item.isAiButton) {
                 return (
                   <AiButton
                     key={item.id}

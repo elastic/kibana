@@ -52,7 +52,7 @@ describe('useFeaturedItems', () => {
   const chatAction = {
     id: OPEN_DASHBOARD_CHAT_ACTION_ID,
     order: 100,
-    extension: { isHighlighted: true },
+    extension: { isAiButton: true },
     getDisplayName: () => 'Create with chat',
     getIconType: () => 'productAgent',
     getDisplayNameTooltip: () => 'Let the agent build any panel for you.',
@@ -68,9 +68,12 @@ describe('useFeaturedItems', () => {
     mockGetTriggerCompatibleActions.mockReset().mockResolvedValue([featuredAction, esqlAction]);
     mockHasAction.mockReset().mockReturnValue(false);
     mockGetAction.mockReset();
+    chatAction.isCompatible.mockReset().mockResolvedValue(true);
+    chatAction.execute.mockReset();
+    (dashboardApi.clearOverlays as jest.Mock).mockClear();
   });
 
-  it('returns featured trigger actions without Chat by default', async () => {
+  it('returns featured trigger actions without Chat when the action is unavailable', async () => {
     const { result } = renderHook(() => useFeaturedItems({ dashboardApi }));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -103,13 +106,11 @@ describe('useFeaturedItems', () => {
     );
   });
 
-  it('prepends the open-dashboard-chat action when requested and available', async () => {
+  it('prepends the open-dashboard-chat action when available', async () => {
     mockHasAction.mockReturnValue(true);
     mockGetAction.mockResolvedValue(chatAction);
 
-    const { result } = renderHook(() =>
-      useFeaturedItems({ dashboardApi, includeOpenDashboardChat: true })
-    );
+    const { result } = renderHook(() => useFeaturedItems({ dashboardApi }));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -118,10 +119,28 @@ describe('useFeaturedItems', () => {
       'addLensPanelAction',
       'ACTION_CREATE_ESQL_CHART',
     ]);
-    expect(result.current.featuredItems[0].isHighlighted).toBe(true);
+    expect(result.current.featuredItems[0].isAiButton).toBe(true);
     expect(result.current.featuredItems[0]['data-test-subj']).toBe(
       'create-action-Create with chat'
     );
+    expect(result.current.featuredItems[0].executeWithMessage).toEqual(expect.any(Function));
+  });
+
+  it('executes Chat with an initial message via executeWithMessage', async () => {
+    mockHasAction.mockReturnValue(true);
+    mockGetAction.mockResolvedValue(chatAction);
+
+    const { result } = renderHook(() => useFeaturedItems({ dashboardApi }));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    result.current.featuredItems[0].executeWithMessage?.('Create a dashboard for my metrics');
+
+    expect(dashboardApi.clearOverlays).toHaveBeenCalled();
+    expect(chatAction.execute).toHaveBeenCalledWith({
+      initialMessage: 'Create a dashboard for my metrics',
+      trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
+    });
   });
 
   it('omits Chat when the action is incompatible', async () => {
@@ -131,9 +150,7 @@ describe('useFeaturedItems', () => {
       isCompatible: jest.fn().mockResolvedValue(false),
     });
 
-    const { result } = renderHook(() =>
-      useFeaturedItems({ dashboardApi, includeOpenDashboardChat: true })
-    );
+    const { result } = renderHook(() => useFeaturedItems({ dashboardApi }));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 

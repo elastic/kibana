@@ -46,11 +46,8 @@ const featuredItemCopy: Record<string, Partial<Pick<MenuItem, 'name' | 'descript
 
 export const useFeaturedItems = ({
   dashboardApi,
-  includeOpenDashboardChat = false,
 }: {
   dashboardApi: DashboardApi;
-  /** When true, includes the open-dashboard-chat action (rendered as AiButton in the flyout). */
-  includeOpenDashboardChat?: boolean;
 }): { featuredItems: MenuItem[]; loading: boolean } => {
   const [featuredItems, setFeaturedItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +75,7 @@ export const useFeaturedItems = ({
           return copy ? { ...item, ...copy } : item;
         });
 
-        if (includeOpenDashboardChat && uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID)) {
+        if (uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID)) {
           try {
             const chatAction = (await uiActionsService.getAction(
               OPEN_DASHBOARD_CHAT_ACTION_ID
@@ -89,9 +86,25 @@ export const useFeaturedItems = ({
             });
 
             if (compatible) {
-              menuItems.unshift(
-                ...getMenuItems([chatAction as FeaturedAddPanelAction], dashboardApi, context)
+              const chatContext = {
+                ...context,
+                trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
+              };
+              const [chatMenuItem] = getMenuItems(
+                [chatAction as FeaturedAddPanelAction],
+                dashboardApi,
+                chatContext
               );
+              menuItems.unshift({
+                ...chatMenuItem,
+                executeWithMessage: (initialMessage?: string) => {
+                  dashboardApi.clearOverlays();
+                  void chatAction.execute({
+                    ...(initialMessage !== undefined ? { initialMessage } : {}),
+                    trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
+                  });
+                },
+              });
             }
           } catch {
             // An unavailable Chat action should not block featured panel items.
@@ -116,7 +129,7 @@ export const useFeaturedItems = ({
     return () => {
       canceled = true;
     };
-  }, [dashboardApi, includeOpenDashboardChat]);
+  }, [dashboardApi]);
 
   return { loading, featuredItems };
 };

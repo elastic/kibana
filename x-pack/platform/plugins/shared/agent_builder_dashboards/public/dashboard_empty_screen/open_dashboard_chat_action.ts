@@ -27,7 +27,7 @@ export const createOpenDashboardChatAction = (
   id: OPEN_DASHBOARD_CHAT_ACTION_ID,
   type: OPEN_DASHBOARD_CHAT_ACTION_ID,
   order: 100,
-  extension: { isHighlighted: true },
+  extension: { isAiButton: true },
   getDisplayName: () =>
     i18n.translate('xpack.agentBuilderDashboards.addPanelFlyout.createWithChatButtonLabel', {
       defaultMessage: 'Create with chat',

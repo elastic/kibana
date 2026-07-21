@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,12 +21,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import { uiActionsService } from '../../../services/kibana_services';
-import {
-  OPEN_DASHBOARD_CHAT_ACTION_ID,
-  type OpenDashboardChatActionContext,
-} from './dashboard_empty_screen_chat_action';
 
 const metricsPrompt = i18n.translate('dashboard.emptyScreen.metricsPromptButtonLabel', {
   defaultMessage: 'Create a dashboard for my metrics',
@@ -47,59 +41,10 @@ const promptSuggestions = [
   },
 ] as const;
 
-const getActionContext = (initialMessage?: string) => ({
-  ...(initialMessage !== undefined ? { initialMessage } : {}),
-  trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
-});
-
-export const useOpenDashboardChatAction = (): {
-  action?: Action<OpenDashboardChatActionContext>;
-  loading: boolean;
-} => {
-  const [action, setAction] = useState<Action<OpenDashboardChatActionContext>>();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let canceled = false;
-
-    const loadAction = async () => {
-      if (!uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID)) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const registeredAction = (await uiActionsService.getAction(
-          OPEN_DASHBOARD_CHAT_ACTION_ID
-        )) as Action<OpenDashboardChatActionContext>;
-        const compatible = await registeredAction.isCompatible(getActionContext());
-
-        if (!canceled && compatible) {
-          setAction(registeredAction);
-        }
-      } catch {
-        // An unavailable action should not prevent the empty dashboard screen from rendering.
-      } finally {
-        if (!canceled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadAction();
-
-    return () => {
-      canceled = true;
-    };
-  }, []);
-
-  return { action, loading };
-};
-
 export const DashboardEmptyScreenChat = ({
-  action,
+  onOpenChat,
 }: {
-  action: Action<OpenDashboardChatActionContext>;
+  onOpenChat: (initialMessage?: string) => void;
 }) => (
   <EuiPanel hasBorder paddingSize="none" css={styles.panel}>
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
@@ -137,7 +82,7 @@ export const DashboardEmptyScreenChat = ({
                     minWidth={false}
                     contentProps={{ css: styles.promptButtonContent }}
                     css={styles.promptButton}
-                    onClick={() => action.execute(getActionContext(prompt))}
+                    onClick={() => onOpenChat(prompt)}
                     data-test-subj={testSubject}
                   >
                     {prompt}
@@ -152,7 +97,7 @@ export const DashboardEmptyScreenChat = ({
               size="s"
               color="text"
               flush="both"
-              onClick={() => action.execute(getActionContext(''))}
+              onClick={() => onOpenChat('')}
               data-test-subj="dashboardCreateWithChatOpenChat"
             >
               {i18n.translate('dashboard.emptyScreen.openChatButtonLabel', {
