@@ -262,7 +262,7 @@ function SuccessState({
   );
 }
 
-function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry: () => void }) {
+function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry?: () => void }) {
   return (
     <EuiFlexGroup
       direction="column"
@@ -302,16 +302,18 @@ function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry: () 
             </EuiText>
           }
           actions={
-            <EuiButton
-              color="danger"
-              iconType="refresh"
-              onClick={onRetry}
-              data-test-subj="dashboardExportSourceRetryButton"
-            >
-              {i18n.translate('dashboard.exportJson.retryButtonLabel', {
-                defaultMessage: 'Retry',
-              })}
-            </EuiButton>
+            onRetry && (
+              <EuiButton
+                color="danger"
+                iconType="refresh"
+                onClick={onRetry}
+                data-test-subj="dashboardExportSourceRetryButton"
+              >
+                {i18n.translate('dashboard.exportJson.retryButtonLabel', {
+                  defaultMessage: 'Retry',
+                })}
+              </EuiButton>
+            )
           }
         />
       </EuiFlexItem>
@@ -367,6 +369,16 @@ export const ExportJsonPanel = <State extends object, SanitizedState extends obj
             <LoadingState />
           ) : status === 'success' && jsonValue ? (
             <SuccessState openInConsoleRequest={openInConsoleRequest} jsonValue={jsonValue} />
+          ) : !jsonValue ? (
+            <ErrorState
+              error={
+                new Error(
+                  i18n.translate('dashboard.exportJson.noDataError', {
+                    defaultMessage: 'No data was returned. See warnings above for more details.',
+                  })
+                )
+              }
+            />
           ) : (
             <ErrorState error={error} onRetry={onRetry} />
           )}
