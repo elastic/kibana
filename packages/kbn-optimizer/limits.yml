@@ -92,7 +92,6 @@ pageLoadAssetSize:
   home: 13091
   imageEmbeddable: 6189
   inbox: 5344
-  pnd: 150000
   indexLifecycleManagement: 54326
   indexManagement: 39694
   inference: 10368
@@ -141,6 +140,7 @@ pageLoadAssetSize:
   observabilityShared: 75022
   osquery: 48128
   painlessLab: 6299
+  pnd: 7674
   presentationUtil: 8391
   productDocBase: 6767
   productIntercept: 9860
