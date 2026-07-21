@@ -3,11 +3,11 @@
 exports[`EditFilterListHeader renders the header when creating a new filter list with ID, description and items set 1`] = `
 <div>
   <div
-    class="css-1yhsg3m-root-root-root-root"
+    class="css-n8ttoe-root-root-root"
     data-test-subj="appHeader"
   >
     <div
-      class="css-1udzz8e-primaryRow-primaryRow"
+      class="css-t37kb7-primaryRow-primaryRow-primaryRow"
     >
       <div
         class="css-856hcb-titleCluster"
@@ -22,7 +22,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
               class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
             >
               <h1
-                class="euiTitle emotion-euiTitle-xs"
+                class="euiTitle emotion-euiTitle-s"
               >
                 <span
                   class="css-brsrfa-titleFrame"
@@ -184,11 +184,11 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
 exports[`EditFilterListHeader renders the header when creating a new filter list with the ID not set 1`] = `
 <div>
   <div
-    class="css-1yhsg3m-root-root-root-root"
+    class="css-n8ttoe-root-root-root"
     data-test-subj="appHeader"
   >
     <div
-      class="css-1udzz8e-primaryRow-primaryRow"
+      class="css-t37kb7-primaryRow-primaryRow-primaryRow"
     >
       <div
         class="css-856hcb-titleCluster"
@@ -203,7 +203,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
               class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
             >
               <h1
-                class="euiTitle emotion-euiTitle-xs"
+                class="euiTitle emotion-euiTitle-s"
               >
                 <span
                   class="css-brsrfa-titleFrame"
@@ -377,11 +377,11 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
 exports[`EditFilterListHeader renders the header when editing an existing unused filter list with no description or items 1`] = `
 <div>
   <div
-    class="css-1yhsg3m-root-root-root-root"
+    class="css-n8ttoe-root-root-root"
     data-test-subj="appHeader"
   >
     <div
-      class="css-1udzz8e-primaryRow-primaryRow"
+      class="css-t37kb7-primaryRow-primaryRow-primaryRow"
     >
       <div
         class="css-856hcb-titleCluster"
@@ -396,7 +396,7 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
               class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
             >
               <h1
-                class="euiTitle emotion-euiTitle-xs"
+                class="euiTitle emotion-euiTitle-s"
               >
                 <span
                   class="css-brsrfa-titleFrame"
@@ -525,11 +525,11 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
 exports[`EditFilterListHeader renders the header when editing an existing used filter list with description and items set 1`] = `
 <div>
   <div
-    class="css-1yhsg3m-root-root-root-root"
+    class="css-n8ttoe-root-root-root"
     data-test-subj="appHeader"
   >
     <div
-      class="css-1udzz8e-primaryRow-primaryRow"
+      class="css-t37kb7-primaryRow-primaryRow-primaryRow"
     >
       <div
         class="css-856hcb-titleCluster"
@@ -544,7 +544,7 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
               class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
             >
               <h1
-                class="euiTitle emotion-euiTitle-xs"
+                class="euiTitle emotion-euiTitle-s"
               >
                 <span
                   class="css-brsrfa-titleFrame"

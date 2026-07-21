@@ -3,11 +3,11 @@
 exports[`CalendarListsHeader renders header 1`] = `
 <div>
   <div
-    class="css-1yhsg3m-root-root-root-root"
+    class="css-n8ttoe-root-root-root"
     data-test-subj="appHeader"
   >
     <div
-      class="css-1udzz8e-primaryRow-primaryRow"
+      class="css-t37kb7-primaryRow-primaryRow-primaryRow"
     >
       <div
         class="css-856hcb-titleCluster"
@@ -22,7 +22,7 @@ exports[`CalendarListsHeader renders header 1`] = `
               class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
             >
               <h1
-                class="euiTitle emotion-euiTitle-xs"
+                class="euiTitle emotion-euiTitle-s"
               >
                 <span
                   class="css-brsrfa-titleFrame"
