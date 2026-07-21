@@ -11,8 +11,8 @@ The current implementation is a proof of concept, but the boundaries are intenti
 run may access.
 - The sandbox provider owns compute isolation and lifecycle.
 - The coding runtime owns OpenCode configuration, ACP communication, and timeline extraction.
-- Credential minters produce short-lived, run-scoped credentials with the narrowest useful  
-privileges.
+- Connector-owned CLI capabilities produce short-lived, run-scoped credentials with the
+  narrowest useful privileges.
 
 ## End-to-End Flow
 
@@ -24,16 +24,17 @@ privileges.
   - otherwise the process-level default `opencodeSubagent` config.
 4. The executor mints the per-run Agent Builder MCP credential so the sandbox can call back
   into Kibana tools without receiving connector secrets.
-5. The executor resolves direct credentials only for products requested by the parent agent:
-  - GitHub, when the task needs `git` or `gh`;
-  - Elastic CLI, when the task needs Kibana or Elasticsearch access from the sandbox.
+5. The executor resolves only the credentials requested by the parent agent:
+  - direct Elastic CLI access for local Kibana or Elasticsearch work;
+  - connector-owned CLI credentials for tools such as `git`/`gh` or `gcloud`.
 6. The sandbox registry provisions or reuses an isolated sandbox.
-7. `OpenCodeAcpRuntime` writes OpenCode config, injects run-scoped credentials, starts
-  `opencode acp`, and drives ACP over stdio.
+7. `OpenCodeAcpRuntime` writes OpenCode config, injects connector-provided files/env/setup,
+  starts `opencode acp`, and drives ACP over stdio.
 8. ACP `session/update` events are normalized into `OpencodeRunProgress` items and streamed
   back to the conversation UI.
-9. The runtime scrubs injected credentials, the executor revokes minted API keys, and the
-  sandbox lifecycle layer decides whether the sandbox can stay warm or must be torn down.
+9. The runtime scrubs injected credentials, the executor calls connector revocation hooks and
+  invalidates local API keys, and the sandbox lifecycle layer decides whether the sandbox can
+  stay warm or must be torn down.
 
 
 
@@ -65,33 +66,30 @@ so OpenCode can be replaced later without changing provisioning.
 posture for the agent using it.
 - Connector granularity: attached connector IDs are forwarded to the runtime so MCP brokered
 calls are scoped to the connectors available in this run.
-- Credential granularity: `SandboxCredentialRequest` names the exact product and access level
-the sandbox needs.
+- Credential granularity: `SandboxCredentialRequest` names either direct Elastic access or
+  connector-owned CLI credentials with connector-defined mint input.
 
 The structured credential shape is:
 
 ```ts
 {
-  github?: {
-    repository?: string;
-    access?: 'read' | 'push-pr';
-  };
+  cli?: Array<{
+    connectorId?: string;
+    actionTypeId?: string;
+    label?: string;
+    input?: Record<string, unknown>;
+  }>;
   elastic?: {
     kibana?: 'read' | 'write';
     elasticsearch?: 'read' | 'write';
-  };
-  gcp?: {
-    connectorId?: string;
-    projectId?: string;
-    access?: 'read' | 'write';
-    services?: string[];
-    regions?: string[];
   };
 }
 ```
 
 The tool guidance instructs the parent agent to omit credentials that are not needed, use `read`
-by default, and request `write` or `push-pr` only for mutating tasks.
+by default, and request mutating scopes only for tasks that create, update, delete, push, or open
+a PR. When the right CLI connector is ambiguous, the parent agent can call
+`list_sandbox_cli_connectors` before calling `run_opencode_subagent`.
 
 ## Sandbox And Coding Agent Layers
 
@@ -177,25 +175,53 @@ Important files:
 Connector secrets remain inside Kibana. The sandbox sees connector IDs and sub-action names, then
 Kibana's actions framework performs the actual external call.
 
-## GitHub Short-Lived Tokens
+## Connector-Owned CLI Credentials
 
-GitHub is the exception to the "broker through MCP" rule because real `git clone`, `git push`, and
-`gh pr create` need a git-usable credential inside the sandbox.
+Some tools need local credential material inside the sandbox. Real `git clone`, `git push`,
+`gh pr create`, and `gcloud` commands cannot be fully brokered through MCP. For those cases, the
+connector owns a `sandboxCli` capability.
+
+The connector capability includes:
+
+- `skill`: prompt guidance explaining when to request the credential and which follow-up
+  questions to ask.
+- `mintToken.schema`: the connector-defined input shape for least-privilege minting.
+- `mintToken.handler`: the server-side implementation that returns sandbox-safe credential
+  material.
+- `mintTokenOptions.handler`: optional choices the parent agent can show before asking the user.
+- `revokeToken.handler`: cleanup or revocation, called after each run.
+
+The minted token shape is generic:
+
+```ts
+{
+  source: string;
+  expiresAt?: number;
+  env?: Record<string, string>;
+  files?: Array<{ path: string; contents: string; mode?: string }>;
+  setupCommands?: string[];
+  cleanupPaths?: string[];
+}
+```
+
+Agent Builder does not know provider-specific token formats. It asks the connector to mint,
+validates the generic material, writes the files and env into the sandbox, runs setup commands,
+and later removes `cleanupPaths`.
+
+## GitHub CLI And Git Credentials
+
+GitHub CLI access is provided by the GitHub connector's sandbox CLI capability.
 
 The flow is:
 
-1. The parent agent requests `credentials.github` only when the task needs GitHub repo access.
-2. The executor normalizes the target repo from the structured field or, as a fallback, from the
-  prompt.
-3. The executor determines access:
-  - `read` for clone/read-only work;
-  - `push-pr` for branch push or PR creation.
-4. `GithubTokenResolver` searches the run's attached GitHub connectors, or accessible GitHub
-  connectors when none are explicitly attached.
-5. A `.github` connector with `github_app` auth mints an installation token via
+1. The parent agent calls `list_sandbox_cli_connectors` if the GitHub connector is not obvious.
+2. The parent agent calls `run_opencode_subagent` with `credentials.cli`, selecting a `.github`
+  connector and passing the connector-defined input, including repository and access.
+3. The GitHub connector validates the repo against `allowedRepos`.
+4. A `.github` connector with `github_app` auth mints an installation token via
   `GithubAppTokenMinter`.
-6. The connector's `allowedRepos` allowlist is enforced before minting.
-7. The runtime injects the token into git and `gh` configuration, then scrubs it in `finally`.
+5. The connector returns git/gh files, env, setup, and cleanup material as a `SandboxCliToken`.
+6. The runtime injects the token into git and `gh` configuration, then scrubs it in `finally`.
 
 Least-privilege behavior:
 
@@ -203,21 +229,19 @@ Least-privilege behavior:
 - Repository access is limited by the connector's allowlist and by the GitHub App installation.
 - `read` grants read-only repository permissions.
 - `push-pr` grants the permissions required for contents and pull requests.
-- If a requested repo is missing or not allowed, the executor fails before sandbox work starts
-instead of letting OpenCode discover missing credentials halfway through.
+- If a requested repo is missing or not allowed, minting fails before sandbox work starts instead
+  of letting OpenCode discover missing credentials halfway through.
 
 Related files:
 
-- `github_token_resolver.ts` finds GitHub connectors, reads encrypted connector material
-server-side, validates repo allowlists, and returns git-usable tokens.
-- `github_app_token_minter.ts` signs the GitHub App JWT, finds the installation, and mints the
-installation token.
-- `opencode_acp_runtime.ts` writes the token into the sandbox's git credential store and `gh`
-host config.
+- `src/platform/packages/shared/kbn-connector-specs/src/specs/github/github.ts` defines the
+  GitHub connector sandbox CLI capability.
+- `src/platform/packages/shared/kbn-connector-specs/src/specs/github/github_app_token_minter.ts`
+  signs the GitHub App JWT, finds the installation, and mints the installation token.
+- `opencode_acp_runtime.ts` writes connector-provided files/env into the sandbox and runs setup
+  commands.
 - `src/platform/packages/shared/kbn-connector-specs/src/auth_types/github_app.ts` defines the
 connector auth type.
-- `src/platform/packages/shared/kbn-connector-specs/src/specs/github/github.ts` adds GitHub App
-auth and `allowedRepos` to the GitHub connector spec.
 
 
 
@@ -259,9 +283,9 @@ Related files:
 - `server/test_utils/config.ts` mirrors the test config default.
 - `run_opencode_subagent.ts` tells the parent agent when it must request Elastic CLI credentials.
 
-## Google Cloud CLI Credentials And OOTB Installation
+## Google Cloud CLI Credentials
 
-Google Cloud CLI access is requested through `credentials.gcp`.
+Google Cloud CLI access is requested through generic `credentials.cli`.
 
 The implementation is connector-backed:
 
@@ -270,22 +294,26 @@ The implementation is connector-backed:
   credential.
 - The connector can optionally name a target service account to impersonate. The bootstrap
   service account must be allowed to call IAM Credentials `generateAccessToken` for that target.
-- `GcpCliCredentialResolver` reads the connector server-side, validates the requested project,
-  services, and regions, and calls IAM Credentials to mint a short-lived access token.
-- `OpenCodeAcpRuntime` installs or finds `gcloud`, writes `CLOUDSDK_CONFIG`,
-  `CLOUDSDK_AUTH_ACCESS_TOKEN_FILE`, and `CLOUDSDK_CORE_PROJECT`, configures
-  `auth/access_token_file`, and scrubs the token/config files after the run.
+- The connector validates the requested project, services, and regions, and calls IAM
+  Credentials to mint a short-lived access token.
+- The connector returns `CLOUDSDK_CONFIG`, `CLOUDSDK_AUTH_ACCESS_TOKEN_FILE`,
+  `CLOUDSDK_CORE_PROJECT`, token/config files, setup commands, and cleanup paths as a generic
+  `SandboxCliToken`.
+- `OpenCodeAcpRuntime` writes the connector material, runs connector setup commands, and scrubs
+  the token/config files after the run.
 
 The connector's service account JSON never enters the sandbox. The sandbox receives only the
-generated access token, which expires automatically.
+generated access token, which expires automatically. `gcloud` installation is intentionally not
+owned by this connector yet; the sandbox image or future connector setup commands must provide
+the binary.
 
 Related files:
 
-- `gcp_cli_credential_resolver.ts` resolves `.gcp_cli` connectors for sandbox CLI setup.
-- `opencode_acp_runtime.ts` installs `gcloud`, activates the service account, and scrubs config.
-- `run_opencode_subagent.ts` tells the parent agent when it must request GCP CLI credentials.
 - `src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_cli/gcp_cli.ts` defines the
-  generic Google Cloud CLI connector.
+  Google Cloud CLI connector and its sandbox CLI capability.
+- `sandbox_cli_credential_resolver.ts` calls connector-owned mint/options/revoke actions.
+- `opencode_acp_runtime.ts` writes connector files/env, runs setup commands, and scrubs config.
+- `run_opencode_subagent.ts` tells the parent agent when it must request generic CLI credentials.
 
 
 
@@ -317,30 +345,31 @@ renders the OpenCode block in the conversation and makes it collapsible.
 
 Connector specs:
 
-- `src/platform/packages/shared/kbn-connector-specs/src/all_auth_types.ts`
-- `src/platform/packages/shared/kbn-connector-specs/src/auth_types/github_app.ts`
-- `src/platform/packages/shared/kbn-connector-specs/src/auth_types/translations.ts`
+- `src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts`
+- `src/platform/packages/shared/kbn-connector-specs/index.ts`
 - `src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_cli/gcp_cli.ts`
 - `src/platform/packages/shared/kbn-connector-specs/src/specs/github/github.ts`
-- `src/platform/packages/shared/kbn-connector-specs/src/specs/github/github.test.ts`
+- `src/platform/packages/shared/kbn-connector-specs/src/specs/github/github_app_token_minter.ts`
+- `x-pack/platform/plugins/shared/actions/server/lib/single_file_connectors/create_connector_from_spec.ts`
 
 Agent Builder server/runtime:
 
-- `x-pack/platform/plugins/shared/agent_builder/server/config.ts`
-- `x-pack/platform/plugins/shared/agent_builder/server/test_utils/config.ts`
 - `x-pack/platform/plugins/shared/agent_builder/server/services/execution/run_agent/tools/run_opencode_subagent.ts`
+- `x-pack/platform/plugins/shared/agent_builder/server/services/execution/run_agent/tools/list_sandbox_cli_connectors.ts`
+- `x-pack/platform/plugins/shared/agent_builder/server/services/execution/run_agent/tools/register_internal_tools.ts`
 - `x-pack/platform/plugins/shared/agent_builder/server/services/execution/opencode_subagent/coding_runtime.ts`
-- `x-pack/platform/plugins/shared/agent_builder/server/services/execution/opencode_subagent/elastic_cli_credential_minter.ts`
 - `x-pack/platform/plugins/shared/agent_builder/server/services/execution/opencode_subagent/executor.ts`
-- `x-pack/platform/plugins/shared/agent_builder/server/services/execution/opencode_subagent/gcp_cli_credential_resolver.ts`
-- `x-pack/platform/plugins/shared/agent_builder/server/services/execution/opencode_subagent/github_app_token_minter.ts`
-- `x-pack/platform/plugins/shared/agent_builder/server/services/execution/opencode_subagent/github_token_resolver.ts`
 - `x-pack/platform/plugins/shared/agent_builder/server/services/execution/opencode_subagent/opencode_acp_runtime.ts`
 - `x-pack/platform/plugins/shared/agent_builder/server/services/execution/opencode_subagent/provider.ts`
-- `x-pack/platform/plugins/shared/agent_builder/server/services/execution/opencode_subagent/types.ts`
+- `x-pack/platform/plugins/shared/agent_builder/server/services/execution/opencode_subagent/sandbox_cli_credential_requests.ts`
+- `x-pack/platform/plugins/shared/agent_builder/server/services/execution/opencode_subagent/sandbox_cli_credential_resolver.ts`
+- `x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/constants.ts`
+- `x-pack/platform/packages/shared/agent-builder/agent-builder-common/sandboxes/sandbox_profile.ts`
+- `x-pack/platform/plugins/shared/agent_builder/server/routes/internal/sandbox_profiles.ts`
+- `x-pack/platform/plugins/shared/agent_builder/server/services/sandboxes/profile_client.ts`
+- `x-pack/platform/plugins/shared/agent_builder/server/services/sandboxes/saved_object.ts`
 
 Agent Builder UI:
 
-- `x-pack/platform/plugins/shared/agent_builder/public/application/components/conversations/conversation_rounds/round_events/steps/opencode_subagent_step.tsx`
-- `x-pack/platform/plugins/shared/agent_builder/public/application/components/sandboxes/opencode_timeline.tsx`
+- `x-pack/platform/plugins/shared/agent_builder/public/application/components/sandboxes/create_sandbox_profile_flyout.tsx`
 
