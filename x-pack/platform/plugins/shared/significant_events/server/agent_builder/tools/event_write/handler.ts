@@ -68,6 +68,11 @@ export interface EventsWriteFailureResult {
 
 export type EventsWriteBulkResult = EventsWriteResult | EventsWriteFailureResult;
 
+/**
+ * Versions a batch of significant events in one request while preserving input order in the
+ * returned results. Transport or malformed-response failures leave the whole outcome unknown;
+ * Elasticsearch item failures remain isolated to their corresponding results.
+ */
 export async function eventsWriteBulkHandler({
   eventClient,
   inputs,
@@ -86,6 +91,8 @@ export async function eventsWriteBulkHandler({
   const explicitEventIds = inputs.flatMap((input) =>
     input.event_id === undefined ? [] : [input.event_id]
   );
+  // Synthetic event IDs are always new. Only explicit IDs need a latest-version lookup for
+  // previous_event_uuid and investigation lineage.
   const latestEvents =
     explicitEventIds.length === 0
       ? new Map<string, SignificantEvent>()
@@ -105,8 +112,9 @@ export async function eventsWriteBulkHandler({
         event_uuid: eventUuid,
         event_id: eventId,
         previous_event_uuid: latestEvents.get(eventId)?.event_uuid,
-        // Carry forward investigation lineage when creating a new version of an event.
-        // Triage uses this to avoid re-investigating an episode that has already run.
+        // Carry investigation lineage forward so a re-open keeps investigations already attached
+        // to the episode. Triage uses this to avoid re-investigating it. Status updates already
+        // spread the latest document, and the UI attachment path writes this field directly.
         investigations: latestEvents.get(eventId)?.investigations,
         severity: input.severity,
       },
@@ -117,7 +125,7 @@ export async function eventsWriteBulkHandler({
   try {
     response = await eventClient.bulkCreate(
       prepared.map(({ document }) => document),
-      // The triage workflow reads the freshly written event immediately after this call.
+      // `wait_for` lets the immediate triage `_count` see the newly written event version.
       { throwOnFail: false, refresh: 'wait_for' }
     );
   } catch (error) {
@@ -150,6 +158,7 @@ export async function eventsWriteBulkHandler({
   });
 }
 
+/** Single-item adapter retained for callers such as `event_create` that require thrown item errors. */
 export async function eventsWriteHandler({
   eventClient,
   input,

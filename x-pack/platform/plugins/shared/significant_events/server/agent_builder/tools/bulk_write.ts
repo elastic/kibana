@@ -71,6 +71,7 @@ export const assertValidBulkWriteSize = (items: readonly object[]): void => {
   }
 };
 
+/** Rejects the first repeated logical key before callers perform any reads or writes. */
 export const assertUniqueBulkWriteKeys = (
   entries: Array<{ index: number; key: string }>,
   keyName: string
@@ -89,6 +90,10 @@ export const assertUniqueBulkWriteKeys = (
   }
 };
 
+/**
+ * Verifies that an Elasticsearch bulk response contains one create result per submitted document.
+ * A count or operation mismatch makes the persistence outcome unsafe to infer.
+ */
 export const extractCreateResults = (
   response: { items: Array<{ create?: BulkResponseItem }> },
   expectedCount: number,

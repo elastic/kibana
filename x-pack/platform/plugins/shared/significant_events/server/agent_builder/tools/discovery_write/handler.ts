@@ -35,9 +35,12 @@ export type DiscoveryWriteInput = Pick<
   | 'workflow_execution_id'
   | 'conversation_id'
 > & {
-  /** Omit for new events. Pass verbatim for a continuation. */
+  /**
+   * Omit for new events — auto-generated from the stream, rule UUIDs, and a random suffix.
+   * Deduplication uses `makeFingerprint`, not this ID. Pass verbatim for a continuation.
+   */
   event_id?: Discovery['event_id'];
-  /** Deduplication window (ES date math, e.g. `"now-1h"`). Not stored. */
+  /** Deduplication window (ES date math, e.g. `"now-1h"`). Not stored in the document. */
   dedup_window?: string;
 };
 
@@ -73,7 +76,10 @@ export interface DiscoveryWriteFailureResult {
 export type DiscoveryWriteResult = DiscoveryWriteSuccessResult | DiscoveryWriteDuplicateResult;
 export type DiscoveryWriteBulkResult = DiscoveryWriteResult | DiscoveryWriteFailureResult;
 
-/** `rule_uuid` from every detection signal, deduplicated. */
+/**
+ * `rule_uuid` from every `type: 'detection'` signal, deduplicated. Detection signals are the only
+ * signal type with a `rule_uuid`; other signal types carry no rule identity to extract.
+ */
 const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
   const uuids = (signals ?? [])
     .filter((signal): signal is Extract<SignalEntry, { type: 'detection' }> =>
@@ -83,6 +89,11 @@ const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
   return [...new Set(uuids)];
 };
 
+/**
+ * Per-incident event ID: a hash of the primary stream name, every detection rule UUID, and a
+ * random UUID8 suffix. The suffix keeps distinct incidents for the same rules separate in the UI.
+ * Deduplication uses `makeFingerprint` (stream and rules only) instead of this ID.
+ */
 export const generateEventId = (streamNames: string[], ruleUuids: string[]): string => {
   const suffix = uuidv4().replace(/-/g, '').slice(0, 8);
   const primaryStream = [...streamNames].sort()[0] ?? 'unknown';
@@ -90,6 +101,7 @@ export const generateEventId = (streamNames: string[], ruleUuids: string[]): str
   return createHash('sha256').update(basis).digest('hex').slice(0, 16);
 };
 
+/** Stable stream-and-rules identity used only for duplicate detection within the configured window. */
 export const makeFingerprint = (streamNames: string[], ruleUuids: string[]): string => {
   const primaryStream = [...streamNames].sort()[0] ?? 'unknown';
   return [primaryStream, ...[...ruleUuids].sort()].join('|');
@@ -98,6 +110,11 @@ export const makeFingerprint = (streamNames: string[], ruleUuids: string[]): str
 const isDateMathExpression = (value: string): boolean =>
   value.startsWith('now') || value.includes('||');
 
+/**
+ * Parses a past-relative ES date math expression into a millisecond offset from `now`.
+ * Returns `undefined` for unrecognised expressions so callers skip deduplication instead of
+ * silently applying the wrong window.
+ */
 const parseDateMathToMs = (expr: string, now: Date): number | undefined => {
   if (!isDateMathExpression(expr)) {
     return undefined;
@@ -106,6 +123,10 @@ const parseDateMathToMs = (expr: string, now: Date): number | undefined => {
   return parsed?.isValid() ? now.getTime() - parsed.valueOf() : undefined;
 };
 
+/**
+ * Merges prior discovery signals with the submitted signals, keeping the latest detection signal
+ * per `metadata.rule_uuid`. Prior-only rules are carried forward; submitted rules win ties.
+ */
 export const mergeSignalsLatestPerRule = (
   priorDocs: Array<Pick<Discovery, '@timestamp' | 'signals'>>,
   submitted: SignalEntry[],
@@ -137,6 +158,11 @@ interface PreparedInput {
   fingerprint?: string;
 }
 
+/**
+ * Validates constraints that must fail before any reads or writes, then precomputes deduplication
+ * data for eligible new discoveries. Continuations, handled markers, clearances, and invalid
+ * windows intentionally have no fingerprint or cutoff.
+ */
 const prepareInputs = (inputs: DiscoveryWriteInput[], now: Date): PreparedInput[] => {
   assertValidBulkWriteSize(inputs);
   assertUniqueBulkWriteKeys(
@@ -177,6 +203,9 @@ const findExistingDuplicate = (
     return undefined;
   }
   const { cutoffMs, fingerprint } = prepared;
+  // Match each item against its own cutoff. The candidates come from findLatest, which excludes
+  // handled markers and returns only the latest document per event, so an old resolved version
+  // cannot block a new incident.
   return recentDiscoveries.find(
     (discovery) =>
       discovery.kind === 'discovery' &&
@@ -186,6 +215,11 @@ const findExistingDuplicate = (
   );
 };
 
+/**
+ * Writes a batch while preserving input order in the returned results. Duplicate discoveries are
+ * resolved without writing; all remaining documents share one bulk request and expose item-level
+ * failures without obscuring successful or skipped siblings.
+ */
 export async function discoveryWriteBulkHandler({
   discoveryClient,
   inputs,
@@ -198,6 +232,9 @@ export async function discoveryWriteBulkHandler({
   const cutoffs = preparedInputs.flatMap(({ cutoffMs }) =>
     cutoffMs === undefined ? [] : [cutoffMs]
   );
+  // Scan once from the earliest eligible cutoff and apply each item's narrower window in memory.
+  // ES|QL `IN` does not perform membership checks on multivalued keyword fields such as
+  // `stream_names`, so the stream-and-rules fingerprint is also matched in memory.
   const recentDiscoveries =
     cutoffs.length === 0
       ? []
@@ -239,6 +276,8 @@ export async function discoveryWriteBulkHandler({
   }
 
   const priorDocsByEventId = new Map<string, Discovery[]>();
+  // Continuation writes are full snapshots. Fetch their histories in parallel and exclude handled
+  // markers so processed cycles do not carry marker signals into the next discovery version.
   await Promise.all(
     inputsToCreate
       .filter(({ input }) => input.event_id !== undefined && input.kind !== 'handled')
