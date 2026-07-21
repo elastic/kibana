@@ -48,6 +48,12 @@ export class SecurityEvalChatClient {
           connector_id: this.connectorId,
           conversation_id: conversationId,
           input: message,
+          // Run the agent inline instead of via Task Manager (the server's auto-detect default).
+          // Task Manager runs the agent in a detached background context whose gen_ai spans form a
+          // separate root trace, so `response.trace_id` (the HTTP-request trace) contains no agent
+          // spans and the trace-based evaluators (Skill Invoked / Tool Calls / Tokens / Latency)
+          // all read 0/N-A. Inline execution keeps agent spans under the eval request's trace.
+          _execution_mode: 'local',
         }),
       });
 

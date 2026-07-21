@@ -99,6 +99,9 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-security-server",
-    "@kbn/rrule"
+    "@kbn/rrule",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
+    "@kbn/logging-mocks"
   ]
 }

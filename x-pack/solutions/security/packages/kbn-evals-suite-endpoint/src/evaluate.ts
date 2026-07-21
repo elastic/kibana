@@ -9,6 +9,8 @@ import type { Client } from '@elastic/elasticsearch';
 import { evaluate as base } from '@kbn/evals';
 import { createEsClientForTesting, systemIndicesSuperuser } from '@kbn/test';
 import { SecurityEvalChatClient } from './chat_client';
+import type { EvaluateForensicDataset } from './evaluate_forensic_dataset';
+import { createEvaluateForensicDataset } from './evaluate_forensic_dataset';
 import type { EvaluateSecurityDataset } from './evaluate_dataset';
 import { createEvaluateSecurityDataset } from './evaluate_dataset';
 
@@ -17,6 +19,7 @@ export const evaluate = base.extend<
   {
     chatClient: SecurityEvalChatClient;
     evaluateDataset: EvaluateSecurityDataset;
+    evaluateForensicDataset: EvaluateForensicDataset;
     internalEsClient: Client;
   }
 >({
@@ -34,6 +37,20 @@ export const evaluate = base.extend<
           chatClient,
           evaluators,
           executorClient,
+        })
+      );
+    },
+    { scope: 'worker' },
+  ],
+  evaluateForensicDataset: [
+    ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
+      use(
+        createEvaluateForensicDataset({
+          chatClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
         })
       );
     },

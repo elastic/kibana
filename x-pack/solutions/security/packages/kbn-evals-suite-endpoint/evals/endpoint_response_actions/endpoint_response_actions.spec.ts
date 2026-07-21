@@ -1,0 +1,234 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { tags } from '@kbn/scout';
+import { evaluate } from '../../src/evaluate';
+import {
+  waitForEndpointPackage,
+  waitForTransformPropagation,
+  seedScenario,
+} from '../../src/data_generators/endpoint_data';
+import { cleanupSeededData } from '../../src/data_generators/cleanup';
+
+const SKILL_PATH = 'skills/security/endpoint/endpoint-response-actions/SKILL.md';
+
+evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, () => {
+  evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, chatClient, log }) => {
+    await waitForEndpointPackage(kbnClient, esClient, log);
+
+    try {
+      await chatClient.converse({ message: 'hello' });
+    } catch (e) {
+      log.warning(`Warmup failed: ${e}`);
+    }
+
+    const clients = { esClient, internalEsClient };
+    // Seed endpoint data for response-action tests
+    await seedScenario(clients, {
+      agentId: 'eval-agent-isolate-001',
+      hostName: 'eval-host-isolate',
+      os: { name: 'Windows', version: '10' },
+      policyName: 'eval-policy-response',
+      policyStatus: 'success',
+    });
+    await seedScenario(clients, {
+      agentId: 'eval-agent-release-001',
+      hostName: 'eval-host-release',
+      os: { name: 'Linux', version: 'Ubuntu 22.04' },
+      policyName: 'eval-policy-response',
+      policyStatus: 'success',
+    });
+
+    await waitForTransformPropagation(esClient, log, {
+      metadataCurrent: 2,
+      metadataUnited: 2,
+    });
+  });
+
+  evaluate.afterAll(async ({ esClient, internalEsClient }) => {
+    await cleanupSeededData({ esClient, internalEsClient });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Scenario 1: Isolate host via natural language
+  // ---------------------------------------------------------------------------
+  evaluate('isolate host via natural language command', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'endpoint-response-actions: isolate host NL',
+        description:
+          'Validates that the agent parses an isolate command from natural language, ' +
+          'resolves the host to an endpoint ID, and invokes the isolation skill with ' +
+          'a confirmation step.',
+        examples: [
+          {
+            input: {
+              question: 'Isolate host eval-host-isolate',
+            },
+            output: {
+              criteria: [
+                `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                'Resolved host name "eval-host-isolate" to an endpoint/agent ID',
+                'Presented a confirmation prompt before executing the isolation',
+                'Called the executeHostIsolation inline tool or equivalent',
+                'Reported the isolation result (success or pending) back to the user',
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Scenario 2: Release host via natural language
+  // ---------------------------------------------------------------------------
+  evaluate('release host via natural language command', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'endpoint-response-actions: release host NL',
+        description:
+          'Validates that the agent parses a release/unisolate command from natural language, ' +
+          'resolves the host, and invokes the un-isolation skill with confirmation.',
+        examples: [
+          {
+            input: {
+              question: 'Release eval-host-release from isolation',
+            },
+            output: {
+              criteria: [
+                `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                'Resolved host name "eval-host-release" to an endpoint/agent ID',
+                'Presented a confirmation prompt before executing the release',
+                'Called the executeHostIsolation (release mode) or equivalent inline tool',
+                'Reported the release result back to the user',
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Scenario 3: List endpoints before isolation
+  // ---------------------------------------------------------------------------
+  evaluate('list endpoints before taking action', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'endpoint-response-actions: list endpoints',
+        description:
+          'Validates that the agent can list available endpoints when the user asks ' +
+          'for context before deciding which host to isolate.',
+        examples: [
+          {
+            input: {
+              question: 'Show me all endpoints that are currently online',
+            },
+            output: {
+              criteria: [
+                `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                'Called the getEndpointList inline tool or equivalent',
+                'Returned a list of endpoints including at least eval-host-isolate and eval-host-release',
+                'Did not attempt to isolate any host without explicit user confirmation',
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Scenario 4: Follow up on a prior response action by action ID
+  // ---------------------------------------------------------------------------
+  evaluate('look up prior response action status by action ID', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'endpoint-response-actions: action status follow-up',
+        description:
+          'Validates that the agent uses the read-only get_response_action_status tool ' +
+          'when the analyst asks about a previously dispatched response action, instead of ' +
+          'falling back to platform.core.search or raw Elasticsearch queries.',
+        examples: [
+          {
+            input: {
+              question:
+                'Can you check the status of response action 8d043de1-a9ea-4dc9-ae41-2a5ff7dc693e?',
+            },
+            output: {
+              criteria: [
+                `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                'Called endpoint-response-actions.get_response_action_status with action ID 8d043de1-a9ea-4dc9-ae41-2a5ff7dc693e',
+                'Did not use platform.core.search or raw Elasticsearch queries to look up the action status',
+                'Reported the lookup result to the analyst (action status if found, or a clear not-found message)',
+              ],
+            },
+          },
+          {
+            input: {
+              question:
+                'The malware scan on eval-host-isolate returned pending earlier — what is the status of action c1db8485-5110-4fef-a683-d5c037a65de5 now?',
+            },
+            output: {
+              criteria: [
+                `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                'Called endpoint-response-actions.get_response_action_status with action ID c1db8485-5110-4fef-a683-d5c037a65de5',
+                'Did not dispatch a new scan or other write action just to check status',
+                'Reported the current action status or a clear not-found message to the analyst',
+              ],
+            },
+          },
+          {
+            input: {
+              question: "What's the weather in Amsterdam today?",
+            },
+            output: {
+              criteria: [
+                'Did not activate the endpoint response actions skill',
+                'Did not call endpoint-response-actions.get_response_action_status',
+                'Did not attempt to isolate, release, or scan any endpoint',
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Scenario 5: Closing incident summary after containment
+  // ---------------------------------------------------------------------------
+  evaluate('produces closing incident summary after containment', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'endpoint-response-actions: incident summary after containment',
+        description:
+          'Validates that after the final containment action in an incident workflow, ' +
+          'the agent produces a consolidated closing summary covering contained hosts, ' +
+          'scan results, audit confirmation, and a recommended next step.',
+        examples: [
+          {
+            input: {
+              question:
+                'We just isolated eval-host-isolate and the scan finished. Give me the incident summary — what is the state of containment?',
+            },
+            output: {
+              criteria: [
+                `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                'Produces a consolidated summary that names the contained host(s) and their final isolation status',
+                'References the scan result or malware detection outcome for the host',
+                'Confirms actions were logged for audit or mentions audit trail',
+                'Suggests a recommended next step (e.g. forensic imaging, remediation, or further investigation)',
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+});

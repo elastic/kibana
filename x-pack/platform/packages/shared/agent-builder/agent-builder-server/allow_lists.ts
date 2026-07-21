@@ -106,6 +106,15 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'threat_intel.extract_diamond',
   'threat_intel.get_report',
   'threat_intel.correlate_synthesis_pack',
+
+  // Osquery
+  `${internalNamespaces.osquery}.check_integration`,
+  `${internalNamespaces.osquery}.list_saved_queries`,
+  `${internalNamespaces.osquery}.get_table_schema`,
+  `${internalNamespaces.osquery}.run_live_query`,
+  `${internalNamespaces.osquery}.get_live_query_results`,
+  `${internalNamespaces.osquery}.list_packs`,
+  `${internalNamespaces.osquery}.resolve_agent_ids`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
@@ -206,8 +215,10 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'threat-intelligence',
   'find-security-rules',
   'pci-compliance',
+  'endpoint-forensic-analysis',
   'investigate-rule',
   'siem-readiness',
+  'endpoint-response-actions',
   'attack-discovery-alert-retrieval-builder',
   'attack-discovery-generator',
   'attack-discovery-workflow-troubleshooting',
