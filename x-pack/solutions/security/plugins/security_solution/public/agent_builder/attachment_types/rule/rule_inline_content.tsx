@@ -130,8 +130,6 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     return null;
   }
 
-  const hasDiff = originalRule != null;
-
   const { query, index, filters, interval, from } = getRuleDisplayFields(rule);
   const schedule = interval
     ? toSimpleRuleSchedule({ interval, from: from ?? `now-${interval}`, to: 'now' })
@@ -242,7 +240,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
         </>
       )}
 
-      {hasDiff && (
+      {originalRule != null && (
         <>
           <EuiSpacer size="s" />
           <EuiAccordion
