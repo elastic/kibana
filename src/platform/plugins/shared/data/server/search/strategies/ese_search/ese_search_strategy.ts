@@ -9,7 +9,6 @@
 
 import type { Observable } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import { catchError, tap } from 'rxjs';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
@@ -31,6 +30,7 @@ import { getDefaultSearchParams, getShardTimeout } from '../es_search';
 import { getTotalLoaded, shimHitsTotal } from '../../../../common/search/strategies/es_search';
 import type { SearchConfigSchema } from '../../../config';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
+import { getAsStreamWithRetryOption } from '../common/async_utils';
 
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
@@ -66,9 +66,7 @@ export const enhancedEsSearchStrategyProvider = (
         ...options.transport,
         signal: options.abortSignal,
         meta: true,
-        asStream: (options.stream
-          ? { retryOn401: true }
-          : undefined) as unknown as TransportRequestOptions['asStream'],
+        asStream: getAsStreamWithRetryOption(options.stream),
         requestTimeout: 600_000, // 10 minutes, making this huge enough that it should never interfere with the `wait_for_completion_timeout` param, which is what should be controlling the timeout of the search request.
       }
     );
@@ -93,9 +91,7 @@ export const enhancedEsSearchStrategyProvider = (
       ...options.transport,
       signal: options.abortSignal,
       meta: true,
-      asStream: (options.stream
-        ? { retryOn401: true }
-        : undefined) as unknown as TransportRequestOptions['asStream'],
+      asStream: getAsStreamWithRetryOption(options.stream),
     });
 
     return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options);
