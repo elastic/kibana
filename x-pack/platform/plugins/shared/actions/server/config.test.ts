@@ -622,10 +622,7 @@ describe('config validation', () => {
     });
 
     test('accepts an http URL in development mode', () => {
-      const result = configSchema.validate(
-        { relay: { url: 'http://relay.test' } },
-        { dev: true }
-      );
+      const result = configSchema.validate({ relay: { url: 'http://relay.test' } }, { dev: true });
 
       expect(result.relay?.url).toEqual('http://relay.test');
     });
