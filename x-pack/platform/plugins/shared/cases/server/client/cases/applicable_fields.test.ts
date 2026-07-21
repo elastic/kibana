@@ -195,6 +195,25 @@ describe('applicable_fields', () => {
       ).rejects.toThrow('Template missing not found');
     });
 
+    it('throws (does not leak the template) when the template belongs to a different owner', async () => {
+      // makeTemplateSO always sets owner: 'securitySolution' — request as a different,
+      // already-authorized owner to simulate a caller passing another owner's templateId.
+      templatesService.getTemplate.mockResolvedValue(
+        makeTemplateSO([
+          { name: 'rollout', label: 'Rollout', type: 'keyword', control: 'TEXTAREA' },
+        ]) as never
+      );
+
+      await expect(
+        resolveApplicableFields({
+          owner: 'observability',
+          templateId: 'tpl-1',
+          templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+        })
+      ).rejects.toThrow('Template tpl-1 not found');
+    });
+
     it('throws when the template has an invalid definition', async () => {
       templatesService.getTemplate.mockResolvedValue(
         makeTemplateSO([

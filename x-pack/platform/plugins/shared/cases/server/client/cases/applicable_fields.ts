@@ -90,7 +90,11 @@ export const resolveApplicableFields = async ({
     const templateSO = await templatesService.getTemplate(templateId, undefined, {
       includeDeleted: true,
     });
-    if (!templateSO) {
+    // `templatesService` is unsecured — `owner` here is already authorized (either the
+    // caller-supplied owner for pre-create discovery, or the case's owner for existing-case
+    // discovery), so reject a template belonging to a different owner rather than leaking its
+    // field structure across owners.
+    if (!templateSO || templateSO.attributes.owner !== owner) {
       throw Boom.badRequest(`Template ${templateId} not found`);
     }
 

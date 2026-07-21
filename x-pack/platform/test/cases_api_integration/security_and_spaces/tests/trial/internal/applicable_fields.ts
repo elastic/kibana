@@ -54,13 +54,13 @@ export default ({ getService }: FtrProviderContext): void => {
       .set('x-elastic-internal-origin', 'foo')
       .set('elastic-api-version', '2023-10-31');
 
-  const createTemplate = async (fields: Array<Record<string, unknown>>) => {
+  const createTemplate = async (fields: Array<Record<string, unknown>>, owner: string = OWNER) => {
     const { body } = await supertest
       .post('/internal/cases/templates')
       .set('kbn-xsrf', 'true')
       .send({
         name: 'Test Template',
-        owner: OWNER,
+        owner,
         definition: yamlStringify({ name: 'Test Template', fields }),
         isEnabled: true,
       })
@@ -123,6 +123,19 @@ export default ({ getService }: FtrProviderContext): void => {
         await getPublic(`${APPLICABLE_FIELDS_URL}?owner=${OWNER}&templateId=does-not-exist`).expect(
           400
         );
+      });
+
+      it('returns 400 (and does not leak fields) when templateId belongs to a different owner', async () => {
+        const otherOwnerTemplate = await createTemplate(
+          [{ name: 'secret_field', type: 'keyword', control: 'INPUT_TEXT', label: 'Secret' }],
+          'observabilityFixture'
+        );
+
+        const { body } = await getPublic(
+          `${APPLICABLE_FIELDS_URL}?owner=${OWNER}&templateId=${otherOwnerTemplate.templateId}`
+        ).expect(400);
+
+        expect(JSON.stringify(body)).to.not.contain('secret_field');
       });
 
       it('returns 400 when owner is omitted', async () => {

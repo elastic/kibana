@@ -28,7 +28,7 @@ export const getCaseApplicableFieldsRoute = createCasesRoute({
   },
   params: {
     params: schema.object({
-      case_id: schema.string(),
+      case_id: schema.string({ maxLength: 36 }),
     }),
   },
   handler: async ({ context, request, response }) => {
