@@ -427,9 +427,12 @@ describe('registerChatRoutes', () => {
       expect.objectContaining({
         executionId: createHash('sha256')
           .update(
-            ['default', 'team:T123/channel:C123/thread:1712345678.000100', 'Ev0PV23K4AB1'].join(
-              '\u0000'
-            )
+            [
+              'default',
+              ConversationOriginType.Slack,
+              'team:T123/channel:C123/thread:1712345678.000100',
+              'Ev0PV23K4AB1',
+            ].join('\u0000')
           )
           .digest('hex'),
         metadata: { idempotency_key: 'Ev0PV23K4AB1' },

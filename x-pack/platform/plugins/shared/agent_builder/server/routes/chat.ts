@@ -415,7 +415,9 @@ export function registerChatRoutes({
     const scopeId = conversationId ?? origin?.external_conversation_id ?? '';
     const executionId =
       providedExecutionId ??
-      createHash('sha256').update([spaceId, scopeId, idempotencyKey].join('\u0000')).digest('hex');
+      createHash('sha256')
+        .update([spaceId, origin?.type ?? '', scopeId, idempotencyKey].join('\u0000'))
+        .digest('hex');
 
     return {
       useTaskManager: true,

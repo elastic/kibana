@@ -45,15 +45,17 @@ const INTERNAL_API_VERSION = '1';
 
 const deriveIdempotentExecutionId = ({
   spaceId,
+  originType,
   externalConversationId,
   idempotencyKey,
 }: {
   spaceId: string;
+  originType: string;
   externalConversationId: string;
   idempotencyKey: string;
 }) =>
   createHash('sha256')
-    .update([spaceId, externalConversationId, idempotencyKey].join('\u0000'))
+    .update([spaceId, originType, externalConversationId, idempotencyKey].join('\u0000'))
     .digest('hex');
 
 apiTest.describe(
@@ -389,6 +391,7 @@ apiTest.describe(
           expect(executionId).toBe(
             deriveIdempotentExecutionId({
               spaceId: 'default',
+              originType: ConversationOriginType.Slack,
               externalConversationId: requestBody.origin.external_conversation_id,
               idempotencyKey,
             })
