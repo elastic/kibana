@@ -7,14 +7,14 @@
 
 import {
   EuiBadge,
-  EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
+  EuiTable,
+  EuiTableBody,
+  EuiTableRow,
+  EuiTableRowCell,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { GenAiFields } from './get_genai_fields';
@@ -41,33 +41,6 @@ interface DetailRow {
   label: React.ReactNode;
   content: React.ReactNode;
 }
-
-const detailTableCss = css`
-  thead {
-    display: none;
-  }
-  tr:last-child td {
-    border-bottom: none;
-  }
-`;
-
-const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
-  {
-    field: 'label' as const,
-    name: i18n.translate('xpack.apm.genAi.details.columnField', { defaultMessage: 'Field' }),
-    width: '160px',
-    render: (label: React.ReactNode) => (
-      <EuiText size="xs">
-        <strong>{label}</strong>
-      </EuiText>
-    ),
-  },
-  {
-    field: 'content' as const,
-    name: i18n.translate('xpack.apm.genAi.details.columnValue', { defaultMessage: 'Value' }),
-    render: (content: React.ReactNode) => content,
-  },
-];
 
 interface Props {
   genAi: GenAiFields;
@@ -210,15 +183,20 @@ export function GenAiTab({ genAi }: Props) {
             title={i18n.translate('xpack.apm.genAi.section.details', {
               defaultMessage: 'Details',
             })}
+            bordered={false}
           >
-            <EuiBasicTable
-              tableLayout="auto"
-              compressed
-              items={detailRows}
-              columns={DETAIL_COLUMNS}
-              data-test-subj="genAiDetails"
-              css={detailTableCss}
-            />
+            <EuiTable compressed data-test-subj="genAiDetails">
+              <EuiTableBody>
+                {detailRows.map(({ id, label, content }) => (
+                  <EuiTableRow key={id}>
+                    <EuiTableRowCell style={{ whiteSpace: 'nowrap', width: 160 }}>
+                      <strong>{label}</strong>
+                    </EuiTableRowCell>
+                    <EuiTableRowCell>{content}</EuiTableRowCell>
+                  </EuiTableRow>
+                ))}
+              </EuiTableBody>
+            </EuiTable>
           </GenAiSection>
         </>
       )}

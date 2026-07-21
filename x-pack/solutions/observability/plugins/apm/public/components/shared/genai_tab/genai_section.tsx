@@ -13,15 +13,12 @@ interface Props {
   title: string;
   /** Whether the accordion is open on first render. Defaults to true. */
   initialIsOpen?: boolean;
+  /** Wrap children in a bordered panel. Set to false for table content to avoid double borders. */
+  bordered?: boolean;
   children: React.ReactNode;
 }
 
-/**
- * A collapsible section that mirrors the visual style of Discover's trace overview
- * (`ContentFrameworkSection`): an EuiAccordion with a title header and its content
- * wrapped in a bordered, shadow-free EuiPanel.
- */
-export function GenAiSection({ id, title, initialIsOpen = true, children }: Props) {
+export function GenAiSection({ id, title, initialIsOpen = true, bordered = true, children }: Props) {
   return (
     <EuiAccordion
       id={`genAiSection-${id}`}
@@ -34,9 +31,13 @@ export function GenAiSection({ id, title, initialIsOpen = true, children }: Prop
       }
     >
       <EuiSpacer size="s" />
-      <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-        {children}
-      </EuiPanel>
+      {bordered ? (
+        <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+          {children}
+        </EuiPanel>
+      ) : (
+        children
+      )}
     </EuiAccordion>
   );
 }
