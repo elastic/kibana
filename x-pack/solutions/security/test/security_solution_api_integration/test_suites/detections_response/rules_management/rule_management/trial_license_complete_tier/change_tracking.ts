@@ -33,28 +33,32 @@ export default ({ getService }: FtrProviderContext): void => {
   const detectionsApi = getService('detectionsApi');
   const es = getService('es');
   const log = getService('log');
+  const utils = getService('securitySolutionUtils');
 
   const refreshHistory = async () => {
-    await es.indices.refresh({ index: CHANGE_HISTORY_DATA_STREAM, ignore_unavailable: true });
+    await es.indices.refresh(
+      { index: CHANGE_HISTORY_DATA_STREAM, ignore_unavailable: true },
+      { headers: { 'x-elastic-product-origin': 'kibana' } }
+    );
   };
 
   const clearHistory = async () => {
     try {
-      await es.deleteByQuery({
-        index: CHANGE_HISTORY_DATA_STREAM,
-        query: { match_all: {} },
-        conflicts: 'proceed',
-        refresh: true,
-      });
+      await es.deleteByQuery(
+        {
+          index: CHANGE_HISTORY_DATA_STREAM,
+          query: { match_all: {} },
+          conflicts: 'proceed',
+          refresh: true,
+        },
+        { headers: { 'x-elastic-product-origin': 'kibana' } }
+      );
     } catch {
       // Change history index may not exist yet
     }
   };
 
-  // Skip in Serverless until "xpack.alerting.ruleChangeTracking.enabled" and
-  // xpack.securitySolution.enableExperimental: [ruleChangesHistoryEnabled] feature flags
-  // permanently enabled
-  describe('@ess @skipInServerless rule change history', () => {
+  describe('@ess @serverless rule change history', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
@@ -78,9 +82,11 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.total).toBe(1);
         expect(body.items).toHaveLength(1);
 
+        const username = await utils.getUsername();
+
         const [item] = body.items;
         expect(item.action).toBe('rule_create');
-        expect(item.user).toEqual({ name: 'elastic' });
+        expect(item.user).toEqual({ name: username });
         expect(item.rule).toMatchObject({ id: rule.id, revision: 0 });
         expect(item.old_values).toBeNull();
       });

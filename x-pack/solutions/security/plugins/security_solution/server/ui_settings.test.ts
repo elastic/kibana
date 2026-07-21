@@ -26,7 +26,6 @@ describe('initUiSettings', () => {
     enableAlertsAndAttacksAlignment: false,
     extendedRuleExecutionLoggingEnabled: false,
     newFlyoutSystemDisabled: false,
-    ruleChangesHistoryEnabled: false,
   } as ExperimentalFeatures;
 
   beforeEach(() => {

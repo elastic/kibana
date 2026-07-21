@@ -59,7 +59,6 @@ export function generateAlertingConfig(overwrites: Partial<AlertingConfig> = {})
       totalFieldsLimit: 2800,
     },
     ruleChangeTracking: {
-      enabled: false,
       scope: ['security'],
     },
     invalidateApiKeysTask: {
