@@ -66,7 +66,7 @@ describe('ProfileStateRegistry', () => {
 
     expect(
       registry.pickStateByType({
-        profileState: {
+        profileStateMap: {
           testProfileState: {
             uiValue: 'ui',
             urlValue: 'url',
@@ -74,7 +74,7 @@ describe('ProfileStateRegistry', () => {
           },
           unregisteredProfileState: { uiValue: 'ignored' },
         },
-        stateType: ProfileStateType.Ui,
+        stateTypes: [ProfileStateType.Ui],
       })
     ).toEqual({
       testProfileState: {
@@ -89,12 +89,12 @@ describe('ProfileStateRegistry', () => {
 
     expect(
       registry.pickStateByType({
-        profileState: {
+        profileStateMap: {
           testProfileState: {
             uiValue: 'ui',
           },
         },
-        stateType: ProfileStateType.Persistent,
+        stateTypes: [ProfileStateType.Persistent],
       })
     ).toEqual({});
   });
@@ -105,8 +105,8 @@ describe('ProfileStateRegistry', () => {
 
     expect(
       registry.pickStateByType({
-        profileState: undefined,
-        stateType: ProfileStateType.Persistent,
+        profileStateMap: undefined,
+        stateTypes: [ProfileStateType.Persistent],
       })
     ).toEqual({});
   });
@@ -117,7 +117,7 @@ describe('ProfileStateRegistry', () => {
 
     expect(
       registry.pickStateByType({
-        profileState: {
+        profileStateMap: {
           testProfileState: {
             uiValue: 'ui',
             unregisteredValue: 'ignored',
@@ -126,7 +126,7 @@ describe('ProfileStateRegistry', () => {
             uiValue: 'ignored',
           },
         },
-        stateType: ProfileStateType.Ui,
+        stateTypes: [ProfileStateType.Ui],
       })
     ).toEqual({
       testProfileState: {
@@ -135,38 +135,36 @@ describe('ProfileStateRegistry', () => {
     });
   });
 
-  it('picks state by type merged over defaults', () => {
+  it('picks state by type expanded with defaults for requested types', () => {
     const registry = new ProfileStateRegistry();
     registry.registerDefinition(TEST_PROFILE_STATE_DEF);
 
     expect(
       registry.pickStateByType({
-        profileState: {
+        profileStateMap: {
           testProfileState: {
             uiValue: 'ui',
             persistentValue: 'persistent',
           },
         },
-        stateType: ProfileStateType.Persistent,
-        shouldMergeDefaults: true,
+        stateTypes: [ProfileStateType.Url, ProfileStateType.Persistent],
+        defaultsHandling: 'expand',
       })
     ).toEqual({
       testProfileState: {
-        uiValue: 'defaultUi',
         urlValue: 'defaultUrl',
         persistentValue: 'persistent',
-        nestedValue: { count: 0 },
       },
     });
   });
 
-  it('picks no merged state when no registered fields match the requested type', () => {
+  it('picks no expanded state when no registered fields match the requested type', () => {
     const registry = new ProfileStateRegistry();
     registry.registerDefinition(TEST_PROFILE_STATE_DEF);
 
     expect(
       registry.pickStateByType({
-        profileState: {
+        profileStateMap: {
           testProfileState: {
             uiValue: 'ui',
           },
@@ -174,10 +172,199 @@ describe('ProfileStateRegistry', () => {
             persistentValue: 'ignored',
           },
         },
-        stateType: ProfileStateType.Persistent,
-        shouldMergeDefaults: true,
+        stateTypes: [ProfileStateType.Persistent],
+        defaultsHandling: 'expand',
       })
     ).toEqual({});
+  });
+
+  it('picks state by type stripped of default values', () => {
+    const registry = new ProfileStateRegistry();
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    expect(
+      registry.pickStateByType({
+        profileStateMap: {
+          testProfileState: {
+            uiValue: 'defaultUi',
+            urlValue: 'url',
+            persistentValue: 'defaultPersistent',
+            nestedValue: { count: 0 },
+          },
+        },
+        stateTypes: [ProfileStateType.Ui, ProfileStateType.Url, ProfileStateType.Persistent],
+        defaultsHandling: 'strip',
+      })
+    ).toEqual({
+      testProfileState: {
+        urlValue: 'url',
+      },
+    });
+  });
+
+  it('omits default-only state when stripping defaults', () => {
+    const registry = new ProfileStateRegistry();
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    expect(
+      registry.pickStateByType({
+        profileStateMap: {
+          testProfileState: TEST_PROFILE_STATE_DEF.defaultState,
+        },
+        stateTypes: [ProfileStateType.Ui, ProfileStateType.Url, ProfileStateType.Persistent],
+        defaultsHandling: 'strip',
+      })
+    ).toEqual({});
+  });
+
+  it('merges registered profile state maps in order', () => {
+    const registry = new ProfileStateRegistry();
+    const secondaryProfileStateDef: ProfileStateDefinition<{
+      secondaryUiValue: string;
+      secondaryUrlValue: string;
+    }> = {
+      key: 'secondaryProfileState',
+      descriptor: {
+        secondaryUiValue: { type: ProfileStateType.Ui },
+        secondaryUrlValue: { type: ProfileStateType.Url },
+      },
+      defaultState: {
+        secondaryUiValue: 'defaultSecondaryUi',
+        secondaryUrlValue: 'defaultSecondaryUrl',
+      },
+    };
+
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+    registry.registerDefinition(secondaryProfileStateDef);
+
+    expect(
+      registry.mergeState(
+        {
+          testProfileState: {
+            uiValue: 'firstUi',
+            urlValue: 'firstUrl',
+            unregisteredValue: 'ignored',
+          },
+          secondaryProfileState: {
+            secondaryUrlValue: 'firstSecondaryUrl',
+          },
+          unregisteredProfileState: {
+            uiValue: 'ignored',
+          },
+        },
+        undefined,
+        {
+          testProfileState: {
+            uiValue: 'secondUi',
+            persistentValue: 'secondPersistent',
+          },
+          secondaryProfileState: {
+            secondaryUiValue: 'secondSecondaryUi',
+          },
+        }
+      )
+    ).toEqual({
+      testProfileState: {
+        uiValue: 'secondUi',
+        urlValue: 'firstUrl',
+        persistentValue: 'secondPersistent',
+      },
+      secondaryProfileState: {
+        secondaryUrlValue: 'firstSecondaryUrl',
+        secondaryUiValue: 'secondSecondaryUi',
+      },
+    });
+  });
+
+  it('returns an empty object when merging only undefined or unregistered state', () => {
+    const registry = new ProfileStateRegistry();
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    expect(
+      registry.mergeState(undefined, {
+        unregisteredProfileState: {
+          uiValue: 'ignored',
+        },
+      })
+    ).toEqual({});
+  });
+
+  it('picks fields by state type from a single profile state object', () => {
+    const registry = new ProfileStateRegistry();
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    expect(
+      registry.filterFieldsByType({
+        profileState: {
+          uiValue: 'ui',
+          urlValue: 'url',
+          persistentValue: 'persistent',
+          nestedValue: { count: 1 },
+        },
+        stateKey: TEST_PROFILE_STATE_DEF.key,
+        stateTypes: [ProfileStateType.Ui, ProfileStateType.Url],
+      })
+    ).toEqual({
+      uiValue: 'ui',
+      urlValue: 'url',
+      nestedValue: { count: 1 },
+    });
+  });
+
+  it('returns undefined when no fields match a single profile state object', () => {
+    const registry = new ProfileStateRegistry();
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    expect(
+      registry.filterFieldsByType({
+        profileState: {
+          uiValue: 'ui',
+        },
+        stateKey: TEST_PROFILE_STATE_DEF.key,
+        stateTypes: [ProfileStateType.Persistent],
+      })
+    ).toBeUndefined();
+  });
+
+  it('picks fields by state type from a single profile state object expanded with defaults', () => {
+    const registry = new ProfileStateRegistry();
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    expect(
+      registry.filterFieldsByType({
+        profileState: {
+          uiValue: 'ui',
+          persistentValue: 'persistent',
+        },
+        stateKey: TEST_PROFILE_STATE_DEF.key,
+        stateTypes: [ProfileStateType.Url, ProfileStateType.Persistent],
+        defaultsHandling: 'expand',
+      })
+    ).toEqual({
+      urlValue: 'defaultUrl',
+      persistentValue: 'persistent',
+    });
+  });
+
+  it('picks fields by state type from a single profile state object stripped of defaults', () => {
+    const registry = new ProfileStateRegistry();
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    expect(
+      registry.filterFieldsByType({
+        profileState: {
+          uiValue: 'ui',
+          urlValue: 'defaultUrl',
+          persistentValue: 'defaultPersistent',
+          nestedValue: { count: 0 },
+        },
+        stateKey: TEST_PROFILE_STATE_DEF.key,
+        stateTypes: [ProfileStateType.Ui, ProfileStateType.Url, ProfileStateType.Persistent],
+        defaultsHandling: 'strip',
+      })
+    ).toEqual({
+      uiValue: 'ui',
+    });
   });
 });
 

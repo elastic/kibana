@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { RunStepButton } from './run_step_button';
 import {

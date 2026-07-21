@@ -1,0 +1,133 @@
+{
+  "sha1": "dd1af19ad62171069e1df2b4a73faf503d4ce4b0",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "fa3e925e0f5c158-34f75b388c3e8f0",
+      "title": "Embeddable alerts table - alerts panel authorization alerts-only user (stackAlertsOnly) sees alerts in a pre-configured alerts panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/add_alerts_panel.spec.ts",
+        "line": 56,
+        "column": 11
+      }
+    },
+    {
+      "id": "fa3e925e0f5c158-160fc5a0d70a2bf",
+      "title": "Embeddable alerts table - alerts panel authorization stack rules user (stackAlerts) sees alerts in a pre-configured alerts panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/add_alerts_panel.spec.ts",
+        "line": 56,
+        "column": 11
+      }
+    },
+    {
+      "id": "8b04f9a21d8cb7c-9da465e50b5c081",
+      "title": "Embeddable alerts table - alert consumer visibility alerts-only user (stackAlertsOnly) sees alerts with consumer alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/consumer_visibility.spec.ts",
+        "line": 71,
+        "column": 13
+      }
+    },
+    {
+      "id": "8b04f9a21d8cb7c-f512be975cfd333",
+      "title": "Embeddable alerts table - alert consumer visibility alerts-only user (stackAlertsOnly) sees alerts with consumer stackAlerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/consumer_visibility.spec.ts",
+        "line": 71,
+        "column": 13
+      }
+    },
+    {
+      "id": "8b04f9a21d8cb7c-911829f42de0a73",
+      "title": "Embeddable alerts table - alert consumer visibility alerts-only user (stackAlertsOnly) does not see alerts with consumer logs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/consumer_visibility.spec.ts",
+        "line": 103,
+        "column": 13
+      }
+    },
+    {
+      "id": "8b04f9a21d8cb7c-5fcefa788f3015a",
+      "title": "Embeddable alerts table - alert consumer visibility stack rules user (stackAlerts) sees alerts with consumer alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/consumer_visibility.spec.ts",
+        "line": 71,
+        "column": 13
+      }
+    },
+    {
+      "id": "8b04f9a21d8cb7c-e43c95e3d7b7220",
+      "title": "Embeddable alerts table - alert consumer visibility stack rules user (stackAlerts) sees alerts with consumer stackAlerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/consumer_visibility.spec.ts",
+        "line": 71,
+        "column": 13
+      }
+    },
+    {
+      "id": "8b04f9a21d8cb7c-0a28a9a446e69c9",
+      "title": "Embeddable alerts table - alert consumer visibility stack rules user (stackAlerts) does not see alerts with consumer logs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/consumer_visibility.spec.ts",
+        "line": 103,
+        "column": 13
+      }
+    }
+  ]
+}

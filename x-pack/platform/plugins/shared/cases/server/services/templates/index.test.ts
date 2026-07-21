@@ -88,6 +88,7 @@ describe('TemplatesService', () => {
   // Spy on the analytics v2 refresh hook so the per-write-path assertions
   // can verify it fires without any wiring.
   const refreshAnalyticsV2DataView = jest.fn();
+  const getFieldDefinitionsForOwner = jest.fn().mockResolvedValue([]);
 
   const createService = () =>
     new TemplatesService({
@@ -96,6 +97,7 @@ describe('TemplatesService', () => {
       esClient,
       namespace: 'default',
       refreshAnalyticsV2DataView,
+      getFieldDefinitionsForOwner,
     });
 
   /** Default getAllTemplates params — override individual fields as needed */
@@ -114,6 +116,7 @@ describe('TemplatesService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     unsecuredSavedObjectsClient.find.mockResolvedValue(createMockFindResponse([]));
+    getFieldDefinitionsForOwner.mockResolvedValue([]);
   });
 
   describe('getAllTemplates', () => {
@@ -886,6 +889,82 @@ describe('TemplatesService', () => {
       }),
       expect.objectContaining({ id: 'generated-id' })
     );
+  });
+
+  it('resolves $ref fields into fieldDefinitions on create', async () => {
+    const definition = yamlStringify({
+      name: 'Case with ref',
+      fields: [{ $ref: 'severity_level' }],
+    });
+    getFieldDefinitionsForOwner.mockResolvedValue([
+      {
+        fieldDefinitionId: 'fd-1',
+        name: 'severity_level',
+        owner: 'securitySolution',
+        description: '',
+        definition: yamlStringify({
+          name: 'severity_level',
+          label: 'Severity Level',
+          type: 'keyword',
+          control: 'SELECT_BASIC',
+          metadata: { options: ['Low', 'High'] },
+        }),
+      },
+    ]);
+    const service = createService();
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.createTemplate(
+      {
+        name: 'Ref Template',
+        owner: 'securitySolution',
+        definition,
+      },
+      'alice',
+      'generated-id'
+    );
+
+    expect(getFieldDefinitionsForOwner).toHaveBeenCalledWith('securitySolution');
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      expect.objectContaining({
+        fieldCount: 1,
+        fieldDefinitions: [
+          {
+            name: 'severity_level',
+            label: 'Severity Level',
+            type: 'keyword',
+            control: 'SELECT_BASIC',
+          },
+        ],
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('does not fetch the field library on create when the definition has no $ref fields', async () => {
+    const definition = yamlStringify({
+      name: 'Case without refs',
+      fields: [{ name: 'inline_notes', label: 'Notes', type: 'keyword', control: 'INPUT_TEXT' }],
+    });
+    const service = createService();
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.createTemplate(
+      { name: 'Inline Template', owner: 'securitySolution', definition },
+      'alice',
+      'generated-id'
+    );
+
+    expect(getFieldDefinitionsForOwner).not.toHaveBeenCalled();
   });
 
   it('does not derive template metadata from YAML case defaults on create', async () => {

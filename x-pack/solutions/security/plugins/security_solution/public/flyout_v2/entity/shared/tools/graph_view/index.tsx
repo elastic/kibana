@@ -9,7 +9,7 @@ import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import {
   GraphGroupedNodePreviewPanel,
   type GraphGroupedNodePreviewPanelProps,

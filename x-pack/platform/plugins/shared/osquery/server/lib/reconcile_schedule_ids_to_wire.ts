@@ -7,7 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { get, isEqual, unset } from 'lodash';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import type { CoreStart, Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
