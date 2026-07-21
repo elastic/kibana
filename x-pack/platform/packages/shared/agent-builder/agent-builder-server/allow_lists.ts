@@ -309,6 +309,10 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Security Solution – Threat Intelligence
   'threat-intel-mitre-heatmap',
+  'threat-intel-report-table',
+  'threat-intel-severity-timeline',
+  'threat-intel-subscription-confirmation',
+  'threat-intel-finding-card',
 
   // Security Solution – Attack Discovery (discoveries plugin)
   // gated behind the workflows feature flag
