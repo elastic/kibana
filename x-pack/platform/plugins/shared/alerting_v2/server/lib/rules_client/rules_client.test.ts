@@ -1264,25 +1264,6 @@ describe('RulesClient', () => {
         data: { code: 'RULE_RUN_CONFLICT', details: { rule_id: 'rule-id-run-conflict' } },
       });
     });
-
-    it('logs when the task was forced to run', async () => {
-      const client = createClient();
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
-        attributes: { ...baseSoAttrs, enabled: true },
-        version: 'WzEsMV0=',
-        id: 'rule-id-run-forced',
-        type: RULE_SAVED_OBJECT_TYPE,
-        references: [],
-      });
-      taskManager.runSoon.mockResolvedValueOnce({
-        id: 'task:run',
-        forced: true,
-      });
-
-      await client.runRuleNow({ id: 'rule-id-run-forced' });
-
-      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('rule-id-run-forced'));
-    });
   });
 
   describe('findRules', () => {

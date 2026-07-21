@@ -33,6 +33,7 @@ describe('useRunRule', () => {
   const mockRunRule = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddDanger = jest.fn();
+  const mockAddWarning = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -44,13 +45,19 @@ describe('useRunRule', () => {
         return { runRule: mockRunRule } as any;
       }
       if (service === 'notifications') {
-        return { toasts: { addSuccess: mockAddSuccess, addDanger: mockAddDanger } } as any;
+        return {
+          toasts: {
+            addSuccess: mockAddSuccess,
+            addDanger: mockAddDanger,
+            addWarning: mockAddWarning,
+          },
+        } as any;
       }
       return undefined as any;
     });
   });
 
-  it('shows a success toast and invalidates the rule detail query', async () => {
+  it('shows a success toast', async () => {
     mockRunRule.mockResolvedValue(undefined);
     const { result } = renderHook(() => useRunRule(), { wrapper: createWrapper() });
 
@@ -63,7 +70,7 @@ describe('useRunRule', () => {
     });
   });
 
-  it('shows a danger toast when the run fails', async () => {
+  it('shows a danger toast when the run fails for an unrecognized reason', async () => {
     mockRunRule.mockRejectedValue(new Error('run failed'));
     const { result } = renderHook(() => useRunRule(), { wrapper: createWrapper() });
 
@@ -71,6 +78,37 @@ describe('useRunRule', () => {
 
     await waitFor(() => {
       expect(mockAddDanger).toHaveBeenCalledWith(expect.any(String));
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+      expect(mockAddWarning).not.toHaveBeenCalled();
+    });
+  });
+
+  it('shows a warning toast (not danger) when the rule is already running', async () => {
+    mockRunRule.mockRejectedValue(
+      Object.assign(new Error('conflict'), { body: { code: 'RULE_ALREADY_RUNNING' } })
+    );
+    const { result } = renderHook(() => useRunRule(), { wrapper: createWrapper() });
+
+    result.current.mutate({ id: 'rule-1' });
+
+    await waitFor(() => {
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.any(String));
+      expect(mockAddDanger).not.toHaveBeenCalled();
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+    });
+  });
+
+  it('shows a warning toast (not danger) on a run conflict', async () => {
+    mockRunRule.mockRejectedValue(
+      Object.assign(new Error('conflict'), { body: { code: 'RULE_RUN_CONFLICT' } })
+    );
+    const { result } = renderHook(() => useRunRule(), { wrapper: createWrapper() });
+
+    result.current.mutate({ id: 'rule-1' });
+
+    await waitFor(() => {
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.any(String));
+      expect(mockAddDanger).not.toHaveBeenCalled();
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });
   });

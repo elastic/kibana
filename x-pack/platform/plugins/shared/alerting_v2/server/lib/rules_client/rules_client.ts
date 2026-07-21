@@ -474,10 +474,9 @@ export class RulesClient {
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
 
-    let forced: boolean;
     let conflict: boolean | undefined;
     try {
-      ({ forced, conflict } = await this.taskManager.runSoon(taskId));
+      ({ conflict } = await this.taskManager.runSoon(taskId));
     } catch (e) {
       if (e instanceof TaskAlreadyRunningError) {
         throw Boom.conflict(`Rule with id "${id}" is already running`, {
@@ -495,12 +494,6 @@ export class RulesClient {
       throw Boom.conflict(`Running rule with id "${id}" conflicted, please retry`, {
         code: ALERTING_V2_ERROR_CODES.RULE_RUN_CONFLICT,
         details: { rule_id: id },
-      });
-    }
-
-    if (forced) {
-      this.logger.info({
-        message: `Rule "${id}" was forced to run despite being in "running" status`,
       });
     }
   }
