@@ -591,6 +591,23 @@
     ]
   },
   {
+    "id": "obs-signals-metrics",
+    "name": "Obs UX: Signals & Metrics",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/obs-signals-metrics-team",
+      "label": "Team:obs-signals-metrics"
+    },
+    "responsibilities": [
+      "Infrastructure metrics",
+      "Hosts UI",
+      "Metrics Explorer",
+      "Metrics Experience"
+    ]
+  },
+  {
     "id": "obs-signals-traces",
     "name": "Obs UX: Signals & Traces",
     "areas": [

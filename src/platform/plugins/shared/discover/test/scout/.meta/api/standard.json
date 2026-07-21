@@ -1,5 +1,5 @@
 {
-  "sha1": "1512ddeee76378b7a6b5327b35f5b349c7c844cc",
+  "sha1": "b81a6e23ddf8223b5eaa9aab14d40bc0c23c1a8c",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -106,6 +106,84 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/api/tests/create_discover_session.spec.ts",
         "line": 126,
+        "column": 10
+      }
+    },
+    {
+      "id": "bf79177725f4c71-85dc3d09cd6fa87",
+      "title": "DELETE /api/discover_sessions/{id} deletes an existing Discover session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/delete_discover_session.spec.ts",
+        "line": 36,
+        "column": 10
+      }
+    },
+    {
+      "id": "bf79177725f4c71-d3305e240325400",
+      "title": "DELETE /api/discover_sessions/{id} returns 404 when the Discover session does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/delete_discover_session.spec.ts",
+        "line": 64,
+        "column": 10
+      }
+    },
+    {
+      "id": "bf79177725f4c71-d59f9a34d0b583f",
+      "title": "DELETE /api/discover_sessions/{id} returns 403 when the user cannot delete Discover sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/delete_discover_session.spec.ts",
+        "line": 79,
         "column": 10
       }
     },
