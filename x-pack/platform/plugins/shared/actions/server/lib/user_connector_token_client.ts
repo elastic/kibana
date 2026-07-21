@@ -643,6 +643,13 @@ export class UserConnectorTokenClient {
               .join(', ')}`
           );
         }
+        // Stop if an entire page failed to delete; otherwise the next find() returns
+        // the same records and the loop never terminates.
+        if (failed.length === result.saved_objects.length) {
+          throw new Error(
+            `Failed to make progress deleting user_connector_token records for ${context}`
+          );
+        }
       }
     } catch (err) {
       this.logger.error(
