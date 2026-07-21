@@ -32,7 +32,7 @@ import {
   usePermissionCheck,
   createPermissionFailureMessage,
 } from '../../capabilities/check_capabilities';
-import { useEnabledFeatures } from '../../contexts/ml/serverless_context';
+import { useEnabledFeatures } from '../../contexts/ml/enabled_features_context';
 import { useMlKibana } from '../../contexts/kibana';
 import type { TabIdType, KibanaAssetType } from './flyout';
 import { TAB_IDS } from './flyout';
