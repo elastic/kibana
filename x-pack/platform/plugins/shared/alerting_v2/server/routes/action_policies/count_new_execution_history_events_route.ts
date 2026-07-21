@@ -17,7 +17,10 @@ import {
 import { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import { countActionPolicyExecutionHistoryOasExamples } from './action_policy_oas_examples';
+import {
+  COUNT_ACTION_POLICY_EXECUTION_HISTORY_SUMMARY,
+  countActionPolicyExecutionHistoryOasExamples,
+} from './action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH } from '../constants';
 
@@ -31,7 +34,7 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'Count new action policy execution events since a timestamp',
+    summary: COUNT_ACTION_POLICY_EXECUTION_HISTORY_SUMMARY,
     description:
       'Returns the count of dispatcher summary events with @timestamp greater than the given ISO timestamp.',
     oasOperationObject: countActionPolicyExecutionHistoryOasExamples,

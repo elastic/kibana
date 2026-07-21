@@ -18,7 +18,10 @@ import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import { actionPolicyTagsOasExamples } from '../action_policies/action_policy_oas_examples';
+import {
+  ACTION_POLICY_TAGS_SUMMARY,
+  actionPolicyTagsOasExamples,
+} from '../action_policies/action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 
 @injectable()
@@ -31,7 +34,7 @@ export class ActionPolicyTagsRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'Get action policy tags suggestions',
+    summary: ACTION_POLICY_TAGS_SUMMARY,
     description: 'Get suggestions for action policy tags based on an optional search query.',
     oasOperationObject: actionPolicyTagsOasExamples,
   } as const;

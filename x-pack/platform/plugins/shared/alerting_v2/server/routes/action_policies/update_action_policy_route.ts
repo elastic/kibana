@@ -19,7 +19,10 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import { updateActionPolicyOasExamples } from './action_policy_oas_examples';
+import {
+  UPDATE_ACTION_POLICY_SUMMARY,
+  updateActionPolicyOasExamples,
+} from './action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
@@ -37,7 +40,7 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'Partially update an action policy.',
+    summary: UPDATE_ACTION_POLICY_SUMMARY,
     description:
       'Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.',
     oasOperationObject: updateActionPolicyOasExamples,

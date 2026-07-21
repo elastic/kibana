@@ -17,7 +17,10 @@ import {
 import { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import { listActionPolicyExecutionHistoryOasExamples } from './action_policy_oas_examples';
+import {
+  LIST_ACTION_POLICY_EXECUTION_HISTORY_SUMMARY,
+  listActionPolicyExecutionHistoryOasExamples,
+} from './action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
 
@@ -31,7 +34,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'List action policy execution history',
+    summary: LIST_ACTION_POLICY_EXECUTION_HISTORY_SUMMARY,
     description:
       'Get a paginated list of dispatcher summary events for action policies in the current space.',
     oasOperationObject: listActionPolicyExecutionHistoryOasExamples,

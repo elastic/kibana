@@ -17,7 +17,10 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import { disableActionPolicyOasExamples } from './action_policy_oas_examples';
+import {
+  DISABLE_ACTION_POLICY_SUMMARY,
+  disableActionPolicyOasExamples,
+} from './action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
@@ -35,7 +38,7 @@ export class DisableActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'Disable an action policy',
+    summary: DISABLE_ACTION_POLICY_SUMMARY,
     description: 'Disable an action policy by identifier.',
     oasOperationObject: disableActionPolicyOasExamples,
   } as const;

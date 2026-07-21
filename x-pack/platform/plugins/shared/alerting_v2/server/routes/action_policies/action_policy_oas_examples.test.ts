@@ -13,6 +13,7 @@ import {
 } from '../../lib/errors/action_policy_error_messages';
 import { CreateActionPolicyRoute } from './create_action_policy_route';
 import {
+  CREATE_ACTION_POLICY_SUMMARY,
   actionPolicyTagsOasExamples,
   createActionPolicyOasExamples,
   getActionPolicyOasExamples,
@@ -23,12 +24,13 @@ describe('action policy OAS examples', () => {
   it('includes request, success, and route-error examples for create', () => {
     const oas = createActionPolicyOasExamples();
 
+    expect(CreateActionPolicyRoute.options.summary).toBe(CREATE_ACTION_POLICY_SUMMARY);
     expect(
       oas.requestBody?.content?.['application/json']?.examples?.createActionPolicyRequest
-    ).toBeDefined();
+    ).toEqual(expect.objectContaining({ summary: CREATE_ACTION_POLICY_SUMMARY }));
     expect(
       oas.responses?.[201]?.content?.['application/json']?.examples?.createActionPolicyResponse
-    ).toBeDefined();
+    ).toEqual(expect.objectContaining({ summary: CREATE_ACTION_POLICY_SUMMARY }));
     expect(
       oas.responses?.[400]?.content?.['application/json']?.examples?.invalidActionPolicyData
     ).toEqual(
@@ -100,5 +102,4 @@ describe('action policy OAS examples', () => {
       })
     );
   });
-
 });

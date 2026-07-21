@@ -37,6 +37,26 @@ type OASOperationObject = Exclude<
 
 type RouteErrorStatus = 400 | 404 | 409;
 
+/** Shared with each action-policy route's `routeOptions.summary`. */
+export const CREATE_ACTION_POLICY_SUMMARY = 'Create an action policy';
+export const UPSERT_ACTION_POLICY_SUMMARY = 'Create or replace an action policy';
+export const UPDATE_ACTION_POLICY_SUMMARY = 'Partially update an action policy.';
+export const GET_ACTION_POLICY_SUMMARY = 'Get an action policy';
+export const LIST_ACTION_POLICIES_SUMMARY = 'List action policies';
+export const DELETE_ACTION_POLICY_SUMMARY = 'Delete an action policy';
+export const ENABLE_ACTION_POLICY_SUMMARY = 'Enable an action policy';
+export const DISABLE_ACTION_POLICY_SUMMARY = 'Disable an action policy';
+export const SNOOZE_ACTION_POLICY_SUMMARY = 'Snooze an action policy';
+export const UNSNOOZE_ACTION_POLICY_SUMMARY = 'Unsnooze an action policy';
+export const UPDATE_ACTION_POLICY_API_KEY_SUMMARY = 'Update an action policy API key';
+export const BULK_ACTION_ACTION_POLICIES_SUMMARY = 'Bulk action action policies';
+export const MATCH_ACTION_POLICIES_FOR_RULE_SUMMARY = 'Match action policies for a rule';
+export const LIST_ACTION_POLICY_EXECUTION_HISTORY_SUMMARY = 'List action policy execution history';
+export const COUNT_ACTION_POLICY_EXECUTION_HISTORY_SUMMARY =
+  'Count new action policy execution events since a timestamp';
+export const MATCHER_DATA_FIELDS_SUMMARY = 'Get matcher data fields suggestions';
+export const ACTION_POLICY_TAGS_SUMMARY = 'Get action policy tags suggestions';
+
 const CREATE_REQUEST: CreateActionPolicyDataInput = {
   name: 'Notify on host alerts',
   description: 'Sends a workflow notification when matching host alerts fire.',
@@ -225,11 +245,11 @@ export const createActionPolicyOasExamples = (): OASOperationObject =>
   buildActionPolicyOas({
     requestBody: {
       name: 'createActionPolicyRequest',
-      summary: 'Create an action policy',
+      summary: CREATE_ACTION_POLICY_SUMMARY,
       value: CREATE_REQUEST,
     },
     responses: {
-      201: policyResponse('createActionPolicyResponse', 'Created action policy'),
+      201: policyResponse('createActionPolicyResponse', CREATE_ACTION_POLICY_SUMMARY),
     },
     errors: [400],
   });
@@ -238,12 +258,12 @@ export const upsertActionPolicyOasExamples = (): OASOperationObject =>
   buildActionPolicyOas({
     requestBody: {
       name: 'upsertActionPolicyRequest',
-      summary: 'Create or replace an action policy',
+      summary: UPSERT_ACTION_POLICY_SUMMARY,
       value: CREATE_REQUEST,
     },
     responses: {
-      200: policyResponse('upsertActionPolicyReplacedResponse', 'Replaced action policy'),
-      201: policyResponse('upsertActionPolicyCreatedResponse', 'Created action policy'),
+      200: policyResponse('upsertActionPolicyReplacedResponse', UPSERT_ACTION_POLICY_SUMMARY),
+      201: policyResponse('upsertActionPolicyCreatedResponse', UPSERT_ACTION_POLICY_SUMMARY),
     },
     errors: [400, 404, 409],
   });
@@ -252,11 +272,11 @@ export const updateActionPolicyOasExamples = (): OASOperationObject =>
   buildActionPolicyOas({
     requestBody: {
       name: 'updateActionPolicyRequest',
-      summary: 'Partially update an action policy',
+      summary: UPDATE_ACTION_POLICY_SUMMARY,
       value: UPDATE_REQUEST,
     },
     responses: {
-      200: policyResponse('updateActionPolicyResponse', 'Updated action policy', {
+      200: policyResponse('updateActionPolicyResponse', UPDATE_ACTION_POLICY_SUMMARY, {
         name: UPDATE_REQUEST.name,
         description: UPDATE_REQUEST.description,
       }),
@@ -267,7 +287,7 @@ export const updateActionPolicyOasExamples = (): OASOperationObject =>
 export const getActionPolicyOasExamples = (): OASOperationObject =>
   buildActionPolicyOas({
     responses: {
-      200: policyResponse('getActionPolicyResponse', 'Requested action policy'),
+      200: policyResponse('getActionPolicyResponse', GET_ACTION_POLICY_SUMMARY),
     },
     errors: [404],
   });
@@ -277,7 +297,7 @@ export const listActionPoliciesOasExamples = (): OASOperationObject =>
     responses: {
       200: {
         name: 'listActionPoliciesResponse',
-        summary: 'Paginated action policies',
+        summary: LIST_ACTION_POLICIES_SUMMARY,
         value: LIST_RESPONSE,
       },
     },
@@ -292,7 +312,7 @@ export const deleteActionPolicyOasExamples = (): OASOperationObject =>
 export const enableActionPolicyOasExamples = (): OASOperationObject =>
   buildActionPolicyOas({
     responses: {
-      200: policyResponse('enableActionPolicyResponse', 'Enabled action policy', {
+      200: policyResponse('enableActionPolicyResponse', ENABLE_ACTION_POLICY_SUMMARY, {
         enabled: true,
       }),
     },
@@ -302,7 +322,7 @@ export const enableActionPolicyOasExamples = (): OASOperationObject =>
 export const disableActionPolicyOasExamples = (): OASOperationObject =>
   buildActionPolicyOas({
     responses: {
-      200: policyResponse('disableActionPolicyResponse', 'Disabled action policy', {
+      200: policyResponse('disableActionPolicyResponse', DISABLE_ACTION_POLICY_SUMMARY, {
         enabled: false,
       }),
     },
@@ -313,11 +333,11 @@ export const snoozeActionPolicyOasExamples = (): OASOperationObject =>
   buildActionPolicyOas({
     requestBody: {
       name: 'snoozeActionPolicyRequest',
-      summary: 'Snooze until a timestamp',
+      summary: SNOOZE_ACTION_POLICY_SUMMARY,
       value: SNOOZE_REQUEST,
     },
     responses: {
-      200: policyResponse('snoozeActionPolicyResponse', 'Snoozed action policy', {
+      200: policyResponse('snoozeActionPolicyResponse', SNOOZE_ACTION_POLICY_SUMMARY, {
         snoozedUntil: SNOOZE_REQUEST.snoozedUntil,
       }),
     },
@@ -327,7 +347,7 @@ export const snoozeActionPolicyOasExamples = (): OASOperationObject =>
 export const unsnoozeActionPolicyOasExamples = (): OASOperationObject =>
   buildActionPolicyOas({
     responses: {
-      200: policyResponse('unsnoozeActionPolicyResponse', 'Unsnoozed action policy', {
+      200: policyResponse('unsnoozeActionPolicyResponse', UNSNOOZE_ACTION_POLICY_SUMMARY, {
         snoozedUntil: null,
       }),
     },
@@ -343,13 +363,13 @@ export const bulkActionActionPoliciesOasExamples = (): OASOperationObject =>
   buildActionPolicyOas({
     requestBody: {
       name: 'bulkActionActionPoliciesRequest',
-      summary: 'Enable and snooze policies',
+      summary: BULK_ACTION_ACTION_POLICIES_SUMMARY,
       value: BULK_REQUEST,
     },
     responses: {
       200: {
         name: 'bulkActionActionPoliciesResponse',
-        summary: 'Bulk action result',
+        summary: BULK_ACTION_ACTION_POLICIES_SUMMARY,
         value: BULK_RESPONSE,
       },
     },
@@ -360,13 +380,13 @@ export const matchActionPoliciesForRuleOasExamples = (): OASOperationObject =>
   buildActionPolicyOas({
     requestBody: {
       name: 'matchActionPoliciesForRuleRequest',
-      summary: 'Match policies for a rule',
+      summary: MATCH_ACTION_POLICIES_FOR_RULE_SUMMARY,
       value: MATCH_REQUEST,
     },
     responses: {
       200: {
         name: 'matchActionPoliciesForRuleResponse',
-        summary: 'Matched action policies',
+        summary: MATCH_ACTION_POLICIES_FOR_RULE_SUMMARY,
         value: MATCH_RESPONSE,
       },
     },
@@ -378,7 +398,7 @@ export const listActionPolicyExecutionHistoryOasExamples = (): OASOperationObjec
     responses: {
       200: {
         name: 'listActionPolicyExecutionHistoryResponse',
-        summary: 'Paginated execution history',
+        summary: LIST_ACTION_POLICY_EXECUTION_HISTORY_SUMMARY,
         value: EXECUTION_HISTORY_RESPONSE,
       },
     },
@@ -390,7 +410,7 @@ export const countActionPolicyExecutionHistoryOasExamples = (): OASOperationObje
     responses: {
       200: {
         name: 'countActionPolicyExecutionHistoryResponse',
-        summary: 'Count of new execution events',
+        summary: COUNT_ACTION_POLICY_EXECUTION_HISTORY_SUMMARY,
         value: EXECUTION_HISTORY_COUNT_RESPONSE,
       },
     },
@@ -402,7 +422,7 @@ export const matcherDataFieldsOasExamples = (): OASOperationObject =>
     responses: {
       200: {
         name: 'matcherDataFieldsResponse',
-        summary: 'Suggested matcher field names',
+        summary: MATCHER_DATA_FIELDS_SUMMARY,
         value: MATCHER_DATA_FIELDS_RESPONSE,
       },
     },
@@ -414,7 +434,7 @@ export const actionPolicyTagsOasExamples = (): OASOperationObject =>
     responses: {
       200: {
         name: 'actionPolicyTagsResponse',
-        summary: 'Suggested action policy tags',
+        summary: ACTION_POLICY_TAGS_SUMMARY,
         value: ACTION_POLICY_TAGS_RESPONSE,
       },
     },
