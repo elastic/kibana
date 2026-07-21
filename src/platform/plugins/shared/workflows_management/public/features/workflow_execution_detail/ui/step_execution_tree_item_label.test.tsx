@@ -93,6 +93,13 @@ describe('StepExecutionTreeItemLabel', () => {
     expect(screen.queryByText(/\ds/)).not.toBeInTheDocument();
   });
 
+  it('does not render execution duration when executionTimeMs is 0', () => {
+    renderWithIntl({ ...defaultProps, executionTimeMs: 0 });
+    // Avoid the React {0 && …} trap: must not render a bare "0" text node
+    expect(screen.queryByText('0')).not.toBeInTheDocument();
+    expect(screen.queryByText('0ms')).not.toBeInTheDocument();
+  });
+
   it('renders without a status', () => {
     renderWithIntl({ ...defaultProps, status: undefined });
     expect(screen.getByTestId('workflowStepName')).toHaveTextContent('my_step');
