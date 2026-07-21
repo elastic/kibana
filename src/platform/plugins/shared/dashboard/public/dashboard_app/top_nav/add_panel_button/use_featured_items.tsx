@@ -17,11 +17,9 @@ import { getMenuItems } from './use_menu_item_groups';
 export const useFeaturedItems = ({
   dashboardApi,
   returnFocus,
-  onActionExecute,
 }: {
   dashboardApi: DashboardApi;
   returnFocus?: () => void;
-  onActionExecute?: () => void;
 }): { featuredItems: MenuItem[]; loading: boolean } => {
   const [featuredItems, setFeaturedItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -43,7 +41,7 @@ export const useFeaturedItems = ({
       .then((actions) => {
         if (canceled) return;
         setLoading(false);
-        setFeaturedItems(getMenuItems(actions, dashboardApi, context, onActionExecute));
+        setFeaturedItems(getMenuItems(actions, dashboardApi, context));
       })
       .catch((e) => {
         if (!canceled) {
@@ -56,7 +54,7 @@ export const useFeaturedItems = ({
     return () => {
       canceled = true;
     };
-  }, [dashboardApi, returnFocus, onActionExecute]);
+  }, [dashboardApi, returnFocus]);
 
   return { loading, featuredItems };
 };

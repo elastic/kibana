@@ -161,15 +161,10 @@ export const useDashboardMenuItems = ({
 
   const openAddPanelFlyout = useCallback(
     (params?: AppMenuRunActionParams) => {
-      let shouldReturnFocus = true;
       openLazyFlyout({
         core: coreServices,
         parentApi: dashboardApi,
-        returnFocus: params?.returnFocus
-          ? () => {
-              if (shouldReturnFocus) params.returnFocus();
-            }
-          : undefined,
+        returnFocus: params?.returnFocus,
         loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
           const { AddPanelFlyout } = await import('./add_panel_button/components/add_panel_flyout');
 
@@ -178,9 +173,6 @@ export const useDashboardMenuItems = ({
               dashboardApi={dashboardApi}
               ariaLabelledBy={ariaLabelledBy}
               returnFocus={params?.returnFocus}
-              onActionExecute={() => {
-                shouldReturnFocus = false;
-              }}
             />
           );
         },

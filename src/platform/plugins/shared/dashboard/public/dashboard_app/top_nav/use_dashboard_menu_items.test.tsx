@@ -8,7 +8,6 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import type { ReactElement } from 'react';
 
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
@@ -60,40 +59,6 @@ describe('useDashboardMenuItems', () => {
       restoreFocus?.();
 
       expect(returnFocus).toHaveBeenCalledTimes(1);
-    });
-
-    test('does not return focus while handing off to a panel editor', async () => {
-      const returnFocus = jest.fn();
-      const { result } = renderHook(
-        () =>
-          useDashboardMenuItems({
-            isLabsShown: false,
-            setIsLabsShown: jest.fn(),
-            maybeRedirect: jest.fn(),
-          }),
-        {
-          wrapper: dashboardContextWrapper({}),
-        }
-      );
-
-      result.current.editModeTopNavConfig.items
-        ?.find(({ id }) => id === 'add')
-        ?.run?.({
-          triggerElement: document.createElement('button'),
-          returnFocus,
-        });
-
-      const [{ loadContent, returnFocus: restoreFocus }] =
-        jest.mocked(openLazyFlyout).mock.calls[0];
-      const content = (await loadContent({
-        closeFlyout: jest.fn(),
-        ariaLabelledBy: 'addPanelTitle',
-      })) as ReactElement<{ onActionExecute?: () => void }>;
-
-      content.props.onActionExecute?.();
-      restoreFocus?.();
-
-      expect(returnFocus).not.toHaveBeenCalled();
     });
   });
 

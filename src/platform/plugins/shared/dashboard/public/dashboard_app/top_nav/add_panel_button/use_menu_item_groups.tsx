@@ -23,11 +23,9 @@ import type { MenuItemGroup } from './types';
 export const useMenuItemGroups = ({
   dashboardApi,
   returnFocus,
-  onActionExecute,
 }: {
   dashboardApi: DashboardApi;
   returnFocus?: () => void;
-  onActionExecute?: () => void;
 }): { groups: MenuItemGroup[] | undefined; loading: boolean; error: Error | undefined } => {
   const context = useMemo(
     () => ({
@@ -50,12 +48,12 @@ export const useMenuItemGroups = ({
   useEffect(() => {
     if (!result) return;
     const generateListSubscription = result?.generateMenuItemGroups$.subscribe(() => {
-      setGroups(generateMenuItemGroups(result.groups, dashboardApi, context, onActionExecute));
+      setGroups(generateMenuItemGroups(result.groups, dashboardApi, context));
     });
     return () => {
       generateListSubscription?.unsubscribe();
     };
-  }, [result, dashboardApi, context, onActionExecute]);
+  }, [result, dashboardApi, context]);
 
   return { loading, error, groups };
 };
@@ -99,8 +97,7 @@ async function getActionGroups(
 export function getMenuItems(
   actions: Action[],
   dashboardApi: DashboardApi,
-  context: ActionExecutionContext,
-  onActionExecute?: () => void
+  context: ActionExecutionContext
 ) {
   return actions
     .map((action) => {
@@ -120,7 +117,6 @@ export function getMenuItems(
               event.preventDefault();
             }
           }
-          onActionExecute?.();
           dashboardApi.clearOverlays();
           action.execute(context);
         },
@@ -141,8 +137,7 @@ export function getMenuItems(
 function generateMenuItemGroups(
   groups: Record<string, { group: PresentableGroup; actions: Action[] }>,
   dashboardApi: DashboardApi,
-  context: ActionExecutionContext,
-  onActionExecute?: () => void
+  context: ActionExecutionContext
 ): MenuItemGroup[] {
   return Object.entries(groups ?? {})
     .map(([groupId, { group, actions }]) => {
@@ -151,7 +146,7 @@ function generateMenuItemGroups(
         title: group.getDisplayName?.(context) ?? '',
         'data-test-subj': `dashboardEditorMenu-${group.id}Group`,
         order: group.order ?? 0,
-        items: getMenuItems(actions, dashboardApi, context, onActionExecute),
+        items: getMenuItems(actions, dashboardApi, context),
       };
     })
     .sort((groupA, groupB) => groupB.order - groupA.order);
