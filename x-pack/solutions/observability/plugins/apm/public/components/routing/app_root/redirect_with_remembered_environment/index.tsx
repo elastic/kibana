@@ -31,6 +31,14 @@ export function RedirectWithRememberedEnvironment({ children }: { children: Reac
   const previousLocation = usePrevious(location);
   const defaultServiceEnvironment = useDefaultEnvironment();
 
+  // Legacy hash URLs (e.g. `/app/apm#/services/foo/service-map`) briefly land on the APM
+  // root with the real route still in the hash. The `/` route's `RenderRedirectTo` rewrites
+  // those to a path; redirecting here first would drop the hash and strand the user on the
+  // service inventory. Defer to that handler while a hash is present.
+  if (location.hash) {
+    return children;
+  }
+
   const query = qs.parse(location.search);
   const normalizedPathname = location.pathname.replace(/\/$/, '');
   // `/app/apm` maps to `/`, which then redirects to `/services` while preserving

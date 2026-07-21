@@ -29,7 +29,10 @@ describe('RedirectWithRememberedEnvironment', () => {
     jest.restoreAllMocks();
   });
 
-  function renderUrl(location: Pick<Location, 'pathname' | 'search'>, defaultSetting: string) {
+  function renderUrl(
+    location: Pick<Location, 'pathname' | 'search'> & Partial<Pick<Location, 'hash'>>,
+    defaultSetting: string
+  ) {
     history.replace(location);
 
     jest.spyOn(useApmPluginContextExports, 'useApmPluginContext').mockReturnValue({
@@ -132,6 +135,24 @@ describe('RedirectWithRememberedEnvironment', () => {
     await waitFor(() => {
       expect(qs.parse(history.location.search).environment).toEqual('staging');
     });
+  });
+
+  it('does not redirect when a legacy hash URL lands on the root, preserving the hash for RenderRedirectTo', () => {
+    const legacyHash = '#/services/opbeans-java/service-map?environment=staging';
+
+    renderUrl(
+      {
+        pathname: '',
+        search: noQuery,
+        hash: legacyHash,
+      },
+      'production'
+    );
+
+    // The hash carries the real route (and its environment); redirecting here would drop it
+    // before the `/` route's RenderRedirectTo can convert it to a path.
+    expect(history.location.hash).toEqual(legacyHash);
+    expect(qs.parse(history.location.search).environment).toBeUndefined();
   });
 
   it('restores the environment when navigating to the APM root', async () => {
