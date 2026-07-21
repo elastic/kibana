@@ -18,6 +18,9 @@ import type {
   RuleTagsResponse,
   UpdateRuleBody,
 } from '@kbn/alerting-v2-schemas';
+import { createRuleDataSchema } from '@kbn/alerting-v2-schemas';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import { treeifyError } from '@kbn/zod/v4';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import {
   getInvalidRuleDataMessage,
@@ -134,11 +137,17 @@ const RULE_TAGS_RESPONSE: RuleTagsResponse = {
 
 const SAMPLE_RULE_ID = RULE_RESPONSE.id;
 
+const invalidCreateParse = createRuleDataSchema.safeParse({});
+
+if (invalidCreateParse.success) {
+  throw new Error('expected createRuleDataSchema parse to fail for OAS example');
+}
+
 const INVALID_RULE_DATA_ERROR: ErrorResponse = {
   code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
   error: 'Bad Request',
-  message: getInvalidRuleDataMessage('create', 'metadata.name: Required'),
-  details: { context: 'create', errors: { metadata: { name: ['Required'] } } },
+  message: getInvalidRuleDataMessage('create', stringifyZodError(invalidCreateParse.error)),
+  details: { context: 'create', errors: treeifyError(invalidCreateParse.error) },
 };
 
 const RULE_NOT_FOUND_ERROR: ErrorResponse = {

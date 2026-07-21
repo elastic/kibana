@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createRuleDataSchema } from '@kbn/alerting-v2-schemas';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import {
   getInvalidRuleDataMessage,
@@ -36,12 +38,17 @@ describe('rule OAS examples', () => {
     expect(
       oas.responses?.[201]?.content?.['application/json']?.examples?.createRuleResponse
     ).toEqual(expect.objectContaining({ summary: CREATE_RULE_SUMMARY }));
+    const invalidCreateParse = createRuleDataSchema.safeParse({});
+    expect(invalidCreateParse.success).toBe(false);
+    if (invalidCreateParse.success) {
+      throw new Error('expected invalid create parse to fail');
+    }
     expect(oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRuleData).toEqual(
       expect.objectContaining({
         summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
         value: expect.objectContaining({
           code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
-          message: getInvalidRuleDataMessage('create', 'metadata.name: Required'),
+          message: getInvalidRuleDataMessage('create', stringifyZodError(invalidCreateParse.error)),
         }),
       })
     );
