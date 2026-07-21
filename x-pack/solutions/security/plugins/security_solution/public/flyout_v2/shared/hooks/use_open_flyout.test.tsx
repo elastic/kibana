@@ -20,8 +20,8 @@ import {
   FLYOUT_SESSION_KIND,
 } from '../../../common/lib/telemetry';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
   useStore: jest.fn(() => ({})),
 }));
 jest.mock('react-router-dom', () => ({
