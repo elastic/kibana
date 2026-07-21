@@ -869,6 +869,8 @@ const ESQLEditorInternal = function ESQLEditor({
                     onCommentLine
                   );
 
+                  let prevLineCount = editor.getModel()?.getLineCount() || 1;
+
                   const expandToFitContent = () => {
                     const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
                     const lineCount = editor.getModel()?.getLineCount() || 1;
@@ -893,7 +895,11 @@ const ESQLEditorInternal = function ESQLEditor({
 
                   const modelContentDisposable = editor.onDidChangeModelContent(async () => {
                     trackInputLatencyOnKeystroke(editor.getValue() ?? '');
-                    expandToFitContent();
+                    const lineCount = editor.getModel()?.getLineCount() || 1;
+                    if (lineCount > prevLineCount) {
+                      expandToFitContent();
+                    }
+                    prevLineCount = lineCount;
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {
                       addSourcesDecorator();
