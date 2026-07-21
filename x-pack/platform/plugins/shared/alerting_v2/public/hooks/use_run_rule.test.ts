@@ -65,7 +65,7 @@ describe('useRunRule', () => {
 
     await waitFor(() => {
       expect(mockRunRule).toHaveBeenCalledWith('rule-1');
-      expect(mockAddSuccess).toHaveBeenCalledWith(expect.any(String));
+      expect(mockAddSuccess).toHaveBeenCalledWith('Rule run started');
       expect(mockAddDanger).not.toHaveBeenCalled();
     });
   });
@@ -77,39 +77,25 @@ describe('useRunRule', () => {
     result.current.mutate({ id: 'rule-1' });
 
     await waitFor(() => {
-      expect(mockAddDanger).toHaveBeenCalledWith(expect.any(String));
+      expect(mockAddDanger).toHaveBeenCalledWith('Failed to run rule');
       expect(mockAddSuccess).not.toHaveBeenCalled();
       expect(mockAddWarning).not.toHaveBeenCalled();
     });
   });
 
-  it('shows a warning toast (not danger) when the rule is already running', async () => {
-    mockRunRule.mockRejectedValue(
-      Object.assign(new Error('conflict'), { body: { code: 'RULE_ALREADY_RUNNING' } })
-    );
-    const { result } = renderHook(() => useRunRule(), { wrapper: createWrapper() });
+  it.each([['RULE_ALREADY_RUNNING'], ['RULE_RUN_CONFLICT']])(
+    'shows the retry warning toast (not danger) for %s',
+    async (code) => {
+      mockRunRule.mockRejectedValue(Object.assign(new Error('conflict'), { body: { code } }));
+      const { result } = renderHook(() => useRunRule(), { wrapper: createWrapper() });
 
-    result.current.mutate({ id: 'rule-1' });
+      result.current.mutate({ id: 'rule-1' });
 
-    await waitFor(() => {
-      expect(mockAddWarning).toHaveBeenCalledWith(expect.any(String));
-      expect(mockAddDanger).not.toHaveBeenCalled();
-      expect(mockAddSuccess).not.toHaveBeenCalled();
-    });
-  });
-
-  it('shows a warning toast (not danger) on a run conflict', async () => {
-    mockRunRule.mockRejectedValue(
-      Object.assign(new Error('conflict'), { body: { code: 'RULE_RUN_CONFLICT' } })
-    );
-    const { result } = renderHook(() => useRunRule(), { wrapper: createWrapper() });
-
-    result.current.mutate({ id: 'rule-1' });
-
-    await waitFor(() => {
-      expect(mockAddWarning).toHaveBeenCalledWith(expect.any(String));
-      expect(mockAddDanger).not.toHaveBeenCalled();
-      expect(mockAddSuccess).not.toHaveBeenCalled();
-    });
-  });
+      await waitFor(() => {
+        expect(mockAddWarning).toHaveBeenCalledWith('Could not start the run, please try again');
+        expect(mockAddDanger).not.toHaveBeenCalled();
+        expect(mockAddSuccess).not.toHaveBeenCalled();
+      });
+    }
+  );
 });

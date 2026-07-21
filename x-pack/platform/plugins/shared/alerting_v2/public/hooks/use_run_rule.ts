@@ -35,28 +35,20 @@ export const useRunRule = () => {
       );
     },
     onError: (error) => {
-      switch (getErrorCode(error)) {
-        case 'RULE_ALREADY_RUNNING':
-          toasts.addWarning(
-            i18n.translate('xpack.alertingV2.hooks.useRunRule.alreadyRunningMessage', {
-              defaultMessage: 'Rule is already running',
-            })
-          );
-          return;
-        case 'RULE_RUN_CONFLICT':
-          toasts.addWarning(
-            i18n.translate('xpack.alertingV2.hooks.useRunRule.conflictMessage', {
-              defaultMessage: 'Could not start the run, please try again',
-            })
-          );
-          return;
-        default:
-          toasts.addDanger(
-            i18n.translate('xpack.alertingV2.hooks.useRunRule.errorMessage', {
-              defaultMessage: 'Failed to run rule',
-            })
-          );
+      const errorCode = getErrorCode(error);
+      if (errorCode === 'RULE_ALREADY_RUNNING' || errorCode === 'RULE_RUN_CONFLICT') {
+        toasts.addWarning(
+          i18n.translate('xpack.alertingV2.hooks.useRunRule.conflictMessage', {
+            defaultMessage: 'Could not start the run, please try again',
+          })
+        );
+        return;
       }
+      toasts.addDanger(
+        i18n.translate('xpack.alertingV2.hooks.useRunRule.errorMessage', {
+          defaultMessage: 'Failed to run rule',
+        })
+      );
     },
   });
 };
