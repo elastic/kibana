@@ -11,6 +11,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esSupertest = getService('esSupertest');
+  const esSupertestWithoutAuth = getService('esSupertestWithoutAuth');
   const supertest = getService('supertest');
 
   describe('FakeRequest self HTTP client', () => {
@@ -27,13 +28,18 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
+      const { body: authenticatedUser } = await esSupertestWithoutAuth
+        .get('/_security/_authenticate')
+        .set('authorization', `ApiKey ${apiKey.encoded}`)
+        .expect(200);
+
       const { body } = await supertest
         .post('/test_endpoints/self_client/fake_request')
         .set('kbn-xsrf', 'xxx')
         .send({ apiKey: apiKey.encoded })
         .expect(200);
 
-      expect(body).to.eql({ username: 'elastic', hasManage: true });
+      expect(body).to.eql({ username: authenticatedUser.username, hasManage: true });
 
       await supertest
         .post('/test_endpoints/self_client/fake_request')

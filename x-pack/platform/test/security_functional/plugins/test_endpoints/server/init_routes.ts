@@ -515,7 +515,10 @@ export function initRoutes(
         if (error instanceof Error && 'response' in error) {
           const { response: targetResponse } = error as Error & { response?: Response };
           if (targetResponse) {
-            return response.custom({ statusCode: targetResponse.status });
+            return response.custom({
+              statusCode: targetResponse.status,
+              body: targetResponse.statusText,
+            });
           }
         }
         throw error;
