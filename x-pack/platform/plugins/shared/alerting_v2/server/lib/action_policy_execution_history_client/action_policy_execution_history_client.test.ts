@@ -278,26 +278,26 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       });
     });
 
-    describe('episodeId filter', () => {
-      it('forwards the episodeId through to the event log service', async () => {
+    describe('episodeIds filter', () => {
+      it('forwards the episodeIds through to the event log service', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
-        await client.listExecutionHistory({ request, episodeId: 'ep-1' });
+        await client.listExecutionHistory({ request, episodeIds: ['ep-1', 'ep-2'] });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ episodeId: 'ep-1' })
+          expect.objectContaining({ episodeIds: ['ep-1', 'ep-2'] })
         );
       });
 
-      it('forwards episodeId as undefined when not provided', async () => {
+      it('forwards episodeIds as undefined when not provided', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
         await client.listExecutionHistory({ request });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ episodeId: undefined })
+          expect.objectContaining({ episodeIds: undefined })
         );
       });
     });

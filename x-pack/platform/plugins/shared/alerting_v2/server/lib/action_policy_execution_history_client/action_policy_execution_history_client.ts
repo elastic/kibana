@@ -56,7 +56,7 @@ export interface ListExecutionHistoryParams {
   search?: string;
   ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
-  episodeId?: string;
+  episodeIds?: string[];
 }
 
 export interface ListExecutionHistoryResult {
@@ -99,7 +99,7 @@ export class ActionPolicyExecutionHistoryClient {
     search,
     ruleIds,
     outcome = DEFAULT_OUTCOME_FILTER,
-    episodeId,
+    episodeIds,
   }: ListExecutionHistoryParams): Promise<ListExecutionHistoryResult> {
     const startDate = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
@@ -120,7 +120,7 @@ export class ActionPolicyExecutionHistoryClient {
       policyIds: matchingSearchIds.policyIds,
       ruleIds: matchingSearchIds.ruleIds,
       mandatoryRuleIds: ruleIds,
-      episodeId,
+      episodeIds,
     });
 
     const nameMaps = await this.resolveNames(result.events, spaceId);

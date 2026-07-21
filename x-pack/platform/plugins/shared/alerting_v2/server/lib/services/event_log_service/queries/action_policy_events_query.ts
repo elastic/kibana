@@ -42,11 +42,11 @@ export interface BuildActionPolicyEventsQueryParams {
    */
   mandatoryRuleIds?: string[];
   /**
-   * Episode filter. Applied as an AND clause: the event must reference this
-   * episode id in the top-level `kibana.alerting_v2.dispatcher.episode_ids`
-   * keyword array.
+   * Episode filter. Applied as an AND clause: the event must reference at
+   * least one of these episode ids in the top-level
+   * `kibana.alerting_v2.dispatcher.episode_ids` keyword array.
    */
-  episodeId?: string;
+  episodeIds?: string[];
 }
 
 /**
@@ -129,8 +129,8 @@ const buildBaseActionPolicyEventsQuery = (
     filters.push(buildMandatoryRuleClause(params.mandatoryRuleIds));
   }
 
-  if (params.episodeId) {
-    filters.push({ term: { 'kibana.alerting_v2.dispatcher.episode_ids': params.episodeId } });
+  if (params.episodeIds && params.episodeIds.length > 0) {
+    filters.push({ terms: { 'kibana.alerting_v2.dispatcher.episode_ids': params.episodeIds } });
   }
 
   return {

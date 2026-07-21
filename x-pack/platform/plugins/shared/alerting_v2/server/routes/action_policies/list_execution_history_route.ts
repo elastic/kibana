@@ -67,7 +67,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { page, perPage, search, ruleIds, outcome, episodeId } = this.request.query ?? {};
+    const { page, perPage, search, ruleIds, outcome, episodeIds } = this.request.query ?? {};
 
     const result = await this.executionHistoryClient.listExecutionHistory({
       request: this.request,
@@ -76,7 +76,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
       search,
       ruleIds,
       outcome,
-      episodeId,
+      episodeIds,
     });
 
     return this.ctx.response.ok({ body: result });

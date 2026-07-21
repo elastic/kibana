@@ -177,19 +177,21 @@ describe('EventLogService', () => {
       expect(boolClause.bool.minimum_should_match).toBe(1);
     });
 
-    it('forwards episodeId as an episode_ids term filter to the ES query', async () => {
+    it('forwards episodeIds as an episode_ids terms filter to the ES query', async () => {
       const { eventLogService, mockEsClient } = createEventLogService();
       mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
       await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
         startDate: SINCE,
-        episodeId: 'ep-1',
+        episodeIds: ['ep-1', 'ep-2'],
       });
 
       const [args] = mockEsClient.search.mock.calls[0] as [any];
       expect(args.query.bool.filter).toEqual(
-        expect.arrayContaining([{ term: { 'kibana.alerting_v2.dispatcher.episode_ids': 'ep-1' } }])
+        expect.arrayContaining([
+          { terms: { 'kibana.alerting_v2.dispatcher.episode_ids': ['ep-1', 'ep-2'] } },
+        ])
       );
     });
 

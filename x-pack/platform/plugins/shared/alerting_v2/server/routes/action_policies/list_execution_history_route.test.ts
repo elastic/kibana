@@ -54,17 +54,17 @@ describe('ListExecutionHistoryRoute', () => {
     });
   });
 
-  it('forwards episodeId from the query to the client', async () => {
+  it('forwards episodeIds from the query to the client', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest({
-      query: { episodeId: 'ep-1' },
+      query: { episodeIds: ['ep-1', 'ep-2'] },
     });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
 
     expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
-      expect.objectContaining({ episodeId: 'ep-1' })
+      expect.objectContaining({ episodeIds: ['ep-1', 'ep-2'] })
     );
   });
 
