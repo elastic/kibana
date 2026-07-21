@@ -16,10 +16,6 @@ import { DashboardArtifactsSubsection } from './dashboard_artifacts_subsection';
 export const ArtifactsSection: React.FC = () => {
   const artifactsAccordionId = useGeneratedHtmlId({ prefix: 'ruleArtifactsSection' });
 
-  // Users with `actionPolicies: none` can't read action policies, so hide the
-  // subsection entirely rather than rendering a component that would only fail
-  // to load. Gating on the capability also avoids the (unauthorized) list
-  // request and its retries.
   const canReadActionPolicies = useService(UserCapabilities).canRead('actionPolicies');
 
   return (
