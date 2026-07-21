@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
