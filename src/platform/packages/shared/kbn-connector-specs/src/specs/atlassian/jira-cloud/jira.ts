@@ -164,5 +164,6 @@ export const JiraConnector: ConnectorSpec = {
     '- Discovery: getProjects → getProject (by key) → searchIssuesWithJql (scoped to project)',
     '- Issue lookup: searchIssuesWithJql → getIssue (by key from results)',
     '- User-filtered search: searchUsers (to get accountId) → searchIssuesWithJql with assignee = "accountId"',
+    '- For capabilities not yet exposed as named actions: listTools to discover, callTool to invoke.',
   ].join('\n'),
 };
