@@ -10,6 +10,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@e
 import { i18n } from '@kbn/i18n';
 import type { AgentName, AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useApmRoutePath } from '../../../../hooks/use_apm_route_path';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -43,8 +44,12 @@ export function ServiceHeaderBadges({
   const {
     path: { serviceName },
     query,
-    query: { environment },
+    query: { environment, comparisonEnabled, offset },
   } = useApmParams('/services/{serviceName}/*');
+
+  const routePath = useApmRoutePath();
+  const isInOverviewTab = routePath === '/services/{serviceName}/overview';
+
   const { agentName } = useApmServiceContext();
 
   const { mostCriticalSloStatus, sloFetchStatus } = useServiceSloContext();
@@ -111,6 +116,7 @@ export function ServiceHeaderBadges({
     canReadMlJobs &&
     anomalyStatus === FETCH_STATUS.SUCCESS &&
     anomalyData?.anomalyScore !== undefined;
+  const isShowingExpectedBounds = comparisonEnabled && offset === 'expected_bounds';
 
   const showSloBadge = canReadSlos && sloFetchStatus === FETCH_STATUS.SUCCESS;
 
@@ -173,6 +179,8 @@ export function ServiceHeaderBadges({
                     agentName: agentName as AgentName,
                     anomalyEnvironment: anomalyData.anomalyEnvironment,
                     query,
+                    comparisonEnabled: isInOverviewTab ? !isShowingExpectedBounds : true,
+                    isInServiceOverview: isInOverviewTab,
                   }
                 : undefined
             }
