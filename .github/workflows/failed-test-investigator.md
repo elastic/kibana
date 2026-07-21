@@ -103,9 +103,8 @@ safe-outputs:
       - ai:fix-flaky
     max: 5
     target: *issue_number
-    # Apply labels as `kibanamachine` (a user), not the default GITHUB_TOKEN bot, so the
-    # `labeled` event for `ai:fix-flaky` triggers the Flaky Test Fixer (GITHUB_TOKEN
-    # events don't trigger workflows).
+    # Label as `kibanamachine` so the `ai:fix-flaky` labeled event triggers the
+    # Flaky Test Fixer (default GITHUB_TOKEN events don't trigger workflows).
     github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
