@@ -66,7 +66,7 @@ export type BurnRateAlert = Omit<ObservabilitySloAlert, 'kibana.alert.group'> & 
   [ALERT_GROUP]?: Group[];
 };
 
-export const getRuleExecutor = (basePath: IBasePath) =>
+export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = false) =>
   async function executor(
     options: RuleExecutorOptions<
       BurnRateRuleParams,
@@ -93,7 +93,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
       throw new AlertsClientError();
     }
 
-    const projectRouting = isServerless ? PROJECT_ROUTING_ORIGIN : undefined;
+    const projectRouting = isServerless && isCpsEnabled ? PROJECT_ROUTING_ORIGIN : undefined;
     const sloRepository = new DefaultSLODefinitionRepository(soClient, logger);
     let slo: SLODefinition;
     try {

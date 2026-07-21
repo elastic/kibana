@@ -17,7 +17,10 @@ export interface SummaryTransformGenerator {
 }
 
 export class DefaultSummaryTransformGenerator implements SummaryTransformGenerator {
-  constructor(private readonly isServerless: boolean) {}
+  constructor(
+    private readonly isServerless: boolean,
+    private readonly isCpsEnabled: boolean = false
+  ) {}
 
   public generate(slo: SLODefinition): TransformPutTransformRequest {
     let result: TransformPutTransformRequest;
@@ -32,7 +35,7 @@ export class DefaultSummaryTransformGenerator implements SummaryTransformGenerat
       throw new Error('Not supported SLO');
     }
 
-    if (this.isServerless) {
+    if (this.isServerless && this.isCpsEnabled) {
       result = { ...result, source: { ...result.source, project_routing: PROJECT_ROUTING_ORIGIN } };
     }
 

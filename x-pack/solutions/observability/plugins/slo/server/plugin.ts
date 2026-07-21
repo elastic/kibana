@@ -74,6 +74,7 @@ export class SLOPlugin
   private readonly config: SLOConfig;
   private readonly isServerless: boolean;
   private readonly isDev: boolean;
+  private isCpsEnabled: boolean = false;
   private orphanSummaryCleanupTask?: OrphanSummaryCleanupTask;
   private tempSummaryCleanupTask?: TempSummaryCleanupTask;
   private staleInstancesCleanupTask?: StaleInstancesCleanupTask;
@@ -90,6 +91,7 @@ export class SLOPlugin
     core: CoreSetup<SLOPluginStartDependencies, SLOServerStart>,
     plugins: SLOPluginSetupDependencies
   ): SLOServerSetup {
+    this.isCpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
     const lockManager = new LockManagerService(core, this.logger);
     plugins.share.url.locators.create(new AlertsLocatorDefinition());
     const savedObjectTypes = [
@@ -158,7 +160,7 @@ export class SLOPlugin
     core.savedObjects.registerType(sloSettings);
     core.savedObjects.registerType(sloComposite);
 
-    registerBurnRateRule(plugins.alerting, core.http.basePath);
+    registerBurnRateRule(plugins.alerting, core.http.basePath, this.isCpsEnabled);
     registerSloUsageCollector(plugins.usageCollection);
 
     const mappedPlugins = mapValues(plugins, (value, key) => {
@@ -180,6 +182,7 @@ export class SLOPlugin
         plugins: mappedPlugins,
         config: {
           isServerless: this.isServerless,
+          isCpsEnabled: this.isCpsEnabled,
           compositeSloSummaryTaskEnabled: this.config.compositeSloSummaryTaskEnabled,
         },
         getScopedClients: async ({ request, logger }) => {
@@ -219,12 +222,12 @@ export class SLOPlugin
           const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
           const transformManager = new DefaultTransformManager(
-            createTransformGenerators(spaceId, dataViewsService, this.isServerless),
+            createTransformGenerators(spaceId, dataViewsService, this.isServerless, this.isCpsEnabled),
             scopedClusterClient,
             logger
           );
           const summaryTransformManager = new DefaultSummaryTransformManager(
-            new DefaultSummaryTransformGenerator(this.isServerless),
+            new DefaultSummaryTransformGenerator(this.isServerless, this.isCpsEnabled),
             scopedClusterClient,
             logger
           );

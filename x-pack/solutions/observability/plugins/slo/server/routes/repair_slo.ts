@@ -29,7 +29,7 @@ export const repairSLORoute = createSloServerRoute({
       logger,
     });
 
-    const transformGenerators = createTransformGenerators(spaceId, dataViewsService, false);
+    const transformGenerators = createTransformGenerators(spaceId, dataViewsService, false, false);
 
     const transformManager = new DefaultTransformManager(
       transformGenerators,
@@ -38,7 +38,7 @@ export const repairSLORoute = createSloServerRoute({
     );
 
     const summaryTransformManager = new DefaultSummaryTransformManager(
-      new DefaultSummaryTransformGenerator(config.isServerless),
+      new DefaultSummaryTransformGenerator(config.isServerless, config.isCpsEnabled),
       scopedClusterClient,
       logger
     );

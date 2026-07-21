@@ -28,8 +28,13 @@ import { getFilterRange } from './common';
 const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 export class TimesliceMetricTransformGenerator extends TransformGenerator {
-  constructor(spaceId: string, dataViewService: DataViewsService, isServerless: boolean) {
-    super(spaceId, dataViewService, isServerless);
+  constructor(
+    spaceId: string,
+    dataViewService: DataViewsService,
+    isServerless: boolean,
+    isCpsEnabled: boolean = false
+  ) {
+    super(spaceId, dataViewService, isServerless, isCpsEnabled);
   }
 
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
@@ -46,7 +51,8 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
       await this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
       slo,
-      this.isServerless
+      this.isServerless,
+      this.isCpsEnabled
     );
   }
 

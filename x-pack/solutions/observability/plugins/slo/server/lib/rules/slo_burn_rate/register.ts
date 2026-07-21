@@ -27,7 +27,7 @@ import {
 import { getRuleExecutor } from './executor';
 import { sloRuleFieldMap } from './field_map';
 
-export function sloBurnRateRuleType(basePath: IBasePath) {
+export function sloBurnRateRuleType(basePath: IBasePath, isCpsEnabled: boolean = false) {
   return {
     id: SLO_BURN_RATE_RULE_TYPE_ID,
     name: i18n.translate('xpack.slo.rules.burnRate.name', {
@@ -55,7 +55,7 @@ export function sloBurnRateRuleType(basePath: IBasePath) {
     solution: 'observability' as const,
     minimumLicenseRequired: 'platinum' as LicenseType,
     isExportable: true,
-    executor: getRuleExecutor(basePath),
+    executor: getRuleExecutor(basePath, isCpsEnabled),
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [

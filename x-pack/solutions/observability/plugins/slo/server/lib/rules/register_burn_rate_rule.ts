@@ -9,6 +9,10 @@ import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { IBasePath } from '@kbn/core/server';
 import { sloBurnRateRuleType } from './slo_burn_rate';
 
-export function registerBurnRateRule(alertingPlugin: AlertingServerSetup, basePath: IBasePath) {
-  alertingPlugin.registerType(sloBurnRateRuleType(basePath));
+export function registerBurnRateRule(
+  alertingPlugin: AlertingServerSetup,
+  basePath: IBasePath,
+  isCpsEnabled: boolean = false
+) {
+  alertingPlugin.registerType(sloBurnRateRuleType(basePath, isCpsEnabled));
 }

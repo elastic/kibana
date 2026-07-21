@@ -28,8 +28,13 @@ import { InvalidTransformError } from '../../errors';
 import { getFilterRange } from './common';
 
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
-  constructor(spaceId: string, dataViewService: DataViewsService, isServerless: boolean) {
-    super(spaceId, dataViewService, isServerless);
+  constructor(
+    spaceId: string,
+    dataViewService: DataViewsService,
+    isServerless: boolean,
+    isCpsEnabled: boolean = false
+  ) {
+    super(spaceId, dataViewService, isServerless, isCpsEnabled);
   }
 
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
@@ -46,7 +51,8 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       this.buildAggregations(slo),
       this.buildSettings(slo, this.isServerless ? '@timestamp' : 'event.ingested'),
       slo,
-      this.isServerless
+      this.isServerless,
+      this.isCpsEnabled
     );
   }
 
