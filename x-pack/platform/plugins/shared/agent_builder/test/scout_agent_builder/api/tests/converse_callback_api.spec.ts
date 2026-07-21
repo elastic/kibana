@@ -566,6 +566,11 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(400);
+        expect(response.body).toMatchObject({
+          message: expect.stringContaining(
+            'idempotency_key and execution_id are mutually exclusive'
+          ),
+        });
       }
     );
 

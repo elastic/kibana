@@ -204,7 +204,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     agentId: string;
     request: ExecuteAgentParams['request'];
   }): Promise<ExecuteAgentResult> {
-    await this.deps.taskManager.schedule(this.buildRunAgentTask(executionId), { request });
+    // ensureScheduled tolerates the task already existing: a concurrent idempotent
+    // replay may have re-issued this schedule while repairing a stuck execution.
+    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), { request });
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
 
