@@ -225,8 +225,8 @@ export const MondayCom: ConnectorSpec = {
     getUpdates: {
       isTool: true,
       description:
-        'Retrieve updates (comments) posted on a Monday.com item or board. Pass objectId (the item ' +
-        'or board ID as a string) and objectType ("Item" or "Board"). Returns update text, author, ' +
+        'Retrieve updates (comments) posted on a Monday.com item or board. Pass object_id (the item ' +
+        'or board ID as a string) and object_type ("Item" or "Board"). Returns update text, author, ' +
         'and timestamps in reverse-chronological order.',
       input: GetUpdatesInputSchema,
       handler: async (ctx, input: GetUpdatesInput) => {
