@@ -20,6 +20,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH } from '../constants';
+import { getRuleExecutionsOasExamples } from './execution_history_oas_examples';
 
 @injectable()
 export class GetRuleExecutionsRoute extends BaseAlertingRoute {
@@ -33,6 +34,7 @@ export class GetRuleExecutionsRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'List rule executions',
     description: 'Get a paginated list of rule execution events.',
+    oasOperationObject: getRuleExecutionsOasExamples,
   } as const;
   static schemas = {
     request: {
