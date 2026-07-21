@@ -1,5 +1,5 @@
 {
-  "sha1": "c1685d9156fc8e1c556cbb7aa6a46c43e2e00ee6",
+  "sha1": "7a4f8a5bec99d31a70bc9673a7a6b025093f8981",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1013,6 +1013,36 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
         "line": 285,
+        "column": 7
+      }
+    },
+    {
+      "id": "15dbcb23bd3138a-ed40107d9c87924",
+      "title": "Manage regions privileges feature-privileged user can see Manage regions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_privileges.spec.ts",
+        "line": 24,
+        "column": 7
+      }
+    },
+    {
+      "id": "15dbcb23bd3138a-a992061201e2219",
+      "title": "Manage regions privileges feature-read user cannot see Manage regions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_privileges.spec.ts",
+        "line": 32,
         "column": 7
       }
     },
