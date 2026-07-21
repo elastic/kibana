@@ -4082,6 +4082,7 @@ describe('Package policy service', () => {
     describe('remove protections', () => {
       beforeEach(() => {
         mockAgentPolicyService.bumpRevision.mockReset();
+        jest.mocked(licenseService.hasAtLeast).mockReturnValue(true);
       });
 
       const generateAttributes = (overrides: Record<string, unknown> = {}) => ({
@@ -4283,19 +4284,19 @@ describe('Package policy service', () => {
           testPolicyIds,
           [],
           // Add package override for both old and new policies
-          { package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' } }
+          { package: { name: 'apache', title: 'Apache', version: '1.0.0' } }
         );
 
         await packagePolicyService.update(
           savedObjectsClient,
           elasticsearchClient,
           generateSO({
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           }).id,
           generateAttributes({
             policy_ids: [],
             name: 'test-package-policy-1',
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           })
         );
 
@@ -4312,7 +4313,7 @@ describe('Package policy service', () => {
         const savedObjectsClient = createSavedObjectClientMock();
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-        // Mock existing package policy
+        // Mock existing package policy with same package name as the update ('test')
         savedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             {
@@ -4320,7 +4321,10 @@ describe('Package policy service', () => {
               type: 'abcd',
               references: [],
               version: 'test',
-              attributes: createPackagePolicyMock(),
+              attributes: {
+                ...createPackagePolicyMock(),
+                package: { name: 'test', title: 'Test', version: '0.0.1' },
+              },
             },
           ],
         });
@@ -5678,16 +5682,16 @@ describe('Package policy service', () => {
         // All non-endpoint policies
         const nonEndpointPoliciesSO = [
           generateSO({
-            name: 'not-endpoint-policy',
+            name: 'apache-policy',
             policy_ids: ['test-agent-policy-1'],
-            id: 'not-endpoint-1',
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            id: 'apache-1',
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           }),
           generateSO({
-            name: 'not-endpoint-policy-2',
+            name: 'apache-policy-2',
             policy_ids: ['test-agent-policy-2'],
-            id: 'not-endpoint-2',
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            id: 'apache-2',
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           }),
         ];
 
@@ -5725,10 +5729,10 @@ describe('Package policy service', () => {
             package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.9.0' },
           }),
           generateSO({
-            name: 'not-endpoint-policy',
+            name: 'apache-policy',
             policy_ids: ['test-agent-policy-2'],
-            id: 'not-endpoint-1',
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            id: 'apache-1',
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           }),
         ];
         const mixedTestedPolicies = [
