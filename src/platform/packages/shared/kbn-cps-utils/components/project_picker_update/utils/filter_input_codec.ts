@@ -195,3 +195,24 @@ export function getFilterExpressionLookupKey(expression: FilterExpressionValue):
   }
   return encoded;
 }
+
+/**
+ * codec to derive valid project routing schemas from the CPS project picker filter expressions,
+ * {@link https://www.elastic.co/docs/explore-analyze/cross-project-search/cross-project-search-project-routing see project routing documentation}
+ */
+export const projectRoutingCodec = z.codec(z.string().nullable(), FilterExpressionSchema, {
+  encode: ({ operator, tagName, tagValue }) => {
+    switch (operator) {
+      case FilterOperator.EQUALS:
+        return `${tagName}:${tagValue}`;
+      case FilterOperator.NOT_EQUALS:
+        return `${tagName}:* AND NOT ${tagName}:${tagValue}`;
+      default:
+        return null;
+    }
+  },
+  decode: (value) => {
+    // We don't support decoding project routing schema to filter expressions just yet,
+    throw new Error('Not implemented');
+  },
+});
