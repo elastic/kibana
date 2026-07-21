@@ -146543,7 +146543,10 @@ components:
         hasAuth:
           $ref: '#/components/schemas/has_auth'
         headers:
-          type: string
+          type: object
+          nullable: true
+          additionalProperties:
+            type: string
           description: |
             A set of key-value pairs sent as headers with the request URLs for the create case, update case, get case, and create comment methods.
         updateIncidentJson:
