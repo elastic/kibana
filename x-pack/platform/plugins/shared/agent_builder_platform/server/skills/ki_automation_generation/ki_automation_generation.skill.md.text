@@ -233,6 +233,10 @@ The AI Index schema has these base fields (all required unless noted):
 | `content` | text + semantic | Free-text for semantic retrieval: purpose, questions answered, access patterns |
 | `tags` | keyword[] | Filter facets |
 | `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on |
+| `@timestamp` | date | When this KI was last profiled; enables recency guards on scheduled runs |
+| `confidence` | float (0–1) | Coverage score from `profile_index`; agents prefer higher-confidence KIs when routing |
+
+**Required fields note**: `@timestamp` and `confidence` must be declared in the target index mapping (`ensure_target_index` step). The AI Index templates use `dynamic: strict`, so undeclared fields are rejected at index time. Write both fields from the `sink_index_ki` step: set `@timestamp` to the current ISO date and `confidence` to the score produced by `profile_index`.
 
 **Rule**: structured facts belong in both `content` and `attributes`, to facilitate exact-match and filter queries, as well as semantic searches.
 
@@ -247,6 +251,8 @@ id:          <index name or connector_id>
 type:        <type>
 title:       <display_name>
 tags:        [...]
+@timestamp:  <ISO date when KI was last profiled, e.g. "2025-07-21T10:00:00Z">
+confidence:  <0.0–1.0 coverage score from profile_index>
 attributes:
   # Repeat structured values here for exact-match / filter queries.
   # Index Metadata example:
@@ -289,6 +295,7 @@ Before presenting any workflow to the user:
 - [ ] `id` on `elasticsearch.index` is set to a stable unique value for idempotent upserts
 - [ ] `triggers: [{type: manual}]`
 - [ ] Corpus filter (Phase 3) is applied
+- [ ] `@timestamp` and `confidence` are declared in the target index mapping (`ensure_target_index`) and written by `sink_index_ki`
 
 ## Workflow shapes for each strategy
 
@@ -297,7 +304,8 @@ to the tool — describe the workflow in natural language using these shapes as 
 
 **Index Metadata:**
 A `foreach` loop over a hardcoded list of index names. Per iteration: `GET /<index>/_mapping`,
-`elasticsearch.search` size 20 for sample docs, `ai.prompt` producing display_name, purpose,
+`elasticsearch.search` size 20 for sample docs using `function_score` with `random_score` (so
+each run samples different records rather than always returning the first-ingested documents), `ai.prompt` producing display_name, purpose,
 answers_questions, does_not_contain, key_fields, joins, when_to_use, and access_patterns (each
 with question_type, esql_template, esql_example, params, returns). Then `elasticsearch.index`
 writing the KI document.
@@ -343,6 +351,14 @@ KI including access_patterns using `execute_connector_sub_action` syntax. `elast
 to upsert. Put domain-specific categorical fields (status, record_type, owner, tags from the source system)
 into `attributes` so they remain filterable after ingestion. Note that any of the above strategies
 can be used with connectors.
+
+## Adapting the recipe
+
+- **Scheduling:** When the workflow runs on a schedule, query `FROM <target_index> | WHERE id == "<index_name>" | KEEP @timestamp` to retrieve the KI's last-profiled date. Skip re-profiling if the source index has not been updated since that timestamp (e.g. check with `elasticsearch.search` using a `range` query on the source index's `@timestamp`). This avoids burning LLM tokens on unchanged data.
+
+- **Large or noisy indices (multi-iteration):** For indices whose content cannot be captured in a single 20-document random sample, use a while-loop convergence pattern: run `sample_docs` → `profile_index` → `evaluate_coverage` (does `confidence` meet the threshold?). If not, re-sample a different random slice (vary the `random_score` seed by iteration index) and repeat up to N iterations, merging profiles. Stop when `confidence ≥ threshold` or max iterations is reached.
+
+- **Validate-and-repair broken `esql_example`:** The access-pattern validation step sets `on-failure.continue: true` so a broken query does not halt the workflow. When a query fails, do not ship the broken example silently. Use `platform.core.generate_esql` to repair it — pass the failing query, the error message, and the index mapping as context — then replace the original `esql_example` with the repaired query before indexing the KI.
 
 ## Handling edge cases
 
