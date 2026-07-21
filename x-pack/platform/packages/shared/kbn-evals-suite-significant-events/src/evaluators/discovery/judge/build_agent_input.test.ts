@@ -9,8 +9,8 @@ import { buildDiscoveryJudgeInput } from './build_agent_input';
 
 describe('buildDiscoveryJudgeInput', () => {
   it('emits the Unreviewed Discoveries section with compact JSON', () => {
-    expect(buildDiscoveryJudgeInput({ discoveries: [{ discovery_slug: 'svc__x-s' }] })).toBe(
-      '## Unreviewed Discoveries\n[{"discovery_slug":"svc__x-s"}]'
+    expect(buildDiscoveryJudgeInput({ discoveries: [{ event_id: 'svc__x-s' }] })).toBe(
+      '## Unreviewed Discoveries\n[{"event_id":"svc__x-s"}]'
     );
   });
 });

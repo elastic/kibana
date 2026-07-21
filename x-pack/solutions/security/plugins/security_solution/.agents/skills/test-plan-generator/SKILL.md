@@ -41,6 +41,10 @@ If you catch yourself thinking any of these, STOP. The thought itself is the sig
 | "This sub-issue's ACs apply even though the sub-issue is not yet implemented." | Use the Pending work pattern in `references/document-structure.md`. |
 | "The issue is thin but the PR fills the gaps — I'll just write the plan from the PR." | The skill records *Issue clarity*, not PR clarity. Run the Issue Clarity Assessment (Step 1.5) — if combined readability is 1, apply the stop-and-ask gate before continuing. See [`references/issue-clarity-assessment.md`](references/issue-clarity-assessment.md). |
 | "I found a PR that obviously implements this scope, but no issue cross-references it — I'll add it to the corpus." | Treat as **orphan**. Do not absorb silently — orphan PRs are the most common source of silent scope creep. Flag under Known Limitations with `⚠️` and ask the user whether to include before proceeding. See [`references/gathering-context.md`](references/gathering-context.md#orphan-prs). |
+| "The feature is behind an off-by-default flag, so there is no upgrade surface — I can skip upgrade scenarios." | A flag hides the feature; it does not stop schema / SO / config / navigation changes from shipping. Evaluate upgrade against the trigger in [`references/optional-scenarios.md`](references/optional-scenarios.md#always-evaluated-coverage). |
+| "The PR only demos create and read for this object — that is the scope." | The PR is a starting point, not the scope boundary. Walk C / R / U / D per persisted object (including operations reachable through platform-generic endpoints). See [`references/common-mistakes.md`](references/common-mistakes.md#silent-crud-gaps). |
+| "This is out of scope, no need to say why." | Every *Out of scope* bullet must carry a one-clause reason on the same line — a bullet without a reason is indistinguishable from an oversight. |
+| "The feature only reads this referenced object — I don't need to think about what happens when the referenced object changes or is deleted." | Referenced / snapshotted data is a first-class scope concern. Cover dangling reference, drift, and dependency unavailability, or document the exclusion. See [`references/common-mistakes.md`](references/common-mistakes.md#ignoring-dependency-data-lifecycle). |
 
 ---
 
@@ -214,10 +218,10 @@ Find `TARGET_VERSION` from (in priority order): the issue's milestone name, proj
 
 | Situation | Action |
 |---|---|
-| Feature touches stored data, mappings, saved objects, or navigation | Mark `TARGET_VERSION` as `⚠️ Not specified — please confirm before publishing` in Assumptions; **omit upgrade scenarios** rather than guess; record the gap in Known Limitations |
-| Feature is a pure parser, pure compute, or otherwise has no upgrade surface | Mark `TARGET_VERSION` as `⚠️ Not specified — please confirm before publishing` in Assumptions; skip the upgrade-section evaluation entirely |
+| Feature touches stored data, mappings, saved objects, or navigation | Mark `TARGET_VERSION` as `⚠️ Not specified — please confirm before publishing` in Assumptions; **keep the upgrade scenarios** using the `TARGET_VERSION` placeholder (upgrade coverage is triggered by what the code ships, not by whether the target version is known — see [Always-evaluated coverage](references/optional-scenarios.md#always-evaluated-coverage)); record the `⚠️` in Known Limitations |
+| Feature is a pure parser, pure compute, or otherwise has no upgrade surface | Record upgrade under *Out of scope* with a one-clause reason (e.g. *"no upgrade surface — pure parser / pure compute"*); `TARGET_VERSION` is irrelevant in this case |
 
-This fallback is the Core rule's `⚠️` escape: never guess the version, never publish an assumption as a fact, never insert speculative upgrade scenarios.
+This fallback is the Core rule's `⚠️` escape: never guess the version, never publish an assumption as a fact. It never omits upgrade coverage the trigger requires — the unknown value is flagged, not the scope decision.
 
 **Checkpoint before Step 3:** Apply the Core rule — if the mental model has gaps or ambiguities, stop and ask the user before proceeding.
 

@@ -194,7 +194,7 @@ function formatDateInstant(
 export function dateMathToRelativeParts(
   value: string
 ): { count: number; unit: string; isFuture: boolean; round?: string } | null {
-  const match = value.match(/^now([+-])(\d+)([smhdwMy])(\/[smhdwMy])?$/);
+  const match = value.match(/^now([+-])(\d+)(ms|[smhdwMy])(\/[smhdwMy])?$/);
   if (!match) {
     return null;
   }

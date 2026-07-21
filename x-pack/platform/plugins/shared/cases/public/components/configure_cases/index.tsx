@@ -417,35 +417,40 @@ export const ConfigureCases: React.FC = React.memo(() => {
               <EuiSpacer size="xl" />
             </>
           )}
-          <div css={sectionWrapperCss}>
-            <EuiFlexItem grow={false}>
-              <CustomFields
-                customFields={customFields}
-                isLoading={isLoadingCaseConfiguration}
-                disabled={isLoadingCaseConfiguration}
-                handleAddCustomField={() =>
-                  setFlyOutVisibility({ type: 'customField', visible: true })
-                }
-                handleDeleteCustomField={onDeleteCustomField}
-                handleEditCustomField={onEditCustomField}
-              />
-            </EuiFlexItem>
-          </div>
+          {/* Templates and custom fields are managed in the new templates UI when it is enabled. */}
+          {!isTemplatesEnabled && (
+            <>
+              <div css={sectionWrapperCss}>
+                <EuiFlexItem grow={false}>
+                  <CustomFields
+                    customFields={customFields}
+                    isLoading={isLoadingCaseConfiguration}
+                    disabled={isLoadingCaseConfiguration}
+                    handleAddCustomField={() =>
+                      setFlyOutVisibility({ type: 'customField', visible: true })
+                    }
+                    handleDeleteCustomField={onDeleteCustomField}
+                    handleEditCustomField={onEditCustomField}
+                  />
+                </EuiFlexItem>
+              </div>
 
-          <EuiSpacer size="xl" />
+              <EuiSpacer size="xl" />
 
-          <div css={sectionWrapperCss}>
-            <EuiFlexItem grow={false}>
-              <Templates
-                templates={templates}
-                isLoading={isLoadingCaseConfiguration}
-                disabled={isLoadingCaseConfiguration}
-                onAddTemplate={() => setFlyOutVisibility({ type: 'template', visible: true })}
-                onEditTemplate={onEditTemplate}
-                onDeleteTemplate={onDeleteTemplate}
-              />
-            </EuiFlexItem>
-          </div>
+              <div css={sectionWrapperCss}>
+                <EuiFlexItem grow={false}>
+                  <Templates
+                    templates={templates}
+                    isLoading={isLoadingCaseConfiguration}
+                    disabled={isLoadingCaseConfiguration}
+                    onAddTemplate={() => setFlyOutVisibility({ type: 'template', visible: true })}
+                    onEditTemplate={onEditTemplate}
+                    onDeleteTemplate={onDeleteTemplate}
+                  />
+                </EuiFlexItem>
+              </div>
+            </>
+          )}
 
           {hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled && (
             <>

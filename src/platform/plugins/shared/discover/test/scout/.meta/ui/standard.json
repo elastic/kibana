@@ -1,5 +1,5 @@
 {
-  "sha1": "faa9eda3a51a994770fce21a92f1210e1f43a3a4",
+  "sha1": "1f1f0cd56a64e43bfa6055070680c58a2ebbc628",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"

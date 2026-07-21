@@ -9,17 +9,12 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Redirect, type RouteComponentProps } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom-v5-compat';
-import {
-  ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
-  ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
-} from '@kbn/elastic-assistant-common';
 
 import { AttackDiscoveryRoutes } from './routes';
 import { useIsAlertsAndAttacksAlignmentEnabled } from '../common/hooks/use_is_alerts_and_attacks_alignment_enabled';
 import { useSpaceId } from '../common/hooks/use_space_id';
 import { useIdsFromUrl } from './pages/results/history/use_ids_from_url';
 import { buildAttackDetailPath } from '../../common/utils/attack_detail_path';
-import { ATTACKS_PATH } from '../../common/constants';
 
 jest.mock('react-router-dom', () => ({
   Redirect: jest.fn(() => <div data-test-subj="mock-redirect" />),
@@ -68,81 +63,34 @@ describe('AttackDiscoveryRoutes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useSearchParams as jest.Mock).mockReturnValue([mockSearchParams]);
+    (useSpaceId as jest.Mock).mockReturnValue('default');
+    (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: [] });
   });
 
-  describe('when enableAlertsAndAttacksAlignment is false', () => {
-    beforeEach(() => {
-      (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(false);
-      (useSpaceId as jest.Mock).mockReturnValue('default');
-      (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: [] });
-    });
+  // The legacy `/attack_discovery` -> Attacks redirect is intentionally disabled
+  // (see ENABLE_LEGACY_ATTACK_DISCOVERY_REDIRECT in routes.tsx). Attack Discovery is now a
+  // permanent top-level page, so the route always renders the page and never redirects,
+  // regardless of the alerts-and-attacks alignment setting.
+  it.each([false, true])(
+    'renders the AttackDiscoveryPage without redirecting when alignment enabled = %s',
+    (alignmentEnabled) => {
+      (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(alignmentEnabled);
 
-    it('renders the legacy AttackDiscoveryPage', () => {
       render(<AttackDiscoveryRoutes {...mockRouteProps} />);
+
       expect(screen.getByTestId('mock-attack-discovery-page')).toBeInTheDocument();
       expect(Redirect).not.toHaveBeenCalled();
-    });
-  });
+    }
+  );
 
-  describe('when enableAlertsAndAttacksAlignment is true', () => {
-    beforeEach(() => {
-      (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
-    });
+  it('does not redirect even when the URL contains attack ids', () => {
+    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
+    (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: ['attack-id-1', 'attack-id-2'] });
 
-    describe('when there are no ids in the URL', () => {
-      beforeEach(() => {
-        (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: [] });
-        (useSpaceId as jest.Mock).mockReturnValue('default');
-      });
+    render(<AttackDiscoveryRoutes {...mockRouteProps} />);
 
-      it('redirects to the main attacks page', () => {
-        render(<AttackDiscoveryRoutes {...mockRouteProps} />);
-        expect(Redirect).toHaveBeenCalledWith({ to: ATTACKS_PATH }, {});
-      });
-    });
-
-    describe('when there are ids in the URL', () => {
-      beforeEach(() => {
-        (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: ['attack-id-1', 'attack-id-2'] });
-      });
-
-      describe('when spaceId is undefined', () => {
-        beforeEach(() => {
-          (useSpaceId as jest.Mock).mockReturnValue(undefined);
-        });
-
-        it('returns null and waits for spaceId to resolve', () => {
-          const { container } = render(<AttackDiscoveryRoutes {...mockRouteProps} />);
-          expect(container).toBeEmptyDOMElement();
-          expect(Redirect).not.toHaveBeenCalled();
-        });
-      });
-
-      describe('when spaceId is resolved', () => {
-        const mockTimestamp = '2026-07-03T12:00:00.000Z';
-        const expectedIndex = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-custom-space,${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-custom-space`;
-        const expectedPath = '/mock-attack-detail-path';
-
-        beforeEach(() => {
-          (useSpaceId as jest.Mock).mockReturnValue('custom-space');
-          const searchParams = new URLSearchParams();
-          searchParams.set('timestamp', mockTimestamp);
-          (useSearchParams as jest.Mock).mockReturnValue([searchParams]);
-          (buildAttackDetailPath as jest.Mock).mockReturnValue(expectedPath);
-        });
-
-        it('redirects to the attack detail flyout for the first id with the correct index and timestamp', () => {
-          render(<AttackDiscoveryRoutes {...mockRouteProps} />);
-
-          expect(buildAttackDetailPath).toHaveBeenCalledWith({
-            attackId: 'attack-id-1',
-            index: expectedIndex,
-            timestamp: mockTimestamp,
-          });
-
-          expect(Redirect).toHaveBeenCalledWith({ to: expectedPath }, {});
-        });
-      });
-    });
+    expect(screen.getByTestId('mock-attack-discovery-page')).toBeInTheDocument();
+    expect(Redirect).not.toHaveBeenCalled();
+    expect(buildAttackDetailPath).not.toHaveBeenCalled();
   });
 });

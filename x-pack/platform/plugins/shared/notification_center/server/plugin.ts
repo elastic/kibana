@@ -15,7 +15,7 @@ import type {
 import type { NotificationCenterConfig } from './config';
 import { registerNotificationCleanupTask, scheduleNotificationCleanupTask } from './cleanup_task';
 import { registerNotificationDataStream } from './data_stream/notification_data_stream';
-import { buildSubmitNotification } from './submit';
+import { buildForType } from './submit';
 import { registerNotificationUserStorage } from './user_storage';
 import type {
   NotificationCenterPluginSetup,
@@ -51,7 +51,7 @@ export class NotificationCenterPlugin
     registerNotificationCleanupTask(core, plugins.taskManager, this.logger);
 
     return {
-      submitNotification: buildSubmitNotification(core),
+      forType: buildForType(core),
     };
   }
 

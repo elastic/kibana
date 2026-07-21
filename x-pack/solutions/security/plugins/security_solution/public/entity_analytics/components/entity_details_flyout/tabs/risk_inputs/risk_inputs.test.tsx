@@ -42,6 +42,7 @@ jest.mock('../../../risk_score_timeline', () => ({
     entityId: string;
     scoreType?: string;
     onPointSelect: (timestamp: string | undefined) => void;
+    onRangeChange: (range: { from: string; to: string }) => void;
   }) => (
     <div
       data-test-subj="mockRiskScoreTimeline"
@@ -52,6 +53,16 @@ jest.mock('../../../risk_score_timeline', () => ({
         type="button"
         data-test-subj="mockSelectPoint"
         onClick={() => props.onPointSelect('2021-08-10T14:00:00.000Z')}
+      />
+      <button
+        type="button"
+        data-test-subj="mockRangeExcludingSelection"
+        onClick={() => props.onRangeChange({ from: 'now-1d', to: 'now' })}
+      />
+      <button
+        type="button"
+        data-test-subj="mockRangeIncludingSelection"
+        onClick={() => props.onRangeChange({ from: 'now-10y', to: 'now' })}
       />
     </div>
   ),
@@ -1193,7 +1204,6 @@ describe('RiskInputsTab', () => {
           from: PIT_TIMESTAMP,
           to: PIT_TIMESTAMP,
           includeContributions: true,
-          pageSize: 1,
           skip: false,
         })
       );
@@ -1230,6 +1240,48 @@ describe('RiskInputsTab', () => {
       );
       expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
         expect.objectContaining({ skip: true })
+      );
+    });
+
+    it('clears a point-in-time selection that falls outside a newly selected range', () => {
+      enableHistoryFlag();
+      mockUseRiskScoreHistory.mockReturnValue({
+        data: { entity_id: 'user:elastic', entity_type: 'user', entries: [pitEntry] },
+        isFetching: false,
+      });
+
+      const { getByTestId, queryByTestId } = renderTab();
+
+      fireEvent.click(getByTestId('mockSelectPoint'));
+      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+
+      // the selected 2021 timestamp is outside a now-1d..now range
+      fireEvent.click(getByTestId('mockRangeExcludingSelection'));
+
+      expect(queryByTestId('riskInputsTabPitIndicator')).not.toBeInTheDocument();
+      expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
+        expect.objectContaining({ skip: true })
+      );
+    });
+
+    it('keeps a point-in-time selection that still falls within a newly selected range', () => {
+      enableHistoryFlag();
+      mockUseRiskScoreHistory.mockReturnValue({
+        data: { entity_id: 'user:elastic', entity_type: 'user', entries: [pitEntry] },
+        isFetching: false,
+      });
+
+      const { getByTestId } = renderTab();
+
+      fireEvent.click(getByTestId('mockSelectPoint'));
+      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+
+      // the selected 2021 timestamp is still inside a now-10y..now range
+      fireEvent.click(getByTestId('mockRangeIncludingSelection'));
+
+      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+      expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
+        expect.objectContaining({ from: PIT_TIMESTAMP, to: PIT_TIMESTAMP, skip: false })
       );
     });
 
@@ -1308,7 +1360,6 @@ describe('RiskInputsTab', () => {
             from: PIT_TIMESTAMP,
             to: PIT_TIMESTAMP,
             includeContributions: true,
-            pageSize: 1,
             skip: false,
           })
         );
