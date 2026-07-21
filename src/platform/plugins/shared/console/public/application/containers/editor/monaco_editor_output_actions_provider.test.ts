@@ -42,15 +42,15 @@ describe('MonacoEditorOutputActionsProvider', () => {
   let triggerCursorPositionChange: () => Promise<void>;
   let triggerCursorSelectionChange: () => Promise<void>;
   let provider: MonacoEditorOutputActionsProvider;
-  // Mutable focus state so blurring the editor's text input flips hasTextFocus() to
-  // false, mirroring the browser.
+  // Mutable focus state so blurring the editor's focused input flips hasTextFocus()
+  // to false, mirroring the browser.
   let hasFocus: boolean;
-  let inputArea: { blur: jest.Mock };
+  let activeElement: { blur: jest.Mock };
 
   beforeEach(() => {
     setEditorActionsCss = jest.fn();
     hasFocus = true;
-    inputArea = {
+    activeElement = {
       blur: jest.fn(() => {
         hasFocus = false;
       }),
@@ -67,7 +67,11 @@ describe('MonacoEditorOutputActionsProvider', () => {
       getScrollTop: jest.fn(() => 0),
       hasTextFocus: jest.fn(() => hasFocus),
       getDomNode: jest.fn(() => ({
-        querySelector: jest.fn(() => inputArea),
+        ownerDocument: {
+          get activeElement() {
+            return hasFocus ? activeElement : null;
+          },
+        },
       })),
       onDidBlurEditorText: jest.fn(),
       onDidChangeCursorPosition: jest.fn((callback: () => Promise<void>) => {
@@ -133,14 +137,25 @@ describe('MonacoEditorOutputActionsProvider', () => {
     expect(getLastActionsCss()).toEqual({ visibility: 'hidden' });
 
     // resetOutputActions() relinquishes editor focus, so a highlight recomputation
-    // triggered afterwards (e.g. the layout event from the success toast mounting)
-    // stays in the hide branch instead of re-rendering the button that copy just hid.
-    // See https://github.com/elastic/kibana/issues/278855.
-    expect(inputArea.blur).toHaveBeenCalled();
+    // triggered afterwards stays in the hide branch instead of re-rendering the
+    // button that copy just hid. See https://github.com/elastic/kibana/issues/278855.
+    expect(activeElement.blur).toHaveBeenCalled();
 
     await triggerCursorSelectionChange();
 
     expect(getLastActionsCss()).toEqual({ visibility: 'hidden' });
+  });
+
+  it('does not blur another element when the editor no longer has text focus', () => {
+    const otherActiveElement = { blur: jest.fn() };
+    editor.hasTextFocus.mockReturnValue(false);
+    editor.getDomNode.mockReturnValue({
+      ownerDocument: { activeElement: otherActiveElement },
+    } as unknown as HTMLElement);
+
+    provider.resetOutputActions();
+
+    expect(otherActiveElement.blur).not.toHaveBeenCalled();
   });
 
   it('re-shows the actions once the editor regains focus after a reset', async () => {
