@@ -24,6 +24,7 @@ import {
   getAlertEventNotFoundMessage,
   getCannotActivateEpisodeMessage,
 } from '../../lib/errors/alert_error_messages';
+import { jsonExample } from '../json_oas_example';
 
 type OASOperationObject = Exclude<
   Awaited<ReturnType<NonNullable<RouteConfigOptions<RouteMethod>['oasOperationObject']>>>,
@@ -31,19 +32,6 @@ type OASOperationObject = Exclude<
 >;
 
 type RouteErrorStatus = 400 | 404;
-
-const jsonExample = <T>(name: string, summary: string, value: T) => ({
-  content: {
-    'application/json': {
-      examples: {
-        [name]: {
-          summary,
-          value,
-        },
-      },
-    },
-  },
-});
 
 const SAMPLE_GROUP_HASH = 'group-hash-1';
 const SAMPLE_EPISODE_ID = 'episode-1';
