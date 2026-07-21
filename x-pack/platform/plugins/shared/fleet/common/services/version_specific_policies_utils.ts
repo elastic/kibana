@@ -151,9 +151,20 @@ export function buildPolicyIdsOrVariantsEsFilter(
 // during a mixed-version rollout will lack the field and must be matched via the legacy
 // policy_id term/prefix pattern.
 
+// TODO: Remove these two fallback helpers once all fleet-server versions in use populate
+// policy_base_id on agent enrolment. Until then, agents enrolled via an older fleet-server
+// during a mixed-version rollout will lack the field and must be matched via the legacy
+// policy_id term/prefix pattern.
+//
+// NOTE: The fallback uses an exact term match on policy_id only (no prefix for version
+// variants such as "policy-id#9.3") to remain compatible with search.allow_expensive_queries:false.
+// Agents with versioned policy_id values that also lack policy_base_id will be missed in that
+// path, but those can only exist during the narrow overlap of an in-progress upgrade and an
+// older fleet-server — the startup backfill covers all pre-existing documents.
+
 /**
  * ES query DSL filter preferring `policy_base_id` for migrated documents, with a legacy
- * `policy_id` fallback for documents that pre-date the `policy_base_id` field.
+ * `policy_id` exact-term fallback for documents that pre-date the `policy_base_id` field.
  */
 export function buildPolicyBaseIdWithFallbackEsFilter(
   baseId: string,
@@ -168,7 +179,7 @@ export function buildPolicyBaseIdWithFallbackEsFilter(
           bool: {
             must: [
               { bool: { must_not: { exists: { field: policyBaseIdField } } } },
-              buildPolicyIdOrVariantsEsFilter(baseId, policyIdField),
+              { term: { [policyIdField]: baseId } },
             ],
           },
         },
@@ -198,7 +209,7 @@ export function buildPolicyBaseIdsWithFallbackEsFilter(
           bool: {
             must: [
               { bool: { must_not: { exists: { field: policyBaseIdField } } } },
-              buildPolicyIdsOrVariantsEsFilter(uniqueIds, policyIdField),
+              { terms: { [policyIdField]: uniqueIds } },
             ],
           },
         },
