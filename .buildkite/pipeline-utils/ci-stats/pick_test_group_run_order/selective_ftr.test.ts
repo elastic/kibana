@@ -30,11 +30,15 @@ describe('FTR_EXCLUDED_MODULES', () => {
     expect(FTR_EXCLUDED_MODULES.has('@kbn/test-jest-helpers')).toBe(false);
   });
 
+  it('does not include runtime plugins', () => {
+    expect(FTR_EXCLUDED_MODULES.has('@kbn/evals-plugin')).toBe(false);
+  });
+
   it('includes Scout / Jest / Cypress / evals helpers', () => {
     expect(FTR_EXCLUDED_MODULES.has('@kbn/scout')).toBe(true);
     expect(FTR_EXCLUDED_MODULES.has('@kbn/test-eui-helpers')).toBe(true);
     expect(FTR_EXCLUDED_MODULES.has('@kbn/cypress-test-helper')).toBe(true);
-    expect(FTR_EXCLUDED_MODULES.has('@kbn/evals-plugin')).toBe(true);
+    expect(FTR_EXCLUDED_MODULES.has('@kbn/evals')).toBe(true);
   });
 });
 

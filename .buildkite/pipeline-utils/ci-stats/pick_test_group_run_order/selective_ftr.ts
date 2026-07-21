@@ -41,7 +41,6 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/evals',
   '@kbn/evals-extensions',
   '@kbn/evals-phoenix-executor',
-  '@kbn/evals-plugin',
   '@kbn/performance-testing-dataset-extractor',
 
   // Lint
