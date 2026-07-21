@@ -67,10 +67,16 @@ export class DurationFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val: number) => {
+  textConvert: TextContextTypeConvert = (val) => {
     const missing = this.checkForMissingValueText(val);
     if (missing) {
       return missing;
+    }
+
+    // Some fields like histogram have object values that cannot be represented as a duration,
+    // so render them as-is.
+    if (typeof val === 'object') {
+      return JSON.stringify(val);
     }
 
     const inputFormat = this.param('inputFormat');

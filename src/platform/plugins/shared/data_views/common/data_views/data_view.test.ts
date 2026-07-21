@@ -481,7 +481,7 @@ describe('IndexPattern', () => {
       );
     });
 
-    test('should derive a scalar formatter from defaultFormatter for scalar fields', () => {
+    test('should derive a scalar formatter from defaultFormatter', () => {
       expect(
         indexPattern.getFormatterForField({
           name: 'durationSeconds',
@@ -492,19 +492,6 @@ describe('IndexPattern', () => {
           defaultFormatter: 's',
         })
       ).toBeInstanceOf(MockFieldFormatter);
-    });
-
-    test('should ignore defaultFormatter for object-valued fields and fall back to the default instance', () => {
-      const formatter = indexPattern.getFormatterForField({
-        name: 'metric_reader.collection.duration',
-        type: 'exponential_histogram',
-        esTypes: ['exponential_histogram'],
-        searchable: false,
-        aggregatable: true,
-        defaultFormatter: 's',
-      });
-
-      expect(formatter).not.toBeInstanceOf(MockFieldFormatter);
     });
   });
 

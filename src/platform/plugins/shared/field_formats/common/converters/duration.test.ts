@@ -35,6 +35,17 @@ describe('Duration Format', () => {
     expect(formatter.convertToReact(60)).toBe('a minute');
   });
 
+  test('renders object values (e.g. histogram fields) as JSON instead of NaN', () => {
+    const formatter = new DurationFormat(
+      { inputFormat: 'seconds', outputFormat: 'humanize' },
+      jest.fn()
+    );
+    const histogramValue = { scale: 20, sum: 0.000825416, min: 0.000825416, max: 0.000825416 };
+
+    expect(formatter.convertToText(histogramValue)).toBe(JSON.stringify(histogramValue));
+    expect(formatter.convertToReact(histogramValue)).toBe(JSON.stringify(histogramValue));
+  });
+
   test('wraps a multi-value array with bracket notation', () => {
     const formatter = new DurationFormat(
       { inputFormat: 'seconds', outputFormat: 'humanize' },
