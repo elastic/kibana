@@ -82,6 +82,20 @@ export interface ObservabilityCreateSLOFeature {
   }) => React.ReactNode;
 }
 
+export interface ObservabilityServiceFlyoutFeatureRenderDeps {
+  serviceName: string;
+  agentName?: string;
+  environment: string;
+  rangeFrom: string;
+  rangeTo: string;
+  onClose: () => void;
+}
+
+export interface ObservabilityServiceFlyoutFeature {
+  id: 'observability-service-flyout';
+  renderServiceFlyout: (deps: ObservabilityServiceFlyoutFeatureRenderDeps) => React.ReactNode;
+}
+
 export interface ObservabilityLogsFetchDocumentByIdFeature {
   id: 'observability-logs-fetch-document-by-id';
   fetchLogDocumentById: (
@@ -300,6 +314,7 @@ export type DiscoverFeature =
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityLogsAIInsightFeature
   | ObservabilityCreateSLOFeature
+  | ObservabilityServiceFlyoutFeature
   | ObservabilityLogEventsFeature
   | ObservabilityTracesFeature
   | ObservabilityLogsFetchDocumentByIdFeature
