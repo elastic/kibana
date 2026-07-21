@@ -599,6 +599,7 @@ describe('#httpRequestEvent', () => {
         },
         "message": "User is requesting [/path] endpoint",
         "url": Object {
+          "original": "http://localhost/original/path",
           "domain": "localhost",
           "path": "/path",
           "port": undefined,
@@ -640,6 +641,7 @@ describe('#httpRequestEvent', () => {
         "message": "User is requesting [/original/path] endpoint",
         "url": Object {
           "domain": "localhost",
+          "original": "http://localhost/original/path?query=param",
           "path": "/original/path",
           "port": undefined,
           "query": "query=param",

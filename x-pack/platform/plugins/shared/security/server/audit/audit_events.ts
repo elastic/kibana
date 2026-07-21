@@ -36,6 +36,7 @@ export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
       },
     },
     url: {
+      original: url.href,
       domain: url.hostname,
       path: url.pathname,
       port: url.port ? parseInt(url.port, 10) : undefined,
