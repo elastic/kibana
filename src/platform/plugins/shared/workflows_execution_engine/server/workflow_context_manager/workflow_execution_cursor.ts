@@ -21,7 +21,7 @@ export interface WorkflowExecutionCursorInit {
 export interface WorkflowExecutionCursorApi {
   readonly isExecuting: boolean;
   readonly error: Error | undefined;
-  captureError(caught: Error): void;
+  captureError(caught: unknown): void;
   clearError(): void;
   start(): void;
   stop(): void;
@@ -69,8 +69,8 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
    * Records a execution-level error from a caught/thrown value.
    * Synchronous so callers may invoke it after `await` without tripping `require-atomic-updates`.
    */
-  public captureError(caught: Error): void {
-    this.workflowError = caught;
+  public captureError(caught: unknown): void {
+    this.workflowError = caught instanceof Error ? caught : new Error(String(caught));
   }
 
   /**

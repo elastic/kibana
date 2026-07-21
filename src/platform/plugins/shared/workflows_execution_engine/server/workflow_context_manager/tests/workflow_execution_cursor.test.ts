@@ -90,4 +90,30 @@ describe('WorkflowExecutionCursor', () => {
     const entryCursor = new WorkflowExecutionCursor({ workflowExecutionGraph });
     expect(entryCursor.currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
   });
+
+  describe('captureError', () => {
+    it('stores an Error instance directly', () => {
+      const err = new Error('step failed');
+      workflowExecutionCursor.captureError(err);
+      expect(workflowExecutionCursor.error).toBe(err);
+    });
+
+    it('wraps a non-Error value in an Error with the stringified message', () => {
+      workflowExecutionCursor.captureError('something went wrong');
+      expect(workflowExecutionCursor.error).toBeInstanceOf(Error);
+      expect(workflowExecutionCursor.error?.message).toBe('something went wrong');
+    });
+
+    it('wraps a non-Error object using String()', () => {
+      workflowExecutionCursor.captureError({ code: 42 });
+      expect(workflowExecutionCursor.error).toBeInstanceOf(Error);
+      expect(workflowExecutionCursor.error?.message).toBe('[object Object]');
+    });
+
+    it('clearError removes a previously captured error', () => {
+      workflowExecutionCursor.captureError(new Error('boom'));
+      workflowExecutionCursor.clearError();
+      expect(workflowExecutionCursor.error).toBeUndefined();
+    });
+  });
 });

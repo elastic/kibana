@@ -443,7 +443,11 @@ export class WorkflowExecutionRuntimeManager {
       scopeStack: this.workflowExecutionCursor.currentStackFrames,
     };
 
-    if (this.workflowExecutionCursor.error) {
+    if (isTerminalStatus(workflowExecution.status)) {
+      // Preserve a terminal status already written by cancel/timeout paths.
+      // A stale cursor error must not downgrade CANCELLED → FAILED.
+      workflowExecutionUpdate.status = workflowExecution.status;
+    } else if (this.workflowExecutionCursor.error) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
       workflowExecutionUpdate.error = ExecutionError.fromError(
         this.workflowExecutionCursor.error

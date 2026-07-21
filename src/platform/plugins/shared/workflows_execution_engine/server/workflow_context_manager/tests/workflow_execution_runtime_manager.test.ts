@@ -513,6 +513,26 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
     });
 
+    it('should preserve CANCELLED status when a cursor error was captured before cancellation', async () => {
+      // Simulate: step fails (cursor captures error), then workflow is cancelled.
+      // saveState must persist CANCELLED, not FAILED.
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        ...workflowExecution,
+        startedAt: '2025-08-05T00:00:00.000Z',
+        status: ExecutionStatus.CANCELLED,
+      });
+      underTest.setWorkflowError(new Error('step failed before cancel'));
+
+      await underTest.saveState();
+
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ status: ExecutionStatus.CANCELLED })
+      );
+      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith(
+        expect.objectContaining({ status: ExecutionStatus.FAILED })
+      );
+    });
+
     describe.each(TerminalExecutionStatuses)('for status %s', (status) => {
       beforeEach(() => {
         (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
