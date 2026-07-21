@@ -83,6 +83,6 @@ export async function runPolicyBaseIdBackfillIfNeeded(
   logger.debug('Backfilling policy_base_id on fleet-agents and fleet-policies');
   await backfillPolicyBaseId(esClient);
   await settingsService.saveSettings(soClient, {
-    completed_migrations: [...(settings.completed_migrations ?? []), MIGRATION_KEY],
+    completed_migrations: [...new Set([...(settings.completed_migrations ?? []), MIGRATION_KEY])],
   });
 }
