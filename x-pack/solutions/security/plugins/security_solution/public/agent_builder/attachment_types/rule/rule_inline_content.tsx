@@ -7,8 +7,6 @@
 
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { useRule } from '../../../detection_engine/rule_management/logic/use_rule';
-import { stripServerFields } from '../../../detection_engine/common/ai_rule_creation_handler';
 import {
   EuiAccordion,
   EuiBadge,
@@ -122,13 +120,11 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
-  const { data: savedRule } = useRule(attachment.origin ?? '', false, {
-    enabled: Boolean(attachment.origin),
-  });
-  const originalRule = useMemo(
-    () => (savedRule ? (stripServerFields(savedRule) as RuleResponse) : null),
-    [savedRule]
-  );
+  const originalRule = useMemo(() => {
+    const prevText = attachment.versionData?.previousVersionData?.text;
+    if (!prevText) return null;
+    return parseRuleFromAttachment({ ...attachment, data: { ...attachment.data, text: prevText } });
+  }, [attachment]);
 
   if (!rule) {
     return null;
