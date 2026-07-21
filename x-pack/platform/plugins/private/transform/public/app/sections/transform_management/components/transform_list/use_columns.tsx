@@ -25,6 +25,7 @@ import {
   EuiIconTip,
   RIGHT_ALIGNMENT,
   EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { useTransformCapabilities } from '../../../../hooks';
@@ -40,11 +41,18 @@ import type { TransformListRow } from '../../../../common';
 import { getTransformProgress, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
+import { useAppDependencies } from '../../../../app_dependencies';
 
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 import { TransformTaskStateBadge } from './transform_task_state_badge';
+import { getProjectScopeSortValue, ProjectScopeColumn } from './project_scope_column';
 
 const TRUNCATE_TEXT_LINES = 3;
+
+type TransformListColumn =
+  | EuiTableComputedColumnType<TransformListRow>
+  | EuiTableFieldDataColumnType<TransformListRow>
+  | EuiTableActionsColumnType<TransformListRow>;
 
 const TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG = i18n.translate(
   'xpack.transform.transformList.needsReauthorizationBadge.insufficientPermissions',
@@ -58,6 +66,59 @@ const StatsUnknown = () => (
     <FormattedMessage id="xpack.transform.transformList.statsUnknown" defaultMessage="Unknown" />
   </EuiText>
 );
+
+const TransformIdWithDescription = ({ item }: { item: TransformListRow }) => {
+  const transformId = item.config.id;
+  const description = item.config.description;
+  const transformIdContent = !isManagedTransform(item) ? (
+    <EuiToolTip content={transformId}>
+      <span data-test-subj="transformListColumnIdText">{transformId}</span>
+    </EuiToolTip>
+  ) : (
+    <>
+      <EuiToolTip
+        content={`${transformId} (${i18n.translate(
+          'xpack.transform.transformList.managedBadgeLabel',
+          {
+            defaultMessage: 'Managed',
+          }
+        )})`}
+      >
+        <span data-test-subj="transformListColumnIdText">{transformId}</span>
+      </EuiToolTip>
+      &nbsp;
+      <EuiToolTip
+        content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
+          defaultMessage:
+            'This transform is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
+        })}
+      >
+        <EuiBadge tabIndex={0} color="hollow" data-test-subj="transformListRowIsManagedBadge">
+          {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
+            defaultMessage: 'Managed',
+          })}
+        </EuiBadge>
+      </EuiToolTip>
+    </>
+  );
+
+  return (
+    <>
+      <div>{transformIdContent}</div>
+      {description ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiToolTip content={description}>
+            <EuiText color="subdued" size="s">
+              <span data-test-subj="transformListColumnDescriptionText">{description}</span>
+            </EuiText>
+          </EuiToolTip>
+        </>
+      ) : null}
+    </>
+  );
+};
+
 export const useColumns = (
   expandedRowItemIds: TransformId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<TransformId[]>>,
@@ -67,6 +128,30 @@ export const useColumns = (
 ) => {
   const NoStatsFallbackComponent = transformsStatsLoading ? EuiLoadingSpinner : StatsUnknown;
   const { canStartStopTransform } = useTransformCapabilities();
+  const { cps } = useAppDependencies();
+  const cpsManager = cps?.cpsManager;
+  const [hasLinkedProjects, setHasLinkedProjects] = React.useState(
+    () => cpsManager?.hasLinkedProjects() ?? false
+  );
+
+  React.useEffect(() => {
+    let isMounted = true;
+    setHasLinkedProjects(cpsManager?.hasLinkedProjects() ?? false);
+
+    if (!cpsManager) {
+      return;
+    }
+
+    cpsManager.whenReady().then(() => {
+      if (isMounted) {
+        setHasLinkedProjects(cpsManager.hasLinkedProjects());
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [cpsManager]);
 
   const { actions, modals } = useActions({
     forceDisable: transformSelection.length > 0,
@@ -86,18 +171,7 @@ export const useColumns = (
     setExpandedRowItemIds([...expandedRowItemIds]);
   }
 
-  const columns: [
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableFieldDataColumnType<TransformListRow>,
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableFieldDataColumnType<TransformListRow>,
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableActionsColumnType<TransformListRow>
-  ] = [
+  const columns: TransformListColumn[] = [
     {
       name: (
         <EuiScreenReaderOnly>
@@ -157,41 +231,7 @@ export const useColumns = (
       sortable: true,
       truncateText: { lines: TRUNCATE_TEXT_LINES },
       scope: 'row',
-      render: (transformId, item) => {
-        if (!isManagedTransform(item))
-          return (
-            <EuiToolTip content={transformId}>
-              <span>{transformId}</span>
-            </EuiToolTip>
-          );
-        return (
-          <>
-            <EuiToolTip
-              content={`${transformId} (${i18n.translate(
-                'xpack.transform.transformList.managedBadgeLabel',
-                {
-                  defaultMessage: 'Managed',
-                }
-              )})`}
-            >
-              <span>{transformId}</span>
-            </EuiToolTip>
-            &nbsp;
-            <EuiToolTip
-              content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
-                defaultMessage:
-                  'This transform is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
-              })}
-            >
-              <EuiBadge tabIndex={0} color="hollow" data-test-subj="transformListRowIsManagedBadge">
-                {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
-                  defaultMessage: 'Managed',
-                })}
-              </EuiBadge>
-            </EuiToolTip>
-          </>
-        );
-      },
+      render: (_transformId, item) => <TransformIdWithDescription item={item} />,
     },
     {
       id: 'alertRule',
@@ -206,7 +246,7 @@ export const useColumns = (
         </EuiScreenReaderOnly>
       ),
       width: '30px',
-      render: (item) => {
+      render: (item: TransformListRow) => {
         const needsReauth = needsReauthorization(item);
 
         const actionMsg = canStartStopTransform
@@ -257,20 +297,28 @@ export const useColumns = (
         );
       },
     },
-    {
-      field: TRANSFORM_LIST_COLUMN.DESCRIPTION,
-      'data-test-subj': 'transformListColumnDescription',
-      name: i18n.translate('xpack.transform.description', { defaultMessage: 'Description' }),
-      sortable: true,
-      truncateText: { lines: TRUNCATE_TEXT_LINES },
-      render(text: string) {
-        return (
-          <EuiToolTip content={text}>
-            <span>{text}</span>
-          </EuiToolTip>
-        );
-      },
-    },
+    ...(cpsManager && hasLinkedProjects
+      ? [
+          {
+            name: i18n.translate('xpack.transform.projectScope', {
+              defaultMessage: 'Project scope',
+            }),
+            'data-test-subj': 'transformListColumnProjectScope',
+            sortable: (item: TransformListRow) =>
+              getProjectScopeSortValue(item.config.source.project_routing),
+            truncateText: true,
+            render(item: TransformListRow) {
+              return (
+                <ProjectScopeColumn
+                  cpsManager={cpsManager}
+                  projectRouting={item.config.source.project_routing}
+                />
+              );
+            },
+            width: '160px',
+          } satisfies EuiTableComputedColumnType<TransformListRow>,
+        ]
+      : []),
     {
       name: i18n.translate('xpack.transform.type', { defaultMessage: 'Type' }),
       'data-test-subj': 'transformListColumnType',
