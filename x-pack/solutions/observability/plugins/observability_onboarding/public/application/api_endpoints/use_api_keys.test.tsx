@@ -91,6 +91,27 @@ describe('useApiKeys', () => {
     expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 
+  it('keeps previously created endpoint flags when creating a key for another endpoint', async () => {
+    mockCallApi.mockResolvedValue({ encodedApiKey: 'encoded-key' });
+
+    const { result } = renderHook(() => useApiKeys());
+    await act(async () => {
+      await result.current.createApiKey(ApiEndpointId.Prometheus);
+    });
+    await act(async () => {
+      await result.current.createApiKey(ApiEndpointId.Elasticsearch);
+    });
+
+    expect(result.current.keyCreatedBeforeByEndpointId).toEqual({
+      [ApiEndpointId.Prometheus]: true,
+      [ApiEndpointId.Elasticsearch]: true,
+    });
+    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '{}')).toEqual({
+      [ApiEndpointId.Prometheus]: true,
+      [ApiEndpointId.Elasticsearch]: true,
+    });
+  });
+
   it('exposes created-before flags already stored in localStorage', () => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ prometheus: true }));
 

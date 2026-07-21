@@ -30,6 +30,7 @@ export const SecurityCallout = ({
     <>
       <EuiSpacer size="m" />
       <EuiCallOut
+        announceOnMount
         iconType="info"
         onDismiss={onDismiss}
         title={i18n.translate('xpack.observability_onboarding.apiEndpoints.securityCalloutTitle', {

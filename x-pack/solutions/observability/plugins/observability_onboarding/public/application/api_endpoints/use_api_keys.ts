@@ -12,6 +12,7 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { useKibana } from '../../hooks/use_kibana';
 import { callObservabilityOnboardingApi } from '../../services/rest/create_call_api';
 import type { ApiEndpointId } from '../../../common/api_endpoints';
+import { readStoredFlags } from './read_stored_flags';
 
 const CREATED_KEYS_STORAGE_KEY = 'observabilityOnboarding.apiEndpoints.createdKeys';
 
@@ -42,7 +43,10 @@ export function useApiKeys(): UseApiKeysResult {
           { signal: null, params: { path: { id: endpointId } } }
         );
         setEncodedApiKeys((previous) => ({ ...previous, [endpointId]: encodedApiKey }));
-        setCreatedKeysInStorage((previous) => ({ ...previous, [endpointId]: true }));
+        setCreatedKeysInStorage({
+          ...readStoredFlags(CREATED_KEYS_STORAGE_KEY),
+          [endpointId]: true,
+        });
         notifications?.toasts.addSuccess({
           title: i18n.translate('xpack.observability_onboarding.apiEndpoints.createKeySuccess', {
             defaultMessage: 'API key created successfully',

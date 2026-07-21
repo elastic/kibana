@@ -37,6 +37,40 @@ describe('useSecurityCalloutDismissal', () => {
     });
   });
 
+  it('keeps earlier dismissals when dismissing another endpoint in the same mount', () => {
+    const { result } = renderHook(() => useSecurityCalloutDismissal());
+
+    act(() => {
+      result.current.dismissCallout(ApiEndpointId.Prometheus);
+    });
+    act(() => {
+      result.current.dismissCallout(ApiEndpointId.Elasticsearch);
+    });
+
+    expect(result.current.dismissedByEndpointId).toEqual({
+      [ApiEndpointId.Prometheus]: true,
+      [ApiEndpointId.Elasticsearch]: true,
+    });
+    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '{}')).toEqual({
+      [ApiEndpointId.Prometheus]: true,
+      [ApiEndpointId.Elasticsearch]: true,
+    });
+  });
+
+  it('recovers from corrupt storage when persisting a dismissal', () => {
+    window.localStorage.setItem(STORAGE_KEY, 'not-json');
+
+    const { result } = renderHook(() => useSecurityCalloutDismissal());
+
+    act(() => {
+      result.current.dismissCallout(ApiEndpointId.Prometheus);
+    });
+
+    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '{}')).toEqual({
+      [ApiEndpointId.Prometheus]: true,
+    });
+  });
+
   it('reads dismissals back from storage on mount', () => {
     window.localStorage.setItem(
       STORAGE_KEY,
