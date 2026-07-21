@@ -41,6 +41,19 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     /**
+     * Whether the Cases templates v2 feature (`xpack.cases.templates.enabled`) is ON, detected at
+     * runtime from the (classic) Case Settings page. When the flag is ON, custom fields and templates
+     * move off the settings page onto the dedicated v2 templates / field-library routes and the
+     * `configure-cases-back-to-cases` affordance renders; when OFF, the legacy in-page
+     * `templates-form-group` section renders instead. Must be called while on the Case Settings page.
+     */
+    async isTemplatesV2Enabled(): Promise<boolean> {
+      // The legacy `templates-form-group` section is rendered only when the flag is OFF, so its
+      // absence is the definitive ON signal on the settings page.
+      return !(await testSubjects.exists('templates-form-group', { timeout: 2000 }));
+    },
+
+    /**
      * Waits for the case view page to load in either design (legacy `case-view-title` or the
      * redesign app header title).
      */

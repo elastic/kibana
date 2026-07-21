@@ -36,6 +36,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...integrationConfig.get('kbnTestServer.serverArgs'),
         '--xpack.eventLog.logEntries=true',
         '--xpack.eventLog.indexEntries=true',
+        // Pin the Cases templates flag ON so the templates-v2 migration task
+        // (`cases_templates_v2_migration`) is deterministically registered,
+        // matching the expected task-type list in
+        // `check_registered_task_types.ts` regardless of the global default.
+        '--xpack.cases.templates.enabled=true',
         '--xpack.task_manager.monitored_aggregated_stats_refresh_rate=5000',
         '--xpack.task_manager.invalidate_api_key_task.removalDelay="1s"',
         `--xpack.stack_connectors.enableExperimental=${JSON.stringify([

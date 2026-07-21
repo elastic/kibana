@@ -30,10 +30,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('case settings screenshots', async function () {
-      // With the templates feature flag enabled (the default), custom fields and
-      // templates are managed on the dedicated v2 templates / field-library pages
-      // rather than inline on the Case Settings page. Capture the settings page,
-      // the templates list, the field library, and the add-connector flyout.
+      // Custom fields and templates management moves off the Case Settings page onto the dedicated
+      // v2 templates / field-library pages when the templates feature flag
+      // (`xpack.cases.templates.enabled`) is ON. Capture the settings page and add-connector flyout
+      // (flag-agnostic) plus, when the flag is ON, the templates list and field library pages. The
+      // flag is detected at runtime so the suite is green whether it defaults ON or OFF.
       await navigateToCasesApp(getPageObject, getService, owner);
       // The redesigned settings page drops the custom fields and templates management these
       // screenshots document, so skip while the redesign is on.
@@ -53,33 +54,37 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         screenshotDirectories
       );
 
-      // Templates list page — reachable when the templates flag is ON.
-      // Strip any query string / hash so the sub-path is appended cleanly.
+      // Strip any query string / hash so sub-paths are appended cleanly.
       const configureUrl = (await browser.getCurrentUrl()).split(/[?#]/)[0].replace(/\/$/, '');
-      await browser.get(`${configureUrl}/templates`);
-      await header.waitUntilLoadingHasFinished();
-      await retry.waitFor('templates-table exist', async () => {
-        return await testSubjects.exists('templates-table');
-      });
-      await svlCommonScreenshots.takeScreenshot(
-        'observability-cases-templates',
-        screenshotDirectories,
-        1400,
-        1000
-      );
+      const isTemplatesV2Enabled = await cases.common.isTemplatesV2Enabled();
 
-      // Field library page — reachable when the templates flag is ON.
-      await browser.get(`${configureUrl}/field_library`);
-      await header.waitUntilLoadingHasFinished();
-      await retry.waitFor('fieldDefinitionsTable exist', async () => {
-        return await testSubjects.exists('fieldDefinitionsTable');
-      });
-      await svlCommonScreenshots.takeScreenshot(
-        'observability-cases-field-library',
-        screenshotDirectories,
-        1400,
-        700
-      );
+      if (isTemplatesV2Enabled) {
+        // Templates list page — reachable only when the templates flag is ON.
+        await browser.get(`${configureUrl}/templates`);
+        await header.waitUntilLoadingHasFinished();
+        await retry.waitFor('templates-table exist', async () => {
+          return await testSubjects.exists('templates-table');
+        });
+        await svlCommonScreenshots.takeScreenshot(
+          'observability-cases-templates',
+          screenshotDirectories,
+          1400,
+          1000
+        );
+
+        // Field library page — reachable only when the templates flag is ON.
+        await browser.get(`${configureUrl}/field_library`);
+        await header.waitUntilLoadingHasFinished();
+        await retry.waitFor('fieldDefinitionsTable exist', async () => {
+          return await testSubjects.exists('fieldDefinitionsTable');
+        });
+        await svlCommonScreenshots.takeScreenshot(
+          'observability-cases-field-library',
+          screenshotDirectories,
+          1400,
+          700
+        );
+      }
 
       // Add-connector flyout on the settings page (unchanged by the flag).
       await browser.get(configureUrl);

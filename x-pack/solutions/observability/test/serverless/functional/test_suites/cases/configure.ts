@@ -75,13 +75,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // With the templates feature flag enabled (the default), custom fields and
-    // templates are managed on the dedicated v2 templates / field-library pages,
-    // not inline on the Case Settings page. The legacy in-page flow is covered by
-    // the flag-OFF stateful `configure_legacy.ts` suite.
+    // When the templates feature flag (`xpack.cases.templates.enabled`) is ON, custom fields and
+    // templates are managed on the dedicated v2 templates / field-library pages, not inline on the
+    // Case Settings page. These pages only exist when the flag is ON, so the suites detect the flag
+    // at runtime (from the settings page) and skip when it is OFF — keeping the file green whether the
+    // flag defaults ON or OFF. The legacy in-page flow is covered by the flag-OFF stateful
+    // `configure_legacy.ts` suite.
     describe('Templates page (v2)', function () {
-      before(async () => {
+      before(async function () {
         await navigateToConfigure();
+        if (!(await cases.common.isTemplatesV2Enabled())) {
+          return this.skip();
+        }
         // The cases app pathname already ends with `configure`, so append the
         // sub-path after stripping any query string / hash.
         const configureUrl = (await browser.getCurrentUrl()).split(/[?#]/)[0].replace(/\/$/, '');
@@ -100,8 +105,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Field library page (v2)', function () {
-      before(async () => {
+      before(async function () {
         await navigateToConfigure();
+        if (!(await cases.common.isTemplatesV2Enabled())) {
+          return this.skip();
+        }
         const configureUrl = (await browser.getCurrentUrl()).split(/[?#]/)[0].replace(/\/$/, '');
         await browser.get(`${configureUrl}/field_library`);
         await header.waitUntilLoadingHasFinished();

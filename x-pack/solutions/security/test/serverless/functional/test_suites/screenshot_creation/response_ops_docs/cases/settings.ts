@@ -30,10 +30,11 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
     });
 
     it('case settings screenshot', async function () {
-      // With the templates feature flag enabled (the default), custom fields and
-      // templates are managed on the dedicated v2 templates / field-library pages
-      // rather than inline on the Case Settings page. Capture the settings page,
-      // the templates list, and the create-template editor for the docs.
+      // Custom fields and templates management moves off the Case Settings page onto the dedicated
+      // v2 templates / field-library pages when the templates feature flag
+      // (`xpack.cases.templates.enabled`) is ON. Capture the settings page (flag-agnostic) plus, when
+      // the flag is ON, the templates list and field library pages. The flag is detected at runtime so
+      // the suite is green whether it defaults ON or OFF.
       await navigateToCasesApp(getPageObject, getService, owner);
       // The redesigned settings page drops the custom fields and templates management these
       // screenshots document, so skip while the redesign is on.
@@ -50,7 +51,11 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       });
       await svlCommonScreenshots.takeScreenshot('security-cases-settings', screenshotDirectories);
 
-      // Templates list page — reachable when the templates flag is ON.
+      if (!(await cases.common.isTemplatesV2Enabled())) {
+        return;
+      }
+
+      // Templates list page — reachable only when the templates flag is ON.
       // Strip any query string / hash so the sub-path is appended cleanly.
       const configureUrl = (await browser.getCurrentUrl()).split(/[?#]/)[0].replace(/\/$/, '');
       await browser.get(`${configureUrl}/templates`);
@@ -65,7 +70,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         1000
       );
 
-      // Field library page — reachable when the templates flag is ON.
+      // Field library page — reachable only when the templates flag is ON.
       await browser.get(`${configureUrl}/field_library`);
       await pageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor('fieldDefinitionsTable exist', async () => {
