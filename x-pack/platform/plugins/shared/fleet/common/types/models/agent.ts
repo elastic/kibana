@@ -334,6 +334,10 @@ export interface FleetServerAgent {
    */
   policy_id?: string;
   /**
+   * The base policy ID (policy_id without version suffix) for efficient querying.
+   */
+  policy_base_id?: string;
+  /**
    * The current policy revision_idx for the Elastic Agent
    */
   policy_revision_idx?: number | null;

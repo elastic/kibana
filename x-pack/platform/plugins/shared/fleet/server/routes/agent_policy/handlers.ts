@@ -14,10 +14,7 @@ import { isEmpty, uniq } from 'lodash';
 import yaml from 'yaml';
 
 import { ALL_SPACES_ID, FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
-import {
-  removeVersionSuffixFromPolicyId,
-  buildPolicyIdOrVariantsKuery,
-} from '../../../common/services/version_specific_policies_utils';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import {
@@ -108,7 +105,7 @@ export async function populateAssignedAgentsCount(
   const policyKueryById = new Map(
     agentPolicies.map((agentPolicy) => [
       agentPolicy.id,
-      buildPolicyIdOrVariantsKuery(agentPolicy.id),
+      `policy_base_id:"${agentPolicy.id}"`,
     ])
   );
 

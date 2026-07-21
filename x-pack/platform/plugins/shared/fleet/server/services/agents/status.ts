@@ -17,10 +17,6 @@ import type {
 
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { agentStatusesToSummary } from '../../../common/services';
-import {
-  buildPolicyIdOrVariantsEsFilter,
-  buildPolicyIdsOrVariantsEsFilter,
-} from '../../../common/services/version_specific_policies_utils';
 import { AGENTS_INDEX } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { FleetError, FleetUnauthorizedError } from '../../errors';
@@ -90,12 +86,10 @@ export async function getAgentStatusForAgentPolicy(
     );
     clauses.push(kueryAsElasticsearchQuery);
   }
-  // If agentPolicyIds is provided, we filter by those, otherwise we filter by deprecated agentPolicyId.
-  // Also matches agents on version-specific variants of the given policies (e.g. `id#9.2`).
   if (agentPolicyIds) {
-    clauses.push(buildPolicyIdsOrVariantsEsFilter(agentPolicyIds));
+    clauses.push({ terms: { policy_base_id: agentPolicyIds } });
   } else if (agentPolicyId) {
-    clauses.push(buildPolicyIdOrVariantsEsFilter(agentPolicyId));
+    clauses.push({ term: { policy_base_id: agentPolicyId } });
   }
 
   const query =

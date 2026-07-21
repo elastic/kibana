@@ -76,6 +76,7 @@ export async function getVersionSpecificPolicies(
     const versionSpecificPolicy: FleetServerPolicy = {
       ...fleetServerPolicy,
       policy_id: `${fullPolicy.id}${AGENT_POLICY_VERSION_SEPARATOR}${version}`,
+      policy_base_id: fullPolicy.id,
       data: {
         ...fleetServerPolicy.data,
         inputs: getInputsForVersion(updatedFullPolicy?.inputs ?? fullPolicy.inputs, version),

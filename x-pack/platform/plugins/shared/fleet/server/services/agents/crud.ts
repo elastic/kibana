@@ -20,10 +20,7 @@ import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
-import {
-  buildPolicyIdsOrVariantsEsFilter,
-  removeVersionSuffixFromPolicyId,
-} from '../../../common/services/version_specific_policies_utils';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 import { AGENTS_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 import {
   FleetError,
@@ -706,9 +703,7 @@ export async function getAgentVersionsForAgentPolicyIds(
       >({
         query: {
           bool: {
-            // Also matches agents on version-specific variants of the given policies
-            // (e.g. `id#9.2`), which would otherwise be missed by an exact terms match.
-            filter: [buildPolicyIdsOrVariantsEsFilter(agentPolicyIds)],
+            filter: [{ terms: { policy_base_id: agentPolicyIds } }],
           },
         },
         index: AGENTS_INDEX,
@@ -716,9 +711,11 @@ export async function getAgentVersionsForAgentPolicyIds(
       })
     );
 
-    // Group by base policy id so version-specific variants roll up under their parent policy.
-    const groupedHits = groupBy(hits, (hit) =>
-      hit._source?.policy_id ? removeVersionSuffixFromPolicyId(hit._source.policy_id) : undefined
+    const groupedHits = groupBy(
+      hits,
+      (hit) =>
+        hit._source?.policy_base_id ??
+        (hit._source?.policy_id ? removeVersionSuffixFromPolicyId(hit._source.policy_id) : undefined)
     );
 
     for (const [policyId, policyHits] of Object.entries(groupedHits)) {

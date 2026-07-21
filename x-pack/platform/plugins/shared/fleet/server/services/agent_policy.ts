@@ -128,8 +128,6 @@ import {
 import {
   hasVersionSuffix,
   removeVersionSuffixFromPolicyId,
-  buildPolicyIdOrVariantsKuery,
-  buildPolicyIdOrVariantsEsFilter,
 } from '../../common/services/version_specific_policies_utils';
 
 import { VERIFY_PERMISSIONS_TASK } from '../tasks/agentless/verify_permissions_task';
@@ -974,15 +972,11 @@ class AgentPolicyService {
               (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
           }
           if (options.withAgentCount) {
-            const policyKuery = buildPolicyIdOrVariantsKuery(
-              agentPolicy.id,
-              `${AGENTS_PREFIX}.policy_id`
-            );
             await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
               showInactive: true,
               perPage: 0,
               page: 1,
-              kuery: policyKuery,
+              kuery: `${AGENTS_PREFIX}.policy_base_id:"${agentPolicy.id}"`,
             }).then(({ total }) => (agentPolicy.agents = total));
           } else {
             agentPolicy.agents = 0;
@@ -1682,13 +1676,11 @@ class AgentPolicyService {
     }
 
     // Prevent deleting policy when assigned agents are inactive. Also matches agents on
-    // version-specific variants of this policy (e.g. `id#9.2`), which would otherwise be
-    // missed since their policy_id is not an exact match.
     const { total } = await getAgentsByKuery(esClient, soClient, {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: buildPolicyIdOrVariantsKuery(id, `${AGENTS_PREFIX}.policy_id`),
+      kuery: `${AGENTS_PREFIX}.policy_base_id:"${id}"`,
     });
 
     if (total > 0 && !agentPolicy?.supports_agentless) {
@@ -2121,7 +2113,7 @@ class AgentPolicyService {
         ignore_unavailable: true,
         scroll_size: SO_SEARCH_LIMIT,
         refresh: true,
-        query: buildPolicyIdOrVariantsEsFilter(agentPolicyId),
+        query: { term: { policy_base_id: agentPolicyId } },
       });
       hasMore = (res.deleted ?? 0) === SO_SEARCH_LIMIT;
     }
