@@ -156,3 +156,24 @@ export const CLICK_TO_SEND_EMAIL = (email: string) =>
 export const ADD_CONNECTOR = i18n.translate('xpack.cases.casesRedesign.details.addConnector', {
   defaultMessage: 'Add connector',
 });
+
+export const LEGACY_CUSTOM_FIELDS_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.details.legacyCustomFieldsTitle',
+  {
+    defaultMessage: 'Legacy custom fields',
+  }
+);
+
+export const LEGACY_CUSTOM_FIELDS_VIEW_CUSTOM_FIELDS = i18n.translate(
+  'xpack.cases.casesRedesign.details.legacyCustomFieldsViewCustomFields',
+  {
+    defaultMessage: 'custom fields',
+  }
+);
+
+export const LEGACY_CUSTOM_FIELDS_VIEW_SETTINGS = i18n.translate(
+  'xpack.cases.casesRedesign.details.legacyCustomFieldsViewSettings',
+  {
+    defaultMessage: 'settings',
+  }
+);
