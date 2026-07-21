@@ -21,6 +21,9 @@ const suggestionsBodySchema = z
   .object({
     field: z.string().min(1).max(256).describe('The field to suggest values for.'),
     query: z.string().max(1024).describe('Optional search query for filtering suggestions.'),
+    // Sent by @kbn/kql's value suggestion provider; unused by this route.
+    fieldMeta: z.unknown().optional(),
+    filters: z.unknown().optional(),
   })
   .strict();
 

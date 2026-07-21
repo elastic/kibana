@@ -37,4 +37,26 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       expect(response).toHaveStatusCode(400);
     }
   );
+
+  apiTest(
+    'validation: accepts fieldMeta and filters sent by the KQL value suggestion provider',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(
+        ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH,
+        {
+          headers: adminHeaders,
+          body: {
+            field: 'rule.name',
+            query: 'test',
+            fieldMeta: { name: 'rule.name', type: 'string' },
+            filters: [],
+          },
+          responseType: 'json',
+        }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(Array.isArray(response.body)).toBe(true);
+    }
+  );
 });
