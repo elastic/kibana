@@ -50,9 +50,8 @@ export class EvaluateMatchersStep implements DispatcherStep {
 
     for (const episode of dispatchable) {
       const rule = episode.rule_id ? rules.get(episode.rule_id) : undefined;
-      if (!rule) continue;
 
-      const spacePolicies = policiesBySpace.get(rule.spaceId) ?? [];
+      const spacePolicies = policiesBySpace.get(episode.space_id) ?? [];
       let context: MatcherContext | undefined;
 
       for (const policy of spacePolicies) {
@@ -74,7 +73,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
           const truncatedMatcher = truncate(policy.matcher, MAX_LOGGED_TEXT_LENGTH);
           this.logger.warn({
             message: () =>
-              `Failed to evaluate KQL matcher for policy ${policy.id} (rule ${rule.id}, episode ${episode.episode_id}): ${reason}. Matcher: ${truncatedMatcher}. Treating as no-match.`,
+              `Failed to evaluate KQL matcher for policy ${policy.id} (episode ${episode.episode_id}): ${reason}. Matcher: ${truncatedMatcher}. Treating as no-match.`,
           });
           continue;
         }
