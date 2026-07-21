@@ -7,13 +7,12 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   routeDefinitions,
   type HasApmPoliciesResponse,
   type FleetAgentResponse,
   type UnsupportedApmServerSchemaResponse,
-  type RunMigrationCheckResponse,
-  type CloudApmPackagePolicyResponse,
   type JavaAgentVersionsResponse,
 } from '@kbn/apm-api-shared';
 import {
@@ -30,6 +29,7 @@ import { getApmPackagePolicies } from './get_apm_package_policies';
 import { getJavaAgentVersionsFromRegistry } from './get_java_agent_versions';
 import { getUnsupportedApmServerSchema } from './get_unsupported_apm_server_schema';
 import { isSuperuser } from './is_superuser';
+import type { RunMigrationCheckResponse } from './run_migration_check';
 import { runMigrationCheck } from './run_migration_check';
 
 function throwNotFoundIfFleetMigrationNotAvailable(featureFlags: ApmFeatureFlags): void {
@@ -115,8 +115,9 @@ const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
   },
 });
 
+// Can not migrate to apm-api-shared, it depends on Fleet
 const getMigrationCheckRoute = createApmServerRoute({
-  endpoint: routeDefinitions.fleet.migrationCheck.endpoint,
+  endpoint: 'GET /internal/apm/fleet/migration_check',
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<RunMigrationCheckResponse> => {
     const { core, plugins, context, config, request } = resources;
@@ -142,14 +143,15 @@ const getMigrationCheckRoute = createApmServerRoute({
   },
 });
 
+// Can not migrate to apm-api-shared, it depends on Fleet
 const createCloudApmPackagePolicyRoute = createApmServerRoute({
-  endpoint: routeDefinitions.fleet.cloudApmPackagePolicy.endpoint,
+  endpoint: 'POST /internal/apm/fleet/cloud_apm_package_policy',
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_write'],
     },
   },
-  handler: async (resources): Promise<CloudApmPackagePolicyResponse> => {
+  handler: async (resources): Promise<{ cloudApmPackagePolicy: PackagePolicy }> => {
     const { plugins, context, config, request, logger } = resources;
     const cloudApmMigrationEnabled = config.agent.migrations.enabled;
 

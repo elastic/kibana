@@ -54,16 +54,11 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/ai-tools'
   - '@kbn/traced-es-client'
-  - '@kbn/rule-data-utils'
   - '@kbn/es-types'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/storage-adapter'
   - '@kbn/search-inference-endpoints'
-  - '@kbn/alerts-as-data-utils'
-  - '@kbn/rule-registry-plugin'
-  - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/task-manager-plugin'
-  - '@kbn/licensing-types'
   - '@kbn/core-analytics-server'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-utils'
@@ -82,8 +77,8 @@ dependsOn:
   - '@kbn/console-plugin'
   - '@kbn/scout'
   - '@kbn/core-http-server-mocks'
-  - '@kbn/actions-utils'
-  - '@kbn/es-query'
+  - '@kbn/apm-utils'
+  - '@kbn/datemath'
 tags:
   - plugin
   - prod

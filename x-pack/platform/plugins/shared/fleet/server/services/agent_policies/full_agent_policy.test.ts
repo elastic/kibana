@@ -1694,6 +1694,25 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should set agent.features.include_tags_in_events.enabled from advanced_settings', async () => {
+    mockAgentPolicy({
+      advanced_settings: {
+        agent_features_include_tags_in_events_enabled: true,
+      },
+    });
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      agent: {
+        features: {
+          include_tags_in_events: {
+            enabled: true,
+          },
+        },
+      },
+    });
+  });
+
   it('should have ssl options in outputs when fleet server host has es ssl options', async () => {
     const fleetServerHostWithSSL = {
       name: 'default Fleet Server',

@@ -17,6 +17,8 @@ import type { StartServices } from '../../types';
 import { NotesDetails } from '../../flyout_v2/shared/tools/notes';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import { formatFlyoutTitle, NOTES_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
+import { getDocumentTitle } from '../../flyout_v2/document/main/utils/get_header_title';
 
 export interface AlertFlyoutFooterProps {
   /**
@@ -64,6 +66,7 @@ export const AlertFlyoutFooter = ({
       {
         ...defaultToolsFlyoutProperties,
         historyKey,
+        title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
       }
     );
   }, [history, historyKey, hit, services, store]);

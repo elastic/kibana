@@ -16,7 +16,7 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { significantEventsDeepLinkIds, type SigEventsLinkId } from '@kbn/deeplinks-observability';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import { DataStreamsStatsService } from '@kbn/dataset-quality-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
@@ -165,9 +165,12 @@ export class StreamsAppPlugin
         switchMap(([coreStart, pluginsStart]) =>
           combineLatest([
             pluginsStart.streams.navigationStatus$,
-            coreStart.uiSettings.get$(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY),
+            coreStart.featureFlags.getBooleanValue$(
+              STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+              false
+            ),
           ]).pipe(
-            map(([{ status }, isSignificantEventsDiscoveryEnabled]): AppUpdater => {
+            map(([{ status }, isSignificantEventsAvailable]): AppUpdater => {
               return (app) => {
                 if (status !== 'enabled') {
                   return {
@@ -180,9 +183,12 @@ export class StreamsAppPlugin
                   visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
                   deepLinks: (app.deepLinks ?? []).map((link) => {
                     if (significantEventsDeepLinkIds.includes(link.id as SigEventsLinkId)) {
+                      // Significant events entry points stay hidden until the rollout flag is on,
+                      // mirroring the server-side gate so the feature is fully absent from the UI
+                      // in deployments where it has not been enabled.
                       return {
                         ...link,
-                        visibleIn: isSignificantEventsDiscoveryEnabled ? ['globalSearch'] : [],
+                        visibleIn: isSignificantEventsAvailable ? ['globalSearch'] : [],
                       };
                     }
 

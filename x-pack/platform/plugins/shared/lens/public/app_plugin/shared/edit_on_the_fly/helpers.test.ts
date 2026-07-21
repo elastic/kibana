@@ -216,6 +216,28 @@ describe('Lens inline editing helpers', () => {
       expect(setErrorsSpy).toHaveBeenCalled();
     });
 
+    it('does not call setErrors when the request is aborted', async () => {
+      mockFetchData.mockImplementation(() => {
+        throw new Error('aborted');
+      });
+      const setErrorsSpy = jest.fn();
+      const abortController = new AbortController();
+      abortController.abort();
+      const suggestionsAttributes = await getSuggestions(
+        query,
+        startDependencies.data,
+        httpMock,
+        uiSettingsMock,
+        mockDatasourceMap(),
+        mockVisualizationMap(),
+        dataviewSpecArr,
+        setErrorsSpy,
+        abortController
+      );
+      expect(suggestionsAttributes).toBeUndefined();
+      expect(setErrorsSpy).not.toHaveBeenCalled();
+    });
+
     describe('trendline layer preservation', () => {
       const mainLayerId = '46aa21fa-b747-4543-bf90-0b40007c546d';
       const trendlineLayerId = 'trendline-layer-1';

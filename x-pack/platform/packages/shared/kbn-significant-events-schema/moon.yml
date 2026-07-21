@@ -21,9 +21,8 @@ dependsOn:
   - '@kbn/zod-helpers'
   - '@kbn/streamlang'
   - '@kbn/inference-common'
-  - '@kbn/streams-schema'
   - '@kbn/workflows'
-  - '@kbn/licensing-types'
+  - '@kbn/i18n'
 tags:
   - shared-common
   - package

@@ -14,6 +14,7 @@ import { AlertsTablePage } from './alerts_table';
 import { AlertControls } from './alert_controls';
 import { OverviewPage } from './overview_page';
 import { CasesPage } from './cases_page';
+import { EmbeddableAlertsTablePage } from './embeddable_alerts_table';
 
 export interface TriggersActionsPageObjects extends ObltPageObjects {
   rulesPage: RulesPage;
@@ -23,6 +24,7 @@ export interface TriggersActionsPageObjects extends ObltPageObjects {
   alertControls: AlertControls;
   overviewPage: OverviewPage;
   casesPage: CasesPage;
+  embeddableAlertsTable: EmbeddableAlertsTablePage;
 }
 
 export function extendPageObjects(
@@ -38,5 +40,6 @@ export function extendPageObjects(
     alertControls: createLazyPageObject(AlertControls, page),
     overviewPage: createLazyPageObject(OverviewPage, page),
     casesPage: createLazyPageObject(CasesPage, page),
+    embeddableAlertsTable: createLazyPageObject(EmbeddableAlertsTablePage, page),
   };
 }

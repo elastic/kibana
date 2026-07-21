@@ -32,6 +32,8 @@ xpack.features.overrides:
   workflowsManagement.hidden: true
   ### Agent Builder SML is hidden when Agent Builder is disabled for this tier
   agentBuilderSml.hidden: true
+  ### Context Engine is hidden when Agent Builder is disabled for this tier
+  contextEngine.hidden: true
 
 
 xpack.fleet.internal.registry.excludePackages: [

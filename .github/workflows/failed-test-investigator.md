@@ -40,6 +40,9 @@ env:
   # Lets the agent omit `-o elastic` on every `bk` invocation (see https://buildkite.com/docs/pipelines/configure/environment-variables)
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
+imports:
+  - .github/workflows/buildkite-cli-setup.md
+
 engine:
   id: claude
   version: '2.1.165'
@@ -74,27 +77,6 @@ network:
     - elastic.co
 sandbox:
   agent: awf # Migrated from deprecated network setting
-steps:
-  - name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
-    env:
-      BK_VERSION: 3.44.0
-      BK_SHA256: 88867c0b983ad2afe1efc26f0df6b46b5673577c1aea95eba76992636fb9abe9
-      OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
-    run: |
-      set -euo pipefail
-      tmp="$(mktemp -d)"
-      url="https://github.com/buildkite/cli/releases/download/v${BK_VERSION}/bk_${BK_VERSION}_linux_amd64.tar.gz"
-      curl -fsSL --retry 3 --retry-delay 2 "${url}" -o "${tmp}/bk.tgz"
-      echo "${BK_SHA256}  ${tmp}/bk.tgz" | sha256sum -c -
-      tar -xzf "${tmp}/bk.tgz" -C "${tmp}" --strip-components=1 "bk_${BK_VERSION}_linux_amd64/bk"
-      install -d "${RUNNER_TEMP}/gh-aw/mcp-cli/bin"
-      install -m 0755 "${tmp}/bk" "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk"
-      "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk" --version
-      if [ -z "${OPS_BUILDKITE_TOKEN:-}" ]; then
-        echo "::error::OPS_BUILDKITE_TOKEN secret is not set" >&2
-        exit 1
-      fi
-      echo "BUILDKITE_API_TOKEN=${OPS_BUILDKITE_TOKEN}" >> "${GITHUB_ENV}"
 
 safe-outputs:
   noop:
@@ -107,25 +89,29 @@ safe-outputs:
     hide-older-comments: true
   add-labels:
     allowed:
-      - failure:ai-fixable
+      # classification labels, max one per issue
       - failure:test-needs-update
       - failure:test-environment
       - failure:application
       - failure:ci-environment
       - failure:inconclusive
+      # optional labels
+      - failure:ai-fixable
+      - failure:fix-did-not-hold
       - failure:insufficient-data
-    max: 3
+    max: 4
     target: *issue_number
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
   # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
-  # max=4 covers a full stale verdict: up to three investigator labels (a classification,
-  # `failure:ai-fixable`, and `failure:insufficient-data`) plus a lingering `ai:fix-flaky`.
+  # max=5 covers a full stale verdict: up to four investigator labels (a classification,
+  # `failure:ai-fixable`, `failure:fix-did-not-hold`, and `failure:insufficient-data`)
+  # plus a lingering `ai:fix-flaky`.
   remove-labels:
     allowed:
       - failure:*
       - ai:fix-flaky
-    max: 4
+    max: 5
     target: *issue_number
 
 strict: false
@@ -147,7 +133,7 @@ This run is killed at a hard timeout and posts a single, write-once comment that
 
 Investigate the test failure(s) using the `flaky-test-investigator` skill (path: `.agents/skills/flaky-test-investigator`). Read the files in the folder directly, do not invoke the skill directly as that is disabled in this environment.
 
-Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.).
+Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.). Review the **issue timeline** as part of this — its reopen history and any prior fix PRs that referenced this issue tell you whether an earlier fix already tried and failed.
 
 Every conclusion must cite specific evidence. Do not guess.
 
@@ -191,6 +177,15 @@ Add exactly one classification label to the issue that matches the chosen `class
 
 Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
 
+### "Previous fix didn't hold" label
+
+Add `failure:fix-did-not-hold` (in addition to the classification label) when your investigation shows a **fix was already merged for this same failure and the failure came back** — regardless of who wrote it (a human contributor or an automation such as the flaky-test fixer). This label tracks fixes that regressed, so apply it only when **both** of the following hold:
+
+- a prior PR that **fixed this issue was merged** (from the issue timeline / reopen history you already reviewed, corroborated by `git log`/`git blame` when ambiguous); and
+- the current failure is the **same** one that PR set out to fix — same test, and the same assertion/error signature and root-cause area — i.e. the merged fix demonstrably did not hold.
+
+Do **not** add the label when the recurring failure is **unrelated** to what the merged fix addressed — a different root cause, or a symptom the earlier fix never targeted — even if it lands in the same test file or suite.
+
 ### "Insufficient data" label
 
 Add `failure:insufficient-data` (in addition to the other label(s)) when you could **not** reach a strong, confident conclusion because the data needed to diagnose the failure was missing — server logs, a Playwright trace, the failure screenshot, or build logs were absent, expired, or never uploaded. Missing data on its own is not enough to warrant the label: add it only when that data would have changed the conclusion or substantially raised the confidence of the analysis.
@@ -202,7 +197,7 @@ When you set it, the comment's `#### Additional context` → "Open questions" bu
 
 ### Refresh stale labels on re-investigation
 
-This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, and `failure:insufficient-data` only if data is still the blocker, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
+This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:fix-did-not-hold`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, `failure:fix-did-not-hold` only if a merged fix for this same failure still demonstrably did not hold, and `failure:insufficient-data` only if data is still the blocker, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
 
 ## Attribution
 

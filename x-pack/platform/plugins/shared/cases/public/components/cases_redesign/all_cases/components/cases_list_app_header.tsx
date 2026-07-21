@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { AppHeader } from '@kbn/app-header';
 import { PAGE_TITLE } from '../../../../common/translations';
 import { useCreateCaseNavigation } from '../../../../common/navigation';
 import {
@@ -16,6 +15,7 @@ import {
 } from '../../../../common/navigation/hooks';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { KibanaServices } from '../../../../common/lib/kibana';
+import { CasesAppHeader } from '../../../app/cases_app_header';
 import { getListMenu } from './header_menu';
 
 export const CasesListAppHeader: FC = () => {
@@ -45,7 +45,7 @@ export const CasesListAppHeader: FC = () => {
     ]
   );
 
-  return <AppHeader sticky={false} title={PAGE_TITLE} menu={menu} />;
+  return <CasesAppHeader title={PAGE_TITLE} menu={menu} />;
 };
 
 CasesListAppHeader.displayName = 'CasesListAppHeader';

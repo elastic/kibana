@@ -29,6 +29,7 @@ export const internalToPublicDefinition = async (
   readonly: skill.readonly,
   plugin_id: skill.plugin_id,
   experimental: skill.experimental,
+  exclude_from_elastic_capabilities: skill.excludeFromElasticCapabilities,
 });
 
 /**
@@ -45,6 +46,7 @@ export const internalToPublicSummary = async (
   readonly: skill.readonly,
   plugin_id: skill.plugin_id,
   experimental: skill.experimental,
+  exclude_from_elastic_capabilities: skill.excludeFromElasticCapabilities,
   referenced_content_count: skill.referencedContentCount,
 });
 

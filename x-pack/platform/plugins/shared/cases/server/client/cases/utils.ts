@@ -724,7 +724,7 @@ export const enrichCasesWithFieldLabels = (
   const labelsByTemplateKey = new Map<string, Record<string, string>>();
   for (const so of templateSOs) {
     const fieldKeyToLabel = Object.fromEntries(
-      (so.attributes.fieldNames ?? []).map((field) => [
+      (so.attributes.fieldDefinitions ?? []).map((field) => [
         `${field.name}_as_${field.type}`,
         field.label,
       ])

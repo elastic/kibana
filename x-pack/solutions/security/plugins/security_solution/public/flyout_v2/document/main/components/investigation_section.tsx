@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
@@ -24,20 +23,12 @@ import { useRuleWithFallback } from '../../../../detection_engine/rule_managemen
 import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
 import {
-  HOST_NAME_FIELD_NAME,
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
-  USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { INVESTIGATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
-
-export const INVESTIGATION_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.investigation.sectionTitle',
-  {
-    defaultMessage: 'Investigation',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'investigation';
 
@@ -108,14 +99,9 @@ export const InvestigationSection = memo(
           if (!ruleId) {
             return <>{props.children}</>;
           }
-          return <OpenFlyoutLink {...props} value={ruleId} asParent />;
+          return <OpenFlyoutLink {...props} value={ruleId} />;
         }
-        return (
-          <OpenFlyoutLink
-            {...props}
-            asParent={props.field === HOST_NAME_FIELD_NAME || props.field === USER_NAME_FIELD_NAME}
-          />
-        );
+        return <OpenFlyoutLink {...props} />;
       },
       [ruleId]
     );

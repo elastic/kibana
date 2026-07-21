@@ -11,7 +11,7 @@ import { EuiPageTemplate, useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { selectUnit } from '@formatjs/intl-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useLocation, useParams } from 'react-router-dom';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';

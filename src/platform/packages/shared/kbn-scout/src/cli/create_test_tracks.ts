@@ -103,7 +103,7 @@ export function identifyTestLoads(
             case 'configs':
               return filter.paths.has(config.path);
             case 'modules':
-              if (filter.ids.size === 0) return true;
+              if (filter.ids.size === 0) return false;
               const resolvedModuleID = findPackageForPath(REPO_ROOT, config.path)?.id;
               return resolvedModuleID ? filter.ids.has(resolvedModuleID) : false;
             case 'channels':

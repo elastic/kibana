@@ -15,6 +15,7 @@ import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
 } from '../types/attachments_v2';
+import type { User } from '../types/user';
 import { AttachmentType } from '../../../common/types/domain';
 
 /**
@@ -82,39 +83,41 @@ export const passThroughTransformer: AttachmentTypeTransformer<
   },
 };
 
-/**
- * Extracts common attributes from either old or new schema.
- */
-export function extractCommonAttributes(attributes: AttachmentAttributesV2): CommonAttributes {
-  const createdBy = attributes.created_by;
-  const pushedBy = attributes.pushed_by;
-  const updatedBy = attributes.updated_by;
+const normalizeUser = (user: User): User => ({
+  username: user.username || '',
+  full_name: user.full_name,
+  email: user.email,
+  profile_uid: user.profile_uid,
+});
 
-  return {
-    created_at: attributes.created_at,
-    created_by: {
-      username: createdBy.username || '',
-      full_name: createdBy.full_name,
-      email: createdBy.email,
-      profile_uid: createdBy.profile_uid,
-    },
-    pushed_at: attributes.pushed_at ?? null,
-    pushed_by: pushedBy
-      ? {
-          username: pushedBy.username || '',
-          full_name: pushedBy.full_name,
-          email: pushedBy.email,
-          profile_uid: pushedBy.profile_uid,
-        }
-      : null,
-    updated_at: attributes.updated_at ?? null,
-    updated_by: updatedBy
-      ? {
-          username: updatedBy.username || '',
-          full_name: updatedBy.full_name,
-          email: updatedBy.email,
-          profile_uid: updatedBy.profile_uid,
-        }
-      : null,
-  };
+/**
+ * Extracts common attributes from either old or new schema, emitting only the
+ * fields present on the input. PATCH payloads omit `created_*`/`pushed_*`, so a
+ * full projection would both throw and clobber stored values on a partial update.
+ */
+export function extractCommonAttributes(
+  attributes: Partial<AttachmentAttributesV2>
+): Partial<CommonAttributes> {
+  const result: Partial<CommonAttributes> = {};
+
+  if (attributes.created_at !== undefined) {
+    result.created_at = attributes.created_at;
+  }
+  if (attributes.created_by !== undefined) {
+    result.created_by = normalizeUser(attributes.created_by);
+  }
+  if (attributes.pushed_at !== undefined) {
+    result.pushed_at = attributes.pushed_at ?? null;
+  }
+  if (attributes.pushed_by !== undefined) {
+    result.pushed_by = attributes.pushed_by ? normalizeUser(attributes.pushed_by) : null;
+  }
+  if (attributes.updated_at !== undefined) {
+    result.updated_at = attributes.updated_at ?? null;
+  }
+  if (attributes.updated_by !== undefined) {
+    result.updated_by = attributes.updated_by ? normalizeUser(attributes.updated_by) : null;
+  }
+
+  return result;
 }

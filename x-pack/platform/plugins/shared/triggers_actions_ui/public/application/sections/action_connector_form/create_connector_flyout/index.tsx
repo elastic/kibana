@@ -18,8 +18,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-
 import { i18n } from '@kbn/i18n';
 import {
   AgentBuilderConnectorFeatureId,
@@ -31,6 +29,7 @@ import {
   DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
   DEPRECATED_LLM_CONNECTOR_INFO,
 } from '@kbn/response-ops-rule-form/src/translations';
+import { isConnectorTypeTestable } from '../../../lib/is_connector_type_testable';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
   ActionConnector,
@@ -39,11 +38,13 @@ import type {
   ActionTypeIndex,
   ActionTypeRegistryContract,
 } from '../../../../types';
+import { EditConnectorTabs } from '../../../../types';
 import { ActionTypeMenu } from '../action_type_menu';
 import type { ResetForm } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { useConnectorCreateForm } from '../use_connector_create_form';
 import { useKibana } from '../../../../common/lib/kibana';
+import { EditConnectorFlyoutContent } from '../edit_connector_flyout';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
@@ -109,8 +110,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const isUsingInitialConnector = Boolean(initialConnector);
   const hasConnectorTypeSelected = actionType != null;
-  // Only stack connectors (not spec-based) support the test tab
-  const isTestable = !actionType?.source || actionType.source === ACTION_TYPE_SOURCES.stack;
+  const isTestable = isConnectorTypeTestable(actionType ?? undefined);
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype
@@ -165,6 +165,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const resetActionType = useCallback(() => setActionType(null), []);
 
+  const [connectorToTest, setConnectorToTest] = useState<ActionConnector | null>(null);
+  const [isFormModified, setIsFormModified] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
   const testConnector = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();
 
@@ -177,9 +181,9 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         onTestConnector(createdConnector);
       }
 
-      onClose();
+      setConnectorToTest(createdConnector);
     }
-  }, [validateAndCreateConnector, onClose, onConnectorCreated, onTestConnector]);
+  }, [validateAndCreateConnector, onConnectorCreated, onTestConnector]);
 
   const onSubmit = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();
@@ -229,6 +233,39 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const handleErrorFocus = useCallback((node: HTMLDivElement) => {
     node?.focus();
   }, []);
+
+  const onFlyoutClose = useCallback(() => {
+    if (connectorToTest && isFormModified) {
+      setShowConfirmModal(true);
+      return;
+    }
+    onClose();
+  }, [connectorToTest, isFormModified, onClose]);
+
+  if (connectorToTest) {
+    return (
+      <EuiFlyout
+        onClose={onFlyoutClose}
+        aria-labelledby="flyoutTitle"
+        size="m"
+        data-test-subj="edit-connector-flyout"
+      >
+        <EditConnectorFlyoutContent
+          actionTypeRegistry={actionTypeRegistry}
+          connector={connectorToTest}
+          onClose={onClose}
+          tab={EditConnectorTabs.Test}
+          onConnectorUpdated={setConnectorToTest}
+          icon={icon}
+          isFormModified={isFormModified}
+          onFormModifiedChange={setIsFormModified}
+          onCloseAttempt={onFlyoutClose}
+          showConfirmModal={showConfirmModal}
+          onConfirmModalCancel={() => setShowConfirmModal(false)}
+        />
+      </EuiFlyout>
+    );
+  }
 
   return (
     <EuiFlyout
