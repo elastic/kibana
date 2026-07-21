@@ -43,6 +43,19 @@ import { getConversation } from '../fixtures/converse_http';
 
 const INTERNAL_API_VERSION = '1';
 
+const deriveIdempotentExecutionId = ({
+  spaceId,
+  externalConversationId,
+  idempotencyKey,
+}: {
+  spaceId: string;
+  externalConversationId: string;
+  idempotencyKey: string;
+}) =>
+  createHash('sha256')
+    .update([spaceId, externalConversationId, idempotencyKey].join('\u0000'))
+    .digest('hex');
+
 apiTest.describe(
   'Agent Builder - converse callback API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
@@ -369,7 +382,13 @@ apiTest.describe(
 
           const firstAccepted = first.body as ChatCallbackAcceptedResponse;
           executionId = firstAccepted.execution_id;
-          expect(executionId).toBe(createHash('sha256').update(idempotencyKey).digest('hex'));
+          expect(executionId).toBe(
+            deriveIdempotentExecutionId({
+              spaceId: 'default',
+              externalConversationId: requestBody.origin.external_conversation_id,
+              idempotencyKey,
+            })
+          );
           expect(firstAccepted.status).toBe(ExecutionStatus.scheduled);
 
           const firstCallback = (await callbackServer.waitForRequest())
@@ -471,6 +490,57 @@ apiTest.describe(
           conversationId
         );
         expect(conversation.rounds).toHaveLength(1);
+      }
+    );
+
+    apiTest(
+      'schedules separate executions for the same key on different origins',
+      async ({ apiClient }) => {
+        const idempotencyKey = 'Ev-callback-cross-origin';
+        const executionIds: string[] = [];
+
+        for (const thread of ['cross-origin-a', 'cross-origin-b']) {
+          await setupAgentDirectAnswer({
+            proxy: llmProxy,
+            title: `Callback Cross Origin Title ${thread}`,
+            response: `Cross origin response ${thread}`,
+          });
+
+          const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
+            headers: internalHeaders(),
+            body: {
+              input: 'Hello cross origin idempotent callback',
+              connector_id: connectorId,
+              origin: {
+                type: ConversationOriginType.Slack,
+                external_conversation_id: `team:T123/channel:C123/thread:${thread}`,
+                idempotency_key: idempotencyKey,
+              },
+              callback: {
+                url: `${callbackServerUrl}/callback?token=cross-origin`,
+              },
+            },
+            responseType: 'json',
+          });
+
+          expect(response).toHaveStatusCode(202);
+
+          const accepted = response.body as ChatCallbackAcceptedResponse;
+          executionIds.push(accepted.execution_id);
+
+          const callbackPayload = (await callbackServer.waitForRequest())
+            .body as ChatCallbackSuccessPayload;
+
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+          expect(callbackPayload.execution_id).toBe(accepted.execution_id);
+          expect(callbackPayload.status).toBe(ExecutionStatus.completed);
+
+          conversationIds.add(callbackPayload.response.conversation_id);
+        }
+
+        // The same key on a different origin thread is a different event: both ran.
+        expect(executionIds[0]).not.toBe(executionIds[1]);
       }
     );
 

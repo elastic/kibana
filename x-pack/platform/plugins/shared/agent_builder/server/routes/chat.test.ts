@@ -432,7 +432,13 @@ describe('registerChatRoutes', () => {
     });
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
-        executionId: createHash('sha256').update('Ev0PV23K4AB1').digest('hex'),
+        executionId: createHash('sha256')
+          .update(
+            ['default', 'team:T123/channel:C123/thread:1712345678.000100', 'Ev0PV23K4AB1'].join(
+              '\u0000'
+            )
+          )
+          .digest('hex'),
         metadata: { idempotency_key: 'Ev0PV23K4AB1' },
         useTaskManager: true,
         params: expect.objectContaining({

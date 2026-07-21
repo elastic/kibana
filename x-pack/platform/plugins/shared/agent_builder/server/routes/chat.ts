@@ -396,7 +396,8 @@ export function registerChatRoutes({
    * while callback requests always use Task Manager and carry the callback and origin.
    */
   const resolveExecutionOptions = (
-    payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload
+    payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload,
+    spaceId?: string
   ): {
     useTaskManager: boolean | undefined;
     origin: ExecutionConversationOrigin | undefined;
@@ -406,25 +407,32 @@ export function registerChatRoutes({
   } => {
     if (isChatCallbackRequestBodyPayload(payload)) {
       let origin: ExecutionConversationOrigin | undefined;
-      let idempotencyKey: string | undefined;
+      let executionId = payload.execution_id;
+      let metadata: Record<string, string> | undefined;
 
       if (payload.origin) {
-        const { idempotency_key: key, ...originRest } = payload.origin;
+        const { idempotency_key: idempotencyKey, ...originRest } = payload.origin;
 
-        idempotencyKey = key;
         origin = originRest;
+
+        if (idempotencyKey) {
+          // The idempotency key deterministically owns the execution id, scoped to the
+          // space and origin conversation, so a replayed delivery of the same surface
+          // event maps to the same execution document while keys reused across spaces
+          // or threads cannot collide.
+          executionId = createHash('sha256')
+            .update([spaceId, originRest.external_conversation_id, idempotencyKey].join('\u0000'))
+            .digest('hex');
+          metadata = { idempotency_key: idempotencyKey };
+        }
       }
 
       return {
         useTaskManager: true,
         origin,
         callback: payload.callback,
-        // The idempotency key deterministically owns the execution id, so a replayed
-        // delivery of the same surface event maps to the same execution document.
-        executionId: idempotencyKey
-          ? createHash('sha256').update(idempotencyKey).digest('hex')
-          : payload.execution_id,
-        metadata: idempotencyKey ? { idempotency_key: idempotencyKey } : undefined,
+        executionId,
+        metadata,
       };
     }
 
@@ -444,10 +452,12 @@ export function registerChatRoutes({
     payload,
     request,
     executionService,
+    spaceId,
   }: {
     payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload;
     request: KibanaRequest;
     executionService: AgentExecutionService;
+    spaceId?: string;
   }) => {
     const {
       agent_id: agentId,
@@ -463,8 +473,10 @@ export function registerChatRoutes({
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
-    const { useTaskManager, origin, callback, executionId, metadata } =
-      resolveExecutionOptions(payload);
+    const { useTaskManager, origin, callback, executionId, metadata } = resolveExecutionOptions(
+      payload,
+      spaceId
+    );
 
     return executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
@@ -645,10 +657,13 @@ export function registerChatRoutes({
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
+        const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
+
         const { executionId } = await executeAgent({
           payload,
           request,
           executionService,
+          spaceId,
         });
 
         return response.accepted<ChatCallbackAcceptedResponse>({
