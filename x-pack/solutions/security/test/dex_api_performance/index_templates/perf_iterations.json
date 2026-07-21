@@ -1,0 +1,30 @@
+{
+  "index_patterns": ["perf-dex-prebuilt-rules-iterations"],
+  "template": {
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "run_id": { "type": "keyword" },
+        "environment_id": { "type": "keyword" },
+        "scenario": { "type": "keyword" },
+        "boot_type": { "type": "keyword" },
+        "iteration": { "type": "integer" },
+        "total_rules": { "type": "integer" },
+        "duration_ms": { "type": "long" },
+        "http_status": { "type": "integer" },
+        "rules_succeeded": { "type": "integer" },
+        "rules_failed": { "type": "integer" },
+        "rules_skipped": { "type": "integer" },
+        "rss_before_mb": { "type": "double" },
+        "rss_after_mb": { "type": "double" },
+        "heap_before_mb": { "type": "double" },
+        "heap_after_mb": { "type": "double" },
+        "delete_duration_ms": { "type": "long" },
+        "error_message": { "type": "text" },
+        "customer_read_latency_mean_ms": { "type": "long" },
+        "customer_read_latency_p95_ms": { "type": "long" },
+        "concurrent_install_rejected": { "type": "boolean" }
+      }
+    }
+  }
+}
