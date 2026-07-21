@@ -31,9 +31,12 @@ properties:
             - $ref: 'connector_properties_swimlane.yaml'
         customFields:
           type: array
+          deprecated: true
           description: >
+            Deprecated. Use `extended_fields` instead.
             Custom field values for a case.
             Any optional custom fields that are not specified in the request are set to null.
+            Values written here continue to work during the migration to `extended_fields`.
           minItems: 0
           maxItems: 10
           items:
@@ -44,6 +47,8 @@ properties:
               - value
             properties:
               $ref: 'case_customfields.yaml'
+        extended_fields:
+          $ref: 'case_extended_fields.yaml'
         description:
           $ref: 'case_description.yaml'
         id:

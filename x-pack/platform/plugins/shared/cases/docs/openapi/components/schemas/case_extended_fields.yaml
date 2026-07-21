@@ -1,0 +1,18 @@
+type: object
+additionalProperties:
+  type: string
+description: >
+  A map of case field values from the field library. This replaces `customFields`.
+  Each entry is keyed by the field's storage key, which follows the
+  `<field_name>_as_<storage_type>` convention, where `storage_type` is `keyword` (text),
+  `integer` (number), or `boolean` (toggle). Values are always strings.
+  Only keys that exist as global (library-wide) field definitions for the case owner — plus
+  the fields of an applied template — are accepted; any other key is rejected.
+  To discover the valid keys and their storage keys, use the get case fields API
+  (`GET /api/cases/fields`, or `GET /api/cases/{caseId}/fields` for an existing case).
+  Legacy custom fields are migrated into this map, so a migrated field's value is found under
+  its `<key>_as_<storage_type>` key.
+example:
+  priority_as_keyword: high
+  ticket_number_as_integer: '4287'
+  escalated_as_boolean: 'true'
