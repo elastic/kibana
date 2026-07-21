@@ -869,24 +869,31 @@ const ESQLEditorInternal = function ESQLEditor({
                     onCommentLine
                   );
 
-                  setMeasuredEditorWidth(editor.getLayoutInfo().width);
-                  if (expandToFitQueryOnMount) {
+                  const expandToFitContent = () => {
                     const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
                     const lineCount = editor.getModel()?.getLineCount() || 1;
-                    const padding = lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical scrollbars
-                    const height = editor.getTopForLineNumber(lineCount + 1) + padding;
-                    if (height > editorHeight && height < EDITOR_MAX_HEIGHT) {
-                      setEditorHeight(height);
-                    } else if (height >= EDITOR_MAX_HEIGHT) {
-                      setEditorHeight(EDITOR_MAX_HEIGHT);
-                    }
+                    const contentHeight =
+                      editor.getTopForLineNumber(lineCount + 1) + lineHeight * 1.25;
+                    setEditorHeight((currentHeight) => {
+                      if (contentHeight > currentHeight) {
+                        return Math.min(contentHeight, EDITOR_MAX_HEIGHT);
+                      }
+                      return currentHeight;
+                    });
+                  };
+
+                  setMeasuredEditorWidth(editor.getLayoutInfo().width);
+                  if (expandToFitQueryOnMount) {
+                    expandToFitContent();
                   }
+
                   const layoutChangeDisposable = editor.onDidLayoutChange((layoutInfoEvent) => {
                     onLayoutChangeRef.current(layoutInfoEvent);
                   });
 
                   const modelContentDisposable = editor.onDidChangeModelContent(async () => {
                     trackInputLatencyOnKeystroke(editor.getValue() ?? '');
+                    expandToFitContent();
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {
                       addSourcesDecorator();
