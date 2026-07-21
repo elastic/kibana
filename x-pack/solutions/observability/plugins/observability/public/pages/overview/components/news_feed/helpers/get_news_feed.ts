@@ -29,10 +29,16 @@ const removeSuffixFromVersion = (kibanaVersion?: string) =>
 export async function getNewsFeed({
   http,
   kibanaVersion,
+  newsfeedEnabled,
 }: {
   http: HttpSetup;
   kibanaVersion: string;
+  newsfeedEnabled: boolean;
 }): Promise<NewsFeed> {
+  if (!newsfeedEnabled) {
+    return { items: [] };
+  }
+
   try {
     return await http.get(
       `https://feeds.elastic.co/observability-solution/v${removeSuffixFromVersion(

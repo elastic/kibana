@@ -35,6 +35,7 @@ import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plu
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { NewsfeedPublicPluginStart } from '@kbn/newsfeed-plugin/public';
 import type {
   NavigationEntry,
   ObservabilitySharedPluginSetup,
@@ -163,6 +164,7 @@ export interface ObservabilityPublicPluginsStart {
   licenseManagement?: LicenseManagementUIPluginSetup;
   logsDataAccess: LogsDataAccessPluginStart;
   navigation: NavigationPublicPluginStart;
+  newsfeed?: NewsfeedPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   ruleTypeRegistry: RuleTypeRegistryContract;

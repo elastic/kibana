@@ -41,7 +41,8 @@ import type { DataContextApps, HasDataMap } from '../../context/has_data_context
 import { appLabels } from '../../context/has_data_context/has_data_context';
 
 export function OverviewPage() {
-  const { http, observabilityAIAssistant, kibanaVersion, serverless, share } = useKibana().services;
+  const { http, newsfeed, observabilityAIAssistant, kibanaVersion, serverless, share } =
+    useKibana().services;
 
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
@@ -63,9 +64,9 @@ export function OverviewPage() {
 
   const { data: newsFeed } = useFetcher(() => {
     if (!Boolean(serverless)) {
-      return getNewsFeed({ http, kibanaVersion });
+      return getNewsFeed({ http, kibanaVersion, newsfeedEnabled: Boolean(newsfeed) });
     }
-  }, [http, kibanaVersion, serverless]);
+  }, [http, kibanaVersion, newsfeed, serverless]);
 
   const { hasDataMap } = useHasData();
   // we need to filter out unwanted apps

@@ -25,9 +25,21 @@ describe('getNewsFeed', () => {
       },
     } as unknown as HttpSetup;
 
-    const newsFeed = await getNewsFeed({ http, kibanaVersion: '8.7.0' });
+    const newsFeed = await getNewsFeed({ http, kibanaVersion: '8.7.0', newsfeedEnabled: true });
     expect(newsFeed.items).toEqual([]);
   });
+
+  it('Returns empty array without fetching when newsfeed is disabled', async () => {
+    const http = {
+      get: jest.fn(),
+    } as unknown as HttpSetup;
+
+    const newsFeed = await getNewsFeed({ http, kibanaVersion: '8.7.0', newsfeedEnabled: false });
+
+    expect(newsFeed.items).toEqual([]);
+    expect(http.get).not.toHaveBeenCalled();
+  });
+
   it('Returns array with the news feed', async () => {
     const http = {
       get: async () => {
@@ -92,7 +104,7 @@ describe('getNewsFeed', () => {
       },
     } as unknown as HttpSetup;
 
-    const newsFeed = await getNewsFeed({ http, kibanaVersion: '8.7.0' });
+    const newsFeed = await getNewsFeed({ http, kibanaVersion: '8.7.0', newsfeedEnabled: true });
     expect(newsFeed.items.length).toEqual(3);
   });
 });
