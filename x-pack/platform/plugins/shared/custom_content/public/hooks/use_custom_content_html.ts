@@ -18,7 +18,7 @@ const SCRIPT_ERROR_MESSAGE = i18n.translate('xpack.customContent.error.templateS
 
 export interface UseCustomContentHtmlParams {
   embeddableId: string;
-  prompt: string;
+  prompt: string | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
   colorMode: 'LIGHT' | 'DARK';

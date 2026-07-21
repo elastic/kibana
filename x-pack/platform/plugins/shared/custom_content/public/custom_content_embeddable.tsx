@@ -17,6 +17,7 @@ import {
   useBatchedPublishingSubjects,
   apiPublishesReload,
 } from '@kbn/presentation-publishing';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { CustomContentEmbeddableState } from '../server';
@@ -73,7 +74,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ...stateApi,
       ...titleManager.api,
       serializeState,
-      getTypeDisplayName: () => 'Custom content',
+      getTypeDisplayName: () =>
+        i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
+          defaultMessage: 'Custom content',
+        }),
     });
 
     return {

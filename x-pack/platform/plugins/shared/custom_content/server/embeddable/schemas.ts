@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 
 export const customContentStateSchema = schema.object({
-  prompt: schema.string(),
+  prompt: schema.maybe(schema.string()),
   template: schema.maybe(schema.string()),
 });
 

@@ -13,7 +13,7 @@ import { useCustomContentHtml } from '../hooks/use_custom_content_html';
 
 interface CustomContentComponentProps {
   embeddableId: string;
-  prompt: string;
+  prompt: string | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
   onTemplateChange: (template: string) => void;
