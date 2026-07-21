@@ -10,6 +10,11 @@ import {
   MAX_ENTITY_SUMMARY_HIGHLIGHTS,
   MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS,
 } from '@kbn/entity-store/common/entity_summary';
+import {
+  ENTITY_METADATA,
+  ENTITY_SCHEMA_VERSION_V2,
+  getEntityIndexPattern,
+} from '@kbn/entity-store/common';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { ENTITY_AI_SUMMARY_PERSISTED_EVENT } from '../../../telemetry/event_based/events';
 import {
@@ -23,6 +28,8 @@ const mockCreateEntityMetadataClient = jest.fn(() => ({
   bulkAppendMetadata: mockBulkAppendMetadata,
 }));
 
+const mockCheckPrivileges = jest.fn();
+const mockCheckPrivilegesDynamicallyWithRequest = jest.fn(() => mockCheckPrivileges);
 const mockGetStartServices = jest.fn();
 
 // Import after mocks are set up
@@ -56,6 +63,8 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
 
     mockBulkAppendMetadata.mockReset().mockResolvedValue({ successful: 1, failed: 0 });
     mockCreateEntityMetadataClient.mockClear();
+    mockCheckPrivileges.mockReset().mockResolvedValue({ hasAllRequested: true });
+    mockCheckPrivilegesDynamicallyWithRequest.mockClear();
 
     // Mocks must be configured on the raw context before convertContext wraps it —
     // mutating the converted context.core does not propagate through to the route.
@@ -84,6 +93,11 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
       {
         entityStore: {
           createEntityMetadataClient: mockCreateEntityMetadataClient,
+        },
+        security: {
+          authz: {
+            checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+          },
         },
       },
     ]);
@@ -158,17 +172,54 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     expect(docs[0]['Ai_summary.staleness']).toEqual(BASE_REQUEST_BODY.summary.staleness);
   });
 
-  it('uses asInternalUser — createEntityMetadataClient is called with the internal ES client', async () => {
+  it('checks metadata read privileges, then writes via asInternalUser', async () => {
     const internalEsClient = { mock: 'internal-client' };
     mockGetStartServices.mockResolvedValue([
-      { elasticsearch: { client: { asInternalUser: internalEsClient } } },
-      { entityStore: { createEntityMetadataClient: mockCreateEntityMetadataClient } },
+      {
+        elasticsearch: {
+          client: { asInternalUser: internalEsClient },
+        },
+      },
+      {
+        entityStore: { createEntityMetadataClient: mockCreateEntityMetadataClient },
+        security: {
+          authz: {
+            checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+          },
+        },
+      },
     ]);
 
     const request = buildRequest();
     await server.inject(request, context);
 
+    expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledTimes(1);
+    expect(mockCheckPrivileges).toHaveBeenCalledWith({
+      elasticsearch: {
+        cluster: [],
+        index: {
+          [getEntityIndexPattern({
+            schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+            dataset: ENTITY_METADATA,
+            namespace: 'default',
+          })]: ['read'],
+        },
+      },
+    });
+    expect(mockCreateEntityMetadataClient).toHaveBeenCalledTimes(1);
     expect(mockCreateEntityMetadataClient).toHaveBeenCalledWith(internalEsClient, 'default');
+  });
+
+  it('returns { created: false } and does not persist when the user lacks metadata read access', async () => {
+    mockCheckPrivileges.mockResolvedValue({ hasAllRequested: false });
+
+    const request = buildRequest();
+    const response = await server.inject(request, context);
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({ created: false });
+    expect(mockBulkAppendMetadata).not.toHaveBeenCalled();
+    expect(mockReportEvent).not.toHaveBeenCalled();
   });
 
   it('falls back to "unknown" for Ai_summary.generated_by when no authenticated user', async () => {

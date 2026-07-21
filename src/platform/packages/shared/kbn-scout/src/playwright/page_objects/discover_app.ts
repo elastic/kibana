@@ -322,11 +322,22 @@ export class DiscoverApp {
     });
   }
 
-  async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
+  async openSaveSearchModal(name?: string) {
     await this.page.testSubj.click('discoverSaveButton');
-    await this.page.testSubj.fill('savedObjectTitle', name);
+    await this.page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'visible' });
+    if (name !== undefined) {
+      await this.page.testSubj.fill('savedObjectTitle', name);
+    }
+  }
+
+  private getStoreTimeWithSearchSwitch() {
+    return this.page.testSubj.locator('storeTimeWithSearch');
+  }
+
+  async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
+    await this.openSaveSearchModal(name);
     if (storeTimeRange !== undefined) {
-      const switchControl = this.page.testSubj.locator('storeTimeWithSearch');
+      const switchControl = this.getStoreTimeWithSearchSwitch();
       await switchControl.waitFor({ state: 'visible' });
       const isChecked = (await switchControl.getAttribute('aria-checked')) === 'true';
       if (isChecked !== storeTimeRange) {
@@ -713,6 +724,17 @@ export class DiscoverApp {
 
   getLensEditFlyout(): Locator {
     return this.page.testSubj.locator('lnsChartSwitchPopover');
+  }
+
+  async openEsqlQuickReferenceFlyout() {
+    await this.page.testSubj.click('esql-help-popover-button');
+    await this.esqlMenuPopover.waitFor({ state: 'visible' });
+    await this.page.testSubj.click('esql-quick-reference');
+    await this.getEsqlQuickReferenceFlyout().waitFor({ state: 'visible' });
+  }
+
+  getEsqlQuickReferenceFlyout(): Locator {
+    return this.page.testSubj.locator('esqlInlineDocumentationFlyout');
   }
 
   async getTheColumnFromGrid(): Promise<string[]> {
