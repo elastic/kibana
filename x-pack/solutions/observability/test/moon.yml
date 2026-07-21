@@ -95,6 +95,7 @@ dependsOn:
   - '@kbn/logs-explorer-plugin'
   - '@kbn/observability-logs-explorer-plugin'
   - '@kbn/security-plugin-types-common'
+  - '@kbn/repo-info'
 tags:
   - test-helper
   - package
