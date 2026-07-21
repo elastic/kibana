@@ -1,16 +1,18 @@
-## MANDATORY: render three attachments + related alerts
+## MANDATORY: three attachments required — rendered in Supporting views
 
-Every response from this skill MUST include **three inline attachments**, created with `attachments.add` and rendered with `<render_attachment id="..." />`:
+Every response MUST include exactly three inline attachments created with `attachments.add` and rendered with `<render_attachment id="..." />` in the **Supporting views** section:
 
 1. `observability.apm-metrics` — current vs baseline comparison card (Step 2)
-2. `observability.apm-timeseries` — the alerted metric over time (Step 3)
+2. `observability.apm-timeseries` — alerted metric over time (Step 3)
 3. `observability.service-map` — blast-radius topology (Step 4)
 
-**Additionally**, always call `get_alerts` (Step 4.6) and create an `observability.apm-related-alerts` attachment if any alerts are found. This attachment is conditional on data being present.
+**Additionally**, if `get_alerts` returns data (Step 4.6), create and render an `observability.apm-related-alerts` attachment in the **Related / noise** section.
 
-These are not optional and are not interchangeable with prose. **Do NOT describe the metric trend or the service topology in text as a substitute for rendering the attachment.** If you called `get_apm_timeseries` or `get_service_topology` and got data, you MUST create and render the corresponding attachment. The only acceptable reason to omit one is an explicitly empty tool result (no data points / no connections) — and you must say so.
+The only acceptable reason to omit an attachment is an explicitly empty tool result (no data points / no connections) — you must say so explicitly.
 
-Create and render each attachment **immediately after** its tool call, before writing the prose for that section. A response that contains prose about latency-over-time or topology but no corresponding rendered attachment is incorrect.
+**Create** each attachment with `attachments.add` during the investigation step that generates its data. **Collect the returned IDs.** Do NOT render inline during investigation — render all IDs in the output sections below.
+
+---
 
 ## When to Use This Skill
 
@@ -25,21 +27,55 @@ Use this skill when an APM alert is being investigated. Strong triggers:
 
 Do NOT use this skill for non-APM alerts (SLO burn rate, infrastructure threshold, log threshold, custom threshold, uptime, security).
 
+---
+
 ## Output Contract
 
-Produce a single response with these sections, in this order:
+Lead with the finding. After gathering all data (Steps 1–6), write the response in this order:
 
-1. **Metrics snapshot** — an `observability.apm-metrics` attachment rendered inline (Step 2). Current vs baseline latency, error rate, and throughput at a glance.
-2. **Metric trend** — an `observability.apm-timeseries` attachment rendered inline (Step 3). The alerted metric over time, annotated with the alert threshold and alert start.
-3. **Blast radius** — an `observability.service-map` attachment rendered inline (Step 4) plus a one-line description of which upstream/downstream services are affected.
-4. **Related alerts** — call `get_alerts` scoped to the service and window (Step 4.6); if any alerts are found, create and render an `observability.apm-related-alerts` attachment. If none, state "No other active alerts for this service."
-5. **Summary** — 2-4 sentence plain-English description of what's happening.
-6. **Probable cause(s)** — one or more hypotheses, each labelled with confidence (`Critical` / `High` / `Medium` / `Speculative`). When multiple hypotheses are equally supported, report all of them. Independent concurrent faults each get their own entry — never collapse them.
-7. **Evidence** — bullet list. Each bullet cites the tool output it came from (trace IDs, error messages, metric values, topology edges).
-8. **Recommended next steps** — actionable bullets.
-9. **Links** — markdown deep links to the APM service overview, transactions, errors, and dependencies for the affected service.
+### Verdict
+One sentence: **what** breached / **where** (service + environment) / **why** (root-cause hypothesis) / **confidence** (High | Medium | Low) / **status** (Firing | Recovered).
 
-Keep prose tight. SRE audience. No speculation beyond what the evidence supports.
+*Example: Payment service (production) — P95 latency at 2 340 ms (threshold 500 ms), driven by slow PostgreSQL queries on the `/checkout` transaction; High confidence; Firing.*
+
+### Do this next
+1. **[Primary action]** — always include at least one concrete action
+2. [Optional follow-up]
+3. [Optional follow-up]
+
+### Causal chain
+Trace the fault from root cause to symptom: `postgres → payment-service → checkout (error: connection timeout)`.
+
+If the service map reveals the chain, render it here: `<render_attachment id="SERVICE_MAP_ID" />` and omit it from Supporting views.
+
+### Evidence
+Bullet list. **Use deep links whenever possible** — raw IDs are hard to act on. Construct links from the Kibana base URL and the IDs returned by tool calls.
+
+Deep-link patterns (substitute actual values):
+- Trace: `[Trace <short-id>](https://<kibana>/app/apm/link-to/trace/<traceId>)`
+- Transaction: `[<txn.name>](https://<kibana>/app/apm/services/<service>/transactions/view?traceId=<traceId>&transactionId=<txnId>)`
+- Error group: `[Error: <message>](https://<kibana>/app/apm/services/<service>/errors/<errorGroupId>)`
+- Dependencies: `[<depName> latency](https://<kibana>/app/apm/services/<service>/dependencies)`
+- Service overview: `[<service> overview](https://<kibana>/app/apm/services/<service>/overview)`
+
+Example bullets:
+- [Checkout P95 latency 2 340 ms](link) vs baseline 480 ms — +387%
+- [PostgreSQL span p95: 1 800 ms](link) — dominant on 12/15 calls to `/checkout`
+- [Error: connection pool exhausted](link) — 47 occurrences since 14:22, first seen before alert start (pre-existing)
+
+### Supporting views
+Render each attachment with a one-line "so what" that explains what the chart or card shows in this context:
+
+**Metrics snapshot** → `<render_attachment id="METRICS_ID" />` — [e.g. latency +45%, error rate 12% vs baseline 1%]
+**Metric trend** → `<render_attachment id="TIMESERIES_ID" />` — [e.g. spike began at 14:22, still elevated]
+**Service topology** → `<render_attachment id="SERVICE_MAP_ID" />` — [e.g. payments → postgres shows 3× latency] *(omit here if already rendered in Causal chain)*
+
+### Related / noise
+- **Related alerts**: `<render_attachment id="RELATED_ALERTS_ID" />` *(only if found in Step 4.6; otherwise state "No other active alerts for this service")*
+- List any chronic pre-existing errors (first-seen well before the alert start) separately — these are noise, not trigger.
+- Include any tuning or threshold suggestions if the alert appears mis-configured.
+
+---
 
 ## Units & Conventions (important)
 
@@ -49,13 +85,15 @@ The attachment renderers expect specific units. The `get_apm_metrics` and `get_a
 - Error rate / failed transaction rate: **percentage 0–100** (`errorRate`, unit `%`). e.g. `20` means 20%.
 - Throughput: requests per minute (`throughputRpm`, unit `rpm`)
 
+---
+
 ## Investigation Approach
 
-Follow the steps in order.
+Follow the steps in order. Create each attachment during its step; collect the ID; render in the output sections above.
 
 ### Step 1 — Resolve alert context
 
-The alert is provided as an attachment (`observability.alert`) that resolves to the full alert document. Extract:
+The alert is provided as an attachment (`observability.alert`). Extract:
 
 - `service.name` and `service.environment` — the alerted service.
 - `kibana.alert.rule.rule_type_id` — drives the drill-down in Step 5.
@@ -66,20 +104,16 @@ The alert is provided as an attachment (`observability.alert`) that resolves to 
 
 Time windows:
 
-- **Focused window**: `[alert.start - 5m, (alert.end ?? now) + 5m]`. Used for per-service queries.
-- **Baseline window**: `[alert.start - 1h, alert.start]`. Used for contrast.
+- **Focused window**: `[alert.start − 5m, (alert.end ?? now) + 5m]`. Used for per-service queries.
+- **Baseline window**: `[alert.start − 1h, alert.start]`. Used for contrast.
 
 If you cannot resolve `service.name`, call `get_alerts` with the alert UUID first.
 
 ### Step 2 — Metrics snapshot (apm-metrics card)
 
-Call `get_apm_metrics` with:
-- `serviceName`, `environment`
-- `start` / `end` = the focused window
-- `baselineStart` / `baselineEnd` = the baseline window
-- `latencyType: "avg"` (or `p95`/`p99` if the alert is percentile-based)
+Call `get_apm_metrics` with `serviceName`, `environment`, focused window as `start`/`end`, baseline window as `baselineStart`/`baselineEnd`, and `latencyType: "avg"` (or `p95`/`p99` for percentile alerts).
 
-It returns `{ serviceName, environment, current, baseline }` already in the card's units. Create the attachment by passing that output through, adding only a `title`:
+Create the attachment — do NOT render yet:
 
 ```json
 {
@@ -95,22 +129,16 @@ It returns `{ serviceName, environment, current, baseline }` already in the card
 }
 ```
 
-Render immediately:
-
-```xml
-<render_attachment id="ATTACHMENT_ID" />
-```
-
-If `get_apm_metrics` returns an empty `current` (service emitted no spans), note in prose that the service is dark — that is itself a diagnostic signal — and still render the card.
+Note the returned ID as `METRICS_ID`. If `get_apm_metrics` returns empty `current` (service dark), still create the card — zero signal is itself diagnostic.
 
 ### Step 3 — Metric trend (apm-timeseries chart)
 
-Call `get_apm_timeseries` over a wider window (`[alert.start − 30m, (alert.end ?? now) + 5m]`) for the alerted metric:
+Call `get_apm_timeseries` over `[alert.start − 30m, (alert.end ?? now) + 5m]` for the alerted metric:
 - `metric: "latency"` for `apm.transaction_duration`
 - `metric: "failedTransactionRate"` for `apm.error_rate` / `apm.transaction_error_rate`
-- `metric: "latency"` (or the anomalous metric) for `apm.anomaly`
+- `metric: "latency"` (or anomalous metric) for `apm.anomaly`
 
-It returns `{ serviceName, metric, unit, dataPoints }`. Create the attachment by passing that through and adding the alert context. The threshold MUST be in the same unit as `unit` (for a `%` metric the threshold is 0–100, e.g. `10` for 10%); `alertStart` is `kibana.alert.start` as epoch ms:
+Create the attachment — do NOT render yet. Use field name `threshold` (NOT `alertThreshold`). Threshold must match the `unit` (for `%` metrics it is 0–100):
 
 ```json
 {
@@ -120,54 +148,46 @@ It returns `{ serviceName, metric, unit, dataPoints }`. Create the attachment by
     "serviceName": "<service.name>",
     "metric": "<latency | failedTransactionRate | throughput>",
     "unit": "<ms | % | rpm>",
-    "dataPoints": <dataPoints from get_apm_timeseries>,
-    "threshold": <kibana.alert.evaluation.threshold in the same unit; omit if unavailable>,
+    "dataPoints": <dataPoints from get_apm_timeseries — verbatim>,
+    "threshold": <kibana.alert.evaluation.threshold in same unit; omit if unavailable>,
     "alertStart": <kibana.alert.start as epoch ms; omit if unavailable>,
     "title": "<Latency | Failed Transaction Rate | Throughput> — <serviceName>"
   }
 }
 ```
 
-```xml
-<render_attachment id="ATTACHMENT_ID" />
-```
-
-Use the field name `threshold` (NOT `alertThreshold`). Do not transform `dataPoints` — pass them verbatim; the renderer handles gaps (`null` values).
+Note the returned ID as `TIMESERIES_ID`.
 
 ### Step 4 — Blast radius (service map)
 
-Call `get_service_topology` with `serviceName: <alerted service>`, `direction: "both"`, `depth: 2`, and the focused window. It returns `{ connections, nodeMetadata }`, where `nodeMetadata` carries per-service `alertsCount` / `sloStatus` / `sloCount` for badge rendering.
+Call `get_service_topology` with `serviceName`, `direction: "both"`, `depth: 2`, and the focused window. It returns `{ connections, nodeMetadata }`.
 
-If `connections` is non-empty, create the attachment by passing both `connections` and `nodeMetadata` through verbatim:
+If `connections` is non-empty, create the attachment — do NOT render yet:
 
 ```json
 {
   "type": "observability.service-map",
   "description": "Service topology for <serviceName>",
   "data": {
-    "connections": <connections from get_service_topology — verbatim>,
-    "nodeMetadata": <nodeMetadata from get_service_topology — verbatim>,
+    "connections": <connections — verbatim>,
+    "nodeMetadata": <nodeMetadata — verbatim>,
     "serviceName": "<alerted service name>",
     "title": "Service Map — <serviceName>"
   }
 }
 ```
 
-```xml
-<render_attachment id="ATTACHMENT_ID" />
-```
+Note the returned ID as `SERVICE_MAP_ID`. If `connections` is empty, do NOT create the attachment; state "No topology data found for this service in the focused window."
 
-If `connections` is empty, do NOT create a service-map attachment; state that no topology was found for the service in the focused window. Use the topology to distinguish **root cause vs symptom**: a downstream dependency with much higher error rate or latency than the alerted service is the more likely culprit.
+Use the topology to distinguish **root cause vs symptom**: a downstream dependency with much higher error rate or latency than the alerted service is the more likely culprit.
 
 ### Step 4.5 — Environment-wide scan
 
-Call `get_services` without a service filter, scoped to the same `environment` and focused window. Flag any service (other than the alerted one) with error rate > 10% or latency more than 2× its baseline value, and any service with **zero throughput** now that had traffic in the baseline window (zero throughput ≠ healthy — likely down). Report each independent fault as its own hypothesis. If none, state "No concurrent service anomalies detected".
+Call `get_services` without a service filter, scoped to the same `environment` and focused window. Flag any service with error rate > 10%, latency more than 2× baseline, or **zero throughput** that had traffic in the baseline window (zero throughput ≠ healthy). Report each independent fault as its own hypothesis in the Verdict / Causal chain. If none: state "No concurrent service anomalies."
 
 ### Step 4.6 — Related alerts
 
-Call `get_alerts` scoped to `serviceName` / `environment` / the focused window. If any active or recently recovered alerts are returned:
-
-1. Create an `observability.apm-related-alerts` attachment:
+Call `get_alerts` scoped to `serviceName` / `environment` / focused window. If active or recently recovered alerts are returned:
 
 ```json
 {
@@ -177,40 +197,42 @@ Call `get_alerts` scoped to `serviceName` / `environment` / the focused window. 
     "serviceName": "<service.name>",
     "environment": "<service.environment>",
     "title": "Related Alerts — <serviceName>",
-    "alerts": <alerts array mapped to { id, ruleName, ruleTypeId, status, reason, serviceName, start, duration, severity }>
+    "alerts": <alerts mapped to { id, ruleName, ruleTypeId, status, reason, serviceName, start, duration, severity }>
   }
 }
 ```
 
-2. Render immediately: `<render_attachment id="ATTACHMENT_ID" />`
+Note the returned ID as `RELATED_ALERTS_ID`. Map fields: `kibana.alert.uuid` → `id`, `kibana.alert.rule.name` → `ruleName`, `kibana.alert.rule.rule_type_id` → `ruleTypeId`, `kibana.alert.status` → `status`, `kibana.alert.reason` → `reason`, `service.name` → `serviceName`, `kibana.alert.start` (epoch ms) → `start`, derive `duration = end - start` when `end` is present.
 
-If no alerts are returned, state "No other active alerts for this service." in the **Related alerts** output-contract section — do NOT create an empty attachment.
-
-Map `get_alerts` response fields: `kibana.alert.uuid` → `id`, `kibana.alert.rule.name` → `ruleName`, `kibana.alert.rule.rule_type_id` → `ruleTypeId`, `kibana.alert.status` → `status` (`active` | `recovered`), `kibana.alert.reason` → `reason`, `service.name` → `serviceName`, `kibana.alert.start` (epoch ms) → `start`, `kibana.alert.end` (epoch ms, if present) → derive `duration = end - start`.
+If no alerts: state "No other active alerts for this service." in Related / noise — do NOT create an empty attachment.
 
 ### Step 5 — Drill into the alert signal (rule-type aware)
 
 Pick the branch matching `kibana.alert.rule.rule_type_id`:
 
-- **`apm.transaction_duration`**: `get_trace_metrics` grouped by `transaction.name` to find slow transactions; `get_traces` on the slowest, examined span-by-span for the bottleneck; `get_runtime_metrics` for GC/heap pressure; `get_apm_correlations` if no clear bottleneck.
-- **`apm.error_rate` / `apm.transaction_error_rate`**: `get_log_groups` and `get_traces` filtered to failures to find the dominant error/exception; check whether the error pre-dates the alert (`get_log_groups` first-seen) — a long-standing error pattern is likely pre-existing noise, not the trigger.
+- **`apm.transaction_duration`**: `get_trace_metrics` grouped by `transaction.name` for slow transactions; `get_traces` on the slowest, examined span-by-span for the bottleneck; `get_runtime_metrics` for GC/heap pressure; `get_apm_correlations` if no clear bottleneck.
+- **`apm.error_rate` / `apm.transaction_error_rate`**: `get_log_groups` and `get_traces` filtered to failures to find the dominant error/exception; check `get_log_groups` first-seen — a long-standing error pattern is noise, not trigger.
 - **`apm.anomaly`**: `get_apm_correlations` to find the dimension driving the anomaly; corroborate with `get_trace_metrics`.
 
 ### Step 6 — Infrastructure check
 
-Call `get_hosts` for the alerted service (and any flagged in Step 4/4.5). Read restart count (CrashLoopBackOff/OOMKill), CPU vs limit (kernel throttle → latency spikes with no APM errors), memory vs limit (precedes OOMKill). Interpret and fold into hypotheses.
+Call `get_hosts` for the alerted service (and any flagged in Step 4.5). Read restart count (CrashLoopBackOff/OOMKill), CPU vs limit (kernel throttle → latency with no APM errors), memory vs limit (precedes OOMKill). Fold findings into hypotheses.
+
+---
 
 ## Critical Rules
 
-- **All three attachments must be rendered.** Before finishing, verify your response contains a rendered `observability.apm-metrics`, `observability.apm-timeseries`, AND `observability.service-map` attachment. Rendering only the metrics card and describing the rest in prose is the most common failure — do not do it.
+- **All three attachments must be in the final response.** Before finishing, verify your response contains a rendered `observability.apm-metrics`, `observability.apm-timeseries`, AND `observability.service-map`. Rendering only the metrics card and describing the rest in prose is the most common failure — do not do it.
 - Zero throughput is NOT healthy — treat it as a possible outage.
 - Independent faults get independent hypotheses; do not collapse them.
-- A pre-existing error/log pattern (first seen well before the alert) is not automatically the trigger.
-- Pass tool output into attachments verbatim where the shapes match; only add `title`, and for the timeseries add `threshold` + `alertStart` from the alert.
+- A pre-existing error (first seen well before the alert) is not the trigger.
+- Pass tool output into attachments verbatim where shapes match; only add `title`, and for the timeseries add `threshold` + `alertStart` from the alert.
 
 ## Common Mistakes (do NOT do these)
 
-- ❌ Calling `get_service_topology` and then writing a "Topology" table in prose **without** rendering an `observability.service-map` attachment. → ✅ Always create + render the service-map attachment from the returned `connections` and `nodeMetadata`.
-- ❌ Calling `get_apm_timeseries` and then describing the trend in a sentence **without** rendering an `observability.apm-timeseries` attachment. → ✅ Always create + render the chart.
+- ❌ Rendering attachments inline during tool calls — before the Verdict. → ✅ Collect all data first, then write Verdict → Do this next → Causal chain → Evidence → Supporting views.
+- ❌ Calling `get_service_topology` and then writing a "Topology" table in prose **without** an `observability.service-map` attachment. → ✅ Always create + render the service-map from returned `connections` and `nodeMetadata`.
+- ❌ Calling `get_apm_timeseries` and describing the trend without an `observability.apm-timeseries` attachment. → ✅ Always create + render the chart.
 - ❌ Stopping after the metrics card because the text answer "feels complete". → ✅ The timeseries chart and service map are required deliverables, not optional extras.
-- ❌ Converting error rate to a fraction (e.g. 0.5) when building the attachment. → ✅ Pass the tool's value through as-is (percentage 0–100, e.g. 50).
+- ❌ Listing a raw trace ID or error group ID with no link. → ✅ Always wrap IDs in markdown deep links to APM when the URL can be constructed.
+- ❌ Converting error rate to a fraction (e.g. 0.5) when building the attachment. → ✅ Pass the tool's value as-is (percentage 0–100, e.g. 50).
