@@ -149,11 +149,7 @@ describe('registerGenerateRoute', () => {
     await handler({}, request, response);
 
     const events = await readNdjson(response.ok.mock.results[0].value.body);
-    expect(events).toEqual([
-      { token: expect.stringContaining('Content-Security-Policy') },
-      { token: '<div>' },
-      { token: 'hello</div>' },
-    ]);
+    expect(events).toEqual([{ token: '<div>' }, { token: 'hello</div>' }]);
 
     const [{ system, messages }] = chatComplete.mock.calls[0];
     expect(system).toContain('OUTPUT RULES');
@@ -181,10 +177,7 @@ describe('registerGenerateRoute', () => {
     await handler({}, request, response);
 
     const events = await readNdjson(response.ok.mock.results[0].value.body);
-    expect(events).toEqual([
-      { token: expect.stringContaining('Content-Security-Policy') },
-      { error: 'Generated content exceeded size limit' },
-    ]);
+    expect(events).toEqual([{ error: 'Generated content exceeded size limit' }]);
   });
 
   it('measures the size limit in actual UTF-8 bytes, not JS string length', async () => {
@@ -211,10 +204,7 @@ describe('registerGenerateRoute', () => {
     await handler({}, request, response);
 
     const events = await readNdjson(response.ok.mock.results[0].value.body);
-    expect(events).toEqual([
-      { token: expect.stringContaining('Content-Security-Policy') },
-      { error: 'Generated content exceeded size limit' },
-    ]);
+    expect(events).toEqual([{ error: 'Generated content exceeded size limit' }]);
   });
 
   it('logs the real error and emits a generic error line when the inference call errors', async () => {
@@ -236,10 +226,7 @@ describe('registerGenerateRoute', () => {
     await handler({}, request, response);
 
     const events = await readNdjson(response.ok.mock.results[0].value.body);
-    expect(events).toEqual([
-      { token: expect.stringContaining('Content-Security-Policy') },
-      { error: 'Custom content generation failed' },
-    ]);
+    expect(events).toEqual([{ error: 'Custom content generation failed' }]);
     expect(loggerError).toHaveBeenCalledWith(
       expect.stringContaining('upstream provider secret leak')
     );

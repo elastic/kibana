@@ -14,7 +14,6 @@ import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import {
-  CUSTOM_CONTENT_CSP_META,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_ENABLED_FLAG_KEY,
@@ -131,8 +130,6 @@ export function registerGenerateRoute(
       const { connectorId } = connector;
 
       const systemPrompt = buildSystemPromptStatic(colorMode);
-
-      passThrough.write(JSON.stringify({ token: CUSTOM_CONTENT_CSP_META }) + '\n');
 
       const client = inference.getClient({ request });
       const events$ = client.chatComplete({
