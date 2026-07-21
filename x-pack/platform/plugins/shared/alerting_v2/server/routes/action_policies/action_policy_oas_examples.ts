@@ -21,7 +21,11 @@ import type {
   SnoozeActionPolicyBody,
   UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
-import { createActionPolicyDataSchema } from '@kbn/alerting-v2-schemas';
+import {
+  bulkActionActionPoliciesBodySchema,
+  createActionPolicyDataSchema,
+  matchActionPoliciesForRuleBodySchema,
+} from '@kbn/alerting-v2-schemas';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError } from '@kbn/zod/v4';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
@@ -233,10 +237,40 @@ const INVALID_QUERY_PARAMETERS_EXAMPLE = {
   value: INVALID_QUERY_PARAMETERS_ERROR,
 };
 
-const INVALID_REQUEST_BODY_EXAMPLE = {
-  name: 'invalidActionPolicyData',
+const invalidBulkBodyParse = bulkActionActionPoliciesBodySchema.safeParse({});
+
+if (invalidBulkBodyParse.success) {
+  throw new Error('expected bulkActionActionPoliciesBodySchema parse to fail for OAS example');
+}
+
+const INVALID_BULK_REQUEST_BODY_EXAMPLE = {
+  name: 'invalidBulkActionRequestBody',
   summary: INVALID_REQUEST_BODY_DESCRIPTION,
-  value: INVALID_ACTION_POLICY_DATA_ERROR,
+  value: {
+    code: 'BAD_REQUEST',
+    error: 'Bad Request',
+    message: stringifyZodError(invalidBulkBodyParse.error),
+    details: { errors: treeifyError(invalidBulkBodyParse.error) },
+  } satisfies ErrorResponse,
+};
+
+const invalidMatchBodyParse = matchActionPoliciesForRuleBodySchema.safeParse({
+  unknownField: 'x',
+});
+
+if (invalidMatchBodyParse.success) {
+  throw new Error('expected matchActionPoliciesForRuleBodySchema parse to fail for OAS example');
+}
+
+const INVALID_MATCH_REQUEST_BODY_EXAMPLE = {
+  name: 'invalidMatchActionPoliciesRequestBody',
+  summary: INVALID_REQUEST_BODY_DESCRIPTION,
+  value: {
+    code: 'BAD_REQUEST',
+    error: 'Bad Request',
+    message: stringifyZodError(invalidMatchBodyParse.error),
+    details: { errors: treeifyError(invalidMatchBodyParse.error) },
+  } satisfies ErrorResponse,
 };
 
 const ACTION_POLICY_UPSERT_CONFLICT_EXAMPLE = {
@@ -416,7 +450,7 @@ export const bulkActionActionPoliciesOasExamples = (): AlertingV2OasOperationObj
         summary: BULK_ACTION_ACTION_POLICIES_SUMMARY,
         value: BULK_RESPONSE,
       },
-      400: INVALID_REQUEST_BODY_EXAMPLE,
+      400: INVALID_BULK_REQUEST_BODY_EXAMPLE,
     },
   });
 
@@ -433,7 +467,7 @@ export const matchActionPoliciesForRuleOasExamples = (): AlertingV2OasOperationO
         summary: MATCH_ACTION_POLICIES_FOR_RULE_SUMMARY,
         value: MATCH_RESPONSE,
       },
-      400: INVALID_REQUEST_BODY_EXAMPLE,
+      400: INVALID_MATCH_REQUEST_BODY_EXAMPLE,
     },
   });
 
