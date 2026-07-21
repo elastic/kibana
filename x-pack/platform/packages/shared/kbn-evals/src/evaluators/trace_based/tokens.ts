@@ -22,9 +22,7 @@ export function createOutputTokensEvaluator({
     log,
     config: {
       name: 'Output Tokens',
-      // TO_LONG resolves union types: older trace indices map the token fields
-      // as integer, newer ones as long, and ES|QL rejects such fields unless
-      // explicitly converted.
+      // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
         | STATS 
