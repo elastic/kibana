@@ -5,22 +5,37 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { BackgroundAgentCompleteStep as BackgroundAgentCompleteStepData } from '@kbn/agent-builder-common';
 import { ExecutionStatus, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
-import type { ToolResult as ToolResultData } from '@kbn/agent-builder-common/tools/tool_result';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getEbtProps } from '@kbn/ebt-click';
 import { StepLayout } from '../step_layout';
-import { ToolResult } from '../results/tool_result';
-import { ToolResponseFlyout } from '../flyouts/tool_response_flyout';
+import { JsonCodeBlock } from '../json_code_block';
 
 const viewJsonLabel = i18n.translate(
   'xpack.agentBuilder.roundEvents.steps.backgroundAgent.viewJson',
   { defaultMessage: 'View JSON' }
+);
+
+const flyoutTitle = i18n.translate(
+  'xpack.agentBuilder.roundEvents.steps.backgroundAgent.flyoutTitle',
+  { defaultMessage: 'Background agent result' }
 );
 
 interface BackgroundAgentStepProps {
@@ -32,6 +47,7 @@ export const BackgroundAgentStep: React.FC<BackgroundAgentStepProps> = ({ step }
 };
 
 const BackgroundAgentHeadline: React.FC<{ step: BackgroundAgentCompleteStepData }> = ({ step }) => {
+  const { euiTheme } = useEuiTheme();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
   const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
@@ -39,22 +55,13 @@ const BackgroundAgentHeadline: React.FC<{ step: BackgroundAgentCompleteStepData 
   const isFailure =
     step.status === ExecutionStatus.failed || step.status === ExecutionStatus.aborted;
 
-  // Synthetic `ToolResult` of type `other` so `ToolResponseFlyout` can render
-  // the completion payload via its existing JSON-dump path.
-  const syntheticResult: ToolResultData = useMemo(
-    () => ({
-      type: ToolResultType.other,
-      tool_result_id: `bg-${step.execution_id}`,
-      data: {
-        execution_id: step.execution_id,
-        status: step.status,
-        response: step.response,
-        error: step.error,
-        completed_at: step.completed_at,
-      },
-    }),
-    [step]
-  );
+  const flyoutData = {
+    execution_id: step.execution_id,
+    status: step.status,
+    response: step.response,
+    error: step.error,
+    completed_at: step.completed_at,
+  };
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
@@ -95,9 +102,26 @@ const BackgroundAgentHeadline: React.FC<{ step: BackgroundAgentCompleteStepData 
           {viewJsonLabel}
         </EuiLink>
       </EuiFlexItem>
-      <ToolResponseFlyout isOpen={isFlyoutOpen} onClose={closeFlyout}>
-        <ToolResult result={syntheticResult} />
-      </ToolResponseFlyout>
+      {isFlyoutOpen && (
+        <EuiFlyout
+          onClose={closeFlyout}
+          aria-labelledby="backgroundAgentFlyoutTitle"
+          size="m"
+          ownFocus={false}
+          css={css`
+            z-index: ${Number(euiTheme.levels.flyout) + 4};
+          `}
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id="backgroundAgentFlyoutTitle">{flyoutTitle}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <JsonCodeBlock data={flyoutData} />
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      )}
     </EuiFlexGroup>
   );
 };
