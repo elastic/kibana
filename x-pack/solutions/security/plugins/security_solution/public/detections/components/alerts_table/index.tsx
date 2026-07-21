@@ -494,6 +494,28 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     tablePageIndex,
     tableType,
   ]);
+
+  // Keep the store's `flyoutAlert` in sync with the table's own page when
+  // that page refetches (e.g. `alertsTableRef.current?.refresh()` after an
+  // assignee/status mutation from the flyout's `Take action` menu). Without
+  // this, `flyoutAlert` is only ever written on open or on cross-page
+  // navigation (the effect above), so the flyout kept rendering pre-mutation
+  // data for same-page alerts.
+  useEffect(() => {
+    if (flyoutAlertIndex == null || reduxItemsPerPage <= 0) return;
+    if (flyoutPageIndex !== tablePageIndex) return;
+    const offset = flyoutAlertIndex - tablePageIndex * reduxItemsPerPage;
+    const alert = tableContext?.alerts?.[offset] as Alert | undefined;
+    if (!alert) return;
+    setState({ flyoutAlert: alert });
+  }, [
+    flyoutAlertIndex,
+    flyoutPageIndex,
+    reduxItemsPerPage,
+    setState,
+    tableContext?.alerts,
+    tablePageIndex,
+  ]);
   const userProfiles = useFetchUserProfilesFromAlerts({
     alerts: tableContext?.alerts ?? [],
     columns: tableContext?.columns ?? [],

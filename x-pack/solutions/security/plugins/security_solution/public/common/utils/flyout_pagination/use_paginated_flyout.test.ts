@@ -118,7 +118,9 @@ describe('usePaginatedFlyout', () => {
     expect(slice.flyoutAlert).toBeNull();
     expect(slice.flyoutDocumentRef).toBeNull();
     expect(slice.isFlyoutAlertLoading).toBe(false);
-    expect(slice.totalAlertCount).toBe(0);
+    // totalAlertCount is source-level state, not a displayed-document field,
+    // so it survives the soft-reset (see SOFT_RESET's comment).
+    expect(slice.totalAlertCount).toBe(10);
     // openAlertFlyoutImpl is still registered (set by the useEffect)
     expect(slice.openAlertFlyoutImpl).not.toBeNull();
   });
