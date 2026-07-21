@@ -19,6 +19,7 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { snoozeActionPolicyOasExamples } from './action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
@@ -38,6 +39,7 @@ export class SnoozeActionPolicyRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Snooze an action policy',
     description: 'Snooze an action policy until a specified time.',
+    oasOperationObject: snoozeActionPolicyOasExamples,
   } as const;
   static schemas = {
     request: {

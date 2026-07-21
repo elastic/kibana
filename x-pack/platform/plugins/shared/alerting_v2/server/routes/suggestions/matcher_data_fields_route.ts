@@ -14,6 +14,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { matcherDataFieldsOasExamples } from '../action_policies/action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 
 const matcherDataFieldsQuerySchema = z.object({
@@ -36,6 +37,7 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Get matcher data fields suggestions',
     description: 'Get suggestions for matcher data fields.',
+    oasOperationObject: matcherDataFieldsOasExamples,
   } as const;
   static schemas = {
     request: {

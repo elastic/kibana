@@ -16,6 +16,7 @@ import {
   type CreateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { upsertActionPolicyOasExamples } from './action_policy_oas_examples';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
@@ -41,6 +42,7 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
     summary: 'Create or replace an action policy',
     description:
       'Creates an action policy with the given identifier, or fully replaces it if one already exists.',
+    oasOperationObject: upsertActionPolicyOasExamples,
   } as const;
 
   static schemas = {

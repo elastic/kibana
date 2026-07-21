@@ -13,6 +13,7 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { listActionPoliciesOasExamples } from './action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
@@ -63,6 +64,7 @@ export class ListActionPoliciesRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'List action policies',
     description: 'Get a paginated list of action policies with optional filtering and sorting.',
+    oasOperationObject: listActionPoliciesOasExamples,
   } as const;
   static schemas = {
     request: {

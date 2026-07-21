@@ -17,6 +17,7 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { createActionPolicyOasExamples } from './action_policy_oas_examples';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
@@ -36,6 +37,7 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
     summary: 'Create an action policy',
     description:
       'Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/.',
+    oasOperationObject: createActionPolicyOasExamples,
   } as const;
   static schemas = {
     request: {
