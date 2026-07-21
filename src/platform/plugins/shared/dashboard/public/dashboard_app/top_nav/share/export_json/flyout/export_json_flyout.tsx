@@ -69,7 +69,7 @@ export const ExportJsonFlyout = <
 }) => {
   const [forceExportByValue, setForceExportByValue] = useState<boolean>(false);
   const state = useMemo(
-    () => getExportJson(!forceExportByValue),
+    () => getExportJson(forceExportByValue),
     [getExportJson, forceExportByValue]
   );
 
