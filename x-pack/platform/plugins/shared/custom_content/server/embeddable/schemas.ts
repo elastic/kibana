@@ -8,7 +8,10 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
-import { CUSTOM_CONTENT_MAX_PROMPT_LENGTH, CUSTOM_CONTENT_MAX_TEMPLATE_BYTES } from '../../common/constants';
+import {
+  CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
+  CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
+} from '../../common/constants';
 
 export const customContentStateSchema = schema.object({
   prompt: schema.maybe(schema.string({ maxLength: CUSTOM_CONTENT_MAX_PROMPT_LENGTH })),
