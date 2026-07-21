@@ -21,7 +21,7 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 
-type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
+type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController' | 'executionUuid'>;
 
 @injectable()
 export class RuleExecutorTaskRunner {
@@ -30,8 +30,12 @@ export class RuleExecutorTaskRunner {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
-    const input = this.createRuleExecutionInput(taskInstance, abortController);
+  public async run({
+    taskInstance,
+    abortController,
+    executionUuid,
+  }: TaskRunParams): Promise<RunResult> {
+    const input = this.createRuleExecutionInput(taskInstance, abortController, executionUuid);
 
     const result = await this.pipeline.execute(input);
 
@@ -43,7 +47,8 @@ export class RuleExecutorTaskRunner {
    */
   private createRuleExecutionInput(
     taskInstance: TaskRunParams['taskInstance'],
-    abortController: AbortController
+    abortController: AbortController,
+    executionUuid: string
   ): RuleExecutionPipelineInput {
     const params = taskInstance.params as RuleExecutorTaskParams;
     const scheduledAt = taskInstance.scheduledAt;
@@ -52,6 +57,7 @@ export class RuleExecutorTaskRunner {
       ruleId: params.ruleId,
       spaceId: params.spaceId,
       scheduledAt: this.getScheduledAtISOString(scheduledAt, taskInstance.startedAt),
+      executionUuid,
       abortSignal: abortController.signal,
     };
   }

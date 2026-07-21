@@ -22,14 +22,14 @@ describe('extractDiscoveriesFromToolCall', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_DISCOVERY_WRITE,
         tool_call_id: 'dw-1',
-        params: { kind: 'discovery', title: 'DB latency spike', event_id: 'slug-from-input' },
-        results: [{ data: { event_id: 'slug-resolved' } }],
+        params: { kind: 'discovery', title: 'DB latency spike', event_id: 'event-from-input' },
+        results: [{ data: { event_id: 'event-resolved' } }],
       },
     ];
     const discoveries = extractDiscoveriesFromToolCall(steps);
     expect(discoveries).toHaveLength(1);
     expect(discoveries[0].title).toBe('DB latency spike');
-    expect(discoveries[0].event_id).toBe('slug-resolved');
+    expect(discoveries[0].event_id).toBe('event-resolved');
   });
 
   it('returns [] when no discovery_write steps are present', () => {
@@ -43,12 +43,12 @@ describe('extractDiscoveriesFromToolCall', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_DISCOVERY_WRITE,
         tool_call_id: 'dw-2',
-        params: { kind: 'discovery', title: 'CPU spike', event_id: 'original-slug' },
+        params: { kind: 'discovery', title: 'CPU spike', event_id: 'original-event-id' },
         results: [{ data: {} }],
       },
     ];
     const discoveries = extractDiscoveriesFromToolCall(steps);
-    expect(discoveries[0].event_id).toBe('original-slug');
+    expect(discoveries[0].event_id).toBe('original-event-id');
   });
 });
 
@@ -61,7 +61,7 @@ describe('extractSignificantEventsFromToolCall', () => {
         tool_call_id: 'ew-1',
         params: {
           discovery_id: 'd-1',
-          event_id: 'slug-1',
+          event_id: 'event-1',
           status: 'open',
           severity: '60-high',
           confidence: 0.9,

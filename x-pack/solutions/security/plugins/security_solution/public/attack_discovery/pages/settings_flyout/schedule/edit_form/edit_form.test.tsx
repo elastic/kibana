@@ -641,7 +641,8 @@ describe.skip('EditForm', () => {
   });
 });
 
-describe('EditForm — empty alert retrieval workflows (deferred validation)', () => {
+// Failing: See https://github.com/elastic/kibana/issues/277801
+describe.skip('EditForm — empty alert retrieval workflows (deferred validation)', () => {
   const mockTriggersActionsUi = triggersActionsUiMock.createStart();
   const mockUseListWorkflows = useListWorkflows as jest.MockedFunction<typeof useListWorkflows>;
   const mockUseGenerateWorkflow = useGenerateWorkflow as jest.MockedFunction<

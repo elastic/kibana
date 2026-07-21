@@ -446,7 +446,7 @@
     },
     {
       "groupName": "@reduxjs/toolkit",
-      "matchDepNames": ["@reduxjs/toolkit", "immer"],
+      "matchDepNames": ["@reduxjs/toolkit", "immer", "redux-toolkit-v1", "immer-v9"],
       "reviewers": ["team:kibana-visualizations", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "enabled": true,
@@ -1840,7 +1840,7 @@
     },
     {
       "groupName": "redux-thunk",
-      "matchDepNames": ["redux-thunk"],
+      "matchDepNames": ["redux-thunk", "redux-thunk-v2"],
       "reviewers": ["team:kibana-presentation", "team:kibana-management", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
@@ -2087,7 +2087,14 @@
     },
     {
       "groupName": "redux",
-      "matchDepNames": ["redux", "react-redux", "reselect"],
+      "matchDepNames": [
+        "redux",
+        "react-redux",
+        "reselect",
+        "redux-v4",
+        "react-redux-v7",
+        "reselect-v4"
+      ],
       "reviewers": [
         "team:search-kibana",
         "team:kibana-presentation",

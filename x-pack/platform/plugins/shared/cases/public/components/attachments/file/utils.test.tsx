@@ -10,10 +10,12 @@ import {
   pdfMimeTypes,
   textMimeTypes,
 } from '../../../../common/constants/mime_types';
-import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import { FILE_ATTACHMENT_TYPE, SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import { basicComment } from '../../../containers/mock';
+import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { makeFileComment } from './case_view_files.test';
-import { getFileIdsFromComments, isImage, parseMimeType } from './utils';
+import { getFileIdsFromComments, getFilesFromComments, isImage, parseMimeType } from './utils';
 
 const imageMimeTypes = Array.from(IMAGE_MIME_TYPES);
 
@@ -102,5 +104,35 @@ describe('getFileIdsFromComments', () => {
       owner
     );
     expect(result).toEqual(new Set(['file-1']));
+  });
+});
+
+describe('getFilesFromComments', () => {
+  const owner = SECURITY_SOLUTION_OWNER;
+
+  const makeUnifiedFileComment = (name: string, extension: string): AttachmentUIV2 =>
+    ({
+      type: FILE_ATTACHMENT_TYPE,
+      id: `c-${name}`,
+      attachmentId: `file-${name}`,
+      metadata: {
+        files: [{ name, extension, mimeType: 'image/png', created: '2024-01-01T00:00:00.000Z' }],
+        soType: FILE_SO_TYPE,
+      },
+    } as unknown as AttachmentUIV2);
+
+  it('returns an empty array when there are no file comments', () => {
+    expect(getFilesFromComments([basicComment], owner)).toEqual([]);
+  });
+
+  it('extracts name + extension from unified file comments', () => {
+    const result = getFilesFromComments([makeUnifiedFileComment('report', 'pdf')], owner);
+    expect(result).toEqual([{ name: 'report', extension: 'pdf' }]);
+  });
+
+  it('ignores file comments without valid metadata', () => {
+    // Legacy external-reference file comments carry `externalReferenceMetadata`,
+    // not the unified `metadata.files`, so they are skipped.
+    expect(getFilesFromComments([makeFileComment('c1', 'file-1', owner)], owner)).toEqual([]);
   });
 });

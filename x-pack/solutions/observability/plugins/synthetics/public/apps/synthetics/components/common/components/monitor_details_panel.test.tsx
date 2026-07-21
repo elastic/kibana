@@ -16,7 +16,7 @@ import type {
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
 
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useDispatch: () => jest.fn(),
 }));
 

@@ -80,4 +80,60 @@ describe('eventsWriteHandler', () => {
     expect(written.previous_event_uuid).toBe('latest-id');
     expect(result.written).toBe(true);
   });
+
+  it('writes with refresh wait_for so an immediate triage _count can see the event', async () => {
+    const eventClient = {
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      bulkCreate: jest.fn().mockResolvedValue(undefined),
+    };
+
+    await eventsWriteHandler({
+      eventClient: eventClient as never,
+      input: { ...baseInput, event_id: 'checkout__latency-abc12345' },
+    });
+
+    expect(eventClient.bulkCreate.mock.calls[0][1]).toEqual({
+      throwOnFail: true,
+      refresh: 'wait_for',
+    });
+  });
+
+  it('carries the investigations lineage forward from the latest event on re-open', async () => {
+    const investigations = [
+      { workflow_execution_id: 'wf-1', started_at: '2024-01-01T00:00:00.000Z' },
+    ];
+    const eventClient = {
+      findLatestByEventIds: jest
+        .fn()
+        .mockResolvedValue(
+          new Map([['checkout__latency-abc12345', { event_uuid: 'latest-id', investigations }]])
+        ),
+      bulkCreate: jest.fn().mockResolvedValue(undefined),
+    };
+
+    await eventsWriteHandler({
+      eventClient: eventClient as never,
+      input: { ...baseInput, event_id: 'checkout__latency-abc12345' },
+    });
+
+    const written = eventClient.bulkCreate.mock.calls[0][0][0];
+    expect(written.investigations).toEqual(investigations);
+  });
+
+  it('leaves investigations undefined when the latest event has none', async () => {
+    const eventClient = {
+      findLatestByEventIds: jest
+        .fn()
+        .mockResolvedValue(new Map([['checkout__latency-abc12345', { event_uuid: 'latest-id' }]])),
+      bulkCreate: jest.fn().mockResolvedValue(undefined),
+    };
+
+    await eventsWriteHandler({
+      eventClient: eventClient as never,
+      input: { ...baseInput, event_id: 'checkout__latency-abc12345' },
+    });
+
+    const written = eventClient.bulkCreate.mock.calls[0][0][0];
+    expect(written.investigations).toBeUndefined();
+  });
 });
