@@ -13,6 +13,7 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
 import { login, ROLE } from '../../tasks/login';
+import { disableNewFlyout } from '../../tasks/kibana_advanced_settings';
 
 describe('Results', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
@@ -66,6 +67,7 @@ describe('Results', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, (
   });
   describe('do not see results results when does not have RBAC', () => {
     before(() => {
+      disableNewFlyout();
       login(ROLE.t1_analyst);
     });
 

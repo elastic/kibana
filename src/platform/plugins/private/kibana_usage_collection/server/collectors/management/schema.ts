@@ -805,13 +805,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Maximum number of cases the Cases connector can open during a single rule run.',
     },
   },
-  'observability:streamsEnableSignificantEventsAlertingV2': {
-    type: 'boolean',
-    _meta: {
-      description:
-        'Back Streams Significant events queries with Alerting v2 (kind: signal) instead of the streams.rules.esql rule type.',
-    },
-  },
   'observability:streamsEnableContentPacks': {
     type: 'boolean',
     _meta: {

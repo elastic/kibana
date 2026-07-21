@@ -72322,6 +72322,8 @@ components:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
               nullable: true
+            agent_features_include_tags_in_events_enabled:
+              nullable: true
             agent_internal:
               nullable: true
             agent_limits_go_max_procs:
@@ -95071,6 +95073,8 @@ components:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
               nullable: true
+            agent_features_include_tags_in_events_enabled:
+              nullable: true
             agent_internal:
               nullable: true
             agent_limits_go_max_procs:
@@ -106157,6 +106161,8 @@ components:
             agent_download_timeout:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
+              nullable: true
+            agent_features_include_tags_in_events_enabled:
               nullable: true
             agent_internal:
               nullable: true
