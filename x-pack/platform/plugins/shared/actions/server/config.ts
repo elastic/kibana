@@ -150,7 +150,7 @@ export const configSchema = schema.object({
   customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
   relay: schema.maybe(
     schema.object({
-      url: schema.uri({ scheme: ['https'] }),
+      url: schema.uri({ scheme: ['https', 'http'] }),
       ssl: schema.maybe(relaySSLConfigSchema),
     })
   ),
