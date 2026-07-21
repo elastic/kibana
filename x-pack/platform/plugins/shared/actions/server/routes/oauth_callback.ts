@@ -680,13 +680,14 @@ export const oauthCallbackRoute = (
             returnUrl: kibanaReturnUrl,
           });
         } catch (err) {
+          // Log the underlying cause for operators; return a generic message to the client.
           routeLogger.error(`OAuth callback failed: ${getErrorMessage(err)}`);
           if (err instanceof Error && err.stack) {
             routeLogger.debug(`OAuth callback error stack: ${err.stack}`);
           }
 
           return respondWithError(res, {
-            details: err instanceof Error ? err.message : GENERIC_OAUTH_ERROR,
+            details: GENERIC_OAUTH_ERROR,
             statusCode: getErrorStatusCode(err),
             connectorId: stateConnectorId,
             returnUrl: kibanaReturnUrl,
