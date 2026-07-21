@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
 import type {
   ActionPolicyResponse,
   BulkActionActionPoliciesBody,
@@ -31,7 +30,7 @@ import {
   getActionPolicyVersionConflictMessage,
   getInvalidActionPolicyDataMessage,
 } from '../../lib/errors/action_policy_error_messages';
-import { jsonExample } from '../json_oas_example';
+import { jsonExample, type AlertingV2OasOperationObject } from '../json_oas_example';
 import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
@@ -41,11 +40,6 @@ import {
   INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
 } from '../route_response_descriptions';
 import { listActionPoliciesQuerySchema } from './list_action_policies_query_schema';
-
-type OASOperationObject = Exclude<
-  Awaited<ReturnType<NonNullable<RouteConfigOptions<RouteMethod>['oasOperationObject']>>>,
-  string
->;
 
 type RouteErrorStatus = 400 | 404 | 409;
 
@@ -259,8 +253,8 @@ const buildActionPolicyOas = ({
   requestBody?: { name: string; summary: string; value: unknown };
   responses?: Record<number, { name: string; summary: string; value: unknown }>;
   errors?: RouteErrorStatus[];
-}): OASOperationObject => {
-  const operation: OASOperationObject = {};
+}): AlertingV2OasOperationObject => {
+  const operation: AlertingV2OasOperationObject = {};
 
   if (requestBody) {
     operation.requestBody = jsonExample(requestBody.name, requestBody.summary, requestBody.value);
@@ -290,7 +284,7 @@ const policyResponse = (
   value: { ...ACTION_POLICY_RESPONSE, ...overrides },
 });
 
-export const createActionPolicyOasExamples = (): OASOperationObject =>
+export const createActionPolicyOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     requestBody: {
       name: 'createActionPolicyRequest',
@@ -303,7 +297,7 @@ export const createActionPolicyOasExamples = (): OASOperationObject =>
     errors: [400],
   });
 
-export const upsertActionPolicyOasExamples = (): OASOperationObject =>
+export const upsertActionPolicyOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     requestBody: {
       name: 'upsertActionPolicyRequest',
@@ -318,7 +312,7 @@ export const upsertActionPolicyOasExamples = (): OASOperationObject =>
     errors: [400, 404],
   });
 
-export const updateActionPolicyOasExamples = (): OASOperationObject =>
+export const updateActionPolicyOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     requestBody: {
       name: 'updateActionPolicyRequest',
@@ -334,7 +328,7 @@ export const updateActionPolicyOasExamples = (): OASOperationObject =>
     errors: [400, 404, 409],
   });
 
-export const getActionPolicyOasExamples = (): OASOperationObject =>
+export const getActionPolicyOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     responses: {
       200: policyResponse('getActionPolicyResponse', GET_ACTION_POLICY_SUMMARY),
@@ -342,7 +336,7 @@ export const getActionPolicyOasExamples = (): OASOperationObject =>
     errors: [404],
   });
 
-export const listActionPoliciesOasExamples = (): OASOperationObject =>
+export const listActionPoliciesOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     responses: {
       200: {
@@ -354,12 +348,12 @@ export const listActionPoliciesOasExamples = (): OASOperationObject =>
     },
   });
 
-export const deleteActionPolicyOasExamples = (): OASOperationObject =>
+export const deleteActionPolicyOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     errors: [404],
   });
 
-export const enableActionPolicyOasExamples = (): OASOperationObject =>
+export const enableActionPolicyOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     responses: {
       200: policyResponse('enableActionPolicyResponse', ENABLE_ACTION_POLICY_SUMMARY, {
@@ -369,7 +363,7 @@ export const enableActionPolicyOasExamples = (): OASOperationObject =>
     errors: [404, 409],
   });
 
-export const disableActionPolicyOasExamples = (): OASOperationObject =>
+export const disableActionPolicyOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     responses: {
       200: policyResponse('disableActionPolicyResponse', DISABLE_ACTION_POLICY_SUMMARY, {
@@ -379,7 +373,7 @@ export const disableActionPolicyOasExamples = (): OASOperationObject =>
     errors: [404, 409],
   });
 
-export const snoozeActionPolicyOasExamples = (): OASOperationObject =>
+export const snoozeActionPolicyOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     requestBody: {
       name: 'snoozeActionPolicyRequest',
@@ -394,7 +388,7 @@ export const snoozeActionPolicyOasExamples = (): OASOperationObject =>
     errors: [400, 404, 409],
   });
 
-export const unsnoozeActionPolicyOasExamples = (): OASOperationObject =>
+export const unsnoozeActionPolicyOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     responses: {
       200: policyResponse('unsnoozeActionPolicyResponse', UNSNOOZE_ACTION_POLICY_SUMMARY, {
@@ -404,12 +398,12 @@ export const unsnoozeActionPolicyOasExamples = (): OASOperationObject =>
     errors: [404, 409],
   });
 
-export const updateActionPolicyApiKeyOasExamples = (): OASOperationObject =>
+export const updateActionPolicyApiKeyOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     errors: [404, 409],
   });
 
-export const bulkActionActionPoliciesOasExamples = (): OASOperationObject =>
+export const bulkActionActionPoliciesOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     requestBody: {
       name: 'bulkActionActionPoliciesRequest',
@@ -426,7 +420,7 @@ export const bulkActionActionPoliciesOasExamples = (): OASOperationObject =>
     },
   });
 
-export const matchActionPoliciesForRuleOasExamples = (): OASOperationObject =>
+export const matchActionPoliciesForRuleOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     requestBody: {
       name: 'matchActionPoliciesForRuleRequest',
@@ -443,7 +437,7 @@ export const matchActionPoliciesForRuleOasExamples = (): OASOperationObject =>
     },
   });
 
-export const listActionPolicyExecutionHistoryOasExamples = (): OASOperationObject =>
+export const listActionPolicyExecutionHistoryOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     responses: {
       200: {
@@ -455,7 +449,7 @@ export const listActionPolicyExecutionHistoryOasExamples = (): OASOperationObjec
     },
   });
 
-export const countActionPolicyExecutionHistoryOasExamples = (): OASOperationObject =>
+export const countActionPolicyExecutionHistoryOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     responses: {
       200: {
@@ -467,7 +461,7 @@ export const countActionPolicyExecutionHistoryOasExamples = (): OASOperationObje
     },
   });
 
-export const matcherDataFieldsOasExamples = (): OASOperationObject =>
+export const matcherDataFieldsOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     responses: {
       200: {
@@ -479,7 +473,7 @@ export const matcherDataFieldsOasExamples = (): OASOperationObject =>
     },
   });
 
-export const actionPolicyTagsOasExamples = (): OASOperationObject =>
+export const actionPolicyTagsOasExamples = (): AlertingV2OasOperationObject =>
   buildActionPolicyOas({
     responses: {
       200: {

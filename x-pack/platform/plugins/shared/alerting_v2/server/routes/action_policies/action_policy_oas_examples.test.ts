@@ -10,6 +10,7 @@ import {
   getActionPolicyNotFoundMessage,
   getActionPolicyVersionConflictMessage,
 } from '../../lib/errors/action_policy_error_messages';
+import type { AlertingV2OasOperationObject } from '../json_oas_example';
 import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
@@ -23,6 +24,15 @@ import {
   getActionPolicyOasExamples,
   upsertActionPolicyOasExamples,
 } from './action_policy_oas_examples';
+
+const getValidateResponseDescription = (status: number): string | undefined => {
+  const { validate } = CreateActionPolicyRoute;
+  if (typeof validate !== 'object' || validate === null || !('response' in validate)) {
+    return undefined;
+  }
+  const response = (validate as { response?: Record<number, { description?: string }> }).response;
+  return response?.[status]?.description;
+};
 
 describe('action policy OAS examples', () => {
   it('includes request, success, and route-error examples for create', () => {
@@ -45,7 +55,7 @@ describe('action policy OAS examples', () => {
         }),
       })
     );
-    expect(CreateActionPolicyRoute.validate.response?.[400]?.description).toBe(
+    expect(getValidateResponseDescription(400)).toBe(
       INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION
     );
   });
@@ -85,11 +95,14 @@ describe('action policy OAS examples', () => {
   it('is exposed on CreateActionPolicyRoute.options', async () => {
     expect(CreateActionPolicyRoute.options.oasOperationObject).toBe(createActionPolicyOasExamples);
 
-    const oas = await CreateActionPolicyRoute.options.oasOperationObject!();
-    expect(typeof oas).not.toBe('string');
-    if (typeof oas === 'string') {
-      throw new Error('expected object OAS fragment');
+    const oasOperationObject = CreateActionPolicyRoute.options.oasOperationObject;
+    expect(oasOperationObject).toBeDefined();
+    if (!oasOperationObject) {
+      throw new Error('expected oasOperationObject');
     }
+
+    const oas = (await oasOperationObject()) as AlertingV2OasOperationObject;
+    expect(typeof oas).not.toBe('string');
 
     expect(
       oas.requestBody?.content?.['application/json']?.examples?.createActionPolicyRequest
@@ -101,6 +114,7 @@ describe('action policy OAS examples', () => {
       oas.responses?.[400]?.content?.['application/json']?.examples?.invalidActionPolicyData
     ).toBeDefined();
   });
+
   it('includes success examples for action policy tags', () => {
     const oas = actionPolicyTagsOasExamples();
 
