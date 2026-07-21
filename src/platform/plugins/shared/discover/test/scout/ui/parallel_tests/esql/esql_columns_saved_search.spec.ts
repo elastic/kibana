@@ -13,13 +13,43 @@
  * reload, and restored again when switching between saved searches.
  */
 
-import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../fixtures';
 
-const SAVED_SEARCH_NON_TRANSFORMATIONAL_INITIAL_COLUMNS = 'nonTransformationalInitialColumns';
-const SAVED_SEARCH_NON_TRANSFORMATIONAL_CUSTOM_COLUMNS = 'nonTransformationalCustomColumns';
-const SAVED_SEARCH_TRANSFORMATIONAL_INITIAL_COLUMNS = 'transformationalInitialColumns';
-const SAVED_SEARCH_TRANSFORMATIONAL_CUSTOM_COLUMNS = 'transformationalCustomColumns';
+interface ColumnTestCase {
+  id: string;
+  query: string;
+  /** `column_order` stored on the saved session tab. */
+  savedColumnOrder: string[];
+  /** Columns the data grid/table is expected to show when the tab is restored. */
+  expectedGridColumns: string[];
+}
+
+const columnTestCases: ColumnTestCase[] = [
+  {
+    id: 'non_transformational_initial_columns',
+    query: 'FROM logstash-* | LIMIT 1',
+    savedColumnOrder: [],
+    expectedGridColumns: ['@timestamp', 'Summary'],
+  },
+  {
+    id: 'non_transformational_custom_columns',
+    query: 'FROM logstash-* | LIMIT 100',
+    savedColumnOrder: ['bytes', 'extension'],
+    expectedGridColumns: ['@timestamp', 'bytes', 'extension'],
+  },
+  {
+    id: 'transformational_initial_columns',
+    query: 'FROM logstash-* | LIMIT 100 | KEEP ip, @timestamp, bytes',
+    savedColumnOrder: ['ip', '@timestamp', 'bytes'],
+    expectedGridColumns: ['ip', '@timestamp', 'bytes'],
+  },
+  {
+    id: 'transformational_custom_columns',
+    query: 'FROM logstash-* | LIMIT 100 | KEEP ip, @timestamp, bytes',
+    savedColumnOrder: ['ip', 'bytes'],
+    expectedGridColumns: ['ip', 'bytes'],
+  },
+];
 
 spaceTest.describe(
   'Discover ES|QL columns - saved searches / discover sessions',
@@ -27,6 +57,19 @@ spaceTest.describe(
   () => {
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
       await discoverScoutSpace.setupDiscoverDefaults();
+      const tabs = columnTestCases.map(({ id, query, savedColumnOrder }) => ({
+        id,
+        label: id,
+        column_order: savedColumnOrder,
+        data_source: {
+          type: 'esql' as const,
+          query,
+        },
+      }));
+      await discoverScoutSpace.createDiscoverSession({
+        title: 'columns',
+        tabs,
+      });
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -40,111 +83,65 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'persists columns in saved search/discover session and restores them on reload and re-selection',
+      'column behavior of (non-)transitional queries with new Discover session',
       async ({ page, pageObjects }) => {
-        spaceTest.setTimeout(180_000);
         const { discover, unifiedFieldList } = pageObjects;
 
-        await spaceTest.step(
-          'save initial columns for a non-transformational command',
-          async () => {
-            const columns = ['@timestamp', 'Summary'];
-            await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
-
-            await page.reload();
-            await discover.waitUntilTabIsLoaded();
-            await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
-
-            await discover.saveSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_INITIAL_COLUMNS);
-            await discover.waitUntilTabIsLoaded();
-            await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
-          }
-        );
-
-        await spaceTest.step('save custom columns for a non-transformational command', async () => {
-          await discover.clickNewSearch();
+        const expectDocHeaderAfterReload = async (columns: string[]) => {
+          await page.reload();
           await discover.waitUntilTabIsLoaded();
+          await discover.expectDocHeaderToEqual(columns);
+        };
 
+        await spaceTest.step('initial columns for a non-transformational command', async () => {
+          const columns = ['@timestamp', 'Summary'];
+          await discover.expectDocHeaderToEqual(columns);
+        });
+
+        await spaceTest.step('custom columns for a non-transformational command', async () => {
+          await discover.clickNewSearch();
           const columns = ['@timestamp', 'bytes', 'extension'];
           await unifiedFieldList.clickFieldListItemAdd('bytes');
           await unifiedFieldList.clickFieldListItemAdd('extension');
-          await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
-
-          await page.reload();
-          await discover.waitUntilTabIsLoaded();
-          await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
-
-          await discover.saveSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_CUSTOM_COLUMNS);
-          await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
+          await discover.expectDocHeaderToEqual(columns);
         });
 
-        await spaceTest.step('save initial columns for a transformational command', async () => {
+        await spaceTest.step('initial columns for a transformational command', async () => {
           await discover.clickNewSearch();
-          await discover.waitUntilTabIsLoaded();
-
-          const columns = ['ip', '@timestamp'];
+          const columns = ['ip', '@timestamp', 'bytes'];
           await discover.codeEditor.setCodeEditorValue(
-            'from logstash-* | limit 500 | keep ip, @timestamp'
+            'FROM logstash-* | LIMIT 100 | KEEP ip, @timestamp, bytes'
           );
           await discover.submitQuery();
-          await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
-
-          await page.reload();
-          await discover.waitUntilTabIsLoaded();
-          await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
-
-          await discover.saveSearch(SAVED_SEARCH_TRANSFORMATIONAL_INITIAL_COLUMNS);
-          await expect.poll(() => discover.getDocHeader()).toStrictEqual(columns);
+          await discover.expectDocHeaderToEqual(columns);
+          await expectDocHeaderAfterReload(columns);
         });
 
-        await spaceTest.step('save custom columns for a transformational command', async () => {
+        await spaceTest.step('custom columns for a transformational command', async () => {
           await discover.clickNewSearch();
-          await discover.waitUntilTabIsLoaded();
-
+          const columns = ['ip', 'bytes'];
           await discover.codeEditor.setCodeEditorValue(
-            'from logstash-* | limit 500 | keep ip, @timestamp, bytes'
+            'FROM logstash-* | LIMIT 100 | KEEP ip, @timestamp, bytes'
           );
           await discover.submitQuery();
-          await expect
-            .poll(() => discover.getDocHeader())
-            .toStrictEqual(['ip', '@timestamp', 'bytes']);
-
           await unifiedFieldList.clickFieldListItemRemove('@timestamp');
-          await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', 'bytes']);
-
-          await page.reload();
-          await discover.waitUntilTabIsLoaded();
-          await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', 'bytes']);
-
-          await discover.saveSearch(SAVED_SEARCH_TRANSFORMATIONAL_CUSTOM_COLUMNS);
-          await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', 'bytes']);
+          await discover.expectDocHeaderToEqual(columns);
+          await expectDocHeaderAfterReload(columns);
         });
+      }
+    );
 
-        await spaceTest.step(
-          'restore columns correctly when switching between saved searches/discover sessions',
-          async () => {
-            await discover.loadSavedSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_INITIAL_COLUMNS);
-            await expect
-              .poll(() => discover.getDocHeader())
-              .toStrictEqual(['@timestamp', 'Summary']);
+    spaceTest(
+      'column behavior of (non-)transitional queries when restoring a saved Discover session',
+      async ({ pageObjects }) => {
+        const { discover, unifiedTabs } = pageObjects;
+        await discover.loadSavedSearch('columns');
+        await discover.expectDocHeaderToEqual(columnTestCases[0].expectedGridColumns);
 
-            await discover.loadSavedSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_CUSTOM_COLUMNS);
-            await expect
-              .poll(() => discover.getDocHeader())
-              .toStrictEqual(['@timestamp', 'bytes', 'extension']);
-
-            await discover.loadSavedSearch(SAVED_SEARCH_TRANSFORMATIONAL_INITIAL_COLUMNS);
-            await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', '@timestamp']);
-
-            await discover.loadSavedSearch(SAVED_SEARCH_TRANSFORMATIONAL_CUSTOM_COLUMNS);
-            await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', 'bytes']);
-
-            await discover.clickNewSearch();
-            await expect
-              .poll(() => discover.getDocHeader())
-              .toStrictEqual(['@timestamp', 'Summary']);
-          }
-        );
+        for (const [tabIndex, { expectedGridColumns }] of columnTestCases.entries()) {
+          await unifiedTabs.selectTab(tabIndex);
+          await discover.expectDocHeaderToEqual(expectedGridColumns);
+        }
       }
     );
   }

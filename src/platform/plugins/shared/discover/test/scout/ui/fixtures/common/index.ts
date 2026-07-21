@@ -27,7 +27,7 @@ import {
 import * as testData from './constants';
 
 type DiscoverSessionCreateClassicTab = Partial<DiscoverSessionApiClassicTab> &
-  Pick<DiscoverSessionApiClassicTab, 'data_source' | 'id' | 'label'>;
+  Pick<DiscoverSessionApiClassicTab, 'data_source' | 'id' | 'label' | 'column_order'>;
 
 type DiscoverSessionCreateEsqlTab = Partial<DiscoverSessionApiEsqlTab> &
   Pick<DiscoverSessionApiEsqlTab, 'data_source' | 'id' | 'label'>;

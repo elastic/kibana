@@ -37,32 +37,32 @@ spaceTest.describe('Discover ES|QL columns', { tag: '@local-stateful-classic' },
     async ({ pageObjects }) => {
       const { discover } = pageObjects;
       const initialColumns = ['@timestamp', 'Summary'];
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(initialColumns);
+      await discover.expectDocHeaderToEqual(initialColumns);
 
       await discover.codeEditor.setCodeEditorValue('from logstash-* | limit 500');
       await discover.submitQuery();
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(initialColumns);
+      await discover.expectDocHeaderToEqual(initialColumns);
 
       await discover.codeEditor.setCodeEditorValue('from logs* | limit 500');
       await discover.submitQuery();
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(initialColumns);
+      await discover.expectDocHeaderToEqual(initialColumns);
 
       await pageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'bytes']);
+      await discover.expectDocHeaderToEqual(['@timestamp', 'bytes']);
 
       // different index pattern => reset columns
       await discover.codeEditor.setCodeEditorValue('from logstash-* | limit 500');
       await discover.submitQuery();
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(initialColumns);
+      await discover.expectDocHeaderToEqual(initialColumns);
 
       await pageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'extension']);
+      await discover.expectDocHeaderToEqual(['@timestamp', 'extension']);
 
       // same index pattern => don't reset columns
       const currentQuery = await discover.codeEditor.getCodeEditorValue();
       await discover.codeEditor.setCodeEditorValue(`${currentQuery} | where bytes > 0`);
       await discover.submitQuery();
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'extension']);
+      await discover.expectDocHeaderToEqual(['@timestamp', 'extension']);
     }
   );
 
@@ -82,7 +82,7 @@ spaceTest.describe('Discover ES|QL columns', { tag: '@local-stateful-classic' },
         'from logstash-* | keep ip, @timestamp, bytes | limit 10'
       );
       await discover.submitQuery();
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', '@timestamp', 'bytes']);
+      await discover.expectDocHeaderToEqual(['ip', '@timestamp', 'bytes']);
     }
   );
 
@@ -95,12 +95,12 @@ spaceTest.describe('Discover ES|QL columns', { tag: '@local-stateful-classic' },
         'from logstash-* | keep ip, @timestamp | limit 500'
       );
       await datePicker.setCommonlyUsedTime('Last_1 hour');
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual([]);
+      await discover.expectDocHeaderToEqual([]);
 
       await page.reload();
       await discover.waitUntilTabIsLoaded();
       await datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE_DISPLAY);
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['ip', '@timestamp']);
+      await discover.expectDocHeaderToEqual(['ip', '@timestamp']);
     }
   );
 
@@ -108,11 +108,10 @@ spaceTest.describe('Discover ES|QL columns', { tag: '@local-stateful-classic' },
     'formats a column using columnsMeta when its type differs from the data-view field',
     async ({ page, pageObjects }) => {
       const { discover } = pageObjects;
-      // This query preserves the original numeric DistanceMiles field in
-      // DistanceMilesOriginal, then replaces DistanceMiles with a string array.
-      // Although the data view defines DistanceMiles as numeric, ES|QL returns a
-      // string array for the renamed column, so formatting must follow the ES|QL
-      // result type rather than the data-view field type.
+      // The query preserves the original `ip` field in `ipORIG`, then replaces
+      // `ip` with a string array. Although the data view defines `ip` as an IP
+      // field, ES|QL returns a keyword array for it, so the column type icons
+      // must follow the ES|QL result types rather than the data-view field types.
       const query =
         'FROM logstash* | LIMIT 1 | EVAL ipORIG = ip | EVAL ip = ["a", "b"] | KEEP ip, ipORIG';
       await discover.codeEditor.setCodeEditorValue(query);

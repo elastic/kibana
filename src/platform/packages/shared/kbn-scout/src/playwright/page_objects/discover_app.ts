@@ -654,6 +654,13 @@ export class DiscoverApp {
   }
 
   /**
+   * Polls until the data grid header columns strictly equal the expected columns.
+   */
+  async expectDocHeaderToEqual(columns: readonly string[]) {
+    await expect.poll(() => this.getDocHeader()).toStrictEqual(columns);
+  }
+
+  /**
    * Returns structured row data from the data grid, excluding control columns.
    * Each inner array contains the visible text of each data cell in that row.
    * When `isAnchorRow` is true, only the highlighted anchor row (context view) is returned.
