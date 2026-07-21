@@ -134,12 +134,23 @@ export class SpecDefinitionsService {
       const loadedDefinition: EndpointDefinition = JSON.parse(readFileSync(file, 'utf8'));
       if (overrideFile) {
         const loadedOverride: EndpointDefinition = JSON.parse(readFileSync(overrideFile, 'utf8'));
-        // hand-written body rules are curated as complete definitions: replace
-        // the generated rules wholesale instead of deep-merging, otherwise
-        // shape mismatches (e.g. generated array vs override object) produce
-        // hybrid rules that drop curated keys during JSON serialization
+        // body rules are merged per top-level key: a curated key replaces the
+        // generated key wholesale (deep-merging would produce hybrid rules
+        // that drop curated keys on shape mismatches, e.g. generated array vs
+        // override object), while generated-only keys are preserved so
+        // curated overrides don't suppress newly generated rules; a curated
+        // top-level __scope_link replaces the rules wholesale since the body
+        // compiler redirects the whole body and ignores sibling keys
         Object.entries(loadedOverride).forEach(([endpointName, endpointDescription]) => {
-          if (endpointDescription.data_autocomplete_rules && loadedDefinition[endpointName]) {
+          const generatedRules = loadedDefinition[endpointName]?.data_autocomplete_rules;
+          const overrideRules = endpointDescription.data_autocomplete_rules;
+          if (overrideRules && generatedRules) {
+            if (!Object.hasOwn(overrideRules, '__scope_link')) {
+              endpointDescription.data_autocomplete_rules = {
+                ...generatedRules,
+                ...overrideRules,
+              };
+            }
             delete loadedDefinition[endpointName].data_autocomplete_rules;
           }
         });

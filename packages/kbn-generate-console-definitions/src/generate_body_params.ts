@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isEqual, pickBy, uniqWith } from 'lodash';
+
 import type { SpecificationTypes } from './types';
 import { findTypeDefinition } from './helpers';
 import { isAvailabilityPublic } from './generate_availability';
@@ -69,7 +71,11 @@ export const generateBodyParams = (
     ),
   };
   if (body.kind === 'properties') {
-    return convertProperties(body.properties, context);
+    // the parent request type can define additional body properties
+    return {
+      ...convertInherited(requestType.inherits, context),
+      ...convertProperties(body.properties, context),
+    };
   }
   if (body.kind === 'value') {
     const converted = convertBodyValueOf(body.value, context);
@@ -158,6 +164,28 @@ const bindGenerics = (
   return bindings;
 };
 
+const convertInherited = (
+  inherits: SpecificationTypes.Inherits | undefined,
+  context: ConversionContext
+): Record<string, unknown> => {
+  if (!inherits) {
+    return {};
+  }
+  const inherited = convertInstanceOf(
+    { kind: 'instance_of', type: inherits.type, generics: inherits.generics },
+    context
+  );
+  if (isObjectValue(inherited)) {
+    return inherited;
+  }
+  // a parent with a shortcut property converts to a OneOf of its object and
+  // shortcut forms; only the object form carries the inheritable properties
+  if (isOneOf(inherited)) {
+    return inherited.__one_of.find(isObjectValue) ?? {};
+  }
+  return {};
+};
+
 const convertInterface = (
   definedType: SpecificationTypes.Interface,
   typeName: SpecificationTypes.TypeName,
@@ -166,16 +194,6 @@ const convertInterface = (
   if (typeName.name === 'QueryContainer' && typeName.namespace === '_types.query_dsl') {
     return { __scope_link: 'GLOBAL.query' };
   }
-  const inherited = definedType.inherits
-    ? convertInstanceOf(
-        {
-          kind: 'instance_of',
-          type: definedType.inherits.type,
-          generics: definedType.inherits.generics,
-        },
-        context
-      )
-    : {};
   const additionalPropertiesBehavior = definedType.behaviors?.find(
     ({ type }) =>
       type.namespace === '_spec_utils' &&
@@ -186,7 +204,7 @@ const convertInterface = (
     ? convertBodyValueOf(additionalPropertiesType, context)
     : UNSUPPORTED;
   const objectValue = {
-    ...(isObjectValue(inherited) ? inherited : {}),
+    ...convertInherited(definedType.inherits, context),
     ...(additionalPropertiesValue === UNSUPPORTED ? {} : { '*': additionalPropertiesValue }),
     ...convertProperties(definedType.properties, context),
   };
@@ -251,27 +269,14 @@ const convertInstanceOf = (
 
 const intersectObjectValues = (values: Array<Record<string, unknown>>): Record<string, unknown> => {
   const [first, ...rest] = values;
-  return Object.fromEntries(
-    Object.entries(first).filter(([key, value]) =>
-      rest.every(
-        (candidate) =>
-          Object.hasOwn(candidate, key) && JSON.stringify(candidate[key]) === JSON.stringify(value)
-      )
-    )
+  // note: Object.hasOwn instead of _.has, since property names can contain
+  // dots (e.g. index settings) which _.has would treat as paths
+  return pickBy(first, (value, key) =>
+    rest.every((candidate) => Object.hasOwn(candidate, key) && isEqual(candidate[key], value))
   );
 };
 
-const uniqueValues = <T extends BodyParamValue>(values: T[]): T[] => {
-  const seen = new Set<string>();
-  return values.filter((value) => {
-    const serialized = JSON.stringify(value);
-    if (seen.has(serialized)) {
-      return false;
-    }
-    seen.add(serialized);
-    return true;
-  });
-};
+const uniqueValues = <T extends BodyParamValue>(values: T[]): T[] => uniqWith(values, isEqual);
 
 const convertUnion = (
   { items }: SpecificationTypes.UnionOf,
@@ -283,13 +288,6 @@ const convertUnion = (
   }
 
   const objectValues = uniqueValues(converted.filter(isObjectValue));
-  if (objectValues.length === 1) {
-    return objectValues[0];
-  }
-  if (objectValues.length > 1) {
-    return intersectObjectValues(objectValues);
-  }
-
   const choices = uniqueValues(
     converted.flatMap((value): BodyParamValue[] => {
       if (isOneOf(value)) {
@@ -300,6 +298,16 @@ const convertUnion = (
         : [];
     })
   );
+  if (objectValues.length === 1) {
+    // keep the primitive/enum choices of the remaining union branches
+    // alongside the single object branch
+    return choices.length > 0
+      ? oneOf(uniqueValues([objectValues[0], ...choices]))
+      : objectValues[0];
+  }
+  if (objectValues.length > 1) {
+    return intersectObjectValues(objectValues);
+  }
   if (choices.length > 0) {
     return oneOf(choices);
   }

@@ -216,7 +216,7 @@ describe('SpecDefinitionsService', () => {
     });
   });
 
-  it('replaces generated data_autocomplete_rules wholesale when the override defines its own', () => {
+  it('merges data_autocomplete_rules per top-level key when the override defines its own', () => {
     mockGlobbySync.mockImplementation((pattern) => {
       if (pattern.includes('generated')) {
         return ['/generated/endpoint1.json'];
@@ -258,11 +258,96 @@ describe('SpecDefinitionsService', () => {
       endpointsAvailability: 'stack',
     });
     const endpoints = specDefinitionsService.asJson().endpoints;
-    // curated rules are authoritative: no deep-merge leftovers from the generated rules
+    // curated keys are authoritative per key (no deep-merge hybrids);
+    // generated-only keys survive so curation doesn't suppress new rules
     expect(endpoints.endpoint1.data_autocomplete_rules).toEqual({
       __template: [{ add: { index: 'test1', alias: 'alias1' } }],
       actions: { __any_of: [{ add: {} }] },
+      generated_only_param: '',
     });
+  });
+
+  it('replaces rules wholesale when the override rules are a top-level __scope_link', () => {
+    mockGlobbySync.mockImplementation((pattern) => {
+      if (pattern.includes('generated')) {
+        return ['/generated/endpoint1.json'];
+      }
+      if (pattern.includes('overrides')) {
+        return ['/overrides/endpoint1.json'];
+      }
+      return [];
+    });
+
+    mockReadFileSync.mockImplementation((path) => {
+      if (path.toString() === '/generated/endpoint1.json') {
+        return JSON.stringify(
+          getMockEndpoint({
+            endpointName: 'endpoint1',
+            data_autocomplete_rules: { generated_only_param: '' },
+          })
+        );
+      }
+      if (path.toString() === '/overrides/endpoint1.json') {
+        return JSON.stringify(
+          getMockEndpoint({
+            endpointName: 'endpoint1',
+            data_autocomplete_rules: { __scope_link: 'other.endpoint' },
+          })
+        );
+      }
+      return '';
+    });
+    const specDefinitionsService = new SpecDefinitionsService();
+    specDefinitionsService.start({
+      endpointsAvailability: 'stack',
+    });
+    const endpoints = specDefinitionsService.asJson().endpoints;
+    // the body compiler redirects the whole body for a top-level __scope_link
+    // and ignores sibling keys, so merged generated keys would be dead rules
+    expect(endpoints.endpoint1.data_autocomplete_rules).toEqual({
+      __scope_link: 'other.endpoint',
+    });
+  });
+
+  it('keeps generated rules when the override only adds metadata', () => {
+    mockGlobbySync.mockImplementation((pattern) => {
+      if (pattern.includes('generated')) {
+        return ['/generated/endpoint1.json'];
+      }
+      if (pattern.includes('overrides')) {
+        return ['/overrides/endpoint1.json'];
+      }
+      return [];
+    });
+
+    mockReadFileSync.mockImplementation((path) => {
+      if (path.toString() === '/generated/endpoint1.json') {
+        return JSON.stringify(
+          getMockEndpoint({
+            endpointName: 'endpoint1',
+            data_autocomplete_rules: { generated_param: { __one_of: [true, false] } },
+          })
+        );
+      }
+      if (path.toString() === '/overrides/endpoint1.json') {
+        return JSON.stringify({
+          endpoint1: { priority: 10, documentation: 'https://example.com' },
+        });
+      }
+      return '';
+    });
+    const specDefinitionsService = new SpecDefinitionsService();
+    specDefinitionsService.start({
+      endpointsAvailability: 'stack',
+    });
+    const endpoints = specDefinitionsService.asJson().endpoints;
+    expect(endpoints.endpoint1).toEqual(
+      expect.objectContaining({
+        priority: 10,
+        documentation: 'https://example.com',
+        data_autocomplete_rules: { generated_param: { __one_of: [true, false] } },
+      })
+    );
   });
 
   it('loads manual definitions if any', () => {

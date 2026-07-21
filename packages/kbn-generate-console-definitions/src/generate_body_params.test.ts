@@ -415,6 +415,65 @@ describe('generateBodyParams', () => {
     });
   });
 
+  it('WHEN the request type inherits SHOULD add parent body properties with child precedence', () => {
+    const parentInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'ParentRequestBase', namespace: '_types' },
+      properties: [
+        getMockProperty({ propertyName: 'inherited_prop' }),
+        getMockProperty({
+          propertyName: 'mode',
+          type: { kind: 'instance_of', type: { name: 'boolean', namespace: '_builtins' } },
+        }),
+      ],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [parentInterface] };
+    const requestType: SpecificationTypes.Request = {
+      ...makeRequestWithBody([getMockProperty({ propertyName: 'mode' })]),
+      inherits: { type: parentInterface.name },
+    };
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      inherited_prop: '',
+      mode: '',
+    });
+  });
+
+  it('WHEN the parent interface has a shortcut property SHOULD still inherit its properties', () => {
+    const parentInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'ShortcutParent', namespace: '_types' },
+      properties: [
+        getMockProperty({ propertyName: 'source' }),
+        getMockProperty({ propertyName: 'lang' }),
+      ],
+      shortcutProperty: 'source',
+      specLocation: '',
+    };
+    const childInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'Child', namespace: '_types' },
+      inherits: { type: parentInterface.name },
+      properties: [getMockProperty({ propertyName: 'extra' })],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = {
+      ...mockSchema,
+      types: [parentInterface, childInterface],
+    };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'child',
+        type: { kind: 'instance_of', type: childInterface.name },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      child: { source: '', lang: '', extra: '' },
+    });
+  });
+
   it('returns __scope_link to GLOBAL.query for QueryContainer', () => {
     const queryContainer: SpecificationTypes.Interface = {
       kind: 'interface',
@@ -521,6 +580,34 @@ describe('generateBodyParams', () => {
     });
   });
 
+  it('WHEN a union has a boolean and an interface without a shortcut SHOULD keep both forms', () => {
+    const docValuesConfig: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'DocValuesConfig', namespace: '_types.mapping' },
+      properties: [getMockProperty({ propertyName: 'format' })],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [docValuesConfig] };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'doc_values',
+        type: {
+          kind: 'union_of',
+          items: [
+            { kind: 'instance_of', type: { name: 'boolean', namespace: '_builtins' } },
+            { kind: 'instance_of', type: docValuesConfig.name },
+          ],
+        },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      doc_values: {
+        __one_of: [{ format: '' }, true, false],
+      },
+    });
+  });
+
   it('generates __one_of for union of enums', () => {
     const enumA: SpecificationTypes.Enum = {
       kind: 'enum',
@@ -590,6 +677,99 @@ describe('generateBodyParams', () => {
 
     expect(generateBodyParams(requestType, schema)).toEqual({
       variant: { common: '' },
+    });
+  });
+
+  it('WHEN intersecting object branches SHOULD compare dotted keys and reordered objects structurally', () => {
+    // dotted property names (e.g. index settings) must not be treated as
+    // lodash paths, and nested objects must compare key-order-insensitively
+    const firstInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'FirstSettings', namespace: '_types' },
+      properties: [
+        getMockProperty({ propertyName: 'index.number_of_replicas' }),
+        getMockProperty({
+          propertyName: 'nested',
+          type: { kind: 'instance_of', type: { name: 'Nested', namespace: '_types' } },
+        }),
+      ],
+      specLocation: '',
+    };
+    const secondInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'SecondSettings', namespace: '_types' },
+      properties: [
+        getMockProperty({ propertyName: 'index.number_of_replicas' }),
+        getMockProperty({
+          propertyName: 'nested',
+          type: { kind: 'instance_of', type: { name: 'Nested', namespace: '_types' } },
+        }),
+      ],
+      specLocation: '',
+    };
+    const nestedInterface: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'Nested', namespace: '_types' },
+      properties: [
+        getMockProperty({ propertyName: 'alpha' }),
+        getMockProperty({ propertyName: 'beta' }),
+      ],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = {
+      ...mockSchema,
+      types: [firstInterface, secondInterface, nestedInterface],
+    };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'settings',
+        type: {
+          kind: 'union_of',
+          items: [
+            { kind: 'instance_of', type: firstInterface.name },
+            { kind: 'instance_of', type: secondInterface.name },
+          ],
+        },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      settings: {
+        'index.number_of_replicas': '',
+        nested: { alpha: '', beta: '' },
+      },
+    });
+  });
+
+  it('WHEN union branches convert to equal choices SHOULD deduplicate them', () => {
+    const enumA: SpecificationTypes.Enum = {
+      kind: 'enum',
+      name: { name: 'EnumA', namespace: '_types' },
+      members: [{ name: 'shared' }, { name: 'a_only' }],
+      specLocation: '',
+    };
+    const enumB: SpecificationTypes.Enum = {
+      kind: 'enum',
+      name: { name: 'EnumB', namespace: '_types' },
+      members: [{ name: 'shared' }, { name: 'b_only' }],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [enumA, enumB] };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'combined',
+        type: {
+          kind: 'union_of',
+          items: [
+            { kind: 'instance_of', type: enumA.name },
+            { kind: 'instance_of', type: enumB.name },
+          ],
+        },
+      }),
+    ]);
+
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      combined: { __one_of: ['shared', 'a_only', 'b_only'] },
     });
   });
 

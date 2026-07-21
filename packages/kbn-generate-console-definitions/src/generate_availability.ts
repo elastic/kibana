@@ -40,6 +40,9 @@ import { SpecificationTypes } from './types';
 
 const DEFAULT_ENDPOINT_AVAILABILITY = true;
 
+// if the availability object is present, check the visibility property:
+// if visibility is missing, it's public by default -> available;
+// if visibility is set, anything other than public means not available
 export const isAvailabilityPublic = (
   availability: SpecificationTypes.Availability | undefined
 ): boolean =>
