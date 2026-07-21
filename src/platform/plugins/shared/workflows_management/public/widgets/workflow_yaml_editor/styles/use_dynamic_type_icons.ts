@@ -307,6 +307,15 @@ export function useDynamicTypeIcons(
   ]);
 }
 
+// Step type prefixes whose icons are monochrome glyphs (EUI icons rendered to SVG
+// with black default fill). Prefix matching avoids enumerating every member of
+// large extension families (data.*, ai.*, cases.*, security.*).
+const MONOCHROME_PREFIXES = ['data.', 'ai.', 'cases.', 'security.', 'search.'];
+
+const isMonochromeActionType = (actionTypeId: string): boolean =>
+  MonochromeIcons.has(actionTypeId) ||
+  MONOCHROME_PREFIXES.some((prefix) => actionTypeId.startsWith(prefix));
+
 /**
  * Inject dynamic CSS for connector icons in Monaco autocompletion.
  * Uses targetDoc (editor's document) so styles apply when the editor is in an iframe.
@@ -360,7 +369,7 @@ async function injectDynamicConnectorIcons(
       }
 
       let cssProperties = '';
-      if (MonochromeIcons.has(connector.actionTypeId)) {
+      if (isMonochromeActionType(connector.actionTypeId)) {
         cssProperties = `
         mask-image: url("${iconBase64}");
         mask-size: contain;
@@ -451,7 +460,9 @@ async function injectDynamicShadowIcons(
       ? `
   [class^="trigger-type-glyph"]::before {
     ${glyphBaseRule}
-    background-image: url("${boltUrl}") !important;
+    mask-image: url("${boltUrl}");
+    mask-size: contain;
+    background-color: currentColor;
   }
   `
       : '';
@@ -462,7 +473,9 @@ async function injectDynamicShadowIcons(
   [class^="trigger-inline-icon-"]::before {
     content: '' !important; display: inline-block !important; width: 12px !important; height: 12px !important;
     margin-left: 4px !important; vertical-align: middle !important; background-size: contain !important; background-repeat: no-repeat !important;
-    background-image: url("${boltUrl}") !important;
+    mask-image: url("${boltUrl}");
+    mask-size: contain;
+    background-color: currentColor;
   }
   `
       : '';
@@ -480,7 +493,9 @@ async function injectDynamicShadowIcons(
   ${inlineScope}.type-inline-highlight.${CUSTOM_TRIGGER_INLINE_CLASS}::after,
   span.type-inline-highlight.${CUSTOM_TRIGGER_INLINE_CLASS}::after {
     ${baseRule}
-    background-image: url("${boltUrl}") !important;
+    mask-image: url("${boltUrl}");
+    mask-size: contain;
+    background-color: currentColor;
   }
   `;
   }
@@ -491,7 +506,9 @@ async function injectDynamicShadowIcons(
     cssToInject += `
   ${inlineScope}.type-inline-highlight.type-${triggerId}${notCustom}::after {
     ${baseRule}
-    background-image: url("${iconUrl}") !important;
+    mask-image: url("${iconUrl}");
+    mask-size: contain;
+    background-color: currentColor;
   }
   `;
   }
@@ -543,7 +560,7 @@ async function injectDynamicShadowIcons(
       }
 
       let bgProp: string;
-      if (MonochromeIcons.has(connector.actionTypeId)) {
+      if (isMonochromeActionType(connector.actionTypeId)) {
         bgProp = `
         mask-image: url("${iconBase64}");
         mask-size: contain;
@@ -558,7 +575,7 @@ async function injectDynamicShadowIcons(
           ? iconBase64
           : boltUrl || FALLBACK_BOLT_DATA_URL;
         const triggerBgProp =
-          MonochromeIcons.has(connector.actionTypeId) && isValidDataUrl(iconBase64)
+          isMonochromeActionType(connector.actionTypeId) && isValidDataUrl(iconBase64)
             ? bgProp
             : `background-image: url("${triggerIconUrl}") !important;`;
         cssToInject += `

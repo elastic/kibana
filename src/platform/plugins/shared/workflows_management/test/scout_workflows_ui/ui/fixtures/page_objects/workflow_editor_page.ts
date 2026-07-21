@@ -284,6 +284,23 @@ export class WorkflowEditorPage {
     );
   }
 
+  async getStepTypeIconStyles(stepType: string): Promise<{
+    backgroundImage: string;
+    maskImage: string;
+  }> {
+    const typeClass = stepType.replaceAll('.', '-');
+    const typeDecoration = this.yamlEditor.locator(`.type-inline-highlight.type-${typeClass}`);
+    await typeDecoration.waitFor({ state: 'visible' });
+
+    return typeDecoration.evaluate((element) => {
+      const iconStyles = getComputedStyle(element, '::after');
+      return {
+        backgroundImage: iconStyles.backgroundImage,
+        maskImage: iconStyles.maskImage,
+      };
+    });
+  }
+
   /**
    * Save the workflow
    */

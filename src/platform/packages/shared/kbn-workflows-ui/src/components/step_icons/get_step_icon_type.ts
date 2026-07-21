@@ -98,6 +98,9 @@ export const getStepIconType = (nodeType: string): IconType => {
     case 'while-iteration':
       iconType = 'tokenNumber';
       break;
+    case 'merge':
+      iconType = HardcodedIcons.merge;
+      break;
     case 'parallel':
     case 'enter-parallel':
     case 'exit-parallel':
