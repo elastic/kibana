@@ -15,7 +15,6 @@ type OASOperationObject = Exclude<
   string
 >;
 
-/** Shared with {@link GetRuleExecutionsRoute.routeOptions.summary}. */
 export const GET_RULE_EXECUTIONS_SUMMARY = 'List rule executions';
 
 const RULE_EXECUTIONS_RESPONSE: GetRuleExecutionsResponse = {
