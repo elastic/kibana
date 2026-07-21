@@ -16,11 +16,11 @@ const INDEX_AI_INDEX_ID = 'scout_test_index_ai_index';
 const INDEX_AI_INDEX_PATH = `api/context_engine/ai_index/${INDEX_AI_INDEX_ID}`;
 const LAZY_AI_INDEX_ID = `${AI_INDEX_ID}_lazy`;
 const LAZY_AI_INDEX_PATH = `api/context_engine/ai_index/${LAZY_AI_INDEX_ID}`;
-const DEST_DATA_STREAM = '.ai-index-ds-scout-test';
-const DEST_INDEX = '.ai-index-idx-scout-test';
+const DEST_DATA_STREAM = 'ai-index-ds-scout-test';
+const DEST_INDEX = 'ai-index-idx-scout-test';
 // Must not match the data stream template pattern (`${DEST_DATA_STREAM}*`),
 // or ES refuses to create it as a plain index.
-const PLAIN_INDEX = '.ai-index-ds-plain-scout-test';
+const PLAIN_INDEX = 'ai-index-ds-plain-scout-test';
 const DEST_INDEX_TEMPLATE = 'scout-test-context-engine-template';
 const CONTEXT_ENGINE_ENABLED_SETTING = 'contextEngine:enabled';
 
@@ -167,7 +167,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
         responseType: 'json',
         body: {
           ...aiIndexBody,
-          dest: { type: 'data_stream', value: '.ai-index-ds-does-not-exist*' },
+          dest: { type: 'data_stream', value: 'ai-index-ds-does-not-exist*' },
         },
       });
 
