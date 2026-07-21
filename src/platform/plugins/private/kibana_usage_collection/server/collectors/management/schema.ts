@@ -188,7 +188,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'securitySolution:enableAttackDiscoveryWorkflows': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: { description: 'Enables Attack Discovery Workflows for this space.' },
   },
   'securitySolution:enableRuleChangesHistory': {
     type: 'boolean',
