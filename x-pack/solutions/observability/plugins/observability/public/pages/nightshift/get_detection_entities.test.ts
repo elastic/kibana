@@ -5,12 +5,22 @@
  * 2.0.
  */
 
-import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
+import type { Feature, LifecycleDetection, SignificantEvent } from '@kbn/significant-events-schema';
 import {
   enrichEntityFeature,
   getDetectionEntities,
   resolveEntityFeature,
 } from './get_detection_entities';
+
+const mockDetection = (overrides: Partial<LifecycleDetection> = {}): LifecycleDetection => ({
+  detection_id: 'det-1',
+  rule_name: 'latency-p95-spike',
+  rule_uuid: 'rule-1',
+  stream_name: 'logs.web-frontend',
+  change_point_type: 'spike',
+  '@timestamp': '2026-07-10T12:00:00Z',
+  ...overrides,
+});
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',
@@ -52,13 +62,7 @@ describe('getDetectionEntities', () => {
           },
         ],
       }),
-      {
-        detection_id: 'det-1',
-        rule_uuid: 'rule-1',
-        stream_name: 'logs.web-frontend',
-        change_point_type: 'spike',
-        '@timestamp': '2026-07-10T12:00:00Z',
-      },
+      mockDetection(),
       [feature]
     );
 
@@ -72,34 +76,17 @@ describe('getDetectionEntities', () => {
 
   it('falls back to entity-type stream features when causal features are absent', () => {
     const feature = mockFeature();
-    const entities = getDetectionEntities(
-      mockEvent(),
-      {
-        detection_id: 'det-1',
-        rule_uuid: 'rule-1',
-        stream_name: 'logs.web-frontend',
-        change_point_type: 'spike',
-        '@timestamp': '2026-07-10T12:00:00Z',
-      },
-      [feature, mockFeature({ uuid: 'other', type: 'schema', title: 'schema feature' })]
-    );
+    const entities = getDetectionEntities(mockEvent(), mockDetection(), [
+      feature,
+      mockFeature({ uuid: 'other', type: 'schema', title: 'schema feature' }),
+    ]);
 
     expect(entities).toHaveLength(1);
     expect(entities[0].feature).toEqual(feature);
   });
 
   it('falls back to the detection stream name when no features are available', () => {
-    const entities = getDetectionEntities(
-      mockEvent(),
-      {
-        detection_id: 'det-1',
-        rule_uuid: 'rule-1',
-        stream_name: 'logs.web-frontend',
-        change_point_type: 'spike',
-        '@timestamp': '2026-07-10T12:00:00Z',
-      },
-      []
-    );
+    const entities = getDetectionEntities(mockEvent(), mockDetection(), []);
 
     expect(entities).toEqual([
       {
@@ -115,16 +102,7 @@ describe('getDetectionEntities', () => {
     const features = Array.from({ length: 5 }, (_, index) =>
       mockFeature({ uuid: `feature-${index}`, id: `entity-${index}`, title: `entity-${index}` })
     );
-    const entities = getDetectionEntities(
-      mockEvent(),
-      {
-        detection_id: 'det-1',
-        stream_name: 'logs.web-frontend',
-        change_point_type: 'spike',
-        '@timestamp': '2026-07-10T12:00:00Z',
-      },
-      features
-    );
+    const entities = getDetectionEntities(mockEvent(), mockDetection(), features);
 
     expect(entities).toHaveLength(3);
   });
@@ -177,6 +155,7 @@ describe('enrichEntityFeature', () => {
       metadata: {
         detection_id: 'det-9',
         rule_uuid: 'rule-9',
+        rule_name: 'consumer-lag-growth',
         change_point_type: 'trend_change',
         p_value: 0.01,
       },
