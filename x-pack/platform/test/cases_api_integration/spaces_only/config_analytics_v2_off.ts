@@ -25,11 +25,11 @@ export default createTestConfig('spaces_only', {
   disabledPlugins: ['security'],
   license: 'trial',
   ssl: false,
-  testFiles: [require.resolve('./tests/trial/analytics_v2_off')],
+  testFiles: [require.resolve('./tests/trial/analytics_v2_off_suite')],
   kbnServerArgs: [
-    // Explicit `false` (overrides the plugin default of `true`) — the entire
+    // Explicit `false`, pinned regardless of the plugin default — the entire
     // point of this config is the flag-off regression guard, so the flag must
-    // be visible here.
+    // be visible here and independent of whatever the default happens to be.
     '--xpack.cases.analyticsV2.enabled=false',
   ],
 });
