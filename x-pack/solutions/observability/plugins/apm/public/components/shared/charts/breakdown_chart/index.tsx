@@ -26,6 +26,7 @@ import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
+import { unit } from '@kbn/apm-common';
 import { getVizColorForIndex } from '../../../../../common/viz_colors';
 import type { Annotation } from '../../../../../common/annotations';
 import {
@@ -36,7 +37,6 @@ import {
 import type { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { useChartPointerEventContext } from '../../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { unit } from '../../../../utils/style';
 import { ChartContainer } from '../chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../helper/helper';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';

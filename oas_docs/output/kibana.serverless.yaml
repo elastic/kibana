@@ -79,7 +79,7 @@ tags:
     x-displayName: Connectors
   - name: Dashboards
     description: |
-      > **Technical preview** — The Dashboards API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+      > This documentation is temporarily hosted at a separate location.
       >
       > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
     externalDocs:
@@ -160,6 +160,7 @@ tags:
       description: Maintenance window documentation
       url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/maintenance-windows
     x-displayName: Maintenance windows
+  - name: Markdowns
   - name: Message Signing Service
     description: |
       Enables you to rotate message signing key pairs for secure Fleet communication.
@@ -331,7 +332,7 @@ tags:
     x-displayName: Task manager
   - name: Visualizations
     description: |
-      > **Technical preview** — The Visualizations API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+      > This documentation is temporarily hosted at a separate location.
       >
       > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
     externalDocs:
@@ -11310,7 +11311,7 @@ paths:
       summary: Get dashboards
       operationId: get-dashboards-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -11322,7 +11323,7 @@ paths:
       summary: Create a dashboard
       operationId: create-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -11335,7 +11336,7 @@ paths:
       summary: Get a dashboard
       operationId: get-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -11347,7 +11348,7 @@ paths:
       summary: Update a dashboard
       operationId: update-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -11359,7 +11360,7 @@ paths:
       summary: Delete a dashboard
       operationId: delete-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -42237,6 +42238,26 @@ paths:
               type: string
             maxItems: 100
             type: array
+        - description: A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are included. If the same name is shared by multiple tags, items matching any of those tags are included.
+          in: query
+          name: tag_names
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+            x-state: Generally available; added in 9.6.0
+        - description: A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are excluded. If the same name is shared by multiple tags, items matching any of those tags are excluded.
+          in: query
+          name: excluded_tag_names
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+            x-state: Generally available; added in 9.6.0
       responses:
         '200':
           content:
@@ -45970,6 +45991,757 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/markdowns:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/markdowns</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of markdown library items. Each result includes title, description, and metadata, but not the content. Use `GET /api/markdowns/{id}` to retrieve the complete state.
+      operationId: get-markdowns
+      parameters:
+        - description: The page of results to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of results to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
+        - description: Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                searchMarkdownsResponse:
+                  description: Paginated list of markdown library item summaries. Each item includes the ID, a subset of state fields (`title` and `description`), and metadata. The full `content` is not included; use `GET /api/markdowns/{id}` to retrieve a specific item.
+                  summary: Search markdown library items response
+                  value:
+                    data:
+                      - data:
+                          description: Intro and context for the web logs dashboard.
+                          title: Web logs overview
+                        id: 5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+                        meta:
+                          created_at: '2026-04-13T10:00:00.000Z'
+                          managed: false
+                          updated_at: '2026-04-13T10:00:00.000Z'
+                          version: WzU5LDFd
+                    meta:
+                      page: 1
+                      per_page: 20
+                      total: 1
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    description: List of markdown library items matching the query.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        data:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: A short description of the markdown library item.
+                              type: string
+                            title:
+                              description: The markdown library item title.
+                              type: string
+                          required:
+                            - title
+                        id:
+                          description: The markdown library item ID.
+                          type: string
+                        meta:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                      required:
+                        - id
+                        - data
+                        - meta
+                    maxItems: 1000
+                    minItems: 0
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      page:
+                        default: 1
+                        description: The returned page of results.
+                        minimum: 1
+                        type: number
+                      per_page:
+                        default: 20
+                        description: The number of results returned per page.
+                        maximum: 1000
+                        minimum: 1
+                        type: number
+                      total:
+                        description: The total number of results matching the query.
+                        type: number
+                    required:
+                      - total
+                required:
+                  - data
+                  - meta
+          description: success
+        '403':
+          description: forbidden
+      summary: List markdown library items
+      tags:
+        - Markdowns
+      x-codeSamples:
+        - label: Search markdown library items - cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/markdowns?query=welcome&per_page=10" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Search markdown library items - Console
+          lang: Console
+          source: |
+            GET kbn:/api/markdowns?query=welcome&per_page=10
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/markdowns</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a new markdown library item and returns its ID, full state, and metadata.
+      operationId: post-markdowns
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createMarkdown:
+                summary: Create a markdown library item
+                value:
+                  content: |
+                    ## Web logs overview
+
+                    A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).
+
+                    **Key metrics in this dashboard:**
+
+                    - Total request count by HTTP method
+                    - Average response size over time
+                    - Geographic distribution of client IPs
+
+                    > Use the time picker above to narrow the dashboard to an incident window.
+
+                    For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).
+                  description: Intro and context for the web logs dashboard.
+                  settings:
+                    open_links_in_new_tab: true
+                  title: Web logs overview
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                content:
+                  description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
+                  type: string
+                description:
+                  description: A short description of the markdown library item.
+                  type: string
+                settings:
+                  additionalProperties: false
+                  description: Display settings for the markdown panel.
+                  type: object
+                  properties:
+                    open_links_in_new_tab:
+                      default: true
+                      description: Open links in a new browser tab.
+                      type: boolean
+                title:
+                  description: The markdown library item title.
+                  minLength: 1
+                  type: string
+              required:
+                - content
+                - settings
+                - title
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                createMarkdownResponse:
+                  description: Response to creating a markdown library item. Returns the generated ID, the full item state in `data`, and metadata.
+                  summary: Create markdown library item response
+                  value:
+                    data:
+                      content: |
+                        ## Web logs overview
+
+                        A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).
+
+                        **Key metrics in this dashboard:**
+
+                        - Total request count by HTTP method
+                        - Average response size over time
+                        - Geographic distribution of client IPs
+
+                        > Use the time picker above to narrow the dashboard to an incident window.
+
+                        For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).
+                      description: Intro and context for the web logs dashboard.
+                      settings:
+                        open_links_in_new_tab: true
+                      title: Web logs overview
+                    id: 5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:00:00.000Z'
+                      version: WzU5LDFd
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      content:
+                        description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
+                        type: string
+                      description:
+                        description: A short description of the markdown library item.
+                        type: string
+                      settings:
+                        additionalProperties: false
+                        description: Display settings for the markdown panel.
+                        type: object
+                        properties:
+                          open_links_in_new_tab:
+                            default: true
+                            description: Open links in a new browser tab.
+                            type: boolean
+                      title:
+                        description: The markdown library item title.
+                        minLength: 1
+                        type: string
+                    required:
+                      - content
+                      - settings
+                      - title
+                  id:
+                    description: The unique ID of the markdown library item, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+      summary: Create a markdown library item
+      tags:
+        - Markdowns
+      x-codeSamples:
+        - label: Create a markdown library item - cURL
+          lang: cURL
+          source: |
+            curl -X POST "${KIBANA_URL}/api/markdowns" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+              "title": "Web logs overview",
+              "description": "Intro and context for the web logs dashboard.",
+              "content": "## Web logs overview\n\nA quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).\n\n**Key metrics in this dashboard:**\n\n- Total request count by HTTP method\n- Average response size over time\n- Geographic distribution of client IPs\n\n> Use the time picker above to narrow the dashboard to an incident window.\n\nFor field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).\n",
+              "settings": {
+                "open_links_in_new_tab": true
+              }
+            }'
+        - label: Create a markdown library item - Console
+          lang: Console
+          source: |
+            POST kbn:/api/markdowns
+            {
+              "title": "Web logs overview",
+              "description": "Intro and context for the web logs dashboard.",
+              "content": "## Web logs overview\n\nA quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).\n\n**Key metrics in this dashboard:**\n\n- Total request count by HTTP method\n- Average response size over time\n- Geographic distribution of client IPs\n\n> Use the time picker above to narrow the dashboard to an incident window.\n\nFor field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).\n",
+              "settings": {
+                "open_links_in_new_tab": true
+              }
+            }
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/markdowns/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/markdowns/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Permanently deletes a markdown library item by ID.
+      operationId: delete-markdowns-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The markdown library item ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content, the markdown library item was successfully deleted.
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Delete a markdown library item
+      tags:
+        - Markdowns
+      x-codeSamples:
+        - label: Delete a markdown library item - cURL
+          lang: cURL
+          source: |
+            curl -X DELETE "${KIBANA_URL}/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - label: Delete a markdown library item - Console
+          lang: Console
+          source: |
+            DELETE kbn:/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/markdowns/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the complete state of a markdown library item by ID.
+      operationId: get-markdowns-id
+      parameters:
+        - description: The markdown library item ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getMarkdownResponse:
+                  description: The full markdown library item state including `content`, `settings`, and metadata.
+                  summary: Get markdown library item response
+                  value:
+                    data:
+                      content: |
+                        ## Web logs overview
+
+                        A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).
+
+                        **Key metrics in this dashboard:**
+
+                        - Total request count by HTTP method
+                        - Average response size over time
+                        - Geographic distribution of client IPs
+
+                        > Use the time picker above to narrow the dashboard to an incident window.
+
+                        For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).
+                      description: Intro and context for the web logs dashboard.
+                      settings:
+                        open_links_in_new_tab: true
+                      title: Web logs overview
+                    id: 5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:00:00.000Z'
+                      version: WzU5LDFd
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      content:
+                        description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
+                        type: string
+                      description:
+                        description: A short description of the markdown library item.
+                        type: string
+                      settings:
+                        additionalProperties: false
+                        description: Display settings for the markdown panel.
+                        type: object
+                        properties:
+                          open_links_in_new_tab:
+                            default: true
+                            description: Open links in a new browser tab.
+                            type: boolean
+                      title:
+                        description: The markdown library item title.
+                        minLength: 1
+                        type: string
+                    required:
+                      - content
+                      - settings
+                      - title
+                  id:
+                    description: The unique ID of the markdown library item, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: success
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Get a markdown library item by ID
+      tags:
+        - Markdowns
+      x-codeSamples:
+        - label: Get a markdown library item - cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Get a markdown library item - Console
+          lang: Console
+          source: |
+            GET kbn:/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/markdowns/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replaces the full state of a markdown library item. Partial updates are not supported.
+        To make incremental changes, retrieve the item first, modify the fields you need, then send the complete object back.
+
+        If no item exists with the specified ID, a new one is created.
+      operationId: put-markdowns-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique ID of the markdown library item to be created or updated.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              upsertMarkdown:
+                summary: Upsert a markdown library item
+                value:
+                  content: |
+                    ## Web logs overview
+
+                    A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).
+
+                    **Key metrics in this dashboard:**
+
+                    - Total request count by HTTP method
+                    - Average response size over time
+                    - Geographic distribution of client IPs
+                    - _New:_ error rate broken down by status code
+
+                    > Use the time picker above to narrow the dashboard to an incident window.
+
+                    For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).
+                  description: Intro and context for the web logs dashboard.
+                  settings:
+                    open_links_in_new_tab: true
+                  title: Web logs overview
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                content:
+                  description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
+                  type: string
+                description:
+                  description: A short description of the markdown library item.
+                  type: string
+                settings:
+                  additionalProperties: false
+                  description: Display settings for the markdown panel.
+                  type: object
+                  properties:
+                    open_links_in_new_tab:
+                      default: true
+                      description: Open links in a new browser tab.
+                      type: boolean
+                title:
+                  description: The markdown library item title.
+                  minLength: 1
+                  type: string
+              required:
+                - content
+                - settings
+                - title
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updatedMarkdownResponse:
+                  description: The complete updated markdown library item state after a full replacement. PUT replaces the entire item, so any fields omitted from the request are reset to their defaults.
+                  summary: Update markdown library item response
+                  value:
+                    data:
+                      content: |
+                        ## Web logs overview
+
+                        A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).
+
+                        **Key metrics in this dashboard:**
+
+                        - Total request count by HTTP method
+                        - Average response size over time
+                        - Geographic distribution of client IPs
+                        - _New:_ error rate broken down by status code
+
+                        > Use the time picker above to narrow the dashboard to an incident window.
+
+                        For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).
+                      description: Intro and context for the web logs dashboard.
+                      settings:
+                        open_links_in_new_tab: true
+                      title: Web logs overview
+                    id: 5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T11:00:00.000Z'
+                      version: WzYwLDFd
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      content:
+                        description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
+                        type: string
+                      description:
+                        description: A short description of the markdown library item.
+                        type: string
+                      settings:
+                        additionalProperties: false
+                        description: Display settings for the markdown panel.
+                        type: object
+                        properties:
+                          open_links_in_new_tab:
+                            default: true
+                            description: Open links in a new browser tab.
+                            type: boolean
+                      title:
+                        description: The markdown library item title.
+                        minLength: 1
+                        type: string
+                    required:
+                      - content
+                      - settings
+                      - title
+                  id:
+                    description: The unique ID of the markdown library item, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: updated
+        '201':
+          content:
+            application/json:
+              examples:
+                createdMarkdownResponse:
+                  description: Returned when the upsert created a new item because no item existed with the specified ID.
+                  summary: Create markdown library item response (via upsert)
+                  value:
+                    data:
+                      content: |
+                        ## Web logs overview
+
+                        A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).
+
+                        **Key metrics in this dashboard:**
+
+                        - Total request count by HTTP method
+                        - Average response size over time
+                        - Geographic distribution of client IPs
+
+                        > Use the time picker above to narrow the dashboard to an incident window.
+
+                        For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).
+                      description: Intro and context for the web logs dashboard.
+                      settings:
+                        open_links_in_new_tab: true
+                      title: Web logs overview
+                    id: web-logs-overview
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:00:00.000Z'
+                      version: WzU5LDFd
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      content:
+                        description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
+                        type: string
+                      description:
+                        description: A short description of the markdown library item.
+                        type: string
+                      settings:
+                        additionalProperties: false
+                        description: Display settings for the markdown panel.
+                        type: object
+                        properties:
+                          open_links_in_new_tab:
+                            default: true
+                            description: Open links in a new browser tab.
+                            type: boolean
+                      title:
+                        description: The markdown library item title.
+                        minLength: 1
+                        type: string
+                    required:
+                      - content
+                      - settings
+                      - title
+                  id:
+                    description: The unique ID of the markdown library item, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+      summary: Upsert a markdown library item
+      tags:
+        - Markdowns
+      x-codeSamples:
+        - label: Upsert a markdown library item - cURL
+          lang: cURL
+          source: |
+            curl -X PUT "${KIBANA_URL}/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+              "title": "Web logs overview",
+              "description": "Intro and context for the web logs dashboard.",
+              "content": "## Web logs overview\n\nA quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).\n\n**Key metrics in this dashboard:**\n\n- Total request count by HTTP method\n- Average response size over time\n- Geographic distribution of client IPs\n- _New:_ error rate broken down by status code\n\n> Use the time picker above to narrow the dashboard to an incident window.\n\nFor field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).\n",
+              "settings": {
+                "open_links_in_new_tab": true
+              }
+            }'
+        - label: Upsert a markdown library item - Console
+          lang: Console
+          source: |
+            PUT kbn:/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
+            {
+              "title": "Web logs overview",
+              "description": "Intro and context for the web logs dashboard.",
+              "content": "## Web logs overview\n\nA quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).\n\n**Key metrics in this dashboard:**\n\n- Total request count by HTTP method\n- Average response size over time\n- Geographic distribution of client IPs\n- _New:_ error rate broken down by status code\n\n> Use the time picker above to narrow the dashboard to an incident window.\n\nFor field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).\n",
+              "settings": {
+                "open_links_in_new_tab": true
+              }
+            }
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/ml/saved_objects/sync:
     get:
       description: |
@@ -48405,15 +49177,6 @@ paths:
               - propagated
               - resolution
             type: string
-        - description: Maximum number of history entries to return per request.
-          in: query
-          name: page_size
-          required: false
-          schema:
-            default: 100
-            maximum: 1000
-            minimum: 1
-            type: integer
         - description: When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.
           in: query
           name: include_contributions
@@ -48501,8 +49264,10 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - type
@@ -48512,8 +49277,10 @@ paths:
                         type: object
                         properties:
                           id:
+                            maxLength: 512
                             type: string
                           type:
+                            maxLength: 256
                             type: string
                         required:
                           - type
@@ -48531,8 +49298,10 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - type
@@ -48541,11 +49310,14 @@ paths:
                   type: array
                 search:
                   description: Search for documents to export using the Elasticsearch Simple Query String syntax.
+                  maxLength: 10000
                   type: string
                 type:
                   anyOf:
-                    - type: string
+                    - maxLength: 256
+                      type: string
                     - items:
+                        maxLength: 256
                         type: string
                       maxItems: 100
                       type: array
@@ -48827,8 +49599,10 @@ paths:
                       createNewCopy:
                         type: boolean
                       destinationId:
+                        maxLength: 512
                         type: string
                       id:
+                        maxLength: 512
                         type: string
                       ignoreMissingReferences:
                         type: boolean
@@ -48842,10 +49616,13 @@ paths:
                           type: object
                           properties:
                             from:
+                              maxLength: 512
                               type: string
                             to:
+                              maxLength: 512
                               type: string
                             type:
+                              maxLength: 256
                               type: string
                           required:
                             - type
@@ -48854,6 +49631,7 @@ paths:
                         maxItems: 100
                         type: array
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - type
@@ -63884,7 +64662,7 @@ paths:
       summary: Get visualizations
       operationId: get-visualizations-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -63896,7 +64674,7 @@ paths:
       summary: Create a visualization
       operationId: create-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -63909,7 +64687,7 @@ paths:
       summary: Get a visualization
       operationId: get-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -63921,7 +64699,7 @@ paths:
       summary: Update a visualization
       operationId: update-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -63933,7 +64711,7 @@ paths:
       summary: Delete a visualization
       operationId: delete-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -67304,6 +68082,105 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /s/{spaceId}/api/observability/slos/_bulk_snapshot:
+    post:
+      description: |
+        Compute the summary of multiple SLO instances at a given point in time. The endpoint is synchronous and returns results directly. Each result contains either a summary (on success) or a per-instance error. The list of requests is limited to 100 entries. When `instanceId` is omitted or set to `'*'`, the API returns a result for each matching instance (up to 1000 per SLO). You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: bulkSnapshotOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkSnapshotRequest:
+                summary: Compute snapshots for two SLO instances
+                value:
+                  at: '2025-01-12T10:00:00.000Z'
+                  requests:
+                    - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                      instanceId: '*'
+                    - id: d077e940-1515-11ee-9c50-9d096392f520
+                      instanceId: host.name:web-01
+            schema:
+              $ref: '#/components/schemas/SLOs_bulk_snapshot_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkSnapshotResponse:
+                  summary: Bulk snapshot response with mixed success and per-instance error
+                  value:
+                    at: '2025-01-12T10:00:00.000Z'
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        instanceId: '*'
+                        summary:
+                          errorBudget:
+                            consumed: 0.24
+                            initial: 0.01
+                            remaining: 0.76
+                          good: 9976
+                          sliValue: 0.9976
+                          status: HEALTHY
+                          total: 10000
+                      - error:
+                          message: SLO [d077e940-1515-11ee-9c50-9d096392f520] not found
+                          statusCode: 404
+                        id: d077e940-1515-11ee-9c50-9d096392f520
+                        instanceId: host.name:web-01
+              schema:
+                $ref: '#/components/schemas/SLOs_snapshot_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: '`requests` is limited to 100 entries'
+                    statusCode: 400
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    statusCode: 403
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Forbidden response
+      summary: Compute SLO instance summaries in bulk at a point in time
+      tags:
+        - slo
+      x-state: Generally available; added in 9.6.0
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /s/{spaceId}/api/observability/slos/_delete_instances:
     post:
       description: |
@@ -67795,6 +68672,130 @@ paths:
       summary: Reset an SLO
       tags:
         - slo
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /s/{spaceId}/api/observability/slos/{sloId}/_snapshot:
+    get:
+      description: |
+        Compute the summary of an SLO at a given point in time. When `instanceId` is provided, returns that instance. When `instanceId` is omitted or set to `'*'`, returns all matching instances (up to 1000). The endpoint is synchronous and returns results directly. You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: getSnapshotOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+        - $ref: '#/components/parameters/SLOs_slo_id'
+        - description: The point in time at which to compute the SLO instance summary (ISO 8601 date-time)
+          in: query
+          name: at
+          required: true
+          schema:
+            example: '2025-01-12T10:00:00.000Z'
+            format: date-time
+            type: string
+        - description: |
+            The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value (for example `host.name:web-01`) to return that instance only.
+          in: query
+          name: instanceId
+          required: false
+          schema:
+            example: '*'
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSnapshotResponse:
+                  summary: Snapshot result for a healthy SLO instance
+                  value:
+                    at: '2025-01-12T10:00:00.000Z'
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        instanceId: '*'
+                        summary:
+                          errorBudget:
+                            consumed: 0.24
+                            initial: 0.01
+                            remaining: 0.76
+                          good: 9976
+                          sliValue: 0.9976
+                          status: HEALTHY
+                          total: 10000
+                getSnapshotResponseViolated:
+                  summary: Snapshot result for a violated SLO instance
+                  value:
+                    at: '2025-01-12T10:00:00.000Z'
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        instanceId: host.name:web-01
+                        summary:
+                          errorBudget:
+                            consumed: 5
+                            initial: 0.01
+                            remaining: -4
+                          good: 9500
+                          sliValue: 0.95
+                          status: VIOLATED
+                          total: 10000
+              schema:
+                $ref: '#/components/schemas/SLOs_snapshot_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: "Invalid value 'foo' supplied to: at"
+                    statusCode: 400
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    statusCode: 403
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Forbidden response
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found
+                    statusCode: 404
+              schema:
+                $ref: '#/components/schemas/SLOs_404_response'
+          description: Not found response
+      summary: Compute an SLO instance summary at a point in time
+      tags:
+        - slo
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -71579,6 +72580,8 @@ components:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
               nullable: true
+            agent_features_include_tags_in_events_enabled:
+              nullable: true
             agent_internal:
               nullable: true
             agent_limits_go_max_procs:
@@ -73554,8 +74557,9 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePercentage'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValue'
-      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges.
+      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and for named palettes.
       title: Color By Value
     Kibana_HTTP_APIs_colorByValueAbsolute:
       additionalProperties: false
@@ -73600,6 +74604,31 @@ components:
         - range
         - steps
       title: Color By Value (Absolute)
+      type: object
+    Kibana_HTTP_APIs_colorByValuePalette:
+      additionalProperties: false
+      description: Color by value using a palette, with colors distributed across the range of values.
+      properties:
+        palette:
+          description: The name of the palette to apply across the value range.
+          enum:
+            - status
+            - temperature
+            - complementary
+            - negative
+            - positive
+            - cool
+            - warm
+            - gray
+          type: string
+        type:
+          enum:
+            - distributed_palette
+          type: string
+      required:
+        - type
+        - palette
+      title: Color By Value (Palette)
       type: object
     Kibana_HTTP_APIs_colorByValuePercentage:
       additionalProperties: false
@@ -85177,6 +86206,7 @@ components:
               description: Panel configuration stored inline
               properties:
                 content:
+                  description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
                   type: string
                 description:
                   description: A short description of the panel.
@@ -85189,10 +86219,12 @@ components:
                   type: boolean
                 settings:
                   additionalProperties: false
+                  description: Display settings for the markdown panel.
                   type: object
                   properties:
                     open_links_in_new_tab:
                       default: true
+                      description: Open links in a new browser tab.
                       type: boolean
                 title:
                   description: The panel title.
@@ -86504,6 +87536,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -86586,6 +87619,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -86667,6 +87701,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -86960,6 +87995,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -87043,6 +88079,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -87126,6 +88163,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -87209,6 +88247,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -87292,6 +88331,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -94290,6 +95330,8 @@ components:
             agent_download_timeout:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
+              nullable: true
+            agent_features_include_tags_in_events_enabled:
               nullable: true
             agent_internal:
               nullable: true
@@ -105377,6 +106419,8 @@ components:
             agent_download_timeout:
               nullable: true
             agent_features_disable_policy_change_acks_enabled:
+              nullable: true
+            agent_features_include_tags_in_events_enabled:
               nullable: true
             agent_internal:
               nullable: true
@@ -124542,9 +125586,14 @@ components:
           items:
             $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreHistoryEntry'
           type: array
+        interval:
+          description: The effective Elasticsearch `date_histogram` interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.
+          maxLength: 10
+          type: string
       required:
         - entity_id
         - entity_type
+        - interval
         - entries
     Security_Entity_Analytics_API_RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
@@ -129889,6 +130938,38 @@ components:
           type: string
       title: Bulk Purge Rollup data response
       type: object
+    SLOs_bulk_snapshot_request:
+      description: |
+        The bulk snapshot SLO request takes a point in time and a list of SLO instances to compute summaries for. The list is limited to 100 entries.
+      properties:
+        at:
+          description: The point in time at which to compute the SLO instance summaries
+          example: '2025-01-12T10:00:00.000Z'
+          format: date-time
+          type: string
+        requests:
+          description: The list of SLO instances to compute. Limited to 100 entries.
+          items:
+            type: object
+            properties:
+              id:
+                description: The SLO definition id
+                example: 8853df00-ae2e-11ed-90af-09bb6422b258
+                type: string
+              instanceId:
+                description: |
+                  The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value to return that instance only.
+                example: '*'
+                type: string
+            required:
+              - id
+          maxItems: 100
+          type: array
+      required:
+        - at
+        - requests
+      title: Bulk snapshot SLO request
+      type: object
     SLOs_create_slo_request:
       description: |
         The create SLO API request body varies depending on the type of indicator, time window and budgeting method.
@@ -129903,7 +130984,7 @@ components:
         groupBy:
           $ref: '#/components/schemas/SLOs_group_by'
         id:
-          description: A optional and unique identifier for the SLO. Must be between 8 and 36 chars
+          description: A optional and unique identifier for the SLO. Must be between 8 and 48 chars
           example: my-super-slo-id
           type: string
         indicator:
@@ -130883,6 +131964,110 @@ components:
         - createdAt
         - updatedAt
         - version
+    SLOs_snapshot_response:
+      description: |
+        The snapshot SLO response returns the point in time and the per-instance results. Each result contains either a summary (success) or an error (per-instance failure).
+      properties:
+        at:
+          description: The point in time at which the summaries were computed
+          example: '2025-01-12T10:00:00.000Z'
+          format: date-time
+          type: string
+        results:
+          description: The per-instance computation results
+          items:
+            $ref: '#/components/schemas/SLOs_snapshot_result'
+          type: array
+      required:
+        - at
+        - results
+      title: Snapshot SLO response
+      type: object
+    SLOs_snapshot_result:
+      description: |
+        The result of computing an SLO instance summary at a point in time. Contains either a summary (on success) or an error (on failure).
+      properties:
+        error:
+          description: Error information when the computation failed for this SLO instance. Present when the computation failed.
+          type: object
+          properties:
+            message:
+              description: The error message
+              example: SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found
+              type: string
+            statusCode:
+              description: The HTTP status code of the error
+              example: 404
+              type: number
+          required:
+            - statusCode
+            - message
+        id:
+          description: The SLO definition id
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+          type: string
+        instanceId:
+          description: The SLO instance id. '*' represents the default (ungrouped) instance.
+          example: '*'
+          type: string
+        summary:
+          description: The SLO instance summary at the requested point in time. Present when the computation succeeded.
+          type: object
+          properties:
+            errorBudget:
+              type: object
+              properties:
+                consumed:
+                  description: The error budget consumed, or null when no data is available
+                  example: 0.24
+                  nullable: true
+                  type: number
+                initial:
+                  description: The initial error budget, derived from the SLO objective
+                  example: 0.01
+                  type: number
+                remaining:
+                  description: The error budget remaining, or null when no data is available
+                  example: 0.76
+                  nullable: true
+                  type: number
+              required:
+                - initial
+                - consumed
+                - remaining
+            good:
+              description: The number of good events
+              example: 9976
+              type: number
+            sliValue:
+              description: The SLI value at the requested point in time, or null when no data is available
+              example: 0.9976
+              nullable: true
+              type: number
+            status:
+              description: The SLO health status
+              enum:
+                - NO_DATA
+                - HEALTHY
+                - DEGRADING
+                - VIOLATED
+              example: HEALTHY
+              type: string
+            total:
+              description: The total number of events
+              example: 10000
+              type: number
+          required:
+            - status
+            - sliValue
+            - errorBudget
+            - good
+            - total
+      required:
+        - id
+        - instanceId
+      title: Snapshot result
+      type: object
     SLOs_summary:
       description: The SLO computed data
       properties:

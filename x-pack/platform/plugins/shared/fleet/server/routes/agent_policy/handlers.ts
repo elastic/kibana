@@ -7,24 +7,17 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
-import {
-  escapeKuery,
-  escapeQuotes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-} from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { isEmpty, uniq } from 'lodash';
 
 import yaml from 'yaml';
 
+import { ALL_SPACES_ID, FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
 import {
-  ALL_SPACES_ID,
-  AGENT_POLICY_VERSION_SEPARATOR,
-  FIPS_AGENT_KUERY,
-  inputsFormat,
-} from '../../../common/constants';
-import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
+  removeVersionSuffixFromPolicyId,
+  buildPolicyIdOrVariantsKuery,
+} from '../../../common/services/version_specific_policies_utils';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import {
@@ -88,12 +81,6 @@ import { getLatestAgentAvailableDockerImageVersion } from '../../services/agents
 
 const deduplicateIds = (ids: string[]) => uniq(ids);
 
-function getPolicyOrVersionSpecificKuery(policyId: string): string {
-  return `(policy_id:"${escapeQuotes(policyId)}" or policy_id:${escapeKuery(
-    policyId
-  )}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
-}
-
 interface AssignedAgentsCountAggregation {
   buckets: Record<
     string,
@@ -121,7 +108,7 @@ export async function populateAssignedAgentsCount(
   const policyKueryById = new Map(
     agentPolicies.map((agentPolicy) => [
       agentPolicy.id,
-      getPolicyOrVersionSpecificKuery(agentPolicy.id),
+      buildPolicyIdOrVariantsKuery(agentPolicy.id),
     ])
   );
 

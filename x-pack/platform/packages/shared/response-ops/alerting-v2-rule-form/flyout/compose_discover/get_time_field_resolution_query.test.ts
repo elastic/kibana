@@ -30,6 +30,12 @@ describe('getTimeFieldResolutionQuery', () => {
     );
   });
 
+  it('returns the breach query for standalone alert rules when committed', () => {
+    expect(getTimeFieldResolutionQuery(standaloneQuery, true, true)).toBe(
+      standaloneQuery.breach.query
+    );
+  });
+
   it('returns empty when the query is not committed', () => {
     expect(getTimeFieldResolutionQuery(composedQuery, true, false)).toBe('');
   });

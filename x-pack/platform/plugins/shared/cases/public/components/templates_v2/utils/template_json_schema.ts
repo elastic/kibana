@@ -8,6 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
 import { REQUIRED_TEMPLATE_ROOT_KEYS } from '../constants';
+import { FIELD_TYPE_TITLES } from './field_type_titles';
+import { ASSIGNEE_DEFAULT_SNIPPETS, FIELD_DEFAULT_SNIPPETS } from './template_field_snippets';
 import * as i18n from '../translations';
 
 /**
@@ -25,13 +27,76 @@ interface OverrideCtx {
 }
 
 function applySchemaOverrides(ctx: OverrideCtx) {
+  removeNullFromEditorSchema(ctx);
   removeAdditionalPropertiesFromAllOfItems(ctx);
   addBranchPropertyEnumHints(ctx);
   addDiscriminatorEnumHints(ctx);
   addUniqueItemsToOptionsArrays(ctx);
   addTitlesToOneOfBranches(ctx);
+  disallowUnknownMetadataKeys(ctx);
   convertFieldUnionToIfThenChain(ctx);
   addRequiredRootKeys(ctx);
+}
+
+/**
+ * Every control's `metadata` Zod schema uses `.catchall(z.unknown())`, so an author can type a
+ * misspelled option key (e.g. `defualt`, `option`) and it is accepted silently, then ignored — a
+ * documented gotcha that forces authors back to the reference docs. In JSON Schema the catchall
+ * projects to `additionalProperties: true`, so monaco-yaml never flags the typo. Here we flip the
+ * editor's `metadata` objects to `additionalProperties: false` so Monaco surfaces "property X is
+ * not allowed" on an unknown key, turning a silent no-op into an actionable hint. This is
+ * editor-only: runtime Zod validation (defined solely by the schema) stays lenient, so a stored
+ * definition carrying an unknown key is never rejected on save.
+ */
+function disallowUnknownMetadataKeys(ctx: OverrideCtx) {
+  if (ctx.path[ctx.path.length - 1] !== 'metadata') {
+    return;
+  }
+  const schema = ctx.jsonSchema as Record<string, unknown>;
+  if (schema.type === 'object' && schema.properties != null) {
+    schema.additionalProperties = false;
+  }
+}
+
+/**
+ * The runtime schema keeps the case defaults nullable for back-compat (migrated / legacy-stored
+ * definitions may carry `null`), which `z.toJSONSchema` faithfully reproduces as a `null` branch,
+ * `type: [..., 'null']`, or a `null` enum member. In the editor that surfaces `null` as an
+ * autocomplete suggestion (e.g. for `severity`), which we never want an author to pick. Strip the
+ * `null` option from the generated schema so Monaco offers only real values — without loosening
+ * runtime validation, which is defined solely by the Zod schema.
+ */
+function removeNullFromEditorSchema(ctx: OverrideCtx) {
+  const schema = ctx.jsonSchema as Record<string, unknown>;
+  const isNullBranch = (branch: unknown): boolean =>
+    branch != null &&
+    typeof branch === 'object' &&
+    (branch as Record<string, unknown>).type === 'null';
+
+  for (const unionKey of ['anyOf', 'oneOf'] as const) {
+    const branches = schema[unionKey];
+    if (Array.isArray(branches)) {
+      const nonNullBranches = branches.filter((branch) => !isNullBranch(branch));
+      if (nonNullBranches.length !== branches.length) {
+        if (nonNullBranches.length === 1) {
+          // Collapse a `<value> | null` union down to just the value schema.
+          delete schema[unionKey];
+          Object.assign(schema, nonNullBranches[0]);
+        } else {
+          schema[unionKey] = nonNullBranches;
+        }
+      }
+    }
+  }
+
+  if (Array.isArray(schema.type)) {
+    const nonNullTypes = (schema.type as string[]).filter((type) => type !== 'null');
+    schema.type = nonNullTypes.length === 1 ? nonNullTypes[0] : nonNullTypes;
+  }
+
+  if (Array.isArray(schema.enum)) {
+    schema.enum = (schema.enum as unknown[]).filter((value) => value !== null);
+  }
 }
 
 /**
@@ -67,7 +132,7 @@ function addRequiredRootKeys(ctx: OverrideCtx) {
  */
 export function getTemplateDefinitionJsonSchema(): z.core.JSONSchema.JSONSchema | null {
   try {
-    return z.toJSONSchema(
+    const schema = z.toJSONSchema(
       ParsedTemplateDefinitionSchema.omit({ settings: true, connector: true }),
       {
         target: 'draft-7',
@@ -76,8 +141,38 @@ export function getTemplateDefinitionJsonSchema(): z.core.JSONSchema.JSONSchema 
         override: applySchemaOverrides,
       }
     );
+    attachDefaultSnippets(schema);
+    return schema;
   } catch (error) {
     return null;
+  }
+}
+
+/**
+ * yaml-language-server offers a schema's `defaultSnippets` as completions when the author starts a
+ * new entry in an array. Attaching them to `fields.items` gives a "pick a field type" menu that
+ * scaffolds a complete, valid field (correct `control`/`type`/`metadata`) so authoring does not
+ * require recalling keys from the reference docs; `assignees.items` gets the `- uid:` shape. We also
+ * surface `$ref` as a completable key on a field entry, since it is a valid alternative to `control`
+ * (a field-library reference) but — being conditionless — is otherwise not advertised by the schema.
+ */
+function attachDefaultSnippets(schema: z.core.JSONSchema.JSONSchema): void {
+  const properties = schema.properties as Record<string, Record<string, unknown>> | undefined;
+  if (properties == null) {
+    return;
+  }
+
+  const fieldsItems = properties.fields?.items as Record<string, unknown> | undefined;
+  if (fieldsItems != null && typeof fieldsItems === 'object') {
+    fieldsItems.defaultSnippets = FIELD_DEFAULT_SNIPPETS;
+    const fieldProps = (fieldsItems.properties ?? {}) as Record<string, unknown>;
+    fieldProps.$ref = { type: 'string', description: i18n.FIELD_SNIPPET_DESC_REF };
+    fieldsItems.properties = fieldProps;
+  }
+
+  const assigneesItems = properties.assignees?.items as Record<string, unknown> | undefined;
+  if (assigneesItems != null && typeof assigneesItems === 'object') {
+    assigneesItems.defaultSnippets = ASSIGNEE_DEFAULT_SNIPPETS;
   }
 }
 
@@ -235,17 +330,6 @@ function addUniqueItemsToOptionsArrays(ctx: OverrideCtx) {
   }
 }
 
-const FIELD_TYPE_TITLES: Record<string, string> = {
-  INPUT_TEXT: i18n.FIELD_TYPE_TITLE_INPUT_TEXT,
-  INPUT_NUMBER: i18n.FIELD_TYPE_TITLE_INPUT_NUMBER,
-  SELECT_BASIC: i18n.FIELD_TYPE_TITLE_SELECT_BASIC,
-  TEXTAREA: i18n.FIELD_TYPE_TITLE_TEXTAREA,
-  DATE_PICKER: i18n.FIELD_TYPE_TITLE_DATE_PICKER,
-  CHECKBOX_GROUP: i18n.FIELD_TYPE_TITLE_CHECKBOX_GROUP,
-  RADIO_GROUP: i18n.FIELD_TYPE_TITLE_RADIO_GROUP,
-  USER_PICKER: i18n.FIELD_TYPE_TITLE_USER_PICKER,
-};
-
 /**
  * Sets a human-readable `title` on each oneOf branch that has a `control`
  * discriminator with a const value. Without titles, monaco-yaml's
@@ -303,6 +387,10 @@ function convertFieldUnionToIfThenChain(ctx: OverrideCtx) {
     return;
   }
 
+  // Only branches carrying a `control` const become if/then entries. The RefField branch (`$ref`,
+  // no `control`) contributes none and the original oneOf/anyOf is dropped below, so a `- $ref: foo`
+  // entry gets no JSON-Schema validation here. This is intentional: `$ref` completion is served by
+  // the dedicated completion provider (use_ref_field_completion), and inline fields still validate.
   const allOf: Array<Record<string, unknown>> = branchesWithControl.map(
     ({ controlValue, branch }) => ({
       if: { properties: { control: { const: controlValue } }, required: ['control'] },

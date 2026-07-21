@@ -1,5 +1,9 @@
 {
-  "sha1": "ff631ce8d67305318c81010c310aa3fde4f8d903",
+  "sha1": "b5a2b609295b9e8f9c766d22965f04c78f0fa73f",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "bcb9cab26454e44-7c276f5e1f3aed9",
@@ -185,7 +189,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
-        "line": 194,
+        "line": 199,
         "column": 7
       }
     },
@@ -199,7 +203,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
-        "line": 216,
+        "line": 221,
         "column": 7
       }
     },
@@ -399,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_grid.spec.ts",
-        "line": 71,
+        "line": 75,
         "column": 7
       }
     },
@@ -425,7 +429,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_grid.spec.ts",
-        "line": 83,
+        "line": 87,
         "column": 7
       }
     },
@@ -451,7 +455,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_grid.spec.ts",
-        "line": 98,
+        "line": 106,
         "column": 7
       }
     },
