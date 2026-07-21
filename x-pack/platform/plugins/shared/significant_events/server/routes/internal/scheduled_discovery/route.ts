@@ -252,8 +252,6 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
 
       if (enabledChanged || (nextEnabled && configChanged)) {
         const spaceId = await getSpaceId(request);
-        if (nextEnabled && server.agentBuilder) {
-          await installDiscoveryAgents({ agentBuilder: server.agentBuilder, spaceId });
         if (nextEnabled) {
           if (!server.agentBuilder) {
             throw new Error(
