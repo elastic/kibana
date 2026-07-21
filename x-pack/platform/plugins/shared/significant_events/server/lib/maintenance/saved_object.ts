@@ -28,6 +28,13 @@ export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE = 'significant-events-
  */
 export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID = 'significant-events-maintenance-state';
 
+/**
+ * Upper bound for arrays persisted on the maintenance SO. Entries scale with
+ * spaces / managed targets; this is well above realistic deployments and
+ * satisfies CodeQL unbounded-array checks on SO create schemas.
+ */
+const MAINTENANCE_STATE_ARRAY_MAX_SIZE = 10000;
+
 const maintenanceFailureSchemaV1 = schema.object({
   target: schema.string(),
   error: schema.string(),
@@ -38,7 +45,9 @@ const maintenanceSummarySchemaV1 = schema.object({
   executionsCancelled: schema.number(),
   workflowsDisabled: schema.number(),
   rulesDisabled: schema.number(),
-  partialFailures: schema.arrayOf(maintenanceFailureSchemaV1),
+  partialFailures: schema.arrayOf(maintenanceFailureSchemaV1, {
+    maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
+  }),
 });
 
 const disabledWorkflowSchemaV1 = schema.object({
@@ -48,15 +57,21 @@ const disabledWorkflowSchemaV1 = schema.object({
 
 const pausedFeatureSettingsSchemaV1 = schema.object({
   continuousOnboardingWasEnabled: schema.boolean(),
-  scheduledDiscoveryEnabledSpaceIds: schema.arrayOf(schema.string()),
+  scheduledDiscoveryEnabledSpaceIds: schema.arrayOf(schema.string(), {
+    maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
+  }),
 });
 
 const maintenanceStateAttributesV1 = schema.object({
   state: schema.string(),
   updatedAt: schema.maybe(schema.string()),
   updatedBy: schema.maybe(schema.string()),
-  disabledWorkflows: schema.arrayOf(disabledWorkflowSchemaV1),
-  disabledRuleIds: schema.arrayOf(schema.string()),
+  disabledWorkflows: schema.arrayOf(disabledWorkflowSchemaV1, {
+    maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
+  }),
+  disabledRuleIds: schema.arrayOf(schema.string(), {
+    maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
+  }),
   lastSummary: schema.maybe(maintenanceSummarySchemaV1),
   pausedSettings: schema.maybe(pausedFeatureSettingsSchemaV1),
 });
