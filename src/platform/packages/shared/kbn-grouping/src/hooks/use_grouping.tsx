@@ -24,7 +24,7 @@ import { Grouping as GroupingComponent } from '../components/grouping';
  */
 export interface UseGrouping<T> {
   getGrouping: (props: DynamicGroupingProps<T>) => React.ReactElement;
-  groupSelector: React.ReactElement<GroupSelectorProps> | null;
+  groupSelector: React.ReactElement<GroupSelectorProps>;
   selectedGroups: string[];
   setSelectedGroups: (selectedGroups: string[]) => void;
 }
@@ -173,12 +173,12 @@ export const useGrouping = <T,>({
         <GroupingComponent
           {...componentProps}
           {...props}
-          groupSelector={groupSelector}
+          groupSelector={settings?.hideGroupSelector ? null : groupSelector}
           groupingId={groupingId}
           tracker={tracker}
         />
       ),
-    [componentProps, groupSelector, groupingId, tracker]
+    [componentProps, groupSelector, groupingId, settings?.hideGroupSelector, tracker]
   );
 
   return useMemo(
