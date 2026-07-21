@@ -118,6 +118,17 @@ describe('parser corpus: textToTimeRange (English)', () => {
         },
       },
       {
+        input: 'this month until now',
+        note: 'week/month/year-to-date named range (rounded start → now)',
+        expected: {
+          start: 'now/M',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          isNaturalLanguage: true,
+          isInvalid: false,
+        },
+      },
+      {
         input: 'last month',
         note: 'named range with month rounding',
         expected: {
@@ -930,6 +941,18 @@ describe('parser corpus: textToTimeRange (de-DE)', () => {
       },
     },
     {
+      input: 'diese woche bis jetzt',
+      options: { locale },
+      note: 'German week-to-date named range — "this week until now"',
+      expected: {
+        start: 'now/w',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
       input: 'letzte 7 Minuten',
       options: { locale },
       note: 'German duration (past) — "last 7 minutes"',
@@ -1080,6 +1103,18 @@ describe('parser corpus: textToTimeRange (fr-FR)', () => {
         start: 'now/d',
         end: 'now/d',
         type: [DATE_TYPE_RELATIVE, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: "cette semaine jusqu'à présent",
+      options: { locale },
+      note: 'French week-to-date named range — "this week until now"',
+      expected: {
+        start: 'now/w',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
         isNaturalLanguage: true,
         isInvalid: false,
       },

@@ -140,6 +140,65 @@ describe('FieldDefinitionsService', () => {
     });
   });
 
+  describe('getGlobalFieldDefinitionsForSearch', () => {
+    it('returns only isGlobal definitions for the given owners', async () => {
+      const globalField = makeFieldDefinitionSO({ isGlobal: true });
+      const nonGlobalField = makeFieldDefinitionSO({ name: 'non_global', isGlobal: false });
+      soClient.find.mockResolvedValue({
+        saved_objects: [globalField, nonGlobalField],
+        total: 2,
+        per_page: 10000,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getGlobalFieldDefinitionsForSearch({
+        owner: ['securitySolution'],
+      });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "securitySolution"`,
+          perPage: 10000,
+        })
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('my_field');
+    });
+
+    it('fetches all owners when owner is omitted', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [makeFieldDefinitionSO({ isGlobal: true })],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      await service.getGlobalFieldDefinitionsForSearch({});
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: undefined,
+          perPage: 10000,
+        })
+      );
+    });
+
+    it('excludes non-global definitions', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [makeFieldDefinitionSO({ isGlobal: false })],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getGlobalFieldDefinitionsForSearch({
+        owner: ['securitySolution'],
+      });
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('getFieldDefinition', () => {
     it('retrieves a single field definition by id', async () => {
       const so = makeFieldDefinitionSO();
