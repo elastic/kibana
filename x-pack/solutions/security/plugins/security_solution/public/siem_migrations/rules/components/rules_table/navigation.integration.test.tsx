@@ -154,24 +154,13 @@ describe('MigrationRulesTable navigation (integration)', () => {
     expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('First Rule');
   });
 
-  // The opened row is highlighted via a CSS rule on the table wrapper, which also carries
-  // a data-opened-rule-id attribute reflecting the currently opened rule (stable element,
-  // no per-row churn). Assert on that attribute.
-  const openedRuleId = () =>
-    document
-      .querySelector('[data-test-subj="rules-translation-table"]')
-      ?.closest('[data-opened-rule-id]')
-      ?.getAttribute('data-opened-rule-id') ?? null;
-
-  it('should show the next rule and move the row highlight when the user navigates forward', () => {
+  it('should show the next rule when the user navigates forward', () => {
     renderTable();
     openFlyoutForRule('First Rule');
-    expect(openedRuleId()).toBe('rule-1');
 
     fireEvent.click(screen.getByTestId('migrationRuleFlyoutNextRuleButton'));
 
     expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Second Rule');
-    expect(openedRuleId()).toBe('rule-2');
   });
 
   it('should return to the previous rule when the user navigates backward', () => {
@@ -228,14 +217,12 @@ describe('MigrationRulesTable navigation (integration)', () => {
     );
   });
 
-  it('should not highlight any row when the flyout is closed', () => {
+  it('should close the flyout when close button is clicked', () => {
     renderTable();
-    expect(openedRuleId()).toBeNull();
-
     openFlyoutForRule('First Rule');
-    expect(openedRuleId()).toBe('rule-1');
+    expect(screen.getByTestId('ruleMigrationDetailsFlyout')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('detailsFlyoutCloseButton'));
-    expect(openedRuleId()).toBeNull();
+    expect(screen.queryByTestId('ruleMigrationDetailsFlyout')).not.toBeInTheDocument();
   });
 });

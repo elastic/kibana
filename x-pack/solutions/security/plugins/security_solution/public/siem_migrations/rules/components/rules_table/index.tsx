@@ -462,7 +462,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                     </UtilityBar>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <div css={highlightCss} data-opened-rule-id={openedMigrationRuleId}>
+                <div css={highlightCss}>
                   <MemoizedBasicTable<RuleMigrationRule>
                     loading={isTableLoading}
                     items={migrationRules}

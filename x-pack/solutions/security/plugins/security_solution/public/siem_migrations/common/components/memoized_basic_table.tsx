@@ -30,7 +30,14 @@ import type { EuiBasicTableProps } from '@elastic/eui';
 const MemoizedBasicTableComponent = <T extends object>(props: EuiBasicTableProps<T>) => (
   <EuiBasicTable<T> {...props} />
 );
+MemoizedBasicTableComponent.displayName = 'MemoizedBasicTable';
 
+/**
+ * Memoized, generic, prop-transparent replacement for `EuiBasicTable`. Accepts the exact
+ * same props (`EuiBasicTableProps<T>`) and can be swapped in wherever `EuiBasicTable` is
+ * used with props. Instance refs are not forwarded (no consumer needs them); add
+ * `forwardRef` if that ever changes.
+ */
 export const MemoizedBasicTable = React.memo(
   MemoizedBasicTableComponent
 ) as typeof MemoizedBasicTableComponent;
