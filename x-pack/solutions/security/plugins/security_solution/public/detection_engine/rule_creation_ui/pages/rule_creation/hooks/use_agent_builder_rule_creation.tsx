@@ -54,6 +54,7 @@ interface ConversationAttachment {
   type: string;
   origin?: string;
   versions?: unknown;
+  data?: Record<string, unknown>;
 }
 
 /** The conversation's rule card the form should track: the bound card when present, else the first rule card. */
@@ -159,8 +160,10 @@ export const useAgentBuilderRuleCreation = ({
         return;
       }
       const cardRuleId = resolveSyncRuleId(ruleAttachment, pageRuleId);
-      const storedOriginalText = (ruleAttachment as { data?: { originalText?: string } }).data
-        ?.originalText;
+      const storedOriginalText =
+        typeof ruleAttachment.data?.originalText === 'string'
+          ? ruleAttachment.data.originalText
+          : undefined;
       if (storedOriginalText) {
         originalTextRef.current = storedOriginalText;
       }

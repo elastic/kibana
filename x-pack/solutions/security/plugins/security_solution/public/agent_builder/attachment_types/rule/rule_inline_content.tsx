@@ -129,6 +129,8 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     return null;
   }
 
+  const hasDiff = originalRule != null && attachment.data?.originalText !== attachment.data?.text;
+
   const { query, index, filters, interval, from } = getRuleDisplayFields(rule);
   const schedule = interval
     ? toSimpleRuleSchedule({ interval, from: from ?? `now-${interval}`, to: 'now' })
@@ -239,7 +241,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
         </>
       )}
 
-      {originalRule && attachment.data?.originalText !== attachment.data?.text && (
+      {hasDiff && (
         <>
           <EuiSpacer size="s" />
           <EuiAccordion
