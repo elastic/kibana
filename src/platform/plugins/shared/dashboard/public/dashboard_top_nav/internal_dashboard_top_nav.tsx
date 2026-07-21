@@ -499,10 +499,14 @@ export function InternalDashboardTopNav({
             isApproximate: esqlApproximation ?? false,
             onChange: dashboardApi.setEsqlApproximation,
             disabled: !hasApproximateLicense || !hasEsqlPanel,
-            additionalText: i18n.translate('dashboard.esqlApproximationToggle.additionalText', {
-              defaultMessage:
-                'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
-            }),
+            additionalText: hasApproximateLicense
+              ? i18n.translate('dashboard.esqlApproximationToggle.additionalText', {
+                  defaultMessage:
+                    'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
+                })
+              : i18n.translate('dashboard.esqlApproximationToggle.invalidLicenseText', {
+                  defaultMessage: 'Upgrade to Enterpise license to enable fast mode.',
+                }),
           }}
         />
       )}
