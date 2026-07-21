@@ -154,10 +154,24 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
               data-test-subj="manageRegionsCallout"
             >
               <p>
-                {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.body', {
-                  defaultMessage:
-                    "Some models are only available in specific regions. Restricting regions might make those models unavailable. Check each model's details to verify its supported regions.",
-                })}
+                <FormattedMessage
+                  id="xpack.searchInferenceEndpoints.manageRegions.callout.body"
+                  defaultMessage="Some models are only available in specific regions. Restricting regions might make those models unavailable. {modelDetailsLink} to verify its supported regions."
+                  values={{
+                    modelDetailsLink: (
+                      <a
+                        href="https://www.elastic.co/docs/explore-analyze/elastic-inference/eis-supported-models"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {i18n.translate(
+                          'xpack.searchInferenceEndpoints.manageRegions.callout.body.modelDetailsLinkText',
+                          { defaultMessage: "Check each model's details" }
+                        )}
+                      </a>
+                    ),
+                  }}
+                />
               </p>
             </EuiCallOut>
           )}
