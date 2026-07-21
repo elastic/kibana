@@ -28,6 +28,7 @@ import {
   getActionPolicyVersionConflictMessage,
   getInvalidActionPolicyDataMessage,
 } from '../../lib/errors/action_policy_error_messages';
+import { jsonExample } from '../json_oas_example';
 
 type OASOperationObject = Exclude<
   Awaited<ReturnType<NonNullable<RouteConfigOptions<RouteMethod>['oasOperationObject']>>>,
@@ -35,19 +36,6 @@ type OASOperationObject = Exclude<
 >;
 
 type RouteErrorStatus = 400 | 404 | 409;
-
-const jsonExample = <T>(name: string, summary: string, value: T) => ({
-  content: {
-    'application/json': {
-      examples: {
-        [name]: {
-          summary,
-          value,
-        },
-      },
-    },
-  },
-});
 
 const CREATE_REQUEST: CreateActionPolicyDataInput = {
   name: 'Notify on host alerts',
