@@ -26,6 +26,26 @@ const WORKER_MAX_OLD_GEN_MB = 128;
 const MAX_CONCURRENT_VALIDATIONS = 2;
 
 let activeValidationCount = 0;
+const pendingValidationSlots: Array<() => void> = [];
+
+const acquireValidationSlot = (): Promise<void> | undefined => {
+  if (activeValidationCount < MAX_CONCURRENT_VALIDATIONS) {
+    activeValidationCount += 1;
+    return;
+  }
+
+  return new Promise<void>((resolve) => pendingValidationSlots.push(resolve));
+};
+
+const releaseValidationSlot = (): void => {
+  const next = pendingValidationSlots.shift();
+  if (next) {
+    next();
+    return;
+  }
+
+  activeValidationCount -= 1;
+};
 
 /**
  * Compile and headless-render a Vega-Lite spec in an isolated worker. Spec
@@ -39,14 +59,12 @@ export const validateVegaSpec = async ({
   spec: Record<string, unknown>;
   logger: Logger;
 }): Promise<VegaValidationResult> => {
-  if (activeValidationCount >= MAX_CONCURRENT_VALIDATIONS) {
-    logger.warn(
-      `Vega validator is at capacity (${MAX_CONCURRENT_VALIDATIONS}); skipping validation`
-    );
-    return { warnings: [] };
+  const pendingSlot = acquireValidationSlot();
+  if (pendingSlot) {
+    logger.debug(`Vega validator is at capacity (${MAX_CONCURRENT_VALIDATIONS}); waiting`);
+    await pendingSlot;
   }
 
-  activeValidationCount += 1;
   let worker: Worker | undefined;
 
   try {
@@ -128,6 +146,6 @@ export const validateVegaSpec = async ({
         );
       }
     }
-    activeValidationCount -= 1;
+    releaseValidationSlot();
   }
 };

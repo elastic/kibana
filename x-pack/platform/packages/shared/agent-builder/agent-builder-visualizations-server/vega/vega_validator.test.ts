@@ -150,18 +150,30 @@ describe('validateVegaSpec', () => {
     expect(lastWorker().terminate).toHaveBeenCalled();
   });
 
-  it('limits concurrent workers and fails open when capacity is exhausted', async () => {
+  it('queues excess validations and runs them when capacity becomes available', async () => {
     const first = validateVegaSpec({ spec: { mark: 'bar' }, logger });
     const second = validateVegaSpec({ spec: { mark: 'line' }, logger });
-
-    await expect(validateVegaSpec({ spec: { mark: 'point' }, logger })).resolves.toEqual({
-      warnings: [],
+    const queued = validateVegaSpec({
+      spec: { transform: [{ calculate: 'undefined', as: 'broken' }], mark: 'point' },
+      logger,
     });
+
     expect(mockWorkerInstances).toHaveLength(2);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('capacity'));
 
     mockWorkerInstances[0].emit('message', { ok: true, warnings: [] });
+    await first;
+
+    expect(mockWorkerInstances).toHaveLength(3);
+    mockWorkerInstances[2].emit('message', {
+      ok: false,
+      error: 'Unrecognized signal name: "undefined"',
+    });
+    await expect(queued).resolves.toEqual({
+      error: 'Unrecognized signal name: "undefined"',
+      warnings: [],
+    });
+
     mockWorkerInstances[1].emit('message', { ok: true, warnings: [] });
-    await Promise.all([first, second]);
+    await second;
   });
 });
