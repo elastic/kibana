@@ -9,7 +9,10 @@ import {
   ALERT_EPISODE_ACTION_TYPE,
   createAckAlertActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
-import { CREATE_ACK_ALERT_ACTION_SUMMARY, createAckAlertActionOasExamples } from './alert_oas_examples';
+import {
+  CREATE_ACK_ALERT_ACTION_SUMMARY,
+  createAckAlertActionOasExamples,
+} from './alert_oas_examples';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateAckAlertActionRoute = createAlertActionRouteForType({
