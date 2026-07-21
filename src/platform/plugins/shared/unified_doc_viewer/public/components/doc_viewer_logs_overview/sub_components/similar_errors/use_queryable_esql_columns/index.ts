@@ -10,7 +10,7 @@
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 export interface UseQueryableEsqlColumnsResult {
   /**
