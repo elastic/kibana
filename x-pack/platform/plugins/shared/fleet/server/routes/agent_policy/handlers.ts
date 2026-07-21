@@ -17,8 +17,6 @@ import { inputsFormat } from '../../../common/constants';
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
-import { redactProxySecretsFromPolicy } from '../../services/agent_policies/full_agent_policy';
-import { listFleetProxies } from '../../services/fleet_proxies';
 import { appContextService, agentPolicyService, licenseService } from '../../services';
 import { UNPRIVILEGED_AGENT_KUERY } from '../../constants';
 import { type AgentClient } from '../../services/agents';
