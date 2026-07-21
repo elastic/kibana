@@ -15,8 +15,6 @@ import { PolledDataChecker } from './polled_data_checker';
 
 export function estimateBucketSpanFactory(client) {
   const { asCurrentUser, asInternalUser } = client;
-  // here!!!
-  // check everywhere where runtimeMappings is used
   class BucketSpanEstimator {
     constructor(
       {

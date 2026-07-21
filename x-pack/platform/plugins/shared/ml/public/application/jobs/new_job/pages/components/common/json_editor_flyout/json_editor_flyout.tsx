@@ -41,6 +41,18 @@ export enum EDITOR_MODE {
   EDITABLE,
 }
 const WARNING_CALLOUT_OFFSET = 100;
+
+function hasInvalidProjectRouting(
+  projectRouting: string | undefined,
+  allowedProjects: string[]
+): boolean {
+  const scope = projectRouting?.replace(/^_alias:/, '');
+  const requestedProjects = scope ? scope.split(',').filter((p) => p.length > 0) : [];
+  return (
+    requestedProjects.length === 0 || !requestedProjects.every((p) => allowedProjects.includes(p))
+  );
+}
+
 interface Props {
   isDisabled: boolean;
   jobEditorMode: EDITOR_MODE;
@@ -67,6 +79,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   const [jobSchema, setJobSchema] = useState<object>();
   const [datafeedSchema, setDatafeedSchema] = useState<object>();
   const [allowedProjects, setAllowedProjects] = useState<string[]>([]);
+  const [allowedProjectsLoaded, setAllowedProjectsLoaded] = useState(false);
 
   useEffect(() => {
     setJobConfigString(jobCreator.formattedJobJson);
@@ -86,19 +99,41 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
 
       setShowChangedIndicesWarning(false);
       setShowProjectRoutingWarning(false);
+      setAllowedProjects([]);
+      setAllowedProjectsLoaded(!cpsManager);
+
       if (cpsManager) {
-        cpsManager.fetchProjects().then((projects) => {
-          if (projects) {
-            const aliases = projects.linkedProjects.map((project) => project._alias);
-            if (projects.origin) {
-              aliases.push(projects.origin._alias);
+        let cancelled = false;
+        cpsManager
+          .fetchProjects()
+          .then((projects) => {
+            if (cancelled) {
+              return;
             }
-            setAllowedProjects([...aliases, '_origin', '*']);
-          }
-        });
+            if (projects) {
+              const aliases = projects.linkedProjects.map((project) => project._alias);
+              if (projects.origin) {
+                aliases.push(projects.origin._alias);
+              }
+              setAllowedProjects([...aliases, '_origin', '*']);
+            } else {
+              // Ensure validation still has the built-in tokens if the fetch returns null.
+              setAllowedProjects(['_origin', '*']);
+            }
+          })
+          .finally(() => {
+            if (!cancelled) {
+              setAllowedProjectsLoaded(true);
+            }
+          });
+        return () => {
+          cancelled = true;
+        };
       }
     } else {
       setTempCombinedJob(null);
+      setAllowedProjects([]);
+      setAllowedProjectsLoaded(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showJsonFlyout]);
@@ -153,17 +188,17 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
         originalIndices.every((value, index) => value === datafeed.indices[index]);
       setShowChangedIndicesWarning(valid === false);
 
-      if (cpsManager) {
-        const scope = datafeed.project_routing?.replace(/^_alias:/, '');
-        const requestedProjects = scope ? scope.split(',').filter((p) => p.length > 0) : [];
-        const hasInvalidProjectRouting =
-          requestedProjects.length === 0 ||
-          !requestedProjects.every((p) => allowedProjects.includes(p));
-
-        setShowProjectRoutingWarning(hasInvalidProjectRouting);
-        if (hasInvalidProjectRouting) {
+      if (cpsManager && allowedProjectsLoaded) {
+        const invalidProjectRouting = hasInvalidProjectRouting(
+          datafeed.project_routing,
+          allowedProjects
+        );
+        setShowProjectRoutingWarning(invalidProjectRouting);
+        if (invalidProjectRouting) {
           valid = false;
         }
+      } else {
+        setShowProjectRoutingWarning(false);
       }
 
       setTempCombinedJob({
@@ -178,6 +213,32 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
 
     setSaveable(valid);
   }
+
+  // Re-validate project routing once allowed projects finish loading, so a
+  // stale invalid warning (or blocked save) from the empty-list race is cleared.
+  useEffect(() => {
+    if (!showJsonFlyout || !cpsManager || !allowedProjectsLoaded) {
+      return;
+    }
+
+    const jsonValue = collapseLiteralStrings(datafeedConfigString);
+    if (!isValidJson(jsonValue)) {
+      return;
+    }
+
+    const datafeed: Datafeed = JSON.parse(jsonValue);
+    const invalidProjectRouting = hasInvalidProjectRouting(
+      datafeed.project_routing,
+      allowedProjects
+    );
+    setShowProjectRoutingWarning(invalidProjectRouting);
+    // Only force save off when routing is invalid. Do not enable save here —
+    // that should only happen via user edits in onDatafeedChange / onJobChange.
+    if (invalidProjectRouting) {
+      setSaveable(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowedProjects, allowedProjectsLoaded, showJsonFlyout]);
 
   async function onSave() {
     const jobConfig = JSON.parse(jobConfigString);
