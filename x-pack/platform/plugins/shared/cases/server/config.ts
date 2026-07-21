@@ -29,7 +29,7 @@ export const ConfigSchema = schema.object({
    * in production. Enabling v2 has no effect on v1 — they coexist independently.
    */
   analyticsV2: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: schema.boolean({ defaultValue: false }),
     /**
      * Reconciliation cadence in minutes. The reconciliation task is the
      * durability backstop for v2's fire-and-forget write hooks: every
