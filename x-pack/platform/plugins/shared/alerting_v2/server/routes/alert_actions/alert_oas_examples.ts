@@ -18,11 +18,18 @@ import type {
   CreateUnsnoozeAlertActionBody,
   ErrorResponse,
 } from '@kbn/alerting-v2-schemas';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  bulkCreateAlertActionBodySchema,
+  createAlertActionParamsSchema,
+} from '@kbn/alerting-v2-schemas';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import { treeifyError } from '@kbn/zod/v4';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
 import {
   getAlertEventNotFoundMessage,
   getCannotActivateEpisodeMessage,
+  getCannotDeactivateEpisodeMessage,
 } from '../../lib/errors/alert_error_messages';
 import { jsonExample, type AlertingV2OasOperationObject } from '../json_oas_example';
 import {
@@ -98,7 +105,33 @@ const BULK_RESPONSE: BulkCreateAlertActionResponse = {
   total: 2,
 };
 
-const INVALID_ALERT_ACTION_ERROR: ErrorResponse = {
+const invalidParamsParse = createAlertActionParamsSchema.safeParse({});
+
+if (invalidParamsParse.success) {
+  throw new Error('expected createAlertActionParamsSchema parse to fail for OAS example');
+}
+
+const INVALID_SCHEMA_OR_PARAMETERS_ERROR: ErrorResponse = {
+  code: 'BAD_REQUEST',
+  error: 'Bad Request',
+  message: stringifyZodError(invalidParamsParse.error),
+  details: { errors: treeifyError(invalidParamsParse.error) },
+};
+
+const invalidBulkBodyParse = bulkCreateAlertActionBodySchema.safeParse([]);
+
+if (invalidBulkBodyParse.success) {
+  throw new Error('expected bulkCreateAlertActionBodySchema parse to fail for OAS example');
+}
+
+const INVALID_BULK_REQUEST_BODY_ERROR: ErrorResponse = {
+  code: 'BAD_REQUEST',
+  error: 'Bad Request',
+  message: stringifyZodError(invalidBulkBodyParse.error),
+  details: { errors: treeifyError(invalidBulkBodyParse.error) },
+};
+
+const INVALID_ACTIVATE_STATE_TRANSITION_ERROR: ErrorResponse = {
   code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
   error: 'Bad Request',
   message: getCannotActivateEpisodeMessage(SAMPLE_EPISODE_ID),
@@ -107,6 +140,18 @@ const INVALID_ALERT_ACTION_ERROR: ErrorResponse = {
     episode_id: SAMPLE_EPISODE_ID,
     episode_status: 'active',
     action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+  },
+};
+
+const INVALID_DEACTIVATE_STATE_TRANSITION_ERROR: ErrorResponse = {
+  code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+  error: 'Bad Request',
+  message: getCannotDeactivateEpisodeMessage(SAMPLE_EPISODE_ID),
+  details: {
+    group_hash: SAMPLE_GROUP_HASH,
+    episode_id: SAMPLE_EPISODE_ID,
+    episode_status: 'inactive',
+    action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
   },
 };
 
@@ -122,15 +167,33 @@ const ALERT_EVENT_NOT_FOUND_ERROR: ErrorResponse = {
 
 const ERROR_EXAMPLES: Record<RouteErrorStatus, ReturnType<typeof jsonExample<ErrorResponse>>> = {
   400: jsonExample(
-    'invalidAlertAction',
+    'invalidAlertActionRequest',
     INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-    INVALID_ALERT_ACTION_ERROR
+    INVALID_SCHEMA_OR_PARAMETERS_ERROR
   ),
   404: jsonExample(
     'alertEventNotFound',
     ALERT_EVENT_NOT_FOUND_DESCRIPTION,
     ALERT_EVENT_NOT_FOUND_ERROR
   ),
+};
+
+const INVALID_ACTIVATE_STATE_TRANSITION_EXAMPLE = {
+  name: 'invalidEpisodeStateTransition',
+  summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  value: INVALID_ACTIVATE_STATE_TRANSITION_ERROR,
+};
+
+const INVALID_DEACTIVATE_STATE_TRANSITION_EXAMPLE = {
+  name: 'invalidEpisodeStateTransition',
+  summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  value: INVALID_DEACTIVATE_STATE_TRANSITION_ERROR,
+};
+
+const INVALID_BULK_REQUEST_BODY_EXAMPLE = {
+  name: 'invalidBulkCreateAlertActionRequest',
+  summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  value: INVALID_BULK_REQUEST_BODY_ERROR,
 };
 
 const buildAlertOas = ({
@@ -229,7 +292,10 @@ export const createActivateAlertActionOasExamples = (): AlertingV2OasOperationOb
       summary: CREATE_ACTIVATE_ALERT_ACTION_SUMMARY,
       value: ACTIVATE_REQUEST,
     },
-    errors: [400, 404],
+    responses: {
+      400: INVALID_ACTIVATE_STATE_TRANSITION_EXAMPLE,
+    },
+    errors: [404],
   });
 
 export const createDeactivateAlertActionOasExamples = (): AlertingV2OasOperationObject =>
@@ -239,7 +305,10 @@ export const createDeactivateAlertActionOasExamples = (): AlertingV2OasOperation
       summary: CREATE_DEACTIVATE_ALERT_ACTION_SUMMARY,
       value: DEACTIVATE_REQUEST,
     },
-    errors: [400, 404],
+    responses: {
+      400: INVALID_DEACTIVATE_STATE_TRANSITION_EXAMPLE,
+    },
+    errors: [404],
   });
 
 export const bulkCreateAlertActionOasExamples = (): AlertingV2OasOperationObject =>
@@ -255,6 +324,6 @@ export const bulkCreateAlertActionOasExamples = (): AlertingV2OasOperationObject
         summary: BULK_CREATE_ALERT_ACTION_SUMMARY,
         value: BULK_RESPONSE,
       },
+      400: INVALID_BULK_REQUEST_BODY_EXAMPLE,
     },
-    errors: [400],
   });
