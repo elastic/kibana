@@ -24,9 +24,10 @@ describe('createOpenDashboardChatAction', () => {
 
   it('uses the agent icon and Create with chat label', () => {
     const action = createOpenDashboardChatAction(openChat);
+    const context = { trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID } };
 
-    expect(action.getIconType?.()).toBe('productAgent');
-    expect(action.getDisplayName?.()).toBe('Create with chat');
+    expect(action.getIconType?.(context)).toBe('productAgent');
+    expect(action.getDisplayName?.(context)).toBe('Create with chat');
   });
 
   it('is compatible', async () => {

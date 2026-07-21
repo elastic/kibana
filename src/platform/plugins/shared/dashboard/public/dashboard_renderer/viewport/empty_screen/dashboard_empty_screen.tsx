@@ -43,14 +43,9 @@ export function DashboardEmptyScreen() {
   const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = viewMode === 'edit';
-
-  const { chatItem, panelItems } = useMemo(() => {
-    const chat = featuredItems.find((item) => item.id === OPEN_DASHBOARD_CHAT_ACTION_ID);
-    return {
-      chatItem: chat,
-      panelItems: featuredItems.filter((item) => item.id !== OPEN_DASHBOARD_CHAT_ACTION_ID),
-    };
-  }, [featuredItems]);
+  const hasChatItem = featuredItems.some(
+    (item) => item.id === OPEN_DASHBOARD_CHAT_ACTION_ID && item.executeWithMessage
+  );
 
   const styles = useMemoCss(emptyScreenStyles);
 
@@ -107,30 +102,27 @@ export function DashboardEmptyScreen() {
 
   const actions = (() => {
     if (showEditPrompt) {
-      const featuredItemPanels = panelItems.map((item) => (
-        <EuiFlexItem key={item.id} grow={Boolean(chatItem)} css={styles.featuredItem}>
-          <FeaturedItemCard item={item} />
-        </EuiFlexItem>
-      ));
-
       return (
-        <EuiFlexGroup direction="column" gutterSize="s" css={styles.actionsWrapper}>
-          {chatItem?.executeWithMessage ? (
-            <>
-              <EuiFlexItem grow={false}>
-                <DashboardEmptyScreenChat onOpenChat={chatItem.executeWithMessage} />
+        <EuiFlexGroup gutterSize="s" wrap css={styles.actionsWrapper}>
+          {featuredItems.map((item) => {
+            const { executeWithMessage } = item;
+            const isChatCard =
+              item.id === OPEN_DASHBOARD_CHAT_ACTION_ID && executeWithMessage != null;
+
+            return (
+              <EuiFlexItem
+                key={item.id}
+                grow={hasChatItem}
+                css={isChatCard ? styles.chatItem : styles.featuredItem}
+              >
+                {isChatCard ? (
+                  <DashboardEmptyScreenChat onOpenChat={executeWithMessage} />
+                ) : (
+                  <FeaturedItemCard item={item} />
+                )}
               </EuiFlexItem>
-              {featuredItemPanels.length > 0 && (
-                <EuiFlexItem>
-                  <EuiFlexGroup gutterSize="s" wrap>
-                    {featuredItemPanels}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
-            </>
-          ) : (
-            featuredItemPanels
-          )}
+            );
+          })}
         </EuiFlexGroup>
       );
     }
@@ -215,6 +207,11 @@ const emptyScreenStyles = {
   actionsWrapper: css({
     width: '100%',
     maxWidth: '100%',
+    minWidth: 0,
+  }),
+  // Force Chat onto its own full-width row above the other featured cards.
+  chatItem: css({
+    flexBasis: '100%',
     minWidth: 0,
   }),
   featuredItem: css({

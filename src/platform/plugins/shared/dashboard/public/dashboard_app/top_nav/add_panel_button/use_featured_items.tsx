@@ -86,20 +86,18 @@ export const useFeaturedItems = ({
             });
 
             if (compatible) {
-              const chatContext = {
-                ...context,
-                trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
-              };
               const [chatMenuItem] = getMenuItems(
                 [chatAction as FeaturedAddPanelAction],
                 dashboardApi,
-                chatContext
+                {
+                  ...context,
+                  trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
+                }
               );
               menuItems.unshift({
                 ...chatMenuItem,
                 executeWithMessage: (initialMessage?: string) => {
-                  dashboardApi.clearOverlays();
-                  void chatAction.execute({
+                  chatAction.execute({
                     ...(initialMessage !== undefined ? { initialMessage } : {}),
                     trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
                   });

@@ -106,7 +106,7 @@ describe('useFeaturedItems', () => {
     );
   });
 
-  it('prepends the open-dashboard-chat action when available', async () => {
+  it('includes the open-dashboard-chat action first by order when available', async () => {
     mockHasAction.mockReturnValue(true);
     mockGetAction.mockResolvedValue(chatAction);
 
