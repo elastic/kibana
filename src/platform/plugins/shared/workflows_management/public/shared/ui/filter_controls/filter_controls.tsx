@@ -75,7 +75,7 @@ export const FilterControls = (props: FilterControlsProps) => {
 
   useEffect(() => {
     let cancelled = false;
-
+    console.log(dataViewSpec);
     if (dataViewSpec?.id) {
       (async () => {
         await dataViews.create(dataViewSpec);
