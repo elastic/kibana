@@ -12,7 +12,7 @@ serverless: deprecated
 The {{bedrock}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{bedrock}}.
 
 ::::{important}
-:applies_to: {"stack": "deprecated 9.5, removed 9.6", "serverless": "removed"}
+:applies_to: {"stack": "deprecated 9.5", "serverless": "deprecated"}
 This connector is deprecated. If it is in use, it continues to work, along with any rule actions that rely on it. 
 
 For new AI integrations, use {{es}} {{infer}} endpoints instead of LLM connectors. Plan migration of existing LLM connectors and any rule actions that reference them before future removal.
