@@ -85,14 +85,9 @@ export interface CreateTest {
   services: InheritedServices & {
     apmFtrConfig: () => ApmFtrConfig;
     registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
-    logSynthtraceEsClient: (
-      context: InheritedFtrProviderContext
-    ) => Promise<LogsSynthtraceEsClient>;
-    synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
-    apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
-    synthtraceKibanaClient: (
-      context: InheritedFtrProviderContext
-    ) => Promise<ApmSynthtraceKibanaClient>;
+    logSynthtraceEsClient: (context: InheritedFtrProviderContext) => LogsSynthtraceEsClient;
+    apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => ApmSynthtraceEsClient;
+    synthtraceKibanaClient: (context: InheritedFtrProviderContext) => ApmSynthtraceKibanaClient;
     apmApiClient: (context: InheritedFtrProviderContext) => ApmApiClient;
     ml: ({ getService }: FtrProviderContext) => ReturnType<typeof MachineLearningAPIProvider>;
   };
@@ -153,7 +148,7 @@ export function createTestConfig(
         apmFtrConfig: () => config,
         registry: RegistryProvider,
         apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
-          return getApmSynthtraceEsClient(context, synthtraceKibanaClient);
+          return getApmSynthtraceEsClient(context);
         },
         logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
           new LogsSynthtraceEsClient({
