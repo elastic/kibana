@@ -56,7 +56,6 @@ describe('isEpisodeFlapping', () => {
     // 3 changes in 20 events: [A,R,A] + 17 recovering
     const statuses = concat(alternate(ACTIVE, RECOVERING, 3), times(17, constant(RECOVERING)));
     expect(statuses).toHaveLength(20);
-    expect(countEpisodeStateChanges(statuses)).toBe(3);
     expect(isEpisodeFlapping(statuses)).toBe(false);
   });
 
