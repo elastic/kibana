@@ -32,7 +32,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const alertsPage = pageObjects.alerts;
   let adminSupertest: SupertestWithRoleScopeType;
 
-  describe('Security Alerts Page - Graph visualization in Serverless', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/278157
+  describe.skip('Security Alerts Page - Graph visualization in Serverless', function () {
     // See details: https://github.com/elastic/kibana/issues/208903
     this.tags(['failsOnMKI', 'cloud_security_posture_graph_viz']);
 
