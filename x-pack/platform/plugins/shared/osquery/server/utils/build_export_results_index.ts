@@ -16,7 +16,7 @@ import { prefixIndexPatternsWithCcs } from './ccs_utils';
  * client routing) and the export route handler (which opens the PIT). Keeping a
  * single source of truth ensures the PIT scope matches the namespace- and
  * CCS-resolved targets the factory would otherwise use — a PIT masks the search
- * body's `index`, so if the two drift the export silently reads the wrong scope.
+ * body's `index`, so keeping them aligned ensures the export reads the same targets.
  */
 export const buildExportResultsIndex = ({
   integrationNamespaces,

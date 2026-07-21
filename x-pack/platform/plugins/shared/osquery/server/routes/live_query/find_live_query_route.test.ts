@@ -280,10 +280,10 @@ describe('findLiveQueryRoute', () => {
     );
   });
 
-  it('passes undefined namespaces (not the space id) when integration namespaces are unavailable', async () => {
-    // The space id is not an integration namespace. When Fleet cannot resolve
-    // namespaces we pass `undefined` so the counts query uses the base pattern;
-    // results stay scoped to the active space via the space_id filter.
+  it('passes undefined namespaces when integration namespaces are unavailable', async () => {
+    // When Fleet cannot resolve integration namespaces we pass `undefined` so the
+    // counts query uses the base pattern; results stay scoped to the active space
+    // via the space_id filter.
     (mockOsqueryContext.service.getActiveSpace as jest.Mock).mockResolvedValue({
       id: 'custom-space',
     });
@@ -330,7 +330,7 @@ describe('findLiveQueryRoute', () => {
     );
   });
 
-  it('uses resolved integration namespaces in a hyphenated space (not the space id)', async () => {
+  it('uses resolved integration namespaces in a hyphenated space', async () => {
     const service = mockOsqueryContext.service as unknown as {
       getActiveSpace: jest.Mock;
       getIntegrationNamespaces?: jest.Mock;

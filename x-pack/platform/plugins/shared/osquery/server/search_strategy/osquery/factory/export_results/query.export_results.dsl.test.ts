@@ -93,11 +93,11 @@ describe('buildExportResultsQuery', () => {
       const dsl = buildExportResultsQuery(baseOptions);
       const queryStr = JSON.stringify(dsl.query);
 
-      // The baseFilter value should appear scoped (not as a top-level OR)
+      // The baseFilter value should appear within the composed query
       expect(queryStr).toContain('test-action');
     });
 
-    it('prevents KQL OR gate-bypass: malicious kuery cannot escape baseFilter scope', () => {
+    it('keeps baseFilter and a user kuery containing OR in separate AND-combined groups', () => {
       const dsl = buildExportResultsQuery({
         ...baseOptions,
         baseFilter: 'action_id: "abc"',
@@ -110,7 +110,7 @@ describe('buildExportResultsQuery', () => {
       // The base filter value must be present
       expect(queryStr).toContain('"abc"');
 
-      // The top-level bool must not have a should clause (would allow OR-escape)
+      // The top-level bool must not have a should clause; each part stays in its own group
       const boolQuery = dsl.query as { bool?: { should?: unknown } } | undefined;
       expect(boolQuery?.bool?.should).toBeUndefined();
     });
