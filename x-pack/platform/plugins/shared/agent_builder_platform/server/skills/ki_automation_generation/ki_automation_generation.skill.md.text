@@ -37,7 +37,10 @@ Apply these when deciding what KIs to generate and what each one should contain.
    wrong answers. For those, provide an access pattern that reads live data.
 
 3. **Access patterns must be grounded and validated.** Build every query from the index's real
-   mapping and sample documents — never invented field names. 
+   mapping and sample documents — never invented field names. Exception: **detection KIs legitimately
+   precompute complete, runnable queries** (not templates) — the detection condition is stable and
+   does not need to be parameterised at ask-time. Ground every threshold and field name in the
+   observed data distributions (see `stats_distribution` grounding step) before writing the query.
 
 4. **The Context Engine is more like a cache than a database.** Avoid generating KIs for the entire corpus
    eagerly. Prefer data views. Best practice is to apply a filter before starting: a time window (e.g. last 90 days), a status
@@ -85,8 +88,9 @@ Choose the strategy (or combination) that fits the data source and question type
 | **Selective / Outlier** | One KI per significant document | Log streams, event feeds where most records are noise but outliers matter. |
 | **Atomic Facts** | Many KIs per document | Very information-dense documents (contracts, research papers) where one KI per document loses precision. |
 | **Cumulative / Wiki-style** | One KI per entity, updated over time | Entities recurring across many documents (customers, products, hosts). |
+| **Detection / Feature (Observability)** | One detection KI per named condition; one feature KI per entity/dependency | Observability indices (logs, APM, metrics) where you need named, runnable detection conditions and structured feature extractions rather than per-document KIs. |
 
-Quick guide: logs/events/metrics → Index Metadata + Selective/Outlier; knowledge base / article corpus → Bottom-Up; dense docs → Atomic Facts; recurring entities → Cumulative/Wiki-style; multiple indices/tables → Metadata for all, then add a deeper strategy for the most important one; unsure → Index/Table Metadata.
+Quick guide: logs/events/metrics → Index Metadata + Selective/Outlier; Observability indices with detection needs → Detection / Feature; knowledge base / article corpus → Bottom-Up; dense docs → Atomic Facts; recurring entities → Cumulative/Wiki-style; multiple indices/tables → Metadata for all, then add a deeper strategy for the most important one; unsure → Index/Table Metadata.
 
 ## Available tools
 
@@ -236,6 +240,19 @@ The AI Index schema has these base fields (all required unless noted):
 | `@timestamp` | date | When this KI was last profiled; enables recency guards on scheduled runs |
 | `confidence` | float (0–1) | Coverage score from `profile_index`; agents prefer higher-confidence KIs when routing |
 
+**Extended fields for Detection / Feature KIs (sig-events schema):** Declare all of the following in `ensure_target_index` — the AI Index templates use `dynamic: strict`, so undeclared fields are rejected at index time.
+
+| Field | Type | Purpose |
+|---|---|---|
+| `query` | keyword | Complete, runnable ES|QL query (detection KIs only — not a template) |
+| `query_type` | keyword | Named detection condition type (e.g. `"error_spike"`, `"latency_p99"`) |
+| `severity_score` | float (0–1) | Detection severity derived from observed distributions |
+| `evidence` | keyword[] | Observed distribution values that justify the threshold |
+| `expires_at` | date | Expiry date (~30 days); used by freshness guard to skip unchanged indices |
+| `run_id` | keyword | Unique identifier for the workflow execution that produced this KI |
+| `excluded` | boolean | Soft-exclude: KI exists but is skipped by agents |
+| `deleted` | boolean | Soft-delete: KI is retained for audit but treated as removed |
+
 **Required fields note**: `@timestamp` and `confidence` must be declared in the target index mapping (`ensure_target_index` step). The AI Index templates use `dynamic: strict`, so undeclared fields are rejected at index time. Write both fields from the `sink_index_ki` step: set `@timestamp` to the current ISO date and `confidence` to the score produced by `profile_index`.
 
 **Rule**: structured facts belong in both `content` and `attributes`, to facilitate exact-match and filter queries, as well as semantic searches.
@@ -296,6 +313,9 @@ Before presenting any workflow to the user:
 - [ ] `triggers: [{type: manual}]`
 - [ ] Corpus filter (Phase 3) is applied
 - [ ] `@timestamp` and `confidence` are declared in the target index mapping (`ensure_target_index`) and written by `sink_index_ki`
+- [ ] Detection KIs carry complete runnable queries (not templates); `esql_example` IS the query
+- [ ] `run_id` and `expires_at` (~30 days) are written to every detection/feature KI
+- [ ] Cross-run title dedup and expiry-based freshness guard are implemented when the workflow runs on a schedule
 
 ## Workflow shapes for each strategy
 
@@ -351,6 +371,30 @@ KI including access_patterns using `execute_connector_sub_action` syntax. `elast
 to upsert. Put domain-specific categorical fields (status, record_type, owner, tags from the source system)
 into `attributes` so they remain filterable after ingestion. Note that any of the above strategies
 can be used with connectors.
+
+**Detection / Feature (Observability):**
+Targets Observability indices (logs, APM, metrics) and generates two KI types from a single profiling run.
+
+*Target index:* Use a user-owned `.ai-index-ds-*` index. Do NOT write to `.significant_events-knowledge_indicators` — it is system-managed.
+
+*Pre-analysis grounding (before `ai.prompt`):*
+1. `sample_error_logs` — `elasticsearch.search` with `function_score` + `random_score`, filtered to error/warning records (e.g. `log.level == "error" OR log.level == "warn"`), size 20. Supports `METADATA _id, _source` and the `: match` full-text operator in the filter.
+2. `stats_distribution` — `elasticsearch.esql.query` aggregating field-level distributions: error types, log levels, host/service counts, span names (e.g. `FROM <index> | STATS count = COUNT() BY error.type, log.level | SORT count DESC | LIMIT 50`). These observed counts ground every threshold the LLM sets.
+
+*AI prompt:* Feed both grounding results to a single `ai.prompt` step that produces:
+- `detections[]` — one entry per named detection condition: `{ name, description, query (complete runnable ES|QL — NOT a template), query_type, severity_score (0–1), evidence[] }`. Every threshold must be directly justified by a value in `stats_distribution`.
+- `features[]` — one entry per observed entity/dependency/technology/schema feature: `{ slug, subtype (entity | dependency | technology | schema), description, confidence (0–1), evidence[] }`.
+
+*Sinking:*
+- `sink_detection_ki` — `elasticsearch.index` with `id = <index>/<name>`, `type = "detection"`, writing `query`, `query_type`, `severity_score`, `evidence`, `run_id`, `expires_at`, `@timestamp`, `confidence`.
+- `sink_feature_ki` — `elasticsearch.index` with `id = <index>/<slug>`, `type = "feature"`, writing `slug`, `subtype`, `evidence`, `run_id`, `expires_at`, `@timestamp`, `confidence`.
+
+*Lifecycle and dedup:*
+- Stamp every KI with `run_id` (unique per workflow execution).
+- Set `expires_at` ~30 days from now.
+- Freshness guard: before running `sample_error_logs`, query the target for the latest `@timestamp` for this source index. Skip the entire profiling run if it is within the freshness window.
+- Cross-run title dedup: before indexing, query the target by `title + source_index`; if a matching KI exists, upsert by its id to avoid duplicates across runs.
+- After a successful run, soft-delete stale KIs from the same source index that carry an older `run_id` by setting `deleted: true`.
 
 ## Adapting the recipe
 
