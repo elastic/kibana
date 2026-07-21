@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ensureApproximationLicense } from '@kbn/esql-utils';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 const POPOVER_WIDTH = 320;
@@ -120,9 +121,7 @@ export const EsqlApproximationToggle = ({
     let cancelled = false;
     licensing.getLicense().then((license) => {
       if (!cancelled) {
-        setInvalidLicense(
-          !Boolean(license && license.isActive && license.hasAtLeast('enterprise'))
-        );
+        setInvalidLicense(!ensureApproximationLicense(license));
       }
     });
 

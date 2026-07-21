@@ -15,6 +15,7 @@ import type { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EsqlAsyncQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import type { WithRequiredProperty } from '@kbn/utility-types';
+import { ensureApproximationLicense } from '@kbn/esql-utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import {
   getCommonDefaultAsyncSubmitParams,
@@ -109,7 +110,13 @@ export const esqlAsyncSearchStrategyProvider = (
     const { dropNullColumns, ...requestParams } = request.params;
 
     const license = await licensing?.getLicense();
-    const validLicense = Boolean(license && license.isActive && license.hasAtLeast('enterprise'));
+    const validLicense = ensureApproximationLicense(license);
+
+    if (!validLicense && options.approximation) {
+      logger.warn(
+        'Dropping approximation:true from ESQL search because approximation its not supported at your license level. Upgrade to Enterpise license to enable fast mode.'
+      );
+    }
 
     const params = {
       ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
