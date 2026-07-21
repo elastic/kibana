@@ -19,6 +19,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
+import { createRuleOasExamples } from './rule_oas_examples';
 
 @injectable()
 export class CreateRuleRoute extends BaseAlertingRoute {
@@ -33,6 +34,7 @@ export class CreateRuleRoute extends BaseAlertingRoute {
     summary: 'Create a rule',
     description:
       'Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/.',
+    oasOperationObject: createRuleOasExamples,
   } as const;
   static schemas = {
     request: {

@@ -17,6 +17,7 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
+import { deleteRuleOasExamples } from './rule_oas_examples';
 
 @injectable()
 export class DeleteRuleRoute extends BaseAlertingRoute {
@@ -29,6 +30,7 @@ export class DeleteRuleRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Delete a rule',
+    oasOperationObject: deleteRuleOasExamples,
   } as const;
   static schemas = {
     request: {

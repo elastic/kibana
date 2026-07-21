@@ -21,6 +21,7 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
+import { updateRuleOasExamples } from './rule_oas_examples';
 
 @injectable()
 export class UpdateRuleRoute extends BaseAlertingRoute {
@@ -33,6 +34,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Update a rule',
+    oasOperationObject: updateRuleOasExamples,
   } as const;
   static schemas = {
     request: {

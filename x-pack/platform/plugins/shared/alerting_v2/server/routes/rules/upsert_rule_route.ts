@@ -21,6 +21,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
 import { RulesClient } from '../../lib/rules_client/rules_client';
+import { upsertRuleOasExamples } from './rule_oas_examples';
 
 @injectable()
 export class UpsertRuleRoute extends BaseAlertingRoute {
@@ -35,6 +36,7 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
     summary: 'Create or replace a rule',
     description:
       'Creates a rule with the given identifier, or fully replaces it if one already exists.',
+    oasOperationObject: upsertRuleOasExamples,
   } as const;
   static schemas = {
     request: {
