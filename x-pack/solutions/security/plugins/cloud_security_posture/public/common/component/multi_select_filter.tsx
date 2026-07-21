@@ -114,6 +114,17 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
 
   return (
     <EuiFilterGroup>
+      {/*
+       * a11y: EuiPopover defaults its panel to role="dialog" + aria-modal="true", causing VoiceOver
+       * to announce "you are in a modal dialog". panelProps={{ role: 'none' }} removes those dialog
+       * semantics; EuiSelectable inside already has role="listbox" for correct AT context.
+       *
+       * "expanded" is included in aria-label so VoiceOver announces the open state when focus enters
+       * the panel. ownFocus moves focus into the panel on open, so external live regions are ignored
+       * by VoiceOver — embedding the state in the panel's own label is the reliable alternative.
+       * "collapsed" is handled automatically by EuiFilterButton's built-in aria-expanded="false"
+       * when focus returns to the button on close.
+       */}
       <EuiPopover
         ownFocus
         aria-label={`${buttonLabel}, ${i18n.translate(
