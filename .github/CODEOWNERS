@@ -1209,6 +1209,7 @@ x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
 x-pack/platform/plugins/shared/content_connectors @elastic/search-kibana
 x-pack/platform/plugins/shared/context_engine @elastic/context-eng
+x-pack/platform/plugins/shared/custom_content @elastic/kibana-visualizations @elastic/kibana-presentation
 x-pack/platform/plugins/shared/data_quality @elastic/kibana-management
 x-pack/platform/plugins/shared/dataset_quality @elastic/kibana-management
 x-pack/platform/plugins/shared/elastic_console @elastic/obs-elastic-brain-team
@@ -1440,10 +1441,11 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 ##  https://help.github.com/articles/about-codeowners/
 ####
 
-# limits.yml changes frequently as bundle sizes shift; no owner means the ops
-# team isn't auto-requested as reviewer on every bump. A GitHub Actions workflow
-# (bundle-size-limits-comment.yml) flags increases ≥15% instead.
+# limits.yml files change frequently as bundle sizes shift; no owner means the
+# ops team isn't auto-requested as reviewer on every bump. A GitHub Actions
+# workflow (bundle-size-limits-comment.yml) flags increases ≥15% instead.
 packages/kbn-optimizer/limits.yml
+packages/kbn-rspack-optimizer/limits.yml
 
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
