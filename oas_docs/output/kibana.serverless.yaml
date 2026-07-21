@@ -65019,6 +65019,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: 'When true, performs a preflight conflict check only. Returns the subset of the supplied workflow IDs that already exist (including soft-deleted tombstones and cross-space documents) without writing anything. The response body is `{ existingIds: string[] }` instead of the normal `{ created, failed }` shape.'
+          in: query
+          name: dryRun
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:
