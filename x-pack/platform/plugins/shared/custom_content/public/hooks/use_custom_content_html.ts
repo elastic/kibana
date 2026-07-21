@@ -46,10 +46,10 @@ export function useCustomContentHtml({
   const [error, setError] = useState<string | undefined>();
   const [isAiUnavailable, setIsAiUnavailable] = useState(false);
 
-  const abortRef = useRef<AbortController | null>(null);
-  const accRef = useRef('');
-  const htmlRef = useRef('');
-  htmlRef.current = html;
+  // Tracks whether the panel already has rendered HTML so the streaming interval
+  // is skipped when re-generating — avoids a flash of partial content over existing output.
+  const renderedHtmlRef = useRef('');
+  renderedHtmlRef.current = html;
 
   // onTemplateChange() writes back into savedTemplate, a dep of this effect. Track what we last
   // wrote so we can skip the echo re-run without also skipping intentional version bumps.
@@ -70,10 +70,8 @@ export function useCustomContentHtml({
       return;
     }
 
-    abortRef.current?.abort();
     const controller = new AbortController();
-    abortRef.current = controller;
-    accRef.current = '';
+    let acc = '';
 
     const template = savedTemplate;
 
@@ -100,9 +98,9 @@ export function useCustomContentHtml({
       }
     };
 
-    if (!htmlRef.current) {
+    if (!renderedHtmlRef.current) {
       intervalRef = setInterval(() => {
-        if (accRef.current) setHtml(prepareHtml(accRef.current));
+        if (acc) setHtml(prepareHtml(acc));
       }, 300);
     }
 
@@ -110,7 +108,7 @@ export function useCustomContentHtml({
       core.http,
       { prompt, colorMode },
       (token) => {
-        accRef.current += token;
+        acc += token;
       },
       controller.signal
     )
@@ -130,7 +128,7 @@ export function useCustomContentHtml({
         if (hasFailed || controller.signal.aborted) return;
         stopInterval();
 
-        const raw = stripMarkdownFences(accRef.current);
+        const raw = stripMarkdownFences(acc);
 
         if (containsScript(raw)) {
           setError(SCRIPT_ERROR_MESSAGE);
