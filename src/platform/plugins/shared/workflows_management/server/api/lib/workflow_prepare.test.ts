@@ -113,16 +113,36 @@ describe('applyFieldUpdates', () => {
     expect(patch.tags).toEqual(['a', 'b']);
   });
 
-  it('allows disabling a workflow', () => {
-    const { patch } = applyFieldUpdates({ enabled: false }, baseSource);
+  it('allows disabling a workflow and syncs definition.enabled', () => {
+    const sourceWithDef = {
+      ...baseSource,
+      definition: { name: 'Original', enabled: true, version: '1' } as WorkflowYaml,
+    };
+    const { patch } = applyFieldUpdates({ enabled: false }, sourceWithDef);
     expect(patch.enabled).toBe(false);
+    expect(patch.definition).toBeDefined();
+    expect(patch.definition?.enabled).toBe(false);
+    // other definition fields must be preserved
+    expect(patch.definition?.name).toBe('Original');
   });
 
-  it('allows enabling a workflow only if it has a definition', () => {
-    const sourceWithDefinition = { ...baseSource, enabled: false, definition: {} as WorkflowYaml };
+  it('allows enabling a workflow only if it has a definition, and syncs definition.enabled', () => {
+    const sourceWithDefinition = {
+      ...baseSource,
+      enabled: false,
+      definition: { name: 'Original', enabled: false, version: '1' } as WorkflowYaml,
+    };
     const { patch, validationErrors } = applyFieldUpdates({ enabled: true }, sourceWithDefinition);
     expect(patch.enabled).toBe(true);
+    expect(patch.definition).toBeDefined();
+    expect(patch.definition?.enabled).toBe(true);
     expect(validationErrors).toEqual([]);
+  });
+
+  it('does not set definition in patch when definition is null', () => {
+    const { patch } = applyFieldUpdates({ enabled: false }, baseSource); // baseSource has definition: null
+    expect(patch.enabled).toBe(false);
+    expect(patch.definition).toBeUndefined();
   });
 
   it('surfaces a validation error and does not rewrite YAML when enabling a workflow without a definition', () => {
