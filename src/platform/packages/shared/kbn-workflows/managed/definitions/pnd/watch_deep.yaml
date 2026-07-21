@@ -1,8 +1,9 @@
 version: "1"
 name: Deep Watch
 description: >
-  Deep Watch skeleton. Specialist, on-demand depth — forensics,
+  Deep Watch. Specialist, on-demand depth — forensics,
   hunts, and draft-only conclusions under human review.
+  Activated by escalation from Dark Watch or an analyst.
 enabled: true
 tags:
   - watch
@@ -18,7 +19,7 @@ steps:
         autonomyLevel: 3
         handoff: records
         onDemand: true
-        draft: false
+        draft: true
         cadence: manual
         from: 8
         to: 18
@@ -38,9 +39,38 @@ steps:
           - name: DNS · netflow
             access: full
             label: Read
-        # Capabilities projected from executable steps — see Watch Floor.
-        callables: []
-  - name: specialist_stub
-    type: console
+        callables:
+          - id: deep-watch-forensics
+            name: Forensic analysis
+            kind: skill
+            summary: On-demand · patient-zero timeline, lateral movement, persistence
+            gated: false
+            enabled: true
+          - id: endpoint-forensic-analysis
+            name: Endpoint forensics
+            kind: skill
+            summary: EDR telemetry · process trees, IoC validation, evidence packaging
+            gated: false
+            enabled: true
+  - name: forensic_investigation
+    type: ai.agent
+    timeout: "15m"
+    create-conversation: true
     with:
-      message: "Deep Watch skeleton — add ai.agent / skill steps (see Floor)"
+      message: >
+        Use the [/deep-watch-forensics](skill://deep-watch-forensics) skill to
+        perform a forensic investigation of the escalated threat context below.
+
+        Correlate endpoint telemetry (process events, network connections, file writes,
+        registry modifications) with threat-intelligence IoCs. Produce:
+        1. Patient-zero identification with first-seen timestamp
+        2. Chronological attack timeline (process tree)
+        3. Lateral movement chain across affected hosts
+        4. Persistence mechanisms enumerated
+        5. IoC validation results (file hashes, C2 IPs, registry keys)
+        6. Draft forensic report with recommended containment actions
+
+        All conclusions are DRAFT — for specialist review only.
+        Do NOT execute response actions. Recommend containment to the analyst.
+
+        Escalation context: {{trigger.context}}
