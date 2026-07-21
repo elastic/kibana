@@ -184,7 +184,8 @@ export const MondayCom: ConnectorSpec = {
           board_id: input.board_id,
           name: input.item_name,
           group_id: input.group_id,
-          column_values: input.column_values != null ? JSON.stringify(input.column_values) : undefined,
+          column_values:
+            input.column_values != null ? JSON.stringify(input.column_values) : undefined,
         });
       },
     },

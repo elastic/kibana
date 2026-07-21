@@ -190,7 +190,11 @@ describe('MondayCom', () => {
     });
 
     it('calls get_board_items_page with cursor and custom limit', async () => {
-      const input = parse('getBoardItemsPage', { board_id: 99887766, cursor: 'abc123', limit: 100 });
+      const input = parse('getBoardItemsPage', {
+        board_id: 99887766,
+        cursor: 'abc123',
+        limit: 100,
+      });
       await MondayCom.actions.getBoardItemsPage.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
