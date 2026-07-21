@@ -117,3 +117,18 @@ export const LIST_CASE_META_LINK_ARIA = (title: string) =>
     values: { title },
     defaultMessage: 'View case details for {title}',
   });
+
+export const SEARCH_HIDDEN_FIELDS_INFO_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.tableFilters.searchHiddenFieldsInfoTitle',
+  {
+    defaultMessage: 'Search may include hidden fields',
+  }
+);
+
+export const SEARCH_HIDDEN_FIELDS_INFO_TEXT = i18n.translate(
+  'xpack.cases.casesRedesign.tableFilters.searchHiddenFieldsInfoText',
+  {
+    defaultMessage:
+      'Results can match values from template and custom fields that are not shown as columns.',
+  }
+);
