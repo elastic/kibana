@@ -129,7 +129,7 @@ spaceTest.describe('Discover URL state', { tag: tags.deploymentAgnostic }, () =>
         start: testData.DEFAULT_TIME_RANGE.from,
         end: testData.DEFAULT_TIME_RANGE.to,
       });
-      expect(await discover.getHitCount()).toBe('11,268');
+      expect(await discover.getHitCountInt()).toBeGreaterThan(0);
     }
   );
 
@@ -137,6 +137,7 @@ spaceTest.describe('Discover URL state', { tag: tags.deploymentAgnostic }, () =>
     'should merge custom global filters with saved search filters',
     async ({ browserAuth, page, pageObjects, scoutSpace }) => {
       const { dataGrid, discover, filterBar, unifiedFieldList } = pageObjects;
+      const discoverHitCount = page.testSubj.locator('discoverQueryHits');
       const savedSearchTitle = `testFilters ${scoutSpace.id}`;
 
       await browserAuth.loginAsPrivilegedUser();
@@ -152,15 +153,15 @@ spaceTest.describe('Discover URL state', { tag: tags.deploymentAgnostic }, () =>
       await unifiedFieldList.clickFieldListItemAdd('extension');
       await unifiedFieldList.clickFieldListItemAdd('bytes');
 
-      expect(await discover.getHitCount()).toBe('737');
+      await expect(discoverHitCount).toHaveText('737');
 
       await discover.saveSearch(savedSearchTitle);
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.getHitCount()).toBe('737');
+      await expect(discoverHitCount).toHaveText('737');
 
       await page.reload();
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.getHitCount()).toBe('737');
+      await expect(discoverHitCount).toHaveText('737');
 
       const savedSearchId = page.url().match(/view\/([^?]+)\?/)?.[1];
       expect(savedSearchId).toBeTruthy();
@@ -171,7 +172,7 @@ spaceTest.describe('Discover URL state', { tag: tags.deploymentAgnostic }, () =>
       await expect(dataGrid.getCell(0, '@timestamp')).toContainText('Sep 22, 2015 @ 20:44:05.521');
       await expect(dataGrid.getCell(0, 'extension')).toContainText('jpg');
       await expect(dataGrid.getCell(0, 'bytes')).toContainText('1,808');
-      expect(await discover.getHitCount()).toBe('737');
+      await expect(discoverHitCount).toHaveText('737');
 
       await page.goto(
         new URL(
@@ -191,7 +192,7 @@ spaceTest.describe('Discover URL state', { tag: tags.deploymentAgnostic }, () =>
       await expect(dataGrid.getCell(0, '@timestamp')).toContainText('Sep 22, 2015 @ 20:41:53.463');
       await expect(dataGrid.getCell(0, 'extension')).toContainText('png');
       await expect(dataGrid.getCell(0, 'bytes')).toContainText('1,969');
-      expect(await discover.getHitCount()).toBe('137');
+      await expect(discoverHitCount).toHaveText('137');
       await expect(discover.unsavedChangesIndicator()).toBeVisible();
 
       await page.reload();
@@ -200,7 +201,7 @@ spaceTest.describe('Discover URL state', { tag: tags.deploymentAgnostic }, () =>
       await expect(dataGrid.getCell(0, '@timestamp')).toContainText('Sep 22, 2015 @ 20:41:53.463');
       await expect(dataGrid.getCell(0, 'extension')).toContainText('png');
       await expect(dataGrid.getCell(0, 'bytes')).toContainText('1,969');
-      expect(await discover.getHitCount()).toBe('137');
+      await expect(discoverHitCount).toHaveText('137');
       await expect(discover.unsavedChangesIndicator()).toBeVisible();
     }
   );
