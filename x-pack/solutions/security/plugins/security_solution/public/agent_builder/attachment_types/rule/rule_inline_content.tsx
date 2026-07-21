@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { useQuery } from '@kbn/react-query';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiAccordion,
@@ -51,8 +50,7 @@ import {
 } from './translations';
 import { RuleDiffTab } from '../../../detection_engine/rule_management/components/rule_details/rule_diff_tab';
 import { stripServerFields } from '../../../detection_engine/common/ai_rule_creation_handler';
-import { fetchRuleById } from '../../../detection_engine/rule_management/api/api';
-import { transformInput } from '../../../detection_engine/common/transforms';
+import { useRule } from '../../../detection_engine/rule_management/logic/use_rule';
 
 const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiText size="s">
@@ -124,12 +122,9 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
-  const ruleOrigin = attachment.origin;
-  const { data: savedRule } = useQuery(
-    ['rule-attachment-saved-rule', ruleOrigin],
-    ({ signal }) => fetchRuleById({ id: ruleOrigin as string, signal }).then(transformInput),
-    { enabled: Boolean(ruleOrigin) }
-  );
+  const { data: savedRule } = useRule(attachment.origin ?? '', false, {
+    enabled: Boolean(attachment.origin),
+  });
   const originalRule = useMemo(
     () => (savedRule ? (stripServerFields(savedRule) as RuleResponse) : null),
     [savedRule]
