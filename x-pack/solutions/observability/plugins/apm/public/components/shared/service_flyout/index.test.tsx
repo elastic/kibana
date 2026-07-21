@@ -114,6 +114,8 @@ const service: ServiceFlyoutService = {
   agentName: 'java',
 };
 
+const mockReportServiceFlyoutViewed = jest.fn();
+
 const contextProps = {
   deps: {
     core: {} as any,
@@ -121,46 +123,50 @@ const contextProps = {
     lens: {} as any,
     dataViews: {} as any,
   },
+  telemetry: {
+    client: { reportServiceFlyoutViewed: mockReportServiceFlyoutViewed },
+    source: 'test-source',
+  },
 };
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('ServiceFlyout onView', () => {
-  it('notifies the consumer with the initial tab on mount', () => {
-    const onView = jest.fn();
-
+describe('ServiceFlyout telemetry', () => {
+  it('reports the initial tab on mount', () => {
     render(
       <ServiceFlyout
         {...contextProps}
         service={service}
         filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onView={onView}
         onClose={jest.fn()}
       />
     );
 
-    expect(onView).toHaveBeenCalledTimes(1);
-    expect(onView).toHaveBeenCalledWith({ tabId: 'overview' });
+    expect(mockReportServiceFlyoutViewed).toHaveBeenCalledTimes(1);
+    expect(mockReportServiceFlyoutViewed).toHaveBeenCalledWith({
+      tabId: 'overview',
+      source: 'test-source',
+    });
   });
 
-  it('notifies the consumer with the new tab when the selected tab changes', () => {
-    const onView = jest.fn();
-
+  it('reports the new tab when the selected tab changes', () => {
     render(
       <ServiceFlyout
         {...contextProps}
         service={service}
         filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onView={onView}
         onClose={jest.fn()}
       />
     );
 
     fireEvent.click(screen.getByTestId('mockTabChange'));
 
-    expect(onView).toHaveBeenLastCalledWith({ tabId: 'alerts' });
+    expect(mockReportServiceFlyoutViewed).toHaveBeenLastCalledWith({
+      tabId: 'alerts',
+      source: 'test-source',
+    });
   });
 });
 

@@ -7,7 +7,6 @@
 
 import type { SloStatus } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
-import type { ServiceFlyoutSource } from './constants';
 
 export interface ServiceFlyoutService {
   name: string;
@@ -20,5 +19,4 @@ export interface ServiceFlyoutOptions {
   transactionType?: string;
   rangeFrom?: string;
   rangeTo?: string;
-  source?: ServiceFlyoutSource;
 }

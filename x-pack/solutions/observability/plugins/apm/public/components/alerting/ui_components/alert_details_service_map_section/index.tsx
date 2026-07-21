@@ -29,7 +29,6 @@ import { isActivePlatinumLicense } from '../../../../../common/license_check';
 import { ApmEmbeddableContext } from '../../../../embeddable/embeddable_context';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
-import { SERVICE_FLYOUT_SOURCES } from '../../../shared/service_flyout/constants';
 import { useApmEmbeddableDeps } from '../../context/apm_embeddable_deps_context';
 import type { AlertDetailsAppSectionProps } from '../alert_details_app_section/types';
 import { getServiceMapTimeRange } from './get_service_map_time_range';
@@ -103,7 +102,6 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
       transactionType: rawTransactionType != null ? String(rawTransactionType) : undefined,
       rangeFrom: paddedRange?.from,
       rangeTo: paddedRange?.to,
-      source: SERVICE_FLYOUT_SOURCES.alertDetails,
     };
   }, [alert, alertStart, alertEnd]);
 

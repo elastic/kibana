@@ -41,6 +41,11 @@ export const SERVICE_FLYOUT_TABS = [
   },
 ] as const;
 
+export interface ServiceFlyoutTelemetry {
+  client: { reportServiceFlyoutViewed: (params: { tabId: string; source: string }) => void };
+  source: string;
+}
+
 interface ServiceFlyoutProps {
   deps: ServiceFlyoutContextValue['deps'];
   service: ServiceFlyoutContextValue['service'];
@@ -50,7 +55,7 @@ interface ServiceFlyoutProps {
     rangeTo: string;
     transactionType?: string;
   };
-  onView?: (params: { tabId: ServiceFlyoutTabId }) => void;
+  telemetry: ServiceFlyoutTelemetry;
   onClose: () => void;
   historyKey?: symbol;
 }
@@ -59,7 +64,7 @@ export function ServiceFlyout({
   deps,
   service,
   filters,
-  onView,
+  telemetry,
   onClose,
   historyKey,
 }: ServiceFlyoutProps) {
@@ -80,9 +85,10 @@ export function ServiceFlyout({
     SERVICE_FLYOUT_DEFAULT_TAB_ID
   );
 
+  const { client: telemetryClient, source: telemetrySource } = telemetry;
   useEffect(() => {
-    onView?.({ tabId: selectedTabId });
-  }, [onView, selectedTabId]);
+    telemetryClient.reportServiceFlyoutViewed({ tabId: selectedTabId, source: telemetrySource });
+  }, [telemetryClient, telemetrySource, selectedTabId]);
 
   const renderTabContent = () => {
     switch (selectedTabId) {

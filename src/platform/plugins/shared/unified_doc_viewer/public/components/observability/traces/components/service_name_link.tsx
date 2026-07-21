@@ -17,6 +17,8 @@ import { ServiceNameWithIcon } from './service_name_with_icon';
 
 const SERVICE_OVERVIEW_LOCATOR_ID = 'serviceOverviewLocator';
 
+export const UNIFIED_DOC_VIEWER_ABOUT_SOURCE = 'unified_doc_viewer_about';
+
 interface ServiceNameLinkProps {
   serviceName: string;
   agentName?: string;
@@ -68,6 +70,7 @@ export function ServiceNameLink({
             environment: 'ENVIRONMENT_ALL',
             rangeFrom: timeRangeFrom,
             rangeTo: timeRangeTo,
+            source: UNIFIED_DOC_VIEWER_ABOUT_SOURCE,
             onClose: () => setFlyoutOpen(false),
             flyoutHistoryKey,
           })}

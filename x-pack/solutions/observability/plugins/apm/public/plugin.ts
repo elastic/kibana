@@ -539,6 +539,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         lens: plugins.lens,
         dataViews: plugins.dataViews,
         alerting: plugins.alerting,
+        telemetryClient: this.telemetry.start(),
       }),
     });
     const isCpsEnabled = core.featureFlags.getBooleanValue(

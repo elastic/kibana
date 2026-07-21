@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ServiceNameLink } from './service_name_link';
+import { ServiceNameLink, UNIFIED_DOC_VIEWER_ABOUT_SOURCE } from './service_name_link';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { useFlyoutHistoryKey } from '../../../doc_viewer_flyout/flyout_history_key_context';
 
@@ -80,6 +80,7 @@ const defaultProps = {
 beforeEach(() => {
   jest.clearAllMocks();
   (getUnifiedDocViewerServices as jest.Mock).mockReturnValue(mockServices);
+  (useFlyoutHistoryKey as jest.Mock).mockReturnValue(undefined);
 });
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -129,6 +130,7 @@ describe('ServiceNameLink with service flyout feature registered', () => {
         environment: ENVIRONMENT_ALL,
         rangeFrom: 'now-30m',
         rangeTo: 'now',
+        source: UNIFIED_DOC_VIEWER_ABOUT_SOURCE,
       })
     );
   });
@@ -165,6 +167,10 @@ describe('ServiceNameLink with service flyout feature registered', () => {
 });
 
 describe('ServiceNameLink without service flyout feature', () => {
+  beforeEach(() => {
+    mockGetById.mockReturnValue(undefined);
+  });
+
   it('renders an APM navigation link when the user has APM access', () => {
     render(<ServiceNameLink {...defaultProps} />);
 

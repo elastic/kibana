@@ -16,6 +16,7 @@ import type {
   PluginStartContract as AlertingStartContract,
 } from '@kbn/alerting-plugin/public';
 import type { ObservabilityServiceFlyoutFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
+import type { ServiceFlyoutTelemetry } from '.';
 
 const LazyServiceFlyout = dynamic(() => import('.').then((m) => ({ default: m.ServiceFlyout })));
 
@@ -25,12 +26,14 @@ export function createServiceFlyoutRenderer({
   lens,
   dataViews,
   alerting,
+  telemetryClient,
 }: {
   share: SharePublicStart;
   core: CoreStart;
   lens: LensPublicStart;
   dataViews: DataViewsPublicPluginStart;
   alerting?: AlertingStartContract;
+  telemetryClient: ServiceFlyoutTelemetry['client'];
 }) {
   return (deps: ObservabilityServiceFlyoutFeatureRenderDeps): React.ReactNode => (
     <LazyServiceFlyout
@@ -47,6 +50,7 @@ export function createServiceFlyoutRenderer({
         rangeFrom: deps.rangeFrom,
         rangeTo: deps.rangeTo,
       }}
+      telemetry={{ client: telemetryClient, source: deps.source }}
       historyKey={deps.flyoutHistoryKey}
       onClose={deps.onClose}
     />
