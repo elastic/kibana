@@ -127,7 +127,7 @@ export const DIFF_AI_LABEL = i18n.translate(
 
 export const DIFF_SAVED_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.agentBuilder.ruleAttachment.diffSavedDescription',
-  { defaultMessage: 'The rule as it was when added to chat' }
+  { defaultMessage: 'The rule as currently saved in Kibana' }
 );
 
 export const DIFF_AI_DESCRIPTION = i18n.translate(
