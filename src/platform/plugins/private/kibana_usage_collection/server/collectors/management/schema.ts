@@ -856,6 +856,20 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Non-default value of the scheduled Significant Events detection interval (minutes).',
     },
   },
+  'observability:streamsSigEventsScheduledDiscoveryDetectionBucketIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events detection bucket interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDetectionLookbackMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events detection lookback window (minutes).',
+    },
+  },
   'observability:streamsSigEventsScheduledDiscoveryTargetCoverageMinutes': {
     type: 'long',
     _meta: {
@@ -964,6 +978,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: {
       description: 'Prefix for the tags the alert analysis workflow adds to analyzed alerts',
+    },
+  },
+  'cloudSecurityPosture:graphRuntimeEvaluationsEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables integration-specific entity enrichment in the Security graph (actor sub-type, target identity, display names).',
     },
   },
   'elasticRamen:enabled': {

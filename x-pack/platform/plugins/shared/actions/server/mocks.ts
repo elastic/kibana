@@ -42,7 +42,9 @@ const createSetupMock = () => {
       getAwsSesConfig: jest.fn(),
       getWebhookSettings: jest.fn(),
       getEarsUrl: jest.fn(),
+      getRelaySSLSettings: jest.fn(),
     }),
+    getRelayClient: jest.fn(),
     setEnabledConnectorTypes: jest.fn(),
     isActionTypeEnabled: jest.fn(),
     registerConnectorLifecycleListener: jest.fn(),
@@ -67,6 +69,7 @@ const createStartMock = () => {
     isSystemActionConnector: jest.fn(),
     registerDynamicConnector: jest.fn(),
     unregisterDynamicConnector: jest.fn(),
+    getRelayClient: jest.fn(),
   });
 
   return mock;
