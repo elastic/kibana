@@ -73,19 +73,24 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
   }) => {
     await uiSettings.set({ defaultIndex: TSDB_DATA_VIEW_ID });
     await pageObjects.lens.openFullEditor();
-    const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
-    // field list may be slow to render after Lens loads the data view
-    await fieldLocator.waitFor({ state: 'visible', timeout: 10_000 });
-    await fieldLocator.dragTo(page.testSubj.locator('workspace-drag-drop-prompt'));
 
-    await expect
-      .poll(() => pageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel'))
-      .toBe('Median of bytes_gauge');
+    await test.step('defaults to median', async () => {
+      const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
+      // field list may be slow to render after Lens loads the data view
+      await fieldLocator.waitFor({ state: 'visible', timeout: 10_000 });
+      await fieldLocator.dragTo(page.testSubj.locator('workspace-drag-drop-prompt'));
 
-    await pageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
-    await expect(page.testSubj.locator('median-partial-warning')).toHaveCount(0);
-    await expect(page.testSubj.locator('lens-editor-warning')).toHaveCount(0);
-    await pageObjects.lens.closeDimensionEditor();
+      await expect
+        .poll(() => pageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel'))
+        .toBe('Median of bytes_gauge');
+    });
+
+    await test.step('does not show warnings', async () => {
+      await pageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
+      await expect(page.testSubj.locator('median-partial-warning')).toHaveCount(0);
+      await expect(page.testSubj.locator('lens-editor-warning')).toHaveCount(0);
+      await pageObjects.lens.closeDimensionEditor();
+    });
   });
 
   test('defaults to average and shows warnings for rolled-up metrics', async ({
@@ -255,13 +260,9 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
       keepOpen: true,
     });
     await pageObjects.lens.clearDimensionField();
-    await page.testSubj
-      .locator('indexPattern-dimension-field')
-      .getByTestId('comboBoxInput')
-      .click();
+    const fieldComboBox = page.components.comboBox('indexPattern-dimension-field');
+    expect(await fieldComboBox.getAvailableOptions()).not.toHaveLength(0);
     const optionsList = page.getByRole('listbox');
-    await expect(optionsList).toBeVisible();
-    await expect.poll(() => optionsList.getByRole('option').count()).toBeGreaterThan(0);
 
     // role="presentation" is EUI's combobox group label — no data-test-subj available
     await expect(
