@@ -219,7 +219,7 @@ Find `TARGET_VERSION` from (in priority order): the issue's milestone name, proj
 | Situation | Action |
 |---|---|
 | Feature touches stored data, mappings, saved objects, or navigation | Mark `TARGET_VERSION` as `⚠️ Not specified — please confirm before publishing` in Assumptions; **keep the upgrade scenarios** using the `TARGET_VERSION` placeholder (upgrade coverage is triggered by what the code ships, not by whether the target version is known — see [Always-evaluated coverage](references/optional-scenarios.md#always-evaluated-coverage)); record the `⚠️` in Known Limitations |
-| Feature is a pure parser, pure compute, or otherwise has no upgrade surface | Mark `TARGET_VERSION` as `⚠️ Not specified — please confirm before publishing` in Assumptions; skip the upgrade-section evaluation entirely |
+| Feature is a pure parser, pure compute, or otherwise has no upgrade surface | Record upgrade under *Out of scope* with a one-clause reason (e.g. *"no upgrade surface — pure parser / pure compute"*); `TARGET_VERSION` is irrelevant in this case |
 
 This fallback is the Core rule's `⚠️` escape: never guess the version, never publish an assumption as a fact. It never omits upgrade coverage the trigger requires — the unknown value is flagged, not the scope decision.
 

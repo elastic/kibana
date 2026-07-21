@@ -51,7 +51,7 @@ If a required testing type has no applicable scenario for a given feature area â
 
 ## Always-evaluated coverage
 
-These coverage areas are **evaluated on every generate run**, not included on a per-feature "should I add this?" basis. They either produce scenarios or produce an explicit *Out of scope* bullet with a one-clause reason. Never omit them silently.
+These coverage areas are **evaluated on every generation run**, not included on a per-feature "should I add this?" basis. They either produce scenarios or produce an explicit *Out of scope* bullet with a one-clause reason. Never omit them silently.
 
 | Coverage | Trigger | Scope decision |
 |---|---|---|
