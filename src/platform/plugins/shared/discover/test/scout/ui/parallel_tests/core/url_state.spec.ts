@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../fixtures';
 import { testData } from '../../fixtures/common';
@@ -25,7 +26,7 @@ const getDiscoverUrlWithDataViewId = (baseUrl: string, dataViewId: string) => {
   return `${origin}${spacePath}/app/discover#/?_a=(dataSource:(dataViewId:'${dataViewId}',type:dataView))`;
 };
 
-spaceTest.describe('Discover URL state', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('Discover URL state', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });
