@@ -9,9 +9,10 @@
 
 import { EuiLink } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import React from 'react';
+import React, { useState } from 'react';
 import { EBT_CLICK_ACTIONS, getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { useFlyoutHistoryKey } from '../../../doc_viewer_flyout/flyout_history_key_context';
 import { ServiceNameWithIcon } from './service_name_with_icon';
 
 const SERVICE_OVERVIEW_LOCATOR_ID = 'serviceOverviewLocator';
@@ -35,12 +36,46 @@ export function ServiceNameLink({
     share: { url: urlService },
     core,
     data: dataService,
+    discoverShared,
   } = getUnifiedDocViewerServices();
 
-  const canViewApm = core.application.capabilities.apm?.show || false;
+  const [flyoutOpen, setFlyoutOpen] = useState(false);
+  const flyoutHistoryKey = useFlyoutHistoryKey();
+
   const { from: timeRangeFrom, to: timeRangeTo } =
     dataService.query.timefilter.timefilter.getTime();
 
+  const serviceFlyoutFeature = discoverShared.features.registry.getById(
+    'observability-service-flyout'
+  );
+
+  const content = <ServiceNameWithIcon agentName={agentName} serviceName={formattedServiceName} />;
+
+  if (serviceFlyoutFeature) {
+    return (
+      <>
+        <EuiLink
+          onClick={() => setFlyoutOpen(true)}
+          data-test-subj={dataTestSubj}
+          {...getEbtProps({ action: EBT_CLICK_ACTIONS.VIEW_SERVICE, ...ebt })}
+        >
+          {content}
+        </EuiLink>
+        {flyoutOpen &&
+          serviceFlyoutFeature.renderServiceFlyout({
+            serviceName,
+            agentName,
+            environment: 'ENVIRONMENT_ALL',
+            rangeFrom: timeRangeFrom,
+            rangeTo: timeRangeTo,
+            onClose: () => setFlyoutOpen(false),
+            flyoutHistoryKey,
+          })}
+      </>
+    );
+  }
+
+  const canViewApm = core.application.capabilities.apm?.show || false;
   const apmLinkToServiceEntityLocator = urlService.locators.get<{
     serviceName: string;
     rangeFrom: string;
@@ -65,8 +100,6 @@ export function ServiceNameLink({
         },
       })
     : undefined;
-
-  const content = <ServiceNameWithIcon agentName={agentName} serviceName={formattedServiceName} />;
 
   return (
     <>
