@@ -13,10 +13,9 @@ The {{bedrock}} connector uses [axios](https://github.com/axios/axios) to send a
 
 ::::{important}
 :applies_to: {"stack": "deprecated 9.5, removed 9.6", "serverless": "removed"}
-The {{bedrock}} connector is deprecated. Existing {{bedrock}} connectors and rule actions that use them continue to work but display deprecation indicators. Follow the guidance that matches your version and deployment type:
+This connector is deprecated. If it is in use, it continues to work, along with any rule actions that rely on it. 
 
-- {applies_to}`serverless: removed` {applies_to}`stack: removed 9.6` You cannot create new LLM connectors through the standard connector UI.
-- {applies_to}`stack: deprecated 9.5` For new AI integrations, use {{es}} {{infer}} endpoints instead of LLM connectors. Plan migration of existing LLM connectors and any rule actions that reference them before future removal.
+For new AI integrations, use {{es}} {{infer}} endpoints instead of LLM connectors. Plan migration of existing LLM connectors and any rule actions that reference them before future removal.
 ::::
 
 ## Create connectors in {{kib}} [define-bedrock-ui]
