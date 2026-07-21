@@ -103,10 +103,7 @@ export async function populateAssignedAgentsCount(
   // (keyed by policy id), each with sub-aggregations for the unprivileged/FIPS counts and the
   // per-version breakdown. This keeps the work to one ES request regardless of page size.
   const policyKueryById = new Map(
-    agentPolicies.map((agentPolicy) => [
-      agentPolicy.id,
-      `policy_base_id:"${agentPolicy.id}"`,
-    ])
+    agentPolicies.map((agentPolicy) => [agentPolicy.id, `policy_base_id:"${agentPolicy.id}"`])
   );
 
   const { aggregations } = await agentClient.listAgents({

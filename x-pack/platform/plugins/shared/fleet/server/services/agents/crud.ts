@@ -715,7 +715,9 @@ export async function getAgentVersionsForAgentPolicyIds(
       hits,
       (hit) =>
         hit._source?.policy_base_id ??
-        (hit._source?.policy_id ? removeVersionSuffixFromPolicyId(hit._source.policy_id) : undefined)
+        (hit._source?.policy_id
+          ? removeVersionSuffixFromPolicyId(hit._source.policy_id)
+          : undefined)
     );
 
     for (const [policyId, policyHits] of Object.entries(groupedHits)) {

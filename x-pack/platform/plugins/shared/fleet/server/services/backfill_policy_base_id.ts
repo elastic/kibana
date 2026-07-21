@@ -7,7 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { AGENTS_INDEX, AGENT_POLICY_INDEX } from '../../common/constants';
+import { AGENT_POLICY_INDEX, AGENTS_INDEX } from '../../common/constants';
+
 import { appContextService } from '.';
 
 // Painless: strip '#version' suffix from policy_id and store as policy_base_id.
@@ -37,7 +38,9 @@ async function runBackfill(esClient: ElasticsearchClient, index: string, label: 
       },
     });
     logger.debug(
-      `Backfilled policy_base_id on ${result.updated ?? 0} ${label} documents (${result.noops ?? 0} noops)`
+      `Backfilled policy_base_id on ${result.updated ?? 0} ${label} documents (${
+        result.noops ?? 0
+      } noops)`
     );
   } catch (err) {
     logger.warn(`Failed to backfill policy_base_id on ${label}: ${err.message}`);
