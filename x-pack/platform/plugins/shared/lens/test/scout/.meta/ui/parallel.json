@@ -1,5 +1,5 @@
 {
-  "sha1": "d32641f90d0c8bd9ee37dc9af57fa711824a5864",
+  "sha1": "19cc40e787d697ef476771bd716cc9adbd7094cc",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1029,6 +1029,20 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/table.spec.ts",
         "line": 122,
         "column": 12
+      }
+    },
+    {
+      "id": "14fc84565fd6c1c-dce60f7b6eb64ac",
+      "title": "Lens open in Lens — agg-based Visualize navigation should navigate between Visualize and Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/visualize_navigation.spec.ts",
+        "line": 48,
+        "column": 14
       }
     },
     {

@@ -236,6 +236,92 @@ export const INVALID_USER_PICKER_DEFAULT = (name: string) =>
     values: { name },
   });
 
+export const CONDITION_UNKNOWN_FIELD = (fieldName: string) =>
+  i18n.translate('xpack.cases.templates.validation.conditionUnknownField', {
+    defaultMessage:
+      'Condition references unknown field "{fieldName}". It must match the name of a field defined in this template; otherwise the rule is always treated as true.',
+    values: { fieldName },
+  });
+
+export const VALIDATION_RULE_NOT_APPLICABLE = (rule: string, fieldTypeTitle: string) =>
+  i18n.translate('xpack.cases.templates.validation.ruleNotApplicable', {
+    defaultMessage:
+      'The "{rule}" rule has no effect on {fieldTypeTitle} fields and will be ignored.',
+    values: { rule, fieldTypeTitle },
+  });
+
+export const REF_FIELD_COMPLETION_DETAIL = i18n.translate(
+  'xpack.cases.templates.validation.refFieldCompletionDetail',
+  { defaultMessage: 'Field library reference' }
+);
+
+export const REF_FIELD_COMPLETION_GLOBAL = i18n.translate(
+  'xpack.cases.templates.validation.refFieldCompletionGlobal',
+  { defaultMessage: 'Global field' }
+);
+
+// Autocomplete snippets — inserted as ready-to-edit field skeletons from the editor.
+export const FIELD_SNIPPET_DESC_INPUT_TEXT = i18n.translate(
+  'xpack.cases.templates.snippet.inputText',
+  { defaultMessage: 'Insert a single-line text field' }
+);
+
+export const FIELD_SNIPPET_DESC_INPUT_NUMBER = i18n.translate(
+  'xpack.cases.templates.snippet.inputNumber',
+  { defaultMessage: 'Insert a numeric field' }
+);
+
+export const FIELD_SNIPPET_DESC_TEXTAREA = i18n.translate(
+  'xpack.cases.templates.snippet.textarea',
+  { defaultMessage: 'Insert a multi-line text field' }
+);
+
+export const FIELD_SNIPPET_DESC_SELECT_BASIC = i18n.translate(
+  'xpack.cases.templates.snippet.selectBasic',
+  { defaultMessage: 'Insert a single-select dropdown' }
+);
+
+export const FIELD_SNIPPET_DESC_RADIO_GROUP = i18n.translate(
+  'xpack.cases.templates.snippet.radioGroup',
+  { defaultMessage: 'Insert a radio button group' }
+);
+
+export const FIELD_SNIPPET_DESC_CHECKBOX_GROUP = i18n.translate(
+  'xpack.cases.templates.snippet.checkboxGroup',
+  { defaultMessage: 'Insert a checkbox group' }
+);
+
+export const FIELD_SNIPPET_DESC_DATE_PICKER = i18n.translate(
+  'xpack.cases.templates.snippet.datePicker',
+  { defaultMessage: 'Insert a date picker' }
+);
+
+export const FIELD_SNIPPET_DESC_TOGGLE = i18n.translate('xpack.cases.templates.snippet.toggle', {
+  defaultMessage: 'Insert an on/off toggle',
+});
+
+export const FIELD_SNIPPET_DESC_USER_PICKER = i18n.translate(
+  'xpack.cases.templates.snippet.userPicker',
+  { defaultMessage: 'Insert a user picker' }
+);
+
+export const FIELD_SNIPPET_DESC_MARKDOWN = i18n.translate(
+  'xpack.cases.templates.snippet.markdown',
+  { defaultMessage: 'Insert a display-only markdown block' }
+);
+
+export const FIELD_SNIPPET_LABEL_REF = i18n.translate('xpack.cases.templates.snippet.refLabel', {
+  defaultMessage: 'Field library reference ($ref)',
+});
+
+export const FIELD_SNIPPET_DESC_REF = i18n.translate('xpack.cases.templates.snippet.refDesc', {
+  defaultMessage: 'Reference a reusable field from the field library',
+});
+
+export const ASSIGNEE_SNIPPET_DESC = i18n.translate('xpack.cases.templates.snippet.assignee', {
+  defaultMessage: 'Add an assignee by user profile ID',
+});
+
 export const TEMPLATE_ENABLED = i18n.translate('xpack.cases.templates.enabled', {
   defaultMessage: 'Enabled',
 });
@@ -939,4 +1025,157 @@ export const CONNECTOR_NOT_FOUND = i18n.translate(
     defaultMessage:
       'Connector not found. Cases created from this template will fall back to no connector.',
   }
+);
+
+// --- Editor Actions menu -----------------------------------------------------------------------
+
+export const ACTIONS_MENU_BUTTON = i18n.translate('xpack.cases.templates.actionsMenu.button', {
+  defaultMessage: 'Actions menu',
+});
+
+export const ACTIONS_MENU_ROOT_TITLE = i18n.translate('xpack.cases.templates.actionsMenu.title', {
+  // Kept identical to the trigger label so the popover header and the chip read as one control.
+  defaultMessage: 'Actions menu',
+});
+
+export const ACTIONS_MENU_ARIA = i18n.translate('xpack.cases.templates.actionsMenu.aria', {
+  defaultMessage: 'Open the template actions menu',
+});
+
+export const ACTION_NEW_FIELD_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.newField.title',
+  { defaultMessage: 'New field' }
+);
+export const ACTION_NEW_FIELD_DESC = i18n.translate(
+  'xpack.cases.templates.actionsMenu.newField.desc',
+  { defaultMessage: 'Scaffold a custom field of any type' }
+);
+
+export const ACTION_FIELD_LIBRARY_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.fieldLibrary.title',
+  { defaultMessage: 'Field library' }
+);
+export const ACTION_FIELD_LIBRARY_DESC = i18n.translate(
+  'xpack.cases.templates.actionsMenu.fieldLibrary.desc',
+  { defaultMessage: 'Reference a saved field from the library' }
+);
+
+export const ACTION_VALIDATION_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.validation.title',
+  { defaultMessage: 'Validation' }
+);
+export const ACTION_VALIDATION_DESC = i18n.translate(
+  'xpack.cases.templates.actionsMenu.validation.desc',
+  { defaultMessage: 'Add a validation rule to the selected field' }
+);
+
+export const ACTION_CONDITIONAL_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.conditional.title',
+  { defaultMessage: 'Conditional logic' }
+);
+export const ACTION_CONDITIONAL_DESC = i18n.translate(
+  'xpack.cases.templates.actionsMenu.conditional.desc',
+  { defaultMessage: 'Show or require the selected field based on another' }
+);
+
+export const ACTIONS_MENU_SELECT_A_FIELD = i18n.translate(
+  'xpack.cases.templates.actionsMenu.selectAField',
+  { defaultMessage: 'Place the cursor on a field to enable this action' }
+);
+
+export const ACTIONS_MENU_SEARCH_FIELDS = i18n.translate(
+  'xpack.cases.templates.actionsMenu.searchFields',
+  { defaultMessage: 'Search library fields' }
+);
+
+export const ACTIONS_MENU_NO_LIBRARY_FIELDS_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.noLibraryFieldsTitle',
+  { defaultMessage: 'No library fields yet' }
+);
+
+export const ACTIONS_MENU_NO_LIBRARY_FIELDS = i18n.translate(
+  'xpack.cases.templates.actionsMenu.noLibraryFields',
+  {
+    defaultMessage:
+      'Create reusable fields in the Field library, then reference them from any template.',
+  }
+);
+
+export const ACTIONS_MENU_LOADING_LIBRARY = i18n.translate(
+  'xpack.cases.templates.actionsMenu.loadingLibrary',
+  { defaultMessage: 'Loading library fields…' }
+);
+
+export const ACTIONS_MENU_LIBRARY_GLOBAL_BADGE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.libraryGlobalBadge',
+  { defaultMessage: 'Global' }
+);
+
+export const ACTIONS_MENU_FIELD_EXISTS = (name: string) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.fieldExists', {
+    defaultMessage: '"{name}" is already in this template',
+    values: { name },
+  });
+
+export const ACTIONS_MENU_RULE_EXISTS = (rule: string) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.ruleExists', {
+    defaultMessage: '"{rule}" is already set on this field',
+    values: { rule },
+  });
+
+export const ACTIONS_MENU_NO_FIELD_AT_CURSOR = i18n.translate(
+  'xpack.cases.templates.actionsMenu.noFieldAtCursor',
+  { defaultMessage: 'Place the cursor on a field before adding this rule' }
+);
+
+export const ACTIONS_MENU_FIX_YAML_FIRST = i18n.translate(
+  'xpack.cases.templates.actionsMenu.fixYamlFirst',
+  { defaultMessage: 'Fix the YAML errors before using the actions menu' }
+);
+
+export const ACTIONS_MENU_INVALID_YAML = i18n.translate(
+  'xpack.cases.templates.actionsMenu.invalidYaml',
+  { defaultMessage: 'Fix the YAML errors in the editor before adding to the template' }
+);
+
+// Validation rule labels
+export const VALIDATION_RULE_REQUIRED = i18n.translate(
+  'xpack.cases.templates.actionsMenu.rule.required',
+  { defaultMessage: 'Required' }
+);
+export const VALIDATION_RULE_REQUIRED_ON_CLOSE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.rule.requiredOnClose',
+  { defaultMessage: 'Required before closing' }
+);
+export const VALIDATION_RULE_PATTERN = i18n.translate(
+  'xpack.cases.templates.actionsMenu.rule.pattern',
+  { defaultMessage: 'Pattern (regex)' }
+);
+export const VALIDATION_RULE_MIN = i18n.translate('xpack.cases.templates.actionsMenu.rule.min', {
+  defaultMessage: 'Minimum value',
+});
+export const VALIDATION_RULE_MAX = i18n.translate('xpack.cases.templates.actionsMenu.rule.max', {
+  defaultMessage: 'Maximum value',
+});
+export const VALIDATION_RULE_MIN_LENGTH = i18n.translate(
+  'xpack.cases.templates.actionsMenu.rule.minLength',
+  { defaultMessage: 'Minimum length' }
+);
+export const VALIDATION_RULE_MAX_LENGTH = i18n.translate(
+  'xpack.cases.templates.actionsMenu.rule.maxLength',
+  { defaultMessage: 'Maximum length' }
+);
+
+// Conditional-logic labels
+export const CONDITION_SHOW_WHEN = i18n.translate(
+  'xpack.cases.templates.actionsMenu.condition.showWhen',
+  { defaultMessage: 'Show when…' }
+);
+export const CONDITION_SHOW_WHEN_COMPOUND = i18n.translate(
+  'xpack.cases.templates.actionsMenu.condition.showWhenCompound',
+  { defaultMessage: 'Show when (multiple conditions)…' }
+);
+export const CONDITION_REQUIRED_WHEN = i18n.translate(
+  'xpack.cases.templates.actionsMenu.condition.requiredWhen',
+  { defaultMessage: 'Require when…' }
 );
