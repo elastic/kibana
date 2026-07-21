@@ -34,6 +34,7 @@ PND is a **standalone Security-category app** (`/app/pnd`) that **uses platform 
 - Slots Throughline-ordered destinations into the **Security solution nav** (ESS + serverless trees)
 - Platform footer stays as on Security `main`: Launchpad, Developer tools, Settings / stack management, collapse
 - **Discover** uses the platform `{ link: 'discover' }` destination (real `/app/discover`)
+- **Dashboards** uses Security’s real dashboards destination (same Throughline slot; no PND stub)
 - **Chats** stays in-app and embeds Agent Builder
 - Watches keeps a **content-area** secondary nav (Workflows / Skills / … stubs)
 - Ask PND FAB routes to Chats (hidden on `/chats`)
@@ -45,7 +46,7 @@ PND is a **standalone Security-category app** (`/app/pnd`) that **uses platform 
 | `/app/pnd` | Brief — Investigation queue |
 | `/app/pnd/chats` | Agent Builder embed (`sessionTag: pnd`) |
 | `/app/discover` | Real Discover (via Security / PND nav Discover item) |
-| `/app/pnd/dashboards` | Placeholder — coming soon |
+| `/app/security/dashboards` | Real Security dashboards (via Throughline Dashboards item) |
 | `/app/pnd/alerts` | Placeholder — coming soon |
 | `/app/pnd/attacks` | Placeholder — coming soon |
 | `/app/pnd/records` | Placeholder — coming soon |
@@ -104,14 +105,14 @@ YAML + registry entries: `src/platform/packages/shared/kbn-workflows/managed/def
 ## In scope (PR1)
 
 - Platform chrome (header + Security footer utilities)
-- Throughline body order in Security nav; Discover → real Discover
+- Throughline body order in Security nav; Discover → real Discover; Dashboards → real Security dashboards
 - Brief queue, Watches catalog/detail, Chats Agent Builder embed
 - Investigation shells + mock internal APIs
 
 ## Non-goals (this PR)
 
 - Nesting routes under `/app/security` or importing Security page wrappers
-- Wiring remaining operate destinations (Dashboards, Alerts, …) to real apps — Discover only for that quick win
+- Wiring remaining operate destinations (Alerts, Attacks, …) to real apps
 - Pixel-perfect Throughline CSS port
 - Implementing Workflows / Skills / Activity / Performance / Guardrails data
 - No `.kibana-threat-intel-hunt-findings` index / Intelligence Hub findings queue

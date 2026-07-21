@@ -62,8 +62,9 @@ export const createNavigationTree = (
         link: 'discover',
         icon: 'productDiscover',
       },
+      // Real Security dashboards (not a PND stub) — Throughline position + icon
       {
-        link: 'pnd:dashboards' as AppDeepLinkId,
+        ...defaultNavigationTree.dashboards(),
         icon: 'dashboardApp',
       },
       {
@@ -92,7 +93,6 @@ export const createNavigationTree = (
         getIsActive: ({ pathNameSerialized, prepend }) =>
           pathNameSerialized.startsWith(prepend('/app/pnd/watches')),
       },
-      defaultNavigationTree.dashboards(),
       defaultNavigationTree.rules(),
       services.uiSettings.get(
         ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,

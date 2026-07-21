@@ -9,18 +9,12 @@ import type { AppDeepLink } from '@kbn/core/public';
 import { PND_DEEP_LINK } from './components/app_chrome/translations';
 import * as i18n from './components/app_chrome/translations';
 
-/** Deep links for Security solution nav + global search (Discover is platform-owned). */
+/** Deep links for Security solution nav + global search (Discover + Dashboards are owned elsewhere). */
 export const getPndDeepLinks = (): AppDeepLink[] => [
   {
     id: PND_DEEP_LINK.chats,
     title: i18n.NAV_CHATS,
     path: '/chats',
-    visibleIn: ['globalSearch', 'projectSideNav'],
-  },
-  {
-    id: PND_DEEP_LINK.dashboards,
-    title: i18n.NAV_DASHBOARDS,
-    path: '/dashboards',
     visibleIn: ['globalSearch', 'projectSideNav'],
   },
   {
