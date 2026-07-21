@@ -7,14 +7,16 @@
 
 import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { useKibana } from '../../common/lib/kibana';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context'; // Lazy-loaded so consumers of this hook don't statically pull the rule flyout graph into their
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
+import { RULE_TITLE } from '../shared/constants/flyout_titles';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the rule flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
@@ -23,6 +25,11 @@ const RuleDetails = lazy(() => import('./main').then((m) => ({ default: m.RuleDe
 export interface OpenRuleFlyoutParams {
   /** The unique identifier of the rule to display. */
   ruleId: string;
+  /**
+   * Flyout-history title to use for this open, e.g. `formatFlyoutTitle(RULE_TITLE, ruleName)`.
+   * Omitted falls back to the bare "Rule" title.
+   */
+  title?: string;
 }
 
 export interface RuleFlyoutApi {
@@ -63,11 +70,16 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
   // here so callers never have to reason about it: they pick `openRuleFlyout` (main) or
   // `openRuleFlyoutAsChild` (child) and this helper maps that to the right session.
   const open = useCallback(
-    (children: ReactNode, session: OverlaySystemFlyoutOpenOptions['session']) => {
+    (
+      children: ReactNode,
+      session: OverlaySystemFlyoutOpenOptions['session'],
+      title: OverlaySystemFlyoutOpenOptions['title']
+    ) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
+        title,
       };
       overlays.openSystemFlyout(
         flyoutProviders({
@@ -92,15 +104,15 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
   );
 
   const openRuleFlyout = useCallback(
-    ({ ruleId }: OpenRuleFlyoutParams) => {
-      open(<RuleDetails ruleId={ruleId} />, sessionMode);
+    ({ ruleId, title }: OpenRuleFlyoutParams) => {
+      open(<RuleDetails ruleId={ruleId} />, sessionMode, title ?? RULE_TITLE);
     },
     [open, sessionMode]
   );
 
   const openRuleFlyoutAsChild = useCallback(
-    ({ ruleId }: OpenRuleFlyoutParams) => {
-      open(<RuleDetails ruleId={ruleId} />, 'inherit');
+    ({ ruleId, title }: OpenRuleFlyoutParams) => {
+      open(<RuleDetails ruleId={ruleId} />, 'inherit', buildFlyoutNavTitle(title ?? RULE_TITLE));
     },
     [open]
   );

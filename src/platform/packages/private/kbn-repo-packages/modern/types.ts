@@ -47,6 +47,7 @@ export interface ParsedPackageJson {
 export type KibanaPackageType =
   | 'core'
   | 'plugin'
+  | 'tooling'
   | 'shared-browser'
   | 'shared-server'
   | 'shared-common'
@@ -145,7 +146,7 @@ export interface SharedBrowserPackageManifest extends PackageManifestBaseFields 
 }
 
 export interface BasePackageManifest extends PackageManifestBaseFields {
-  type: 'shared-server' | 'functional-tests' | 'test-helper' | 'shared-scss' | 'core';
+  type: 'shared-server' | 'functional-tests' | 'test-helper' | 'shared-scss' | 'core' | 'tooling';
 }
 
 export type KibanaPackageManifest =
