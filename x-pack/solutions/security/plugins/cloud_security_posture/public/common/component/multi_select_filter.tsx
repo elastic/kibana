@@ -107,10 +107,20 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
     });
   };
 
+  const searchLabel =
+    i18n.translate('xpack.csp.common.component.multiSelectFilter.searchWord', {
+      defaultMessage: 'Search ',
+    }) + buttonLabel;
+
   return (
     <EuiFilterGroup>
       <EuiPopover
         ownFocus
+        aria-label={`${buttonLabel}, ${i18n.translate(
+          'xpack.csp.common.component.multiSelectFilter.expanded',
+          { defaultMessage: 'expanded' }
+        )}`}
+        panelProps={{ role: 'none' }}
         button={
           <EuiFilterButton
             css={css`
@@ -123,6 +133,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
             numFilters={showActiveOptionsNumber ? options.length : undefined}
             hasActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length > 0 : undefined}
             numActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length : undefined}
+            aria-haspopup="listbox"
             aria-label={buttonLabel}
           >
             <EuiText size="s" className="eui-textTruncate">
@@ -152,10 +163,8 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
           options={options}
           searchable
           searchProps={{
-            placeholder:
-              i18n.translate('xpack.csp.common.component.multiSelectFilter.searchWord', {
-                defaultMessage: 'Search ',
-              }) + buttonLabel,
+            placeholder: searchLabel,
+            'aria-label': searchLabel,
             compressed: false,
             'data-test-subj': `${id}-search-input`,
             css: css`
