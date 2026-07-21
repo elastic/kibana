@@ -33,7 +33,7 @@ const createMockScope = (runner: AlertingTaskRunner) => {
   return {
     bind: jest.fn().mockReturnValue(bindResult),
     get: jest.fn().mockReturnValue(runner),
-    unbindAll: jest.fn().mockResolvedValue(undefined),
+    unbindAllAsync: jest.fn().mockResolvedValue(undefined),
     _scopeBinding: scopeBinding,
   };
 };
@@ -175,7 +175,7 @@ describe('createTaskRunnerFactory', () => {
       abortController: runContext.abortController,
     });
     expect(result).toEqual(runResult);
-    expect(scope.unbindAll).toHaveBeenCalledTimes(1);
+    expect(scope.unbindAllAsync).toHaveBeenCalledTimes(1);
   });
 
   it('binds the task runner in a transient scope when a fakeRequest is not required', async () => {
@@ -195,7 +195,7 @@ describe('createTaskRunnerFactory', () => {
     expect(scope.bind).toHaveBeenCalledWith(TestTaskRunner);
     expect(scope._scopeBinding.inTransientScope).toHaveBeenCalledTimes(1);
     expect(scope._scopeBinding.inRequestScope).not.toHaveBeenCalled();
-    expect(scope.unbindAll).toHaveBeenCalledTimes(1);
+    expect(scope.unbindAllAsync).toHaveBeenCalledTimes(1);
   });
 
   it('unbinds the scope even when the task runner throws', async () => {
@@ -213,6 +213,6 @@ describe('createTaskRunnerFactory', () => {
     });
 
     await expect(createTaskRunner(createRunContext()).run()).rejects.toThrow(failure);
-    expect(scope.unbindAll).toHaveBeenCalledTimes(1);
+    expect(scope.unbindAllAsync).toHaveBeenCalledTimes(1);
   });
 });

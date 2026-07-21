@@ -192,7 +192,7 @@ export class PluginWrapper<
     }
 
     await this.instance?.stop?.();
-    await this.container?.unbindAll();
+    await this.container?.unbindAllAsync();
     this.instance = undefined;
     this.container = undefined;
   }
