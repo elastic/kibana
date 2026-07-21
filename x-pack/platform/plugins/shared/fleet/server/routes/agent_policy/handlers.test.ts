@@ -7,7 +7,7 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { agentPolicyService, appContextService } from '../../services';
+import { agentPolicyService } from '../../services';
 import { listFleetProxies } from '../../services/fleet_proxies';
 
 import type { FleetRequestHandlerContext } from '../..';
@@ -17,8 +17,6 @@ import type { AgentPolicy } from '../../types';
 
 import {
   bulkGetAgentPoliciesHandler,
-  copyAgentPolicyHandler,
-  createAgentPolicyHandler,
   downloadFullAgentPolicy,
   getFullAgentPolicy,
   GetListAgentPolicyOutputsHandler,
@@ -46,7 +44,6 @@ jest.mock('../../services/agent_policy_create', () => {
 jest.mock('../../services/fleet_proxies', () => ({
   listFleetProxies: jest.fn().mockResolvedValue({ items: [] }),
 }));
-
 
 const agentPolicyServiceMock = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
