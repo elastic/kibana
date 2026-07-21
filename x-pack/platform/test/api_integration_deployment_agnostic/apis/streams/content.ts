@@ -592,7 +592,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const response = await importContent(
           apiClient,
-          'logs.otel',
+          'logs',
           {
             include: { objects: { all: {} } },
             content: Readable.from(archive),
@@ -621,7 +621,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const response = await importContent(
           apiClient,
-          'logs.otel',
+          'logs',
           {
             include: { objects: { all: {} } },
             content: Readable.from(archive),
@@ -664,7 +664,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const response = await importContent(
           apiClient,
-          'logs.otel',
+          'logs',
           {
             include: { objects: { all: {} } },
             content: Readable.from(archive),
