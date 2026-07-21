@@ -22,10 +22,10 @@ import {
 } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import type { ESQLSourceResult } from '@kbn/esql-types';
+import type { ESQLSourceResult, EsqlView } from '@kbn/esql-types';
 import type { ILicense } from '@kbn/licensing-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getDatasets, getESQLSources, getTimeseriesIndices } from '@kbn/esql-utils';
+import { getDatasets, getESQLSources, getTimeseriesIndices, getViews } from '@kbn/esql-utils';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
@@ -41,6 +41,7 @@ interface DataSourceBrowserKibanaServices {
   esql?: {
     getLicense?: () => Promise<ILicense | undefined>;
     enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+    enrichViews?: (views: EsqlView[]) => Promise<EsqlView[]>;
   };
 }
 
@@ -74,6 +75,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   const { http, application } = core;
   const getLicense = kibana.services?.esql?.getLicense;
   const enrichSources = kibana.services?.esql?.enrichSources;
+  const enrichViews = kibana.services?.esql?.enrichViews;
 
   const getTimeseriesIndicesCallback = useCallback(async () => {
     return await getTimeseriesIndices(http);
@@ -85,12 +87,21 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
   const getDatasetsCallback = useCallback(() => getDatasets(http), [http]);
 
+  const getViewsCallback = useCallback(async () => {
+    const result = await getViews(http);
+    if (!enrichViews) {
+      return result;
+    }
+    return { ...result, views: await enrichViews(result.views) };
+  }, [enrichViews, http]);
+
   const { allSources, isLoading } = useAllSources({
     isOpen,
     preloadedSources,
     getSources: getSourcesCallback,
     getTimeseriesIndices: getTimeseriesIndicesCallback,
     getDatasets: getDatasetsCallback,
+    getViews: getViewsCallback,
     isTimeseries,
   });
   const { euiTheme } = useEuiTheme();

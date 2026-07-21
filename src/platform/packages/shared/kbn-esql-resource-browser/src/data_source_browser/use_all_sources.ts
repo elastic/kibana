@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import type {
   ESQLSourceResult,
   EsqlDatasetsResult,
+  EsqlViewsResult,
   IndexAutocompleteItem,
   IndicesAutocompleteResult,
 } from '@kbn/esql-types';
@@ -38,6 +39,19 @@ const normalizeDatasets = ({ datasets }: EsqlDatasetsResult): ESQLSourceResult[]
     hidden: false,
   })) ?? [];
 
+// `type` may already be set by an enricher (e.g. Streams marks a view backed by a
+// stream as "Wired Stream"/"Classic Stream"); only fall back to the generic view type
+// when no enrichment provided one.
+const normalizeViews = ({ views }: EsqlViewsResult): ESQLSourceResult[] =>
+  views?.map((v) => ({
+    name: v.name,
+    title: v.name,
+    description: v.description,
+    links: v.links,
+    type: v.type ?? 'view',
+    hidden: false,
+  })) ?? [];
+
 const mergeSources = (
   base: ESQLSourceResult[],
   datasets: ESQLSourceResult[]
@@ -53,6 +67,7 @@ export interface UseAllSourcesParams {
   getSources: () => Promise<ESQLSourceResult[]>;
   getTimeseriesIndices: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   getDatasets?: () => Promise<EsqlDatasetsResult>;
+  getViews?: () => Promise<EsqlViewsResult>;
 }
 
 export const useAllSources = ({
@@ -62,6 +77,7 @@ export const useAllSources = ({
   getSources,
   getTimeseriesIndices,
   getDatasets,
+  getViews,
 }: UseAllSourcesParams): { allSources: ESQLSourceResult[]; isLoading: boolean } => {
   const [allSources, setAllSources] = useState<ESQLSourceResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,13 +108,30 @@ export const useAllSources = ({
       }
     };
 
+    // ES|QL views aren't valid TS command sources, so skip fetching them for timeseries,
+    // mirroring how federated datasets are treated.
+    const fetchViews = async (): Promise<ESQLSourceResult[]> => {
+      if (isTimeseries || !getViews) return [];
+      try {
+        const result = await getViews();
+        return normalizeViews(result);
+      } catch (error) {
+        // getViews already swallows fetch errors; this only guards against
+        // normalizeViews failing on an unexpected response shape.
+        // eslint-disable-next-line no-console
+        console.error('Failed to normalize the views', error);
+        return [];
+      }
+    };
+
     if (preloadedSources !== undefined) {
-      // Render preloaded sources immediately, then append federated datasets when they
-      // arrive, since preloaded sources come from the autocomplete cache and don't include them.
+      // Render preloaded sources immediately, then append federated datasets and views when
+      // they arrive, since preloaded sources come from the autocomplete cache and don't include
+      // them.
       setAllSources(preloadedSources);
-      fetchDatasets().then((datasets) => {
+      Promise.all([fetchDatasets(), fetchViews()]).then(([datasets, views]) => {
         if (isMountedRef.current && isEffectActive) {
-          setAllSources(mergeSources(preloadedSources, datasets));
+          setAllSources(mergeSources(mergeSources(preloadedSources, datasets), views));
         }
       });
       return () => {
@@ -114,9 +147,13 @@ export const useAllSources = ({
           const normalized = normalizeTimeseriesIndices(result);
           if (isMountedRef.current && isEffectActive) setAllSources(normalized);
         } else {
-          const [fetched, datasets] = await Promise.all([getSources?.() ?? [], fetchDatasets()]);
+          const [fetched, datasets, views] = await Promise.all([
+            getSources?.() ?? [],
+            fetchDatasets(),
+            fetchViews(),
+          ]);
           if (isMountedRef.current && isEffectActive) {
-            setAllSources(mergeSources(fetched, datasets));
+            setAllSources(mergeSources(mergeSources(fetched, datasets), views));
           }
         }
       } catch {
@@ -131,7 +168,15 @@ export const useAllSources = ({
     return () => {
       isEffectActive = false;
     };
-  }, [getSources, getTimeseriesIndices, getDatasets, isTimeseries, isOpen, preloadedSources]);
+  }, [
+    getSources,
+    getTimeseriesIndices,
+    getDatasets,
+    getViews,
+    isTimeseries,
+    isOpen,
+    preloadedSources,
+  ]);
 
   return { allSources, isLoading };
 };
