@@ -63,6 +63,12 @@ export const IN_MOTION = i18n.translate('xpack.pnd.brief.inMotion', {
   defaultMessage: 'In motion',
 });
 
+export const pendingProposalsLabel = (count: number) =>
+  i18n.translate('xpack.pnd.brief.pendingProposals', {
+    defaultMessage: '{count, plural, one {# pending proposal} other {# pending proposals}}',
+    values: { count },
+  });
+
 export const OPEN_CHAT = i18n.translate('xpack.pnd.brief.openChat', {
   defaultMessage: 'Open in chat',
 });

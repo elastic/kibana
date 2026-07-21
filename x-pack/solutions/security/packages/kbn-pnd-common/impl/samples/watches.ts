@@ -165,21 +165,21 @@ const darkWatchBase: Watch = {
   draft: false,
   managed: true,
   sortOrder: 30,
-  mandate: 'Overnight autonomous response',
+  mandate: 'Continuous, technology-aware hunting for relevant threats and coverage gaps',
   description:
-    'Dark Watch skeleton. Overnight / continuous hunt-style sweeps with allow-listed autonomous actions.',
+    'Dark Watch skeleton. Continuous, technology-aware hunting with overnight UTC sweeps and reviewable findings.',
   schedule: {
     set: true,
     mode: 'window',
     from: 22,
     to: 6,
-    onDemand: false,
+    onDemand: true,
     cadence: 'sweep',
     every: 60,
     handoff: 'brief',
   },
   triggers: [
-    { type: 'schedule', summary: 'Schedule · every 60m' },
+    { type: 'schedule', summary: 'Schedule · hourly from 22:00–06:00 UTC' },
     { type: 'manual', summary: 'Manual / on demand' },
   ],
   coverage: [
@@ -188,12 +188,12 @@ const darkWatchBase: Watch = {
   ],
   scopeSummary: 'Mail · IdP · edge / VPN',
   scopes: [
-    { name: 'Mail · IdP', access: 'full', label: 'Read + act' },
-    { name: 'Edge / VPN', access: 'full', label: 'Read + act' },
+    { name: 'Mail · IdP', access: 'full', label: 'Read + monitor' },
+    { name: 'Edge / VPN', access: 'full', label: 'Read + monitor' },
     { name: 'Customer data', access: 'denied', label: 'No access' },
   ],
   callables: [],
-  autonomyLevel: 5,
+  autonomyLevel: 2,
   metrics: {
     runs7d: 56,
     acceptedPct: 65,
@@ -211,7 +211,7 @@ const darkWatchBase: Watch = {
         { name: 'hunt_stub', type: 'console', status: 'completed' },
       ],
       summary: 'Beacon correlation · 2 hosts flagged',
-      action: 'auto',
+      action: 'read',
     },
   ],
 };

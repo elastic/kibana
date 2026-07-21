@@ -10,6 +10,7 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,19 +21,23 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { Proposal, ProposalStatus } from '@kbn/pnd-common';
+import { isHttpFetchError } from '@kbn/core-http-browser';
+import type { Proposal } from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigation, useInvestigationProposals } from '../../hooks/use_investigations_api';
 import * as i18n from './translations';
 
-const ProposalRow: React.FC<{
-  proposal: Proposal;
-  onStatusChange: (proposalId: string, status: ProposalStatus) => void;
-}> = ({ proposal, onStatusChange }) => (
-  <EuiPanel paddingSize="m" data-test-subj={`pndProposalRow-${proposal.id}`}>
+const ProposalRow: React.FC<{ proposal: Proposal; isSelected: boolean }> = ({
+  proposal,
+  isSelected,
+}) => (
+  <EuiPanel
+    paddingSize="m"
+    color={isSelected ? 'primary' : 'plain'}
+    data-test-subj={`pndProposalRow-${proposal.id}`}
+  >
     <EuiText size="s">
       <p>
         <strong>{proposal.summary}</strong>
@@ -42,17 +47,17 @@ const ProposalRow: React.FC<{
     <EuiSpacer size="s" />
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiButton size="s" onClick={() => onStatusChange(proposal.id, 'approved')}>
+        <EuiButton size="s" disabled>
           {i18n.ACTION_APPROVE}
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton size="s" color="text" onClick={() => onStatusChange(proposal.id, 'modified')}>
+        <EuiButton size="s" color="text" disabled>
           {i18n.ACTION_MODIFY}
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty size="s" onClick={() => onStatusChange(proposal.id, 'dismissed')}>
+        <EuiButtonEmpty size="s" disabled>
           {i18n.ACTION_DISMISS}
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -61,25 +66,22 @@ const ProposalRow: React.FC<{
 );
 
 export const InvestigationDetailPage: React.FC = () => {
-  const { services } = useKibana();
   const { id, proposalId } = useParams<{ id: string; proposalId?: string }>();
-  const { data, isLoading, error } = useInvestigation(id);
+  const { data, isLoading, error, refetch } = useInvestigation(id);
   const proposalsQuery = useInvestigationProposals(id);
-  const [localStatuses, setLocalStatuses] = useState<Record<string, ProposalStatus>>({});
   const [selectedTabId, setSelectedTabId] = useState('overview');
   usePndDocTitle(data?.investigation?.title ?? i18n.PAGE_TITLE);
 
   useEffect(() => {
-    setLocalStatuses({});
     setSelectedTabId(proposalId ? 'proposals' : 'overview');
   }, [id, proposalId]);
 
-  const proposals = useMemo(() => {
-    return (proposalsQuery.data?.proposals ?? []).map((proposal) => ({
-      ...proposal,
-      status: localStatuses[proposal.id] ?? proposal.status,
-    }));
-  }, [localStatuses, proposalsQuery.data?.proposals]);
+  const proposals = useMemo(
+    () => proposalsQuery.data?.proposals ?? [],
+    [proposalsQuery.data?.proposals]
+  );
+  const hasRequestedProposal =
+    !proposalId || proposals.some((proposal) => proposal.id === proposalId);
 
   useEffect(() => {
     if (!proposalId) {
@@ -91,11 +93,6 @@ export const InvestigationDetailPage: React.FC = () => {
     }
   }, [proposalId, proposals]);
 
-  const onStatusChange = (nextProposalId: string, status: ProposalStatus) => {
-    setLocalStatuses((current) => ({ ...current, [nextProposalId]: status }));
-    services.notifications?.toasts.addSuccess(i18n.STATUS_UPDATED);
-  };
-
   if (isLoading) {
     return (
       <PndPageSection>
@@ -104,11 +101,29 @@ export const InvestigationDetailPage: React.FC = () => {
     );
   }
 
-  if (error || !data?.investigation) {
+  const isNotFound =
+    (isHttpFetchError(error) && error.response?.status === 404) || (!error && !data?.investigation);
+
+  if (isNotFound) {
     return (
       <PndPageSection>
         <PndPageHeader title={i18n.PAGE_TITLE} backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }} />
         <EuiEmptyPrompt iconType="alert" title={<h2>{i18n.NOT_FOUND}</h2>} />
+      </PndPageSection>
+    );
+  }
+
+  if (error || !data?.investigation) {
+    return (
+      <PndPageSection>
+        <PndPageHeader title={i18n.PAGE_TITLE} backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }} />
+        <EuiEmptyPrompt
+          iconType="error"
+          color="danger"
+          title={<h2>{i18n.LOAD_ERROR_TITLE}</h2>}
+          body={<p>{i18n.LOAD_ERROR_BODY}</p>}
+          actions={<EuiButton onClick={() => refetch()}>{i18n.RETRY}</EuiButton>}
+        />
       </PndPageSection>
     );
   }
@@ -137,12 +152,30 @@ export const InvestigationDetailPage: React.FC = () => {
       content: (
         <>
           <EuiSpacer size="m" />
-          {proposals.map((proposal) => (
-            <React.Fragment key={proposal.id}>
-              <ProposalRow proposal={proposal} onStatusChange={onStatusChange} />
-              <EuiSpacer size="m" />
-            </React.Fragment>
-          ))}
+          <EuiCallOut title={i18n.DECISIONS_UNAVAILABLE} iconType="info" />
+          <EuiSpacer size="m" />
+          {proposalsQuery.isLoading ? (
+            <EuiLoadingSpinner size="l" aria-label={i18n.LOADING_PROPOSALS} />
+          ) : null}
+          {proposalsQuery.error ? (
+            <EuiEmptyPrompt
+              iconType="error"
+              color="danger"
+              title={<h3>{i18n.PROPOSALS_LOAD_ERROR}</h3>}
+              actions={<EuiButton onClick={() => proposalsQuery.refetch()}>{i18n.RETRY}</EuiButton>}
+            />
+          ) : null}
+          {!proposalsQuery.isLoading && !proposalsQuery.error && !hasRequestedProposal ? (
+            <EuiEmptyPrompt iconType="alert" title={<h3>{i18n.PROPOSAL_NOT_FOUND}</h3>} />
+          ) : null}
+          {!proposalsQuery.isLoading && !proposalsQuery.error && hasRequestedProposal
+            ? proposals.map((proposal) => (
+                <React.Fragment key={proposal.id}>
+                  <ProposalRow proposal={proposal} isSelected={proposal.id === proposalId} />
+                  <EuiSpacer size="m" />
+                </React.Fragment>
+              ))
+            : null}
         </>
       ),
     },

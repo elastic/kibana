@@ -1,9 +1,8 @@
 version: "1"
 name: Dark Watch
 description: >
-  Dark Watch skeleton. Overnight / continuous hunt-style sweeps with
-  allow-listed autonomous actions. Scheduled interval is a stand-in until richer
-  window triggers exist.
+  Dark Watch skeleton. Continuous, technology-aware hunting with overnight UTC
+  sweeps and reviewable findings.
 enabled: true
 tags:
   - watch
@@ -11,17 +10,22 @@ tags:
 triggers:
   - type: scheduled
     with:
-      every: "60m"
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: UTC
+        byhour: [22, 23, 0, 1, 2, 3, 4, 5]
+        byminute: [0]
   - type: manual
 steps:
   - name: watch_policy
     type: data.set
     with:
       watch:
-        mandate: Overnight autonomous response
-        autonomyLevel: 5
+        mandate: Continuous, technology-aware hunting for relevant threats and coverage gaps
+        autonomyLevel: 2
         handoff: brief
-        onDemand: false
+        onDemand: true
         draft: false
         cadence: sweep
         every: 60
@@ -36,10 +40,10 @@ steps:
         scopes:
           - name: Mail · IdP
             access: full
-            label: Read + act
+            label: Read + monitor
           - name: Edge / VPN
             access: full
-            label: Read + act
+            label: Read + monitor
           - name: Customer data
             access: denied
             label: No access

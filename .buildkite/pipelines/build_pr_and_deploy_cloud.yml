@@ -80,7 +80,7 @@ steps:
           machineType: c2-standard-16
           preemptible: true
           diskSizeGb: 150
-        timeout_in_minutes: 30
+        timeout_in_minutes: 60
         depends_on: build
         retry:
           automatic:

@@ -83,11 +83,6 @@ const asHandoff = (value: unknown): ScheduleHandoff => {
   return 'none';
 };
 
-const asCadence = (value: unknown): ScheduleCadence => {
-  if (value === 'stream' || value === 'sweep' || value === 'manual') return value;
-  return 'manual';
-};
-
 const asMode = (value: unknown): ScheduleMode => {
   if (value === 'always' || value === 'window' || value === 'demand') return value;
   return 'demand';
@@ -97,7 +92,11 @@ export const extractWatchPolicy = (
   definition: WorkflowYaml | null | undefined
 ): WatchAgentStepAttrs | undefined => {
   if (!definition?.steps) return undefined;
-  for (const step of definition.steps) {
+  const policyStep = definition.steps.find(
+    (step) => (step as { name?: unknown }).name === 'watch_policy'
+  );
+  const candidateSteps = policyStep ? [policyStep] : definition.steps;
+  for (const step of candidateSteps) {
     const withBlock = (step as { with?: unknown }).with;
     if (!isRecord(withBlock)) continue;
     const watch = withBlock.watch;
@@ -107,10 +106,10 @@ export const extractWatchPolicy = (
   return undefined;
 };
 
-const mapTriggerType = (raw: string | undefined): WorkflowTriggerType => {
+export const normalizeWorkflowTriggerType = (raw: string | undefined): WorkflowTriggerType => {
   if (raw === 'scheduled' || raw === 'schedule') return 'schedule';
-  if (raw === 'alert' || raw === 'event') return 'event';
-  return 'manual';
+  if (!raw || raw === 'manual') return 'manual';
+  return 'event';
 };
 
 export const projectTriggers = (
@@ -118,7 +117,7 @@ export const projectTriggers = (
 ): WatchTriggerProjection[] => {
   const triggers = definition?.triggers ?? [];
   return triggers.map((trigger) => {
-    const type = mapTriggerType(trigger.type);
+    const type = normalizeWorkflowTriggerType(trigger.type);
     const triggerRecord = trigger as Record<string, unknown>;
     const withBlock = isRecord(triggerRecord.with) ? triggerRecord.with : {};
     let summary = String(trigger.type ?? 'manual');
@@ -140,17 +139,14 @@ export const projectSchedule = (
   const hasSchedule = triggers.some((t) => t.type === 'schedule');
   const hasEvent = triggers.some((t) => t.type === 'event');
   const hasManual = triggers.some((t) => t.type === 'manual');
-  const onDemand = policy?.onDemand ?? (hasManual && !hasSchedule && !hasEvent);
+  const manualOnly = hasManual && !hasSchedule && !hasEvent;
+  const onDemand = manualOnly || (policy?.onDemand ?? false);
 
   let mode: ScheduleMode = 'demand';
-  if (policy?.mode) {
-    mode = asMode(policy.mode);
-  } else if (hasEvent && !hasSchedule) {
+  if (hasSchedule) {
+    mode = policy?.mode ? asMode(policy.mode) : 'window';
+  } else if (hasEvent) {
     mode = 'always';
-  } else if (hasSchedule) {
-    mode = 'window';
-  } else if (onDemand) {
-    mode = 'demand';
   }
 
   const set = !asBoolean(policy?.draft, false) && mode !== 'demand';
@@ -161,7 +157,7 @@ export const projectSchedule = (
     from: asNumber(policy?.from, 8),
     to: asNumber(policy?.to, 18),
     onDemand,
-    cadence: asCadence(policy?.cadence ?? (hasSchedule ? 'sweep' : hasEvent ? 'stream' : 'manual')),
+    cadence: hasSchedule ? 'sweep' : hasEvent ? 'stream' : 'manual',
     every: asNumber(policy?.every, 60),
     handoff: asHandoff(policy?.handoff),
   };
@@ -192,6 +188,20 @@ const walkSteps = (steps: unknown, visit: (step: Record<string, unknown>) => voi
     visit(step);
     walkSteps(step.steps, visit);
     walkSteps(step.else, visit);
+    if (Array.isArray(step.cases)) {
+      for (const branchCase of step.cases) {
+        if (isRecord(branchCase)) {
+          walkSteps(branchCase.steps, visit);
+        }
+      }
+    }
+    if (Array.isArray(step.branches)) {
+      for (const branch of step.branches) {
+        if (isRecord(branch)) {
+          walkSteps(branch.steps, visit);
+        }
+      }
+    }
   }
 };
 

@@ -151,18 +151,36 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
   retry 5 60 ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json > "$ECCTL_LOGS"
 
   echo "Enabling verbose logging..."
-  # Preserve PR-specific settings from deploy.json (e.g. xpack.pnd.enabled) when
-  # applying verbose logging — a bare assignment would wipe user_settings_yaml.
   ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
-    .resources.kibana[0].plan.kibana.user_settings_yaml = "logging.root.level: all\nxpack.pnd.enabled: true"
+    def ensure_setting($pattern; $key; $value):
+      if test("(?m)^" + $pattern + ":") then
+        sub("(?m)^" + $pattern + ":.*$"; $key + ": " + $value)
+      else
+        . + (if length == 0 or endswith("\n") then "" else "\n" end) + $key + ": " + $value + "\n"
+      end;
+    .resources.kibana[0].plan.kibana.user_settings_yaml = (
+      (.resources.kibana[0].plan.kibana.user_settings_yaml // "")
+      | ensure_setting("logging\\.root\\.level"; "logging.root.level"; "all")
+      | ensure_setting("xpack\\.pnd\\.enabled"; "xpack.pnd.enabled"; "true")
+    )
     ' > /tmp/verbose_logging.json
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/verbose_logging.json > "$ECCTL_LOGS"
 else
   ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
+    def ensure_setting($pattern; $key; $value):
+      if test("(?m)^" + $pattern + ":") then
+        sub("(?m)^" + $pattern + ":.*$"; $key + ": " + $value)
+      else
+        . + (if length == 0 or endswith("\n") then "" else "\n" end) + $key + ": " + $value + "\n"
+      end;
     .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
     (.. | select(.version? != null).version) = "'$VERSION'" |
     (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.zone_count != null) | .zone_count) = '$ES_ZONE_COUNT' |
-    (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.id == "hot_content") | .size.value) = '$ES_HOT_TIER_MEMORY_SIZE'
+    (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.id == "hot_content") | .size.value) = '$ES_HOT_TIER_MEMORY_SIZE' |
+    .resources.kibana[0].plan.kibana.user_settings_yaml = (
+      (.resources.kibana[0].plan.kibana.user_settings_yaml // "")
+      | ensure_setting("xpack\\.pnd\\.enabled"; "xpack.pnd.enabled"; "true")
+    )
     ' > /tmp/deploy.json
 
   # Verify that zone_count was set (at least one topology element should have zone_count)

@@ -21,9 +21,9 @@ Restart Kibana after changing config, then open `/app/pnd` (or use the Security 
 
 Before enabling live projection in shared or production environments:
 
-- PND watch routes currently authorize with **`pnd_read` only** and call Workflows Management APIs without composing Workflows `read` / `readManaged` / `readExecution` privileges.
-- A follow-up must pass the user `KibanaRequest` (or equivalent `authzResult` checks) into the watch projection layer so `pnd_read` does not bypass Workflows RBAC.
-- Until that lands, keep `useMockData: true` outside local development.
+- Live watch routes require **`pnd_read` + Workflows `read` + `readManaged`** (same pair Workflows uses for managed reads). Execution privileges are not required at the route gate; recent-run enrichment soft-fails when unavailable.
+- A follow-up should still pass the user `KibanaRequest` (or `authzResult`) into the watch projection layer so managed/execution reads are enforced inside Workflows Management calls, not only at the PND route boundary.
+- Until request-scoped Workflows authz lands in projection, prefer `useMockData: true` outside local development.
 
 ## Chrome strategy (PR1)
 
@@ -126,4 +126,15 @@ node scripts/regenerate_moon_projects.js --update --filter @kbn/pnd-plugin
 node scripts/type_check --project x-pack/solutions/security/plugins/pnd/tsconfig.json
 node scripts/jest x-pack/solutions/security/plugins/pnd/public/components/app_chrome/pnd_chrome.test.tsx
 node scripts/jest x-pack/solutions/security/packages/kbn-pnd-common
+```
+
+### Page-load budget
+
+Keep `pageLoadAssetSize.pnd` lean — prefer a thin plugin entry over raising the optimizer limit. Keep the app UI behind `import('./application')` in `public/plugin.ts`. The shared package (`@kbn/pnd-common`) must use an **explicit export allow-list** in `index.ts` — never `export *` for schemas/samples. Star re-exports defeat optimizer tree-shaking and can pull Zod + mock catalogs into the page-load bundle even when the plugin only imports a few constants.
+
+Measure with:
+
+```bash
+node scripts/build_kibana_platform_plugins.js --filter pnd --dist --no-cache --no-examples
+# inspect …/pnd/target/public/metrics.json → "page load bundle size"
 ```

@@ -101,23 +101,25 @@ export class PndPlugin
       return {};
     }
 
-    void (async () => {
-      const { failedIds } = await installStatic({
-        enabled: this.config.enabled,
-        workflowsExtensions: plugins.workflowsExtensions,
-        logger: this.logger,
-      });
-
-      if (failedIds.length > 0) {
-        this.logger.warn(
-          `PND managed watch install incomplete — failed ids: ${failedIds.join(', ')}`
-        );
-      }
-    })();
+    const installationReady = installStatic({
+      enabled: this.config.enabled,
+      workflowsExtensions: plugins.workflowsExtensions,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `PND managed watch installation failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
 
     if (!this.config.ui.useMockData && this.workflowsManagementApi != null) {
       const managementClient = new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi);
-      this.watchProjection = new WatchWorkflowProjectionServiceImpl(managementClient, this.logger);
+      this.watchProjection = new WatchWorkflowProjectionServiceImpl(
+        managementClient,
+        this.logger,
+        installationReady
+      );
     }
 
     return {};

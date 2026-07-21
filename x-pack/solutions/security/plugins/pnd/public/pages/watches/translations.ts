@@ -158,6 +158,10 @@ export const LOAD_ERROR_BODY = i18n.translate('xpack.pnd.watches.loadError.body'
   defaultMessage: 'Something went wrong while fetching the watch catalog.',
 });
 
+export const STALE_DATA_WARNING = i18n.translate('xpack.pnd.watches.staleDataWarning', {
+  defaultMessage: 'The latest refresh failed. Showing the most recently loaded watch data.',
+});
+
 export const RETRY = i18n.translate('xpack.pnd.watches.retry', {
   defaultMessage: 'Retry',
 });

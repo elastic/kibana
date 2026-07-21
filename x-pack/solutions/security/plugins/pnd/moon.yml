@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod

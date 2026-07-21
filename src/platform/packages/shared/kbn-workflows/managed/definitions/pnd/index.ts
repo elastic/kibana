@@ -57,7 +57,7 @@ export const PND_WATCH_DARK_WORKFLOW = {
   id: PND_WATCH_DARK_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 4,
+  version: 5,
   visibility: VISIBILITY,
   yaml: WATCH_DARK_YAML,
 } as const satisfies ManagedWorkflowDefinition;

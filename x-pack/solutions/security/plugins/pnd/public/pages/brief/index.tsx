@@ -107,6 +107,13 @@ const BriefCard: React.FC<{
                 <EuiBadge color="hollow">{i18n.IN_MOTION}</EuiBadge>
               </EuiFlexItem>
             ) : null}
+            {investigation.pendingProposalCount > 0 ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">
+                  {i18n.pendingProposalsLabel(investigation.pendingProposalCount)}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow />
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">

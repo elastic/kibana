@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   EuiButton,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -83,7 +84,7 @@ export const WatchesPage: React.FC = () => {
           </EuiFlexGroup>
         ) : null}
 
-        {error ? (
+        {error && !data ? (
           <EuiEmptyPrompt
             iconType="error"
             color="danger"
@@ -99,6 +100,12 @@ export const WatchesPage: React.FC = () => {
 
         {data ? (
           <>
+            {error ? (
+              <>
+                <EuiCallOut color="warning" iconType="warning" title={i18n.STALE_DATA_WARNING} />
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
             <CoverageStrip watches={data.watches} onSelectWatch={onSelectWatch} />
             <EuiSpacer size="l" />
             <EuiFlexGroup alignItems="baseline" gutterSize="s">
