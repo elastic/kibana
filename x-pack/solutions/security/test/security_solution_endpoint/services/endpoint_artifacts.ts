@@ -73,9 +73,10 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
     /**
      * Deletes an artifact list along with all of its items (if any).
      *
-     * Uses the SO client to perform deletion in order to reduce test flakiness, in case
+     * Uses the ES client to perform deletion in order to reduce test flakiness, in case
      * a race condition or any other weird scenario results in having multiple lists with the same list_id.
-     * In those cases, exception_list API would delete only one of the lists.
+     * In those cases, exception_list API would delete only one of the lists, while SO client would delete only
+     * the first 10 items. ES client seems to be the most reliable.
      *
      * @param listId
      * @param supertest
