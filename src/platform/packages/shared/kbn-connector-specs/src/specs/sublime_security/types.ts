@@ -184,9 +184,9 @@ export const ListMailboxesInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(1)
-      .max(100)
+      .max(500)
       .default(20)
-      .describe('Maximum number of mailboxes to return (1-100, default 20)'),
+      .describe('Maximum number of mailboxes to return (1-500, default 20)'),
     offset: z.number().int().min(0).default(0).describe('Zero-based offset for pagination'),
   })
 );
