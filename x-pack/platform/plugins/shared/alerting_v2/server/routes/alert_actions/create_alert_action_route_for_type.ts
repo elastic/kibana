@@ -12,8 +12,12 @@ import {
   type CreateAlertActionParams,
 } from '@kbn/alerting-v2-schemas';
 import { Request, type RouteDefinition } from '@kbn/core-di-server';
-import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import type {
+  KibanaRequest,
+  RouteConfigOptions,
+  RouteMethod,
+  RouteSecurity,
+} from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import type { z } from '@kbn/zod/v4';
 import { AlertActionsClient } from '../../lib/alert_actions_client';
@@ -30,6 +34,7 @@ interface CreateAlertActionRouteForTypeOptions<
   bodySchema: z.ZodType<
     Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>
   >;
+  oasOperationObject?: RouteConfigOptions<RouteMethod>['oasOperationObject'];
 }
 
 export const createAlertActionRouteForType = <
@@ -38,6 +43,7 @@ export const createAlertActionRouteForType = <
   actionType,
   pathSuffix,
   bodySchema,
+  oasOperationObject,
 }: CreateAlertActionRouteForTypeOptions<TAction>): RouteDefinition<
   CreateAlertActionParams,
   unknown,
@@ -58,11 +64,12 @@ export const createAlertActionRouteForType = <
     static routeOptions = {
       summary: `Create an alert ${pathSuffix} action`,
       description: 'Create an action for a specific alert group.',
-    };
-    static validate = {
+      oasOperationObject,
+    } as const;
+    static schemas = {
       request: {
-        params: buildRouteValidationWithZod(createAlertActionParamsSchema),
-        body: buildRouteValidationWithZod(bodySchema),
+        params: createAlertActionParamsSchema,
+        body: bodySchema,
       },
       response: {
         204: {
@@ -77,7 +84,7 @@ export const createAlertActionRouteForType = <
           description: 'Indicates the alert event was not found.',
         },
       },
-    } as const;
+    };
 
     protected readonly routeName = `create alert ${pathSuffix} action`;
 
