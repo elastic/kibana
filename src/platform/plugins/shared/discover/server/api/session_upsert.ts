@@ -26,14 +26,16 @@ export const upsertDiscoverSession = async (
   const { core } = await requestContext.resolve(['core']);
   const { attributes, references } = transformDiscoverSessionIn(data);
 
+  // Check whether the session exists (standard or legacy) so the ID is validated only when creating it.
   try {
     await core.savedObjects.client.get<DiscoverSessionAttributes>(SavedSearchType, id);
   } catch (error) {
+    // Only a missing session indicates creation; propagate all other lookup errors.
     if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
       throw error;
     }
 
-    // Preserve legacy IDs on updates, but enforce the current format for new sessions.
+    // Creating a session with an invalid legacy ID returns a 400 response.
     asCodeIdSchema.validate(id);
   }
 

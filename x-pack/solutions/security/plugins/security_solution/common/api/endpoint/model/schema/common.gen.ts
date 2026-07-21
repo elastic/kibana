@@ -40,13 +40,13 @@ export type PageSize = z.infer<typeof PageSize>;
 /**
  * A start date in ISO 8601 format or Date Math format.
  */
-export const StartDate = lazySchema(() => z.string());
+export const StartDate = lazySchema(() => z.string().max(64));
 export type StartDate = z.infer<typeof StartDate>;
 
 /**
  * An end date in ISO format or Date Math format.
  */
-export const EndDate = lazySchema(() => z.string());
+export const EndDate = lazySchema(() => z.string().max(64));
 export type EndDate = z.infer<typeof EndDate>;
 
 /**
@@ -101,7 +101,7 @@ export const SortFieldEnum = SortField.enum;
  * A list of agent IDs. Max of 250.
  */
 export const AgentIds = lazySchema(() =>
-  z.union([z.array(z.string().min(1)).min(1).max(250), z.string().min(1)])
+  z.union([z.array(z.string().min(1).max(256)).min(1).max(250), z.string().min(1).max(256)])
 );
 export type AgentIds = z.infer<typeof AgentIds>;
 
@@ -158,7 +158,7 @@ export type Statuses = z.infer<typeof Statuses>;
  * A list of user IDs. Max of 50.
  */
 export const UserIds = lazySchema(() =>
-  z.union([z.array(z.string().min(1)).min(1).max(50), z.string().min(1)])
+  z.union([z.array(z.string().min(1).max(256)).min(1).max(50), z.string().min(1).max(256)])
 );
 export type UserIds = z.infer<typeof UserIds>;
 
@@ -166,7 +166,7 @@ export type UserIds = z.infer<typeof UserIds>;
  * A list of action IDs that should include the complete output of the action. Max of 50.
  */
 export const WithOutputs = lazySchema(() =>
-  z.union([z.array(z.string().min(1)).min(1).max(50), z.string().min(1)])
+  z.union([z.array(z.string().min(1).max(256)).min(1).max(50), z.string().min(1).max(256)])
 );
 export type WithOutputs = z.infer<typeof WithOutputs>;
 
@@ -187,13 +187,13 @@ export type Types = z.infer<typeof Types>;
 /**
  * List of endpoint IDs (cannot contain empty strings). Max of 250.
  */
-export const EndpointIds = lazySchema(() => z.array(z.string().min(1)).min(1).max(250));
+export const EndpointIds = lazySchema(() => z.array(z.string().min(1).max(256)).min(1).max(250));
 export type EndpointIds = z.infer<typeof EndpointIds>;
 
 /**
  * Optional comment
  */
-export const Comment = lazySchema(() => z.string());
+export const Comment = lazySchema(() => z.string().max(30000));
 export type Comment = z.infer<typeof Comment>;
 
 /**
@@ -218,11 +218,11 @@ export const BaseActionSchema = lazySchema(() =>
     /**
      * If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
      */
-    alert_ids: z.array(z.string().min(1)).min(1).max(50).optional(),
+    alert_ids: z.array(z.string().min(1).max(256)).min(1).max(50).optional(),
     /**
      * The IDs of cases where the action taken will be logged. Max of 50.
      */
-    case_ids: z.array(z.string().min(1)).min(1).max(50).optional(),
+    case_ids: z.array(z.string().min(1).max(256)).min(1).max(50).optional(),
     comment: Comment.optional(),
     parameters: Parameters.optional(),
     agent_type: AgentTypes.optional(),
