@@ -26,6 +26,7 @@ import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import { canShowSavedQuery } from './lib/can_show_saved_query';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 export interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -36,6 +37,7 @@ export interface StatefulSearchBarDeps {
   kql: { autocomplete: KqlPluginStart['autocomplete'] };
   cps: CPSPluginStart;
   esql?: EsqlPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = Omit<
@@ -171,6 +173,7 @@ export function createSearchBar({
   kql,
   cps,
   esql,
+  licensing
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -245,6 +248,7 @@ export function createSearchBar({
           kql,
           cps,
           esql,
+          licensing,
           ...core,
         }}
       >
