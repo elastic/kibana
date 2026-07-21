@@ -8,6 +8,7 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
+import { getAiIndexJsonSchema } from '@kbn/context-engine-plugin/common/http_api/ai_index_schema';
 import content from './ki_automation_generation.skill.md.text';
 import indexSelectionReferenceYaml from './index_selection_reference.yaml.text';
 
@@ -24,6 +25,11 @@ export const kiAutomationGenerationSkill = defineSkillType({
       name: 'index-selection-reference-workflow',
       relativePath: '.',
       content: indexSelectionReferenceYaml,
+    },
+    {
+      name: 'ai-index-schema',
+      relativePath: '.',
+      content: JSON.stringify(getAiIndexJsonSchema(), null, 2),
     },
   ],
   getRegistryTools: () => [
