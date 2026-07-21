@@ -264,6 +264,7 @@ export type DashboardInternalApi = ReturnType<
   publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   publishVariables: () => void;
+  checkApproximateLicense: () => boolean;
 };
 
 export interface DashboardUser {

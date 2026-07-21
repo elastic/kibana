@@ -67,6 +67,7 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
@@ -124,6 +125,7 @@ export interface DashboardStartDependencies {
   lens?: LensPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   cps?: CPSPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 export interface DashboardSetup {

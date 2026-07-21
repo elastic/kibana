@@ -29,6 +29,7 @@ import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin'
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DashboardStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
@@ -38,6 +39,7 @@ export let dataService: DataPublicPluginStart;
 export let dataViewEditorService: DataViewEditorStart;
 export let embeddableService: EmbeddableStart;
 export let fieldFormatService: FieldFormatsStart;
+export let licensingService: LicensingPluginStart | undefined;
 export let navigationService: NavigationPublicPluginStart;
 export let noDataPageService: NoDataPagePluginStart | undefined;
 export let observabilityAssistantService: ObservabilityAIAssistantPublicStart | undefined;
@@ -66,6 +68,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   dataViewEditorService = deps.dataViewEditor;
   embeddableService = deps.embeddable;
   fieldFormatService = deps.fieldFormats;
+  licensingService = deps.licensing;
   navigationService = deps.navigation;
   noDataPageService = deps.noDataPage;
   observabilityAssistantService = deps.observabilityAIAssistant;

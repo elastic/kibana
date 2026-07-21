@@ -12,6 +12,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, concatMap, merge, of, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 import type { EuiFlyoutProps } from '@elastic/eui';
+import type { ILicense } from '@kbn/licensing-types';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardState } from '../../common/types';
 import { initializeAccessControlManager } from './access_control_manager';
@@ -56,6 +57,7 @@ export function getDashboardApi({
   savedObjectId,
   user,
   isAccessControlEnabled,
+  license,
 }: {
   creationOptions?: DashboardCreationOptions;
   panelFlyoutType?: EuiFlyoutProps['type'];
@@ -65,6 +67,7 @@ export function getDashboardApi({
   savedObjectId?: string;
   user?: DashboardUser;
   isAccessControlEnabled?: boolean;
+  license?: ILicense;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
@@ -143,7 +146,7 @@ export function getDashboardApi({
     settingsManager.api.projectRoutingRestore$
   );
 
-  const approximationManager = initializeApproximationManager(initialState);
+  const approximationManager = initializeApproximationManager(initialState, license);
 
   function setState(state: DashboardState) {
     layoutManager.internalApi.reset(state);
@@ -327,6 +330,7 @@ export function getDashboardApi({
     ...unifiedSearchManager.internalApi,
     ...unsavedChangesManager.internalApi,
     ...esqlVariablesManager.api,
+    checkApproximateLicense: approximationManager.internalApi.checkApproximateLicense,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
   };

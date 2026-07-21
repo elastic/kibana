@@ -10,19 +10,25 @@
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatestWith, debounceTime, map, skip, startWith } from 'rxjs';
+import type { ILicense } from '@kbn/licensing-types';
 import type { DashboardState } from '../../common';
 
-export function initializeApproximationManager(initialState: DashboardState) {
-  const isApproximate$ = new BehaviorSubject<boolean>(initialState.esql_approximation ?? false);
+export function initializeApproximationManager(initialState: DashboardState, license?: ILicense) {
+  const isValidLicense = Boolean(license && license.isActive && license.hasAtLeast('enterprise'));
 
-  function setEsqlApproximation(value: boolean) {
+  const isApproximate$ = new BehaviorSubject<boolean>(
+    isValidLicense ? initialState.esql_approximation ?? false : false
+  );
+
+  function setEsqlApproximation(_value: boolean) {
+    const value = isValidLicense ? _value : false;
     if (value !== isApproximate$.value) {
       isApproximate$.next(value);
     }
   }
 
   const comparators: StateComparators<Pick<DashboardState, 'esql_approximation'>> = {
-    esql_approximation: 'referenceEquality',
+    esql_approximation: (a, b) => (isValidLicense ? a === b : true),
   };
 
   const getState = (): Pick<DashboardState, 'esql_approximation'> => ({
@@ -56,6 +62,7 @@ export function initializeApproximationManager(initialState: DashboardState) {
           })
         );
       },
+      checkApproximateLicense: () => isValidLicense,
       comparators,
       getState,
       reset: (lastSavedState: DashboardState) => {

@@ -40,7 +40,8 @@
       "observabilityAIAssistant",
       "lens",
       "security",
-      "cps"
+      "cps",
+      "licensing",
     ],
     "requiredBundles": [
       "kibanaReact",

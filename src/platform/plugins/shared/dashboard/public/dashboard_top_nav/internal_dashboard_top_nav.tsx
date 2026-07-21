@@ -142,6 +142,10 @@ export function InternalDashboardTopNav({
     dashboardInternalApi.unpublishedEsqlVariables$
   );
 
+  const hasApproximateLicense = useMemo(
+    () => dashboardInternalApi.checkApproximateLicense(),
+    [dashboardInternalApi]
+  );
   const hasUnpublishedFilters = useMemo(() => {
     return !deepEqual(publishedChildFilters ?? [], unpublishedChildFilters ?? []);
   }, [publishedChildFilters, unpublishedChildFilters]);
@@ -494,7 +498,7 @@ export function InternalDashboardTopNav({
           esqlApproximation={{
             isApproximate: esqlApproximation ?? false,
             onChange: dashboardApi.setEsqlApproximation,
-            disabled: !hasEsqlPanel,
+            disabled: !hasApproximateLicense || !hasEsqlPanel,
             additionalText: i18n.translate('dashboard.esqlApproximationToggle.additionalText', {
               defaultMessage:
                 'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',

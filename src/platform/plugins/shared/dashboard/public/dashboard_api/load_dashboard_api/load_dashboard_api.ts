@@ -19,7 +19,7 @@ import {
   getDashboardBackupService,
   initializeDashboardApiServices,
 } from '../../services/dashboard_api_services';
-import { coreServices } from '../../services/kibana_services';
+import { coreServices, licensingService } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardUserActivityService } from '../../services/user_activity_service';
 import { getDashboardApi } from '../get_dashboard_api';
@@ -53,11 +53,12 @@ export async function loadDashboardApi({
     }
   });
 
-  const [readResult, user, isAccessControlEnabled] = savedObjectId
+  const [readResult, user, isAccessControlEnabled, license] = savedObjectId
     ? await Promise.all([
         dashboardClient.get(savedObjectId),
         getUserAccessControlData(),
         getAccessControlClient().isAccessControlEnabled(),
+        licensingService ? licensingService?.getLicense() : undefined,
       ])
     : [undefined, undefined, undefined];
 
@@ -101,6 +102,7 @@ export async function loadDashboardApi({
     savedObjectId,
     user,
     isAccessControlEnabled,
+    license,
   });
   const userActivityService = getDashboardUserActivityService(api);
 
