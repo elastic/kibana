@@ -12,6 +12,7 @@ import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_c
 import { IntegrationRetriever } from './integration_retriever';
 import { PrebuiltRulesRetriever } from './prebuilt_rules_retriever';
 import { RuleResourceRetriever } from './rule_resource_retriever';
+import { getElserErrorMessage } from './get_elser_error_message';
 
 export interface RuleMigrationsRetrieverDeps {
   data: RuleMigrationsDataClient;
@@ -44,20 +45,29 @@ export class RuleMigrationsRetriever {
   }
 
   private async populateElserIndices() {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     try {
       await Promise.race([
         Promise.all([this.prebuiltRules.populateIndex(), this.integrations.populateIndex()]),
         new Promise((_, reject) => {
-          setTimeout(
+          timeoutId = setTimeout(
             () => reject(new Error(`Timeout (${POPULATE_ELSER_INDICES_TIMEOUT_MIN}m)`)),
             POPULATE_ELSER_INDICES_TIMEOUT_MIN * 60 * 1000
           );
         }),
       ]);
     } catch (err) {
-      throw new Error(
-        `Failed to populate ELSER indices. Make sure the ELSER model is deployed and running at Machine Learning > Trained Models. ${err}`
-      );
+      const elserMessage = getElserErrorMessage(err);
+      if (elserMessage) {
+        throw new Error(elserMessage);
+      }
+      throw err;
+    } finally {
+      // Clear the timeout timer so it does not keep the event loop alive once the
+      // populate has settled (either resolved or rejected).
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     }
   }
 
