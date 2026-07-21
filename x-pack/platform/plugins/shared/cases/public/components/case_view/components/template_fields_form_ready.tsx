@@ -50,12 +50,12 @@ const parseCheckboxItems = (value: unknown): string[] => {
  * with a 400. Returning `undefined` here lets the required-field check surface the gap
  * to the user so they can re-pick before confirming the template switch.
  *
- * TOGGLE is also validated here: all keyword-typed controls (SELECT_BASIC, RADIO_GROUP,
- * INPUT_TEXT, TOGGLE, …) share a field-key namespace, so a value carried over from a
- * different control type (e.g. `"high"` from a SELECT) into a TOGGLE field would pass
- * client validation but be rejected by the server (`must be either true or false`).
- * The toggle's valid domain — `true | false | 'true' | 'false'` — is template-independent,
- * so legitimate toggle values are always preserved.
+ * TOGGLE is also validated here as a defensive guard: a toggle's valid domain is
+ * `true | false | 'true' | 'false'`, so any other carried-over value (e.g. a stale or
+ * hand-edited `"high"`) would pass client validation but be rejected by the server
+ * (`must be either true or false`). A toggle now stores under its own `_as_boolean`
+ * key, so it can no longer collide with a keyword control's `_as_keyword` value, but the
+ * domain check is cheap and keeps a malformed value from reaching the server.
  *
  * Controls whose valid domain is template-independent and whose values cannot conflict
  * across control types (INPUT_TEXT, TEXTAREA, INPUT_NUMBER, DATE_PICKER, USER_PICKER)
@@ -78,9 +78,9 @@ const sanitizeExistingValue = (field: InlineField, existingValue: unknown): unkn
   }
 
   if (field.control === FieldType.TOGGLE) {
-    // A toggle only ever stores 'true' | 'false'. A value inherited under the same
-    // field key from a different keyword-typed control (e.g. a SELECT storing 'high')
-    // would pass client validation but be rejected by the server with a 400.
+    // A toggle only ever stores 'true' | 'false'. Guard against any other value (e.g. a
+    // stale or hand-edited 'high') that would pass client validation but be rejected by
+    // the server with a 400.
     return existingValue === true ||
       existingValue === false ||
       existingValue === 'true' ||
