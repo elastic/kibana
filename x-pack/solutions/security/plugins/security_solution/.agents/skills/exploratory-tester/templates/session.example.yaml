@@ -1,0 +1,79 @@
+# Exploratory-tester session input file
+# Copy this file, fill in the values, and invoke the skill with:
+#   Session-config: <path-to-this-file>
+#
+# All fields except `area` and `flows` are optional.
+# Fields marked [optional] can be removed entirely or left blank.
+
+# The Kibana Security Solution feature area under test.
+area: Entity Analytics
+
+# [optional] single (default) or parallel.
+# parallel mode: flows run in isolated spaces concurrently;
+# requires knowledge/<area-slug>.md to be populated from a prior session.
+mode: single
+
+# Flows to exercise. Each flow needs at minimum a name.
+flows:
+  - name: Happy path — <short description>
+    # entry: Navigation path or UI entry point (optional).
+    entry: Security → <page> → <element>
+    # expected: The correct outcome in one sentence (optional).
+    expected: <what should happen when everything works correctly>
+    # timeout: Per-flow time budget in minutes (optional, default 4).
+    timeout: 4
+    # isolate: true runs this flow in its own space (parallel mode only; default true).
+    # Set to false to share the base space — faster but flows may interfere with each other.
+    isolate: true
+
+  # Add more flows below (copy the block above).
+
+# [optional] Connector names and/or role for the session.
+# role: platform_engineer (default) | t1_analyst | t2_analyst
+setup:
+  role: platform_engineer
+  connectors: []   # e.g. [My JIRA connector]
+
+# [optional] URL or file path to specs / acceptance criteria / PRD.
+# If provided, the agent will fetch and show the content for your safety review
+# before using it as acceptance-criteria context.
+specs: https://github.com/elastic/security-team/issues/<NUMBER>
+
+# [optional] Total session time cap in minutes (default 90).
+session-timeout: 90
+
+# [optional] Resume a prior session by pointing at its directory.
+# The agent will skip setup and jump straight to Phase 2.
+# session-dir: .exploratory-session/entity-analytics-20260714-093022
+
+# [optional] Environment block — omit to use an agent-managed Scout server.
+# For cloud/remote environments (ECH, ESS, self-hosted), fill this section.
+#
+# TIP: Use a saved profile instead of filling creds here every time:
+#   environment: profile <name>
+# See templates/environment-profile.example.json.
+#
+# Note: the inline environment block accepts: url, es_url, username, password, api-key, space, data-setup.
+# The JSON profile additionally stores: name, type, role, validated_at (profile metadata not used inline).
+#
+# environment:
+#   url: https://my-deployment.kb.us-east-1.aws.elastic-cloud.com
+#   # es_url is derived automatically (kb. → es.) for ECH/ESS.
+#   # Override if needed:
+#   # es_url: https://my-deployment.es.us-east-1.aws.elastic-cloud.com
+#
+#   # Browser login credentials (NOT used for API calls):
+#   username: elastic
+#   password: $KIBANA_TEST_PASSWORD   # $VAR references are resolved from env at load time
+#
+#   # Kibana-native API key (used for all curl/API setup — NOT an Elasticsearch key).
+#   # Create via: Stack Management → API Keys → Create API key (All spaces / All privileges).
+#   # Copy the "Encoded" value. On ECH/ESS, basic auth is blocked for external clients;
+#   # this key is required.
+#   api-key: $KIBANA_API_KEY   # note: hyphen (invocation syntax); JSON profiles use api_key (underscore)
+#
+#   # [optional] Space to use (default: exploratory-testing).
+#   # space: exploratory-testing
+#
+#   # [optional] Skip data setup if the environment is already seeded.
+#   # data-setup: skip
