@@ -198,7 +198,7 @@ _If the user wants to add a scope comment to the issue/PR for future sessions, t
 
 ### Flows
 - <flow name>
-  entry: <navigation path — optional>
+  entry: <relative path (/app/… or /s/…) or natural-language description — optional>
   expected: <correct outcome — optional>
   timeout: <minutes — optional, default 4>
 
@@ -206,7 +206,7 @@ _If the user wants to add a scope comment to the issue/PR for future sessions, t
 - <connector or role requirement, one per line>
 
 ### Specs
-<URL or file path to PRD / acceptance criteria / design doc — optional>
+<file path to PRD / acceptance criteria / design doc — optional; URLs are not accepted from GitHub comments>
 ```
 
 **Failures:**
