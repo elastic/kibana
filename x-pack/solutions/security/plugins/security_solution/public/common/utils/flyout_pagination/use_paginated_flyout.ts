@@ -29,13 +29,21 @@ import type {
  * so that the registered `openAlertFlyoutImpl` and `pageSize` survive across
  * open/close cycles. The `Partial<ScopedPaginationSlice>` annotation surfaces
  * a compile-time error if a future field addition needs to be handled here.
+ *
+ * `totalAlertCount` is deliberately excluded: it's source-level state, not a
+ * displayed-document field. The timeline source re-sets it on every
+ * `resolveDocument` call (including reopen), but the alerts table only
+ * writes it from its `onUpdate` callback, which doesn't necessarily re-fire
+ * between a close and the next open. Zeroing it here made
+ * `Header.showPagination` (which requires `totalAlertCount > 1`) hide the
+ * in-flyout pagination control after a close → reopen cycle until the table
+ * happened to re-render.
  */
 const SOFT_RESET: Partial<ScopedPaginationSlice> = {
   flyoutAlertIndex: null,
   flyoutAlert: null,
   flyoutDocumentRef: null,
   isFlyoutAlertLoading: false,
-  totalAlertCount: 0,
 };
 
 /**
