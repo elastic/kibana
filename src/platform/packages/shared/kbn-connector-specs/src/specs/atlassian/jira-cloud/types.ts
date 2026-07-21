@@ -97,12 +97,6 @@ export const SearchUsersInputSchema = lazySchema(() =>
       .number()
       .optional()
       .describe('Maximum number of users to return (default determined by Jira API)'),
-    property: z
-      .string()
-      .optional()
-      .describe(
-        'A query string used to search user properties. Property keys and values must not exceed 100 characters.'
-      ),
   })
 );
 export type SearchUsersInput = z.infer<typeof SearchUsersInputSchema>;

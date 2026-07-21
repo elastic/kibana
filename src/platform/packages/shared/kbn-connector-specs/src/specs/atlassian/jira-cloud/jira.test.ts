@@ -8,297 +8,173 @@
  */
 
 import type { ActionContext } from '../../../connector_spec';
+import { getConnectorSpec } from '../../../..';
 import { JiraConnector } from './jira';
 
-describe('JiraConnector', () => {
-  const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-  };
+const mockCallTool = jest.fn();
+const mockListTools = jest.fn();
 
+jest.mock('../../../lib/mcp/with_mcp_client', () => ({
+  withMcpClient: jest.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
+    return fn({ callTool: mockCallTool, listTools: mockListTools });
+  }),
+}));
+
+describe('JiraConnector', () => {
   const mockContext = {
-    client: mockClient,
+    client: {},
     log: { debug: jest.fn() },
-    config: { subdomain: 'mycompany' },
+    config: { serverUrl: 'https://mcp.atlassian.com/v1/sse' },
   } as unknown as ActionContext;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCallTool.mockResolvedValue({
+      content: [{ type: 'text', text: '{}' }],
+    });
+    mockListTools.mockResolvedValue({
+      tools: [{ name: 'get_issue' }, { name: 'search_issues_using_jql' }],
+    });
   });
 
   describe('auth', () => {
-    it('supports basic auth', () => {
-      const types = (JiraConnector.auth?.types as Array<string | { type: string }>).map((t) =>
-        typeof t === 'string' ? t : t.type
-      );
-      expect(types).toContain('basic');
+    it('supports only oauth_authorization_code', () => {
+      expect(JiraConnector.auth?.types).toHaveLength(1);
+      expect(JiraConnector.auth?.types[0]).toMatchObject({ type: 'oauth_authorization_code' });
     });
 
-    it('supports oauth_authorization_code with correct Atlassian defaults', () => {
-      const oauthType = (
-        JiraConnector.auth?.types as Array<
-          string | { type: string; defaults?: Record<string, unknown> }
-        >
-      ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
-      expect(oauthType).toBeDefined();
-      expect(oauthType).toMatchObject({
-        type: 'oauth_authorization_code',
+    it('uses Atlassian OAuth endpoints', () => {
+      expect(JiraConnector.auth?.types[0]).toMatchObject({
         defaults: {
           authorizationUrl: 'https://auth.atlassian.com/authorize',
           tokenUrl: 'https://auth.atlassian.com/oauth/token',
-          scope: 'read:jira-work read:jira-user offline_access',
         },
       });
     });
   });
 
-  describe('buildBaseUrl', () => {
-    it.each([
-      ['config is undefined', undefined],
-      ['subdomain is missing', {}],
-    ])('should throw a clear error when %s', async (_, config) => {
-      const ctx = { ...mockContext, config } as unknown as ActionContext;
-      await expect(
-        JiraConnector.actions.searchIssuesWithJql.handler(ctx, { jql: 'project = X' })
-      ).rejects.toThrow('Jira Cloud subdomain is required');
+  describe('schema', () => {
+    it('has a serverUrl field defaulting to the Atlassian MCP server', () => {
+      if (!JiraConnector.schema) throw new Error('schema not defined');
+      const parsed = JiraConnector.schema.parse({});
+      expect((parsed as { serverUrl?: string }).serverUrl).toBe('https://mcp.atlassian.com/v1/sse');
     });
+  });
+
+  it('is discoverable via getConnectorSpec', () => {
+    const spec = getConnectorSpec('.jira-cloud');
+    expect(spec).toBe(JiraConnector);
   });
 
   describe('searchIssuesWithJql action', () => {
-    it('should search issues with JQL and return response data', async () => {
-      const mockResponse = {
-        data: {
-          issues: [
-            {
-              id: '10001',
-              key: 'MYPROJ-1',
-              fields: { summary: 'Fix login bug', status: { name: 'In Progress' } },
-            },
-          ],
-          total: 1,
-        },
-      };
-      mockClient.post.mockResolvedValue(mockResponse);
-
-      const result = await JiraConnector.actions.searchIssuesWithJql.handler(mockContext, {
-        jql: 'project = MYPROJ',
-      });
-
-      expect(mockClient.post).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/rest/api/3/search/jql',
-        { jql: 'project = MYPROJ' }
-      );
-      expect(result).toEqual(mockResponse.data);
+    it('is exposed as a tool', () => {
+      expect(JiraConnector.actions.searchIssuesWithJql.isTool).toBe(true);
     });
 
-    it('should build base URL from config subdomain', async () => {
-      const mockResponse = { data: { issues: [], total: 0 } };
-      mockClient.post.mockResolvedValue(mockResponse);
-
-      const contextWithSubdomain = {
-        ...mockContext,
-        config: { subdomain: 'acme' },
-      } as unknown as ActionContext;
-
-      await JiraConnector.actions.searchIssuesWithJql.handler(contextWithSubdomain, {
-        jql: 'assignee = currentUser()',
-      });
-
-      expect(mockClient.post).toHaveBeenCalledWith(
-        'https://acme.atlassian.net/rest/api/3/search/jql',
-        { jql: 'assignee = currentUser()' }
-      );
-    });
-
-    it('should include optional maxResults and nextPageToken in the request', async () => {
-      const mockResponse = { data: { issues: [], total: 0 } };
-      mockClient.post.mockResolvedValue(mockResponse);
-
+    it('calls search_issues_using_jql with jql, max_results, and next_page_token', async () => {
       await JiraConnector.actions.searchIssuesWithJql.handler(mockContext, {
-        jql: 'status = Done',
-        maxResults: 50,
-        nextPageToken: 'page-token-abc',
+        jql: 'project = PROJ AND status = "In Progress"',
+        maxResults: 10,
+        nextPageToken: 'tok123',
       });
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/rest/api/3/search/jql',
-        {
-          jql: 'status = Done',
-          maxResults: 50,
-          nextPageToken: 'page-token-abc',
-        }
-      );
-    });
-
-    it('should use api.atlassian.com base URL when using OAuth with cloud ID', async () => {
-      const oauthContext = {
-        ...mockContext,
-        config: {
-          subdomain: 'mycompany',
-          cloudId: '11223344-a1b2-3c33-d444-ef1234567890',
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'search_issues_using_jql',
+        arguments: {
+          jql: 'project = PROJ AND status = "In Progress"',
+          max_results: 10,
+          next_page_token: 'tok123',
         },
-        secrets: { authType: 'oauth_authorization_code' },
-      } as unknown as ActionContext;
-
-      const mockResponse = { data: { issues: [], total: 0 } };
-      mockClient.post.mockResolvedValue(mockResponse);
-
-      await JiraConnector.actions.searchIssuesWithJql.handler(oauthContext, { jql: 'project = X' });
-
-      expect(mockClient.get).not.toHaveBeenCalled();
-      expect(mockClient.post).toHaveBeenCalledWith(
-        'https://api.atlassian.com/ex/jira/11223344-a1b2-3c33-d444-ef1234567890/rest/api/3/search/jql',
-        { jql: 'project = X' }
-      );
-    });
-
-    it('should throw when OAuth is used without cloud ID', async () => {
-      const oauthContext = {
-        ...mockContext,
-        secrets: { authType: 'oauth_authorization_code' },
-      } as unknown as ActionContext;
-
-      await expect(
-        JiraConnector.actions.searchIssuesWithJql.handler(oauthContext, { jql: 'project = X' })
-      ).rejects.toThrow(
-        'Jira Cloud ID is required in connector configuration when using OAuth authentication.'
-      );
+      });
     });
   });
 
   describe('getIssue action', () => {
-    it('should retrieve issue by ID and return response data', async () => {
-      const mockResponse = {
-        data: {
-          id: '10002',
-          key: 'MYPROJ-2',
-          fields: {
-            summary: 'Add login page',
-            status: { name: 'To Do' },
-            assignee: { displayName: 'Alice' },
-          },
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
+    it('is exposed as a tool', () => {
+      expect(JiraConnector.actions.getIssue.isTool).toBe(true);
+    });
 
-      const result = await JiraConnector.actions.getIssue.handler(mockContext, {
-        issueId: '10002',
+    it('calls get_issue with issue_key mapped from issueId', async () => {
+      await JiraConnector.actions.getIssue.handler(mockContext, { issueId: 'PROJ-123' });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'get_issue',
+        arguments: { issue_key: 'PROJ-123' },
       });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/rest/api/3/issue/10002'
-      );
-      expect(result).toEqual(mockResponse.data);
     });
   });
 
   describe('getProjects action', () => {
-    it('should fetch projects and return response data', async () => {
-      const mockResponse = {
-        data: {
-          values: [
-            { id: '10000', key: 'MYPROJ', name: 'My Project' },
-            { id: '10001', key: 'OTHER', name: 'Other Project' },
-          ],
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await JiraConnector.actions.getProjects.handler(mockContext, {});
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/rest/api/3/project/search',
-        { params: {} }
-      );
-      expect(result).toEqual(mockResponse.data);
+    it('is exposed as a tool', () => {
+      expect(JiraConnector.actions.getProjects.isTool).toBe(true);
     });
 
-    it('should include optional maxResults, startAt, and query as params', async () => {
-      const mockResponse = { data: { values: [] } };
-      mockClient.get.mockResolvedValue(mockResponse);
-
+    it('calls list_projects with query, max_results, and start_at', async () => {
       await JiraConnector.actions.getProjects.handler(mockContext, {
+        query: 'platform',
         maxResults: 20,
-        startAt: 10,
-        query: 'MYPROJ',
+        startAt: 0,
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/rest/api/3/project/search',
-        {
-          params: {
-            maxResults: 20,
-            startAt: 10,
-            query: 'MYPROJ',
-          },
-        }
-      );
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'list_projects',
+        arguments: { query: 'platform', max_results: 20, start_at: 0 },
+      });
+    });
+  });
+
+  describe('getProject action', () => {
+    it('is exposed as a tool', () => {
+      expect(JiraConnector.actions.getProject.isTool).toBe(true);
+    });
+
+    it('calls get_project with project_key mapped from projectId', async () => {
+      await JiraConnector.actions.getProject.handler(mockContext, { projectId: 'PROJ' });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'get_project',
+        arguments: { project_key: 'PROJ' },
+      });
     });
   });
 
   describe('searchUsers action', () => {
-    it('should search users by query and return response data', async () => {
-      const mockResponse = {
-        data: [
-          {
-            accountId: '5b10a2844c20165700ede21g',
-            displayName: 'Mia Krystof',
-            emailAddress: 'mia@example.com',
-          },
-        ],
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await JiraConnector.actions.searchUsers.handler(mockContext, {
-        query: 'mia',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/rest/api/3/user/search',
-        { params: { query: 'mia' } }
-      );
-      expect(result).toEqual(mockResponse.data);
+    it('is exposed as a tool', () => {
+      expect(JiraConnector.actions.searchUsers.isTool).toBe(true);
     });
 
-    it('should build base URL from config subdomain', async () => {
-      const mockResponse = { data: [] };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const contextWithSubdomain = {
-        ...mockContext,
-        config: { subdomain: 'acme' },
-      } as unknown as ActionContext;
-
-      await JiraConnector.actions.searchUsers.handler(contextWithSubdomain, {
-        query: 'workplace-search',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://acme.atlassian.net/rest/api/3/user/search',
-        { params: { query: 'workplace-search' } }
-      );
-    });
-
-    it('should include optional startAt and maxResults in the request', async () => {
-      const mockResponse = { data: [] };
-      mockClient.get.mockResolvedValue(mockResponse);
-
+    it('calls search_users with mapped parameters', async () => {
       await JiraConnector.actions.searchUsers.handler(mockContext, {
         query: 'alice',
-        startAt: 10,
-        maxResults: 25,
+        accountId: 'acc123',
+        username: 'alice',
+        maxResults: 10,
+        startAt: 0,
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://mycompany.atlassian.net/rest/api/3/user/search',
-        {
-          params: {
-            query: 'alice',
-            startAt: 10,
-            maxResults: 25,
-          },
-        }
-      );
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'search_users',
+        arguments: {
+          query: 'alice',
+          account_id: 'acc123',
+          username: 'alice',
+          max_results: 10,
+          start_at: 0,
+        },
+      });
+    });
+  });
+
+  describe('test handler', () => {
+    it('returns ok with tool count on successful connection', async () => {
+      if (!JiraConnector.test) throw new Error('test handler not defined');
+      const result = await JiraConnector.test.handler(mockContext);
+
+      expect(mockListTools).toHaveBeenCalled();
+      expect(result).toEqual({
+        ok: true,
+        message: 'Connected to Jira Cloud MCP server. 2 tools available.',
+      });
     });
   });
 });
