@@ -222,7 +222,6 @@ describe('GraphQLConnector', () => {
         })
       ).rejects.toThrow('Only query operations are allowed');
     });
-
   });
 
   // ---------------------------------------------------------------------------
