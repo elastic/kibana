@@ -539,9 +539,13 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           )}
                           checked={namespaceCustomizationEnabled}
                           disabled={isNamespaceCustomizationInputDisabled}
-                          onChange={(e) =>
-                            handleNamespaceCustomizationToggleChange(e.target.checked)
-                          }
+                          onChange={(e) => {
+                            handleNamespaceCustomizationToggleChange(e.target.checked);
+                            if (!e.target.checked) {
+                              setSelectedIlmPolicy(undefined);
+                              onIlmPolicyChange?.(undefined);
+                            }
+                          }}
                         />
                       </EuiToolTip>
                       <EuiSpacer size="xs" />
