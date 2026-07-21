@@ -18,7 +18,7 @@ jest.mock('../utils/run_esql_async_search');
 
 const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 
-const { ACTIVE, RECOVERING } = ALERT_EPISODE_STATUS;
+const { ACTIVE } = ALERT_EPISODE_STATUS;
 
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
