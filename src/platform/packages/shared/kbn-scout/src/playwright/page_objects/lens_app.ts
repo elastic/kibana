@@ -217,6 +217,26 @@ export class LensApp {
     await this.closeDimensionEditorButton.waitFor({ state: 'hidden' });
   }
 
+  /** Removes all dimensions from the given panel, polling until none remain. */
+  async removeAllDimensions(dimensionTestSubj: string) {
+    const removeLocator = this.page.testSubj.locator(
+      `${dimensionTestSubj} > indexPattern-dimension-remove`
+    );
+    await expect
+      .poll(
+        async () => {
+          const buttons = await removeLocator.all();
+          if (buttons.length > 0) {
+            await buttons[0].hover();
+            await buttons[0].click();
+          }
+          return removeLocator.count();
+        },
+        { timeout: 30_000 }
+      )
+      .toBe(0);
+  }
+
   /**
    * Activates the layer tab at `index`. Requires the tabs row to be visible (multi-layer charts).
    * Tab `data-test-subj` values use layer ids (not numeric indices), so tabs are resolved by order.
