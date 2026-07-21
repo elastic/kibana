@@ -12,8 +12,8 @@ import type { RuleResponse } from '../../../../common/api/detection_engine';
 import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   MigrationRuleDetailsFlyout,
-  type MigrationFlyoutNavigation,
 } from '../components/rule_details_flyout';
+import type { MigrationFlyoutNavigation } from '../../common/components/details_flyout';
 
 interface UseMigrationRuleDetailsFlyoutParams {
   isLoading?: boolean;

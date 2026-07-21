@@ -53,15 +53,13 @@ import {
 import {
   CLOSE_BUTTON_LABEL,
   SUMMARY_TAB_LABEL,
+  PREVIOUS_BUTTON_LABEL,
+  NEXT_BUTTON_LABEL,
 } from '../../../common/components/details_flyout/translation';
 import { UpdatedByLabel } from '../../../common/components/updated_by_label';
 
-export interface MigrationFlyoutNavigation {
-  hasPrevious: boolean;
-  hasNext: boolean;
-  goToPrevious: () => void;
-  goToNext: () => void;
-}
+import type { MigrationFlyoutNavigation } from '../../../common/components/details_flyout';
+export type { MigrationFlyoutNavigation } from '../../../common/components/details_flyout';
 
 interface MigrationRuleDetailsFlyoutContentProps {
   migrationRule: RuleMigrationRule;
@@ -272,7 +270,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
                 isDisabled={!navigation.hasPrevious || isLoading}
                 onClick={navigation.goToPrevious}
                 data-test-subj="migrationRuleFlyoutPreviousRuleButton"
-                aria-label={i18n.PREVIOUS_RULE_BUTTON_LABEL}
+                aria-label={PREVIOUS_BUTTON_LABEL}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -284,7 +282,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
                 isDisabled={!navigation.hasNext || isLoading}
                 onClick={navigation.goToNext}
                 data-test-subj="migrationRuleFlyoutNextRuleButton"
-                aria-label={i18n.NEXT_RULE_BUTTON_LABEL}
+                aria-label={NEXT_BUTTON_LABEL}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
