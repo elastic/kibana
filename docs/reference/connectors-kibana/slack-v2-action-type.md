@@ -210,3 +210,11 @@ To use Bot Token authentication, you need a Slack app with a bot token.
 ::::{note}
 Bot tokens cannot search across the workspace — the **Search messages** action is not supported with bot token authentication. Use **Get conversation history** to read messages from channels the bot is a member of. To use **Get conversation history** on a private channel, the bot must first be invited to that channel.
 ::::
+
+::::{note}
+The scopes above enable all read and messaging actions out of the box. Additional write scopes are required for channel-management actions:
+- `channels:manage` — required for **Create conversation** (public channels)
+- `groups:write` — required for **Create conversation** (private channels) and **Invite to conversation**
+
+Add these scopes under **Bot Token Scopes** in your Slack app configuration if you need these actions.
+::::
