@@ -299,7 +299,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               >
                 <FormattedMessage
                   id="xpack.fleet.agentPolicyForm.rotateUninstallTokenModal.body"
-                  defaultMessage="This will generate a new uninstall token and push an updated policy to all agents. The previous token will no longer be valid. Agents using the old token will need to use the new uninstall command."
+                  defaultMessage="This will generate a new uninstall token and push an updated policy to all agents. The previous token will no longer be valid. To uninstall agents that are still using the old policy, you need to use the new uninstall command."
                 />
               </EuiConfirmModal>
             )}
