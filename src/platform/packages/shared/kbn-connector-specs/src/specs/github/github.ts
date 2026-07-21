@@ -74,6 +74,35 @@ const WORKSPACE = '/workspace';
 const GIT_CREDENTIALS_PATH = `${WORKSPACE}/.git-credentials`;
 const GH_CONFIG_DIR = `${WORKSPACE}/.config/gh`;
 const GH_HOSTS_PATH = `${GH_CONFIG_DIR}/hosts.yml`;
+const GH_CLI_DIR = `${WORKSPACE}/.github-cli`;
+const SANDBOX_CLI_BIN_DIR = `${WORKSPACE}/.sandbox-cli-bin`;
+
+const installGithubCliCommand = [
+  'set -e',
+  `mkdir -p '${GH_CLI_DIR}' '${SANDBOX_CLI_BIN_DIR}'`,
+  `if command -v gh >/dev/null 2>&1; then`,
+  `  ln -sf "$(command -v gh)" '${SANDBOX_CLI_BIN_DIR}/gh'`,
+  `elif [ ! -x '${GH_CLI_DIR}/bin/gh' ]; then`,
+  `  arch="$(uname -m)"`,
+  `  case "$arch" in`,
+  `    x86_64|amd64) gh_arch="amd64" ;;`,
+  `    aarch64|arm64) gh_arch="arm64" ;;`,
+  `    *) echo "Unsupported architecture for GitHub CLI: $arch" >&2; exit 1 ;;`,
+  `  esac`,
+  `  version="$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest | sed -n 's/.*"tag_name": "v\\([^"]*\\)".*/\\1/p' | head -1)"`,
+  `  if [ -z "$version" ]; then echo "Unable to resolve latest GitHub CLI version" >&2; exit 1; fi`,
+  `  tmp="$(mktemp -d)"`,
+  `  curl -fsSL "https://github.com/cli/cli/releases/download/v\${version}/gh_\${version}_linux_\${gh_arch}.tar.gz" -o "$tmp/gh.tar.gz"`,
+  `  tar -xzf "$tmp/gh.tar.gz" -C "$tmp"`,
+  `  rm -rf '${GH_CLI_DIR}'`,
+  `  mv "$tmp/gh_\${version}_linux_\${gh_arch}" '${GH_CLI_DIR}'`,
+  `  rm -rf "$tmp"`,
+  `  ln -sf '${GH_CLI_DIR}/bin/gh' '${SANDBOX_CLI_BIN_DIR}/gh'`,
+  `else`,
+  `  ln -sf '${GH_CLI_DIR}/bin/gh' '${SANDBOX_CLI_BIN_DIR}/gh'`,
+  `fi`,
+  `GH_CONFIG_DIR='${GH_CONFIG_DIR}' '${SANDBOX_CLI_BIN_DIR}/gh' auth status --hostname github.com`,
+].join('\n');
 
 const sandboxCliMintTokenInputSchema = lazySchema(() =>
   z.object({
@@ -143,10 +172,12 @@ const buildGitHubSandboxToken = ({
   token,
   source,
   expiresAt,
+  repository,
 }: {
   token: string;
   source: string;
   expiresAt?: number;
+  repository?: string;
 }): SandboxCliMintTokenResponse => ({
   source,
   expiresAt,
@@ -170,10 +201,14 @@ const buildGitHubSandboxToken = ({
     },
   ],
   setupCommands: [
-    `git config --global credential.helper 'store --file ${GIT_CREDENTIALS_PATH}'`,
+    installGithubCliCommand,
+    `git config --global credential.helper 'store --file=${GIT_CREDENTIALS_PATH}'`,
     `mkdir -p "$HOME/.config/gh" && cp ${GH_HOSTS_PATH} "$HOME/.config/gh/hosts.yml" && chmod 0600 "$HOME/.config/gh/hosts.yml"`,
+    ...(repository
+      ? [`git ls-remote https://github.com/${normalizeRepo(repository)}.git HEAD >/dev/null`]
+      : []),
   ],
-  cleanupPaths: [GIT_CREDENTIALS_PATH, GH_CONFIG_DIR, '$HOME/.config/gh/hosts.yml'],
+  cleanupPaths: [GIT_CREDENTIALS_PATH, GH_CONFIG_DIR, GH_CLI_DIR, '$HOME/.config/gh/hosts.yml'],
 });
 
 const mintSandboxGitToken = async (
@@ -190,6 +225,7 @@ const mintSandboxGitToken = async (
     return buildGitHubSandboxToken({
       token: secrets.token,
       source: 'github_bearer_connector_token',
+      repository: input.repository,
     });
   }
 
@@ -214,7 +250,7 @@ const mintSandboxGitToken = async (
     );
   }
 
-  const repo = input.repository ?? firstConcreteRepo(allowedRepos) ?? firstConcreteRepo(repos);
+  const repo = input.repository ?? firstConcreteRepo(repos) ?? firstConcreteRepo(allowedRepos);
   if (!repo) {
     throw new Error(
       'GitHub App connector requires a requested repo or allowedRepos config to mint an installation token'
@@ -253,6 +289,7 @@ const mintSandboxGitToken = async (
     token: minted.token,
     expiresAt: Date.parse(minted.expiresAt),
     source: 'github_app_installation_token',
+    repository: repo,
   });
 };
 
@@ -624,6 +661,8 @@ export const GithubConnector: ConnectorSpec = {
       'If the repository is incomplete or ownerless, for example "kibana" instead of',
       '"elastic/kibana" or "example/kibana", ask which repo to use before requesting credentials.',
       'Do not guess the repository owner.',
+      'Pass the selected owner/repo as mint input.repository so the token is scoped to the repo',
+      'the sandbox will clone or push.',
       'Use read access for clone-only work and push-pr only when the task must push or open a PR.',
     ].join(' '),
     mintToken: {

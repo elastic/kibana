@@ -27,6 +27,8 @@ export interface SandboxCliCredentialRequest {
 
 export interface ResolvedSandboxCliCredential {
   connectorId: string;
+  connectorName: string;
+  connectorDisplayName: string;
   actionTypeId: string;
   token: SandboxCliToken;
   label?: string;
@@ -35,6 +37,7 @@ export interface ResolvedSandboxCliCredential {
 export interface SandboxCliConnectorOption {
   connectorId: string;
   name: string;
+  displayName: string;
   actionTypeId: string;
   description: string;
   skill: string;
@@ -88,6 +91,7 @@ export class SandboxCliCredentialResolver {
         return {
           connectorId: connector.id,
           name: connector.name,
+          displayName: connector.displayName,
           actionTypeId: connector.actionTypeId,
           description: spec?.metadata.description ?? connector.actionTypeId,
           skill: spec?.sandboxCli?.skill ?? '',
@@ -179,6 +183,8 @@ export class SandboxCliCredentialResolver {
         );
         return {
           connectorId: connector.id,
+          connectorName: connector.name,
+          connectorDisplayName: connector.displayName,
           actionTypeId: connector.actionTypeId,
           token: executeResult.data,
           label: requested.label,
@@ -235,7 +241,7 @@ export class SandboxCliCredentialResolver {
       connectorId?: string;
       actionTypeId?: string;
     }
-  ): Promise<Array<{ id: string; name: string; actionTypeId: string }>> {
+  ): Promise<Array<{ id: string; name: string; displayName: string; actionTypeId: string }>> {
     if (connectorId) {
       if (allowedConnectors && !allowedConnectors.includes(connectorId)) {
         return [];
@@ -244,8 +250,16 @@ export class SandboxCliCredentialResolver {
       if (!connector || (actionTypeId && connector.actionTypeId !== actionTypeId)) {
         return [];
       }
-      return getConnectorSpec(connector.actionTypeId)?.sandboxCli
-        ? [{ id: connector.id, name: connector.name, actionTypeId: connector.actionTypeId }]
+      const spec = getConnectorSpec(connector.actionTypeId);
+      return spec?.sandboxCli
+        ? [
+            {
+              id: connector.id,
+              name: connector.name,
+              displayName: spec.metadata.displayName,
+              actionTypeId: connector.actionTypeId,
+            },
+          ]
         : [];
     }
 
@@ -256,16 +270,23 @@ export class SandboxCliCredentialResolver {
           )
         : await actionsClient.getAll();
 
-    const sandboxCliConnectors: Array<{ id: string; name: string; actionTypeId: string }> = [];
+    const sandboxCliConnectors: Array<{
+      id: string;
+      name: string;
+      displayName: string;
+      actionTypeId: string;
+    }> = [];
     for (const connector of connectors) {
+      const spec = connector ? getConnectorSpec(connector.actionTypeId) : undefined;
       if (
         connector &&
         (!actionTypeId || connector.actionTypeId === actionTypeId) &&
-        getConnectorSpec(connector.actionTypeId)?.sandboxCli
+        spec?.sandboxCli
       ) {
         sandboxCliConnectors.push({
           id: connector.id,
           name: connector.name,
+          displayName: spec.metadata.displayName,
           actionTypeId: connector.actionTypeId,
         });
       }

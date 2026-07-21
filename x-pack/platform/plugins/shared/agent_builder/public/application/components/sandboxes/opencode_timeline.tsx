@@ -42,6 +42,8 @@ export interface OpencodeTimelineItem {
   credentialIconVariant?: 'secured' | 'compute';
   /** Connector instance id for `kibana` connector calls (renders its icon). */
   connectorId?: string;
+  /** Connector action type id for connector-owned CLI credential/setup rows. */
+  actionTypeId?: string;
 }
 
 /** Phase → EUI icon type. */
@@ -77,9 +79,6 @@ const StatusIcon: React.FC<{
       <EuiIcon type="errorFilled" size="s" color="danger" css={topMargin} aria-hidden={true} />
     );
   }
-  if (status === 'in_progress' && phase !== 'done') {
-    return <EuiLoadingSpinner size="s" css={topMargin} />;
-  }
   // A connector call shows that connector's own icon (e.g. AbuseIPDB, Slack),
   // resolved from its action type; falls back to the generic phase icon.
   if (phase === 'kibana' && actionTypeId) {
@@ -89,7 +88,7 @@ const StatusIcon: React.FC<{
       </span>
     );
   }
-  if (phase === 'credential' && iconType && credentialIconVariant) {
+  if (phase === 'credential' && (iconType || actionTypeId) && credentialIconVariant) {
     const badgeIcon = credentialIconVariant === 'secured' ? 'lock' : 'compute';
     return (
       <span
@@ -103,7 +102,16 @@ const StatusIcon: React.FC<{
           justify-content: center;
         `}
       >
-        <EuiIcon type={iconType} size="s" color={euiTheme.colors.textSuccess} aria-hidden={true} />
+        {actionTypeId ? (
+          <ConnectorTypeIcon actionTypeId={actionTypeId} size="s" />
+        ) : (
+          <EuiIcon
+            type={iconType ?? 'wrench'}
+            size="s"
+            color={euiTheme.colors.textSuccess}
+            aria-hidden={true}
+          />
+        )}
         <EuiIcon
           type={badgeIcon}
           size="m"
@@ -121,6 +129,9 @@ const StatusIcon: React.FC<{
         />
       </span>
     );
+  }
+  if (status === 'in_progress' && phase !== 'done' && !iconType) {
+    return <EuiLoadingSpinner size="s" css={topMargin} />;
   }
   const icon = iconType ?? PHASE_ICON[phase] ?? 'wrench';
   // Highlight security-relevant steps: connector calls (accent) and credential
@@ -213,13 +224,20 @@ const TimelineRow: React.FC<{
         onClick={hasDetail ? () => setIsOpen((v) => !v) : undefined}
       >
         <EuiFlexItem grow={false}>
-          <StatusIcon
-            status={item.status}
-            phase={item.phase}
-            iconType={item.iconType}
-            credentialIconVariant={item.credentialIconVariant}
-            actionTypeId={item.connectorId ? connectorTypeById.get(item.connectorId) : undefined}
-          />
+          {(() => {
+            const actionTypeId =
+              item.actionTypeId ??
+              (item.connectorId ? connectorTypeById.get(item.connectorId) : undefined);
+            return (
+              <StatusIcon
+                status={item.status}
+                phase={item.phase}
+                iconType={item.iconType}
+                credentialIconVariant={item.credentialIconVariant}
+                actionTypeId={actionTypeId}
+              />
+            );
+          })()}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">{item.label}</EuiText>

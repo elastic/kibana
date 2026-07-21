@@ -344,6 +344,7 @@ const ELASTIC_CLI_ENV_PATH = `${WORKSPACE}/.elastic-cli-env`;
 const SANDBOX_CLI_ENV_PATH = `${WORKSPACE}/.sandbox-cli-env`;
 const ELASTIC_CLI_PREFIX = `${WORKSPACE}/.elastic-cli-npm`;
 const ELASTIC_CLI_BIN_DIR = `${ELASTIC_CLI_PREFIX}/bin`;
+const SANDBOX_CLI_BIN_DIR = `${WORKSPACE}/.sandbox-cli-bin`;
 const shSingleQuote = (value: string): string => `'${value.replace(/'/g, `'\\''`)}'`;
 
 const parentDir = (path: string): string => {
@@ -353,6 +354,18 @@ const parentDir = (path: string): string => {
   }
   return path.slice(0, lastSlash);
 };
+
+const withCliSuffix = (label: string): string => (/\bcli\b/i.test(label) ? label : `${label} CLI`);
+
+const withConnectorSuffix = (label: string): string =>
+  /\bconnector\b/i.test(label) ? label : `${label} connector`;
+
+const sandboxCliCredentialLabel = (
+  credential: NonNullable<CodingRunParams['sandboxCliCredentials']>[number]
+): string =>
+  `${withConnectorSuffix(
+    withCliSuffix(credential.connectorDisplayName || credential.label || credential.actionTypeId)
+  )} (${credential.connectorName})`;
 
 /**
  * OpenCode coding runtime, driven over ACP (LAYER 2).
@@ -485,7 +498,7 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
       }
 
       if (sandboxCliCredentials?.length) {
-        await this.injectSandboxCliCredentials(sandbox, sandboxCliCredentials);
+        await this.injectSandboxCliCredentials(sandbox, sandboxCliCredentials, upsert);
         abortSignal?.throwIfAborted?.();
       }
 
@@ -785,20 +798,27 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
 
   private async injectSandboxCliCredentials(
     sandbox: Sandbox,
-    credentials: NonNullable<CodingRunParams['sandboxCliCredentials']>
+    credentials: NonNullable<CodingRunParams['sandboxCliCredentials']>,
+    upsert: (
+      id: string,
+      patch: Partial<OpencodeRunProgress> & Pick<OpencodeRunProgress, 'phase' | 'label'>
+    ) => void
   ): Promise<void> {
     const files = credentials.flatMap((credential) => credential.token.files ?? []);
     const env = credentials.reduce<Record<string, string>>(
       (acc, credential) => ({ ...acc, ...(credential.token.env ?? {}) }),
       {}
     );
-    const dirs = [...new Set([...files.map((file) => parentDir(file.path)), WORKSPACE])];
+    const dirs = [
+      ...new Set([...files.map((file) => parentDir(file.path)), WORKSPACE, SANDBOX_CLI_BIN_DIR]),
+    ];
     await sandbox.exec(`mkdir -p ${dirs.map(shSingleQuote).join(' ')}`, { timeoutMs: 10_000 });
     await sandbox.putFiles([
       ...files.map((file) => ({ path: file.path, contents: file.contents })),
       {
         path: SANDBOX_CLI_ENV_PATH,
         contents: [
+          `export PATH=${shSingleQuote(SANDBOX_CLI_BIN_DIR)}:$PATH`,
           ...Object.entries(env).map(([key, value]) => `export ${key}=${shSingleQuote(value)}`),
           '',
         ].join('\n'),
@@ -809,7 +829,6 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
         .filter((file) => file.mode)
         .map((file) => `chmod ${file.mode} ${shSingleQuote(file.path)}`),
       `chmod 600 ${shSingleQuote(SANDBOX_CLI_ENV_PATH)}`,
-      ...credentials.flatMap((credential) => credential.token.setupCommands ?? []),
     ];
     if (commands.length > 0) {
       const result = await sandbox.exec(commands.join(' && '), { timeoutMs: 60_000 });
@@ -820,6 +839,47 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
           }`
         );
       }
+    }
+    for (const credential of credentials) {
+      const label = sandboxCliCredentialLabel(credential);
+      const setupCommands = credential.token.setupCommands ?? [];
+      const command = setupCommands.join(' && ');
+      const id = `sandbox-cli-setup-${credential.connectorId}`;
+      upsert(id, {
+        phase: 'credential',
+        label: `Preparing ${label}`,
+        status: 'in_progress',
+        actionTypeId: credential.actionTypeId,
+        connectorId: credential.connectorId,
+        credentialIconVariant: 'compute',
+      });
+      if (setupCommands.length > 0) {
+        const result = await sandbox.exec(command, { timeoutMs: 300_000 });
+        if (result.exitCode !== 0) {
+          upsert(id, {
+            phase: 'credential',
+            label: `Failed to prepare ${label}`,
+            status: 'failed',
+            actionTypeId: credential.actionTypeId,
+            connectorId: credential.connectorId,
+            credentialIconVariant: 'compute',
+            output: capTail(result.stderr || result.stdout),
+          });
+          throw new Error(
+            `Failed to configure ${label} in sandbox (exit ${result.exitCode}): ${
+              result.stderr || result.stdout
+            }`
+          );
+        }
+      }
+      upsert(id, {
+        phase: 'credential',
+        label: `${label} ready`,
+        status: 'completed',
+        actionTypeId: credential.actionTypeId,
+        connectorId: credential.connectorId,
+        credentialIconVariant: 'compute',
+      });
     }
     this.logger.info(
       `Injected sandbox CLI credentials (${credentials

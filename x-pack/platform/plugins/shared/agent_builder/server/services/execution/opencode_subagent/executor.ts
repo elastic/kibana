@@ -41,6 +41,16 @@ const kibanaUrlFromMcpUrl = (mcpUrl: string): string => {
   return url.toString().replace(/\/$/, '');
 };
 
+const withCliSuffix = (label: string): string => (/\bcli\b/i.test(label) ? label : `${label} CLI`);
+
+const withConnectorSuffix = (label: string): string =>
+  /\bconnector\b/i.test(label) ? label : `${label} connector`;
+
+const sandboxCliCredentialLabel = (credential: ResolvedSandboxCliCredential): string =>
+  `${withConnectorSuffix(
+    withCliSuffix(credential.connectorDisplayName || credential.label || credential.actionTypeId)
+  )} (${credential.connectorName})`;
+
 // Re-export shared types for existing importers.
 export type { OpencodePhase, OpencodeItemStatus, OpencodeTodo, OpencodeRunProgress } from './types';
 export type { SandboxProviderMetadata } from './sandbox_provider';
@@ -468,20 +478,33 @@ export class OpencodeSubagentExecutor {
               ? sandboxCliCredentialDiagnostics.join('; ')
               : `Unable to resolve ${missingCredentialCount} sandbox CLI credential request(s)`
             : undefined;
-        recordProgress({
-          id: 'sandbox-cli-credentials',
-          phase: 'credential',
-          label: sandboxCliCredentialFailure
-            ? 'No sandbox CLI credentials prepared'
-            : 'Prepared sandbox CLI credentials',
-          status: sandboxCliCredentialFailure ? 'failed' : 'completed',
-          credentialIconVariant: 'secured',
-          detail: sandboxCliCredentialFailure
-            ? sandboxCliCredentialFailure
-            : resolvedSandboxCliCredentials
-                .map((credential) => credential.label ?? credential.actionTypeId)
-                .join(', '),
-        });
+        if (sandboxCliCredentialFailure) {
+          recordProgress({
+            id: 'sandbox-cli-credentials',
+            phase: 'credential',
+            label: 'No sandbox CLI credentials prepared',
+            status: 'failed',
+            credentialIconVariant: 'secured',
+            detail: sandboxCliCredentialFailure,
+          });
+        } else {
+          for (const credential of resolvedSandboxCliCredentials) {
+            recordProgress({
+              id: `sandbox-cli-credentials-${credential.connectorId}`,
+              phase: 'credential',
+              label: `Prepared ${sandboxCliCredentialLabel(credential)} credentials`,
+              status: 'completed',
+              actionTypeId: credential.actionTypeId,
+              connectorId: credential.connectorId,
+              credentialIconVariant: 'secured',
+              detail: credential.token.expiresAt
+                ? `source: ${credential.token.source}; expires: ${new Date(
+                    credential.token.expiresAt
+                  ).toISOString()}`
+                : `source: ${credential.token.source}`,
+            });
+          }
+        }
         if (sandboxCliCredentialFailure) {
           throw new Error(
             `Sandbox CLI credentials are required for this run, but could not be prepared: ${sandboxCliCredentialFailure}`

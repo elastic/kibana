@@ -61,4 +61,10 @@ export interface OpencodeRunProgress {
    * render that connector's own icon (resolved via its action type).
    */
   connectorId?: string;
+  /**
+   * Connector action type id for connector-owned sandbox CLI credential/setup
+   * rows. Lets the UI render the connector icon even when it cannot resolve the
+   * connector instance from the shared connector list.
+   */
+  actionTypeId?: string;
 }
