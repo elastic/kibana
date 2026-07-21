@@ -748,8 +748,15 @@ export class SettingsPageObject extends FtrService {
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
+      // A lingering/animating success toast can overlap the flyout's bottom-right Delete
+      // button and intercept the click. Drain toasts, click via a short-retry element handle
+      // (so an interception surfaces here instead of being swallowed by the click's own long
+      // internal retry), then gate success on the flyout actually closing so an intercepted
+      // click re-drains toasts and retries.
       await this.toasts.dismissAllWithChecks();
-      await this.testSubjects.click('confirmFlyoutConfirmButton');
+      const confirmButton = await this.testSubjects.find('confirmFlyoutConfirmButton');
+      await confirmButton.click();
+      await this.testSubjects.missingOrFail('confirmFlyoutConfirmButton');
     });
     await this.retry.try(async () => {
       const currentUrl = await this.browser.getCurrentUrl();
