@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -415,7 +414,7 @@ const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ ite
   );
 };
 
-/** Create-rule flyout — card layout matching design spec. */
+/** Create-rule flyout — compact list layout matching dashboard "Add panel" style. */
 const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
@@ -424,99 +423,76 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateThresholdRule,
   legacyRuleTypes,
 }) => {
-  const isAgentDisabled = createWithAgentDisabled === true;
-  const hasAgentTooltip = createWithAgentTooltipText !== undefined;
-  const agentCard = (
-    <EuiCard
-      layout="vertical"
-      display="plain"
-      titleElement="h3"
-      titleSize="xs"
-      hasBorder={true}
-      aria-disabled={isAgentDisabled || undefined}
-      css={isAgentDisabled ? actionPanelDisabledStyle : undefined}
-      title={AI_AGENT_TITLE}
-      description={AI_AGENT_DESCRIPTION}
-      onClick={isAgentDisabled ? noop : onCreateWithAgent}
-      icon={<EuiIcon type="productAgent" color="text" size="l" aria-hidden={true} />}
-      data-test-subj="createWithAgentCard"
-    />
+  const styles = useMemoCss(listEmptyStateStyles);
+
+  const primaryOptions = useMemo<RuleCreateOptionItem[]>(
+    () => [
+      {
+        id: 'create-esql-rule',
+        iconType: 'code',
+        title: ESQL_RULE_TITLE,
+        description: ESQL_RULE_DESCRIPTION,
+        onClick: onCreateEsqlRule,
+        'data-test-subj': 'createEsqlRuleCard',
+      },
+      {
+        id: 'create-with-agent',
+        iconType: 'productAgent',
+        title: AI_AGENT_TITLE,
+        description: AI_AGENT_DESCRIPTION,
+        onClick: onCreateWithAgent,
+        disabled: createWithAgentDisabled,
+        tooltipText: createWithAgentTooltipText,
+        'data-test-subj': 'createWithAgentCard',
+      },
+    ],
+    [onCreateEsqlRule, onCreateWithAgent, createWithAgentDisabled, createWithAgentTooltipText]
   );
 
-  const builderOptions: RuleCreateOptionItem[] = [
-    {
-      id: 'create-threshold-rule',
-      iconType: 'chartThreshold',
-      title: THRESHOLD_RULE_TITLE,
-      description: THRESHOLD_RULE_DESCRIPTION,
-      onClick: onCreateThresholdRule ?? noop,
-      'data-test-subj': 'createThresholdRuleCard',
-    },
-    {
-      id: 'create-match-rule',
-      iconType: 'chartBarVertical',
-      title: MATCH_RULE_TITLE,
-      description: MATCH_RULE_DESCRIPTION,
-      onClick: noop,
-      'data-test-subj': 'createMatchRuleCard',
-    },
-    {
-      id: 'create-correlation-rule',
-      iconType: 'heatmap',
-      title: CORRELATION_RULE_TITLE,
-      description: CORRELATION_RULE_DESCRIPTION,
-      onClick: noop,
-      'data-test-subj': 'createCorrelationRuleCard',
-    },
-  ];
+  const builderOptions = useMemo<RuleCreateOptionItem[]>(
+    () => [
+      {
+        id: 'create-threshold-rule',
+        iconType: 'chartThreshold',
+        title: THRESHOLD_RULE_TITLE,
+        description: THRESHOLD_RULE_DESCRIPTION,
+        onClick: onCreateThresholdRule ?? noop,
+        'data-test-subj': 'createThresholdRuleCard',
+      },
+      {
+        id: 'create-match-rule',
+        iconType: 'chartBarVertical',
+        title: MATCH_RULE_TITLE,
+        description: MATCH_RULE_DESCRIPTION,
+        onClick: noop,
+        'data-test-subj': 'createMatchRuleCard',
+      },
+      {
+        id: 'create-correlation-rule',
+        iconType: 'heatmap',
+        title: CORRELATION_RULE_TITLE,
+        description: CORRELATION_RULE_DESCRIPTION,
+        onClick: noop,
+        'data-test-subj': 'createCorrelationRuleCard',
+      },
+    ],
+    [onCreateThresholdRule]
+  );
 
   return (
     <>
-      <EuiFlexGroup direction="row" gutterSize="s">
-        <EuiFlexItem>
-          <EuiCard
-            layout="vertical"
-            display="plain"
-            titleElement="h3"
-            titleSize="xs"
-            hasBorder={true}
-            title={ESQL_RULE_TITLE}
-            description={ESQL_RULE_DESCRIPTION}
-            onClick={onCreateEsqlRule}
-            icon={<EuiIcon type="code" color="text" size="l" aria-hidden={true} />}
-            data-test-subj="createEsqlRuleCard"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {hasAgentTooltip ? (
-            <EuiToolTip content={createWithAgentTooltipText} display="block">
-              {agentCard}
-            </EuiToolTip>
-          ) : (
-            agentCard
-          )}
-        </EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {primaryOptions.map((item) => (
+          <EuiFlexItem key={item.id} grow={false}>
+            <RuleCreateOptionActionPanel item={item} actionPanelStyle={styles.actionPanel} />
+          </EuiFlexItem>
+        ))}
       </EuiFlexGroup>
       <RuleBuilderSectionDivider />
       <EuiFlexGroup direction="column" gutterSize="s">
         {builderOptions.map((item) => (
           <EuiFlexItem key={item.id} grow={false}>
-            <EuiCard
-              layout="horizontal"
-              display="plain"
-              titleElement="h3"
-              titleSize="xxs"
-              hasBorder={true}
-              title={item.title}
-              description={
-                <EuiText size="xs" color="subdued">
-                  {item.description}
-                </EuiText>
-              }
-              onClick={item.onClick}
-              icon={<EuiIcon type={item.iconType} color="text" size="l" aria-hidden={true} />}
-              data-test-subj={item['data-test-subj']}
-            />
+            <RuleCreateOptionActionPanel item={item} actionPanelStyle={styles.actionPanel} />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
