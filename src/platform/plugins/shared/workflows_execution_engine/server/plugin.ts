@@ -269,7 +269,7 @@ export class WorkflowsExecutionEnginePlugin
                 const runResult = await runWorkflow({
                   workflowRunId,
                   spaceId,
-                  signal,
+                  signal: taskAbortController.signal,
                   config,
                   logger,
                   fakeRequest,
@@ -643,7 +643,7 @@ export class WorkflowsExecutionEnginePlugin
               await runWorkflow({
                 workflowRunId: workflowExecution.id,
                 spaceId: workflowExecution.spaceId,
-                signal,
+                signal: taskAbortController.signal,
                 logger,
                 config,
                 fakeRequest,
