@@ -910,7 +910,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
 
         expect(response.body.message).to.eql(
-          'Cannot change the package of an existing integration policy. Delete this policy and create a new one with the desired package.'
+          'Cannot change the package of an existing integration policy. Create a new policy with the desired package.'
         );
       });
 
