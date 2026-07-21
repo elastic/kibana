@@ -42,8 +42,10 @@ interface DetailRow {
   content: React.ReactNode;
 }
 
-// Remove the last row's bottom border so it doesn't double up with the panel border.
-const noLastRowBorderCss = css`
+const detailTableCss = css`
+  thead {
+    display: none;
+  }
   tr:last-child td {
     border-bottom: none;
   }
@@ -215,7 +217,7 @@ export function GenAiTab({ genAi }: Props) {
               items={detailRows}
               columns={DETAIL_COLUMNS}
               data-test-subj="genAiDetails"
-              css={noLastRowBorderCss}
+              css={detailTableCss}
             />
           </GenAiSection>
         </>
