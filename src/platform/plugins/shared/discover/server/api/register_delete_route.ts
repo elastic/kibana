@@ -53,7 +53,7 @@ export const registerDeleteRoute = (
         },
       },
       async (context, request, response) =>
-        telemetryHandler(request, usageCounter, undefined, async () => {
+        telemetryHandler(request, { usageCounter }, async () => {
           try {
             await deleteDiscoverSession(context, request.params.id);
           } catch (error) {

@@ -21,8 +21,7 @@ import { registerTrackUserActivityRoute } from '../user_activity/register_routes
 export function registerRoutes(
   http: HttpServiceSetup,
   usageCounter: UsageCounter | undefined,
-  logger: Logger,
-  agenticUsageCounter?: UsageCounter
+  logger: Logger
 ) {
   const { versioned: versionedRouter } = http.createRouter<RequestHandlerContext>();
 
@@ -31,11 +30,11 @@ export function registerRoutes(
   // Only allows panel.type value with registered embeddable schema
   // Validate panel.config at route level
   //
-  registerCreateRoute(versionedRouter, usageCounter, false, logger, agenticUsageCounter);
-  registerReadRoute(versionedRouter, usageCounter, false, logger, agenticUsageCounter);
-  registerUpdateRoute(versionedRouter, usageCounter, false, logger, agenticUsageCounter);
-  registerDeleteRoute(versionedRouter, usageCounter, logger, agenticUsageCounter);
-  registerSearchRoute(versionedRouter, usageCounter, logger, agenticUsageCounter);
+  registerCreateRoute(versionedRouter, usageCounter, false, logger);
+  registerReadRoute(versionedRouter, usageCounter, false, logger);
+  registerUpdateRoute(versionedRouter, usageCounter, false, logger);
+  registerDeleteRoute(versionedRouter, usageCounter, logger);
+  registerSearchRoute(versionedRouter, usageCounter, logger);
   registerSanitizeRoute(versionedRouter, logger);
 
   //

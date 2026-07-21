@@ -27,7 +27,7 @@ import { getLensResponseItem } from './utils';
 
 export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement, builder, usageCounter, agenticUsageCounter }
+  { contentManagement, builder, usageCounter }
 ) => {
   const searchRoute = router.get({
     path: LENS_VIS_API_PATH,
@@ -82,7 +82,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, agenticUsageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         const { core } = await ctx.resolve(['core']);
         const useGASchemas = await core.featureFlags.getBooleanValue(
           AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,

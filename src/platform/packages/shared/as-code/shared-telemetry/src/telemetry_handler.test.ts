@@ -11,12 +11,12 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { telemetryHandler, ELASTIC_AGENTIC_USER_AGENT } from './telemetry_handler';
+import { telemetryHandler } from './telemetry_handler';
+import { AGENTIC_COUNTER_TYPE, ELASTIC_AGENTIC_USER_AGENT } from './telemetry_handler';
 
 describe('dashboard api telemetry handler', () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
   const usageCounter = usageCollection.createUsageCounter('dashboard_api');
-  const agenticUsageCounter = usageCollection.createUsageCounter('dashboard_api_agentic');
   const routePath = '/api/dashboards/{id}';
   const actualPath = '/api/dashboards/123';
 
@@ -33,7 +33,7 @@ describe('dashboard api telemetry handler', () => {
       });
 
       const response = { status: 200 } as IKibanaResponse<any>;
-      const result = await telemetryHandler(request, undefined, undefined, () => response);
+      const result = await telemetryHandler(request, {}, () => response);
 
       expect(result).toBe(response);
       expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -50,7 +50,7 @@ describe('dashboard api telemetry handler', () => {
       });
 
       const response = { status: 200 } as IKibanaResponse<any>;
-      const result = await telemetryHandler(request, usageCounter, undefined, () => response);
+      const result = await telemetryHandler(request, { usageCounter }, () => response);
 
       expect(result).toBe(response);
       expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -63,7 +63,7 @@ describe('dashboard api telemetry handler', () => {
       });
 
       const response = { status: 200 } as IKibanaResponse<any>;
-      const result = await telemetryHandler(request, usageCounter, undefined, () => response);
+      const result = await telemetryHandler(request, { usageCounter }, () => response);
 
       expect(result).toBe(response);
       expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -77,7 +77,7 @@ describe('dashboard api telemetry handler', () => {
       });
 
       const response = { status: 201 } as IKibanaResponse<any>;
-      const result = await telemetryHandler(request, usageCounter, undefined, () => response);
+      const result = await telemetryHandler(request, { usageCounter }, () => response);
 
       expect(result).toBe(response);
       expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
@@ -88,7 +88,7 @@ describe('dashboard api telemetry handler', () => {
   });
 
   describe('agentic telemetry', () => {
-    it('increments both counters for elastic-agentic user-agent', async () => {
+    it('increments counter twice for elastic-agentic user-agent when trackAgentic is true', async () => {
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
         path: '/api/dashboards',
@@ -97,13 +97,15 @@ describe('dashboard api telemetry handler', () => {
       });
 
       const response = { status: 201 } as IKibanaResponse<any>;
-      await telemetryHandler(request, usageCounter, agenticUsageCounter, () => response);
+      await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
 
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(2);
       expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
         counterName: 'post /api/dashboards 201',
       });
-      expect(agenticUsageCounter.incrementCounter).toHaveBeenCalledWith({
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
         counterName: 'post /api/dashboards 201',
+        counterType: AGENTIC_COUNTER_TYPE,
       });
     });
 
@@ -116,10 +118,12 @@ describe('dashboard api telemetry handler', () => {
       });
 
       const response = { status: 200 } as IKibanaResponse<any>;
-      await telemetryHandler(request, usageCounter, agenticUsageCounter, () => response);
+      await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
 
       expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
-      expect(agenticUsageCounter.incrementCounter).not.toHaveBeenCalled();
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith(
+        expect.objectContaining({ counterType: AGENTIC_COUNTER_TYPE })
+      );
     });
 
     it('excludes agentic counter for Kibana-origin requests even with elastic-agentic user-agent', async () => {
@@ -134,10 +138,9 @@ describe('dashboard api telemetry handler', () => {
       });
 
       const response = { status: 200 } as IKibanaResponse<any>;
-      await telemetryHandler(request, usageCounter, agenticUsageCounter, () => response);
+      await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
 
       expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
-      expect(agenticUsageCounter.incrementCounter).not.toHaveBeenCalled();
     });
 
     it('matches elastic-agentic user-agent case-insensitively', async () => {
@@ -149,12 +152,14 @@ describe('dashboard api telemetry handler', () => {
       });
 
       const response = { status: 200 } as IKibanaResponse<any>;
-      await telemetryHandler(request, usageCounter, agenticUsageCounter, () => response);
+      await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
 
-      expect(agenticUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith(
+        expect.objectContaining({ counterType: AGENTIC_COUNTER_TYPE })
+      );
     });
 
-    it('is a no-op when agenticUsageCounter is undefined', async () => {
+    it('does not increment agentic counter when trackAgentic is not set', async () => {
       const request = httpServerMock.createKibanaRequest({
         method: 'get',
         path: actualPath,
@@ -163,10 +168,12 @@ describe('dashboard api telemetry handler', () => {
       });
 
       const response = { status: 200 } as IKibanaResponse<any>;
-      await telemetryHandler(request, usageCounter, undefined, () => response);
+      await telemetryHandler(request, { usageCounter }, () => response);
 
       expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
-      expect(agenticUsageCounter.incrementCounter).not.toHaveBeenCalled();
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith(
+        expect.objectContaining({ counterType: AGENTIC_COUNTER_TYPE })
+      );
     });
   });
 });

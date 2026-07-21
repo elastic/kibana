@@ -27,8 +27,7 @@ export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
   usageCounter: UsageCounter | undefined,
   isDashboardAppRequest: boolean,
-  logger: Logger,
-  agenticUsageCounter?: UsageCounter
+  logger: Logger
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const updateRoute = router.put({
@@ -86,7 +85,7 @@ export function registerUpdateRoute(
       }),
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, agenticUsageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
           const { body, operation } = await update(
             ctx,

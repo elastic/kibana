@@ -29,7 +29,7 @@ import { lensCreateRequestBodySchema, lensCreateResponseBodySchema } from './sch
 
 export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement, builder, usageCounter, agenticUsageCounter }
+  { contentManagement, builder, usageCounter }
 ) => {
   const createRoute = router.post({
     path: LENS_VIS_API_PATH,
@@ -87,7 +87,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, agenticUsageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         const { core } = await ctx.resolve(['core']);
         const useGASchemas = await core.featureFlags.getBooleanValue(
           AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,

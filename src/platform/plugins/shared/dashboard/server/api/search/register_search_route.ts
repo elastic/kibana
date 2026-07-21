@@ -30,8 +30,7 @@ import { search } from './search';
 export function registerSearchRoute(
   router: VersionedRouter<RequestHandlerContext>,
   usageCounter: UsageCounter | undefined,
-  logger: Logger,
-  agenticUsageCounter?: UsageCounter
+  logger: Logger
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const searchRoute = router.get({
@@ -78,7 +77,7 @@ export function registerSearchRoute(
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, agenticUsageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
           const {
             core: { featureFlags },

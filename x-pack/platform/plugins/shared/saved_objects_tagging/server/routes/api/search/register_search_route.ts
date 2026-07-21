@@ -46,7 +46,7 @@ export const registerSearchRoute = (router: TagsPluginRouter, usageCounter?: Usa
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, undefined, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         try {
           return res.ok({
             body: await search(ctx, req.query),

@@ -36,7 +36,7 @@ import { getLensRequestConfig, getLensResponseItem } from './utils';
 
 export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement, builder, usageCounter, agenticUsageCounter }
+  { contentManagement, builder, usageCounter }
 ) => {
   const updateRoute = router.put({
     path: `${LENS_VIS_API_PATH}/{id}`,
@@ -102,7 +102,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, agenticUsageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         const requestBodyData = req.body;
         if (isLensLegacyAttributes(requestBodyData) && !requestBodyData.visualizationType) {
           throw new Error('visualizationType is required');

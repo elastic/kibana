@@ -48,7 +48,7 @@ export const registerReadRoute = (router: TagsPluginRouter, usageCounter?: Usage
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, undefined, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         const { id } = req.params;
         try {
           const body = await read(ctx, id);
