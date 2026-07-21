@@ -8,10 +8,12 @@
 import type { GcsConfig } from '../data_generators/replay';
 import {
   BANK_OF_ANTHOS_NAMESPACE,
+  INCIDENTS_NAMESPACE,
   OTEL_DEMO_NAMESPACE,
   QUARKUS_SUPER_HEROES_NAMESPACE,
 } from '../constants';
 import { bankOfAnthosDataset } from './bank_of_anthos';
+import { incidentsDataset } from './incidents';
 import { otelDemoDataset } from './otel_demo';
 import { quarkusSuperHeroesDataset } from './quarkus_super_heroes';
 import type { DatasetConfig, SnapshotSourceOverride } from './types';
@@ -23,6 +25,7 @@ const DATASETS: Record<string, DatasetConfig> = {
   [OTEL_DEMO_NAMESPACE]: otelDemoDataset,
   [BANK_OF_ANTHOS_NAMESPACE]: bankOfAnthosDataset,
   [QUARKUS_SUPER_HEROES_NAMESPACE]: quarkusSuperHeroesDataset,
+  [INCIDENTS_NAMESPACE]: incidentsDataset,
 };
 
 let cachedActiveDatasets: DatasetConfig[] | undefined;
@@ -82,6 +85,7 @@ export const resolveScenarioSnapshotSource = ({
     gcs: {
       bucket: datasetGcs.bucket,
       basePathPrefix: snapshotSource?.gcs?.basePathPrefix ?? datasetGcs.basePathPrefix,
+      runScoped: datasetGcs.runScoped,
     },
   };
 };

@@ -40,4 +40,18 @@ describe('snapshot_run_config', () => {
       resolveBasePath({ bucket: GCS_BUCKET, basePathPrefix: OTEL_DEMO_GCS_BASE_PATH_PREFIX })
     ).toBe('2026-02-26-test/otel-demo');
   });
+
+  it('resolveBasePath uses basePathPrefix as-is when runScoped is false', async () => {
+    process.env.SIGEVENTS_SNAPSHOT_RUN = '2026-02-26-test';
+    jest.resetModules();
+
+    const { resolveBasePath } = await import('./snapshot_run_config');
+    expect(
+      resolveBasePath({
+        bucket: GCS_BUCKET,
+        basePathPrefix: 'customer0-incidents/incident-3048',
+        runScoped: false,
+      })
+    ).toBe('customer0-incidents/incident-3048');
+  });
 });

@@ -13,6 +13,7 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
   cleanSignificantEventsDataStreams,
+  replayIntoManagedStream,
   replaySignificantEventsSnapshot,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
@@ -73,7 +74,13 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
           }
 
           await cleanSignificantEventsDataStreams(esClient, log);
-          await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
+          if (dataset.replayMode === 'managed-stream') {
+            await replayIntoManagedStream(esClient, log, source.snapshotName, source.gcs, {
+              includeOriginalNameIndices: true,
+            });
+          } else {
+            await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
+          }
           await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
           const sampleDocuments = await collectSampleDocuments({
