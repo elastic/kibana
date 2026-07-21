@@ -18,7 +18,7 @@ import type { FieldDefinition } from '../../../common/types/domain/field_definit
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { Template } from '../../../common/types/domain/template/v1';
 import { toFieldDefinitions, trimFieldDefaults } from '../../services/templates/utils';
-import { buildFieldDefinitionYaml } from './build_field_definition_yaml';
+import { buildFieldDefinitionYaml } from '../../common/utils/field_definitions';
 import { buildTemplateYaml } from './build_template_yaml';
 import type { LegacyCustomField, LegacyTemplate, MigrationCounts } from './types';
 

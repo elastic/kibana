@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Breakpoints where AppMenu renders the enabled switch outside the overflow menu.
- * Keep aligned with `AppMenuComponent` (`m`/`l` inline switch + overflow items, `xl` fully inline).
- */
-export const WORKFLOW_DETAIL_INLINE_TOOLBAR_BREAKPOINTS = ['m', 'l', 'xl'] as const;
+export { DiscoverAppHeader } from './src/app_header/app_header';
+export type { DiscoverAppHeaderProps } from './src/app_header/app_header';
