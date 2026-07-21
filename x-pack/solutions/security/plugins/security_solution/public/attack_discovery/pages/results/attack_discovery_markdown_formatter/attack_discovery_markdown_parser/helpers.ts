@@ -6,7 +6,7 @@
  */
 
 const iconLookup: Record<string, string> = {
-  'host.name': 'desktop',
+  'host.name': 'display',
   'user.name': 'user',
   'process.name': 'gear',
   'file.name': 'document',
