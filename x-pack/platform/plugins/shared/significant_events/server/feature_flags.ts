@@ -16,6 +16,8 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
@@ -32,15 +34,20 @@ import type { SignificantEventsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
+  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
+  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+  MAX_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+  MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
+  MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
 } from '../common/constants';
@@ -139,6 +146,58 @@ export function registerFeatureFlags(
               ),
               type: 'number',
               schema: schema.number({ min: MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES }),
+              solutionViews: ['classic', 'oblt'],
+              technicalPreview: true,
+              readonly: true,
+              readonlyMode: 'ui',
+            },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES]:
+            {
+              category: ['observability'],
+              name: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionBucketIntervalMinutesName',
+                {
+                  defaultMessage:
+                    'Scheduled Significant Events detection bucket interval (minutes)',
+                }
+              ) as string,
+              value: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
+              description: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionBucketIntervalMinutesDescription',
+                {
+                  defaultMessage:
+                    'Date-histogram bucket width used by the scheduled Significant Events change-point detection in this Kibana space. Wider buckets smooth out short-term burst noise.',
+                }
+              ),
+              type: 'number',
+              schema: schema.number({
+                min: MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
+                max: MAX_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
+              }),
+              solutionViews: ['classic', 'oblt'],
+              technicalPreview: true,
+              readonly: true,
+              readonlyMode: 'ui',
+            },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES]:
+            {
+              category: ['observability'],
+              name: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionLookbackMinutesName',
+                {
+                  defaultMessage: 'Scheduled Significant Events detection lookback (minutes)',
+                }
+              ) as string,
+              value: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
+              description: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionLookbackMinutesDescription',
+                {
+                  defaultMessage:
+                    'Time window analysed by the scheduled Significant Events change-point detection in this Kibana space. Must be a multiple of the detection bucket interval yielding between 22 and 1000 buckets.',
+                }
+              ),
+              type: 'number',
+              schema: schema.number({ min: MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES }),
               solutionViews: ['classic', 'oblt'],
               technicalPreview: true,
               readonly: true,
