@@ -29,11 +29,11 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart, HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getESQLQueryVariables, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import type { EsqlView } from './mock_views';
-import { slugifyViewName } from './services/name_utils';
+import { finalizeViewName, sanitizeViewNameInput } from './services/name_utils';
 import { fetchView, upsertView } from './services/views_client';
 import { setLocalViewMetadata } from './services/local_metadata';
 import { runMockQueryPreview, type MockQueryPreviewResult } from './services/mock_query_preview';
@@ -90,8 +90,15 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
   const handleNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setName(slugifyViewName(event.target.value));
+    setName(sanitizeViewNameInput(event.target.value));
     setNameError(undefined);
+  }, []);
+
+  // Collapsing repeated separators and trimming leading/trailing ones only happens once the
+  // name is finalized (here, and again defensively in `handleSubmit`) -- see
+  // `sanitizeViewNameInput`'s doc comment for why that can't happen on every keystroke.
+  const handleNameBlur = useCallback(() => {
+    setName((currentName) => finalizeViewName(currentName));
   }, []);
 
   const onTextLangQueryChange = useCallback((nextQuery: AggregateQuery) => {
@@ -122,7 +129,11 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
   const esqlText = 'esql' in query ? query.esql : '';
 
   const handleSubmit = useCallback(async () => {
-    if (!name.trim()) {
+    // Defensively finalize again here (not just on blur) in case the field was never blurred --
+    // e.g. pasting a name and immediately clicking Create.
+    const finalName = finalizeViewName(name);
+    if (!finalName) {
+      setName(finalName);
       setNameError(
         i18n.translate('esqlViews.flyout.nameRequiredError', {
           defaultMessage: 'Enter a name.',
@@ -130,6 +141,7 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
       );
       return;
     }
+    setName(finalName);
     if (!esqlText.trim()) {
       notifications.toasts.addWarning(
         i18n.translate('esqlViews.flyout.queryRequiredWarning', {
@@ -138,11 +150,29 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
       );
       return;
     }
+    // ES|QL views can't contain query parameters at all (see
+    // https://www.elastic.co/docs/reference/query-languages/esql/esql-views#_query_parameters),
+    // so a query still referencing e.g. `?_tstart`/`?_tend` or an ES|QL Control variable would
+    // otherwise just fail server-side with an opaque "Bad Request".
+    const unresolvedParams = getESQLQueryVariables(esqlText);
+    if (unresolvedParams.length) {
+      notifications.toasts.addWarning(
+        i18n.translate('esqlViews.flyout.queryHasParamsWarning', {
+          defaultMessage:
+            'Remove {count, plural, one {the parameter} other {the parameters}} {params} before saving -- ES|QL views can’t contain query parameters.',
+          values: {
+            count: unresolvedParams.length,
+            params: unresolvedParams.map((param) => `?${param}`).join(', '),
+          },
+        })
+      );
+      return;
+    }
 
     setIsSaving(true);
     try {
       if (mode === 'create') {
-        const existing = await fetchView(http, name);
+        const existing = await fetchView(http, finalName);
         if (existing) {
           setNameError(
             i18n.translate('esqlViews.flyout.nameTakenError', {
@@ -154,28 +184,28 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
         }
       }
 
-      await upsertView(http, name, esqlText);
+      await upsertView(http, finalName, esqlText);
 
       const lastUpdated = new Date().toISOString();
       const createdBy =
         initialView?.createdBy ??
         i18n.translate('esqlViews.flyout.currentUserLabel', { defaultMessage: 'You' });
-      setLocalViewMetadata(name, { description, createdBy, lastUpdated, query: esqlText });
+      setLocalViewMetadata(finalName, { description, createdBy, lastUpdated, query: esqlText });
 
       notifications.toasts.addSuccess(
         mode === 'create'
           ? i18n.translate('esqlViews.flyout.createSuccessToast', {
               defaultMessage: 'View "{name}" was created.',
-              values: { name },
+              values: { name: finalName },
             })
           : i18n.translate('esqlViews.flyout.updateSuccessToast', {
               defaultMessage: 'View "{name}" was updated.',
-              values: { name },
+              values: { name: finalName },
             })
       );
 
       onSaved({
-        name,
+        name: finalName,
         description,
         query: esqlText,
         source: getIndexPatternFromESQLQuery(esqlText) || '\u2014',
@@ -188,7 +218,7 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
       notifications.toasts.addDanger({
         title: i18n.translate('esqlViews.flyout.saveErrorToast', {
           defaultMessage: 'Failed to save view "{name}"',
-          values: { name },
+          values: { name: finalName },
         }),
         text: message,
       });
@@ -230,7 +260,7 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
           helpText={
             !nameError &&
             i18n.translate('esqlViews.flyout.nameHelpText', {
-              defaultMessage: 'Lowercase letters, numbers, and hyphens only.',
+              defaultMessage: 'Lowercase letters, numbers, hyphens, and underscores only.',
             })
           }
           isInvalid={Boolean(nameError)}
@@ -240,6 +270,7 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
           <EuiFieldText
             value={name}
             onChange={handleNameChange}
+            onBlur={handleNameBlur}
             placeholder={i18n.translate('esqlViews.flyout.textPlaceholder', {
               defaultMessage: 'Type text',
             })}

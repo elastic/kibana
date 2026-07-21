@@ -17,6 +17,7 @@ import type { CreateEditEsqlViewFlyoutProps } from '@kbn/esql-views-plugin/publi
 import type { DiscoverServices } from '../../../../../build_services';
 import type { DiscoverInternalState } from '../../../state_management/redux';
 import { selectTab } from '../../../state_management/redux';
+import { literalizeEsqlQueryParams } from './literalize_esql_query_params';
 
 const getManageEsqlViewsUrl = (services: DiscoverServices): string =>
   services.application.getUrlForApp('management', { path: '/kibana/esqlViews' });
@@ -46,8 +47,20 @@ export const getCreateEsqlViewAppMenuItem = ({
     iconType: 'save',
     testId: 'discoverCreateEsqlViewButton',
     render: ({ context: { onFinishAction } }) => {
-      const { query } = selectTab(getState(), tabId).appState;
-      const initialQuery = isOfAggregateQueryType(query) ? query.esql : undefined;
+      const tab = selectTab(getState(), tabId);
+      const { query } = tab.appState;
+      const rawQuery = isOfAggregateQueryType(query) ? query.esql : undefined;
+      // ES|QL views can't contain query parameters (see `literalizeEsqlQueryParams`'s doc
+      // comment), so resolve Discover's `?_tstart`/`?_tend` and any active ES|QL Controls to
+      // their current literal values before ever showing the query to the user as a candidate
+      // view definition. Any parameter this can't resolve is left as-is; the flyout itself
+      // blocks saving while the query still has unresolved parameters.
+      const initialQuery = rawQuery
+        ? literalizeEsqlQueryParams(rawQuery, {
+            esqlVariables: tab.esqlVariables,
+            timeRange: tab.dataRequestParams.timeRangeAbsolute,
+          }).query
+        : undefined;
 
       return (
         <CreateEsqlViewFlyout
