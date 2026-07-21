@@ -869,13 +869,18 @@ const ESQLEditorInternal = function ESQLEditor({
                     onCommentLine
                   );
 
-                  let prevLineCount = editor.getModel()?.getLineCount() || 1;
-
-                  const expandToFitContent = () => {
+                  const getContentHeight = () => {
                     const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
                     const lineCount = editor.getModel()?.getLineCount() || 1;
-                    const contentHeight =
-                      editor.getTopForLineNumber(lineCount + 1) + lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical
+                    return (
+                      editor.getTopForLineNumber(lineCount + 1) + lineHeight * 1.25 // Extra line at the bottom, plus a bit more to compensate for hidden vertical
+                    );
+                  };
+
+                  let prevContentHeight = getContentHeight();
+
+                  const expandToFitContent = () => {
+                    const contentHeight = getContentHeight();
                     setEditorHeight((currentHeight) => {
                       if (contentHeight > currentHeight) {
                         return Math.min(contentHeight, EDITOR_MAX_HEIGHT);
@@ -895,11 +900,11 @@ const ESQLEditorInternal = function ESQLEditor({
 
                   const modelContentDisposable = editor.onDidChangeModelContent(async () => {
                     trackInputLatencyOnKeystroke(editor.getValue() ?? '');
-                    const lineCount = editor.getModel()?.getLineCount() || 1;
-                    if (lineCount > prevLineCount) {
+                    const contentHeight = getContentHeight();
+                    if (contentHeight > prevContentHeight) {
                       expandToFitContent();
                     }
-                    prevLineCount = lineCount;
+                    prevContentHeight = contentHeight;
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {
                       addSourcesDecorator();
