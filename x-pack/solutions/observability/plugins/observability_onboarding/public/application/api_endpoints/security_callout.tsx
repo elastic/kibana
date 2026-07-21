@@ -38,7 +38,7 @@ export const SecurityCallout = ({
         })}
         data-test-subj="observabilityOnboardingApiEndpointsSecurityCallout"
       >
-        {i18n.translate('xpack.observability_onboarding.apiEndpoints.securityCalloutBody', {
+        {i18n.translate('xpack.observability_onboarding.apiEndpoints.securityCalloutDescription', {
           defaultMessage:
             "For security, API keys are shown only once, right after you create them. If you already created a key and saved it, keep using it — you don't need a new one. Create a new key only if you've lost the previous one or need an additional key. Manage existing ones in API keys.",
         })}
