@@ -6,7 +6,7 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
 export const ConnectorsTab = () => (
@@ -16,16 +16,18 @@ export const ConnectorsTab = () => (
     data-test-subj="contextConnectorsPlaceholder"
     title={
       <h3>
-        {i18n.translate('xpack.contextEngine.sourcePicker.connectors.placeholderTitle', {
-          defaultMessage: 'Connectors coming soon',
-        })}
+        <FormattedMessage
+          id="xpack.contextEngine.sourcePicker.connectors.placeholderTitle"
+          defaultMessage="Connectors coming soon"
+        />
       </h3>
     }
     body={
       <p>
-        {i18n.translate('xpack.contextEngine.sourcePicker.connectors.placeholderBody', {
-          defaultMessage: 'Support for adding connectors as a source is not available yet.',
-        })}
+        <FormattedMessage
+          id="xpack.contextEngine.sourcePicker.connectors.placeholderBody"
+          defaultMessage="Support for adding connectors as a source is not available yet."
+        />
       </p>
     }
   />

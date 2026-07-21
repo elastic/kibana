@@ -6,15 +6,11 @@
  */
 
 import { EuiEmptyPrompt, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  AutomationsPanel,
-  DescriptionPanel,
-  SourcesPanel,
-} from '../components/ai_index_detail';
+import { AutomationsPanel, DescriptionPanel, SourcesPanel } from '../components/ai_index_detail';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
 
@@ -33,9 +29,10 @@ export const AiIndexDetailPage = () => {
             data-test-subj="contextAiIndexDetailError"
             title={
               <h2>
-                {i18n.translate('xpack.contextEngine.aiIndexDetail.error.title', {
-                  defaultMessage: 'Unable to load AI index',
-                })}
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.error.title"
+                  defaultMessage="Unable to load AI index"
+                />
               </h2>
             }
             body={<p>{error.message}</p>}

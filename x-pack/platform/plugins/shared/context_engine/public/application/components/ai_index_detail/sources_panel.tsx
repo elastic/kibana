@@ -16,7 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
 import { SourceRow } from './source_row';
@@ -34,9 +34,10 @@ export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: Sou
       <EuiFlexItem>
         <EuiTitle size="s">
           <h2>
-            {i18n.translate('xpack.contextEngine.aiIndexDetail.sources.title', {
-              defaultMessage: 'Sources',
-            })}
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.sources.title"
+              defaultMessage="Sources"
+            />
           </h2>
         </EuiTitle>
       </EuiFlexItem>
@@ -48,19 +49,20 @@ export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: Sou
           isDisabled={!canEdit}
           data-test-subj="contextEditSourcesButton"
         >
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.sources.editButton', {
-            defaultMessage: 'Edit sources',
-          })}
+          <FormattedMessage
+            id="xpack.contextEngine.aiIndexDetail.sources.editButton"
+            defaultMessage="Edit sources"
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer size="s" />
     <EuiText size="s" color="subdued">
       <p>
-        {i18n.translate('xpack.contextEngine.aiIndexDetail.sources.description', {
-          defaultMessage:
-            'ES|QL views, indices, Connectors and stream signals feeding this AI index.',
-        })}
+        <FormattedMessage
+          id="xpack.contextEngine.aiIndexDetail.sources.description"
+          defaultMessage="ES|QL views, indices, Connectors and stream signals feeding this AI index."
+        />
       </p>
     </EuiText>
     <EuiSpacer size="m" />
@@ -73,16 +75,18 @@ export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: Sou
         data-test-subj="contextAiIndexSourcesEmpty"
         title={
           <h3>
-            {i18n.translate('xpack.contextEngine.aiIndexDetail.sources.emptyTitle', {
-              defaultMessage: 'No sources yet',
-            })}
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.sources.emptyTitle"
+              defaultMessage="No sources yet"
+            />
           </h3>
         }
         body={
           <p>
-            {i18n.translate('xpack.contextEngine.aiIndexDetail.sources.emptyBody', {
-              defaultMessage: 'Add a source to start building context for this AI index.',
-            })}
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.sources.emptyBody"
+              defaultMessage="Add a source to start building context for this AI index."
+            />
           </p>
         }
       />

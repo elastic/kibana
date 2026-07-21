@@ -6,7 +6,6 @@
  */
 
 import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
 import { toSourceType } from '../../utils/sources';
@@ -25,17 +24,9 @@ export const SourceRow = ({ source }: SourceRowProps) => (
       {/* minWidth: 0 lets the flex item shrink so long queries truncate instead of overflowing the panel */}
       <EuiFlexItem css={{ minWidth: 0 }}>
         <EuiText size="s" color="subdued" className="eui-textTruncate">
-          <FormattedMessage
-            id="xpack.contextEngine.aiIndexDetail.sources.esqlPrefix"
-            defaultMessage="ES|QL · {query}"
-            values={{
-              query: (
-                <EuiCode language="sql" transparentBackground>
-                  {source.value}
-                </EuiCode>
-              ),
-            }}
-          />
+          <EuiCode language="sql" transparentBackground>
+            {source.value}
+          </EuiCode>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

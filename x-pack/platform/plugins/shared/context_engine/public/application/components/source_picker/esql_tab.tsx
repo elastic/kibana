@@ -8,7 +8,7 @@
 import { EuiButton, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import type { AggregateQuery } from '@kbn/es-query';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 
 interface EsqlTabProps {
@@ -61,9 +61,10 @@ export const EsqlTab = ({ onAdd }: EsqlTabProps) => {
         isDisabled={!trimmedQuery}
         data-test-subj="contextAddEsqlSourceButton"
       >
-        {i18n.translate('xpack.contextEngine.sourcePicker.esql.addButton', {
-          defaultMessage: 'Add ES|QL source',
-        })}
+        <FormattedMessage
+          id="xpack.contextEngine.sourcePicker.esql.addButton"
+          defaultMessage="Add ES|QL source"
+        />
       </EuiButton>
     </div>
   );

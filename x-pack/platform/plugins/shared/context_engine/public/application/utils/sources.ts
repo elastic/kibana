@@ -23,9 +23,14 @@ export const toSourceType = (type: AiIndexSourceType): SourceType =>
  * Converts the source picker selection into the shape stored on the AI index.
  */
 export const toAiIndexSources = (selectedSources: SelectedSource[]): AiIndexSource[] =>
-  selectedSources
-    .filter((source) => source.type === 'esql')
-    .map((source) => ({ type: 'esql', value: source.value }));
+  selectedSources.map((source) => {
+    switch (source.type) {
+      case 'esql':
+        return { type: 'esql', value: source.value };
+      default:
+        throw new Error(`Unsupported AI index source type: ${source.type}`);
+    }
+  });
 
 /**
  * Rebuilds source picker selections from the sources stored on an AI index.

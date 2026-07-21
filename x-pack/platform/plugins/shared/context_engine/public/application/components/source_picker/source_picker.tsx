@@ -16,6 +16,7 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { ConnectorsTab } from './connectors_tab';
 import { EsqlTab } from './esql_tab';
@@ -97,9 +98,10 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           }
           data-test-subj="contextSourcePickerTab-esql"
         >
-          {i18n.translate('xpack.contextEngine.sourcePicker.tabs.esql', {
-            defaultMessage: 'ES|QL',
-          })}
+          <FormattedMessage
+            id="xpack.contextEngine.sourcePicker.tabs.esql"
+            defaultMessage="ES|QL"
+          />
         </EuiTab>
         <EuiTab
           isSelected={selectedTab === 'connectors'}
@@ -107,9 +109,10 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           prepend={<EuiIcon type="plugs" aria-hidden={true} />}
           data-test-subj="contextSourcePickerTab-connectors"
         >
-          {i18n.translate('xpack.contextEngine.sourcePicker.tabs.connectors', {
-            defaultMessage: 'Connectors',
-          })}
+          <FormattedMessage
+            id="xpack.contextEngine.sourcePicker.tabs.connectors"
+            defaultMessage="Connectors"
+          />
         </EuiTab>
       </EuiTabs>
 

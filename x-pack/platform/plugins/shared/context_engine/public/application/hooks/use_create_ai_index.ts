@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { DEFAULT_AI_INDEX_DATA_STREAM, DEFAULT_AI_INDEX_NAME } from '../../../common/constants';
@@ -14,18 +14,13 @@ import { putAiIndex } from '../api/ai_indices';
 import type { SelectedSource } from '../components/source_picker';
 import { getErrorMessage } from '../utils/get_error_message';
 import { toAiIndexSources } from '../utils/sources';
+import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
 interface CreatedAiIndex {
   id: string;
 }
 
-/**
- * Builds the AI index payload using a fixed identity while the create page has
- * no dedicated form. The `dest` points at the data stream created from Dev
- * Console via the "Create AI index dest" button, so the two always match. The
- * fixed id means repeated creates upsert the same record.
- */
 const buildAiIndexProperties = (sources: AiIndexSource[]): { id: string } & AiIndexProperties => ({
   id: DEFAULT_AI_INDEX_NAME,
   name: DEFAULT_AI_INDEX_NAME,
@@ -38,12 +33,16 @@ export const useCreateAiIndex = () => {
   const {
     services: { http, notifications },
   } = useKibana();
+  const queryClient = useQueryClient();
 
   const { mutateAsync, isLoading } = useMutation<CreatedAiIndex, Error, SelectedSource[]>({
     mutationFn: async (selectedSources) => {
       const { id, ...properties } = buildAiIndexProperties(toAiIndexSources(selectedSources));
       await putAiIndex(http, { aiIndexId: id, properties });
       return { id };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.list() });
     },
     onError: (error) => {
       const toastMessage = getErrorMessage(error);

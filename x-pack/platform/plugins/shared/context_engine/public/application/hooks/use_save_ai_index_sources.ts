@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import type {
@@ -17,6 +17,7 @@ import { putAiIndex } from '../api/ai_indices';
 import type { SelectedSource } from '../components/source_picker';
 import { getErrorMessage } from '../utils/get_error_message';
 import { toAiIndexSources } from '../utils/sources';
+import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
 interface SaveSourcesVariables {
@@ -33,6 +34,7 @@ export const useSaveAiIndexSources = () => {
   const {
     services: { http, notifications },
   } = useKibana();
+  const queryClient = useQueryClient();
 
   const { mutateAsync, isLoading } = useMutation<PutAiIndexResponse, Error, SaveSourcesVariables>({
     mutationFn: ({ aiIndex, selectedSources }) => {
@@ -44,6 +46,9 @@ export const useSaveAiIndexSources = () => {
         sources: toAiIndexSources(selectedSources),
       };
       return putAiIndex(http, { aiIndexId: aiIndex.id, properties });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.list() });
     },
     onError: (error) => {
       const toastMessage = getErrorMessage(error);

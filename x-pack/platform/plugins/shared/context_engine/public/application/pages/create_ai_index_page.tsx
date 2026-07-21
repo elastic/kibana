@@ -15,6 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import React, { useState } from 'react';
@@ -69,18 +70,19 @@ export const CreateAiIndexPage = () => {
             <EuiFlexItem>
               <EuiTitle size="s">
                 <h2>
-                  {i18n.translate('xpack.contextEngine.createAiIndex.addSource.title', {
-                    defaultMessage: 'Add a source',
-                  })}
+                  <FormattedMessage
+                    id="xpack.contextEngine.createAiIndex.addSource.title"
+                    defaultMessage="Add a source"
+                  />
                 </h2>
               </EuiTitle>
               <EuiSpacer size="s" />
               <EuiText size="s" color="subdued">
                 <p>
-                  {i18n.translate('xpack.contextEngine.createAiIndex.addSource.description', {
-                    defaultMessage:
-                      'Pick what this AI index should build context from. You can add more than one.',
-                  })}
+                  <FormattedMessage
+                    id="xpack.contextEngine.createAiIndex.addSource.description"
+                    defaultMessage="Pick what this AI index should build context from. You can add more than one."
+                  />
                 </p>
               </EuiText>
             </EuiFlexItem>
@@ -110,9 +112,10 @@ export const CreateAiIndexPage = () => {
                     isLoading={isCreating}
                     isDisabled={selectedSources.length === 0}
                   >
-                    {i18n.translate('xpack.contextEngine.createAiIndex.continueButton', {
-                      defaultMessage: 'Continue',
-                    })}
+                    <FormattedMessage
+                      id="xpack.contextEngine.createAiIndex.continueButton"
+                      defaultMessage="Continue"
+                    />
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>

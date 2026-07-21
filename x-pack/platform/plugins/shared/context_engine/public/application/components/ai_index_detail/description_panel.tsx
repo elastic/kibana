@@ -6,7 +6,7 @@
  */
 
 import { EuiPanel, EuiSkeletonText, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
 interface DescriptionPanelProps {
@@ -18,9 +18,10 @@ export const DescriptionPanel = ({ isLoading, description }: DescriptionPanelPro
   <EuiPanel hasBorder paddingSize="l">
     <EuiTitle size="s">
       <h2>
-        {i18n.translate('xpack.contextEngine.aiIndexDetail.description.title', {
-          defaultMessage: 'Description',
-        })}
+        <FormattedMessage
+          id="xpack.contextEngine.aiIndexDetail.description.title"
+          defaultMessage="Description"
+        />
       </h2>
     </EuiTitle>
     <EuiSpacer size="s" />
@@ -29,11 +30,12 @@ export const DescriptionPanel = ({ isLoading, description }: DescriptionPanelPro
     ) : (
       <EuiText size="s" color={description ? undefined : 'subdued'}>
         <p>
-          {description ??
-            i18n.translate('xpack.contextEngine.aiIndexDetail.description.empty', {
-              defaultMessage:
-                'No sources yet — add a source and a summary will be generated automatically.',
-            })}
+          {description ?? (
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.description.empty"
+              defaultMessage="No sources yet — add a source and a summary will be generated automatically."
+            />
+          )}
         </p>
       </EuiText>
     )}

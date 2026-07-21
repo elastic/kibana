@@ -7,7 +7,7 @@
 
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
-import { SOURCE_TYPE_LABELS } from './types';
+import { getSourceTypeLabel } from './types';
 import type { SourceType } from './types';
 
 interface SourceTypeBadgeProps {
@@ -16,11 +16,10 @@ interface SourceTypeBadgeProps {
 }
 
 /**
- * Tag that surfaces a source's type (e.g. "ES|QL view"). The label is derived
- * from {@link SOURCE_TYPE_LABELS} so the mapping lives in one place.
+ * Tag that surfaces a source's type (e.g. "ES|QL view").
  */
 export const SourceTypeBadge = ({ type, 'data-test-subj': dataTestSubj }: SourceTypeBadgeProps) => (
   <EuiBadge color="hollow" css={{ textTransform: 'uppercase' }} data-test-subj={dataTestSubj}>
-    {SOURCE_TYPE_LABELS[type]}
+    {getSourceTypeLabel(type)}
   </EuiBadge>
 );
