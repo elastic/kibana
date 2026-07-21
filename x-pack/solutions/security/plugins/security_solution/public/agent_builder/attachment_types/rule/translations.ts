@@ -109,3 +109,28 @@ export const LIMITATIONS_BODY = i18n.translate(
       'Only ES|QL rules are supported. Requires existing index data. Severity and risk score default to Low / 21 — ask the assistant to change them.',
   }
 );
+
+export const DIFF_ACCORDION_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.diffAccordionLabel',
+  { defaultMessage: 'Changes from saved rule' }
+);
+
+export const DIFF_SAVED_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.diffSavedLabel',
+  { defaultMessage: 'Saved' }
+);
+
+export const DIFF_AI_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.diffAiLabel',
+  { defaultMessage: 'AI suggested' }
+);
+
+export const DIFF_SAVED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.diffSavedDescription',
+  { defaultMessage: 'The rule as it was when added to chat' }
+);
+
+export const DIFF_AI_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.diffAiDescription',
+  { defaultMessage: 'The rule as suggested by the AI assistant' }
+);
