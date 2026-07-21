@@ -53,6 +53,7 @@ const listQueriesRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    tags: ['oas-tag:streams'],
     deprecated: {
       documentationUrl:
         'https://www.elastic.co/docs/api/doc/serverless/operation/operation-get-streams-name-queries',
@@ -122,6 +123,7 @@ const upsertQueryRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    tags: ['oas-tag:streams'],
     deprecated: {
       documentationUrl:
         'https://www.elastic.co/docs/api/doc/serverless/operation/operation-put-streams-name-queries-queryid',
@@ -203,6 +205,7 @@ const deleteQueryRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    tags: ['oas-tag:streams'],
     deprecated: {
       documentationUrl:
         'https://www.elastic.co/docs/api/doc/serverless/operation/operation-delete-streams-name-queries-queryid',
@@ -283,6 +286,7 @@ const bulkQueriesRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    tags: ['oas-tag:streams'],
     deprecated: {
       documentationUrl:
         'https://www.elastic.co/docs/api/doc/serverless/operation/operation-post-streams-name-queries-bulk',
