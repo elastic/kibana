@@ -145,6 +145,8 @@ export const EntityHighlightsAccordion: React.FC<{
     entitySnapshot,
     refetchEntityRecord,
     refetchPersistedSummary,
+    // Persist only when the user can read the metadata index, otherwise keep it in-session only
+    persistSummary: canReadPersistedSummary,
   });
 
   // Staleness check — compare stored snapshot against current entity signals.

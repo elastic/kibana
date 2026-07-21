@@ -25,7 +25,9 @@
       "ignore_unavailable": "__flag__",
       "lenient": "__flag__",
       "rewrite": "__flag__",
-      "q": ""
+      "q": "",
+      "routing": [],
+      "_slice": ""
     },
     "methods": [
       "GET",
