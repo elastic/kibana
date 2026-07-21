@@ -97,7 +97,7 @@ export class AgentBuilderSmlPlugin
         'Kibana resources available for use in Agent Builder, including dashboards, ' +
         'visualizations, connectors, workflows, alerting rules, action policies, ' +
         'and significant events.',
-      dest: { type: 'index', value: '.ai-index-idx-sml-data' },
+      dest: { type: 'index', value: 'ai-index-idx-sml-data' },
       automations: [],
       sources: [],
     });

@@ -177,6 +177,7 @@ export const LastResponseSummaryChart: React.FC<LastResponseSummaryChartProps> =
             items={tableData}
             columns={columns}
             tableLayout="auto"
+            tableCaption={i18n.LAST_RESPONSE_SUMMARY_TABLE_CAPTION}
             data-test-subj="last-response-summary-table"
           />
         </EuiFlexItem>

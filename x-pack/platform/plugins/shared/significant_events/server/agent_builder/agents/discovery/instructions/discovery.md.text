@@ -29,7 +29,7 @@ Stop at the lowest mechanism the evidence supports. "The service is failing" is 
 
 - **`## Detection batch`** — unprocessed change-point detections, one row per rule. Each row carries `detection_id`, `rule_uuid`, `rule_name`, `stream_name`, `change_point_type`, and `p_value`. You decide investigate-vs-resolve yourself by reading each row's `change_point_type` **and its direction** — see `<change_type_semantics>`.
 
-**Open events** — fetched via `platform_sig_events_event_search` once per batch before detection grouping. Call with `status: "open"` to retrieve events whose latest significant-event status is `open`. Each returned entry is the latest significant event document per `event_id`. Routing a current group to one of these events is a **continuation** (reuse its `event_id`); a group matching no candidate opens a new event. 
+**Continuation candidates** — the saved `events` array returned by the one batch-wide search defined in `<tools>` and `<tool_examples>`. It is the only candidate set used for this batch and contains at most one latest open document per `event_id`.
 
 An **episode** is the full open→closed lifecycle of one `event_id`; "event"/`event_id` refers to the identity key, "episode" to its lifecycle state — used interchangeably below.
 
@@ -56,8 +56,8 @@ Classify each detection as **escalation** or **recovering** from its `change_poi
 
 <tools>
 
-- `platform_sig_events_event_search` — call once per batch before grouping detection rules. Pass `status: "open"` and `stream_names` (all distinct stream names from the active batch). The returned `events` array is the continuation candidate set.
-- `platform_sig_events_discovery_write` — final output step; call once per group, then stop. For new episodes, omit `event_id` (auto-generated). For a continuation (including a recovering episode), pass the candidate's `event_id` verbatim.
+- `platform_sig_events_event_search` — fetch the continuation candidate set exactly once per batch in the same parallel tool-call group as the KI searches. See `<tool_examples>` for the required call.
+- `platform_sig_events_discovery_write` — final output step; emit one call per group in the same assistant response, then stop. For new episodes, omit `event_id` (auto-generated). For a continuation (including a recovering episode), pass the candidate's `event_id` verbatim.
 - `platform_sig_events_ki_search` and `platform_core_execute_esql` — provided and documented by the loaded `significant-events-ki-grounding` skill.
 
 </tools>
@@ -114,12 +114,14 @@ Example: platform_sig_events_discovery_write
 
 - Use only the tools listed in `<tools>`. Tool results are delivered inline — never call `read_file` or `list_files` for any reason, including locating skill files or reading tool results.
 - **`load_skill` must run alone, in its own tool call batch.** Do not dispatch any other tool in the same step. Wait for the response before proceeding. If `load_skill` returns an error, retry with the correct skill ID — do not explore the filesystem to find the skill.
+- Follow this tool sequence exactly: `load_skill` → the loaded skill's KI searches plus one event search in the same parallel tool-call group → parallel ES|QL wave(s) → grouping/routing → all discovery writes in one parallel tool-call group.
+- Never call event search more than once in a run.
 
 </tool_discipline>
 
 <critical_rules>
 
-1. **KI search is mandatory first** — call `platform_sig_events_ki_search` before any `platform_core_execute_esql`, even when continuation candidates are present.
+1. **KI grounding is mandatory first** — follow the loaded `significant-events-ki-grounding` protocol before any `platform_core_execute_esql`, even when continuation candidates are present.
    - Skipping it leaves `causal_features` empty and `signals` without KI-backed queries.
    - A discovery with any **escalation** detection and `signals: []` is invalid — return to KI search.
 2. **Exact-match KI queries always run for escalation detections — `stationary` does not skip them.** The dependency/infra gate controls `blast_radius` population only. "This signal is probably noise" is a hypothesis; the query is how you confirm or refute it. Recovering (downward/settle) detections also run their exact-match query — with a recovery lens — to confirm the failure has actually stopped rather than to hunt for it.
@@ -193,7 +195,9 @@ First call `load_skill` with `significant-events-ki-grounding` — `platform_sig
 
 **Partition rules into failure domains.** Assign each rule a 2–4 word label from `rule_name` + `change_point_type` (e.g., `"database connection errors"`, `"sensitive data in logs"`). Rules with matching labels share a domain; a single rule always forms its own domain. This label is a prior for `<correlation_rules>`: a domain mismatch alone is sufficient to block Path 2/3 grouping between two rules (Path 1's dependency-edge cascade is exempt — cascades legitimately span different domains).
 
-**Follow the KI search protocol from the loaded `significant-events-ki-grounding` skill** — one call for the entire batch, result dedup, `dataset_analysis` discard, and all follow-up rules.
+**Follow the KI search protocol from the loaded `significant-events-ki-grounding` skill** for the entire batch, including result deduplication and `dataset_analysis` discard.
+
+In the same assistant response as the KI search call(s), fetch the continuation candidates using the required call in `<tool_examples>`. Retain the result for grouping and continuation; it does not depend on KI or ES|QL results.
 
 ### Step 2: Form Hypotheses
 
@@ -225,7 +229,7 @@ Include only KIs involving the failing service. Apply KI type definitions from t
 
 ### Step 3: Run and Record Confirmation Queries
 
-Follow the confirmation query protocol from the loaded `significant-events-ki-grounding` context for modifications, deduplication, cap, ordering, and `description` format. Deferred entity KI follow-up per the KI search protocol in the same context.
+Follow the confirmation query protocol from the loaded `significant-events-ki-grounding` context for modifications, deduplication, cap, ordering, and `description` format. Dispatch every independent primary query in one mandatory parallel wave; only result-dependent contradiction checks may run in a later wave.
 
 **Record each call as a `signals[]` entry:** `metadata.rule_name`, `metadata.rule_uuid`, `stream_name`, `evidence.result` (found/empty/error), `evidence.esql_query` (exact post-modification string), `description`, `collected_at`.
 
@@ -241,7 +245,7 @@ Follow the confirmation query protocol from the loaded `significant-events-ki-gr
 
 ### Step 4: Group
 
-Before any continuation checks in this step, call `platform_sig_events_event_search` once with `status: "open"` and `stream_names` containing all distinct stream names from the active batch. Treat the returned `events` as the continuation candidate set.
+Use the continuation candidate set fetched alongside the KI searches. Treat its `events` array as the complete candidate set for this run; do not call the tool again during grouping or per-group routing.
 
 **Recovering pre-pass (before correlation grouping).** Recovering (downward/settle) rules do not participate in onset-based correlation grouping. Process their recovery-lens query results separately first:
 
@@ -265,7 +269,7 @@ Routing is **per group** and **fans out**: evaluate each group independently —
 
 **For each group, run the continuation check.**
 
-Is this group part of an open event from `platform_sig_events_event_search` `events`? Run in order; stop at first match:
+Match each group against the saved continuation candidates. Evaluate these matchers in order and stop at the first match:
 
 Derive current failure context from `signals[].description` found-row content first, then `symptom_hypothesis`, then `summary`; use rule names last.
 
@@ -302,8 +306,7 @@ Discoveries are re-evaluated every cycle — apply this check even when the cand
 3. `blast_radius` dependency entries: scan query KI `evidence` for `"Dependency: <source> → <target>"` strings. Never populate from continuation-candidate data alone.
 4. `causal_features` ceiling: apply the ceiling from the `confidence` field description in the tool schema.
 
-For each discovery group:
-1. Call `platform_sig_events_discovery_write` with the full discovery document. One call per group.
+Call `platform_sig_events_discovery_write` once per discovery simultaneously in the same tool-call group.
 
 Apply field rules from `<field_rules>`.
 

@@ -14,7 +14,7 @@ import type { AiIndexProperties } from '../../common/http_api/ai_indices';
 const makeProperties = (overrides: Partial<AiIndexProperties> = {}): AiIndexProperties => ({
   name: 'Test Index',
   description: 'A test AI index',
-  dest: { type: 'index', value: '.ai-index-idx-test' },
+  dest: { type: 'index', value: 'ai-index-idx-test' },
   automations: [],
   sources: [],
   ...overrides,
