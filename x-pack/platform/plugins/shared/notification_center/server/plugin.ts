@@ -13,7 +13,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { NotificationCenterConfig } from './config';
-import { registerCleanupTask, scheduleCleanupTask } from './cleanup_task';
+import { registerNotificationCleanupTask, scheduleNotificationCleanupTask } from './cleanup_task';
 import { registerNotificationDataStream } from './data_stream/notification_data_stream';
 import { buildSubmitNotification } from './submit';
 import { registerNotificationUserStorage } from './user_storage';
@@ -48,7 +48,7 @@ export class NotificationCenterPlugin
 
     registerNotificationDataStream(core.dataStreams);
     registerNotificationUserStorage(core.userStorage);
-    registerCleanupTask(core, plugins.taskManager, this.logger);
+    registerNotificationCleanupTask(core, plugins.taskManager, this.logger);
 
     return {
       submitNotification: buildSubmitNotification(core),
@@ -59,7 +59,7 @@ export class NotificationCenterPlugin
     _core: CoreStart,
     plugins: NotificationCenterStartDependencies
   ): NotificationCenterPluginStart {
-    scheduleCleanupTask(plugins.taskManager).catch((err) => {
+    scheduleNotificationCleanupTask(plugins.taskManager).catch((err) => {
       this.logger.error(`Failed to schedule Notification Center cleanup task: ${err.message}`);
     });
 

@@ -10,8 +10,8 @@ import {
   buildCleanupQuery,
   CLEANUP_TASK_ID,
   CLEANUP_TASK_TYPE,
-  registerCleanupTask,
-  scheduleCleanupTask,
+  registerNotificationCleanupTask,
+  scheduleNotificationCleanupTask,
   SEVERITY_RETENTION_DAYS,
 } from './cleanup_task';
 import { NOTIFICATION_DATA_STREAM_NAME } from './data_stream/notification_data_stream';
@@ -65,7 +65,7 @@ describe('cleanup_task', () => {
     });
   });
 
-  describe('registerCleanupTask()', () => {
+  describe('registerNotificationCleanupTask()', () => {
     const deleteByQuery = jest.fn().mockResolvedValue({});
     const getStartServices = jest
       .fn()
@@ -84,7 +84,7 @@ describe('cleanup_task', () => {
     });
 
     it('registers the task with the correct type, title, cost, and timeout', () => {
-      registerCleanupTask(core, taskManager, logger);
+      registerNotificationCleanupTask(core, taskManager, logger);
 
       expect(registerTaskDefinitions).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -98,7 +98,7 @@ describe('cleanup_task', () => {
     });
 
     it('run() calls deleteByQuery against the notification data stream with the abort signal', async () => {
-      registerCleanupTask(core, taskManager, logger);
+      registerNotificationCleanupTask(core, taskManager, logger);
 
       const taskDef = registerTaskDefinitions.mock.calls[0][0][CLEANUP_TASK_TYPE];
       const runner = taskDef.createTaskRunner({ abortController });
@@ -118,7 +118,7 @@ describe('cleanup_task', () => {
     it('run() logs an error and does not throw when deleteByQuery fails', async () => {
       deleteByQuery.mockRejectedValueOnce(new Error('ES unavailable'));
 
-      registerCleanupTask(core, taskManager, logger);
+      registerNotificationCleanupTask(core, taskManager, logger);
 
       const taskDef = registerTaskDefinitions.mock.calls[0][0][CLEANUP_TASK_TYPE];
       const runner = taskDef.createTaskRunner({ abortController });
@@ -128,12 +128,12 @@ describe('cleanup_task', () => {
     });
   });
 
-  describe('scheduleCleanupTask()', () => {
+  describe('scheduleNotificationCleanupTask()', () => {
     it('calls ensureScheduled with correct id, taskType, and daily interval', async () => {
       const ensureScheduled = jest.fn().mockResolvedValue({});
       const taskManager = { ensureScheduled } as any;
 
-      await scheduleCleanupTask(taskManager);
+      await scheduleNotificationCleanupTask(taskManager);
 
       expect(ensureScheduled).toHaveBeenCalledWith({
         id: CLEANUP_TASK_ID,

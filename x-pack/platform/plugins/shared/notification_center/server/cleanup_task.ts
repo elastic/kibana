@@ -45,7 +45,7 @@ export const buildCleanupQuery = () => ({
   },
 });
 
-export const registerCleanupTask = (
+export const registerNotificationCleanupTask = (
   core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>,
   taskManager: TaskManagerSetupContract,
   logger: Logger
@@ -79,7 +79,7 @@ export const registerCleanupTask = (
   });
 };
 
-export const scheduleCleanupTask = (taskManager: TaskManagerStartContract) =>
+export const scheduleNotificationCleanupTask = (taskManager: TaskManagerStartContract) =>
   taskManager.ensureScheduled({
     id: CLEANUP_TASK_ID,
     taskType: CLEANUP_TASK_TYPE,
