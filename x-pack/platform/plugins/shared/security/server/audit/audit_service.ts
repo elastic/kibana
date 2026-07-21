@@ -45,8 +45,10 @@ export const AUDIT_OTEL_FIELD_DROPS: string[] = ['service.version', 'host.name']
 
 // event.type is required on every audit log. Authentication events omit it; default to 'access'.
 // SO/Space events already carry a specific type (e.g. 'creation', 'deletion') so are unaffected.
+// log.type: 'audit' is required on all audit logs per the log-delivery convention.
 export const AUDIT_OTEL_FIELD_DEFAULTS: Record<string, string | string[]> = {
   'event.type': ['access'],
+  'log.type': 'audit',
 };
 
 // OTel semantic conventions require HTTP method to be uppercase (e.g. 'GET' not 'get').
