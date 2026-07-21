@@ -25,6 +25,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiMarkdownFormat,
   EuiPanel,
   EuiSpacer,
   EuiTab,
@@ -195,9 +196,9 @@ export const InvestigationDetailFlyout: React.FC<InvestigationDetailFlyoutProps>
           ) : null}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiText size="s">
-          <p>{summary ?? 'No assessment summary available.'}</p>
-        </EuiText>
+        <EuiMarkdownFormat textSize="s">
+          {summary ?? 'No assessment summary available.'}
+        </EuiMarkdownFormat>
 
         <EuiSpacer size="l" />
         <EuiTitle size="xs">
