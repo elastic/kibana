@@ -39,6 +39,9 @@ spaceTest.describe(
         });
 
         await spaceTest.step('opens a new ES|QL-backed dashboard', async () => {
+          // The "Try ES|QL" handler is a no-op until the Lens state helpers finish loading, so wait
+          // for the page's readiness signal before clicking, otherwise the click does not navigate.
+          await page.testSubj.locator('dashboardNoDataPageLoaded').waitFor({ state: 'attached' });
           await page.testSubj.click('tryESQLLink');
           await pageObjects.dashboard.waitForRenderComplete();
           // The breadcrumb is prefixed with "Editing " when the dashboard is in edit mode,
