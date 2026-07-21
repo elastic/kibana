@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/platform/context_engine/ki_automation_generation.spec.ts
-
 import { tags } from '@kbn/scout';
 import { evaluate as base } from '../../../src/evaluate';
 import { createEvaluateDataset } from '../../../src/evaluate_dataset';

@@ -37,7 +37,7 @@ export const kiAutomationGenerationSkill = defineSkillType({
     platformCoreTools.executeWorkflow,
     platformCoreTools.generateEsql,
     platformCoreTools.executeEsql,
-    platformCoreTools.listIndices,
+    platformCoreTools.listIndices, // available for edge-case handling; Phase 1 uses get_index_mapping instead
     platformCoreTools.getIndexMapping,
     platformCoreTools.getWorkflowExecutionStatus,
     `${internalNamespaces.workflows}.validate_workflow`,
