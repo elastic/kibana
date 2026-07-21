@@ -6,26 +6,39 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import React, { lazy, useCallback, useMemo } from 'react';
 import { noop } from 'lodash/fp';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { PrevalenceDetailsProps } from './tools/prevalence';
-import { useKibana } from '../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import type { FlyoutOrigin } from '../../common/lib/telemetry';
+import {
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
-import { flyoutProviders } from '../shared/components/flyout_provider';
-import { FlyoutLoading } from '../shared/components/flyout_loading';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context'; // Tools are lazy-loaded so consumers of this hook don't statically pull the whole document-flyout
+import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
+import {
+  ANALYZER_TITLE,
+  CORRELATIONS_TITLE,
+  ENTITIES_TITLE,
+  formatFlyoutTitle,
+  GRAPH_TITLE,
+  INVESTIGATION_GUIDE_TITLE,
+  PREVALENCE_TITLE,
+  RESPONSE_TITLE,
+  SESSION_VIEW_TITLE,
+  THREAT_INTELLIGENCE_TITLE,
+} from '../shared/constants/flyout_titles';
+import { getAlertHistoryTitle, getDocumentTitle } from './main/utils/get_header_title';
+import { useFlyoutSessionContext } from '../session_context';
 
 // Tools are lazy-loaded so consumers of this hook don't statically pull the whole document-flyout
 // tool graph into their bundle; the chunk only loads when a flyout is actually opened.
@@ -75,6 +88,15 @@ export interface OpenDocumentFlyoutParams {
   renderCellActions?: CellActionRenderer;
   /** Invoked after an alert is mutated inside the flyout, to let the caller refresh. Defaults to a no-op. */
   onAlertUpdated?: () => void;
+  /** Which UI trigger opened this flyout, when known. */
+  origin?: FlyoutOrigin;
+  /**
+   * Flyout-history title to use for this open, when already known synchronously by the caller
+   * (e.g. `getDocumentHistoryTitle(hit)`). For `openDocumentFlyoutFromIndex`, omitted means no
+   * title. For `openDocumentFlyoutFromIndexAsChild`, omitted falls back to the bare "Alert" title,
+   * since the full document isn't loaded yet at open time.
+   */
+  title?: string;
 }
 
 export interface OpenAnalyzerParams {
@@ -82,6 +104,8 @@ export interface OpenAnalyzerParams {
   hit: DataTableRecord;
   renderCellActions?: CellActionRenderer;
   onAlertUpdated?: () => void;
+  /** Which UI trigger opened the analyzer tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenSessionViewParams {
@@ -91,6 +115,8 @@ export interface OpenSessionViewParams {
   jumpToEntityId?: string;
   renderCellActions?: CellActionRenderer;
   onAlertUpdated?: () => void;
+  /** Which UI trigger opened the session view tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenDocumentEntitiesParams {
@@ -98,6 +124,8 @@ export interface OpenDocumentEntitiesParams {
   hit: DataTableRecord;
   /** Scope id for the entity links opened from the tool. */
   scopeId?: string;
+  /** Which UI trigger opened the entities tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenDocumentCorrelationsParams {
@@ -108,34 +136,50 @@ export interface OpenDocumentCorrelationsParams {
   /** Whether the document is being displayed in a rule preview. */
   isRulePreview: boolean;
   /** Callback to open one of the correlated alerts. */
-  onShowAlert: (id: string, indexName: string) => void;
+  onShowAlert: (id: string, indexName: string, title?: string) => void;
   /** Optional callback to open a correlated attack; when omitted the attack column is hidden. */
-  onShowAttack?: (id: string, indexName: string) => void;
+  onShowAttack?: (id: string, indexName: string, title?: string) => void;
+  /** Which UI trigger opened the correlations tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenDocumentResponseParams {
   /** The alert document whose response actions should be shown. */
   hit: DataTableRecord;
+  /** Which UI trigger opened the response tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenDocumentThreatIntelligenceParams {
   /** The document whose threat intelligence matches should be shown. */
   hit: DataTableRecord;
+  /** Which UI trigger opened the threat intelligence tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenDocumentInvestigationGuideParams {
   /** The alert document whose investigation guide should be shown. */
   hit: DataTableRecord;
+  /** Which UI trigger opened the investigation guide tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
-/** Parameters for the prevalence tool. Mirrors the tool's own props (the caller builds `columns`). */
-export type OpenDocumentPrevalenceParams = PrevalenceDetailsProps;
+/**
+ * Parameters for the prevalence tool. Mirrors the tool's own props (the caller builds `columns`),
+ * plus the UI trigger that opened it.
+ */
+export type OpenDocumentPrevalenceParams = PrevalenceDetailsProps & {
+  /** Which UI trigger opened the prevalence tool, when known. */
+  origin?: FlyoutOrigin;
+};
 
 export interface OpenDocumentGraphParams {
   /** The document to render the graph for. */
   hit: DataTableRecord;
   renderCellActions?: CellActionRenderer;
   onAlertUpdated?: () => void;
+  /** Which UI trigger opened the graph tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface DocumentFlyoutApi {
@@ -178,8 +222,9 @@ export interface DocumentFlyoutApi {
 /**
  * Developer-facing API to open the new (EUI-based) document flyout and its tool flyouts, in the
  * same mindset as `useExpandableFlyoutApi`. It encapsulates the provider wiring
- * (`flyoutProviders` + `overlays.openSystemFlyout`) and the per-tool flyout properties so call
- * sites don't have to repeat them.
+ * (`flyoutProviders` + `overlays.openSystemFlyout`, via `useOpenFlyout`) and the per-tool flyout
+ * properties so call sites don't have to repeat them. `useOpenFlyout` also reports open/close
+ * telemetry for every method below.
  *
  * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
  * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
@@ -188,37 +233,9 @@ export interface DocumentFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const mainFlyoutSessionMode = useFlyoutSessionContext();
-
-  const open = useCallback(
-    (
-      children: ReactNode,
-      properties: OverlaySystemFlyoutOpenOptions,
-      propagatedMainFlyoutSessionMode = mainFlyoutSessionMode
-    ) => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <FlyoutSessionContextProvider value={propagatedMainFlyoutSessionMode}>
-              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
-            </FlyoutSessionContextProvider>
-          ),
-        }),
-        properties
-      );
-    },
-    [overlays, services, store, history, mainFlyoutSessionMode]
-  );
+  const open = useOpenFlyout();
 
   // Builds the document flyout content (resolved from a concrete `_index`), shared by both the main
   // and child open methods. Only the `session` differs between them, so it is kept private here and
@@ -242,19 +259,23 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
 
   const openDocumentFlyoutFromIndex = useCallback(
     (params: OpenDocumentFlyoutParams) => {
-      open(buildFromIndexContent(params), {
-        ...defaultDocumentFlyoutProperties,
-        historyKey,
-        session: mainFlyoutSessionMode,
-      });
+      open(
+        buildFromIndexContent(params),
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: sessionMode,
+          title: params.title,
+        },
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: sessionMode,
+          origin: params.origin,
+        }
+      );
     },
-    [
-      open,
-      buildFromIndexContent,
-      defaultDocumentFlyoutProperties,
-      historyKey,
-      mainFlyoutSessionMode,
-    ]
+    [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openDocumentFlyoutFromIndexAsChild = useCallback(
@@ -264,9 +285,16 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,
-          session: 'inherit',
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          title: buildFlyoutNavTitle(params.title ?? getAlertHistoryTitle()),
         },
-        'inherit'
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          origin: params.origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey]
@@ -278,6 +306,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       indexName,
       renderCellActions = cellActionRenderer,
       onAlertUpdated = noop,
+      origin,
     }: OpenDocumentFlyoutParams) => {
       open(
         <DocumentFlyoutWrapperFromPattern
@@ -286,10 +315,16 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: mainFlyoutSessionMode }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode },
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: sessionMode,
+          origin,
+        }
       );
     },
-    [open, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
+    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openAnalyzer = useCallback(
@@ -297,6 +332,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       hit,
       renderCellActions = cellActionRenderer,
       onAlertUpdated = noop,
+      origin,
     }: OpenAnalyzerParams) => {
       open(
         <AnalyzerGraph
@@ -304,7 +340,20 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(ANALYZER_TITLE, getDocumentTitle(hit)),
+        },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.ANALYZER,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]
@@ -317,6 +366,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       jumpToEntityId,
       renderCellActions = cellActionRenderer,
       onAlertUpdated = noop,
+      origin,
     }: OpenSessionViewParams) => {
       open(
         <SessionView
@@ -326,19 +376,44 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(SESSION_VIEW_TITLE, getDocumentTitle(hit)),
+        },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.SESSION_VIEW,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]
   );
 
   const openDocumentEntities = useCallback(
-    ({ hit, scopeId }: OpenDocumentEntitiesParams) => {
-      open(<EntityDetails hit={hit} scopeId={scopeId} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+    ({ hit, scopeId, origin }: OpenDocumentEntitiesParams) => {
+      open(
+        <EntityDetails hit={hit} scopeId={scopeId} />,
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(ENTITIES_TITLE, getDocumentTitle(hit)),
+        },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.ENTITIES,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
+      );
     },
     [open, historyKey]
   );
@@ -350,6 +425,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       isRulePreview,
       onShowAlert,
       onShowAttack,
+      origin,
     }: OpenDocumentCorrelationsParams) => {
       open(
         <CorrelationsDetails
@@ -359,36 +435,73 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onShowAlert={onShowAlert}
           onShowAttack={onShowAttack}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(CORRELATIONS_TITLE, getDocumentTitle(hit)),
+        },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.CORRELATIONS,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]
   );
 
   const openDocumentResponse = useCallback(
-    ({ hit }: OpenDocumentResponseParams) => {
-      open(<ResponseDetails hit={hit} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+    ({ hit, origin }: OpenDocumentResponseParams) => {
+      open(
+        <ResponseDetails hit={hit} />,
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(RESPONSE_TITLE, getDocumentTitle(hit)),
+        },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.RESPONSE,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
+      );
     },
     [open, historyKey]
   );
 
   const openDocumentThreatIntelligence = useCallback(
-    ({ hit }: OpenDocumentThreatIntelligenceParams) => {
-      open(<ThreatIntelligenceDetails hit={hit} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+    ({ hit, origin }: OpenDocumentThreatIntelligenceParams) => {
+      open(
+        <ThreatIntelligenceDetails hit={hit} />,
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(THREAT_INTELLIGENCE_TITLE, getDocumentTitle(hit)),
+        },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.THREAT_INTELLIGENCE,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
+      );
     },
     [open, historyKey]
   );
 
   const openDocumentPrevalence = useCallback(
-    ({ hit, investigationFields, scopeId, columns }: OpenDocumentPrevalenceParams) => {
+    ({ hit, investigationFields, scopeId, columns, origin }: OpenDocumentPrevalenceParams) => {
       open(
         <PrevalenceDetails
           hit={hit}
@@ -396,19 +509,44 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           scopeId={scopeId}
           columns={columns}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(PREVALENCE_TITLE, getDocumentTitle(hit)),
+        },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.PREVALENCE,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]
   );
 
   const openDocumentInvestigationGuide = useCallback(
-    ({ hit }: OpenDocumentInvestigationGuideParams) => {
-      open(<InvestigationGuide hit={hit} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+    ({ hit, origin }: OpenDocumentInvestigationGuideParams) => {
+      open(
+        <InvestigationGuide hit={hit} />,
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(INVESTIGATION_GUIDE_TITLE, getDocumentTitle(hit)),
+        },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.INVESTIGATION_GUIDE,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
+      );
     },
     [open, historyKey]
   );
@@ -418,6 +556,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       hit,
       renderCellActions = cellActionRenderer,
       onAlertUpdated = noop,
+      origin,
     }: OpenDocumentGraphParams) => {
       open(
         <GraphDetails
@@ -425,7 +564,20 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(GRAPH_TITLE, getDocumentTitle(hit)),
+        },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.GRAPH,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
       );
     },
     [open, historyKey]

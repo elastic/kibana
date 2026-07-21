@@ -20,7 +20,7 @@ export const MOCK_TEMPLATES: Template[] = [
     tags: ['security', 'incident', 'critical'],
     author: 'john.doe',
     fieldCount: 8,
-    fieldNames: [
+    fieldDefinitions: [
       { name: 'severity', label: 'Severity', type: 'keyword', control: 'SELECT_BASIC' },
       { name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
       {
@@ -50,7 +50,7 @@ export const MOCK_TEMPLATES: Template[] = [
     tags: ['observability', 'monitoring', 'alerts'],
     author: 'jane.smith',
     fieldCount: 5,
-    fieldNames: [
+    fieldDefinitions: [
       { name: 'service', label: 'Service', type: 'keyword', control: 'INPUT_TEXT' },
       { name: 'environment', label: 'Environment', type: 'keyword', control: 'SELECT_BASIC' },
       { name: 'alert_type', label: 'Alert Type', type: 'keyword', control: 'SELECT_BASIC' },
@@ -72,7 +72,7 @@ export const MOCK_TEMPLATES: Template[] = [
     tags: ['support', 'general'],
     author: 'bob.wilson',
     fieldCount: 4,
-    fieldNames: [
+    fieldDefinitions: [
       { name: 'category', label: 'Category', type: 'keyword', control: 'SELECT_BASIC' },
       { name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
       { name: 'customer_id', label: 'Customer ID', type: 'keyword', control: 'INPUT_TEXT' },
@@ -93,7 +93,7 @@ export const MOCK_TEMPLATES: Template[] = [
     tags: ['security', 'malware', 'threat'],
     author: 'john.doe',
     fieldCount: 12,
-    fieldNames: [
+    fieldDefinitions: [
       { name: 'malware_type', label: 'Malware Type', type: 'keyword', control: 'SELECT_BASIC' },
       { name: 'file_hash', label: 'File Hash', type: 'keyword', control: 'INPUT_TEXT' },
       { name: 'file_name', label: 'File Name', type: 'keyword', control: 'INPUT_TEXT' },

@@ -18,9 +18,13 @@ import {
   getApmMlDetectorLabel,
   getSeverity,
   getSeverityColor,
+  isNoAnomalyScore,
 } from '../../../../../common/anomaly_detection';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
+
+const COMPARISON_ENABLED_DEFAULT = true;
+const IS_IN_SERVICE_OVERVIEW_DEFAULT = false;
 
 function getI18nLabel(severity: ML_ANOMALY_SEVERITY): string {
   switch (severity) {
@@ -56,6 +60,69 @@ function formatLabelWithScore(label: string, score?: number): string {
   return `${label} (${Math.round(score)})`;
 }
 
+function getTooltipContent({
+  isNone,
+  score,
+  detectorType,
+  href,
+  comparisonEnabled = COMPARISON_ENABLED_DEFAULT,
+  isInServiceOverview = IS_IN_SERVICE_OVERVIEW_DEFAULT,
+}: {
+  isNone: boolean;
+  score: number | undefined;
+  detectorType: AnomalyDetectorType | undefined;
+  href: string | undefined;
+  comparisonEnabled: boolean | undefined;
+  isInServiceOverview: boolean | undefined;
+}): string {
+  if (score === undefined) {
+    return i18n.translate('xpack.apm.anomaliesBadge.tooltip.unknown', {
+      defaultMessage: 'No anomaly score is available for the selected time range.',
+    });
+  }
+
+  if (isNone) {
+    return i18n.translate('xpack.apm.anomaliesBadge.tooltip.none', {
+      defaultMessage: 'No anomalies detected.',
+    });
+  }
+
+  if (href === undefined) {
+    return i18n.translate('xpack.apm.anomaliesBadge.tooltip.score.noLink', {
+      defaultMessage:
+        'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}}',
+      values: {
+        score: score.toFixed(2),
+        detectorType: detectorType ?? 'none',
+        detectorLabel: detectorType !== undefined ? getApmMlDetectorLabel(detectorType) : '',
+      },
+    });
+  }
+
+  if (!isInServiceOverview) {
+    return i18n.translate('xpack.apm.anomaliesBadge.tooltip.score.outsideLink', {
+      defaultMessage:
+        'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}} - Click to view more.',
+      values: {
+        score: score.toFixed(2),
+        detectorType: detectorType ?? 'none',
+        detectorLabel: detectorType !== undefined ? getApmMlDetectorLabel(detectorType) : '',
+      },
+    });
+  }
+
+  return i18n.translate('xpack.apm.anomaliesBadge.tooltip.score', {
+    defaultMessage:
+      'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}}{comparisonEnabled, select, true { - Click to view expected bounds.} other { - Click to hide expected bounds.}}',
+    values: {
+      score: score.toFixed(2),
+      detectorType: detectorType ?? 'none',
+      detectorLabel: detectorType !== undefined ? getApmMlDetectorLabel(detectorType) : '',
+      comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+    },
+  });
+}
+
 const anomaliesBadgeCss = css`
   align-items: center;
 `;
@@ -71,14 +138,15 @@ type OverviewQuery = TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['quer
 function toAnomalyOverviewQuery(
   query: OverviewQuery,
   severity: ML_ANOMALY_SEVERITY,
-  anomalyEnvironment: Environment
-): OverviewQuery {
+  anomalyEnvironment: Environment,
+  comparisonEnabled = COMPARISON_ENABLED_DEFAULT
+): Partial<OverviewQuery> {
   return {
     ...query,
     kuery: '',
     anomalyThreshold: severity === ML_ANOMALY_SEVERITY.UNKNOWN ? undefined : severity,
     environment: anomalyEnvironment,
-    comparisonEnabled: true,
+    comparisonEnabled,
     offset: 'expected_bounds',
   };
 }
@@ -92,6 +160,13 @@ export interface AnomaliesBadgeNavigationProps {
    * environment/etc).
    */
   query: OverviewQuery;
+  comparisonEnabled?: boolean;
+  /**
+   * Tooltip content is slightly different when the badge is shown in the service overview page vs. other pages.
+   * The prop is provided by consumers to avoid a direct dependency to `useApmParams` in this component,
+   * which would make it less reusable in other pages.
+   */
+  isInServiceOverview?: boolean;
 }
 
 interface AnomaliesBadgeProps {
@@ -107,11 +182,16 @@ interface AnomaliesBadgeProps {
 export function AnomaliesBadge({ score, detectorType, navigationProps }: AnomaliesBadgeProps) {
   const apmRouter = useApmRouter();
 
+  const isNone = isNoAnomalyScore(score);
   const severity = getSeverity(score);
-  const text = formatLabelWithScore(getI18nLabel(severity), score);
+  const text = isNone
+    ? i18n.translate('xpack.apm.anomaliesBadge.label.none', {
+        defaultMessage: 'None',
+      })
+    : formatLabelWithScore(getI18nLabel(severity), score);
 
   const href =
-    navigationProps && score !== undefined
+    navigationProps && score !== undefined && !isNone
       ? apmRouter.link(
           isMobileAgentName(navigationProps.agentName)
             ? '/mobile-services/{serviceName}/overview'
@@ -121,27 +201,21 @@ export function AnomaliesBadge({ score, detectorType, navigationProps }: Anomali
             query: toAnomalyOverviewQuery(
               navigationProps.query,
               severity,
-              navigationProps.anomalyEnvironment
-            ),
+              navigationProps.anomalyEnvironment,
+              navigationProps.comparisonEnabled
+            ) as OverviewQuery,
           }
         )
       : undefined;
 
-  const tooltipContent =
-    score === undefined
-      ? i18n.translate('xpack.apm.anomaliesBadge.tooltip.unknown', {
-          defaultMessage: 'No anomaly score is available for the selected time range.',
-        })
-      : i18n.translate('xpack.apm.anomaliesBadge.tooltip.score', {
-          defaultMessage:
-            'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}}{hasHref, select, true { - Click to view more.} other {}}',
-          values: {
-            score: score.toFixed(2),
-            detectorType: detectorType ?? 'none',
-            detectorLabel: detectorType !== undefined ? getApmMlDetectorLabel(detectorType) : '',
-            hasHref: href !== undefined ? 'true' : 'false',
-          },
-        });
+  const tooltipContent = getTooltipContent({
+    isNone,
+    score,
+    detectorType,
+    href,
+    comparisonEnabled: navigationProps?.comparisonEnabled,
+    isInServiceOverview: navigationProps?.isInServiceOverview,
+  });
 
   const roleProps = href ? { href } : { role: 'img', 'aria-label': text };
 
@@ -156,7 +230,7 @@ export function AnomaliesBadge({ score, detectorType, navigationProps }: Anomali
       >
         <EuiHealth
           textSize="inherit"
-          color={score === undefined ? 'subdued' : getSeverityColor(score)}
+          color={score === undefined || isNone ? 'subdued' : getSeverityColor(score)}
           css={anomaliesBadgeHealthCss}
         >
           {text}

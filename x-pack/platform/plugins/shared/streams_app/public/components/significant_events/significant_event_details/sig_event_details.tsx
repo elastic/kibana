@@ -6,36 +6,19 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiListGroup,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 
-const ROOT_CAUSE_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.rootCause', {
-  defaultMessage: 'Root Cause',
-});
-const RECOMMENDATIONS_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.recommendations', {
-  defaultMessage: 'Recommendations',
-});
-const CAUSE_KIS_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.causeKis', {
-  defaultMessage: 'Cause KIs',
+const CAUSAL_FEATURES_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.causalFeatures', {
+  defaultMessage: 'Causal Features',
 });
 const STREAMS_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.streams', {
   defaultMessage: 'Streams',
 });
-const RULES_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.rules', {
-  defaultMessage: 'Rules',
-});
 
-const evidencePanelCss = css`
+const signalPanelCss = css`
   margin-bottom: 4px;
 `;
 
@@ -54,7 +37,8 @@ interface SigEventDetailsProps {
 }
 
 export const SigEventDetails = ({ event }: SigEventDetailsProps) => {
-  const ruleNames = event.rule_names ?? [];
+  const signals = event.signals ?? [];
+  const detectionSignals = signals.filter((s) => s.type === 'detection');
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -64,74 +48,42 @@ export const SigEventDetails = ({ event }: SigEventDetailsProps) => {
         </EuiText>
       )}
 
-      {event.root_cause && (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiTitle size="xs">
-            <h3>{ROOT_CAUSE_TITLE}</h3>
-          </EuiTitle>
-          <EuiPanel color="plain" hasBorder paddingSize="s">
-            <EuiText size="s">
-              <p>{event.root_cause}</p>
-            </EuiText>
-          </EuiPanel>
-        </EuiFlexGroup>
-      )}
-
-      {event.recommendations && event.recommendations.length > 0 && (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiTitle size="xs">
-            <h3>{RECOMMENDATIONS_TITLE}</h3>
-          </EuiTitle>
-          <EuiPanel color="subdued" paddingSize="s" hasBorder={false}>
-            <EuiListGroup
-              listItems={event.recommendations.map((rec, idx) => ({
-                label: `${idx + 1}. ${rec}`,
-                size: 's' as const,
-                wrapText: true,
-              }))}
-              bordered={false}
-              maxWidth={false}
-            />
-          </EuiPanel>
-        </EuiFlexGroup>
-      )}
-
-      {event.evidences && event.evidences.length > 0 && (
+      {detectionSignals.length > 0 && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiTitle size="xs">
             <h3>
-              {i18n.translate('xpack.streams.sigEventsTab.flyout.evidence', {
-                defaultMessage: 'Evidence ({count})',
-                values: { count: event.evidences.length },
+              {i18n.translate('xpack.streams.sigEventsTab.flyout.signals', {
+                defaultMessage: 'Signals ({count})',
+                values: { count: detectionSignals.length },
               })}
             </h3>
           </EuiTitle>
-          {event.evidences.map((ev, idx) => (
-            <EuiPanel key={idx} color="plain" hasBorder paddingSize="s" css={evidencePanelCss}>
+          {detectionSignals.map((signal, idx) => (
+            <EuiPanel key={idx} color="plain" hasBorder paddingSize="s" css={signalPanelCss}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-                {ev.rule_name && (
+                {signal.metadata?.rule_name && (
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
-                      <strong>{ev.rule_name}</strong>
+                      <strong>{signal.metadata.rule_name}</strong>
                     </EuiText>
                   </EuiFlexItem>
                 )}
-                {ev.stream_name && (
+                {signal.stream_name && (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">{ev.stream_name}</EuiBadge>
+                    <EuiBadge color="hollow">{signal.stream_name}</EuiBadge>
                   </EuiFlexItem>
                 )}
-                {ev.result && (
+                {signal.evidence?.result && (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color={ev.result === 'anomaly' ? 'warning' : 'hollow'}>
-                      {ev.result}
+                    <EuiBadge color={signal.evidence.result === 'empty' ? 'hollow' : 'warning'}>
+                      {signal.evidence.result}
                     </EuiBadge>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-              {ev.description && (
+              {signal.description && (
                 <EuiText size="xs" color="subdued">
-                  {ev.description}
+                  {signal.description}
                 </EuiText>
               )}
             </EuiPanel>
@@ -139,14 +91,14 @@ export const SigEventDetails = ({ event }: SigEventDetailsProps) => {
         </EuiFlexGroup>
       )}
 
-      {event.cause_kis && event.cause_kis.length > 0 && (
+      {event.causal_features && event.causal_features.length > 0 && (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiTitle size="xxs">
-            <h4>{CAUSE_KIS_TITLE}</h4>
+            <h4>{CAUSAL_FEATURES_TITLE}</h4>
           </EuiTitle>
           <BadgeRow
-            items={event.cause_kis.map(
-              (ki) => `${ki.name || '-'}${ki.stream_name ? ` (${ki.stream_name})` : ''}`
+            items={event.causal_features.map(
+              (f) => `${f.name || '-'}${f.stream_name ? ` (${f.stream_name})` : ''}`
             )}
           />
         </EuiFlexGroup>
@@ -158,15 +110,6 @@ export const SigEventDetails = ({ event }: SigEventDetailsProps) => {
         </EuiTitle>
         <BadgeRow items={event.stream_names ?? []} color="hollow" />
       </EuiFlexGroup>
-
-      {ruleNames.length > 0 && (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiTitle size="xxs">
-            <h4>{RULES_TITLE}</h4>
-          </EuiTitle>
-          <BadgeRow items={ruleNames} />
-        </EuiFlexGroup>
-      )}
     </EuiFlexGroup>
   );
 };

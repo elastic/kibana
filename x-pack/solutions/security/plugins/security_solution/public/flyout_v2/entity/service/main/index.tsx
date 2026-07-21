@@ -14,17 +14,16 @@ import type { CriticalityLevelWithUnassigned } from '../../../../../common/entit
 import type { ESQuery } from '../../../../../common/typed_json';
 import { buildEntityNameFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
-import type { Refetch } from '../../../../common/types';
+import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
-import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
-import { ENTITY_ANALYTICS_TABLE_ID } from '../../../../entity_analytics/components/home/constants';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import {
   EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
   type EntityDetailsPath,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
@@ -121,11 +120,6 @@ export const Service: FC<ServiceProps> = memo(function Service({
   const { setQuery, deleteQuery } = useGlobalTime();
   const observedService = useObservedService(documentEntityIdentifiers, scopeId);
 
-  const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
-  const onRecalculation = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
-  }, [refetchEntitiesTable]);
-
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
       entityType: EntityType.service,
@@ -134,13 +128,11 @@ export const Service: FC<ServiceProps> = memo(function Service({
       entityStoreV2Enabled: true,
       entityFromStoreResult,
       riskScoreState,
-      onRecalculation,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
     calculateEntityRiskScore();
-  }, [calculateEntityRiskScore, refetchEntitiesTable]);
+  }, [calculateEntityRiskScore]);
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
     onSuccess: onAssetCriticalityChanged,
@@ -163,23 +155,51 @@ export const Service: FC<ServiceProps> = memo(function Service({
     : undefined;
 
   const onShowService = useCallback(() => {
-    openServiceFlyoutAsChild({ serviceName, entityId, scopeId, title: serviceName });
+    openServiceFlyoutAsChild({
+      serviceName,
+      entityId,
+      scopeId,
+      title: serviceName,
+      origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
+    });
   }, [openServiceFlyoutAsChild, serviceName, entityId, scopeId]);
 
   const onShowRelatedEntity = useCallback(
-    (params: {
-      engineType: string | undefined;
-      entityId: string;
-      entityName: string | undefined;
-    }) =>
+    (
+      params: {
+        engineType: string | undefined;
+        entityId: string;
+        entityName: string | undefined;
+      },
+      origin: FlyoutOrigin
+    ) =>
       openEntityDetailsAsChild({
         engineType: params.engineType,
         entityId: params.entityId,
         entityName: params.entityName,
         scopeId,
         title: params.entityName ?? params.entityId,
+        origin,
       }),
     [openEntityDetailsAsChild, scopeId]
+  );
+
+  const onShowRelatedEntityFromGraph = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, FLYOUT_ORIGIN.GRAPH_NODE),
+    [onShowRelatedEntity]
+  );
+
+  const onShowRelatedEntityFromResolution = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK),
+    [onShowRelatedEntity]
   );
 
   const openDetailsPanel = useCallback(
@@ -192,6 +212,10 @@ export const Service: FC<ServiceProps> = memo(function Service({
             entityId: entityStoreEntityId,
             onShowEntity: onShowService,
             title: serviceName,
+            origin:
+              path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
+                ? FLYOUT_ORIGIN.RISK_SUMMARY_RESOLUTION
+                : FLYOUT_ORIGIN.RISK_SUMMARY_ENTITY,
           });
         case EntityDetailsLeftPanelTab.GRAPH_VIEW:
           if (!entityStoreEntityId) return;
@@ -199,9 +223,11 @@ export const Service: FC<ServiceProps> = memo(function Service({
             entityId: entityStoreEntityId,
             scopeId,
             entityName: serviceName,
-            onShowEntity: onShowRelatedEntity,
+            onShowEntity: onShowRelatedEntityFromGraph,
             onShowOriginatingEntity: onShowService,
             title: serviceName,
+            flyoutType: FLYOUT_TYPE.SERVICE,
+            origin: FLYOUT_ORIGIN.VISUALIZATIONS_GRAPH,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -211,8 +237,9 @@ export const Service: FC<ServiceProps> = memo(function Service({
             entityName: serviceName,
             scopeId,
             onShowEntity: onShowService,
-            onShowRelatedEntity,
+            onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: serviceName,
+            origin: FLYOUT_ORIGIN.RESOLUTION_SECTION,
           });
       }
     },
@@ -224,7 +251,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
       scopeId,
       entityStoreEntityId,
       onShowService,
-      onShowRelatedEntity,
+      onShowRelatedEntityFromGraph,
+      onShowRelatedEntityFromResolution,
     ]
   );
 
@@ -285,11 +313,13 @@ export const Service: FC<ServiceProps> = memo(function Service({
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={false}
             entityStoreEntityId={entityStoreEntityId}
-            onShowEntity={onShowRelatedEntity}
+            onShowEntity={onShowRelatedEntityFromResolution}
+            riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>
       <ServicePanelFooter
+        serviceName={serviceName}
         identityFields={documentEntityIdentifiers}
         entity={entityFromStoreResult.entityRecord ?? undefined}
         flyoutFooterProps={{

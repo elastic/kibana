@@ -17,7 +17,7 @@ import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import { discoverPlugins } from '../utils/plugin_discovery';
 import { findTargetEntry } from '../utils/entry_generation';
 import { loadDllManifest } from './dll_manifest';
-import { getExternals } from './externals';
+import { getExternals, isKeaReactReduxImport } from './externals';
 import {
   getSharedResolveConfig,
   getSharedResolveFallback,
@@ -158,8 +158,17 @@ export async function createExternalPluginConfig(
 
     // Externalize shared deps AND cross-plugin imports
     externals: [
-      // Static externals for npm shared deps (same as main build)
-      sharedDepsExternals,
+      // Function externals: skip externalizing react-redux when imported by kea
+      // so the NormalModuleReplacementPlugin can redirect it to react-redux-v7.
+      ({ context, request }: { context?: string; request?: string }, callback: Function) => {
+        if (isKeaReactReduxImport(context, request)) {
+          return callback();
+        }
+        if (request && request in sharedDepsExternals) {
+          return callback(null, sharedDepsExternals[request]);
+        }
+        return callback();
+      },
       // Dynamic externals for cross-plugin imports (different from main build).
       // Uses callback-style externals to report errors when an import targets
       // an undeclared directory, matching legacy BundleRemotesPlugin semantics.
@@ -220,6 +229,15 @@ export async function createExternalPluginConfig(
     plugins: [
       // Same plugins as main build
       new NodeLibsBrowserPlugin() as any,
+
+      // Redirect kea's react-redux import to react-redux-v7 so it shares the
+      // same React context as the <Provider> from react-redux-v7 used by
+      // consumers like enterprise_search.
+      new rspack.NormalModuleReplacementPlugin(/^react-redux$/, (resource: any) => {
+        if (isKeaReactReduxImport(resource.context, resource.request)) {
+          resource.request = 'react-redux-v7';
+        }
+      }),
       new rspack.DllReferencePlugin({
         context: repoRoot,
         manifest: loadDllManifest(),

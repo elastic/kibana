@@ -13,20 +13,19 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
-import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import type { Refetch } from '../../../../common/types';
 import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
-import { ENTITY_ANALYTICS_TABLE_ID } from '../../../../entity_analytics/components/home/constants';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildUserNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
+import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { Header } from './header';
@@ -176,11 +175,6 @@ export const User: FC<UserProps> = memo(function User({
     entityStoreV2Enabled ? entityFromStoreResult : undefined
   );
 
-  const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
-  const onRecalculation = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
-  }, [refetchEntitiesTable]);
-
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
       entityType: EntityType.user,
@@ -189,13 +183,11 @@ export const User: FC<UserProps> = memo(function User({
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
-      onRecalculation,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
     calculateEntityRiskScore();
-  }, [calculateEntityRiskScore, refetchEntitiesTable]);
+  }, [calculateEntityRiskScore]);
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
     onSuccess: onAssetCriticalityChanged,
@@ -264,23 +256,51 @@ export const User: FC<UserProps> = memo(function User({
   ) : undefined;
 
   const onOpenUser = useCallback(() => {
-    openUserFlyoutAsChild({ userName, entityId, scopeId, title: userName });
+    openUserFlyoutAsChild({
+      userName,
+      entityId,
+      scopeId,
+      title: userName,
+      origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
+    });
   }, [openUserFlyoutAsChild, userName, entityId, scopeId]);
 
   const onShowRelatedEntity = useCallback(
-    (params: {
-      engineType: string | undefined;
-      entityId: string;
-      entityName: string | undefined;
-    }) =>
+    (
+      params: {
+        engineType: string | undefined;
+        entityId: string;
+        entityName: string | undefined;
+      },
+      origin: FlyoutOrigin
+    ) =>
       openEntityDetailsAsChild({
         engineType: params.engineType,
         entityId: params.entityId,
         entityName: params.entityName,
         scopeId,
         title: params.entityName ?? params.entityId,
+        origin,
       }),
     [openEntityDetailsAsChild, scopeId]
+  );
+
+  const onShowRelatedEntityFromGraph = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, FLYOUT_ORIGIN.GRAPH_NODE),
+    [onShowRelatedEntity]
+  );
+
+  const onShowRelatedEntityFromResolution = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK),
+    [onShowRelatedEntity]
   );
 
   const openDetailsPanel = useCallback(
@@ -293,6 +313,10 @@ export const User: FC<UserProps> = memo(function User({
             entityId: entityStoreEntityId,
             onShowEntity: onOpenUser,
             title: userName,
+            origin:
+              path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
+                ? FLYOUT_ORIGIN.RISK_SUMMARY_RESOLUTION
+                : FLYOUT_ORIGIN.RISK_SUMMARY_ENTITY,
           });
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return openEntityAnomalyInsights({
@@ -301,6 +325,7 @@ export const User: FC<UserProps> = memo(function User({
             entityId: entityStoreEntityId,
             onOpenEntity: onOpenUser,
             title: userName,
+            origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
           });
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -311,6 +336,7 @@ export const User: FC<UserProps> = memo(function User({
                 entityId: panelDisplayEntityId,
                 onShowEntity: onOpenUser,
                 title: userName,
+                origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
               });
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return openEntityMisconfigurationInsights({
@@ -319,6 +345,7 @@ export const User: FC<UserProps> = memo(function User({
                 entityId: panelDisplayEntityId,
                 onShowEntity: onOpenUser,
                 title: userName,
+                origin: FLYOUT_ORIGIN.INSIGHTS_MISCONFIGURATION,
               });
           }
           break;
@@ -328,9 +355,11 @@ export const User: FC<UserProps> = memo(function User({
             entityId: entityStoreEntityId,
             scopeId,
             entityName: userName,
-            onShowEntity: onShowRelatedEntity,
+            onShowEntity: onShowRelatedEntityFromGraph,
             onShowOriginatingEntity: onOpenUser,
             title: userName,
+            flyoutType: FLYOUT_TYPE.USER,
+            origin: FLYOUT_ORIGIN.VISUALIZATIONS_GRAPH,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -340,8 +369,9 @@ export const User: FC<UserProps> = memo(function User({
             entityName: userName,
             scopeId,
             onShowEntity: onOpenUser,
-            onShowRelatedEntity,
+            onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: userName,
+            origin: FLYOUT_ORIGIN.RESOLUTION_SECTION,
           });
         // TODO: currently dead (v1 accessed through left pane tabs, need to perhaps add preview?)
         case EntityDetailsLeftPanelTab.OKTA: {
@@ -351,7 +381,6 @@ export const User: FC<UserProps> = memo(function User({
               managedUser: oktaManagedUser,
               value: userName,
               onOpenUser,
-              title: userName,
             });
           }
           break;
@@ -363,7 +392,6 @@ export const User: FC<UserProps> = memo(function User({
               managedUser: entraManagedUser,
               value: userName,
               onOpenUser,
-              title: userName,
             });
           }
           break;
@@ -385,7 +413,8 @@ export const User: FC<UserProps> = memo(function User({
       entityStoreEntityId,
       managedUser,
       onOpenUser,
-      onShowRelatedEntity,
+      onShowRelatedEntityFromGraph,
+      onShowRelatedEntityFromResolution,
     ]
   );
 
@@ -434,14 +463,19 @@ export const User: FC<UserProps> = memo(function User({
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
-            onShowEntity={onShowRelatedEntity}
+            onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
+            riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </EuiFlyoutBody>
       {assetInventoryEnabled && (
         <EuiFlyoutFooter>
-          <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+          <Footer
+            userName={userName}
+            identityFields={documentEntityIdentifiers}
+            entity={entityFromStore}
+          />
         </EuiFlyoutFooter>
       )}
     </>

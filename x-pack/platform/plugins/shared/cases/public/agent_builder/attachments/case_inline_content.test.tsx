@@ -40,6 +40,19 @@ const renderInline = (attachment: CaseAttachment) => {
 };
 
 describe('CaseInlineContent', () => {
+  const originalLocation = window.location;
+
+  beforeEach(() => {
+    // @ts-expect-error - We need to override window.location for testing
+    delete window.location;
+    // @ts-expect-error - We need to override window.location for testing
+    window.location = { pathname: 'notCasePage' };
+  });
+  afterEach(() => {
+    // @ts-expect-error - We need to override window.location for testing
+    window.location = originalLocation;
+  });
+
   it('renders title, counts, and description', () => {
     renderInline(buildAttachment());
     expect(screen.getByText('Threat Intel Filebeat Module Indicator Match')).toBeInTheDocument();
@@ -48,8 +61,24 @@ describe('CaseInlineContent', () => {
     expect(screen.getByText('12')).toBeInTheDocument(); // assignees count
   });
 
-  it('renders the "Go to case" button', () => {
+  it('renders the "Go to case" button when not on case page', () => {
     renderInline(buildAttachment());
+    expect(screen.getByTestId('case-attachment-go-to-case')).toBeInTheDocument();
+  });
+
+  it('hides the "Go to case" button when on the case\'s page', () => {
+    const attachment = buildAttachment();
+    // @ts-expect-error - We need to override window.location for testing
+    window.location = { pathname: `/cases/${attachment.id}` };
+    renderInline(attachment);
+    expect(screen.queryByTestId('case-attachment-go-to-case')).not.toBeInTheDocument();
+  });
+
+  it('shows the "Go to case" button when on another case\'s page', () => {
+    const attachment = buildAttachment();
+    // @ts-expect-error - We need to override window.location for testing
+    window.location = { pathname: `/cases/someCaseid` };
+    renderInline(attachment);
     expect(screen.getByTestId('case-attachment-go-to-case')).toBeInTheDocument();
   });
 

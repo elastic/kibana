@@ -83,6 +83,7 @@ describe('runNode', () => {
       flushEventLogs: jest.fn().mockResolvedValue(undefined),
       contextManager: {
         ensureContextReady: jest.fn().mockResolvedValue(undefined),
+        releaseReadPins: jest.fn(),
       },
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
@@ -493,6 +494,35 @@ describe('runNode', () => {
         'Failed to execute onCancel hook - continuing execution',
         syncError
       );
+    });
+  });
+
+  describe('releaseReadPins lifecycle hook (pin cleanup on node exit)', () => {
+    it('calls releaseReadPins on every successful run', async () => {
+      await runNode(mockParams);
+
+      expect(mockStepExecutionRuntime.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls releaseReadPins even when run() throws', async () => {
+      mockNodeImplementation.run.mockRejectedValue(new Error('node exploded'));
+
+      await runNode(mockParams);
+
+      // Error is caught → setWorkflowError, but the finally block still fires.
+      expect(mockParams.workflowRuntime.setWorkflowError).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls releaseReadPins on the status !== RUNNING short-circuit even though ensureContextReady never ran', async () => {
+      // Verifies idempotency: the pin release fires in finally regardless of whether
+      // ensureContextReady set any pins (eviction-disabled fast path, or early return).
+      workflowExecution.status = ExecutionStatus.CANCELLED;
+
+      await runNode(mockParams);
+
+      expect(mockNodeImplementation.run).not.toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
     });
   });
 });

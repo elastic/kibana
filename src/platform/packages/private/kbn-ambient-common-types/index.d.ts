@@ -61,3 +61,20 @@ declare module '*.yml' {
   // eslint-disable-next-line import/no-default-export
   export default content;
 }
+
+/**
+ * Redux Toolkit v2 migration: type declarations for v1 compat alias internal deps.
+ *
+ * redux-toolkit-v1 (npm alias for @reduxjs/toolkit@1.9.7) has its dependencies
+ * (reselect@4, immer@9) nested under redux-toolkit-v1/node_modules/ because the
+ * top-level versions are now v5/v10. TypeScript considers these nested paths
+ * non-portable (TS2742), so we declare them here to map the types to the
+ * top-level v1 alias packages.
+ */
+declare module 'redux-toolkit-v1/node_modules/reselect' {
+  export * from 'reselect-v4';
+}
+
+declare module 'redux-toolkit-v1/node_modules/immer/dist/internal' {
+  export * from 'immer-v9/dist/internal';
+}

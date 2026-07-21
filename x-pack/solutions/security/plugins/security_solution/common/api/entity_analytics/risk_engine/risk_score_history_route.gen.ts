@@ -53,6 +53,10 @@ export const RiskScoreHistoryResponse = lazySchema(() =>
   z.object({
     entity_id: z.string().max(1000),
     entity_type: IdentifierType,
+    /**
+     * The effective Elasticsearch `date_histogram` interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.
+     */
+    interval: z.string().max(10),
     entries: z.array(RiskScoreHistoryEntry),
   })
 );
@@ -80,10 +84,6 @@ export const GetRiskScoreHistoryRequestQuery = lazySchema(() =>
      * Filter entries by the type of score recorded (`base`, `propagated`, or `resolution`).
      */
     score_type: z.enum(['base', 'propagated', 'resolution']).optional(),
-    /**
-     * Maximum number of history entries to return per request.
-     */
-    page_size: z.coerce.number().int().min(1).max(1000).optional().default(100),
     /**
      * When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.
      */

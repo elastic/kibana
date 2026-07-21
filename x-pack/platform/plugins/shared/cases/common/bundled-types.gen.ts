@@ -1155,7 +1155,7 @@ export const TemplateV2Response = lazySchema(() =>
     /**
      * Metadata about each field defined in the template.
      */
-    fieldNames: z
+    fieldDefinitions: z
       .array(
         z.object({
           name: z.string().max(256),

@@ -108,3 +108,20 @@ export interface AuthenticatedUser extends User {
    */
   http_authentication_scheme: string | null;
 }
+
+/**
+ * Whether the user is anonymous, i.e. was authenticated via the `anonymous` authentication
+ * provider.
+ */
+export function isUserAnonymous(user: Pick<AuthenticatedUser, 'authentication_provider'>) {
+  return user.authentication_provider.type === 'anonymous';
+}
+
+/**
+ * All users are supposed to have profiles except anonymous users and users authenticated
+ * via authentication HTTP proxies.
+ * @param user Authenticated user information.
+ */
+export function canUserHaveProfile(user: Pick<AuthenticatedUser, 'authentication_provider'>) {
+  return !isUserAnonymous(user) && user.authentication_provider.type !== 'http';
+}

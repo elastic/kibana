@@ -17,7 +17,7 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
+      diskSizeGb: 130
     timeout_in_minutes: 50
     retry:
       automatic:
