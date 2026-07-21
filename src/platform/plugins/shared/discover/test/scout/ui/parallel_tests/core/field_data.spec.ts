@@ -75,8 +75,6 @@ spaceTest.describe('Discover field data', { tag: '@local-stateful-classic' }, ()
           'relatedContent',
         ])}`
       );
-      await pageObjects.discover.waitUntilTabIsLoaded();
-      await pageObjects.dataGrid.waitForDocTableRendered();
 
       await expect(pageObjects.dataGrid.getColumnHeader('relatedContent')).toBeVisible();
       await expect(pageObjects.dataGrid.getCell(0, 'relatedContent')).toContainText(
