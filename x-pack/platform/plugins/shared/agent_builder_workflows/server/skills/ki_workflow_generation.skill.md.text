@@ -49,6 +49,13 @@ for any dataset, not just the built-in strategy below.
    This collapses the asker's job from "author ES|QL from scratch" to "pick a map, fill the
    params, run it" — removing one of the two expensive ES|QL-generation steps.
 
+   **Strategy 2 exception — detection condition KIs** carry `query.esql` (a complete, runnable
+   query rather than a parameterized template), because the detection condition — not a volatile
+   threshold value — is the stable thing. The threshold was set from observed distribution data
+   at generation time and stored verbatim. Both forms are legitimate: `maps[]` templates for
+   fill-in-the-blank question-classes; a complete `query.esql` for named detection conditions
+   whose thresholds were grounded in real data at generation time.
+
 4. **Maps must be grounded and validated at generation time.** Build every query from the
    index's real mapping and sample documents — never invented field names. Dry-run each
    `esql_example` before writing the KI; a broken call number is worse than none.
@@ -88,7 +95,7 @@ fallback) — not something you save directly.
 ## Strategy catalog
 
 Each strategy is a concrete recipe built on the first principles above. More will be added
-(atomic-case KIs, theme/entity-class KIs); today the implemented strategy is:
+(atomic-case KIs, theme/entity-class KIs). Currently implemented:
 
 ### Strategy 1 — Index-selection KIs (one KI per index)
 
@@ -383,6 +390,398 @@ steps:
       continue: true
 ```
 
+### Strategy 2 — Significant-event / detection KIs
+
+**Goal:** for an Observability index (logs, APM, metrics), generate two complementary KI types
+in a single profiling run:
+
+- **2a — Query (detection) KIs:** one KI per named detection condition. Each carries a
+  *complete, runnable* ES|QL query (not a template), `query_type` (match | stats),
+  `severity_score`, `evidence[]` quoting observed distributions, and a description that
+  explicitly states the threshold and its baseline rationale. The workflow fans out one
+  `elasticsearch.index` doc per detection.
+- **2b — Feature (knowledge) KIs:** one KI per extracted structural feature — entity,
+  dependency, technology, or schema. Each carries `feature.slug`, `feature.subtype`,
+  `feature.confidence`, and `evidence[]` with doc-count or distribution quotes from the samples.
+
+**Why complete queries, not templates:** detection conditions are stable facts — "error rate > 20%
+is anomalous for this index" does not change per question. The threshold was set from observed data
+at generation time. Compare a question-class map for "status of case X": it uses a template because
+`X` changes per question. Detection KIs invert this — the condition is precomputed; only the
+result (match / no-match) varies at run-time.
+
+**Grounding — pre-analysis steps (before `ai.prompt`):**
+
+Run three steps before calling the AI profiler so it can set thresholds from real data:
+
+1. `sample_error_logs` — `FROM <index> METADATA _id, _source | WHERE attributes.processor.event == "error" | LIMIT 50`
+   (adapt the error-level field to the index schema). Gives the LLM realistic error-log shapes.
+2. `stats_distribution` — a `STATS` query for key distributions (e.g. `COUNT(*) BY level` or
+   `COUNT(*) BY http.response.status_code`). Feed the result into the prompt as the distribution
+   summary. Evidence strings in the LLM output **must** quote these observed values (e.g.
+   `"~20% error rate across 500 sampled docs"`).
+3. `sample_docs` — same randomised `function_score + random_score` sample as Strategy 1 (20 docs,
+   general representation).
+
+Both `sample_error_logs` and `stats_distribution` should use `on-failure.continue: true` — not all
+indices have an `attributes.processor.event` field; the profiler will work from what is available.
+
+**ES|QL additions for Strategy 2 queries:**
+
+These patterns are valid ES|QL and may appear in generated detection queries:
+
+- `FROM <index> METADATA _id, _source` — fetches document `_id` and raw `_source` alongside
+  selected fields. Use when surfacing originating document IDs.
+- `WHERE field : "term"` — the full-text `:` match operator (not `==`). Use for text-field lookups
+  where exact-keyword matching is too strict.
+
+Add both to the `profile_index` prompt's ES|QL correctness block alongside the Strategy 1 rules.
+
+**KI document shape — Detection KI (2a):**
+
+```
+id:           <run_id>/<detection_slug>
+type:         ki
+title:        "Elevated error rate in my-logs-*"
+description:  "Detects error rate > 20%. Baseline: ~20% error rate observed in 500 sampled docs."
+content:      "Detection: Elevated error rate in my-logs-*. Detects error rate > 20%. ..."
+query:
+  esql:           'FROM my-logs-* | STATS error_count = COUNT(*) WHERE level == "error", total = COUNT(*) | EVAL error_rate = error_count / total | WHERE error_rate > 0.2'
+  query_type:     stats          # or: match
+  severity_score: 70             # 0–100
+  rule_backed:    false
+evidence:     ["observed error_rate ~20% across 500 sampled docs"]
+run_id:       "2026-07-21T12:00:00Z-abc123"
+excluded:     false
+deleted:      false
+expires_at:   "2026-08-20T00:00:00.000Z"   # ~30d from generation; see lifecycle note
+'@timestamp': "2026-07-21T12:00:00.000Z"
+```
+
+**KI document shape — Feature KI (2b):**
+
+```
+id:           <run_id>/<feature_slug>
+type:         ki
+title:        "Service: payment-service"
+content:      "Feature: Service payment-service. Found in 43% of sampled docs."
+feature:
+  type:             dependency     # entity | dependency | technology | schema
+  subtype:          service
+  slug:             "payment-service"
+  confidence:       0.9            # 0–1
+  evidence_doc_ids: []             # doc _ids from METADATA _id passes, if available
+evidence:     ["found service.name=payment-service in 43% of sampled docs"]
+run_id:       "2026-07-21T12:00:00Z-abc123"
+excluded:     false
+deleted:      false
+expires_at:   "2026-08-20T00:00:00.000Z"
+'@timestamp': "2026-07-21T12:00:00.000Z"
+```
+
+**Target index mapping (extended for significant-events KI schema):**
+
+```yaml
+mappings:
+  dynamic: strict
+  properties:
+    id: { type: keyword }
+    type: { type: keyword }
+    title:
+      type: text
+      fields:
+        semantic: { type: semantic_text }
+    content:
+      type: text
+      fields:
+        semantic: { type: semantic_text }
+    description:
+      type: text
+      fields:
+        semantic: { type: semantic_text }
+    query:
+      properties:
+        esql: { type: keyword, index: false }
+        query_type: { type: keyword }
+        severity_score: { type: integer }
+        rule_backed: { type: boolean }
+    feature:
+      properties:
+        type: { type: keyword }
+        subtype: { type: keyword }
+        slug: { type: keyword }
+        confidence: { type: float }
+        evidence_doc_ids: { type: keyword }
+    evidence: { type: text }
+    run_id: { type: keyword }
+    excluded: { type: boolean }
+    deleted: { type: boolean }
+    expires_at: { type: date }
+    '@timestamp': { type: date }
+```
+
+**Reference YAML (skeleton — feed to `generate_workflow` as spec):**
+
+```yaml
+version: "1"
+name: Significant-event detection + feature KIs
+description: >
+  Profile an Observability index with pre-analysis grounding steps, then fan out
+  one KI doc per detection condition (2a) and one per structural feature (2b).
+enabled: true
+tags:
+  - detection
+  - knowledge-indicators
+  - observability
+consts:
+  target_index: .ai-index-ds-sig-kis   # user-owned; see system-datastream caveat below
+  run_id: "manual-run-1"               # override per execution; see lifecycle note
+  expires_at: "2026-08-20T00:00:00.000Z"  # ~30d; set before launching (Liquid has no date math)
+  indices:
+    - my-logs-*
+    - apm-*
+triggers:
+  - type: manual
+steps:
+  - name: ensure_target_index
+    type: elasticsearch.indices.create
+    with:
+      index: "{{ consts.target_index }}"
+      mappings:
+        dynamic: strict
+        properties:
+          id: { type: keyword }
+          type: { type: keyword }
+          title: { type: text, fields: { semantic: { type: semantic_text } } }
+          content: { type: text, fields: { semantic: { type: semantic_text } } }
+          description: { type: text, fields: { semantic: { type: semantic_text } } }
+          query:
+            properties:
+              esql: { type: keyword, index: false }
+              query_type: { type: keyword }
+              severity_score: { type: integer }
+              rule_backed: { type: boolean }
+          feature:
+            properties:
+              type: { type: keyword }
+              subtype: { type: keyword }
+              slug: { type: keyword }
+              confidence: { type: float }
+              evidence_doc_ids: { type: keyword }
+          evidence: { type: text }
+          run_id: { type: keyword }
+          excluded: { type: boolean }
+          deleted: { type: boolean }
+          expires_at: { type: date }
+          '@timestamp': { type: date }
+    on-failure:
+      continue: true
+  - name: loop_indices
+    type: foreach
+    foreach: "{{ consts.indices | json }}"
+    steps:
+      - name: get_mapping
+        type: elasticsearch.request
+        with:
+          method: GET
+          path: /{{ foreach.item }}/_mapping
+      # Pre-analysis: error-log sample for realistic error shapes
+      - name: sample_error_logs
+        type: elasticsearch.esql.query
+        with:
+          query: 'FROM {{ foreach.item }} METADATA _id, _source | WHERE attributes.processor.event == "error" | LIMIT 50'
+          format: json
+        on-failure:
+          continue: true
+      # Pre-analysis: key distribution for data-driven thresholds
+      - name: stats_distribution
+        type: elasticsearch.esql.query
+        with:
+          query: 'FROM {{ foreach.item }} | STATS doc_count = COUNT(*) BY log_level = level | SORT doc_count DESC | LIMIT 10'
+          format: json
+        on-failure:
+          continue: true
+      # General random sample (same as Strategy 1)
+      - name: sample_docs
+        type: elasticsearch.search
+        with:
+          index: "{{ foreach.item }}"
+          query:
+            function_score:
+              query: { match_all: {} }
+              random_score: {}
+          size: 20
+      - name: profile_index
+        type: ai.prompt
+        connector-id: <your-chat-completion-connector-id>
+        with:
+          prompt: |
+            You are a detection engineer and data analyst. Extract DETECTION CONDITIONS and
+            STRUCTURAL FEATURES from an Observability index.
+
+            You are given: the index name, its Elasticsearch mapping, 20 random sample docs,
+            a sample of error-level logs, and a distribution summary.
+
+            Rules:
+            - Ground everything ONLY in mapping + samples + distribution. Never invent fields.
+            - Do NOT copy literal PII (names, emails, tokens) into output; refer to such fields
+              by name and generalized shape.
+            - detection_kis: produce a COMPLETE, RUNNABLE ES|QL query per condition (not a
+              template with ?params). Set thresholds from the distribution data; quote the
+              observed distribution in evidence[]. Set query_type="stats" for STATS-based
+              conditions, "match" for filter/WHERE-only conditions. description MUST state the
+              threshold AND its baseline rationale (e.g. "Detects error rate > 20%. Baseline:
+              ~20% error rate observed in 500 sampled docs.").
+            - feature_kis: extract entity/dependency/technology/schema features. confidence is
+              0–1 based on frequency in samples. evidence[] must quote observed doc counts or
+              distribution percentages.
+
+            ES|QL correctness (all queries must be VALID ES|QL that runs):
+            - Start with `FROM <index>`. For metadata access: `FROM <index> METADATA _id, _source`.
+            - Full-text search: `WHERE field : "term"` (colon operator, not ==).
+            - ISO-8601 date literals only (e.g. "2024-01-01T00:00:00.000Z").
+            - Quote strings with double quotes; do not quote numbers or booleans.
+            - For relative date ranges prefer `WHERE @timestamp >= NOW() - 30 days`.
+            - End example/runnable queries with a small `| LIMIT n`.
+
+            Index: {{ foreach.item }}
+            Mapping: {{ steps.get_mapping.output | json }}
+            Sample docs: {{ steps.sample_docs.output.hits.hits | map: '_source' | json }}
+            Error log sample: {{ steps.sample_error_logs.output | json }}
+            Distribution: {{ steps.stats_distribution.output | json }}
+          schema:
+            type: object
+            properties:
+              detection_kis:
+                type: array
+                items:
+                  type: object
+                  required: [title, slug, description, query, evidence]
+                  properties:
+                    title: { type: string }
+                    slug: { type: string }
+                    description:
+                      type: string
+                      description: "Must state the threshold and its baseline rationale."
+                    query:
+                      type: object
+                      required: [esql, query_type, severity_score]
+                      properties:
+                        esql: { type: string }
+                        query_type: { type: string, enum: [match, stats] }
+                        severity_score: { type: integer, minimum: 0, maximum: 100 }
+                        rule_backed: { type: boolean }
+                    evidence:
+                      type: array
+                      items: { type: string }
+              feature_kis:
+                type: array
+                items:
+                  type: object
+                  required: [title, slug, feature, evidence]
+                  properties:
+                    title: { type: string }
+                    slug: { type: string }
+                    feature:
+                      type: object
+                      required: [type, subtype, slug, confidence]
+                      properties:
+                        type: { type: string, enum: [entity, dependency, technology, schema] }
+                        subtype: { type: string }
+                        slug: { type: string }
+                        confidence: { type: number, minimum: 0, maximum: 1 }
+                        evidence_doc_ids: { type: array, items: { type: string } }
+                    evidence:
+                      type: array
+                      items: { type: string }
+        timeout: 120s
+      # Fan out: one elasticsearch.index per detection KI (2a)
+      - name: sink_detection_kis
+        type: foreach
+        foreach: "{{ steps.profile_index.output.content.detection_kis | json }}"
+        steps:
+          - name: write_detection_ki
+            type: elasticsearch.index
+            with:
+              index: "{{ consts.target_index }}"
+              id: "{{ consts.run_id }}/{{ foreach.item.slug }}"
+              refresh: wait_for
+              document:
+                id: "{{ consts.run_id }}/{{ foreach.item.slug }}"
+                type: ki
+                title: "{{ foreach.item.title }}"
+                description: "{{ foreach.item.description }}"
+                content: "Detection: {{ foreach.item.title }}. {{ foreach.item.description }}"
+                run_id: "{{ consts.run_id }}"
+                excluded: false
+                deleted: false
+                # expires_at is passed as a const — Liquid cannot compute date arithmetic.
+                # Set consts.expires_at to NOW() + 30d before launching the workflow.
+                expires_at: "{{ consts.expires_at }}"
+                '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.000Z" }}'
+                # Use ${{ }} (type-preserving) for arrays/objects — same rule as maps in Strategy 1.
+                evidence: "${{ foreach.item.evidence }}"
+                query: "${{ foreach.item.query }}"
+        iteration-on-failure:
+          continue: true
+      # Fan out: one elasticsearch.index per feature KI (2b)
+      - name: sink_feature_kis
+        type: foreach
+        foreach: "{{ steps.profile_index.output.content.feature_kis | json }}"
+        steps:
+          - name: write_feature_ki
+            type: elasticsearch.index
+            with:
+              index: "{{ consts.target_index }}"
+              id: "{{ consts.run_id }}/{{ foreach.item.slug }}"
+              refresh: wait_for
+              document:
+                id: "{{ consts.run_id }}/{{ foreach.item.slug }}"
+                type: ki
+                title: "{{ foreach.item.title }}"
+                content: "Feature: {{ foreach.item.title }}. {{ foreach.item.evidence | join: ' ' }}"
+                run_id: "{{ consts.run_id }}"
+                excluded: false
+                deleted: false
+                expires_at: "{{ consts.expires_at }}"
+                '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.000Z" }}'
+                evidence: "${{ foreach.item.evidence }}"
+                feature: "${{ foreach.item.feature }}"
+        iteration-on-failure:
+          continue: true
+    iteration-on-failure:
+      continue: true
+```
+
+**Lifecycle and dedup:**
+
+- **`run_id`:** stamp every KI with a `run_id` that identifies the workflow execution (e.g. a
+  timestamp string or a random token passed via a trigger parameter; set as `consts.run_id`
+  before launching). This enables post-run dedup: query for duplicate `title` values across
+  `run_id`s and tombstone the older ones by setting `excluded: true`.
+- **`expires_at`:** set to ~30 days from generation. Liquid cannot compute date arithmetic, so
+  pass `expires_at` as a workflow const (e.g. `consts.expires_at: "2026-08-20T00:00:00.000Z"`)
+  or have the trigger supply it. A scheduled re-run should query for KIs where
+  `expires_at < NOW()` and mark them `excluded: true` before generating fresh ones.
+- **Freshness guard (scheduled runs):** before `profile_index`, query the target index for KIs
+  where `run_id` contains today's date (or `@timestamp > NOW() - <interval>`). Skip the index if
+  fresh KIs exist. This mirrors the `@timestamp` recency guard in Strategy 1 but ties freshness
+  to a specific run rather than raw last-write time — more precise when a partial run failed.
+- **Dedup across runs:** KIs can produce duplicate titles across consecutive runs (same condition,
+  different `run_id`). After each run, query `SELECT title, run_id, expires_at FROM <target_index>
+  GROUP BY title HAVING COUNT(*) > 1` and set `excluded: true` on all but the newest.
+
+**Caveat — system datastream:**
+
+`.significant_events-knowledge_indicators` is a **system-managed datastream** owned by the Kibana
+Streams / Significant Events feature (`significant_events` plugin). Writing to it with a generated
+workflow risks schema conflicts and may be overwritten or rejected by the platform.
+
+**The safe default:** write to a user-owned index (e.g. `.ai-index-ds-sig-kis`) in the shape
+documented above. Only target the system datastream if the user explicitly wants to feed the
+Significant Events detection-and-triage pipeline — and in that case, verify field names against
+the live `@kbn/significant-events-schema` package before generating.
+
 ## Adapting the recipe to a user's data
 
 - **Index list:** ask the user which indices to profile, or discover candidates first. Populate
@@ -451,8 +850,11 @@ YAML themselves via the Workflows UI **Import** (`.yml`/`.yaml`), or programmati
 - **Never precompute volatile values** — hand over a live-data map instead.
 - Defer deep workflow YAML syntax and debugging to the `workflow-authoring` skill.
 
-## First principles beyond Strategy 1 (coming soon)
+## First principles across strategies
 
-The librarian principles above are strategy-agnostic. Future strategy entries (atomic-case KIs,
-theme/entity-class KIs) will reuse the same `maps[]` contract and the precompute-path-not-value
-rule; only the granularity and the profiling prompt change.
+The librarian principles above are strategy-agnostic. Strategy 2 (detection and feature KIs)
+reuses the precompute-path-not-value rule but departs from the `maps[]` contract: detection
+conditions are complete queries rather than fill-in-the-blank templates, because the condition
+itself is the stable thing (see principle 3 exception note). Future strategy entries
+(atomic-case KIs, theme/entity-class KIs) will continue to share the same core principles;
+only the granularity, the profiling prompt, and the KI doc shape change.
