@@ -23,10 +23,12 @@ export class DashboardChatPage {
   }
 
   async openFromMetricsPrompt() {
+    await this.metricsPrompt.waitFor({ state: 'visible' });
     await this.metricsPrompt.click();
   }
 
   async openFromAddPanelFlyout() {
+    await this.addPanelChatAction.waitFor({ state: 'visible' });
     await this.addPanelChatAction.click();
   }
 }

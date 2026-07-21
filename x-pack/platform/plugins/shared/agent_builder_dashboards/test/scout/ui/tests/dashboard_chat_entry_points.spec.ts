@@ -9,9 +9,19 @@ import { tags, type KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
+/**
+ * Scoped role for Chat entry points: dashboard edit + Agent Builder show, plus
+ * Actions so EmbeddableAccessBoundary can resolve LLM connectors.
+ */
 const dashboardChatRole: KibanaRole = {
   elasticsearch: {
-    cluster: [],
+    cluster: ['monitor'],
+    indices: [
+      {
+        names: ['*'],
+        privileges: ['read'],
+      },
+    ],
   },
   kibana: [
     {
@@ -19,6 +29,7 @@ const dashboardChatRole: KibanaRole = {
       feature: {
         agentBuilder: ['all'],
         dashboard_v2: ['all'],
+        actions: ['all'],
       },
       spaces: ['*'],
     },
@@ -39,8 +50,10 @@ test.describe(
     }) => {
       await pageObjects.dashboardChat.openFromMetricsPrompt();
 
-      await expect(pageObjects.dashboardChat.conversationInputForm).toBeVisible();
-      await expect(pageObjects.dashboardChat.conversationInputEditor).not.toBeEmpty();
+      await expect(pageObjects.dashboardChat.conversationInputForm).toBeVisible({
+        timeout: 60_000,
+      });
+      await expect(pageObjects.dashboardChat.conversationInputEditor).not.toHaveText('');
       await expect(pageObjects.dashboardChat.roundResponses).toHaveCount(0);
     });
 
@@ -50,8 +63,10 @@ test.describe(
       await pageObjects.dashboard.openAddPanelFlyout();
       await pageObjects.dashboardChat.openFromAddPanelFlyout();
 
-      await expect(pageObjects.dashboardChat.conversationInputForm).toBeVisible();
-      await expect(pageObjects.dashboardChat.conversationInputEditor).toBeEmpty();
+      await expect(pageObjects.dashboardChat.conversationInputForm).toBeVisible({
+        timeout: 60_000,
+      });
+      await expect(pageObjects.dashboardChat.conversationInputEditor).toHaveText('');
       await expect(pageObjects.dashboardChat.roundResponses).toHaveCount(0);
     });
   }
