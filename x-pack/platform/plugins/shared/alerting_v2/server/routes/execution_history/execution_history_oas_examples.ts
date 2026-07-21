@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
 import type { ErrorResponse, GetRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
 import {
   RULE_EXECUTIONS_MAX_PER_PAGE,
@@ -14,13 +13,8 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError } from '@kbn/zod/v4';
-import { jsonExample } from '../json_oas_example';
+import { jsonExample, type AlertingV2OasOperationObject } from '../json_oas_example';
 import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
-
-type OASOperationObject = Exclude<
-  Awaited<ReturnType<NonNullable<RouteConfigOptions<RouteMethod>['oasOperationObject']>>>,
-  string
->;
 
 export const GET_RULE_EXECUTIONS_SUMMARY = 'List rule executions';
 
@@ -59,7 +53,7 @@ const INVALID_QUERY_ERROR: ErrorResponse = {
   details: { errors: treeifyError(invalidQueryParse.error) },
 };
 
-export const getRuleExecutionsOasExamples = (): OASOperationObject => ({
+export const getRuleExecutionsOasExamples = (): AlertingV2OasOperationObject => ({
   responses: {
     200: jsonExample(
       'getRuleExecutionsResponse',

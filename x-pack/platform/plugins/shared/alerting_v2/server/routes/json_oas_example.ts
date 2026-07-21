@@ -6,6 +6,31 @@
  */
 
 /**
+ * Concrete OAS fragment shape used by Alerting v2 examples/tests.
+ * Narrower than the OpenAPI `ReferenceObject | MediaTypeObject` union so
+ * callers can read `content` without casts.
+ */
+export interface AlertingV2OasOperationObject {
+  requestBody?: {
+    content?: {
+      'application/json'?: {
+        examples?: Record<string, { summary?: string; value?: unknown }>;
+      };
+    };
+  };
+  responses?: Record<
+    string,
+    {
+      content?: {
+        'application/json'?: {
+          examples?: Record<string, { summary?: string; value?: unknown }>;
+        };
+      };
+    }
+  >;
+}
+
+/**
  * Builds an OpenAPI media-type object with a single named JSON example.
  * Shared by Alerting v2 route `oasOperationObject` helpers.
  */

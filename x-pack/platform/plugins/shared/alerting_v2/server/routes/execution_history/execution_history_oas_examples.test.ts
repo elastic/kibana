@@ -12,12 +12,22 @@ import {
   getRuleExecutionsQuerySchema,
 } from '@kbn/alerting-v2-schemas';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import type { AlertingV2OasOperationObject } from '../json_oas_example';
 import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_response_descriptions';
 import {
   GET_RULE_EXECUTIONS_SUMMARY,
   getRuleExecutionsOasExamples,
 } from './execution_history_oas_examples';
 import { GetRuleExecutionsRoute } from './get_rule_executions_route';
+
+const getValidateResponseDescription = (status: number): string | undefined => {
+  const { validate } = GetRuleExecutionsRoute;
+  if (typeof validate !== 'object' || validate === null || !('response' in validate)) {
+    return undefined;
+  }
+  const response = (validate as { response?: Record<number, { description?: string }> }).response;
+  return response?.[status]?.description;
+};
 
 describe('execution history OAS examples', () => {
   it('includes success and 400 examples for list rule executions', () => {
@@ -64,19 +74,20 @@ describe('execution history OAS examples', () => {
       oas.responses?.[400]?.content?.['application/json']?.examples?.invalidRuleExecutionsQuery
         ?.value.message
     ).toBe(stringifyZodError(invalidQueryParse.error));
-    expect(GetRuleExecutionsRoute.validate.response?.[400]?.description).toBe(
-      INVALID_QUERY_PARAMETERS_DESCRIPTION
-    );
+    expect(getValidateResponseDescription(400)).toBe(INVALID_QUERY_PARAMETERS_DESCRIPTION);
   });
 
   it('is exposed on GetRuleExecutionsRoute.options', async () => {
     expect(GetRuleExecutionsRoute.options.oasOperationObject).toBe(getRuleExecutionsOasExamples);
 
-    const oas = await GetRuleExecutionsRoute.options.oasOperationObject!();
-    expect(typeof oas).not.toBe('string');
-    if (typeof oas === 'string') {
-      throw new Error('expected object OAS fragment');
+    const oasOperationObject = GetRuleExecutionsRoute.options.oasOperationObject;
+    expect(oasOperationObject).toBeDefined();
+    if (!oasOperationObject) {
+      throw new Error('expected oasOperationObject');
     }
+
+    const oas = (await oasOperationObject()) as AlertingV2OasOperationObject;
+    expect(typeof oas).not.toBe('string');
 
     expect(
       oas.responses?.[200]?.content?.['application/json']?.examples?.getRuleExecutionsResponse
