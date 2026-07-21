@@ -18,87 +18,84 @@ apiTest.describe(
   'POST /s/<space>/api/core/capabilities - Discover space feature controls',
   { tag: tags.stateful.classic },
   () => {
+    let spaceId: string | undefined;
+
+    apiTest.afterEach(async ({ apiServices }) => {
+      if (spaceId) {
+        await apiServices.spaces.delete(spaceId);
+        spaceId = undefined;
+      }
+    });
+
     apiTest(
       'space with no features disabled exposes discover and visualize capabilities',
       async ({ apiClient, apiServices, requestAuth }, testInfo) => {
-        const spaceId = `discover-space-enabled-${testInfo.parallelIndex}-${Date.now()}`;
+        spaceId = `discover-space-enabled-${testInfo.parallelIndex}-${Date.now()}`;
         await apiServices.spaces.create({ id: spaceId, name: spaceId, disabledFeatures: [] });
 
-        try {
-          const adminCredentials = await requestAuth.getApiKeyForAdmin();
-          const response = await apiClient.post(`/s/${spaceId}/api/core/capabilities`, {
-            headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-            body: { applications: ['discover', 'kibana'] },
-            responseType: 'json',
-          });
+        const adminCredentials = await requestAuth.getApiKeyForAdmin();
+        const response = await apiClient.post(`/s/${spaceId}/api/core/capabilities`, {
+          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          body: { applications: ['discover', 'kibana'] },
+          responseType: 'json',
+        });
 
-          expect(response).toHaveStatusCode(200);
-          const body = response.body as DiscoverCapabilitiesResponse;
-          expect(body.navLinks.discover).toBe(true);
-          expect(body.discover_v2.show).toBe(true);
-          expect(body.discover_v2.save).toBe(true);
-          expect(body.visualize_v2.show).toBe(true);
-        } finally {
-          await apiServices.spaces.delete(spaceId);
-        }
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as DiscoverCapabilitiesResponse;
+        expect(body.navLinks.discover).toBe(true);
+        expect(body.discover_v2.show).toBe(true);
+        expect(body.discover_v2.save).toBe(true);
+        expect(body.visualize_v2.show).toBe(true);
       }
     );
 
     apiTest(
       'space with Discover disabled hides the discover navlink and zeroes discover capabilities',
       async ({ apiClient, apiServices, requestAuth }, testInfo) => {
-        const spaceId = `discover-space-disabled-${testInfo.parallelIndex}-${Date.now()}`;
+        spaceId = `discover-space-disabled-${testInfo.parallelIndex}-${Date.now()}`;
         await apiServices.spaces.create({
           id: spaceId,
           name: spaceId,
           disabledFeatures: ['discover'],
         });
 
-        try {
-          const adminCredentials = await requestAuth.getApiKeyForAdmin();
-          const response = await apiClient.post(`/s/${spaceId}/api/core/capabilities`, {
-            headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-            body: { applications: ['discover', 'kibana'] },
-            responseType: 'json',
-          });
+        const adminCredentials = await requestAuth.getApiKeyForAdmin();
+        const response = await apiClient.post(`/s/${spaceId}/api/core/capabilities`, {
+          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          body: { applications: ['discover', 'kibana'] },
+          responseType: 'json',
+        });
 
-          expect(response).toHaveStatusCode(200);
-          const body = response.body as DiscoverCapabilitiesResponse;
-          expect(body.navLinks.discover).toBe(false);
-          expect(body.discover_v2.show).toBe(false);
-          expect(body.discover_v2.save).toBe(false);
-        } finally {
-          await apiServices.spaces.delete(spaceId);
-        }
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as DiscoverCapabilitiesResponse;
+        expect(body.navLinks.discover).toBe(false);
+        expect(body.discover_v2.show).toBe(false);
+        expect(body.discover_v2.save).toBe(false);
       }
     );
 
     apiTest(
       'space with Visualize disabled hides the visualize field action capability',
       async ({ apiClient, apiServices, requestAuth }, testInfo) => {
-        const spaceId = `discover-space-visualize-disabled-${testInfo.parallelIndex}-${Date.now()}`;
+        spaceId = `discover-space-visualize-disabled-${testInfo.parallelIndex}-${Date.now()}`;
         await apiServices.spaces.create({
           id: spaceId,
           name: spaceId,
           disabledFeatures: ['visualize'],
         });
 
-        try {
-          const adminCredentials = await requestAuth.getApiKeyForAdmin();
-          const response = await apiClient.post(`/s/${spaceId}/api/core/capabilities`, {
-            headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-            body: { applications: ['discover', 'kibana'] },
-            responseType: 'json',
-          });
+        const adminCredentials = await requestAuth.getApiKeyForAdmin();
+        const response = await apiClient.post(`/s/${spaceId}/api/core/capabilities`, {
+          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          body: { applications: ['discover', 'kibana'] },
+          responseType: 'json',
+        });
 
-          expect(response).toHaveStatusCode(200);
-          const body = response.body as DiscoverCapabilitiesResponse;
-          // Discover itself stays enabled; only the visualize field action goes away.
-          expect(body.discover_v2.show).toBe(true);
-          expect(body.visualize_v2.show).toBe(false);
-        } finally {
-          await apiServices.spaces.delete(spaceId);
-        }
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as DiscoverCapabilitiesResponse;
+        // Discover itself stays enabled; only the visualize field action goes away.
+        expect(body.discover_v2.show).toBe(true);
+        expect(body.visualize_v2.show).toBe(false);
       }
     );
   }
