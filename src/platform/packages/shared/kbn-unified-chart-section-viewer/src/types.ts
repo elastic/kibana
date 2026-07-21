@@ -86,9 +86,9 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    */
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
   /**
-   * Drives the "Recently explored" sort, falls back to A->Z.
+   * Loads the list of recently explored metrics, falls back to A->Z.
    */
-  recentlyExploredMetrics?: readonly string[];
+  getRecentlyExploredMetrics?: () => readonly string[];
   /**
    * Records a metric as recently explored (host persists it), keyed by `getMetricUniqueKey`.
    * Called when the user interacts with a metric chart. Recorded on click action, hover is ignored.

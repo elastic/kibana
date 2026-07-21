@@ -9,7 +9,6 @@
 
 import { Sha256 } from '@kbn/crypto-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { BehaviorSubject, type Observable } from 'rxjs';
 
 const RECENT_METRICS_STORAGE_KEY = 'discover:metricsExperience:recentlyExplored';
 const RECENT_METRICS_MAX_LENGTH = 100;
@@ -26,27 +25,21 @@ const loadKeys = (storage: IStorageWrapper, storageKey: string): string[] => {
 
 export class RecentMetricsStorage {
   private readonly storageKey: string;
-  private readonly keys$: BehaviorSubject<readonly string[]>;
 
   constructor(basePath: string, private readonly storage: IStorageWrapper) {
     this.storageKey = buildStorageKey(basePath);
-    this.keys$ = new BehaviorSubject<readonly string[]>(loadKeys(storage, this.storageKey));
   }
 
   public get(): readonly string[] {
-    return this.keys$.getValue();
-  }
-
-  public get$(): Observable<readonly string[]> {
-    return this.keys$.asObservable();
+    return loadKeys(this.storage, this.storageKey);
   }
 
   public add(metricKey: string): void {
-    const next = [metricKey, ...this.keys$.getValue().filter((key) => key !== metricKey)].slice(
+    const current = loadKeys(this.storage, this.storageKey);
+    const next = [metricKey, ...current.filter((key) => key !== metricKey)].slice(
       0,
       RECENT_METRICS_MAX_LENGTH
     );
     this.storage.set(this.storageKey, next);
-    this.keys$.next(next);
   }
 }

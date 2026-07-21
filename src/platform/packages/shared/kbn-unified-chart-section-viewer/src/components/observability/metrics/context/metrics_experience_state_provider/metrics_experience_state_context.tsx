@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { createContext } from 'react';
-import type { Dimension, MetricsGridSettings, MetricsSort } from '../../../../../types';
+import { isEqual } from 'lodash';
+import type {
+  Dimension,
+  MetricsGridSettings,
+  MetricsSort,
+  UnifiedMetricsGridProps,
+} from '../../../../../types';
 import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../../../flyout/metrics_grid_settings_flyout/constants';
 import { DEFAULT_METRICS_SORT } from '../../../../../common/constants';
 import {
@@ -44,14 +50,16 @@ export function MetricsExperienceStateProvider({
   profileId,
   gridSettings = METRICS_GRID_SETTINGS_DEFAULTS,
   onGridSettingsChange,
-  recentlyExploredMetrics = EMPTY_RECENT_METRICS,
+  getRecentlyExploredMetrics,
+  discoverFetch$,
   onMetricExplored,
 }: {
   children: React.ReactNode;
   profileId: string;
   gridSettings?: MetricsGridSettings;
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
-  recentlyExploredMetrics?: readonly string[];
+  getRecentlyExploredMetrics?: () => readonly string[];
+  discoverFetch$?: UnifiedMetricsGridProps['fetch$'];
   onMetricExplored?: (metricUniqueKey: string) => void;
 }) {
   const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
@@ -60,6 +68,34 @@ export function MetricsExperienceStateProvider({
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
   const [flyoutState, setFlyoutState] = useRestorableState('flyoutState', undefined);
   const [metricsSort, setMetricsSort] = useRestorableState('metricsSort', DEFAULT_METRICS_SORT);
+
+  // Recency snapshot: read fresh from storage on mount and re-sampled only on the triggers
+  // below, so the "Recently explored" order stays stable while the user interacts or paginates.
+  const [recentlyExploredMetrics, setRecentlyExploredMetrics] = useState<readonly string[]>(
+    () => getRecentlyExploredMetrics?.() ?? EMPTY_RECENT_METRICS
+  );
+
+  const refreshRecentlyExplored = useCallback(() => {
+    setRecentlyExploredMetrics((prev) => {
+      const next = getRecentlyExploredMetrics?.() ?? EMPTY_RECENT_METRICS;
+      // Keep the previous reference when unchanged to avoid a needless re-sort.
+      return isEqual(prev, next) ? prev : next;
+    });
+  }, [getRecentlyExploredMetrics]);
+
+  // Grid triggers: sort, search and dimensions changes.
+  useEffect(refreshRecentlyExplored, [
+    refreshRecentlyExplored,
+    metricsSort,
+    searchTerm,
+    selectedDimensions,
+  ]);
+
+  // Discover triggers: ES|QL query executed and time range changes.
+  useEffect(() => {
+    const subscription = discoverFetch$?.subscribe(() => refreshRecentlyExplored());
+    return () => subscription?.unsubscribe();
+  }, [discoverFetch$, refreshRecentlyExplored]);
 
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
