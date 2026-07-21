@@ -141,16 +141,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         onMouseLeave={() => setIsTagHovered({ ...isTagHovered, [option.label]: false })}
       >
         <EuiFlexItem>
-          <TruncatedEuiHighlight
-            search={search}
-            onClick={() => {
-              const tagsToAdd = option.checked === 'on' ? [] : [option.label];
-              const tagsToRemove = option.checked === 'on' ? [option.label] : [];
-              updateTags(tagsToAdd, tagsToRemove);
-            }}
-          >
-            {option.label}
-          </TruncatedEuiHighlight>
+          <TruncatedEuiHighlight search={search}>{option.label}</TruncatedEuiHighlight>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <TagOptions
@@ -228,6 +219,16 @@ export const TagsAddRemove: React.FC<Props> = ({
             value: searchValue ?? '',
           }}
           options={labels}
+          onChange={(newOptions) => {
+            const changedIndex = newOptions.findIndex(
+              (opt, i) => opt.checked !== labels[i]?.checked
+            );
+            if (changedIndex === -1) return;
+            const option = newOptions[changedIndex];
+            const isNowChecked = option.checked === 'on';
+            updateTags(isNowChecked ? [option.label] : [], isNowChecked ? [] : [option.label]);
+            setLabels(newOptions);
+          }}
           renderOption={renderOption}
         >
           {(list, search) => (
