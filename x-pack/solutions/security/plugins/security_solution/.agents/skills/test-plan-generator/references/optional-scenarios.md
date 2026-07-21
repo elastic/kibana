@@ -69,23 +69,26 @@ These coverage areas are **evaluated on every generation run**, not included on 
 
 ### Upgrade scenarios
 
-Use `TARGET_VERSION` (detected in Step 2) as the target version. Run upgrade scenarios from each of the following source versions:
-- The last minor of the previous major series (currently `8.19.x`)
-- The last minor of the current major cycle (currently `9.3`)
+Use `TARGET_VERSION` (detected in Step 2) as the target version.
 
-Check with the team if you are unsure which versions are current — these values change with each release cycle.
+**Resolve source versions from `<repo-root>/versions.json`** — this file is the authoritative list of currently-supported release branches and is updated as the release train advances. Resolve the two placeholders below at generation time from that file (never hardcode version numbers):
+
+- `PREVIOUS_MAJOR_LAST_MINOR` — the `version` of the entry with `branchType: "release"` whose major is exactly one less than `TARGET_VERSION`'s major (e.g. `8.19.19` when `TARGET_VERSION` is on the `9.x` line).
+- `CURRENT_MAJOR_LAST_MINOR` — the `version` of the highest-numbered entry with `branchType: "release"` whose major equals `TARGET_VERSION`'s major and whose minor is strictly less than `TARGET_VERSION`'s minor (e.g. `9.5.0` when `TARGET_VERSION` is `9.6`).
+
+If either placeholder cannot be resolved from `versions.json` (no eligible entry — e.g. `TARGET_VERSION` is the first minor of a new major cycle, so no `CURRENT_MAJOR_LAST_MINOR` exists yet), record it under *Assumptions* with a `⚠️` and ask the user to confirm before publishing — do not drop the scenario.
 
 ```gherkin
 @upgrade
-Scenario: Feature works correctly after upgrading from the last minor of the previous major to TARGET_VERSION
-  Given a Kibana instance running the last minor of the previous major series with existing data relevant to this feature
+Scenario: Feature works correctly after upgrading from PREVIOUS_MAJOR_LAST_MINOR to TARGET_VERSION
+  Given a Kibana instance running PREVIOUS_MAJOR_LAST_MINOR with existing data relevant to this feature
   When the instance is upgraded to TARGET_VERSION
   Then the feature is accessible and behaves as expected
   And existing data or configuration is preserved without errors
 
 @upgrade
-Scenario: Feature works correctly after upgrading from the last minor of the current major cycle to TARGET_VERSION
-  Given a Kibana instance running the last minor of the current major cycle with existing data relevant to this feature
+Scenario: Feature works correctly after upgrading from CURRENT_MAJOR_LAST_MINOR to TARGET_VERSION
+  Given a Kibana instance running CURRENT_MAJOR_LAST_MINOR with existing data relevant to this feature
   When the instance is upgraded to TARGET_VERSION
   Then the feature is accessible and behaves as expected
   And existing data or configuration is preserved without errors
