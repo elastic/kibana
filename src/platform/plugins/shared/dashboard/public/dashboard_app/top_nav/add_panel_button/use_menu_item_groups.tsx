@@ -18,7 +18,7 @@ import { triggers, type Action, type ActionExecutionContext } from '@kbn/ui-acti
 
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { uiActionsService } from '../../../services/kibana_services';
-import type { AddPanelActionExtension, MenuItem, MenuItemGroup } from './types';
+import type { AddPanelActionExtension, MenuItemGroup } from './types';
 
 type AddPanelAction = Action<object, AddPanelActionExtension>;
 
@@ -95,9 +95,9 @@ export function getMenuItems(
   actions: AddPanelAction[],
   dashboardApi: DashboardApi,
   context: ActionExecutionContext
-): MenuItem[] {
+) {
   return actions
-    .map((action): MenuItem => {
+    .map((action) => {
       const actionName = action.getDisplayName(context);
       return {
         id: action.id,
