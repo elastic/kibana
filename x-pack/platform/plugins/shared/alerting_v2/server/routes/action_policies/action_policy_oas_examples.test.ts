@@ -6,6 +6,11 @@
  */
 
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
+import {
+  getActionPolicyNotFoundMessage,
+  getActionPolicyVersionConflictMessage,
+  getInvalidActionPolicyDataMessage,
+} from '../../lib/errors/action_policy_error_messages';
 import { CreateActionPolicyRoute } from './create_action_policy_route';
 import {
   createActionPolicyOasExamples,
@@ -43,6 +48,7 @@ describe('action policy OAS examples', () => {
       expect.objectContaining({
         value: expect.objectContaining({
           code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
+          message: getActionPolicyNotFoundMessage('action-policy-1'),
         }),
       })
     );
@@ -57,6 +63,7 @@ describe('action policy OAS examples', () => {
       expect.objectContaining({
         value: expect.objectContaining({
           code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
+          message: getActionPolicyVersionConflictMessage('action-policy-1'),
         }),
       })
     );

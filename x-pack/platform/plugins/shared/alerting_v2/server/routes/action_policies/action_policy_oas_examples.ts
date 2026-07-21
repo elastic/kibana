@@ -6,8 +6,26 @@
  */
 
 import type { RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
-import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  ActionPolicyResponse,
+  BulkActionActionPoliciesBody,
+  BulkActionActionPoliciesResponse,
+  CountPolicyExecutionEventsResponse,
+  CreateActionPolicyDataInput,
+  ErrorResponse,
+  FindActionPoliciesResponse,
+  ListPolicyExecutionHistoryResponse,
+  MatchActionPoliciesForRuleBody,
+  MatchActionPoliciesForRuleResponse,
+  SnoozeActionPolicyBody,
+  UpdateActionPolicyBody,
+} from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
+import {
+  getActionPolicyNotFoundMessage,
+  getActionPolicyVersionConflictMessage,
+  getInvalidActionPolicyDataMessage,
+} from '../../lib/errors/action_policy_error_messages';
 
 type OASOperationObject = Exclude<
   Awaited<ReturnType<NonNullable<RouteConfigOptions<RouteMethod>['oasOperationObject']>>>,
@@ -16,7 +34,7 @@ type OASOperationObject = Exclude<
 
 type RouteErrorStatus = 400 | 404 | 409;
 
-const jsonExample = (name: string, summary: string, value: unknown) => ({
+const jsonExample = <T>(name: string, summary: string, value: T) => ({
   content: {
     'application/json': {
       examples: {
@@ -29,27 +47,32 @@ const jsonExample = (name: string, summary: string, value: unknown) => ({
   },
 });
 
-const CREATE_REQUEST = {
+/**
+ * Typed OAS example payloads. Annotated against @kbn/alerting-v2-schemas so
+ * schema changes fail typecheck until these examples are updated.
+ */
+
+const CREATE_REQUEST: CreateActionPolicyDataInput = {
   name: 'Notify on host alerts',
   description: 'Sends a workflow notification when matching host alerts fire.',
-  destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
+  destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: 'host.name: "web-*"',
   tags: ['production'],
-  groupingMode: 'per_episode' as const,
-  throttle: { strategy: 'on_status_change' as const },
+  groupingMode: 'per_episode',
+  throttle: { strategy: 'on_status_change' },
 };
 
-const ACTION_POLICY_RESPONSE = {
+const ACTION_POLICY_RESPONSE: ActionPolicyResponse = {
   id: 'action-policy-1',
   version: 'WzAsMV0=',
   name: CREATE_REQUEST.name,
   description: CREATE_REQUEST.description,
   enabled: true,
-  destinations: CREATE_REQUEST.destinations,
-  matcher: CREATE_REQUEST.matcher,
+  destinations: [{ type: 'workflow', id: 'workflow-1' }],
+  matcher: 'host.name: "web-*"',
   groupBy: null,
-  tags: CREATE_REQUEST.tags,
-  groupingMode: CREATE_REQUEST.groupingMode,
+  tags: ['production'],
+  groupingMode: 'per_episode',
   throttle: { strategy: 'on_status_change', interval: null },
   snoozedUntil: null,
   auth: { owner: 'elastic', createdByUser: true },
@@ -59,24 +82,24 @@ const ACTION_POLICY_RESPONSE = {
   updatedAt: '2026-01-15T12:00:00.000Z',
 };
 
-const UPDATE_REQUEST = {
+const UPDATE_REQUEST: UpdateActionPolicyBody = {
   version: 'WzAsMV0=',
   name: 'Notify on host alerts (updated)',
   description: 'Updated description.',
 };
 
-const SNOOZE_REQUEST = {
+const SNOOZE_REQUEST: SnoozeActionPolicyBody = {
   snoozedUntil: '2026-01-16T12:00:00.000Z',
 };
 
-const BULK_REQUEST = {
+const BULK_REQUEST: BulkActionActionPoliciesBody = {
   actions: [
-    { id: 'action-policy-1', action: 'enable' as const },
-    { id: 'action-policy-2', action: 'snooze' as const, snoozedUntil: SNOOZE_REQUEST.snoozedUntil },
+    { id: 'action-policy-1', action: 'enable' },
+    { id: 'action-policy-2', action: 'snooze', snoozedUntil: SNOOZE_REQUEST.snoozedUntil },
   ],
 };
 
-const MATCH_REQUEST = {
+const MATCH_REQUEST: MatchActionPoliciesForRuleBody = {
   rule: {
     id: 'rule-1',
     name: 'Host CPU high',
@@ -84,24 +107,93 @@ const MATCH_REQUEST = {
   },
 };
 
-const ERROR_EXAMPLES: Record<RouteErrorStatus, ReturnType<typeof jsonExample>> = {
-  400: jsonExample('invalidActionPolicyData', 'Invalid action policy request', {
-    code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
-    error: 'Bad Request',
-    message: 'Invalid action policy data.',
-  } satisfies ErrorResponse),
-  404: jsonExample('actionPolicyNotFound', 'Action policy does not exist', {
-    code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
-    error: 'Not Found',
-    message: 'Action policy "action-policy-1" not found.',
-    details: { action_policy_id: 'action-policy-1' },
-  } satisfies ErrorResponse),
-  409: jsonExample('actionPolicyVersionConflict', 'Concurrent update conflict', {
-    code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
-    error: 'Conflict',
-    message: 'Action policy "action-policy-1" was updated by another caller.',
-    details: { action_policy_id: 'action-policy-1' },
-  } satisfies ErrorResponse),
+const LIST_RESPONSE: FindActionPoliciesResponse = {
+  items: [ACTION_POLICY_RESPONSE],
+  total: 1,
+  page: 1,
+  perPage: 20,
+};
+
+const BULK_RESPONSE: BulkActionActionPoliciesResponse = {
+  processed: 2,
+  total: 2,
+  errors: [],
+};
+
+const MATCH_RESPONSE: MatchActionPoliciesForRuleResponse = {
+  items: [{ actionPolicy: ACTION_POLICY_RESPONSE, category: 'global-filtered' }],
+  total: 1,
+};
+
+const EXECUTION_HISTORY_RESPONSE: ListPolicyExecutionHistoryResponse = {
+  items: [
+    {
+      '@timestamp': '2026-01-15T12:05:00.000Z',
+      policy: { id: 'action-policy-1', name: 'Notify on host alerts' },
+      outcome: 'dispatched',
+      episode_count: 1,
+      action_group_count: 1,
+      rules: [{ id: 'rule-1', name: 'Host CPU high' }],
+      totalRuleCount: 1,
+      workflows: [{ id: 'workflow-1', name: 'Notify oncall' }],
+    },
+  ],
+  page: 1,
+  perPage: 20,
+  totalEvents: 1,
+  searchMatches: null,
+};
+
+const EXECUTION_HISTORY_COUNT_RESPONSE: CountPolicyExecutionEventsResponse = {
+  count: 3,
+};
+
+/** Local route schema is `z.array(z.string())` — no shared package type. */
+const MATCHER_DATA_FIELDS_RESPONSE: string[] = [
+  'host.name',
+  'host.ip',
+  'kibana.alert.rule.name',
+];
+
+const SAMPLE_ACTION_POLICY_ID = ACTION_POLICY_RESPONSE.id;
+
+const INVALID_ACTION_POLICY_DATA_ERROR: ErrorResponse = {
+  code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
+  error: 'Bad Request',
+  message: getInvalidActionPolicyDataMessage('create', 'name: Required'),
+  details: { context: 'create', errors: { name: ['Required'] } },
+};
+
+const ACTION_POLICY_NOT_FOUND_ERROR: ErrorResponse = {
+  code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
+  error: 'Not Found',
+  message: getActionPolicyNotFoundMessage(SAMPLE_ACTION_POLICY_ID),
+  details: { action_policy_id: SAMPLE_ACTION_POLICY_ID },
+};
+
+const ACTION_POLICY_VERSION_CONFLICT_ERROR: ErrorResponse = {
+  code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
+  error: 'Conflict',
+  message: getActionPolicyVersionConflictMessage(SAMPLE_ACTION_POLICY_ID),
+  details: { action_policy_id: SAMPLE_ACTION_POLICY_ID },
+};
+
+const ERROR_EXAMPLES: Record<RouteErrorStatus, ReturnType<typeof jsonExample<ErrorResponse>>> = {
+  400: jsonExample(
+    'invalidActionPolicyData',
+    'Invalid action policy request',
+    INVALID_ACTION_POLICY_DATA_ERROR
+  ),
+  404: jsonExample(
+    'actionPolicyNotFound',
+    'Action policy does not exist',
+    ACTION_POLICY_NOT_FOUND_ERROR
+  ),
+  409: jsonExample(
+    'actionPolicyVersionConflict',
+    'Concurrent update conflict',
+    ACTION_POLICY_VERSION_CONFLICT_ERROR
+  ),
 };
 
 const buildActionPolicyOas = ({
@@ -136,8 +228,8 @@ const buildActionPolicyOas = ({
 const policyResponse = (
   name: string,
   summary: string,
-  overrides: Record<string, unknown> = {}
-) => ({
+  overrides: Partial<ActionPolicyResponse> = {}
+): { name: string; summary: string; value: ActionPolicyResponse } => ({
   name,
   summary,
   value: { ...ACTION_POLICY_RESPONSE, ...overrides },
@@ -200,12 +292,7 @@ export const listActionPoliciesOasExamples = (): OASOperationObject =>
       200: {
         name: 'listActionPoliciesResponse',
         summary: 'Paginated action policies',
-        value: {
-          items: [ACTION_POLICY_RESPONSE],
-          total: 1,
-          page: 1,
-          perPage: 20,
-        },
+        value: LIST_RESPONSE,
       },
     },
     errors: [400],
@@ -277,11 +364,7 @@ export const bulkActionActionPoliciesOasExamples = (): OASOperationObject =>
       200: {
         name: 'bulkActionActionPoliciesResponse',
         summary: 'Bulk action result',
-        value: {
-          processed: 2,
-          total: 2,
-          errors: [],
-        },
+        value: BULK_RESPONSE,
       },
     },
     errors: [400],
@@ -298,10 +381,7 @@ export const matchActionPoliciesForRuleOasExamples = (): OASOperationObject =>
       200: {
         name: 'matchActionPoliciesForRuleResponse',
         summary: 'Matched action policies',
-        value: {
-          items: [{ actionPolicy: ACTION_POLICY_RESPONSE, category: 'global-filtered' }],
-          total: 1,
-        },
+        value: MATCH_RESPONSE,
       },
     },
     errors: [400],
@@ -313,24 +393,7 @@ export const listActionPolicyExecutionHistoryOasExamples = (): OASOperationObjec
       200: {
         name: 'listActionPolicyExecutionHistoryResponse',
         summary: 'Paginated execution history',
-        value: {
-          items: [
-            {
-              '@timestamp': '2026-01-15T12:05:00.000Z',
-              policy: { id: 'action-policy-1', name: 'Notify on host alerts' },
-              outcome: 'dispatched',
-              episode_count: 1,
-              action_group_count: 1,
-              rules: [{ id: 'rule-1', name: 'Host CPU high' }],
-              totalRuleCount: 1,
-              workflows: [{ id: 'workflow-1', name: 'Notify oncall' }],
-            },
-          ],
-          page: 1,
-          perPage: 20,
-          totalEvents: 1,
-          searchMatches: null,
-        },
+        value: EXECUTION_HISTORY_RESPONSE,
       },
     },
     errors: [400],
@@ -342,7 +405,7 @@ export const countActionPolicyExecutionHistoryOasExamples = (): OASOperationObje
       200: {
         name: 'countActionPolicyExecutionHistoryResponse',
         summary: 'Count of new execution events',
-        value: { count: 3 },
+        value: EXECUTION_HISTORY_COUNT_RESPONSE,
       },
     },
     errors: [400],
@@ -354,7 +417,7 @@ export const matcherDataFieldsOasExamples = (): OASOperationObject =>
       200: {
         name: 'matcherDataFieldsResponse',
         summary: 'Suggested matcher field names',
-        value: ['host.name', 'host.ip', 'kibana.alert.rule.name'],
+        value: MATCHER_DATA_FIELDS_RESPONSE,
       },
     },
     errors: [400],
