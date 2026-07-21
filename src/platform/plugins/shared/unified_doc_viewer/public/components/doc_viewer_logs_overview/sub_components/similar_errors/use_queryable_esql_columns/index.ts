@@ -53,17 +53,23 @@ export function useQueryableEsqlColumns(indexPattern?: string): UseQueryableEsql
     data: { search },
   } = getUnifiedDocViewerServices();
 
-  const { value, error, loading } = useAbortableAsync(
+  const {
+    value,
+    error,
+    loading: isFetchInFlight,
+  } = useAbortableAsync(
     ({ signal }) =>
       indexPattern ? fetchQueryableColumns(indexPattern, search.search, signal) : undefined,
     [search, indexPattern]
   );
 
+  // `isFetchInFlight` only turns on once the fetch effect has run; also treat
+  // the window before the first resolution as loading so consumers don't build
+  // queries from an unresolved column set.
+  const awaitingFirstResolution = Boolean(indexPattern) && !value && !error;
+
   return {
     queryableColumns: value,
-    // `loading` from useAbortableAsync only turns on once its effect has run;
-    // also report loading before the first resolution (no value and no error
-    // yet) so consumers don't build queries from an unresolved column set.
-    loading: loading || (Boolean(indexPattern) && !value && !error),
+    loading: isFetchInFlight || awaitingFirstResolution,
   };
 }
