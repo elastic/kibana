@@ -988,12 +988,10 @@ describe('RulesClient', () => {
     it('runs the executor task for an enabled rule', async () => {
       const client = createClient();
 
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
+      rulesSavedObjectService.get.mockResolvedValueOnce({
         attributes: { ...baseSoAttrs, enabled: true },
         version: 'WzEsMV0=',
         id: 'rule-id-run-1',
-        type: RULE_SAVED_OBJECT_TYPE,
-        references: [],
       });
       getRuleExecutorTaskIdMock.mockReturnValueOnce('task:run');
       taskManager.runSoon.mockResolvedValueOnce({ id: 'task:run', forced: false });
@@ -1009,7 +1007,7 @@ describe('RulesClient', () => {
 
     it('throws 404 when rule is not found', async () => {
       const client = createClient();
-      mockSavedObjectsClient.get.mockRejectedValueOnce(
+      rulesSavedObjectService.get.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
           RULE_SAVED_OBJECT_TYPE,
           'rule-id-run-404'
@@ -1023,12 +1021,10 @@ describe('RulesClient', () => {
 
     it('throws 400 RULE_DISABLED when the rule is disabled', async () => {
       const client = createClient();
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
+      rulesSavedObjectService.get.mockResolvedValueOnce({
         attributes: { ...baseSoAttrs, enabled: false },
         version: 'WzEsMV0=',
         id: 'rule-id-run-disabled',
-        type: RULE_SAVED_OBJECT_TYPE,
-        references: [],
       });
 
       await expect(client.runRuleNow({ id: 'rule-id-run-disabled' })).rejects.toMatchObject({
@@ -1041,12 +1037,10 @@ describe('RulesClient', () => {
 
     it('throws 409 RULE_ALREADY_RUNNING when the task is already running', async () => {
       const client = createClient();
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
+      rulesSavedObjectService.get.mockResolvedValueOnce({
         attributes: { ...baseSoAttrs, enabled: true },
         version: 'WzEsMV0=',
         id: 'rule-id-run-active',
-        type: RULE_SAVED_OBJECT_TYPE,
-        references: [],
       });
       taskManager.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('task:run'));
 
@@ -1058,12 +1052,10 @@ describe('RulesClient', () => {
 
     it('throws 409 RULE_RUN_CONFLICT when runSoon reports a task-store conflict', async () => {
       const client = createClient();
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
+      rulesSavedObjectService.get.mockResolvedValueOnce({
         attributes: { ...baseSoAttrs, enabled: true },
         version: 'WzEsMV0=',
         id: 'rule-id-run-conflict',
-        type: RULE_SAVED_OBJECT_TYPE,
-        references: [],
       });
       taskManager.runSoon.mockResolvedValueOnce({
         id: 'task:run',
