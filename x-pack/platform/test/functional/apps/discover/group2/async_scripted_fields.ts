@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. These are some good smoke tests. They should be cleaned up though.
+ */
+
 // Tests for scripted field in default distribution where async search is used
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -82,6 +86,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('query should show incomplete results badge on dashboard', async function () {
+      /**
+       * TODO: Should use a fixture or the API instead of the UI to create this.
+       */
       await security.testUser.setRoles([
         'test_logstash_reader',
         'global_discover_all',
