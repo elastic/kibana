@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import {
-  EuiAvatar,
-  EuiComment,
-  EuiCommentList,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiAvatar, EuiComment, EuiCommentList, EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import type { GenAiMessage } from './get_genai_fields';
 import { GenAiMessageContent } from './genai_message_content';
 
+/**
+ * Fixed-size role avatar using EUI semantic background tokens so the circle
+ * is always the same size regardless of the role label length — keeping all
+ * message bodies aligned in a consistent column.
+ */
 function RoleAvatar({ role }: { role: string }) {
   const { euiTheme } = useEuiTheme();
+
+  // Semantic "light" background tokens — soft pastels that work in both
+  // light and dark mode and match EUI's own status-color system.
   const colorByRole: Record<string, string> = {
-    system: euiTheme.colors.warning,
-    user: euiTheme.colors.primary,
-    assistant: euiTheme.colors.success,
-    tool: euiTheme.colors.accent,
-    function: euiTheme.colors.accent,
+    system: euiTheme.colors.backgroundLightWarning,
+    user: euiTheme.colors.backgroundLightPrimary,
+    assistant: euiTheme.colors.backgroundLightSuccess,
+    tool: euiTheme.colors.backgroundLightAccent,
+    function: euiTheme.colors.backgroundLightAccent,
   };
-  const color = colorByRole[role.toLowerCase()] ?? euiTheme.colors.lightShade;
+  const color = colorByRole[role.toLowerCase()] ?? euiTheme.colors.backgroundBaseSubdued;
+
   return (
     <EuiAvatar
       name={role}
@@ -55,30 +55,20 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
   if (allMessages.length === 0) return null;
 
   return (
-    <>
-      <EuiTitle size="xxs">
-        <h4>
-          {i18n.translate('xpack.apm.genAi.messages.title', {
-            defaultMessage: 'Conversation',
-          })}
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiCommentList aria-label="GenAI conversation">
-        {allMessages.map((msg, i) => (
-          <EuiComment
-            key={i}
-            username={msg.role}
-            timelineAvatar={<RoleAvatar role={msg.role} />}
-            timelineAvatarAriaLabel={msg.role}
-            data-test-subj={`genAiMessage-${i}`}
-          >
-            <EuiText size="s">
-              <GenAiMessageContent message={msg} />
-            </EuiText>
-          </EuiComment>
-        ))}
-      </EuiCommentList>
-    </>
+    <EuiCommentList aria-label="GenAI conversation">
+      {allMessages.map((msg, i) => (
+        <EuiComment
+          key={i}
+          username={msg.role}
+          timelineAvatar={<RoleAvatar role={msg.role} />}
+          timelineAvatarAriaLabel={msg.role}
+          data-test-subj={`genAiMessage-${i}`}
+        >
+          <EuiText size="s">
+            <GenAiMessageContent message={msg} />
+          </EuiText>
+        </EuiComment>
+      ))}
+    </EuiCommentList>
   );
 }

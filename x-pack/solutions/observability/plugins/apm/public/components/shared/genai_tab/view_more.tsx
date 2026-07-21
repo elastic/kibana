@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 
@@ -17,6 +17,7 @@ interface Props {
 
 export function ViewMore({ children }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const { euiTheme } = useEuiTheme();
 
   return (
     <>
@@ -33,8 +34,8 @@ export function ViewMore({ children }: Props) {
               bottom: 0,
               left: 0,
               right: 0,
-              height: 48,
-              background: 'linear-gradient(transparent, var(--euiPageBackgroundColor, white))',
+              height: euiTheme.size.xxl,
+              background: `linear-gradient(transparent, ${euiTheme.colors.backgroundBasePlain})`,
             }}
           />
         )}

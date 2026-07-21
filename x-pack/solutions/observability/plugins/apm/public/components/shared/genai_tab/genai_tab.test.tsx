@@ -86,4 +86,21 @@ describe('GenAiTab', () => {
     expect(screen.getByText('temperature')).toBeInTheDocument();
     expect(screen.getByText('max_tokens')).toBeInTheDocument();
   });
+
+  it('renders all three accordion sections when data is present', () => {
+    renderTab({
+      responseModel: 'gpt-4o-2024-08-06',
+      inputMessages: [{ role: 'user', content: 'Hello' }],
+    });
+    expect(screen.getByTestId('genAiSection-summary')).toBeInTheDocument();
+    expect(screen.getByTestId('genAiSection-details')).toBeInTheDocument();
+    expect(screen.getByTestId('genAiSection-conversation')).toBeInTheDocument();
+  });
+
+  it('omits Details and Conversation sections when their data is absent', () => {
+    renderTab({ responseModel: undefined, requestParams: {}, response: {} });
+    expect(screen.getByTestId('genAiSection-summary')).toBeInTheDocument();
+    expect(screen.queryByTestId('genAiSection-details')).toBeNull();
+    expect(screen.queryByTestId('genAiSection-conversation')).toBeNull();
+  });
 });

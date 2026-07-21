@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { GenAiFields } from './get_genai_fields';
 import { GenAiFieldValue } from './genai_field_value';
 import { GenAiMessages } from './genai_messages';
+import { GenAiSection } from './genai_section';
 
 interface PillProps {
   label: string;
@@ -54,10 +47,13 @@ export function GenAiTab({ genAi }: Props) {
     conversationId,
   } = genAi;
 
+  // ── Summary pills ──────────────────────────────────────────────────────────
   const pills: PillProps[] = [];
   if (operationName) {
     pills.push({
-      label: i18n.translate('xpack.apm.genAi.pill.operationName', { defaultMessage: 'Operation' }),
+      label: i18n.translate('xpack.apm.genAi.pill.operationName', {
+        defaultMessage: 'Operation',
+      }),
       value: operationName,
       testSubj: 'genAiPillOperationName',
     });
@@ -95,6 +91,7 @@ export function GenAiTab({ genAi }: Props) {
     });
   }
 
+  // ── Details rows ───────────────────────────────────────────────────────────
   const extraParams: Array<{
     title: NonNullable<React.ReactNode>;
     description: NonNullable<React.ReactNode>;
@@ -132,62 +129,74 @@ export function GenAiTab({ genAi }: Props) {
       description: <GenAiFieldValue value={response.finish_reasons} />,
     });
   }
-
-  const reqParamEntries = Object.entries(requestParams).filter(([, v]) => v !== undefined);
-  if (reqParamEntries.length) {
-    reqParamEntries.forEach(([key, val]) => {
+  Object.entries(requestParams)
+    .filter(([, v]) => v !== undefined)
+    .forEach(([key, val]) => {
       extraParams.push({
         title: key,
         description: <GenAiFieldValue value={val} />,
       });
     });
-  }
 
   const hasConversation =
     inputMessages.length > 0 || outputMessages.length > 0 || !!systemInstructions;
 
   return (
     <>
+      {/* ── Section 1: Summary ─────────────────────────────────────────── */}
       {pills.length > 0 && (
-        <>
-          <EuiFlexGroup gutterSize="s" wrap data-test-subj="genAiPills">
+        <GenAiSection
+          id="summary"
+          title={i18n.translate('xpack.apm.genAi.section.summary', {
+            defaultMessage: 'Summary',
+          })}
+        >
+          <EuiFlexGroup gutterSize="xs" wrap data-test-subj="genAiPills">
             {pills.map((p) => (
               <EuiFlexItem grow={false} key={p.testSubj}>
                 <Pill {...p} />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
-        </>
+        </GenAiSection>
       )}
 
+      {/* ── Section 2: Details ─────────────────────────────────────────── */}
       {extraParams.length > 0 && (
         <>
-          <EuiTitle size="xxs">
-            <h4>
-              {i18n.translate('xpack.apm.genAi.details.title', {
-                defaultMessage: 'Details',
-              })}
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiDescriptionList
-            type="column"
-            columnWidths={[1, 3]}
-            listItems={extraParams}
-            data-test-subj="genAiDetails"
-          />
+          <EuiSpacer size="m" />
+          <GenAiSection
+            id="details"
+            title={i18n.translate('xpack.apm.genAi.section.details', {
+              defaultMessage: 'Details',
+            })}
+          >
+            <EuiDescriptionList
+              type="column"
+              columnWidths={[1, 3]}
+              listItems={extraParams}
+              data-test-subj="genAiDetails"
+            />
+          </GenAiSection>
         </>
       )}
 
+      {/* ── Section 3: Conversation ────────────────────────────────────── */}
       {hasConversation && (
         <>
-          <EuiHorizontalRule margin="m" />
-          <GenAiMessages
-            inputMessages={inputMessages}
-            outputMessages={outputMessages}
-            systemInstructions={systemInstructions}
-          />
+          <EuiSpacer size="m" />
+          <GenAiSection
+            id="conversation"
+            title={i18n.translate('xpack.apm.genAi.section.conversation', {
+              defaultMessage: 'Conversation',
+            })}
+          >
+            <GenAiMessages
+              inputMessages={inputMessages}
+              outputMessages={outputMessages}
+              systemInstructions={systemInstructions}
+            />
+          </GenAiSection>
         </>
       )}
     </>
