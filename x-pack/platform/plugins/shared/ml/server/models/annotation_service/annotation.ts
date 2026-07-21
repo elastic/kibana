@@ -408,6 +408,10 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
     jobIds: string[];
     earliestMs?: number;
   }): Promise<Annotation[]> {
+    if (jobIds.length === 0) {
+      return [];
+    }
+
     await checkJobAccess(jobIds);
 
     const params: estypes.SearchRequest = {
