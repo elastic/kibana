@@ -52,13 +52,13 @@ spaceTest.describe('Discover large strings', { tag: '@local-stateful-classic' },
 
   spaceTest(
     'searches and highlights a term inside large string field data',
-    async ({ page, pageObjects }) => {
+    async ({ pageObjects }) => {
       await pageObjects.queryBar.setQuery('Newsletter');
       await pageObjects.discover.submitQuery();
       await pageObjects.discover.waitUntilTabIsLoaded();
 
       expect(await pageObjects.discover.getHitCountInt()).toBe(1);
-      await expect(page.locator('mark')).toHaveCount(1);
+      await expect(pageObjects.discover.getSearchTermHighlights()).toHaveCount(1);
     }
   );
 });
