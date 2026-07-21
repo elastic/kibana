@@ -32,11 +32,11 @@ export function LayerHeader({
     () =>
       filterVisualizationMap(
         visualizationMap,
-        activeVisualization.id,
+        activeVisualization?.id,
         layerConfigProps.frame,
         onlyAllowSwitchToSubtypes
       ),
-    [visualizationMap, activeVisualization.id, layerConfigProps.frame, onlyAllowSwitchToSubtypes]
+    [visualizationMap, activeVisualization?.id, layerConfigProps.frame, onlyAllowSwitchToSubtypes]
   );
 
   if (!activeVisualization) {
