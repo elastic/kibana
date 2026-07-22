@@ -43,16 +43,15 @@ describe('MonochromeIcons', () => {
     const failures: string[] = [];
     for (const id of MonochromeIcons) {
       const value = HardcodedIconDataUrls[id];
-      if (value === undefined) {
-        // Connector-only ids (.http, .gen-ai, .bedrock) have no entry in HardcodedIconDataUrls — skip.
-        continue;
-      }
-      const isValid =
-        typeof value !== 'string' || value === 'test-file-stub' || value.startsWith('data:');
-      if (!isValid) {
-        failures.push(
-          `["${id}"] = "${String(value).slice(0, 60)}" (bare EUI name — invalid in CSS url())`
-        );
+      // Connector-only ids (.http, .gen-ai, .bedrock) have no entry in HardcodedIconDataUrls — skip.
+      if (value !== undefined) {
+        const isValid =
+          typeof value !== 'string' || value === 'test-file-stub' || value.startsWith('data:');
+        if (!isValid) {
+          failures.push(
+            `["${id}"] = "${String(value).slice(0, 60)}" (bare EUI name — invalid in CSS url())`
+          );
+        }
       }
     }
     expect(failures).toEqual([]);
