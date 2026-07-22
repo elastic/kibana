@@ -169,10 +169,8 @@ export function buildPolicyBaseIdWithFallbackEsFilter(
         { term: { [policyBaseIdField]: baseId } },
         {
           bool: {
-            must: [
-              { bool: { must_not: { exists: { field: policyBaseIdField } } } },
-              { term: { [policyIdField]: baseId } },
-            ],
+            filter: [{ term: { [policyIdField]: baseId } }],
+            must_not: [{ exists: { field: policyBaseIdField } }],
           },
         },
       ],
@@ -199,10 +197,8 @@ export function buildPolicyBaseIdsWithFallbackEsFilter(
         { terms: { [policyBaseIdField]: uniqueIds } },
         {
           bool: {
-            must: [
-              { bool: { must_not: { exists: { field: policyBaseIdField } } } },
-              { terms: { [policyIdField]: uniqueIds } },
-            ],
+            filter: [{ terms: { [policyIdField]: uniqueIds } }],
+            must_not: [{ exists: { field: policyBaseIdField } }],
           },
         },
       ],
