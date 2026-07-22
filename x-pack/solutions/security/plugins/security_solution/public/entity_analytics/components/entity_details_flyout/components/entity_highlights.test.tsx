@@ -608,8 +608,7 @@ describe('EntityHighlights', () => {
 
     // The key mirrors the one built in entity_highlights.tsx:
     // `securitySolution.entitySummary.staleness.dismissed.${space}.${entityType}.${entityId}`
-    const dismissKey =
-      'securitySolution.entitySummary.staleness.dismissed.default.user.test-user';
+    const dismissKey = 'securitySolution.entitySummary.staleness.dismissed.default.user.test-user';
 
     const renderStale = () => {
       mockUseFetchPersistedAiSummary.mockReturnValue(stalePersistedSummary);
@@ -636,9 +635,7 @@ describe('EntityHighlights', () => {
       const callout = screen.getByTestId('entity-highlights-staleness-callout');
       fireEvent.click(within(callout).getByLabelText('Dismiss this callout'));
 
-      expect(
-        screen.queryByTestId('entity-highlights-staleness-callout')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('entity-highlights-staleness-callout')).not.toBeInTheDocument();
       // The dismissed score (current normalized risk) is stored so the same drift stays dismissed.
       expect(window.localStorage.getItem(dismissKey)).toBe('90');
     });
@@ -648,9 +645,7 @@ describe('EntityHighlights', () => {
 
       renderStale();
 
-      expect(
-        screen.queryByTestId('entity-highlights-staleness-callout')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('entity-highlights-staleness-callout')).not.toBeInTheDocument();
     });
 
     it('re-shows the callout when the risk score changed since the previous dismissal', () => {

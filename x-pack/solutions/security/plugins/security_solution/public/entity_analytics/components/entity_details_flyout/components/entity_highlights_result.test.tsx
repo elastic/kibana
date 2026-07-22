@@ -581,9 +581,7 @@ describe('EntityHighlightsResult', () => {
 
       // Multiple reasons no longer render as <ul><li> items; the changed signal labels are
       // joined (via joinSignalLabels) into the header text instead.
-      const summary = screen.getByText(
-        /Entity risk changed after the summary was generated\./
-      );
+      const summary = screen.getByText(/Entity risk changed after the summary was generated\./);
       expect(summary).toBeInTheDocument();
       // The staleness detail itself is not rendered as a list (the recommended-actions
       // markdown below renders its own list, so we only assert on this element's ancestry).
