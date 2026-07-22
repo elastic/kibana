@@ -9,6 +9,7 @@
 
 import { DurationFormat } from './duration';
 import { HTML_CONTEXT_TYPE } from '../content_types';
+import { asPrettyString } from '../utils';
 
 describe('Duration Format', () => {
   test('handles missing values in html context', () => {
@@ -25,6 +26,16 @@ describe('Duration Format', () => {
     expect(duration.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
       '<span class="ffString__emptyValue">(null)</span>'
     );
+  });
+
+  test('renders object values (e.g. histogram fields) as JSON instead of NaN', () => {
+    const formatter = new DurationFormat(
+      { inputFormat: 'seconds', outputFormat: 'humanize' },
+      jest.fn()
+    );
+    const histogramValue = { scale: 20, sum: 0.000825416, min: 0.000825416, max: 0.000825416 };
+
+    expect(formatter.convert(histogramValue)).toBe(asPrettyString(histogramValue));
   });
 
   testCase({
