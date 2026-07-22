@@ -71,7 +71,18 @@ export const OverviewPage: React.FC = () => {
     absoluteTotal,
   } = useMonitorList();
 
-  const hasNoMonitors = !search && !enablementLoading && monitorsLoaded && absoluteTotal === 0;
+  // Ping-only Heartbeat / Elastic Agent monitors (`origin: 'heartbeat'`, CCS remote
+  // monitors) have no saved object, so they are absent from `absoluteTotal` but present
+  // in the overview status `allConfigs`. Wait for the overview status to load and treat
+  // its entries as monitors so we don't redirect to Getting Started (and flash the grid)
+  // when the only monitors are ping-driven.
+  const hasNoMonitors =
+    !search &&
+    !enablementLoading &&
+    monitorsLoaded &&
+    absoluteTotal === 0 &&
+    overviewLoaded &&
+    allConfigs.length === 0;
 
   if (hasNoMonitors && !monitorsLoading && isEnabled) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;

@@ -33,7 +33,9 @@ export const MonitorManagementPage: React.FC = () => {
 
   const { error: enablementError, isEnabled, loading: enablementLoading } = useEnablement();
 
-  useOverviewStatus({ scopeStatusByLocation: false });
+  const { allConfigs, loaded: overviewLoaded } = useOverviewStatus({
+    scopeStatusByLocation: false,
+  });
 
   const monitorListProps = useMonitorList();
   const { syntheticsMonitors, loading: monitorsLoading, absoluteTotal, loaded } = monitorListProps;
@@ -41,7 +43,12 @@ export const MonitorManagementPage: React.FC = () => {
   const { loading: locationsLoading } = useLocations();
   const showEmptyState = isEnabled !== undefined && syntheticsMonitors.length === 0;
 
-  if (isEnabled && !monitorsLoading && absoluteTotal === 0 && loaded) {
+  // Ping-only Heartbeat / Elastic Agent (and CCS remote) monitors have no saved object,
+  // so they are absent from `absoluteTotal` but surface in the overview status
+  // `allConfigs`. Don't redirect to Getting Started when the only monitors are ping-driven.
+  const hasNoMonitors = absoluteTotal === 0 && overviewLoaded && allConfigs.length === 0;
+
+  if (isEnabled && !monitorsLoading && loaded && hasNoMonitors) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 

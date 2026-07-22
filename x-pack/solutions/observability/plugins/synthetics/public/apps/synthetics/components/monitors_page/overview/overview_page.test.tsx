@@ -21,7 +21,7 @@ const mockUseOverviewStatus = jest.fn((_opts?: { scopeStatusByLocation: boolean 
   error: undefined,
   loading: false,
   loaded: false,
-  allConfigs: [],
+  allConfigs: [] as unknown[],
 }));
 
 jest.mock('../hooks/use_overview_status', () => ({
@@ -35,14 +35,16 @@ jest.mock('../hooks/use_overview_status', () => ({
   })),
 }));
 
+const mockUseMonitorList = jest.fn(() => ({
+  loading: false,
+  loaded: false,
+  handleFilterChange: jest.fn(),
+  absoluteTotal: 0,
+  syntheticsMonitors: [],
+}));
+
 jest.mock('../hooks/use_monitor_list', () => ({
-  useMonitorList: jest.fn(() => ({
-    loading: false,
-    loaded: false,
-    handleFilterChange: jest.fn(),
-    absoluteTotal: 0,
-    syntheticsMonitors: [],
-  })),
+  useMonitorList: () => mockUseMonitorList(),
 }));
 
 jest.mock('../../../hooks', () => ({
@@ -122,23 +124,101 @@ const buildStore = () => {
   return store;
 };
 
+const renderPage = () => {
+  const store = buildStore();
+  const history = createMemoryHistory({ initialEntries: ['/overview'] });
+
+  render(
+    <Provider store={store}>
+      <Router history={history}>
+        <OverviewPage />
+      </Router>
+    </Provider>
+  );
+
+  return history;
+};
+
 describe('OverviewPage wiring', () => {
   beforeEach(() => {
     mockUseOverviewStatus.mockClear();
+    mockUseMonitorList.mockReset();
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: false,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
   });
 
   it('calls useOverviewStatus with scopeStatusByLocation: true on mount', () => {
-    const store = buildStore();
-    const history = createMemoryHistory({ initialEntries: ['/overview'] });
-
-    render(
-      <Provider store={store}>
-        <Router history={history}>
-          <OverviewPage />
-        </Router>
-      </Provider>
-    );
+    const history = renderPage();
 
     expect(mockUseOverviewStatus).toHaveBeenCalledWith({ scopeStatusByLocation: true });
+    expect(history.location.pathname).toBe('/overview');
+  });
+
+  it('redirects to Getting Started when there are no saved-object and no overview monitors', () => {
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: true,
+      allConfigs: [],
+    });
+
+    const history = renderPage();
+
+    expect(history.location.pathname).toBe('/monitors/getting-started');
+  });
+
+  it('does not redirect when only ping-only overview monitors exist (no saved objects)', () => {
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: true,
+      allConfigs: [{ configId: 'hb-1', origin: 'heartbeat' }],
+    });
+
+    const history = renderPage();
+
+    expect(history.location.pathname).toBe('/overview');
+  });
+
+  it('does not redirect before the overview status has loaded (avoids the empty-state flash)', () => {
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: false,
+      allConfigs: [],
+    });
+
+    const history = renderPage();
+
+    expect(history.location.pathname).toBe('/overview');
   });
 });
