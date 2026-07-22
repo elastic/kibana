@@ -46,6 +46,7 @@ const FlyoutBody = styled(EuiFlyoutBody)`
 
 export const AgentPolicyYamlFlyout = memo<{
   policyId: string;
+  revision?: number | null;
   onClose: () => void;
 }>(({ policyId, revision, onClose }) => {
   const flyoutTitleId = useGeneratedHtmlId();
