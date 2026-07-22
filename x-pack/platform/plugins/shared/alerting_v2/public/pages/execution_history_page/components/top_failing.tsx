@@ -13,17 +13,20 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiText,
   EuiTitle,
   useEuiTheme,
   type EuiBasicTableColumn,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   ReactFlow,
   ReactFlowProvider,
+  Background,
   BaseEdge,
   getBezierPath,
   Handle,
@@ -34,63 +37,118 @@ import {
   type NodeProps,
   type EdgeProps,
   MarkerType,
+  BackgroundVariant,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-// -- Sequence map node --
+// -- Step data --
 
-interface SequenceStepData extends Record<string, unknown> {
+interface ChainStep {
   label: string;
+  type: 'rule' | 'policy' | 'workflow';
   status: 'success' | 'failed' | 'warning';
+  icon: string;
+  iconColor: string;
+  meta: string;
+}
+
+interface SequenceStepData extends ChainStep, Record<string, unknown> {
   stepIndex: number;
   totalSteps: number;
 }
 
 type SequenceStepNode = Node<SequenceStepData, 'sequenceStep'>;
 
-const statusConfig: Record<string, { icon: string; color: string; badgeColor: string }> = {
-  success: { icon: 'checkInCircleFilled', color: 'success', badgeColor: 'success' },
-  failed: { icon: 'error', color: 'danger', badgeColor: 'danger' },
-  warning: { icon: 'warning', color: 'warning', badgeColor: 'warning' },
+// -- Sequence node component --
+
+const statusBadge: Record<string, { icon: string; color: string; label: string }> = {
+  success: { icon: 'checkInCircleFilled', color: 'success', label: 'OK' },
+  failed: { icon: 'error', color: 'danger', label: 'Failed' },
+  warning: { icon: 'warning', color: 'warning', label: 'Warning' },
+};
+
+const typeIconBg: Record<string, string> = {
+  rule: '#E6F0FA',
+  policy: '#FFF3E0',
+  workflow: '#E8F5E9',
 };
 
 const SequenceStepComponent: React.FC<NodeProps<SequenceStepNode>> = ({ data }) => {
   const { euiTheme } = useEuiTheme();
-  const config = statusConfig[data.status] ?? statusConfig.success;
+  const badge = statusBadge[data.status] ?? statusBadge.success;
 
   return (
     <>
       {data.stepIndex > 0 && (
         <Handle type="target" position={Position.Left} style={{ visibility: 'hidden' }} />
       )}
-      <EuiPanel
-        hasBorder
-        hasShadow={false}
-        paddingSize="s"
+      <div
         css={css({
           width: '100%',
           height: '100%',
+          background: euiTheme.colors.emptyShade,
+          borderRadius: euiTheme.border.radius.medium,
+          border: `1px solid ${euiTheme.colors.lightShade}`,
+          padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
           display: 'flex',
           alignItems: 'center',
-          gap: euiTheme.size.s,
-          borderColor: data.status === 'failed' ? euiTheme.colors.danger : undefined,
-          borderWidth: data.status === 'failed' ? 2 : 1,
+          gap: euiTheme.size.m,
+          boxShadow: `0 1px 3px rgba(0,0,0,0.06)`,
         })}
       >
-        <EuiIcon type={config.icon} color={config.color} size="m" css={css({ flexShrink: 0 })} />
-        <EuiText
-          size="xs"
+        {/* Type icon */}
+        <div
           css={css({
-            fontWeight: 600,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            flexGrow: 1,
+            width: 36,
+            height: 36,
+            borderRadius: euiTheme.border.radius.medium,
+            backgroundColor: typeIconBg[data.type] ?? typeIconBg.rule,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
           })}
         >
-          {data.label}
-        </EuiText>
-      </EuiPanel>
+          <EuiIcon type={data.icon} color={data.iconColor} size="m" />
+        </div>
+
+        {/* Name + meta */}
+        <div css={css({ flex: 1, minWidth: 0, overflow: 'hidden' })}>
+          <EuiLink
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            css={css({
+              fontSize: 13,
+              fontWeight: 600,
+              display: 'block',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            })}
+          >
+            {data.label}
+          </EuiLink>
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={css({
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              lineHeight: 1.4,
+            })}
+          >
+            {data.meta}
+          </EuiText>
+        </div>
+
+        {/* Status badge */}
+        <EuiIcon
+          type={badge.icon}
+          color={badge.color}
+          size="m"
+          css={css({ flexShrink: 0 })}
+        />
+      </div>
       {data.stepIndex < data.totalSteps - 1 && (
         <Handle type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
       )}
@@ -98,7 +156,7 @@ const SequenceStepComponent: React.FC<NodeProps<SequenceStepNode>> = ({ data }) 
   );
 };
 
-// -- Sequence map edge --
+// -- Sequence edge --
 
 const SequenceArrowEdge: React.FC<EdgeProps> = ({
   id,
@@ -125,12 +183,7 @@ const SequenceArrowEdge: React.FC<EdgeProps> = ({
 const nodeTypes = { sequenceStep: SequenceStepComponent };
 const edgeTypes = { sequenceArrow: SequenceArrowEdge };
 
-// -- Data --
-
-interface ChainStep {
-  label: string;
-  status: 'success' | 'failed' | 'warning';
-}
+// -- Chain data --
 
 interface FailingChain {
   id: string;
@@ -146,8 +199,22 @@ const MOCK_CHAINS: FailingChain[] = [
     id: '1',
     chain: 'High CPU alert executed → Slack notifications failed',
     steps: [
-      { label: 'High CPU alert', status: 'success' },
-      { label: 'Slack notifications', status: 'failed' },
+      {
+        label: 'High CPU alert',
+        type: 'rule',
+        status: 'success',
+        icon: 'bell',
+        iconColor: '#0077CC',
+        meta: 'ES|QL · every 1m · 23 episodes',
+      },
+      {
+        label: 'Slack notifications',
+        type: 'policy',
+        status: 'failed',
+        icon: 'editorComment',
+        iconColor: '#E67300',
+        meta: 'Action policy · 87 failures · last: 2m ago',
+      },
     ],
     occurrences: 87,
     lastSeen: '2 min ago',
@@ -157,8 +224,22 @@ const MOCK_CHAINS: FailingChain[] = [
     id: '2',
     chain: 'Memory threshold executed → PagerDuty escalation failed',
     steps: [
-      { label: 'Memory threshold', status: 'success' },
-      { label: 'PagerDuty escalation', status: 'failed' },
+      {
+        label: 'Memory threshold',
+        type: 'rule',
+        status: 'success',
+        icon: 'bell',
+        iconColor: '#0077CC',
+        meta: 'Threshold · every 5m · 8 episodes',
+      },
+      {
+        label: 'PagerDuty escalation',
+        type: 'policy',
+        status: 'failed',
+        icon: 'editorComment',
+        iconColor: '#E67300',
+        meta: 'Action policy · 42 failures · last: 5m ago',
+      },
     ],
     occurrences: 42,
     lastSeen: '5 min ago',
@@ -168,9 +249,30 @@ const MOCK_CHAINS: FailingChain[] = [
     id: '3',
     chain: 'Disk usage monitor executed → Email digest dispatched to → Cleanup workflow',
     steps: [
-      { label: 'Disk usage monitor', status: 'success' },
-      { label: 'Email digest', status: 'warning' },
-      { label: 'Cleanup workflow', status: 'warning' },
+      {
+        label: 'Disk usage monitor',
+        type: 'rule',
+        status: 'success',
+        icon: 'bell',
+        iconColor: '#0077CC',
+        meta: 'ES|QL · every 10m · 5 episodes',
+      },
+      {
+        label: 'Email digest',
+        type: 'policy',
+        status: 'warning',
+        icon: 'editorComment',
+        iconColor: '#E67300',
+        meta: 'Action policy · throttled · last: 12m ago',
+      },
+      {
+        label: 'Cleanup workflow',
+        type: 'workflow',
+        status: 'warning',
+        icon: 'pipeNoBreaks',
+        iconColor: '#00836D',
+        meta: 'Workflow · pending · 31 runs',
+      },
     ],
     occurrences: 31,
     lastSeen: '12 min ago',
@@ -180,8 +282,22 @@ const MOCK_CHAINS: FailingChain[] = [
     id: '4',
     chain: 'Error rate spike executed → Slack notifications failed',
     steps: [
-      { label: 'Error rate spike', status: 'success' },
-      { label: 'Slack notifications', status: 'failed' },
+      {
+        label: 'Error rate spike',
+        type: 'rule',
+        status: 'success',
+        icon: 'bell',
+        iconColor: '#0077CC',
+        meta: 'ES|QL · every 1m · 12 episodes',
+      },
+      {
+        label: 'Slack notifications',
+        type: 'policy',
+        status: 'failed',
+        icon: 'editorComment',
+        iconColor: '#E67300',
+        meta: 'Action policy · 28 failures · last: 18m ago',
+      },
     ],
     occurrences: 28,
     lastSeen: '18 min ago',
@@ -191,9 +307,30 @@ const MOCK_CHAINS: FailingChain[] = [
     id: '5',
     chain: 'Network latency executed → PagerDuty escalation dispatched to → Incident triage workflow',
     steps: [
-      { label: 'Network latency', status: 'success' },
-      { label: 'PagerDuty escalation', status: 'warning' },
-      { label: 'Incident triage workflow', status: 'warning' },
+      {
+        label: 'Network latency',
+        type: 'rule',
+        status: 'success',
+        icon: 'bell',
+        iconColor: '#0077CC',
+        meta: 'Threshold · every 5m · 3 episodes',
+      },
+      {
+        label: 'PagerDuty escalation',
+        type: 'policy',
+        status: 'warning',
+        icon: 'editorComment',
+        iconColor: '#E67300',
+        meta: 'Action policy · throttled · last: 25m ago',
+      },
+      {
+        label: 'Incident triage workflow',
+        type: 'workflow',
+        status: 'warning',
+        icon: 'pipeNoBreaks',
+        iconColor: '#00836D',
+        meta: 'Workflow · pending · 15 runs',
+      },
     ],
     occurrences: 15,
     lastSeen: '25 min ago',
@@ -203,9 +340,9 @@ const MOCK_CHAINS: FailingChain[] = [
 
 // -- Layout --
 
-const NODE_WIDTH = 200;
-const NODE_HEIGHT = 44;
-const NODE_GAP = 120;
+const NODE_WIDTH = 260;
+const NODE_HEIGHT = 56;
+const NODE_GAP = 100;
 
 const buildGraph = (steps: ChainStep[]) => {
   const nodes: SequenceStepNode[] = steps.map((step, i) => ({
@@ -213,7 +350,7 @@ const buildGraph = (steps: ChainStep[]) => {
     type: 'sequenceStep',
     position: { x: i * (NODE_WIDTH + NODE_GAP), y: 0 },
     style: { width: NODE_WIDTH, height: NODE_HEIGHT },
-    data: { label: step.label, status: step.status, stepIndex: i, totalSteps: steps.length },
+    data: { ...step, stepIndex: i, totalSteps: steps.length },
   }));
 
   const edges: Edge[] = [];
@@ -225,7 +362,7 @@ const buildGraph = (steps: ChainStep[]) => {
       type: 'sequenceArrow',
       markerEnd: { type: MarkerType.ArrowClosed },
       style: {
-        stroke: steps[i + 1].status === 'failed' ? '#BD271E' : '#98A2B3',
+        stroke: steps[i + 1].status === 'failed' ? '#BD271E' : '#D3DAE6',
         strokeWidth: 2,
       },
     });
@@ -238,36 +375,35 @@ const buildGraph = (steps: ChainStep[]) => {
 
 const AutoFitFlow: React.FC<{ nodes: SequenceStepNode[]; edges: Edge[] }> = ({ nodes, edges }) => {
   const { fitView } = useReactFlow();
-  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      fitView({ padding: 0.2, maxZoom: 1, duration: 0 });
+      fitView({ padding: 0.15, maxZoom: 1, duration: 0 });
     }, 50);
     return () => clearTimeout(timer);
   }, [fitView, nodes.length]);
 
   return (
-    <div ref={containerRef} css={css({ width: '100%', height: '100%' })}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        fitView
-        fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
-        nodesDraggable={false}
-        nodesConnectable={false}
-        elementsSelectable={false}
-        panOnDrag={false}
-        zoomOnScroll={false}
-        zoomOnPinch={false}
-        zoomOnDoubleClick={false}
-        preventScrolling={false}
-        proOptions={{ hideAttribution: true }}
-        style={{ width: '100%', height: '100%' }}
-      />
-    </div>
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
+      fitView
+      fitViewOptions={{ padding: 0.15, maxZoom: 1 }}
+      nodesDraggable={false}
+      nodesConnectable={false}
+      elementsSelectable={false}
+      panOnDrag={false}
+      zoomOnScroll={false}
+      zoomOnPinch={false}
+      zoomOnDoubleClick={false}
+      preventScrolling={false}
+      proOptions={{ hideAttribution: true }}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#D3DAE6" />
+    </ReactFlow>
   );
 };
 
@@ -280,11 +416,12 @@ const FailureSequenceMap: React.FC<{ steps: ChainStep[] }> = ({ steps }) => {
   return (
     <div
       css={css({
-        height: 120,
+        height: 140,
         width: '100%',
         borderRadius: euiTheme.border.radius.medium,
-        background: euiTheme.colors.backgroundBasePlain,
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
         border: `1px solid ${euiTheme.colors.lightShade}`,
+        overflow: 'hidden',
       })}
     >
       <ReactFlowProvider>
