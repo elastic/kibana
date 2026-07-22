@@ -285,6 +285,28 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       ]);
     });
 
+    it('keeps actions metadata reads on the internal-user search client when CPS is enabled', async () => {
+      const actionsRequest = {
+        factoryQueryType: OsqueryQueries.actions,
+        kuery: '',
+        pagination: { activePage: 0, cursorStart: 0, querySize: 20 },
+        sort: { field: 'created_at', direction: Direction.desc },
+        spaceId: 'default',
+      } as StrategyRequestType<OsqueryQueries.actions>;
+
+      const { provider, searchMock, getSearchStrategy } = setup({
+        cpsEnabled: true,
+        actionsIndexExists: true,
+      });
+
+      await lastValueFrom(
+        provider.search(actionsRequest, {} as never, { request: {} } as never)
+      );
+
+      expect(searchMock).toHaveBeenCalled();
+      expect(getSearchStrategy).not.toHaveBeenCalled();
+    });
+
     it('adds CCS-prefixed index targets when remote clusters are connected', async () => {
       (hasConnectedRemoteClusters as jest.Mock).mockResolvedValueOnce(true);
       const { provider, searchMock } = setup();

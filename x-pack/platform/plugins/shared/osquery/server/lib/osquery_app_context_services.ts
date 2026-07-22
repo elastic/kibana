@@ -27,7 +27,7 @@ import type { Space, SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { ConfigType } from '../../common/config';
 import type { ExperimentalFeatures } from '../../common';
 import type { TelemetryEventsSender } from './telemetry/sender';
-import type { StartPlugins } from '../types';
+import type { StartPlugins, OsqueryPluginStart } from '../types';
 import { getIntegrationNamespaces } from '../utils/get_integration_namespaces';
 
 export type OsqueryAppContextServiceStartContract = Partial<
@@ -133,7 +133,7 @@ export interface OsqueryAppContext {
   config(): ConfigType;
   experimentalFeatures: ExperimentalFeatures;
   security: SecurityPluginStart;
-  getStartServices: CoreSetup<StartPlugins>['getStartServices'];
+  getStartServices: CoreSetup<StartPlugins, OsqueryPluginStart>['getStartServices'];
   telemetryEventsSender: TelemetryEventsSender;
   licensing: LicensingPluginSetup;
   /**

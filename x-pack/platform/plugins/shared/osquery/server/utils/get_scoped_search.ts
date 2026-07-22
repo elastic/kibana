@@ -7,13 +7,13 @@
 
 import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import type { StartPlugins } from '../types';
+import type { StartPlugins, OsqueryPluginStart } from '../types';
 
 export const getScopedSearch = async (
   context: DataRequestHandlerContext,
   request: KibanaRequest,
   cpsEnabled: boolean,
-  getStartServices: CoreSetup<StartPlugins>['getStartServices']
+  getStartServices: CoreSetup<StartPlugins, OsqueryPluginStart>['getStartServices']
 ) => {
   if (cpsEnabled) {
     const [, { data }] = await getStartServices();

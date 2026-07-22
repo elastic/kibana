@@ -94,7 +94,7 @@ export const updateActionTagsRoute = (
           const [coreStartServices] = await osqueryContext.getStartServices();
           const clusterClient = coreStartServices.elasticsearch.client;
           const internalEsClient = clusterClient.asInternalUser;
-          const readEsClient = getReadEsClient(clusterClient, request, osqueryContext.cpsEnabled);
+          const dataReadEsClient = getReadEsClient(clusterClient, request, osqueryContext.cpsEnabled);
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
@@ -108,7 +108,7 @@ export const updateActionTagsRoute = (
 
           const spaceFilter = buildSpaceIdFilter(spaceId);
 
-          const searchResult = await readEsClient.search({
+          const searchResult = await internalEsClient.search({
             index,
             size: 1,
             query: {
@@ -127,7 +127,7 @@ export const updateActionTagsRoute = (
           const hit = searchResult.hits.hits[0];
 
           if (!hit) {
-            const scheduledCheck = await readEsClient.search({
+            const scheduledCheck = await dataReadEsClient.search({
               index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
               size: 0,
               query: {

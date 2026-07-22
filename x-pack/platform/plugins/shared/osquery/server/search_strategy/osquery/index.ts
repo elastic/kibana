@@ -26,6 +26,7 @@ import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
 import type { OsqueryFactory } from './factory/types';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
@@ -108,9 +109,10 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
           // The 'osquery_manager' substring matches both local and CCS-prefixed patterns
           // (e.g. '*:logs-osquery_manager.action...').
           const indices = Array.isArray(dsl.index) ? dsl.index : dsl.index ? [dsl.index] : [];
-          const useInternalSearchClient =
-            !osqueryContext.cpsEnabled &&
-            indices.some((index) => index.includes('fleet') || index.includes('osquery_manager'));
+          const useInternalSearchClient = shouldUseInternalSearchClient(
+            indices,
+            osqueryContext.cpsEnabled
+          );
           es = useInternalSearchClient
             ? data.search.searchAsInternalUser
             : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);

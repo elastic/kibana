@@ -11,13 +11,9 @@ import { getReadEsClient } from './get_read_es_client';
 
 describe('getReadEsClient', () => {
   const request = httpServerMock.createKibanaRequest();
-  const mockReadClient = elasticsearchServiceMock.createElasticsearchClient();
+  const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
   const clusterClient = elasticsearchServiceMock.createClusterClient();
-  clusterClient.asScoped.mockReturnValue({
-    asCurrentUser: mockReadClient,
-    asInternalUser: clusterClient.asInternalUser,
-    asSecondaryAuthUser: clusterClient.asInternalUser,
-  });
+  clusterClient.asScoped.mockReturnValue(scopedClusterClient);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,6 +30,6 @@ describe('getReadEsClient', () => {
     const client = getReadEsClient(clusterClient, request, true);
 
     expect(clusterClient.asScoped).toHaveBeenCalledWith(request, { projectRouting: 'space' });
-    expect(client).toBe(mockReadClient);
+    expect(client).toBe(scopedClusterClient.asCurrentUser);
   });
 });
