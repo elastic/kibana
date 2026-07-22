@@ -14,10 +14,9 @@ import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from
 import { appContextService } from '../app_context';
 
 import { agentPolicyService } from '../agent_policy';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 import { ActionRunner } from './action_runner';
-
-import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 import { bulkUpdateAgents } from './crud';
 import { createErrorActionResults, createAgentAction } from './actions';
