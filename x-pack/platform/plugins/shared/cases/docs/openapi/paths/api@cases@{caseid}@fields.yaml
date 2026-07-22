@@ -29,3 +29,18 @@ get:
           examples:
             response401:
               $ref: '../components/examples/response_401.yaml'
+    '403':
+      description: The user does not have access to the case.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+    '404':
+      description: The case was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response404:
+              $ref: '../components/examples/response_404.yaml'

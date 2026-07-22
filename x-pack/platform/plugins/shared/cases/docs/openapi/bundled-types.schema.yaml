@@ -977,6 +977,12 @@ paths:
               examples:
                 getCaseApplicableFieldsResponse:
                   $ref: '#/components/examples/get_case_applicable_fields_response'
+        '400':
+          description: The request is invalid, for example when the `templateId` does not exist for the owner or its definition is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -986,6 +992,12 @@ paths:
               examples:
                 response401:
                   $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have access to the requested owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/{caseId}:
     get:
       summary: Get case information
@@ -1046,6 +1058,21 @@ paths:
               examples:
                 response401:
                   $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have access to the case.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+        '404':
+          description: The case was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response404:
+                  $ref: '#/components/examples/response_404'
   /api/cases/{caseId}/alerts:
     get:
       summary: Get all alerts for a case

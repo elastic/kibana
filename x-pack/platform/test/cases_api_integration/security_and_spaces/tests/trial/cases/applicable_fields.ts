@@ -20,6 +20,7 @@ import {
   secOnlyManageTemplates,
   secOnlyNoManageTemplates,
   secOnlyRead,
+  secOnlySpacesAll,
   superUser,
 } from '../../../../common/lib/authentication/users';
 
@@ -170,6 +171,11 @@ export default ({ getService }: FtrProviderContext): void => {
       it('returns 404 for a missing case', async () => {
         await getPublic(`${CASES_URL}/does-not-exist/fields`).expect(404);
       });
+
+      it('accepts connector-generated 64-char SHA-256 case ids (404, not a 400 length rejection)', async () => {
+        const sha256Id = 'a'.repeat(64);
+        await getPublic(`${CASES_URL}/${sha256Id}/fields`).expect(404);
+      });
     });
 
     describe('rbac', () => {
@@ -207,8 +213,11 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('is space-isolated: field definitions from space1 are not visible in space2', async () => {
+          // `secOnlySpacesAll` has securitySolutionFixture privileges in every space, so the
+          // request itself is authorized in space2 and the assertion isolates the DATA scoping
+          // (a space1-only user would 403 here before space isolation is ever exercised).
           const { body } = await getPublicAs(`${APPLICABLE_FIELDS_URL}?owner=${OWNER}`, {
-            user: secOnly,
+            user: secOnlySpacesAll,
             space: 'space2',
           }).expect(200);
 
