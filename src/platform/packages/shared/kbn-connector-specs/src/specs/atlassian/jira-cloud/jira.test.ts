@@ -301,4 +301,29 @@ describe('JiraConnector', () => {
       );
     });
   });
+
+  // ===========================================================================
+  // test handler
+  // ===========================================================================
+
+  describe('test handler', () => {
+    it('should call /rest/api/3/myself and return {}', async () => {
+      mockClient.get.mockResolvedValue({ data: { accountId: 'abc123', displayName: 'Alice' } });
+
+      if (!JiraConnector.test) throw new Error('Test handler not defined');
+      const result = await JiraConnector.test.handler(mockContext);
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/myself'
+      );
+      expect(result).toEqual({});
+    });
+
+    it('should throw when the API call fails', async () => {
+      mockClient.get.mockRejectedValue(new Error('Unauthorized'));
+
+      if (!JiraConnector.test) throw new Error('Test handler not defined');
+      await expect(JiraConnector.test.handler(mockContext)).rejects.toThrow('Unauthorized');
+    });
+  });
 });
