@@ -14,6 +14,7 @@ import {
   EuiListGroup,
   EuiPanel,
   EuiStat,
+  EuiText,
   EuiTitle,
   type EuiListGroupProps,
   useGeneratedHtmlId,
@@ -54,7 +55,7 @@ export const TaskManagerHealth: React.FC = () => {
   }));
 
   const buttonContent = (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxs">
           <h3>
@@ -68,6 +69,28 @@ export const TaskManagerHealth: React.FC = () => {
         <EuiBadge color={statusColor[MOCK_HEALTH.status] ?? 'default'}>
           {MOCK_HEALTH.status}
         </EuiBadge>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="success">
+          <strong>{MOCK_HEALTH.score}%</strong>{' '}
+          <EuiText size="xs" color="subdued" css={css({ display: 'inline' })}>
+            {i18n.translate(
+              'xpack.alertingV2.executionHistory.taskManagerHealth.healthScoreInline',
+              { defaultMessage: 'health' }
+            )}
+          </EuiText>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          <strong>{MOCK_HEALTH.claimedTasks}/{MOCK_HEALTH.capacity}</strong>{' '}
+          <EuiText size="xs" color="subdued" css={css({ display: 'inline' })}>
+            {i18n.translate(
+              'xpack.alertingV2.executionHistory.taskManagerHealth.capacityInline',
+              { defaultMessage: 'capacity' }
+            )}
+          </EuiText>
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

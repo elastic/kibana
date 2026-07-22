@@ -18,6 +18,7 @@ import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyou
 import { PoliciesTabContent, RulesTabContent } from './components';
 import { ExecutionKpis } from './components/execution_kpis';
 import { TaskManagerHealth } from './components/task_manager_health';
+import { TopFailing } from './components/top_failing';
 
 const POLICIES_TAB_ID = 'policies';
 const RULES_TAB_ID = 'rules';
@@ -89,6 +90,8 @@ export const ExecutionHistoryPage = () => {
       />
       <EuiSpacer size="m" />
       <ExecutionKpis />
+      <EuiSpacer size="m" />
+      <TopFailing />
       <EuiSpacer size="m" />
       <TaskManagerHealth />
       <EuiSpacer size="m" />

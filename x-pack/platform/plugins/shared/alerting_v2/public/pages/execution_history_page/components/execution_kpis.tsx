@@ -12,49 +12,20 @@ import {
   EuiPanel,
   EuiStat,
   EuiTitle,
-  EuiListGroup,
-  type EuiListGroupProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const MOCK_DATA = {
   totalExecutions: 12_847,
+  ruleExecutions: 9_421,
+  policyExecutions: 3_426,
   failedExecutions: 342,
-  failedPercentage: '2.7%',
   failedRules: 5,
   failedPolicies: 3,
-  failedByType: '1.2%',
-  topFailingRules: [
-    { label: 'High CPU alert', id: '1' },
-    { label: 'Memory threshold', id: '2' },
-    { label: 'Disk usage monitor', id: '3' },
-    { label: 'Network latency', id: '4' },
-    { label: 'Error rate spike', id: '5' },
-  ],
-  topFailingPolicies: [
-    { label: 'Slack notifications', id: '1' },
-    { label: 'PagerDuty escalation', id: '2' },
-    { label: 'Email digest', id: '3' },
-  ],
+  failureRate: '2.7%',
 };
 
 export const ExecutionKpis: React.FC = () => {
-  const topRulesItems: EuiListGroupProps['listItems'] = MOCK_DATA.topFailingRules.map((r) => ({
-    key: r.id,
-    label: r.label,
-    size: 's' as const,
-    onClick: () => {},
-  }));
-
-  const topPoliciesItems: EuiListGroupProps['listItems'] = MOCK_DATA.topFailingPolicies.map(
-    (p) => ({
-      key: p.id,
-      label: p.label,
-      size: 's' as const,
-      onClick: () => {},
-    })
-  );
-
   return (
     <EuiFlexGroup gutterSize="m">
       <EuiFlexItem>
@@ -62,7 +33,7 @@ export const ExecutionKpis: React.FC = () => {
           <EuiTitle size="xxs">
             <h3>
               {i18n.translate('xpack.alertingV2.executionHistory.kpis.executionsTitle', {
-                defaultMessage: 'Executions',
+                defaultMessage: 'All executions',
               })}
             </h3>
           </EuiTitle>
@@ -80,22 +51,22 @@ export const ExecutionKpis: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
-                title={MOCK_DATA.failedExecutions.toLocaleString()}
+                title={MOCK_DATA.ruleExecutions.toLocaleString()}
                 description={i18n.translate(
-                  'xpack.alertingV2.executionHistory.kpis.failedExecutions',
-                  { defaultMessage: 'Failed' }
+                  'xpack.alertingV2.executionHistory.kpis.ruleExecutions',
+                  { defaultMessage: 'Rules' }
                 )}
                 textAlign="left"
-                titleColor="danger"
                 reverse
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
-                title={MOCK_DATA.failedPercentage}
-                description={i18n.translate('xpack.alertingV2.executionHistory.kpis.failedRate', {
-                  defaultMessage: 'Failure rate',
-                })}
+                title={MOCK_DATA.policyExecutions.toLocaleString()}
+                description={i18n.translate(
+                  'xpack.alertingV2.executionHistory.kpis.policyExecutions',
+                  { defaultMessage: 'Action policies' }
+                )}
                 textAlign="left"
                 reverse
               />
@@ -105,21 +76,34 @@ export const ExecutionKpis: React.FC = () => {
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiPanel hasBorder data-test-subj="executionKpisFailingResourcesPanel">
+        <EuiPanel hasBorder data-test-subj="executionKpisFailuresPanel">
           <EuiTitle size="xxs">
             <h3>
-              {i18n.translate('xpack.alertingV2.executionHistory.kpis.failingResourcesTitle', {
-                defaultMessage: 'Failing resources',
+              {i18n.translate('xpack.alertingV2.executionHistory.kpis.failuresTitle', {
+                defaultMessage: 'Failures',
               })}
             </h3>
           </EuiTitle>
           <EuiFlexGroup gutterSize="m" responsive={false} wrap>
             <EuiFlexItem>
               <EuiStat
+                title={MOCK_DATA.failedExecutions.toLocaleString()}
+                description={i18n.translate(
+                  'xpack.alertingV2.executionHistory.kpis.failedTotal',
+                  { defaultMessage: 'Total failed' }
+                )}
+                textAlign="left"
+                titleColor="danger"
+                reverse
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiStat
                 title={MOCK_DATA.failedRules}
-                description={i18n.translate('xpack.alertingV2.executionHistory.kpis.failedRules', {
-                  defaultMessage: 'Rules',
-                })}
+                description={i18n.translate(
+                  'xpack.alertingV2.executionHistory.kpis.failingRules',
+                  { defaultMessage: 'Failing rules' }
+                )}
                 textAlign="left"
                 titleColor="danger"
                 reverse
@@ -129,8 +113,8 @@ export const ExecutionKpis: React.FC = () => {
               <EuiStat
                 title={MOCK_DATA.failedPolicies}
                 description={i18n.translate(
-                  'xpack.alertingV2.executionHistory.kpis.failedPolicies',
-                  { defaultMessage: 'Action policies' }
+                  'xpack.alertingV2.executionHistory.kpis.failingPolicies',
+                  { defaultMessage: 'Failing policies' }
                 )}
                 textAlign="left"
                 titleColor="danger"
@@ -139,48 +123,14 @@ export const ExecutionKpis: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
-                title={MOCK_DATA.failedByType}
+                title={MOCK_DATA.failureRate}
                 description={i18n.translate(
-                  'xpack.alertingV2.executionHistory.kpis.failedByType',
-                  { defaultMessage: 'By execution type' }
+                  'xpack.alertingV2.executionHistory.kpis.failureRate',
+                  { defaultMessage: 'Failure rate' }
                 )}
                 textAlign="left"
                 reverse
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiPanel hasBorder data-test-subj="executionKpisTopFailingPanel">
-          <EuiTitle size="xxs">
-            <h3>
-              {i18n.translate('xpack.alertingV2.executionHistory.kpis.topFailingTitle', {
-                defaultMessage: 'Top failing',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiFlexGroup gutterSize="m" responsive={false}>
-            <EuiFlexItem>
-              <EuiTitle size="xxxs">
-                <h4>
-                  {i18n.translate('xpack.alertingV2.executionHistory.kpis.topFailingRules', {
-                    defaultMessage: 'Rules',
-                  })}
-                </h4>
-              </EuiTitle>
-              <EuiListGroup listItems={topRulesItems} maxWidth={false} flush />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxxs">
-                <h4>
-                  {i18n.translate('xpack.alertingV2.executionHistory.kpis.topFailingPolicies', {
-                    defaultMessage: 'Action policies',
-                  })}
-                </h4>
-              </EuiTitle>
-              <EuiListGroup listItems={topPoliciesItems} maxWidth={false} flush />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
