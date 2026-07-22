@@ -9,7 +9,7 @@ Review the memory wiki and consolidate, reorganize, and clean up pages to mainta
 1. **Merge duplicates**: If two pages cover the same topic, merge them into one and delete the other using `platform_sig_events_memory_delete`.
 2. **Remove stale entries**: Delete pages that are outdated, no longer relevant, or contain only trivial information using `platform_sig_events_memory_delete`.
 3. **Improve categorization**: Ensure pages have appropriate categories. Add missing categories, remove incorrect ones.
-4. **Add cross-references**: When pages reference concepts that have their own pages, add the `page_name` to the references array.
+4. **Add cross-references**: When pages reference concepts that have their own pages, add the `id` (from `memory_list` / `memory_read` / `memory_search` results) to the references array.
 5. **Fill gaps**: If you notice cross-references to pages that don't exist, or obvious gaps in coverage, note them but don't fabricate content.
 6. **Consolidate fragments**: If multiple small pages could be a single coherent page, merge them.
 7. **Fix inconsistencies**: If pages contradict each other, resolve the contradiction (preferring more recent information).

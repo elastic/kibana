@@ -131,7 +131,7 @@ As the user answers, write findings to memory incrementally. Do not wait until t
 - Update it with `platform_sig_events_memory_patch` (for additions to existing pages) or `platform_sig_events_memory_write` (for new pages)
 - Use categories like: "architecture", "services", "infrastructure", "operations", "deployment", "repositories", "access"
 - Tag pages with relevant terms (e.g. "deployment", "kubernetes", "ci-cd", "runbook", "github", "flow", "dashboard")
-- Reference related pages (e.g. a service page should reference its infrastructure page)
+- Reference related pages by page id (e.g. a service page should reference its infrastructure page)
 
 ## Step 4 — Confirm and close
 
