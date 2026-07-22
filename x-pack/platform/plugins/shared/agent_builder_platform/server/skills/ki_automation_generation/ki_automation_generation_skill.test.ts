@@ -52,6 +52,7 @@ describe('kiAutomationGenerationSkill', () => {
     const properties = schema.properties as Record<string, unknown>;
     expect(properties).toBeDefined();
     expect(properties).toHaveProperty('id');
+    expect(properties).toHaveProperty('name');
     expect(properties).toHaveProperty('dest');
     expect(properties).toHaveProperty('sources');
     expect(properties).toHaveProperty('automations');

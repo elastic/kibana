@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import type { z } from '@kbn/zod/v4';
 import {
   AI_INDEX_API_VERSION,
   MAX_AI_INDEX_AUTOMATION_LENGTH,
@@ -24,9 +23,9 @@ import {
   aiIndexByIdPath,
   aiIndexPath,
 } from '../../common/constants';
-import type { aiIndexHttpItemSchema } from '../../common/http_api/ai_index_schema';
 import type {
   DeleteAiIndexResponse,
+  GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexResponse,
 } from '../../common/http_api/ai_indices';
@@ -202,9 +201,7 @@ export const registerAiIndexRoutes = ({
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         try {
-          const body: z.infer<typeof aiIndexHttpItemSchema> = await getAiIndexService().get(
-            request.params.aiIndexId
-          );
+          const body: GetAiIndexResponse = await getAiIndexService().get(request.params.aiIndexId);
           return response.ok({ body });
         } catch (error) {
           return handleAiIndexError(error, response);
