@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/deeplinks-context-engine
   channel: ''
   owner: '@elastic/context-eng'
-  sourceRoot: src/platform/packages/shared/deeplinks/context_engine
+  sourceRoot: src/platform/packages/shared/deeplinks/context-engine
 dependsOn: []
 tags:
   - shared-common

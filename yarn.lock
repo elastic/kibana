@@ -6650,7 +6650,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-context-engine@link:src/platform/packages/shared/deeplinks/context_engine":
+"@kbn/deeplinks-context-engine@link:src/platform/packages/shared/deeplinks/context-engine":
   version "0.0.0"
   uid ""
 
