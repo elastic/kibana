@@ -41363,10 +41363,6 @@ paths:
                     properties:
                       action_secret_storage_requirements_met:
                         type: boolean
-                      completed_migrations:
-                        items:
-                          type: string
-                        type: array
                       delete_unenrolled_agents:
                         additionalProperties: false
                         type: object
@@ -41580,10 +41576,6 @@ paths:
                     properties:
                       action_secret_storage_requirements_met:
                         type: boolean
-                      completed_migrations:
-                        items:
-                          type: string
-                        type: array
                       delete_unenrolled_agents:
                         additionalProperties: false
                         type: object
