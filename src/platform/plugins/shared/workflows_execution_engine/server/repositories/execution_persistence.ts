@@ -1,0 +1,96 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { StepExecutionField } from './step_execution_repository';
+
+export interface WorkflowExecutionPersistence {
+  getWorkflowExecutionById(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<EsWorkflowExecution | null>;
+  updateWorkflowExecution(
+    workflowExecution: Partial<EsWorkflowExecution>,
+    options?: { refresh?: boolean | 'wait_for' }
+  ): Promise<void>;
+}
+
+export interface StepExecutionPersistence {
+  getStepExecutionsByIds(
+    stepExecutionIds: string[],
+    sourceIncludes?: StepExecutionField[],
+    sourceExcludes?: StepExecutionField[]
+  ): Promise<EsWorkflowStepExecution[]>;
+  bulkUpsert(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void>;
+}
+
+export class InMemoryExecutionPersistence
+  implements WorkflowExecutionPersistence, StepExecutionPersistence
+{
+  private readonly stepExecutions = new Map<string, Partial<EsWorkflowStepExecution>>();
+
+  constructor(private execution: EsWorkflowExecution) {}
+
+  public async getWorkflowExecutionById(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<EsWorkflowExecution | null> {
+    if (this.execution.id !== workflowExecutionId || this.execution.spaceId !== spaceId) {
+      return null;
+    }
+    return this.execution;
+  }
+
+  public async updateWorkflowExecution(
+    workflowExecution: Partial<EsWorkflowExecution>
+  ): Promise<void> {
+    this.execution = { ...this.execution, ...workflowExecution };
+  }
+  public async getStepExecutionsByIds(ids: string[]): Promise<EsWorkflowStepExecution[]> {
+    return ids.flatMap((id) => {
+      const execution = this.stepExecutions.get(id);
+      if (!execution) {
+        return [];
+      }
+      if (!isCompleteStepExecution(execution)) {
+        throw new Error(
+          `Step execution ${id} was read before its required fields were initialized`
+        );
+      }
+      return [execution];
+    });
+  }
+
+  public async bulkUpsert(executions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {
+    for (const update of executions) {
+      if (!update.id) {
+        throw new Error('Step execution ID is required for in-memory upsert');
+      }
+      this.stepExecutions.set(update.id, {
+        ...this.stepExecutions.get(update.id),
+        ...update,
+      });
+    }
+  }
+}
+
+const isCompleteStepExecution = (
+  execution: Partial<EsWorkflowStepExecution>
+): execution is EsWorkflowStepExecution =>
+  typeof execution.spaceId === 'string' &&
+  typeof execution.id === 'string' &&
+  typeof execution.stepId === 'string' &&
+  Array.isArray(execution.scopeStack) &&
+  typeof execution.workflowRunId === 'string' &&
+  typeof execution.workflowId === 'string' &&
+  execution.status !== undefined &&
+  typeof execution.startedAt === 'string' &&
+  typeof execution.topologicalIndex === 'number' &&
+  typeof execution.globalExecutionIndex === 'number' &&
+  typeof execution.stepExecutionIndex === 'number';

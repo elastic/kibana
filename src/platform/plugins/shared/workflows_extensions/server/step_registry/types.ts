@@ -13,6 +13,14 @@ import type { StepContext } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
 
+/** A named request-local capability transported opaquely by the workflow engine. */
+export interface WorkflowExecutionCapability {
+  readonly id: string;
+  readonly value: object;
+}
+
+export type WorkflowExecutionCapabilities = readonly WorkflowExecutionCapability[];
+
 // -----------------------------------------------------------------------------
 // Poll step types
 // -----------------------------------------------------------------------------
@@ -383,6 +391,13 @@ export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
    * Current step's type
    */
   stepType: string;
+
+  /**
+   * Trusted, request-local capabilities supplied by the execution caller.
+   * They are passed directly to handlers and are never added to workflow
+   * context, template variables, step input/output, or persisted state.
+   */
+  capabilities?: WorkflowExecutionCapabilities;
 }
 
 /**

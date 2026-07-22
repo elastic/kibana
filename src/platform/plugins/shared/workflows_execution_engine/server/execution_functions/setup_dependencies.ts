@@ -23,8 +23,12 @@ import {
   mergeEmitterWorkflowIntoEventChainVisited,
 } from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type {
+  StepExecutionPersistence,
+  WorkflowExecutionPersistence,
+} from '../repositories/execution_persistence';
+import { StepExecutionRepository } from '../repositories/step_execution_repository';
+import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
@@ -43,10 +47,13 @@ export async function setupDependencies(
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
   dependencies: ContextDependencies,
-  workflowExecutionRepository: WorkflowExecutionRepository,
-  stepExecutionRepository: StepExecutionRepository,
   fakeRequest?: KibanaRequest,
-  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart
+  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart,
+  options: {
+    workflowExecution?: EsWorkflowExecution;
+    workflowExecutionRepository?: WorkflowExecutionPersistence;
+    stepExecutionRepository?: StepExecutionPersistence;
+  } = {}
 ) {
   const { coreStart, actions, taskManager, workflowsExtensions } = dependencies;
 
@@ -55,15 +62,18 @@ export async function setupDependencies(
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
+  const workflowExecutionPersistence =
+    options.workflowExecutionRepository ?? new WorkflowExecutionRepository(internalEsClient, logger);
+  const stepExecutionPersistence =
+    options.stepExecutionRepository ?? new StepExecutionRepository(internalEsClient, logger);
   const workflowRepository = new WorkflowRepository({
     esClient: internalEsClient,
     logger,
   });
 
-  const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-    workflowRunId,
-    spaceId
-  );
+  const workflowExecution =
+    options.workflowExecution ??
+    (await workflowExecutionPersistence.getWorkflowExecutionById(workflowRunId, spaceId));
 
   if (!workflowExecution) {
     throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
@@ -113,7 +123,7 @@ export async function setupDependencies(
   } catch (error) {
     if (isGraphBuildError(error)) {
       const finishedAt = new Date();
-      await workflowExecutionRepository.updateWorkflowExecution({
+      await workflowExecutionPersistence.updateWorkflowExecution({
         id: workflowRunId,
         status: ExecutionStatus.FAILED,
         error: { type: 'GraphBuildError', message: error.message },
@@ -150,12 +160,12 @@ export async function setupDependencies(
   });
 
   const workflowExecutionState = new WorkflowExecutionState(
-    workflowExecution as EsWorkflowExecution,
-    workflowExecutionRepository
+    workflowExecution,
+    workflowExecutionPersistence
   );
 
   const stepIoService = new StepIoService({
-    stepRepository: stepExecutionRepository,
+    stepRepository: stepExecutionPersistence,
     state: workflowExecutionState,
     evictionMinBytes: config.eviction.minPayloadSize.getValueInBytes(),
     logger,
@@ -172,7 +182,7 @@ export async function setupDependencies(
 
   // Create workflow runtime first (simpler, fewer dependencies)
   const workflowRuntime = new WorkflowExecutionRuntimeManager({
-    workflowExecution: workflowExecution as EsWorkflowExecution,
+    workflowExecution,
     workflowExecutionGraph,
     workflowExecutionCursor,
     workflowLogger,
@@ -187,6 +197,15 @@ export async function setupDependencies(
     coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
 
   const workflowTaskManager = new WorkflowTaskManager(taskManager);
+
+  const workflowExecutionRepository =
+    workflowExecutionPersistence instanceof WorkflowExecutionRepository
+      ? workflowExecutionPersistence
+      : undefined;
+  const stepExecutionRepository =
+    stepExecutionPersistence instanceof StepExecutionRepository
+      ? stepExecutionPersistence
+      : undefined;
 
   const enhancedDependencies: ContextDependencies = {
     ...dependencies,
@@ -228,6 +247,7 @@ export async function setupDependencies(
     workflowLogger,
     workflowTaskManager,
     nodesFactory,
+    workflowExecutionPersistence,
     workflowExecutionRepository,
     esClient,
     telemetryClient,

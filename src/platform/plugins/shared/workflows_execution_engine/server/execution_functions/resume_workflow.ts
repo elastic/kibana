@@ -63,10 +63,9 @@ export async function resumeWorkflow({
       logger,
       config,
       dependencies,
-      workflowExecutionRepository,
-      stepExecutionRepository,
       fakeRequest,
-      workflowsExecutionEngine
+      workflowsExecutionEngine,
+      { workflowExecutionRepository, stepExecutionRepository }
     );
   } catch (error) {
     // The graph could not be built — a permanent author error (the parallel
@@ -93,6 +92,10 @@ export async function resumeWorkflow({
     workflowTaskManager,
     workflowExecutionCursor,
   } = setupResult;
+
+  if (!workflowExecutionRepository) {
+    throw new Error('Persistent workflow execution repository is unavailable');
+  }
 
   const loadedExecution = workflowExecutionState.getWorkflowExecution();
   if (isTerminalStatus(loadedExecution.status)) {
