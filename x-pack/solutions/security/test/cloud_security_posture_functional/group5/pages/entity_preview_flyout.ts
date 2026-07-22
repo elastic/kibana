@@ -63,7 +63,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Install Entity Store V2 (covers the generic engine the asset inventory tests need).
       // v2 install always installs all entity types; per-type selection is no longer available.
-      await installEntityStoreV2({ supertest, logger });
+      await installEntityStoreV2({ supertest, retry, logger });
       await waitForEntityStoreV2Running({ supertest, retry, logger });
 
       // Load security alerts with modified mappings (includes actor and target)

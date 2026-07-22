@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dataView.create('security-solution');
 
       // Install Entity Store V2 (required for graph visualization)
-      await installEntityStoreV2({ supertest: adminSupertest, logger });
+      await installEntityStoreV2({ supertest: adminSupertest, retry, logger });
       await waitForEntityStoreV2Running({ supertest: adminSupertest, retry, logger });
     });
 

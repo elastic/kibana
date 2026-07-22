@@ -93,12 +93,23 @@ const PUBLIC_HEADERS = {
  */
 export const installEntityStoreV2 = async ({
   supertest,
+  retry,
   logger,
   spaceId,
-}: Pick<EntityStoreHelpersDeps, 'supertest' | 'logger'> & { spaceId?: string }) => {
+}: Pick<EntityStoreHelpersDeps, 'supertest' | 'retry' | 'logger'> & { spaceId?: string }) => {
   const spacePath = spaceId ? `/s/${spaceId}` : '';
   const spaceLabel = spaceId || 'default';
   logger.debug(`Installing Entity Store V2 for space: ${spaceLabel}`);
+
+  // The entityStoreEnableV2 uiSetting flag is eventually consistent server-side, so an install
+  // issued right after it is enabled can hit the feature-flag middleware while it still reads the
+  // stale value and returns 403. Poll the read-only status route (same middleware) until it clears.
+  await retry.waitForWithTimeout('Entity Store V2 feature flag to propagate', 30000, async () => {
+    const { status } = await supertest
+      .get(`${spacePath}${ENTITY_STORE_ROUTES.public.STATUS}`)
+      .set(PUBLIC_HEADERS);
+    return status !== 403;
+  });
 
   const response = await supertest
     .post(`${spacePath}${ENTITY_STORE_ROUTES.public.INSTALL}`)

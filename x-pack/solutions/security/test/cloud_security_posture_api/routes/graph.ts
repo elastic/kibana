@@ -2643,7 +2643,7 @@ export default function (providerContext: FtrProviderContext) {
           // Install Entity Store V2 in entities-space (covers the generic engine
           // the asset inventory tests need). v2 install always installs all
           // entity types; per-type selection is no longer available.
-          await installEntityStoreV2({ supertest, logger, spaceId: entitiesSpaceId });
+          await installEntityStoreV2({ supertest, retry, logger, spaceId: entitiesSpaceId });
           await waitForEntityStoreV2Running({
             supertest,
             retry,

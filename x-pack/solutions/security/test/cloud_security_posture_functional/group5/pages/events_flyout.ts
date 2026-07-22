@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await dataView.create('security-solution');
 
       // Install Entity Store V2 (required for graph visualization)
-      await installEntityStoreV2({ supertest, logger });
+      await installEntityStoreV2({ supertest, retry, logger });
       await waitForEntityStoreV2Running({ supertest, retry, logger });
     });
 
