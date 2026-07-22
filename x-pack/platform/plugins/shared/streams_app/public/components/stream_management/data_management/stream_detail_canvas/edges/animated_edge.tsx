@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { css, keyframes } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { BaseEdge, getSmoothStepPath, type EdgeProps } from '@xyflow/react';
@@ -28,6 +28,10 @@ const flowStyles = css`
   stroke-dasharray: ${DASH} ${GAP};
   animation: ${flowMarch} 0.9s linear infinite;
   pointer-events: none;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 export function AnimatedEdge({
@@ -40,8 +44,10 @@ export function AnimatedEdge({
   targetPosition,
   markerEnd,
   style,
+  selected,
 }: EdgeProps) {
   const { euiTheme } = useEuiTheme();
+  const [isHovered, setIsHovered] = useState(false);
 
   const [edgePath] = getSmoothStepPath({
     sourceX,
@@ -53,22 +59,28 @@ export function AnimatedEdge({
     borderRadius: 12,
   });
 
+  const isActive = isHovered || Boolean(selected);
+  const strokeColor = isActive ? 'transparent' : euiTheme.colors.borderBaseProminent;
+
   return (
-    <>
+    <g onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
       <BaseEdge
         id={id}
         path={edgePath}
         markerEnd={markerEnd}
-        style={{ ...style, stroke: euiTheme.colors.mediumShade, strokeWidth: 1.5 }}
+        style={{ ...style, stroke: strokeColor, strokeWidth: 1 }}
+        interactionWidth={24}
       />
-      <path
-        d={edgePath}
-        css={flowStyles}
-        stroke={euiTheme.colors.borderBaseProminent}
-        strokeWidth={2.5}
-        strokeLinecap="round"
-        style={{ opacity: 0.7 }}
-      />
-    </>
+      {isActive ? (
+        <path
+          d={edgePath}
+          css={flowStyles}
+          stroke={euiTheme.colors.primary}
+          strokeWidth={1}
+          strokeLinecap="round"
+          style={{ opacity: 0.85 }}
+        />
+      ) : null}
+    </g>
   );
 }
