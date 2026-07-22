@@ -44,6 +44,7 @@ import '@xyflow/react/dist/style.css';
 // -- Step data --
 
 interface ChainStep {
+  id: string;
   label: string;
   type: 'rule' | 'policy' | 'workflow';
   status: 'success' | 'failed' | 'warning';
@@ -55,6 +56,7 @@ interface ChainStep {
 interface SequenceStepData extends ChainStep, Record<string, unknown> {
   stepIndex: number;
   totalSteps: number;
+  onClickLink?: () => void;
 }
 
 type SequenceStepNode = Node<SequenceStepData, 'sequenceStep'>;
@@ -115,7 +117,11 @@ const SequenceStepComponent: React.FC<NodeProps<SequenceStepNode>> = ({ data }) 
         {/* Name + meta */}
         <div css={css({ flex: 1, minWidth: 0, overflow: 'hidden' })}>
           <EuiLink
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            className="nodrag nopan"
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              data.onClickLink?.();
+            }}
             css={css({
               fontSize: 13,
               fontWeight: 600,
@@ -123,6 +129,7 @@ const SequenceStepComponent: React.FC<NodeProps<SequenceStepNode>> = ({ data }) 
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
+              cursor: data.onClickLink ? 'pointer' : 'default',
             })}
           >
             {data.label}
@@ -194,13 +201,18 @@ interface FailingChain {
   status: 'failed' | 'warning';
 }
 
+const REAL_RULE_ID_1 = '377b80d5-61e5-48a1-bb0e-fc74f975b684';
+const REAL_RULE_ID_2 = '4a59457f-b8bc-42ca-9bf9-6b08276912e9';
+const REAL_POLICY_ID = 'f845071f-44f0-4753-be47-963ec9163b03';
+
 const MOCK_CHAINS: FailingChain[] = [
   {
     id: '1',
-    chain: 'High CPU alert executed → Slack notifications failed',
+    chain: 'New ESQL rule executed → Action policy to design global execution failed',
     steps: [
       {
-        label: 'High CPU alert',
+        id: REAL_RULE_ID_1,
+        label: 'New ESQL rule',
         type: 'rule',
         status: 'success',
         icon: 'bell',
@@ -208,7 +220,8 @@ const MOCK_CHAINS: FailingChain[] = [
         meta: 'ES|QL · every 1m · 23 episodes',
       },
       {
-        label: 'Slack notifications',
+        id: REAL_POLICY_ID,
+        label: 'Action policy to design global execution',
         type: 'policy',
         status: 'failed',
         icon: 'editorComment',
@@ -222,10 +235,11 @@ const MOCK_CHAINS: FailingChain[] = [
   },
   {
     id: '2',
-    chain: 'Memory threshold executed → PagerDuty escalation failed',
+    chain: 'asdasf executed → Action policy to design global execution failed',
     steps: [
       {
-        label: 'Memory threshold',
+        id: REAL_RULE_ID_2,
+        label: 'asdasf',
         type: 'rule',
         status: 'success',
         icon: 'bell',
@@ -233,7 +247,8 @@ const MOCK_CHAINS: FailingChain[] = [
         meta: 'Threshold · every 5m · 8 episodes',
       },
       {
-        label: 'PagerDuty escalation',
+        id: REAL_POLICY_ID,
+        label: 'Action policy to design global execution',
         type: 'policy',
         status: 'failed',
         icon: 'editorComment',
@@ -247,10 +262,11 @@ const MOCK_CHAINS: FailingChain[] = [
   },
   {
     id: '3',
-    chain: 'Disk usage monitor executed → Email digest dispatched to → Cleanup workflow',
+    chain: 'New ESQL rule executed → Action policy to design global execution dispatched to → Cleanup workflow',
     steps: [
       {
-        label: 'Disk usage monitor',
+        id: REAL_RULE_ID_1,
+        label: 'New ESQL rule',
         type: 'rule',
         status: 'success',
         icon: 'bell',
@@ -258,7 +274,8 @@ const MOCK_CHAINS: FailingChain[] = [
         meta: 'ES|QL · every 10m · 5 episodes',
       },
       {
-        label: 'Email digest',
+        id: REAL_POLICY_ID,
+        label: 'Action policy to design global execution',
         type: 'policy',
         status: 'warning',
         icon: 'editorComment',
@@ -266,6 +283,7 @@ const MOCK_CHAINS: FailingChain[] = [
         meta: 'Action policy · throttled · last: 12m ago',
       },
       {
+        id: 'workflow-cleanup',
         label: 'Cleanup workflow',
         type: 'workflow',
         status: 'warning',
@@ -280,10 +298,11 @@ const MOCK_CHAINS: FailingChain[] = [
   },
   {
     id: '4',
-    chain: 'Error rate spike executed → Slack notifications failed',
+    chain: 'asdasf executed → Action policy to design global execution failed',
     steps: [
       {
-        label: 'Error rate spike',
+        id: REAL_RULE_ID_2,
+        label: 'asdasf',
         type: 'rule',
         status: 'success',
         icon: 'bell',
@@ -291,7 +310,8 @@ const MOCK_CHAINS: FailingChain[] = [
         meta: 'ES|QL · every 1m · 12 episodes',
       },
       {
-        label: 'Slack notifications',
+        id: REAL_POLICY_ID,
+        label: 'Action policy to design global execution',
         type: 'policy',
         status: 'failed',
         icon: 'editorComment',
@@ -305,10 +325,11 @@ const MOCK_CHAINS: FailingChain[] = [
   },
   {
     id: '5',
-    chain: 'Network latency executed → PagerDuty escalation dispatched to → Incident triage workflow',
+    chain: 'New ESQL rule executed → Action policy to design global execution dispatched to → Incident triage workflow',
     steps: [
       {
-        label: 'Network latency',
+        id: REAL_RULE_ID_1,
+        label: 'New ESQL rule',
         type: 'rule',
         status: 'success',
         icon: 'bell',
@@ -316,7 +337,8 @@ const MOCK_CHAINS: FailingChain[] = [
         meta: 'Threshold · every 5m · 3 episodes',
       },
       {
-        label: 'PagerDuty escalation',
+        id: REAL_POLICY_ID,
+        label: 'Action policy to design global execution',
         type: 'policy',
         status: 'warning',
         icon: 'editorComment',
@@ -324,6 +346,7 @@ const MOCK_CHAINS: FailingChain[] = [
         meta: 'Action policy · throttled · last: 25m ago',
       },
       {
+        id: 'workflow-triage',
         label: 'Incident triage workflow',
         type: 'workflow',
         status: 'warning',
@@ -344,13 +367,27 @@ const NODE_WIDTH = 260;
 const NODE_HEIGHT = 56;
 const NODE_GAP = 100;
 
-const buildGraph = (steps: ChainStep[]) => {
+const buildGraph = (
+  steps: ChainStep[],
+  onRuleClick?: (ruleId: string) => void,
+  onPolicyClick?: (policyId: string) => void
+) => {
   const nodes: SequenceStepNode[] = steps.map((step, i) => ({
     id: `step-${i}`,
     type: 'sequenceStep',
     position: { x: i * (NODE_WIDTH + NODE_GAP), y: 0 },
     style: { width: NODE_WIDTH, height: NODE_HEIGHT },
-    data: { ...step, stepIndex: i, totalSteps: steps.length },
+    data: {
+      ...step,
+      stepIndex: i,
+      totalSteps: steps.length,
+      onClickLink:
+        step.type === 'rule' && onRuleClick
+          ? () => onRuleClick(step.id)
+          : step.type === 'policy' && onPolicyClick
+          ? () => onPolicyClick(step.id)
+          : undefined,
+    },
   }));
 
   const edges: Edge[] = [];
@@ -409,9 +446,16 @@ const AutoFitFlow: React.FC<{ nodes: SequenceStepNode[]; edges: Edge[] }> = ({ n
 
 // -- Inline sequence map --
 
-const FailureSequenceMap: React.FC<{ steps: ChainStep[] }> = ({ steps }) => {
+const FailureSequenceMap: React.FC<{
+  steps: ChainStep[];
+  onRuleClick?: (ruleId: string) => void;
+  onPolicyClick?: (policyId: string) => void;
+}> = ({ steps, onRuleClick, onPolicyClick }) => {
   const { euiTheme } = useEuiTheme();
-  const { nodes, edges } = useMemo(() => buildGraph(steps), [steps]);
+  const { nodes, edges } = useMemo(
+    () => buildGraph(steps, onRuleClick, onPolicyClick),
+    [steps, onRuleClick, onPolicyClick]
+  );
 
   return (
     <div
@@ -433,7 +477,12 @@ const FailureSequenceMap: React.FC<{ steps: ChainStep[] }> = ({ steps }) => {
 
 // -- Main component --
 
-export const TopFailing: React.FC = () => {
+interface TopFailingProps {
+  onRuleClick?: (ruleId: string) => void;
+  onPolicyClick?: (policyId: string) => void;
+}
+
+export const TopFailing: React.FC<TopFailingProps> = ({ onRuleClick, onPolicyClick }) => {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const toggleRow = useCallback((id: string) => {
@@ -452,7 +501,13 @@ export const TopFailing: React.FC = () => {
     const map: Record<string, React.ReactNode> = {};
     for (const chain of MOCK_CHAINS) {
       if (expandedIds.has(chain.id)) {
-        map[chain.id] = <FailureSequenceMap steps={chain.steps} />;
+        map[chain.id] = (
+          <FailureSequenceMap
+            steps={chain.steps}
+            onRuleClick={onRuleClick}
+            onPolicyClick={onPolicyClick}
+          />
+        );
       }
     }
     return map;

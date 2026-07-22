@@ -94,7 +94,7 @@ export const ExecutionHistoryPage = () => {
       <EuiSpacer size="m" />
       <TaskManagerHealth />
       <EuiSpacer size="m" />
-      <TopFailing />
+      <TopFailing onRuleClick={handleRuleClick} onPolicyClick={handlePolicyClick} />
       <EuiSpacer size="m" />
       <EuiTitle size="xs">
         <h3>
