@@ -142,9 +142,7 @@ export const bulkOverwriteTransformedDocuments =
  * Formats the allocation explanation response into a human-readable string
  * suitable for inclusion in a log message.
  */
-function formatAllocationExplanation(
-  explain: estypes.ClusterAllocationExplainResponse
-): string {
+function formatAllocationExplanation(explain: estypes.ClusterAllocationExplainResponse): string {
   const parts: string[] = [];
 
   if (explain.allocate_explanation) {
@@ -161,7 +159,9 @@ function formatAllocationExplanation(
           const key = `${decider.decider}: ${decider.explanation}`;
           if (!seen.has(key)) {
             seen.add(key);
-            blockingReasons.push(`[${decider.decider}] ${decider.decision}: ${decider.explanation}`);
+            blockingReasons.push(
+              `[${decider.decider}] ${decider.decision}: ${decider.explanation}`
+            );
           }
         }
       }
