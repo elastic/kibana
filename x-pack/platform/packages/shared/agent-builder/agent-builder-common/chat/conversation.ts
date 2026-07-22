@@ -27,14 +27,6 @@ import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
 
 /**
- * Origin metadata attached to the user input that initiated a round.
- */
-export interface RoundInputOrigin {
-  /** Author attribution from the external origin. */
-  author?: ConversationOriginAuthor;
-}
-
-/**
  * Represents the input that initiated a conversation round.
  */
 export interface RoundInput {
@@ -42,8 +34,6 @@ export interface RoundInput {
    * A text message from the user.
    */
   message: string;
-  /** Origin metadata for this input, when it originated outside Kibana. */
-  origin?: RoundInputOrigin;
   /**
    * Optional attachments to provide to the agent.
    * @deprecated Use attachment_refs with conversation-level attachments instead
@@ -343,6 +333,8 @@ export interface ConversationRound {
   input: RoundInput;
   /** Origin metadata for the user input that initiated this round. */
   origin?: ConversationRoundOrigin;
+  /** Author attribution for the round input, when known (an external system like Slack or GitHub, or a Kibana user). */
+  author?: ConversationRoundAuthor;
   /** List of intermediate steps before the end result, such as tool calls */
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
@@ -366,13 +358,13 @@ export interface ConversationOrigin {
   external_conversation_id: string;
 }
 
-export interface ConversationOriginAuthor {
-  /** Stable author identifier in the external origin. */
+export interface ConversationRoundAuthor {
+  /** Stable author identifier (from the external system like Slack or GitHub, or the Kibana user). */
   id: string;
-  /** Optional display name from the external origin. */
-  name?: string;
-  /** Optional handle from the external origin. */
-  handle?: string;
+  /** Optional username / handle. */
+  username?: string;
+  /** Optional display name. */
+  full_name?: string;
 }
 
 /** External system the message comes from, for example Slack or GitHub. */
@@ -454,7 +446,7 @@ export interface Conversation {
   workspace_id?: string;
   /** Access mode for the conversation. Missing values are treated as private. */
   access_control?: ConversationAccessControl;
-  /** External origin used to resolve conversations submitted by stateless relays. */
+  /** External origin used to resolve conversations submitted from an external system like Slack or GitHub. */
   origin?: ConversationOrigin;
 }
 

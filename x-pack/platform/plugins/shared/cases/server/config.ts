@@ -24,12 +24,12 @@ export const ConfigSchema = schema.object({
   }),
   /**
    * Cases-as-data v2 — cluster-level analytics index populated by real-time
-   * saved-object hooks (see `server/cases_analytics_v2`). Off by default; v1
-   * (`analytics.index.enabled`) is the primary path until v2 has been validated
-   * in production. Enabling v2 has no effect on v1 — they coexist independently.
+   * saved-object hooks (see `server/cases_analytics_v2`). Enabled by default;
+   * v2 now runs alongside v1 (`analytics.index.enabled`). Enabling v2 has no
+   * effect on v1 — they coexist independently.
    */
   analyticsV2: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
     /**
      * Reconciliation cadence in minutes. The reconciliation task is the
      * durability backstop for v2's fire-and-forget write hooks: every
@@ -160,15 +160,15 @@ export const ConfigSchema = schema.object({
   // after it was on no longer throws "Missing mappings" errors. Any template /
   // field-definition documents created while enabled remain in the index.
   templates: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
   // Temporary feature flag for the Cases UX redesign (elastic/security-team#17398).
   // Once the redesigned UI fully replaces the current one, this config block will be removed.
   casesRedesign: schema.object({
-    list: schema.boolean({ defaultValue: false }),
-    details: schema.boolean({ defaultValue: false }),
-    settings: schema.boolean({ defaultValue: false }),
+    list: schema.boolean({ defaultValue: true }),
+    details: schema.boolean({ defaultValue: true }),
+    settings: schema.boolean({ defaultValue: true }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
 });

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: DELETE. Covered in x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/error_handling.spec.ts and src/platform/test/functional/apps/discover/group1/_errors.ts. The scout version already covers license:trial and the assertions don't actually check for any license-related differences in error message anyways.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
