@@ -159,6 +159,13 @@ export class LensApp {
 
     await this.confirmSaveButton.click();
     await this.saveModal.waitFor({ state: 'hidden' });
+    // Saving a new SO triggers a redirect (history.push) that reloads the
+    // document. Wait for the breadcrumb to reflect the saved title, which
+    // confirms the redirect completed and persistedDoc is set in Redux.
+    await this.page
+      .locator('nav[aria-label="Breadcrumbs"]')
+      .getByText(title)
+      .waitFor({ state: 'visible' });
   }
 
   async configureXYDimensions(options?: {
