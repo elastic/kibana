@@ -14,19 +14,16 @@ import { resolveHeartbeatIndices } from './resolve_heartbeat_indices';
 import type { SyntheticsServerSetup } from '../types';
 
 const buildServer = ({
-  ccsEnabled = true,
   isElasticsearchServerless = false,
   cacheGet = jest.fn(),
   warn = jest.fn(),
 }: {
-  ccsEnabled?: boolean;
   isElasticsearchServerless?: boolean;
   cacheGet?: jest.Mock;
   warn?: jest.Mock;
 } = {}) =>
   ({
     isElasticsearchServerless,
-    config: { experimental: { ccs: { enabled: ccsEnabled } } },
     syntheticsIndicesCache: { get: cacheGet, invalidate: jest.fn() },
     logger: { warn, error: jest.fn(), debug: jest.fn(), info: jest.fn() },
   } as unknown as SyntheticsServerSetup);
@@ -40,22 +37,7 @@ describe('resolveHeartbeatIndices', () => {
     jest.restoreAllMocks();
   });
 
-  it('returns the local pattern without touching the cache when CCS is disabled', async () => {
-    const cacheGet = jest.fn();
-    const server = buildServer({ ccsEnabled: false, cacheGet });
-
-    const indices = await resolveHeartbeatIndices({
-      server,
-      spaceId,
-      savedObjectsClient,
-      esClient,
-    });
-
-    expect(indices).toBe(SYNTHETICS_INDEX_PATTERN);
-    expect(cacheGet).not.toHaveBeenCalled();
-  });
-
-  it('returns the local pattern when running on serverless even if the flag is set', async () => {
+  it('returns the local pattern without touching the cache when CCS is disabled (serverless)', async () => {
     const cacheGet = jest.fn();
     const server = buildServer({ isElasticsearchServerless: true, cacheGet });
 
