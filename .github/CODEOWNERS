@@ -2690,6 +2690,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/work
 
 # Connector Agent Skills
 src/platform/packages/shared/kbn-connector-specs/.claude/skills @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/ansible_controller/** @elastic/response-ops
 
 
 # Connector Workflow Tests

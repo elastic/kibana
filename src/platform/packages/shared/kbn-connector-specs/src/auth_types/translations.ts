@@ -355,3 +355,54 @@ export const GCP_SERVICE_ACCOUNT_SCOPE_HELP_TEXT = i18n.translate(
       'OAuth scope for the access token. Defaults to https://www.googleapis.com/auth/cloud-platform.',
   }
 );
+
+export const ANSIBLE_CONTROLLER_AUTH_LABEL = i18n.translate(
+  'connectorSpecs.ansibleControllerAuth.label',
+  {
+    defaultMessage: 'API token',
+  }
+);
+
+export const ANSIBLE_CONTROLLER_AUTH_TOKEN_LABEL = i18n.translate(
+  'connectorSpecs.ansibleControllerAuth.token.label',
+  {
+    defaultMessage: 'Token',
+  }
+);
+
+export const ANSIBLE_CONTROLLER_AUTH_TOKEN_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.ansibleControllerAuth.token.requiredMessage',
+  {
+    defaultMessage: 'An Ansible Automation Controller / AWX API token is required.',
+  }
+);
+
+export const ANSIBLE_CONTROLLER_AUTH_CA_LABEL = i18n.translate(
+  'connectorSpecs.ansibleControllerAuth.ca.label',
+  {
+    defaultMessage: 'Server CA certificate (PEM)',
+  }
+);
+
+export const ANSIBLE_CONTROLLER_AUTH_CA_HELP_TEXT = i18n.translate(
+  'connectorSpecs.ansibleControllerAuth.ca.helpText',
+  {
+    defaultMessage:
+      'Paste the PEM-encoded certificate authority used to verify the Controller / AWX server. Leave empty to rely on the system trust store or to disable verification.',
+  }
+);
+
+export const ANSIBLE_CONTROLLER_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
+  'connectorSpecs.ansibleControllerAuth.verificationMode.label',
+  {
+    defaultMessage: 'Verification mode',
+  }
+);
+
+export const ANSIBLE_CONTROLLER_AUTH_VERIFICATION_MODE_HELP_TEXT = i18n.translate(
+  'connectorSpecs.ansibleControllerAuth.verificationMode.helpText',
+  {
+    defaultMessage:
+      'How to verify the server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
+  }
+);
