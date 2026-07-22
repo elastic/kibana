@@ -12,7 +12,10 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { WorkflowRepository } from '@kbn/workflows';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type {
+  WorkflowExecutionCapabilities,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { WorkflowLogEvent } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
@@ -32,6 +35,8 @@ export interface ContextDependencies {
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
   spaceId?: string;
   request?: KibanaRequest;
+  /** Request-local privileged behavior; never serialize this value. */
+  capabilities?: WorkflowExecutionCapabilities;
 }
 
 /**

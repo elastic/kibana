@@ -27,6 +27,8 @@ export type {
   WorkflowExecutionsDataClient,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
+  ExecuteWorkflowOptions,
+  WorkflowExecutionMode,
 } from './types';
 
 export { getStepExecutionsByWorkflowExecution } from './repositories/data_access_layer/lib/get_step_executions_by_workflow_execution';

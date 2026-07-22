@@ -50,6 +50,8 @@ export type {
   StepHandler,
   StepHandlerContext,
   StepHandlerResult,
+  WorkflowExecutionCapability,
+  WorkflowExecutionCapabilities,
   OnCancelHandler,
   StartWithHandoffHandler,
   PollHandler,
