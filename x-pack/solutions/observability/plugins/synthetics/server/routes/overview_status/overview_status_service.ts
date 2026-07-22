@@ -54,12 +54,14 @@ interface LocationStatusEntry {
   // terms sub-agg because the field is wildcard-typed and top_metrics cannot
   // collect it. Falls back to locationId when unavailable.
   locationLabel?: string;
-  // Whether the ping carries `meta.space_id`, which Kibana always stamps onto
-  // monitors it pushes (public + private, UI + project). Standalone Heartbeat /
-  // Elastic Agent autodiscovery pings never have it. Used to avoid classifying
-  // the leftover pings of a *deleted* Kibana monitor as an autodiscovery
-  // (`origin: 'heartbeat'`) monitor once its saved object is gone.
-  hasKibanaManagedFields?: boolean;
+  // Whether the ping carries `meta.space_id`. Kibana stamps both `config_id`
+  // and `meta.space_id` onto every monitor it pushes (public + private, UI +
+  // project); standalone Heartbeat / Elastic Agent autodiscovery pings carry
+  // neither. Presence of either marker means the ping came from a Kibana-pushed
+  // monitor, so a no-saved-object ping with a marker is a *deleted* Kibana
+  // monitor and must not be surfaced as an autodiscovery (`origin: 'heartbeat'`)
+  // monitor. `config_id` presence is read directly from `configId`.
+  hasMetaSpaceId?: boolean;
   // The latest error reason for the most recent final summary on this
   // (monitor, location). Only populated for down checks where the heartbeat
   // doc has an `error` object — `error.message` is `text` so we collect it
@@ -744,7 +746,7 @@ export class OverviewStatusService {
             locationNameAgg?.buckets?.[0]?.key ??
             (bKey.locationId == null ? HEARTBEAT_UNMAPPED_LOCATION_LABEL : undefined);
           const spaceIdAgg = (rest as any).space_id;
-          const hasKibanaManagedFields = (spaceIdAgg?.buckets?.length ?? 0) > 0;
+          const hasMetaSpaceId = (spaceIdAgg?.buckets?.length ?? 0) > 0;
           const kibanaUrl = ccsEnabled ? metrics?.kibanaUrl : undefined;
           const monitorName = metrics?.['monitor.name'];
           const monitorType = metrics?.['monitor.type'];
@@ -765,7 +767,7 @@ export class OverviewStatusService {
             ...(monitorInterval != null ? { monitorIntervalSeconds: Number(monitorInterval) } : {}),
             ...(configId ? { configId: String(configId) } : {}),
             ...(tags ? { tags: Array.isArray(tags) ? tags.map(String) : [String(tags)] } : {}),
-            ...(hasKibanaManagedFields ? { hasKibanaManagedFields } : {}),
+            ...(hasMetaSpaceId ? { hasMetaSpaceId } : {}),
             error:
               errorMessage || errorType ? { message: errorMessage, type: errorType } : undefined,
             downSince,
@@ -1072,11 +1074,14 @@ export class OverviewStatusService {
         if (!includeHeartbeatMonitors) {
           return;
         }
-        // Skip pings that carry Kibana's provenance markers (`meta.space_id`).
-        // Those come from a monitor Kibana pushed; with no saved object it's a
-        // *deleted* Kibana monitor whose pings haven't aged out yet — not an
-        // autodiscovery monitor — so it must not resurrect as `heartbeat`.
-        if (locData.hasKibanaManagedFields) {
+        // A genuine autodiscovery ping carries NEITHER of Kibana's provenance
+        // markers — `config_id` and `meta.space_id`, both stamped on every
+        // monitor Kibana pushes. If either is present the ping came from a
+        // Kibana-pushed monitor; with no saved object it's a *deleted* Kibana
+        // monitor whose pings haven't aged out yet, so it must not resurrect as
+        // `heartbeat`. Requiring both to be absent is also the safe stance for
+        // standalone Heartbeat pings that happen to set either field.
+        if (locData.configId || locData.hasMetaSpaceId) {
           return;
         }
         // Cap the number of distinct monitors we synthesize from ping data.
