@@ -705,6 +705,13 @@ export const ML_RULES_DISABLED_MESSAGE = i18n.translate(
   }
 );
 
+export const RULE_CHANGES_HISTORY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.ruleChangesHistoryDescription',
+  {
+    defaultMessage: 'History',
+  }
+);
+
 export const DUPLICATE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription',
   {
@@ -1194,6 +1201,13 @@ export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
   }
 );
 
+export const AUTO_REFRESH_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshPopoverAriaLabel',
+  {
+    defaultMessage: 'Auto refresh settings',
+  }
+);
+
 export const CLEAR_RULES_TABLE_FILTERS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.clearRulesTableFilters',
   {
@@ -1670,5 +1684,59 @@ export const RULE_SETTINGS_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagement.ruleSettingsTitle',
   {
     defaultMessage: 'Settings',
+  }
+);
+
+export const UPGRADE_PREBUILT_RULES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradePrebuiltRulesTableCaption',
+  {
+    defaultMessage: 'Prebuilt rules available for upgrade',
+  }
+);
+
+/**
+ * AI rule creation save handler
+ */
+
+export const SAVE_RULE_FAILED_TITLE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.saveFailedTitle',
+  {
+    defaultMessage: 'Failed to save rule',
+  }
+);
+
+export const RULE_UPDATED_TITLE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.updatedTitle',
+  {
+    defaultMessage: 'Rule updated',
+  }
+);
+
+export const RULE_SAVED_TITLE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.savedTitle',
+  {
+    defaultMessage: 'Rule saved',
+  }
+);
+
+export const ORIGIN_LINK_FAILED_TITLE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.originLinkFailedTitle',
+  {
+    defaultMessage: 'Rule saved, but the chat card could not be linked to it',
+  }
+);
+
+export const ORIGIN_LINK_FAILED_TEXT = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.originLinkFailedText',
+  {
+    defaultMessage:
+      'The rule was saved successfully. Refresh the conversation before saving from this card again to avoid creating a duplicate.',
+  }
+);
+
+export const UNKNOWN_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.unknownErrorMessage',
+  {
+    defaultMessage: 'Unknown error',
   }
 );

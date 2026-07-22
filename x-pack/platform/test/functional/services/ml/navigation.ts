@@ -72,7 +72,9 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToAlertsAndAction() {
-      await PageObjects.common.navigateToApp('rules');
+      await PageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await testSubjects.click('rulesTab');
       await testSubjects.existOrFail('rulesListSection');
     },

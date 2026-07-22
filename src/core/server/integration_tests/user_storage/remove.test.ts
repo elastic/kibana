@@ -25,6 +25,9 @@ import {
 import type { UserStorageDefinition, IUserStorageClient } from '@kbn/core-user-storage-common';
 
 const PROFILE_UID = 'integration-test-profile-uid';
+// space-scoped keys use {namespace}:{profileUid} as the SO document id;
+// namespace undefined → 'default', matching namespaceToString() in the server client.
+const SPACE_DOC_ID = `default:${PROFILE_UID}`;
 
 describe('UserStorage remove() / null-merge behavior', () => {
   let servers: TestUtils;
@@ -84,7 +87,7 @@ describe('UserStorage remove() / null-merge behavior', () => {
 
     const doc = await savedObjectsClient.get<{ data: Record<string, unknown> }>(
       USER_STORAGE_SO_TYPE,
-      PROFILE_UID
+      SPACE_DOC_ID
     );
     expect(doc.attributes.data).toHaveProperty('test:string_a', null);
   });
@@ -109,13 +112,5 @@ describe('UserStorage remove() / null-merge behavior', () => {
 
     expect(await userStorage.get('test:string_a')).toBe('default_a');
     expect(await userStorage.get('test:string_b')).toBe('value_b');
-  });
-
-  it('getAll() treats null the same as undefined (returns default)', async () => {
-    await userStorage.set('test:string_a', 'custom_value');
-    await userStorage.remove('test:string_a');
-
-    const all = await userStorage.getAll();
-    expect(all['test:string_a']).toBe('default_a');
   });
 });

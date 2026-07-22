@@ -79,7 +79,7 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-http-server-utils",
-    "@kbn/spaces-utils",
+    "@kbn/core-spaces-common",
     "@kbn/core-http-server",
     "@kbn/setup-node-env",
     "@kbn/react-query",
@@ -98,6 +98,7 @@
     "@kbn/core-http-browser",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-request-handler-context-server",
-    "@kbn/core-security-server"
+    "@kbn/core-security-server",
+    "@kbn/rrule"
   ]
 }

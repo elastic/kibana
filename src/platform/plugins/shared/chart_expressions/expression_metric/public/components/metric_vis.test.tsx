@@ -35,7 +35,7 @@ import * as secondaryMetricInfoModule from './secondary_metric_info';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v === null ? NaN : v}`;
-  return { getConverterFor: () => convertFn };
+  return { convertToText: convertFn };
 });
 
 const mockGetColorForValue = jest.fn<undefined | string, any>(() => undefined);
@@ -87,6 +87,7 @@ const defaultMetricParams: MetricVisParam = {
   secondaryAlign: 'right',
   iconAlign: 'left',
   valueFontSize: 'default',
+  density: 'compact',
   secondaryTrend: {
     visuals: undefined,
     baseline: undefined,
@@ -797,11 +798,11 @@ describe('MetricVisComponent', function () {
         maxDimensions: {
           x: {
             unit: 'pixels',
-            value: 310,
+            value: 300,
           },
           y: {
             unit: 'pixels',
-            value: 310,
+            value: 160,
           },
         },
       },
@@ -1266,6 +1267,7 @@ describe('MetricVisComponent', function () {
             maxCols: 3,
             titlesTextAlign: 'left',
             valueFontSize: 'default',
+            density: 'compact',
             primaryAlign: 'right',
             secondaryAlign: 'right',
             primaryPosition: 'bottom',

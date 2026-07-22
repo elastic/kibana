@@ -13,6 +13,7 @@ import type {
 import { v4 as uuidv4 } from 'uuid';
 
 import pMap from 'p-map';
+import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 
 import { appContextService } from '..';
 import * as AgentService from '../agents';
@@ -91,7 +92,11 @@ export async function reassignAgentsToVersionSpecificPolicies(versionedAgentPoli
 
   const { baseId: agentPolicyId, version } = splitVersionSuffixFromPolicyId(versionedAgentPolicyId);
   // agents enrolled to parent policy or agents using child policy but upgraded to new version
-  const kueryToReassignAgents = `(policy_id:"${agentPolicyId}" AND agent.version:${version}.*) OR (policy_id:${agentPolicyId}* AND agent.version:${version}.* AND upgraded_at:*)`;
+  const kueryToReassignAgents = `(policy_id:"${escapeQuotes(
+    agentPolicyId
+  )}" AND agent.version:${version}.*) OR (policy_id:${escapeKuery(
+    agentPolicyId
+  )}* AND agent.version:${version}.* AND upgraded_at:*)`;
 
   try {
     const { total } = await AgentService.getAgentsByKuery(esClient, soClient, {

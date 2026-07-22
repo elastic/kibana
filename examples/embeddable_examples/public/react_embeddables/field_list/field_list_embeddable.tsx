@@ -19,7 +19,7 @@ import {
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
-  initializeUnsavedChanges,
+  initializeStateApi,
 } from '@kbn/presentation-publishing';
 import { LazyDataViewPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import {
@@ -121,18 +121,16 @@ export const getFieldListFactory = (
           })
       );
 
-      function serializeState(): FieldListSerializedState {
-        const { dataViews: selectedDataViews, ...rest } = fieldListStateManager.getLatestState();
-        return {
-          ...titleManager.getLatestState(),
-          ...rest,
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<FieldListSerializedState>({
+      const stateApi = initializeStateApi<FieldListSerializedState>({
         uuid,
         parentApi,
-        serializeState,
+        serializeState: (): FieldListSerializedState => {
+          const { dataViews: selectedDataViews, ...rest } = fieldListStateManager.getLatestState();
+          return {
+            ...titleManager.getLatestState(),
+            ...rest,
+          };
+        },
         anyStateChange$: merge(titleManager.anyStateChange$, fieldListStateManager.anyStateChange$),
         getComparators: () => ({
           ...titleComparators,
@@ -141,17 +139,16 @@ export const getFieldListFactory = (
           },
           dataViewId: 'referenceEquality',
         }),
-        onReset: async (lastSaved) => {
-          const lastState = await deserializeState(dataViews, lastSaved);
-          fieldListStateManager.reinitializeState(lastState);
-          titleManager.reinitializeState(lastSaved);
+        applySerializedState: async (nextState) => {
+          const nextRuntimeState = await deserializeState(dataViews, nextState);
+          fieldListStateManager.reinitializeState(nextRuntimeState);
+          titleManager.reinitializeState(nextState);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
-        serializeState,
+        ...stateApi,
       });
 
       return {

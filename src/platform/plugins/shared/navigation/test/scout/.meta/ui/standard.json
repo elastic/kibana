@@ -1,6 +1,38 @@
 {
-  "sha1": "9eac97629518887e59bfbca9edcb7234eae45b65",
+  "sha1": "57659a7c6b07f823bf0cf2ed850f969ec9e223bf",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
+    {
+      "id": "56a87b3c042792d-0f151a046a326da",
+      "title": "Scenario B — Customize navigation link is hidden in the default (classic) space hides the \"Customize navigation\" link in the user menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/customize_nav_link_disabled_in_classic.spec.ts",
+        "line": 33,
+        "column": 9
+      }
+    },
+    {
+      "id": "4a943ba82f2f824-4b58f437f875564",
+      "title": "Scenario A — Customize navigation link is visible in an es-solution space persists navigation customizations across reloads for a read-only user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/customize_nav_link_with_access.spec.ts",
+        "line": 87,
+        "column": 9
+      }
+    },
     {
       "id": "9d36407f6b29998-c5ea838e311eff6",
       "title": "navigation has security serverless side nav",
@@ -39,7 +71,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 35,
+        "line": 37,
         "column": 7
       }
     },
@@ -53,7 +85,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 50,
+        "line": 52,
         "column": 7
       }
     },
@@ -67,7 +99,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 61,
+        "line": 63,
         "column": 7
       }
     },
@@ -81,7 +113,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 74,
+        "line": 76,
         "column": 7
       }
     },
@@ -95,7 +127,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 85,
+        "line": 87,
         "column": 7
       }
     }

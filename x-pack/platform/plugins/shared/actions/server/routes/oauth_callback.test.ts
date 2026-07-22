@@ -439,7 +439,7 @@ describe('oauthCallbackRoute', () => {
     });
   });
 
-  it('redirects with error on token exchange failure', async () => {
+  it('redirects with error surfacing the underlying message on token exchange failure', async () => {
     const mockOAuthState = {
       id: 'state-id',
       state: 'valid-state',
@@ -481,7 +481,7 @@ describe('oauthCallbackRoute', () => {
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
         location:
-          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&status_code=500&error=OAuth+authorization+failed',
+          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&status_code=500&error=Token+exchange+failed',
       },
     });
   });
@@ -522,7 +522,7 @@ describe('oauthCallbackRoute', () => {
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
         location:
-          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&status_code=500&error=OAuth+authorization+failed',
+          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&status_code=500&error=Connector+missing+required+OAuth+configuration+%28clientId%2C+clientSecret%2C+tokenUrl%29',
       },
     });
   });

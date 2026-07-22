@@ -13,9 +13,10 @@ import {
   EuiIcon,
   EuiPanel,
   EuiPopover,
+  EuiToolTip,
+  type EuiContextMenuPanelDescriptor,
   useEuiTheme,
   useGeneratedHtmlId,
-  type EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
@@ -212,16 +213,23 @@ export const ActionPolicyActionsMenu = ({
     <EuiPopover
       aria-labelledby={popoverTitleId}
       button={
-        <EuiButtonIcon
-          iconType="boxesHorizontal"
-          color="text"
-          aria-label={i18n.translate('xpack.alertingV2.actionPoliciesList.action.more', {
+        <EuiToolTip
+          content={i18n.translate('xpack.alertingV2.actionPoliciesList.action.more', {
             defaultMessage: 'More actions',
           })}
-          onClick={togglePopover}
-          isDisabled={isDisabled}
-          data-test-subj={dataTestSubj}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            color="text"
+            aria-label={i18n.translate('xpack.alertingV2.actionPoliciesList.action.more', {
+              defaultMessage: 'More actions',
+            })}
+            onClick={togglePopover}
+            isDisabled={isDisabled}
+            data-test-subj={dataTestSubj}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}

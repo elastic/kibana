@@ -20,8 +20,8 @@ import {
   ASSET_CRITICALITY_TAB_TEST_ID,
   WATCHLISTS_TAB_TEST_ID,
   ENGINE_STATUS_TAB_TEST_ID,
-  ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID,
 } from '../test_ids';
+import { useHasEntityResolutionLicense } from '../../common/hooks/use_has_entity_resolution_license';
 
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
@@ -78,7 +78,10 @@ jest.mock('../../common/lib/kibana', () => ({
       },
     },
   }),
-  useUiSetting$: () => [false],
+}));
+
+jest.mock('../../common/hooks/use_has_entity_resolution_license', () => ({
+  useHasEntityResolutionLicense: jest.fn(() => false),
 }));
 
 jest.mock('../../helper_hooks', () => ({
@@ -135,10 +138,6 @@ jest.mock('../components/entity_store/components/clear_entity_data_button', () =
   ),
 }));
 
-jest.mock('../hooks/use_enabled_entity_types', () => ({
-  useEntityStoreTypes: () => ['host', 'user'],
-}));
-
 const mockToggleSelectedClosedAlertsSetting = jest.fn();
 const mockToggleScoreRetainment = jest.fn();
 
@@ -154,6 +153,12 @@ jest.mock(
 jest.mock('../components/entity_analytics_toggle', () => ({
   EntityAnalyticsToggle: () => (
     <span data-test-subj="mock-entity-analytics-toggle">{'Entity analytics toggle'}</span>
+  ),
+}));
+
+jest.mock('../components/entity_resolution', () => ({
+  EntityResolutionTab: () => (
+    <span data-test-subj="mock-entity-resolution-tab">{'Entity resolution tab'}</span>
   ),
 }));
 jest.mock('../components/risk_score_management/risk_score_useful_links_section', () => ({
@@ -225,6 +230,7 @@ const buildConfig = (overrides: Record<string, unknown> = {}) => {
 describe('EntityAnalyticsManagementPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
     mockUseConfigurableRiskEngineSettings.mockReturnValue(buildConfig());
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     mockUseEntityStoreStatus.mockReturnValue({
@@ -264,6 +270,18 @@ describe('EntityAnalyticsManagementPage', () => {
     expect(screen.getByTestId(ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(RISK_SCORE_TAB_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(ASSET_CRITICALITY_TAB_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('shows the Resolution tab when license is active', () => {
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+    render(pageComponent());
+    expect(screen.getByTestId('entityResolutionTab')).toBeInTheDocument();
+  });
+
+  it('hides the Resolution tab when license is inactive', () => {
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    render(pageComponent());
+    expect(screen.queryByTestId('entityResolutionTab')).not.toBeInTheDocument();
   });
 
   it('has the risk score tab selected by default with content visible', () => {
@@ -347,12 +365,6 @@ describe('EntityAnalyticsManagementPage', () => {
   it('does not show Engine Status tab when entity store is not installed', () => {
     render(pageComponent());
     expect(screen.queryByTestId(ENGINE_STATUS_TAB_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('shows feature flag callout when entity store is disabled by feature flag', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    render(pageComponent());
-    expect(screen.getByTestId(ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID)).toBeInTheDocument();
   });
 
   it('shows entity store missing privileges callout when privileges are insufficient', () => {

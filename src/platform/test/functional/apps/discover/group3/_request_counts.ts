@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Good smoke test for browser-based behavior. Consider updating to use Playwright's request tracking capabilities.
+ */
+
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/group3/_request_counts.ts
+
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -28,9 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover request counts', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
       );

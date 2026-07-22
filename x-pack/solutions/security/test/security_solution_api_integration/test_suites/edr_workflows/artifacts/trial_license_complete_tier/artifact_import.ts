@@ -34,7 +34,7 @@ import type {
   FindExceptionListItemsResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
 import { ensureSpaceIdExists } from '@kbn/security-solution-plugin/scripts/endpoint/common/spaces';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   disablePerPolicyEndpointExceptions,

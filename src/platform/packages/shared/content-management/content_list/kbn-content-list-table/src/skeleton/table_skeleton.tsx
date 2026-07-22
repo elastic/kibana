@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiSkeletonCircle,
   EuiSkeletonRectangle,
   EuiSkeletonText,
   useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { isCustomSkeletonNode, type SkeletonOutput } from '@kbn/content-list-assembly';
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import type { ResolvedColumn } from '../hooks/use_columns';
 
 /**
@@ -34,7 +36,25 @@ const HEADER_HEIGHT = 36;
 
 export const MAX_SKELETON_ROW_COUNT = 20;
 
-const renderSkeletonCell = (output: SkeletonOutput): React.ReactNode => {
+const tableCss = css`
+  width: 100%;
+  border-collapse: collapse;
+`;
+
+const headerCellCssFor = (euiTheme: UseEuiTheme['euiTheme']) => css`
+  padding: ${euiTheme.size.s} ${euiTheme.size.base};
+  vertical-align: middle;
+`;
+
+const bodyCellCssFor = (euiTheme: UseEuiTheme['euiTheme'], compressed: boolean) => css`
+  padding: ${compressed ? euiTheme.size.xs : euiTheme.size.s} ${euiTheme.size.base};
+  vertical-align: middle;
+`;
+
+const renderSkeletonCell = (
+  output: SkeletonOutput,
+  defaultRectangleHeight: string
+): React.ReactNode => {
   if (isCustomSkeletonNode(output)) {
     return output.node;
   }
@@ -56,21 +76,11 @@ const renderSkeletonCell = (output: SkeletonOutput): React.ReactNode => {
   }
 
   // Rectangle is the default.
-  return <RectangleCell width={output.width ?? '100%'} height={output.height} />;
-};
-
-/**
- * Wraps `EuiSkeletonRectangle` so the default rectangle height can be sourced
- * from `euiTheme.size.base` (16px) at render time instead of a hard-coded
- * pixel value.
- */
-const RectangleCell = ({ width, height }: { width: string | number; height?: string | number }) => {
-  const { euiTheme } = useEuiTheme();
   return (
     <EuiSkeletonRectangle
       isLoading
-      width={width}
-      height={height ?? euiTheme.size.base}
+      width={output.width ?? '100%'}
+      height={output.height ?? defaultRectangleHeight}
       borderRadius="s"
     />
   );
@@ -96,6 +106,15 @@ export interface TableSkeletonProps {
   'data-test-subj'?: string;
 }
 
+interface ColumnDescriptor {
+  /** Stable React `key` derived from `field` or column index. */
+  key: string | number;
+  /** Inline `style` for the `<th>`/`<td>` width, or `undefined` to skip allocation. */
+  style: { width: string | number } | undefined;
+  /** Pre-rendered body-cell content. Identical across rows. */
+  bodyContent: React.ReactNode;
+}
+
 /**
  * Column-aware loading skeleton shown while the initial table fetch is in
  * flight. Cell shapes come from preset/custom descriptors or column metadata.
@@ -106,41 +125,51 @@ export const TableSkeleton = ({
   rowCount,
   tableLayout,
   compressed,
-  'data-test-subj': dataTestSubj = 'content-list-table-skeleton',
+  'data-test-subj': dataTestSubj = CONTENT_LIST_TEST_SUBJECTS.tableSkeleton,
 }: TableSkeletonProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const tableCss = css`
-    width: 100%;
-    border-collapse: collapse;
-  `;
+  const headerCellCss = useMemo(() => headerCellCssFor(euiTheme), [euiTheme]);
+  const bodyCellCss = useMemo(() => bodyCellCssFor(euiTheme, compressed), [euiTheme, compressed]);
 
-  const headerCellCss = css`
-    padding: ${euiTheme.size.s} ${euiTheme.size.base};
-    vertical-align: middle;
-  `;
-
-  const bodyCellCss = css`
-    padding: ${compressed ? euiTheme.size.xs : euiTheme.size.s} ${euiTheme.size.base};
-    vertical-align: middle;
-  `;
+  // Pre-compute per-column descriptors so the body-row loop reuses the same
+  // React nodes across all rows instead of re-allocating per cell.
+  const columnDescriptors = useMemo<ColumnDescriptor[]>(
+    () =>
+      columns.map((resolved, colIdx) => {
+        const colWidth = 'width' in resolved.column ? resolved.column.width : undefined;
+        const colKey =
+          'field' in resolved.column && resolved.column.field
+            ? String(resolved.column.field)
+            : colIdx;
+        return {
+          key: colKey,
+          style: colWidth ? { width: colWidth } : undefined,
+          bodyContent: renderSkeletonCell(resolved.skeleton, euiTheme.size.base),
+        };
+      }),
+    [columns, euiTheme.size.base]
+  );
 
   const clampedRowCount = Math.min(
     Math.max(rowCount ?? MAX_SKELETON_ROW_COUNT, 1),
     MAX_SKELETON_ROW_COUNT
   );
-  const rows = Array.from({ length: clampedRowCount }, (_unused, rowIdx) => rowIdx);
 
   // Width of the selection checkbox column matches `euiTheme.size.xl` (32px),
   // which is the rendered width of the EUI checkbox cell.
   const checkboxColumnWidth = euiTheme.size.xl;
+  const checkboxColumnStyle = useMemo(
+    () => ({ width: checkboxColumnWidth }),
+    [checkboxColumnWidth]
+  );
 
   return (
     <table css={tableCss} style={{ tableLayout }} data-test-subj={dataTestSubj} aria-hidden="true">
       <thead>
         <tr>
           {hasSelection && (
-            <th css={headerCellCss} style={{ width: checkboxColumnWidth }}>
+            <th css={headerCellCss} style={checkboxColumnStyle}>
               <EuiSkeletonRectangle
                 isLoading
                 width={checkboxColumnWidth}
@@ -149,34 +178,23 @@ export const TableSkeleton = ({
               />
             </th>
           )}
-          {columns.map((resolved, colIdx) => {
-            const colWidth = 'width' in resolved.column ? resolved.column.width : undefined;
-            const colKey =
-              'field' in resolved.column && resolved.column.field
-                ? String(resolved.column.field)
-                : colIdx;
-            return (
-              <th
-                key={colKey}
-                css={headerCellCss}
-                style={colWidth ? { width: colWidth } : undefined}
-              >
-                <EuiSkeletonRectangle
-                  isLoading
-                  width="100%"
-                  height={HEADER_HEIGHT}
-                  borderRadius="s"
-                />
-              </th>
-            );
-          })}
+          {columnDescriptors.map(({ key, style }) => (
+            <th key={key} css={headerCellCss} style={style}>
+              <EuiSkeletonRectangle
+                isLoading
+                width="100%"
+                height={HEADER_HEIGHT}
+                borderRadius="s"
+              />
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody>
-        {rows.map((rowIdx) => (
+        {Array.from({ length: clampedRowCount }, (_unused, rowIdx) => (
           <tr key={rowIdx} data-test-subj={`${dataTestSubj}-row`}>
             {hasSelection && (
-              <td css={bodyCellCss} style={{ width: checkboxColumnWidth }}>
+              <td css={bodyCellCss} style={checkboxColumnStyle}>
                 <EuiSkeletonRectangle
                   isLoading
                   width={checkboxColumnWidth}
@@ -185,22 +203,11 @@ export const TableSkeleton = ({
                 />
               </td>
             )}
-            {columns.map((resolved, colIdx) => {
-              const colWidth = 'width' in resolved.column ? resolved.column.width : undefined;
-              const colKey =
-                'field' in resolved.column && resolved.column.field
-                  ? String(resolved.column.field)
-                  : colIdx;
-              return (
-                <td
-                  key={colKey}
-                  css={bodyCellCss}
-                  style={colWidth ? { width: colWidth } : undefined}
-                >
-                  {renderSkeletonCell(resolved.skeleton)}
-                </td>
-              );
-            })}
+            {columnDescriptors.map(({ key, style, bodyContent }) => (
+              <td key={key} css={bodyCellCss} style={style}>
+                {bodyContent}
+              </td>
+            ))}
           </tr>
         ))}
       </tbody>

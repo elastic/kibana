@@ -115,12 +115,7 @@ export interface CloudConnectorFormProps {
 
 export type CloudSetupForCloudConnector = Pick<
   CloudSetup,
-  | 'isCloudEnabled'
-  | 'cloudId'
-  | 'cloudHost'
-  | 'deploymentUrl'
-  | 'serverless'
-  | 'isServerlessEnabled'
+  'isCloudEnabled' | 'cloudId' | 'deploymentUrl' | 'serverless' | 'isServerlessEnabled'
 >;
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {

@@ -130,7 +130,7 @@ The evaluation framework supports two reporting modes:
 
 #### Retrieving Evaluation Scores from Elasticsearch
 
-Evaluation results are stored in the .kibana-evaluations data stream on the Elasticsearch cluster your Scout configuration points to (defaulting to http://localhost:9220). For on-demand analysis, you can query this data stream using the Kibana instance at http://localhost:5620.
+Evaluation results are stored in the .evaluation-scores data stream on the Elasticsearch cluster your Scout configuration points to (defaulting to http://localhost:9220). For on-demand analysis, you can query this data stream using the Kibana instance at http://localhost:5620.
 
 ##### Useful Queries
 
@@ -142,7 +142,7 @@ Evaluation results are stored in the .kibana-evaluations data stream on the Elas
 POST /_query?format=txt
 {
   "query": """
-FROM .kibana-evaluations
+FROM .evaluation-scores
 | WHERE run_id == "${run_id}"
 | EVAL mean_dataset_score = MV_AVG(evaluator.scores)
 | STATS
@@ -164,7 +164,7 @@ FROM .kibana-evaluations
 POST /_query?format=txt
 {
   "query": """
-FROM .kibana-evaluations
+FROM .evaluation-scores
 | WHERE run_id == "${run_id}"
 | DISSECT dataset.name "%{scenario}: %{rest}"
 | EVAL mean_dataset_score = MV_AVG(evaluator.scores)
@@ -187,7 +187,7 @@ FROM .kibana-evaluations
 POST /_query?format=txt
 {
   "query": """
-FROM .kibana-evaluations
+FROM .evaluation-scores
 | WHERE run_id == "${run_id}"
 | DISSECT dataset.name "%{scenario}: %{rest}"
 | EVAL mean_dataset_score = MV_AVG(evaluator.scores)

@@ -1,0 +1,46 @@
+{
+  "sha1": "1ada770aa9236a776e17ddc47702667ca250850d",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "9a9cb745a2410ae-70753e6cedbcd4d",
+      "title": "Setup Discover tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/global.setup.ts",
+        "line": 12,
+        "column": 16
+      }
+    },
+    {
+      "id": "824488486da5bce-4972361234be3d6",
+      "title": "Discover query mode (default: esql) opens Discover in esql mode when no default query mode is stored",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/query_mode.spec.ts",
+        "line": 74,
+        "column": 16
+      }
+    },
+    {
+      "id": "824488486da5bce-ee762dda94f98e6",
+      "title": "Discover query mode (default: classic) opens Discover in classic mode when no default query mode is stored",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/query_mode.spec.ts",
+        "line": 74,
+        "column": 16
+      }
+    }
+  ]
+}

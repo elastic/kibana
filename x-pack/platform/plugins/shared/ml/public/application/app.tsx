@@ -86,6 +86,7 @@ export const App: FC<AppProps> = ({
       dashboard: deps.dashboard,
       data: deps.data,
       dataViewEditor: deps.dataViewEditor,
+      dataViewFieldEditor: deps.dataViewFieldEditor,
       dataViews: deps.data.dataViews,
       dataVisualizer: deps.dataVisualizer,
       embeddable: deps.embeddable,

@@ -10,6 +10,12 @@ import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@k
 import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+} from '@kbn/fleet-plugin/common/services/version_specific_policies_utils';
+import { stringify } from '../../utils/stringify';
 import type {
   HostInfo,
   HostMetadata,
@@ -46,6 +52,7 @@ import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/end
 import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -58,12 +65,23 @@ const isAgentPolicyWithPackagePolicies = (
 };
 
 export class EndpointMetadataService {
+  private readonly esClient: ElasticsearchClient;
+  private readonly soClient: SavedObjectsClientContract;
+  private readonly fleetServices: EndpointFleetServicesInterface;
+  private readonly logger: Logger;
+
   constructor(
-    private readonly esClient: ElasticsearchClient,
-    private readonly soClient: SavedObjectsClientContract,
-    private readonly fleetServices: EndpointFleetServicesInterface,
-    private readonly logger?: Logger
-  ) {}
+    private readonly endpointContext: EndpointAppContextService,
+    spaceId: string = DEFAULT_SPACE_ID
+  ) {
+    this.esClient = endpointContext.getInternalEsClient();
+    this.soClient = endpointContext.savedObjects.createInternalScopedSoClient({
+      readonly: false,
+      spaceId,
+    });
+    this.fleetServices = endpointContext.getInternalFleetServices(spaceId);
+    this.logger = endpointContext.createLogger('endpointMetadata');
+  }
 
   /**
    * Validates that the data retrieved is valid for the current user space. We do this
@@ -78,13 +96,53 @@ export class EndpointMetadataService {
       .filter((id) => !!id);
 
     if (agentIds.length > 0) {
-      this.logger?.debug(
+      this.logger.debug(
         `Checking to see if the following agent ids are valid for current space:\n${agentIds.join(
           '\n'
         )}`
       );
       await this.fleetServices.ensureInCurrentSpace({ agentIds });
     }
+  }
+
+  /**
+   * Mutate the `hits` included in a search response against the United metadata index to address
+   * known issue with data populated in the records
+   * @param data
+   * @private
+   */
+  private adjustUnitedIndexSearchResultHits(
+    data: SearchResponse<UnitedAgentMetadataPersistedData>
+  ): SearchResponse<UnitedAgentMetadataPersistedData> {
+    const hits = data.hits?.hits ?? [];
+    const recordsAltered: string[] = [];
+
+    for (const hit of hits) {
+      // If `united.agent.policy_id` includes a suffix, remove it
+      if (
+        hit._source?.united?.agent?.policy_id &&
+        hasVersionSuffix(hit._source?.united?.agent?.policy_id)
+      ) {
+        const existingPolicyId = hit._source.united.agent.policy_id;
+        const adjustedPolicyId = removeVersionSuffixFromPolicyId(existingPolicyId);
+
+        recordsAltered.push(
+          `Agent [${hit._source?.united?.agent?.agent?.id}]: adjusted 'policy_id' property value from [${existingPolicyId}] to [${adjustedPolicyId}]`
+        );
+
+        (hit._source.united.agent.policy_id as string) = adjustedPolicyId;
+      }
+    }
+
+    if (recordsAltered.length > 0) {
+      this.logger
+        .get('adjustUnitedIndexSearchResultHits')
+        .debug(
+          () => `Made ${recordsAltered.length} data adjustments:\n${recordsAltered.join('\n')}`
+        );
+    }
+
+    return data;
   }
 
   /**
@@ -97,7 +155,8 @@ export class EndpointMetadataService {
    * @throws
    */
   async getHostMetadata(endpointId: string): Promise<HostMetadata> {
-    const query = getESQueryHostMetadataByID(endpointId);
+    const ccsEnabled = await this.endpointContext.isCcsEnabled();
+    const query = getESQueryHostMetadataByID(endpointId, ccsEnabled);
     const queryResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
 
     await this.ensureDataValidForSpace(queryResult);
@@ -116,7 +175,8 @@ export class EndpointMetadataService {
    * @param fleetAgentIds
    */
   async findHostMetadataForFleetAgents(fleetAgentIds: string[]): Promise<HostMetadata[]> {
-    const query = getESQueryHostMetadataByFleetAgentIds(fleetAgentIds);
+    const ccsEnabled = await this.endpointContext.isCcsEnabled();
+    const query = getESQueryHostMetadataByFleetAgentIds(fleetAgentIds, ccsEnabled);
 
     query.size = fleetAgentIds.length;
 
@@ -146,13 +206,13 @@ export class EndpointMetadataService {
     try {
       if (!fleetAgentId) {
         fleetAgentId = endpointMetadata.agent.id;
-        this.logger?.warn(`Missing elastic agent id, using host id instead ${fleetAgentId}`);
+        this.logger.warn(`Missing elastic agent id, using host id instead ${fleetAgentId}`);
       }
 
       fleetAgent = await this.getFleetAgent(fleetAgentId);
     } catch (error) {
       if (error instanceof FleetAgentNotFoundError) {
-        this.logger?.debug(`agent with id ${fleetAgentId} not found`);
+        this.logger.debug(`agent with id ${fleetAgentId} not found`);
       } else {
         throw error;
       }
@@ -207,7 +267,7 @@ export class EndpointMetadataService {
       try {
         if (!fleetAgentId) {
           fleetAgentId = endpointMetadata.agent.id;
-          this.logger?.warn(
+          this.logger.warn(
             new EndpointError(
               `Missing elastic fleet agent id on Endpoint Metadata doc - using Endpoint agent.id instead: ${fleetAgentId}`
             )
@@ -217,7 +277,7 @@ export class EndpointMetadataService {
         fleetAgent = await this.getFleetAgent(fleetAgentId);
       } catch (error) {
         if (error instanceof FleetAgentNotFoundError) {
-          this.logger?.warn(`Agent with id ${fleetAgentId} not found`);
+          this.logger.warn(`Agent with id ${fleetAgentId} not found`);
         } else {
           throw error;
         }
@@ -228,7 +288,7 @@ export class EndpointMetadataService {
       try {
         fleetAgentPolicy = await this.getFleetAgentPolicy(fleetAgent.policy_id ?? '');
       } catch (error) {
-        this.logger?.error(error);
+        this.logger.error(error);
       }
     }
 
@@ -250,7 +310,7 @@ export class EndpointMetadataService {
           endpointMetadata.Endpoint.policy.applied.id
         );
       } catch (error) {
-        this.logger?.error(error);
+        this.logger.error(error);
       }
     }
     return {
@@ -287,7 +347,7 @@ export class EndpointMetadataService {
    */
   async getFleetAgent(agentId: string): Promise<Agent> {
     try {
-      return await this.fleetServices.agent.getAgent(agentId);
+      return await this.fleetServices.fetchAgent(agentId);
     } catch (error) {
       if (error instanceof AgentNotFoundError) {
         throw new FleetAgentNotFoundError(`agent with id ${agentId} not found`, error);
@@ -347,20 +407,28 @@ export class EndpointMetadataService {
   async getHostMetadataList(
     queryOptions: GetMetadataListRequestQuery
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
+    const logger = this.logger.get('getHostMetadataList()');
+    logger.debug(() => `Retrieving host metadata list using: ${stringify(queryOptions)}`);
+
+    const ccsEnabled = await this.endpointContext.isCcsEnabled();
     const endpointPolicies = await this.getAllEndpointPackagePolicies();
     const endpointPolicyIds = uniq(endpointPolicies.flatMap((policy) => policy.policy_ids));
     const unitedIndexQuery = await buildUnitedIndexQuery(
       this.soClient,
       queryOptions,
-      endpointPolicyIds
+      endpointPolicyIds,
+      ccsEnabled
     );
 
     let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadataPersistedData>;
 
+    logger.debug(() => `Executing query: ${stringify(unitedIndexQuery, 15)}`);
+
     try {
-      unitedMetadataQueryResponse = await this.esClient.search<UnitedAgentMetadataPersistedData>(
-        unitedIndexQuery
-      );
+      unitedMetadataQueryResponse = await this.esClient
+        .search<UnitedAgentMetadataPersistedData>(unitedIndexQuery)
+        .then(this.adjustUnitedIndexSearchResultHits.bind(this));
+
       // FYI: we don't need to run the ES search response through `this.ensureDataValidForSpace()` because
       // the query (`unitedIndexQuery`) above already included a filter with all of the valid policy ids
       // for the current space - thus data is already coped to the space
@@ -374,7 +442,7 @@ export class EndpointMetadataService {
       }
 
       const err = wrapErrorIfNeeded(error);
-      this.logger?.error(err);
+      logger.error(err);
       throw err;
     }
 
@@ -442,7 +510,11 @@ export class EndpointMetadataService {
   }
 
   async getMetadataForEndpoints(endpointIDs: string[]): Promise<HostMetadata[]> {
-    const query = getESQueryHostMetadataByIDs(endpointIDs);
+    const ccsEnabled = await this.endpointContext.isCcsEnabled();
+    const query = getESQueryHostMetadataByIDs(endpointIDs, ccsEnabled);
+
+    this.logger.get('getMetadataForEndpoints').debug(() => `with query: ${stringify(query, 15)}`);
+
     const searchResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
 
     await this.ensureDataValidForSpace(searchResult);

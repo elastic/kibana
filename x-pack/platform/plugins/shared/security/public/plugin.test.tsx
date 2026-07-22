@@ -93,6 +93,7 @@ describe('Security Plugin', () => {
         },
         management: managementSetupMock,
         fatalErrors: coreSetupMock.fatalErrors,
+        uiSettings: coreSetupMock.uiSettings,
         getStartServices: coreSetupMock.getStartServices,
         buildFlavor: expect.stringMatching(new RegExp('^serverless|traditional$')),
       });
@@ -165,6 +166,16 @@ describe('Security Plugin', () => {
           },
           "userProfiles": Object {
             "bulkGet": [Function],
+            "dataUpdates$": Observable {
+              "source": Subject {
+                "closed": false,
+                "currentObservers": null,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+            },
             "enabled$": Observable {
               "operator": [Function],
               "source": Observable {

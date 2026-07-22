@@ -20,5 +20,7 @@
     "@kbn/cloud-plugin",
     "@kbn/agent-builder-plugin",
     "@kbn/try-in-console",
+    "@kbn/cloud",
+    "@kbn/core-doc-links-browser",
   ]
 }

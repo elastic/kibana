@@ -7,63 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useBasePath, useCustomBranding, useProjectHome } from '../../shared/chrome_hooks';
 import { LoadingIndicator } from '../../shared/loading_indicator';
+import { headerButtonBaseStyles, useHeaderButtonStyleVars } from './header_action_button';
 
 const LOGO_ARIA_LABEL = i18n.translate('core.ui.chrome.globalHeader.logoAriaLabel', {
   defaultMessage: 'Elastic home',
 });
 
-const useLogoStyles = () => {
-  const { euiTheme } = useEuiTheme();
+const logoLinkStyles = css`
+  ${headerButtonBaseStyles};
+  width: 32px;
+  justify-content: center;
+  border: none;
+  text-decoration: none;
+  color: inherit;
 
-  return useMemo(
-    () => css`
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: ${euiTheme.border.radius.medium};
-      color: ${euiTheme.colors.text};
-      text-decoration: none;
-
-      &:hover {
-        background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-      }
-
-      &:focus-visible {
-        outline: 2px solid ${euiTheme.colors.primary};
-        outline-offset: -2px;
-      }
-
-      svg {
-        width: 20px;
-        height: 20px;
-      }
-    `,
-    [euiTheme]
-  );
-};
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+`;
 
 export const ChromeNextGlobalHeaderLogo = React.memo(() => {
   const basePath = useBasePath();
   const homeHref = basePath.prepend(useProjectHome());
   const { logo: customLogo } = useCustomBranding();
-  const logoStyles = useLogoStyles();
+  const styleVars = useHeaderButtonStyleVars();
 
   return (
     <a
       href={homeHref}
       aria-label={LOGO_ARIA_LABEL}
       data-test-subj="chromeNextGlobalHeaderLogo"
-      css={logoStyles}
+      css={logoLinkStyles}
+      style={styleVars}
     >
-      <LoadingIndicator customLogo={customLogo} />
+      <LoadingIndicator customLogo={customLogo} elasticLogoColor={'text'} />
     </a>
   );
 });

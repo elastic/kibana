@@ -40,10 +40,17 @@ import { injectActionParams } from '../../inject_action_params';
 
 enum Reasons {
   MUTED = 'muted',
+  SNOOZED = 'snoozed',
   THROTTLED = 'throttled',
   ACTION_GROUP_NOT_CHANGED = 'actionGroupHasNotChanged',
   DELAYED = 'delayed',
 }
+
+// Yield to the event loop after holding the thread for this many milliseconds
+// during the action-parameter building loop. Prevents event loop starvation
+// when a rule has many alert×action pairs. Does not reduce CPU; only ensures
+// other pending I/O and Task Manager heartbeats get a turn between slices.
+const YIELD_AFTER_MS = 50;
 
 export class PerAlertActionScheduler<
   Params extends RuleTypeParams,
@@ -58,6 +65,7 @@ export class PerAlertActionScheduler<
 {
   private actions: RuleAction[] = [];
   private mutedAlertIdsSet: Set<string> = new Set();
+  private snoozedAlertIdsSet: Set<string> = new Set();
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private skippedAlerts: { [key: string]: { reason: string } } = {};
 
@@ -77,6 +85,7 @@ export class PerAlertActionScheduler<
       context.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
     this.mutedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
+    this.snoozedAlertIdsSet = context.activeSnoozedIds ?? new Set();
 
     const canGetSummarizedAlerts =
       !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
@@ -125,7 +134,10 @@ export class PerAlertActionScheduler<
         const optionsBase = {
           spaceId: this.context.taskInstance.params.spaceId,
           ruleId: this.context.rule.id,
-          excludedAlertInstanceIds: this.context.rule.mutedInstanceIds,
+          excludedAlertInstanceIds: [
+            ...this.context.rule.mutedInstanceIds,
+            ...this.snoozedAlertIdsSet,
+          ],
           alertsFilter: action.alertsFilter,
         };
 
@@ -184,7 +196,12 @@ export class PerAlertActionScheduler<
       spaceId: this.context.taskInstance.params.spaceId,
     });
 
+    let sliceStart = Date.now();
     for (const { action, alert } of executables) {
+      if (Date.now() - sliceStart > YIELD_AFTER_MS) {
+        await new Promise(setImmediate);
+        sliceStart = Date.now();
+      }
       const { actionTypeId } = action;
       if (
         !shouldScheduleAction({
@@ -289,6 +306,7 @@ export class PerAlertActionScheduler<
     return (
       !this.hasActiveMaintenanceWindow({ alert, action }) &&
       !this.isAlertMuted(alert) &&
+      !this.isAlertSnoozed(alert) &&
       !this.isAlertDelayed(alert) &&
       !this.hasPendingCountButNotNotifyOnChange({ alert, action }) &&
       !alert.isFilteredOut(summarizedAlerts)
@@ -375,6 +393,26 @@ export class PerAlertActionScheduler<
         );
       }
       this.skippedAlerts[alertId] = { reason: Reasons.MUTED };
+      return true;
+    }
+    return false;
+  }
+
+  private isAlertSnoozed(
+    alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>
+  ) {
+    const alertId = alert.getId();
+    const snoozed = this.snoozedAlertIdsSet.has(alertId);
+    if (snoozed) {
+      if (
+        !this.skippedAlerts[alertId] ||
+        (this.skippedAlerts[alertId] && this.skippedAlerts[alertId].reason !== Reasons.SNOOZED)
+      ) {
+        this.context.logger.debug(
+          `skipping scheduling of actions for '${alertId}' in rule ${this.context.ruleLabel}: alert is snoozed`
+        );
+      }
+      this.skippedAlerts[alertId] = { reason: Reasons.SNOOZED };
       return true;
     }
     return false;

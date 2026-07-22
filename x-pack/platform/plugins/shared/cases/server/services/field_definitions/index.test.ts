@@ -101,6 +101,102 @@ describe('FieldDefinitionsService', () => {
         })
       );
     });
+
+    it('filters by isGlobal in application code when isGlobal is true (new isGlobal attribute)', async () => {
+      const globalField = makeFieldDefinitionSO({ isGlobal: true });
+      const nonGlobalField = makeFieldDefinitionSO({ name: 'non_global', isGlobal: false });
+      soClient.find.mockResolvedValue({
+        saved_objects: [globalField, nonGlobalField],
+        total: 2,
+        per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getFieldDefinitions('securitySolution', { isGlobal: true });
+
+      // No KQL isGlobal filter — filtering is done in application code
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "securitySolution"`,
+        })
+      );
+      expect(result.fieldDefinitions).toHaveLength(1);
+      expect(result.fieldDefinitions[0].name).toBe('my_field');
+    });
+
+    it('returns all definitions when isGlobal is false (no filtering)', async () => {
+      const fd1 = makeFieldDefinitionSO({ isGlobal: true });
+      const fd2 = makeFieldDefinitionSO({ name: 'non_global', isGlobal: false });
+      soClient.find.mockResolvedValue({
+        saved_objects: [fd1, fd2],
+        total: 2,
+        per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getFieldDefinitions('securitySolution', { isGlobal: false });
+
+      expect(result.fieldDefinitions).toHaveLength(2);
+    });
+  });
+
+  describe('getGlobalFieldDefinitionsForSearch', () => {
+    it('returns only isGlobal definitions for the given owners', async () => {
+      const globalField = makeFieldDefinitionSO({ isGlobal: true });
+      const nonGlobalField = makeFieldDefinitionSO({ name: 'non_global', isGlobal: false });
+      soClient.find.mockResolvedValue({
+        saved_objects: [globalField, nonGlobalField],
+        total: 2,
+        per_page: 10000,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getGlobalFieldDefinitionsForSearch({
+        owner: ['securitySolution'],
+      });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "securitySolution"`,
+          perPage: 10000,
+        })
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('my_field');
+    });
+
+    it('fetches all owners when owner is omitted', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [makeFieldDefinitionSO({ isGlobal: true })],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      await service.getGlobalFieldDefinitionsForSearch({});
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: undefined,
+          perPage: 10000,
+        })
+      );
+    });
+
+    it('excludes non-global definitions', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [makeFieldDefinitionSO({ isGlobal: false })],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getGlobalFieldDefinitionsForSearch({
+        owner: ['securitySolution'],
+      });
+
+      expect(result).toEqual([]);
+    });
   });
 
   describe('getFieldDefinition', () => {

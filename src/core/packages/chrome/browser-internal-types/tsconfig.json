@@ -12,5 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/core-chrome-browser",
+    "@kbn/core-http-browser",
+    "@kbn/core-mount-utils-browser",
   ]
 }

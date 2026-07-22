@@ -167,6 +167,7 @@ function renderController(services: ReturnType<typeof buildServices>['services']
 describe('AgentBuilderAnnouncementModalController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
   });
 
   it('does not render the modal when hideAnnouncements is true', async () => {
@@ -349,5 +350,39 @@ describe('AgentBuilderAnnouncementModalController', () => {
     expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderAnnouncementModal-2a')).toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderAnnouncementImportantNotes')).toBeInTheDocument();
+  });
+
+  it('does not show the modal on remount when dismissed before a slow profile update completes', async () => {
+    // Simulate a slow profile update (e.g. high-latency proxy environment) that hasn't
+    // resolved by the time the user navigates to the next page and the component remounts.
+    let resolvePartialUpdate!: () => void;
+    const slowPartialUpdate = jest.fn(
+      () => new Promise<void>((resolve) => (resolvePartialUpdate = resolve))
+    );
+    const { services } = buildServices();
+    (services.userProfile as { partialUpdate: jest.Mock }).partialUpdate = slowPartialUpdate;
+
+    const { unmount } = renderController(services);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument()
+    );
+
+    // Dismiss the modal — markSeen() fires but partialUpdate is still pending.
+    await userEvent.click(screen.getByTestId('agentBuilderAnnouncementContinueButton'));
+
+    // Simulate navigation: unmount and remount before the profile update resolves.
+    unmount();
+    renderController(services);
+
+    // The modal must not reappear even though partialUpdate hasn't finished.
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('agentBuilderAnnouncementContinueButton')
+      ).not.toBeInTheDocument();
+    });
+
+    // Let the pending update resolve to avoid unhandled promise warnings.
+    resolvePartialUpdate();
   });
 });

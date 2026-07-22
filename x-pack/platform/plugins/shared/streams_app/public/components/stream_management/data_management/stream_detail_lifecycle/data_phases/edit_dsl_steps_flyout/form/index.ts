@@ -18,12 +18,7 @@ export { createDslStepsFlyoutDeserializer } from './deserializer';
 export { createDslStepsFlyoutSerializer } from './serializer';
 
 export { MAX_DOWNSAMPLE_STEPS } from './constants';
-export {
-  parseInterval,
-  toMilliseconds,
-  formatMillisecondsInUnit,
-  getStepIndexFromArrayItemPath,
-} from './utils';
+export { parseInterval, toMilliseconds, getStepIndexFromArrayItemPath } from './utils';
 
 export { AfterField, FixedIntervalField } from './fields';
 

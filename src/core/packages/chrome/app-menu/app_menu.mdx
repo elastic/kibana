@@ -15,6 +15,14 @@ It offers a structured and organized way to present navigation options and actio
 
 ![App Menu in Kibana chrome layout](./app_menu.png)
 
+## AppMenuConfig
+
+The `AppMenuConfig` object accepts:
+
+- **`items`** — menu items displayed in the app menu bar. Items beyond the limit overflow into a "More" popover.
+- **`primaryActionItem`** — a primary action button placed as the rightmost item. Can be a simple button (with `run`), a button with a popover (with `items`), or a split button (with `run` and `splitButtonProps`).
+- **`switch`** — an optional `AppMenuSwitch` rendered to the left of the menu items. Only one switch is available per app menu.
+
 ## Usage
 
 There are two ways of adding the app menu to your application:

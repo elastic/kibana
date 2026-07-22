@@ -10,6 +10,7 @@ import type {
   SavedObject,
   ElasticsearchClient,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { omit } from 'lodash';
 import pMap from 'p-map';
 
@@ -19,6 +20,7 @@ import {
   MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS,
 } from '../constants';
 import { FleetProxyUnauthorizedError } from '../errors';
+import { validateFleetSavedObjectId } from '../../common/services';
 import type {
   DownloadSource,
   FleetProxy,
@@ -79,6 +81,8 @@ export async function createFleetProxy(
   const logger = appContextService.getLogger();
   logger.debug(`Creating fleet proxy ${data}`);
 
+  validateFleetSavedObjectId(options?.id);
+
   const res = await soClient.create<FleetProxySOAttributes>(
     FLEET_PROXY_SAVED_OBJECT_TYPE,
     fleetProxyDataToSOAttribute(data),
@@ -89,6 +93,35 @@ export async function createFleetProxy(
   );
   logger.debug(`Created fleet proxy ${options?.id}`);
   return savedObjectToFleetProxy(res);
+}
+
+export async function bulkCreateFleetProxies(
+  soClient: SavedObjectsClientContract,
+  proxies: Array<NewFleetProxy & { id?: string }>,
+  options?: { overwrite?: boolean }
+): Promise<FleetProxy[]> {
+  if (proxies.length === 0) {
+    return [];
+  }
+  const logger = appContextService.getLogger();
+  logger.debug(`Bulk creating ${proxies.length} fleet proxies`);
+
+  const res = await soClient.bulkCreate<FleetProxySOAttributes>(
+    proxies.map(({ id, ...data }) => ({
+      type: FLEET_PROXY_SAVED_OBJECT_TYPE,
+      id,
+      attributes: fleetProxyDataToSOAttribute(data),
+    })),
+    { overwrite: options?.overwrite }
+  );
+
+  const itemErrors = res.saved_objects.filter(isSavedObjectErrorResult);
+  if (itemErrors.length > 0) {
+    throw itemErrors[0].error;
+  }
+
+  logger.debug(`Bulk created ${proxies.length} fleet proxies`);
+  return res.saved_objects.map(savedObjectToFleetProxy);
 }
 
 export async function getFleetProxy(
@@ -178,7 +211,7 @@ export async function bulkGetFleetProxies(
 
   return res.saved_objects
     .map((so) => {
-      if (so.error) {
+      if (isSavedObjectErrorResult(so)) {
         if (!ignoreNotFound || so.error.statusCode !== 404) {
           throw so.error;
         }

@@ -38,6 +38,7 @@ export const OnePasswordConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
+    docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/one-password-action-type`,
   },
   auth: {
     types: [

@@ -22,6 +22,7 @@ import {
   type KibanaResponseFactory,
 } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { createVersionedRouterMock, type MockedVersionedRouter } from './versioned_router.mock';
 import { lazyObject } from '@kbn/lazy-object';
 
@@ -64,6 +65,7 @@ export interface RequestFixtureOptions<P = any, Q = any, B = any> {
     query?: RouteValidationSpec<Q>;
     body?: RouteValidationSpec<B>;
   };
+  spaceId?: string;
 }
 
 function createKibanaRequestMock<P = any, Q = any, B = any>({
@@ -85,13 +87,18 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
     startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
   },
   auth = { isAuthenticated: true },
+  spaceId,
 }: RequestFixtureOptions<P, Q, B> = {}): KibanaRequest<P, Q, B> {
   const queryString = stringify(query, { sort: false });
   const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
+  const appState = spaceId
+    ? { ...kibanaRequestState, spaceId: asSpaceId(spaceId) }
+    : kibanaRequestState;
+
   return kibanaRequestFactory<P, Q, B>(
     hapiMocks.createRequest({
-      app: kibanaRequestState,
+      app: appState,
       auth,
       headers,
       params,

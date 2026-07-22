@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { createSavedObjectClientMock } from '../mocks';
 

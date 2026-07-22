@@ -17,21 +17,28 @@ import {
   EuiIcon,
   EuiPopover,
   EuiTextTruncate,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
+import type { ConversationDisplayStatus } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
 import { appPaths } from '../../../../../utils/app_paths';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import {
   createActiveConversationListItemStyles,
   createConversationListItemStyles,
+  createStatusLinkStyles,
 } from '../../../../conversations/conversation_list_item_styles';
 import { BaseDeleteConversationModal } from '../../../../conversations/delete_conversation_modal';
 import { BaseRenameConversationModal } from '../../../../conversations/rename_conversation_modal';
+import { ConversationStatusIndicator } from './conversation_status_indicator';
 
 const ACTIONS_CLASS = 'agentBuilderSidebarConversationListRowActions';
+const STATUS_INDICATOR_CLASS = 'agentBuilderSidebarConversationListRowStatusIndicator';
 
 const labels = {
   rename: i18n.translate('xpack.agentBuilder.sidebar.conversationList.rename', {
@@ -39,6 +46,12 @@ const labels = {
   }),
   delete: i18n.translate('xpack.agentBuilder.sidebar.conversationList.delete', {
     defaultMessage: 'Delete',
+  }),
+  markAsRead: i18n.translate('xpack.agentBuilder.sidebar.conversationList.markAsRead', {
+    defaultMessage: 'Mark as read',
+  }),
+  markAsUnread: i18n.translate('xpack.agentBuilder.sidebar.conversationList.markAsUnread', {
+    defaultMessage: 'Mark as unread',
   }),
   openMenu: i18n.translate('xpack.agentBuilder.sidebar.conversationList.openMenu', {
     defaultMessage: 'Open conversation menu',
@@ -56,6 +69,8 @@ export interface ConversationListItemRowProps {
   routeConversationId: string | undefined;
   showActionsMenu?: boolean;
   onItemClick?: () => void;
+  status?: ConversationDisplayStatus;
+  read?: boolean;
 }
 
 export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = ({
@@ -66,24 +81,27 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   routeConversationId,
   showActionsMenu = true,
   onItemClick,
+  status,
+  read,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const { deleteConversation, renameConversation } = useConversationListMutations({
-    routeConversationId,
-  });
+  const { deleteConversation, renameConversation, markAsRead, markAsUnread } =
+    useConversationListMutations({ routeConversationId, agentId });
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
 
   const baseLinkStyles = createConversationListItemStyles(euiTheme);
   const activeLinkStyles = createActiveConversationListItemStyles(euiTheme);
+  const statusLinkStyles = createStatusLinkStyles(status, euiTheme);
 
   const linkStyles = css([
     isActive ? activeLinkStyles : baseLinkStyles,
+    statusLinkStyles,
     css`
       flex: 1 1 0;
       min-width: 0;
@@ -99,7 +117,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       align-items: center;
       gap: ${euiTheme.size.xxs};
       border-radius: ${euiTheme.border.radius.small};
-      padding-inline-end: ${showActionsMenu ? euiTheme.size.xxs : 0};
+      padding-inline-end: ${status || showActionsMenu ? euiTheme.size.xxs : 0};
 
       &:hover,
       &:focus-within {
@@ -111,11 +129,21 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         background-color: ${bg};
       `}
 
+      .${STATUS_INDICATOR_CLASS} {
+        opacity: 1;
+        transition: opacity 150ms ease;
+      }
+
+      .${ACTIONS_CLASS} {
+        opacity: 0;
+        transition: opacity 150ms ease;
+      }
+
       ${showActionsMenu &&
       css`
-        .${ACTIONS_CLASS} {
-          flex-shrink: 0;
+        &:hover .${STATUS_INDICATOR_CLASS}, &:focus-within .${STATUS_INDICATOR_CLASS} {
           opacity: 0;
+          pointer-events: none;
         }
 
         &:hover .${ACTIONS_CLASS}, &:focus-within .${ACTIONS_CLASS} {
@@ -124,13 +152,19 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
 
         ${isPopoverOpen &&
         css`
+          .${STATUS_INDICATOR_CLASS} {
+            opacity: 0;
+            pointer-events: none;
+          }
           .${ACTIONS_CLASS} {
             opacity: 1;
           }
         `}
       `}
     `;
-  }, [euiTheme, isActive, isPopoverOpen, showActionsMenu]);
+  }, [euiTheme, isActive, isPopoverOpen, showActionsMenu, status]);
+
+  const isUnread = read === false;
 
   const menuItems = useMemo(
     () => [
@@ -142,8 +176,32 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           closePopover();
           setIsRenameModalOpen(true);
         }}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          action: AGENT_BUILDER_UI_EBT.action.conversationList.RENAME_CONVERSATION,
+        })}
       >
         {labels.rename}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="read-status"
+        icon={isUnread ? 'eyeClosed' : 'eye'}
+        onClick={() => {
+          closePopover();
+          if (isUnread) {
+            markAsRead(conversationId);
+          } else {
+            markAsUnread(conversationId);
+          }
+        }}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          action: isUnread
+            ? AGENT_BUILDER_UI_EBT.action.conversationList.MARK_AS_READ
+            : AGENT_BUILDER_UI_EBT.action.conversationList.MARK_AS_UNREAD,
+        })}
+      >
+        {isUnread ? labels.markAsRead : labels.markAsUnread}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="delete"
@@ -156,27 +214,37 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           closePopover();
           setIsDeleteModalOpen(true);
         }}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          action: AGENT_BUILDER_UI_EBT.action.conversationList.DELETE_CONVERSATION,
+        })}
       >
         {labels.delete}
       </EuiContextMenuItem>,
     ],
-    [closePopover, conversationId, euiTheme.colors.danger]
+    [closePopover, conversationId, euiTheme.colors.danger, isUnread, markAsRead, markAsUnread]
   );
 
   const menuButton = (
-    <EuiButtonIcon
-      iconType="boxesVertical"
-      display="empty"
-      size="xs"
-      aria-label={labels.openMenu}
-      aria-expanded={isPopoverOpen}
-      onClick={(e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        togglePopover();
-      }}
-      data-test-subj={`agentBuilderSidebarConversationMenu-${conversationId}`}
-    />
+    <EuiToolTip content={labels.openMenu} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="boxesVertical"
+        display="empty"
+        size="xs"
+        aria-label={labels.openMenu}
+        aria-expanded={isPopoverOpen}
+        onClick={(e: React.MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          togglePopover();
+        }}
+        data-test-subj={`agentBuilderSidebarConversationMenu-${conversationId}`}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          action: AGENT_BUILDER_UI_EBT.action.conversationList.OPEN_CONVERSATION_MENU,
+        })}
+      />
+    </EuiToolTip>
   );
 
   return (
@@ -198,26 +266,67 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
             to={appPaths.agent.conversations.byId({ agentId, conversationId })}
             css={linkStyles}
             data-test-subj={`agentBuilderSidebarConversation-${conversationId}`}
-            onClick={onItemClick}
+            onClick={() => {
+              onItemClick?.();
+            }}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.sidebar,
+              action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_RESUME,
+            })}
           >
             <EuiTextTruncate text={title || conversationId} />
           </Link>
         </EuiFlexItem>
 
-        {showActionsMenu ? (
+        {status !== undefined || showActionsMenu ? (
           <EuiFlexItem grow={false}>
-            <div className={ACTIONS_CLASS}>
-              <EuiPopover
-                button={menuButton}
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-                panelPaddingSize="none"
-                anchorPosition="downRight"
-                repositionOnScroll
-                aria-label={labels.actionsMenu}
-              >
-                <EuiContextMenuPanel items={menuItems} />
-              </EuiPopover>
+            <div
+              css={css`
+                position: relative;
+                width: ${euiTheme.size.l};
+                height: ${euiTheme.size.l};
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              `}
+            >
+              {status !== undefined && (
+                <div
+                  className={STATUS_INDICATOR_CLASS}
+                  css={css`
+                    position: absolute;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  `}
+                >
+                  <ConversationStatusIndicator status={status} />
+                </div>
+              )}
+              {showActionsMenu && (
+                <div
+                  className={ACTIONS_CLASS}
+                  css={css`
+                    position: absolute;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  `}
+                >
+                  <EuiPopover
+                    button={menuButton}
+                    isOpen={isPopoverOpen}
+                    closePopover={closePopover}
+                    panelPaddingSize="none"
+                    anchorPosition="downRight"
+                    repositionOnScroll
+                    aria-label={labels.actionsMenu}
+                  >
+                    <EuiContextMenuPanel items={menuItems} />
+                  </EuiPopover>
+                </div>
+              )}
             </div>
           </EuiFlexItem>
         ) : null}

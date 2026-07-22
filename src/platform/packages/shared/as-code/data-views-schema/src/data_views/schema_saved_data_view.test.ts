@@ -80,6 +80,41 @@ describe('savedDataViewSpecSchema', () => {
     );
   });
 
+  it('accepts field_filters as an array of strings', () => {
+    const input = {
+      index_pattern: 'logs-*',
+      field_filters: ['field_a', 'field_b'],
+    };
+
+    expect(savedDataViewSpecSchema.validate(input)).toEqual(input);
+  });
+
+  it('accepts an empty field_filters array', () => {
+    const input = {
+      index_pattern: 'logs-*',
+      field_filters: [],
+    };
+
+    expect(savedDataViewSpecSchema.validate(input)).toEqual(input);
+  });
+
+  it('accepts spec without field_filters', () => {
+    const input = {
+      index_pattern: 'logs-*',
+    };
+
+    expect(savedDataViewSpecSchema.validate(input)).toEqual(input);
+  });
+
+  it('rejects field_filters with non-string values', () => {
+    const input = {
+      index_pattern: 'logs-*',
+      field_filters: [123],
+    };
+
+    expect(() => savedDataViewSpecSchema.validate(input)).toThrow();
+  });
+
   it('rejects an empty field_settings key', () => {
     const input = {
       index_pattern: 'logs-*',

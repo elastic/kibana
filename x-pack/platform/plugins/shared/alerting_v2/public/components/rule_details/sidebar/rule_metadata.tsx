@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -14,6 +14,7 @@ import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profile
 import { resolveDisplayName } from '../../../utils/resolve_display_name';
 import { useRule } from '../rule_context';
 import { EMPTY_VALUE } from '../utils';
+import { RuleDetailsTable } from './rule_details_table';
 
 export const RuleMetadata: React.FunctionComponent = () => {
   const rule = useRule();
@@ -57,21 +58,16 @@ export const RuleMetadata: React.FunctionComponent = () => {
 
   return (
     <>
-      <EuiTitle size="s">
-        <h2>
+      <EuiTitle size="xxs">
+        <h3>
           {i18n.translate('xpack.alertingV2.ruleDetails.metadata', {
             defaultMessage: 'Metadata',
           })}
-        </h2>
+        </h3>
       </EuiTitle>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
-      <EuiDescriptionList
-        compressed
-        type="column"
-        listItems={metadataItems}
-        css={{ maxWidth: 600 }}
-      />
+      <RuleDetailsTable items={metadataItems} />
     </>
   );
 };

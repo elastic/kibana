@@ -201,7 +201,7 @@ const hardDeleteWorkflows = async (
     }
   }
 
-  await unscheduleWorkflowTasks(successfulIds, taskScheduler, logger);
+  await unscheduleWorkflowTasks(successfulIds, taskScheduler);
   await purgeWorkflowRelatedData(successfulIds, spaceId, esClient, logger);
 
   return {
@@ -252,7 +252,7 @@ const softDeleteWorkflows = async (
       successfulIds.push(...successIds);
       failures.push(...bulkFailures);
 
-      await unscheduleWorkflowTasks(successfulIds, deps.taskScheduler, deps.logger);
+      await unscheduleWorkflowTasks(successfulIds, deps.taskScheduler);
     } catch (error) {
       bulkOperations.forEach((op) => {
         failures.push({

@@ -23,8 +23,6 @@ export const DEFAULT_PLATFORM = 'linux,windows,darwin';
 
 export const OSQUERY_SCHEDULED_INPUT_TYPE = 'osquery_scheduled';
 
-export const CASE_ATTACHMENT_TYPE_ID = 'osquery';
-
 export const API_VERSIONS = {
   public: {
     v1: '2023-10-31',

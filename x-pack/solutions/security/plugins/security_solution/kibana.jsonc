@@ -67,6 +67,7 @@
       "telemetry",
       "elasticAssistantSharedState",
       "share",
+      "workflowsExtensions"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -86,9 +87,9 @@
       "serverless",
       "agentBuilder",
       "llmTasks",
-      "workflowsExtensions",
       "cps",
-      "searchInferenceEndpoints"
+      "searchInferenceEndpoints",
+      "esql"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -100,7 +101,8 @@
       "ml",
       "unifiedSearch",
       "esql",
-      "agentBuilder"
+      "agentBuilder",
+      "workflowsExtensions"
     ],
     "extraPublicDirs": [
       "common"

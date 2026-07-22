@@ -17,7 +17,7 @@
 
 import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
-import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline';
+import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
@@ -29,6 +29,7 @@ import {
   type GetPipelineOptions,
   prHasFIPSLabel,
   doAllChangesMatch,
+  isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
@@ -49,6 +50,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
   const pipeline: string[] = [];
 
   try {
+    if (await isAutomatedVersionBumpPR()) {
+      emitPipeline([emptyStep]);
+      return;
+    }
+
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
@@ -125,18 +131,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml', cancelable)
       );
-    }
-
-    if (
-      (await doAnyChangesMatch([
-        /^x-pack\/solutions\/observability\/plugins\/apm/,
-        /^src\/platform\/packages\/shared\/kbn-synthtrace/,
-        /^\.buildkite\/pipelines\/pull_request\/apm_cypress\.yml/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
-      ALL_UI_TEST_SUITES
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml', cancelable));
     }
 
     if (
@@ -600,9 +594,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
-    const evalsYaml = getEvalPipeline(GITHUB_PR_LABELS);
-    if (evalsYaml) {
-      pipeline.push(evalsYaml);
+    // On matching labels, hand LLM evals to the dedicated `kibana-evals-pr-llm-evals` pipeline via a
+    // fire-and-forget trigger step (not inline) so their runtime is off the PR's critical path.
+    const evalsTrigger = getEvalTriggerStep(GITHUB_PR_LABELS);
+    if (evalsTrigger) {
+      pipeline.push(evalsTrigger);
     }
 
     if (GITHUB_PR_LABELS.includes('ci:sync-model-labels')) {
@@ -643,20 +639,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
-    // Run Saved Objects checks conditionally
-    if (
-      await doAnyChangesMatch([
-        /^packages\/kbn-check-saved-objects-cli\/current_fields.json/,
-        /^packages\/kbn-check-saved-objects-cli\/current_mappings.json/,
-        /^src\/core\/server\/integration_tests\/ci_checks\/saved_objects\/check_registered_types.test.ts/,
-        /^\.buildkite\/pipelines\/pull_request\/check_saved_objects\.yml/,
-        /^src\/core\/packages\/saved-objects\/server-internal\/wip_types\.json/,
-      ])
-    ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml', cancelable)
-      );
-    }
+    // Run Saved Objects checks systematically
+    pipeline.push(
+      getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml', cancelable)
+    );
 
     // Run Workflow Schema OOM prevention test when schema or connector whitelist changes
     if (
@@ -689,6 +675,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/page_load_bench.yml', cancelable)
       );
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:run-code-quality')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/code_quality.yml', cancelable));
     }
 
     // post_build is not cancelable — cleanup/reporting should always run

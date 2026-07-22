@@ -16,9 +16,9 @@ import {
   isOAuthClientLogoMediaType,
 } from '@kbn/security-plugin/common/oauth';
 import { useFormContext } from 'react-hook-form';
+import { McpClientLogo } from '@kbn/agent-builder-browser';
 import { readBlobAsDataUrl } from '../../../utils/data_url';
 import { labels } from '../../../utils/i18n';
-import { McpClientLogo } from '../mcp_client_logo';
 import { toClientLogoPayload } from './mcp_client_transform';
 import type { McpClientFormData } from './types';
 

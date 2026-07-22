@@ -40,6 +40,7 @@ test.describe(
       await test.step('navigate to Auto-detect flow', async () => {
         await pageObjects.onboarding.selectHostUseCase();
         await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
+        await pageObjects.onboarding.waitForIngestionModeSelector();
       });
 
       await test.step('Classic ingestion is selected by default', async () => {
@@ -60,6 +61,7 @@ test.describe(
     test('canceling the modal keeps Classic ingestion selected', async ({ pageObjects }) => {
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
+      await pageObjects.onboarding.waitForIngestionModeSelector();
 
       await test.step('open modal and cancel', async () => {
         await pageObjects.onboarding.selectWiredStreams();
@@ -85,6 +87,7 @@ test.describe(
     }) => {
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
+      await pageObjects.onboarding.waitForIngestionModeSelector();
 
       await test.step('open modal and confirm', async () => {
         await pageObjects.onboarding.selectWiredStreams();
@@ -125,6 +128,7 @@ test.describe(
 
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
+      await pageObjects.onboarding.waitForIngestionModeSelector();
 
       await test.step('clicking Wired Streams switches directly without modal', async () => {
         await pageObjects.onboarding.selectWiredStreams();

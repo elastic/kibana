@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiListGroup,
+  EuiHorizontalRule,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PopoverListItem } from '../../../../popovers/primitives/popover_list_item';
 import {
@@ -28,7 +34,6 @@ import {
   emitPinnedEuidToggle,
 } from '../../../../filters/filter_store';
 import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../../../common/constants';
-import { useOpenEntityPreviewPanel } from '../../../hooks/use_open_entity_preview_panel';
 
 const actionsButtonAriaLabel = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.actionsButton.ariaLabel',
@@ -43,20 +48,36 @@ export interface EntityActionsButtonProps {
    * Unique identifier for the graph instance, used to scope filter state.
    */
   scopeId: string;
+  /**
+   * Whether this entity is the initial/origin entity of the graph investigation.
+   * When true, "hide entity relationships" is disabled because the origin entity's
+   * relationships are always shown and cannot be hidden from the grouped panel.
+   */
+  isInitialEntity?: boolean;
+  /** Invoked to open the entity details preview for the clicked item. */
+  onShowEntity: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 }
 
 /**
  * Actions button for entity items in the grouped node preview panel.
  * Shows a popover with filter toggle actions and entity details option.
  * Uses FilterStore (scoped by scopeId) for filter state management.
- * Uses useExpandableFlyoutApi to open entity details preview panel.
+ * Delegates opening the entity details preview to the consumer via `onShowEntity`.
  */
-export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps) => {
+export const EntityActionsButton = ({
+  item,
+  scopeId,
+  isInitialEntity = false,
+  onShowEntity,
+}: EntityActionsButtonProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
 
-  const openEntityPreviewPanel = useOpenEntityPreviewPanel();
   const sourceFields = (item.entity.sourceFields ?? {}) as Record<string, string | string[]>;
   const engineType = item.entity.engine_type;
 
@@ -135,7 +156,8 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
   const items = getEntityExpandItems({
     nodeId: item.id,
     entityFilterActions,
-    onShowEntityDetails: () => openEntityPreviewPanel(item.id, scopeId, item.entity),
+    onShowEntityDetails: () =>
+      onShowEntity({ engineType, entityId: item.id, entityName: item.entity.name }),
     onClose: closePopover,
     shouldRender: {
       showEntityRelationships: true,
@@ -146,21 +168,28 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
     },
     showEntityDetailsDisabled: !item.entity.availableInEntityStore,
     isEntityRelationshipsExpanded: isEntityRelationshipExpandedForScope(scopeId, item.id),
-    toggleEntityRelationships: (action) => emitEntityRelationshipToggle(scopeId, item.id, action),
-    showEntityRelationshipsDisabled: !item.entity.availableInEntityStore,
+    toggleEntityRelationships: (action) => {
+      emitEntityRelationshipToggle(scopeId, item.id, action);
+      // Pin the entity when showing relationships so it appears as a solo node
+      // rather than merging back into its type-group. Unpin when hiding.
+      emitPinnedEuidToggle(scopeId, item.id, action);
+    },
+    showEntityRelationshipsDisabled: !item.entity.availableInEntityStore || isInitialEntity,
   });
 
   return (
     <EuiPopover
       aria-label={actionsButtonAriaLabel}
       button={
-        <EuiButtonIcon
-          iconType="boxesHorizontal"
-          aria-label={actionsButtonAriaLabel}
-          color="text"
-          onClick={togglePopover}
-          data-test-subj={GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID}
-        />
+        <EuiToolTip content={actionsButtonAriaLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            aria-label={actionsButtonAriaLabel}
+            color="text"
+            onClick={togglePopover}
+            data-test-subj={GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}

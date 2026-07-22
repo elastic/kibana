@@ -65,6 +65,7 @@ export const esqlAsyncSearchStrategyProvider = (
         signal: options.abortSignal,
         meta: true,
         asStream: options.stream,
+        requestTimeout: 10_000, // The P99 latency for this API is around 9s and 10s is a good compromise between waiting for partial results and not keeping the UI blocked.
       }
     );
   }
@@ -109,6 +110,7 @@ export const esqlAsyncSearchStrategyProvider = (
 
     const params = {
       ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
+      ...(options.approximation !== undefined && { approximation: options.approximation }),
       ...requestParams,
     };
 

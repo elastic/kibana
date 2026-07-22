@@ -15,7 +15,7 @@ const YARN_EXEC = process.env.npm_execpath || 'yarn';
 export const InstallDependencies: Task = {
   description: 'Installing node_modules, including production builds of packages',
 
-  async run(config, log, build) {
+  async run(_config, log, build) {
     await exec(
       log,
       YARN_EXEC,

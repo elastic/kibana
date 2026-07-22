@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/269635
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Dashboards and visualizations
+title: Show feedback in tables when a filter cannot be applied
+description: Displays a notification in data tables when a filter action cannot be applied, so users understand why filtering did not take effect.

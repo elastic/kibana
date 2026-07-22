@@ -21,6 +21,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { useConversationList } from '../../hooks/use_conversation_list';
 import {
   createActiveConversationListItemStyles,
@@ -112,6 +114,10 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
                   onClose();
                 }}
                 data-test-subj={`agentBuilderConversationSearchResult-${conversation.id}`}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                  action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_RESUME,
+                })}
               >
                 <EuiTextTruncate text={conversation.title || conversation.id} />
               </button>

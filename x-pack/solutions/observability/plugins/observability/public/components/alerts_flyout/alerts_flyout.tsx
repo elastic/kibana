@@ -35,6 +35,7 @@ import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { paths } from '../../../common/locators/paths';
 import { AlertOverview } from '../alert_overview/alert_overview';
 import { useKibana } from '../../utils/kibana_react';
+import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 
 type TabId = 'overview' | 'table';
@@ -61,6 +62,9 @@ export function AlertsFlyout({
       basePath: { prepend },
     },
   } = useKibana().services;
+  const { authorizedToReadRuleForAlert } = useAuthorizedToReadRuleType();
+
+  const canReadAlertRule = alert ? authorizedToReadRuleForAlert(alert) : false;
 
   const parsedAlert = alert ? parseAlert(observabilityRuleTypeRegistry)(alert) : null;
 
@@ -162,7 +166,7 @@ export function AlertsFlyout({
             <EuiText size="s" color="subdued">
               {getAlertSubtitle(alert[ALERT_RULE_CATEGORY]?.[0] as string)}
             </EuiText>
-            {alert?.[ALERT_RULE_UUID] && (
+            {canReadAlertRule && alert?.[ALERT_RULE_UUID] && (
               <EuiText size="s">
                 <EuiLink
                   data-test-subj="o11yAlertFlyoutRuleLink"

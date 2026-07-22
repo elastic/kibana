@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/entity-store",
-  "owner": "@elastic/core-analysis",
+  "owner": "@elastic/security-entity-analytics",
   "description": "Central place for Entities management and logs extraction",
   "group": "security",
   "visibility": "private",
@@ -14,13 +14,15 @@
       "taskManager",
       "dataViews",
       "security",
-      "licensing"
+      "licensing",
+      "workflowsExtensions"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects"
     ],
     "extraPublicDirs": [
-      "common"
+      "common",
+      "common/entity_summary"
     ]
   }
 }

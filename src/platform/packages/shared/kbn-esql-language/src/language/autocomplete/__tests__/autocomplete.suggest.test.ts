@@ -20,4 +20,20 @@ describe('autocomplete.suggest', () => {
 
     expect((callbacks.getColumnsFor as any).mock.calls.length).toBe(0);
   });
+
+  describe('new line suggestion', () => {
+    test('does not suggest "New line" when cursor is at the start of an empty line', async () => {
+      const { suggest } = await setup();
+      // caret is on the blank line after the newline
+      const result = await suggest('FROM index | LIMIT 10\n/');
+      expect(result.map((s) => s.text)).not.toContain('\n');
+    });
+
+    test('suggests "New line" when cursor is at the end of a non-empty line', async () => {
+      const { suggest } = await setup();
+      // caret after trailing space — triggers after_value position in LIMIT
+      const result = await suggest('FROM index | LIMIT 10 /');
+      expect(result.map((s) => s.text)).toContain('\n');
+    });
+  });
 });

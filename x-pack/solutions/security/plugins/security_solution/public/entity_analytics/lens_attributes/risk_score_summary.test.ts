@@ -14,15 +14,6 @@ import { useLensAttributes } from '../../common/components/visualization_actions
 import type { Query } from '@kbn/es-query';
 import { EntityType } from '../../../common/entity_analytics/types';
 
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
-
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),
 }));

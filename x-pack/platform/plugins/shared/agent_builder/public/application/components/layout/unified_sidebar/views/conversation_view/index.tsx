@@ -21,7 +21,8 @@ import {
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { appPaths } from '../../../../../utils/app_paths';
 import {
   getAgentIdFromPath,
@@ -81,7 +82,7 @@ export const ConversationSidebarView: React.FC = () => {
 
   const { conversations = [] } = useConversationList({ agentId });
   const hasConversations = conversations.length > 0;
-  const { removeAllErrors } = useStreamingContext();
+  const { removeAllErrors, removeError } = useStreamingContext();
 
   const isNewConversationRoute =
     conversationId === 'new' || pathname === appPaths.agent.root({ agentId });
@@ -133,8 +134,8 @@ export const ConversationSidebarView: React.FC = () => {
     navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
   };
 
-  const handleConversationItemClick = () => {
-    removeAllErrors();
+  const handleConversationItemClick = (clickedConversationId: string) => {
+    removeError(clickedConversationId);
   };
 
   return (
@@ -204,6 +205,11 @@ export const ConversationSidebarView: React.FC = () => {
                             color="text"
                             onClick={handlePressNewConversation}
                             data-test-subj="agentBuilderSidebarNewConversationButton"
+                            {...getEbtProps({
+                              element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                              action:
+                                AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
+                            })}
                           >
                             {newLabel}
                           </EuiButton>
@@ -218,6 +224,11 @@ export const ConversationSidebarView: React.FC = () => {
                             onClick={() => setIsSearchModalOpen(true)}
                             disabled={!hasConversations}
                             data-test-subj="agentBuilderSidebarSearchChatsButton"
+                            {...getEbtProps({
+                              element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                              action:
+                                AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_SEARCH,
+                            })}
                           >
                             {searchLabel}
                           </EuiButton>
@@ -261,7 +272,7 @@ export const ConversationSidebarView: React.FC = () => {
           currentConversationId={conversationId}
           onClose={() => setIsSearchModalOpen(false)}
           onSelectConversation={(id) => {
-            removeAllErrors();
+            removeError(id);
             navigateToAgentBuilderUrl(
               appPaths.agent.conversations.byId({ agentId, conversationId: id })
             );

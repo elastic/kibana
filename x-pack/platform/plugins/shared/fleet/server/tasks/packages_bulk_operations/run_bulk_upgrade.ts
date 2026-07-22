@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type {
   ElasticsearchClient,
@@ -126,6 +126,9 @@ async function bulkUpgradePackagePolicies({
   });
 
   if (policyIdsToUpgrade.items.length) {
+    // Agentless is intentionally NOT filtered out under disableAgentlessLegacyAPI: the flag targets
+    // the public legacy policy APIs, not this system path. Same engine the agentless API uses, and
+    // the periodic deployment-sync task reconciles the workload by revision.
     const upgradePackagePoliciesResults = await packagePolicyService.bulkUpgrade(
       savedObjectsClient,
       esClient,

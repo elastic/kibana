@@ -1,0 +1,124 @@
+version: '1'
+name: Security - Attack discovery - Generation
+description: |
+  Generates Attack discoveries from the provided context. This workflow is for
+  Generation only; (no Alert retrieval or validation steps are executed)
+enabled: true
+tags:
+  - Attack discovery
+  - Security
+  - attackDiscovery:generation
+
+triggers:
+  - type: manual
+
+inputs:
+  additionalProperties: false
+  properties:
+    additional_context:
+      description: |
+        Optional free-form text appended to the LLM generation prompt.
+        Use this to provide extra context, constraints, or focus areas
+        that the model should consider when analysing alerts.
+      type: string
+    additional_alerts:
+      default: []
+      description: |
+        Pre-retrieved alerts passed from the pipeline endpoint.
+        The pipeline endpoint runs retrieval workflows separately
+        and passes the results here for generation.
+      items:
+        type: string
+      type: array
+    alert_retrieval_workflow_ids:
+      default: []
+      description: |
+        Array of custom alert retrieval workflow IDs to execute.
+        This array is read but not acted upon by this workflow.
+        The pipeline endpoint handles retrieval orchestration.
+      items:
+        type: string
+      type: array
+    alerts_index_pattern:
+      description: >
+        Elasticsearch index pattern for security alerts. When not provided,
+        defaults to .alerts-security.alerts-<spaceId> using the current
+        Kibana space (via workflow.spaceId).
+      type: string
+    anonymization_fields:
+      description: Fields to anonymize before sending to LLM
+      items:
+        additionalProperties: true
+        type: object
+      type: array
+    api_config:
+      additionalProperties: false
+      description: LLM API configuration
+      properties:
+        action_type_id:
+          type: string
+        connector_id:
+          type: string
+        model:
+          type: string
+      required:
+        - connector_id
+      type: object
+    connector_name:
+      description: Human-readable name of the connector (defaults to connector_id if not provided)
+      type: string
+    end:
+      description: Time range end (e.g., "now")
+      type: string
+    filter:
+      additionalProperties: true
+      description: Elasticsearch query filter
+      type: object
+    alert_retrieval_mode:
+      default: 'custom_query'
+      description: |
+        Controls how the built-in default alert retrieval workflow operates.
+        Values: 'custom_query' (DSL-based), 'esql' (ES|QL query), 'custom_only' (skip built-in retrieval),
+        'provided' (alerts supplied directly via the `alerts` input; retrieval is skipped),
+        'skill' (alerts retrieved by the attack-discovery-generator skill workflow).
+        This field is read but not acted upon by this workflow.
+        The _generate endpoint handles retrieval orchestration.
+      type: string
+      enum: ['custom_only', 'custom_query', 'esql', 'provided', 'skill']
+    esql_query:
+      description: |
+        ES|QL query for alert retrieval (required when alert_retrieval_mode is 'esql').
+      type: string
+    validation_workflow_id:
+      default: 'default'
+      description: |
+        ID of the validation workflow to use, or "default" for built-in validation.
+        This ID is read but not acted upon by this workflow.
+        The _generate endpoint handles validation orchestration.
+      type: string
+    replacements:
+      additionalProperties: true
+      description: Initial anonymization replacements
+      type: object
+    size:
+      default: 150
+      description: Maximum number of alerts to retrieve
+      type: integer
+    start:
+      description: Time range start (e.g., "now-24h")
+      type: string
+  required:
+    - api_config
+
+steps:
+  - name: generate_discoveries
+    type: security.attack-discovery.generate
+    timeout: '10m'
+    with:
+      additional_context: ${{ inputs.additional_context }}
+      alerts: ${{ inputs.additional_alerts }}
+      api_config: ${{ inputs.api_config }}
+      replacements: ${{ inputs.replacements }}
+      type: attack_discovery
+  # Validation is handled outside this workflow by the _generate endpoint,
+  # which invokes the alert retrieval, generation, and validation workflows sequentially.

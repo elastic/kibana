@@ -188,6 +188,7 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.security.session.idleTimeout=3600000', // 1 hour
       '--telemetry.optIn=true',
       '--xpack.fleet.agents.pollingRequestTimeout=5000', // 5 seconds
+      '--xpack.fleet.productVersionsApiTimeoutMs=5000',
       '--xpack.ruleRegistry.write.enabled=true',
       '--xpack.ruleRegistry.write.enabled=true',
       '--xpack.ruleRegistry.write.cache.enabled=false',

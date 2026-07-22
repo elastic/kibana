@@ -22,7 +22,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ServiceMapGraph } from '../graph';
 import {
   generateServiceMapElements,
@@ -47,14 +46,8 @@ const defaultTimeRange = {
 const meta: Meta<typeof ServiceMapGraph> = {
   title: 'app/ServiceMap/ServiceMap',
   component: ServiceMapGraph,
-  decorators: [
-    (Story) => (
-      <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
-        <Story />
-      </MockApmPluginStorybook>
-    ),
-  ],
   parameters: {
+    routePath: '/service-map?rangeFrom=now-15m&rangeTo=now',
     layout: 'fullscreen',
     a11y: {
       config: {

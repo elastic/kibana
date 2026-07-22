@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -153,15 +154,22 @@ export const RunTimeFilter: React.FC<RunTimeFilterProps> = ({ value, unit, onCha
         </EuiFlexItem>
         {hasDraftValue && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              color="primary"
-              size="s"
-              aria-label={i18n.translate('xpack.queryActivity.runTimeFilter.clearFilter', {
+            <EuiToolTip
+              content={i18n.translate('xpack.queryActivity.runTimeFilter.clearFilter', {
                 defaultMessage: 'Clear filter',
               })}
-              onClick={handleClear}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="cross"
+                color="primary"
+                size="s"
+                aria-label={i18n.translate('xpack.queryActivity.runTimeFilter.clearFilter', {
+                  defaultMessage: 'Clear filter',
+                })}
+                onClick={handleClear}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

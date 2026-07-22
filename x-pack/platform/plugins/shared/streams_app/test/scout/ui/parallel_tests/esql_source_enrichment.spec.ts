@@ -23,10 +23,6 @@ test.describe(
       await apiServices.streams.updateStream(STREAM_NAME, { description: STREAM_DESCRIPTION });
     });
 
-    test.beforeEach(async ({ pageObjects }) => {
-      await pageObjects.discover.setQueryMode('classic');
-    });
-
     test.afterAll(async ({ apiServices }) => {
       await apiServices.streams.deleteStream(STREAM_NAME);
     });
@@ -37,7 +33,7 @@ test.describe(
       page,
     }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'classic' });
 
       const codeEditor = pageObjects.discover.codeEditor;
 

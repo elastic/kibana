@@ -22,6 +22,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 export interface ReputationLinkSetting {
   name: string;
@@ -113,6 +114,10 @@ export const ReputationLinksOverflow = React.memo<ReputationLinkOverflowProps>(
         {rowItems.length > overflowIndexStart && (
           <EuiPopover
             id="popover"
+            aria-label={i18n.translate(
+              'xpack.securitySolution.reputationLinks.overflowPopover.ariaLabel',
+              { defaultMessage: 'More reputation links' }
+            )}
             button={button}
             isOpen={isOpen}
             closePopover={togglePopover}

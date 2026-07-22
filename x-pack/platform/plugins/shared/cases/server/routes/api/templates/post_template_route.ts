@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
-import { CreateTemplateInputSchema } from '../../../../common/types/domain/template/v1';
+import { parse as yamlParse } from 'yaml';
+import { isBoom } from '@hapi/boom';
+import {
+  CreateTemplateInputSchema,
+  ParsedTemplateDefinitionSchema,
+} from '../../../../common/types/domain/template/v1';
 import { INTERNAL_TEMPLATES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -33,11 +37,24 @@ export const postTemplateRoute = createCasesRoute({
       const input = CreateTemplateInputSchema.parse(request.body);
 
       // Validate YAML definition can be parsed
+      let parsedYaml: unknown;
       try {
-        yaml.load(input.definition);
+        parsedYaml = yamlParse(input.definition);
       } catch (yamlError) {
         return response.badRequest({
           body: { message: `Invalid YAML definition: ${yamlError}` },
+        });
+      }
+
+      // Validate parsed definition against the field schema
+      const definitionResult = ParsedTemplateDefinitionSchema.safeParse(parsedYaml);
+      if (!definitionResult.success) {
+        return response.badRequest({
+          body: {
+            message: `Invalid template definition: ${JSON.stringify(
+              definitionResult.error.issues
+            )}`,
+          },
         });
       }
 
@@ -48,6 +65,12 @@ export const postTemplateRoute = createCasesRoute({
         body: parsedTemplate,
       });
     } catch (error) {
+      if (isBoom(error) && error.output.statusCode === 409) {
+        return response.conflict({
+          body: { message: error.message },
+        });
+      }
+
       throw createCaseError({
         message: `Failed to create template: ${error}`,
         error,

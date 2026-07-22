@@ -20,11 +20,14 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
-import { validateCustomFields } from './validators';
+import {
+  validateCustomFields,
+  resolveGlobalFields,
+  validateCaseExtendedFields,
+} from './validators';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest } from './utils';
-import { parseTemplate } from '../../routes/api/templates/parse_template';
-import { validateExtendedFields } from '../../../common/types/domain/template/validate_extended_fields';
+import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
 
 /**
  * Creates a new case.
@@ -42,6 +45,7 @@ export const create = async (
       licensingService,
       notificationService,
       templatesService,
+      fieldDefinitionsService,
     },
     user,
     logger,
@@ -75,29 +79,15 @@ export const create = async (
     }
 
     if (query.extended_fields) {
-      if (!query.template?.id) {
-        throw Boom.badRequest('extended_fields require a template to be specified');
-      }
-      const templateSO = await templatesService.getTemplate(
-        query.template.id,
-        String(query.template.version)
-      );
-      if (!templateSO) {
-        throw Boom.badRequest(`Template ${query.template.id} not found`);
-      }
-      let parsedTemplate;
-      try {
-        parsedTemplate = parseTemplate(templateSO.attributes);
-      } catch (err) {
-        throw Boom.badRequest(`Template ${query.template.id} has an invalid definition`);
-      }
-      const extendedFieldErrors = validateExtendedFields(
-        query.extended_fields,
-        parsedTemplate.definition.fields
-      );
-      if (extendedFieldErrors.length) {
-        throw Boom.badRequest(`Invalid extended_fields: ${extendedFieldErrors.join('; ')}`);
-      }
+      const globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
+      await validateCaseExtendedFields({
+        extendedFields: query.extended_fields,
+        templateId: query.template?.id,
+        globalFields,
+        templatesService,
+        fieldDefinitionsService,
+        owner: query.owner,
+      });
     }
 
     /**
@@ -123,6 +113,20 @@ export const create = async (
      */
 
     const normalizedCase = normalizeCreateCaseRequest(query, customFieldsConfiguration);
+
+    // Mirror customFields into extended_fields so that automations writing to the legacy API
+    // keep the v2 analytics / UI surface populated. CustomFields-win semantics: the incoming
+    // value overrides any pre-set mirror key (e.g. a template default in the request).
+    //
+    // Pass the RAW request customFields (query.customFields), not the post-fill array
+    // (normalizedCase.customFields). fillMissingCustomFields pads absent optional-no-default
+    // fields with { key, value: null }; those synthetic nulls would otherwise hit the merge's
+    // delete branch and wipe mirror keys the request never intended to clear.
+    if (clientArgs.config.templates.enabled) {
+      normalizedCase.extended_fields =
+        mergeCustomFieldsIntoExtendedFields(query.customFields, normalizedCase.extended_fields) ??
+        undefined; // return type includes null when input is null; CasePostRequest.extended_fields is never null
+    }
 
     const newCase = await caseService.createCase({
       attributes: transformNewCase({

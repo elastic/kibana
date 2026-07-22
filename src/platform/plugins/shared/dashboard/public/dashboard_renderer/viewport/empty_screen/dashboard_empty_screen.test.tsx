@@ -16,6 +16,24 @@ import { DashboardEmptyScreen } from './dashboard_empty_screen';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 
+jest.mock('../../../dashboard_app/top_nav/add_panel_button/use_featured_items', () => {
+  return {
+    useFeaturedItems: () => ({
+      featuredItems: [
+        {
+          id: '1',
+          name: 'Mock Add Panel',
+          icon: 'chart',
+          onClick: jest.fn(),
+          order: 0,
+          ['data-test-subj']: 'mockAddPanelAction',
+        },
+      ],
+      loading: false,
+    }),
+  };
+});
+
 describe('DashboardEmptyScreen', () => {
   function renderComponent(viewMode: ViewMode) {
     const mockDashboardApi = {
@@ -47,6 +65,7 @@ describe('DashboardEmptyScreen', () => {
     expect(screen.queryByTestId('dashboardEmptyReadWrite')).not.toBeInTheDocument();
     expect(screen.queryByTestId('dashboardEmptyReadOnly')).not.toBeInTheDocument();
     expect(screen.getByTestId('emptyDashboardWidget')).toBeInTheDocument();
+    expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
   });
 
   test('renders correctly with readonly mode', () => {

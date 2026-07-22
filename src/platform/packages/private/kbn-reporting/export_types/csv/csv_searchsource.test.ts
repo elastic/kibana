@@ -36,7 +36,6 @@ const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
   },
-  path: '/',
 };
 
 const mockLogger = loggingSystemMock.createLogger();
@@ -75,9 +74,7 @@ beforeAll(async () => {
     context
   );
 
-  mockCsvSearchSourceExportType.setup({
-    basePath: { set: jest.fn() },
-  });
+  mockCsvSearchSourceExportType.setup({});
 
   mockCsvSearchSourceExportType.start({
     esClient: elasticsearchServiceMock.createClusterClient(),

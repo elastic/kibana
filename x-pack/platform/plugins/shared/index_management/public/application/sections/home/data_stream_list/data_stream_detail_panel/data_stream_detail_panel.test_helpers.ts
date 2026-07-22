@@ -33,6 +33,7 @@ export const createMockDataStream = (overrides?: Partial<DataStream>): DataStrea
     delete_index: true,
     manage_data_stream_lifecycle: true,
     read_failure_store: true,
+    manage: true,
   },
   hidden: false,
   lifecycle: {
@@ -50,17 +51,57 @@ export const createMockAppContext = (): AppDependencies =>
       locators: {
         get: jest.fn(() => ({
           getRedirectUrl: jest.fn(() => '/app/path'),
+          navigate: jest.fn(),
         })),
       },
     },
     core: {
+      getUrlForApp: jest.fn(
+        (_appId: string, { path }: { path?: string } = {}) => `/app${path ?? ''}`
+      ),
+      notifications: {
+        toasts: {
+          addDanger: jest.fn(),
+          addError: jest.fn(),
+          addSuccess: jest.fn(),
+          addWarning: jest.fn(),
+        },
+      },
       application: {
         navigateToUrl: jest.fn(),
+        capabilities: {
+          management: {
+            data: {
+              snapshot_restore: true,
+            },
+            stack: {
+              license_management: true,
+            },
+          },
+        },
+      },
+    },
+    plugins: {
+      licensing: undefined,
+      cloud: undefined,
+    },
+    services: {
+      notificationService: {
+        showDangerToast: jest.fn(),
+        showWarningToast: jest.fn(),
+        showSuccessToast: jest.fn(),
+        showInfoToast: jest.fn(),
+      },
+    },
+    docLinks: {
+      links: {
+        subscriptions: 'https://www.elastic.co/subscriptions',
       },
     },
     config: {
       enableSizeAndDocCount: true,
       enableDataStreamStats: true,
       enableTogglingDataRetention: true,
+      isServerless: false,
     },
   } as unknown as AppDependencies);

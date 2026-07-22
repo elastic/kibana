@@ -6,12 +6,11 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { AGENT_TYPE_OPAMP } from '../../../../../../../common/constants';
 import { AgentStatusKueryHelper } from '../../../../services';
 import { AGENTS_PREFIX } from '../../../../constants';
 
 const NO_TAGS_VALUE = i18n.translate('xpack.fleet.noTagsValue', {
-  defaultMessage: 'No Tags',
+  defaultMessage: 'No tags',
 });
 export const getKuery = ({
   search,
@@ -102,13 +101,5 @@ export const getKuery = ({
       kueryBuilder = kueryStatus;
     }
   }
-  const excludeOpamp = `NOT type:${AGENT_TYPE_OPAMP}`;
-  const trimmed = kueryBuilder.trim();
-  if (trimmed) {
-    kueryBuilder = `(${trimmed}) and ${excludeOpamp}`;
-  } else {
-    kueryBuilder = excludeOpamp;
-  }
-
-  return kueryBuilder;
+  return kueryBuilder.trim();
 };

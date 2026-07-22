@@ -152,8 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBarService.removeAllFilters();
 
       // Create a new panel
-      await dashboardAddPanel.openAddPanelFlyout();
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.clickAddEsqlPanel();
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
 
       const ESQL_QUERY = 'from logs* | stats maxB = max(bytes)';

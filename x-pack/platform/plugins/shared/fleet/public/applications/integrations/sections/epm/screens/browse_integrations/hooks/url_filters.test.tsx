@@ -228,6 +228,39 @@ describe('useUrlFilters', () => {
 
     expect(result.current.signal).toEqual([dataTypes.Logs, dataTypes.Metrics, dataTypes.Traces]);
   });
+
+  it('returns undefined for showContent when not in URL', () => {
+    (useUrlParams as jest.Mock).mockReturnValue({
+      urlParams: {},
+      toUrlParams: jest.fn(),
+    });
+
+    const { result } = renderHook(() => useUrlFilters());
+
+    expect(result.current.showContent).toBeUndefined();
+  });
+
+  it('returns true for showContent when showContent=true in URL', () => {
+    (useUrlParams as jest.Mock).mockReturnValue({
+      urlParams: { showContent: 'true' },
+      toUrlParams: jest.fn(),
+    });
+
+    const { result } = renderHook(() => useUrlFilters());
+
+    expect(result.current.showContent).toBe(true);
+  });
+
+  it('returns undefined for showContent when value is not "true"', () => {
+    (useUrlParams as jest.Mock).mockReturnValue({
+      urlParams: { showContent: 'false' },
+      toUrlParams: jest.fn(),
+    });
+
+    const { result } = renderHook(() => useUrlFilters());
+
+    expect(result.current.showContent).toBeUndefined();
+  });
 });
 
 describe('useAddUrlFilters', () => {
@@ -502,6 +535,58 @@ describe('useAddUrlFilters', () => {
     });
     expect(mockPush).toHaveBeenCalledWith({
       search: expect.stringContaining('signal=logs'),
+    });
+  });
+
+  it('adds showContent=true to URL when showContent is true', () => {
+    const { result } = renderHook(() => useAddUrlFilters());
+
+    act(() => {
+      result.current({ showContent: true });
+    });
+
+    expect(mockPush).toHaveBeenCalledWith({
+      search: 'showContent=true',
+    });
+  });
+
+  it('removes showContent from URL when showContent is undefined', () => {
+    (useUrlParams as jest.Mock).mockReturnValue({
+      urlParams: { showContent: 'true' },
+      toUrlParams: mockToUrlParams,
+    });
+
+    const { result } = renderHook(() => useAddUrlFilters());
+
+    act(() => {
+      result.current({ showContent: undefined });
+    });
+
+    expect(mockPush).toHaveBeenCalledWith({
+      search: '',
+    });
+  });
+
+  it('preserves other filters when toggling showContent', () => {
+    (useUrlParams as jest.Mock).mockReturnValue({
+      urlParams: { q: 'apache', status: 'deprecated' },
+      toUrlParams: mockToUrlParams,
+    });
+
+    const { result } = renderHook(() => useAddUrlFilters());
+
+    act(() => {
+      result.current({ showContent: true });
+    });
+
+    expect(mockPush).toHaveBeenCalledWith({
+      search: expect.stringContaining('q=apache'),
+    });
+    expect(mockPush).toHaveBeenCalledWith({
+      search: expect.stringContaining('status=deprecated'),
+    });
+    expect(mockPush).toHaveBeenCalledWith({
+      search: expect.stringContaining('showContent=true'),
     });
   });
 });

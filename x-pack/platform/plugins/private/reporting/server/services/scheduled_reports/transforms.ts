@@ -13,7 +13,7 @@ import type {
 import type { Logger } from '@kbn/core/server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { RRule } from '@kbn/rrule';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { BulkGetResult } from '@kbn/task-manager-plugin/server/task_store';
 import { isOk } from '@kbn/task-manager-plugin/server/lib/result_type';

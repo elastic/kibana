@@ -149,7 +149,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       truncateText: false,
       render: (timestamp: ChangePointAnnotation['timestamp']) => (
         <span style={isDashboardEmbedding ? lineClampStyle : undefined}>
-          {dateFormatter.convert(timestamp)}
+          {dateFormatter.convertToText(timestamp)}
         </span>
       ),
       width: isDashboardEmbedding ? '180px' : '20%',

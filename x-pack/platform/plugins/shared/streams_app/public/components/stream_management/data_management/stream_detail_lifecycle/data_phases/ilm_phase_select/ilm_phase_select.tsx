@@ -19,7 +19,12 @@ import {
   type PopoverAnchorPosition,
   useEuiTheme,
 } from '@elastic/eui';
-import { PHASE_ORDER, PHASE_TITLES } from '@kbn/data-lifecycle-phases';
+import {
+  DefaultRepositoryRequiredBadge,
+  EnterpriseLicenseRequiredBadge,
+  PHASE_ORDER,
+  PHASE_TITLES,
+} from '@kbn/data-lifecycle-phases';
 import { useIlmPhasesColorAndDescription } from '../../hooks/use_ilm_phases_color_and_description';
 
 export type IlmPhaseSelectOption = (typeof PHASE_ORDER)[number];
@@ -39,6 +44,8 @@ export interface IlmPhaseSelectProps {
   disabled?: boolean;
   initialIsOpen?: boolean;
   anchorPosition?: PopoverAnchorPosition;
+  showEnterpriseLicenseRequiredBadge?: boolean;
+  showDefaultRepositoryRequiredBadge?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -50,6 +57,8 @@ export const IlmPhaseSelect = ({
   disabled = false,
   initialIsOpen = false,
   anchorPosition = 'downCenter',
+  showEnterpriseLicenseRequiredBadge = false,
+  showDefaultRepositoryRequiredBadge = false,
   'data-test-subj': dataTestSubj = 'ilmPhaseSelect',
 }: IlmPhaseSelectProps) => {
   const [isOpen, togglePopover] = useToggle(initialIsOpen);
@@ -76,6 +85,24 @@ export const IlmPhaseSelect = ({
             <EuiIcon type="dot" color={ilmPhases[option].color} aria-hidden={true} />
           );
 
+        const frozenBadge = (() => {
+          if (option !== 'frozen') return;
+
+          if (showEnterpriseLicenseRequiredBadge) {
+            return {
+              kind: 'enterpriseRequired' as const,
+              testSubj: `${dataTestSubj}Option-${option}-enterpriseRequiredBadge`,
+            };
+          }
+
+          if (showDefaultRepositoryRequiredBadge) {
+            return {
+              kind: 'defaultRepositoryRequired' as const,
+              testSubj: `${dataTestSubj}Option-${option}-defaultRepositoryRequiredBadge`,
+            };
+          }
+        })();
+
         return (
           <EuiContextMenuItem
             key={option}
@@ -92,7 +119,20 @@ export const IlmPhaseSelect = ({
           >
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">{PHASE_TITLES[option]}</EuiText>
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">{PHASE_TITLES[option]}</EuiText>
+                  </EuiFlexItem>
+                  {frozenBadge && (
+                    <EuiFlexItem grow={false}>
+                      {frozenBadge.kind === 'enterpriseRequired' ? (
+                        <EnterpriseLicenseRequiredBadge data-test-subj={frozenBadge.testSubj} />
+                      ) : (
+                        <DefaultRepositoryRequiredBadge data-test-subj={frozenBadge.testSubj} />
+                      )}
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
@@ -110,6 +150,8 @@ export const IlmPhaseSelect = ({
       euiTheme.size.s,
       ilmPhases,
       onSelect,
+      showDefaultRepositoryRequiredBadge,
+      showEnterpriseLicenseRequiredBadge,
       togglePopover,
     ]
   );

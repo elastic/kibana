@@ -17,6 +17,14 @@ export interface UseFetchRelatedAlertsByAncestryParams {
    * Values of the kibana.alert.rule.parameters.index field
    */
   indices: string[];
+  /**
+   * Optional time range to bound the underlying resolver tree query.
+   * When omitted, the query is unbounded.
+   */
+  interval?: {
+    from: string;
+    to: string;
+  };
 }
 export interface UseFetchRelatedAlertsByAncestryResult {
   /**
@@ -35,6 +43,10 @@ export interface UseFetchRelatedAlertsByAncestryResult {
    * Number of alerts
    */
   dataCount: number;
+  /**
+   * Refetches the data, bypassing the cache.
+   */
+  refetch: () => void;
 }
 
 /**
@@ -44,10 +56,12 @@ export interface UseFetchRelatedAlertsByAncestryResult {
 export const useFetchRelatedAlertsByAncestry = ({
   documentId,
   indices,
+  interval,
 }: UseFetchRelatedAlertsByAncestryParams): UseFetchRelatedAlertsByAncestryResult => {
-  const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree({
+  const { loading, error, alertIds, refetch } = useAlertPrevalenceFromProcessTree({
     documentId,
     indices,
+    interval,
   });
 
   return useMemo(
@@ -56,7 +70,8 @@ export const useFetchRelatedAlertsByAncestry = ({
       error,
       data: alertIds,
       dataCount: alertIds?.length || 0,
+      refetch,
     }),
-    [alertIds, error, loading]
+    [alertIds, error, loading, refetch]
   );
 };

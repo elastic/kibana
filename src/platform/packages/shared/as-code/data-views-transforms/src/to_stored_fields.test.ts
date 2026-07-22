@@ -290,6 +290,20 @@ describe('toStoredFieldAttributes', () => {
       });
       expect(result!.my_field).not.toHaveProperty('customDescription');
     });
+
+    it('maps popularity to count when popularity is present', () => {
+      const result = toStoredFieldAttributes({
+        my_field: { type: 'keyword', popularity: 42 },
+      });
+      expect(result!.my_field).toEqual({ count: 42 });
+    });
+
+    it('omits count when popularity is absent', () => {
+      const result = toStoredFieldAttributes({
+        my_field: { type: 'keyword' },
+      });
+      expect(result!.my_field).not.toHaveProperty('count');
+    });
   });
 
   describe('composite fields', () => {
@@ -331,6 +345,25 @@ describe('toStoredFieldAttributes', () => {
         },
       });
       expect(result).not.toHaveProperty('my_composite');
+    });
+
+    it('maps subfield popularity to count', () => {
+      const result = toStoredFieldAttributes({
+        my_composite: {
+          type: RUNTIME_FIELD_COMPOSITE_TYPE,
+          fields: { sub: { type: 'keyword', popularity: 7 } },
+        },
+      });
+      expect(result!['my_composite.sub']).toEqual({ count: 7 });
+    });
+  });
+
+  describe('indexed fields', () => {
+    it('maps popularity-only indexed settings to count', () => {
+      const result = toStoredFieldAttributes({
+        indexed: { popularity: 3 },
+      });
+      expect(result).toEqual({ indexed: { count: 3 } });
     });
   });
 

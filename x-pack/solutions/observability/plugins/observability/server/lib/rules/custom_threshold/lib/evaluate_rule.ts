@@ -17,6 +17,7 @@ import type {
 } from '../../../../../common/custom_threshold_rule/types';
 import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import type { AdditionalContext } from '../utils';
+import { UNGROUPED_FACTORY_KEY } from '../constants';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
 import type { MissingGroupsRecord } from './check_missing_group';
@@ -32,6 +33,7 @@ export type Evaluation = CustomMetricExpressionParams & {
   currentValue: number | null;
   timestamp: string;
   shouldFire: boolean;
+  shouldWarn: boolean;
   isNoData: boolean;
   bucketKey: Record<string, string>;
   flattenGrouping?: Record<string, any>;
@@ -112,20 +114,30 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
           currentValues[missingGroup.key] = {
             value: null,
             trigger: false,
+            warn: false,
             bucketKey: missingGroup.bucketKey,
           };
         }
       }
 
+      // When getData returns the global '*' no-data entry (e.g. 0 composite buckets) and
+      // checkMissingGroups reinjected per-group entries, drop the redundant '*' so the
+      // executor doesn't emit a duplicate ungrouped alert alongside per-group ones.
+      const keys = Object.keys(currentValues);
+      if (keys.includes(UNGROUPED_FACTORY_KEY) && keys.some((k) => k !== UNGROUPED_FACTORY_KEY)) {
+        delete currentValues[UNGROUPED_FACTORY_KEY];
+      }
+
       const evaluations: Record<string, Evaluation> = {};
       for (const key of Object.keys(currentValues)) {
         const result = currentValues[key];
-        if (result.trigger || result.value === null) {
+        if (result.trigger || result.warn || result.value === null) {
           evaluations[key] = {
             ...criterion,
             currentValue: result.value,
             timestamp: moment(calculatedTimerange.end).toISOString(),
             shouldFire: result.trigger,
+            shouldWarn: result.warn,
             isNoData: result.value === null,
             bucketKey: result.bucketKey,
             flattenGrouping: result.flattenGrouping,
