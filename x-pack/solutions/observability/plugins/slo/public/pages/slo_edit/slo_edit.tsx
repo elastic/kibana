@@ -29,7 +29,7 @@ export function SloEditPage() {
   const { initialValues, isLoading, isEditMode, slo } = useSloFormValues(sloId);
 
   const { data: permissions } = usePermissions();
-  const { ObservabilityPageTemplate, isServerless } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
 
