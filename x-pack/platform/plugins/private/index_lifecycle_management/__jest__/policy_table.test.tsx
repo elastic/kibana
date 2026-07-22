@@ -207,17 +207,14 @@ describe('policy table', () => {
 
     await waitFor(() => {
       const visiblePolicies = getPolicies();
-      expect(visiblePolicies.filter((p) => p.isManagedPolicy).length).toBeGreaterThan(0);
+      expect(visiblePolicies.length).toBeGreaterThan(0);
+      // Every visible row must be managed
+      expect(visiblePolicies.every((p) => p.isManagedPolicy)).toBe(true);
 
       visiblePolicies.forEach((p) => {
         const policyRow = screen.getByTestId(`policyTableRow-${p.name}`);
         const warningBadge = within(policyRow).queryByTestId('managedPolicyBadge');
-
-        if (p.isManagedPolicy) {
-          expect(warningBadge).toBeInTheDocument();
-        } else {
-          expect(warningBadge).not.toBeInTheDocument();
-        }
+        expect(warningBadge).toBeInTheDocument();
       });
     });
   });
