@@ -672,19 +672,52 @@ export const TopFailing: React.FC<TopFailingProps> = ({ onRuleClick, onPolicyCli
         name: i18n.translate('xpack.alertingV2.executionHistory.topFailing.chainColumn', {
           defaultMessage: 'Execution chain',
         }),
-        render: (chain: string, item: FailingChain) => (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon
-                type={item.status === 'failed' ? 'error' : 'warning'}
-                color={item.status === 'failed' ? 'danger' : 'warning'}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s">{chain}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
+        render: (_chain: string, item: FailingChain) => {
+          const allSteps = item.sources
+            ? [...item.sources, ...item.steps]
+            : item.steps;
+          const sourceCount = item.sources?.length ?? 0;
+
+          return (
+            <EuiText size="s">
+              <span
+                css={css({
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  flexWrap: 'wrap',
+                  rowGap: 4,
+                })}
+              >
+                {allSteps.map((step, i) => {
+                  const badge = statusBadge[step.status];
+                  const showComma = item.sources && i > 0 && i < sourceCount;
+                  const showArrow = i > 0 && !showComma;
+                  return (
+                    <React.Fragment key={`${step.id}-${i}`}>
+                      {showComma && (
+                        <span css={css({ color: '#69707D', marginLeft: -4 })}>,</span>
+                      )}
+                      {showArrow && (
+                        <EuiIcon type="sortRight" size="s" color="subdued" />
+                      )}
+                      <span
+                        css={css({
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                        })}
+                      >
+                        {step.label}
+                        <EuiIcon type={badge.icon} color={badge.color} size="s" />
+                      </span>
+                    </React.Fragment>
+                  );
+                })}
+              </span>
+            </EuiText>
+          );
+        },
       },
       {
         field: 'occurrences',
