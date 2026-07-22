@@ -118,12 +118,14 @@ const changePointScanRoute = createServerRoute({
     const startedAt = Date.now();
     const scanResults = await Promise.all(
       groupQueryLinksByRuleSchedule(queryLinks).map(({ schedule, queryLinks: groupedLinks }) => {
+        // Metric series is 1m-resolution; always analyze at 1m (see schedule.ts).
+        // Lookback still varies by severity profile (critical uses workflow input).
         const criticalCadence = schedule.interval_minutes === 1;
         return sigEventsContext.alertsReader.runChangePointScan(
           esClient,
           {
             lookback: criticalCadence ? params.body.lookback : schedule.lookback,
-            bucketInterval: criticalCadence ? params.body.bucketInterval : schedule.bucket_interval,
+            bucketInterval: schedule.bucket_interval,
             ruleIds: groupedLinks.map((queryLink) => queryLink.rule_id),
             spaceId,
           },

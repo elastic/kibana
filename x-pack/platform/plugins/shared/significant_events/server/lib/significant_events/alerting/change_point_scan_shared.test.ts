@@ -6,6 +6,7 @@
  */
 
 import {
+  METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
   METRIC_SERIES_BUCKET_RUNTIME_FIELD,
   METRIC_SERIES_VALUE_RUNTIME_FIELD,
   buildChangePointHistogramBounds,
@@ -22,10 +23,12 @@ describe('buildChangePointHistogramBounds', () => {
 });
 
 describe('buildChangePointTimeSeriesAggs', () => {
-  it('uses MAX + zero-fill for 1m analysis buckets', () => {
+  it('always analyzes at 1m with _count-based zero-fill for CHANGE_POINT metric_value ON bucket', () => {
     const extendedBounds = buildChangePointHistogramBounds('now-40m', '1m');
-    const aggs = buildChangePointTimeSeriesAggs('1m', { extendedBounds });
+    // Coarser request intervals must not change analysis resolution.
+    const aggs = buildChangePointTimeSeriesAggs('5m', { extendedBounds });
 
+    expect(METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL).toBe('1m');
     expect(aggs.over_time).toEqual({
       date_histogram: {
         field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
@@ -34,64 +37,26 @@ describe('buildChangePointTimeSeriesAggs', () => {
         extended_bounds: extendedBounds,
       },
       aggs: {
-        volume_raw: {
+        metric_value_raw: {
           max: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
         },
-        volume: {
+        metric_value: {
           bucket_script: {
-            buckets_path: { v: 'volume_raw' },
-            script: 'params.v != null ? params.v : 0',
-            gap_policy: 'insert_zeros',
-          },
-        },
-      },
-    });
-    expect(aggs.change_points).toEqual({
-      change_point: { buckets_path: 'over_time>volume' },
-    });
-  });
-
-  it('uses MAX-per-minute then SUM + zero-fill for coarser analysis buckets', () => {
-    const extendedBounds = buildChangePointHistogramBounds('now-125m', '5m');
-    const aggs = buildChangePointTimeSeriesAggs('5m', { extendedBounds });
-
-    expect(aggs.over_time).toEqual({
-      date_histogram: {
-        field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
-        fixed_interval: '5m',
-        min_doc_count: 0,
-        extended_bounds: extendedBounds,
-      },
-      aggs: {
-        by_minute: {
-          date_histogram: {
-            field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
-            fixed_interval: '1m',
-            min_doc_count: 1,
-          },
-          aggs: {
-            minute_max: {
-              max: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
+            buckets_path: {
+              docs: '_count',
+              val: 'metric_value_raw',
             },
-          },
-        },
-        volume_raw: {
-          sum_bucket: {
-            buckets_path: 'by_minute>minute_max',
-            gap_policy: 'insert_zeros',
-          },
-        },
-        volume: {
-          bucket_script: {
-            buckets_path: { v: 'volume_raw' },
-            script: 'params.v != null ? params.v : 0',
+            script:
+              'params.docs == 0 || params.val == null || Double.isNaN(params.val) ? 0.0 : params.val',
             gap_policy: 'insert_zeros',
           },
         },
       },
     });
     expect(aggs.change_points).toEqual({
-      change_point: { buckets_path: 'over_time>volume' },
+      change_point: {
+        buckets_path: 'over_time>metric_value',
+      },
     });
   });
 });

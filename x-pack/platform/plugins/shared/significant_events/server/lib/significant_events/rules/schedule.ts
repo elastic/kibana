@@ -25,9 +25,11 @@ export const DEFAULT_RULE_INTERVAL = '5m';
 /** @deprecated Prefer {@link METRIC_SERIES_LOOKBACK}; kept for callers that still derive 2× lookback. */
 export const RULE_LOOKBACK_OVERLAP_RATIO = 2;
 
+/** Always 1m — MATCH metric series emits one point per closed minute (`CHANGE_POINT … ON bucket`). */
 const CRITICAL_ANALYSIS_BUCKET_INTERVAL = '1m';
 const CRITICAL_ANALYSIS_LOOKBACK_MINUTES = 40;
-const DEFAULT_ANALYSIS_BUCKET_INTERVAL = '5m';
+/** Same 1m analysis resolution as critical; longer window for non-critical rules. */
+const DEFAULT_ANALYSIS_BUCKET_INTERVAL = '1m';
 const DEFAULT_ANALYSIS_LOOKBACK_MINUTES = 125;
 
 export interface RuleDetectionSchedule {
@@ -88,8 +90,9 @@ export function getRuleLookbackInterval(interval: string): string {
 
 /**
  * Detection change_point analysis profile by severity.
- * Analysis bucket is always >= 1m (never sub-minute) so it aligns with
- * closed-minute `metric_value` points from MATCH rules.
+ * Bucket interval is always 1m (source metric-series resolution). A coarser
+ * interval (e.g. 5m) collapses ~40 one-minute points into ~8 buckets and
+ * starves change_point (< 22 values → `indeterminable`).
  */
 export function getRuleDetectionSchedule(
   query: Pick<StreamQuery, 'severity_score'>

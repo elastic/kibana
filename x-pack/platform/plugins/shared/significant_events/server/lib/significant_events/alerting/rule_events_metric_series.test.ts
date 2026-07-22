@@ -49,11 +49,15 @@ describe('buildRuleEventsSignalFilter', () => {
 });
 
 describe('METRIC_SERIES_RUNTIME_MAPPINGS', () => {
-  it('exposes long epoch bucket and long metric_value runtime fields', () => {
+  it('reads flattened leaves from _source first (Alerting flattened access pattern)', () => {
     expect(METRIC_SERIES_RUNTIME_MAPPINGS['metric_series.bucket']?.type).toBe('date');
     expect(METRIC_SERIES_RUNTIME_MAPPINGS['metric_series.value']?.type).toBe('long');
-    expect(METRIC_SERIES_RUNTIME_MAPPINGS['metric_series.bucket']?.script?.source).toContain(
-      'Long.parseLong'
+    const bucketScript = METRIC_SERIES_RUNTIME_MAPPINGS['metric_series.bucket']?.script?.source;
+    expect(bucketScript).toContain("params._source.data['bucket']");
+    expect(bucketScript?.indexOf('params._source')).toBeLessThan(
+      bucketScript?.indexOf("doc.containsKey('data.bucket')") ?? -1
     );
+    expect(bucketScript).toContain('Long.parseLong');
+    expect(bucketScript).toContain('ZonedDateTime.parse');
   });
 });

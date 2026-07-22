@@ -17,6 +17,9 @@ import {
 
 export const RULES_BUCKET_SIZE = 1000;
 
+/** Source metric series is always 1 closed-minute point; analysis must match. */
+export const METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL = '1m';
+
 export {
   METRIC_SERIES_BUCKET_RUNTIME_FIELD,
   METRIC_SERIES_VALUE_RUNTIME_FIELD,
@@ -25,91 +28,67 @@ export {
 
 export function buildChangePointHistogramBounds(
   lookback: string,
-  bucketInterval: string
+  bucketInterval: string = METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL
 ): AggregationsExtendedBounds<AggregationsFieldDateMath> {
   return { min: lookback, max: `now-${bucketInterval}` };
 }
 
 /**
- * Coalesce a possibly-null sibling metric to 0. Empty `extended_bounds`
- * histogram buckets have no docs, so max/sum_bucket return null — and
- * `change_point` then reports `indeterminable` (not enough non-null points).
- * The pre-metric-series scan used `over_time>_count`, which is 0 for empty
- * buckets; this restores that dense series contract for metric volumes.
- */
-function zeroFilledVolume(
-  bucketsPath: string
-): Record<string, AggregationsAggregationContainer> {
-  return {
-    volume: {
-      bucket_script: {
-        buckets_path: { v: bucketsPath },
-        script: 'params.v != null ? params.v : 0',
-        gap_policy: 'insert_zeros',
-      },
-    },
-  };
-}
-
-/**
- * Volume over source `bucket` time, then change_point on that series.
+ * DSL equivalent of:
  *
- * - Analysis interval `1m`: MAX(metric_value) collapses overlapping MATCH
- *   recounts for the same minute.
- * - Coarser intervals (e.g. `5m`): MAX per source minute, then SUM into the
- *   analysis bucket.
- * - Empty analysis buckets are zero-filled so change_point always sees the
- *   full extended_bounds width (same density contract as the old `_count` path).
+ * ```esql
+ * | EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(data, "metric_value"))
+ * | EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))
+ * | STATS metric_value = MAX(metric_value) BY bucket
+ * | CHANGE_POINT metric_value ON bucket
+ * ```
+ *
+ * Analysis interval is fixed at 1m (source resolution). Missing minutes are
+ * zero-filled via `extended_bounds` + a `bucket_script` over `_count` — the
+ * same density contract as the pre-metric-series `over_time>_count` path.
+ * (`change_point.gap_policy` alone is not reliable for null max metrics.)
  */
 export function buildChangePointTimeSeriesAggs(
-  bucketInterval: string,
+  _bucketInterval: string,
   {
     extendedBounds,
   }: {
     extendedBounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
   }
 ): Record<string, AggregationsAggregationContainer> {
-  const isMinuteAnalysis = bucketInterval === '1m';
-
-  const volumeAggs: Record<string, AggregationsAggregationContainer> = isMinuteAnalysis
-    ? {
-        volume_raw: {
-          max: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
-        },
-        ...zeroFilledVolume('volume_raw'),
-      }
-    : {
-        by_minute: {
-          date_histogram: {
-            field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
-            fixed_interval: '1m',
-            min_doc_count: 1,
-          },
-          aggs: {
-            minute_max: {
-              max: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
-            },
-          },
-        },
-        volume_raw: {
-          sum_bucket: {
-            buckets_path: 'by_minute>minute_max',
-            gap_policy: 'insert_zeros',
-          },
-        },
-        ...zeroFilledVolume('volume_raw'),
-      };
-
   return {
     over_time: {
       date_histogram: {
         field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
-        fixed_interval: bucketInterval,
+        fixed_interval: METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL,
         min_doc_count: 0,
         extended_bounds: extendedBounds,
       },
-      aggs: volumeAggs,
+      aggs: {
+        // Collapse overlapping MATCH recounts for the same source minute.
+        metric_value_raw: {
+          max: { field: METRIC_SERIES_VALUE_RUNTIME_FIELD },
+        },
+        // `_count` is always present (0 on empty extended_bounds buckets). Use it
+        // to force a numeric series — null `max` alone is skipped by change_point
+        // and yields `indeterminable` when fewer than 22 non-null points remain.
+        metric_value: {
+          bucket_script: {
+            buckets_path: {
+              docs: '_count',
+              val: 'metric_value_raw',
+            },
+            script:
+              'params.docs == 0 || params.val == null || Double.isNaN(params.val) ? 0.0 : params.val',
+            gap_policy: 'insert_zeros',
+          },
+        },
+      },
     },
-    change_points: { change_point: { buckets_path: 'over_time>volume' } },
+    change_points: {
+      change_point: {
+        buckets_path: 'over_time>metric_value',
+      },
+    },
   };
 }

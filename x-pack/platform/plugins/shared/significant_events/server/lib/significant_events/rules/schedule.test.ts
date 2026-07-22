@@ -53,10 +53,10 @@ describe('Significant Events rule scheduling', () => {
     });
   });
 
-  it('keeps default analysis profile on 5m buckets', () => {
+  it('uses default analysis profile on 1m buckets with a longer lookback', () => {
     expect(getRuleDetectionSchedule({ severity_score: 60 })).toEqual({
       interval_minutes: 5,
-      bucket_interval: '5m',
+      bucket_interval: '1m',
       lookback: 'now-125m',
       lookback_minutes: 125,
     });

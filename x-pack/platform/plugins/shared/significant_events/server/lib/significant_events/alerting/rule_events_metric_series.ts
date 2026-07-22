@@ -28,9 +28,6 @@ export const RULE_EVENTS_INDEX = '.rule-events';
  * | EVAL metric_value = TO_INTEGER(FIELD_EXTRACT(data, "metric_value"))
  * | EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))
  * ```
- *
- * `data.bucket` is the ES|QL date from `BUCKET` (epoch millis under flattened
- * storage); `data.metric_value` is an integer count. Do not `TO_LONG` on write.
  */
 export function projectMetricSeriesColumns(query: ComposerQuery): ComposerQuery {
   const dataCol = esql.col('data');
@@ -47,46 +44,60 @@ export const METRIC_SERIES_BUCKET_RUNTIME_FIELD = 'metric_series.bucket';
 export const METRIC_SERIES_VALUE_RUNTIME_FIELD = 'metric_series.value';
 
 /**
- * DSL equivalent of {@link projectMetricSeriesColumns}: typed runtime fields over
- * flattened `data` leaves (doc-values first, `_source` fallback).
+ * Parse a flattened `data` leaf from `_source` (preferred) or doc-values.
+ *
+ * Alerting v2 treats `doc['data.<leaf>']` as brittle for flattened fields and
+ * prefers `_source` / FIELD_EXTRACT (see series_grouping_values_query). Runtime
+ * mappings used by change_point must follow the same `_source`-first rule or the
+ * date_histogram sees no values and change_point returns `indeterminable`.
  */
+function flattenedLeafScript(leaf: string, emitDate: boolean): string {
+  const emitBlock = emitDate
+    ? `
+          try {
+            emit(Long.parseLong(text));
+          } catch (NumberFormatException e1) {
+            try {
+              emit((long) Double.parseDouble(text));
+            } catch (NumberFormatException e2) {
+              emit(ZonedDateTime.parse(text).toInstant().toEpochMilli());
+            }
+          }`
+    : `
+          try {
+            emit(Long.parseLong(text));
+          } catch (NumberFormatException e) {
+            emit((long) Double.parseDouble(text));
+          }`;
+
+  return `
+        String text = null;
+        if (params._source != null && params._source.containsKey('data') && params._source.data != null) {
+          def raw = params._source.data['${leaf}'];
+          if (raw != null) { text = raw.toString(); }
+        }
+        if (text == null || text.isEmpty()) {
+          if (doc.containsKey('data.${leaf}') && !doc['data.${leaf}'].empty) {
+            text = doc['data.${leaf}'].value.toString();
+          }
+        }
+        if (text != null && !text.isEmpty()) {
+          ${emitBlock}
+        }
+      `;
+}
+
 export const METRIC_SERIES_RUNTIME_MAPPINGS: MappingRuntimeFields = {
   [METRIC_SERIES_BUCKET_RUNTIME_FIELD]: {
     type: 'date',
     script: {
-      source: `
-        String bucket = null;
-        if (doc.containsKey('data.${METRIC_SERIES_BUCKET_FIELD}') && !doc['data.${METRIC_SERIES_BUCKET_FIELD}'].empty) {
-          bucket = doc['data.${METRIC_SERIES_BUCKET_FIELD}'].value.toString();
-        } else if (params._source != null && params._source.containsKey('data') && params._source.data != null && params._source.data.containsKey('${METRIC_SERIES_BUCKET_FIELD}')) {
-          def raw = params._source.data['${METRIC_SERIES_BUCKET_FIELD}'];
-          if (raw != null) { bucket = raw.toString(); }
-        }
-        if (bucket != null && !bucket.isEmpty()) {
-          // ES|QL date columns usually land as epoch-millis strings; ISO is possible.
-          try {
-            emit(Long.parseLong(bucket));
-          } catch (NumberFormatException e) {
-            emit(ZonedDateTime.parse(bucket).toInstant().toEpochMilli());
-          }
-        }
-      `,
+      source: flattenedLeafScript(METRIC_SERIES_BUCKET_FIELD, true),
     },
   },
   [METRIC_SERIES_VALUE_RUNTIME_FIELD]: {
     type: 'long',
     script: {
-      source: `
-        def raw = null;
-        if (doc.containsKey('data.${METRIC_SERIES_VALUE_FIELD}') && !doc['data.${METRIC_SERIES_VALUE_FIELD}'].empty) {
-          raw = doc['data.${METRIC_SERIES_VALUE_FIELD}'].value;
-        } else if (params._source != null && params._source.containsKey('data') && params._source.data != null && params._source.data.containsKey('${METRIC_SERIES_VALUE_FIELD}')) {
-          raw = params._source.data['${METRIC_SERIES_VALUE_FIELD}'];
-        }
-        if (raw != null) {
-          emit(Long.parseLong(raw.toString()));
-        }
-      `,
+      source: flattenedLeafScript(METRIC_SERIES_VALUE_FIELD, false),
     },
   },
 };
