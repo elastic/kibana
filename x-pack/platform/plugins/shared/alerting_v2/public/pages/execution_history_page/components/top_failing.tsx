@@ -96,6 +96,7 @@ const SequenceStepComponent: React.FC<NodeProps<SequenceStepNode>> = ({ data }) 
           alignItems: 'center',
           gap: euiTheme.size.m,
           boxShadow: `0 1px 3px rgba(0,0,0,0.06)`,
+          pointerEvents: 'all',
         })}
       >
         {/* Type icon */}
@@ -196,6 +197,7 @@ interface FailingChain {
   id: string;
   chain: string;
   steps: ChainStep[];
+  sources?: ChainStep[];
   occurrences: number;
   lastSeen: string;
   status: 'failed' | 'warning';
@@ -359,6 +361,44 @@ const MOCK_CHAINS: FailingChain[] = [
     lastSeen: '25 min ago',
     status: 'warning',
   },
+  {
+    id: '6',
+    chain: 'Multiple rules → Action policy to design global execution failed (fan-in)',
+    sources: [
+      {
+        id: REAL_RULE_ID_1,
+        label: 'New ESQL rule',
+        type: 'rule',
+        status: 'success',
+        icon: 'bell',
+        iconColor: '#0077CC',
+        meta: 'ES|QL · every 1m · 23 episodes',
+      },
+      {
+        id: REAL_RULE_ID_2,
+        label: 'asdasf',
+        type: 'rule',
+        status: 'success',
+        icon: 'bell',
+        iconColor: '#0077CC',
+        meta: 'Threshold · every 5m · 8 episodes',
+      },
+    ],
+    steps: [
+      {
+        id: REAL_POLICY_ID,
+        label: 'Action policy to design global execution',
+        type: 'policy',
+        status: 'failed',
+        icon: 'editorComment',
+        iconColor: '#E67300',
+        meta: 'Action policy · matcher: all alerts · 129 episodes queued',
+      },
+    ],
+    occurrences: 129,
+    lastSeen: '1 min ago',
+    status: 'failed',
+  },
 ];
 
 // -- Layout --
@@ -367,7 +407,7 @@ const NODE_WIDTH = 260;
 const NODE_HEIGHT = 56;
 const NODE_GAP = 100;
 
-const buildGraph = (
+const buildLinearGraph = (
   steps: ChainStep[],
   onRuleClick?: (ruleId: string) => void,
   onPolicyClick?: (policyId: string) => void
@@ -408,6 +448,79 @@ const buildGraph = (
   return { nodes, edges };
 };
 
+const ROW_GAP = 24;
+
+const buildFanInGraph = (
+  sources: ChainStep[],
+  targets: ChainStep[],
+  onRuleClick?: (ruleId: string) => void,
+  onPolicyClick?: (policyId: string) => void
+) => {
+  const nodes: SequenceStepNode[] = [];
+  const edges: Edge[] = [];
+  const totalSteps = sources.length + targets.length;
+  const sourcesHeight = sources.length * NODE_HEIGHT + (sources.length - 1) * ROW_GAP;
+  const startY = -sourcesHeight / 2 + NODE_HEIGHT / 2;
+
+  sources.forEach((step, i) => {
+    nodes.push({
+      id: `source-${i}`,
+      type: 'sequenceStep',
+      position: { x: 0, y: startY + i * (NODE_HEIGHT + ROW_GAP) },
+      style: { width: NODE_WIDTH, height: NODE_HEIGHT },
+      data: {
+        ...step,
+        stepIndex: 0,
+        totalSteps: 2,
+        onClickLink:
+          step.type === 'rule' && onRuleClick
+            ? () => onRuleClick(step.id)
+            : step.type === 'policy' && onPolicyClick
+            ? () => onPolicyClick(step.id)
+            : undefined,
+      },
+    });
+  });
+
+  targets.forEach((step, i) => {
+    nodes.push({
+      id: `target-${i}`,
+      type: 'sequenceStep',
+      position: { x: NODE_WIDTH + NODE_GAP, y: i * (NODE_HEIGHT + ROW_GAP) - (targets.length > 1 ? ((targets.length - 1) * (NODE_HEIGHT + ROW_GAP)) / 2 : 0) },
+      style: { width: NODE_WIDTH, height: NODE_HEIGHT },
+      data: {
+        ...step,
+        stepIndex: 1,
+        totalSteps: 2,
+        onClickLink:
+          step.type === 'rule' && onRuleClick
+            ? () => onRuleClick(step.id)
+            : step.type === 'policy' && onPolicyClick
+            ? () => onPolicyClick(step.id)
+            : undefined,
+      },
+    });
+  });
+
+  sources.forEach((_, si) => {
+    targets.forEach((target, ti) => {
+      edges.push({
+        id: `edge-s${si}-t${ti}`,
+        source: `source-${si}`,
+        target: `target-${ti}`,
+        type: 'sequenceArrow',
+        markerEnd: { type: MarkerType.ArrowClosed },
+        style: {
+          stroke: target.status === 'failed' ? '#BD271E' : '#D3DAE6',
+          strokeWidth: 2,
+        },
+      });
+    });
+  });
+
+  return { nodes, edges };
+};
+
 // -- AutoFit wrapper --
 
 const AutoFitFlow: React.FC<{ nodes: SequenceStepNode[]; edges: Edge[] }> = ({ nodes, edges }) => {
@@ -430,7 +543,6 @@ const AutoFitFlow: React.FC<{ nodes: SequenceStepNode[]; edges: Edge[] }> = ({ n
       fitViewOptions={{ padding: 0.15, maxZoom: 1 }}
       nodesDraggable={false}
       nodesConnectable={false}
-      elementsSelectable={false}
       panOnDrag={false}
       zoomOnScroll={false}
       zoomOnPinch={false}
@@ -448,19 +560,28 @@ const AutoFitFlow: React.FC<{ nodes: SequenceStepNode[]; edges: Edge[] }> = ({ n
 
 const FailureSequenceMap: React.FC<{
   steps: ChainStep[];
+  sources?: ChainStep[];
   onRuleClick?: (ruleId: string) => void;
   onPolicyClick?: (policyId: string) => void;
-}> = ({ steps, onRuleClick, onPolicyClick }) => {
+}> = ({ steps, sources, onRuleClick, onPolicyClick }) => {
   const { euiTheme } = useEuiTheme();
+  const isFanIn = sources && sources.length > 0;
   const { nodes, edges } = useMemo(
-    () => buildGraph(steps, onRuleClick, onPolicyClick),
-    [steps, onRuleClick, onPolicyClick]
+    () =>
+      isFanIn
+        ? buildFanInGraph(sources, steps, onRuleClick, onPolicyClick)
+        : buildLinearGraph(steps, onRuleClick, onPolicyClick),
+    [steps, sources, isFanIn, onRuleClick, onPolicyClick]
   );
+
+  const height = isFanIn
+    ? Math.max(140, sources.length * NODE_HEIGHT + (sources.length - 1) * ROW_GAP + 60)
+    : 140;
 
   return (
     <div
       css={css({
-        height: 140,
+        height,
         width: '100%',
         borderRadius: euiTheme.border.radius.medium,
         backgroundColor: euiTheme.colors.backgroundBaseSubdued,
@@ -504,6 +625,7 @@ export const TopFailing: React.FC<TopFailingProps> = ({ onRuleClick, onPolicyCli
         map[chain.id] = (
           <FailureSequenceMap
             steps={chain.steps}
+            sources={chain.sources}
             onRuleClick={onRuleClick}
             onPolicyClick={onPolicyClick}
           />

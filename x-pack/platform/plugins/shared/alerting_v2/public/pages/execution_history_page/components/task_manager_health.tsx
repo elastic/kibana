@@ -11,12 +11,10 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroup,
   EuiPanel,
   EuiStat,
   EuiText,
   EuiTitle,
-  type EuiListGroupProps,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -30,13 +28,6 @@ const MOCK_HEALTH = {
   pollingRate: '3s',
   claimedTasks: 847,
   capacity: 1000,
-  topTasks: [
-    { label: 'alerting:threshold — 342 runs', id: '1' },
-    { label: 'alerting:es-query — 218 runs', id: '2' },
-    { label: 'alerting:siem.queryRule — 156 runs', id: '3' },
-    { label: 'actions:slack — 89 runs', id: '4' },
-    { label: 'actions:email — 42 runs', id: '5' },
-  ],
 };
 
 const statusColor: Record<string, string> = {
@@ -47,12 +38,6 @@ const statusColor: Record<string, string> = {
 
 export const TaskManagerHealth: React.FC = () => {
   const accordionId = useGeneratedHtmlId({ prefix: 'taskManagerHealth' });
-
-  const topTaskItems: EuiListGroupProps['listItems'] = MOCK_HEALTH.topTasks.map((t) => ({
-    key: t.id,
-    label: t.label,
-    size: 's' as const,
-  }));
 
   const buttonContent = (
     <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
@@ -107,87 +92,73 @@ export const TaskManagerHealth: React.FC = () => {
           }
         `}
       >
-        <EuiFlexGroup gutterSize="m" css={css({ paddingTop: 16 })}>
-          <EuiFlexItem grow={2}>
-            <EuiTitle size="xxxs">
-              <h4>
-                {i18n.translate('xpack.alertingV2.executionHistory.taskManagerHealth.statsTitle', {
-                  defaultMessage: 'Performance',
-                })}
-              </h4>
-            </EuiTitle>
-            <EuiFlexGroup gutterSize="m" responsive={false} wrap>
-              <EuiFlexItem>
-                <EuiStat
-                  title={`${MOCK_HEALTH.score}%`}
-                  description={i18n.translate(
-                    'xpack.alertingV2.executionHistory.taskManagerHealth.healthScore',
-                    { defaultMessage: 'Health score' }
-                  )}
-                  textAlign="left"
-                  titleColor="success"
-                  reverse
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiStat
-                  title={MOCK_HEALTH.avgDrift}
-                  description={i18n.translate(
-                    'xpack.alertingV2.executionHistory.taskManagerHealth.avgDrift',
-                    { defaultMessage: 'Avg drift' }
-                  )}
-                  textAlign="left"
-                  reverse
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiStat
-                  title={MOCK_HEALTH.avgDuration}
-                  description={i18n.translate(
-                    'xpack.alertingV2.executionHistory.taskManagerHealth.avgDuration',
-                    { defaultMessage: 'Avg duration' }
-                  )}
-                  textAlign="left"
-                  reverse
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiStat
-                  title={MOCK_HEALTH.pollingRate}
-                  description={i18n.translate(
-                    'xpack.alertingV2.executionHistory.taskManagerHealth.pollingRate',
-                    { defaultMessage: 'Polling rate' }
-                  )}
-                  textAlign="left"
-                  reverse
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiStat
-                  title={`${MOCK_HEALTH.claimedTasks} / ${MOCK_HEALTH.capacity}`}
-                  description={i18n.translate(
-                    'xpack.alertingV2.executionHistory.taskManagerHealth.capacity',
-                    { defaultMessage: 'Capacity' }
-                  )}
-                  textAlign="left"
-                  reverse
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={1}>
-            <EuiTitle size="xxxs">
-              <h4>
-                {i18n.translate(
-                  'xpack.alertingV2.executionHistory.taskManagerHealth.topTasksTitle',
-                  { defaultMessage: 'Top tasks' }
+        <div css={css({ paddingTop: 16 })}>
+          <EuiTitle size="xxxs">
+            <h4>
+              {i18n.translate('xpack.alertingV2.executionHistory.taskManagerHealth.statsTitle', {
+                defaultMessage: 'Performance',
+              })}
+            </h4>
+          </EuiTitle>
+          <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+            <EuiFlexItem>
+              <EuiStat
+                title={`${MOCK_HEALTH.score}%`}
+                description={i18n.translate(
+                  'xpack.alertingV2.executionHistory.taskManagerHealth.healthScore',
+                  { defaultMessage: 'Health score' }
                 )}
-              </h4>
-            </EuiTitle>
-            <EuiListGroup listItems={topTaskItems} maxWidth={false} flush />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                textAlign="left"
+                titleColor="success"
+                reverse
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiStat
+                title={MOCK_HEALTH.avgDrift}
+                description={i18n.translate(
+                  'xpack.alertingV2.executionHistory.taskManagerHealth.avgDrift',
+                  { defaultMessage: 'Avg drift' }
+                )}
+                textAlign="left"
+                reverse
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiStat
+                title={MOCK_HEALTH.avgDuration}
+                description={i18n.translate(
+                  'xpack.alertingV2.executionHistory.taskManagerHealth.avgDuration',
+                  { defaultMessage: 'Avg duration' }
+                )}
+                textAlign="left"
+                reverse
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiStat
+                title={MOCK_HEALTH.pollingRate}
+                description={i18n.translate(
+                  'xpack.alertingV2.executionHistory.taskManagerHealth.pollingRate',
+                  { defaultMessage: 'Polling rate' }
+                )}
+                textAlign="left"
+                reverse
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiStat
+                title={`${MOCK_HEALTH.claimedTasks} / ${MOCK_HEALTH.capacity}`}
+                description={i18n.translate(
+                  'xpack.alertingV2.executionHistory.taskManagerHealth.capacity',
+                  { defaultMessage: 'Capacity' }
+                )}
+                textAlign="left"
+                reverse
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
       </EuiAccordion>
     </EuiPanel>
   );
