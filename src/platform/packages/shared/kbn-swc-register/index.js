@@ -56,7 +56,7 @@ const { TRANSFORMS } = require('./transforms');
 /** @type {Matcher[]} */
 const IGNORE_PATTERNS = [
   // ignore paths matching `/node_modules/{a}`, unless `a` is "@kbn"
-  /[\/\\]node_modules[\/\\](?!@kbn)([^\/\\]+)[\/\\]/,
+  /[\/\\]node_modules[\/\\](?!(?:@kbn|@elastic[\/\\]eui)(?:[\/\\]|$))/,
 
   // ignore packages with "babel" in their names
   /[\/\\]packages[\/\\]([^\/\\]+-)?babel(-[^\/\\]+)?[\/\\]/,
