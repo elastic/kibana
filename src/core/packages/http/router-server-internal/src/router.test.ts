@@ -509,5 +509,4 @@ describe('Router', () => {
       expect(route.options).toEqual({});
     });
   });
-
 });
