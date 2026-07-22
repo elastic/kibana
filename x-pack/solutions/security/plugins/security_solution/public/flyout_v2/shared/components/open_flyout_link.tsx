@@ -8,15 +8,18 @@
 import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { flyoutProviders } from './flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
-import { useKibana } from '../../../common/lib/kibana';
+import { useOpenFlyout } from '../hooks/use_open_flyout';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
-import { buildFlyoutContent } from '../utils/build_flyout_content';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
+import {
+  buildFlyoutContent,
+  getFlyoutTypeForField,
+  buildFlyoutTitleFromField,
+} from '../utils/build_flyout_content';
+import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
+import { useFlyoutSessionContext } from '../../session_context';
+import { FLYOUT_ORIGIN, FLYOUT_SESSION_KIND, FLYOUT_SURFACE } from '../../../common/lib/telemetry';
 
 export interface OpenFlyoutLinkProps {
   /**
@@ -24,9 +27,16 @@ export interface OpenFlyoutLinkProps {
    */
   field: string;
   /**
-   * Field value
+   * Field value. Used both to open the flyout and, by default, to derive its history title.
    */
   value: string;
+  /**
+   * Value to use for the link text and history title instead of `value`. For fields where the
+   * navigation target and the display text differ (e.g. rule name links, which navigate by rule
+   * UUID but display the rule name), pass the display value here so the title isn't derived from
+   * the UUID.
+   */
+  displayValue?: string;
   /**
    * The source document record. When provided, enables entity resolution for host/user flyouts.
    */
@@ -62,52 +72,59 @@ export type OpenFlyoutLinkRenderer = FC<OpenFlyoutLinkProps>;
 export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   field,
   value,
+  displayValue,
   hit,
   asParent = false,
   children,
   'data-test-subj': dataTestSubj = OPEN_FLYOUT_LINK_TEST_ID,
 }) => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
+  const open = useOpenFlyout();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
+  const { historyKey, session: sessionMode } = useFlyoutSessionContext();
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
+  const flyoutType = useMemo(() => getFlyoutTypeForField(field), [field]);
+  const titleValue = displayValue ?? value;
+  const flyoutTitle = useMemo(
+    () => buildFlyoutTitleFromField(field, titleValue) ?? titleValue,
+    [field, titleValue]
+  );
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
-      const resolvedSession = asParent ? 'start' : sessionMode;
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <FlyoutSessionContextProvider value={{ session: resolvedSession, historyKey }}>
-              {flyoutContent}
-            </FlyoutSessionContextProvider>
-          ),
-        }),
+      const resolvedSession = asParent ? FLYOUT_SESSION_KIND.START : sessionMode;
+      open(
+        flyoutContent,
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,
           session: resolvedSession,
-          outsideClickCloses: resolvedSession === 'start',
-        }
+          outsideClickCloses: resolvedSession === FLYOUT_SESSION_KIND.START,
+          title:
+            resolvedSession === FLYOUT_SESSION_KIND.INHERIT
+              ? buildFlyoutNavTitle(flyoutTitle)
+              : flyoutTitle,
+        },
+        flyoutType
+          ? {
+              surface: FLYOUT_SURFACE.FLYOUT,
+              flyoutType,
+              session: resolvedSession,
+              origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
+            }
+          : undefined,
+        resolvedSession
       );
     }
   }, [
     defaultDocumentFlyoutProperties,
-    history,
+    open,
     flyoutContent,
-    historyKey,
-    overlays,
-    services,
-    sessionMode,
-    store,
+    flyoutType,
     asParent,
+    historyKey,
+    flyoutTitle,
+    sessionMode,
   ]);
 
   if (!flyoutContent) {
@@ -116,7 +133,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 
   return (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>
-      {children ?? value}
+      {children ?? titleValue}
     </EuiLink>
   );
 };

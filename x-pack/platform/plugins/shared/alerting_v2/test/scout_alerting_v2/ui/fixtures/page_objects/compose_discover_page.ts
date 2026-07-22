@@ -6,13 +6,15 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { EuiSuperSelectWrapper } from '@kbn/scout';
 
 export class ComposeDiscoverPage {
   public readonly flyout: Locator;
   public readonly nextButton: Locator;
   public readonly backButton: Locator;
   public readonly submitButton: Locator;
+  /** YAML-mode save button (non-representable rules such as alert + standalone). */
+  public readonly yamlSubmitButton: Locator;
   /**
    * "Open query editor" — visible on the Alert Condition step in signal
    * (non-alert) mode when no query has been committed yet.
@@ -33,6 +35,11 @@ export class ComposeDiscoverPage {
   public readonly sandboxCloseButton: Locator;
   public readonly sandboxSearchButton: Locator;
   public readonly sandboxApplyButton: Locator;
+  /** Time field selector on the Alert Condition step; `aria-invalid` when unresolved. */
+  public readonly timeFieldSelector: Locator;
+  /** Inline error rendered under the time field when no date field resolves. */
+  public readonly timeFieldError: Locator;
+  /** Time field selector inside the query sandbox flyout. */
   public readonly sandboxTimeFieldSelector: Locator;
   public readonly ruleNameInput: Locator;
   public readonly addRunbookButton: Locator;
@@ -51,22 +58,25 @@ export class ComposeDiscoverPage {
   /** Callout shown after Apply when the query is empty. */
   public readonly emptyQueryCallout: Locator;
 
-  private readonly codeEditor: KibanaCodeEditorWrapper;
+  private readonly modeSuperSelect: EuiSuperSelectWrapper;
 
   constructor(private readonly page: ScoutPage) {
-    this.codeEditor = new KibanaCodeEditorWrapper(page);
+    this.modeSuperSelect = new EuiSuperSelectWrapper(page, 'composeDiscoverModeSelect');
 
     this.flyout = this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]');
     this.nextButton = this.page.testSubj.locator('composeDiscoverNext');
     this.backButton = this.page.testSubj.locator('composeDiscoverBack');
     this.submitButton = this.page.testSubj.locator('composeDiscoverSubmit');
+    this.yamlSubmitButton = this.page.testSubj.locator('composeDiscoverYamlSubmit');
     this.openEditorButton = this.page.testSubj.locator('composeDiscoverOpenEditor');
     this.editQueryButton = this.page.testSubj.locator('composeDiscoverEditQuery');
     this.alertSummaryEditorButton = this.page.testSubj.locator('esqlSummaryOpenEditor');
     this.sandboxCloseButton = this.page.testSubj.locator('querySandboxClose');
     this.sandboxSearchButton = this.page.testSubj.locator('composeDiscoverRunQuery');
     this.sandboxApplyButton = this.page.testSubj.locator('querySandboxApply');
-    this.sandboxTimeFieldSelector = this.page.testSubj.locator('composeDiscoverTimeField');
+    this.timeFieldSelector = this.page.testSubj.locator('composeDiscoverTimeField');
+    this.timeFieldError = this.page.testSubj.locator('composeDiscoverTimeFieldError');
+    this.sandboxTimeFieldSelector = this.page.testSubj.locator('querySandboxTimeField');
     this.ruleNameInput = this.flyout.locator('[data-test-subj="ruleNameInput"]');
     this.addRunbookButton = this.flyout.locator('[data-test-subj="addRunbookButton"]');
     this.relatedDashboardsSelector = this.flyout.locator('[data-test-subj="dashboardsSelector"]');
@@ -99,10 +109,12 @@ export class ComposeDiscoverPage {
 
   async openCreateFlyout() {
     // Wait until either entry point is rendered — split dropdown (table state)
-    // or empty-state card — before deciding which path to take.
+    // or empty-state card — before deciding which path to take. After a prior
+    // test navigates away, Kibana can still be on the splash screen when
+    // beforeEach's rulesListLoading check already passed, so allow a long wait.
     await this.createRuleSplitDropdownButton
       .or(this.createEsqlRuleCard)
-      .waitFor({ state: 'visible' });
+      .waitFor({ state: 'visible', timeout: 60_000 });
     if (await this.createRuleSplitDropdownButton.isVisible()) {
       await this.createRuleSplitDropdownButton.click();
       await this.createEsqlRuleButton.click();
@@ -116,12 +128,42 @@ export class ComposeDiscoverPage {
   }
 
   /**
-   * Types an ES|QL query into the sandbox's single unified code editor (Monaco
-   * index 0). In the create flow the editor holds the whole pipeline (base +
-   * alert condition); the heuristic split runs on Apply.
+   * Types an ES|QL query into the sandbox's editable code editor.
+   *
+   * Targets the editable (non-read-only) Monaco editor rather than a fixed model
+   * index: in the edit flow the read-only `QuerySummary` editor is also mounted
+   * behind the sandbox and can occupy `getModels()[0]`, so setting index 0 would
+   * write to the summary instead of the sandbox — leaving `sandboxQuery` stale
+   * and committing the previous query on Apply. Setting the model value fires the
+   * editor's `onChange`, which propagates the new query into the sandbox state.
    */
   async setSandboxQuery(query: string) {
-    await this.codeEditor.setCodeEditorValue(query, 0);
+    await this.page.evaluate((value: string) => {
+      const monacoEnv = (window as unknown as { MonacoEnvironment?: any }).MonacoEnvironment;
+      const editorApi = monacoEnv?.monaco?.editor;
+      if (!editorApi) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+
+      const editors = editorApi.getEditors() as Array<{
+        getModel(): { setValue(v: string): void } | null;
+        getRawOptions(): { readOnly?: boolean };
+      }>;
+      const editable = editors.find((e) => !e.getRawOptions()?.readOnly && e.getModel());
+
+      if (editable) {
+        editable.getModel()!.setValue(value);
+        return;
+      }
+
+      // Fallback: no editable editor found — update the last model (the sandbox
+      // editor is created after any read-only summary editors).
+      const models = editorApi.getModels() as Array<{ setValue(v: string): void }>;
+      if (!models.length) {
+        throw new Error('No Monaco editor models found');
+      }
+      models[models.length - 1].setValue(value);
+    }, query);
   }
 
   async clickNext() {
@@ -130,6 +172,10 @@ export class ComposeDiscoverPage {
 
   async clickSubmit() {
     await this.submitButton.click();
+  }
+
+  async clickYamlSubmit() {
+    await this.yamlSubmitButton.click();
   }
 
   async clickApply() {
@@ -143,6 +189,31 @@ export class ComposeDiscoverPage {
 
   async setRuleName(name: string) {
     await this.ruleNameInput.fill(name);
+  }
+
+  /**
+   * Switches Alert / Signal mode. The sandbox must be closed first — ModeSelect
+   * is disabled while the query sandbox is open in form mode.
+   */
+  async selectMode(kind: 'alert' | 'signal') {
+    await this.modeSuperSelect.selectOption(kind);
+  }
+
+  /** Waits until a time-field `<select>` option is present (field-caps resolution). */
+  async waitForTimeFieldOption(selector: Locator, value: string) {
+    await selector.locator(`option[value="${value}"]`).waitFor({ state: 'attached' });
+  }
+
+  /** Selects a value in the Alert Condition step Time field `<select>`. */
+  async selectTimeField(value: string) {
+    await this.waitForTimeFieldOption(this.timeFieldSelector, value);
+    await this.timeFieldSelector.selectOption(value);
+  }
+
+  /** Selects a value in the query sandbox Time field `<select>`. */
+  async selectSandboxTimeField(value: string) {
+    await this.waitForTimeFieldOption(this.sandboxTimeFieldSelector, value);
+    await this.sandboxTimeFieldSelector.selectOption(value);
   }
 
   async addRunbook(text: string) {

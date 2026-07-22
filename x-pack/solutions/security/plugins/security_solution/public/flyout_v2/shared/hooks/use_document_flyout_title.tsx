@@ -13,13 +13,24 @@ import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { noop } from 'lodash/fp';
 import { EventKind } from '../../document/main/constants/event_kinds';
-import { getDocumentTitle } from '../../document/main/utils/get_header_title';
+import {
+  getDocumentHistoryTitle,
+  getDocumentTitle,
+} from '../../document/main/utils/get_header_title';
 import { useKibana } from '../../../common/lib/kibana';
 import type { CellActionRenderer } from '../components/cell_actions';
 import { noopCellActionRenderer } from '../components/cell_actions';
 import { flyoutProviders } from '../components/flyout_provider';
 import { DocumentFlyout } from '../../document/main';
 import { useDefaultDocumentFlyoutProperties } from './use_default_flyout_properties';
+import { useFlyoutTelemetry } from './use_flyout_telemetry';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+} from '../../../common/lib/telemetry';
+import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
 import { DocumentSeverity } from '../../document/main/components/severity';
 import { Timestamp } from '../components/timestamp';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
@@ -59,6 +70,7 @@ export const useDocumentFlyoutTitle = ({
   const history = useHistory();
   const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const { historyKey } = useFlyoutSessionContext();
+  const { reportOpened, reportClosed } = useFlyoutTelemetry();
 
   const isAlert = useMemo(
     () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -66,16 +78,19 @@ export const useDocumentFlyoutTitle = ({
   );
 
   const label = useMemo(() => getDocumentTitle(hit), [hit]);
+  const sessionTitle = useMemo(() => getDocumentHistoryTitle(hit), [hit]);
   const iconType = isAlert ? 'warning' : 'analyzeEvent';
 
   const onTitleClick = useCallback(() => {
-    services.overlays?.openSystemFlyout(
+    const ref = services.overlays?.openSystemFlyout(
       flyoutProviders({
         services,
         store,
         history,
         children: (
-          <FlyoutSessionContextProvider value={{ session: 'inherit', historyKey }}>
+          <FlyoutSessionContextProvider
+            value={{ session: FLYOUT_SESSION_KIND.INHERIT, historyKey }}
+          >
             <DocumentFlyout
               hit={hit}
               renderCellActions={renderCellActions}
@@ -84,8 +99,23 @@ export const useDocumentFlyoutTitle = ({
           </FlyoutSessionContextProvider>
         ),
       }),
-      { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+      {
+        ...defaultFlyoutProperties,
+        historyKey,
+        session: FLYOUT_SESSION_KIND.INHERIT,
+        title: buildFlyoutNavTitle(sessionTitle),
+      }
     );
+    if (!ref) return;
+    const meta = {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      session: FLYOUT_SESSION_KIND.INHERIT,
+      origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
+    };
+    const openedAt = Date.now();
+    reportOpened(meta);
+    ref.onClose.then(() => reportClosed(meta, Date.now() - openedAt)).catch(noop);
   }, [
     defaultFlyoutProperties,
     history,
@@ -93,7 +123,10 @@ export const useDocumentFlyoutTitle = ({
     hit,
     onAlertUpdated,
     renderCellActions,
+    reportClosed,
+    reportOpened,
     services,
+    sessionTitle,
     store,
   ]);
 

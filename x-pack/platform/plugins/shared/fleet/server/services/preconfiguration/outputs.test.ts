@@ -358,7 +358,7 @@ describe('Outputs preconfiguration', () => {
       });
       expect(result[1]).toMatchObject({
         id: 'es-agentless-output',
-        name: 'Internal output for agentless',
+        name: 'Internal output for managed integrations',
         type: 'elasticsearch',
         hosts: ['https://test-es.co:9200'],
         ca_sha256: 'test-ca-sha256',

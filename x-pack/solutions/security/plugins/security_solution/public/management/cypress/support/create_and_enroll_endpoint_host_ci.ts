@@ -10,6 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/kbn-client';
 import { kibanaPackageJson } from '@kbn/repo-info';
+import { PINNED_AGENT_VERSION } from '../../../../scripts/endpoint/common/endpoint_host_services';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
 import { fetchFleetLatestAvailableAgentVersion } from '../../../../common/endpoint/utils/fetch_fleet_version';
 import { isFleetServerRunning } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
@@ -76,6 +77,10 @@ export const createAndEnrollEndpointHostCI = async ({
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
     if (isServerless) {
       agentVersion = await fetchFleetLatestAvailableAgentVersion(kbnClient);
+    } else {
+      // Temporary: pin the stateful/ESS agent to a version unaffected by the broken Linux
+      // ransomware global artifact (see PINNED_AGENT_VERSION). Remove once fixed upstream.
+      agentVersion = PINNED_AGENT_VERSION;
     }
   }
 

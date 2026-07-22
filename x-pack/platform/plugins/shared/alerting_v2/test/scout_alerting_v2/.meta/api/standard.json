@@ -1,5 +1,9 @@
 {
-  "sha1": "5318ab86b84e5275078ff39dd949d2ef9007bbfa",
+  "sha1": "a0d5747b5c064d5faf1cfbcfcfbe84abc6b61c56",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -7529,7 +7533,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/telemetry.spec.ts",
-        "line": 113,
+        "line": 156,
         "column": 10
       }
     }

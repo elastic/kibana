@@ -35,6 +35,34 @@ jest.mock('@kbn/esql-editor', () => ({
   ESQLEditor: () => <div data-test-subj="esqlEditorMock" />,
 }));
 
+jest.mock('./compose_discover_form/alert_condition_step', () => ({
+  AlertConditionStep: () => null,
+}));
+
+jest.mock('./compose_discover_form/recovery_condition_step', () => ({
+  RecoveryConditionStep: () => null,
+}));
+
+jest.mock('./compose_discover_form/details_and_artifacts_step', () => ({
+  DetailsAndArtifactsStep: () => null,
+}));
+
+jest.mock('./compose_discover_form/notifications_step', () => ({
+  NotificationsStep: () => null,
+}));
+
+jest.mock('./compose_discover_form/linked_action_policies_step', () => ({
+  LinkedActionPoliciesStep: () => null,
+}));
+
+jest.mock('./compose_discover_form/centralized_action_policies_panel', () => ({
+  CentralizedActionPoliciesPanel: () => null,
+}));
+
+jest.mock('./compose_discover_form/esql_recovery_content', () => ({
+  EsqlRecoveryContent: () => null,
+}));
+
 const mockComposeDiscoverForm = jest.fn((_props: FormProps) => (
   <div data-test-subj="composeDiscoverFormMock" />
 ));

@@ -124,7 +124,7 @@ const getErrorMessage = (error: Error | ServerError): string => {
 
 export const useCasesToast = () => {
   const { appId } = useApplication();
-  const { application, i18n, theme, userProfile } = useKibana().services;
+  const { application, i18n, theme, userProfile, rendering } = useKibana().services;
   const { getUrlForApp, navigateToUrl } = application;
 
   const toasts = useToasts();
@@ -184,8 +184,13 @@ export const useCasesToast = () => {
       showSuccessToast: (title: string, text?: ToastInputFields['text']) => {
         toasts.addSuccess({ title, text, className: 'eui-textBreakWord' });
       },
-      showDangerToast: (title: string, text?: string) => {
-        toasts.addDanger({ title, text, className: 'eui-textBreakWord' });
+      showDangerToast: (title: string, text?: React.ReactNode) => {
+        // Rich (non-string) content must be rendered via a mount point.
+        const mountedText =
+          text != null && typeof text !== 'string'
+            ? toMountPoint(text, rendering)
+            : text ?? undefined;
+        toasts.addDanger({ title, text: mountedText, className: 'eui-textBreakWord' });
       },
       showInfoToast: (title: string, text?: string) => {
         toasts.addInfo({
@@ -195,7 +200,7 @@ export const useCasesToast = () => {
         });
       },
     }),
-    [i18n, theme, userProfile, appId, getUrlForApp, navigateToUrl, toasts]
+    [i18n, theme, userProfile, appId, getUrlForApp, navigateToUrl, toasts, rendering]
   );
 };
 

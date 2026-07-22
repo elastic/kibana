@@ -88,12 +88,14 @@ export interface UsageStats {
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:excludeColdAndFrozenTiersInPrevalence': boolean;
   'securitySolution:enableAssetInventory': boolean;
+  'securitySolution:enableSiemReadiness': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'securitySolution:suppressionBehaviorOnAlertClosure': string;
   'securitySolution:defaultValueReportMinutes': string;
   'securitySolution:defaultValueReportRate': string;
   'securitySolution:defaultValueReportTitle': string;
   'securitySolution:enableAlertsAndAttacksAlignment': boolean;
+  'securitySolution:enableAttackDiscoveryWorkflows': boolean;
   'securitySolution:enableRuleChangesHistory': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;

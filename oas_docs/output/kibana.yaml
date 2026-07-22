@@ -98,7 +98,7 @@ tags:
     x-displayName: Connectors
   - name: Dashboards
     description: |
-      > **Technical preview** — The Dashboards API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+      > This documentation is temporarily hosted at a separate location.
       >
       > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
     externalDocs:
@@ -400,7 +400,7 @@ tags:
       Enables you to invalidate user sessions for security and session management purposes.
   - name: Visualizations
     description: |
-      > **Technical preview** — The Visualizations API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+      > This documentation is temporarily hosted at a separate location.
       >
       > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
     externalDocs:
@@ -13616,7 +13616,7 @@ paths:
       summary: Get dashboards
       operationId: get-dashboards-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -13628,7 +13628,7 @@ paths:
       summary: Create a dashboard
       operationId: create-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -13641,7 +13641,7 @@ paths:
       summary: Get a dashboard
       operationId: get-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -13653,7 +13653,7 @@ paths:
       summary: Update a dashboard
       operationId: update-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -13665,7 +13665,7 @@ paths:
       summary: Delete a dashboard
       operationId: delete-dashboard-redirect
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
       responses:
@@ -17206,7 +17206,7 @@ paths:
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](../operation/operation-post-saved-objects-export) and [import](../operation/operation-post-saved-objects-import) any necessary connectors before importing detection rules.
 
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ExportRules
@@ -17516,7 +17516,7 @@ paths:
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](../operation/operation-post-saved-objects-export) and [import](../operation/operation-post-saved-objects-import) any necessary connectors before importing detection rules.
 
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
@@ -51467,15 +51467,6 @@ paths:
               - propagated
               - resolution
             type: string
-        - description: Maximum number of history entries to return per request.
-          in: query
-          name: page_size
-          required: false
-          schema:
-            default: 100
-            maximum: 1000
-            minimum: 1
-            type: integer
         - description: When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.
           in: query
           name: include_contributions
@@ -70722,7 +70713,7 @@ paths:
       summary: Get visualizations
       operationId: get-visualizations-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -70734,7 +70725,7 @@ paths:
       summary: Create a visualization
       operationId: create-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -70747,7 +70738,7 @@ paths:
       summary: Get a visualization
       operationId: get-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -70759,7 +70750,7 @@ paths:
       summary: Update a visualization
       operationId: update-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -70771,7 +70762,7 @@ paths:
       summary: Delete a visualization
       operationId: delete-visualization-redirect
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
       responses:
@@ -71051,6 +71042,13 @@ paths:
         - description: Whether to overwrite existing workflows.
           in: query
           name: overwrite
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: 'When true, performs a preflight conflict check only. Returns the subset of the supplied workflow IDs that already exist (including soft-deleted tombstones and cross-space documents) without writing anything. The response body is `{ existingIds: string[] }` instead of the normal `{ created, failed }` shape.'
+          in: query
+          name: dryRun
           required: false
           schema:
             default: false
@@ -134726,9 +134724,14 @@ components:
           items:
             $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreHistoryEntry'
           type: array
+        interval:
+          description: The effective Elasticsearch `date_histogram` interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.
+          maxLength: 10
+          type: string
       required:
         - entity_id
         - entity_type
+        - interval
         - entries
     Security_Entity_Analytics_API_RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.

@@ -328,6 +328,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
+
     productFeaturesService.setup(core, plugins);
 
     events.forEach((eventConfig) => {

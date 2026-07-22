@@ -9,12 +9,26 @@ import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import * as reactRedux from 'react-redux';
 import { useMonitorLatestPing } from './use_monitor_latest_ping';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { ConfigKey, MonitorTypeEnum, type Ping } from '../../../../../../common/runtime_types';
 import { getMonitorLastRunAction } from '../../../state';
+import { fetchLatestTestRun } from '../../../state/monitor_details/api';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useEsSearch: jest.fn().mockReturnValue({ data: undefined, loading: false, error: undefined }),
+  // Mirror of the real FETCH_STATUS enum values; test bodies read it back off
+  // the mocked module below so there is a single source of truth.
+  FETCH_STATUS: {
+    LOADING: 'loading',
+    SUCCESS: 'success',
+    FAILURE: 'failure',
+    PENDING: 'pending',
+  },
+  useFetcher: jest.fn().mockReturnValue({ data: undefined, status: 'pending', loading: false }),
+}));
+
+const { FETCH_STATUS } = observabilitySharedPublic;
+
+jest.mock('../../../state/monitor_details/api', () => ({
+  fetchLatestTestRun: jest.fn().mockResolvedValue({ ping: undefined }),
 }));
 
 jest.mock('../../../contexts', () => ({
@@ -50,7 +64,8 @@ jest.mock('react-redux', () => {
   };
 });
 
-const useEsSearchMock = observabilitySharedPublic.useEsSearch as jest.Mock;
+const useFetcherMock = observabilitySharedPublic.useFetcher as jest.Mock;
+const fetchLatestTestRunMock = fetchLatestTestRun as jest.Mock;
 
 // Sentinel objects used by tests to assert hook plumbing without coupling to
 // the full Ping/Monitor shapes.
@@ -77,7 +92,12 @@ describe('useMonitorLatestPing', () => {
     mockUrlParams.mockReturnValue({});
     mockUseSelectedLocation.mockReturnValue({ label: 'US East' });
     mockLatestPingState.mockReturnValue({ data: undefined, loading: false, loaded: false });
-    useEsSearchMock.mockReturnValue({ data: undefined, loading: false, error: undefined });
+    useFetcherMock.mockReturnValue({
+      data: undefined,
+      status: FETCH_STATUS.PENDING,
+      loading: false,
+    });
+    fetchLatestTestRunMock.mockResolvedValue({ ping: undefined });
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -137,16 +157,16 @@ describe('useMonitorLatestPing', () => {
       expect(result.current.latestPing).toBeUndefined();
     });
 
-    it('does not issue the remote CCS query', () => {
+    it('does not call the remote latest-ping route', () => {
       mockUseSelectedMonitor.mockReturnValue({ monitor: localMonitor });
 
       renderHook(() => useMonitorLatestPing());
 
-      expect(useEsSearchMock).toHaveBeenCalledWith(
-        expect.objectContaining({ index: '' }),
-        expect.any(Array),
-        expect.any(Object)
-      );
+      // useRemoteMonitorLatestPing is still invoked (rules of hooks), but its
+      // fetcher short-circuits without a remoteName so the route is never hit.
+      const fetchCallback = useFetcherMock.mock.calls[0][0];
+      fetchCallback();
+      expect(fetchLatestTestRunMock).not.toHaveBeenCalled();
     });
   });
 
@@ -162,51 +182,42 @@ describe('useMonitorLatestPing', () => {
       expect(mockDispatch).not.toHaveBeenCalled();
     });
 
-    it('queries the CCS-prefixed synthetics index pattern', () => {
+    it('calls the latest-ping route with monitorId, locationLabel, and remoteName', () => {
       renderHook(() => useMonitorLatestPing());
 
-      expect(useEsSearchMock).toHaveBeenCalledWith(
-        expect.objectContaining({ index: `remote-a:${SYNTHETICS_INDEX_PATTERN}` }),
-        expect.arrayContaining(['remote-query-id', 'US East', 'remote-a']),
-        expect.objectContaining({ name: 'getRemoteMonitorLatestPing' })
-      );
+      const fetchCallback = useFetcherMock.mock.calls[0][0];
+      fetchCallback();
+      expect(fetchLatestTestRunMock).toHaveBeenCalledWith({
+        monitorId: 'remote-query-id',
+        locationLabel: 'US East',
+        remoteName: 'remote-a',
+      });
     });
 
-    it('filters by monitor.id, observer.geo.name, and summary existence; sorts by @timestamp desc', () => {
-      renderHook(() => useMonitorLatestPing());
-
-      const params = useEsSearchMock.mock.calls[0][0];
-      expect(params.query.bool.filter).toEqual([
-        { term: { 'monitor.id': 'remote-query-id' } },
-        { term: { 'observer.geo.name': 'US East' } },
-        { exists: { field: 'summary' } },
-      ]);
-      expect(params.sort).toEqual([{ '@timestamp': 'desc' }]);
-      expect(params.size).toBe(1);
-    });
-
-    it('omits the location filter when no location label is selected', () => {
+    it('omits the location label when no location is selected', () => {
       mockUseSelectedLocation.mockReturnValue(undefined);
 
       renderHook(() => useMonitorLatestPing());
 
-      const params = useEsSearchMock.mock.calls[0][0];
-      expect(params.query.bool.filter).toEqual([
-        { term: { 'monitor.id': 'remote-query-id' } },
-        { exists: { field: 'summary' } },
-      ]);
+      const fetchCallback = useFetcherMock.mock.calls[0][0];
+      fetchCallback();
+      expect(fetchLatestTestRunMock).toHaveBeenCalledWith({
+        monitorId: 'remote-query-id',
+        locationLabel: undefined,
+        remoteName: 'remote-a',
+      });
     });
 
-    it('returns the latest ping from the remote ES result', () => {
+    it('returns the latest ping from the route result', () => {
       const ping = {
         monitor: { id: 'remote-query-id' },
         observer: { geo: { name: 'US East' } },
         '@timestamp': '2024-01-01T00:00:00Z',
       } as unknown as Ping;
-      useEsSearchMock.mockReturnValue({
-        data: { hits: { hits: [{ _source: ping }] } },
+      useFetcherMock.mockReturnValue({
+        data: { ping },
+        status: FETCH_STATUS.SUCCESS,
         loading: false,
-        error: undefined,
       });
 
       const { result } = renderHook(() => useMonitorLatestPing());
@@ -216,11 +227,11 @@ describe('useMonitorLatestPing', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    it('returns undefined latestPing with loaded=true when the remote query has no hits', () => {
-      useEsSearchMock.mockReturnValue({
-        data: { hits: { hits: [] } },
+    it('returns undefined latestPing with loaded=true when the route returns no ping', () => {
+      useFetcherMock.mockReturnValue({
+        data: { ping: undefined },
+        status: FETCH_STATUS.SUCCESS,
         loading: false,
-        error: undefined,
       });
 
       const { result } = renderHook(() => useMonitorLatestPing());
@@ -239,20 +250,22 @@ describe('useMonitorLatestPing', () => {
       expect(result.current.latestPing).toBeUndefined();
     });
 
-    it('does not run the CCS query when the monitor has not yet been resolved (index empty)', () => {
+    it('does not call the route when the monitor has not yet been resolved', () => {
       mockUseSelectedMonitor.mockReturnValue({ monitor: undefined });
 
       renderHook(() => useMonitorLatestPing());
 
-      expect(useEsSearchMock).toHaveBeenCalledWith(
-        expect.objectContaining({ index: '' }),
-        expect.any(Array),
-        expect.any(Object)
-      );
+      const fetchCallback = useFetcherMock.mock.calls[0][0];
+      fetchCallback();
+      expect(fetchLatestTestRunMock).not.toHaveBeenCalled();
     });
 
-    it('propagates loading=true from useEsSearch', () => {
-      useEsSearchMock.mockReturnValue({ data: undefined, loading: true, error: undefined });
+    it('propagates loading=true from the fetcher', () => {
+      useFetcherMock.mockReturnValue({
+        data: undefined,
+        status: FETCH_STATUS.LOADING,
+        loading: true,
+      });
 
       const { result } = renderHook(() => useMonitorLatestPing());
 
