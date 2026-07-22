@@ -16,6 +16,8 @@ import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_s
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { PoliciesTabContent, RulesTabContent } from './components';
+import { ExecutionKpis } from './components/execution_kpis';
+import { TaskManagerHealth } from './components/task_manager_health';
 
 const POLICIES_TAB_ID = 'policies';
 const RULES_TAB_ID = 'rules';
@@ -85,6 +87,10 @@ export const ExecutionHistoryPage = () => {
         padding={{ bleed: 'm' }}
         tabs={tabs}
       />
+      <EuiSpacer size="m" />
+      <ExecutionKpis />
+      <EuiSpacer size="m" />
+      <TaskManagerHealth />
       <EuiSpacer size="m" />
       {selectedTabId === RULES_TAB_ID ? (
         <RulesTabContent onRuleClick={handleRuleClick} />
