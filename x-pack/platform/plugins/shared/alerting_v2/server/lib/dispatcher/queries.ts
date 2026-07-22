@@ -130,7 +130,8 @@ export const getAlertEpisodeSuppressionsQueries = (
             last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
             last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
             last_snooze_action = MAX(last_snooze_action),
-            source = LAST(source, @timestamp)
+            source = LAST(source, @timestamp),
+            rule_id = LAST(rule_id, @timestamp)
           BY subject, group_hash, episode_id
         | EVAL should_suppress = CASE(
             last_snooze_action == "snooze", true,

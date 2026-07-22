@@ -316,9 +316,10 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(requests[0].query).toContain('last_deactivate_action == "deactivate", TRUE');
   });
 
-  it('keeps the expected output columns including source', () => {
+  it('keeps the expected output columns including source and rule_id', () => {
     const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
 
+    expect(requests[0].query).toContain('rule_id = LAST(rule_id, @timestamp)');
     expect(requests[0].query).toContain(
       'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source'
     );
