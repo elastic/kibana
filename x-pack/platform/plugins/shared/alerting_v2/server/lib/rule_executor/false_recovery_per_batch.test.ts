@@ -7,6 +7,7 @@
 
 /**
  * Reproduces the per-batch false-recovery bug in the rule executor.
+ * https://github.com/elastic/rna-program/issues/760
  *
  * `CreateRecoveryEventsStep` runs once per streaming batch and computes
  * recoveries against only the current batch's breached group hashes
