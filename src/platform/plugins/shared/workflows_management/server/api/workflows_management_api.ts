@@ -49,13 +49,20 @@ import type {
   WorkflowPartialDetailDto,
   WorkflowSortField,
 } from '@kbn/workflows/types/v1';
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type {
+  ExecuteWorkflowResponse,
+  WorkflowsExecutionEnginePluginStart,
+} from '@kbn/workflows-execution-engine/server';
+import { classifyWorkflowTriggerMatch } from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server/repositories/logs_repository';
 import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
-import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
+import type {
+  ServerTriggerDefinition,
+  WorkflowExecutionCapabilities,
+} from '@kbn/workflows-extensions/server';
 import {
   parseWorkflowYamlToJSON,
   parseYamlToJSONWithoutValidation,
@@ -116,6 +123,20 @@ export interface GetWorkflowsParams {
 
 export interface GetWorkflowAggsOptions {
   managedFilter?: GetWorkflowsParams['managedFilter'];
+}
+
+export interface ResolveWorkflowTriggerMatchesResult {
+  matched: WorkflowDetailDto[];
+  invalidConditionWorkflowIds: string[];
+}
+
+export interface ExecuteWorkflowSynchronouslyParams {
+  workflowId: string;
+  context: Record<string, unknown>;
+  spaceId: string;
+  request: KibanaRequest;
+  capabilities?: WorkflowExecutionCapabilities;
+  abortSignal?: AbortSignal;
 }
 
 export interface DeleteWorkflowsResponse {
@@ -304,6 +325,44 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<WorkflowDetailDto[]> {
     return this.workflowsService.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
+  }
+
+  public async resolveWorkflowTriggerMatches(
+    triggerId: string,
+    event: Record<string, unknown>,
+    spaceId: string
+  ): Promise<ResolveWorkflowTriggerMatchesResult> {
+    const subscribed = await this.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
+    const matched: WorkflowDetailDto[] = [];
+    const invalidConditionWorkflowIds: string[] = [];
+
+    subscribed.forEach((workflow) => {
+      const outcome = classifyWorkflowTriggerMatch(workflow, triggerId, event);
+      if (outcome === 'matched') {
+        matched.push(workflow);
+      } else if (outcome === 'kql_error') {
+        invalidConditionWorkflowIds.push(workflow.id);
+      }
+    });
+
+    return { matched, invalidConditionWorkflowIds };
+  }
+
+  public async executeWorkflowSynchronously({
+    workflowId,
+    context,
+    spaceId,
+    request,
+    capabilities,
+    abortSignal,
+  }: ExecuteWorkflowSynchronouslyParams): Promise<ExecuteWorkflowResponse> {
+    const workflow = await this.getSavedWorkflowExecutionModel(workflowId, spaceId);
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    return workflowsExecutionEngine.executeWorkflow(workflow, context, request, {
+      executionMode: 'sync',
+      capabilities,
+      abortSignal,
+    });
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {

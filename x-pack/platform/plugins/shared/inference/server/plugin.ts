@@ -44,6 +44,7 @@ import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 import { TokenUsageLogger } from './token_usage';
 import { installTokenUsageDashboard } from './dashboard';
+import type { WorkflowAnonymizationProvider } from './workflow_anonymization_provider';
 
 const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
   let parsed: unknown = value;
@@ -101,6 +102,7 @@ export class InferencePlugin
   private regexWorker?: RegexWorkerService;
   private endpointIdCache: InferenceEndpointIdCache;
   private tokenUsageLogger: TokenUsageLogger;
+  private workflowAnonymizationProvider?: WorkflowAnonymizationProvider;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
@@ -121,7 +123,14 @@ export class InferencePlugin
       logger: this.logger,
     });
 
-    return {};
+    return {
+      registerWorkflowAnonymizationProvider: (provider) => {
+        if (this.workflowAnonymizationProvider) {
+          throw new Error('A workflow anonymization provider is already registered');
+        }
+        this.workflowAnonymizationProvider = provider;
+      },
+    };
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
