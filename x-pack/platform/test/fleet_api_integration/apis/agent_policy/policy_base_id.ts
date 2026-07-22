@@ -16,6 +16,7 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const fleetAndAgents = getService('fleetAndAgents');
+  const kibanaServer = getService('kibanaServer');
 
   describe('fleet_policy_base_id', () => {
     skipIfNoDockerRegistry(providerContext);
