@@ -92,16 +92,6 @@ apiTest.describe('Suggestions API - non time based', { tag: tags.deploymentAgnos
     expect(response.body).toStrictEqual(['nestedValue']);
   });
 
-  apiTest('returns 404 if index is not found', async ({ apiClient }) => {
-    const response = await apiClient.post(`${SUGGESTIONS_VALUES_PATH}/not_found`, {
-      headers: { ...COMMON_HEADERS, ...cookieHeader },
-      responseType: 'json',
-      body: { field: 'baz.keyword', query: '1' },
-    });
-
-    expect(response).toHaveStatusCode(404);
-  });
-
   apiTest('returns 400 without a query', async ({ apiClient }) => {
     const response = await apiClient.post(`${SUGGESTIONS_VALUES_PATH}/basic_index`, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },

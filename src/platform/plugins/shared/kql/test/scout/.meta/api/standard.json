@@ -1,6 +1,30 @@
 {
-  "sha1": "2703c746f3a24c6b95ba0d7d2cf610543f244df9",
+  "sha1": "d8ecbe0c8741b21de17ff4d31e1e06e288fdcfce",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
+    {
+      "id": "158e8bbf77123e6-12246a59e5b37b8",
+      "title": "Suggestions API - non time based - missing index returns 404 if index is not found",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions_missing_index.spec.ts",
+        "line": 29,
+        "column": 12
+      }
+    },
     {
       "id": "8f22242c1e56e76-a28d1b90026924d",
       "title": "Suggestions API - time based filter is applied on a document level with terms_agg",
@@ -236,32 +260,6 @@
       }
     },
     {
-      "id": "e6c0509cae8ad9c-fa3c254b6d43397",
-      "title": "Suggestions API - non time based returns 404 if index is not found",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions.spec.ts",
-        "line": 95,
-        "column": 10
-      }
-    },
-    {
       "id": "e6c0509cae8ad9c-b277dea725a8ea9",
       "title": "Suggestions API - non time based returns 400 without a query",
       "expectedStatus": "passed",
@@ -283,7 +281,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions.spec.ts",
-        "line": 105,
+        "line": 95,
         "column": 10
       }
     },
@@ -309,7 +307,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions.spec.ts",
-        "line": 115,
+        "line": 105,
         "column": 10
       }
     }
