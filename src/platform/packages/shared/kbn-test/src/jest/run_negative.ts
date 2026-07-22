@@ -15,19 +15,13 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 /**
- * Negative testing for the Jest runner (`scripts/jest_all`).
- *
- * Each scenario is a "canary": a Jest config wired to fail in a specific way. We feed
- * each one to the real runner, capture its exit code + output, and INVERT the result —
- * a scenario only passes if the runner reported the expected failure. If a change to the
- * runner ever stops surfacing one of these failures, this job goes red.
- *
- * A few canaries pin KNOWN BUGS in the runner instead (marked below with a tracking
- * issue): they assert today's broken behavior, so fixing the bug flips them red —
- * the signal to update or remove that canary.
+ * Negative testing for `scripts/jest_all`: each scenario feeds a deliberately-failing
+ * Jest config to the runner and inverts the result — it passes only if the runner
+ * surfaces the expected failure. Scenarios tagged with a tracking issue pin a known
+ * runner bug and go red once it's fixed (the signal to update them).
  */
 
-const NEGATIVE_FAILURE_EXIT_CODE = 10; // scripts/jest_all exits 10 when any config fails
+const NEGATIVE_FAILURE_EXIT_CODE = 10; // scripts/jest_all's "a config failed" code
 const DEFAULT_SCENARIO_TIMEOUT_MS = 10 * 60 * 1000;
 
 export interface NegativeScenario {
@@ -35,17 +29,10 @@ export interface NegativeScenario {
   description: string;
   /** REPO_ROOT-relative path to the canary Jest config. */
   configPath: string;
-  /**
-   * Exit code the runner must produce. `10` is `scripts/jest_all`'s graceful
-   * "a config failed" code; a crash in the runner itself (e.g. the string-buffer
-   * overflow) surfaces as an uncaught exception, i.e. exit `1`. `'timeout'` means
-   * the runner is expected to hang and be killed by this scenario's `timeoutMs`
-   * (there is no exit code in that case).
-   */
+  /** Exit code the runner must produce; `'timeout'` means we expect it to hang and kill it. */
   expectedExitCode: number | 'timeout';
-  /** All of these must appear in the runner output for the scenario to pass. */
+  /** All must appear in the runner output for the scenario to pass. */
   expectedPatterns: RegExp[];
-  /** Extra env for this scenario's runner invocation (e.g. a small heap for OOM). */
   env?: Record<string, string>;
   timeoutMs?: number;
 }
@@ -82,7 +69,6 @@ export const NEGATIVE_SCENARIOS: NegativeScenario[] = [
     description: 'test process is OOM-killed',
     configPath: fixtureConfig('worker_oom'),
     expectedExitCode: NEGATIVE_FAILURE_EXIT_CODE,
-    // A small heap makes the allocation loop crash quickly and deterministically.
     env: { NODE_OPTIONS: '--max-old-space-size=256' },
     expectedPatterns: [/worker_oom/, /heap out of memory|out of memory|FATAL ERROR/i],
   },
@@ -90,11 +76,8 @@ export const NEGATIVE_SCENARIOS: NegativeScenario[] = [
     name: 'log_buffer_overload',
     description: 'output larger than a JS string (~512MB)',
     configPath: fixtureConfig('log_buffer_overload'),
-    // The current runner accumulates child output into a JS string and crashes with an
-    // uncaught "Invalid string length", i.e. exit 1 (not the graceful 10). Tracked in
-    // elastic/kibana-operations#624 (bug fix elastic/kibana#269289 was merged then
-    // reverted). When the buffer is fixed the runner will no longer crash and this
-    // canary will start failing the pipeline; remove or update it then.
+    // KNOWN BUG elastic/kibana-operations#624: runner buffers child output into a JS
+    // string and crashes with an uncaught "Invalid string length" (exit 1).
     expectedExitCode: 1,
     expectedPatterns: [/Invalid string length/],
   },
@@ -123,10 +106,8 @@ export const NEGATIVE_SCENARIOS: NegativeScenario[] = [
     name: 'process_exit_zero',
     description: 'test calls process.exit(0), runner falsely reports PASS',
     configPath: fixtureConfig('process_exit_zero'),
-    // KNOWN BUG: the runner trusts the child exit code alone, so a mid-run
-    // process.exit(0) yields a green config even though a failing test never ran.
-    // This canary pins the buggy behavior; tracked in elastic/kibana-operations#625.
-    // When the runner verifies run completeness, flip this to exit 10 + FAILED.
+    // KNOWN BUG elastic/kibana-operations#625: runner trusts the child exit code, so a
+    // mid-run process.exit(0) is reported green even though a failing test never ran.
     expectedExitCode: 0,
     expectedPatterns: [/process\.exit called with "0"/, /✅.*process_exit_zero/],
   },
@@ -134,31 +115,13 @@ export const NEGATIVE_SCENARIOS: NegativeScenario[] = [
     name: 'runner_hang',
     description: 'test leaves an open handle, runner hangs forever',
     configPath: fixtureConfig('runner_hang'),
-    // KNOWN BUG: run_all has no per-config timeout, so a child that never exits
-    // hangs the runner until something external kills it — here, this scenario's
-    // timeoutMs. Tracked in elastic/kibana-operations#626. When the runner enforces
-    // its own per-config timeout, flip this to exit 10 + a timeout report.
+    // KNOWN BUG elastic/kibana-operations#626: no per-config timeout, so a child that
+    // never exits hangs the runner until this scenario's timeoutMs kills it.
     expectedExitCode: 'timeout',
     expectedPatterns: [/Starting .*runner_hang/],
     timeoutMs: 90_000,
   },
 ];
-
-/** Pure inversion logic: did the runner behave the way this scenario expects? */
-export const evaluateScenario = (
-  scenario: NegativeScenario,
-  exitCode: number | 'timeout',
-  output: string
-): ScenarioEvaluation => {
-  const exitCodeMatched = exitCode === scenario.expectedExitCode;
-  const missingPatterns = scenario.expectedPatterns.filter((pattern) => !pattern.test(output));
-
-  return {
-    exitCodeMatched,
-    missingPatterns,
-    passedAsExpected: exitCodeMatched && missingPatterns.length === 0,
-  };
-};
 
 /** Entry point for `scripts/jest_negative`. */
 export const runJestNegative = async () => {
@@ -191,6 +154,21 @@ export const runJestNegative = async () => {
   process.exit(0);
 };
 
+export const evaluateScenario = (
+  scenario: NegativeScenario,
+  exitCode: number | 'timeout',
+  output: string
+): ScenarioEvaluation => {
+  const exitCodeMatched = exitCode === scenario.expectedExitCode;
+  const missingPatterns = scenario.expectedPatterns.filter((pattern) => !pattern.test(output));
+
+  return {
+    exitCodeMatched,
+    missingPatterns,
+    passedAsExpected: exitCodeMatched && missingPatterns.length === 0,
+  };
+};
+
 const runScenario = async (
   scenario: NegativeScenario,
   log: ToolingLog
@@ -198,17 +176,13 @@ const runScenario = async (
   log.write(`--- Negative canary: ${scenario.name} (${scenario.description})`);
 
   const started = Date.now();
-  // detached puts the runner in its own process group so a timeout can kill the
-  // whole tree — execa's own `timeout` only signals the direct child, leaking the
-  // hung Jest grandchild (the very thing the runner_hang canary creates).
   const subprocess = execa('node', ['scripts/jest_all', '--configs', scenario.configPath], {
     cwd: REPO_ROOT,
     reject: false,
     all: true,
-    detached: true,
+    detached: true, // detached=true: own process group so a timeout can SIGKILL the whole tree
     env: {
       ...process.env,
-      // Single config, but be explicit so the runner never waits on cache warmup.
       JEST_WARMUP_DELAY_MS: '0',
       ...scenario.env,
     },
@@ -243,7 +217,6 @@ const runScenario = async (
     for (const pattern of evaluation.missingPatterns) {
       log.error(`  missing expected output pattern: ${pattern}`);
     }
-    // Surface the runner output so failures are debuggable in CI.
     log.write(output);
   }
 
