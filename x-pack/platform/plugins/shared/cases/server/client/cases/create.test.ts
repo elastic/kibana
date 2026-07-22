@@ -1363,6 +1363,22 @@ describe('create', () => {
       ).rejects.toThrow('Template tmpl-exp not found');
     });
 
+    it('rejects a disabled template with the same not-found error', async () => {
+      const clientArgs = createClientArgs();
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        ...templateSO,
+        attributes: { ...templateSO.attributes, isEnabled: false },
+      });
+
+      await expect(
+        create(
+          { ...minimalRequest, template: { id: 'tmpl-exp' } },
+          clientArgs,
+          expansionCasesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-exp not found');
+    });
+
     it('does not expand when the templates flag is disabled and rejects an unpinned version', async () => {
       const clientArgs = createClientArgs({ templatesEnabled: false });
 

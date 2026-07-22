@@ -45,6 +45,14 @@ export default ({ getService }: FtrProviderContext): void => {
       .expect(204);
   };
 
+  const disableTemplate = async (templateId: string, { space }: { space?: string } = {}) => {
+    await supertest
+      .patch(`${space ? getSpaceUrlPrefix(space) : ''}/internal/cases/templates/${templateId}`)
+      .set('kbn-xsrf', 'true')
+      .send({ isEnabled: false })
+      .expect(200);
+  };
+
   const kitchenSinkDefinition = {
     name: 'Expansion Template',
     severity: 'high',
@@ -151,6 +159,25 @@ export default ({ getService }: FtrProviderContext): void => {
       // required_on_close validation reads archived versions with includeDeleted: true.)
       const template = await createTemplate(kitchenSinkDefinition);
       await deleteTemplate(template.templateId);
+
+      const res = await createCase(
+        supertest,
+        {
+          ...getPostCaseRequest({ owner: OWNER }),
+          template: { id: template.templateId },
+        },
+        400
+      );
+
+      expect(JSON.stringify(res)).to.contain('not found');
+    });
+
+    it('rejects a disabled template with the same not-found error', async () => {
+      // A disabled template is not selectable for new cases (the create-from-template UI requests
+      // isEnabled: true only). The API enforces the same, returning the not-found error rather than
+      // leaking that the template exists but is disabled.
+      const template = await createTemplate(kitchenSinkDefinition);
+      await disableTemplate(template.templateId);
 
       const res = await createCase(
         supertest,

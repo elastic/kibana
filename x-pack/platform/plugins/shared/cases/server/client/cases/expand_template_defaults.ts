@@ -70,7 +70,17 @@ export const resolveTemplateForCreate = async ({
     { includeDeleted: false }
   );
 
-  if (!templateSO || templateSO.attributes.owner !== owner) {
+  // A disabled template is not selectable for new cases, matching the create-from-template UI
+  // (which requests `isEnabled: true` only). We treat it exactly like a missing template — same
+  // "not found" wording, no existence leak — rather than filtering inside the templates service:
+  // required_on_close validation reads whichever version a case already pinned regardless of its
+  // enabled state, and must keep working. `isEnabled` is optional and defaults to enabled, so only
+  // an explicit `false` disables. (An already-open case that pinned this template is unaffected.)
+  if (
+    !templateSO ||
+    templateSO.attributes.owner !== owner ||
+    templateSO.attributes.isEnabled === false
+  ) {
     throw Boom.badRequest(`Template ${templateId} not found`);
   }
 
