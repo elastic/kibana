@@ -19,6 +19,7 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityIconByType } from '../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import type { EntityAttachmentMetadata } from '../../../../common/cases/attachments/entity';
 import { EntityAttachmentPayloadSchema } from '../../../../common/cases/attachments/entity';
+import { ENTITY_STORE_INDEX_PATTERN } from '../../../../common/entity_analytics/entity_store/constants';
 
 export type { EntityAttachmentMetadata };
 export interface EntityToAttach {
@@ -93,6 +94,9 @@ export const generateEntityAttachmentsWithoutOwner = (
       metadata: {
         entityName: entity.name,
         entityType: entity.type,
+        // Lets the Cases platform pair this attachment's id with an index so the
+        // "already attached" duplicate check works (unified matching needs id+index).
+        index: ENTITY_STORE_INDEX_PATTERN,
         ...(entity.riskScore != null ? { riskScore: entity.riskScore } : {}),
         ...(entity.riskLevel != null ? { riskLevel: entity.riskLevel } : {}),
       } satisfies EntityAttachmentMetadata,

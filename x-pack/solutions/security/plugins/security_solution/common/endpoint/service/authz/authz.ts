@@ -144,7 +144,7 @@ export const calculateEndpointAuthz = (
     canReadEndpointList,
     canWritePolicyManagement,
     canReadPolicyManagement,
-    canWriteActionsLogManagement,
+    canWriteActionsLogManagement: canWriteActionsLogManagement && isEnterpriseLicense,
     canReadActionsLogManagement: canReadActionsLogManagement && isEnterpriseLicense,
     canAccessEndpointActionsLogManagement: canReadActionsLogManagement && isPlatinumPlusLicense,
     canReadWorkflowInsights: canReadWorkflowInsights && isEnterpriseLicense,

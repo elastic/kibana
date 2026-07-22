@@ -18,7 +18,7 @@ import {
   type StoredTombstone,
 } from '../data_stream';
 import type { SignificantEventsAlertingContext } from '../../significant_events/alerting/significant_events_alerting_context';
-import { ALERTS_READER_V1 } from '../../significant_events/alerting/alerts_reader';
+import { ALERTS_READER_V2 } from '../../significant_events/alerting/alerts_reader';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 
 jest.mock('../../significant_events/latest_source_query', () => {
@@ -26,6 +26,7 @@ jest.mock('../../significant_events/latest_source_query', () => {
   return {
     ...actual,
     executeAndDecodeSource: jest.fn(),
+    queryEsql: jest.fn(),
   };
 });
 
@@ -39,7 +40,7 @@ jest.mock('./bulk_with_inference_fallback', () => {
   };
 });
 
-import { executeAndDecodeSource } from '../../significant_events/latest_source_query';
+import { executeAndDecodeSource, queryEsql } from '../../significant_events/latest_source_query';
 
 const STREAM = 'logs-app';
 
@@ -87,8 +88,7 @@ function createAlertingContext(
   rulesManagementClient: SignificantEventsAlertingContext['rulesClient']
 ): SignificantEventsAlertingContext {
   return {
-    alertingV2Active: false,
-    alertsReader: ALERTS_READER_V1,
+    alertsReader: ALERTS_READER_V2,
     rulesClient: rulesManagementClient,
   };
 }
@@ -126,6 +126,7 @@ function makeClient(): {
 
 beforeEach(() => {
   (executeAndDecodeSource as jest.Mock).mockReset();
+  (queryEsql as jest.Mock).mockReset();
 });
 
 describe('KnowledgeIndicatorClient.bulk', () => {
@@ -572,23 +573,21 @@ describe('KnowledgeIndicatorClient.bulk — lifecycle (expires_at)', () => {
   });
 });
 
-describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
-  function makeClientWithSearch(): {
+describe('KnowledgeIndicatorClient.findIndicators search', () => {
+  function makeClientWithRanker(): {
     client: KnowledgeIndicatorClient;
     runEsql: jest.Mock;
-    search: jest.Mock;
+    rankEsql: jest.Mock;
+    logger: Logger;
   } {
     const create = jest.fn().mockResolvedValue({ errors: false, items: [] });
-    const search = jest.fn().mockResolvedValue({
-      hits: { hits: [], total: { value: 0 } },
-    });
     const dataStreamClient = {
       create,
     } as unknown as KnowledgeIndicatorClientDeps['dataStreamClient'];
     const logger = loggerMock.create() as unknown as Logger;
     const deps: KnowledgeIndicatorClientDeps = {
       dataStreamClient,
-      esClient: { search } as unknown as KnowledgeIndicatorClientDeps['esClient'],
+      esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
       soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
       logger,
     };
@@ -603,11 +602,37 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
       true,
       createAlertingContext(rulesManagementClient)
     );
-    return { client, runEsql: executeAndDecodeSource as jest.Mock, search };
+    const rankEsql = queryEsql as jest.Mock;
+    rankEsql.mockResolvedValue({ columns: [], values: [] });
+    return { client, runEsql: executeAndDecodeSource as jest.Mock, rankEsql, logger };
   }
 
+  const rankedResponse = (
+    rows: Array<{
+      id: string;
+      'stream.name': string;
+      type: typeof KI_TYPE_FEATURE | typeof KI_TYPE_QUERY;
+      '@timestamp': string;
+    }>
+  ) => ({
+    columns: [
+      { name: 'id', type: 'keyword' },
+      { name: 'stream.name', type: 'keyword' },
+      { name: 'type', type: 'keyword' },
+      { name: '@timestamp', type: 'date' },
+    ],
+    values: rows.map((row) => [row.id, row['stream.name'], row.type, row['@timestamp']]),
+  });
+
+  const rankRequest = (rankEsql: jest.Mock): { query: string; params: unknown[] } => {
+    const composerQuery = rankEsql.mock.calls[0][0].query as {
+      toRequest: () => { query: string; params: unknown[] };
+    };
+    return composerQuery.toRequest();
+  };
+
   it('uses only feature fields when type is [feature]', async () => {
-    const { client, runEsql, search } = makeClientWithSearch();
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
     runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
 
     await client.findIndicators(STREAM, 'checkout', {
@@ -615,71 +640,119 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
       searchMode: 'keyword',
     });
 
-    expect(search).toHaveBeenCalledTimes(1);
-    const { retriever } = search.mock.calls[0][0] as {
-      retriever: {
-        standard: { query: { bool: { should: Array<{ wildcard: Record<string, unknown> }> } } };
-      };
-    };
-    const fields = retriever.standard.query.bool.should.map((c) => Object.keys(c.wildcard)[0]);
-    expect(fields).toContain('feature.type');
-    expect(fields).toContain('feature.subtype');
-    expect(fields).toContain('tags');
-    expect(fields).not.toContain('query.esql');
-    expect(fields).not.toContain('query.features.id');
+    expect(rankEsql).toHaveBeenCalledTimes(1);
+    const { query } = rankRequest(rankEsql);
+    expect(query).toContain('TO_LOWER(`feature.type`) LIKE');
+    expect(query).toContain('TO_LOWER(`feature.subtype`) LIKE');
+    expect(query).toContain('MV_CONCAT(TO_LOWER(tags), " ") LIKE "*checkout*"');
+    expect(query).not.toContain('query.esql');
+    expect(query).not.toContain('query.features.id');
+    expect(query).toContain('EVAL _score = CASE');
+    expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout*", 3.0, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout*", 2.0, 0.0)');
   });
 
   it('uses only query fields when type is [query]', async () => {
-    const { client, runEsql, search } = makeClientWithSearch();
-    runEsql.mockResolvedValueOnce({ hits: [] });
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
+    runEsql.mockResolvedValueOnce({ hits: [createQueryDoc({ id: 'q-1' })] });
 
     await client.findIndicators(STREAM, 'SELECT', {
       types: [KI_TYPE_QUERY],
       searchMode: 'keyword',
     });
 
-    // No hits from ES|QL phase → search is not called (early return).
-    // Test the field set by calling with a doc present.
-    (executeAndDecodeSource as jest.Mock).mockReset();
-    const fakeQuery = {
-      '@timestamp': '2026-01-01T00:00:00.000Z',
-      id: 'q-1',
-      type: KI_TYPE_QUERY,
-      'stream.name': STREAM,
-      title: 'Error query',
-      description: 'desc',
-      query: {
-        esql: 'FROM logs | WHERE body.text:"error"',
-        query_type: 'match',
-        rule_backed: false,
-        rule_id: 'r1',
-      },
-    };
-    runEsql.mockResolvedValueOnce({ hits: [fakeQuery] });
-    search.mockClear();
-    search.mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } });
+    expect(rankEsql).toHaveBeenCalledTimes(1);
+    const { query } = rankRequest(rankEsql);
+    expect(query).toContain('TO_LOWER(`query.esql`) LIKE');
+    expect(query).toContain('TO_LOWER(`query.features.id`) LIKE');
+    expect(query).not.toContain('feature.type');
+    expect(query).not.toContain('feature.subtype');
+    expect(query).not.toContain('MV_CONCAT(TO_LOWER(tags)');
+  });
 
-    await client.findIndicators(STREAM, 'SELECT', {
-      types: [KI_TYPE_QUERY],
+  it('matches tags by substring, not exact element (recall parity with DSL wildcard)', async () => {
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+
+    // Searching a partial tag token (e.g. `client`) must still surface features
+    // whose tag *contains* it (e.g. `browser-client`), matching the pre-migration
+    // DSL `wildcard('tags', '*client*')`. The regression was `MV_CONTAINS`, which
+    // only matched a tag element exactly equal to the query.
+    await client.findIndicators(STREAM, 'client', {
+      types: [KI_TYPE_FEATURE],
       searchMode: 'keyword',
     });
 
-    expect(search).toHaveBeenCalledTimes(1);
-    const { retriever } = search.mock.calls[0][0] as {
-      retriever: {
-        standard: { query: { bool: { should: Array<{ wildcard: Record<string, unknown> }> } } };
-      };
-    };
-    const fields = retriever.standard.query.bool.should.map((c) => Object.keys(c.wildcard)[0]);
-    expect(fields).toContain('query.esql');
-    expect(fields).toContain('query.features.id');
-    expect(fields).not.toContain('feature.type');
-    expect(fields).not.toContain('feature.subtype');
-    expect(fields).not.toContain('tags');
+    const { query } = rankRequest(rankEsql);
+    // Substring form: join the multivalue then apply the shared `*<query>*` pattern.
+    expect(query).toContain('MV_CONCAT(TO_LOWER(tags), " ") LIKE "*client*"');
+    expect(query).toContain('CASE(MV_CONCAT(TO_LOWER(tags), " ") LIKE "*client*", 1.0, 0.0)');
+    // The exact-element form must be gone.
+    expect(query).not.toContain('MV_CONTAINS');
+  });
+
+  it('uses double keyword scores in hybrid search', async () => {
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+
+    await client.findIndicators(STREAM, 'checkout service', {
+      types: [KI_TYPE_FEATURE],
+      searchMode: 'hybrid',
+    });
+
+    const { query } = rankRequest(rankEsql);
+    expect(query).toContain('FUSE RRF');
+    expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout service*", 3.0, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout service*", 2.0, 0.0)');
+  });
+
+  it('normalizes and thresholds semantic scores in ES|QL', async () => {
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+
+    await client.findIndicators(STREAM, 'checkout service', {
+      types: [KI_TYPE_FEATURE],
+      searchMode: 'semantic',
+      limit: 25,
+    });
+
+    const request = rankRequest(rankEsql);
+    expect(request.query).toContain('METADATA _score, _id, _index');
+    expect(request.query).toContain('MATCH(search_embedding, ?q)');
+    expect(request.query).toContain('FUSE LINEAR WITH {"normalizer": "minmax"}');
+    expect(request.query).toContain('WHERE _score >= 0.15');
+    expect(request.query).toContain(
+      'KEEP _id, _index, _score, id, `stream.name`, type, @timestamp'
+    );
+    expect(request.query).toContain('SORT _score DESC | LIMIT 25');
+    expect(request.params).toEqual([{ q: 'checkout service' }]);
+  });
+
+  it('thresholds the normalized semantic branch before hybrid RRF fusion', async () => {
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+
+    await client.findIndicators(STREAM, 'checkout service', {
+      types: [KI_TYPE_FEATURE],
+      searchMode: 'hybrid',
+    });
+
+    const request = rankRequest(rankEsql);
+    expect(request.query).toContain('METADATA _score, _id, _index');
+    const linearFuse = request.query.indexOf(
+      'FUSE LINEAR GROUP BY label WITH {"normalizer": "minmax"}'
+    );
+    const threshold = request.query.indexOf('WHERE _score >= 0.15');
+    const rrfFuse = request.query.indexOf('FUSE RRF WITH {"rank_constant": 20}');
+    expect(linearFuse).toBeGreaterThan(-1);
+    expect(threshold).toBeGreaterThan(linearFuse);
+    expect(rrfFuse).toBeGreaterThan(threshold);
+    expect(request.query.match(/KEEP _id, _index, _score/g)).toHaveLength(2);
+    expect(request.params).toEqual([{ q: 'checkout service' }]);
   });
 
   it('dedupes ranked rows to one per group and emits the phase-1 latest payload', async () => {
-    const { client, runEsql, search } = makeClientWithSearch();
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
 
     const latestTs = '2026-03-01T00:00:00.000Z';
     const olderTs = '2026-01-01T00:00:00.000Z';
@@ -691,33 +764,21 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
       ],
     });
 
-    // Phase 2: ES ranks several rows for the same group — two share the latest
+    // Phase 2: ES|QL ranks several rows for the same group — two share the latest
     // timestamp (a tie) with different payloads, one is an older revision. The
     // result must be a single hit carrying the phase-1 payload regardless of
     // which row ranked first.
-    search.mockResolvedValueOnce({
-      hits: {
-        total: { value: 3 },
-        hits: [
-          {
-            _id: 'aaa',
-            _source: createFeatureDoc({ id: 'feat-1', '@timestamp': latestTs, title: 'tie-a' }),
-          },
-          {
-            _id: 'zzz',
-            _source: createFeatureDoc({ id: 'feat-1', '@timestamp': latestTs, title: 'tie-b' }),
-          },
-          {
-            _id: 'mmm',
-            _source: createFeatureDoc({ id: 'feat-1', '@timestamp': olderTs, title: 'stale' }),
-          },
-        ],
-      },
-    });
+    rankEsql.mockResolvedValueOnce(
+      rankedResponse([
+        { id: 'feat-1', 'stream.name': STREAM, type: KI_TYPE_FEATURE, '@timestamp': latestTs },
+        { id: 'feat-1', 'stream.name': STREAM, type: KI_TYPE_FEATURE, '@timestamp': latestTs },
+        { id: 'feat-1', 'stream.name': STREAM, type: KI_TYPE_FEATURE, '@timestamp': olderTs },
+      ])
+    );
 
     const { hits } = await client.findIndicators(STREAM, 'checkout', {
       types: [KI_TYPE_FEATURE],
-      searchMode: 'keyword',
+      searchMode: 'hybrid',
     });
 
     expect(hits).toHaveLength(1);
@@ -726,7 +787,7 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
   });
 
   it('drops a group whose latest revision did not match the query', async () => {
-    const { client, runEsql, search } = makeClientWithSearch();
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
 
     // Phase 1 latest is newer than any matching ranked row below.
     runEsql.mockResolvedValueOnce({
@@ -734,24 +795,59 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     });
 
     // Only a stale revision matched the query — the group must not resurface.
-    search.mockResolvedValueOnce({
-      hits: {
-        total: { value: 1 },
-        hits: [
-          {
-            _id: 'old',
-            _source: createFeatureDoc({ id: 'feat-1', '@timestamp': '2026-01-01T00:00:00.000Z' }),
-          },
-        ],
-      },
-    });
+    rankEsql.mockResolvedValueOnce(
+      rankedResponse([
+        {
+          id: 'feat-1',
+          'stream.name': STREAM,
+          type: KI_TYPE_FEATURE,
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+        },
+      ])
+    );
 
     const { hits } = await client.findIndicators(STREAM, 'checkout', {
       types: [KI_TYPE_FEATURE],
-      searchMode: 'keyword',
+      searchMode: 'semantic',
     });
 
     expect(hits).toHaveLength(0);
+  });
+
+  it('falls back from auto-resolved hybrid to keyword when semantic search fails', async () => {
+    const { client, runEsql, rankEsql, logger } = makeClientWithRanker();
+    const latest = createFeatureDoc();
+    runEsql.mockResolvedValue({ hits: [latest] });
+    rankEsql
+      .mockRejectedValueOnce(new Error('inference endpoint unavailable'))
+      .mockResolvedValueOnce(rankedResponse([latest]));
+
+    const { hits } = await client.findIndicators(STREAM, 'checkout', {
+      types: [KI_TYPE_FEATURE],
+    });
+
+    expect(rankEsql).toHaveBeenCalledTimes(2);
+    expect(rankRequest(rankEsql).query).toContain('FUSE RRF');
+    const fallbackQuery = (
+      rankEsql.mock.calls[1][0].query as { toRequest: () => { query: string } }
+    ).toRequest().query;
+    expect(fallbackQuery).not.toContain('FUSE');
+    expect(hits).toHaveLength(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('falling back to keyword'));
+  });
+
+  it('propagates failures for an explicitly requested hybrid search', async () => {
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+    rankEsql.mockRejectedValueOnce(new Error('inference endpoint unavailable'));
+
+    await expect(
+      client.findIndicators(STREAM, 'checkout', {
+        types: [KI_TYPE_FEATURE],
+        searchMode: 'hybrid',
+      })
+    ).rejects.toThrow('inference endpoint unavailable');
+    expect(rankEsql).toHaveBeenCalledTimes(1);
   });
 });
 

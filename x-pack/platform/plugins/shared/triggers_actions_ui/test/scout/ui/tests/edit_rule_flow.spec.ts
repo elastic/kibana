@@ -108,9 +108,9 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     kbnUrl,
   }) => {
     await page.goto(kbnUrl.get(`/app/${SM_BASE}/rule/${testRuleId}`));
-    await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
+    await expect(page.testSubj.locator('appHeaderTitle')).toBeVisible();
 
-    await page.testSubj.click('ruleActionsButton');
+    await page.testSubj.click('app-menu-overflow-button');
     await page.testSubj.click('openEditRuleFlyoutButton');
 
     await expect(page).toHaveURL(RULES_EDIT_URL_RE);
@@ -127,9 +127,9 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
 
     // Navigate via details page so the edit page has the correct return path.
     await page.goto(kbnUrl.get(`/app/${SM_BASE}/rule/${testRuleId}`));
-    await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
+    await expect(page.testSubj.locator('appHeaderTitle')).toBeVisible();
 
-    await page.testSubj.click('ruleActionsButton');
+    await page.testSubj.click('app-menu-overflow-button');
     await page.testSubj.click('openEditRuleFlyoutButton');
     await expect(page.testSubj.locator('ruleForm')).toBeVisible();
 
@@ -140,7 +140,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
 
     await expect(page).toHaveURL(RULES_DETAILS_URL_RE);
     expect(page.url()).toContain(`/${SM_BASE}/rule/${testRuleId}`);
-    await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
+    await expect(page.testSubj.locator('appHeaderTitle')).toBeVisible();
 
     const saved = await apiServices.alerting.rules.get(testRuleId);
     expect(saved.data.name).toBe(updatedName);
@@ -154,9 +154,9 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     kbnUrl,
   }) => {
     await page.goto(kbnUrl.get(`/app/${SM_BASE}/rule/${testRuleId}`));
-    await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
+    await expect(page.testSubj.locator('appHeaderTitle')).toBeVisible();
 
-    await page.testSubj.click('ruleActionsButton');
+    await page.testSubj.click('app-menu-overflow-button');
     await page.testSubj.click('openEditRuleFlyoutButton');
     await expect(page.testSubj.locator('ruleForm')).toBeVisible();
 
@@ -164,6 +164,6 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
 
     await expect(page).toHaveURL(RULES_DETAILS_URL_RE);
     expect(page.url()).toContain(`/${SM_BASE}/rule/${testRuleId}`);
-    await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
+    await expect(page.testSubj.locator('appHeaderTitle')).toBeVisible();
   });
 });

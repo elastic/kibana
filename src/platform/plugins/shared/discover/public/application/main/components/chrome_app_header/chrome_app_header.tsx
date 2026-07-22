@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
-import { AppHeader } from '@kbn/app-header';
+import { DiscoverAppHeader } from '@kbn/app-header/discover';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { getChromeHeaderBack, getChromeHeaderTitle } from './utils';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -20,17 +20,11 @@ import { useIsChromeNextProjectHeader } from './use_is_chrome_next_project_heade
 
 interface ChromeAppHeaderProps {
   menu?: AppMenuConfig;
-  titleAppend?: ReactNode;
-  isCollapsed?: boolean;
+  tabsBar?: ReactNode;
   hasTabs?: boolean;
 }
 
-export const ChromeAppHeader = ({
-  menu,
-  titleAppend,
-  isCollapsed,
-  hasTabs = false,
-}: ChromeAppHeaderProps) => {
+export const ChromeAppHeader = ({ menu, tabsBar, hasTabs = false }: ChromeAppHeaderProps) => {
   const { embeddableEditor } = useDiscoverServices();
   const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
   const persistedDiscoverSession = useInternalStateSelector(
@@ -49,20 +43,31 @@ export const ChromeAppHeader = ({
   }, [embeddableEditor]);
 
   const appMenu = useMemo(() => {
+    // Share is surfaced as the title-row action but also kept in the overflow menu. Sharing is
+    // effectively session-scoped (not tab-scoped), so per design it belongs in the first section
+    // right below "New session"/"Open" rather than leading the tab-scoped section. The fractional
+    // offset keeps share adjacent-below "New session" without colliding with any order.
+    const newSessionItem = menu?.items?.find((item) => item.id === AppMenuActionId.new);
+
     return {
       ...menu,
-      isCollapsed,
-      items: menu?.items?.map(
-        (item) =>
-          ({
+      items: menu?.items?.map((item) => {
+        // We need more space for the tabs as the title is now in the same row. Move all items to the
+        // overflow menu. (Except switch language)
+        const overflow = item.id !== AppMenuActionId.switchLanguageMode;
+
+        if (item.id === AppMenuActionId.share && newSessionItem) {
+          return {
             ...item,
-            // We need more space for the tabs as the title is now in the same row. Move all items to the overflow menu.
-            // (Except switch language)
-            overflow: item.id !== AppMenuActionId.switchLanguageMode,
-          } as AppMenuItemType)
-      ),
+            overflow,
+            order: newSessionItem.order + 0.5,
+          } as AppMenuItemType;
+        }
+
+        return { ...item, overflow } as AppMenuItemType;
+      }),
     };
-  }, [isCollapsed, menu]);
+  }, [menu]);
 
   if (!isChromeNextProjectHeader) {
     return null;
@@ -74,13 +79,13 @@ export const ChromeAppHeader = ({
         position: relative;
       `}
     >
-      <AppHeader
+      <DiscoverAppHeader
         title={title}
         back={back}
         menu={appMenu}
         sticky={false}
-        padding="s"
-        titleAppend={titleAppend}
+        spacing="compact"
+        tabsBar={tabsBar}
         borderless={hasTabs}
       />
     </div>

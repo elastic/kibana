@@ -7,23 +7,19 @@
 
 import type { YAMLMap } from 'yaml';
 import { isMap, parseDocument } from 'yaml';
+import { reorderTemplateDefinitionKeys } from './reorder_template_definition_keys';
 
 /**
- * Case-default scalar keys that are forced-present in the editor "blueprint" YAML. Seeded as `null`
- * ("no default") when missing — the schema tolerates `null`, so seeding is behaviorally neutral.
- */
-const CASE_DEFAULT_SCALAR_KEYS = ['description', 'severity', 'category'] as const;
-
-/**
- * Ensures every case-default key plus the `fields` block is present in the editor "blueprint" YAML,
- * so an author never mistakes an absent key for "this field won't be on the case". Run ONCE when
- * seeding the initial editor value (not on every keystroke) — removing a block afterwards surfaces
- * as a validation error rather than being silently re-added.
+ * Ensures the structural `fields` block is present in the editor "blueprint" YAML, and normalizes
+ * the top-level key order (case defaults in render-panel order, with custom `fields` appended last).
+ * Run ONCE when seeding the initial editor value (not on every keystroke).
  *
- * The `connector` and `settings` blocks are intentionally NOT seeded here: under the Fields/
- * Configuration split they are panel-owned (edited on the Configuration tab, merged into the saved
- * definition on save), never part of the editor buffer. Template identity is likewise never written
- * here — it lives on the template's saved-object attributes.
+ * Case defaults (name/description/severity/category/tags/assignees) are all optional and are NOT
+ * seeded: an author adds only what their workflow needs, and the render panel shows sensible
+ * fallbacks for anything left unset. The `connector` and `settings` blocks are likewise not seeded —
+ * under the Fields/Configuration split they are panel-owned (edited on the Configuration tab, merged
+ * into the saved definition on save), never part of the editor buffer. Template identity is never
+ * written here either — it lives on the template's saved-object attributes.
  */
 export const seedRequiredTemplateBlocks = (definitionYaml: string): string => {
   try {
@@ -41,14 +37,12 @@ export const seedRequiredTemplateBlocks = (definitionYaml: string): string => {
       }
     };
 
-    // `name` (the case-default title) requires a real value and is not seeded — a missing/empty name
-    // is surfaced as a validation error instead.
-    for (const key of CASE_DEFAULT_SCALAR_KEYS) {
-      ensure(key, null);
-    }
-    ensure('tags', doc.createNode([]));
-    ensure('assignees', doc.createNode([]));
+    // Only the structural `fields` block is seeded; every case default is optional and left to the
+    // author (the render panel supplies fallbacks for anything unset).
     ensure('fields', doc.createNode([]));
+
+    // Order the case defaults to match the render panel and append `fields` last.
+    modified = reorderTemplateDefinitionKeys(doc) || modified;
 
     // Preserve the author's exact formatting/comments when nothing was missing.
     return modified ? doc.toString() : definitionYaml;

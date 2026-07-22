@@ -7,14 +7,7 @@
 
 import React from 'react';
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../../../../shared/kibana';
@@ -37,9 +30,6 @@ export const ModelStarted = ({
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="checkCircleFill" color="success" aria-hidden />
-          </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiText color="success" size="xs">
               <h3>

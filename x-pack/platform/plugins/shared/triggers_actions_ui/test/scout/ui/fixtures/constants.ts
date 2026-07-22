@@ -50,8 +50,8 @@ export const CONNECTORS_LIST_SELECTORS = {
 } as const;
 
 export const RULE_DETAILS_TEST_SUBJECTS = {
-  RULE_DETAILS_TITLE: 'ruleDetailsTitle',
-  RULE_NAME: 'ruleName',
+  RULE_DETAILS_TITLE: 'appHeaderTitle',
+  RULE_NAME: 'appHeaderTitle',
   ALERTS_SEARCH_BAR_ROW: 'ruleDetailsAlertsSearchBarRow',
   ALERTS_TABLE_EMPTY_STATE: 'alertsTableEmptyState',
 } as const;
