@@ -89,14 +89,16 @@ All paths relative to this skill's directory.
 
 ## Scaffold shortcut
 
-Use the general skill's scaffold with Security Solution defaults:
+Use the general skill's scaffold with Security Solution defaults. Security Solution tests are organised into namespace sub-directories, so pass the correct `<namespace>` for the feature area being migrated (e.g. `timelines`, `entity_analytics`, `flyout`, `reports`, `workflows`, `agent_builder`):
 
 ```bash
 bash .agents/skills/cypress-to-scout-migration/scripts/scaffold_scout_spec.sh \
   --name <spec_name> --domain <domain_path> \
-  --plugin-test-dir x-pack/solutions/security/plugins/security_solution/test/scout/ui \
+  --plugin-test-dir x-pack/solutions/security/plugins/security_solution/test/scout/<namespace>/ui \
   --type parallel --scout-package @kbn/scout-security
 ```
+
+If the namespace directory does not yet exist, create it first with `node scripts/scout.js generate --path x-pack/solutions/security/plugins/security_solution --type ui` and move / rename the generated scaffold into the correct namespace sub-directory, or create the structure manually following an existing namespace (e.g. `test/scout/timelines/ui/`).
 
 ## Security Solution tags
 
@@ -180,7 +182,7 @@ After migration, run the `scout-best-practices-reviewer` skill against the new t
 
 ## Ownership notes
 
-- **Timeline UI** lives in the `security_solution` plugin (`public/timelines/`), not the `timelines` plugin. The `timelines` plugin only contains server-side saved object definitions and APIs. Scout tests for timeline UI belong in `security_solution/test/scout/`.
+- **Timeline UI** lives in the `security_solution` plugin (`public/timelines/`), not the `timelines` plugin. The `timelines` plugin only contains server-side saved object definitions and APIs. Scout tests for timeline UI belong in `security_solution/test/scout/timelines/ui/`.
 - **Timeline `deleteAll()`** must delete both timelines and templates — they share the same API but require separate fetch calls filtered by `timeline_type`.
 
 ## Skill improvement

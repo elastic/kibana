@@ -75,9 +75,21 @@ If a new API service is added, verify it:
 
 ### Test placement
 
-- Timeline UI tests belong in `security_solution/test/scout/` — the `timelines` plugin only has server-side saved object definitions and APIs
-- Parallel specs go in `test/scout/ui/parallel_tests/<domain>/`
-- Sequential specs go in `test/scout/ui/tests/<domain>/`
+Security Solution Scout tests use a namespace sub-directory structure. Each feature area has its own directory under `test/scout/`:
+
+| Namespace | Path |
+|-----------|------|
+| `entity_analytics` | `test/scout/entity_analytics/{ui,api}/` |
+| `flyout` | `test/scout/flyout/ui/` |
+| `timelines` | `test/scout/timelines/ui/` |
+| `agent_builder` | `test/scout/agent_builder/ui/` |
+| `reports` | `test/scout/reports/ui/` |
+| `workflows` | `test/scout/workflows/ui/` |
+
+- Timeline UI tests belong in `security_solution/test/scout/timelines/ui/` — the `timelines` plugin only has server-side saved object definitions and APIs
+- Parallel specs go in `test/scout/<namespace>/ui/parallel_tests/`
+- Sequential specs go in `test/scout/<namespace>/ui/tests/`
+- Root-level `test/scout/ui/` or `test/scout/api/` no longer exist in `security_solution`; a structural guard in kbn-scout enforces that root-level and namespace-based layouts cannot coexist
 
 ## Migration parity (Security-specific additions)
 

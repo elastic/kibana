@@ -27,6 +27,9 @@ This file maps Security Solution feature areas to their test directories, file n
   - [Investigations](#investigations-cross-feature-dashboards-data-view-threat-intelligence)
   - [Notes](#notes)
   - [Onboarding / Sourcerer / Common](#onboarding--sourcerer--common)
+  - [Agent Builder](#agent-builder)
+  - [Reports (AI Value Report)](#reports-ai-value-report)
+  - [Workflows](#workflows)
 - [File naming conventions](#file-naming-conventions)
 - [Notes for test coverage catalog](#notes-for-test-coverage-catalog)
 
@@ -53,8 +56,22 @@ These skills describe test file conventions, runner commands, authentication pat
 | API integration (FTR) | `x-pack/solutions/security/test/security_solution_api_integration/` | `node scripts/functional_tests` |
 | Functional / E2E (FTR) | `x-pack/solutions/security/test/functional/` | `node scripts/functional_tests` |
 | Cypress E2E | `x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/**/*.cy.ts` | Cypress runner |
-| Scout API | `<plugin>/test/scout*/api/**/*.spec.ts` | `node scripts/scout.js run-tests` |
-| Scout UI | `<plugin>/test/scout*/ui/**/*.spec.ts` | `node scripts/scout.js run-tests` |
+| Scout API | `<plugin>/test/scout/<namespace>/api/**/*.spec.ts` | `node scripts/scout.js run-tests` |
+| Scout UI | `<plugin>/test/scout/<namespace>/ui/**/*.spec.ts` | `node scripts/scout.js run-tests` |
+
+> **Security Solution Scout namespace structure.** Scout tests for `security_solution` are organised into feature-area sub-directories under `test/scout/`:
+>
+> ```
+> test/scout/
+>   agent_builder/ui/
+>   entity_analytics/ui/  entity_analytics/api/
+>   flyout/ui/
+>   reports/ui/
+>   timelines/ui/
+>   workflows/ui/
+> ```
+>
+> Each namespace has its own `parallel.playwright.config.ts` and `fixtures/` tree. Use `test/scout/<namespace>/ui/` (or `api/`) in place of the generic `test/scout*/ui/` glob when working with Security Solution tests. A structural guard in kbn-scout enforces this: root-level `test/scout/{ui,api}/` and namespace dirs cannot coexist in the same plugin.
 
 ---
 
@@ -87,6 +104,7 @@ These skills describe test file conventions, runner commands, authentication pat
 | Cypress E2E | `test/security_solution_cypress/cypress/e2e/investigations/timelines/` |
 | Cypress E2E | `test/security_solution_cypress/cypress/e2e/investigations/timeline_templates/` |
 | API integration | `test/security_solution_api_integration/test_suites/investigation/timeline/` |
+| Scout UI | `plugins/security_solution/test/scout/timelines/ui/` |
 
 ### Cases
 
@@ -106,7 +124,9 @@ These skills describe test file conventions, runner commands, authentication pat
 | API integration | `test/security_solution_api_integration/test_suites/entity_analytics/entity_details/` |
 | API integration | `test/security_solution_api_integration/test_suites/entity_analytics/entity_store/` |
 | API integration | `test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/` |
-| Scout API | `plugins/entity_store/test/scout/api/` |
+| Scout UI | `plugins/security_solution/test/scout/entity_analytics/ui/` |
+| Scout API | `plugins/security_solution/test/scout/entity_analytics/api/` |
+| Scout API (entity_store pkg) | `plugins/entity_store/test/scout/api/` |
 
 ### Explore (Hosts, Network, Users, Overview)
 
@@ -161,6 +181,7 @@ These skills describe test file conventions, runner commands, authentication pat
 |---|---|
 | Unit | `plugins/security_solution/public/flyout/**/*.test.ts` |
 | Unit (package) | `packages/expandable-flyout/src/**/*.test.ts` |
+| Scout UI | `plugins/security_solution/test/scout/flyout/ui/` |
 
 ### Asset Inventory
 
@@ -215,6 +236,24 @@ These skills describe test file conventions, runner commands, authentication pat
 | Unit | `plugins/security_solution/public/sourcerer/**/*.test.ts` |
 | Unit | `plugins/security_solution/public/common/**/*.test.ts` |
 
+### Agent Builder
+
+| Test type | Directory |
+|---|---|
+| Scout UI | `plugins/security_solution/test/scout/agent_builder/ui/` |
+
+### Reports (AI Value Report)
+
+| Test type | Directory |
+|---|---|
+| Scout UI | `plugins/security_solution/test/scout/reports/ui/` |
+
+### Workflows
+
+| Test type | Directory |
+|---|---|
+| Scout UI | `plugins/security_solution/test/scout/workflows/ui/` |
+
 ---
 
 ## File naming conventions
@@ -224,8 +263,8 @@ These skills describe test file conventions, runner commands, authentication pat
 | Unit test | Co-located with source file | `alerts_table.tsx` → `alerts_table.test.ts` |
 | Jest integration test | Adjacent or in `__tests__/` | `my_hook.test.ts` with `jest.integration.config.js` |
 | Cypress spec | `*.cy.ts` inside `cypress/e2e/` | `rule_creation.cy.ts` |
-| Scout UI spec | `*.spec.ts` inside `test/scout*/ui/` | `alerts_page.spec.ts` |
-| Scout API spec | `*.spec.ts` inside `test/scout*/api/` | `rules_api.spec.ts` |
+| Scout UI spec | `*.spec.ts` inside `test/scout/<namespace>/ui/` | `alerts_page.spec.ts` |
+| Scout API spec | `*.spec.ts` inside `test/scout/<namespace>/api/` | `rules_api.spec.ts` |
 | FTR API integration test | `*.ts` inside `test_suites/` | `create_rules.ts` |
 
 ---
