@@ -30,23 +30,12 @@ import {
 import type { ProcessEvent } from '../../common';
 import { searchAlerts } from './alerts_route';
 import { searchProcessWithIOEvents } from './io_events_route';
+import {
+  sessionEntityIdSchema,
+  sessionTimestampSchema,
+  sessionViewIndexPatternSchema,
+} from './validation';
 import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
-
-// Elasticsearch index names are capped at 255 bytes. 256 covers names with a
-// single wildcard character.
-const INDEX_NAME_MAX_LENGTH = 256;
-
-// Session entity IDs are compound identifiers (process.entry_leader.entity_id
-// format). All observed values are under 128 chars; 1024 is a safe ceiling.
-const SESSION_ENTITY_ID_MAX_LENGTH = 1024;
-
-// ISO 8601 timestamp strings for session start time.
-// Millisecond-precision ISO is 24 chars; 100 covers all valid forms.
-const SESSION_TIMESTAMP_MAX_LENGTH = 100;
-
-// Pagination cursor: an opaque Base64-encoded sort value from ES search_after.
-// 1024 is a conservative ceiling for encoded sort keys.
-const CURSOR_MAX_LENGTH = 1024;
 
 export const registerProcessEventsRoute = (
   router: IRouter,
@@ -70,10 +59,10 @@ export const registerProcessEventsRoute = (
         validate: {
           request: {
             query: schema.object({
-              index: schema.string({ maxLength: INDEX_NAME_MAX_LENGTH }),
-              sessionEntityId: schema.string({ maxLength: SESSION_ENTITY_ID_MAX_LENGTH }),
-              sessionStartTime: schema.string({ maxLength: SESSION_TIMESTAMP_MAX_LENGTH }),
-              cursor: schema.maybe(schema.string({ maxLength: CURSOR_MAX_LENGTH })),
+              index: sessionViewIndexPatternSchema,
+              sessionEntityId: sessionEntityIdSchema,
+              sessionStartTime: sessionTimestampSchema,
+              cursor: schema.maybe(sessionTimestampSchema),
               forward: schema.maybe(schema.boolean()),
               pageSize: schema.maybe(schema.number({ min: 1, max: PROCESS_EVENTS_PER_PAGE })), // currently only set in FTR tests to test pagination
             }),

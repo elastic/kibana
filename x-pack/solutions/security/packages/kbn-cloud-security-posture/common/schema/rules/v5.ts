@@ -10,6 +10,7 @@ import {
   BENCHMARK_VERSION_MAX_LENGTH,
   DEFAULT_BENCHMARK_RULES_PER_PAGE,
   RULE_FIELD_NAME_MAX_LENGTH,
+  RULE_NUMBER_MAX_LENGTH,
   RULE_SEARCH_MAX_LENGTH,
   RULE_SECTION_MAX_LENGTH,
 } from './v3';
@@ -130,8 +131,8 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   // maxSize is set to 100 as there are limited rules per benchmark
   ruleNumber: schema.maybe(
     schema.oneOf([
-      schema.string({ maxLength: RULE_SECTION_MAX_LENGTH }),
-      schema.arrayOf(schema.string({ maxLength: RULE_SECTION_MAX_LENGTH }), {
+      schema.string({ maxLength: RULE_NUMBER_MAX_LENGTH }),
+      schema.arrayOf(schema.string({ maxLength: RULE_NUMBER_MAX_LENGTH }), {
         minSize: 1,
         maxSize: 100,
       }),

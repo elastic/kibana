@@ -12,18 +12,11 @@ import {
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
   TIMESTAMP_PROPERTY,
 } from '../../common/constants';
-
-// Elasticsearch index names are capped at 255 bytes. 256 covers names with a
-// single wildcard character.
-const INDEX_NAME_MAX_LENGTH = 256;
-
-// Session entity IDs are compound identifiers (process.entry_leader.entity_id
-// format). All observed values are under 128 chars; 1024 is a safe ceiling.
-const SESSION_ENTITY_ID_MAX_LENGTH = 1024;
-
-// ISO 8601 timestamp strings for session start time.
-// Millisecond-precision ISO is 24 chars; 100 covers all valid forms.
-const SESSION_TIMESTAMP_MAX_LENGTH = 100;
+import {
+  sessionEntityIdSchema,
+  sessionTimestampSchema,
+  sessionViewIndexPatternSchema,
+} from './validation';
 
 export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -43,9 +36,9 @@ export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) =>
         validate: {
           request: {
             query: schema.object({
-              index: schema.string({ maxLength: INDEX_NAME_MAX_LENGTH }),
-              sessionEntityId: schema.string({ maxLength: SESSION_ENTITY_ID_MAX_LENGTH }),
-              sessionStartTime: schema.string({ maxLength: SESSION_TIMESTAMP_MAX_LENGTH }),
+              index: sessionViewIndexPatternSchema,
+              sessionEntityId: sessionEntityIdSchema,
+              sessionStartTime: sessionTimestampSchema,
             }),
           },
         },

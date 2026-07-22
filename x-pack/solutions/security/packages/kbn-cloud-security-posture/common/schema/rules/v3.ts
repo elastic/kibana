@@ -38,9 +38,9 @@ export const RULE_ID_MAX_LENGTH = 256;
 // 64 is generous for all known versions.
 export const BENCHMARK_VERSION_MAX_LENGTH = 64;
 
-// Package policy IDs are Kibana saved-object IDs (UUID v4: 36 chars).
-// 64 covers UUID v4 plus any future prefixed variants.
-export const PACKAGE_POLICY_ID_MAX_LENGTH = 64;
+// Fleet supports custom package policy IDs up to 255 characters. Keep this in
+// sync with Fleet's PackagePolicy schema.
+export const PACKAGE_POLICY_ID_MAX_LENGTH = 255;
 
 // Since version 8.7.0
 

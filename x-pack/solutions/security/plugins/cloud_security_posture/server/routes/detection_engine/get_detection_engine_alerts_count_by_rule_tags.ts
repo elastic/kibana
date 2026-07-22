@@ -17,9 +17,9 @@ import type { CspRouter } from '../../types';
 
 const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts-default' as const;
 
-// Rule tags are user-defined strings on Kibana detection rules.
-// 256 covers the longest realistic tag with generous headroom.
-const RULE_TAG_MAX_LENGTH = 256;
+// Keep this aligned with the alerting rule tag contract in
+// x-pack/platform/plugins/shared/alerting/common/constants/limits.ts.
+const RULE_TAG_MAX_LENGTH = 512;
 // maxSize mirrors the cspBenchmarkRuleMetadataSchema tags ceiling: rules
 // are not expected to carry more than 100 tags.
 const RULE_TAGS_MAX_SIZE = 100;

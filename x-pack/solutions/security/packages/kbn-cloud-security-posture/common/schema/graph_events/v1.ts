@@ -10,7 +10,7 @@ import {
   COUNTRY_CODES_MAX_SIZE,
   DETAIL_PAGE_SIZE_MAX,
   ENTITY_IDS_MAX_SIZE,
-  GRAPH_ID_MAX_LENGTH,
+  ES_DOCUMENT_ID_MAX_LENGTH,
   INDEX_PATTERN_MAX_LENGTH,
   INDEX_PATTERN_REGEX,
   INDEX_PATTERNS_MAX_SIZE,
@@ -50,7 +50,7 @@ export const eventsRequestSchema = schema.object({
     size: schema.number({ min: 1, max: DETAIL_PAGE_SIZE_MAX }),
   }),
   query: schema.object({
-    eventIds: schema.arrayOf(schema.string({ maxLength: GRAPH_ID_MAX_LENGTH }), {
+    eventIds: schema.arrayOf(schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }), {
       minSize: 1,
       maxSize: ENTITY_IDS_MAX_SIZE,
     }),

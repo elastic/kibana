@@ -74,10 +74,9 @@ export const DETAIL_PAGE_SIZE_MAX = 100;
 // String length ceilings (`maxLength`) for `schema.string` — DoS protection.
 // ---------------------------------------------------------------------------
 
-// Node/entity identifiers used in graph relationship queries (pinnedIds,
-// originEventIds, entityIdSchema.id). Structured strings produced by the graph
-// service; all forms are well under 256 chars.
-export const GRAPH_ID_MAX_LENGTH = 256;
+// Elasticsearch document `_id` values used to seed graph traversal and fetch
+// event details. Elasticsearch limits `_id` values to 512 bytes.
+export const ES_DOCUMENT_ID_MAX_LENGTH = 512;
 
 // Individual index-pattern strings (e.g. "logs-*",
 // ".alerts-security.alerts-*"). ES index/data-stream names are capped at
@@ -110,7 +109,7 @@ export type ProjectRouting = typeof PROJECT_ROUTING_ORIGIN | typeof PROJECT_ROUT
  * (relevant when opening graph from entity flyout).
  */
 export const entityIdSchema = schema.object({
-  id: schema.string({ maxLength: GRAPH_ID_MAX_LENGTH }),
+  id: schema.string({ maxLength: ENTITY_EUID_MAX_LENGTH }),
   isOrigin: schema.boolean(),
 });
 
@@ -119,7 +118,7 @@ export const graphRequestSchema = schema.object({
   showUnknownTarget: schema.maybe(schema.boolean()),
   query: schema.object({
     pinnedIds: schema.maybe(
-      schema.arrayOf(schema.string({ maxLength: GRAPH_ID_MAX_LENGTH }), {
+      schema.arrayOf(schema.string({ maxLength: ENTITY_EUID_MAX_LENGTH }), {
         maxSize: PINNED_IDS_MAX_SIZE,
       })
     ),
@@ -127,7 +126,7 @@ export const graphRequestSchema = schema.object({
     originEventIds: schema.maybe(
       schema.arrayOf(
         schema.object({
-          id: schema.string({ maxLength: GRAPH_ID_MAX_LENGTH }),
+          id: schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }),
           isAlert: schema.boolean(),
         }),
         {
