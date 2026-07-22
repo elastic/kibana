@@ -35,6 +35,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
+import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
+
 import type { CategoryFacet } from '../../home/category_facets';
 
 import { useUrlFilters, useAddUrlFilters } from '../hooks/url_filters';
@@ -167,6 +169,7 @@ const SetupMethodFilter: React.FC<{
   selectedMethods?: SetupMethodFilterType[];
   onChange: (methods: SetupMethodFilterType[]) => void;
 }> = ({ selectedMethods = [], onChange }) => {
+  const { isAgentlessEnabled } = useAgentless();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), []);
   const closePopover = useCallback(() => setIsOpen(false), []);
@@ -210,12 +213,16 @@ const SetupMethodFilter: React.FC<{
     [onChange]
   );
 
+  if (!isAgentlessEnabled) {
+    return null;
+  }
+
   return (
     <EuiPopover
       id="browseIntegrationsSetupMethodPopover"
       aria-label={i18n.translate(
         'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodPopoverAriaLabel',
-        { defaultMessage: 'Setup method options' }
+        { defaultMessage: 'Ingestion method options' }
       )}
       isOpen={isOpen}
       closePopover={closePopover}
@@ -232,7 +239,7 @@ const SetupMethodFilter: React.FC<{
         >
           <FormattedMessage
             id="xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodLabel"
-            defaultMessage="Setup method"
+            defaultMessage="Ingestion method"
           />
         </EuiFilterButton>
       }

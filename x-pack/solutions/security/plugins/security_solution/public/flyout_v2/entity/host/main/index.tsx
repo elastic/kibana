@@ -19,10 +19,12 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildHostNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
+import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { Header } from './header';
@@ -252,23 +254,51 @@ export const Host: FC<HostProps> = memo(function Host({
   ) : undefined;
 
   const onShowHost = useCallback(() => {
-    openHostFlyoutAsChild({ hostName, entityId, scopeId });
+    openHostFlyoutAsChild({
+      hostName,
+      entityId,
+      scopeId,
+      title: hostName,
+      origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
+    });
   }, [openHostFlyoutAsChild, hostName, entityId, scopeId]);
 
   const onShowRelatedEntity = useCallback(
-    (params: {
-      engineType: string | undefined;
-      entityId: string;
-      entityName: string | undefined;
-    }) =>
+    (
+      params: {
+        engineType: string | undefined;
+        entityId: string;
+        entityName: string | undefined;
+      },
+      origin: FlyoutOrigin
+    ) =>
       openEntityDetailsAsChild({
         engineType: params.engineType,
         entityId: params.entityId,
         entityName: params.entityName,
         scopeId,
         title: params.entityName ?? params.entityId,
+        origin,
       }),
     [openEntityDetailsAsChild, scopeId]
+  );
+
+  const onShowRelatedEntityFromGraph = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, FLYOUT_ORIGIN.GRAPH_NODE),
+    [onShowRelatedEntity]
+  );
+
+  const onShowRelatedEntityFromResolution = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK),
+    [onShowRelatedEntity]
   );
 
   const openDetailsPanel = useCallback(
@@ -280,6 +310,11 @@ export const Host: FC<HostProps> = memo(function Host({
             entityName: hostName,
             entityId: entityStoreEntityId,
             onShowEntity: onShowHost,
+            title: hostName,
+            origin:
+              path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
+                ? FLYOUT_ORIGIN.RISK_SUMMARY_RESOLUTION
+                : FLYOUT_ORIGIN.RISK_SUMMARY_ENTITY,
           });
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return openEntityAnomalyInsights({
@@ -287,6 +322,8 @@ export const Host: FC<HostProps> = memo(function Host({
             value: hostName,
             entityId: entityStoreEntityId,
             onOpenEntity: onShowHost,
+            title: hostName,
+            origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
           });
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -295,6 +332,8 @@ export const Host: FC<HostProps> = memo(function Host({
                 value: hostName,
                 entityId: panelDisplayEntityId,
                 onShowHost,
+                title: hostName,
+                origin: FLYOUT_ORIGIN.INSIGHTS_VULNERABILITY,
               });
             case CspInsightLeftPanelSubTab.ALERTS:
               return openEntityAlertsInsights({
@@ -302,6 +341,8 @@ export const Host: FC<HostProps> = memo(function Host({
                 value: hostName,
                 entityId: panelDisplayEntityId,
                 onShowEntity: onShowHost,
+                title: hostName,
+                origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
               });
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return openEntityMisconfigurationInsights({
@@ -309,6 +350,8 @@ export const Host: FC<HostProps> = memo(function Host({
                 value: hostName,
                 entityId: panelDisplayEntityId,
                 onShowEntity: onShowHost,
+                title: hostName,
+                origin: FLYOUT_ORIGIN.INSIGHTS_MISCONFIGURATION,
               });
           }
           return;
@@ -318,8 +361,11 @@ export const Host: FC<HostProps> = memo(function Host({
             entityId: entityStoreEntityId,
             scopeId,
             entityName: hostName,
-            onShowEntity: onShowRelatedEntity,
+            onShowEntity: onShowRelatedEntityFromGraph,
             onShowOriginatingEntity: onShowHost,
+            title: hostName,
+            flyoutType: FLYOUT_TYPE.HOST,
+            origin: FLYOUT_ORIGIN.VISUALIZATIONS_GRAPH,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -329,7 +375,9 @@ export const Host: FC<HostProps> = memo(function Host({
             entityName: hostName,
             scopeId,
             onShowEntity: onShowHost,
-            onShowRelatedEntity,
+            onShowRelatedEntity: onShowRelatedEntityFromResolution,
+            title: hostName,
+            origin: FLYOUT_ORIGIN.RESOLUTION_SECTION,
           });
       }
     },
@@ -346,7 +394,8 @@ export const Host: FC<HostProps> = memo(function Host({
       panelDisplayEntityId,
       entityStoreEntityId,
       onShowHost,
-      onShowRelatedEntity,
+      onShowRelatedEntityFromGraph,
+      onShowRelatedEntityFromResolution,
     ]
   );
 
@@ -394,8 +443,9 @@ export const Host: FC<HostProps> = memo(function Host({
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
-            onShowEntity={onShowRelatedEntity}
+            onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
+            riskScoreQueryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </EuiFlyoutBody>
