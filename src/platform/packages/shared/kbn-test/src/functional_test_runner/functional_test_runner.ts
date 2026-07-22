@@ -325,15 +325,27 @@ export class FunctionalTestRunner {
     const timeoutMs = this.config.get('mochaOpts.abortCleanupTimeout');
     let timedOut = false;
     const cleanup = lifecycle.cleanup.trigger();
-    await Promise.race([
-      cleanup,
-      // `ref: false` so this timer doesn't keep the Node event loop alive if `cleanup`
-      // wins the race. Otherwise an embedder that awaits `run()` without a hard
-      // `process.exit()` would have its exit delayed by up to `timeoutMs`.
-      setTimeoutAsync(timeoutMs, undefined, { ref: false }).then(() => {
-        timedOut = true;
-      }),
-    ]);
+    // The timer stays ref'd (default) so it can hold the event loop open long enough to
+    // bound a hung cleanup handler. If `cleanup` wins the race we abort the timer in the
+    // `finally` so it doesn't keep the loop alive for the remaining `timeoutMs` — otherwise
+    // an embedder that awaits `run()` without a hard `process.exit()` would have its exit
+    // delayed by up to `timeoutMs`.
+    const cancelTimeout = new AbortController();
+    try {
+      await Promise.race([
+        cleanup,
+        setTimeoutAsync(timeoutMs, undefined, { signal: cancelTimeout.signal }).then(
+          () => {
+            timedOut = true;
+          },
+          () => {
+            // timer was cancelled because cleanup finished first; ignore the AbortError
+          }
+        ),
+      ]);
+    } finally {
+      cancelTimeout.abort();
+    }
 
     if (timedOut) {
       this.log.warning(`cleanup did not finish within ${timeoutMs}ms of aborting, moving on`);
