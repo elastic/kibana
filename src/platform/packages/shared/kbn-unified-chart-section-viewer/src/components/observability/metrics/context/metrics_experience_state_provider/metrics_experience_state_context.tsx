@@ -51,16 +51,16 @@ export function MetricsExperienceStateProvider({
   gridSettings = METRICS_GRID_SETTINGS_DEFAULTS,
   onGridSettingsChange,
   getRecentlyExploredMetrics,
-  discoverFetch$,
   onMetricExplored,
+  discoverFetch$,
 }: {
   children: React.ReactNode;
   profileId: string;
   gridSettings?: MetricsGridSettings;
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
   getRecentlyExploredMetrics?: () => readonly string[];
-  discoverFetch$?: UnifiedMetricsGridProps['fetch$'];
   onMetricExplored?: (metricUniqueKey: string) => void;
+  discoverFetch$?: UnifiedMetricsGridProps['fetch$'];
 }) {
   const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
   const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
@@ -69,23 +69,22 @@ export function MetricsExperienceStateProvider({
   const [flyoutState, setFlyoutState] = useRestorableState('flyoutState', undefined);
   const [metricsSort, setMetricsSort] = useRestorableState('metricsSort', DEFAULT_METRICS_SORT);
 
-  // Recency snapshot: read fresh from storage on mount and re-sampled only on the triggers
-  // below, so the "Recently explored" order stays stable while the user interacts or paginates.
+  // Read from storage on mount and refreshed only on the triggers below,
   const [recentlyExploredMetrics, setRecentlyExploredMetrics] = useState<readonly string[]>(
     () => getRecentlyExploredMetrics?.() ?? EMPTY_RECENT_METRICS
   );
 
-  const refreshRecentlyExplored = useCallback(() => {
+  const refreshRecentlyExploredMetrics = useCallback(() => {
     setRecentlyExploredMetrics((prev) => {
       const next = getRecentlyExploredMetrics?.() ?? EMPTY_RECENT_METRICS;
-      // Keep the previous reference when unchanged to avoid a needless re-sort.
+      // Prevent re-rendering if the list hasn't changed (i.e. ESQL auto-refresh).
       return isEqual(prev, next) ? prev : next;
     });
   }, [getRecentlyExploredMetrics]);
 
   // Grid triggers: sort, search and dimensions changes.
-  useEffect(refreshRecentlyExplored, [
-    refreshRecentlyExplored,
+  useEffect(refreshRecentlyExploredMetrics, [
+    refreshRecentlyExploredMetrics,
     metricsSort,
     searchTerm,
     selectedDimensions,
@@ -93,9 +92,9 @@ export function MetricsExperienceStateProvider({
 
   // Discover triggers: ES|QL query executed and time range changes.
   useEffect(() => {
-    const subscription = discoverFetch$?.subscribe(() => refreshRecentlyExplored());
+    const subscription = discoverFetch$?.subscribe(refreshRecentlyExploredMetrics);
     return () => subscription?.unsubscribe();
-  }, [discoverFetch$, refreshRecentlyExplored]);
+  }, [discoverFetch$, refreshRecentlyExploredMetrics]);
 
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
