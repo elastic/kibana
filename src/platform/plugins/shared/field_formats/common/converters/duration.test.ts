@@ -9,6 +9,7 @@
 
 import { DurationFormat } from './duration';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
+import { asPrettyString } from '../utils';
 
 describe('Duration Format', () => {
   test('handles missing values', () => {
@@ -42,8 +43,8 @@ describe('Duration Format', () => {
     );
     const histogramValue = { scale: 20, sum: 0.000825416, min: 0.000825416, max: 0.000825416 };
 
-    expect(formatter.convertToText(histogramValue)).toBe(JSON.stringify(histogramValue));
-    expect(formatter.convertToReact(histogramValue)).toBe(JSON.stringify(histogramValue));
+    expect(formatter.convertToText(histogramValue)).toBe(asPrettyString(histogramValue));
+    expect(formatter.convertToReact(histogramValue)).toBe(asPrettyString(histogramValue));
   });
 
   test('wraps a multi-value array with bracket notation', () => {
