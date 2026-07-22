@@ -70,10 +70,8 @@ export const UNIT_SHORT_TO_FULL_MAP: Record<string, string> = {
 /**
  * Maps each date-math offset unit to the unit used for rounding (`/X` suffix).
  *
- * Each unit rounds to the next finer meaningful unit so bounds snap to clean
- * boundaries without noticeably extending the window (rounding `now-1h` to
- * `/h` could stretch it to almost two hours; `/m` keeps it at ~1h). Units of
- * a day and above all normalise to `/d`.
+ * Minutes up to a week round to the next finer unit.
+ * Seconds and milliseconds round to `/s`, while months and years normalise to `/d`.
  */
 export const ROUND_UNIT_MAP: Record<string, string> = {
   ms: 's',
