@@ -89,9 +89,11 @@ const GuidedTourComponent: React.FC<GuidedTourProps> = ({
     if (!isActive || !currentStepConfig || !isCurrentAnchorMounted) {
       return;
     }
-    document
-      .querySelector(currentStepConfig.anchor)
-      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const anchorEl = document.querySelector(currentStepConfig.anchor);
+    // jsdom does not implement scrollIntoView; guard so tours used in unit tests do not crash.
+    if (anchorEl && typeof anchorEl.scrollIntoView === 'function') {
+      anchorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }, [isActive, currentStepConfig, isCurrentAnchorMounted]);
 
   if (!isActive || !currentStepConfig || !isCurrentAnchorMounted) {

@@ -432,8 +432,12 @@ describe('CaseFormFields', () => {
       expect(
         await screen.findByTestId('legacy-custom-fields-deprecation-callout')
       ).toBeInTheDocument();
-      expect(screen.getByTestId('legacy-custom-fields-view-new-link')).toBeInTheDocument();
-      expect(screen.getByTestId('legacy-custom-fields-view-settings-link')).toBeInTheDocument();
+      // announceOnMount duplicates content into a live region with the same test subjects.
+      const content = screen.getByTestId('legacy-custom-fields-deprecation-callout__content');
+      expect(within(content).getByTestId('legacy-custom-fields-view-new-link')).toBeInTheDocument();
+      expect(
+        within(content).getByTestId('legacy-custom-fields-view-settings-link')
+      ).toBeInTheDocument();
       expect(screen.getByTestId('legacy-custom-fields-divider')).toBeInTheDocument();
     });
 
@@ -460,12 +464,17 @@ describe('CaseFormFields', () => {
       expect(
         await screen.findByTestId('legacy-custom-fields-deprecation-callout')
       ).toBeInTheDocument();
-      expect(screen.queryByTestId('legacy-custom-fields-view-new-link')).not.toBeInTheDocument();
+      const content = screen.getByTestId('legacy-custom-fields-deprecation-callout__content');
       expect(
-        screen.queryByTestId('legacy-custom-fields-view-settings-link')
+        within(content).queryByTestId('legacy-custom-fields-view-new-link')
       ).not.toBeInTheDocument();
       expect(
-        screen.getByText(/Contact your administrator to confirm the fields have been migrated/i)
+        within(content).queryByTestId('legacy-custom-fields-view-settings-link')
+      ).not.toBeInTheDocument();
+      expect(
+        within(content).getByText(
+          /Contact your administrator to confirm the fields have been migrated/i
+        )
       ).toBeInTheDocument();
     });
 

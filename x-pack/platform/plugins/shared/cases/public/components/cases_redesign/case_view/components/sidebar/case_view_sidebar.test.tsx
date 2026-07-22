@@ -417,11 +417,12 @@ describe('CaseViewSidebar (redesign)', () => {
     // Accordion is closed by default; open it to reveal the callout.
     await userEvent.click(screen.getByTestId('case-view-sidebar-legacy-custom-fields-toggle'));
 
+    // announceOnMount duplicates callout content into a live region with the same test subjects.
+    const content = await screen.findByTestId('legacy-custom-fields-deprecation-callout__content');
+    expect(within(content).getByTestId('legacy-custom-fields-view-new-link')).toBeInTheDocument();
     expect(
-      await screen.findByTestId('legacy-custom-fields-deprecation-callout')
+      within(content).getByTestId('legacy-custom-fields-view-settings-link')
     ).toBeInTheDocument();
-    expect(screen.getByTestId('legacy-custom-fields-view-new-link')).toBeInTheDocument();
-    expect(screen.getByTestId('legacy-custom-fields-view-settings-link')).toBeInTheDocument();
   });
 
   it('shows the administrator message in the deprecation callout when the user lacks settings permission', async () => {
@@ -447,13 +448,17 @@ describe('CaseViewSidebar (redesign)', () => {
 
     await userEvent.click(screen.getByTestId('case-view-sidebar-legacy-custom-fields-toggle'));
 
+    const content = await screen.findByTestId('legacy-custom-fields-deprecation-callout__content');
     expect(
-      await screen.findByTestId('legacy-custom-fields-deprecation-callout')
-    ).toBeInTheDocument();
-    expect(screen.queryByTestId('legacy-custom-fields-view-new-link')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('legacy-custom-fields-view-settings-link')).not.toBeInTheDocument();
+      within(content).queryByTestId('legacy-custom-fields-view-new-link')
+    ).not.toBeInTheDocument();
     expect(
-      screen.getByText(/Contact your administrator to confirm the fields have been migrated/i)
+      within(content).queryByTestId('legacy-custom-fields-view-settings-link')
+    ).not.toBeInTheDocument();
+    expect(
+      within(content).getByText(
+        /Contact your administrator to confirm the fields have been migrated/i
+      )
     ).toBeInTheDocument();
   });
 
