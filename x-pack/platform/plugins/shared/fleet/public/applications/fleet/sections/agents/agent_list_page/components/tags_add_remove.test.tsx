@@ -66,6 +66,7 @@ describe('TagsAddRemove', () => {
       'agent1',
       ['tag1', 'tag2'],
       expect.anything(),
+      expect.anything(),
       undefined,
       undefined
     );
@@ -83,6 +84,7 @@ describe('TagsAddRemove', () => {
     expect(mockUpdateTags).toHaveBeenCalledWith(
       'agent1',
       [],
+      expect.anything(),
       expect.anything(),
       undefined,
       undefined
@@ -103,6 +105,7 @@ describe('TagsAddRemove', () => {
       'agent1',
       ['tag1', 'tag'],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -124,6 +127,7 @@ describe('TagsAddRemove', () => {
       'agent1',
       ['tag'],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -143,6 +147,7 @@ describe('TagsAddRemove', () => {
       'agent1',
       ['tag1', 'newTag'],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -162,6 +167,7 @@ describe('TagsAddRemove', () => {
       'agent1',
       ['tag1', 'Tag-123 _myTag'],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -183,6 +189,7 @@ describe('TagsAddRemove', () => {
       'agent1',
       ['tag1', '01234567890123456789'],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );

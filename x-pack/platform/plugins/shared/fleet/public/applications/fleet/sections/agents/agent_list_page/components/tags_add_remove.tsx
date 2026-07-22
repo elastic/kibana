@@ -108,6 +108,7 @@ export const TagsAddRemove: React.FC<Props> = ({
   const updateTags = async (
     tagsToAdd: string[],
     tagsToRemove: string[],
+    onError?: () => void,
     successMessage?: string,
     errorMessage?: string
   ) => {
@@ -117,6 +118,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         agentId,
         newSelectedTags,
         () => onTagsUpdated(tagsToAdd),
+        onError,
         successMessage,
         errorMessage
       );
@@ -169,6 +171,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         updateTags(
           [searchValue],
           [],
+          undefined,
           i18n.translate('xpack.fleet.createAgentTags.successNotificationTitle', {
             defaultMessage: 'Tag created',
           }),
@@ -226,8 +229,11 @@ export const TagsAddRemove: React.FC<Props> = ({
             if (changedIndex === -1) return;
             const option = newOptions[changedIndex];
             const isNowChecked = option.checked === 'on';
-            updateTags(isNowChecked ? [option.label] : [], isNowChecked ? [] : [option.label]);
+            const labelsSnapshot = labels;
             setLabels(newOptions);
+            updateTags(isNowChecked ? [option.label] : [], isNowChecked ? [] : [option.label], () =>
+              setLabels(labelsSnapshot)
+            );
           }}
           renderOption={renderOption}
         >
