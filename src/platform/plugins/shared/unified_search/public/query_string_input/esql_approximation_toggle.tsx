@@ -41,7 +41,7 @@ const getLabels = (
     });
     const additionalDisabledText = invalidLicense
       ? i18n.translate('unifiedSearch.esqlApproximationToggle.invalidLicenseText', {
-          defaultMessage: 'Upgrade to Enterpise license to enable fast mode.',
+          defaultMessage: 'Upgrade to Enterprise license to enable fast mode.',
         })
       : additionalText;
     return {
