@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiSpacer, EuiTabs, EuiTab, EuiTitle } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
@@ -96,6 +96,14 @@ export const ExecutionHistoryPage = () => {
       <EuiSpacer size="m" />
       <TopFailing />
       <EuiSpacer size="m" />
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate('xpack.alertingV2.executionHistory.executionLogsTitle', {
+            defaultMessage: 'Execution logs',
+          })}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiTabs>
         {tabs.map((tab) => (
           <EuiTab
