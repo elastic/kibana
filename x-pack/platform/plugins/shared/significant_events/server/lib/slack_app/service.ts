@@ -6,10 +6,9 @@
  */
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsClient, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { RelayRequestError, type RelayClientContract } from '@kbn/actions-plugin/server';
-import type { SignificantEventsServer } from '../../types';
-import { buildManagedKeyRoleDescriptors } from './resolve_managed_key_role_descriptors';
 import type {
   SlackAppConnectResponse,
   SlackAppDisconnectResponse,
@@ -28,18 +27,8 @@ import { getKibanaUrl } from './get_kibana_url';
 export class SlackAppService {
   private readonly logger: Logger;
 
-  constructor(private readonly server: SignificantEventsServer) {
+  constructor(private readonly server: StreamsServer) {
     this.logger = server.logger.get('slack-app');
-  }
-
-  /**
-   * Internal saved-objects client used to resolve the deployment's configured
-   * observability sources (APM indices, log sources) when minting the managed key.
-   * Internal (not request-scoped) so resolution never depends on the connecting
-   * user's saved-object privileges.
-   */
-  private getInternalSoClient(): SavedObjectsClientContract {
-    return new SavedObjectsClient(this.server.core.savedObjects.createInternalRepository());
   }
 
   /**
@@ -133,20 +122,42 @@ export class SlackAppService {
     // is granted on behalf of the connecting user but survives their deletion (ES keys
     // outlive their owner). Because the grant intersects with the owner's privileges, the
     // connecting user must themselves hold every privilege below or the key is silently
-    // under-privileged. Observability read patterns are resolved from the deployment's own
-    // APM-sources / log-sources config at connect time (not hardcoded) so custom-configured
-    // sources are covered; the agent tools query them as this key (asCurrentUser).
-    const kibanaRoleDescriptors = await buildManagedKeyRoleDescriptors({
-      soClient: this.getInternalSoClient(),
-      logger: this.logger,
-      apmSourcesAccess: this.server.apmSourcesAccess,
-      logsDataAccess: this.server.logsDataAccess,
-    });
-
+    // under-privileged.
+    //
+    // - Observability signals get direct ES read: the obs agent tools query them as this key
+    //   (asCurrentUser). Broad conventional patterns cover APM/OTel logs, metrics and traces
+    //   without regenerating the key when new data is onboarded.
+    // - Significant Events and Streams data is reached through the `streams` Kibana feature
+    //   (read), and connectors/LLM through `actions` (read) — both go via the internal Kibana
+    //   client, so no grants on system/dot indices (unsupported in serverless) are needed.
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
       metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
-      kibana_role_descriptors: kibanaRoleDescriptors,
+      kibana_role_descriptors: {
+        nightshift_relay_agent_builder: {
+          elasticsearch: {
+            cluster: ['monitor_inference'],
+            indices: [
+              {
+                names: ['traces-*', 'logs-*', 'metrics-*', 'apm-*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [
+            {
+              spaces: ['*'],
+              feature: {
+                streams: ['read'],
+                agentBuilder: ['read'],
+                actions: ['read'],
+                workflowsManagement: ['read'],
+              },
+            },
+          ],
+        },
+      },
     });
 
     if (!apiKeyResult) {

@@ -18,6 +18,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
+import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { SignificantEventsConfig } from '../common/config';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import {
@@ -36,7 +37,6 @@ import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types
 import type {
   SignificantEventsPluginSetupDependencies,
   SignificantEventsPluginStartDependencies,
-  SignificantEventsServer,
 } from './types';
 import {
   type KnowledgeIndicatorClient,
@@ -90,7 +90,7 @@ export class SignificantEventsPlugin
 {
   public config: SignificantEventsConfig;
   public logger: Logger;
-  public server?: SignificantEventsServer;
+  public server?: StreamsServer;
   private isDev: boolean;
   private ebtTelemetryService = new EbtTelemetryService();
   private getScopedClients?: GetScopedClients;
@@ -116,7 +116,7 @@ export class SignificantEventsPlugin
       workflowsManagement: plugins.workflowsManagement,
       cloud: plugins.cloud,
       kibanaVersion: this.kibanaVersion,
-    } as SignificantEventsServer;
+    } as StreamsServer;
     this.server.workflowsManagement = plugins.workflowsManagement;
 
     core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
@@ -347,8 +347,6 @@ export class SignificantEventsPlugin
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
-      this.server.apmSourcesAccess = plugins.apmSourcesAccess;
-      this.server.logsDataAccess = plugins.logsDataAccess;
 
       this.server.relayClient = plugins.actions.getRelayClient();
     }

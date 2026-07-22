@@ -77,8 +77,6 @@
     "@kbn/scout",
     "@kbn/core-http-server-mocks",
     "@kbn/apm-utils",
-    "@kbn/datemath",
-    "@kbn/apm-sources-access-plugin",
-    "@kbn/logs-data-access-plugin"
+    "@kbn/datemath"
   ]
 }
