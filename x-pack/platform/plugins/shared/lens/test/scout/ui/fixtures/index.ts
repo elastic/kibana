@@ -36,4 +36,3 @@ export const spaceTest = baseSpaceTest.extend<
     await use(extendPageObjects(pageObjects, page));
   },
 });
-

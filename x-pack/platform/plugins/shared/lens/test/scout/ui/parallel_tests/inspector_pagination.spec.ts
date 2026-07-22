@@ -82,9 +82,7 @@ spaceTest.describe('Lens inspector pagination', { tag: tags.stateful.classic }, 
       const pageOneRows = await inspector.getTableData();
 
       await inspector.goToTablePage(1);
-      await expect
-        .poll(async () => await inspector.getTableData())
-        .not.toStrictEqual(pageOneRows);
+      await expect.poll(async () => await inspector.getTableData()).not.toStrictEqual(pageOneRows);
       const pageTwoRows = await inspector.getTableData();
       expect(pageTwoRows).toHaveLength(INSPECTOR_PAGE_SIZE);
     }
