@@ -13,6 +13,7 @@ import type {
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
+import { episodeSubject } from './utils/subject';
 import { suppressionEpisodeKey, suppressionSeriesKey } from './utils/suppression_key';
 
 @injectable()
@@ -46,8 +47,9 @@ export function applySuppression(
   const dispatchable: AlertEpisode[] = [];
 
   for (const ep of episodes) {
-    const episodeKey = suppressionEpisodeKey(ep);
-    const seriesKey = suppressionSeriesKey(ep);
+    const subject = episodeSubject(ep);
+    const episodeKey = `${subject}:${ep.group_hash}:${ep.episode_id}`;
+    const seriesKey = `${subject}:${ep.group_hash}:*`;
 
     const episodeSuppression = suppressionMap.get(episodeKey);
     const seriesSuppression = suppressionMap.get(seriesKey);
