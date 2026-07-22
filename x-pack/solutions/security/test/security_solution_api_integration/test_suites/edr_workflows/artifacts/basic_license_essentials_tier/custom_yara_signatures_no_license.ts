@@ -44,7 +44,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       adminSupertest = await utils.createSuperTest();
-      await endpointArtifactTestResources.ensureListExists(CUSTOM_YARA_SIGNATURES_LIST_DEFINITION);
+      await endpointArtifactTestResources.ensureListExists(CUSTOM_YARA_SIGNATURES_LIST_DEFINITION, {
+        supertest: adminSupertest,
+      });
     });
 
     beforeEach(async () => {
