@@ -91,6 +91,23 @@ describe('classifyToken', () => {
       expect(result.kind).toBe('skip');
       expect((result as { kind: 'skip'; reason: string }).reason).toBe('no-anchor');
     });
+
+    it('skips backtick token with a space (command string)', () => {
+      const result = classifyToken(
+        'node scripts/scout.js run-tests',
+        'backtick',
+        '`node scripts/scout.js run-tests`',
+        ''
+      );
+      expect(result.kind).toBe('skip');
+      expect((result as any).reason).toBe('contains-space');
+    });
+
+    it('skips declared-base token with fewer than 3 components', () => {
+      const content = '<!-- skill-path-base: x-pack/solutions/security -->';
+      const result = classifyToken('cypress/e2e/', 'backtick', '`cypress/e2e/`', content);
+      expect(result.kind).toBe('skip');
+    });
   });
 
   describe('validate cases', () => {
@@ -204,9 +221,9 @@ describe('extractPaths', () => {
 
   it('respects declared-base comment: classifyToken assigns anchor=declared-base', () => {
     const content =
-      '<!-- skill-path-base: x-pack/solutions/security -->\n\nSee `plugins/security_solution/` for details.';
+      '<!-- skill-path-base: x-pack/solutions/security -->\n\nSee `plugins/security_solution/public/` for details.';
     const results = extractPaths(content);
-    const token = results.find((r) => r.token === 'plugins/security_solution/');
+    const token = results.find((r) => r.token === 'plugins/security_solution/public/');
     expect(token).toBeDefined();
     if (token) {
       const classified = classifyToken(token.token, token.tokenKind, token.rawLine, content);

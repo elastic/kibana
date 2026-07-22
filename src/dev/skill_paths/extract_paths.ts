@@ -93,14 +93,19 @@ export function classifyToken(
     return { kind: 'skip', reason: 'no-slash' };
   }
 
+  // Skip command strings — tokens with spaces cannot be filesystem paths
+  if (tokenKind === 'backtick' && token.includes(' ')) {
+    return { kind: 'skip', reason: 'contains-space' };
+  }
+
   // Backtick tokens that start with a known repo-root prefix
   if (REPO_ROOT_PREFIXES.some((prefix) => token.startsWith(prefix))) {
     return { kind: 'validate', anchor: 'repo-root', token };
   }
 
-  // Backtick tokens in a file that declares a base path
+  // Backtick tokens in a file that declares a base path (min 3 components to avoid naming-convention fragments)
   const baseMatch = fileContent.match(/<!--\s*skill-path-base:\s*(\S+)\s*-->/);
-  if (baseMatch) {
+  if (baseMatch && token.split('/').filter(Boolean).length >= 3) {
     return { kind: 'validate', anchor: 'declared-base', token, declaredBase: baseMatch[1] };
   }
 
