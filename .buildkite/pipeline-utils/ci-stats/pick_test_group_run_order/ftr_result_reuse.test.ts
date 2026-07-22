@@ -10,7 +10,7 @@
 import type { FtrConfigResultRecord } from './ftr_result_reuse';
 import {
   classifyChangedFile,
-  getTestRoot,
+  isUnderFtrTestRoot,
   mergeRecords,
   resolveReusableConfigs,
 } from './ftr_result_reuse';
@@ -40,26 +40,24 @@ const baseInput = {
   sameEsSnapshot: true,
 };
 
-describe('getTestRoot', () => {
-  it('returns the path up to the first /test/ segment', () => {
-    expect(getTestRoot(CONFIG_A)).toBe('x-pack/platform/test');
-    expect(getTestRoot(CONFIG_B)).toBe('x-pack/solutions/security/test');
-    expect(getTestRoot('src/platform/test/api_integration/config.js')).toBe('src/platform/test');
+describe('isUnderFtrTestRoot', () => {
+  it('recognizes the known FTR roots', () => {
+    expect(isUnderFtrTestRoot(CONFIG_A)).toBe(true);
+    expect(isUnderFtrTestRoot(CONFIG_B)).toBe(true);
+    expect(isUnderFtrTestRoot('src/platform/test/api_integration/config.js')).toBe(true);
+    expect(isUnderFtrTestRoot('x-pack/test_serverless/functional/config.ts')).toBe(true);
   });
 
-  it('returns null for paths without a test segment', () => {
-    expect(getTestRoot('src/platform/plugins/shared/dashboard/public/plugin.ts')).toBeNull();
-  });
-
-  it('does not treat plugin-internal test dirs as FTR roots', () => {
+  it('does not match plugin sources or plugin-internal test dirs', () => {
+    expect(isUnderFtrTestRoot('src/platform/plugins/shared/dashboard/public/plugin.ts')).toBe(
+      false
+    );
     expect(
-      getTestRoot('x-pack/platform/plugins/shared/lens/test/scout/ui/foo.spec.ts')
-    ).toBeNull();
-    expect(getTestRoot('src/platform/packages/shared/kbn-scout/test/helpers.ts')).toBeNull();
-  });
-
-  it('recognizes legacy x-pack test roots', () => {
-    expect(getTestRoot('x-pack/test_serverless/functional/config.ts')).toBe('x-pack/test_serverless');
+      isUnderFtrTestRoot('x-pack/platform/plugins/shared/lens/test/scout/ui/foo.spec.ts')
+    ).toBe(false);
+    expect(isUnderFtrTestRoot('src/platform/packages/shared/kbn-scout/test/helpers.ts')).toBe(
+      false
+    );
   });
 });
 
@@ -76,9 +74,9 @@ describe('classifyChangedFile', () => {
     expect(classifyChangedFile('.buildkite/pipelines/on_merge.yml').kind).toBe('ignore');
   });
 
-  it('invalidates the test root for FTR test changes', () => {
+  it('aborts on any FTR test change (configs inherit across roots)', () => {
     expect(classifyChangedFile('x-pack/platform/test/functional/services/some_service.ts')).toEqual(
-      { kind: 'invalidate-root', root: 'x-pack/platform/test' }
+      { kind: 'abort', file: 'x-pack/platform/test/functional/services/some_service.ts' }
     );
   });
 
@@ -142,14 +140,15 @@ describe('resolveReusableConfigs', () => {
     expect(abortReason).toContain('diff');
   });
 
-  it('invalidates only configs under a changed test root', () => {
+  it('aborts entirely on any FTR test change — even in a different test root', () => {
+    // Configs inherit across roots (solution bases read the platform base),
+    // so partial per-root reuse is not safe.
     const { reusable, abortReason } = resolveReusableConfigs({
       ...baseInput,
       changedFiles: ['x-pack/solutions/security/test/functional/apps/some_test.ts'],
     });
-    expect(abortReason).toBeNull();
-    expect(reusable.has(CONFIG_A)).toBe(true);
-    expect(reusable.has(CONFIG_B)).toBe(false);
+    expect(reusable.size).toBe(0);
+    expect(abortReason).toContain('FTR-relevant');
   });
 
   it('aborts entirely on an unrecognized change', () => {

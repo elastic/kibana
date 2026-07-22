@@ -65,35 +65,31 @@ const matchAny = (file: string, matchers: ReturnType<typeof compile>) =>
   matchers.some((m) => m.match(file));
 
 /**
- * The invalidation unit for a path: its FTR test root (e.g.
- * `x-pack/solutions/security/test`). Test files can be shared across sibling
- * config dirs (services, page objects, fixtures), so we invalidate the whole
- * test root rather than guessing a finer mapping.
+ * Any change under an FTR test root aborts reuse entirely. Finer-grained
+ * invalidation (e.g. per test root) is NOT safe: FTR configs inherit across
+ * roots (leaf config -> solution base -> platform base -> test-suites-src
+ * base), so a platform test change can affect solution configs. Rerunning
+ * everything is the only mapping-free safe answer.
  *
  * Only well-known FTR roots are recognized; a `/test/` segment elsewhere
- * (e.g. inside a plugin's `public/`) is NOT a test root and falls through to
- * the fail-closed "unrecognized change" branch.
+ * (e.g. inside a plugin) is NOT a test root and falls through to the
+ * fail-closed "unrecognized change" branch anyway.
  */
 const FTR_TEST_ROOT_RE =
   /^(test|src\/platform\/test|x-pack\/platform\/test|x-pack\/solutions\/[^/]+\/test|x-pack\/test[^/]*)(\/|$)/;
 
-export function getTestRoot(filePath: string): string | null {
-  const match = filePath.match(FTR_TEST_ROOT_RE);
-  return match ? match[1] : null;
+export function isUnderFtrTestRoot(filePath: string): boolean {
+  return FTR_TEST_ROOT_RE.test(filePath);
 }
 
-export type ChangedFileClassification =
-  | { kind: 'abort'; file: string }
-  | { kind: 'ignore' }
-  | { kind: 'invalidate-root'; root: string };
+export type ChangedFileClassification = { kind: 'abort'; file: string } | { kind: 'ignore' };
 
 export function classifyChangedFile(file: string): ChangedFileClassification {
   // Order matters: ftr-manifests live inside `.buildkite/**`, which is
   // otherwise irrelevant, so critical must win.
   if (matchAny(file, CRITICAL)) return { kind: 'abort', file };
   if (matchAny(file, IRRELEVANT)) return { kind: 'ignore' };
-  const root = getTestRoot(file);
-  if (root) return { kind: 'invalidate-root', root };
+  if (isUnderFtrTestRoot(file)) return { kind: 'abort', file };
   if (matchAny(file, JEST_ONLY)) return { kind: 'ignore' };
   // Unrecognized change: we cannot prove it doesn't affect FTR.
   return { kind: 'abort', file };
@@ -121,14 +117,10 @@ export function resolveReusableConfigs(input: ReuseDecisionInput): ReuseDecision
   if (!input.sameEsSnapshot) return none('ES snapshot manifest differs from previous build');
   if (input.changedFiles === null) return none('unable to diff against previous build commit');
 
-  const invalidatedRoots = new Set<string>();
   for (const file of input.changedFiles) {
     const classification = classifyChangedFile(file);
     if (classification.kind === 'abort') {
-      return none(`unrecognized or critical change: ${classification.file}`);
-    }
-    if (classification.kind === 'invalidate-root') {
-      invalidatedRoots.add(classification.root);
+      return none(`FTR-relevant or unrecognized change: ${classification.file}`);
     }
   }
 
@@ -136,8 +128,6 @@ export function resolveReusableConfigs(input: ReuseDecisionInput): ReuseDecision
   for (const config of input.candidateConfigs) {
     const record = input.prevRecords.get(config);
     if (!record || record.result !== 'pass') continue;
-    const configRoot = getTestRoot(config);
-    if (configRoot === null || invalidatedRoots.has(configRoot)) continue;
     reusable.set(config, record);
   }
   return { reusable, abortReason: null };
