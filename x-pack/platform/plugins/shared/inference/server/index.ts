@@ -21,6 +21,11 @@ import type {
 
 export type { InferenceServerSetup, InferenceServerStart };
 export type { InferenceEndpoint } from './util/get_inference_endpoints';
+export type {
+  AroundCompletionEvent,
+  WorkflowAnonymizationProvider,
+  WorkflowAroundCompletionResult,
+} from './workflow_anonymization_provider';
 export {
   INFERENCE_PROCEED_CAPABILITY_ID,
   PII_TOKENIZATION_CAPABILITY_ID,

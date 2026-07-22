@@ -9,7 +9,12 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { type WorkflowDetailDto, WorkflowsManagementApiActions } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  type WorkflowDetailDto,
+  WorkflowsManagementApiActions,
+  type WorkflowYaml,
+} from '@kbn/workflows';
 import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import {
   WorkflowExecutionInvalidStatusError,
@@ -42,6 +47,7 @@ describe('WorkflowsManagementApi', () => {
 
     mockWorkflowsService = {
       getWorkflow: jest.fn(),
+      getWorkflowsSubscribedToTrigger: jest.fn(),
       getWorkflowsByIds: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
@@ -74,6 +80,103 @@ describe('WorkflowsManagementApi', () => {
       steps: z.array(z.any()).optional(),
     });
   };
+
+  describe('workflow-trigger synchronous execution', () => {
+    const createAroundCompletionTrigger = (
+      condition?: string
+    ): WorkflowYaml['triggers'][number] => {
+      // The static WorkflowYaml type models built-ins only; registered triggers are added dynamically.
+      const trigger: WorkflowYaml['triggers'][number] = { type: 'manual' };
+      Reflect.set(trigger, 'type', 'inference.aroundCompletion');
+      if (condition) {
+        Reflect.set(trigger, 'on', { condition });
+      }
+      return trigger;
+    };
+
+    const createTriggeredWorkflow = ({
+      id,
+      condition,
+    }: {
+      id: string;
+      condition?: string;
+    }): WorkflowDetailDto => ({
+      id,
+      name: id,
+      enabled: true,
+      yaml: `name: ${id}`,
+      valid: true,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      createdBy: 'system',
+      lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'system',
+      definition: {
+        version: '1',
+        name: id,
+        enabled: true,
+        triggers: [createAroundCompletionTrigger(condition)],
+        steps: [{ name: 'proceed', type: 'call_site.proceed', with: {} }],
+      },
+    });
+
+    it('resolves matching workflows and reports invalid trigger conditions separately', async () => {
+      mockWorkflowsService.getWorkflowsSubscribedToTrigger.mockResolvedValue([
+        createTriggeredWorkflow({ id: 'unconditional' }),
+        createTriggeredWorkflow({ id: 'matching', condition: 'event.agentId: "agent-a"' }),
+        createTriggeredWorkflow({ id: 'not-matching', condition: 'event.agentId: "agent-b"' }),
+        createTriggeredWorkflow({ id: 'invalid', condition: '(' }),
+      ]);
+
+      await expect(
+        api.resolveWorkflowTriggerMatches(
+          'inference.aroundCompletion',
+          { agentId: 'agent-a' },
+          'space-a'
+        )
+      ).resolves.toEqual({
+        matched: [
+          expect.objectContaining({ id: 'unconditional' }),
+          expect.objectContaining({ id: 'matching' }),
+        ],
+        invalidConditionWorkflowIds: ['invalid'],
+      });
+      expect(mockWorkflowsService.getWorkflowsSubscribedToTrigger).toHaveBeenCalledWith(
+        'inference.aroundCompletion',
+        'space-a'
+      );
+    });
+
+    it('executes a saved workflow synchronously with request-local options', async () => {
+      const workflow = createTriggeredWorkflow({ id: 'workflow-1' });
+      const abortSignal = new AbortController().signal;
+      const capabilities = [{ id: 'test-capability', value: { invoke: jest.fn() } }];
+      mockWorkflowsService.getWorkflow.mockResolvedValue(workflow);
+      mockWorkflowsExecutionEngine.executeWorkflow.mockResolvedValue({
+        workflowExecutionId: 'execution-1',
+        result: { status: ExecutionStatus.COMPLETED, output: { content: 'restored' } },
+      });
+
+      await api.executeWorkflowSynchronously({
+        workflowId: workflow.id,
+        context: { event: { messages: [] }, spaceId: 'space-a' },
+        spaceId: 'space-a',
+        request: mockRequest,
+        capabilities,
+        abortSignal,
+      });
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: workflow.id }),
+        { event: { messages: [] }, spaceId: 'space-a' },
+        mockRequest,
+        {
+          executionMode: 'sync',
+          capabilities,
+          abortSignal,
+        }
+      );
+    });
+  });
 
   describe('cloneWorkflow', () => {
     const createMockWorkflow = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
