@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseRepoSlug } from './fetch_content';
+import { assertAllowedSecurityLabsRepo, parseRepoSlug } from './fetch_content';
 
 describe('parseRepoSlug', () => {
   it('parses an https GitHub URL', () => {
@@ -32,6 +32,26 @@ describe('parseRepoSlug', () => {
   it('throws when the slug cannot be derived', () => {
     expect(() => parseRepoSlug('https://github.com/elastic')).toThrow(
       /Unable to derive owner\/repo/
+    );
+  });
+});
+
+describe('assertAllowedSecurityLabsRepo', () => {
+  it('allows the elastic/security-labs-elastic-co repo', () => {
+    expect(() =>
+      assertAllowedSecurityLabsRepo({ owner: 'elastic', repo: 'security-labs-elastic-co' })
+    ).not.toThrow();
+  });
+
+  it('allows the repo case-insensitively', () => {
+    expect(() =>
+      assertAllowedSecurityLabsRepo({ owner: 'Elastic', repo: 'Security-Labs-Elastic-Co' })
+    ).not.toThrow();
+  });
+
+  it('rejects other GitHub repositories', () => {
+    expect(() => assertAllowedSecurityLabsRepo({ owner: 'elastic', repo: 'kibana' })).toThrow(
+      /Only \[elastic\/security-labs-elastic-co\] is allowed/
     );
   });
 });

@@ -70,7 +70,7 @@ The inference endpoint used to generate the `semantic_text` embeddings. Recogniz
 
 ### `--githubRepoUrl`
 
-GitHub repository to fetch content from when `--localContentPath` is not provided.
+GitHub repository to fetch content from when `--localContentPath` is not provided. Must resolve to `elastic/security-labs-elastic-co` (other repos are rejected so CI rebuilds cannot publish a different source as Security Labs KB). Use `--localContentPath` for local or fork checkouts.
 
 **Default**: `https://github.com/elastic/security-labs-elastic-co`
 
@@ -154,7 +154,7 @@ All CLI parameters can also be set via environment variables:
 | `KIBANA_EMBEDDING_CLUSTER_PASSWORD` | Embedding cluster password |
 | `SECURITY_LABS_VERSION` | Artifact version (`YYYY.MM.DD-HHMMSS` UTC) |
 | `SECURITY_LABS_CONTENT_PATH` | Path to local content |
-| `SECURITY_LABS_REPO_URL` | GitHub repository URL |
+| `SECURITY_LABS_REPO_URL` | GitHub repository URL (must be `elastic/security-labs-elastic-co`) |
 | `SECURITY_LABS_REPO_REF` | Git ref to fetch. Prefer a commit SHA from the article-publish trigger; defaults to `main` |
 | `SECURITY_LABS_CONTENT_SUBPATH` | Repo-relative content path (default `_content/articles`) |
 | `SECURITY_LABS_INFERENCE_ID` | Inference endpoint id (default ELSER) |

@@ -56,7 +56,8 @@ function options(y: yargs.Argv) {
       default: process.env.KIBANA_EMBEDDING_CLUSTER_PASSWORD ?? 'changeme',
     })
     .option('githubRepoUrl', {
-      describe: 'GitHub repository URL for Security Labs content',
+      describe:
+        'GitHub repository URL for Security Labs content (must be elastic/security-labs-elastic-co; use --localContentPath for forks)',
       string: true,
       default: process.env.SECURITY_LABS_REPO_URL ?? SECURITY_LABS_REPO,
     })

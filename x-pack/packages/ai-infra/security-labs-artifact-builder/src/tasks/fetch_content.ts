@@ -11,6 +11,10 @@ import { spawn } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { TaskConfig } from '../types';
 
+/** Only this GitHub repo may be fetched as Security Labs KB content. */
+export const ALLOWED_SECURITY_LABS_REPO_OWNER = 'elastic';
+export const ALLOWED_SECURITY_LABS_REPO_NAME = 'security-labs-elastic-co';
+
 /**
  * Derives the `owner/repo` slug from a GitHub repository URL (e.g.
  * `https://github.com/elastic/security-labs-elastic-co`) or an already-slug-shaped
@@ -30,6 +34,29 @@ export const parseRepoSlug = (githubRepoUrl: string): { owner: string; repo: str
   }
 
   return { owner, repo };
+};
+
+/**
+ * Ensures GitHub fetches only pull from the Elastic Security Labs content repo.
+ * Local/fork experimentation should use `--localContentPath` instead.
+ */
+export const assertAllowedSecurityLabsRepo = ({
+  owner,
+  repo,
+}: {
+  owner: string;
+  repo: string;
+}): void => {
+  if (
+    owner.toLowerCase() !== ALLOWED_SECURITY_LABS_REPO_OWNER ||
+    repo.toLowerCase() !== ALLOWED_SECURITY_LABS_REPO_NAME
+  ) {
+    throw new Error(
+      `Refusing to fetch Security Labs content from [${owner}/${repo}]. ` +
+        `Only [${ALLOWED_SECURITY_LABS_REPO_OWNER}/${ALLOWED_SECURITY_LABS_REPO_NAME}] is allowed ` +
+        `for GitHub fetches. Use --localContentPath for local or fork checkouts.`
+    );
+  }
 };
 
 /**
@@ -166,6 +193,7 @@ export const fetchContent = async ({
   }
 
   const { owner, repo } = parseRepoSlug(config.githubRepoUrl);
+  assertAllowedSecurityLabsRepo({ owner, repo });
   const ref = config.githubRef;
   const contentSubPath = config.contentSubPath.replace(/^\/+/, '').replace(/\/+$/, '');
 
