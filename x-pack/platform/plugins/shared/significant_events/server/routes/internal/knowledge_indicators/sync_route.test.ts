@@ -12,16 +12,11 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-const route =
-  syncRoutes['GET /internal/streams/_knowledge_indicators/_streams_with_indicators'];
+const route = syncRoutes['GET /internal/streams/_knowledge_indicators/_streams_with_indicators'];
 
 type HandlerParams = Parameters<typeof route.handler>[0];
 
-const makeHandlerParams = ({
-  streamNames,
-}: {
-  streamNames: string[];
-}): HandlerParams =>
+const makeHandlerParams = ({ streamNames }: { streamNames: string[] }): HandlerParams =>
   ({
     params: {},
     request: {},

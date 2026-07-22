@@ -57,10 +57,7 @@ import {
   createContinuousKiOnboardingWorkflowService,
   type ContinuousKiOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
-import {
-  createSyncWorkflowService,
-  type SyncWorkflowService,
-} from './lib/workflows/sync_workflow';
+import { createSyncWorkflowService, type SyncWorkflowService } from './lib/workflows/sync_workflow';
 import {
   createSignificantEventsScheduledWorkflowsService,
   type SignificantEventsScheduledWorkflowsService,

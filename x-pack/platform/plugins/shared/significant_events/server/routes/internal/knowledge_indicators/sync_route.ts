@@ -36,7 +36,11 @@ export const streamsWithIndicatorsRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({ request, getScopedClients, server }): Promise<StreamsWithIndicatorsResponse> => {
+  handler: async ({
+    request,
+    getScopedClients,
+    server,
+  }): Promise<StreamsWithIndicatorsResponse> => {
     const { getKnowledgeIndicatorClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
