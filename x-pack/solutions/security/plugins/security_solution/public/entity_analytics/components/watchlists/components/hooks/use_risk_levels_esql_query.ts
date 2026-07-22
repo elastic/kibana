@@ -91,6 +91,11 @@ export const useRiskLevelsEsqlQuery = ({
             abortSignal: signal,
             strategy: 'esql_async',
             projectRouting: '_alias:_origin',
+            executionContext: {
+              type: 'security_solution',
+              name: 'entity_analytics-home_page',
+              id: 'risk_level_panel',
+            },
           }
         )
       );

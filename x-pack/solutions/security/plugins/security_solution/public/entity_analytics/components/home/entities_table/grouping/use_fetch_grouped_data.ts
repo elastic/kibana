@@ -124,9 +124,18 @@ export const useFetchGroupedData = ({
         searchService.search<
           {},
           IKibanaSearchResponse<SearchResponse<{}, EntitiesRootGroupingAggregation>>
-        >({
-          params: getGroupedEntitiesQuery(query, indexPattern),
-        })
+        >(
+          {
+            params: getGroupedEntitiesQuery(query, indexPattern),
+          },
+          {
+            executionContext: {
+              type: 'security_solution',
+              name: 'entity_analytics-home_page',
+              id: 'entities_table_grouped',
+            },
+          }
+        )
       );
 
       if (!aggregations) throw new Error('Failed to aggregate by, missing resource id');
@@ -151,27 +160,36 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
       const {
         rawResponse: { hits },
       } = await lastValueFrom(
-        searchService.search<{}, IKibanaSearchResponse<SearchResponse>>({
-          params: {
-            index: indexPattern,
-            project_routing: '_alias:_origin',
-            ignore_unavailable: true,
-            size: entityIds.length,
-            _source: [
-              ENTITY_FIELDS.ENTITY_ID,
-              ENTITY_FIELDS.ENTITY_NAME,
-              ENTITY_FIELDS.ENTITY_TYPE,
-              ENTITY_FIELDS.ENTITY_RISK,
-              ENTITY_FIELDS.RESOLUTION_RISK_SCORE,
-            ],
-            query: {
-              bool: {
-                filter: [{ terms: { [ENTITY_FIELDS.ENTITY_ID]: entityIds } }],
-                must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
+        searchService.search<{}, IKibanaSearchResponse<SearchResponse>>(
+          {
+            params: {
+              index: indexPattern,
+              project_routing: '_alias:_origin',
+              ignore_unavailable: true,
+              size: entityIds.length,
+              _source: [
+                ENTITY_FIELDS.ENTITY_ID,
+                ENTITY_FIELDS.ENTITY_NAME,
+                ENTITY_FIELDS.ENTITY_TYPE,
+                ENTITY_FIELDS.ENTITY_RISK,
+                ENTITY_FIELDS.RESOLUTION_RISK_SCORE,
+              ],
+              query: {
+                bool: {
+                  filter: [{ terms: { [ENTITY_FIELDS.ENTITY_ID]: entityIds } }],
+                  must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
+                },
               },
             },
           },
-        })
+          {
+            executionContext: {
+              type: 'security_solution',
+              name: 'entity_analytics-home_page',
+              id: 'entities_table_target_metadata',
+            },
+          }
+        )
       );
 
       return parseTargetMetadataHits(hits.hits);

@@ -132,6 +132,11 @@ export const EntityAlertsCell: React.FC<{
           // to a fresh controller so the call type-checks when react-query
           // hasn't supplied one.
           signal: signal ?? new AbortController().signal,
+          context: {
+            type: 'security_solution',
+            name: 'entity_analytics-home_page',
+            id: 'entity_alerts_cell',
+          },
         });
         endTracking('success');
         return response;
