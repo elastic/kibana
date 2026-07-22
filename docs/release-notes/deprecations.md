@@ -43,9 +43,9 @@ $$$kibana-276925$$$
 ::::{dropdown} Migrate to the renamed Managed integrations API
 **Details**<br> The agentless policies API is renamed to the Managed integrations API. The `/api/fleet/agentless_policies` paths are now served at `/api/fleet/managed_integrations`, and the response model is renamed from `AgentlessPolicy` to `ManagedIntegration`. The original `agentless_policies` paths remain available as deprecated aliases that forward to the same handlers. Creating, updating, upgrading, or copying managed integrations through the {{fleet}} package policy (`/api/fleet/package_policies`) and agent policy (`/api/fleet/agent_policies`) APIs is also deprecated in favor of the Managed integrations API.
 
-**Impact**<br> Clients that call the `agentless_policies` paths keep working through the deprecated aliases but log deprecation warnings. Clients that create, update, upgrade, or copy managed integrations through the package policy and agent policy APIs also log deprecation warnings, and these calls are rejected when the `disableAgentlessLegacyAPI` experimental feature flag is enabled. Clients that reference the `AgentlessPolicy` schema (for example, code generated from the OpenAPI spec) no longer find it.
+**Impact**<br> Clients that call the `agentless_policies` paths keep working through the deprecated aliases but log deprecation warnings. Clients that create, update, upgrade, or copy managed integrations through the package policy and agent policy APIs also log deprecation warnings. Clients that reference the `AgentlessPolicy` schema (for example, code generated from the OpenAPI spec) no longer find it.
 
-**Action**<br> Update integrations to call `/api/fleet/managed_integrations` and consume the `ManagedIntegration` response model. Migrate off the deprecated `agentless_policies` paths, and stop using the package policy and agent policy APIs to create, update, upgrade, or copy managed integrations before the `disableAgentlessLegacyAPI` feature flag is enabled.
+**Action**<br> Update integrations to call `/api/fleet/managed_integrations` and consume the `ManagedIntegration` response model. Migrate off the deprecated `agentless_policies` paths, and stop using the package policy and agent policy APIs to create, update, upgrade, or copy managed integrations before these deprecated APIs are removed.
 
 View [#276925]({{kib-pull}}276925).
 ::::
@@ -62,7 +62,7 @@ View [#272414]({{kib-pull}}272414).
 ::::
 
 $$$kibana-261591$$$
-::::{dropdown} Deprecating LLM connector types
+::::{dropdown} Migrate from deprecated LLM connector types
 **Details**<br> The OpenAI (`.gen-ai`), {{bedrock}} (`.bedrock`), {{gemini}} (`.gemini`), and {{infer-cap}} (`.inference`) connector types are deprecated. Existing connectors remain usable and show deprecation badges and warnings on the {{connectors-ui}} page and in rule action selectors.
 
 **Impact**<br> Existing LLM connectors and rule actions that use them continue to work but display deprecation indicators.
