@@ -53,7 +53,7 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
-import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
+import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { getDocumentHistoryTitle } from '../../../../../flyout_v2/document/main/utils/get_header_title';
@@ -195,6 +195,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               attackId: eventData._id,
               indexName: eventData.ecs._index ?? '',
               onAttackUpdated: refetch,
+              origin: FLYOUT_ORIGIN.TIMELINE,
               attackTitle: getAttackTitleValue(eventData),
             });
           } else {
@@ -203,6 +204,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               indexName: eventData.ecs._index,
               renderCellActions: timelineCellActionRenderer,
               onAlertUpdated: refetch,
+              origin: FLYOUT_ORIGIN.TIMELINE,
               title: getDocumentHistoryTitle(eventData),
             });
           }
