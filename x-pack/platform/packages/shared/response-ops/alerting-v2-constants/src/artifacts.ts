@@ -11,6 +11,18 @@ export const RUNBOOK_ARTIFACT_TYPE = 'runbook';
 /** Artifact type identifier for linked dashboards */
 export const DASHBOARD_ARTIFACT_TYPE = 'dashboard';
 
+/** Artifact type identifier for links to other rules (value = target rule id) */
+export const RULE_ARTIFACT_TYPE = 'rule';
+
+/**
+ * Why an artifact is attached (orthogonal to its `type`). Lets a single target
+ * kind (e.g. `rule`) carry different relationship semantics. See rna-program#762.
+ */
+export const ARTIFACT_RELATION = {
+  /** The rule's notifications are suppressed while the target rule has an active episode (rna-program#753). */
+  DEPENDS_ON: 'depends_on',
+} as const;
+
 /** Default maximum character length for artifact values (applies when no type-specific override exists) */
 export const DEFAULT_ARTIFACT_VALUE_LIMIT = 1024;
 

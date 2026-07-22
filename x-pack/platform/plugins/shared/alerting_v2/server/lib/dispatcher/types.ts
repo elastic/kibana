@@ -137,7 +137,17 @@ export interface DispatcherPipelineState {
   readonly episodes?: AlertEpisode[];
   readonly suppressions?: AlertEpisodeSuppression[];
   readonly dispatchable?: AlertEpisode[];
-  readonly suppressed?: Array<AlertEpisode & { reason: string }>;
+  /**
+   * One entry per suppressed (episode, policy) pair — NOT deduped by episode.
+   * Mirrors how `throttled` is per-policy: if two policies both suppress the
+   * same episode, both entries are kept so `.alert-actions` and execution
+   * history record one `suppress` outcome per policy, consistent with how
+   * dispatch/throttle are recorded. `policyId` is set for suppression that
+   * occurs post-matching (e.g. rule-dependency); pre-match suppression
+   * (ack/snooze, maintenance window) has no policy to attribute and leaves
+   * it undefined.
+   */
+  readonly suppressed?: Array<AlertEpisode & { reason: string; policyId?: ActionPolicyId }>;
   readonly rules?: Map<RuleId, Rule>;
   readonly policies?: Map<ActionPolicyId, ActionPolicy>;
   readonly matched?: MatchedPair[];

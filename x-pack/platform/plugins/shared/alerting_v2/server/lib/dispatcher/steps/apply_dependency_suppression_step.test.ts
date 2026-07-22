@@ -100,6 +100,8 @@ describe('ApplyDependencySuppressionStep', () => {
         group_hash: 'g1',
         episode_id: 'e1',
         reason: `${RULE_DEPENDENCY_REASON_PREFIX}:parent`,
+        // `policyId` attributes the outcome to the matching policy for execution history.
+        policyId: 'p1',
       })
     );
   });
@@ -153,10 +155,15 @@ describe('ApplyDependencySuppressionStep', () => {
 
     if (result.type !== 'continue') throw new Error('expected continue');
     expect(result.data?.matched).toEqual([passthroughPair]);
+    // Only the flagged pair is suppressed; the non-flagged sibling passes through.
     expect(result.data?.suppressed).toHaveLength(1);
+    expect(result.data?.suppressed?.[0]).toEqual(expect.objectContaining({ policyId: 'p1' }));
   });
 
-  it('deduplicates suppressed entries when the same episode matches multiple flagged policies', async () => {
+  it('does not dedup by episode: two policies suppressing the same episode each produce their own suppressed entry', async () => {
+    // Mirrors how `throttled` is recorded per-policy, so an episode suppressed
+    // by two different policies gets one `suppress` outcome per policy rather
+    // than being collapsed into a single entry.
     const { step, mockEsClient } = build();
     mockEsClient.esql.query.mockResolvedValue(
       createActiveParentRulesResponse([{ rule_id: 'parent' }])
@@ -180,7 +187,8 @@ describe('ApplyDependencySuppressionStep', () => {
 
     if (result.type !== 'continue') throw new Error('expected continue');
     expect(result.data?.matched).toEqual([]);
-    expect(result.data?.suppressed).toHaveLength(1);
+    expect(result.data?.suppressed).toHaveLength(2);
+    expect(new Set(result.data?.suppressed?.map((s) => s.policyId))).toEqual(new Set(['p1', 'p2']));
   });
 
   it('suppresses when any of multiple parents is active (ANY semantics)', async () => {

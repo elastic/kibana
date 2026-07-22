@@ -18,6 +18,8 @@ import type {
   RuleId,
 } from '../types';
 
+type SuppressedEntry = AlertEpisode & { reason: string; policyId?: string };
+
 export const RULE_DEPENDENCY_REASON_PREFIX = 'rule_dependency';
 const ruleDependencyReason = (parentRuleId: RuleId) =>
   `${RULE_DEPENDENCY_REASON_PREFIX}:${parentRuleId}`;
@@ -29,10 +31,12 @@ const ruleDependencyReason = (parentRuleId: RuleId) =>
  * all matching child notifications — no group correlation).
  *
  * Suppression is per (episode, policy) pair: an episode still dispatches via
- * any other matching policy that doesn't have `suppressDependentRules` enabled.
- * The child's own episode lifecycle is untouched — only notification
- * delivery is suppressed — so chains (A -> B -> C) cascade without
- * recursion: each rule only ever checks its direct parents.
+ * any other matching policy that doesn't have `suppressDependentRules` enabled,
+ * and if *multiple* matching policies suppress the same episode, each produces
+ * its own `suppressed` entry (mirroring how throttling is recorded per-policy)
+ * rather than being deduped into one. The child's own episode lifecycle is
+ * untouched — only notification delivery is suppressed — so chains (A -> B ->
+ * C) cascade without recursion: each rule only ever checks its direct parents.
  */
 @injectable()
 export class ApplyDependencySuppressionStep implements DispatcherStep {
@@ -68,7 +72,10 @@ export class ApplyDependencySuppressionStep implements DispatcherStep {
     }
 
     const newMatched: MatchedPair[] = [];
-    const newlySuppressed = new Map<string, AlertEpisode & { reason: string }>();
+    // One entry per (episode, policy) pair — not deduped by episode. If two
+    // policies both suppress the same episode, both produce a `suppress`
+    // outcome, consistent with how `throttled` is recorded per-policy.
+    const newlySuppressed: SuppressedEntry[] = [];
 
     for (const pair of matched) {
       const { episode, policy } = pair;
@@ -83,13 +90,14 @@ export class ApplyDependencySuppressionStep implements DispatcherStep {
         continue;
       }
 
-      const key = `${episode.rule_id}::${episode.group_hash}::${episode.episode_id}`;
-      if (!newlySuppressed.has(key)) {
-        newlySuppressed.set(key, { ...episode, reason: ruleDependencyReason(activeParent) });
-      }
+      newlySuppressed.push({
+        ...episode,
+        reason: ruleDependencyReason(activeParent),
+        policyId: policy.id,
+      });
     }
 
-    if (newlySuppressed.size === 0) {
+    if (newlySuppressed.length === 0) {
       return { type: 'continue' };
     }
 
@@ -97,7 +105,7 @@ export class ApplyDependencySuppressionStep implements DispatcherStep {
       type: 'continue',
       data: {
         matched: newMatched,
-        suppressed: [...suppressed, ...newlySuppressed.values()],
+        suppressed: [...suppressed, ...newlySuppressed],
       },
     };
   }

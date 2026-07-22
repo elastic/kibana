@@ -344,6 +344,14 @@ const artifactSchema = z
     id: z.string().min(1).max(256).describe('Artifact identifier.'),
     type: z.string().min(1).max(128).describe('Artifact type.'),
     value: z.string().min(1).max(MAX_ARTIFACT_VALUE_LIMIT).describe('Artifact value.'),
+    relation: z
+      .string()
+      .min(1)
+      .max(64)
+      .optional()
+      .describe(
+        'Why the artifact is attached (orthogonal to `type`), e.g. "depends_on". See ARTIFACT_RELATION.'
+      ),
   })
   .strict()
   .check((ctx) => {
@@ -390,8 +398,6 @@ export const createRuleDataBaseSchema = z
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     artifacts: z.array(artifactSchema).max(100).optional(),
-    // POC (rna-program#753): parent rule ids for dependency suppression.
-    depends_on: z.array(z.string()).max(100).optional(),
   })
   .strict();
 
@@ -540,7 +546,6 @@ export const updateRuleDataSchema = z
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
-    depends_on: z.array(z.string()).max(100).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strict()

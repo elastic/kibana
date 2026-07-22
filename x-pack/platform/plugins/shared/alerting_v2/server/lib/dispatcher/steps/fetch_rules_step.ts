@@ -6,6 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { ARTIFACT_RELATION, RULE_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceInternalToken } from '../../services/rules_saved_object_service/tokens';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
@@ -43,9 +44,14 @@ export class FetchRulesStep implements DispatcherStep {
         spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
         name: doc.attributes.metadata.name,
         tags: doc.attributes.metadata.tags ?? [],
-        // POC: read directly from the attribute (raw parent rule ids). Production
-        // resolves this from `references[]` instead (see rna-program#753 / kibana#280212).
-        dependsOn: doc.attributes.depends_on ?? [],
+        // see: `dependsOn` comment in `DispatcherPipelineState` for more details (rna-program#753 / #762)
+        dependsOn: (doc.attributes.artifacts ?? [])
+          .filter(
+            (artifact) =>
+              artifact.type === RULE_ARTIFACT_TYPE &&
+              artifact.relation === ARTIFACT_RELATION.DEPENDS_ON
+          )
+          .map((artifact) => artifact.value),
       });
     }
 

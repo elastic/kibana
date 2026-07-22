@@ -490,7 +490,12 @@ describe('StoreActionsStep', () => {
         reason: 'rule_dependency:parent-rule',
       })
     );
-    expect(docs.some((d: AlertAction) => d.action_type === 'unmatched')).toBe(false);
+    expect(
+      docs.some(
+        (d: Record<string, unknown>) =>
+          (d.action_type as AlertAction['action_type']) === 'unmatched'
+      )
+    ).toBe(false);
   });
 
   it('does not halt when only unmatched episodes exist', async () => {

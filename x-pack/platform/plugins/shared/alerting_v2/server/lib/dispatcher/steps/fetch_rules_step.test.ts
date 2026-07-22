@@ -48,6 +48,56 @@ describe('FetchRulesStep', () => {
     expect(mockFindByIds).toHaveBeenCalledWith(['r1']);
   });
 
+  it('derives dependsOn from "rule" artifacts tagged with the depends_on relation, ignoring other relations', async () => {
+    mockFindByIds.mockResolvedValue([
+      {
+        id: 'child',
+        attributes: createRuleSoAttributes({
+          metadata: { name: 'Child' },
+          artifacts: [
+            { id: 'a1', type: 'rule', value: 'parent-1', relation: 'depends_on' },
+            { id: 'a2', type: 'rule', value: 'parent-2', relation: 'depends_on' },
+            // Different relation on the same target type — must NOT be a dependency.
+            { id: 'a3', type: 'rule', value: 'sibling', relation: 'related' },
+            // Non-rule artifact — ignored.
+            { id: 'a4', type: 'dashboard', value: 'dash-1' },
+          ],
+        }),
+        namespaces: ['default'],
+      },
+    ]);
+
+    const step = new FetchRulesStep(rulesSoService);
+    const state = createDispatcherPipelineState({
+      dispatchable: [createAlertEpisode({ rule_id: 'child' })],
+    });
+
+    const result = await step.execute(state);
+
+    if (result.type !== 'continue') throw new Error('expected continue');
+    expect(result.data?.rules?.get('child')?.dependsOn).toEqual(['parent-1', 'parent-2']);
+  });
+
+  it('defaults dependsOn to an empty array when the rule has no artifacts', async () => {
+    mockFindByIds.mockResolvedValue([
+      {
+        id: 'r1',
+        attributes: createRuleSoAttributes({ metadata: { name: 'Rule 1' } }),
+        namespaces: ['default'],
+      },
+    ]);
+
+    const step = new FetchRulesStep(rulesSoService);
+    const state = createDispatcherPipelineState({
+      dispatchable: [createAlertEpisode({ rule_id: 'r1' })],
+    });
+
+    const result = await step.execute(state);
+
+    if (result.type !== 'continue') throw new Error('expected continue');
+    expect(result.data?.rules?.get('r1')?.dependsOn).toEqual([]);
+  });
+
   it('returns empty map when no active episodes', async () => {
     const step = new FetchRulesStep(rulesSoService);
 

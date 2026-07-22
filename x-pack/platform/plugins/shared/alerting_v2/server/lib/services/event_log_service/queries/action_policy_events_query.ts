@@ -20,7 +20,8 @@ import {
  * Filter inputs shared by the find and count action-policy event queries.
  *
  * `outcome` narrows `event.action` to a single action (`dispatched` |
- * `throttled`). When omitted, both are matched. `policyIds` / `ruleIds`,
+ * `throttled` | `suppressed`). When omitted, all three are matched.
+ * `policyIds` / `ruleIds`,
  * when provided, must match an entry in the nested `kibana.saved_objects`
  * array — or, for rules only, in the top-level
  * `kibana.alerting_v2.dispatcher.rule_ids` spillover field that the
@@ -98,7 +99,7 @@ export const buildCountActionPolicyEventsQuery = (
  * The query reads documents emitted by `store_execution_history_step.ts`:
  *
  *  - `event.provider` is always `alerting_v2`.
- *  - `event.action` is one of `dispatched` / `throttled`.
+ *  - `event.action` is one of `dispatched` / `throttled` / `suppressed`.
  *  - `kibana.space_ids: [spaceId]` for cross-space isolation.
  *  - `kibana.saved_objects` (nested) holds policy + rule refs.
  *  - `kibana.alerting_v2.dispatcher.rule_ids` (top-level keyword) holds the
@@ -147,6 +148,7 @@ const actionFilter = (outcome: PolicyExecutionOutcome | undefined): QueryDslQuer
         'event.action': [
           ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
           ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
+          ACTION_POLICY_EVENT_ACTIONS.SUPPRESSED,
         ],
       },
     };
