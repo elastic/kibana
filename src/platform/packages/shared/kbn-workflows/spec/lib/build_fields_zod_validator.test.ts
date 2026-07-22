@@ -421,6 +421,7 @@ describe('buildFieldsZodValidator', () => {
             episode_status: 'active',
           },
         ],
+        rules: {},
       },
     });
     expect(valid.success).toBe(true);
