@@ -45,7 +45,11 @@ export function AddSplitButton({
 
   return (
     <EuiSplitButton fill={fill} size={size}>
-      <EuiSplitButton.ActionPrimary onClick={onAdd} data-test-subj={addTestSubj}>
+      <EuiSplitButton.ActionPrimary
+        iconType="plus"
+        onClick={onAdd}
+        data-test-subj={addTestSubj}
+      >
         <FormattedMessage id="workflows.actionsMenu.preview.add" defaultMessage="Add" />
       </EuiSplitButton.ActionPrimary>
       <EuiSplitButton.ActionSecondary

@@ -18,6 +18,8 @@ import {
 interface GenerateBuiltInStepSnippetOptions {
   full?: boolean;
   withStepsSection?: boolean;
+  /** When set, applied to the step `with` block (or top-level params when there is no `with`). */
+  withParams?: Record<string, unknown>;
 }
 
 /**
@@ -26,6 +28,7 @@ interface GenerateBuiltInStepSnippetOptions {
  * @param options - Configuration options for snippet generation
  * @param options.full - Whether to include the full YAML structure with step name and type prefix
  * @param options.withStepsSection - Whether to include the "steps:" section
+ * @param options.withParams - Optional explicit parameter values (configure-and-add path)
  * @param workflowOutputs - Declared workflow outputs for workflow.output step snippet
  * @returns The formatted YAML step snippet with appropriate parameters and structure
  */
@@ -33,7 +36,7 @@ interface GenerateBuiltInStepSnippetOptions {
 // eslint-disable-next-line complexity
 export function generateBuiltInStepSnippet(
   stepType: BuiltInStepType,
-  { full, withStepsSection }: GenerateBuiltInStepSnippetOptions = {},
+  { full, withStepsSection, withParams }: GenerateBuiltInStepSnippetOptions = {},
   workflowOutputs?: NormalizableFieldSchema
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
@@ -160,6 +163,14 @@ export function generateBuiltInStepSnippet(
       parameters = {
         with: { '# Add parameters here': '' },
       };
+  }
+
+  if (withParams !== undefined) {
+    if ('with' in parameters) {
+      parameters = { ...parameters, with: withParams };
+    } else {
+      parameters = { ...parameters, ...withParams };
+    }
   }
 
   if (full) {

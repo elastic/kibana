@@ -687,7 +687,7 @@ export const WorkflowYAMLEditor = ({
     }
   }, [openActionsRef, openActionsPopover]);
   const onActionSelected = useCallback(
-    (action: ActionOptionData) => {
+    (action: ActionOptionData, options?: { withParams?: Record<string, unknown> }) => {
       if (isReadOnlyYaml) {
         return;
       }
@@ -713,7 +713,8 @@ export const WorkflowYAMLEditor = ({
           yamlDocumentCurrent,
           action.id,
           cursorPosition,
-          editor
+          editor,
+          options?.withParams
         );
         if (insertedRange) {
           setInsertedStepRange(insertedRange);

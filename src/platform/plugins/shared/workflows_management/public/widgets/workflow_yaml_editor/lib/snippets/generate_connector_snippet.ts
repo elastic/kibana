@@ -20,6 +20,8 @@ import { getRequiredParamsForConnector } from '../get_required_params_for_connec
 interface GenerateConnectorSnippetOptions {
   full?: boolean;
   withStepsSection?: boolean;
+  /** When set, used as the step `with` block instead of scaffolded required params. */
+  withParams?: Record<string, unknown>;
 }
 
 /**
@@ -28,11 +30,12 @@ interface GenerateConnectorSnippetOptions {
  * @param options - Configuration options for snippet generation
  * @param options.full - Whether to include the full YAML structure with step name and type prefix
  * @param options.withStepsSection - Whether to include the "steps:" section
+ * @param options.withParams - Optional explicit `with` values (configure-and-add path)
  * @returns The formatted YAML connector snippet with required parameters as placeholders
  */
 export function generateConnectorSnippet(
   connectorType: string,
-  { full, withStepsSection }: GenerateConnectorSnippetOptions = {},
+  { full, withStepsSection, withParams }: GenerateConnectorSnippetOptions = {},
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
@@ -56,10 +59,17 @@ export function generateConnectorSnippet(
     }
   }
 
-  // Get required parameters for this connector type
-  const requiredParams = getRequiredParamsForConnector(connectorType, dynamicConnectorTypes);
+  const requiredParams =
+    withParams === undefined
+      ? getRequiredParamsForConnector(connectorType, dynamicConnectorTypes)
+      : [];
 
-  if (requiredParams.length === 0) {
+  if (withParams !== undefined) {
+    parameters = {
+      'connector-id': connectorIdValue,
+      with: withParams,
+    };
+  } else if (requiredParams.length === 0) {
     // No required params, just add empty with block with a placeholder comment
     parameters = {
       'connector-id': connectorIdValue,
@@ -68,13 +78,15 @@ export function generateConnectorSnippet(
     // We'll add the comment manually after YAML serialization
   } else {
     // Create with block with required parameters as placeholders
-    const withParams: Record<string, unknown> = {};
+    const withBlock: Record<string, unknown> = {};
     requiredParams.forEach((param) => {
       const placeholder = param.example || param.defaultValue || '';
-      withParams[param.name] = placeholder;
+      withBlock[param.name] = placeholder;
     });
-    parameters = { 'connector-id': connectorIdValue, with: withParams };
+    parameters = { 'connector-id': connectorIdValue, with: withBlock };
   }
+
+  const hasScaffoldedEmptyWith = withParams === undefined && requiredParams.length === 0;
 
   if (full) {
     // if the full snippet is requested, return the whole step node as a sequence item
@@ -99,7 +111,7 @@ export function generateConnectorSnippet(
     }
 
     // If there are no required params, add a comment inside the empty with block
-    if (requiredParams.length === 0) {
+    if (hasScaffoldedEmptyWith) {
       const shortcut = isMac ? '⌘+I' : 'Ctrl+Space';
       const comment = `# Add parameters here. Press ${shortcut} to see all available options`;
       // Replace the empty with block with comment and cursor positioned for parameters (2 spaces for step context)
@@ -115,7 +127,7 @@ export function generateConnectorSnippet(
   const yamlString = stringify(parameters, stringifyOptions);
 
   // If there are no required params, add a comment inside the empty with block
-  if (requiredParams.length === 0) {
+  if (hasScaffoldedEmptyWith) {
     const shortcut = isMac ? '⌘+I' : 'Ctrl+Space';
     const comment = `# Add parameters here. Press ${shortcut} to see all available options`;
     // Replace the empty with block with one that has a comment (2 spaces for proper indentation)
