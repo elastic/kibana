@@ -24,6 +24,13 @@ jest.mock('./artifacts', () => ({
   ArtifactsSection: () => <div data-test-subj="artifactsSectionMock">artifacts</div>,
 }));
 
+const mockCanRead = jest.fn();
+
+jest.mock('@kbn/core-di-browser', () => ({
+  CoreStart: (key: string) => key,
+  useService: () => ({ canRead: mockCanRead }),
+}));
+
 const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
@@ -48,6 +55,11 @@ const renderSection = (rule: RuleApiResponse) =>
   );
 
 describe('RuleOverviewSection', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCanRead.mockReturnValue(true);
+  });
+
   describe('activity section routing', () => {
     it('renders the alert timeline for alert rules', () => {
       renderSection({ ...baseRule, kind: 'alert' });
@@ -58,6 +70,12 @@ describe('RuleOverviewSection', () => {
     it('renders the signal overview instead of the timeline for signal rules', () => {
       renderSection({ ...baseRule, kind: 'signal' });
       expect(screen.getByTestId('signalRuleOverviewMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('alertTimelineSectionMock')).not.toBeInTheDocument();
+    });
+
+    it('hides the alert timeline when the user cannot read alerts', () => {
+      mockCanRead.mockReturnValue(false);
+      renderSection({ ...baseRule, kind: 'alert' });
       expect(screen.queryByTestId('alertTimelineSectionMock')).not.toBeInTheDocument();
     });
   });
