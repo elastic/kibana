@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
+import { createReducer } from 'redux-toolkit-v1';
 import type { FindMaintenanceWindowsResult } from '@kbn/maintenance-windows-plugin/common';
 import { getMaintenanceWindowsAction } from './actions';
 

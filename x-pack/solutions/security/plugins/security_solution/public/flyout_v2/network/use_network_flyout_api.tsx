@@ -6,18 +6,24 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
+import React, { lazy, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy/security_solution/network';
-import { useKibana } from '../../common/lib/kibana';
-import { flyoutProviders } from '../shared/components/flyout_provider';
-import { FlyoutLoading } from '../shared/components/flyout_loading';
+import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
+import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
+import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import { formatFlyoutTitle, NETWORK_TITLE } from '../shared/constants/flyout_titles';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
+import { useFlyoutSessionContext } from '../session_context';
+import { useFlyoutV2UrlWriter } from '../shared/url_state/flyout_v2_url_writer';
+import {
+  FLYOUT_DESCRIPTOR_KIND,
+  decodeFlyoutV2UrlParam,
+  urlParamKeyForHistoryKey,
+} from '../shared/url_state/flyout_v2_url_param';
+import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 
 // Lazy-loaded so consumers of this hook don't statically pull the network flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
@@ -28,6 +34,8 @@ export interface OpenNetworkFlyoutParams {
   ip: string;
   /** Whether the IP is the source or destination of the flow. */
   flowTarget: FlowTargetSourceDest;
+  /** Which UI trigger opened this flyout, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface NetworkFlyoutApi {
@@ -57,70 +65,77 @@ export interface NetworkFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
   const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const openFlyout = useOpenFlyout();
+  const urlParamKey = urlParamKeyForHistoryKey(historyKey);
+  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
 
-  // `session` is the only thing that differs between a main and a child flyout. It is kept private
-  // here so callers never have to reason about it: they pick `openNetworkFlyout` (main) or
-  // `openNetworkFlyoutAsChild` (child) and this helper maps that to the right session.
+  const readFirstDescriptor = useCallback((): FlyoutDescriptor | null => {
+    if (!history?.location) return null;
+    const raw = new URLSearchParams(history.location.search).get(urlParamKey);
+    const stack = decodeFlyoutV2UrlParam(raw);
+    return stack?.[0] ?? null;
+  }, [history, urlParamKey]);
+
   const open = useCallback(
     (
       children: ReactNode,
-      session: OverlaySystemFlyoutOpenOptions['session'],
-      title: OverlaySystemFlyoutOpenOptions['title']
+      session: FlyoutSessionKind,
+      title: OverlaySystemFlyoutOpenOptions['title'],
+      onClose: (() => void) | undefined,
+      origin?: FlyoutOrigin
     ) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
         title,
+        onClose,
       };
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <FlyoutSessionContextProvider
-              value={{
-                session: session === 'inherit' ? 'inherit' : sessionMode,
-                historyKey,
-              }}
-            >
-              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
-            </FlyoutSessionContextProvider>
-          ),
-        }),
-        properties
+      openFlyout(
+        children,
+        properties,
+        { surface: FLYOUT_SURFACE.FLYOUT, flyoutType: FLYOUT_TYPE.NETWORK, session, origin },
+        session === FLYOUT_SESSION_KIND.INHERIT ? FLYOUT_SESSION_KIND.INHERIT : sessionMode
       );
     },
-    [overlays, services, store, history, defaultDocumentFlyoutProperties, historyKey, sessionMode]
+    [openFlyout, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openNetworkFlyout = useCallback(
-    ({ ip, flowTarget }: OpenNetworkFlyoutParams) => {
+    ({ ip, flowTarget, origin }: OpenNetworkFlyoutParams) => {
+      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.network, ip, flowTarget: flowTarget as string });
+      const onClose = buildOnClose(null);
       open(
         <Network ip={ip} flowTarget={flowTarget} />,
         sessionMode,
-        formatFlyoutTitle(NETWORK_TITLE, ip)
+        formatFlyoutTitle(NETWORK_TITLE, ip),
+        onClose,
+        origin
       );
     },
-    [open, sessionMode]
+    [open, sessionMode, writeOnOpen, buildOnClose]
   );
 
   const openNetworkFlyoutAsChild = useCallback(
-    ({ ip, flowTarget }: OpenNetworkFlyoutParams) => {
+    ({ ip, flowTarget, origin }: OpenNetworkFlyoutParams) => {
+      const parentDescriptor = readFirstDescriptor();
+      writeOnOpen(
+        { kind: FLYOUT_DESCRIPTOR_KIND.network, ip, flowTarget: flowTarget as string },
+        'inherit'
+      );
+      const onClose = buildOnClose(parentDescriptor);
       open(
         <Network ip={ip} flowTarget={flowTarget} />,
-        'inherit',
-        buildFlyoutNavTitle(formatFlyoutTitle(NETWORK_TITLE, ip))
+        FLYOUT_SESSION_KIND.INHERIT,
+        buildFlyoutNavTitle(formatFlyoutTitle(NETWORK_TITLE, ip)),
+        onClose,
+        origin
       );
     },
-    [open]
+    [open, readFirstDescriptor, writeOnOpen, buildOnClose]
   );
 
   return useMemo(

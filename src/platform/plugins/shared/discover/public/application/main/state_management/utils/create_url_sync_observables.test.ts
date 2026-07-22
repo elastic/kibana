@@ -15,11 +15,39 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { getPersistedTabMock } from '../redux/__mocks__/internal_state.mocks';
 import { createUrlSyncObservables } from './create_url_sync_observables';
-import { selectDataSourceProfileId, selectTab, type DiscoverAppState } from '../redux';
+import {
+  internalStateActions,
+  selectDataSourceProfileId,
+  selectTab,
+  selectTabRuntimeState,
+  type DiscoverAppState,
+} from '../redux';
+import type { ProfileStateDefinition } from '../../../../context_awareness';
+import { ProfileStateType } from '../../../../context_awareness';
+import { TEST_PROFILE_STATE_DEF } from '../../../../context_awareness/__mocks__/profile_state';
+
+interface SecondaryProfileState {
+  secondaryUrlValue: string;
+  secondaryPersistentValue: string;
+}
+
+const SECONDARY_PROFILE_STATE_DEF: ProfileStateDefinition<SecondaryProfileState> = {
+  key: 'secondaryProfileState',
+  descriptor: {
+    secondaryUrlValue: { type: ProfileStateType.Url },
+    secondaryPersistentValue: { type: ProfileStateType.Persistent },
+  },
+  defaultState: {
+    secondaryUrlValue: 'defaultSecondaryUrl',
+    secondaryPersistentValue: 'defaultSecondaryPersistent',
+  },
+};
 
 describe('createUrlSyncObservables', () => {
   const setup = async () => {
     const services = createDiscoverServicesMock();
+    services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+    services.profileStateRegistry.registerDefinition(SECONDARY_PROFILE_STATE_DEF);
     const toolkit = getDiscoverInternalStateMock({
       services,
       persistedDataViews: [dataViewMockWithTimeField],
@@ -42,10 +70,13 @@ describe('createUrlSyncObservables', () => {
         dispatch: toolkit.internalState.dispatch,
         getState: toolkit.internalState.getState,
         internalState$: from(toolkit.internalState),
+        runtimeStateManager: toolkit.runtimeStateManager,
+        services,
       }),
       internalState: toolkit.internalState,
       runtimeStateManager: toolkit.runtimeStateManager,
       tabId: persistedTab.id,
+      initializeSingleTab: toolkit.initializeSingleTab,
     };
   };
 
@@ -56,6 +87,7 @@ describe('createUrlSyncObservables', () => {
     expect(result.appState$).toBeDefined();
     expect(result.createAppStateContainer).toBeDefined();
     expect(result.globalStateContainer).toBeDefined();
+    expect(result.profileStateContainer).toBeDefined();
   });
 
   it('should allow appStateContainer to get and set app state', async () => {
@@ -176,5 +208,196 @@ describe('createUrlSyncObservables', () => {
 
     const currentGlobalState = result.globalStateContainer.get();
     expect(currentGlobalState).toEqual(originalGlobalState);
+  });
+
+  it('should allow profileStateContainer to get active profile URL state', async () => {
+    const { result, internalState, tabId, initializeSingleTab } = await setup();
+
+    internalState.dispatch(
+      internalStateActions.setProfileState({
+        tabId,
+        profileStateDefinition: TEST_PROFILE_STATE_DEF,
+        profileState: {
+          uiValue: 'ui',
+          urlValue: 'nextUrl',
+          persistentValue: 'persistent',
+          nestedValue: { count: 1 },
+        },
+      })
+    );
+
+    await initializeSingleTab({ tabId });
+
+    expect(result.profileStateContainer.get()).toEqual({
+      [TEST_PROFILE_STATE_DEF.key]: {
+        urlValue: 'nextUrl',
+      },
+    });
+  });
+
+  it('should allow profileStateContainer to set active profile URL state', async () => {
+    const { result, internalState, tabId, initializeSingleTab } = await setup();
+    const currentProfileState = {
+      uiValue: 'ui',
+      urlValue: 'oldUrl',
+      persistentValue: 'persistent',
+      nestedValue: { count: 1 },
+    };
+
+    await initializeSingleTab({ tabId });
+    internalState.dispatch(
+      internalStateActions.setProfileState({
+        tabId,
+        profileStateDefinition: TEST_PROFILE_STATE_DEF,
+        profileState: currentProfileState,
+      })
+    );
+
+    result.profileStateContainer.set({
+      [TEST_PROFILE_STATE_DEF.key]: {
+        urlValue: 'nextUrl',
+      },
+    });
+
+    expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+      [TEST_PROFILE_STATE_DEF.key]: {
+        ...currentProfileState,
+        urlValue: 'nextUrl',
+      },
+    });
+  });
+
+  it('should clear profile URL state fields when profileStateContainer is cleared', async () => {
+    const { result, internalState, tabId, initializeSingleTab } = await setup();
+    const currentProfileState = {
+      uiValue: 'ui',
+      urlValue: 'nextUrl',
+      persistentValue: 'persistent',
+      nestedValue: { count: 1 },
+    };
+
+    await initializeSingleTab({ tabId });
+    internalState.dispatch(
+      internalStateActions.setProfileState({
+        tabId,
+        profileStateDefinition: TEST_PROFILE_STATE_DEF,
+        profileState: currentProfileState,
+      })
+    );
+
+    result.profileStateContainer.set(null);
+
+    expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+      [TEST_PROFILE_STATE_DEF.key]: {
+        uiValue: currentProfileState.uiValue,
+        persistentValue: currentProfileState.persistentValue,
+        nestedValue: currentProfileState.nestedValue,
+      },
+    });
+    expect(result.profileStateContainer.get()).toBeUndefined();
+  });
+
+  it('should preserve active profile URL state when profileStateContainer receives another profile key', async () => {
+    const { result, internalState, tabId, initializeSingleTab } = await setup();
+    const currentProfileState = {
+      uiValue: 'ui',
+      urlValue: 'nextUrl',
+      persistentValue: 'persistent',
+      nestedValue: { count: 1 },
+    };
+
+    await initializeSingleTab({ tabId });
+    internalState.dispatch(
+      internalStateActions.setProfileState({
+        tabId,
+        profileStateDefinition: TEST_PROFILE_STATE_DEF,
+        profileState: currentProfileState,
+      })
+    );
+
+    result.profileStateContainer.set({
+      [SECONDARY_PROFILE_STATE_DEF.key]: {
+        secondaryUrlValue: 'otherProfileUrl',
+      },
+    });
+
+    expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+      [TEST_PROFILE_STATE_DEF.key]: {
+        ...currentProfileState,
+      },
+      [SECONDARY_PROFILE_STATE_DEF.key]: {
+        secondaryUrlValue: 'otherProfileUrl',
+      },
+    });
+    expect(result.profileStateContainer.get()).toEqual({
+      [TEST_PROFILE_STATE_DEF.key]: {
+        urlValue: currentProfileState.urlValue,
+      },
+    });
+  });
+
+  it('should apply profile URL state after the active profile has already changed', async () => {
+    const { result, internalState, runtimeStateManager, tabId, initializeSingleTab } =
+      await setup();
+    const scopedProfilesManager = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    ).scopedProfilesManager$.getValue();
+    const contexts = scopedProfilesManager.getContexts();
+
+    await initializeSingleTab({ tabId });
+    internalState.dispatch(
+      internalStateActions.setProfileState({
+        tabId,
+        profileStateDefinition: TEST_PROFILE_STATE_DEF,
+        profileState: {
+          uiValue: 'ui',
+          urlValue: 'currentProfileUrl',
+          persistentValue: 'persistent',
+          nestedValue: { count: 1 },
+        },
+      })
+    );
+    internalState.dispatch(
+      internalStateActions.setProfileState({
+        tabId,
+        profileStateDefinition: SECONDARY_PROFILE_STATE_DEF,
+        profileState: {
+          secondaryUrlValue: 'previousSecondaryUrl',
+          secondaryPersistentValue: 'secondaryPersistent',
+        },
+      })
+    );
+    jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+      ...contexts,
+      dataSourceContext: {
+        ...contexts.dataSourceContext,
+        profileState: SECONDARY_PROFILE_STATE_DEF,
+      },
+    });
+
+    result.profileStateContainer.set({
+      [SECONDARY_PROFILE_STATE_DEF.key]: {
+        secondaryUrlValue: 'nextSecondaryUrl',
+      },
+    });
+
+    expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+      [TEST_PROFILE_STATE_DEF.key]: {
+        uiValue: 'ui',
+        urlValue: 'currentProfileUrl',
+        persistentValue: 'persistent',
+        nestedValue: { count: 1 },
+      },
+      [SECONDARY_PROFILE_STATE_DEF.key]: {
+        secondaryUrlValue: 'nextSecondaryUrl',
+        secondaryPersistentValue: 'secondaryPersistent',
+      },
+    });
+    expect(result.profileStateContainer.get()).toEqual({
+      [SECONDARY_PROFILE_STATE_DEF.key]: {
+        secondaryUrlValue: 'nextSecondaryUrl',
+      },
+    });
   });
 });
