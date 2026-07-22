@@ -14,16 +14,25 @@ const chunkEvent = (content: string) => ({
   content,
 });
 
-async function readNdjson(stream: NodeJS.ReadableStream): Promise<unknown[]> {
+async function readSse(
+  stream: NodeJS.ReadableStream
+): Promise<Array<{ event: string; data: unknown }>> {
   const chunks: Buffer[] = [];
   for await (const chunk of stream) {
     chunks.push(Buffer.from(chunk));
   }
-  return Buffer.concat(chunks)
-    .toString('utf8')
-    .split('\n')
-    .filter(Boolean)
-    .map((line) => JSON.parse(line));
+  const raw = Buffer.concat(chunks).toString('utf8');
+  const results: Array<{ event: string; data: unknown }> = [];
+  let currentEvent = 'event';
+  for (const line of raw.split('\n')) {
+    if (line.startsWith('event: ')) {
+      currentEvent = line.slice('event: '.length).trim();
+    } else if (line.startsWith('data: ')) {
+      results.push({ event: currentEvent, data: JSON.parse(line.slice('data: '.length)) });
+      currentEvent = 'event';
+    }
+  }
+  return results;
 }
 
 function buildMocks({ featureFlagEnabled = true }: { featureFlagEnabled?: boolean } = {}) {
@@ -64,7 +73,7 @@ function buildMocks({ featureFlagEnabled = true }: { featureFlagEnabled?: boolea
     notFound: jest.fn(() => ({ status: 404 })),
   };
 
-  const logger = { error: jest.fn() };
+  const logger = { error: jest.fn(), debug: jest.fn() };
 
   return {
     router: router as unknown as Parameters<typeof registerGenerateRoute>[0],
@@ -107,7 +116,7 @@ describe('registerGenerateRoute', () => {
     expect(response.ok).not.toHaveBeenCalled();
   });
 
-  it('streams a no_connector error event and never calls the LLM when no connector is configured', async () => {
+  it('streams a no_connector SSE error when no connector is configured', async () => {
     const {
       router,
       handler,
@@ -123,14 +132,20 @@ describe('registerGenerateRoute', () => {
 
     await handler({}, request, response);
 
-    expect(response.ok).toHaveBeenCalled();
-    expect(response.badRequest).not.toHaveBeenCalled();
-    const events = await readNdjson(response.ok.mock.results[0].value.body);
-    expect(events).toEqual([{ error: 'No inference connector configured', code: 'no_connector' }]);
+    expect(response.ok).toHaveBeenCalledWith(
+      expect.objectContaining({ headers: { 'Content-Type': 'text/event-stream' } })
+    );
+    const events = await readSse(response.ok.mock.results[0].value.body);
+    expect(events).toEqual([
+      {
+        event: 'error',
+        data: expect.objectContaining({ error: expect.objectContaining({ code: 'no_connector' }) }),
+      },
+    ]);
     expect(chatComplete).not.toHaveBeenCalled();
   });
 
-  it('streams tokens for a static prompt, prefixed with the CSP meta tag', async () => {
+  it('streams tokens for a static prompt as SSE events', async () => {
     const {
       router,
       handler,
@@ -148,8 +163,11 @@ describe('registerGenerateRoute', () => {
 
     await handler({}, request, response);
 
-    const events = await readNdjson(response.ok.mock.results[0].value.body);
-    expect(events).toEqual([{ token: '<div>' }, { token: 'hello</div>' }]);
+    const events = await readSse(response.ok.mock.results[0].value.body);
+    expect(events).toEqual([
+      { event: 'token', data: { token: '<div>' } },
+      { event: 'token', data: { token: 'hello</div>' } },
+    ]);
 
     const [{ system, messages }] = chatComplete.mock.calls[0];
     expect(system).toContain('OUTPUT RULES');
@@ -157,7 +175,7 @@ describe('registerGenerateRoute', () => {
     expect(abortedUnsubscribe).toHaveBeenCalled();
   });
 
-  it('aborts and emits a single error once the streamed HTML exceeds the size limit', async () => {
+  it('aborts and emits a size_limit_exceeded SSE error once the streamed HTML exceeds the size limit', async () => {
     const {
       router,
       handler,
@@ -176,8 +194,15 @@ describe('registerGenerateRoute', () => {
 
     await handler({}, request, response);
 
-    const events = await readNdjson(response.ok.mock.results[0].value.body);
-    expect(events).toEqual([{ error: 'Generated content exceeded size limit' }]);
+    const events = await readSse(response.ok.mock.results[0].value.body);
+    expect(events).toEqual([
+      {
+        event: 'error',
+        data: expect.objectContaining({
+          error: expect.objectContaining({ code: 'size_limit_exceeded' }),
+        }),
+      },
+    ]);
   });
 
   it('measures the size limit in actual UTF-8 bytes, not JS string length', async () => {
@@ -194,8 +219,6 @@ describe('registerGenerateRoute', () => {
     registerGenerateRoute(router, getStartServices, logger);
     getDefaultConnector.mockResolvedValue({ connectorId: 'connector-1' });
 
-    // Each CJK character is 1 UTF-16 code unit but 3 UTF-8 bytes, so 200,001 of them
-    // are under the old (length-based) 500,000 threshold but well over the real byte budget.
     const multiByteChunk = '字'.repeat(200_001);
     expect(multiByteChunk.length).toBeLessThan(500_000);
     expect(Buffer.byteLength(multiByteChunk, 'utf8')).toBeGreaterThan(500_000);
@@ -203,11 +226,18 @@ describe('registerGenerateRoute', () => {
 
     await handler({}, request, response);
 
-    const events = await readNdjson(response.ok.mock.results[0].value.body);
-    expect(events).toEqual([{ error: 'Generated content exceeded size limit' }]);
+    const events = await readSse(response.ok.mock.results[0].value.body);
+    expect(events).toEqual([
+      {
+        event: 'error',
+        data: expect.objectContaining({
+          error: expect.objectContaining({ code: 'size_limit_exceeded' }),
+        }),
+      },
+    ]);
   });
 
-  it('logs the real error and emits a generic error line when the inference call errors', async () => {
+  it('logs the real error and emits a generation_failed SSE error when the inference call errors', async () => {
     const {
       router,
       handler,
@@ -225,8 +255,15 @@ describe('registerGenerateRoute', () => {
 
     await handler({}, request, response);
 
-    const events = await readNdjson(response.ok.mock.results[0].value.body);
-    expect(events).toEqual([{ error: 'Custom content generation failed' }]);
+    const events = await readSse(response.ok.mock.results[0].value.body);
+    expect(events).toEqual([
+      {
+        event: 'error',
+        data: expect.objectContaining({
+          error: expect.objectContaining({ code: 'generation_failed' }),
+        }),
+      },
+    ]);
     expect(loggerError).toHaveBeenCalledWith(
       expect.stringContaining('upstream provider secret leak')
     );

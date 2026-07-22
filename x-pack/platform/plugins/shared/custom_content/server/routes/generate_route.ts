@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PassThrough } from 'stream';
+import { Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -13,11 +13,14 @@ import { i18n } from '@kbn/i18n';
 import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
+import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
+import { ServerSentEventError } from '@kbn/sse-utils';
 import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_ENABLED_FLAG_KEY,
 } from '../../common/constants';
+import type { CustomContentTokenEvent } from '../../common/types';
 
 const SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
 
@@ -108,89 +111,85 @@ export function registerGenerateRoute(
       const connector =
         defaultConnector ?? (await inference.getConnectorList(request).catch(() => []))[0] ?? null;
 
-      const passThrough = new PassThrough();
       const abortController = new AbortController();
       const abortSub = request.events.aborted$.subscribe(() => abortController.abort());
 
-      if (!connector) {
-        passThrough.write(
-          JSON.stringify({
-            error: i18n.translate('xpack.customContent.generateRoute.noConnectorError', {
-              defaultMessage: 'No inference connector configured',
-            }),
-            code: 'no_connector',
-          }) + '\n'
-        );
-        passThrough.end();
-        return response.ok({
-          headers: { 'Content-Type': 'application/x-ndjson' },
-          body: passThrough,
+      const events$ = new Observable<CustomContentTokenEvent>((subscriber) => {
+        if (!connector) {
+          subscriber.error(
+            new ServerSentEventError(
+              'no_connector',
+              i18n.translate('xpack.customContent.generateRoute.noConnectorError', {
+                defaultMessage: 'No inference connector configured',
+              }),
+              {}
+            )
+          );
+          return;
+        }
+
+        const { connectorId } = connector;
+        const systemPrompt = buildSystemPromptStatic(colorMode);
+        const client = inference.getClient({ request });
+
+        let accHtmlBytes = 0;
+
+        const inferenceEvents$ = client.chatComplete({
+          connectorId,
+          system: systemPrompt,
+          messages: [{ role: MessageRole.User, content: prompt }],
+          stream: true,
+          abortSignal: abortController.signal,
         });
-      }
-      const { connectorId } = connector;
 
-      const systemPrompt = buildSystemPromptStatic(colorMode);
-
-      const client = inference.getClient({ request });
-      const events$ = client.chatComplete({
-        connectorId,
-        system: systemPrompt,
-        messages: [{ role: MessageRole.User, content: prompt }],
-        stream: true,
-        abortSignal: abortController.signal,
-      });
-
-      let accHtmlBytes = 0;
-      let sizeLimitExceeded = false;
-      events$.subscribe({
-        next: (event) => {
-          if (sizeLimitExceeded) return;
-          if (event.type === ChatCompletionEventType.ChatCompletionChunk && event.content) {
-            accHtmlBytes += Buffer.byteLength(event.content, 'utf8');
-            if (accHtmlBytes > CUSTOM_CONTENT_MAX_TEMPLATE_BYTES) {
-              sizeLimitExceeded = true;
-              abortController.abort();
-              abortSub.unsubscribe();
-              if (!passThrough.writableEnded) {
-                passThrough.write(
-                  JSON.stringify({
-                    error: i18n.translate('xpack.customContent.generateRoute.sizeLimitError', {
+        const sub = inferenceEvents$.subscribe({
+          next: (event) => {
+            if (event.type === ChatCompletionEventType.ChatCompletionChunk && event.content) {
+              accHtmlBytes += Buffer.byteLength(event.content, 'utf8');
+              if (accHtmlBytes > CUSTOM_CONTENT_MAX_TEMPLATE_BYTES) {
+                abortController.abort();
+                subscriber.error(
+                  new ServerSentEventError(
+                    'size_limit_exceeded',
+                    i18n.translate('xpack.customContent.generateRoute.sizeLimitError', {
                       defaultMessage: 'Generated content exceeded size limit',
                     }),
-                  }) + '\n'
+                    {}
+                  )
                 );
-                passThrough.end();
+                return;
               }
-              return;
+              subscriber.next({ type: 'token', token: event.content });
             }
-            if (!passThrough.writableEnded)
-              passThrough.write(JSON.stringify({ token: event.content }) + '\n');
-          }
-        },
-        error: (err) => {
-          abortSub.unsubscribe();
-          logger.error(`Custom content generation failed: ${err.message}`);
-          if (!passThrough.writableEnded) {
-            passThrough.write(
-              JSON.stringify({
-                error: i18n.translate('xpack.customContent.generateRoute.generationFailedError', {
+          },
+          error: (err) => {
+            abortSub.unsubscribe();
+            logger.error(`Custom content generation failed: ${err.message}`);
+            subscriber.error(
+              new ServerSentEventError(
+                'generation_failed',
+                i18n.translate('xpack.customContent.generateRoute.generationFailedError', {
                   defaultMessage: 'Custom content generation failed',
                 }),
-              }) + '\n'
+                {}
+              )
             );
-            passThrough.end();
-          }
-        },
-        complete: () => {
-          abortSub.unsubscribe();
-          if (sizeLimitExceeded) return;
-          if (!passThrough.writableEnded) passThrough.end();
-        },
+          },
+          complete: () => {
+            abortSub.unsubscribe();
+            subscriber.complete();
+          },
+        });
+
+        return () => sub.unsubscribe();
       });
 
       return response.ok({
-        headers: { 'Content-Type': 'application/x-ndjson' },
-        body: passThrough,
+        headers: { 'Content-Type': 'text/event-stream' },
+        body: observableIntoEventSourceStream(events$, {
+          signal: abortController.signal,
+          logger,
+        }),
       });
     }
   );
