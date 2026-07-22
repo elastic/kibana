@@ -93,8 +93,6 @@ describe('expand_template_defaults', () => {
       owner: SECURITY_SOLUTION_OWNER,
       templatesService,
       fieldDefinitionsService,
-      actionsClient,
-      logger,
     });
 
   beforeEach(() => {
@@ -153,43 +151,6 @@ describe('expand_template_defaults', () => {
       await expect(resolve()).rejects.toThrow('Template template-1 has an invalid definition');
     });
 
-    it('resolves the template connector name via the actions client', async () => {
-      templatesService.getTemplate.mockResolvedValue(
-        buildTemplateSO({
-          ...kitchenSinkDefinition,
-          connector: { id: 'jira-1', type: '.jira', fields: null },
-        })
-      );
-      actionsClient.get.mockResolvedValue({ name: 'My Jira' } as Awaited<
-        ReturnType<typeof actionsClient.get>
-      >);
-
-      const resolved = await resolve();
-
-      expect(resolved.connector).toEqual({
-        id: 'jira-1',
-        type: '.jira',
-        fields: null,
-        name: 'My Jira',
-      });
-    });
-
-    it('drops the template connector when its id no longer resolves', async () => {
-      templatesService.getTemplate.mockResolvedValue(
-        buildTemplateSO({
-          ...kitchenSinkDefinition,
-          connector: { id: 'deleted-connector', type: '.jira', fields: null },
-        })
-      );
-
-      const resolved = await resolve();
-
-      expect(resolved.connector).toBeUndefined();
-      expect(logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('Dropping template connector default "deleted-connector"')
-      );
-    });
-
     it('resolves $ref fields against the owner field library', async () => {
       templatesService.getTemplate.mockResolvedValue(
         buildTemplateSO({ fields: [{ $ref: 'severity_level' }] })
@@ -231,6 +192,8 @@ describe('expand_template_defaults', () => {
       const resolved = await resolve();
       return applyTemplateDefaultsToCreateRequest(query, resolved, {
         hasPlatinumLicenseOrGreater,
+        actionsClient,
+        logger,
       });
     };
 
@@ -341,7 +304,7 @@ describe('expand_template_defaults', () => {
       expect(expanded.assignees).toEqual([]);
     });
 
-    it('applies the template connector only when the caller sent .none', async () => {
+    it('resolves and applies the template connector only when the caller sent .none', async () => {
       const definitionWithConnector = {
         ...kitchenSinkDefinition,
         connector: { id: 'jira-1', type: '.jira', fields: null },
@@ -351,19 +314,52 @@ describe('expand_template_defaults', () => {
       >);
 
       const expandedFromNone = await expand(baseRequest, definitionWithConnector);
-      expect(expandedFromNone.connector.id).toBe('jira-1');
+      expect(expandedFromNone.connector).toEqual({
+        id: 'jira-1',
+        type: '.jira',
+        fields: null,
+        name: 'My Jira',
+      });
+      expect(actionsClient.get).toHaveBeenCalledWith({ id: 'jira-1' });
+    });
 
+    it('does not resolve the template connector when the caller supplied their own', async () => {
+      const definitionWithConnector = {
+        ...kitchenSinkDefinition,
+        connector: { id: 'jira-1', type: '.jira', fields: null },
+      };
       const callerConnector = {
         id: 'snow-1',
         name: 'My SNOW',
         type: ConnectorTypes.serviceNowITSM,
         fields: null,
       };
-      const expandedFromCaller = await expand(
+
+      const expanded = await expand(
         { ...baseRequest, connector: callerConnector },
         definitionWithConnector
       );
-      expect(expandedFromCaller.connector).toEqual(callerConnector);
+
+      expect(expanded.connector).toEqual(callerConnector);
+      // Connector resolution is deferred behind the .none check, so a caller with their own
+      // connector never triggers the actions-client round-trip.
+      expect(actionsClient.get).not.toHaveBeenCalled();
+    });
+
+    it('drops the template connector (and logs) when its id no longer resolves', async () => {
+      const definitionWithConnector = {
+        ...kitchenSinkDefinition,
+        connector: { id: 'deleted-connector', type: '.jira', fields: null },
+      };
+      // actionsClient.get rejects by default (see beforeEach).
+
+      const expanded = await expand(baseRequest, definitionWithConnector);
+
+      // The caller's .none connector is kept and the debug log makes the drop diagnosable.
+      expect(expanded.connector).toEqual(baseRequest.connector);
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Dropping template connector default "deleted-connector"')
+      );
     });
 
     it('is a no-op for a fully-populated request (UI idempotency)', async () => {

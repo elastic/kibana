@@ -1267,9 +1267,36 @@ describe('create', () => {
 
       const [[userActionArgs]] =
         clientArgs.services.userActionService.creator.createUserAction.mock.calls;
+      // The create_case payload carries the expanded case defaults (severity here). It does NOT
+      // carry template / extended_fields — CreateCaseUserActionRt strips them — so those are
+      // audited via dedicated user actions (asserted below), not on this payload.
       expect(userActionArgs.userAction.payload).toMatchObject({
-        template: { id: 'tmpl-exp', version: 4 },
         severity: CaseSeverity.HIGH,
+      });
+    });
+
+    it('emits template and extended_fields user actions so the audit trail matches the persisted case', async () => {
+      const clientArgs = createClientArgs();
+
+      await create(
+        { ...minimalRequest, template: { id: 'tmpl-exp' } },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      const [[bulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const byType: Record<string, { payload: unknown }> = Object.fromEntries(
+        bulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+
+      // The applied template is recorded with its resolved (point-in-time) name (the SO
+      // attribute name, not the definition's default case title).
+      expect(byType.template.payload).toEqual({
+        template: { id: 'tmpl-exp', version: 4, name: 'Expansion Template' },
+      });
+      // The initial extended_fields are recorded exactly as persisted on the case SO.
+      expect(byType.extended_fields.payload).toEqual({
         extended_fields: { priority_as_keyword: 'medium' },
       });
     });

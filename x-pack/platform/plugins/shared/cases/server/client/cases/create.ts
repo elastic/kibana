@@ -25,6 +25,10 @@ import {
   resolveGlobalFields,
   validateCaseExtendedFields,
 } from './validators';
+import type {
+  CreateUserAction,
+  CommonUserActionArgs,
+} from '../../services/user_actions/types';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest } from './utils';
 import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
@@ -89,6 +93,10 @@ export const create = async (
     // unauthorized callers, and BEFORE extended_fields validation so the merged map is what
     // gets validated.
     let resolvedTemplateFields;
+    // Captured when a template is expanded so the activity log can record which template (with its
+    // point-in-time name) the case was created from and the initial extended_fields it applied —
+    // the create_case user action itself does not carry either field.
+    let appliedTemplateName: string | undefined;
     // Resolved lazily and reused: template expansion needs it to decide whether to apply template
     // assignees, and the license-enforcement block below needs it again — resolve at most once.
     let hasPlatinumLicenseOrGreater: boolean | undefined;
@@ -104,15 +112,16 @@ export const create = async (
         owner: query.owner,
         templatesService,
         fieldDefinitionsService,
-        actionsClient: clientArgs.actionsClient,
-        logger,
       });
+      appliedTemplateName = resolvedTemplate.parsed.name;
 
       const callerSentAssignees = query.assignees !== undefined;
 
       hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
-      query = applyTemplateDefaultsToCreateRequest(query, resolvedTemplate, {
+      query = await applyTemplateDefaultsToCreateRequest(query, resolvedTemplate, {
         hasPlatinumLicenseOrGreater,
+        actionsClient: clientArgs.actionsClient,
+        logger,
       });
 
       // The initial decode validated the raw request; template defaults are merged in afterwards
@@ -207,6 +216,42 @@ export const create = async (
         owner: newCase.attributes.owner,
       },
     });
+
+    // The create_case user action payload does not carry `template` or `extended_fields`
+    // (CreateCaseUserActionRt strips them), so a case created from a template would otherwise leave
+    // no trace in the activity log of which template it came from or its initial template fields.
+    // Emit the dedicated template + extended_fields user actions so the audit trail matches the
+    // persisted case. Only runs on the template-expansion path (flag on + a template was applied).
+    if (query.template?.id && query.template.version !== undefined) {
+      const common = { caseId: newCase.id, user, owner: newCase.attributes.owner };
+      const templateUserActions: Array<CreateUserAction<'template' | 'extended_fields'> & CommonUserActionArgs> =
+        [
+          {
+            ...common,
+            type: UserActionTypes.template,
+            payload: {
+              template: {
+                id: query.template.id,
+                version: query.template.version,
+                ...(appliedTemplateName ? { name: appliedTemplateName } : {}),
+              },
+            },
+          },
+        ];
+
+      // Record the initial extended_fields exactly as persisted on the case SO (the template ×
+      // caller merge, plus any customFields mirror), so the activity log reflects the stored values.
+      const persistedExtendedFields = normalizedCase.extended_fields;
+      if (persistedExtendedFields && Object.keys(persistedExtendedFields).length > 0) {
+        templateUserActions.push({
+          ...common,
+          type: UserActionTypes.extended_fields,
+          payload: { extended_fields: persistedExtendedFields },
+        });
+      }
+
+      await userActionService.creator.bulkCreateUserAction({ userActions: templateUserActions });
+    }
 
     if (query.assignees && query.assignees.length !== 0) {
       const assigneesWithoutCurrentUser = query.assignees.filter(

@@ -31,18 +31,17 @@ export interface ResolvedCreateTemplate {
   parsed: ParsedTemplate;
   /** Template fields with `$ref` entries resolved against the owner's field library. */
   resolvedFields: InlineField[];
-  /**
-   * The template's default connector with its `name` resolved via the actions client, or
-   * undefined when the template has none / the id no longer resolves (deleted, unauthorized,
-   * other space) — mirroring the UI's silent `.none` fallback.
-   */
-  connector?: CasePostRequest['connector'];
 }
 
 /**
  * Resolves the template referenced by a create-case request: fetches the SO (latest version when
  * the request omits one), guards the owner, parses the YAML definition, and resolves `$ref`
  * fields against the owner's field library.
+ *
+ * The template's default connector is NOT resolved here — that read is deferred to
+ * `applyTemplateDefaultsToCreateRequest`, which only performs it when the caller sent a `.none`
+ * connector (the sole case where the template default is actually applied), so a caller supplying
+ * their own connector never pays for the actions-client round-trip.
  *
  * Reads use the unsecured services deliberately: the caller has already passed the createCase
  * authorization for `owner`, matching the `resolveGlobalFields` rationale — creating a case from
@@ -58,16 +57,12 @@ export const resolveTemplateForCreate = async ({
   owner,
   templatesService,
   fieldDefinitionsService,
-  actionsClient,
-  logger,
 }: {
   templateId: string;
   version?: number;
   owner: string;
   templatesService: TemplatesService;
   fieldDefinitionsService: FieldDefinitionsService;
-  actionsClient: PublicMethodsOf<ActionsClient>;
-  logger: Logger;
 }): Promise<ResolvedCreateTemplate> => {
   const templateSO = await templatesService.getTemplate(
     templateId,
@@ -96,7 +91,6 @@ export const resolveTemplateForCreate = async ({
     },
     parsed,
     resolvedFields,
-    connector: await resolveTemplateConnector(parsed, actionsClient, logger),
   };
 };
 
@@ -145,17 +139,27 @@ const resolveTemplateConnector = async (
  *   caller sent none (an empty `tags` array is a caller decision and wins). Deduped defensively.
  * - `settings.extractObservables`: filled from the template when the caller omitted it
  *   (`syncAlerts` is required on the wire, so it is always the caller's).
- * - `connector`: the template connector applies only when the caller sent `.none`.
+ * - `connector`: the template connector applies only when the caller sent `.none`. Its `name` is
+ *   resolved via the actions client here (lazily, behind the `.none` gate); an unresolvable id is
+ *   dropped and the caller's `.none` connector is kept, mirroring the create form's fallback.
  * - `title` / `description` / `owner`: required on the wire — caller wins by construction. The
  *   template's `name` (default case title) and `description` are create-form defaults only.
  * - `template`: rewritten to the resolved `{id, version}` so the case and its `create_case` user
  *   action always pin a concrete version, even when the request omitted one.
  */
-export const applyTemplateDefaultsToCreateRequest = <T extends CasePostRequest>(
+export const applyTemplateDefaultsToCreateRequest = async <T extends CasePostRequest>(
   query: T,
   resolved: ResolvedCreateTemplate,
-  { hasPlatinumLicenseOrGreater }: { hasPlatinumLicenseOrGreater: boolean }
-): T => {
+  {
+    hasPlatinumLicenseOrGreater,
+    actionsClient,
+    logger,
+  }: {
+    hasPlatinumLicenseOrGreater: boolean;
+    actionsClient: PublicMethodsOf<ActionsClient>;
+    logger: Logger;
+  }
+): Promise<T> => {
   const definition = resolved.parsed.definition;
   const expanded: T = { ...query, template: resolved.template };
 
@@ -191,8 +195,14 @@ export const applyTemplateDefaultsToCreateRequest = <T extends CasePostRequest>(
     };
   }
 
-  if (query.connector.type === ConnectorTypes.none && resolved.connector !== undefined) {
-    expanded.connector = resolved.connector;
+  // Resolve the template's default connector only when the caller sent `.none` — the sole case
+  // where it can be applied. Deferring the read here (rather than eagerly in resolveTemplateForCreate)
+  // spares callers with their own connector an actions-client round-trip and a spurious debug log.
+  if (query.connector.type === ConnectorTypes.none) {
+    const templateConnector = await resolveTemplateConnector(resolved.parsed, actionsClient, logger);
+    if (templateConnector !== undefined) {
+      expanded.connector = templateConnector;
+    }
   }
 
   const extendedFieldsDefaults = buildExtendedFieldsDefaults(resolved.resolvedFields);
