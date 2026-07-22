@@ -64,7 +64,7 @@ type SequenceStepNode = Node<SequenceStepData, 'sequenceStep'>;
 // -- Sequence node component --
 
 const statusBadge: Record<string, { icon: string; color: string; label: string; bg: string }> = {
-  success: { icon: 'checkInCircleFilled', color: 'success', label: 'OK', bg: '#c9f3e3' },
+  success: { icon: 'checkInCircleEmpty', color: 'success', label: 'OK', bg: '#c9f3e3' },
   failed: { icon: 'error', color: 'danger', label: 'Failed', bg: '#fdddd8' },
   warning: { icon: 'warning', color: 'warning', label: 'Warning', bg: '#fde9b5' },
 };
