@@ -11,7 +11,7 @@ import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import type React from 'react';
 import { useEffect, useRef } from 'react';
 import { type TriggerType, TriggerTypes } from '@kbn/workflows';
-import { HardcodedIconDataUrls, HardcodedIcons } from '@kbn/workflows-ui';
+import { HardcodedIconDataUrls } from '@kbn/workflows-ui';
 import { buildSuggestTechPreviewBadgeRules } from './get_suggest_tech_preview_badge_styles';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
