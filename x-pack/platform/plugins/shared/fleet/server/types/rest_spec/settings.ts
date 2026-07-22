@@ -212,12 +212,8 @@ export const SettingsSchemaV8 = SettingsSchemaV7.extends({
   download_source_auth_secret_storage_requirements_met: schema.maybe(schema.boolean()),
 });
 
-export const SettingsSchemaV9 = SettingsSchemaV8.extends({
-  completed_migrations: schema.maybe(schema.arrayOf(schema.string())),
-});
-
 export const SettingsResponseSchema = schema.object({
-  item: SettingsSchemaV9,
+  item: SettingsSchemaV8,
 });
 
 export const PutSpaceSettingsRequestSchema = {

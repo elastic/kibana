@@ -52,7 +52,6 @@ import {
   SettingsSchemaV6,
   SettingsSchemaV7,
   SettingsSchemaV8,
-  SettingsSchemaV9,
   PackagePolicySchemaV22,
   PackagePolicySchemaV24,
   PackagePolicySchemaV25,
@@ -207,7 +206,6 @@ export const getSavedObjectTypes = (
           integration_knowledge_enabled: { type: 'boolean' },
           ssl_secret_storage_requirements_met: { type: 'boolean' },
           download_source_auth_secret_storage_requirements_met: { type: 'boolean' },
-          completed_migrations: { type: 'keyword', index: false },
         },
       },
       migrations: {
@@ -310,20 +308,6 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: SettingsSchemaV8.extends({}, { unknowns: 'ignore' }),
             create: SettingsSchemaV8,
-          },
-        },
-        9: {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {
-                completed_migrations: { type: 'keyword', index: false },
-              },
-            },
-          ],
-          schemas: {
-            forwardCompatibility: SettingsSchemaV9.extends({}, { unknowns: 'ignore' }),
-            create: SettingsSchemaV9,
           },
         },
       },
